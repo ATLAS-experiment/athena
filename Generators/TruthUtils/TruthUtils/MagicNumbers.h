@@ -112,7 +112,7 @@ template <class T1,class T2>
 inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
 
 #if  defined(HEPMC3)
-template <class T> inline int uniqueID(const T& p) { return barcode(p); }
+template <class T> inline int uniqueID(const T& p) { return p->id(); }
 #else
 template <class T> inline int uniqueID(const T* p) { return barcode(p); }
 #endif

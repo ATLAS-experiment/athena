@@ -63,6 +63,10 @@ namespace xAOD {
       /// Set barcode
       void setBarcode( int value );
 
+      /// Unique ID
+      /// @note For now just an alias to barcode() - this will change in the future
+      int id() const;
+
       /// Status code
       int status() const;
       /// Set status code

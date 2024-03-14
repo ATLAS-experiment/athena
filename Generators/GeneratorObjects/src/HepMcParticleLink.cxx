@@ -202,6 +202,17 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
 
 
 /**
+ * @brief Eventually return the id of the referenced GenParticle. For
+ * now just return barcode()
+ */
+int HepMcParticleLink::id() const
+{
+  // Placeholder: for now just return barcode()
+  return barcode();
+}
+
+
+/**
  * @brief Return the event number of the referenced GenEvent.
  *        0 means the first GenEvent in the collection.
  */

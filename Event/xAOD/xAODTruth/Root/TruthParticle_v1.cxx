@@ -51,6 +51,11 @@ namespace xAOD {
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TruthParticle_v1, int, status,
                                          setStatus )
 
+   /// For now just an alias to barcode() - this will change in the future
+   int TruthParticle_v1::id() const {
+     return barcode();
+   }
+
    //
    /////////////////////////////////////////////////////////////////////////////
 

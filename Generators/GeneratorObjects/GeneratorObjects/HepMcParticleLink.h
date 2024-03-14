@@ -455,6 +455,13 @@ public:
 
 
   /**
+   * @brief Eventually return the id of the referenced GenParticle. For
+   * now just return barcode()
+   */
+  int id() const;
+
+
+  /**
    * @brief Return the event number of the referenced GenEvent.
    *        0 means the first GenEvent in the collection.
    */
