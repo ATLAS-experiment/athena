@@ -129,7 +129,7 @@ StatusCode DumpGeo::initialize()
     // check that all DetManagers requested by the user are in the list
     // If not, print an error message to warn the user and return
     for (auto& userDet : m_user_filterDetManagersList) {
-      if ( !(isStringInVector(managersList, userDet)) ) {
+      if ( !managersList.count(userDet)) {
         ATH_MSG_FATAL("This Detector Manager you requested to dump is not in the list of DetectorManagers for the geometry tag you are using: " << userDet);
         throw GaudiException("The Detector Manager you requested to dump is not in the list of DetectorManagers.", 
                                     "DumpGeo", StatusCode::FAILURE);
