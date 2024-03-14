@@ -23,8 +23,8 @@ namespace {
   typedef std::vector<std::pair<std::regex, ConstituentsSelection>> SelRegexes;
   
   ConstituentsInputConfig get_iparticle_input_config(
-    const std::string name,
-    const std::vector<std::string> input_variables,
+    const std::string& name,
+    const std::vector<std::string>& input_variables,
     const TypeRegexes& type_regexes) {
     ConstituentsInputConfig config;
     config.name = name;
@@ -47,8 +47,8 @@ namespace {
   }
 
   ConstituentsInputConfig get_track_input_config(
-    const std::string name,
-    const std::vector<std::string> input_variables,
+    const std::string& name,
+    const std::vector<std::string>& input_variables,
     const TypeRegexes& type_regexes,
     const SortRegexes& sort_regexes,
     const SelRegexes& select_regexes,

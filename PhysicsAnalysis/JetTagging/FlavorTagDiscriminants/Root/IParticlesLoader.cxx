@@ -76,7 +76,7 @@ namespace FlavorTagDiscriminants {
               obj = flow->chargedObject(0);
             }
             else{
-              obj = dynamic_cast<const xAOD::IParticle*>(flow);
+              obj = flow;
             }
           }
           if (!obj){
