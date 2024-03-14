@@ -16,13 +16,6 @@ def DQTDetSynchMonAlgConfig(flags):
     acc.merge(TileCablingSvcCfg(flags))
     return acc
 
-def DQTDetSynchMonAlgConfigOld(flags):
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    from DataQualityTools.DataQualityToolsConf import DQTDetSynchMonAlg
-    helper = AthMonitorCfgHelperOld(flags,'DQTDetSynchMonAlgCfg')
-    _DQTDetSynchMonAlgConfigCore(helper, DQTDetSynchMonAlg, athenaCommonFlags.isOnline, True)
-    return helper.result()
 
 def _DQTDetSynchMonAlgConfigCore(helper, algConfObj, isOnline=False, run2Compat=False):
     monAlg = helper.addAlgorithm(algConfObj,'DQTDetSynchMonAlg')

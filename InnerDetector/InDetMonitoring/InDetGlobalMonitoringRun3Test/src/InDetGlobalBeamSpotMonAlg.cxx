@@ -225,6 +225,9 @@ StatusCode InDetGlobalBeamSpotMonAlg::fillHistograms( const EventContext& ctx ) 
       if (vtx->numberDoF() <= 0) continue;
       
       if (vtx->nTrackParticles() < m_minTracksPerVtx) continue;
+      if(vtx->covariancePosition()(0,0) < 0) continue;
+      if(vtx->covariancePosition()(1,1) < 0) continue;
+      if(vtx->covariancePosition()(2,2) < 0) continue;
       
       // Found good VxCandidate to monitor - now fill histograms
       float x = vtx->position().x();

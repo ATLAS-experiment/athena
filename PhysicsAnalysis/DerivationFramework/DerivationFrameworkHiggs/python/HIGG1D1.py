@@ -331,7 +331,7 @@ def HIGG1D1Cfg(flags):
     # Add the variables for Gain and Cluster energy
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
         getGainDecorations, getClusterEnergyPerLayerDecorations )
-    gainDecorations = getGainDecorations(acc, 'HIGG1D1Kernel')
+    gainDecorations = getGainDecorations(acc, flags, 'HIGG1D1Kernel')
     HIGG1D1SlimmingHelper.ExtraVariables.extend(gainDecorations)
     clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
         acc, 'HIGG1D1Kernel' )

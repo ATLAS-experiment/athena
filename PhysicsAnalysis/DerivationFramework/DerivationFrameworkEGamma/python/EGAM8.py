@@ -481,7 +481,7 @@ def EGAM8Cfg(flags):
         getClusterEnergyPerLayerDecorations,
     )
 
-    gainDecorations = getGainDecorations(acc, "EGAM8Kernel")
+    gainDecorations = getGainDecorations(acc, flags, "EGAM8Kernel")
     print("EGAM8 gain decorations: ", gainDecorations)
     EGAM8SlimmingHelper.ExtraVariables.extend(gainDecorations)
     clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(acc, "EGAM8Kernel")

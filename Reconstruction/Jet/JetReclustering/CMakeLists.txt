@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( JetReclustering )
@@ -40,6 +40,3 @@ if( NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS )
       LINK_LIBRARIES xAODRootAccess AsgTools JetInterface xAODJet
       POOLRootAccessLib )
 endif()
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

@@ -121,8 +121,8 @@ InDetBeamSpotRooFit::FitStatus InDetBeamSpotRooFit::fit(std::vector< BeamSpot::V
   Double_t axStart = 0, ayStart = 0, kStart = m_kStart;
   Double_t wxxStart = rfData.reduce(Cut(vtxCut))->sigma(x);
   Double_t wyyStart = rfData.reduce(Cut(vtxCut))->sigma(y);
-  Double_t sxStart = sqrt(wxxStart*wxxStart - kStart*kStart*vxxMean);
-  Double_t syStart = sqrt(wyyStart*wyyStart - kStart*kStart*vyyMean);
+  Double_t sxStart = sqrt(std::abs(wxxStart*wxxStart - kStart*kStart*vxxMean));
+  Double_t syStart = sqrt(std::abs(wyyStart*wyyStart - kStart*kStart*vyyMean));
   Double_t szStart = rfData.reduce(Cut(vtxCut))->sigma(z);
   Double_t mxStart = rfData.reduce(Cut(vtxCut))->mean(x);
   Double_t myStart = rfData.reduce(Cut(vtxCut))->mean(y);

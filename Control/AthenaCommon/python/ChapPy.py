@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file : ChapPy.py
 # @author: Sebastien Binet <binet@cern.ch> 
@@ -195,7 +195,7 @@ class Athena( object ):
             pass
 
         # build the command
-        cmd = [ self.bin, "--batch" ]
+        cmd = [ self.bin ]
         if isinstance(self.cmdOptions, list):
             cmd.extend( self.cmdOptions )
             pass

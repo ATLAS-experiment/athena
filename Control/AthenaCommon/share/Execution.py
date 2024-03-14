@@ -28,7 +28,7 @@ for script in opts.scripts:
       else:
          traceback.print_exc()
 
-      if opts.run_batch:
+      if not opts.interactive:
        # additional processing to get right error codes
          import AthenaCommon.ExitCodes as ExitCodes
          if isinstance( e, IncludeError ):
@@ -105,7 +105,7 @@ else:
 
 
  ## in batch, run as many events as requested, otherwise explain
-   if opts.run_batch:
+   if not opts.interactive:
       ## enable or not athena-mp
       include( "AthenaCommon/runbatch.py" )
    else:

@@ -3,7 +3,7 @@
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import single_electron_triggers, single_photon_triggers
+from TrigEgammaMonitoring.TrigEgammaMonitCategory import single_electron_triggers, single_photon_triggers
 
 #
 # emulator config class

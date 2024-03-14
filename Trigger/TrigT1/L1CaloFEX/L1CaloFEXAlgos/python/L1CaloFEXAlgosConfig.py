@@ -29,7 +29,7 @@ def L1CaloGTowerDecoratorCfg(flags, name, gTowersReadKey = 'L1_gFexDataTowers'):
 
     return acc
 
-def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRoIContainer = "L1_eTauRoI"):
+def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRoIContainer = "L1_eTauRoI", ExtraInputs = []):
     """
     Configure the eFEX TOB decorator algorithm
     Requires the eFEXTOBEtTool
@@ -59,6 +59,8 @@ def eFexTOBDecoratorCfg(flags, name, eFexEMRoIContainer = "L1_eEMRoI", eFexTauRo
         decorator.REnvDecorKey = eFexTauRoIContainer+".REnvDec"
         decorator.REMCoreDecorKey = eFexTauRoIContainer+".REMCoreDec"
         decorator.REMHadDecorKey = eFexTauRoIContainer+".REMHadDec"
+
+    decorator.ExtraInputs = ExtraInputs
 
     acc.addEventAlgo(decorator)
 
