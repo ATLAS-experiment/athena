@@ -308,7 +308,6 @@ class AthConfigFlags(object):
 
 
     def _renamed_map(self):
-        self.loadAllDynamicFlags()
         def rename(key):
             for new, old in self._renames.items():
                 if key.startswith(old + '.'):
