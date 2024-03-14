@@ -355,7 +355,6 @@ class MonitorDef:
                 "L1_2MU3V_VTE50",
                 # Legacy L1Calo
                 # Tau
-                "L1_TAU8", "L1_TAU12IM",
                 "L1_TAU1_TE4_VTE200",
                 "L1_2TAU1_VTE200",
                 # Jet
@@ -392,7 +391,7 @@ class MonitorDef:
                 # TRT
                 "L1_TRT_VTE50", "L1_TRT_VTE200", "L1_TRT_VTE20",
                 # XE
-                "L1_XE30", "L1_XE50",
+                "L1_XE50",
                 # Phase-I L1Calo
                 "L1_eEM5", "L1_eEM9", "L1_eEM12", "L1_eEM15",
                 "L1_eEM18", "L1_eEM18L",
