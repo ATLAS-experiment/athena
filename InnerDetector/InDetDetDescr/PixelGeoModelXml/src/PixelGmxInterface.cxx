@@ -438,8 +438,8 @@ std::shared_ptr<const PixelDiodeMatrix> PixelGmxInterface::buildMatrix(double ph
 
 void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc,GeoModelIO::ReadGeoModel* sqlreader){
 
-    const std::array<std::string,2> sensorTypes({"QuadChip_RD53","SingleChip_RD53"});
-    const std::array<std::string,17> rd53_ParamNames({"circuitsPerEta","circuitsPerPhi","columns","detectorType","is3D","nEtaEndPerSide","nEtaLongPerSide","nPhiEndPerSide","nPhiLongPerSide","pitchEta","pitchEtaEnd","pitchEtaLong","pitchPhi","pitchPhiEnd","pitchPhiLong","rows","thickness"});
+    const std::array<std::string,2> sensorTypes{"QuadChip_RD53","SingleChip_RD53"};
+    const std::array<std::string,17> rd53_ParamNames{"circuitsPerEta","circuitsPerPhi","columns","detectorType","is3D","nEtaEndPerSide","nEtaLongPerSide","nPhiEndPerSide","nPhiLongPerSide","pitchEta","pitchEtaEnd","pitchEtaLong","pitchPhi","pitchPhiEnd","pitchPhiLong","rows","thickness"};
     
     for(const std::string & sType:sensorTypes){
        IRDBRecordset_ptr rd53 = rdbAccessSvc->getRecordsetPtr(sType,"");
@@ -457,11 +457,25 @@ void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     else ATH_MSG_WARNING("Could not retrieve "<<sType<<" table");
     }
 
-     //Now, loop over the FullPhysVols and create the SiDetectorElements
+    //Now, loop over the FullPhysVols and create the SiDetectorElements
     //lots of string parsing...
-    const std::array<std::string,5> fields({"barrel_endcap","layer_wheel","phi_module","eta_module","side"}); 
-    //The below is a map of string keys which contain all the Identifier/DetElement relevant info, and the associated FullPhysVol
-    std::map<std::string, GeoFullPhysVol*> mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>("GeoModelXML");
+    const std::array<std::string,5> fields{"barrel_endcap","layer_wheel","phi_module","eta_module","side"}; 
+    //First, find which name the tables are in the file under (depends upon the plugin used to create the input file)
+    //sort these in order of precedence - ITkPlugin, then ITkPixelPlugin, then GeoModelXMLPlugin
+    const std::array<std::string,3> publishers({"ITk","ITkPixel","GeoModelXML"});
+    //The below is a map of string keys which will contain all the Identifier/DetElement relevant info, and the associated FullPhysVol
+    // (once filled from the published table in the SQLite)
+    std::map<std::string, GeoFullPhysVol*> mapFPV;
+    for (auto & iPub : publishers){
+        //setting the "checkTable" option to true, so that an empty map will be returned if not found and we can try the next one
+         mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>(iPub,true);
+         if (!mapFPV.empty()) {
+            ATH_MSG_DEBUG("Using FPV tables from publisher "<<iPub);
+            break;
+         }
+    }
+    if (mapFPV.empty()) ATH_MSG_ERROR("Could not find any FPV tables under the expected names: "<<publishers);
+
     for (const auto&[fullPhysVolInfoString, fullPhysVolPointer] : mapFPV){
         //find the name of the corresponding detector design type
         size_t startRG = fullPhysVolInfoString.find("RD53_");

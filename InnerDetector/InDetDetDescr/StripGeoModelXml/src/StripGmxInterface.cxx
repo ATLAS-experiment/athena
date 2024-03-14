@@ -670,7 +670,7 @@ void StripGmxInterface::addAlignable(int level,
 void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc,GeoModelIO::ReadGeoModel* sqlreader){
 
     IRDBRecordset_ptr stereoAnnulus = rdbAccessSvc->getRecordsetPtr("StereoAnnulus","");
-    const std::array<std::string,13> stereoAnnulusParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","stereoAngle","centreR","nRows","splitLevel","nStrips","phiPitch","startR","endR"});
+    const std::array<std::string,13> stereoAnnulusParamNames{"thickness","carrierType","readoutSide","fieldDirection","stripDirection","stereoAngle","centreR","nRows","splitLevel","nStrips","phiPitch","startR","endR"};
 
     if(stereoAnnulus->size() !=0){
        for (unsigned int iR =0;iR<stereoAnnulus->size();iR++){
@@ -686,7 +686,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     else ATH_MSG_WARNING("Could not retrieve StereoAnnulus table");
     
     IRDBRecordset_ptr stripBox = rdbAccessSvc->getRecordsetPtr("SiStripBox","");
-    const std::array<std::string,10> stripBoxParamNames({"thickness","carrierType","readoutSide","fieldDirection","stripDirection","nRows","stripLength","splitLevel","nStrips","pitch"});
+    const std::array<std::string,10> stripBoxParamNames{"thickness","carrierType","readoutSide","fieldDirection","stripDirection","nRows","stripLength","splitLevel","nStrips","pitch"};
 
     if(stripBox->size() !=0){
        for (unsigned int iR =0;iR<stripBox->size();iR++){
@@ -703,9 +703,22 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
 
     //Now, loop over the FullPhysVols and create the SiDetectorElements (including splitting where needed)
     //lots of string parsing...
-    std::vector<std::string> fields({"barrel_endcap","layer_wheel","phi_module","eta_module","side"}); 
-    //The below is a map of string keys which contain all the Identifier/DetElement relevant info, and the associated FullPhysVol
-    std::map<std::string, GeoFullPhysVol*> mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>("GeoModelXML");
+    const std::array<std::string,5> fields{"barrel_endcap","layer_wheel","phi_module","eta_module","side"}; 
+    //First, find which name the tables are in the file under (depends upon the plugin used to create the input file)
+    //sort these in order of precedence - ITkPlugin, then ITkStripPlugin, then GeoModelXMLPlugin
+    const std::array<std::string,3> publishers{"ITk","ITkStrip","GeoModelXML"};
+    //The below is a map of string keys which will contain all the Identifier/DetElement relevant info, and the associated FullPhysVol
+    // (once filled from the published table in the SQLite)
+    std::map<std::string, GeoFullPhysVol*> mapFPV;
+    for (auto & iPub : publishers){
+        //setting the "checkTable" option to true, so that an empty map will be returned if not found and we can try then next one
+         mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>(iPub,true);
+         if (!mapFPV.empty()) {
+            ATH_MSG_DEBUG("Using FPV tables from publisher "<<iPub);
+            break;
+            }
+    }
+    if (mapFPV.empty()) ATH_MSG_ERROR("Could not find any FPV tables under the expected names: "<<publishers);
     for (const auto&[fullPhysVolInfoString, fullPhysVolPointer] : mapFPV){
         //find the name of the corresponding detector design type
         size_t startRG = fullPhysVolInfoString.find("RG_");
