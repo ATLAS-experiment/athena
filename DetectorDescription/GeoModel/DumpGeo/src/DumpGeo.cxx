@@ -72,17 +72,6 @@ GeoPhysVol* createTheWorld()
   return world;
 }
 
-
-bool isStringInVector( const std::vector<std::string>& vec,
-        const std::string& str) {
-    auto it = std::find(
-                    vec.begin(),
-                    vec.end(),
-                    str);
-    return it != vec.end();
-}
-
-
 //____________________________________________________________________
 DumpGeo::DumpGeo(const std::string& name, ISvcLocator* svcLocator):
   AthAlgorithm(name, svcLocator)
@@ -117,6 +106,9 @@ StatusCode DumpGeo::initialize()
 
   if ( !(m_user_filterDetManagersList.empty()) ) {
     // Get list of managers
+    // We fill a set from the output vector, 
+    // so we can use its built-in 'count' method later,
+    // to search for DetManagers
     ATH_MSG_INFO("List of GeoModel Detector Managers: ");
     std::set<std::string> managersList{};
     {
