@@ -1,9 +1,9 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Xin Chen <xin.chen@cern.ch>
 */
 #ifndef JPSIXPLUS2V0_H
 #define JPSIXPLUS2V0_H
-// Xin Chen <xin.chen@cern.ch>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -12,12 +12,12 @@
 #include "xAODTracking/VertexContainer.h"
 #include "ITrackToVertex/ITrackToVertex.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
+#include "TrkV0Fitter/TrkV0VertexFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include <vector>
 
 namespace Trk {
     class IVertexFitter;
-    class TrkV0VertexFitter;
     class TrkVKalVrtFitter;
     class IVertexCascadeFitter;
     class VxCascadeInfo;
@@ -36,6 +36,7 @@ namespace DerivationFramework {
 
   class JpsiXPlus2V0 : virtual public AthAlgTool, public IAugmentationTool
   {
+  enum V0Enum{ UNKNOWN=0, LAMBDA=1, LAMBDABAR=2, KS=3 };
   public:
     static const InterfaceID& interfaceID() { return IID_JpsiXPlus2V0; }
     JpsiXPlus2V0(const std::string& type, const std::string& name, const IInterface* parent);
@@ -49,10 +50,10 @@ namespace DerivationFramework {
     std::vector<std::string> m_vertexV0ContainerKeys;
     std::vector<std::string> m_vertexJXHypoNames;
     std::vector<std::string> m_vertexV0HypoNames;
-    std::vector<std::string> m_cascadeOutputsKeys;
+    std::vector<std::string> m_cascadeOutputKeys;
     bool m_refitV0;
     bool m_constrV0;
-    std::vector<std::string> m_v0VtxOutputsKeys;
+    std::vector<std::string> m_v0VtxOutputKeys;
     std::string m_TrkParticleCollection;
     std::string m_VxPrimaryCandidateName;
     std::string m_refPVContainerName;
@@ -95,6 +96,8 @@ namespace DerivationFramework {
     bool   m_constrV02;
     bool   m_constrJXV02;
     bool   m_constrMainV;
+    bool   m_JXSubVtx;
+    bool   m_JXV02SubVtx;
     double m_chi2cut_JX;
     double m_chi2cut_V0;
     double m_chi2cut;
@@ -115,17 +118,18 @@ namespace DerivationFramework {
     size_t      m_PV_minNTracks;
     int         m_DoVertexType;
 
-    double mass_e;
-    double mass_mu;
-    double mass_pion;
-    double mass_proton;
-    double mass_Lambda;
-    double mass_Lambda_b;
-    double mass_Ks;
-    double mass_Bpm;
+    double m_mass_e;
+    double m_mass_mu;
+    double m_mass_pion;
+    double m_mass_proton;
+    double m_mass_Lambda;
+    double m_mass_Lambda_b;
+    double m_mass_Ks;
+    double m_mass_Bpm;
 
-    template<size_t NTracks> xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
-    template<size_t NTracks> xAOD::Vertex* FindVertex(std::vector<const xAOD::VertexContainer*> containers, const xAOD::Vertex* v) const;
+    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const xAOD::TrackParticleContainer* trackContainer) const;
+    template<size_t NTracks> const xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
+    template<size_t NTracks> const xAOD::Vertex* FindVertex(std::vector<const xAOD::VertexContainer*> containers, const xAOD::Vertex* v) const;
   };
 }
 
