@@ -47,17 +47,19 @@ def CosmicFilterToolCfg(flags, name="G4UA::G4CosmicFilterTool", **kwargs):
         # need a cosmic AND filter
         kwargs.setdefault("CollectionName",volumes[0])
         kwargs.setdefault("CollectionName2",volumes[1])
-        result.setPrivateTools(CompFactory.G4UA.G4UA__G4CosmicAndFilterTool(name, **kwargs))
+        result.setPrivateTools(CompFactory.G4UA.G4CosmicAndFilterTool(name, **kwargs))
 
     else:
         # need a cosmic OR filter
         kwargs.setdefault("CollectionName",volumes[0])
         kwargs.setdefault("CollectionName2",volumes[1])
         kwargs.setdefault("CollectionName3",volumes[2])
-        result.setPrivateTools(CompFactory.G4UA.G4UA__G4CosmicOrFilterTool(name, **kwargs))
+        result.setPrivateTools(CompFactory.G4UA.G4CosmicOrFilterTool(name, **kwargs))
     return result
 
-# Note - is an ISF one migrated, but todo the G4UA one
-# def getStoppedParticleFilterTool(name="G4UA::StoppedParticleFilterTool", **kwargs):
-#     kwargs.setdefault("CollectionName",'StoppingPositions')
-#     return  CfgMgr.G4UA__G4CosmicFilterTool(name, **kwargs)
+
+def StoppedParticleFilterToolCfg(flags, name="G4UA::StoppedParticleFilterTool", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("CollectionName",'StoppingPositions')
+    result.setPrivateTools(CompFactory.G4UA.G4CosmicFilterTool(name, **kwargs))
+    return result
