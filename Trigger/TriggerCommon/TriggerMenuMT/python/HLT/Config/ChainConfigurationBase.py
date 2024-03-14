@@ -44,11 +44,14 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         self.chainPartNameNoMultwL1 += "_"+self.chainL1Item
 
     def getStep(self, flags, stepID, stepPartName, sequenceCfgArray, comboHypoCfg=ComboHypoCfg, comboTools=[], **stepArgs):
-        stepName = 'Step%d'%stepID + '_' + stepPartName
+        stepName = 'Step%s'%str(stepID) + '_' + stepPartName
         log.debug("Configuring step %s", stepName)
-        seqArray = []   
-        for sequenceCfg in sequenceCfgArray:
-            seqArray.append (sequenceCfg(flags, **stepArgs) )
+
+        if flags.Trigger.fastMenuGeneration:
+            # do not generate Menu Sequences, just store the functions that can do that
+            seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]   
+        else:
+            seqArray = [gen(flags, **stepArgs) for gen in sequenceCfgArray]
 
         if (len(seqArray)>0):                                
             if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                
@@ -61,7 +64,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)
 
     def getEmptyStep(self, stepID, stepPartName):
-        stepName = 'Step%d'%stepID + '_' + stepPartName
+        stepName = 'Step%s'%str(stepID) + '_' + stepPartName
         log.debug("Configuring empty step %s", stepName)
         return ChainStep(stepName, Sequences=[], multiplicity=[] ,chainDicts=[self.dict])
  
