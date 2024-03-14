@@ -8,7 +8,7 @@ class BootstrapGeneratorConfig(ConfigBlock):
     '''ConfigBlock for the bootstrap generator'''
 
     def __init__(self):
-        super(BootstrapGeneratorConfig, self).__init__('BootstrapGenerator')
+        super(BootstrapGeneratorConfig, self).__init__()
         self.addOption ('nReplicas', 1000, type=int)
         self.addOption ('decoration', None, type=str)
         self.addOption ('runOnMC', False, type=bool)
@@ -45,7 +45,7 @@ def makeBootstrapGeneratorConfig(seq,
     """
 
     config = BootstrapGeneratorConfig()
-    config.setOptionValue ('nReplicas', nReplicas, noneAction='ignore')
-    config.setOptionValue ('decoration', decoration, noneAction='ignore')
-    config.setOptionValue ('runOnMC', runOnMC, noneAction='ignore')
+    config.setOptionValue ('nReplicas', nReplicas)
+    config.setOptionValue ('decoration', decoration)
+    config.setOptionValue ('runOnMC', runOnMC)
     seq.append (config)

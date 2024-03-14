@@ -1,5 +1,26 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+from functools import wraps
+from random import randrange
+def groupBlocks(func):
+    """
+    Decorates a configSequence or function with 'seq' as a
+    arguement.
+
+    Sets groupName to the name of the decorated funtion  or
+    calss plus and integer for each ConfigBlock in the configSequence.
+
+    Blocks with the same groupName can be configured together.
+    """
+    @wraps(func)
+    def wrapper(**kwargs):
+        func(**kwargs)
+        groupName = f"{func.__name__}_{randrange(10**8):08}"
+        for block in kwargs['seq']:
+            block.setOptionValue('groupName', groupName)
+    return wrapper
+
+
 class ConfigSequence:
     """a sequence of ConfigBlock objects
 
@@ -20,7 +41,6 @@ class ConfigSequence:
 
     def append (self, block) :
         """append a configuration block to the sequence"""
-
         self._blocks.append (block)
 
 
@@ -64,26 +84,35 @@ class ConfigSequence:
         WARNING: The backend to option handling is slated to be
         replaced at some point.  This particular function may change
         behavior, interface or be removed/replaced entirely.
-
         """
+        names = name.split('.')
+        # <optionName>
+        optionName = names.pop(-1)
+        # <groupName>.<optionName>, or
+        # .<optionName> (backwards compatability)
+        groupName = names.pop(0) if names else ''
+        if names:
+            raise ValueError(f'Option name can be either <groupName>.<optionName>'
+                f' or <optionName> not {name}')
 
-        nameSplit = name.split ('.')
-        groupName = '.'.join (nameSplit[0:-1])
-        optionName = nameSplit[-1]
-
-        # option names of the form ".option" are used to set the
-        # option on the last set group of blocks configured
-        if groupName == '' and len(nameSplit)==2 :
-            groupName = self._blocks[-1].groupName()
-
-        used = False
-        for block in self._blocks :
-            if block.groupName() == groupName and \
-               block.hasOption (optionName):
-                block.setOptionValue (optionName, value, isDuplicate=used, **kwargs)
-                used = True
-        if not used :
-            raise KeyError (f'unknown option "{name}" in sequence "{self.__class__.__name__}"')
+        blocks = self._blocks
+        # check if last block added has an instance name
+        if not groupName:
+            groupName = blocks[-1].getOptionValue('groupName')
+        if groupName:
+            used = False
+            # set optionName for all blocks with groupName
+            for block in blocks:
+                if ( block.getOptionValue('groupName') == groupName
+                        and block.hasOption(optionName) ):
+                    block.setOptionValue (optionName, value, **kwargs)
+                    used = True
+            if not used:
+                raise ValueError(f'{optionName} not found in blocks with '
+                    f'group name {groupName}')
+        else:
+            # set opyion for last added block
+            blocks[-1].setOptionValue (optionName, value, **kwargs)
 
 
     def printOptions(self):
@@ -92,12 +121,8 @@ class ConfigSequence:
         """
         for config in self:
             print(config)
-            try:
-                options = [(opt, getattr(config, opt)) for opt in config._options]
-                for k, v in options:
-                    print(f"    {k}: {v}")
-            except Exception as e:
-                print(e)
+            for opt in config.getOptions():
+                print(f"    {opt}: {config.getOptionValue(opt)}")
 
 
     def getOptions(self):
@@ -138,13 +163,25 @@ class ConfigSequence:
         return algOptions
 
 
+    def groupBlocks(self, groupName=''):
+        """
+        Assigns all blocks in configSequence groupName. If no name is
+        provided, the name is set to group_ plus an integer.
+
+        Blocks with the same groupName can be configured together.
+        """
+        if not groupName:
+            groupName = f"group_{randrange(10**8):08}"
+        for block in self._blocks:
+            block.setOptionValue('groupName', groupName)
+
+
     def __iadd__( self, sequence, index = None ):
         """Add another sequence to this one
 
         This function is used to add another sequence to this sequence
         using the '+=' operator.
         """
-
         # Check that the received object is of the right type:
         if not isinstance( sequence, ConfigSequence ):
             raise TypeError( 'The received object is not of type ConfigSequence' )
@@ -155,13 +192,12 @@ class ConfigSequence:
         # Return the modified object:
         return self
 
+
     def __iter__( self ):
         """Create an iterator over all the configurations in this sequence
 
         This is to allow for a Python-like iteration over all
         configuration blocks that are part of the sequence.
-
         """
-
         # Create the iterator to process the internal list of algorithms:
         return self._blocks.__iter__()

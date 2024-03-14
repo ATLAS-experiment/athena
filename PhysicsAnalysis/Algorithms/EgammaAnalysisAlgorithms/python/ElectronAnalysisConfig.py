@@ -15,7 +15,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the electron four-momentum correction"""
 
     def __init__ (self, containerName) :
-        super (ElectronCalibrationConfig, self).__init__ (containerName)
+        super (ElectronCalibrationConfig, self).__init__ ()
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('crackVeto', False, type=bool)
@@ -131,7 +131,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
     def __init__ (self, containerName, selectionName) :
-        super (ElectronWorkingPointConfig, self).__init__ (containerName + '.' + selectionName)
+        super (ElectronWorkingPointConfig, self).__init__ ()
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('postfix', None, type=str)
@@ -377,10 +377,10 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
     """
 
     config = ElectronCalibrationConfig (containerName)
-    config.setOptionValue ('crackVeto', crackVeto, noneAction='ignore')
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
-    config.setOptionValue ('isolationCorrection', isolationCorrection, noneAction='ignore')
-    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
+    config.setOptionValue ('crackVeto', crackVeto)
+    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
+    config.setOptionValue ('isolationCorrection', isolationCorrection)
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)
 
 
@@ -415,8 +415,8 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
             raise ValueError ('working point should be of format "likelihood.isolation", not ' + workingPoint)
         config.setOptionValue ('likelihoodWP', splitWP[0])
         config.setOptionValue ('isolationWP', splitWP[1])
-    config.setOptionValue ('recomputeLikelihood', recomputeLikelihood, noneAction='ignore')
-    config.setOptionValue ('chargeIDSelection', chargeIDSelection, noneAction='ignore')
-    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
-    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
+    config.setOptionValue ('recomputeLikelihood', recomputeLikelihood)
+    config.setOptionValue ('chargeIDSelection', chargeIDSelection)
+    config.setOptionValue ('noEffSF', noEffSF)
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)

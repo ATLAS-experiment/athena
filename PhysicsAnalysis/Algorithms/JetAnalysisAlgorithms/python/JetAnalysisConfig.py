@@ -5,6 +5,7 @@ from __future__ import print_function
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
 import re
@@ -14,7 +15,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the common preprocessing of jet sequences"""
 
     def __init__ (self, containerName, jetCollection) :
-        super (PreJetAnalysisConfig, self).__init__ (containerName)
+        super (PreJetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.jetCollection = jetCollection
         self.addOption ('postfix', '', type=str)
@@ -88,7 +89,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the small-r jet sequence"""
 
     def __init__ (self, containerName, jetCollection, jetInput) :
-        super (SmallRJetAnalysisConfig, self).__init__ (containerName)
+        super (SmallRJetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.jetCollection = jetCollection
         self.jetInput = jetInput
@@ -342,7 +343,7 @@ class RScanJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the r-scan jet sequence"""
 
     def __init__ (self, containerName, jetCollection, jetInput, radius) :
-        super (RScanJetAnalysisConfig, self).__init__ (containerName)
+        super (RScanJetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.jetCollection = jetCollection
         self.jetInput = jetInput
@@ -407,7 +408,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the large-r jet sequence"""
 
     def __init__ (self, containerName, jetCollection, jetInput) :
-        super (LargeRJetAnalysisConfig, self).__init__ (containerName)
+        super (LargeRJetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.jetCollection = jetCollection
         self.jetInput = jetInput
@@ -509,6 +510,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 # JVT recommendations
 # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JVTCalibrationRel21
 
+@groupBlocks
 def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
                            runGhostMuonAssociation = None):
     """Create a jet analysis algorithm sequence
@@ -537,8 +539,7 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
     if jetCollectionName == 'AntiKtVR30Rmax4Rmin02PV0TrackJets' :
         # don't to anything on track jets
         config = PreJetAnalysisConfig (containerName, jetCollection)
-        if postfix is not None :
-            config.setOptionValue ("postfix", postfix)
+        config.setOptionValue ("postfix", postfix)
         config.setOptionValue ('runOriginalObjectLink', False)
         config.setOptionValue ('runGhostMuonAssociation', False)
         seq.append (config)
@@ -558,11 +559,9 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = None,
 
 
     config = PreJetAnalysisConfig (containerName, jetCollection)
-    if postfix is not None :
-        config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('postfix', postfix)
     config.runOriginalObjectLink = (btIndex != -1)
-    if runGhostMuonAssociation is not None :
-        config.setOptionValue ('runGhostMuonAssociation', runGhostMuonAssociation)
+    config.setOptionValue ('runGhostMuonAssociation', runGhostMuonAssociation)
     seq.append (config)
 
     if radius == 4:
@@ -611,26 +610,16 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
 
 
     config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput)
-    if postfix is not None :
-        config.setOptionValue ('postfix', postfix)
-    if runJvtUpdate is not None :
-        config.setOptionValue ('runJvtUpdate', runJvtUpdate)
-    if runNNJvtUpdate is not None :
-        config.setOptionValue ('runNNJvtUpdate', runNNJvtUpdate)
-    if runFJvtUpdate is not None :
-        config.setOptionValue ('runFJvtUpdate', runFJvtUpdate)
-    if runJvtSelection is not None :
-        config.setOptionValue ('runJvtSelection', runJvtSelection)
-    if runFJvtSelection is not None :
-        config.setOptionValue ('runFJvtSelection', runFJvtSelection)
-    if runJvtEfficiency is not None :
-        config.setOptionValue ('runJvtEfficiency', runJvtEfficiency)
-    if runFJvtEfficiency is not None :
-        config.setOptionValue ('runFJvtEfficiency', runFJvtEfficiency)
-    if systematicsModelJES is not None :
-        config.setOptionValue ('systematicsModelJES', systematicsModelJES)
-    if systematicsModelJER is not None :
-        config.setOptionValue ('systematicsModelJER', systematicsModelJER)
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('runJvtUpdate', runJvtUpdate)
+    config.setOptionValue ('runNNJvtUpdate', runNNJvtUpdate)
+    config.setOptionValue ('runFJvtUpdate', runFJvtUpdate)
+    config.setOptionValue ('runJvtSelection', runJvtSelection)
+    config.setOptionValue ('runFJvtSelection', runFJvtSelection)
+    config.setOptionValue ('runJvtEfficiency', runJvtEfficiency)
+    config.setOptionValue ('runFJvtEfficiency', runFJvtEfficiency)
+    config.setOptionValue ('systematicsModelJES', systematicsModelJES)
+    config.setOptionValue ('systematicsModelJER', systematicsModelJER)
     seq.append (config)
 
 
@@ -647,8 +636,7 @@ def makeRScanJetAnalysisConfig( seq, containerName, jetCollection,
     """
 
     config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput, radius)
-    if postfix is not None :
-        config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('postfix', postfix)
     seq.append (config)
 
 
@@ -667,8 +655,6 @@ def makeLargeRJetAnalysisConfig( seq, containerName, jetCollection,
     """
 
     config = LargeRJetAnalysisConfig (containerName, jetCollection, jetInput)
-    if postfix is not None :
-        config.setOptionValue ('postfix', postfix)
-    if largeRMass is not None :
-        config.setOptionValue ('largeRMass', largeRMass)
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('largeRMass', largeRMass)
     seq.append (config)

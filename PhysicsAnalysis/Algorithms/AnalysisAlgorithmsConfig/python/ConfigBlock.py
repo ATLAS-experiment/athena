@@ -3,12 +3,11 @@
 class ConfigBlockOption:
     """the information for a single option on a configuration block"""
 
-    def __init__ (self, type, info, duplicateAction, required=False) :
+    def __init__ (self, type=None, info='', noneAction='ignore', required=False) :
         self.type = type
         self.info = info
         self.required = required
-        self.duplicateAction = duplicateAction
-
+        self.noneAction = noneAction
 
 
 class ConfigBlock:
@@ -58,29 +57,17 @@ class ConfigBlock:
 
     """
 
-    def __init__ (self, groupName = '') :
-        self._groupName = groupName
+    # groupName is only a placeholder here
+    def __init__ (self) :
         self._options = {}
+        # used with block configuration to set arbitrary option
+        self.addOption('groupName', '', type=str,
+            info=('Used to specify this block when setting an'
+                ' option at an arbitrary location.'))
 
 
-    def groupName (self) :
-        """the configuration group we belong to
-
-        This is generally either 'ObjectName' or
-        'ObjectName.SelectionName', and can be used to identify blocks
-        on which to set options.  This name should not change after
-        the block has been created, i.e. not depend on any options
-        itself.
-
-        WARNING: The backend to option handling is slated to be
-        replaced at some point.  This particular function may change
-        behavior, interface or be removed/replaced entirely.
-        """
-        return self._groupName
-
-
-    def addOption (self, name, defaultValue,
-                   *, type, info='', duplicateAction='set', required=False) :
+    def addOption (self, name, defaultValue, *, 
+            type, info='', noneAction='ignore', required=False) :
         """declare the given option on the configuration block
 
         This should only be called in the constructor of the
@@ -94,14 +81,15 @@ class ConfigBlock:
             raise KeyError (f'duplicate option: {name}')
         if type not in [str, bool, int, float, list, None] :
             raise TypeError (f'unknown option type: {type}')
-        if duplicateAction not in ['skip', 'set', 'error'] :
-            raise ValueError (f'unknown duplicateAction: {duplicateAction}')
+        noneActions = ['error', 'set', 'ignore']
+        if noneAction not in noneActions :
+            raise ValueError (f'invalid noneAction: {noneAction} [allowed values: {noneActions}]')
         setattr (self, name, defaultValue)
-        self._options[name] = ConfigBlockOption (type=type, info=info, duplicateAction=duplicateAction, required=required)
+        self._options[name] = ConfigBlockOption(type=type, info=info,
+            noneAction=noneAction, required=required)
 
 
-    def setOptionValue (self, name, value,
-                        *, noneAction='error', isDuplicate=False) :
+    def setOptionValue (self, name, value) :
         """set the given option on the configuration block
 
         NOTE: The backend to option handling is slated to be replaced
@@ -109,30 +97,21 @@ class ConfigBlock:
         stay the same, but some behavior may change.
         """
 
-        noneActions = ['error', 'set', 'ignore']
-        if noneAction not in noneActions :
-            raise ValueError (f'invalid noneAction: {noneAction} [allowed values: {noneActions}]')
-
         if name not in self._options :
             raise KeyError (f'unknown option "{name}" in block "{self.__class__.__name__}"')
-        option = self._options[name]
-
-        if isDuplicate :
-            if option.duplicateAction == 'set' :
-                pass
-            elif option.duplicateAction == 'skip' :
-                return
-            elif option.duplicateAction == 'error' :
-                raise Exception (f"can't have two options with the same name: {self._groupName}.{name}")
-
+        noneAction = self._options[name].noneAction
         if value is not None or noneAction == 'set' :
             setattr (self, name, value)
         elif noneAction == 'ignore' :
             pass
         elif noneAction == 'error' :
             raise ValueError (f'passed None for setting option {name} with noneAction=error')
-        else :
-            raise Exception ('should not get here')
+
+
+    def getOptionValue(self, name):
+        """Returns config option value, if present; otherwise return None"""
+        if name in self._options:
+            return getattr(self, name)
 
 
     def getOptions(self):

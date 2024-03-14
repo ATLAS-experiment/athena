@@ -7,7 +7,7 @@ class EventSelectionMergerConfig(ConfigBlock):
     """ConfigBlock for merging the output of various selection streams"""
 
     def __init__(self):
-        super(EventSelectionMergerConfig, self).__init__('EventSelectionMerger')
+        super(EventSelectionMergerConfig, self).__init__()
         self.addOption('selections', [], type=list)
         self.addOption('noFilter', False, type=bool)
 
@@ -24,7 +24,7 @@ class EventSelectionConfig(ConfigBlock):
     """ConfigBlock for interpreting text-based event selections"""
 
     def __init__(self, name):
-        super(EventSelectionConfig, self).__init__('EventSelection_'+name)
+        super(EventSelectionConfig, self).__init__()
         self.addOption('electrons', "", type=str)
         self.addOption('muons', "", type=str)
         self.addOption('jets', "", type=str)
@@ -34,7 +34,7 @@ class EventSelectionConfig(ConfigBlock):
         self.addOption('met', "", type=str)
         self.addOption('btagDecoration', "", type=str)
         self.addOption('preselection', "", type=str)
-        self.addOption('selectionCuts', "", type=str)
+        self.addOption('selectionCuts', "", type=str, noneAction='error')
         self.addOption('noFilter', False, type=bool)
         self.addOption('debugMode', False, type=bool)
         self.step = 0
@@ -664,18 +664,18 @@ def makeEventSelectionConfig(seq,
     """
 
     config = EventSelectionConfig(name)
-    config.setOptionValue ('electrons', electrons, noneAction='ignore')
-    config.setOptionValue ('muons', muons, noneAction='ignore')
-    config.setOptionValue ('jets', jets, noneAction='ignore')
-    config.setOptionValue ('largeRjets', largeRjets, noneAction='ignore')
-    config.setOptionValue ('photons', photons, noneAction='ignore')
-    config.setOptionValue ('taus', taus, noneAction='ignore')
-    config.setOptionValue ('met', met, noneAction='ignore')
-    config.setOptionValue ('btagDecoration', btagDecoration, noneAction='ignore')
-    config.setOptionValue ('preselection', preselection, noneAction='ignore')
+    config.setOptionValue ('electrons', electrons)
+    config.setOptionValue ('muons', muons)
+    config.setOptionValue ('jets', jets)
+    config.setOptionValue ('largeRjets', largeRjets)
+    config.setOptionValue ('photons', photons)
+    config.setOptionValue ('taus', taus)
+    config.setOptionValue ('met', met)
+    config.setOptionValue ('btagDecoration', btagDecoration)
+    config.setOptionValue ('preselection', preselection)
     config.setOptionValue ('selectionCuts', selectionCuts)
-    config.setOptionValue ('noFilter', noFilter, noneAction='ignore')
-    config.setOptionValue ('debugMode', debugMode, noneAction='ignore')
+    config.setOptionValue ('noFilter', noFilter)
+    config.setOptionValue ('debugMode', debugMode)
     seq.append(config)
 
     # add event cutflow algorithm

@@ -11,7 +11,7 @@ class TriggerAnalysisBlock (ConfigBlock):
     """the ConfigBlock for trigger analysis"""
 
     def __init__ (self, configName) :
-        super (TriggerAnalysisBlock, self).__init__ (configName)
+        super (TriggerAnalysisBlock, self).__init__ ()
         self.addOption ('triggerChainsPerYear', {}, type=None)
         self.addOption ('triggerChainsForSelection', [], type=None)
         self.addOption ('prescaleLumiCalcFiles', [], type=None)
@@ -195,29 +195,29 @@ def makeTriggerAnalysisConfig( seq,
     """
 
     config = TriggerAnalysisBlock (configName)
-    config.setOptionValue ('triggerChainsPerYear', triggerChainsPerYear, noneAction='ignore')
-    config.setOptionValue ('triggerChainsForSelection', triggerChainsForSelection, noneAction='ignore')
-    config.setOptionValue ('prescaleLumiCalcFiles', prescaleLumiCalcFiles, noneAction='ignore')
-    config.setOptionValue ('noFilter', noFilter, noneAction='ignore')
-    config.setOptionValue ('noL1', noL1, noneAction='ignore')
+    config.setOptionValue ('triggerChainsPerYear', triggerChainsPerYear)
+    config.setOptionValue ('triggerChainsForSelection', triggerChainsForSelection)
+    config.setOptionValue ('prescaleLumiCalcFiles', prescaleLumiCalcFiles)
+    config.setOptionValue ('noFilter', noFilter)
+    config.setOptionValue ('noL1', noL1)
     if electronWorkingPoint is not None:
         splitWP = electronWorkingPoint.split ('.')
         if len (splitWP) != 2 :
             raise ValueError (f'electron working point should be of format "likelihood.isolation", not {electronWorkingPoint}')
-        config.setOptionValue ('electronID', splitWP[0], noneAction='ignore')
-        config.setOptionValue ('electronIsol', splitWP[1], noneAction='ignore')
+        config.setOptionValue ('electronID', splitWP[0])
+        config.setOptionValue ('electronIsol', splitWP[1])
     if muonWorkingPoint is not None:
         splitWP = muonWorkingPoint.split ('.')
         if len (splitWP) != 2 :
             raise ValueError (f'muon working point should be of format "likelihood.isolation", not {muonWorkingPoint}')
-        config.setOptionValue ('muonID', splitWP[0], noneAction='ignore')
+        config.setOptionValue ('muonID', splitWP[0])
     if photonWorkingPoint is not None:
         splitWP = photonWorkingPoint.split ('.')
         if len (splitWP) != 2 :
             raise ValueError (f'photon working point should be of format "likelihood.isolation", not {photonWorkingPoint}')
-        config.setOptionValue ('photonIsol', splitWP[1], noneAction='ignore')
-    config.setOptionValue('electrons', electrons, noneAction='ignore')
-    config.setOptionValue('muons', muons, noneAction='ignore')
-    config.setOptionValue('photons', photons, noneAction='ignore')
-    config.setOptionValue('noEffSF', noEffSF, noneAction='ignore')
+        config.setOptionValue ('photonIsol', splitWP[1])
+    config.setOptionValue('electrons', electrons)
+    config.setOptionValue('muons', muons)
+    config.setOptionValue('photons', photons)
+    config.setOptionValue('noEffSF', noEffSF)
     seq.append (config)

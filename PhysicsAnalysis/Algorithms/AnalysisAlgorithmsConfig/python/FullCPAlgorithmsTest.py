@@ -831,40 +831,40 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq += config.makeConfig ('Electrons.PtEtaSelection',
         containerName='AnaElectrons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
-    configSeq.setOptionValue ('.minPt', electronMinPt, noneAction='ignore')
-    configSeq.setOptionValue ('.maxEta', electronMaxEta, noneAction='ignore')
+    configSeq.setOptionValue ('.minPt', electronMinPt)
+    configSeq.setOptionValue ('.maxEta', electronMaxEta)
     configSeq += config.makeConfig ('Photons.PtEtaSelection',
         containerName='AnaPhotons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
-    configSeq.setOptionValue ('.minPt', photonMinPt, noneAction='ignore')
-    configSeq.setOptionValue ('.maxEta', photonMaxEta, noneAction='ignore')
+    configSeq.setOptionValue ('.minPt', photonMinPt)
+    configSeq.setOptionValue ('.maxEta', photonMaxEta)
     configSeq += config.makeConfig ('Muons.PtEtaSelection',
         containerName='AnaMuons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
-    configSeq.setOptionValue ('.minPt', muonMinPt, noneAction='ignore')
-    configSeq.setOptionValue ('.maxEta', muonMaxEta, noneAction='ignore')
+    configSeq.setOptionValue ('.minPt', muonMinPt)
+    configSeq.setOptionValue ('.maxEta', muonMaxEta)
     configSeq += config.makeConfig ('TauJets.PtEtaSelection',
         containerName='AnaTauJets')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
-    configSeq.setOptionValue ('.minPt', tauMinPt, noneAction='ignore')
-    configSeq.setOptionValue ('.maxEta', tauMaxEta, noneAction='ignore')
+    configSeq.setOptionValue ('.minPt', tauMinPt)
+    configSeq.setOptionValue ('.maxEta', tauMaxEta)
     configSeq += config.makeConfig ('Jets.PtEtaSelection',
         containerName='AnaJets')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
-    configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
-    configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
+    configSeq.setOptionValue ('.minPt', jetMinPt)
+    configSeq.setOptionValue ('.maxEta', jetMaxEta)
     if largeRJets :
         configSeq += config.makeConfig ('Jets.PtEtaSelection',
             containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
-        configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
-        configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
+        configSeq.setOptionValue ('.minPt', jetMinPt)
+        configSeq.setOptionValue ('.maxEta', jetMaxEta)
     if trackJets :
         configSeq += config.makeConfig ('Jets.PtEtaSelection',
             containerName='AnaTrackJets')
         configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
-        configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
-        configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
+        configSeq.setOptionValue ('.minPt', jetMinPt)
+        configSeq.setOptionValue ('.maxEta', jetMaxEta)
 
     configSeq += config.makeConfig ('ObjectCutFlow',
         containerName='AnaElectrons',

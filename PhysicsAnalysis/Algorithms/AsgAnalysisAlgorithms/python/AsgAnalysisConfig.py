@@ -15,7 +15,7 @@ class CommonServicesConfig (ConfigBlock) :
     """
 
     def __init__ (self) :
-        super (CommonServicesConfig, self).__init__ ('CommonServices')
+        super (CommonServicesConfig, self).__init__ ()
         self.addOption ('runSystematics', None, type=bool)
         self.addOption ('filterSystematics', None, type=str)
         self.addOption ('systematicsHistogram', None , type=str)
@@ -51,7 +51,7 @@ class PileupReweightingBlock (ConfigBlock):
     """the ConfigBlock for pileup reweighting"""
 
     def __init__ (self) :
-        super (PileupReweightingBlock, self).__init__ ('Event')
+        super (PileupReweightingBlock, self).__init__ ()
         self.addOption ('campaign', None, type=None)
         self.addOption ('files', None, type=None)
         self.addOption ('useDefaultConfig', True, type=bool)
@@ -191,7 +191,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
     """the ConfigBlock for generator algorithms"""
 
     def __init__ (self) :
-        super (GeneratorAnalysisBlock, self).__init__ ('Generator')
+        super (GeneratorAnalysisBlock, self).__init__ ()
         self.addOption ('saveCutBookkeepers', True, type=bool)
         self.addOption ('runNumber', None, type=int)
         self.addOption ('cutBookkeepersSystematics', None, type=bool)
@@ -229,17 +229,12 @@ class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
     def __init__ (self, containerName, selectionName) :
-        groupName = containerName
-        if selectionName:
-            groupName += f'.{selectionName}'
-        super (PtEtaSelectionBlock, self).__init__ (f'PtEtaSelection.{groupName}')
+        super (PtEtaSelectionBlock, self).__init__ ()
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('postfix', '', type=str)
-        self.addOption ('minPt', None, type=float,
-                        duplicateAction='skip')
-        self.addOption ('maxEta', None, type=float,
-                        duplicateAction='skip')
+        self.addOption ('minPt', None, type=float)
+        self.addOption ('maxEta', None, type=float)
         self.addOption ('selectionDecoration', 'selectPtEta', type=str)
         self.addOption ('useClusterEta', False, type=bool)
 
@@ -267,10 +262,7 @@ class ObjectCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an object cutflow"""
 
     def __init__ (self, containerName, selectionName) :
-        groupName = containerName
-        if selectionName != '' :
-            groupName += '.' + selectionName
-        super (ObjectCutFlowBlock, self).__init__ (groupName)
+        super (ObjectCutFlowBlock, self).__init__ ()
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('postfix', '', type=str)
@@ -292,10 +284,7 @@ class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
     def __init__ (self, containerName, selectionName) :
-        groupName = containerName
-        if selectionName != '' :
-            groupName += '.' + selectionName
-        super (EventCutFlowBlock, self).__init__ (groupName)
+        super (EventCutFlowBlock, self).__init__ ()
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('customSelections', [], type=None)
@@ -329,7 +318,7 @@ class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
     def __init__ (self, containerName, configName) :
-        super (OutputThinningBlock, self).__init__ (containerName + '.' + configName)
+        super (OutputThinningBlock, self).__init__ ()
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('selection', '', type=str)
@@ -375,7 +364,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
     """the ConfigBlock for the IFF classification of leptons"""
 
     def __init__ (self, containerName='') :
-        super (IFFLeptonDecorationBlock, self).__init__( 'IFFLeptonDecoration' )
+        super (IFFLeptonDecorationBlock, self).__init__()
         self.containerName = containerName
         self.addOption ('separateChargeFlipElectrons', True, type=bool)
         self.addOption ('decoration', 'IFFClass_%SYS%', type=str)
@@ -402,7 +391,7 @@ class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
     def __init__ (self, algoName):
-        super(PerEventSFBlock, self).__init__('PerEventSF'+algoName)
+        super(PerEventSFBlock, self).__init__()
         self.algoName = algoName
         self.addOption('particles', '', type=str)
         self.addOption('objectSF', '', type=str)
@@ -437,11 +426,11 @@ def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfi
     # TO DO: add explanation of the keyword arguments, left to experts
 
     config = PileupReweightingBlock ()
-    config.setOptionValue ('campaign', campaign, noneAction='ignore')
-    config.setOptionValue ('files', files, noneAction='ignore')
-    config.setOptionValue ('useDefaultConfig', useDefaultConfig, noneAction='ignore')
-    config.setOptionValue ('userLumicalcFiles', userLumicalcFiles, noneAction='ignore')
-    config.setOptionValue ('userPileupConfigs', userPileupConfigs, noneAction='ignore')
+    config.setOptionValue ('campaign', campaign)
+    config.setOptionValue ('files', files)
+    config.setOptionValue ('useDefaultConfig', useDefaultConfig)
+    config.setOptionValue ('userLumicalcFiles', userLumicalcFiles)
+    config.setOptionValue ('userPileupConfigs', userPileupConfigs)
     seq.append (config)
 
 
@@ -459,9 +448,9 @@ def makeGeneratorAnalysisConfig( seq,
     """
 
     config = GeneratorAnalysisBlock ()
-    config.setOptionValue ('saveCutBookkeepers', saveCutBookkeepers, noneAction='ignore')
-    config.setOptionValue ('runNumber', runNumber, noneAction='ignore')
-    config.setOptionValue ('cutBookkeepersSystematics', cutBookkeepersSystematics, noneAction='ignore')
+    config.setOptionValue ('saveCutBookkeepers', saveCutBookkeepers)
+    config.setOptionValue ('runNumber', runNumber)
+    config.setOptionValue ('cutBookkeepersSystematics', cutBookkeepersSystematics)
     seq.append (config)
 
 
@@ -486,11 +475,11 @@ def makePtEtaSelectionConfig( seq, containerName,
     """
 
     config = PtEtaSelectionBlock (containerName, selectionName)
-    config.setOptionValue ('postfix',postfix, noneAction='ignore')
-    config.setOptionValue ('minPt',minPt, noneAction='ignore')
-    config.setOptionValue ('maxEta',maxEta, noneAction='ignore')
-    config.setOptionValue ('selectionDecoration',selectionDecoration, noneAction='ignore')
-    config.setOptionValue ('useClusterEta',useClusterEta, noneAction='ignore')
+    config.setOptionValue ('postfix',postfix)
+    config.setOptionValue ('minPt',minPt)
+    config.setOptionValue ('maxEta',maxEta)
+    config.setOptionValue ('selectionDecoration',selectionDecoration)
+    config.setOptionValue ('useClusterEta',useClusterEta)
     seq.append (config)
 
 
@@ -509,7 +498,7 @@ def makeObjectCutFlowConfig( seq, containerName,
     """
 
     config = ObjectCutFlowBlock (containerName, selectionName)
-    config.setOptionValue ('postfix',postfix, noneAction='ignore')
+    config.setOptionValue ('postfix',postfix)
     seq.append (config)
 
 
@@ -525,8 +514,8 @@ def makeEventCutFlowConfig( seq, containerName,
     """
 
     config = EventCutFlowBlock (containerName, selectionName)
-    config.setOptionValue ('postfix', postfix, noneAction='ignore')
-    config.setOptionValue ('customSelections', customSelections, noneAction='ignore')
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('customSelections', customSelections)
     seq.append (config)
 
 
@@ -550,8 +539,8 @@ def makeOutputThinningConfig( seq, containerName,
     """
 
     config = OutputThinningBlock (containerName, configName)
-    config.setOptionValue ('postfix', postfix, noneAction='ignore')
-    config.setOptionValue ('selection', selection, noneAction='ignore')
-    config.setOptionValue ('selectionName', selectionName, noneAction='ignore')
-    config.setOptionValue ('outputName', outputName, noneAction='ignore')
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('selection', selection)
+    config.setOptionValue ('selectionName', selectionName)
+    config.setOptionValue ('outputName', outputName)
     seq.append (config)
