@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ public:
       matrix if the length of the std::vector x ind n.
       @param x: std::vector of length n which represents the values on all axes
       @param T: value which should be recieved*/
-  const T* getBinContent(std::vector<double> x) const;
+  const T* getBinContent(const std::vector<double>& x) const;
 
   // 		/** Add "T" to bin which corresponds to value std::vector x. Can only used for n-dimensional 
   // 			matrix if the length of the std::vector x ind n.
@@ -178,7 +178,7 @@ public:
   /** Clear Matrix content but not binning, dimensions and axis*/
   void  clearEntries();
 
-  bool isInRange(std::vector<double> x) const;
+  bool isInRange(const std::vector<double>& x) const;
 		
   /** The user can add a Description of what this matrix contains and how it was produced, e.g. cuts*/
   void setTextDescription(const std::string& text);
@@ -201,7 +201,7 @@ protected:
 				
   StatusCode setupEntries();
 		
-  unsigned int				Index(std::vector<unsigned int> x) const;
+  unsigned int				Index(const std::vector<unsigned int>& x) const;
   std::vector<unsigned int> 		Index(unsigned int id);
   // 		T& 					Access(std::vector<unsigned int> x);
 };
