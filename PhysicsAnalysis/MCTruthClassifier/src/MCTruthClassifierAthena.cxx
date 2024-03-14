@@ -21,13 +21,11 @@
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
-//
-// std includes
+
 #include <cmath>
 
 using Athena::Units::GeV;
 using namespace MCTruthPartClassifier;
-using std::abs;
 
 namespace {
 
@@ -108,34 +106,22 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
   for (const auto* const thePart : tps) {
     // loop over the stable particle
-    if (!MC::isStable(thePart)) {
-      continue;
-    }
+    if (!MC::isStable(thePart)) continue;
     // excluding G4 particle
-    if(!isFwrdEle || (isFwrdEle && m_FwdElectronUseG4Sel)){
-      if (HepMC::is_simulation_particle(thePart)) {
-	continue;
-      }
-    }
+    if ((!isFwrdEle || (isFwrdEle && m_FwdElectronUseG4Sel)) && HepMC::is_simulation_particle(thePart)) continue;
+
     long iParticlePDG = thePart->pdgId();
     // excluding neutrino
-    if (abs(iParticlePDG) == 12 || abs(iParticlePDG) == 14 || abs(iParticlePDG) == 16) {
-      continue;
-    }
+    if (std::abs(iParticlePDG) == 12 || std::abs(iParticlePDG) == 14 || std::abs(iParticlePDG) == 16) continue;
 
     double pt = thePart->pt() / GeV;
     double q = thePart?thePart->charge():0.0;
     // exclude charged particles with pT<1 GeV
-    if (q != 0 && pt < m_pTChargePartCut) {
-      continue;
-    }
-    if (q == 0 && pt < m_pTNeutralPartCut) {
-      continue;
-    }
+    if (q != 0 && pt < m_pTChargePartCut) continue;
+    if (q == 0 && pt < m_pTNeutralPartCut) continue;
 
     // eleptical cone  for extrapolations m_partExtrConePhi X m_partExtrConeEta
-    if (!isFwrdEle && m_ROICone && std::pow((detPhi(phiClus, thePart->phi()) / m_partExtrConePhi), 2) 
-      + std::pow((detEta(etaClus, thePart->eta()) / m_partExtrConeEta), 2) > 1.0) {
+    if (!isFwrdEle && m_ROICone && std::hypot( detPhi(phiClus, thePart->phi())/m_partExtrConePhi, detEta(etaClus, thePart->eta())/m_partExtrConeEta) > 1.0) {
       continue;
     }
 
@@ -174,14 +160,14 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     if (!isFwrdEle) {
       // the leading photon or electron  inside narrow eleptical cone
       // m_phtClasConePhi  X m_phtClasConeEta
-      if ((iParticlePDG == 22 || abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
+      if ((iParticlePDG == 22 || std::abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
         theEgamma = thePart;
         LeadingPhtPT = pt;
         LeadingPhtdR = dR;
       }
       // leading particle (excluding photon and electron) inside narrow eleptic
       // cone m_phtClasConePhi  X m_phtClasConeEta
-      if ((iParticlePDG != 22 && abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
+      if ((iParticlePDG != 22 && std::abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
         theLeadingPartInCone = thePart;
         LeadingPartPT = pt;
         LeadingPartdR = dR;
@@ -229,31 +215,22 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
   // additional loop over G4 particles,
   for (const auto* const thePart : tps) {
-    // loop over the stable particle
     if (!MC::isStable(thePart)) continue;
-    // only G4 particle
     if (!HepMC::is_simulation_particle(thePart)) continue;
 
     long iParticlePDG = thePart->pdgId();
     // exclude neutrino
-    if (abs(iParticlePDG) == 12 || abs(iParticlePDG) == 14 || abs(iParticlePDG) == 16) continue;
+    if (std::abs(iParticlePDG) == 12 || std::abs(iParticlePDG) == 14 || std::abs(iParticlePDG) == 16) continue;
 
-    // exclude particles interacting into the detector volume
-    if (thePart->decayVtx() != nullptr) {
-      continue;
-    }
+    if (thePart->decayVtx() != nullptr) continue;
 
-    if (std::pow((detPhi(phiClus, thePart->phi()) / m_partExtrConePhi), 2) + std::pow((detEta(etaClus, thePart->eta()) / m_partExtrConeEta), 2) > 1.0) continue;
+    if (std::hypot( detPhi(phiClus, thePart->phi())/m_partExtrConePhi, detEta(etaClus, thePart->eta())/m_partExtrConeEta ) > 1.0) continue;
 
     double pt = thePart->pt() / GeV;
-    double q = thePart?thePart->charge():0.0;
+    double q = thePart->charge();
     // exclude charged particles with pT<1 GeV
-    if (q != 0 && pt < m_pTChargePartCut) {
-      continue;
-    }
-    if (q == 0 && pt < m_pTNeutralPartCut) {
-      continue;
-    }
+    if (q != 0 && pt < m_pTChargePartCut) continue;
+    if (q == 0 && pt < m_pTNeutralPartCut) continue;
 
     double dR(-999.);
     bool isNCone = false;
@@ -272,7 +249,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
     // the leading photon or electron  inside narrow eleptical cone
     // m_phtClasConePhi  X m_phtClasConeEta
-    if ((iParticlePDG == 22 || abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
+    if ((iParticlePDG == 22 || std::abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
       theEgamma = thePart;
       LeadingPhtPT = pt;
       LeadingPhtdR = dR;
@@ -280,7 +257,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
     // leading particle (excluding photon or electron) inside narrow eleptic
     // cone m_phtClasConePhi  X m_phtClasConeEta
-    if ((iParticlePDG != 22 && abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
+    if ((iParticlePDG != 22 && std::abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
       theLeadingPartInCone = thePart;
       LeadingPartPT = pt;
       LeadingPartdR = dR;
@@ -373,15 +350,13 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
   std::vector<CaloSampling::CaloSample> samples = { sample };
   std::vector<std::pair<CaloSampling::CaloSample, std::unique_ptr<const Trk::TrackParameters>>> 
     extension = m_caloExtensionTool->layersCaloExtension(ctx, *params, samples, etaClus, caloDDMgr);
-  double etaCalo = -99;
-  double phiCalo = -99;
   bool extensionOK = (!extension.empty());
   if (!extensionOK) {
     ATH_MSG_WARNING("extrapolation of Truth Particle with eta  " << thePart->eta() << " , charge " << thePart->charge() << " , Pt " << thePart->pt() << " to calo failed");
     return false;
   }
-  etaCalo = extension[0].second->position().eta();
-  phiCalo = extension[0].second->position().phi();
+  double etaCalo = extension[0].second->position().eta();
+  double phiCalo = extension[0].second->position().phi();
 
   double dPhi = detPhi(phiCalo, phiClus);
   double dEta = detEta(etaCalo, etaClus);
@@ -389,9 +364,8 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
 
   if ((!isFwrdEle && dRmatch > m_phtdRtoTrCut) || (isFwrdEle && dRmatch > m_fwrdEledRtoTrCut)) return false;
 
-  if (!isFwrdEle && std::pow(dPhi / m_phtClasConePhi, 2) + std::pow(dEta / m_phtClasConeEta, 2) <= 1.0) isNarrowCone = true;
+  if (!isFwrdEle && std::hypot( dPhi/m_phtClasConePhi, dEta/m_phtClasConeEta ) <= 1.0) isNarrowCone = true;
 
   return true;
 }
-// End of methods using directly the extrapolator usable only from Athena
 #endif
