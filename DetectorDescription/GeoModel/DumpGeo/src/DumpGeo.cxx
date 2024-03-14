@@ -197,6 +197,8 @@ StatusCode DumpGeo::initialize()
   ATH_MSG_INFO("Creating the SQLite DB file...");
   if ( m_outFileName.empty()) {
     ATH_MSG_FATAL("The name of the output SQLite file is not set!");
+    throw GaudiException("The name of the output SQLite file is not set!", 
+                                "DumpGeo", StatusCode::FAILURE);
   }
   ATH_MSG_INFO("Output file name: " << m_outFileName);
 
