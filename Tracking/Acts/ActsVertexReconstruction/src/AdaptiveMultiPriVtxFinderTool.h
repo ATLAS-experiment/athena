@@ -38,6 +38,7 @@
 #include "Acts/Vertexing/AdaptiveMultiVertexFitter.hpp"
 #include "Acts/Vertexing/HelicalTrackLinearizer.hpp"
 #include "Acts/Vertexing/TrackDensityVertexFinder.hpp"
+#include "Acts/Vertexing/TrackAtVertex.hpp"
 #include "Acts/Vertexing/Vertex.hpp"
 #include "Acts/Vertexing/ImpactPointEstimator.hpp"
 
@@ -64,6 +65,10 @@ namespace ActsTrk {
     const Acts::BoundTrackParameters& parameters() const {return m_boundParams;}
 
     const Trk::ITrackLink* trackLink() const {return m_trkLink;}
+
+    static Acts::BoundTrackParameters extractParameters(const Acts::InputTrack& input) {
+      return input.template as<TrackWrapper>()->parameters();
+    }
 
   private:
     const Trk::ITrackLink* m_trkLink;
@@ -104,12 +109,17 @@ namespace ActsTrk {
     }
 
     using Propagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
-    using TrackLinearizer = Acts::HelicalTrackLinearizer<Propagator>;
-    using VertexFitter = Acts::AdaptiveMultiVertexFitter<TrackWrapper, TrackLinearizer>;
-    using VertexSeedFinder = Acts::TrackDensityVertexFinder<VertexFitter, Acts::GaussianTrackDensity<TrackWrapper>>;
-    using VertexFinder = Acts::AdaptiveMultiVertexFinder<VertexFitter, VertexSeedFinder>;
+    using TrackLinearizer = Acts::HelicalTrackLinearizer;
+    using VertexFitter = Acts::AdaptiveMultiVertexFitter;
+    using VertexSeedFinder = Acts::TrackDensityVertexFinder;
+    using VertexFinder = Acts::AdaptiveMultiVertexFinder;
 
     std::shared_ptr<VertexFinder> m_vertexFinder = nullptr;
+
+    std::shared_ptr<Propagator> m_propagator = nullptr;
+
+    // optional because of late initializatio
+    std::optional<TrackLinearizer> m_linearizer = std::nullopt;
 
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "", "ActsExtrapolationTool"};
@@ -140,7 +150,7 @@ namespace ActsTrk {
     DoubleProperty m_minWeight{this, "minWeight", 0.0001, "Min track weight for finder"};
     UnsignedIntegerProperty m_maxIterations{this, "maxIterations", 100, "Vertex finder max. iterations"};
     BooleanProperty m_addSingleTrackVertices{this, "addSingleTrackVertices", false, "Add single-track vertices"};
-    BooleanProperty m_do3dSplitting{this, "do3dSplitting", false, "Do 3d-splitting"};
+    BooleanProperty m_doFullSplitting{this, "doFullSplitting", false, "Do full-splitting"};
     DoubleProperty m_maximumVertexContamination{this, "maximumVertexContamination", 0.5, "Max. vertex contamination"};
     DoubleProperty m_looseConstrValue{this, "looseConstrValue", 1e+8, "Loose constraint value"};
     BooleanProperty m_useVertexCovForIPEstimation{this, "useVertexCovForIPEstimation", false, "Use seed vertex cov for IPEstimation"};

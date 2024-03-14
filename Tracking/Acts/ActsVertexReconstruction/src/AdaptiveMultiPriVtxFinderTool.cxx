@@ -20,6 +20,8 @@
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Utilities/AnnealingUtility.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/Vertexing/TrackAtVertex.hpp"
 
 // STL
 #include <iostream>
@@ -64,24 +66,23 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
 
     auto bField = std::make_shared<ATLASMagneticFieldWrapper>();
     auto stepper = Acts::EigenStepper<>(bField);
-    auto propagator = std::make_shared<Propagator>(std::move(stepper), 
+    m_propagator = std::make_shared<Propagator>(std::move(stepper), 
       std::move(navigator));
+
     // IP Estimator
-    using IPEstimator = Acts::ImpactPointEstimator<TrackWrapper, Propagator>;
-    IPEstimator::Config ipEstCfg(bField, propagator);
+    Acts::ImpactPointEstimator::Config ipEstCfg(bField, m_propagator);
     ipEstCfg.maxIterations = m_ipEstMaxIterations;
     ipEstCfg.precision = m_ipEstPrecision;
-    IPEstimator ipEst(ipEstCfg);
+    Acts::ImpactPointEstimator ipEst(ipEstCfg);
 
     Acts::AnnealingUtility::Config annealingConfig;
     annealingConfig.setOfTemperatures = m_annealingTemps;
     annealingConfig.cutOff = m_annealingCutOff;
     Acts::AnnealingUtility annealingUtility(annealingConfig);
 
-    // Create a custom std::function to extract BoundParameters 
-    // from TrackWrapper
-    std::function<Acts::BoundTrackParameters(TrackWrapper)> extractParameters =
-        [](const TrackWrapper& params) { return params.parameters(); };
+    // Linearizer for Acts::BoundParameters type test
+    TrackLinearizer::Config ltConfig(bField, m_propagator);
+    m_linearizer.emplace(ltConfig);
 
     // Vertex fitter configuration
     VertexFitter::Config fitterCfg(ipEst);
@@ -91,24 +92,22 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     fitterCfg.minWeight = m_minWeightFitter;
     fitterCfg.maxRelativeShift = m_fitterMaxRelativeShift;
     fitterCfg.doSmoothing = m_fitterDoSmoothing;
-    VertexFitter fitter(fitterCfg, extractParameters);
-
-    // Linearizer for Acts::BoundParameters type test
-    TrackLinearizer::Config ltConfig(bField, propagator);
-    TrackLinearizer linearizer(ltConfig);
+    fitterCfg.extractParameters.connect<&TrackWrapper::extractParameters>();
+    fitterCfg.trackLinearizer.connect<&TrackLinearizer::linearizeTrack>(&*m_linearizer);
+    VertexFitter fitter(fitterCfg);
 
     // Set up Gaussian track density
-    Acts::GaussianTrackDensity<TrackWrapper>::Config trackDensityConfig;
+    Acts::GaussianTrackDensity::Config trackDensityConfig;
     trackDensityConfig.d0MaxSignificance = m_gaussianMaxD0Significance;
     trackDensityConfig.z0MaxSignificance = m_gaussianMaxZ0Significance;
-    Acts::GaussianTrackDensity<TrackWrapper> trackDensity(trackDensityConfig);
+    trackDensityConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
+    Acts::GaussianTrackDensity trackDensity(trackDensityConfig);
 
     // Vertex seed finder
-    VertexSeedFinder::Config seedFinderConfig;
-    seedFinderConfig.trackDensityEstimator = trackDensity;
-    VertexSeedFinder seedFinder(seedFinderConfig, extractParameters);
+    VertexSeedFinder::Config seedFinderConfig{trackDensity};
+    auto seedFinder = std::make_shared<VertexSeedFinder>(seedFinderConfig);
     VertexFinder::Config finderConfig(std::move(fitter), seedFinder,
-        ipEst, std::move(linearizer), bField);
+        ipEst, bField);
 
     // Vertex finder config
     finderConfig.tracksMaxZinterval = m_tracksMaxZinterval;
@@ -120,12 +119,13 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     finderConfig.minWeight = m_minWeight;
     finderConfig.maxIterations = m_maxIterations;
     finderConfig.addSingleTrackVertices = m_addSingleTrackVertices;
-    finderConfig.do3dSplitting = m_do3dSplitting;
+    finderConfig.doFullSplitting = m_doFullSplitting;
     finderConfig.maximumVertexContamination = m_maximumVertexContamination;
     finderConfig.initialVariances = Acts::Vector4::Constant(m_looseConstrValue);
     finderConfig.useVertexCovForIPEstimation = m_useVertexCovForIPEstimation;
     finderConfig.useSeedConstraint = m_useSeedConstraint;
-    m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig), extractParameters);
+    finderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
+    m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig));
     
     ATH_MSG_INFO("ACTS AMVF tool successfully initialized");
     return StatusCode::SUCCESS;
@@ -215,7 +215,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
     
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx};
     const Acts::Vector3& beamSpotPos = beamSpotHandle->beamVtx().position();
-    Acts::Vertex<TrackWrapper> beamSpotConstraintVtx(beamSpotPos);
+    Acts::Vertex beamSpotConstraintVtx(beamSpotPos);
     beamSpotConstraintVtx.setCovariance(beamSpotHandle->beamVtx().covariancePosition());
 
     // Get the magnetic field context
@@ -271,14 +271,14 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
       allTracks.emplace_back(trk.get(),Acts::BoundTrackParameters(perigeeSurface, actsParams, covMat, Acts::ParticleHypothesis::pion()));
     }
 
-    std::vector<const TrackWrapper*> allTrackPtrs;
+    std::vector<Acts::InputTrack> allTrackPtrs;
     allTrackPtrs.reserve(allTracks.size());
     
     for(const auto& trk : allTracks){
-      allTrackPtrs.push_back(&trk);
+      allTrackPtrs.emplace_back(&trk);
     }
 
-    Acts::VertexingOptions<TrackWrapper> vertexingOptions( geoContext, magFieldContext );
+    Acts::VertexingOptions vertexingOptions( geoContext, magFieldContext );
 
     if(!m_useBeamConstraint){
       beamSpotConstraintVtx.setPosition(Acts::Vector3::Zero());
@@ -291,7 +291,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
     vertexingOptions.useConstraintInFit = m_useBeamConstraint;
     vertexingOptions.constraint = beamSpotConstraintVtx;
 
-    VertexFinder::State finderState;
+    auto finderState = m_vertexFinder->makeState(magFieldContext);
 
     auto findResult = m_vertexFinder->find(allTrackPtrs, vertexingOptions, finderState);
     
@@ -304,7 +304,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
       return std::make_pair(theVertexContainer, theVertexAuxContainer);
     }
 
-    std::vector<Acts::Vertex<TrackWrapper>> allVertices = *findResult;
+    std::vector<Acts::Vertex> allVertices = *findResult;
 
     std::vector<VertexAndSignalComp> vtxList;
     
@@ -333,8 +333,10 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
           continue;
         }
 
+        const TrackWrapper* originalParams = trk.originalParams.template as<TrackWrapper>();
+
         Trk::Perigee* fittedPerigee = actsBoundToTrkPerigee(trk.fittedParams, beamSpotPos);
-        Trk::VxTrackAtVertex trkAtVtx((trk.originalParams)->trackLink()->clone());
+        Trk::VxTrackAtVertex trkAtVtx(originalParams->trackLink()->clone());
         trkAtVtx.setPerigeeAtVertex(fittedPerigee);
         trkAtVtx.setTrackQuality(Trk::FitQuality(trk.chi2Track, trk.ndf));
         trkAtVtx.setVtxCompatibility(trk.vertexCompatibility);
@@ -342,7 +344,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
         trkAtVtxVec->push_back(trkAtVtx);
 
         const Trk::LinkToXAODTrackParticle* linkToXAODTP =
-        dynamic_cast<const Trk::LinkToXAODTrackParticle*>((trk.originalParams)->trackLink());
+        dynamic_cast<const Trk::LinkToXAODTrackParticle*>(originalParams->trackLink());
         if (linkToXAODTP) {
           xAODVtx->addTrackAtVertex(*linkToXAODTP, trk.trackWeight);
         }

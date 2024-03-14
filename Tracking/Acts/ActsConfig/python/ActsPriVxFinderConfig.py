@@ -29,7 +29,7 @@ def ActsGaussAdaptiveMultiFindingCfg(flags,
                       flags.Tracking.PriVertex.useBeamConstraint)
     kwargs.setdefault("tracksMaxZinterval",
                       flags.Tracking.PriVertex.maxZinterval)
-    kwargs.setdefault("do3dSplitting",
+    kwargs.setdefault("doFullSplitting",
                       not flags.Tracking.PriVertex.useBeamConstraint)
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
@@ -55,7 +55,7 @@ def TrigActsGaussAdaptiveMultiFindingCfg(
     kwargs.setdefault("useBeamConstraint", True)
     kwargs.setdefault("useSeedConstraint", False)
     kwargs.setdefault("tracksMaxZinterval", flags.Tracking.ActiveConfig.TracksMaxZinterval)
-    kwargs.setdefault("do3dSplitting", False)
+    kwargs.setdefault("doFullSplitting", False)
     kwargs.setdefault("addSingleTrackVertices", flags.Tracking.ActiveConfig.addSingleTrackVertices)
 
     acc.setPrivateTools(acc.popToolsAndMerge(

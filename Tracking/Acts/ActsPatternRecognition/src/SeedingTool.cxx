@@ -488,7 +488,7 @@ namespace ActsTrk {
     m_gridCfg = m_gridCfg.toInternalUnits();
 
     // Seed Finder
-    m_finder = Acts::SeedFinder< value_type >(m_finderCfg);
+    m_finder = {m_finderCfg};
  
     return StatusCode::SUCCESS;
   }

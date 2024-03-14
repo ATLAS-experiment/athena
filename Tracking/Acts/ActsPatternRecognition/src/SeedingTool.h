@@ -79,7 +79,7 @@ namespace ActsTrk {
     // *********************************************************************
 
   protected:
-    Acts::SeedFinder< value_type > m_finder;
+    Acts::SeedFinder< value_type, Acts::CylindricalSpacePointGrid<value_type> > m_finder;
     Acts::SeedFinderConfig< value_type > m_finderCfg;
     Acts::CylindricalSpacePointGridConfig m_gridCfg;
 
