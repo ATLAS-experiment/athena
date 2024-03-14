@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -1896,7 +1896,7 @@ StatusCode SGImplSvc::retrieve (CLID clid,
 {
   lock_t lock (m_mutex);
   SG::ConstProxyIterator first;
-  SG::ConstProxyIterator end = first;
+  SG::ConstProxyIterator end;
 
   if (!(proxyRange(clid,first,end)).isSuccess()) {
     std::string typnam;

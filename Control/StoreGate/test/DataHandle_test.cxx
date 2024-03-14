@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // DataHandle<> is not thread-safe.
@@ -174,7 +174,7 @@ namespace Athena_test {
     assert (vp[3]->refCount() == 1);
     for (int i=0; i < 3; i++)
       assert (vp[i]->refCount() == 2);
-    it++; it++;
+    ++it; ++it;
     assert (dh.setState (it, mp.end()).isSuccess());
     assert (vp[0]->refCount() == 1);
     assert (vp[1]->refCount() == 2);
