@@ -237,15 +237,5 @@ StatusCode DumpGeo::initialize()
   return StatusCode::SUCCESS;
 }
 
-//____________________________________________________________________
-StatusCode DumpGeo::execute()
-{
-  return StatusCode::SUCCESS;
-}
 
-//____________________________________________________________________
-void DumpGeo::handle(const Incident& inc)
-{
-  ATH_MSG_INFO("Handling incident '" << inc.type() << "'");
-}
 
