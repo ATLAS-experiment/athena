@@ -104,6 +104,7 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_j140f_LArPEBHLT_L1J75p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_j140f_LArPEBHLT_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j165_LArPEBHLT_L1J100', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportLegGroup),
+        ChainProp(name='HLT_j165_LArPEBHLT_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
     ]
 
     chainsP1['Calib'] = [
@@ -445,8 +446,6 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_j0_pf_ftf_presel6c25_BeamSpotPEB_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_4jJ40']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_BeamSpotPEB_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ85p0ETA21_3jJ40p0ETA25']+SupportPhIGroup),
 
-        # Placed here because not in HI menu
-        ChainProp(name='HLT_j165_LArPEBHLT_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
     ]
 
     addP1Signatures(chains,chainsP1)
@@ -475,6 +474,7 @@ def addLowMuP1Signatures(chains):
         ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L1J100', stream=['IDCalib'], groups=SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
         ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L1jJ160', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
         ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L1XE50', stream=['IDCalib'], groups=SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L1jXE100', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         #IDcalib for lower lumi
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1jJ60', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
 
@@ -605,9 +605,6 @@ def addCosmicP1Signatures(chains):
         ChainProp(name='HLT_noalg_L1eEM5_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
     ]
 
-    chainsP1['Jet'] = [
-        ChainProp(name='HLT_j165_LArPEBHLT_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
-    ]
 
     addP1Signatures(chains,chainsP1)
 
