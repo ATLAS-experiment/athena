@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //#include <assert.h>
@@ -113,7 +113,7 @@ void EMAPMatrix<T>::clear()
 
 
 template <class T>
-unsigned int EMAPMatrix<T>::Index(std::vector<unsigned int> x) const 
+unsigned int EMAPMatrix<T>::Index(const std::vector<unsigned int>& x) const 
 {
   unsigned int index=0;
   //assert(x.size()==m_dimensions);
@@ -322,7 +322,7 @@ const T* EMAPMatrix<T>::getBinContent(double x, double y, double z, double u, do
 
 
 template <class T>
-const T* EMAPMatrix<T>::getBinContent(std::vector<double> x) const
+const T* EMAPMatrix<T>::getBinContent(const std::vector<double>& x) const
 {
   bool statusCode = true;
   std::vector<unsigned int> id;
@@ -405,7 +405,7 @@ void  EMAPMatrix<T>::clearEntries()
 
 
 template <class T>
-bool EMAPMatrix<T>::isInRange(std::vector<double> x) const
+bool EMAPMatrix<T>::isInRange(const std::vector<double>& x) const
 {
   if (x.size()!=m_dimensions) return false;
   for (unsigned int i=0;i<m_dimensions;++i) if (m_axis.at(i).isInRange(x.at(i))==false) return false;
