@@ -30,7 +30,7 @@
  * The stack ordering is Cu, Al, Cu, Cu, Al, Cu. This will be simplified here by
  * creating a copper body with aluminum plates placed within.
 */
-GeoFullPhysVol* ZDC_BRANModule::create(){
+void ZDC_BRANModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
 
     MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
 
@@ -38,7 +38,7 @@ GeoFullPhysVol* ZDC_BRANModule::create(){
     if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, "MATERIALS")) {
         MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
         LogStream << MSG::ERROR << "execute: Could not retrieve StoredMaterialManager object from the detector store" << endmsg;
-        return nullptr;
+        return;
     }
 
     const GeoMaterial *OpAir    = materialManager->getMaterial("ZDC::opticalAir"   );
@@ -125,6 +125,13 @@ GeoFullPhysVol* ZDC_BRANModule::create(){
         }
     }
 
-    return Cu_Body_Physical;
+    // Place the copper body in the mother volume
+    char volName[64];
+    Identifier id = m_zdcID->channel_id(m_side, m_module, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    sprintf(volName, "Zdc::BRAN_Mod %s", id.getString().c_str());
+    mother->add(new GeoNameTag(volName));
+    mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
+    mother->add(trf);
+    mother->add(Cu_Body_Physical);
 
 }
