@@ -29,9 +29,9 @@ class EventViewCreatorAlg : public AthReentrantAlgorithm {
  private:
   ToolHandle< IRoICreatorTool > m_roiTool {this, "RoICreatorTool", "", "Tool for creating RoIs"};
 
-  SG::WriteHandleKey< ViewContainer > m_viewsKey {this, "Views", "OfflineFullScanEventView",
+  SG::WriteHandleKey< ViewContainer > m_viewsKey {this, "Views", "",
       "The key of views collection produced" };
-  SG::WriteHandleKey< ConstDataVector< TrigRoiDescriptorCollection > > m_inViewRoIs {this, "InViewRoIs", "OfflineFullScanInViewRegion",
+  SG::WriteHandleKey< ConstDataVector< TrigRoiDescriptorCollection > > m_inViewRoIs {this, "InViewRoIs", "",
       "RoIs in the View"};
 };
 

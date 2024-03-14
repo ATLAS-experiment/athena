@@ -9,7 +9,6 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "StoreGate/WriteHandleKey.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsToolInterfaces/IStripSpacePointFormationTool.h"
@@ -97,9 +96,9 @@ namespace ActsTrk {
 							  size_t& stripIndex) const;
     const SCT_ID* m_stripId{};
 
-    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle of SCT"};
-    ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ConverterTool", "ActsToTrkConverterTool"};
-    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "", "Tool to retreive Lorentz angle of SCT"};
+    ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ConverterTool", ""};
+    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
 
     Gaudi::Property<bool> m_allClusters{this, "AllClusters", false, "Process all clusters without limits."};
     Gaudi::Property<float> m_overlapLimitOpposite{this, "OverlapLimitOpposite", 2.8, "Overlap limit for opposite-neighbour."};

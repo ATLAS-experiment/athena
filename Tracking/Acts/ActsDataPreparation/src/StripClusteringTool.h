@@ -87,14 +87,14 @@ private:
     ToolHandle<IInDetConditionsTool> m_conditionsTool{
 	this,
 	"StripConditionsTool",
-	"SCT_ConditionsSummaryTool/InDetSCT_ConditionsSummaryTool",
+	"",
 	"Tool to retrieve Strip Conditions summary"
     };
 
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{
 	this,
 	"LorentzAngleTool",
-	"SiLorentzAngleTool/SCTLorentzAngleTool",
+	"",
 	"Tool to retreive Lorentz angle of Si detector module"
     };
 
@@ -109,7 +109,7 @@ private:
     ToolHandle<IInDetConditionsTool> m_summaryTool{
 	this,
 	"conditionsTool",
-	"SCT_ConditionsSummaryTool/ITkStripConditionsSummaryTool",
+	"",
 	"Conditions summary tool"
     };
 

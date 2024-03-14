@@ -35,6 +35,10 @@ def ActsCoreStripSpacePointToolCfg(flags,
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
         kwargs.setdefault("ConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        
     acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 
@@ -46,6 +50,9 @@ def ActsPixelSpacePointFormationAlgCfg(flags,
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
+    kwargs.setdefault('PixelClusters', 'ITkPixelClusters')
+    kwargs.setdefault('PixelSpacePoints', 'ITkPixelSpacePoints')
+    
     if 'SpacePointFormationTool' not in kwargs:
         kwargs.setdefault("SpacePointFormationTool", acc.popToolsAndMerge(ActsPixelSpacePointToolCfg(flags)))
         
@@ -64,6 +71,10 @@ def ActsStripSpacePointFormationAlgCfg(flags,
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
+    kwargs.setdefault('StripClusters', 'ITkStripClusters')
+    kwargs.setdefault('StripSpacePoints', 'ITkStripSpacePoints')
+    kwargs.setdefault('StripOverlapSpacePoints', 'ITkStripOverlapSpacePoints')
+    
     if 'SpacePointFormationTool' not in kwargs:
         from ActsConfig.ActsConfigFlags import SpacePointStrategy
         if flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore:

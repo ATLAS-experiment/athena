@@ -186,9 +186,9 @@ namespace ActsTrk {
 
     SG::ReadHandleKey< Trk::PRDtoTrackMap > m_prdToTrackMap {this, "PRDtoTrackMap", "", "option PRD-to-track association"};
 
-    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsPixel {this, "ActsSpacePointsPixelName", "ITkPixelSpacePoints", "Pixel space points container"};
-    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsStrip {this, "ActsSpacePointsStripName", "ITkStripSpacePoints", "Strip space points container"};
-    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsOverlap {this, "ActsSpacePointsOverlapName", "ITkStripOverlapSpacePoints", "Strip overlap space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsPixel {this, "ActsSpacePointsPixelName", "", "Pixel space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsStrip {this, "ActsSpacePointsStripName", "", "Strip space points container"};
+    SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsOverlap {this, "ActsSpacePointsOverlapName", "", "Strip overlap space points container"};
 
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     SG::ReadCondHandleKey< AtlasFieldCacheCondObj > m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",

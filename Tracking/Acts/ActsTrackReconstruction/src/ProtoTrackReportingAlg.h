@@ -26,8 +26,8 @@ namespace ActsTrk{
     
     private: 
         // the track collection to print 
-        SG::ReadHandleKey<TrackCollection> m_EFTracks{this, "TrackCollection","EFTracks","track collection to look for"};
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_xAODTracks{this, "xAODTrackCollection", "InDetTrackParticles"," xAOD track collection to look for"};
+        SG::ReadHandleKey<TrackCollection> m_EFTracks{this, "TrackCollection","","track collection to look for"};
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_xAODTracks{this, "xAODTrackCollection", ""," xAOD track collection to look for"};
 
 
     }; 

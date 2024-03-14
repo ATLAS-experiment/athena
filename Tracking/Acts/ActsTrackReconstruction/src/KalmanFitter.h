@@ -179,13 +179,13 @@ private:
   //bool SourceLinkType = false for ATLASSourceLink
   //bool SourceLinkType = true for PRDSourceLink
 
-  ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-  ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
+  ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
                                                            "BoundaryCheckTool", 
-                                                           "InDet::InDetBoundaryCheckTool", 
+                                                           "",
                                                            "Boundary checking tool for detector sensitivities"};
 
     // the settable job options
@@ -223,8 +223,8 @@ private:
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
 
-  ToolHandle<Trk::IRIO_OnTrackCreator> m_broadROTcreator {this, "BroadRotCreatorTool", "", ""};
-  ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", "", ""};
+  ToolHandle<Trk::IRIO_OnTrackCreator> m_broadROTcreator {this, "BroadRotCreatorTool", ""};
+  ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", ""};
   //Gaudi Property to choose from PRD or ROT measurment ReFit
   Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false, "Do Refit From PRD instead of ROT"};
 }; // end of namespace

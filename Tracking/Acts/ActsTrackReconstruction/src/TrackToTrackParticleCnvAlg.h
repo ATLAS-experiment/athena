@@ -66,10 +66,10 @@ namespace ActsTrk
                                                      const Acts::PerigeeSurface &perigee_surface) const;
 
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool
-       {this, "ExtrapolationTool", "ActsExtrapolationTool"};
+       {this, "ExtrapolationTool", ""};
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey
-       {this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer","Track collection (ActsTrk variant)"};
+       {this, "ACTSTracksLocation", "","Track collection (ActsTrk variant)"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey
        {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot or empty." };
     SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey

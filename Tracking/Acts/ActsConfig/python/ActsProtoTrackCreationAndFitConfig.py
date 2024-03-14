@@ -1,51 +1,76 @@
 # 
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def ActsTruthGuidedProtoTrackCreatorToolCfg(flags,
+                                            name: str = "ActsTruthGuidedProtoTrackCreatorTool",
+                                            **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('PRD_MultiTruthCollections', ["PRD_MultiTruthITkPixel","PRD_MultiTruthITkStrip"])
+    acc.setPrivateTools(CompFactory.ActsTrk.TruthGuidedProtoTrackCreator(name, **kwargs))
+    return acc
 
-def ActsProtoTackCreationAndFitCfg(flags, name="ActsProtoTrackCreationAndFitAlg", **kwargs):
-    result = ComponentAccumulator() 
+def ActsProtoTackCreationAndFitAlgCfg(flags,
+                                      name: str = "ActsProtoTrackCreationAndFitAlg",
+                                      **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator() 
     from ActsConfig.ActsTrackFindingConfig import isdet  
     kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, ["ITkPixelDetectorElementCollection"], ["ITkStripDetectorElementCollection"]))
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg, ActsTrackingGeometryToolCfg 
+
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
+
+    kwargs.setdefault('PixelClusterContainer', 'ITkPixelClusters')
+    kwargs.setdefault('StripClusterContainer', 'ITkStripClusters')
+    kwargs.setdefault('ACTSTracksLocation', 'EFTestTracks')
     
-    result.merge(ITkPixelReadoutGeometryCfg(flags))
-    result.merge(ITkStripReadoutGeometryCfg(flags))
+    if "TrackingGeometryTool" not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )  # PrivateToolHandle
+        
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault(
+            "ExtrapolationTool",
+            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+        )  # PrivateToolHandle
 
-    kwargs.setdefault(
-        "TrackingGeometryTool",
-        result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
-    )  # PrivateToolHandle
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault(
+            "ATLASConverterTool",
+            acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
+        )
 
-    kwargs.setdefault(
-        "ExtrapolationTool",
-        result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-    )  # PrivateToolHandle
+    if 'ActsFitter' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags,
+                                                                           ReverseFilteringPt=0,
+                                                                           OutlierChi2Cut=30)))
 
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault(
-        "ATLASConverterTool",
-        result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
-    )
+    if 'PatternBuilder' not in kwargs:
+        kwargs.setdefault('PatternBuilder', acc.popToolsAndMerge(ActsTruthGuidedProtoTrackCreatorToolCfg(flags)))
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.ProtoTrackCreationAndFitAlg(name,**kwargs),
+                     primary=True)
+    return acc
 
-    from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
-    kwargs.setdefault("ActsFitter", result.popToolsAndMerge(ActsFitterCfg(flags,
-                                               ReverseFilteringPt=0,
-                                               OutlierChi2Cut=30)))
-    theAlg = CompFactory.ActsTrk.ProtoTrackCreationAndFitAlg(name,**kwargs)
-    result.addEventAlgo(theAlg,primary=True)
-    return result 
-
-def ActsProtoTrackReportingAlgCfg(flags, name="ActsProtoTrackReportingAlg",**kwargs): 
-    result = ComponentAccumulator() 
-    theAlg = CompFactory.ActsTrk.ProtoTrackReportingAlg(name,**kwargs)
-    result.addEventAlgo(theAlg,primary=True)
-    return result 
+def ActsProtoTrackReportingAlgCfg(flags,
+                                  name: str = "ActsProtoTrackReportingAlg",
+                                  **kwargs) -> ComponentAccumulator: 
+    acc = ComponentAccumulator() 
+    acc.addEventAlgo(CompFactory.ActsTrk.ProtoTrackReportingAlg(name,**kwargs),
+                     primary=True)
+    return acc
 
 if __name__ == "__main__":
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
@@ -105,7 +130,7 @@ if __name__ == "__main__":
 
     # ProtoTrackChain Track algo
     top_acc.merge(SetupHistSvc(flags,streamName="HmmRefits",dataFile=flags.outputNTupleFile))
-    top_acc.merge(ActsProtoTackCreationAndFitCfg(flags,"ActsProtoTackCreationAndFitAlg",ACTSTracksLocation=ACTSProtoTrackChainTrackKey   ))
+    top_acc.merge(ActsProtoTackCreationAndFitAlgCfg(flags,"ActsProtoTackCreationAndFitAlg",ACTSTracksLocation=ACTSProtoTrackChainTrackKey   ))
 
     ## Convert ACTs container to Trk converter
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg

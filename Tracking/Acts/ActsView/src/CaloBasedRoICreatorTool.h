@@ -32,7 +32,7 @@ private:
 	"Name of the calo cluster ROIs in Phi,R,Z parameterization"};
   
   SG::WriteHandleKey< TrigRoiDescriptorCollection > m_roiCollectionKey
-    {this, "RoIs", "OfflineCaloBasedRegion"};
+    {this, "RoIs", ""};
 
   SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey
     {this, "BeamSpotKey", "BeamSpotData",
