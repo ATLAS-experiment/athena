@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+from typing import Any, Optional
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaCommon.Logging import logging
 log = logging.getLogger( "TriggerConfigAccess.py" )
@@ -8,6 +9,9 @@ from .TrigConfigSvcCfg import getTrigConfigFromFlag, getL1MenuFileName, getHLTMe
 
 from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess, L1PrescalesSetAccess, BunchGroupSetAccess
 from TrigConfIO.HLTTriggerConfigAccess import HLTMenuAccess, HLTPrescalesSetAccess, HLTJobOptionsAccess, HLTMonitoringAccess
+
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaConfiguration.Enums import Format
 
 from functools import lru_cache
 
@@ -45,7 +49,7 @@ are then loaded from the DB.
 """
 
 @lru_cache(maxsize=None)
-def getKeysFromCool(runNr, lbNr = 0):
+def getKeysFromCool(runNr: int, lbNr: int = 0) -> dict[str,int]:
     """Return dictionary of trigger keys for given run and lumiblock number
     """
     from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
@@ -74,7 +78,7 @@ def getKeysFromCool(runNr, lbNr = 0):
 
     return d
 
-def getDBKeysFromMetadata(flags):
+def getDBKeysFromMetadata(flags) -> Optional[dict[str, Any]]:
     """Provides access to the database keys from the in-file metadata
 
     Gets the database keys from the in-file metadata which are stored together with the json representation
@@ -83,7 +87,6 @@ def getDBKeysFromMetadata(flags):
 
     @returns: dictionary with the DB keys. Returns 'None' if information is not present.
     """
-    from AthenaConfiguration.AutoConfigFlags import GetFileMD
     metadata = GetFileMD(flags.Input.Files)
     keys = metadata.get("TriggerConfigInfo", None)
     if keys is None:
@@ -99,8 +102,7 @@ def getDBKeysFromMetadata(flags):
 Returns a string-serialised JSON object from the metadata store.
 Checks AOD syntax first, then fully-qualified ESD syntax
 """
-def _getJSONFromMetadata(flags, key):
-    from AthenaConfiguration.Enums import Format
+def _getJSONFromMetadata(flags, key) -> Optional[dict[str,Any]]:
     if flags.Input.Format != Format.POOL:
         raise RuntimeError("Cannot read trigger configuration (%s) from input type %s", key, flags.Input.Format)
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
@@ -124,14 +126,15 @@ L1 information
 
 """
 @AccumulatorCache
-def getL1MenuAccess( flags = None ):
+def getL1MenuAccess( flags = None ) -> L1MenuAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
         cfg = L1MenuAccess( filename = getL1MenuFileName( flags ) )
     elif tc["SOURCE"] == "COOL":
         """This is the case when reconstructing the data."""
-        from RecExConfig.InputFilePeeker import inpSum
-        keysFromCool = getKeysFromCool( inpSum["run_number"] )
+        if len(flags.Input.RunNumbers) == 0:
+            raise RuntimeError("No run number available in input metadata")
+        keysFromCool = getKeysFromCool( flags.Input.RunNumbers[0] )
         cfg = L1MenuAccess( dbalias = keysFromCool["DB"], smkey = keysFromCool['SMK'] )
     elif tc["SOURCE"] == "DB":
         cfg = L1MenuAccess( dbalias = tc["DBCONN"], smkey = tc["SMK"] )
@@ -143,14 +146,15 @@ def getL1MenuAccess( flags = None ):
 
 
 @AccumulatorCache
-def getL1PrescalesSetAccess( flags = None ):
+def getL1PrescalesSetAccess( flags = None ) -> L1PrescalesSetAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
         cfg = L1PrescalesSetAccess( filename = getL1PrescalesSetFileName( flags ) )
     elif tc["SOURCE"] == "COOL":
         """This is the case when reconstructing the data."""
-        from RecExConfig.InputFilePeeker import inpSum
-        keysFromCool = getKeysFromCool( inpSum["run_number"] )
+        if len(flags.Input.RunNumbers) == 0:
+            raise RuntimeError("No run number available in input metadata")
+        keysFromCool = getKeysFromCool( flags.Input.RunNumbers[0] )
         cfg = L1PrescalesSetAccess( dbalias = keysFromCool["DB"], l1pskey = keysFromCool['L1PSK'] )
     elif tc["SOURCE"] == "DB":
         cfg = L1PrescalesSetAccess( dbalias = tc["DBCONN"], l1pskey = tc["L1PSK"] )
@@ -162,21 +166,21 @@ def getL1PrescalesSetAccess( flags = None ):
 
 
 @AccumulatorCache
-def getBunchGroupSetAccess( flags = None ):
+def getBunchGroupSetAccess( flags = None ) -> BunchGroupSetAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
         cfg = BunchGroupSetAccess( filename = getBunchGroupSetFileName( flags ) )
     elif tc["SOURCE"] == "COOL":
         """This is the case when reconstructing the data."""
-        from RecExConfig.InputFilePeeker import inpSum
-        keysFromCool = getKeysFromCool( inpSum["run_number"] )
+        if len(flags.Input.RunNumbers) == 0:
+            raise RuntimeError("No run number available in input metadata")
+        keysFromCool = getKeysFromCool( flags.Input.RunNumbers[0] )
         cfg = BunchGroupSetAccess( dbalias = keysFromCool["DB"], bgskey = keysFromCool['BGSK'] )
     elif tc["SOURCE"] == "DB":
         cfg = BunchGroupSetAccess( dbalias = tc["DBCONN"], bgskey = tc["BGSK"] )
     elif tc["SOURCE"] == "INFILE":
-        from RecExConfig.InputFilePeeker import inputFileSummary as inpSum
-        if inpSum["file_type"] != 'pool':
-            raise RuntimeError("Cannot read trigger configuration (Bunchgroup Set) from input type %s" % inpSum["file_type"])
+        if flags.Input.Format != Format.POOL:
+            raise RuntimeError(f"Cannot read trigger configuration (Bunchgroup Set) from input type {flags.Input.Format}")
         raise NotImplementedError("Python access to the trigger configuration (Bunchgroup Set) from in-file metadata not yet implemented")
     else:
         raise RuntimeError("Unknown source of trigger configuration: %s" % tc["SOURCE"])
@@ -189,14 +193,15 @@ HLT information
 
 """
 @AccumulatorCache
-def getHLTMenuAccess( flags = None ):
+def getHLTMenuAccess( flags = None ) -> HLTMenuAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
         cfg = HLTMenuAccess( filename = getHLTMenuFileName( flags ) )
     elif tc["SOURCE"] == "COOL":
         """This is the case when reconstructing the data."""
-        from RecExConfig.InputFilePeeker import inpSum
-        keysFromCool = getKeysFromCool( inpSum["run_number"] )
+        if len(flags.Input.RunNumbers) == 0:
+            raise RuntimeError("No run number available in input metadata")
+        keysFromCool = getKeysFromCool( flags.Input.RunNumbers[0] )
         cfg = HLTMenuAccess( dbalias = keysFromCool["DB"], smkey = keysFromCool['SMK'] )
     elif tc["SOURCE"] == "DB":
         cfg = HLTMenuAccess( dbalias = tc["DBCONN"], smkey = tc["SMK"] )
@@ -208,14 +213,15 @@ def getHLTMenuAccess( flags = None ):
 
 
 @AccumulatorCache
-def getHLTPrescalesSetAccess( flags = None ):
+def getHLTPrescalesSetAccess( flags = None ) -> HLTPrescalesSetAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
         cfg = HLTPrescalesSetAccess( filename = getHLTPrescalesSetFileName( flags ) )
     elif tc["SOURCE"] == "COOL":
         """This is the case when reconstructing the data."""
-        from RecExConfig.InputFilePeeker import inpSum
-        keysFromCool = getKeysFromCool( inpSum["run_number"] )
+        if len(flags.Input.RunNumbers) == 0:
+            raise RuntimeError("No run number available in input metadata")
+        keysFromCool = getKeysFromCool( flags.Input.RunNumbers[0] )
         cfg = HLTPrescalesSetAccess( dbalias = keysFromCool["DB"], hltpskey = keysFromCool['HLTPSK'] )
     elif tc["SOURCE"] == "DB":
         cfg = HLTPrescalesSetAccess( dbalias = tc["DBCONN"], hltpskey = tc["HLTPSK"] )
@@ -227,14 +233,15 @@ def getHLTPrescalesSetAccess( flags = None ):
 
 
 @AccumulatorCache
-def getHLTJobOptionsAccess( flags = None ):
+def getHLTJobOptionsAccess( flags = None ) -> HLTJobOptionsAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
-        cfg = HLTJobOptionsAccess( filename = getHLTJobOptionsFileName( flags ) )
+        cfg = HLTJobOptionsAccess( filename = getHLTJobOptionsFileName() )
     elif tc["SOURCE"] == "COOL":
         """This is the case when reconstructing the data."""
-        from RecExConfig.InputFilePeeker import inpSum
-        keysFromCool = getKeysFromCool( inpSum["run_number"] )
+        if len(flags.Input.RunNumbers) == 0:
+            raise RuntimeError("No run number available in input metadata")
+        keysFromCool = getKeysFromCool( flags.Input.RunNumbers[0] )
         cfg = HLTJobOptionsAccess( dbalias = keysFromCool["DB"], smkey = keysFromCool['SMK'] )
     elif tc["SOURCE"] == "DB":
         cfg = HLTJobOptionsAccess( dbalias = tc["DBCONN"], smkey = tc["SMK"] )
@@ -246,14 +253,15 @@ def getHLTJobOptionsAccess( flags = None ):
 
 
 @AccumulatorCache
-def getHLTMonitoringAccess( flags = None ):
+def getHLTMonitoringAccess( flags = None ) -> HLTMonitoringAccess:
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
         cfg = HLTMonitoringAccess( filename = getHLTMonitoringFileName( flags ) )
     elif tc["SOURCE"] == "COOL":
         """This is the case when reconstructing the data."""
-        from RecExConfig.InputFilePeeker import inpSum
-        keysFromCool = getKeysFromCool( inpSum["run_number"] )
+        if len(flags.Input.RunNumbers) == 0:
+            raise RuntimeError("No run number available in input metadata")
+        keysFromCool = getKeysFromCool( flags.Input.RunNumbers[0] )
         cfg = HLTMonitoringAccess( dbalias = keysFromCool["DB"], smkey = keysFromCool['SMK'] )
     elif tc["SOURCE"] == "DB":
         cfg = HLTMonitoringAccess( dbalias = tc["DBCONN"], smkey = tc["SMK"] )
