@@ -75,10 +75,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSTriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    PHYSTriggerListsHelper = TriggerListsHelper(flags)
 
     # for AOD produced before 24.0.17, the electron removal tau is not available
-    TauJets_EleRM_in_input = (ConfigFlags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
+    TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
     if TauJets_EleRM_in_input:
         logPHYS.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
     else:
@@ -86,7 +86,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
 
     # Common augmentations
     acc.merge(PHYSKernelCfg(
-        ConfigFlags, 
+        flags, 
         name="PHYSKernel", 
         StreamName = stream_name, 
         TriggerListsHelper = PHYSTriggerListsHelper, 
