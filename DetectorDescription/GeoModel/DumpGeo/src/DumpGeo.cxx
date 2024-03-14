@@ -118,7 +118,12 @@ StatusCode DumpGeo::initialize()
   if ( !(m_user_filterDetManagersList.empty()) ) {
     // Get list of managers
     ATH_MSG_INFO("List of GeoModel Detector Managers: ");
-    std::vector<std::string> managersList = theExpt->getListOfManagers();
+    std::set<std::string> managersList{};
+    {
+       std::vector<std::string> blub = theExpt->getListOfManagers();
+       managerList.insert(blub.begin(), blub.end());
+    }    
+
 
     // safety check: 
     // check that all DetManagers requested by the user are in the list
