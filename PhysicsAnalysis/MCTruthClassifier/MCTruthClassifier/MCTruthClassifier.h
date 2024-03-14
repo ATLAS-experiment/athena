@@ -71,6 +71,10 @@ public:
     declareProperty("phtdRtoTrCut", m_phtdRtoTrCut = 0.1);
     declareProperty("fwrdEledRtoTrCut", m_fwrdEledRtoTrCut = 0.15);
     declareProperty("ROICone", m_ROICone = false);
+//AV: those below are needed in egammaClusMatch
+    declareProperty("pTChargePartCut", m_pTChargePartCut = 1.0);
+    declareProperty("pTNeutralPartCut", m_pTNeutralPartCut = 0.);
+    declareProperty("inclG4part", m_inclG4part = false);
 #endif
 #ifndef GENERATIONBASE
     declareProperty("deltaRMatchCut", m_deltaRMatchCut = 0.2);
@@ -81,9 +85,6 @@ public:
     // Properties Available in all
     declareProperty("inclEgammaFwrdEle", m_inclEgammaFwrdEle = true);
     declareProperty("inclEgammaPhoton", m_inclEgammaPhoton = true);
-    declareProperty("pTChargePartCut", m_pTChargePartCut = 1.0);
-    declareProperty("pTNeutralPartCut", m_pTNeutralPartCut = 0.);
-    declareProperty("inclG4part", m_inclG4part = false);
   } 
   // destructor
   virtual ~MCTruthClassifier()  = default ;
@@ -269,9 +270,6 @@ private:
     "ReadHandleKey for xAOD::TruthParticleContainer"
   };
 
-  float m_pTChargePartCut;
-  float m_pTNeutralPartCut;
-  bool m_inclG4part;
   bool m_inclEgammaPhoton;
   bool m_inclEgammaFwrdEle;
 
@@ -305,6 +303,10 @@ private:
   float m_phtdRtoTrCut;
   float m_fwrdEledRtoTrCut;
   bool m_ROICone;
+
+  float m_pTChargePartCut;
+  float m_pTNeutralPartCut;
+  bool m_inclG4part;  
 #endif
 
 #ifndef XAOD_ANALYSIS
