@@ -10,7 +10,7 @@ atlas_install_python_modules( python/*.py
                               python/TriggerAPI
                               python/CFtest
                               scripts/menu_config_tests.py
-                              POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )
+                              POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 )
 
 atlas_install_scripts( scripts/generateL1MenuRun3.py
                        scripts/verify_menu_config.py
