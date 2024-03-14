@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloPprConditionsRun2.h"
@@ -74,7 +74,7 @@ L1CaloPprConditionsRun2::L1CaloPprConditionsRun2(unsigned short extBcidThreshold
 
 namespace {
 unsigned short getLutOffset(double pedMean, unsigned short firStartBit,
-                            std::vector<short int> firCoeff,
+                            const std::vector<short int>& firCoeff,
                             unsigned short lutSlope,
                             unsigned short lutStrategy) {
   unsigned short lutOffset = 0;
