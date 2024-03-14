@@ -60,7 +60,7 @@ namespace JetTagDQA {
 
     declareProperty( "JetPtCutTtbar", m_jetPtCutTtbar = 20000);
     declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 500000);
-    declareProperty( "JetPtCutR10", m_jetPtCutR10 = 450000);
+    declareProperty( "JetPtCutR10", m_jetPtCutR10 = 200000); //pT>200 GeV for large-R jets
     declareProperty( "JetEtaCut", m_jetEtaCut = 2.5);
     declareProperty( "JVTCutAntiKt4EMTopoJets", m_JVTCutAntiKt4EMTopoJets = 0.59);
     declareProperty( "JVTCutLargerEtaAntiKt4EMTopoJets", m_JVTCutLargerEtaAntiKt4EMTopoJets = 0.11);
@@ -242,7 +242,6 @@ namespace JetTagDQA {
       float ptCut = (name==m_jetNameR10) ? m_jetPtCutR10 : m_jetPtCut;
       std::string label_name = "HadronConeExclTruthLabelID";
       if(name==m_jetNameR10) label_name = "R10TruthLabel_R22v1";
-
       // loop over the jets
       for (auto jet : *jets) {
 
@@ -250,16 +249,16 @@ namespace JetTagDQA {
         if(jet->pt() <= ptCut) continue;
         if(std::abs(jet->eta()) >= m_jetEtaCut) continue;
         //Arnaud: JVT cut to remove horns in jet eta 
-        if (plot->m_JVT_defined && jet->getAttribute<float>("Jvt") < plot->m_JVT_cut
-	    && jet->pt() > 20e3 && jet->pt() < 60e3
-	    && std::abs(jet->eta()) < 2.4 ) continue;
-        if (plot->m_JVTLargerEta_defined && jet->getAttribute<float>("Jvt") < plot->m_JVTLargerEta_cut
-	    && jet->pt() > 20e3 && jet->pt() < 60e3
-	    && std::abs(jet->eta()) > 2.4 && std::abs(jet->eta()) < m_jetEtaCut ) continue;
-
+        if(name!=m_jetNameR10){//we don't apply JVT cuts on large-R jets
+            if (plot->m_JVT_defined && jet->getAttribute<float>("Jvt") < plot->m_JVT_cut
+                    && jet->pt() > 20e3 && jet->pt() < 60e3
+                    && std::abs(jet->eta()) < 2.4 ) continue;
+            if (plot->m_JVTLargerEta_defined && jet->getAttribute<float>("Jvt") < plot->m_JVTLargerEta_cut
+                    && jet->pt() > 20e3 && jet->pt() < 60e3
+                    && std::abs(jet->eta()) > 2.4 && std::abs(jet->eta()) < m_jetEtaCut ) continue;
+        }
         // get the btagging
         const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( *jet );
-
         // count the jets that pass the cuts
         nJets_withCut++;
 
@@ -273,7 +272,7 @@ namespace JetTagDQA {
         plot->fillJetKinVars(jet, truth_label, m_onZprime, event);
 
         // fill the jet, btag & vertex related plots
-        if (btag){
+        if (btag && name!=m_jetNameR10){ //small-R jets
           // augment with muon information
           if(! muon_info_available){
             m_muonAugmenter.augment(*btag);
@@ -297,6 +296,12 @@ namespace JetTagDQA {
           if(contains_SV) nJets_containing_SV++;
           // fill discriminant related vars
           plot->fillDiscriminantVariables(btag, jet, jet_Lxy, truth_label, contains_muon, m_onZprime, nJetsThatPassedWPCuts, event);
+        }
+        else if (jet && name==m_jetNameR10){ // large-R jets
+          //fill track and hit information
+          plot->fillTrackVariables_for_largeRjet(jet, myVertex, truth_label, event);
+          // fill discriminant related vars
+          plot->fillDiscriminantVariables_for_largeRjet(jet, truth_label, m_onZprime, nJetsThatPassedWPCuts, event);
         }
         else{
           ATH_MSG_WARNING("btag (obtained by xAOD::BTaggingUtilities::getBTagging(*jet)) is a null pointer.");
