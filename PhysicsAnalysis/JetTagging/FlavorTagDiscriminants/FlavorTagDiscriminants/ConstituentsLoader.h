@@ -75,8 +75,7 @@ namespace FlavorTagDiscriminants {
             IConstituentsLoader(ConstituentsInputConfig cfg) {
               m_config = cfg;
             };
-            virtual ~IConstituentsLoader() {
-            };
+            virtual ~IConstituentsLoader() = default;
             virtual std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
                 const xAOD::Jet& jet, 
                 [[maybe_unused]] const SG::AuxElement& btag) const = 0;
