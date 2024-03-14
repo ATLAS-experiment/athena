@@ -5,20 +5,11 @@
 # https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonRecTools.py
 # https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MooreTools.py
 # from https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/CscTools.py
-from AthenaConfiguration.ComponentFactory import CompFactory
-#
-# and algorithms which are defined in several places:
-# 
-#
-# When porting it I have tried to remove anything redundant, and I have tried to simplify the number of configuration techniques 
-# used, so for example I'm no longer using CfgGetter, and am minimising the use of CfgMgr,
 
 # Core
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
-
-# Muon
-# Csc2dSegmentMaker, Csc4dSegmentMaker=CompFactory.getComps("Csc2dSegmentMaker","Csc4dSegmentMaker",)
 
 #Local
 from TrkConfig.TrkGlobalChi2FitterConfig import MCTBFitterCfg, MCTBSLFitterCfg, MCTBSLFitterMaterialFromTrackCfg
