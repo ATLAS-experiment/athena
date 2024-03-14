@@ -86,9 +86,6 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
       ++nChannels;
     }
     unsigned coolChan=gain;
-    //Special case: Store single-gain constant in channel 1 
-    //To avoid AttrList vs AttrListCollection confusion in Athena DB infrastructure
-    //if (nGain==1) coolChan=1;
  
     coll->add(coolChan,*attrList.release());
   }
