@@ -96,15 +96,15 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'Number of TRT hits per track (Barrel);Number of TRT hits in Barrel;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeTRTHits+1, xmin=-0.5, xmax=m_rangeTRTHits +0.5)
 
-    varName = 'm_eta,m_npixelhits_per_track;Npixhits_vs_eta'
+    varName = 'm_eta_2fillpix,m_npixelhits_per_track_2filleta;Npixhits_vs_eta'
     title = "Number of Pixel his vs track #eta; Track #eta; Number of Pixel hits (PIX+IBL)"
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, ybins=m_rangePixHits+1, ymin=-0.5, ymax=m_rangePixHits +0.5)
 
-    varName = 'm_eta,m_nscthits_per_track;Nscthits_vs_eta'
+    varName = 'm_eta_2fillsct,m_nscthits_per_track_2filleta;Nscthits_vs_eta'
     title = "Number of SCT his vs track #eta; Track #eta; Number of SCT hits"
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, ybins=m_rangeSCTHits+1, ymin=-0.5, ymax=m_rangeSCTHits +0.5)
 
-    varName = 'm_eta,m_ntrthits_per_track;Ntrthits_vs_eta'
+    varName = 'm_eta_2filltrt,m_ntrthits_per_track_2filleta;Ntrthits_vs_eta'
     title = "Number of TRT his vs track #eta; Track #eta; Number of TRT hits"
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange, ybins=m_rangeTRTHits+1, ymin=-0.5, ymax=m_rangeTRTHits +0.5)
 
@@ -156,8 +156,20 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'Track Momentum P;Signed Track P [GeV];Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange)
 
-    varName = 'm_phi,m_d0_bscorr;D0VsPhi0'
+    varName = 'm_phi_2filld0bscorr,m_d0_bscorr_2fillphi;D0VsPhi0'
     title = 'd_{0} (BS) Vs #phi_{0};#phi_{0} [rad];d_{0} (BS) [mm]'
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
+   
+    varName = 'm_phi_2filld0bscorrBAR,m_d0_bscorrBAR;D0VsPhi0_Barrel'
+    title = 'd_{0} (BS) Vs #phi_{0} (Barrel);#phi_{0} [rad];d_{0} (BS) [mm]'
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
+   
+    varName = 'm_phi_2filld0bscorrECA,m_d0_bscorrECA;D0VsPhi0_ECA'
+    title = 'd_{0} (BS) Vs #phi_{0} (ECA);#phi_{0} [rad];d_{0} (BS) [mm]'
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
+   
+    varName = 'm_phi_2filld0bscorrECC,m_d0_bscorrECC;D0VsPhi0_ECC'
+    title = 'd_{0} (BS) Vs #phi_{0} (ECC);#phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
     # end histograms

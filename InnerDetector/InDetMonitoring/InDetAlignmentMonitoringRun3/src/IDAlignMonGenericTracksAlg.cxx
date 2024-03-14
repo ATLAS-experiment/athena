@@ -47,6 +47,7 @@ IDAlignMonGenericTracksAlg::IDAlignMonGenericTracksAlg( const std::string & name
    m_z0Range(250.0),
    m_etaRange(3.0),
    m_NTracksRange(200),
+   m_barrelEta(0.8), //Tracks between -0.8 & 0.8 are considered as Barrel Tracks, otherwise are End-Caps
    m_trackSelection( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this)
 {
   m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
@@ -294,6 +295,9 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     float beamX          = 0;
     float beamY          = 0;
     float d0bscorr       = -999;
+    bool  isTrackBarrel  = false;
+    bool  isTrackECA     = false;
+    bool  isTrackECC     = false;
  
     // get fit quality and chi2 probability of track
     const Trk::FitQuality* fitQual = trksItr->fitQuality();
@@ -325,6 +329,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       trkpt        = measPer->pT()/1000.;  
       if (qOverP < 0) charge = -1;
       else charge=+1; 
+      if (trketa < - m_barrelEta) isTrackECC = true;
+      if (trketa > m_barrelEta) isTrackECA = true;
+      if (!isTrackECA and !isTrackECC) isTrackBarrel = true;
+
 
       // correct the track d0 for the vertex position
       // would rather corrected for the beamline but could not find beamline
@@ -446,11 +454,17 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, eta_m);
 
     // pixel hits vs eta
-    fill(genericTrackGroup, eta_m, npixelhits_per_track_m);    
+    auto eta_2fillpix_m = Monitored::Scalar<float>( "m_eta_2fillpix", trketa );
+    auto npixelhits_per_track_2filleta_m = Monitored::Scalar<float>( "m_npixelhits_per_track_2filleta", nhpix );
+    fill(genericTrackGroup, eta_2fillpix_m, npixelhits_per_track_2filleta_m);    
     // sct hits vs eta
-    fill(genericTrackGroup, eta_m, nscthits_per_track_m);
+    auto eta_2fillsct_m = Monitored::Scalar<float>( "m_eta_2fillsct", trketa );
+    auto nscthits_per_track_2filleta_m = Monitored::Scalar<float>( "m_nscthits_per_track_2filleta", nhsct );
+    fill(genericTrackGroup, eta_2fillsct_m, nscthits_per_track_2filleta_m);
     // trt hits vs eta
-    fill(genericTrackGroup, eta_m, ntrthits_per_track_m);
+    auto eta_2filltrt_m = Monitored::Scalar<float>( "m_eta_2filltrt", trketa );
+    auto ntrthits_per_track_2filleta_m = Monitored::Scalar<float>( "m_ntrthits_per_track_2filleta", nhtrt );
+    fill(genericTrackGroup, eta_2filltrt_m, ntrthits_per_track_2filleta_m);
     
     if (charge>0){
       auto eta_pos_m = Monitored::Scalar<float>( "m_eta_pos", trketa );
@@ -475,7 +489,27 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto d0_bscorr_m = Monitored::Scalar<float>( "m_d0_bscorr", d0bscorr );
     fill(genericTrackGroup, d0_bscorr_m);
     //d0 vs phi 
-    fill(genericTrackGroup, phi_m, d0_bscorr_m);
+    auto phi_2filld0bscorr_m = Monitored::Scalar<float>( "m_phi_2filld0bscorr", trkphi );
+    auto d0_bscorr_2fillphi_m = Monitored::Scalar<float>( "m_d0_bscorr_2fillphi", d0bscorr );
+    fill(genericTrackGroup, phi_2filld0bscorr_m, d0_bscorr_2fillphi_m); 
+    //d0 vs phi in barrel
+    if (isTrackBarrel) {
+      auto phi_2filld0bscorrBAR_m = Monitored::Scalar<float>( "m_phi_2filld0bscorrBAR", trkphi );
+      auto d0_bscorrBAR_m = Monitored::Scalar<float>( "m_d0_bscorrBAR", d0bscorr );
+      fill(genericTrackGroup, phi_2filld0bscorrBAR_m, d0_bscorrBAR_m);
+    } 
+    //d0 vs phi in End-cap A
+    if (isTrackECA) {
+      auto phi_2filld0bscorrECA_m = Monitored::Scalar<float>( "m_phi_2filld0bscorrECA", trkphi );
+      auto d0_bscorrECA_m = Monitored::Scalar<float>( "m_d0_bscorrECA", d0bscorr );
+      fill(genericTrackGroup, phi_2filld0bscorrECA_m, d0_bscorrECA_m);
+    } 
+    //d0 vs phi in End-cap C
+    if (isTrackECC) {
+      auto phi_2filld0bscorrECC_m = Monitored::Scalar<float>( "m_phi_2filld0bscorrECC", trkphi );
+      auto d0_bscorrECC_m = Monitored::Scalar<float>( "m_d0_bscorrECC", d0bscorr );
+      fill(genericTrackGroup, phi_2filld0bscorrECC_m, d0_bscorrECC_m);
+    } 
 
     float pT = charge*trkpt;
     auto pT_m = Monitored::Scalar<float>( "m_pT", pT );
