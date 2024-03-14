@@ -98,12 +98,13 @@ namespace ActsTrk {
         /// @name tool handles
         //@{
         /// @brief Using Lorentz angle tool
-        ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle of SCT"};
+        ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "",
+	  "Tool to retreive Lorentz angle of SCT"};
         //@}
 
         /// @name Configuration flags
         //@{
-        BooleanProperty m_allClusters{this, "AllClusters", false, "Process all clusters without limits."};
+        Gaudi::Property< bool > m_allClusters{this, "AllClusters", false, "Process all clusters without limits."};
         //@}
 
         /// @name Cut parameters
@@ -112,13 +113,13 @@ namespace ActsTrk {
         /// clusters must lie within range of each other.
         /// Phi clusters must lie in region of each wafer separately.
         //@{
-        FloatProperty m_overlapLimitOpposite{this, "OverlapLimitOpposite", 2.8, "Overlap limit for opposite-neighbour."};
-        FloatProperty m_overlapLimitPhi{this, "OverlapLimitPhi", 5.64, "Overlap limit for phi-neighbours."};
-        FloatProperty m_overlapLimitEtaMin{this, "OverlapLimitEtaMin", 1.68, "Low overlap limit for eta-neighbours."};
-        FloatProperty m_overlapLimitEtaMax{this, "OverlapLimitEtaMax", 3.0, "High overlap limit for eta-neighbours."};
+        Gaudi::Property< float > m_overlapLimitOpposite{this, "OverlapLimitOpposite", 2.8, "Overlap limit for opposite-neighbour."};
+        Gaudi::Property< float > m_overlapLimitPhi{this, "OverlapLimitPhi", 5.64, "Overlap limit for phi-neighbours."};
+        Gaudi::Property< float > m_overlapLimitEtaMin{this, "OverlapLimitEtaMin", 1.68, "Low overlap limit for eta-neighbours."};
+        Gaudi::Property< float > m_overlapLimitEtaMax{this, "OverlapLimitEtaMax", 3.0, "High overlap limit for eta-neighbours."};
         /// @brief The following are parameters to build the space points.
-        FloatProperty m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
-        FloatProperty m_stripGapParameter{this, "StripGapParameter", 0.0015, "Recommend 0.001 - 0.0015 for ITK geometry"};
+        Gaudi::Property< float > m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
+        Gaudi::Property< float > m_stripGapParameter{this, "StripGapParameter", 0.0015, "Recommend 0.001 - 0.0015 for ITK geometry"};
         //@}
 
   };

@@ -23,7 +23,7 @@ class FullScanRoICreatorTool : public extends<AthAlgTool, ::IRoICreatorTool> {
 					std::vector< ElementLink< TrigRoiDescriptorCollection > >& ELs) const override;
    
  private:
-   SG::WriteHandleKey< TrigRoiDescriptorCollection > m_roiCollectionKey {this, "RoIs", "OfflineFullScanRegion"};
+  SG::WriteHandleKey< TrigRoiDescriptorCollection > m_roiCollectionKey {this, "RoIs", ""};
 };
 
 #endif

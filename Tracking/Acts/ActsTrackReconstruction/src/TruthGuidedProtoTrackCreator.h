@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRUTHGUIDEDPROTOTRACKCREATOR__H
-#define ACTSTRACKRECONSTRUCTION_TRUTHGUIDEDPROTOTRACKCREATOR__H 1
+#define ACTSTRACKRECONSTRUCTION_TRUTHGUIDEDPROTOTRACKCREATOR__H
 
 #include "ActsToolInterfaces/IProtoTrackCreatorTool.h"
 
@@ -43,7 +43,7 @@ namespace ActsTrk {
     std::unique_ptr<Acts::BoundTrackParameters> makeDummyParams (const HepMC::ConstGenParticlePtr & truthParticle) const;
 
     /// @brief Truth track collection
-    SG::ReadHandleKeyArray<PRD_MultiTruthCollection>    m_prdMultiTruthCollectionNames{this,"PRD_MultiTruthCollections",{"PRD_MultiTruthITkPixel","PRD_MultiTruthITkStrip"}, "PRD multi truth collection names this builder is working on"};
+    SG::ReadHandleKeyArray<PRD_MultiTruthCollection> m_prdMultiTruthCollectionNames{this,"PRD_MultiTruthCollections", {}, "PRD multi truth collection names this builder is working on"};
 
 
   };

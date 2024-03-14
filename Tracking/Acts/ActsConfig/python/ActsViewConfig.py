@@ -15,6 +15,7 @@ def ActsConversionRoICreatorToolCfg(flags,
                                     name : str = "ActsConversionRoICreatorTool",
                                     **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    kwargs.setdefault('RoIs', 'OfflineCaloBasedRegion')
     kwargs.setdefault('CaloClusterRoIContainer', 'ITkCaloClusterROIPhiRZ15GeVUnordered')
     acc.setPrivateTools(CompFactory.CaloBasedRoICreatorTool(name, **kwargs))
     return acc

@@ -47,10 +47,10 @@ namespace ActsTrk
     ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey
-       {this, "TracksLocation", "ActsTracks", "Input track collection"};
+       {this, "TracksLocation", "", "Input track collection"};
     ActsTrk::MutableTrackContainerHandlesHelper m_resolvedTracksBackendHandles;
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_resolvedTracksKey
-       {this, "ResolvedTracksLocation", "ActsTracksResolved", "Ambiguity resolved output track collection"};
+       {this, "ResolvedTracksLocation", "", "Ambiguity resolved output track collection"};
 
     Gaudi::Property<unsigned int> m_maximumSharedHits
        {this, "MaximumSharedHits", 3u, "Maximum number of shared hits per track."};

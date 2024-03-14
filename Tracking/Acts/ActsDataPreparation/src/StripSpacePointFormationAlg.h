@@ -60,7 +60,7 @@ namespace ActsTrk {
 
         /// @name Input data using SG::ReadHandleKey
         //@{
-        SG::ReadHandleKey<xAOD::StripClusterContainer>  m_stripClusterContainerKey{this, "StripClusters", "ITkStripClusters", "name of the input strip cluster container"};
+        SG::ReadHandleKey<xAOD::StripClusterContainer>  m_stripClusterContainerKey{this, "StripClusters", "", "name of the input strip cluster container"};
         //@}
 
         /// @name Input condition data using SG::ReadCondHandleKey
@@ -76,8 +76,8 @@ namespace ActsTrk {
 
         ///@name Output data using SG::WriteHandleKey
         //@{
-	SG::WriteHandleKey<xAOD::SpacePointContainer> m_stripSpacePointContainerKey{this, "StripSpacePoints", "ITkStripSpacePoints", "name of the output strip space point container"};
-	SG::WriteHandleKey<xAOD::SpacePointContainer> m_stripOverlapSpacePointContainerKey{this, "StripOverlapSpacePoints", "ITkStripOverlapSpacePoints", "name of the strip overlap strip space point container"};
+	SG::WriteHandleKey<xAOD::SpacePointContainer> m_stripSpacePointContainerKey{this, "StripSpacePoints", "", "name of the output strip space point container"};
+	SG::WriteHandleKey<xAOD::SpacePointContainer> m_stripOverlapSpacePointContainerKey{this, "StripOverlapSpacePoints", "", "name of the strip overlap strip space point container"};
         //@}
 
         /// @name ToolHandle
@@ -90,7 +90,7 @@ namespace ActsTrk {
 
         /// @name Configuration flags
         //@{
-        BooleanProperty m_processOverlapForStrip{this, "ProcessOverlapForStrip", true, "Enable production of eta/phi overlapping strip space points."};
+        Gaudi::Property< bool > m_processOverlapForStrip{this, "ProcessOverlapForStrip", true, "Enable production of eta/phi overlapping strip space points."};
         //@}
 
   };

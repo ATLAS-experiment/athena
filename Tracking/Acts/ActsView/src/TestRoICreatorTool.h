@@ -26,7 +26,7 @@ class TestRoICreatorTool
 					std::vector< ElementLink< TrigRoiDescriptorCollection > >& ELs) const override;
    
  private:
-   SG::WriteHandleKey< TrigRoiDescriptorCollection > m_roiCollectionKey {this, "RoIs", "TestRegion"};
+    SG::WriteHandleKey< TrigRoiDescriptorCollection > m_roiCollectionKey {this, "RoIs", ""};
 
    Gaudi::Property< std::vector<double> > m_eta_center_rois {this, "EtaCenters", {}, "Center of the RoI - eta coordinate"};
    Gaudi::Property< std::vector<double> > m_phi_center_rois {this, "PhiCenters", {}, "Center of the RoI - phi coordinate"};

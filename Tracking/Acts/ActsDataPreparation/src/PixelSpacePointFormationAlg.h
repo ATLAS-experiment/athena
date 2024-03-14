@@ -54,7 +54,7 @@ namespace ActsTrk {
 
         /// @name Input data using SG::ReadHandleKey
         //@{
-        SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusterContainerKey{this, "PixelClusters", "ITkPixelClusters", "name of the input pixel cluster container"};
+        SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusterContainerKey{this, "PixelClusters", "", "name of the input pixel cluster container"};
         //@}
 
         /// @name Input condition data using SG::ReadCondHandleKey
@@ -65,7 +65,7 @@ namespace ActsTrk {
 
         ///@name Output data using SG::WriteHandleKey
         //@{
-	SG::WriteHandleKey<xAOD::SpacePointContainer> m_pixelSpacePointContainerKey {this, "PixelSpacePoints", "ITkPixelSpacePoints", "name of the output pixel space point container"};
+	SG::WriteHandleKey<xAOD::SpacePointContainer> m_pixelSpacePointContainerKey {this, "PixelSpacePoints", "", "name of the output pixel space point container"};
         //@}
 
         /// @name ToolHandle

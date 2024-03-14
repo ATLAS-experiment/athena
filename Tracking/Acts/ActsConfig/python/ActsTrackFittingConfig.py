@@ -75,26 +75,20 @@ def ActsFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
 
 
 
-def ActsReFitterAlgCfg(flags, name="ActsReFitterAlg", **kwargs):
-    result = ComponentAccumulator()
-
-    actsFitter = result.popToolsAndMerge(ActsFitterCfg(flags))
-
-    kwargs.setdefault("ActsFitter", actsFitter)
+def ActsReFitterAlgCfg(flags,
+                       name : str = "ActsReFitterAlg",
+                       **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
     kwargs.setdefault("TrackName", "ResolvedTracks")
+    kwargs.setdefault("NewTrackName", "Refitted_Tracks")
     kwargs.setdefault("DoReFitFromPRD", flags.Acts.fitFromPRD)
-
-    result.addEventAlgo(
-        CompFactory.ActsTrk.ReFitterAlg(
-            name=name,
-            **kwargs,
-        )
-    )
+    acc.addEventAlgo(CompFactory.ActsTrk.ReFitterAlg(name, **kwargs))
 
     if flags.Acts.writeTrackCollection:
-        result.merge(writeAdditionalTracks(flags))
+        acc.merge(writeAdditionalTracks(flags))
 
-    return result
+    return acc
 
 def forceITkActsReFitterAlgCfg(flags): #Use this flag in the --postInclude of ActsKfRefiting.sh to fit from the PRD (uncalibrated); Else to fit from the ROT (calibrated), use `(...).ActsReFitterAlgCfg` flag directly
    flags = flags.cloneAndReplace("Tracking.ActiveConfig",

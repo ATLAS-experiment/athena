@@ -39,10 +39,10 @@ public:
 
 private:
 
-  ToolHandle<Trk::ITrackFitter> m_actsFitter{this, "ActsFitter", "ActsKalmanFitter", "Choice of Acts Fitter (Kalman by default)"};
+  ToolHandle<Trk::ITrackFitter> m_actsFitter{this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
   // --- job options
-  SG::ReadHandleKey<TrackCollection>  m_trackName{this, "TrackName", "Tracks", "Collection name for tracks to be refitted"};
-  SG::WriteHandleKey<TrackCollection> m_newTrackName{this, "NewTrackName", "ReFitted_Tracks", "Collection name for output tracks"};
+  SG::ReadHandleKey<TrackCollection>  m_trackName{this, "TrackName", "", "Collection name for tracks to be refitted"};
+  SG::WriteHandleKey<TrackCollection> m_newTrackName{this, "NewTrackName", "", "Collection name for output tracks"};
 
   mutable std::mutex m_writeMutex{};
 

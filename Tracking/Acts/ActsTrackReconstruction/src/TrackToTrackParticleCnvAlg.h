@@ -66,7 +66,7 @@ namespace ActsTrk
                                                      const Acts::PerigeeSurface &perigee_surface) const;
 
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool
-       {this, "ExtrapolationTool", "ActsExtrapolationTool"};
+       {this, "ExtrapolationTool", ""};
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey
        {this, "ACTSTracksLocation", "","Track collection (ActsTrk variant)"};
