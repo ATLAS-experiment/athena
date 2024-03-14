@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #ifndef ATHONNXRUNTIMESERVICE_ONNXRUNTIMESVC_H
 #define ATHONNXRUNTIMESERVICE_ONNXRUNTIMESVC_H
 
@@ -10,7 +10,7 @@
 #include <AsgServices/AsgService.h>
 
 // ONNX include(s).
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 // System include(s).
 #include <memory>

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of the package:
 atlas_subdir( TruthRivetTools )
@@ -9,6 +9,8 @@ find_package( YODA )
 find_package( FastJet )
 find_package( ROOT COMPONENTS Core Physics )
 find_package( GSL )
+find_package( HighFive QUIET )   #  Public dependency of Rivet 4.0.0
+find_package( HDF5 )             # Private dependency of Rivet 4.0.0
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
@@ -23,6 +25,9 @@ atlas_add_library( TruthRivetToolsLib
 	LINK_LIBRARIES ${RIVET_LIBRARIES} ${YODA_LIBRARIES}
    ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} ${GSL_LIBRARIES} AsgTools AtlasHepMCLib AtlasHepMCsearchLib
    CxxUtils GenInterfacesLib )
+if( HIGHFIVE_FOUND )
+   target_link_libraries( TruthRivetToolsLib PUBLIC HighFive )
+endif()
 
 atlas_add_component( TruthRivetTools
    src/components/*.cxx

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SiGNNTrackFinder_H
@@ -15,7 +15,7 @@
 
 // ONNX Runtime include(s).
 #include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 class MsgStream;
 
@@ -36,13 +36,13 @@ namespace InDet{
     ///////////////////////////////////////////////////////////////////
     // Main methods for local track finding asked by the ISiMLTrackFinder
     ///////////////////////////////////////////////////////////////////
-      
+
     /**
      * @brief Get track candidates from a list of space points.
      * @param spacepoints a list of spacepoints as inputs to the GNN-based track finder.
      * @param tracks a list of track candidates.
-     * 
-     * @return 
+     *
+     * @return
      */
     virtual StatusCode getTracks(
       const std::vector<const Trk::SpacePoint*>& spacepoints,
@@ -85,7 +85,7 @@ namespace InDet{
   };
 
   MsgStream&    operator << (MsgStream&   ,const SiGNNTrackFinderTool&);
-  std::ostream& operator << (std::ostream&,const SiGNNTrackFinderTool&); 
+  std::ostream& operator << (std::ostream&,const SiGNNTrackFinderTool&);
 
 }
 
