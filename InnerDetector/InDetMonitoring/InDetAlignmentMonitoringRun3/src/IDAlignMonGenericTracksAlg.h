@@ -83,6 +83,7 @@ private:
   float m_z0Range{};
   float m_etaRange{};
   int   m_NTracksRange{};
+  float m_barrelEta{};
   bool  m_doIP{};
   bool  m_doHitQuality{false};
   bool  m_applyTrkSel{};
