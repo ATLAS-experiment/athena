@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef RingerSelectorTools_tools_onnx_RingerSelector_h 
-#define RingerSelectorTools_tools_onnx_RingerSelector_h 
+#ifndef RingerSelectorTools_tools_onnx_RingerSelector_h
+#define RingerSelectorTools_tools_onnx_RingerSelector_h
 
 
 
@@ -12,7 +12,7 @@
 #include "RingerSelectorTools/tools/onnx/Model.h"
 #include "RingerSelectorTools/tools/onnx/Threshold.h"
 #include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 #include "xAODTrigRinger/TrigRingerRings.h"
 #include "xAODTrigCalo/TrigEMCluster.h"
 #include "xAODTrigEgamma/TrigElectron.h"
@@ -28,10 +28,10 @@ namespace Ringer {
 
     {
       public:
-    
+
         /** Standard constructor */
         RingerSelector( const std::string& name );
-    
+
         /** Standard destructor */
         ~RingerSelector()=default;
 
@@ -49,7 +49,7 @@ namespace Ringer {
 
 
         /**
-         * @brief Calculation of model output 
+         * @brief Calculation of model output
          **/
         float predict(const xAOD::TrigRingerRings *, const xAOD::TrigElectron * ) const;
 
@@ -58,10 +58,10 @@ namespace Ringer {
          * @brief Accept method
          **/
         bool accept(const xAOD::TrigRingerRings *, float discr, float mu ) const;
-    
+
 
       private:
-   
+
         /// @brief hold all onnx sessions
         std::vector< Ringer::onnx::Model > m_models;
         /// @brief hold all thresholds definitions
@@ -72,12 +72,12 @@ namespace Ringer {
         /// @brief Get the list of values inside of tenv
         template <typename T>  std::vector<T> GetValues (const std::string& input,  TEnv& env);
         /// @brief Get the list of paths inside of tenv
-        std::vector<std::string> GetPaths(const std::string& input, TEnv& env);  
+        std::vector<std::string> GetPaths(const std::string& input, TEnv& env);
         /// @brief Get basepath from calib path
         std::string GetBasePath(const std::string &path) const;
 
     };
- 
+
   } // namespace onnx
 } //namespace Ringer
 

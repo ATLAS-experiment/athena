@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  *   */
 
 #ifndef TRACKOVERLAYREC_TRACKOVERLAYDECISIONALG_H
@@ -21,7 +21,7 @@
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthPileupEventContainer.h"
 //ONNX Runtime include(s)
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 #include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
 namespace  TrackOverlayDecisionAlg{
   const double M_TWOPI = 2.0 * M_PI;
@@ -48,7 +48,7 @@ namespace  TrackOverlayDecisionAlg{
     /** Constructor with parameters */
     TrackOverlayDecisionAlg( const std::string& name, ISvcLocator* pSvcLocator );
     /** Destructor */
-    virtual ~TrackOverlayDecisionAlg() = default; 
+    virtual ~TrackOverlayDecisionAlg() = default;
     /** Athena algorithm's interface method initialize() */
     virtual StatusCode  initialize() override final; /** Athena algorithm's interface method execute() */
     virtual StatusCode  execute(const EventContext& ctx) const override final;
@@ -107,7 +107,7 @@ namespace  TrackOverlayDecisionAlg{
          output_node_dims = tensor_info.GetShape();
      }
      return std::make_tuple(output_node_dims, output_node_names);
-     }   
+     }
   };
 
 }

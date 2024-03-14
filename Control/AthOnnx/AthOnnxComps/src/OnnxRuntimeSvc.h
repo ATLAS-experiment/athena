@@ -10,7 +10,7 @@
 #include <AsgServices/AsgService.h>
 
 // ONNX include(s).
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 // System include(s).
 #include <memory>

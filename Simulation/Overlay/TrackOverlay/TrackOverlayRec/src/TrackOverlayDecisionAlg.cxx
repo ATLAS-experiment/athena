@@ -1,5 +1,5 @@
 /*
- *  *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *  *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  *   *   */
 //
 #include <fstream>
@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
-#include <unistd.h> 
+#include <unistd.h>
 #include <Eigen/Core>
 //
 #include "GaudiKernel/SystemOfUnits.h"
@@ -20,7 +20,7 @@
 #include "PathResolver/PathResolver.h"
 
 // ONNX Runtime include(s).
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 //
 #include "TrackOverlayDecisionAlg.h"
 #include "EventBookkeeperTools/FilterReporter.h"
@@ -28,8 +28,8 @@
 namespace TrackOverlayDecisionAlg {
     TrackOverlayDecisionAlg::TrackOverlayDecisionAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
      ::AthReentrantAlgorithm( name, pSvcLocator )
-    {     
-    } 
+    {
+    }
 
 StatusCode TrackOverlayDecisionAlg::initialize()
 {
@@ -43,7 +43,7 @@ StatusCode TrackOverlayDecisionAlg::initialize()
   std::string this_file = __FILE__;
   const std::string model_path = PathResolverFindCalibFile("TrackOverlay/TrackOverlay_J7_model.onnx");
   Ort::SessionOptions session_options;
-  
+
   m_session = std::make_unique<Ort::Session>(m_svc->env(), model_path.c_str(), session_options);
   m_inputInfo = TrackOverlayDecisionAlg::GetInputNodeInfo(m_session);
   m_outputInfo = TrackOverlayDecisionAlg::GetOutputNodeInfo(m_session);
@@ -107,32 +107,32 @@ const std::vector<const xAOD::TruthParticle*> TrackOverlayDecisionAlg::getTruthP
           for (const auto& link : links) {
             if (link.isValid()){
               tempVec.push_back(*link);
-            } 
-          } 
-        } 
+            }
+          }
+        }
       } else {
         ATH_MSG_ERROR("no entries in TruthPileupEvents container!");
-      } 
+      }
       }
     } else {
       ATH_MSG_ERROR("bad value for PileUpSwitch");
     }
-   } 
+   }
    return tempVec;
 }
 
 StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
 {
     ATH_MSG_DEBUG ("Executing ...");
-     
+
     std::vector<const xAOD::TruthParticle*> truthParticlesVec = TrackOverlayDecisionAlg::getTruthParticles();
-     
+
     //Access truth info for the NN input
     float eventPxSum = 0.0;
     float eventPySum = 0.0;
     float eventPt = 0.0;
     float puEvents = 0.0;
-       
+
     std::vector<float> pxValues, pyValues, pzValues, eValues, etaValues, phiValues, ptValues;
     float truthMultiplicity = 0.0;
     const int truthParticles = truthParticlesVec.size();
@@ -140,11 +140,11 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
         const xAOD::TruthParticle* thisTruth = truthParticlesVec[itruth];
         const IAthSelectionTool::CutResult accept = m_truthSelectionTool->accept(thisTruth);
         if(accept){
-           pxValues.push_back((thisTruth->px()*0.001-1.46988000e+03)* px_diff); //as MinMaxScaler: 1.46988000e+03 is the lowest value of px from a J7 sample; *(0.001) is used to convert unit rather than *(1/1000) to speed up. 
+           pxValues.push_back((thisTruth->px()*0.001-1.46988000e+03)* px_diff); //as MinMaxScaler: 1.46988000e+03 is the lowest value of px from a J7 sample; *(0.001) is used to convert unit rather than *(1/1000) to speed up.
            pyValues.push_back((thisTruth->py()*0.001-1.35142000e+03)* py_diff); //the lowest value of py: 1.35142000e+03
            pzValues.push_back((thisTruth->pz()*0.001-1.50464000e+03)* pz_diff); //the lowest value of pz: 1.50464000e+03
            ptValues.push_back((thisTruth->pt()*0.001-5.00006000e-01)* pt_diff); //the lowest value of pt: 5.00006000e-01
-              
+
            etaValues.push_back(thisTruth->eta());
            phiValues.push_back(thisTruth->phi());
            eValues.push_back((thisTruth->e()*0.001-5.08307000e-01)*e_diff); //the lowest value of energy: 5.08307000e-01
@@ -161,11 +161,11 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     }
     puEvents = !m_truthPileUpEventName.key().empty() and truthPileupEventContainer.isValid() ?  static_cast<int>( truthPileupEventContainer->size() ) : pie.isValid() ? pie->actualInteractionsPerCrossing() : 0;
     eventPt = std::sqrt(eventPxSum*eventPxSum + eventPySum*eventPySum)*0.001;
-         
+
     std::vector<float> puEventsVec(pxValues.size(), (puEvents-1.55000000e+01)*pu_diff); //min of puEvents= 15.5, max of puEvents=84.5
     std::vector<float> truthMultiplicityVec(pxValues.size(), (truthMultiplicity-1.80000000e+01)*multi_diff);
     std::vector<float> eventPtVec(pxValues.size(), (eventPt-3.42359395e-01)*eventPt_diff);
-    std::vector<float> predictions; 
+    std::vector<float> predictions;
 
     //Compute the distances using Eigen for Eigen's optimized operations. Initialize matirces. Observed a significant improvement on computing calculation.
     Eigen::VectorXf ptEigen = Eigen::VectorXf::Map(ptValues.data(), ptValues.size());
@@ -196,7 +196,7 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
                 pt_0p2 += ptEigen[j];
             }
         }// for j
-             
+
     std::vector<float> featData;
     featData.push_back(pxValues[i]);
     featData.push_back(pyValues[i]);
@@ -209,11 +209,11 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     featData.push_back((sum_0p05 * area0p05) * constant4);
     featData.push_back(pt_0p2 * constant5);
     featData.push_back(pt_0p05 * constant6);
-             
+
     featData.push_back(puEventsVec[i]);
     featData.push_back(truthMultiplicityVec[i]);
     featData.push_back(eventPtVec[i]);
-             
+
     std::vector<int64_t> input_node_dims;
     std::vector<char*> input_node_names;
     input_node_dims = std::get<0>(m_inputInfo);
@@ -223,7 +223,7 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     std::vector<char*> output_node_names;
     output_node_dims = std::get<0>(m_outputInfo);
     output_node_names = std::get<1>(m_outputInfo);
-             
+
     Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeCPU);
     input_node_dims[0]=1;
     Ort::Value input_data = Ort::Value::CreateTensor(memoryInfo, featData.data(), featData.size(), input_node_dims.data(), input_node_dims.size());
@@ -233,7 +233,7 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     auto output_values = mysession.Run(run_options, input_node_names.data(), &input_data, input_node_names.size(), output_node_names.data(), output_node_names.size());
     float* predictionData = output_values[0].GetTensorMutableData<float>();
     float prediction = predictionData[0];
-             
+
     predictions.push_back(prediction);
     }//for i
     float threshold = m_MLthreshold;
@@ -245,7 +245,7 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
         }
     }
     float rouletteScore = static_cast<float>(badTracks) / static_cast<float>(truthMultiplicity);
-    
+
     FilterReporter filter(m_filterParams, false, ctx);
     bool pass = false;
     int decision = rouletteScore == 0;
@@ -255,7 +255,7 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     else{
       pass = false;
     }
-    
+
     if (m_invertfilter) {
     pass =! pass;
     }
@@ -266,5 +266,3 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
 
 
 }// end namespace TrackOverlayDecisionAlg
-
-

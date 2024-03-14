@@ -5,22 +5,22 @@
 // Gaudi include(s).
 #include "GaudiKernel/IAlgTool.h"
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 
 namespace AthOnnx {
     // class IAlgTool
     //
     // Interface class for creating Onnx Runtime sessions.
-    // 
+    //
     // @author Xiangyang Ju <xju@cern.ch>
     //
-    class IOnnxRuntimeSessionTool : virtual public IAlgTool 
+    class IOnnxRuntimeSessionTool : virtual public IAlgTool
     {
         public:
 
         virtual ~IOnnxRuntimeSessionTool() = default;
-        
+
         // @name InterfaceID
         DeclareInterfaceID(IOnnxRuntimeSessionTool, 1, 0);
 

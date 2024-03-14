@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #ifndef ATHEXONNXRUNTIME_EVALUATEMODEL_H
 #define ATHEXONNXRUNTIME_EVALUATEMODEL_H
 
@@ -11,7 +11,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 // Onnx Runtime include(s).
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 // System include(s).
 #include <memory>
@@ -61,7 +61,7 @@ namespace AthOnnx {
       ToolHandle< IOnnxRuntimeInferenceTool >  m_onnxTool{
          this, "ORTInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"
       };
-      
+
       std::vector<std::vector<std::vector<float>>> m_input_tensor_values_notFlat;
 
    }; // class EvaluateModel

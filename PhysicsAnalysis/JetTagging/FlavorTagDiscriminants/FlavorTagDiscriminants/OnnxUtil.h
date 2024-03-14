@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
   This class acts as the interface to an ONNX model. It handles loading model
-  the model, initializing the ORT session, and running inference. It is decoupled 
+  the model, initializing the ORT session, and running inference. It is decoupled
   from the ATLAS EDM as much as possible. The FlavorTagDiscriminants::GNN class
   handles the interaction with the ATLAS EDM.
 */
@@ -10,7 +10,7 @@
 #ifndef ONNXUTIL_H
 #define ONNXUTIL_H
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 #include "nlohmann/json.hpp"
 #include "lwtnn/parse_json.hh"
@@ -64,7 +64,7 @@ namespace FlavorTagDiscriminants {
     private:
       const nlohmann::json loadMetadata(const std::string& key) const;
       const std::string determineModelName() const;
-      
+
       nlohmann::json m_metadata;
       std::string m_path_to_onnx;
 
