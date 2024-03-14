@@ -34,6 +34,8 @@ StatusCode T2CaloEgammaReFastAlgo::initialize()
   ATH_CHECK(m_roiCollectionKey.initialize());
   ATH_CHECK( m_bcidAvgKey.initialize() );
   if (! m_monTool.empty() ) ATH_CHECK( m_monTool.retrieve() );
+  if(m_doCalibWithRings) ATH_CHECK( m_calibWRingsTool.retrieve() );
+
   return StatusCode::SUCCESS;
 }
 
@@ -46,7 +48,10 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
   auto clEta = Monitored::Scalar("TrigEMCluster_eta",-999.0);
   auto clPhi = Monitored::Scalar("TrigEMCluster_phi",-999.0);
   auto clReta = Monitored::Scalar("TrigEMCluster_rEta",-999.0);
-  auto monitoring = Monitored::Group( m_monTool, timer, clET, clHET, clEta, clPhi, clReta);
+  auto clETrings = Monitored::Scalar("TrigEMCluster_et_rings",-999.0); 
+  auto res_et = Monitored::Scalar("Resolution_et",-999.0);
+  auto monitoring = Monitored::Group( m_monTool, timer, clET, clHET, clEta, clPhi, clReta,clETrings,res_et);
+ 
 
   SG::WriteHandle<xAOD::TrigEMClusterContainer> trigEmClusterCollection(m_clusterContainerKey, context);
   ATH_CHECK( trigEmClusterCollection.record(std::make_unique<xAOD::TrigEMClusterContainer>(),
@@ -152,6 +157,8 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
       ptrigEmCluster->setEnergy(0.0);
       ptrigEmCluster->setEt(0.0);
     }
+
+
       if ( caloDDE != 0 ){
         if ( caloDDE->is_lar_em_barrel() ){
           for( ToolHandleArray<IEgammaCalibration>::const_iterator
@@ -165,6 +172,17 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
             (*ical)->makeCorrection(ptrigEmCluster,caloDDE);
         }
       }
+     
+     float et_calib = -999.0;
+     float et_uncalib = ptrigEmCluster->et();
+     if ( m_doCalibWithRings ){
+        ATH_CHECK(m_calibWRingsTool->checkRings(context));
+        et_calib = m_calibWRingsTool->makeCalibWRings(context);
+        ptrigEmCluster->setEt(et_calib);
+
+     }
+
+
     float calZ0 = 0;
 
     // Print out Cluster produced
@@ -187,10 +205,15 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
                              << std::dec);
     }
     // my monitoring
-    clET = ptrigEmCluster->et()*1e-3;
+    clET = et_uncalib*1e-3;
     clHET = ptrigEmCluster->ehad1()*1e-3;
     clEta = ptrigEmCluster->eta();
     clPhi = ptrigEmCluster->phi();
+    clETrings = et_calib*1e-3;
+   
+    res_et = (et_calib - et_uncalib)/et_uncalib;
+    
+
     if ( ptrigEmCluster->e277() > 0.01 ) clReta = ptrigEmCluster->e237()/ptrigEmCluster->e277();
 
   } // end of roiCollection iterator
