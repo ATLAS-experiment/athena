@@ -192,9 +192,9 @@ public:
 
 private:
   /* All get to see these*/
-  inline float detEta(float x, float y) const { return fabs(x - y); }
-  inline float detPhi(float x, float y)  const {
-    float det = x - y;
+  inline double detEta(double x, double y) const { return std::abs(x - y); }
+  inline double detPhi(double x, double y)  const {
+    double det = x - y;
     if (det > M_PI) det = det - 2. * M_PI;
     if (det < -M_PI) det = det + 2. * M_PI;
     return std::abs(det);
