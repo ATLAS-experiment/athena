@@ -42,7 +42,7 @@ def PHYSVALKernelCfg(flags, name='PHYSVALKernel', **kwargs):
     # R = 0.4 LCTopo jets (for tau validation)
     from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.Jetflags import jetInternalFlags
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
 
     jetInternalFlags.isRecoJob = True
     acc.merge(JetRecCfg(flags,AntiKt4LCTopo))
