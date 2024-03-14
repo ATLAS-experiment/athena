@@ -78,14 +78,14 @@ StatusCode CTTDecorCheckInTool::execute()
 
   //save all TrackParticles in an std::vector (needed as input to the CTT tool)
   std::vector<const xAOD::TrackParticle*> trkparticles(0);
-  for(const auto& trkPart : *trackTES){
+  for(const auto trkPart : *trackTES){
     trkparticles.emplace_back(trkPart);
   }
 
   //first decorate all jets with the CTT method
   m_classifiedTrackTagger->decorateJets(trkparticles, *primVertex, *jetTES);
 
-  for(const auto& curjet : *jetTES){
+  for(const auto curjet : *jetTES){
     ATH_MSG_DEBUG( " Jet  pt: " << curjet->pt()<<" eta: "<<curjet->eta()<<" phi: "<< curjet->phi() );
     float CTTScore = m_classifiedTrackTagger->bJetWgts(trkparticles, *primVertex, curjet->p4());
     ATH_MSG_DEBUG ("Retrieved CTT score from CTT tool: " << CTTScore);
