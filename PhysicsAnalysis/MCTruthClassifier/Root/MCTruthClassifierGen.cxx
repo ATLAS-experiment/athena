@@ -1961,7 +1961,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* t
   return PartOutCome;
 }
 //---------------------------------------------------------------------------------
-ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, Info* info) const {
+ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, [[maybe_unused]] Info* info) const {
   ATH_MSG_DEBUG("Executing defOutComeOfTau");
   ParticleOutCome PartOutCome = UnknownOutCome;
   const xAOD::TruthVertex* EndVert = findEndVert(thePart);
@@ -1977,8 +1977,6 @@ ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* th
   int NumOfPi = PD.apd(211);
   int NumOfKaon = PD.apd(321);
   int NumOfNucFr = PD.apd(0) + PD.apd(1000000000, std::numeric_limits<int>::max());
-
-  if (info) info->tauFinalStatePart = std::move(tauFinalStatePart);
 
   if (NumOfNucFr != 0) PartOutCome = NuclInteraction;
   if ((NumOfTauDaug == 3 && NumOfElec == 1 && NumOfElecNeut == 1) || (NumOfTauDaug == (3 + NumOfPhot) && NumOfElecNeut == 1)) PartOutCome = DecaytoElectron;
