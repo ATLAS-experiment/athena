@@ -39,12 +39,14 @@
 #include "Acts/Vertexing/FullBilloirVertexFitter.hpp"
 #include "Acts/Vertexing/HelicalTrackLinearizer.hpp"
 #include "Acts/Vertexing/TrackDensityVertexFinder.hpp"
+#include "Acts/Vertexing/TrackAtVertex.hpp"
 #include "Acts/Vertexing/Vertex.hpp"
 #include "Acts/Vertexing/ImpactPointEstimator.hpp"
 #include "Acts/Utilities/Logger.hpp"
 
 
 #include <cmath>
+#include <optional>
 
 namespace Acts {
 class Surface;
@@ -66,6 +68,10 @@ namespace ActsTrk {
     const Acts::BoundTrackParameters& parameters() const {return m_boundParams;}
 
     const Trk::ITrackLink* trackLink() const {return m_trkLink;}
+
+    static Acts::BoundTrackParameters extractParameters(const Acts::InputTrack& input) {
+      return input.template as<TrackWrapper>()->parameters();
+    }
 
   private:
     const Trk::ITrackLink* m_trkLink;
@@ -106,13 +112,19 @@ namespace ActsTrk {
     }
 
     using Propagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
-    using TrackLinearizer = Acts::HelicalTrackLinearizer<Propagator>;
-    using VertexFitter = Acts::FullBilloirVertexFitter<TrackWrapper, TrackLinearizer>;
-    using VertexSeedFinder = Acts::TrackDensityVertexFinder<VertexFitter, Acts::GaussianTrackDensity<TrackWrapper>>;
-    using VertexFinder = Acts::IterativeVertexFinder<VertexFitter, VertexSeedFinder>;
+    using TrackLinearizer = Acts::HelicalTrackLinearizer;
+    using VertexFitter = Acts::FullBilloirVertexFitter;
+    using VertexSeedFinder = Acts::TrackDensityVertexFinder;
+    using VertexFinder = Acts::IterativeVertexFinder;
 
     std::shared_ptr<VertexFinder> m_vertexFinder = nullptr;
     std::shared_ptr<ATLASMagneticFieldWrapper> m_bField = nullptr;
+
+    std::shared_ptr<Propagator> m_propagator = nullptr;
+
+    // optional because of late initializatio
+    std::optional<TrackLinearizer> m_linearizer = std::nullopt;
+
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "", "ActsTrackingGeometryTool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "", "ActsExtrapolationTool"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkFilter{this, "TrackSelector", "", "InDetTrackSelectionTool"};
