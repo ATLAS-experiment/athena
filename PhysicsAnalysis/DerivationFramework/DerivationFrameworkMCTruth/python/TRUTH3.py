@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TRUTH3.py - format containing standard common ATLAS truth record
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import MetadataCategory
 
-def TRUTH3Cfg(ConfigFlags):
+def TRUTH3Cfg(flags):
     """Main config for TRUTH3"""
     acc = ComponentAccumulator()
 
@@ -13,13 +13,13 @@ def TRUTH3Cfg(ConfigFlags):
     # Add all the particle derivation tools
     # This sets up its own common kernel and adds the common tools to it
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddStandardTruthContentsCfg
-    acc.merge(AddStandardTruthContentsCfg(ConfigFlags))
+    acc.merge(AddStandardTruthContentsCfg(flags))
 
     #==============================================================================
     # Set up slimming content list
     #==============================================================================
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TRUTH3SlimmingHelper = SlimmingHelper("TRUTH3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TRUTH3SlimmingHelper = SlimmingHelper("TRUTH3SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     TRUTH3SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
                                                'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
@@ -50,7 +50,7 @@ def TRUTH3Cfg(ConfigFlags):
 
     # Add TruthTau collections
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
-    acc.merge(AddTauAndDownstreamParticlesCfg(ConfigFlags))
+    acc.merge(AddTauAndDownstreamParticlesCfg(flags))
     TRUTH3SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
 
     # Add standard content
@@ -61,7 +61,7 @@ def TRUTH3Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     TRUTH3ItemList = TRUTH3SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH3", ItemList=TRUTH3ItemList))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TRUTH3", createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TRUTH3", ItemList=TRUTH3ItemList))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TRUTH3", createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc

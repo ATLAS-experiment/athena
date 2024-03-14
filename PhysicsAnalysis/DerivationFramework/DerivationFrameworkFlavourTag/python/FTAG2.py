@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_FTAG2.py
@@ -13,13 +13,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
+def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for FTAG2"""
     acc = ComponentAccumulator()
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg
@@ -34,14 +34,14 @@ def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
 
 
     # TrackParticles associated with small-R jets
-    FTAG2Akt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(ConfigFlags,
+    FTAG2Akt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
         name            = "FTAG2Akt4PFlowJetTPThinningTool",
         StreamName      = kwargs['StreamName'],
         JetKey   = "AntiKt4EMPFlowJets",
         SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    FTAG2AktVRJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(ConfigFlags,
+    FTAG2AktVRJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
         name            = "FTAG2AktVRJetTPThinningTool",
         StreamName      = kwargs['StreamName'],
         JetKey  = "AntiKtVR30Rmax4Rmin02PV0TrackJets",
@@ -50,7 +50,7 @@ def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
 
     # Include inner detector tracks associated with muons
     FTAG2MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "FTAG2MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
@@ -71,7 +71,7 @@ def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
     return acc
 
 
-def FTAG2Cfg(ConfigFlags):
+def FTAG2Cfg(flags):
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -79,10 +79,10 @@ def FTAG2Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG2TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    FTAG2TriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
-    acc.merge(FTAG2KernelCfg(ConfigFlags, name="FTAG2Kernel", StreamName = 'StreamDAOD_FTAG2', TriggerListsHelper = FTAG2TriggerListsHelper))
+    acc.merge(FTAG2KernelCfg(flags, name="FTAG2Kernel", StreamName = 'StreamDAOD_FTAG2', TriggerListsHelper = FTAG2TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -91,7 +91,7 @@ def FTAG2Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    FTAG2SlimmingHelper = SlimmingHelper("FTAG2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     FTAG2SlimmingHelper.SmartCollections = [
             "Electrons",
@@ -119,7 +119,7 @@ def FTAG2Cfg(ConfigFlags):
     FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper)
 
     # Add truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAG2SlimmingHelper)
 
     # Add ExtraVariables
@@ -127,13 +127,13 @@ def FTAG2Cfg(ConfigFlags):
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG2SlimmingHelper, 'FTAG2')
-    FtagBaseContent.trigger_matching(FTAG2SlimmingHelper, FTAG2TriggerListsHelper, ConfigFlags)
+    FtagBaseContent.trigger_matching(FTAG2SlimmingHelper, FTAG2TriggerListsHelper, flags)
 
 
     # Output stream    
     FTAG2ItemList = FTAG2SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_FTAG2", ItemList=FTAG2ItemList, AcceptAlgs=["FTAG2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_FTAG2", AcceptAlgs=["FTAG2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_FTAG2", ItemList=FTAG2ItemList, AcceptAlgs=["FTAG2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_FTAG2", AcceptAlgs=["FTAG2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 

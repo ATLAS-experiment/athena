@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # Slimmed DAOD_PHYSLITE.py for Run 3 trigger-object level analyses (TLAs)
@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Skimming config
-def TLA1SkimmingCfg(ConfigFlags):
+def TLA1SkimmingCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
@@ -19,7 +19,7 @@ def TLA1SkimmingCfg(ConfigFlags):
     tlaLiteTriggerList = PrimaryISRTLATriggers + SupportTLATriggers + SupportPhotonTriggers
 
 
-    if not ConfigFlags.Input.isMC:
+    if not flags.Input.isMC:
         TLA1TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( 
                         name          = "TLA1TriggerSkimmingTool1",
                         TriggerListOR = tlaLiteTriggerList
@@ -30,22 +30,22 @@ def TLA1SkimmingCfg(ConfigFlags):
 
 
 # Main thinning config and common augmentations
-def TLA1KernelCfg(ConfigFlags, name='TLA1Kernel', **kwargs):
+def TLA1KernelCfg(flags, name='TLA1Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for TLA1"""
     acc = ComponentAccumulator()
 
     # Skimming
     skimmingTool = None
-    if not ConfigFlags.Input.isMC:
-        skimmingTool = acc.getPrimaryAndMerge(TLA1SkimmingCfg(ConfigFlags))
+    if not flags.Input.isMC:
+        skimmingTool = acc.getPrimaryAndMerge(TLA1SkimmingCfg(flags))
 
     # Common augmentations
     from DerivationFrameworkTLA.TLACommonConfig import TLACommonAugmentationsCfg
-    acc.merge(TLACommonAugmentationsCfg(ConfigFlags, prefix="TLA1_", TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(TLACommonAugmentationsCfg(flags, prefix="TLA1_", TriggerListsHelper = kwargs['TriggerListsHelper']))
     
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
     DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
-        ConfigFlags,
+        flags,
         name           = "DFCommonTrackSelectionLoose",
         CutLevel       = "Loose",
         DecorationName = "DFTLA1Loose"))
@@ -57,7 +57,7 @@ def TLA1KernelCfg(ConfigFlags, name='TLA1Kernel', **kwargs):
 
     # Include inner detector tracks associated with muons
     TLA1MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "TLA1MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
@@ -65,7 +65,7 @@ def TLA1KernelCfg(ConfigFlags, name='TLA1Kernel', **kwargs):
     
     # Include inner detector tracks associated with electonrs
     TLA1ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "TLA1ElectronTPThinningTool",
         StreamName              = kwargs['StreamName'],
         SGKey                   = "Electrons",
@@ -74,7 +74,7 @@ def TLA1KernelCfg(ConfigFlags, name='TLA1Kernel', **kwargs):
     TLA1_thinning_expression = "InDetTrackParticles.DFTLA1Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
 
     TLA1Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "TLA1Akt4JetTPThinningTool",
         StreamName              = kwargs['StreamName'],
         JetKey                  = "AntiKt4EMTopoJets",
@@ -83,7 +83,7 @@ def TLA1KernelCfg(ConfigFlags, name='TLA1Kernel', **kwargs):
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     TLA1Akt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                         = "TLA1Akt4PFlowJetTPThinningTool",
         StreamName                   = kwargs['StreamName'],
         JetKey                       = "AntiKt4EMPFlowJets",
@@ -109,7 +109,7 @@ def TLA1KernelCfg(ConfigFlags, name='TLA1Kernel', **kwargs):
     return acc
 
 # Main setup of the config & format
-def TLA1Cfg(ConfigFlags):
+def TLA1Cfg(flags):
     stream_name = 'StreamDAOD_TLA1'
     acc = ComponentAccumulator()
 
@@ -117,11 +117,11 @@ def TLA1Cfg(ConfigFlags):
     # This is needed at this scope (for the slimming) and further down in the config chain
     # for actually configuring the matching, so we create it here and pass it down
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TLA1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    TLA1TriggerListsHelper = TriggerListsHelper(flags)
 
 
     # Common augmentations and TLA1 thinning & skimming
-    acc.merge(TLA1KernelCfg(ConfigFlags, name="TLA1Kernel", StreamName = stream_name, TriggerListsHelper = TLA1TriggerListsHelper))
+    acc.merge(TLA1KernelCfg(flags, name="TLA1Kernel", StreamName = stream_name, TriggerListsHelper = TLA1TriggerListsHelper))
     
     # ============================
     # Define contents of the format
@@ -130,7 +130,7 @@ def TLA1Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    TLA1SlimmingHelper = SlimmingHelper("TLA1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TLA1SlimmingHelper = SlimmingHelper("TLA1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     TLA1SlimmingHelper.SmartCollections = [
                         "EventInfo",
@@ -144,7 +144,7 @@ def TLA1Cfg(ConfigFlags):
     ]
     
     # Extra content
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         TLA1SlimmingHelper.ExtraVariables += [
             "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
             
@@ -183,7 +183,7 @@ def TLA1Cfg(ConfigFlags):
 
     
     # Truth extra content
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         # from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         from DerivationFrameworkTLA.TLACommonConfig import addTLATruth3ContentToSlimmerTool
         addTLATruth3ContentToSlimmerTool(TLA1SlimmingHelper)
@@ -221,7 +221,7 @@ def TLA1Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TLA1SlimmingHelper, 
                                         OutputContainerPrefix = "TrigMatch_", 
@@ -230,14 +230,14 @@ def TLA1Cfg(ConfigFlags):
                                         OutputContainerPrefix = "TrigMatch_",
                                         TriggerList = TLA1TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TLA1SlimmingHelper)        
 
     # Output stream    
     TLA1ItemList = TLA1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TLA1", ItemList=TLA1ItemList, AcceptAlgs=["TLA1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TLA1", AcceptAlgs=["TLA1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TLA1", ItemList=TLA1ItemList, AcceptAlgs=["TLA1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TLA1", AcceptAlgs=["TLA1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 

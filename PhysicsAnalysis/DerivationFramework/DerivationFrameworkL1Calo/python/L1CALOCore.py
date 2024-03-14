@@ -133,7 +133,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # set up the slimming helper
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    L1CaloSlimmingHelper = SlimmingHelper("L1CaloSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections)
+    L1CaloSlimmingHelper = SlimmingHelper("L1CaloSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     AllVariables = []
     StaticContent = []

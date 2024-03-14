@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY1.py
@@ -185,7 +185,7 @@ def BPHY1Cfg(flags):
     if flags.Input.isMC :
         AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
 
-    BPHY1SlimmingHelper = SlimmingHelper("BPHY1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    BPHY1SlimmingHelper = SlimmingHelper("BPHY1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     # Needed for trigger objects
     BPHY1SlimmingHelper.IncludeMuonTriggerContent = True
     BPHY1SlimmingHelper.IncludeBPhysTriggerContent = True

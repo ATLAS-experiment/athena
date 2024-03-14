@@ -13,13 +13,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def LLJ1KernelCfg(ConfigFlags, name='LLJ1Kernel', **kwargs):
+def LLJ1KernelCfg(flags, name='LLJ1Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for LLJ1"""
     acc = ComponentAccumulator()
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 
@@ -34,14 +34,14 @@ def LLJ1KernelCfg(ConfigFlags, name='LLJ1Kernel', **kwargs):
     } 
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
-    acc.merge(PhysCommonThinningCfg(ConfigFlags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
+    acc.merge(PhysCommonThinningCfg(flags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
     # Get them from the CA so they can be added to the kernel
     thinningTools = []
     for key in thinningToolsArgs:
         thinningTools.append(acc.getPublicTool(thinningToolsArgs[key]))
 
     ### skimming tool
-    skimmingTool = acc.getPrimaryAndMerge(LLJ1SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.getPrimaryAndMerge(LLJ1SkimmingToolCfg(flags))
 
     # The kernel algorithm itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
@@ -93,7 +93,7 @@ def LLJ1SkimmingToolCfg(flags):
     return(acc)                          
 
 
-def LLJ1Cfg(ConfigFlags):
+def LLJ1Cfg(flags):
     stream_name = 'StreamDAOD_LLJ1'
     acc = ComponentAccumulator()
 
@@ -102,20 +102,19 @@ def LLJ1Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    LLJ1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    LLJ1TriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
-    acc.merge(LLJ1KernelCfg(ConfigFlags, name="LLJ1Kernel", StreamName = stream_name, TriggerListsHelper = LLJ1TriggerListsHelper))
+    acc.merge(LLJ1KernelCfg(flags, name="LLJ1Kernel", StreamName = stream_name, TriggerListsHelper = LLJ1TriggerListsHelper))
     
     # ============================
     # Define contents of the format
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    #from xAODMetaDataCnv.InfileMetaDataConfig import InfileMetaDataCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    LLJ1SlimmingHelper = SlimmingHelper("LLJ1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    LLJ1SlimmingHelper = SlimmingHelper("LLJ1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     LLJ1SlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",
                                            "Photons",
@@ -205,7 +204,7 @@ def LLJ1Cfg(ConfigFlags):
     LLJ1SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
  
     # Truth extra content
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(LLJ1SlimmingHelper)
@@ -228,7 +227,7 @@ def LLJ1Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLJ1SlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_", 
@@ -237,19 +236,19 @@ def LLJ1Cfg(ConfigFlags):
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = LLJ1TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
-    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(LLJ1SlimmingHelper)
         ##################################################### 
         ## NOTE: This block is temporary, during validation of the doEDMVersionConversion flag.
         ## This adds a LOT of containers to the output! In order to help validate the conversion.
         ## It should be removed once doEDMVersionConversion goes into production use.
-        if ConfigFlags.Trigger.doEDMVersionConversion:   
+        if flags.Trigger.doEDMVersionConversion:   
             from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
             from AthenaCommon.Logging import logging
             msg = logging.getLogger('LLJ1Cfg')
             msg.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
-            addTrigEDMSetToOutput(ConfigFlags, LLJ1SlimmingHelper, "AODFULL")
+            addTrigEDMSetToOutput(flags, LLJ1SlimmingHelper, "AODFULL")
             LLJ1SlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer','HLTNav_R2ToR3SummaryAux':'xAOD::TrigCompositeAuxContainer'})
             LLJ1SlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
         ##
@@ -257,8 +256,8 @@ def LLJ1Cfg(ConfigFlags):
 
     # Output stream    
     LLJ1ItemList = LLJ1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_LLJ1", ItemList=LLJ1ItemList, AcceptAlgs=["LLJ1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_LLJ1", AcceptAlgs=["LLJ1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_LLJ1", ItemList=LLJ1ItemList, AcceptAlgs=["LLJ1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_LLJ1", AcceptAlgs=["LLJ1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 

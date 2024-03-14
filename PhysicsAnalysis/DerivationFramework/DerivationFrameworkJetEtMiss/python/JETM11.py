@@ -1,4 +1,4 @@
-4# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+4# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM11.py
@@ -9,13 +9,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM11TriggerSkimmingToolCfg(ConfigFlags):
+def JETM11TriggerSkimmingToolCfg(flags):
     """Configure the trigger skimming tool"""
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    singleElTriggers = TriggerLists.single_el_Trig(ConfigFlags)
-    singleMuTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
+    singleElTriggers = TriggerLists.single_el_Trig(flags)
+    singleMuTriggers = TriggerLists.single_mu_Trig(flags)
 
     JETM11TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "JETM11TrigSkimmingTool1",
                                                                                   TriggerListOR          = singleElTriggers + singleMuTriggers)
@@ -24,7 +24,7 @@ def JETM11TriggerSkimmingToolCfg(ConfigFlags):
 
     return acc
 
-def JETM11StringSkimmingToolCfg(ConfigFlags):
+def JETM11StringSkimmingToolCfg(flags):
     """Configure the string skimming tool"""
 
     acc = ComponentAccumulator()
@@ -40,27 +40,27 @@ def JETM11StringSkimmingToolCfg(ConfigFlags):
 
 
 # Main algorithm config
-def JETM11KernelCfg(ConfigFlags, name='JETM11Kernel', **kwargs):
+def JETM11KernelCfg(flags, name='JETM11Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM11"""
     acc = ComponentAccumulator()
 
     # Skimming
     skimmingTools = []
-    skimmingTools.append(acc.getPrimaryAndMerge(JETM11TriggerSkimmingToolCfg(ConfigFlags)))
-    skimmingTools.append(acc.getPrimaryAndMerge(JETM11StringSkimmingToolCfg(ConfigFlags)))
+    skimmingTools.append(acc.getPrimaryAndMerge(JETM11TriggerSkimmingToolCfg(flags)))
+    skimmingTools.append(acc.getPrimaryAndMerge(JETM11StringSkimmingToolCfg(flags)))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Derivation kernel:
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import TightMETTriggerDerivationKernelCfg
-    acc.merge(TightMETTriggerDerivationKernelCfg(ConfigFlags, name="JETM11Kernel", skimmingTools = skimmingTools, StreamName = 'StreamDAOD_JETM11'))
+    acc.merge(TightMETTriggerDerivationKernelCfg(flags, name="JETM11Kernel", skimmingTools = skimmingTools, StreamName = 'StreamDAOD_JETM11'))
 
     return acc
 
 
-def JETM11Cfg(ConfigFlags):
+def JETM11Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -69,10 +69,10 @@ def JETM11Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM11TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    JETM11TriggerListsHelper = TriggerListsHelper(flags)
 
     # Skimming, thinning, augmentation
-    acc.merge(JETM11KernelCfg(ConfigFlags, name="JETM11Kernel", StreamName = 'StreamDAOD_JETM11', TriggerListsHelper = JETM11TriggerListsHelper))
+    acc.merge(JETM11KernelCfg(flags, name="JETM11Kernel", StreamName = 'StreamDAOD_JETM11', TriggerListsHelper = JETM11TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -81,7 +81,7 @@ def JETM11Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM11SlimmingHelper = SlimmingHelper("JETM11SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    JETM11SlimmingHelper = SlimmingHelper("JETM11SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import addMETTriggerDerivationContent
     addMETTriggerDerivationContent(JETM11SlimmingHelper, isLoose=False)
@@ -100,8 +100,8 @@ def JETM11Cfg(ConfigFlags):
 
     # Output stream    
     JETM11ItemList = JETM11SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM11", ItemList=JETM11ItemList, AcceptAlgs=["JETM11Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM11", AcceptAlgs=["JETM11Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_JETM11", ItemList=JETM11ItemList, AcceptAlgs=["JETM11Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM11", AcceptAlgs=["JETM11Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

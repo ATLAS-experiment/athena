@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM7.py
@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM7SkimmingToolCfg(ConfigFlags):
+def JETM7SkimmingToolCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
@@ -24,21 +24,21 @@ def JETM7SkimmingToolCfg(ConfigFlags):
     return(acc)
 
 # Main algorithm config
-def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
+def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM7"""
     acc = ComponentAccumulator()
 
     # Skimming
-    if not ConfigFlags.Input.isMC:
-        skimmingTool = acc.getPrimaryAndMerge(JETM7SkimmingToolCfg(ConfigFlags))
+    if not flags.Input.isMC:
+        skimmingTool = acc.getPrimaryAndMerge(JETM7SkimmingToolCfg(flags))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
     DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
-        ConfigFlags,
+        flags,
         name           = "DFJETM7CommonTrackSelectionLoose",
         CutLevel       = "Loose",
         DecorationName = "DFJETM7Loose"))
@@ -56,7 +56,7 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
     jetSelectionString = "(AntiKt4EMPFlowByVertexJets.pt > 7.*GeV && AntiKt4EMPFlowByVertexJets.Jvt > 0.4)"
 
     # Include inner detector tracks associated with muons
-    JETM7MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(ConfigFlags,
+    JETM7MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(flags,
         name                    = "JETM7MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
@@ -64,7 +64,7 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
         InDetTrackParticlesKey  = "InDetTrackParticles"))
     
     # Include inner detector tracks associated with electrons
-    JETM7ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(ConfigFlags,
+    JETM7ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(flags,
         name                    = "JETM7ElectronTPThinningTool",
         StreamName              = kwargs['StreamName'],
         SGKey                   = "Electrons",
@@ -72,7 +72,7 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     # Include inner detector tracks associated with by-vertex jets
-    JETM7Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(ConfigFlags,
+    JETM7Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
         name                    = "JETM7Akt4JetTPThinningTool",
         StreamName              = kwargs['StreamName'],
         JetKey                  = "AntiKt4EMPFlowByVertexJets",
@@ -81,35 +81,35 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
 
 
     # Store EMPFlowByVertexJets with JVT > 0.4. This will result in jets extending up to about 2.6 in |eta|
-    JETM7Akt4PFlowByVertexJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+    JETM7Akt4PFlowByVertexJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                                  name             = "JETM7Akt4PFlowByVertexJetThinningTool",
                                                                                  ContainerName    = "AntiKt4EMPFlowByVertexJets",
                                                                                  StreamName       = kwargs['StreamName'],
                                                                                  SelectionString  = jetSelectionString))
 
     # Store regular EMPFlowJets for |eta| > 2.4 to retain forward jets with a PV0 interpretation
-    JETM7Akt4PFlowJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+    JETM7Akt4PFlowJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                                  name             = "JETM7Akt4PFlowJetThinningTool",
                                                                                  ContainerName    = "AntiKt4EMPFlowJets",
                                                                                  StreamName       = kwargs['StreamName'],
                                                                                  SelectionString  = "(abs(AntiKt4EMPFlowJets.eta) > 2.4)"))
 
 
-    JETM7MuonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+    JETM7MuonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                         name             = "JETM7MuonThinningTool",
                                                                         ContainerName    = "Muons",
                                                                         StreamName       = kwargs['StreamName'],
                                                                         SelectionString  = muonSelectionString))
 
 
-    JETM7ElectronThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+    JETM7ElectronThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                             name             = "JETM7ElectronThinningTool",
                                                                             ContainerName    = "Electrons",
                                                                             StreamName       = kwargs['StreamName'],
                                                                             SelectionString  = electronSelectionString))
 
 
-    JETM7PhotonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+    JETM7PhotonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                         name             = "JETM7PhotonThinningTool",
                                                                         ContainerName    = "Photons",
                                                                         StreamName       = kwargs['StreamName'],
@@ -117,7 +117,7 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
 
 
     # Extra jet content:
-    acc.merge(JETM7ExtraContentCfg(ConfigFlags))
+    acc.merge(JETM7ExtraContentCfg(flags))
 
     # Finally the kernel itself
     thinningTools = [JETM7MuonTPThinningTool,
@@ -133,12 +133,12 @@ def JETM7KernelCfg(ConfigFlags, name='JETM7Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
                                       ThinningTools = thinningTools,
-                                      SkimmingTools =[skimmingTool] if not ConfigFlags.Input.isMC else []))   
+                                      SkimmingTools =[skimmingTool] if not flags.Input.isMC else []))   
 
 
     return acc
 
-def JETM7ExtraContentCfg(ConfigFlags):
+def JETM7ExtraContentCfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -159,15 +159,15 @@ def JETM7ExtraContentCfg(ConfigFlags):
     jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
-        acc.merge(JetRecCfg(ConfigFlags,jd))
+        acc.merge(JetRecCfg(flags,jd))
 
     #=======================================
     # More detailed truth information
     #=======================================
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTopQuarkAndDownstreamParticlesCfg
-        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(ConfigFlags, generations=4, rejectHadronChildren=True))
+        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(flags, generations=4, rejectHadronChildren=True))
 
     #=======================================
     # Add Run-2 jet trigger collections
@@ -175,7 +175,7 @@ def JETM7ExtraContentCfg(ConfigFlags):
     # In Run-3, the aux. container type is directly JetAuxContainer (no conversion needed)
     #=======================================
 
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_a10tclcwsubjesFS", "JetContainer_GSCJet"]
 
         for trigger in triggerNames:
@@ -186,7 +186,7 @@ def JETM7ExtraContentCfg(ConfigFlags):
 
     return acc
 
-def JETM7Cfg(ConfigFlags):
+def JETM7Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -195,10 +195,10 @@ def JETM7Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM7TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    JETM7TriggerListsHelper = TriggerListsHelper(flags)
 
     # Skimming, thinning, augmentation, extra content
-    acc.merge(JETM7KernelCfg(ConfigFlags, name="JETM7Kernel", StreamName = 'StreamDAOD_JETM7', TriggerListsHelper = JETM7TriggerListsHelper))
+    acc.merge(JETM7KernelCfg(flags, name="JETM7Kernel", StreamName = 'StreamDAOD_JETM7', TriggerListsHelper = JETM7TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -207,7 +207,7 @@ def JETM7Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM7SlimmingHelper = SlimmingHelper("JETM7SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    JETM7SlimmingHelper = SlimmingHelper("JETM7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     JETM7SlimmingHelper.SmartCollections = ["Electrons", "Photons", "Muons",
                                             "PrimaryVertices",
@@ -220,7 +220,7 @@ def JETM7Cfg(ConfigFlags):
     JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights"]
 
     # Truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM7SlimmingHelper)
@@ -250,7 +250,7 @@ def JETM7Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM7SlimmingHelper, 
                                         OutputContainerPrefix = "TrigMatch_", 
@@ -259,7 +259,7 @@ def JETM7Cfg(ConfigFlags):
                                         OutputContainerPrefix = "TrigMatch_",
                                         TriggerList = JETM7TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(JETM7SlimmingHelper) 
 
@@ -270,8 +270,8 @@ def JETM7Cfg(ConfigFlags):
 
     # Output stream    
     JETM7ItemList = JETM7SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM7", ItemList=JETM7ItemList, AcceptAlgs=["JETM7Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM7", AcceptAlgs=["JETM7Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_JETM7", ItemList=JETM7ItemList, AcceptAlgs=["JETM7Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM7", AcceptAlgs=["JETM7Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

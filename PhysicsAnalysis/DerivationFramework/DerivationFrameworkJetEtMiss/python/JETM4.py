@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM4.py
@@ -9,12 +9,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM4SkimmingToolCfg(ConfigFlags):
+def JETM4SkimmingToolCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    triggerlist = TriggerLists.single_photon_Trig(ConfigFlags)
+    triggerlist = TriggerLists.single_photon_Trig(flags)
     addRun3PhotonTriggers = ["HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"]
     triggerlist = triggerlist+addRun3PhotonTriggers
 
@@ -28,17 +28,17 @@ def JETM4SkimmingToolCfg(ConfigFlags):
 
 
 # Main algorithm config
-def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
+def JETM4KernelCfg(flags, name='JETM4Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM4"""
     acc = ComponentAccumulator()
 
     # Skimming
-    if not ConfigFlags.Input.isMC:
-        skimmingTool = acc.getPrimaryAndMerge(JETM4SkimmingToolCfg(ConfigFlags))
+    if not flags.Input.isMC:
+        skimmingTool = acc.getPrimaryAndMerge(JETM4SkimmingToolCfg(flags))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
@@ -46,7 +46,7 @@ def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
     JETM4_thinning_expression = "( abs(InDetTrackParticles.d0) < 5*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5*mm )"
     JETM4TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM4TrackParticleThinningTool",
         StreamName              = kwargs['StreamName'], 
         SelectionString         = JETM4_thinning_expression,
@@ -54,7 +54,7 @@ def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
     
     # Include inner detector tracks associated with muons
     JETM4MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM4MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
@@ -62,7 +62,7 @@ def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
     
     # Include inner detector tracks associated with electonrs
     JETM4ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM4ElectronTPThinningTool",
         StreamName              = kwargs['StreamName'],
         SGKey                   = "Electrons",
@@ -70,7 +70,7 @@ def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
 
     # Include inner detector tracks associated with photons
     JETM4PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                     = "JETM4PhotonTPThinningTool",
         StreamName               = kwargs['StreamName'],
         SGKey                    = "Photons",
@@ -79,7 +79,7 @@ def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
 
     # Include inner detector tracks associated with taus
     JETM4TauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                   = "JETM4TauTPThinningTool",
         StreamName             = kwargs['StreamName'],
         TauKey                 = "TauJets",
@@ -94,7 +94,7 @@ def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
                      JETM4PhotonTPThinningTool,
                      JETM4TauTPThinningTool]
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         truth_cond_WZH    = "((abs(TruthParticles.pdgId) >= 23) && (abs(TruthParticles.pdgId) <= 25))"                                      # W, Z and Higgs
         truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
         truth_cond_Quark  = "((abs(TruthParticles.pdgId) <=  5 && (TruthParticles.pt > 10000.)) || (abs(TruthParticles.pdgId) == 6))"       # Quarks
@@ -119,21 +119,21 @@ def JETM4KernelCfg(ConfigFlags, name='JETM4Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
                                       ThinningTools = thinningTools,
-                                      SkimmingTools = [skimmingTool] if not ConfigFlags.Input.isMC else []))
+                                      SkimmingTools = [skimmingTool] if not flags.Input.isMC else []))
     
     # Extra jet content:
-    acc.merge(JETM4ExtraContentCfg(ConfigFlags))
+    acc.merge(JETM4ExtraContentCfg(flags))
 
     return acc
 
 
-def JETM4ExtraContentCfg(ConfigFlags):
+def JETM4ExtraContentCfg(flags):
 
     acc = ComponentAccumulator()
 
     # PFlow augmentation tool
     from DerivationFrameworkJetEtMiss.PFlowCommonConfig import PFlowCommonCfg
-    acc.merge(PFlowCommonCfg(ConfigFlags))
+    acc.merge(PFlowCommonCfg(flags))
 
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.JetConfigFlags import jetInternalFlags
@@ -141,12 +141,12 @@ def JETM4ExtraContentCfg(ConfigFlags):
     jetList = [AntiKt4UFOCSSKLowPt]
     jetInternalFlags.isRecoJob = True
     for jd in jetList:
-        acc.merge(JetRecCfg(ConfigFlags,jd))
+        acc.merge(JetRecCfg(flags,jd))
 
     return acc
 
 
-def JETM4Cfg(ConfigFlags):
+def JETM4Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -155,10 +155,10 @@ def JETM4Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM4TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    JETM4TriggerListsHelper = TriggerListsHelper(flags)
 
     # Skimming, thinning, augmentation, extra content
-    acc.merge(JETM4KernelCfg(ConfigFlags, name="JETM4Kernel", StreamName = 'StreamDAOD_JETM4', TriggerListsHelper = JETM4TriggerListsHelper))
+    acc.merge(JETM4KernelCfg(flags, name="JETM4Kernel", StreamName = 'StreamDAOD_JETM4', TriggerListsHelper = JETM4TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -167,7 +167,7 @@ def JETM4Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM4SlimmingHelper = SlimmingHelper("JETM4SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    JETM4SlimmingHelper = SlimmingHelper("JETM4SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     JETM4SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
@@ -192,7 +192,7 @@ def JETM4Cfg(ConfigFlags):
     JETM4SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
 
     # Truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM4SlimmingHelper)
@@ -219,7 +219,7 @@ def JETM4Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM4SlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_", 
@@ -228,7 +228,7 @@ def JETM4Cfg(ConfigFlags):
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = JETM4TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(JETM4SlimmingHelper)        
         # Run 2 is added here temporarily to allow testing/comparison/debugging
@@ -243,8 +243,8 @@ def JETM4Cfg(ConfigFlags):
 
     # Output stream    
     JETM4ItemList = JETM4SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM4", ItemList=JETM4ItemList, AcceptAlgs=["JETM4Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM4", AcceptAlgs=["JETM4Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_JETM4", ItemList=JETM4ItemList, AcceptAlgs=["JETM4Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM4", AcceptAlgs=["JETM4Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

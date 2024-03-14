@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY13.py
@@ -12,18 +12,18 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY13"
 streamName = "StreamDAOD_BPHY13"
 
-def BPHY13Cfg(ConfigFlags):
+def BPHY13Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    isSimulation = flags.Input.isMC
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
 
     BPHY13JpsiFinder = CompFactory.Analysis.JpsiFinder(
@@ -54,7 +54,7 @@ def BPHY13Cfg(ConfigFlags):
         OutputVtxContainerName = "BPHY13OniaCandidates",
         PVContainerName        = "PrimaryVertices",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefPVContainerName     = "SHOULDNOTBEUSED",
     #https://gitlab.cern.ch/atlas/athena/-/blob/21.2/PhysicsAnalysis/DerivationFramework/DerivationFrameworkBPhys/src/BPhysPVTools.cxx#L259
     # bit pattern: doZ0BA|doZ0|doA0|doPt
@@ -89,7 +89,7 @@ def BPHY13Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY13FourTrack",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefPVContainerName       = "BPHY13RefittedPrimaryVertices1",
         RefitPV                  = True,
         MaxPVrefit               = 10000,
@@ -235,7 +235,7 @@ def BPHY13Cfg(ConfigFlags):
         RefitPV                    = True,
         RefPVContainerName         = "BPHY13RefittedPrimaryVertices2", # cannot use existing refitted PVs
         UseMassConstraint          = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         VertexMass                 = 3096.916,
         MassInputParticles         = [105.658, 105.658],
@@ -258,7 +258,7 @@ def BPHY13Cfg(ConfigFlags):
         InputVtxContainerName      = "BPHY13FourTrack",
         TrackIndices               = [ 2, 3 ],
         RefitPV                    = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         RefPVContainerName         = "BPHY13RefittedPrimaryVertices3", # cannot use existing refitted PVs
         UseMassConstraint          = True,
@@ -283,7 +283,7 @@ def BPHY13Cfg(ConfigFlags):
         InputVtxContainerName      = "BPHY13FourTrack",
         TrackIndices               = [ 0, 1 ],
         RefitPV                    = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         RefPVContainerName         = "BPHY13RefittedPrimaryVertices4", # cannot use existing refitted PVs
         UseMassConstraint          = True,
@@ -308,7 +308,7 @@ def BPHY13Cfg(ConfigFlags):
         InputVtxContainerName      = "BPHY13FourTrack",
         TrackIndices               = [ 2, 3 ],
         RefitPV                    = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         RefPVContainerName         = "BPHY13RefittedPrimaryVertices5", # cannot use existing refitted PVs
         UseMassConstraint          = True,
@@ -333,7 +333,7 @@ def BPHY13Cfg(ConfigFlags):
         InputVtxContainerName      = "BPHY13FourTrack",
         TrackIndices               = [ 0, 1 ],
         RefitPV                    = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         RefPVContainerName         = "BPHY13RefittedPrimaryVertices6", # cannot use existing refitted PVs
         UseMassConstraint          = True,
@@ -358,7 +358,7 @@ def BPHY13Cfg(ConfigFlags):
         InputVtxContainerName      = "BPHY13FourTrack",
         TrackIndices               = [ 2, 3 ],
         RefitPV                    = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         RefPVContainerName         = "BPHY13RefittedPrimaryVertices7", # cannot use existing refitted PVs
         UseMassConstraint          = True,
@@ -415,7 +415,7 @@ def BPHY13Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY13SlimmingHelper = SlimmingHelper("BPHY13SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY13SlimmingHelper = SlimmingHelper("BPHY13SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     BPHY13_AllVariables  = getDefaultAllVariables()
     BPHY13_StaticContent = []
@@ -478,7 +478,7 @@ def BPHY13Cfg(ConfigFlags):
     BPHY13SlimmingHelper.AllVariables = BPHY13_AllVariables
     BPHY13SlimmingHelper.StaticContent = BPHY13_StaticContent
 
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY13", ItemList=BPHY13SlimmingHelper.GetItemList(), AcceptAlgs=["BPHY13Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY13", AcceptAlgs=["BPHY13Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY13", ItemList=BPHY13SlimmingHelper.GetItemList(), AcceptAlgs=["BPHY13Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY13", AcceptAlgs=["BPHY13Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
