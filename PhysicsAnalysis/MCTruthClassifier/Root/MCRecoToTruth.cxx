@@ -190,39 +190,31 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, Info* 
   allJetMothers.clear();
   constituents.clear();
   findJetConstituents(jet, constituents, DR);
-
-  // find the matching truth particles
-  std::set<const xAOD::TruthParticle*>::iterator it;
-  for (it = constituents.begin(); it != constituents.end(); ++it) {
-    const xAOD::TruthParticle* thePart = (*it);
-    // determine jet origin
+  // AV: Jet type is the type of hadron with "heaviest" flavour among the jet constituents.
+  // AV: No hadrons in the jet -- the flavour is unknown. 
+  // AV: The algorithm will fail on 4/5 quark hadrons and probably on nonBSM hadrons. To be fixed.
+  for (const auto& thePart: constituents) {
     MC::findAllJetMothers(thePart, allJetMothers);
-    // determine jet type
+    //AV: probably skip ME particles
     if (thePart->status() == 3) continue;
-    // determine jet type
+    // determine if hadron and its type
     tempparttype = particleTruthClassifier(thePart, info).first;
-    if (tempparttype == Hadron) tempparttype = defTypeOfHadron(thePart->pdgId());
+    if (tempparttype != Hadron) continue; 
+    tempparttype = defTypeOfHadron(thePart->pdgId());
     // classify the jet
     if (tempparttype == BBbarMesonPart || tempparttype == BottomMesonPart || tempparttype == BottomBaryonPart) {
       parttype = BJet;
-    } else if (tempparttype == CCbarMesonPart || tempparttype == CharmedMesonPart || tempparttype == CharmedBaryonPart) {
-      if (parttype == BJet) {
-      } else {
-        parttype = CJet;
-      }
-    } else if (tempparttype == StrangeBaryonPart || tempparttype == LightBaryonPart ||
-               tempparttype == StrangeMesonPart || tempparttype == LightMesonPart) {
-      if (parttype == BJet || parttype == CJet) {
-      } else {
-        parttype = LJet;
-      }
-    } else {
-      if (parttype == BJet || parttype == CJet || parttype == LJet) {
-      } else {
-        parttype = UnknownJet;
-      }
+      continue;
     }
-  } // end loop over jet constituents
+    if (tempparttype == CCbarMesonPart || tempparttype == CharmedMesonPart || tempparttype == CharmedBaryonPart) {
+      if (parttype != BJet) parttype = CJet;
+      continue;
+    } 
+    if (tempparttype == StrangeBaryonPart || tempparttype == LightBaryonPart || tempparttype == StrangeMesonPart || tempparttype == LightMesonPart) {
+      if (parttype != BJet && parttype != CJet) parttype = LJet;
+      continue;
+    } 
+  }
 
   // clasify the jet origin
   partorig = defJetOrig(allJetMothers);
@@ -331,10 +323,8 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nul
   float deltaPhi = detPhi(theGenParticle->phi(), trk->phi());
   float deteta = detEta(theGenParticle->eta(), trk->eta());
   float deltaRMatch = std::hypot(deltaPhi, deteta);
-  if (NumOfSiHits > m_NumOfSiHitsCut && deltaRMatch > m_deltaRMatchCut)
-    theGenParticle = nullptr;
-  else if (NumOfSiHits <= m_NumOfSiHitsCut && deltaPhi > m_deltaPhiMatchCut)
-    theGenParticle = nullptr;
+  if ((NumOfSiHits > m_NumOfSiHitsCut && deltaRMatch > m_deltaRMatchCut) ||
+      (NumOfSiHits <= m_NumOfSiHitsCut && deltaPhi > m_deltaPhiMatchCut)) theGenParticle = nullptr;
 
   if (info) {
     info->deltaRMatch = deltaRMatch;
@@ -384,47 +374,30 @@ MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
     }
   } // end if !DR
 }
-double
-MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart,
-                                     const xAOD::Jet* jet,
-                                     bool DR,
-                                     bool nparts) const
+double MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart, const xAOD::Jet* jet, bool DR, bool nparts) const
 {
-
-  // Get jet constituents
   std::set<const xAOD::TruthParticle*> constituents;
-  constituents.clear();
-  findJetConstituents(jet, constituents, DR);
-
-  // Get all particle daughters
   std::set<const xAOD::TruthParticle*> daughters;
-  daughters.clear();
+  std::set<const xAOD::TruthParticle*> intersect;
+
+  findJetConstituents(jet, constituents, DR);
   MC::findParticleDaughters(thePart, daughters);
+
   if (daughters.empty()) daughters.insert(thePart);
 
   // Get the intersection of constituents and daughters
-  std::set<const xAOD::TruthParticle*> intersect;
   std::set_intersection(constituents.begin(),
                         constituents.end(),
                         daughters.begin(),
                         daughters.end(),
                         std::inserter(intersect, intersect.begin()));
 
+  if (nparts) return 1.0*intersect.size() / daughters.size();
   double frac = 0;
-  if (nparts) {
-    frac = 1.0 * intersect.size() / daughters.size();
-  } else {
-    double tot = 0;
-    for (const auto *daughter : daughters) {
-      tot += daughter->pt();
-    }
-    for (const auto *particle : intersect) {
-      frac += particle->pt();
-    }
-    frac /= tot;
-  }
-
-  return frac;
+  double tot = 0;
+  for (const auto *daughter : daughters) { tot += daughter->pt();}
+  for (const auto *particle : intersect) { frac += particle->pt();}
+  return frac/tot;
 }
 
 #endif
