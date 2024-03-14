@@ -8,7 +8,6 @@ from AthenaCommon.CFElements import getSequenceChildren
 from AthenaCommon.Logging import logging
 __log = logging.getLogger( __name__ )
 
-
 # remove prescale suffixes
 def __getMenuBaseName(menuName):
     pattern = re.compile(r'_v\d+|DC14')

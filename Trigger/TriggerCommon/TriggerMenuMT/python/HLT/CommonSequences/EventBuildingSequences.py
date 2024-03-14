@@ -1,7 +1,7 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-
+import functools
 from TrigEDMConfig import DataScoutingInfo
 from TrigEDMConfig.TriggerEDM import recordable
 from TriggerMenuMT.HLT.Menu import EventBuildingInfo
@@ -26,7 +26,7 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         log.error('eventBuildType \'%s\' not found in the allowed Event Building identifiers', eventBuildType)
         return
 
-    seq = pebMenuSequenceCfg(flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
+    seq = functools.partial(pebMenuSequenceCfg, flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
 
     if len(chain.steps)==0:
         # noalg PEB chain

@@ -1,6 +1,7 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+import functools
 from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep
 from AthenaCommon.Logging import logging
 from ..Jet.JetChainConfiguration import JetChainConfiguration
@@ -23,7 +24,7 @@ def addTLAStep(flags, chain, chainDict):
         
         log.debug("addTLAStep: processing signature: %s", cPart['signature'] )
         # call the sequence from their respective signatures
-        tlaSequencesList.append(getTLASignatureSequence(flags, chainDict=chainDict, chainPart=cPart)), #signature=cPart['signature'])),
+        tlaSequencesList.append(functools.partial(getTLASignatureSequence, flags, chainDict=chainDict, chainPart=cPart)), #signature=cPart['signature'])),
             
     log.debug("addTLAStep: About to add a step with: %d parallel sequences.", len(tlaSequencesList))            
     
