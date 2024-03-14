@@ -69,7 +69,7 @@ namespace ActsTrk
        {this, "ExtrapolationTool", "ActsExtrapolationTool"};
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey
-       {this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer","Track collection (ActsTrk variant)"};
+       {this, "ACTSTracksLocation", "","Track collection (ActsTrk variant)"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey
        {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot or empty." };
     SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey

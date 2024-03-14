@@ -129,7 +129,7 @@ def ITkTrackingSiPatternCfg(flags,
     # ------------------------------------------------------------
     runTruth = True
 
-    if flags.Tracking.doITkFastTracking:
+    if flags.Tracking.doITkFastTracking and flags.Tracking.ActiveConfig.doAthenaTrack:
 
         from TrkConfig.TrkCollectionAliasAlgConfig import CopyAlgForAmbiCfg
         acc.merge(CopyAlgForAmbiCfg(
