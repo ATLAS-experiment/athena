@@ -14,10 +14,11 @@
 
 AFPToFAlgorithm::AFPToFAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator)
-, m_afpToFHitContainerKey("AFPToFHitContainer")
+, m_afpToFHitContainerKey("AFPToFHitContainer"), m_afpTrackContainerKey( "AFPTrackContainer" )
 
 {
 	declareProperty( "AFPToFHitContainer", m_afpToFHitContainerKey );
+	declareProperty( "AFPTrackContainer", m_afpTrackContainerKey );
 }
 
 
@@ -31,10 +32,14 @@ StatusCode AFPToFAlgorithm::initialize() {
 	m_TrainsToFGroup    = buildToolMap<int>(m_tools, "AFPToFTool", m_trainsToF);
 	m_BarsInTrainsA     = buildToolMap<std::map<std::string,int>>(m_tools, "AFPToFTool", m_trainsToFA, m_barsToF);
 	m_BarsInTrainsC     = buildToolMap<std::map<std::string,int>>(m_tools,"AFPToFTool", m_trainsToFC, m_barsToF);
+	m_GroupChanCombDeltaT    = buildToolMap<int>(m_tools, "AFPToFTool", m_chanComb);
+
 
 	// We must declare to the framework in initialize what SG objects we are going to use
 	SG::ReadHandleKey<xAOD::AFPToFHitContainer> afpToFHitContainerKey("AFPToFHits");
 	ATH_CHECK(m_afpToFHitContainerKey.initialize());
+	SG::ReadHandleKey<xAOD::AFPTrackContainer> afpTrackContainerKey( "AFPTracks" );
+    ATH_CHECK( m_afpTrackContainerKey.initialize() );
 	
 	ATH_MSG_INFO( "BunchCrossingKey initialization (ToF)" );
 	ATH_CHECK(m_bunchCrossingKeyToF.initialize());
@@ -208,6 +213,13 @@ StatusCode AFPToFAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
 	ATH_CHECK( afpToFHitContainer.initialize() );
 
+	SG::ReadHandle<xAOD::AFPTrackContainer> afpTrackContainer( m_afpTrackContainerKey, ctx );
+    if ( !afpTrackContainer.isValid() ) {
+        ATH_MSG_WARNING( "evtStore() does not contain hits collection with name " << m_afpTrackContainerKey );
+        return StatusCode::SUCCESS;
+    }
+    ATH_CHECK( afpTrackContainer.initialize() );
+
 	nTofHits = afpToFHitContainer->size();
 	fill("AFPToFTool", lb, nTofHits);
 
@@ -297,6 +309,87 @@ StatusCode AFPToFAlgorithm::fillHistograms( const EventContext& ctx ) const {
 		}
 	}
 
-	return StatusCode::SUCCESS;
+	return fillHistograms_crossBarDeltaT(*afpTrackContainer, *afpToFHitContainer);
 }
 
+StatusCode AFPToFAlgorithm::fillHistograms_crossBarDeltaT(
+        const xAOD::AFPTrackContainer& afpTrackContainer,
+        const xAOD::AFPToFHitContainer& afpToFHitContainer) const {
+    // Initialize monitored variables for histogram filling
+    Monitored::Scalar<float> crossBarDeltaT[2] = {
+            Monitored::Scalar<float>( "crossBarDeltaT_A", 0.0 ),
+            Monitored::Scalar<float>( "crossBarDeltaT_C", 0.0 )
+        };
+
+	bool channel_present[2][16] = {};
+	bool multihit[2] = {};
+	std::size_t track_count[2] = {};
+	std::size_t train_count[2][4] = {};
+
+	for (const xAOD::AFPTrack* tracksItr : afpTrackContainer)  
+	{ 
+		const auto side = tracksItr->stationID() == 3;
+		// Ignore tracks that are not from FAR stations
+		if (tracksItr->stationID() != 0 && tracksItr->stationID() != 3) 
+			continue;
+		++track_count[side];
+	}
+
+    // Load the necessary information
+	auto times = std::vector<std::vector<std::vector<float>>>(2, std::vector<std::vector<float>>(4, std::vector<float>(4, -10000)));
+	for (const xAOD::AFPToFHit* hitsItr : afpToFHitContainer)
+	{
+		const auto side = hitsItr->stationID() == 3;
+        const auto train = hitsItr->trainID();
+        const auto bar = hitsItr->barInTrainID();
+        const auto channel = 4 * train + bar;
+		const auto tof_time = hitsItr->time();
+		const auto TimePs=(tof_time)*1000;
+		//Cut on only 1 SiT track in the monitored station
+		if (track_count[side] != 1) continue;
+		// Ignore hits with an impossible origin
+		if (hitsItr->stationID() != 0 && hitsItr->stationID() != 3)
+			continue;
+		if (channel >= 16) continue;
+		if (channel_present[side][channel])
+			multihit[side] = true;
+		channel_present[side][channel] = true;
+		++train_count[side][train];
+
+		times[side][train][bar]=TimePs;
+
+	}
+
+	for (uint8_t side : {0, 1}) 
+	{
+		// Cut on only 1 SiT track in the monitored station
+		if (track_count[side] != 1) continue;
+		// Cut on maximum of 1 hit in each ToF channel
+		if (multihit[side]) continue;
+		//Cut on maximum 1 train per event
+		uint8_t multrain[2] = {};
+		for (uint8_t train; train < 4; ++train)
+			if (train_count[side][train]>1)
+				++multrain[side];
+		if (multrain[side]>1)
+			continue;
+		//fill histos
+		for (uint8_t train = 0; train < 4; ++train)
+			for (uint8_t bar1 = 0; bar1 < 4; ++bar1)
+				for (uint8_t bar2 = 0; bar2 < 4; bar2++)
+					if (bar2>bar1)
+					{
+						int comb = bar1*bar2+bar2-1;
+						if (comb==5) {comb=4;}
+						if (comb==8) {comb=5;}
+						int global_comb = train*6 + comb;
+						if (times[side][train][bar1]>-10000 && times[side][train][bar2]>-10000)
+						{
+							crossBarDeltaT[side] = (times[side][train][bar1] - times[side][train][bar2]);
+							fill(m_tools[m_GroupChanCombDeltaT.at(m_chanComb.at(global_comb))], crossBarDeltaT[side]);
+						}
+					}   
+	}
+
+    return StatusCode::SUCCESS;
+}
