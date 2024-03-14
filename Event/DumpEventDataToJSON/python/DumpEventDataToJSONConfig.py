@@ -28,11 +28,30 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
         kwargs.setdefault('TrackingGeometryTool', result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
     else:
         kwargs.setdefault('TrackingGeometryTool', '')
-        kwargs.setdefault('VectorTrackContainerKeys', [])
-        kwargs.setdefault('TrackStatesLocation', [])
-        kwargs.setdefault('TrackJacobiansLocation', [])
-        kwargs.setdefault('TrackMeasurementsLocation', [])
-        kwargs.setdefault('TrackParametersLocation', [])
+        kwargs.setdefault('TrackContainerKeys', [])
+
+    if 'StreamDAOD_PHYSLITE' in flags.Input.Collections:
+        # AnalysisJets and AnalysisLargeRJets are the standard jet containers
+        kwargs.setdefault('JetContainerKeys', ['AnalysisJets','AnalysisLargeRJets'])
+        # AnalysisMuons are the standard calibrated muon container
+        kwargs.setdefault('MuonContainerKeys', ['AnalysisMuons'])
+        # No clusters or cells in DAOD_PHYSLITE
+        kwargs.setdefault('CaloClusterContainerKeys', [])
+        kwargs.setdefault('CaloCellContainerKey', [])
+        # No real track collections in DAOD_PHYSLITE
+        kwargs.setdefault('TrackCollectionKeys', [])
+        kwargs.setdefault('TrackContainerKeys', [])
+        # InDetTrackParticles are heavily skimmed, so not useful output - keep only muons
+        kwargs.setdefault('TrackParticleContainerKeys', []) #['CombinedMuonTrackParticles'])
+        # No prep raw data in DAOD_PHYSLITE
+        kwargs.setdefault('MdtPrepRawDataKey', '')
+        kwargs.setdefault('RpcPrepRawDataKey', '')
+        kwargs.setdefault('TgcPrepRawDataKey', '')
+        kwargs.setdefault('PixelPrepRawDataKey', '')
+        kwargs.setdefault('SctPrepRawDataKey', '')
+        kwargs.setdefault('TrtPrepRawDataKey', '')
+        # These are set based on detector flags and can simply be disabled (no point)
+        kwargs.update( {'MMPrepRawDataKey':'', 'CscPrepRawDataKey':'', 'sTgcPrepRawDataKey':''} )
 
     dumpAlg = CompFactory.DumpEventDataToJsonAlg( **kwargs)
     result.addEventAlgo(dumpAlg)
@@ -46,7 +65,7 @@ if __name__ == "__main__":
     parser = flags.getArgumentParser()
     parser.add_argument("-o", "--output", dest="output", default='Event.json',
                         help="write JSON to FILE", metavar="FILE")
-    parser.add_argument("--prependCalib", help="Prepend a calibartion event with some labelled objects at specific eta/phi.",
+    parser.add_argument("--prependCalib", help="Prepend a calibration event with some labelled objects at specific eta/phi.",
                         action="store_true")
     args = parser.parse_args()
 
