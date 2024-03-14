@@ -26,6 +26,7 @@
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelDBManager/GMDBManager.h"
 #include "GeoModelWrite/WriteGeoModel.h"
+// #include <GeoModelHelpers/defineWorld.h>
 
 // C++ includes
 #include <vector>
@@ -105,6 +106,7 @@ StatusCode DumpGeo::initialize()
 
 
   if ( !(m_user_filterDetManagersList.empty()) ) {
+    
     // Get list of managers
     // We fill a set from the output vector, 
     // so we can use its built-in 'count' method later,
@@ -113,14 +115,19 @@ StatusCode DumpGeo::initialize()
     std::set<std::string> managersList{};
     {
        std::vector<std::string> blub = theExpt->getListOfManagers();
-       managerList.insert(blub.begin(), blub.end());
+       managersList.insert(blub.begin(), blub.end());
     }    
 
+    // Convert the list of det managers passed by the user into a set
+    std::set<std::string> user_managersList{};
+    {
+       user_managersList.insert(m_user_filterDetManagersList.begin(), m_user_filterDetManagersList.end());
+    }
 
     // safety check: 
     // check that all DetManagers requested by the user are in the list
     // If not, print an error message to warn the user and return
-    for (auto& userDet : m_user_filterDetManagersList) {
+    for (auto& userDet : user_managersList) {
       if ( !managersList.count(userDet)) {
         ATH_MSG_FATAL("This Detector Manager you requested to dump is not in the list of DetectorManagers for the geometry tag you are using: " << userDet);
         throw GaudiException("The Detector Manager you requested to dump is not in the list of DetectorManagers.", 
@@ -143,7 +150,8 @@ StatusCode DumpGeo::initialize()
           unsigned int nTreetops = manager->getNumTreeTops();
           ATH_MSG_INFO("\t" << mm << " - # TreeTops: " << nTreetops);
 
-          if ( nTreetops > 0 &&  isStringInVector(m_user_filterDetManagersList, detManName) ) {
+          // if ( nTreetops > 0) &&  isStringInVector(m_user_filterDetManagersList, detManName) ) {
+          if ( ( nTreetops > 0) &&  user_managersList.count(detManName) ) {
               
               for(unsigned int i=0; i < nTreetops; ++i) {
 
