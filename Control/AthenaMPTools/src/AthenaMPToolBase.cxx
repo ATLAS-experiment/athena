@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMPToolBase.h"
@@ -209,7 +209,7 @@ void AthenaMPToolBase::setRandString(const std::string& randStr)
 
 void AthenaMPToolBase::killChildren()
 {
-  for(auto child : m_processGroup->getChildren()) {
+  for(const AthenaInterprocess::Process& child : m_processGroup->getChildren()) {
     kill(child.getProcessID(),SIGKILL);
   }
 }
