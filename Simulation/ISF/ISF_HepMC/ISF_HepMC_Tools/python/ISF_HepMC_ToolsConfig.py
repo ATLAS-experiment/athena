@@ -191,7 +191,7 @@ def TruthStrategyGroupID_MC15Cfg(flags, name="ISF_MCTruthStrategyGroupID_MC15", 
     kwargs.setdefault("VertexTypes", [3, 14, 15, 4, 5, 6, 7, 2, 12, 13])
     kwargs.setdefault("VertexTypeRangeLow", 201)  # All kinds of decay processes
     kwargs.setdefault("VertexTypeRangeHigh", 298)  # ...
-    kwargs.setdefault("Regions", [1,2]) # Could import AtlasDetDescr::AtlasRegion enum as in TruthService CfgGetter methods here
+    kwargs.setdefault("Regions", [1,2]) # Could import AtlasDetDescr::AtlasRegion enum as in TruthService Cfg methods here
     result.setPrivateTools(CompFactory.ISF.GenericTruthStrategy(name, **kwargs))
     return result
 

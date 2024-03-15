@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFlatFromFile.h"
@@ -43,36 +43,51 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
   std::unique_ptr<CondAttrListCollection> coll= std::make_unique<CondAttrListCollection>(true);
   // we expect line per channel with Id, hash and value
   std::ifstream myfile(input);
-  unsigned long id;
-  unsigned hash;
   std::string line;
+  std::vector< std::vector<float> >  values;
+  for (unsigned gain=0;gain<nGain;++gain) {
+     std::vector<float> gval(m_hashMax);
+     for (unsigned hs=0;hs<m_hashMax;++hs) gval[hs]=1.0; // default
+     values.push_back(gval);
+  }   
+  unsigned id;
+  unsigned hash;
+  float value;
   while (std::getline(myfile, line)) {
-    for (unsigned gain=0;gain<nGain;++gain) {
-      auto attrList = std::make_unique<coral::AttributeList>(*spec);
-      (*attrList)["version"].setValue(0U);
-      coral::Blob& blob=(*attrList)[blobName].data<coral::Blob>();
-      blob.resize(m_hashMax*sizeof(float));
-      float* pblob=static_cast<float*>(blob.startingAddress());
-      for (unsigned hs=0;hs<m_hashMax;++hs) {
-        const HWIdentifier chid=m_onlineID->channel_Id(hs);
-        float value;
-        std::stringstream st(line);
-        st>>std::hex>>id>>std::dec>>hash>>value;
-        if (value < 0) {
-          errIfConnected(chid,gain,blobName);
-          value=1.0; //Default vaue is 1.0, since these are multiplicative constants
-          ++nDefault;
-        } 
-        pblob[hs]=value;
-        ++nChannels;
+      std::stringstream st(line);
+      if(m_isSC) {
+        st>>std::hex>>id>>std::dec>>value;
+        hash=0;
+      } else {
+         st>>std::hex>>id>>std::dec>>hash>>value;
       }
-      unsigned coolChan=gain;
-      //Special case: Store single-gain constant in channel 1 
-      //To avoid AttrList vs AttrListCollection confusion in Athena DB infrastructure
-      if (nGain==1) coolChan=1;
- 
-      coll->add(coolChan,*attrList.release());
+      const HWIdentifier chid(id);
+      if (value < 0) {
+        errIfConnected(chid,hash,blobName);
+        value=1.0; //Default vaue is 1.0, since these are multiplicative constants
+        ++nDefault;
+      } 
+      if (hash >= nGain) {
+        errIfConnected(chid,hash,blobName," Wrong Gain !!!");
+        hash=0; 
+      }
+
+      values[hash][m_onlineID->channel_Hash(chid)]=value;
+  } // over the input file
+
+  for (unsigned gain=0;gain<nGain;++gain) {
+    auto attrList = std::make_unique<coral::AttributeList>(*spec);
+    (*attrList)["version"].setValue(0U);
+    coral::Blob& blob=(*attrList)[blobName].data<coral::Blob>();
+    blob.resize(m_hashMax*sizeof(float));
+    float* pblob=static_cast<float*>(blob.startingAddress());
+    for (unsigned hs=0;hs<m_hashMax;++hs) {
+      pblob[hs]=values[gain][hs];
+      ++nChannels;
     }
+    unsigned coolChan=gain;
+ 
+    coll->add(coolChan,*attrList.release());
   }
 
   ATH_MSG_INFO( "Converted " << blobName << " to inline storage. Total number of channels=" << nChannels );
@@ -245,6 +260,24 @@ StatusCode LArFlatFromFile::stop() {
     }
   }//end have m_OFCInput
 
+  //SIngle:
+  if (m_SingleInput.size()) {
+    std::ifstream myfile(m_SingleInput);
+    // new lines will be skipped unless we stop it from happening:    
+    myfile.unsetf(std::ios_base::skipws);
+
+    // count the newlines with an algorithm specialized for counting:
+    unsigned line_count = std::count( std::istream_iterator<char>(myfile),
+                                      std::istream_iterator<char>(), '\n');
+    myfile.close();
+    if (m_ngain*m_hashMax != line_count) {
+	ATH_MSG_ERROR( "Failed to check input file "<<m_SingleInput );
+        ATH_MSG_ERROR( "Line count: "<<line_count<<" expected: "<<m_ngain*m_hashMax<<" "<<m_isSC);
+	return StatusCode::FAILURE;
+    } else {
+         singleFloatFlat(m_BlobName.value().c_str(),m_SingleInput,m_Folder,m_ngain);
+    }
+  }//end have m_SingleInput
 
   return StatusCode::SUCCESS; 
 }

@@ -118,7 +118,7 @@ def LArRampCfg(flags):
         theLArRampPatcher.ContainerKey="LArRamp"
         theLArRampPatcher.BadChanKey=bcKey
         theLArRampPatcher.PatchMethod="PhiAverage"
-        theLArRampPatcher.SuperCell=flags.LArCalib.isSC
+        theLArRampPatcher.SuperCells=flags.LArCalib.isSC
    
         theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
         theLArRampPatcher.UseCorrChannels=False
@@ -197,6 +197,7 @@ def LArRampCfg(flags):
                                                          AddFEBTempInfo = False,
                                                          RealGeometry = True,
                                                          OffId = True,
+                                                         AddCalib = True,
                                                          RawRamp = True,
                                                          SaveAllSamples =  True,
                                                          BadChanKey = bcKey,

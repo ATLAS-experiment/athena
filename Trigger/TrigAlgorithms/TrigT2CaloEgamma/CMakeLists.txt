@@ -8,8 +8,9 @@ atlas_add_library  ( TrigT2CaloEgammaLib
 		     src/*.cxx
                      src/helpers/*.cxx
 		     PUBLIC_HEADERS TrigT2CaloEgamma
-		     LINK_LIBRARIES CaloEvent CaloGeoHelpers SGTools xAODTrigCalo xAODTrigRinger GaudiKernel TrigSteeringEvent TrigT2CaloCommonLib CaloDetDescrLib TrigT2CaloCalibrationLib TrigTimeAlgsLib
-		     PRIVATE_LINK_LIBRARIES CaloIdentifier AthLinks IRegionSelector TrigT1Interfaces )
+		     LINK_LIBRARIES CaloEvent CaloGeoHelpers SGTools xAODTrigCalo xAODTrigRinger GaudiKernel TrigSteeringEvent TrigT2CaloCommonLib CaloDetDescrLib TrigT2CaloCalibrationLib TrigTimeAlgsLib egammaMVACalibLib 
+		     PRIVATE_LINK_LIBRARIES CaloIdentifier AthLinks IRegionSelector TrigT1Interfaces 
+			 )
 atlas_add_component( TrigT2CaloEgamma
                      src/components/*.cxx
                      LINK_LIBRARIES TrigT2CaloEgammaLib )

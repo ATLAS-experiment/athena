@@ -87,7 +87,7 @@ else:
       hookDebugger()
 
  ## setup multi-process running and debugging
-   if not opts.minimal and opts.nprocs and (opts.nprocs >= 1 or opts.nprocs==-1):
+   if not opts.fromdb and opts.nprocs and (opts.nprocs >= 1 or opts.nprocs==-1):
       from AthenaCommon.AppMgr import ServiceMgr as svcMgr
       import AthenaMP.PyComps as _amppy
       svcMgr += _amppy.MpEvtLoopMgr(NWorkers=opts.nprocs)

@@ -28,6 +28,7 @@
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include "TrigFastCalibWithRings.h"
 
 #include <string>
 
@@ -50,6 +51,13 @@ class T2CaloEgammaReFastAlgo : public AthReentrantAlgorithm {
 
     Gaudi::Property<bool> m_doForward{this, "DoForward", false,
                                        "Do Forward clusters"};
+
+    Gaudi::Property<bool> m_doCalibWithRings{this, "DoCalibWithRings", false,
+                                       "FastCalo Et Calibration using Rings"};
+
+    Gaudi::Property<bool> m_useRings{this, "UseRings", false,
+                                       "Rings are Used in FastCaloFex"};
+
   
     Gaudi::Property<float> m_l1eta{this, "L1ForceEta", -10.0, "Forced LVL1 eta"};
     Gaudi::Property<float> m_l1phi{this, "L1ForcePhi", -10.0, "Forced LVL1 phi"};
@@ -76,9 +84,12 @@ class T2CaloEgammaReFastAlgo : public AthReentrantAlgorithm {
   
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{
       this, "RoIs", "OutputRoIs", "input RoIs"};
+    
     SG::WriteHandleKey<xAOD::TrigEMClusterContainer> m_clusterContainerKey{
         this, "ClustersName", "CaloClusters", "Calo cluster container"};
     ToolHandle< GenericMonitoringTool > m_monTool { this, "MonTool", "", "Monitoring tool" };
+    ToolHandle< TrigFastCalibWithRings > m_calibWRingsTool { this, "CalibWRingsTool", "", "FastCalo Calib with Rings tool" };
+
 };
 
 #endif

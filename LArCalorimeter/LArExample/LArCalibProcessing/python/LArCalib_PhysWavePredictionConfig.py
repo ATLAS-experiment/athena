@@ -11,6 +11,8 @@ def LArPhysWavePredictionCfg(flags):
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
+    if flags.LArCalib.isSC:
+       FolderTagResolver._defaultSuffix="-RUN2-UPD3-00"
     rs=FolderTagResolver()
     CaliWaveTag=rs.getFolderTag(flags.LArCalib.CaliWave.Folder)
     DetCellParamsTag=rs.getFolderTag(flags.LArCalib.DetCellParams.Folder)
@@ -43,13 +45,19 @@ def LArPhysWavePredictionCfg(flags):
     result.merge(addFolders(flags,flags.LArCalib.CaliWave.Folder,detDb=flags.LArCalib.Input.Database, tag=CaliWaveTag, modifiers=chanSelStr(flags)))
     if flags.LArCalib.isSC:
        result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/Tdrift/Computed",detDb="LAR_OFL",tag="LARElecCalibOflSCTdriftComputed-000"))
+       result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/PhysWaves/HECIdeal",detDb="LAR_OFL",tag="LARElecCalibOflSCPhysWavesHECIdeal-calib-02"))
+       result.merge(addFolders(flags,flags.LArCalib.FCALPhysWave.Folder,detDb="LAR_OFL",tag="LARElecCalibOflPhysWavesFCALFromTB-calib-01",modifiers="<key>FCALFromTB</key>"))
     else:   
        result.merge(addFolders(flags,"/LAR/ElecCalibOfl/Tdrift/Computed",detDb="LAR_OFL",tag="LARElecCalibOflTdriftComputed-calib-03"))
     
 
     if isHEC:
-        result.merge(addFolders(flags,"/LAR/ElecCalibOfl/PhysWaves/HECIdeal",detDb="LAR_OFL",db="COMP200",tag="LARElecCalibOflPhysWavesHECIdeal-calib-02"))
-        result.merge(addFolders(flags,flags.LArCalib.CaliPulseParams.Folder,detDb="LAR_OFL", tag=CaliPulseParamsTag))
+        result.merge(addFolders(flags,"/LAR/ElecCalibOfl/PhysWaves/HECIdeal",detDb="LAR_OFL",tag="LARElecCalibOflPhysWavesHECIdeal-calib-02"))
+        if flags.LArCalib.isSC:
+           result.merge(addFolders(flags,flags.LArCalib.CaliPulseParams.Folder,detDb=flags.LArCalib.Input.Database, tag=CaliPulseParamsTag))
+           result.merge(addFolders(flags,flags.LArCalib.DetCellParams.Folder,detDb=flags.LArCalib.Input.Database, tag=DetCellParamsTag))
+        else:    
+           result.merge(addFolders(flags,flags.LArCalib.CaliPulseParams.Folder,detDb="LAR_OFL", tag=CaliPulseParamsTag))
     else:
         result.merge(addFolders(flags,flags.LArCalib.CaliPulseParams.Folder,detDb=flags.LArCalib.Input.Database, tag=CaliPulseParamsTag))
         result.merge(addFolders(flags,flags.LArCalib.DetCellParams.Folder,detDb=flags.LArCalib.Input.Database, tag=DetCellParamsTag))
@@ -78,16 +86,17 @@ def LArPhysWavePredictionCfg(flags):
 
     result.addEventAlgo(LArPhysWavePredictor)
     
-    if (flags.LArCalib.Input.SubDet == "HEC"):
-        LArPhysWaveHECTool=CompFactory.LArPhysWaveHECTool()
+    if (flags.LArCalib.isSC or flags.LArCalib.Input.SubDet == "HEC"):
+        LArPhysWaveHECTool=CompFactory.LArPhysWaveHECTool("LArPhysWaveHECTool")
         LArPhysWaveHECTool.NormalizeCali     = False  
         LArPhysWaveHECTool.TimeOriginShift   = False
         LArPhysWaveHECTool.SubtractBaseline  = False
+        LArPhysWaveHECTool.isSC              = flags.LArCalib.isSC
         result.addPublicTool(LArPhysWaveHECTool)
 
 
-    else: #not HEC but EM:
-        LArPhysWaveTool=CompFactory.LArPhysWaveTool()
+    if flags.LArCalib.isSC or flags.LArCalib.Input.SubDet != "HEC":
+        LArPhysWaveTool=CompFactory.LArPhysWaveTool("LArPhysWaveTool")
         LArPhysWaveTool.NormalizeCali     = False # this is taken care by LArPhysWavePredictor
         LArPhysWaveTool.TimeOriginShift   = False
         LArPhysWaveTool.SubtractBaseline  = False
@@ -103,6 +112,7 @@ def LArPhysWavePredictionCfg(flags):
       LArPhysWaves2Ntuple.AddFEBTempInfo   = False  
       LArPhysWaves2Ntuple.KeyList      = [ "LArPhysWave"  ]
       LArPhysWaves2Ntuple.isSC = flags.LArCalib.isSC
+      LArPhysWaves2Ntuple.AddCalib = True
       LArPhysWaves2Ntuple.BadChanKey = bcKey
       result.addEventAlgo(LArPhysWaves2Ntuple)
 

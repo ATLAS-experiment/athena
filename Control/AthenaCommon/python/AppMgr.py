@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/share/AppMgr.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -402,10 +402,8 @@ class AthAppMgr( AppMgr ):
             selfOptions = self.bootProps()
             for k,v in selfOptions.items(): setattr(self, k, v)
          svcMgr = self.serviceMgr()
-       # the following code is stopped when minimal to prevent the loading of
-       # ConfigurableDb when no configuration is done; FIXME: minimal is set
-       # to go when all code has been cleaned up
-         if self._opts and not self._opts.minimal:
+       # prevent the loading of ConfigurableDb when no configuration is done
+         if self._opts and not self._opts.fromdb:
             from AthenaCommon.ConfigurableDb import getConfigurable
             if not hasattr(svcMgr, 'JobOptionsSvc'):
                svcMgr += getConfigurable(self.JobOptionsSvcType)("JobOptionsSvc")
@@ -484,7 +482,6 @@ class AthAppMgr( AppMgr ):
           # fire ourselves up anew
             Logging.log.info( 'restarting athena.py from %s ... ', fn )
             sys.argv.insert( 1, fn )
-            sys.argv.append( '--minimal' )
             os.execvp( sys.argv[0], sys.argv )
 
          else:

@@ -31,6 +31,7 @@
 #include <TString.h>
 #include <TStyle.h>
 #include <TText.h>
+#include <TImageDump.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/lexical_cast.hpp>
@@ -1325,10 +1326,14 @@ namespace dqutils
     return nSaved;
   }
 
-  void getImageBuffer(TImage* img, TCanvas* myC, char** x, int* y)
+  void getImageBuffer ATLAS_NOT_THREAD_SAFE (TImage** img, TCanvas* myC, char** x, int* y)
   {
-    img->FromPad(myC);
-    img->GetImageBuffer(x, y, TImage::kPng);
+    gVirtualPS->Open(myC->GetName(), 114);
+    myC->Paint();
+    (*img) = dynamic_cast<TImageDump*>(gVirtualPS)->GetImage();
+    if (*img) {
+      (*img)->GetImageBuffer(x, y, TImage::kPng);
+    }
   }
 
   bool HanOutputFile::saveHistogramToFile(std::string nameHis, std::string location, TDirectory* groupDir,
@@ -1399,12 +1404,13 @@ namespace dqutils
     gStyle->SetStatW(0.2);
     gStyle->SetStatH(0.1);
 
-    char* x;
+    char* x = nullptr;
     int y;
     std::string json;
-    TImage* img = TImage::Create();
+    TImage* img = nullptr;
 
     gROOT->SetBatch();
+    TImageDump tid;
     std::string pathname(groupDir->GetPath());
     std::string display = "";
     bool WasCollectionReference = false;
@@ -1831,7 +1837,7 @@ namespace dqutils
         tt.SetNDC();
         tt.SetTextSize(0.03);
         tt.DrawLatex(0.02, 0.01, pathName.c_str());
-        convertToGraphics(cnvsType, myC.get(), json, img, &x, &y);
+        convertToGraphics(cnvsType, myC.get(), json, &img, &x, &y);
       }
       else if (h != 0)
       {
@@ -2118,7 +2124,7 @@ namespace dqutils
         tt.SetTextSize(0.03);
         tt.DrawLatex(0.02, 0.01, pathName.c_str());
 
-        convertToGraphics(cnvsType, myC.get(), json, img, &x, &y);
+        convertToGraphics(cnvsType, myC.get(), json, &img, &x, &y);
       }
       // delete myC;
       gStyle->Reset();
@@ -2149,7 +2155,7 @@ namespace dqutils
       tt.DrawLatex(0.02, 0.01, pathName.c_str());
       // myC->SaveAs( name.c_str() );
 
-      convertToGraphics(cnvsType, myC.get(), json, img, &x, &y);
+      convertToGraphics(cnvsType, myC.get(), json, &img, &x, &y);
 
       gStyle->Reset();
     }
@@ -2277,7 +2283,7 @@ namespace dqutils
       tt.SetNDC();
       tt.SetTextSize(0.03);
       tt.DrawLatex(0.02, 0.01, pathName.c_str());
-      convertToGraphics(cnvsType, myC.get(), json, img, &x, &y);
+      convertToGraphics(cnvsType, myC.get(), json, &img, &x, &y);
       gStyle->Reset();
     }
     std::string rv;
@@ -2287,7 +2293,7 @@ namespace dqutils
     };
     std::pair<std::string, std::string> rvPair{ rv, json };
 
-    delete img;
+    free(x);
     delete hobj;
     delete hRef;
     delete legend;
@@ -3715,7 +3721,7 @@ namespace dqutils
     return true;
   }
 
-  void HanOutputFile::convertToGraphics(int cnvsType, TCanvas* myC, std::string& json, TImage* img, char** x, int* y)
+  void HanOutputFile::convertToGraphics(int cnvsType, TCanvas* myC, std::string& json, TImage** img, char** x, int* y)
   {
     if (cnvsType & GENERATE_PNG)
     {

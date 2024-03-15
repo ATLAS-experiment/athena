@@ -77,6 +77,7 @@ def LArPedestalAutoCorrCfg(flags):
                                                             AddFEBTempInfo = False, 
                                                             RealGeometry = True,
                                                             OffId = True,
+                                                            AddCalib = True,
                                                             isSC = flags.LArCalib.isSC,
                                                             BadChanKey = bcKey
                                                         )
@@ -85,7 +86,8 @@ def LArPedestalAutoCorrCfg(flags):
         result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey = "LArAutoCorr",
                                                            AddFEBTempInfo  = False, isSC = flags.LArCalib.isSC,
                                                            BadChanKey = bcKey,
-                                                           OffId=True
+                                                           OffId=True,
+                                                           AddCalib = True
                                                        )
                         )
 

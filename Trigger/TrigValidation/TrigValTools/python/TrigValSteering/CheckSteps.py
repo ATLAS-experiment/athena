@@ -296,16 +296,15 @@ class RegTestStep(RefComparisonStep):
     def __init__(self, name='RegTest'):
         super(RegTestStep, self).__init__(name)
         self.regex = 'REGTEST'
-        self.executable = 'regtest.pl'
+        self.executable = 'diff'
         self.input_base_name = 'athena'
-        self.args += ' --linematch ".*"'
         self.auto_report_result = True
         self.output_stream = Step.OutputStream.FILE_AND_STDOUT
 
     def configure(self, test):
         self.input_file = self.input_base_name+'.regtest'
         RefComparisonStep.configure(self, test)
-        self.args += ' --inputfile {} --reffile {}'.format(self.input_file, self.reference)
+        self.args += ' -U 2 -b {} {}'.format(self.input_file, self.reference)
         Step.configure(self, test)
 
     def prepare_inputs(self):

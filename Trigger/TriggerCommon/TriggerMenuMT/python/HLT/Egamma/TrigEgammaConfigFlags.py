@@ -34,6 +34,9 @@ def createTrigEgammaConfigFlags():
     flags.addFlag('Trigger.egamma.doNoiseThrRings', False)
     flags.addFlag('Trigger.egamma.sigmaNoiseFactor',2.0)
 
+    # Fastcalo bdt calibration 
+    flags.addFlag('Trigger.egamma.fastCaloETCalibration',False)
+    flags.addFlag('Trigger.egamma.fastCaloETCalibrationVersion','egammaFastCaloCalib/online/v0')
     return flags
 
 
@@ -42,6 +45,5 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
-
     flags.lock()
     flags.dump("Egamma|Trigger")

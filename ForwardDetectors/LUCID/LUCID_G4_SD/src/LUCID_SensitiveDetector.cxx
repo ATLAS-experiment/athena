@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,6 +11,8 @@
 
 // Athena headers
 #include "LUCID_GeoModel/LUCID_Constants.h"
+#include "MCTruth/TrackHelper.h"
+
 
 // Geant4 headers
 #include "G4Step.hh"
@@ -63,12 +65,13 @@ bool LUCID_SensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
       G4cout << "LUCID_SensitiveDetector::ProcessHits(): It is from a Cerenkov process "  << G4endl;
     }
 
+  TrackHelper trHelp(aTrack);
   double energy = aTrack->GetKineticEnergy()/CLHEP::eV;
   double lambda = m_hit->GetWaveLength(energy);
 
   m_HitColl->Emplace(m_hit->GetTubNumber(aStep),
-                     aTrack->GetTrackID(),
                      aTrack->GetDefinition()->GetPDGEncoding(),
+                     trHelp.GetParticleLink(),
                      LUCID_HitHelper::GetVolNumber    (aTrack->GetLogicalVolumeAtVertex()->GetName()),
                      m_hit->GetPreStepPoint (aStep).x(),
                      m_hit->GetPreStepPoint (aStep).y(),

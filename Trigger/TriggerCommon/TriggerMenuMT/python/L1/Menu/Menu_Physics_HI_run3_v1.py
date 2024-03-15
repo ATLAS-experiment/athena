@@ -57,10 +57,12 @@ def defineMenu():
         # combined mu - jet
         'L1_MU3V_J12',
         'L1_MU3V_J20',
-        'L1_MU3V_J30',
+        'L1_MU3V_J30',        
         'L1_MU3V_jJ40',
+        'L1_MU3V_jJ50',
+        'L1_MU3V_jJ60',        
 
-        'L1_TAU8', 'L1_TAU12IM', 'L1_TAU20IM', 'L1_eTAU12_EMPTY', 'L1_eTAU80', 
+        'L1_eTAU12_EMPTY', 'L1_eTAU80', 
 
         # single jet
         'L1_J12','L1_J15','L1_J20','L1_J25', 'L1_J30', 'L1_J40', 'L1_J50' ,'L1_J75','L1_J85', 'L1_J100',
@@ -80,17 +82,17 @@ def defineMenu():
         'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
 
         # gJ - ATR-28029
-        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200","L1_gXEJWOJ100",
+        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200",
 
         # XE
         'L1_XE50', 'L1_XE55', 
-        'L1_XE30', 'L1_XE300',
+        'L1_XE300',
        
         'L1_J40_XE50', 'L1_J40_XE60',
 
         #ATR-28679
-        'L1_jXE60', 'L1_jXE110', 'L1_jXE120', 
-        'L1_gXEJWOJ60', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
+        'L1_jXE100', 'L1_jXE110', 'L1_jXE120', 
+        'L1_gXEJWOJ100', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
         'L1_jJ80_jXE120', 'L1_jJ80_jXE100',
  
          # calo

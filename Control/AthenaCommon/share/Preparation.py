@@ -23,8 +23,7 @@ import AthenaCommon.Constants     as Lvl
 import AthenaCommon.SystemOfUnits as Units
 
 ### Athena configuration -----------------------------------------------------
-if not opts.minimal:
-   from AthenaCommon import CfgMgr
+from AthenaCommon import CfgMgr
 from AthenaCommon.AppMgr import theApp
 from AthenaCommon.Logging import log
 
@@ -88,12 +87,6 @@ del min_cppyy_vmem_growth, grow_vmem, vmem_mb
 ## we have to put it there as some jobOptions might steal the event loop...
 ## ie: do theApp.initialize();theApp.nextEvent(...) directly in the jobO.
 
-# this code is to be removed; for now flag it with 'minimal' to test the effects
-# of its removal
-if not opts.minimal:
-   from AthenaPython import PyAthena
-# -- end of minimal
-
 ## user level configuration
 from AthenaCommon.Include import IncludeError
 try:
@@ -115,14 +108,6 @@ if opts.interactive:
    atexit.register( theApp.exit )
 
    del atexit
-
-### pre-import some general job-flags so they can be used in CLI
-
-# this code is to be removed; for now flag it with 'minimal' to test the effects
-# of its removal
-if not opts.minimal:
-   from AthenaCommon.AthenaCommonFlags import jobproperties as jp
-   from AthenaCommon.GlobalFlags import jobproperties as jp
 
 if opts.command:
    _msg.info( 'executing CLI (-c) command: "%s"' % opts.command )

@@ -18,14 +18,14 @@ def LArPileUpAutoCorrCfg(flags):
        # for the SC we need uA2MeV also from MC, because the one used for data are weighted with E->ET conversion
        result.merge(LArElecCalibDBMCSCCfg(flags,["fSamplSC","ShapeSC","MinBiasSC","uA2MeVSC"]))
     else:
-       result.merge(addFolders(flags,"/LAR/ElecCalibMC/Shape",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCShapeLArPileupShape-RUN2-2018",className="LArShape32MC"))
+       result.merge(addFolders(flags,"/LAR/ElecCalibMC/Shape",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCShapeLArPileupShape-RUN2-2018",className="LArShape32MC",modifiers="<key>LArShapeMC</key>"))
        result.merge(addFolders(flags,"/LAR/ElecCalibMC/fSampl",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCfSampl-G4101-20371-FTFP_BERT_BIRK_v2",className="LArfSamplMC"))
        result.merge(addFolders(flags,"/LAR/ElecCalibMC/MinBias",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCMinBias-mc16-Epos-A3-s3687",className="LArMinBiasMC"))
 
        result.addCondAlgo(CompFactory.LArMCSymCondAlg())
 
        LArShapeSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArShape32MC, LArShape32Sym>")
-       result.addCondAlgo(LArShapeSymAlg(ReadKey="LArShape",WriteKey="LArShapeSym"))
+       result.addCondAlgo(LArShapeSymAlg(ReadKey="LArShapeMC",WriteKey="LArShapeSym"))
 
        LArfSamplSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArfSamplMC, LArfSamplSym>")
        result.addCondAlgo(LArfSamplSymAlg(ReadKey="LArfSampl", WriteKey="LArfSamplSym"))
@@ -35,6 +35,8 @@ def LArPileUpAutoCorrCfg(flags):
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
+    if flags.LArCalib.isSC:
+       FolderTagResolver._defaultSuffix="-UPD3-00"
     rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
     # FIXME these tags has to be re-enabled in 2024 also for main readout:
@@ -118,7 +120,7 @@ def LArPileUpAutoCorrCfg(flags):
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
         result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey="LArPhysAutoCorr",OffId=True,isSC=flags.LArCalib.isSC,
-                                                           BadChanKey=bcKey))
+                                                           BadChanKey=bcKey, AddCalib=True))
         import os
         if os.path.exists(rootfile):
             os.remove(rootfile)

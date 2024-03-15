@@ -70,10 +70,11 @@ class ATLAS_NOT_THREAD_SAFE LArPhysWaveHECTool : public AthAlgTool
   //LArPhysWave m_gPhys;
   const LArPhysWave* m_gIdealPhys = nullptr;	
   
-  const LArOnlineID* m_onlineHelper = nullptr;
+  const LArOnlineID_Base* m_onlineHelper = nullptr;
   //  bool m_verb;
   //int m_region, m_layer ;
   bool m_normalizeCali , m_timeOriginShift , m_subtractBaseline;
+  bool m_isSC;
 
   double   m_TcalMin, m_TcalMax, m_TcalAverage, 
            m_FstepMin, m_FstepMax, m_FstepAverage;

@@ -392,9 +392,6 @@ def generateSubDetectorList(flags):
         toolFwdRegion = result.popToolsAndMerge(ForwardRegionEnvelopeCfg(flags))
         SubDetectorList += [ toolFwdRegion ]
 
-    #if DetFlags.Muon_on(): #HACK
-    #    SubDetectorList += ['MUONQ02'] #FIXME rename to MUON when safe #HACK
-    #SubDetectorList += generateFwdSubDetectorList() #FIXME Fwd Detectors not supported yet.
     result.setPrivateTools(SubDetectorList)
     return result
 
