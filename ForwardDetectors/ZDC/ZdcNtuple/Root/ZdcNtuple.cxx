@@ -98,6 +98,7 @@ StatusCode ZdcNtuple :: initialize ()
 
   ANA_CHECK(m_zdcModuleContainerName.initialize());
   ANA_CHECK(m_zdcSumContainerName.initialize());
+  ATH_CHECK(m_mcEventCollectionName.initialize());
 
   if (enableOutputTree)
   {
@@ -171,6 +172,31 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
     m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
     
+    if(m_isMC){
+      //Modules
+      m_outputTree->Branch("zdc_ZdcModuleTruthTotal",&t_ZdcModuleTruthTotal,"zdc_ZdcModuleTruthTotal[2][7]/F");
+      m_outputTree->Branch("zdc_ZdcModuleTruthInivsible",&t_ZdcModuleTruthInvis,"zdc_ZdcModuleTruthInvisible[2][7]/F");
+      m_outputTree->Branch("zdc_ZdcModuleTruthEM",&t_ZdcModuleTruthEM,"zdc_ZdcModuleTruthEM[2][7]/F");
+      m_outputTree->Branch("zdc_ZdcModuleTruthNonEM",&t_ZdcModuleTruthNonEM,"zdc_ZdcModuleTruthNonEM[2][7]/F");
+      m_outputTree->Branch("zdc_ZdModulecTruthEscaped",&t_ZdcModuleTruthEscaped,"zdc_ZdcModuleTruthEscaped[2][7]/F");
+
+      //Sums
+      m_outputTree->Branch("zdc_ZdcTruthTotal",&t_ZdcTruthTotal,"zdc_ZdcTruthTotal[2]/F");
+      m_outputTree->Branch("zdc_ZdcTruthInvisible",&t_ZdcTruthInvis, "zdc_ZdcTruthInvisible[2]/F");
+      m_outputTree->Branch("zdc_ZdcTruthEM",&t_ZdcTruthEM,"zdc_ZdcTruthEM[2]/F");
+      m_outputTree->Branch("zdc_ZdcTruthNonEM",&t_ZdcTruthNonEM,"zdc_ZdcTruthNonEM[2]/F");
+      m_outputTree->Branch("zdc_ZdcTruthEscaped",&t_ZdcTruthEscaped,"zdc_ZdcTruthEscaped[2]/F");
+
+      //Event gen particles
+      m_outputTree->Branch("zdc_ZdcTruthParticlePosx",&t_ZdcTruthParticlePosx);
+      m_outputTree->Branch("zdc_ZdcTruthParticlePosy",&t_ZdcTruthParticlePosy);
+      m_outputTree->Branch("zdc_ZdcTruthParticlePosz",&t_ZdcTruthParticlePosz);
+      m_outputTree->Branch("zdc_ZdcTruthParticleTime",&t_ZdcTruthParticleTime);
+      m_outputTree->Branch("zdc_ZdcTruthParticlePx",&t_ZdcTruthParticlePx);
+      m_outputTree->Branch("zdc_ZdcTruthParticlePy",&t_ZdcTruthParticlePy);
+      m_outputTree->Branch("zdc_ZdcTruthParticlePz",&t_ZdcTruthParticlePz);
+      m_outputTree->Branch("zdc_ZdcTruthParticleEnergy",&t_ZdcTruthParticleEnergy);
+    }
     if (enableRPD)
     {
       m_outputTree->Branch("zdc_RpdChannelBaseline",&t_RpdChannelBaseline,"zdc_RpdChannelBaseline[2][16]/F");
@@ -182,8 +208,8 @@ StatusCode ZdcNtuple :: initialize ()
       m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitMSE",&t_RpdChannelPileupStretchedExpFitMSE,"zdc_RpdChannelPileupStretchedExpFitMSE[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelAmplitude",&t_RpdChannelAmplitude,"zdc_RpdChannelAmplitude[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelAmplitudeCalib",&t_RpdChannelAmplitudeCalib,"zdc_RpdChannelAmplitudeCalib[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelMaxAdc",&t_RpdChannelMaxAdc,"zdc_RpdChannelMaxAdc[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelMaxAdcCalib",&t_RpdChannelMaxAdcCalib,"zdc_RpdChannelMaxAdcCalib[2][16]/F");
+      m_outputTree->Branch("zdc_RpdChannelMaxADC",&t_RpdChannelMaxADC,"zdc_RpdChannelMaxADC[2][16]/F");
+      m_outputTree->Branch("zdc_RpdChannelMaxADCCalib",&t_RpdChannelMaxADCCalib,"zdc_RpdChannelMaxADCCalib[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelMaxSample",&t_RpdChannelMaxSample,"zdc_RpdChannelMaxSample[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelStatus",&t_RpdChannelStatus,"zdc_RpdChannelStatus[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelPileupFrac",&t_RpdChannelPileupFrac,"zdc_RpdChannelPileupFrac[2][16]/F");
@@ -367,6 +393,17 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("enableClusters = " << enableClusters);
   ANA_MSG_INFO("trackLimit = " << trackLimit);
   ANA_MSG_INFO("trackLimitReject = " << trackLimitReject);
+  ANA_MSG_INFO("isMC = " << m_isMC);
+  ANA_MSG_INFO("useGRL = " <<  useGRL);
+  ANA_MSG_INFO("grlFilename = " <<  grlFilename);
+  ANA_MSG_INFO("slimmed = " <<  slimmed);
+  ANA_MSG_INFO("zdcOnly = " << zdcOnly);
+  ANA_MSG_INFO("flipDelay = " <<  flipDelay);
+  ANA_MSG_INFO("nsamplesZdc = " <<  nsamplesZdc);
+  ANA_MSG_INFO("lhcf2022 = " << lhcf2022);
+  ANA_MSG_INFO("lhcf2022afp = " << lhcf2022afp);
+  ANA_MSG_INFO("lhcf2022zdc = " << lhcf2022zdc);
+  ANA_MSG_INFO("doZdcCalib = " << doZdcCalib);
 
   ANA_MSG_DEBUG("initialize: Initialize!");
 
@@ -488,20 +525,17 @@ StatusCode ZdcNtuple :: execute ()
     passTrigger = processTriggerDecision();
   }
 
-  if (!m_isMC)
-  {
-    if (reprocZdc)
-      {
-	ANA_MSG_INFO ("Reprocessing ZDC in ZdcNtuple");
-	ANA_CHECK(m_zdcAnalysisTool->reprocessZdc());
-      }
-    else
-      {
-	ANA_MSG_INFO ("No ZDC reprocessing");
-      }
-    processZdcNtupleFromModules(); // same model in both cases -- processZdcNtuple() goes straight to the anlaysis tool, which is good for debugging
+  if (reprocZdc){
+    ANA_MSG_INFO ("Reprocessing ZDC in ZdcNtuple");
+    ANA_CHECK(m_zdcAnalysisTool->reprocessZdc());
+  }else{
+    ANA_MSG_INFO ("No ZDC reprocessing");
+  }
 
- 
+  processZdcNtupleFromModules(); // same model in both cases -- processZdcNtuple() goes straight to the anlaysis tool, which is good for debugging
+
+  if(m_isMC){
+    processMCEventCollection();
   }
 
   if (!(zdcCalib || zdcLaser || zdcOnly))
@@ -542,11 +576,6 @@ StatusCode ZdcNtuple :: execute ()
     }
   }
 
-  if (m_isMC)
-  {
-    ANA_CHECK(evtStore()->retrieve( m_truthParticleContainer, "TruthParticles"));
-  }
-
   // if trigger enabled, only write out events which pass one of them, unless using MC
 
   if (enableTrigger && !passTrigger && !m_isMC && writeOnlyTriggers) return StatusCode::SUCCESS;
@@ -568,10 +597,23 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
   ANA_MSG_DEBUG ("copying already processed info!");
 
+  //Reset the truth separately since it has a different range
+  for(int iside : {0,1}){
+    for(int imod = 0; imod < 7; ++imod){
+      t_ZdcModuleTruthTotal[iside][imod] = 0; 
+      t_ZdcModuleTruthInvis[iside][imod] = 0; 
+      t_ZdcModuleTruthEM[iside][imod] = 0; 
+      t_ZdcModuleTruthNonEM[iside][imod] = 0; 
+      t_ZdcModuleTruthEscaped[iside][imod] = 0;
+    }
+  }
+
   for (size_t iside = 0; iside < 2; iside++)
   {
     t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
-    t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0;
+    t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0; t_ZdcTruthTotal[iside] = 0;
+    t_ZdcTruthInvis[iside] = 0; t_ZdcTruthEM[iside] = 0; t_ZdcTruthNonEM[iside] = 0;
+    t_ZdcTruthEscaped[iside] = 0;
     for (int imod = 0; imod < 4; imod++)
     {
       t_ZdcModuleAmp[iside][imod] = 0; t_ZdcModuleTime[iside][imod] = 0; t_ZdcModuleStatus[iside][imod] = 0;
@@ -618,8 +660,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    t_RpdChannelPileupStretchedExpFitMSE[iside][ch] = 0;
 	    t_RpdChannelAmplitude[iside][ch] = 0;
 	    t_RpdChannelAmplitudeCalib[iside][ch] = 0;
-	    t_RpdChannelMaxAdc[iside][ch] = 0;
-	    t_RpdChannelMaxAdcCalib[iside][ch] = 0;
+	    t_RpdChannelMaxADC[iside][ch] = 0;
+	    t_RpdChannelMaxADCCalib[iside][ch] = 0;
 	    t_RpdChannelMaxSample[iside][ch] = 0;
 	    t_RpdChannelStatus[iside][ch] = 0;
 	    t_RpdChannelPileupFrac[iside][ch] = 0;
@@ -686,6 +728,15 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcStatus[iside] = zdcSum->auxdataConst<unsigned int>("Status"+auxSuffix);
       t_ZdcModuleMask += (zdcSum->auxdataConst<unsigned int>("ModuleMask"+auxSuffix) << 4 * iside);
 
+      if(m_isMC){
+        ANA_MSG_DEBUG("Filling sum truth");
+        t_ZdcTruthTotal  [iside] = zdcSum->auxdataConst<float>("TruthTotalEnergy" + auxSuffix);
+        t_ZdcTruthInvis  [iside] = zdcSum->auxdataConst<float>("TruthInvisibleEnergy" + auxSuffix);
+        t_ZdcTruthEM     [iside] = zdcSum->auxdataConst<float>("TruthEMEnergy" + auxSuffix);
+        t_ZdcTruthNonEM  [iside] = zdcSum->auxdataConst<float>("TruthNonEMEnergy" + auxSuffix);
+        t_ZdcTruthEscaped[iside] = zdcSum->auxdataConst<float>("TruthEscapedEnergy" + auxSuffix);
+      }
+
       if (nsamplesZdc == 24) {
         if (enableCentroid) {
           t_centroidStatus[iside] = zdcSum->auxdataConst<unsigned int>("centroidStatus" + auxSuffix);
@@ -719,6 +770,20 @@ void ZdcNtuple::processZdcNtupleFromModules()
       int iside = 0;
       if (zdcMod->zdcSide() > 0) iside = 1;
       int imod = zdcMod->zdcModule();
+
+      if (m_isMC){
+        //Calib hits are only stored in channel 0 of the RPD
+        if(!(imod == 4 && zdcMod->zdcChannel() != 0)){
+          t_ZdcModuleTruthTotal  [iside][imod] = zdcMod->auxdataConst<float>("TruthTotalEnergy" + auxSuffix);
+          t_ZdcModuleTruthInvis  [iside][imod] = zdcMod->auxdataConst<float>("TruthInvisibleEnergy" + auxSuffix);
+          t_ZdcModuleTruthEM     [iside][imod] = zdcMod->auxdataConst<float>("TruthEMEnergy" + auxSuffix);
+          t_ZdcModuleTruthNonEM  [iside][imod] = zdcMod->auxdataConst<float>("TruthNonEMEnergy" + auxSuffix);
+          t_ZdcModuleTruthEscaped[iside][imod] = zdcMod->auxdataConst<float>("TruthEscapedEnergy" + auxSuffix);
+        }
+        //Calib hits are stored for all modules
+        //Other data is only valid for module 1-4
+        if(imod > 4) continue;
+      }
 
       ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << zdcMod->auxdataConst<float>("Amplitude"));
 
@@ -791,8 +856,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
 	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
 	    t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitudeCalib" + auxSuffix);
-	    t_RpdChannelMaxAdc[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADC" + auxSuffix);
-	    t_RpdChannelMaxAdcCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADCCalib" + auxSuffix);
+	    t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADC" + auxSuffix);
+	    t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADCCalib" + auxSuffix);
 	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
 	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
 	    t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupFrac" + auxSuffix);
@@ -824,6 +889,50 @@ void ZdcNtuple::processZdcNtupleFromModules()
   }
 }
 
+void ZdcNtuple::processMCEventCollection(){
+  /******************************************
+   * Get the McEventCollection (input)
+   ******************************************/
+  SG::ReadHandle<McEventCollection> mcEventCollection (m_mcEventCollectionName, getContext());
+  if (!mcEventCollection.isValid()){
+    ANA_MSG_ERROR("Could not retrieve HepMC with key:" << m_mcEventCollectionName.key());
+    return;
+  }else{
+    ANA_MSG_DEBUG("Retrieved HepMC with key: " << m_mcEventCollectionName.key());
+  }
+
+  /******************************************
+   * Clear and resize the output vectors
+  ******************************************/
+  t_ZdcTruthParticlePosx.clear();
+  t_ZdcTruthParticlePosy.clear();
+  t_ZdcTruthParticlePosz.clear();
+  t_ZdcTruthParticleTime.clear();
+  t_ZdcTruthParticlePx.clear();
+  t_ZdcTruthParticlePy.clear();
+  t_ZdcTruthParticlePz.clear();
+  t_ZdcTruthParticleEnergy.clear();
+
+  /******************************************
+   * Sort the particles into sides and add
+   * them to the output vectors
+  ******************************************/  
+  for (unsigned int cntr = 0; cntr < mcEventCollection->size(); ++cntr){
+    const HepMC::GenEvent *genEvt = (*mcEventCollection)[cntr];
+    for (const auto &vertex : genEvt->vertices()){
+      for (const auto &particle : vertex->particles_in()){
+        t_ZdcTruthParticlePosx.push_back(vertex->position().x());
+        t_ZdcTruthParticlePosy.push_back(vertex->position().y());
+        t_ZdcTruthParticlePosz.push_back(vertex->position().z());
+        t_ZdcTruthParticleTime.push_back(vertex->position().t());
+        t_ZdcTruthParticlePx.push_back(particle->momentum().x());
+        t_ZdcTruthParticlePy.push_back(particle->momentum().y());
+        t_ZdcTruthParticlePz.push_back(particle->momentum().z());
+        t_ZdcTruthParticleEnergy.push_back(particle->momentum().e());
+      } // end loop over particles
+    }// end loop over vertices
+  }// end loop over HepMC events
+}
 
 bool ZdcNtuple::processTriggerDecision()
 {
