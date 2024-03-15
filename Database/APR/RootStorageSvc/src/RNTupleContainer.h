@@ -24,19 +24,16 @@ class TClass;
 class IRootAuxDynWriter;
 namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO { class IRNTupleWriter; }
-namespace ROOT { namespace Experimental {
+namespace ROOT::Experimental {
+  class RNTupleReader;
 #if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
   namespace Detail {
-    class RPageSource;
     class RFieldBase;
   }
 #else
-  namespace Internal {
-    class RPageSource;
-  }
   class RFieldBase;
 #endif
-} }
+}
 
 /*
  * POOL namespace declaration
@@ -45,11 +42,10 @@ namespace pool {
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 using ROOT::Experimental::RFieldBase;
-using ROOT::Experimental::Internal::RPageSource;
 #else
 using ROOT::Experimental::Detail::RFieldBase;
-using ROOT::Experimental::Detail::RPageSource;
 #endif
+using ROOT::Experimental::RNTupleReader;
 
 // Forward declaration
 class DbColumn;
@@ -66,7 +62,6 @@ class RNTupleContainer : public DbContainerImp
   /// Definiton of a field info structure
   struct FieldDesc : public DbColumn
   {
-    std::unique_ptr<RFieldBase> field; 
     std::string fieldname;
     std::string sgkey;
     TClass*     clazz = nullptr;
@@ -124,7 +119,7 @@ class RNTupleContainer : public DbContainerImp
 
    RootAuxDynIO::IRNTupleWriter*     m_ntupleWriter = nullptr;
    /// Note: the Fields need to be destroyed before the page source is gone
-   RPageSource*       m_pageSource{};
+   RNTupleReader*       m_ntupleReader{};
 
  public:
    /// Standard constructor

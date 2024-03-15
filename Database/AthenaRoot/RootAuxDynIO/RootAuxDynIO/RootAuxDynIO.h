@@ -18,15 +18,12 @@ class TFile;
 class TClass;
 
 namespace ROOT { namespace Experimental {
+  class RNTupleReader;
 #if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
   namespace Detail {
-    class RPageSource;
     class RFieldBase;
   }
 #else
-  namespace Internal {
-    class RPageSource;
-  }
   class RFieldBase;
 #endif
 } }
@@ -37,11 +34,10 @@ namespace RootAuxDynIO
 {
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
    using ROOT::Experimental::RFieldBase;
-   using ROOT::Experimental::Internal::RPageSource;
 #else
    using ROOT::Experimental::Detail::RFieldBase;
-   using ROOT::Experimental::Detail::RPageSource;
 #endif
+   using ROOT::Experimental::RNTupleReader;
    class IRootAuxDynReader;
    class IRootAuxDynWriter;
    class IRNTupleWriter;
@@ -65,7 +61,7 @@ namespace RootAuxDynIO
    std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel,
                                                               int offsettab_len, bool do_branch_fill);
    
-   std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(RFieldBase* field, RPageSource* source);
+   std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader);
    std::unique_ptr<IRNTupleWriter>    getNTupleAuxDynWriter(TFile*,  const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
 
 

@@ -23,13 +23,8 @@
 
 // Forward declarations
 namespace ROOT { namespace Experimental {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-  namespace Internal {
-#else
-  namespace Detail {
-#endif
-   class RPageSource;
-} } }
+   class RNTupleReader;
+} }
 
 
 class TFile;
@@ -45,11 +40,7 @@ namespace RootAuxDynIO {
  * POOL namespace declaration
  */
 namespace pool  {  
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-   using ROOT::Experimental::Internal::RPageSource;
-#else
-   using ROOT::Experimental::Detail::RPageSource;
-#endif
+   using ROOT::Experimental::RNTupleReader;
 
    class RootTreeContainer;
    
@@ -134,7 +125,7 @@ namespace pool  {
     std::recursive_mutex  m_iomutex;
 
     std::map<std::string, std::unique_ptr<RootAuxDynIO::IRNTupleWriter> >  m_ntupleWriterMap;
-    std::map<std::string, std::unique_ptr<RPageSource> >                   m_ntupleReaderMap;
+    std::map<std::string, std::unique_ptr<RNTupleReader> >                 m_ntupleReaderMap;
 
     using indexLookup_t = std::unordered_map<uint64_t, uint64_t>;
     std::map<void*, indexLookup_t>                                         m_ntupleIndexMap;
@@ -247,10 +238,10 @@ namespace pool  {
     /// Execute Database Transaction action
     virtual DbStatus    transAct(Transaction::Action action);
 
-    RPageSource*        getNTupleReader(const std::string& ntuple_name);
+    RNTupleReader*        getNTupleReader(std::string ntuple_name);
 
     // translate index value to row# for a given RNTuple  
-    uint64_t            indexLookup(RPageSource *ps, uint64_t idx_val);
+    uint64_t            indexLookup(RNTupleReader *ps, uint64_t idx_val);
 
     /// return NTupleWriter for a given ntuple_name
     /// create a new one if needed when create==true
