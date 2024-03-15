@@ -466,10 +466,10 @@ namespace DerivationFramework {
 	  else if(opt == LAMBDABAR) massesV0 = massesV0_pip;
 	  else if(opt == KS)        massesV0 = massesV0_pipi;
 	  // https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkV0Fitter/TrkV0Fitter/TrkV0VertexFitter.h
-	  V0vtx = std::move(std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, massesV0, m_massV0, 0, vtxPos) ));
+	  V0vtx = std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, massesV0, m_massV0, 0, vtxPos) );
 	}
 	else {
-	  V0vtx = std::move(std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, vtxPos) ));
+	  V0vtx = std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, vtxPos) );
 	}
 	if(V0vtx && V0vtx->chiSquared()>=0) {
 	  double chi2DOF = V0vtx->chiSquared()/V0vtx->numberDoF();
