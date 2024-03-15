@@ -211,49 +211,50 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     auto trackOriginCollection = trackOriginsHandle(*jet);
 
     using indexList            = std::vector< int >;
+    using vertexHFMap          = std::map< char, bool>;
     using trackCountMap        = std::map< char, std::set<TL> >;
-    using vertex2trackCountMap = std::map< char, trackCountMap >;
        
     indexList iList(vertexCollection.size());
-    
-    vertex2trackCountMap v2tcMap;
+        
+    vertexHFMap v2HFMap;
+    trackCountMap v2TLMap;
     trackCountMap FittingMap;
     FittingMap.clear();
     
     std::for_each(boost::make_zip_iterator(boost::make_tuple(vertexCollection.cbegin(), trackOriginCollection.cbegin(), trackCollection.cbegin())),
 		boost::make_zip_iterator(boost::make_tuple(vertexCollection.cend(), trackOriginCollection.cend(), trackCollection.cend())),
-		[&v2tcMap, &FittingMap, &minD0=m_minD0, &multiWithPrimary=m_MultiWithPrimary](const boost::tuple<const char &, const char &, const TL &> &e)
+		[&v2HFMap, &v2TLMap, &FittingMap](const boost::tuple<const char &, const char &, const TL &> &e)
 		{
 		  auto v  = e.get<0>();
 		  auto to = e.get<1>();
-      auto tl = e.get<2>();
+      auto tl = e.get<2>();    
       
-      //d0 cut on tracks 
-      if (multiWithPrimary==true )
-      {      
-		    v2tcMap[v][to].insert(tl);
-		  }
-      else if ((*tl)->d0()>minD0){
-        v2tcMap[v][to].insert(tl);    
+      v2TLMap[v].insert(tl);
+      
+      if (3==to||4==to|| 5==to){
+        v2HFMap[v]=(true);
       }
-    });
+    }
+    );
     
-    auto mapComp= [](const auto &LHS, const auto &RHS)
-    {
-    
-      return LHS.second.size() < RHS.second.size();
-    };
-    
-       
-    auto vertex2trackOrigin = [&mapComp, &FittingMap](const auto &e){
+    //Heavy Flavor Numbers of Interest are 3, 4, 5
+    //Want to check if present
+    //Ignore any that arent above a threshold?
+    //Threshold #HF/#Tracks > 0.4?
+
+    auto vertex2trackOrigin = [&v2HFMap, &FittingMap](const auto &e){
       const auto &[v, tcm] = e;
-      const auto &[to, n] = *(std::max_element(tcm.cbegin(), tcm.cend(), mapComp));
+      //if vertex has true value in v2HF map
+      //get track collection from v2TLMap
+      //insert into fitting map
+      
+      if (v2HFMap.find(v) !=v2HFMap.end() && v2HFMap[v]==true)  //if exists and is true
       {
-           FittingMap.insert(std::pair<char, std::set<TL>>(v, n));
+        FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));  //check if copies set or just takes a reference - 
       };
     };    
     
-    std::for_each(v2tcMap.cbegin(), v2tcMap.cend(), vertex2trackOrigin);    
+    std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), vertex2trackOrigin);    
     
     //Working xAOD
     workVectorArrxAOD *xAODwrk = new workVectorArrxAOD();
@@ -279,6 +280,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     for(const auto& pair : FittingMap){
           
       if (pair.second.size() >= 2) {
+      
         // Need at least 2 tracks to perform a fit
         int NTRKS =pair.second.size();        
         std::vector<double> InpMass(NTRKS,m_massPi);
