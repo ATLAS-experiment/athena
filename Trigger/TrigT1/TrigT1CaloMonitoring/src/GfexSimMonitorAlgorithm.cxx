@@ -123,7 +123,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
     }
 
     bool mismatches = (tobs1Cont->size()!=tobs2Cont->size());
-    bool mismatchesExlStatusAndSat = mismatches;
+    //bool mismatchesExlStatusAndSat = mismatches;
 
     auto eventType = Monitored::Scalar<std::string>("EventType","DataTowers"); // always have data towers
     auto Signature = Monitored::Scalar<std::string>("Signature",label);
@@ -131,7 +131,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 
     for(const auto tob1 : *tobs1Cont) {
         bool isMatched = false;
-        bool isPartMatched = false;
+        //bool isPartMatched = false;
         auto word1 = tob1->word();
         auto gfex1 = tob1->gFexType();
         for (auto tob2 : *tobs2Cont) {
@@ -139,17 +139,14 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
                 if(word1 == tob2->word()) {
                     isMatched = true;
                     break;
-                } else if( (word1&0x7FFFFF7F) == (tob2->word()&0x7FFFFF7F) ) {
+                } /*else if( (word1&0x7FFFFF7F) == (tob2->word()&0x7FFFFF7F) ) {
                     // matches after ignore saturation bit (31st bit) and status bit (7th bit) (first bit is 0th)
                     isPartMatched=true;
-                }
+                }*/
             }
         }
         if(!isMatched) {
             mismatches = true;
-            if(!isPartMatched) {
-                mismatchesExlStatusAndSat = true;
-            }
         }
         tobMismatched = (isMatched) ? 0 : 100;
         fill("mismatches",eventType,Signature,tobMismatched);
@@ -158,19 +155,29 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 
 
     if(mismatches) {
-        if(mismatchesExlStatusAndSat) {
-            if(msgLvl(MSG::DEBUG)) {
-                std::cout << label << " : " << std::hex;
-                for (const auto tob: *tobs1Cont) {
-                    std::cout << tob->word() << " ";
-                }
-                std::cout << std::endl << label << " : ";
-                for (const auto tob: *tobs2Cont) {
-                    std::cout << tob->word() << " ";
-                }
-                std::cout << std::endl << std::dec;
-            }
+        // fill the debugging tree with all the words for this signature
+        auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
+        auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
+        std::vector<float> detas{};std::vector<float> setas{};
+        std::vector<float> dphis{};std::vector<float> sphis{};
+        std::vector<unsigned int> dword0s{};std::vector<unsigned int> sword0s{};
+        auto dtobEtas = Monitored::Collection("dataEtas", detas);
+        auto dtobPhis = Monitored::Collection("dataPhis", dphis);
+        auto dtobWord0s = Monitored::Collection("dataWord0s", dword0s);
+        auto stobEtas = Monitored::Collection("simEtas", setas);
+        auto stobPhis = Monitored::Collection("simPhis", sphis);
+        auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
+        fillVectors(tobs1Key,ctx,detas,dphis,dword0s);
+        fillVectors(tobs2Key,ctx,setas,sphis,sword0s);
+        if(msgLvl(MSG::DEBUG)) {
+            std::cout << "LBN: " << std::string(lbnString) << " EventNumber: " << ULong64_t(evtNumber) << " signature: " << label << std::endl;
+            std::cout << "  data : " << std::hex;
+            for (const auto w: dword0s) std::cout << w << " ";
+            std::cout << std::endl << "  sim  : ";
+            for (const auto w: sword0s) std::cout << w << " ";
+            std::cout << std::endl << std::dec;
         }
+        fill("mismatches",lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature);
     }
 
     return !mismatches;

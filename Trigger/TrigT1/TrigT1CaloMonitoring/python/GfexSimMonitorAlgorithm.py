@@ -18,6 +18,9 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                            xlabels=["DataTowers","EmulatedTowers"],
                            ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
                            opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+    helper.defineTree('LBNString,Signature,EventNumber,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+                      "lbnString/string:Signature/string:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
+                      title="mismatched;LBN;Signature",fillGroup="mismatches")
 
     return helper.result()
 
