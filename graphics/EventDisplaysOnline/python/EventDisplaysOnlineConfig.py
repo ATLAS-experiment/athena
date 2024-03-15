@@ -10,18 +10,19 @@ isHIMode = False #TODO
 isBeamSplashMode = False
 isOfflineTest = False
 testWithoutPartition = False
+HorizontalMuons_quickReco = False
 
 # An explicit list for nominal data taking to exclude some high rate streams
 # Empty list to read all
 streamsWanted = ['express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
 if isBeamSplashMode:
-    streamsWanted = ['MinBias']
+    streamsWanted = ['MinBias'] #if trigger fails it will go to debug_HltError
+
 # If testing at p1, write out to /tmp/ to see output
 outputDirectory="/atlas/EventDisplayEvents/"
 #outputDirectory="/tmp/myexley"
-
 if isOfflineTest:
-    outputDirectory="/afs/cern.ch/user/m/myexley/WorkSpace/hackTest/run/output/"
+    outputDirectory="."
 
 sendToPublicStream = False # Gets set later, overwrite here to True to test it
 
@@ -47,7 +48,7 @@ if isCosmicData:
     maxEvents=200
     projectTags=['data24_cos']
     projectName='data24_cos'
-    publicStreams=['Main']#TODO
+    publicStreams=['IDCosmics']
 if isBeamSplashMode:
     maxEvents=-1
     projectTags=['data24_13p6TeV']
@@ -103,11 +104,11 @@ if testWithoutPartition or partitionName != 'ATLAS' or isOfflineTest:
     flags.Exec.MaxEvents = 5
     flags.Output.ESDFileName = outputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
 else:
-    flags.Exec.MaxEvents = -1
+    flags.Exec.MaxEvents = 20000 # hack until we find a way to fix the memory fragmentation ATEAM-896, this resets the memory after 20k events
     flags.Output.ESDFileName = "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
 
 flags.Output.doWriteESD = True
-#flags.Output.doJiveXML = True
+#flags.Output.doJiveXML = True # We call the AlgoJive later on
 
 if testWithoutPartition:
     flags.Input.Files = ['/detwork/dqm/EventDisplays_test_data/data23_13p6TeV.00454188.physics_Main.daq.RAW._lb0633._SFO-12._0002.data']
@@ -117,9 +118,21 @@ else:
     flags.Input.Files = [] # Files are read from the ATLAS (or GM test) partition
 
 flags.Reco.EnableTrigger = False # TODO test True
-flags.LAr.doHVCorr = False # ATLASRECTS-6823
 flags.Detector.GeometryForward = False
 flags.Detector.EnableFwdRegion = False
+if isOfflineTest:
+    flags.LAr.doHVCorr = True
+else:
+    flags.LAr.doHVCorr = False # ATLASRECTS-6823
+
+if isBeamSplashMode or HorizontalMuons_quickReco:
+    flags.Reco.EnableJet=False;
+    flags.Reco.EnableMet=False;
+    flags.Reco.EnableTau=False;
+    flags.Reco.EnablePFlow=False;
+    flags.Reco.EnableBTagging=False;
+    flags.Reco.EnableEgamma=False;
+    flags.Reco.EnableCombinedMuon=False;
 
 from AthenaCommon.Constants import INFO
 flags.Exec.OutputLevel = INFO
@@ -162,7 +175,7 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
 # GM test partition needs to be given the below info
 if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9'):
     flags.Input.OverrideRunNumber = True
-    flags.Input.RunNumbers = [447705]#keep this number the same as (or close to) the run number of the file you are testing on
+    flags.Input.RunNumbers = [449604] # keep this number the same as (or close to) the run number of the file you are testing on
     flags.Input.LumiBlockNumbers = [1]
     flags.Input.ProjectName = projectName
 
@@ -202,14 +215,24 @@ if not testWithoutPartition:
     bytestreamInput.StreamNames = streamsWanted
     #bytestreamInput.StreamType = "physics" #comment out for all streams, e.g. if you also want claibration streams
     bytestreamInput.StreamLogic = "Or"
+
     if isBeamSplashMode:
         bytestreamInput.KeyCount = 62 # equal or greater than the number of DCMs for beam splashes
         bytestreamInput.BufferSize = 186 # three times of keycount for beam splashes
         bytestreamInput.Timeout = 144000000 #(40 hrs) for beam splashes
-        bytestreamInput.StreamType = "physics"
+        bytestreamInput.StreamType = "physics" #if trigger fails it will go to debug_HltError
+
     if partitionName != 'ATLAS':
         bytestreamInput.KeyValue = [ 'Test_emon_push' ]
         bytestreamInput.KeyCount = 1
+
+if isBeamSplashMode or HorizontalMuons_quickReco:
+    # switch of the NSW segment making as it takes too much CPU in beamsplashes
+    acc.getEventAlgo("MuonSegmentMaker").doStgcSegments=False;
+    acc.getEventAlgo("MuonSegmentMaker").doMMSegments=False;
+    acc.getEventAlgo("MuonSegmentMaker_NCB").doStgcSegments=False;
+    acc.getEventAlgo("MuonSegmentMaker_NCB").doMMSegments=False;
+    acc.dropEventAlgo("QuadNSW_MuonSegmentCnvAlg");
 
 onlineEventDisplaysSvc = CompFactory.OnlineEventDisplaysSvc(
     name = "OnlineEventDisplaysSvc",
@@ -246,7 +269,11 @@ if not isOfflineTest:
     streamToServerTool = acc.popToolsAndMerge(StreamToServerToolCfg(flags))
 
 from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
-acc.merge(AlgoJiveXMLCfg(flags,StreamToFileTool=streamToFileTool,StreamToServerTool=streamToServerTool,OnlineMode=True))
+acc.merge(AlgoJiveXMLCfg(flags,StreamToFileTool=streamToFileTool,StreamToServerTool=streamToServerTool,OnlineMode= not isOfflineTest))
+
+if isBeamSplashMode:
+    acc.getPublicTool("CaloLArRetriever").LArlCellThreshold=500.;
+    acc.getPublicTool("CaloHECRetriever").HEClCellThreshold=500.;
 
 # This creates an ESD file per event which is renamed and moved to the desired output
 # dir in the VP1 Event Prod alg
