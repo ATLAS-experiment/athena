@@ -149,7 +149,7 @@ namespace dqutils
   protected:
     virtual void clearData();
     virtual void convertToGraphics(
-      int cnvsType, TCanvas* myC, std::string& json, TImage* img = 0, char** x = 0, int* y = 0);
+      int cnvsType, TCanvas* myC, std::string& json, TImage** img = 0, char** x = 0, int* y = 0);
     virtual void convertToGraphics(int cnvsType, TCanvas* myC, std::string namePNG, std::string nameJSON);
     virtual bool saveFile(
       int cnvsType, std::string pngfName, std::string pngContent, std::string jsonfName, std::string jsonfContent);
