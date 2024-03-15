@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
 #define ATHEXCUDA_TRACKPARTICLECALIBRATOREXAMPLEALG_H
@@ -38,7 +38,11 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
   virtual StatusCode initialize() override;
 
   /// Function executing the algorithm
-  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual StatusCode execute(const EventContext& ctx) const override
+#if (defined(__GNUC__) || defined(__clang__))
+      __attribute__((no_sanitize("vptr")))
+#endif
+      ;
 
   /// @}
 
