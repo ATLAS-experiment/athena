@@ -12,6 +12,7 @@ class OutputAnalysisConfig (ConfigBlock):
         super (OutputAnalysisConfig, self).__init__ (configName)
         self.addOption ('postfix', '', type=str)
         self.addOption ('vars', [], type=None)
+        self.addOption ('varsOnlyForMC', [], type=None)
         self.addOption ('metVars', [], type=None)
         self.addOption ('containers', {}, type=None)
         self.addOption ('treeName', 'analysis', type=str)
@@ -23,6 +24,12 @@ class OutputAnalysisConfig (ConfigBlock):
 
 
     def makeAlgs (self, config) :
+
+        self.vars = set(self.vars)
+        self.varsOnlyForMC = set(self.varsOnlyForMC)
+        # merge the MC-specific branches into the main list only if we are not running on data
+        if config.dataType() is not DataType.Data:
+            self.vars |= self.varsOnlyForMC
 
         if self.storeSelectionFlags:
             self.createSelectionFlagBranches(config)
@@ -95,7 +102,7 @@ class OutputAnalysisConfig (ConfigBlock):
         if len (self.vars) + len (autoVars) :
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
-            ntupleMaker.Branches = self.vars + autoVars
+            ntupleMaker.Branches = list( self.vars | set(autoVars) )
             # ntupleMaker.OutputLevel = 2  # For output validation
 
         if len (self.metVars) + len (autoMetVars) > 0:
