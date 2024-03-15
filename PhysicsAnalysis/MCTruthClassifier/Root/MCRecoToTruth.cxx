@@ -6,27 +6,22 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
 using namespace MCTruthPartClassifier;
-using std::abs;
 
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing trackClassifier");
-
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
-
   const xAOD::TruthParticle* genPart = getGenPart(trkPtr);
   if (info) {
     info->genPart = genPart;
   }
-
   if (!genPart) return std::make_pair(parttype, partorig);
   ATH_MSG_DEBUG("trackClassifier  succeeded ");
   return particleTruthClassifier(genPart, info);
 }
 
-//-----------------------------------------------------------------------------------------
 // Not const due to ITruthParticlesInConeTool::particlesInCone
 // called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
@@ -63,7 +58,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, Info* inf
   return particleTruthClassifier(genPart, info);
 }
 
-//-----------------------------------------------------------------------------------------
 // Not const due to ITruthParticlesInConeTool::particlesInCone
 // called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
@@ -275,7 +269,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nul
     ATH_MSG_WARNING("track matched to the truth with status " << theGenParticle->status());
   }
 
-  if (MC::isDecayed(theGenParticle) && (abs(theGenParticle->pdgId()) == 11 || abs(theGenParticle->pdgId()) == 13)) {
+  if (MC::isDecayed(theGenParticle) && (std::abs(theGenParticle->pdgId()) == 11 || std::abs(theGenParticle->pdgId()) == 13)) {
     const xAOD::TruthVertex* EndVrtx = theGenParticle->decayVtx();
     const xAOD::TruthParticle* theGenPartTmp(nullptr);
 
@@ -359,7 +353,7 @@ MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
     // find the matching truth particles
     for (const auto *const thePart : *truthParticleContainerReadHandle) {
       // match truth particles to the jet
-      if (MC::isStable(thePart) && deltaR((*thePart), (*jet)) < m_jetPartDRMatch) {
+      if (MC::isStable(thePart) && thePart->p4().DeltaR(jet->p4()) < m_jetPartDRMatch) {
         constituents.insert(thePart);
       }
     }

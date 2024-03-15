@@ -3,17 +3,13 @@
 */
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) // Can only be used in Athena
-
-//
 #include "MCTruthClassifier/MCTruthClassifier.h"
-//
 // xAOD EDM includes
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
-//
 // Athena only includes
 #include "AthenaKernel/Units.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -24,7 +20,6 @@
 
 #include <cmath>
 
-using Athena::Units::GeV;
 using namespace MCTruthPartClassifier;
 
 namespace {
@@ -51,13 +46,9 @@ std::unique_ptr<Trk::CurvilinearParameters> extractParamFromTruth(const xAOD::Tr
 }
 
 // Methods using directly the extrapolator usable only from Athena
-//-----------------------------------------------------------------------------------------
 const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus, bool isFwrdEle, Info* info) const
 {
-  //-----------------------------------------------------------------------------------------
-
   ATH_MSG_DEBUG("Executing egammaClusMatch ");
-
   const xAOD::TruthParticle* theMatchPart = nullptr;
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
 
@@ -114,7 +105,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     // excluding neutrino
     if (std::abs(iParticlePDG) == 12 || std::abs(iParticlePDG) == 14 || std::abs(iParticlePDG) == 16) continue;
 
-    double pt = thePart->pt() / GeV;
+    double pt = thePart->pt() / Athena::Units::GeV;
     double q = thePart?thePart->charge():0.0;
     // exclude charged particles with pT<1 GeV
     if (q != 0 && pt < m_pTChargePartCut) continue;
@@ -184,7 +175,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
         BestPartdR = dR;
       };
     }
-  } // end cycle for Gen particle
+  }
 
   if (theEgamma != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(), theEgamma);
@@ -226,7 +217,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
     if (std::hypot( detPhi(phiClus, thePart->phi())/m_partExtrConePhi, detEta(etaClus, thePart->eta())/m_partExtrConeEta ) > 1.0) continue;
 
-    double pt = thePart->pt() / GeV;
+    double pt = thePart->pt() / Athena::Units::GeV;
     double q = thePart->charge();
     // exclude charged particles with pT<1 GeV
     if (q != 0 && pt < m_pTChargePartCut) continue;
@@ -293,9 +284,7 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
   return theMatchPart;
 }
 
-//--------------------------------------------------------------
-bool
-MCTruthClassifier::genPartToCalo(const EventContext& ctx,
+bool MCTruthClassifier::genPartToCalo(const EventContext& ctx,
                                  const xAOD::CaloCluster* clus,
                                  const xAOD::TruthParticle* thePart,
                                  bool isFwrdEle,
@@ -348,8 +337,7 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
 
   // create extension to sample
   std::vector<CaloSampling::CaloSample> samples = { sample };
-  std::vector<std::pair<CaloSampling::CaloSample, std::unique_ptr<const Trk::TrackParameters>>> 
-    extension = m_caloExtensionTool->layersCaloExtension(ctx, *params, samples, etaClus, caloDDMgr);
+  auto  extension = m_caloExtensionTool->layersCaloExtension(ctx, *params, samples, etaClus, caloDDMgr);
   bool extensionOK = (!extension.empty());
   if (!extensionOK) {
     ATH_MSG_WARNING("extrapolation of Truth Particle with eta  " << thePart->eta() << " , charge " << thePart->charge() << " , Pt " << thePart->pt() << " to calo failed");
@@ -363,9 +351,7 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
   dRmatch = std::hypot(dPhi, dEta);
 
   if ((!isFwrdEle && dRmatch > m_phtdRtoTrCut) || (isFwrdEle && dRmatch > m_fwrdEledRtoTrCut)) return false;
-
   if (!isFwrdEle && std::hypot( dPhi/m_phtClasConePhi, dEta/m_phtClasConeEta ) <= 1.0) isNarrowCone = true;
-
   return true;
 }
 #endif

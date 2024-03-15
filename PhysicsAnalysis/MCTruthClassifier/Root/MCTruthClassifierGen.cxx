@@ -318,7 +318,6 @@ ParticleType MCTruthClassifier::defTypeOfElectron(ParticleOrigin EleOrig, bool i
   return BkgElectron;
 }
 
-//-------------------------------------------------------------------------------
 ParticleOrigin
 MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruthTES,
                                      const xAOD::TruthParticle* thePart,
@@ -361,7 +360,6 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   }
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
-  // to exclude interactions mu(barcode<10^6)->mu(barcode10^6)+e
   bool samePart = false;
   for (const auto & theDaug: partOriVert->particles_out()) {
     if (!theDaug)  continue;
