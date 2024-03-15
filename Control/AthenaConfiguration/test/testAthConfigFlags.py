@@ -301,7 +301,18 @@ class TestFlagsSetupDynamic(FlagsSetup):
         print("\nFlag after double remap ..")
         print("-"*80)
 
+    def test_copyAsDict(self):
+        """test for asdict with cloned flags"""
+        zdict = self.flags.asdict()['Z']
+        copyf = self.flags.cloneAndReplace('W', 'Z')
+        wdict = copyf.asdict()['W']
+        self.assertEqual(zdict, wdict)
 
+        # try again with flag address
+        cdict = self.flags.Z.asdict()['C']
+        copyf = self.flags.cloneAndReplace('Z.W', 'Z.C')
+        wdict = copyf.Z.asdict()['W']
+        self.assertEqual(cdict, wdict)
 
 
     def test_exists(self):

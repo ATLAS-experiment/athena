@@ -136,6 +136,9 @@ TrigConf::L1Threshold_eEM::load()
    m_reta  = Selection::stringToWP(getAttribute_optional<std::string>("reta").value_or("None"));
    m_rhad  = Selection::stringToWP(getAttribute_optional<std::string>("rhad").value_or("None"));
    m_wstot = Selection::stringToWP(getAttribute_optional<std::string>("wstot").value_or("None"));
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
+   m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
@@ -145,6 +148,9 @@ TrigConf::L1Threshold_jEM::load()
    m_iso  = Selection::stringToWP(getAttribute_optional<std::string>("iso").value_or("None"));
    m_frac  = Selection::stringToWP(getAttribute_optional<std::string>("frac").value_or("None"));
    m_frac2 = Selection::stringToWP(getAttribute_optional<std::string>("frac2").value_or("None"));
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
+   m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
@@ -157,6 +163,9 @@ TrigConf::L1Threshold_eTAU::load()
    // This will result in no rHad isolation being applied, but there were no
    // active L1 items (eTAU40HA threshold defined but unused) -- ATR-25329
    if(m_rHad == Selection::WP::HADMEDIUM) {m_rHad = Selection::WP::MEDIUM;}
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
+   m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
@@ -164,6 +173,9 @@ TrigConf::L1Threshold_jTAU::load()
 {
    // read the isolation requirements
    m_isolation  = Selection::stringToWP(getAttribute_optional<std::string>("isolation").value_or("None"));
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
+   m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
@@ -171,29 +183,40 @@ TrigConf::L1Threshold_cTAU::load()
 {
    // read the isolation requirements
    m_isolation  = Selection::stringToWP(getAttribute_optional<std::string>("isolation").value_or("None"));
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
+   m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
 TrigConf::L1Threshold_jJ::load()
 {
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
    m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
 TrigConf::L1Threshold_jLJ::load()
 {
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
    m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
 TrigConf::L1Threshold_gJ::load()
 {
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
    m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
 void
 TrigConf::L1Threshold_gLJ::load()
 {
+   // reject TOBs outside explicitly defined eta ranges 
+   // by requiring an impossibly high threshold
    m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
