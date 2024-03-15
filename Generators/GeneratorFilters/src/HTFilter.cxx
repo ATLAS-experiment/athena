@@ -122,15 +122,15 @@ return StatusCode::FAILURE;
       if ( !iter ) continue;
       int pdgid = iter->pdg_id();
       if (m_UseNu && MC::isNeutrino(pdgid) && MC::isGenStable(iter)) {
-	if( Common::fromWZ(iter) || Common::fromTau(iter) ) {
+	if( Common::fromWZorTau(iter)) {
 	  HT += iter->momentum().perp();
 	}
       }
       // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
       if (m_UseLep && (std::abs(pdgid)==11 || std::abs(pdgid)==13) && MC::isGenStable(iter)
 	  && (iter)->momentum().perp()>m_MinLepPt*Gaudi::Units::GeV && std::abs(iter->momentum().eta())<m_MaxLepEta) {
-	bool isFromWZ = Common::fromWZ(iter);
-	if(isFromWZ || Common::fromTau(iter) ) {
+
+	if( Common::fromWZorTau(iter)) {
 	  ATH_MSG_VERBOSE("Adding W/Z/tau lepton with pt " << iter->momentum().perp()
 			  << ", eta " << iter->momentum().eta()
 			  << ", phi " << iter->momentum().phi()
