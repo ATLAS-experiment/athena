@@ -31,7 +31,7 @@ StatusCode TrigMuonEFIdtpHypoTool::initialize()
    } else m_muonSelTool.disable();
    
    if( m_acceptAll ) {
-      ATH_MSG_INFO("Accepting all the events!");
+      ATH_MSG_DEBUG("Accepting all the events!");
    } else {
       if(m_ptBins.size()<=0) { 
 	 ATH_MSG_ERROR("Trying to configure hypo with no pT bins. This is probably a configuration mistake.");
