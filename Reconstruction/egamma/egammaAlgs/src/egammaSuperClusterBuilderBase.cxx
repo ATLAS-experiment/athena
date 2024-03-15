@@ -23,6 +23,7 @@
 
 #include <cmath>
 #include <optional>
+#include <utility>
 
 using xAOD::EgammaHelpers::summaryValueInt;
 
@@ -44,63 +45,39 @@ namespace {
  * direction, and finding the centers of those cells.  Then we use
  * the larger of these for the symmetric range.
  */
-void
+std::pair<const double, const double>
 etaphi_range(const CaloDetDescrManager& dd_man,
              double eta,
              double phi,
              CaloCell_ID::CaloSample sampling,
-             double& deta,
-             double& dphi)
+             const CaloDetDescrElement* elt)
 {
   // Should be smaller than the eta half-width of any cell.
   constexpr double eps = 0.001;
-  deta = 0;
-  dphi = 0;
-  // Get the DD element for the central cell.
-  const CaloDetDescrElement* elt = dd_man.get_element_raw(sampling, eta, phi);
-  if (!elt)
-    return;
 
-  // Now look in the negative eta direction.
-  const CaloDetDescrElement* elt_l =
-    dd_man.get_element_raw(sampling, eta - elt->deta() - eps, phi);
-  double deta_l = 0; // Eta difference on the low (left) side.
-  if (elt_l) {
-    deta_l = std::abs(eta - elt_l->eta_raw()) + eps;
-  }
-  // Now look in the positive eta direction.
-  const CaloDetDescrElement* elt_r =
-    dd_man.get_element_raw(sampling, eta + elt->deta() + eps, phi);
-  double deta_r = 0; // Eta difference on the high (right) side.
-  if (elt_r) {
-    deta_r = std::abs(eta - elt_r->eta_raw()) + eps;
-  }
+  // Now look in the negative eta direction, on the low (left) side.
+  const CaloDetDescrElement* elt_l = dd_man.get_element_raw(sampling, eta - elt->deta() - eps, phi);
+  double deta_l = elt_l ? std::abs(eta - elt_l->eta_raw()) + eps : 0.;
 
-  // Total deta is twice the maximum.
-  deta = 2 * std::max(deta_r, deta_l);
+  // Now look in the positive eta direction, on the high (right) side.
+  const CaloDetDescrElement* elt_r = dd_man.get_element_raw(sampling, eta + elt->deta() + eps, phi);
+  double deta_r = elt_r ? std::abs(eta - elt_r->eta_raw()) + eps : 0.; 
+
   // Now for the phi variation.
   // The phi size can change as a function of eta, but not of phi.
   // Thus we have to look again at the adjacent eta cells, and
   // take the largest variation.
-  // Now look in the negative eta direction.
-  elt_l = dd_man.get_element_raw(sampling,
-                                 eta - elt->deta() - eps,
-                                 CaloPhiRange::fix(phi - elt->dphi() - eps));
+ 
+  // Now look in the negative eta direction, on the low-eta () side.
+  elt_l = dd_man.get_element_raw(sampling, eta - elt->deta() - eps, CaloPhiRange::fix(phi - elt->dphi() - eps));
+  double dphi_l = elt_l ? std::abs(CaloPhiRange::fix(phi - elt_l->phi_raw())) + eps : 0.; 
 
-  double dphi_l = 0; // Phi difference on the low-eta () side.
-  if (elt_l) {
-    dphi_l = std::abs(CaloPhiRange::fix(phi - elt_l->phi_raw())) + eps;
-  }
-  // Now look in the positive eta direction.
-  elt_r = dd_man.get_element_raw(sampling,
-                                 eta + elt->deta() + eps,
-                                 CaloPhiRange::fix(phi - elt->dphi() - eps));
-  double dphi_r = 0; // Phi difference on the positive (down) side.
-  if (elt_r) {
-    dphi_r = std::abs(CaloPhiRange::fix(phi - elt_r->phi_raw())) + eps;
-  }
-  // Total dphi is twice the maximum.
-  dphi = 2 * std::max(dphi_l, dphi_r);
+  // Now look in the positive eta direction, on the positive (down) side.
+  elt_r = dd_man.get_element_raw(sampling, eta + elt->deta() + eps, CaloPhiRange::fix(phi - elt->dphi() - eps));
+  double dphi_r = elt_r ? std::abs(CaloPhiRange::fix(phi - elt_r->phi_raw())) + eps : 0.; 
+  
+  // Total is twice the maximum.
+  return {2 * std::max(deta_r, deta_l), 2 * std::max(dphi_l, dphi_r)};
 }
 
 /** Function to decorate the calo cluster with position variables.
@@ -144,33 +121,41 @@ makeCorrection1(xAOD::CaloCluster* cluster,
                 const CaloDetDescrManager& mgr,
                 const CaloSampling::CaloSample sample)
 {
+  const double clusterEtaMax = cluster->etamax(sample);
+  const double clusterPhiMax = cluster->phimax(sample);
+
   // Protections.
-  if (cluster->etamax(sample) == -999. || cluster->phimax(sample) == -999.) {
+  if (clusterEtaMax == -999. || clusterPhiMax == -999.) {
     return;
   }
-  if (std::abs(cluster->etamax(sample)) < 1E-6 &&
-      std::abs(cluster->phimax(sample)) < 1E-6) {
+  if (std::abs(clusterEtaMax) < 1E-6 && std::abs(clusterPhiMax) < 1E-6) {
     return;
   }
+
   // Get the hottest in raw co-ordinates
   // We have two kinds of enums ...
-  CaloCell_ID::CaloSample xsample =
+  const CaloCell_ID::CaloSample xsample = 
     (sample == CaloSampling::EMB1) ? CaloCell_ID::EMB1 : CaloCell_ID::EME1;
-  //
-  const CaloDetDescrElement* dde =
-    mgr.get_element(xsample, cluster->etamax(sample), cluster->phimax(sample));
+  
+  const CaloDetDescrElement* dde = mgr.get_element(xsample, 
+                                                   clusterEtaMax, 
+                                                   clusterPhiMax);
+
   if (!dde) {
     return;
   }
-  //
+  
   double etamax = dde->eta_raw();
   double phimax = dde->phi_raw();
-  // now Locate the +-1 range
-  double detastr(-999);
-  double dphistr(-999);
-  // Raw co-ordinates used here
-  etaphi_range(mgr, etamax, phimax, xsample, detastr, dphistr);
-  //
+
+  const CaloDetDescrElement* elt = mgr.get_element_raw(xsample, etamax, phimax);
+  if (!elt) {
+    return;
+  }
+
+  // Now Locate the +-1 range, use raw co-ordinates here.
+  auto [detastr, dphistr] = etaphi_range(mgr, etamax, phimax, xsample, elt);
+
   // Given the range refine the position employing the smaller window
   if (detastr > 0 && dphistr > 0) {
     CaloLayerCalculator helper;
