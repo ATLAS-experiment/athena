@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 from copy import deepcopy
@@ -988,7 +988,6 @@ class LArSaturationThreshold( Threshold ):
 class ZeroBiasThresholdTopo( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        print("threshold name is", name)
         super(ZeroBiasThresholdTopo,self).__init__(name = name, ttype = ThrType.ZBTopo, mapping = mapping, run = 3)
         self.mask0       = 0
         self.mask1       = 0
