@@ -39,14 +39,14 @@ def EfexSimMonitoringConfig(flags):
                            type='TH2I', cutmask='IsDataTowers',
                            title='Mismatched DataTower Events;LB:FirstEvtNum;Signature;Events',
                            xlabels=[""],
-                           ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
+                           ybins=1,ymin=0,ymax=1,
                            opt=['kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('LBNString,Signature;h_mismatched_EmulatedTowerEvts',
                            fillGroup="mismatches",
                            type='TH2I', cutmask='IsEmulatedTowers',
                            title='Mismatched EmulatedTower Events;LB:FirstEvtNum;Signature;Events',
                            xlabels=[""],
-                           ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
+                           ybins=1,ymin=0,ymax=1,
                            opt=['kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineTree('LBNString,LBN,EventNumber,fexReadout,timeSince,timeUntil,tobType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
                       "lbnString/string:lbn/l:eventNumber/l:fexReadout/i:timeSince/I:timeUntil/I:tobType/i:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",

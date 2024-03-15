@@ -36,9 +36,9 @@ def EfexInputMonitoringConfig(flags):
                            xlabels=[""],
                            ybins=50,ymin=-2.5,ymax=2.5,
                            opt=['kCanRebin','kAlwaysCreate'],merge="merge")
-    helper.defineTree('Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID,timeSince,timeUntil;errors',
-                                           "error/string:eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string:timeSince/I:timeUntil/I",
-                                           title="errors tree;Error",fillGroup="errors")
+    helper.defineTree('LBNString,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID,timeSince,timeUntil;errors',
+                                           "lbnString/string:error/string:eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string:timeSince/I:timeUntil/I",
+                                           title="errors tree;LBN;Error",fillGroup="errors")
 
 
     result.merge(helper.result())
