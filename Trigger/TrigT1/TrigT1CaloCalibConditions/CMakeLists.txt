@@ -20,6 +20,3 @@ atlas_add_dictionary( TrigT1CaloCalibConditionsDict
                       TrigT1CaloCalibConditions/selection.xml
                       LINK_LIBRARIES TrigT1CaloCalibConditions )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
