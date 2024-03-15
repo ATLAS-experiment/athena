@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_IISOLATIONSELECTIONTOOL_H
@@ -29,9 +29,10 @@
 ///
 /// @brief Select isolated Photons, Electrons and Muons
 ///
-struct strObj;
+
 
 namespace CP {
+    struct strObj;
     class IsolationWP;
     class IIsolationSelectionTool : virtual public asg::IAsgTool {
         /// Declare the interface that the class provides

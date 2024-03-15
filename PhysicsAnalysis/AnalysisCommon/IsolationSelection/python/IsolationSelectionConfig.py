@@ -62,11 +62,11 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
     elIsoWPs   = [ "Loose_VarRad", "TightTrackOnly_FixedRad" ]
     muIsoWPs   = [ "PflowLoose_VarRad", "Loose_VarRad" ] 
     phIsoWPs   = [ "FixedCutLoose", "TightCaloOnly" ]
+
     isoTool   = result.popToolsAndMerge( IsolationSelectionToolCfg( flags,
                                                                     ElectronWPVec = elIsoWPs,
                                                                     MuonWPVec     = muIsoWPs,
-                                                                    PhotonWPVec   = phIsoWPs
-                                                                    ))
+                                                                    PhotonWPVec   = phIsoWPs))
     # Set suffix for writing corrected isolation values
     isoDecSuffix = "CloseByCorr"
     selectionDecorator = "isoSelIsOK"
@@ -74,8 +74,10 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                        result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags, 
                                                                            IsolationSelectionTool = isoTool,
                                                                            SelectionDecorator     = selectionDecorator,
-                                                                           IsoDecSuffix           = isoDecSuffix
-                                                                           )))  
+                                                                           IsoDecSuffix           = isoDecSuffix,
+                                                                           EleContainers = [ x for x in containerNames if x.find("Ele") != -1],
+                                                                           MuoContainers = [ x for x in containerNames if x.find("Muo") != -1],
+                                                                           PhoContainers = [ x for x in containerNames if x.find("Pho") != -1])))  
     
     # Need muon selection tool to apply Loose - no pt cuts
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg

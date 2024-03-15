@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITION_H
@@ -15,16 +15,19 @@
 #include <vector>
 
 #include "AthContainers/AuxElement.h"
+#include "AsgMessaging/AsgMessaging.h"
 
-struct strObj {
-    float pt{0.f};
-    float eta{0.f};
-    std::vector<float> isolationValues;
-    xAOD::Type::ObjectType type{xAOD::Type::ObjectType::EventInfo};
-};
+
 
 namespace CP {
-    class IsolationCondition {
+    struct strObj {
+        float pt{0.f};
+        float eta{0.f};
+        std::vector<float> isolationValues;
+        xAOD::Type::ObjectType type{xAOD::Type::ObjectType::EventInfo};
+    };
+
+    class IsolationCondition : public asg::AsgMessaging {
     public:
         IsolationCondition(const std::string& name, xAOD::Iso::IsolationType isoType, const std::string& isoDecSuffix = "");
         IsolationCondition(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoTypes, const std::string& isoDecSuffix = "");

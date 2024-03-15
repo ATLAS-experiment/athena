@@ -266,7 +266,7 @@ namespace CP {
         if (cache.prim_vtx) {
             // require a primary vertex for isolation correction - expect that if there is not primary vertex, then we only need to assure that the cache.not_sel_parts are treated correctly below
             for (const xAOD::IParticle* particle : cache.prim_parts) {
-                ATH_MSG_DEBUG("Correct the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
+                ATH_MSG_DEBUG("Correct the isolation of particle "<<particleName(particle)<< " with pt: " << particle->pt() * MeVtoGeV << " GeV"
                                                                             << " eta: " << particle->eta()
                                                                             << " phi: " << particle->phi());
 
@@ -553,7 +553,7 @@ namespace CP {
         }
         IsoHelperMap::const_iterator Itr = m_isohelpers.find(type);
         if (Itr == m_isohelpers.end() || Itr->second->getOriginalIsolation(par, isoValue) == CorrectionCode::Error) {
-            ATH_MSG_WARNING("Could not retrieve the isolation variable " << toString(type));
+            ATH_MSG_WARNING(__func__<<"() -- "<<__LINE__<<" Could not retrieve the isolation variable " << toString(type));
             return CorrectionCode::Error;
         } else if (cache.tracks.empty())
             return CorrectionCode::Ok;

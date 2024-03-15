@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOVARIABLEHELPER_H
@@ -7,6 +7,7 @@
 
 #include <IsolationSelection/Defs.h>
 #include <PATInterfaces/CorrectionCode.h>
+#include <AsgMessaging/AsgMessaging.h>
 #include <xAODBase/IParticle.h>
 
 #include <memory>
@@ -16,7 +17,7 @@ namespace CP {
 
     typedef std::unique_ptr<IsoVariableHelper> IsoHelperPtr;
 
-    class IsoVariableHelper {
+    class IsoVariableHelper: public asg::AsgMessaging {
     public:
         CorrectionCode getOriginalIsolation(const xAOD::IParticle* particle, float& value) const;
         CorrectionCode getIsolation(const xAOD::IParticle* particle, float& value) const;

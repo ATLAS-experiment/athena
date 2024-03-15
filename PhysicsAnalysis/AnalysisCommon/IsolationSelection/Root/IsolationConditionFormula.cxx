@@ -30,11 +30,10 @@ namespace CP {
         const float cutVal = m_cutFunction->Eval(x.pt());
         const FloatAccessor& acc = accessor();
         if (!acc.isAvailable(x)) {
-            Warning("IsolationConditionFormula", "Accessor %s is not available. Expected when using primary AODs, post-p3793 "
-                                                 "derivations (only for *FixedRad or FixedCutPflow*  for electrons), pre-p3517 "
-                                                 "derivations (only for FC*), or pre-p3830 derivations (for other electron WPs)",
-                                                 SG::AuxTypeRegistry::instance().getName(acc.auxid()).c_str());
-            if (!m_isoDecSuffix.empty()) throw std::runtime_error("IsolationConditionFormula: IsolationSelectionTool property 'IsoDecSuffix' is set to " + m_isoDecSuffix + ". Must run on derivation made with IsolationCloseByCorrection to create the isolation variables with this suffix, or remove 'IsoDecSuffix'. ");
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"Accessor "<<SG::AuxTypeRegistry::instance().getName(acc.auxid())
+                <<" is not available. Expected when using primary AODs, post-p3793 derivations (only for *FixedRad or FixedCutPflow* for electrons), "
+                <<" pre-p3517 derivations (only for FC*), or pre-p3830 derivations (for other electron WPs)");
+            if (!m_isoDecSuffix.empty()) throw std::runtime_error ("IsolationConditionCombined: IsolationSelectionTool property 'IsoDecSuffix' is set to " + m_isoDecSuffix + ". Must run on derivation made with IsolationCloseByCorrection to create the isolation variables with this suffix, or remove 'IsoDecSuffix'. ");
             return false;
         }
         if (!m_invertCut) return acc(x) <= cutVal;
