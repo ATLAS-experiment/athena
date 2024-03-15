@@ -11,6 +11,7 @@ namespace CP {
     //                                      IsoVariableHelper
     //######################################################################################################
     IsoVariableHelper::IsoVariableHelper(xAOD::Iso::IsolationType type, const std::string& backupPreFix, const std::string& isoDecSuffix) :
+        asg::AsgMessaging{"IsoVariableHelper_ "+ std::string(xAOD::Iso::toString(type))},
         m_isoType(type),
         m_BackupIso(!backupPreFix.empty()),
         m_dec_IsoIsBackup("IsBackup_" + std::string(xAOD::Iso::toString(type)) + (backupPreFix.empty() ? "" : "_") + backupPreFix),
@@ -22,16 +23,17 @@ namespace CP {
 
     CorrectionCode IsoVariableHelper::getOriginalIsolation(const xAOD::IParticle* particle, float& value) const {
         if (!particle) {
-            Error("IsoVariableHelper::getOriginalIsolation()", "No particle given");
+            ATH_MSG_ERROR(__func__<<"() -- "<<__LINE__<<": no particle given");
             return CorrectionCode::Error;
         }
         if (!m_BackupIso) {
             return getIsolationFromOriginal(particle, value);
         } else {
             if (!m_acc_IsoIsBackup.isAvailable(*particle) || !m_acc_IsoIsBackup(*particle)) {
-                Warning("IsoVariableHelper::getOriginalIsolation()",
-                        "No isolation value was backuped thus far. Did you call the BackupIsolation before for %s?",
-                        SG::AuxTypeRegistry::instance().getName(m_acc_IsoIsBackup.auxid()).c_str());
+                ATH_MSG_WARNING(__func__<<"() -- "<<__LINE__<<":"
+                        <<" No isolation value was backuped thus far. "
+                        <<"Did you call the BackupIsolation before for "
+                        <<SG::AuxTypeRegistry::instance().getName(m_acc_IsoIsBackup.auxid()));
                 return CorrectionCode::Error;
             } else {
                 value = m_acc_iso_backup(*particle);
@@ -44,15 +46,15 @@ namespace CP {
         if (originalParticle && getIsolation(originalParticle, value) == CorrectionCode::Error)
             return CorrectionCode::Error;
         else if (!originalParticle) {
-            // Suppress warning as the CloseBy tool is no longer working on a shallow copy
-            // Warning("IsoVariableHelper::getOriginalIsolation()", "No original object was found");
+            ATH_MSG_DEBUG(__func__<<"() -- "<<__LINE__<<": No orignal object was found");
             return getIsolation(particle, value);
         }
         return CorrectionCode::Ok;
     }
     CorrectionCode IsoVariableHelper::getIsolation(const xAOD::IParticle* particle, float& value) const {
         if (!particle || !m_acc_iso_variable.isAvailable(*particle)) {
-            Error("IsoVariableHelper::GetIsolation()", "Failed to retrieve isolation %s", xAOD::Iso::toCString(isotype()));
+           ATH_MSG_ERROR(__func__<<"() -- "<<__LINE__<<": Failed to retrieve isolation "<<
+                         SG::AuxTypeRegistry::instance().getName(m_acc_iso_variable.auxid()));
             return CorrectionCode::Error;
         }
         value = m_acc_iso_variable(*particle);
@@ -60,12 +62,14 @@ namespace CP {
     }
     CorrectionCode IsoVariableHelper::backupIsolation(const xAOD::IParticle* particle) const {
         if (!particle) {
-            Error("IsoVariableHelper::GetIsolation()", "No particle  given");
+            ATH_MSG_ERROR(__func__<<"() -- "<<__LINE__<<": no particle given");
             return CorrectionCode::Error;
         }
         if (m_BackupIso && (!m_acc_IsoIsBackup.isAvailable(*particle) || !m_acc_IsoIsBackup(*particle))) {
             float Isovalue = 0;
-            if (getIsolationFromOriginal(particle, Isovalue) == CorrectionCode::Error) { return CorrectionCode::Error; }
+            if (getIsolation(particle, Isovalue) == CorrectionCode::Error) { 
+                return CorrectionCode::Error; 
+            }
             m_dec_IsoIsBackup(*particle) = true;
             m_dec_iso_backup(*particle) = Isovalue;
         }
@@ -73,11 +77,11 @@ namespace CP {
     }
     CorrectionCode IsoVariableHelper::setIsolation(const xAOD::IParticle* particle, float value) const {
         if (!particle) {
-            Error("IsoVariableHelper::SetIsolation()", "No particle given");
+             ATH_MSG_ERROR(__func__<<"() -- "<<__LINE__<<": no particle given");
             return CorrectionCode::Error;
         }
         if (std::isnan(value) || std::isinf(value)) {
-            Error("IsoVariableHelper::SetIsolation()", "The value is not a number");
+            ATH_MSG_ERROR(__func__<<"() -- "<<__LINE__<<": the value is not a number");
             return CorrectionCode::Error;
         }
         m_dec_iso_variable(*particle) = value;

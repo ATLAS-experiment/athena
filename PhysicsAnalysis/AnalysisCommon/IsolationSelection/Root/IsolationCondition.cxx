@@ -8,14 +8,19 @@
 #include "xAODPrimitives/IsolationCorrection.h"
 namespace CP {
 
-    IsolationCondition::IsolationCondition(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoTypes, const std::string& isoDecSuffix) :
+    IsolationCondition::IsolationCondition(const std::string& name, 
+                                           const std::vector<xAOD::Iso::IsolationType>& isoTypes, 
+                                           const std::string& isoDecSuffix) :
+        asg::AsgMessaging{"IsolationCondition_"+name},
         m_name(name), m_isolationType(isoTypes), m_isoDecSuffix(isoDecSuffix) {
         for (const xAOD::Iso::IsolationType& iso_type : m_isolationType) { 
             std::string accName = std::string(toCString(iso_type)) + (isoDecSuffix.empty() ? "" : "_") + isoDecSuffix; 
             m_acc.emplace_back(accName); 
     }
     }
-    IsolationCondition::IsolationCondition(const std::string& name, const std::vector<std::string>& isoTypes, const std::string& isoDecSuffix) : m_name(name), m_isoDecSuffix(isoDecSuffix) {
+    IsolationCondition::IsolationCondition(const std::string& name, const std::vector<std::string>& isoTypes, const std::string& isoDecSuffix) : 
+            asg::AsgMessaging{"IsolationCondition_"+name},
+            m_name(name), m_isoDecSuffix(isoDecSuffix) {
         for (const std::string& iso_type : isoTypes) {
             m_isolationType.push_back(xAOD::Iso::IsolationType(0));
             std::string accName = iso_type + (isoDecSuffix.empty() ? "" : "_") + isoDecSuffix;
