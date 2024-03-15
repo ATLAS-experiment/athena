@@ -35,9 +35,9 @@ return StatusCode::FAILURE;
       if (!MC::isGenStable(pitr)) continue;
       // Consider all non-interacting particles
       // We want Missing Transverse Momentum, not "Missing Transverse Energy"
-      if (!MC::isInteracting(pitr->pdg_id()) || (m_useChargedNonShowering && MC::isChargedNonShowering(pitr->pdg_id()))) {
+      if (!MC::isInteracting(pitr) || (m_useChargedNonShowering && MC::isChargedNonShowering(pitr))) {
         bool addpart = true;
-        if(!m_useHadronicNu && MC::isNeutrino(pitr->pdg_id()) && !(Common::fromWZ(pitr) || Common::fromTau(pitr)) ) {
+        if(!m_useHadronicNu && MC::isNeutrino(pitr) && !(Common::fromWZorTau(pitr)) ) {
           addpart = false; // ignore neutrinos from hadron decays
         }
         if(addpart) {
@@ -50,7 +50,7 @@ return StatusCode::FAILURE;
   }
 
   // Now see what the total missing Et is and compare to minimum
-  double met = std::sqrt(sumx*sumx + sumy*sumy);
+  double met = std::hypot(sumx,sumy);
   ATH_MSG_DEBUG("Totals for event: EX = " << sumx << ", EY = "<< sumy << ", ET = " << met);
   setFilterPassed(met >= m_METmin);
   return StatusCode::SUCCESS;

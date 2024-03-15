@@ -33,7 +33,7 @@ bool prompt( const xAOD::TruthParticle* part,ToolHandle<IMCTruthClassifier>& cla
   }
 
 
-bool fromWZ(const HepMC::ConstGenParticlePtr& part )
+static bool fromWZ(const HepMC::ConstGenParticlePtr& part )
 {
   // Loop through parents
   // Hit a hadron -> return false
@@ -63,7 +63,7 @@ bool fromWZ(const HepMC::ConstGenParticlePtr& part )
   return false;
 }
 
-bool fromTau(const HepMC::ConstGenParticlePtr& part )
+static bool fromTau(const HepMC::ConstGenParticlePtr& part )
 {
   // Loop through parents
   // Find a tau -> return true
@@ -88,7 +88,10 @@ bool fromTau(const HepMC::ConstGenParticlePtr& part )
 #endif
   return false;
 }
-     
+
+bool fromWZorTau(const HepMC::ConstGenParticlePtr& part ) { return fromWZ(part)||fromTau(part); }
+
+ 
 void classify(ToolHandle<IMCTruthClassifier>& classif,
         const xAOD::TruthParticle * theParticle,
         unsigned int& particleOutCome,

@@ -8,8 +8,7 @@
 #include "GaudiKernel/ToolHandle.h"
 namespace Common {
   bool prompt( const xAOD::TruthParticle* part,ToolHandle<IMCTruthClassifier>& m_classif );
-  bool fromTau(const HepMC::ConstGenParticlePtr& part );
-  bool fromWZ(const HepMC::ConstGenParticlePtr& part );
+  bool fromWZorTau(const HepMC::ConstGenParticlePtr& part );
 void classify(ToolHandle<IMCTruthClassifier>& m_classif,
 const xAOD::TruthParticle * theParticle,
         unsigned int& particleOutCome,
