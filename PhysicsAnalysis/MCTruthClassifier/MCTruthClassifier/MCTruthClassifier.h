@@ -257,8 +257,6 @@ private:
   double fracParticleInJet(const xAOD::TruthParticle*, const xAOD::Jet*, bool DR, bool nparts) const;
   void findJetConstituents(const xAOD::Jet*, std::set<const xAOD::TruthParticle*>& constituents, bool DR) const;
 #endif
-  // Now that we use TLorentzVector for the momentum base class, this is straightforward
-  template <class A, class B> inline double deltaR(A& v1, B& v2) const {return v1.p4().DeltaR(v2.p4());}
 
   static MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) ;
 
