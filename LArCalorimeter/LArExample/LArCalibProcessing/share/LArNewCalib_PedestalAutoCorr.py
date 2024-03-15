@@ -20,7 +20,7 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408913', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="All", help='Partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data23_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data24_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
@@ -83,7 +83,8 @@ if __name__=='__main__':
    flags.LArCalib.Input.RunNumbers = [int(args.run),]
    flags.LArCalib.Input.isRawData = args.rawdata
 
-
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
    # Input files
    flags.Input.Files=flags.LArCalib.Input.Files
@@ -138,18 +139,24 @@ if __name__=='__main__':
 
    flags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputPedAutoCorrRootFileName
    flags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPedAutoCorrPoolFileName
-   flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
+   if args.outsql.startswith("/"):
+      flags.IOVDb.DBConnection="sqlite://;schema=" + args.outsql +";dbname=CONDBR2"
+   else:   
+      flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
    #BadChannels sqlite file to be created 
-   flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
+   if args.badsql.startswith("/"):
+      flags.LArCalib.BadChannelDB =  args.badsql
+   else:   
+      flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
 
    #Other potentially useful flags-settings:
    
    #Define the global output Level:
-   from AthenaCommon.Constants import INFO 
+   from AthenaCommon.Constants import INFO
    flags.Exec.OutputLevel = INFO
 
    from AthenaConfiguration.Enums import LHCPeriod
@@ -158,12 +165,20 @@ if __name__=='__main__':
    flags.lock()
    
    # create bad chan sqlite file
+   cmdlinerm = (['/bin/rm', '-f', flags.LArCalib.BadChannelDB])
    if not flags.LArCalib.isSC:
       cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-t', flags.IOVDb.GlobalTag, '-c', '-a',  '-hitag'])
    else:   
-      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-of', '/LAR/BadChannelsOfl/BadChannelsSC', '-t', 'LARBadChannelsOflBadChannels-RUN2-empty', '-ot', 'LARBadChannelsOflBadChannelsSC-RUN2-UPD3-00', '-c', '-a',  '-hitag', '-ch', '0'])
-      cmdline1 = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-of', '/LAR/BadChannelsOfl/MissingFEBsSC', '-t', flags.IOVDb.GlobalTag, '-ot', 'LARBadChannelsOflMissingFEBsSC-RUN2-UPD3-01', '-a',  '-hitag'])
+      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannelsSC',  '-t', 'LARBadChannelsOflBadChannelsSC'+flags.LArCalib.BadChannelTagSC, '-c', '-a',  '-hitag', '-ch', '0'])
 
+   try:
+      cp = subprocess.run(cmdlinerm, check=True, capture_output=True )
+   except Exception as e:
+      print((" ").join(cmdlinerm))
+      log.info('not existing BadChan sqlite file, fine')
+      sys.exit(-1)
+   print((" ").join(cmdlinerm))
+   print(cp.stdout)
    try:
       cp = subprocess.run(cmdline, check=True, capture_output=True )
    except Exception as e:
@@ -171,14 +186,9 @@ if __name__=='__main__':
       print((" ").join(cmdline))
       log.error('Could not create BadChan sqlite file !!!!')
       sys.exit(-1)
+   print((" ").join(cmdline))
+   print(cp.stdout)
  
-   if flags.LArCalib.isSC:
-      try:
-         cp = subprocess.run(cmdline1, check=True, capture_output=True )
-      except Exception as e:
-         log.error('Could not create BadChan sqlite file !!!!')
-         sys.exit(-1)
-   
    cfg=MainServicesCfg(flags)
 
    cfg.merge(LArPedestalAutoCorrCfg(flags))
@@ -187,7 +197,10 @@ if __name__=='__main__':
    cfg.run() 
 
    #build tag hierarchy in output sqlite file
-   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
+   if args.outsql.startswith("/"):
+      cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py', args.outsql , flags.IOVDb.GlobalTag])
+   else:   
+      cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
    log.debug(cmdline)
    try:
       subprocess.run(cmdline, check=True)

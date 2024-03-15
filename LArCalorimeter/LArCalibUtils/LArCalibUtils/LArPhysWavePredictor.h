@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -57,6 +57,7 @@ class ATLAS_NOT_THREAD_SAFE LArPhysWavePredictor : public AthAlgorithm
   std::string m_keyPhys;
   std::string m_keyMphysMcali;
   std::string m_keyIdealPhys;
+  std::string m_keyFcal;
 
   std::string m_groupingType;
   

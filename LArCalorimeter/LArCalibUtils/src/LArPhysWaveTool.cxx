@@ -123,8 +123,9 @@ LArWave LArPhysWaveTool::exp2Tri (const LArWave &w,const unsigned N, const doubl
 
 LArWave LArPhysWaveTool::caliPhysCorr(const unsigned N, const double dt, const LArWFParams& params) {
   LArWave w(N,dt);
-  for ( unsigned i=0 ; i<N ; i++ ) 
+  for ( unsigned i=0 ; i<N ; i++ ) {
     w.setSample(i,caliPhysCorr(i*dt,params)) ;
+  }
   return w ;
 }
 

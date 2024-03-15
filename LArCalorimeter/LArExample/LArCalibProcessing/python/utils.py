@@ -51,6 +51,10 @@ class FolderTagResolver:
                 self._msg.warning("\tCould not resolve global tag %s",globalTag)
                 self._msg.warning("\tFalling back to default tag %s",foldertag)
                 pass
+            except cool.TagRelationNotFound:
+                self._msg.warning("\tCould not find tag relation to %s",globalTag)
+                self._msg.warning("\tFalling back to default tag %s",foldertag)
+                pass
         return foldertag
           
             

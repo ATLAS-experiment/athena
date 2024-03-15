@@ -14,7 +14,7 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408920', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="Em", help='Data taking partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data23_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data24_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
@@ -32,6 +32,7 @@ if __name__=='__main__':
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
    parser.add_argument('-x','--ignoreBarrel', dest='ignoreB', default=False, action="store_true", help='ignore Barrel channels ?')
    parser.add_argument('-v','--ignoreEndcap', dest='ignoreE', default=False, action="store_true", help='ignore Endcap channels ?')
+   parser.add_argument('-w','--doValid', dest='doValid', default=False, action="store_true", help='run vcalidation ?')
 
 
    args = parser.parse_args()
@@ -83,7 +84,10 @@ if __name__=='__main__':
    flags.LArCalib.Input.Type = args.trig
    flags.LArCalib.Input.RunNumbers = [int(args.run),]
    flags.LArCalib.Input.Database = args.outpdir + "/" +args.inpsql
-   flags.LArCalib.Input.Database2 = args.outpdir + "/" +args.inofcsql
+   if 'db' in args.inofcsql:
+      flags.LArCalib.Input.Database2 = args.outpdir + "/" +args.inofcsql
+   else:   
+      flags.LArCalib.Input.Database2 = args.inofcsql
    gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
    flags.LArCalib.Gain=gainNumMap[args.gain.upper()]
 
@@ -132,7 +136,6 @@ if __name__=='__main__':
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
    flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
-   flags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    
    #Output of this job:
    OutputRampRootFileName = args.outrprefix + "_" + args.run
@@ -155,12 +158,22 @@ if __name__=='__main__':
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
-   #Other potentially useful flags-settings:
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
+   #run validation:
+   if flags.LArCalib.isSC:
+      flags.LArCalib.doValidation= args.doValid
+   else:   
+      flags.LArCalib.doValidation=True 
    
    #Define the global output Level:
+   
    from AthenaCommon.Constants import INFO 
    flags.Exec.OutputLevel = INFO
-   
+   from AthenaCommon.Constants import DEBUG
+   #flags.Exec.OutputLevel = DEBUG
+
    from AthenaConfiguration.Enums import LHCPeriod
    flags.GeoModel.Run = LHCPeriod.Run3
 
@@ -170,13 +183,23 @@ if __name__=='__main__':
    
    cfg.merge(LArRampCfg(flags))
 
-   # adding new patching, again needed in summer 2023
-   if flags.LArCalib.CorrectBadChannels:
-      if flags.LArCalib.doValidation:
-         cfg.getEventAlgo("RampVal").PatchCBs=[0x3df70000]
+   # all debug messages
+   cfg.getService("MessageSvc").debugLimit = 9999999
+   cfg.printConfig()
+   # in case debug is needed
+   #if flags.LArCalib.doValidation:
+   #   from AthenaCommon.Constants import DEBUG
+   #   cfg.getEventAlgo("LArRampPatcher").OutputLevel=DEBUG
+   #   cfg.getEventAlgo("RampVal").OutputLevel=DEBUG
 
-      # block standard patching for this CB
-      cfg.getEventAlgo("LArRampPatcher").DoNotPatchCBs=[0x3df70000]
+   # switch on if some calib. board is failing:
+   # adding new patching, again needed in summer 2023
+   #if flags.LArCalib.CorrectBadChannels:
+   #   if flags.LArCalib.doValidation:
+   #      cfg.getEventAlgo("RampVal").PatchCBs=[0x3fc70000]
+   #
+   #   # block standard patching for this CB
+   #   cfg.getEventAlgo("LArRampPatcher").DoNotPatchCBs=[0x3fc70000]
 
    # ignore some channels ?
    if args.ignoreB:
@@ -184,6 +207,8 @@ if __name__=='__main__':
    if args.ignoreE:
        cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
 
+   # all messages
+   cfg.getService("MessageSvc").debugLimit = 99999999
 
    #run the application
    cfg.run() 

@@ -3,6 +3,7 @@
 */
 
 #include "LArCalibUtils/LArPhysWaveHECTool.h" 
+#include "LArIdentifier/LArOnline_SuperCellID.h"
 
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_errno.h>
@@ -65,6 +66,7 @@ LArPhysWaveHECTool::LArPhysWaveHECTool ( const std::string& type, const std::str
   declareProperty("NormalizeCali",    m_normalizeCali=false) ;//true?
   declareProperty("TimeOriginShift",  m_timeOriginShift=false) ;
   declareProperty("SubtractBaseline", m_subtractBaseline=true) ;
+  declareProperty("isSC",             m_isSC=false) ;
   declareProperty("TcalMin",          m_TcalMin=370) ;
   declareProperty("TcalMax",          m_TcalMax=490) ;
   declareProperty("TcalAverage",      m_TcalAverage=422.2) ;
@@ -78,7 +80,16 @@ LArPhysWaveHECTool::~LArPhysWaveHECTool() {}
 
 StatusCode LArPhysWaveHECTool::initialize()
 {    
-  ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
+  if ( m_isSC ) {
+    ATH_MSG_DEBUG("==== looking at SuperCells ====");
+    const LArOnline_SuperCellID* ll;
+    ATH_CHECK( detStore()->retrieve(ll, "LArOnline_SuperCellID") );
+    m_onlineHelper = (const LArOnlineID_Base*)ll;
+  } else { // m_isSC
+    const LArOnlineID* ll;
+    ATH_CHECK( detStore()->retrieve(ll, "LArOnlineID") );
+    m_onlineHelper = (const LArOnlineID_Base*)ll;
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -93,7 +104,6 @@ StatusCode LArPhysWaveHECTool::makeLArPhysWaveHEC(LArWFParams& wfParam, LArCaliW
   m_Omega0 = 0.;
   m_Taur   = 0.;
   m_gIdealPhys = &idealPhysWave;
-
 
   if(wfParam.fstep()<m_FstepMin || wfParam.fstep()>m_FstepMax){ 
     ATH_MSG_INFO (" Fstep="<< wfParam.fstep() << " out of accepted region ("<<m_FstepMin<< ","<<m_FstepMax<<") average used instead : "<<m_FstepAverage);
@@ -179,15 +189,19 @@ StatusCode LArPhysWaveHECTool::makeLArPhysWaveHEC(LArWFParams& wfParam, LArCaliW
 	   || repro_count==0){ 
 
     // if deviation is above a limit, move the CALIWAVE by 1.0 ADC counts
-    CALIWAVE_SHIFT=1.0*repro_count;
+    if ( m_normalizeCali || peak_tmp < 1.1) {
+       CALIWAVE_SHIFT=0.0005*repro_count;
+    } else {
+       CALIWAVE_SHIFT=1.0*repro_count;
+    }
 
     if(repro_count>0){
       ATH_MSG_INFO ("FT="<<FT<<" Slot="<<Slot<<" Ch="<<Channel<<" Gain="<<gain<<" adc="<<adc);
       ATH_MSG_INFO (repro_count<<". Iteration of INTEGRATION: CALIWAVE IS MOVED UP by "<<CALIWAVE_SHIFT<<" ADC units");
       if(DIFF_AMPL>=QUAL_REQ_AMPL)
-	ATH_MSG_INFO ("Problematic bin="<<idx_bad_time_ampl<<" AmplPhysGSL="<<Ampl_problem_ampl<<" Time="<< Time_problem_ampl <<" Deviation="<<DIFF_AMPL<<" ADC units"<<" Peak="<<peak_tmp);
+	ATH_MSG_INFO ("Problematic DIFF_AMPL bin="<<idx_bad_time_ampl<<" AmplPhysGSL="<<Ampl_problem_ampl<<" Time="<< Time_problem_ampl <<" Deviation="<<DIFF_AMPL<<" ADC units"<<" Peak="<<peak_tmp);
       if(DIFF>=QUAL_REQ)
-	ATH_MSG_INFO ("Problematic bin="<<idx_bad_time<<" AmplPhysGSL="<<Ampl_problem<<" Time="<<Time_problem<<" Deviation="<<DIFF<<" ADC units"<< " Peak="<<peak_tmp);
+	ATH_MSG_INFO ("Problematic DIFF bin="<<idx_bad_time<<" AmplPhysGSL="<<Ampl_problem<<" Time="<<Time_problem<<" Deviation="<<DIFF<<" ADC units"<< " Peak="<<peak_tmp);
     }
 
     pcal.Reset();
@@ -683,6 +697,7 @@ TF1 * LArPhysWaveHECTool::CaliWave2PhysWaveHEC(TProfile *pcal, Double_t *par, do
    mcut = 0.05*pcal->GetMaximum();
  } 
 
+ cout<<"mcut: "<<mcut<<endl;
  i5bin = 0;
  for(i=1; i<=nbin; ++i) {
    x[i-1] = pcal->GetBinCenter(i);

@@ -58,6 +58,7 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
         OFC2Ntup.ContainerKey = "LArOFC_"+postfix
         OFC2Ntup.NtupleName   = "OFC_"+postfix
         OFC2Ntup.AddFEBTempInfo   = False   
+        OFC2Ntup.AddCalib   = True   
         OFC2Ntup.isSC = flags.LArCalib.isSC
         OFC2Ntup.BadChanKey = bcKey
         result.addEventAlgo(OFC2Ntup)
@@ -67,6 +68,7 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
             OFC2NtupMu.ContainerKey = "LArOFC_"+postfix+"_mu"
             OFC2NtupMu.NtupleName   = "OFC_"+postfix+"_mu"
             OFC2NtupMu.AddFEBTempInfo   = False   
+            OFC2NtupMu.AddCalib   = True   
             OFC2NtupMu.isSC = flags.LArCalib.isSC
             OFC2NtupMu.BadChanKey = bcKey
             result.addEventAlgo(OFC2NtupMu)
@@ -76,6 +78,7 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
         Shape2Ntup.ContainerKey="LArShape_"+postfix
         Shape2Ntup.NtupleName="SHAPE_"+postfix
         Shape2Ntup.AddFEBTempInfo   = False
+        Shape2Ntup.AddCalib   = True   
         Shape2Ntup.isSC = flags.LArCalib.isSC
         Shape2Ntup.BadChanKey = bcKey
         result.addEventAlgo(Shape2Ntup)
@@ -84,7 +87,9 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     objList=["LArOFCComplete#LArOFC_"+postfix+"#"+flags.LArCalib.OFCPhys.Folder+folderSuffix,
              "LArShapeComplete#LArShape_"+postfix+"#"+flags.LArCalib.Shape.Folder+folderSuffix]
 
-    rs=FolderTagResolver()
+    if flags.LArCalib.isSC:
+       FolderTagResolver._defaultSuffix="-UPD3-00"
+    rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     OFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+folderSuffix)
     ShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+folderSuffix)
     tagList=[OFCTag,ShapeTag]
@@ -120,11 +125,13 @@ def LArOFCPhysCfg(flags,loadPhysAC=True):
     nColl=flags.LArCalib.OFC.Ncoll
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    rs=FolderTagResolver()
+    if flags.LArCalib.isSC:
+       FolderTagResolver._defaultSuffix="-UPD3-00"
+    rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     PhysWaveTag=rs.getFolderTag(flags.LArCalib.PhysWave.Folder)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
     PhysAutoCorrTag= rs.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
-    if (nColl>0):
+    if (nColl>0 and "mu" not in PhysAutoCorrTag):
         #Insert mu in tag-name:
         elems=PhysAutoCorrTag.split("-")
         PhysAutoCorrTag="-".join([elems[0]+"_mu_%i"%nColl,]+elems[1:])
@@ -147,19 +154,10 @@ def LArOFCPhysCfg(flags,loadPhysAC=True):
         result.merge(addFolders(flags,flags.LArCalib.PhysCaliTdiff.Folder,detDb="LAR_OFL", db="COMP200", tag=PhysCaliTdiffTag))
 
 
-    #def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
-    if not loadPhysAC:
-        #post-processing mode, fix SG key to allow subsequent OFC-phase picking
-        key1="_unpicked"
-    else:
-        key1=""
-
     if flags.LArCalib.isSC:
-       result.merge(_ofcAlg(flags,"3ns%s"%key1,"%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=17,dPhases=3,nDelays=24,nColl=nColl))
-       result.merge(_ofcAlg(flags,"1ns","%isamples%s"%(flags.LArCalib.OFC.Nsamples,key1),nPhases=50,dPhases=1,nDelays=24,nColl=nColl))
+       result.merge(_ofcAlg(flags,"1ns","%isamples"%(flags.LArCalib.OFC.Nsamples),nPhases=50,dPhases=1,nDelays=24,nColl=nColl))
     else:
-       result.merge(_ofcAlg(flags,"3ns%s"%key1,"%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
-       result.merge(_ofcAlg(flags,"1ns","%isamples%s"%(flags.LArCalib.OFC.Nsamples,key1),nPhases=24,dPhases=1,nDelays=24,nColl=nColl))
+       result.merge(_ofcAlg(flags,"3ns","%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))

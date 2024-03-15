@@ -57,9 +57,6 @@ if "inputFolders" not in dir():
                ]
 
 
-if not 'online' in dir():
-   online = True #False
-
 if os.access(sqliteOut,os.F_OK):
   printfunc ("File",sqliteOut,"exists already, removing ....")
   os.remove(sqliteOut)
@@ -76,12 +73,13 @@ globalflags.DatabaseInstance=dbname
 from AthenaCommon.AlgSequence import AlgSequence 
 topSequence = AlgSequence()  
 
+online=True
 include ("LArConditionsCommon/LArMinimalSetup.py")
 from LArCabling.LArCablingAccess import LArOnOffIdMapping
 LArOnOffIdMapping()
 if SuperCells:
-  from LArCabling.LArCablingAccess import LArOnOffIdMappingSC,LArCalibIdMappingSC
-  LArOnOffIdMappingSC()
+   from LArCabling.LArCablingAccess import LArOnOffIdMappingSC,LArCalibIdMappingSC
+   LArOnOffIdMappingSC()
 
 
 theApp.EvtMax = 1
@@ -89,7 +87,7 @@ conddb.setGlobalTag(globalTag) #For id mapping
 
 svcMgr.PoolSvc.SortReplicas=False
 
-svcMgr.EventSelector.RunNumber = 2147483647
+svcMgr.EventSelector.RunNumber = 999999
 
 from LArCalibTools.LArCalibToolsConf import LArCompleteToFlat
 theLArCompleteToFlat=LArCompleteToFlat()
@@ -154,6 +152,7 @@ svcMgr.IOVRegistrationSvc.OverrideTypes = types;
 
 svcMgr.DetectorStore.Dump=True
 
+svcMgr.PoolSvc.ReadCatalog += ["xmlcatalog_file:PoolFileCatalog.xml"]
 
 if 'poolcat' in dir():
   svcMgr.PoolSvc.WriteCatalog="xmlcatalog_file:"+poolcat

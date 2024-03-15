@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArPhysWavePredictor.h"
@@ -57,6 +57,7 @@ LArPhysWavePredictor::LArPhysWavePredictor (const std::string& name, ISvcLocator
   declareProperty("KeyCaliList",      m_keyCali);                  // Keys of LArCaliWaveContainers
   declareProperty("KeyPhys",          m_keyPhys = "LArPhysWave") ; // Key of LArPhysWaveContainer
   declareProperty("KeyIdealPhys",     m_keyIdealPhys   = "LArPhysWaveHECIdeal") ; // added by FT    
+  declareProperty("KeyFcal",          m_keyFcal   = "FCALFromTB") ; // added by FT    
   declareProperty("KeyMphysMcali",    m_keyMphysMcali = "LArMphysOverMcal") ; // Key of LArMphysOverMcalComplete
   declareProperty("DumpMphysMcali",   m_dumpMphysMcali = false ) ; // for debugging
   declareProperty("NormalizeCali",    m_normalizeCali = false ) ; // for debugging
@@ -187,7 +188,7 @@ StatusCode LArPhysWavePredictor::stop()
 
   // Retrieve LArPhysWaveHECTool   // added by FT
   ToolHandle<LArPhysWaveHECTool> larPhysWaveHECTool("LArPhysWaveHECTool");
-  if(m_isHEC){
+  if(m_isSC || m_isHEC){
     sc=larPhysWaveHECTool.retrieve();
     if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( " Can't get LArPhysWaveHECTool " );
@@ -230,7 +231,7 @@ StatusCode LArPhysWavePredictor::stop()
   }
 
   if ( !m_useJODetCellParams ) {
-    if (!m_isHEC) {
+    if (!m_isHEC ) {
       sc = detStore()->retrieve(larDetCellParams);
       if ( sc == StatusCode::FAILURE ) {
 	ATH_MSG_WARNING( "Cannot retrieve LArDetCellParams" );
@@ -288,6 +289,18 @@ StatusCode LArPhysWavePredictor::stop()
     }
   }
   
+  const LArPhysWaveContainer *fcalPhysWaves=nullptr;
+
+  if ( m_isSC ) { //retrieve FCAL phys waves from COOL
+    sc = detStore()->retrieve(fcalPhysWaves, m_keyFcal);
+    if ( sc.isFailure() || !fcalPhysWaves) {
+      ATH_MSG_WARNING( "Cannot retrieve FCAL Phys waves" ); 
+      return sc;
+    }else {
+      ATH_MSG_INFO( "LArPhysCaliTdiff successfully retrieved" );
+    }
+  }
+
   int nchannel = 0 ;
   
   // Create LArPhysWaveContainer for predicted physics waveforms
@@ -334,7 +347,8 @@ StatusCode LArPhysWavePredictor::stop()
   std::vector<int> noTdrift;
   std::vector<int> noTdiff;
 		  
-  for ( unsigned i=0; i<CaloGain::LARNGAIN; ++i ) {
+  unsigned maxgain = m_isSC ? CaloGain::LARNGAIN : 1;
+  for ( unsigned i=0; i<maxgain; ++i ) {
     nTotal.push_back(0);
     noTcali.push_back(0);
     noFstep.push_back(0);
@@ -347,7 +361,7 @@ StatusCode LArPhysWavePredictor::stop()
   /////////////IDEAL PHYSWAVE/////////////////////////////
   // Get current LArPhysWaveContainer
   const LArPhysWaveContainer* larIdealPhysWaveContainer=nullptr;
-  if(m_isHEC){
+  if(m_isHEC || m_isSC){
     ATH_CHECK(detStore()->retrieve(larIdealPhysWaveContainer,m_keyIdealPhys));
     ATH_MSG_INFO("LArPhysWaveContainer with (key = " << m_keyIdealPhys << ") reading from StoreGate" );
   }
@@ -390,12 +404,38 @@ StatusCode LArPhysWavePredictor::stop()
           ATH_MSG_DEBUG((*itVec).size() << " LArCaliWaves found for channel " << m_onlineHelper->channel_name(itVec.channelId()) << " 0x" 
 		       << std::hex << itVec.channelId().get_identifier32().get_compact() << std::dec);
 	  const HWIdentifier chid = itVec.channelId();
+          //
+	  // region and layer information are needed
+	  Identifier id;
+	  try {
+            id = cabling->cnvToIdentifier(chid);
+          } catch (LArID_Exception & execpt) {
+	    ATH_MSG_ERROR( "LArCabling exception caught for channel 0x" << MSG::hex << chid << MSG::dec 
+	        << ". Skipping channel." ) ;
+            continue ;
+	  }
 
-          // Skip if it is FCAL
-          if(m_onlineHelper->isFCALchannel(chid)) continue;
+	  int region = m_caloCellId->region(id);
+          int layer  = m_caloCellId->sampling(id);
 
 	  if ( nchannel < 100 || ( nchannel < 1000 && nchannel%100==0 ) || nchannel%1000==0 ) 
 	     ATH_MSG_INFO( "Processing calibration waveform number " << nchannel );
+
+          if(m_onlineHelper->isFCALchannel(chid)) {
+             if(!m_isSC) continue; // Skip if it is FCAL ini standard readout
+             LArPhysWave fcalw; 
+             // we have only 3 FCAL phys waves, according a layer
+             switch (layer) {
+                case 1: fcalw = fcalPhysWaves->get(HWIdentifier(0x3b300000),0); break;
+                case 2: fcalw = fcalPhysWaves->get(HWIdentifier(0x3b348000),0); break;
+                case 3: fcalw = fcalPhysWaves->get(HWIdentifier(0x3b368000),0); break;
+                default : ATH_MSG_ERROR("Wrong layer for FCAL SC: "<<layer<<" skipping channel 0x"<< MSG::hex << chid << MSG::dec); continue;
+             }
+                          
+             larPhysWaveContainer->setPdata(chid,fcalw, gain);
+             continue;
+          } //isFCALchannel 
+
 
 	  if ( larCaliWave.getFlag() == LArWave::dac0 )  continue ; // skip dac0 waves          
 	  // TODO: here we should add a DAC selection mechanism for TCM method
@@ -407,25 +447,13 @@ StatusCode LArPhysWavePredictor::stop()
 
 	  // calibration pulse copy (working around the const iterator to be able to manipulate it...)
 	  LArCaliWave theLArCaliWave = larCaliWave;
+          ++nchannel;
 	  
-	  // region and layer information are needed
-	  Identifier id;
-	  try {
-            id = cabling->cnvToIdentifier(chid);
-          } catch (LArID_Exception & execpt) {
-	    ATH_MSG_ERROR( "LArCabling exception caught for channel 0x" << MSG::hex << chid << MSG::dec 
-	        << ". Skipping channel." ) ;
-            continue ;
-	  }
-
 	  if ( !cabling->isOnlineConnected(chid)  ) { // unconnected channel : skipping ...          
 	    ATH_MSG_VERBOSE("Unconnected channel 0x" << MSG::hex << chid << MSG::dec 
 			    << ". Skipping channel.");
 	    continue ; 	  
 	  }
-
-	  int region = m_caloCellId->region(id);
-          int layer  = m_caloCellId->sampling(id);
 
   	  // Get the parameters corresponding to current LArCaliWave
 	  float Tcali;
@@ -556,7 +584,9 @@ StatusCode LArPhysWavePredictor::stop()
 	  //      
 	  LArPhysWave larPhysWave;
 	  float MphysMcali ;	
-	  if(larIdealPhysWaveContainer && m_caloCellId->is_lar_hec(id)) {
+	  //if(larIdealPhysWaveContainer && m_caloCellId->is_lar_hec(id)) {
+          // decide by online helper, not sure if offline is working for SC
+	  if(larIdealPhysWaveContainer && m_onlineHelper->isHECchannel(chid)) {
 	    const LArPhysWave& laridealPhysWave = larIdealPhysWaveContainer -> get(chid,gain);
 	    int LArWaveFlag=LArWave::predCali;    // 111 - for HEC Wave
 	    //int LArIdealPhysWaveFlag=LArWave::predCali;    // 111 - for HEC Wave
