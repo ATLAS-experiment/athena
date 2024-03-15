@@ -30,12 +30,12 @@ TrigTauTrackRoiUpdater::~TrigTauTrackRoiUpdater()
 
 StatusCode TrigTauTrackRoiUpdater::initialize()
 {
-  ATH_MSG_INFO( "Initializing " << name() );
-  ATH_MSG_INFO( "z0HalfWidth  " << m_z0HalfWidth );
-  ATH_MSG_INFO( "etaHalfWidth " << m_etaHalfWidth );
-  ATH_MSG_INFO( "phiHalfWidth " << m_phiHalfWidth );
-  ATH_MSG_INFO( "nHitPix      " << m_nHitPix );
-  ATH_MSG_INFO( "nSiHoles     " << m_nSiHoles );
+  ATH_MSG_DEBUG( "Initializing " << name() );
+  ATH_MSG_DEBUG( "z0HalfWidth  " << m_z0HalfWidth );
+  ATH_MSG_DEBUG( "etaHalfWidth " << m_etaHalfWidth );
+  ATH_MSG_DEBUG( "phiHalfWidth " << m_phiHalfWidth );
+  ATH_MSG_DEBUG( "nHitPix      " << m_nHitPix );
+  ATH_MSG_DEBUG( "nSiHoles     " << m_nSiHoles );
 
   if(m_z0HalfWidth<0. || m_etaHalfWidth<0. || m_phiHalfWidth<0.) {
     ATH_MSG_ERROR( "Incorrect parameters." );
@@ -43,9 +43,9 @@ StatusCode TrigTauTrackRoiUpdater::initialize()
   }
 
   if (!m_BDTweights.empty()) {
-    ATH_MSG_INFO( "Using BDT with calibration file " << m_BDTweights );
+    ATH_MSG_DEBUG( "Using BDT with calibration file " << m_BDTweights );
     std::string inputWeightsPath = PathResolverFindCalibFile(m_BDTweights);
-    ATH_MSG_INFO( "InputWeightsPath: " << inputWeightsPath );
+    ATH_MSG_DEBUG( "InputWeightsPath: " << inputWeightsPath );
     m_reader = std::make_unique<tauRecTools::BDTHelper>();
     ATH_CHECK( m_reader->initialize(inputWeightsPath) );
   }
