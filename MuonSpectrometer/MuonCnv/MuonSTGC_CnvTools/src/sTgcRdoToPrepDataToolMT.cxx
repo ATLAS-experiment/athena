@@ -128,7 +128,6 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
         // to be fixed: for now do not set the resolution, it will be added in the next update    
         const int     gasGap = id_helper.gasGap(rdoId);
         const int    channel = id_helper.channel(rdoId);
-        const uint16_t bcTag = rdo->bcTag();
 
         NSWCalib::CalibratedStrip calibStrip;
         ATH_CHECK (m_calibTool->calibrateStrip(ctx, rdo, calibStrip));
@@ -175,16 +174,16 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
                                                                         return (prd.identify() == rdoId); 
                                                                     });
             if (it == sTgcPrds.end()) {
-                sTgcPrds.emplace_back(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time, bcTag);
+                sTgcPrds.emplace_back(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time);
                 sTgcPrds.back().setAuthor(sTgcPrepData::Author::RdoToPrdConverter);
             } else if (it->time() > calibStrip.time) {
-                *it = sTgcPrepData(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time, bcTag);
+                *it = sTgcPrepData(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time);
                 it->setAuthor(sTgcPrepData::Author::RdoToPrdConverter);
             }
         } else {
             // if not merging just add the PRD to the collection
             prdColl->push_back(new sTgcPrepData(rdoId,hash, std::move(localPos), std::move(rdoList), std::move(cov), 
-                                                detEl, calibratedCharge, calibStrip.time, bcTag));
+                                                detEl, calibratedCharge, calibStrip.time));
         } 
     }
 

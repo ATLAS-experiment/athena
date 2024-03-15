@@ -38,12 +38,11 @@ Muon::sTgcPrepData sTgcPrepDataCnv_p3::createsTgcPrepData(const Muon::sTgcPrepDa
                            std::move(rdoList),
                            std::move(cmat),
                            detEl,
-			                     copy(persObj->m_charge),
-			                     copy(persObj->m_time),
-			                     copy(persObj->m_bcBitMap),
-			                     copy(persObj->m_stripNumbers),
-			                     copy(persObj->m_stripTimes),
-			                     copy(persObj->m_stripCharges));
+                           copy(persObj->m_charge),
+                           copy(persObj->m_time),
+                           copy(persObj->m_stripNumbers),
+                           copy(persObj->m_stripTimes),
+                           copy(persObj->m_stripCharges));
   
   data.setAuthor(static_cast<Muon::sTgcPrepData::Author>(persObj->m_author));
   data.setQuality(static_cast<Muon::sTgcPrepData::Quality>(persObj->m_quality));
@@ -69,8 +68,6 @@ void sTgcPrepDataCnv_p3::transToPers(const Muon::sTgcPrepData *transObj,
   
   persObj->m_charge       = transObj->charge();
   persObj->m_time         = transObj->time();
-  
-  persObj->m_bcBitMap     = transObj->getBcBitMap();
   
   persObj->m_stripNumbers = transObj->stripNumbers(); 
   persObj->m_stripTimes   = transObj->stripTimes(); 

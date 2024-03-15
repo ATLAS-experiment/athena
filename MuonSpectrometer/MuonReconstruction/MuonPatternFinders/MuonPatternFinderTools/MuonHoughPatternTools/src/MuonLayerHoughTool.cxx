@@ -1875,14 +1875,12 @@ namespace Muon {
 
             // only pick up phi hits in neighbouring sectors
             if (isNeighbouringSector && channelType == 1) continue;
-            if (m_onlyUseCurrentBunch && (prd->getBcBitMap() & sTgcPrepData::BCBIT_CURRENT) != sTgcPrepData::BCBIT_CURRENT) continue;
             int sublayer = sublay(id);
 
             std::unique_ptr<MuonHough::HitDebugInfo> debug =
                 std::make_unique<MuonHough::HitDebugInfo>(technology, sector, region, layer, sublayer);
             debug->isEtaPhi = 1;
-            debug->trigConfirm = (prd->getBcBitMap() & sTgcPrepData::BCBIT_CURRENT) == sTgcPrepData::BCBIT_CURRENT;
-            debug->time = prd->getBcBitMap();
+            debug->trigConfirm = true;
 
             std::map<unsigned int, unsigned int>::const_iterator pos = m_techToTruthNameIdx.find(technology);
             if (pos != m_techToTruthNameIdx.end()) { matchTruth(truthHits, *truthCollections[pos->second], id, *debug); }

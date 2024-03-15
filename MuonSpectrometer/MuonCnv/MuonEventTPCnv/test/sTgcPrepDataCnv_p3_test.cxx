@@ -41,7 +41,6 @@ void compare (const Muon::sTgcPrepData& p1,
   assert (p1.detectorElement() == p2.detectorElement());
   assert (p1.charge() == p2.charge());
   assert (p1.time() == p2.time());
-  assert (p1.getBcBitMap() == p2.getBcBitMap());
   assert (p1.author() == p2.author());
   assert (p1.quality() == p2.quality());
 }
@@ -80,8 +79,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                              std::move(cov),
                              nullptr,
                              123,
-                             78,
-                             3);
+                             78);
   trans1.setAuthor(Muon::sTgcPrepData::Author::SimpleClusterBuilder);
   trans1.setQuality(Muon::sTgcPrepData::Quality::unKnown);
                             

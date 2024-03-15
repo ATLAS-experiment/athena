@@ -41,7 +41,6 @@ void compare (const Muon::sTgcPrepData& p1,
   assert (p1.detectorElement() == p2.detectorElement());
   assert (p1.charge() == p2.charge());
   assert (p1.time() == p2.time());
-  assert (p1.getBcBitMap() == p2.getBcBitMap());
 }
 
 void testit (const Muon::sTgcPrepData& trans1)
@@ -78,8 +77,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                              std::move(cov),
                              nullptr,
                              123,
-                             78,
-                             3);
+                             78);
                             
   testit (trans1);
 }

@@ -30,7 +30,6 @@ namespace Muon {
     sTgcPrepData &operator=(const sTgcPrepData &) = delete;
     sTgcPrepData &operator=(sTgcPrepData &&) noexcept = default;
 
-
     /** @brief Constructor.
     @param RDOId The identifier of the central strip of the cluster
     @param locpos The local coords of the measurement (this object will now own the LocalPostion)
@@ -41,32 +40,26 @@ namespace Muon {
     @param bcBitMap bitmap storing in which bunches the channel fired
     */
     sTgcPrepData( const Identifier& RDOId,
-          const IdentifierHash &idDE,
-          Amg::Vector2D&& locpos,
-          std::vector<Identifier>&& rdoList,
-          Amg::MatrixX&& locErrMat,
-          const MuonGM::sTgcReadoutElement* detEl,
-          const int charge,
-          const short int time,
-          const uint16_t bcBitMap,
-          std::vector<uint16_t>&& stripNumbers,
-          std::vector<short int>&& stripTimes,
-          std::vector<int>&& stripCharges );
+                  const IdentifierHash &idDE,
+                  Amg::Vector2D&& locpos,
+                  std::vector<Identifier>&& rdoList,
+                  Amg::MatrixX&& locErrMat,
+                  const MuonGM::sTgcReadoutElement* detEl,
+                  const int charge,
+                  const short int time,
+                  std::vector<uint16_t>&& stripNumbers,
+                  std::vector<short int>&& stripTimes,
+                  std::vector<int>&& stripCharges );
 
 
     sTgcPrepData( const Identifier& RDOId,
-          const IdentifierHash &idDE,
-          Amg::Vector2D&& locpos,
-          std::vector<Identifier>&& rdoList,
-          Amg::MatrixX&& locErrMat,
-          const MuonGM::sTgcReadoutElement* detEl,
-          const int charge = 0,
-          const short int time   = 0,
-          const uint16_t bcBitMap=0);
-
-
-
-
+                  const IdentifierHash &idDE,
+                  Amg::Vector2D&& locpos,
+                  std::vector<Identifier>&& rdoList,
+                  Amg::MatrixX&& locErrMat,
+                  const MuonGM::sTgcReadoutElement* detEl,
+                  const int charge = 0,
+                  const short int time = 0);
 
     /** @brief Destructor: */
     virtual ~sTgcPrepData() = default;
@@ -94,9 +87,7 @@ namespace Muon {
     bit2 for Previous BC, bit1 for Current BC, bit0 for Next BC */
     int charge() const;
     short int time() const;
-    uint16_t getBcBitMap() const;
-    enum {BCBIT_UNDEFINED=0, BCBIT_NEXT=1, BCBIT_CURRENT=2, BCBIT_PREVIOUS=4};
-
+    
     /** @brief returns the list of strip numbers */
     const std::vector<uint16_t>& stripNumbers() const;
 
@@ -129,8 +120,6 @@ namespace Muon {
     const MuonGM::sTgcReadoutElement* m_detEl{nullptr};
     int m_charge{0};
     short int m_time{0};
-    uint16_t m_bcBitMap{0};
-
     /** @list of strip numbers, time and charge, of the strips associated to the PRD */
     std::vector<uint16_t> m_stripNumbers{};
      /**
@@ -147,13 +136,11 @@ namespace Muon {
 
   };
 
-  inline const MuonGM::sTgcReadoutElement* sTgcPrepData::detectorElement() const
-  {
+  inline const MuonGM::sTgcReadoutElement* sTgcPrepData::detectorElement() const {
     return m_detEl;
   }
   // return globalPosition:
-  inline const Amg::Vector3D& sTgcPrepData::globalPosition() const
-  {
+  inline const Amg::Vector3D& sTgcPrepData::globalPosition() const {
     if (not m_globalPosition) {
       m_globalPosition.set(std::make_unique<Amg::Vector3D>(
         m_detEl->surface(identify())
@@ -164,35 +151,13 @@ namespace Muon {
     return *m_globalPosition;
   }
 
-  inline int sTgcPrepData::charge() const
-  {
-    return m_charge;
-  }
+  inline int sTgcPrepData::charge() const { return m_charge; }
 
-  inline short int sTgcPrepData::time() const
-  {
-    return m_time;
-  }
+  inline short int sTgcPrepData::time() const { return m_time; }
 
-  inline uint16_t sTgcPrepData::getBcBitMap() const
-  {
-    return m_bcBitMap;
-  }
-
-  inline const std::vector<uint16_t>& sTgcPrepData::stripNumbers() const
-  {
-    return m_stripNumbers;
-  }
-
-  inline const std::vector<short int>& sTgcPrepData::stripTimes() const
-  {
-    return m_stripTimes;
-  }
-
-  inline const std::vector<int>& sTgcPrepData::stripCharges() const
-  {
-    return m_stripCharges;
-  }
+  inline const std::vector<uint16_t>& sTgcPrepData::stripNumbers() const { return m_stripNumbers; }
+  inline const std::vector<short int>& sTgcPrepData::stripTimes() const { return m_stripTimes; }
+  inline const std::vector<int>& sTgcPrepData::stripCharges() const { return m_stripCharges; }
 
 }
 

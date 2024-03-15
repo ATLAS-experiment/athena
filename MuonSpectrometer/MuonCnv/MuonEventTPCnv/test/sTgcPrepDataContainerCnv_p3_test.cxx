@@ -47,7 +47,6 @@ void compare (const Muon::sTgcPrepData& p1,
   assert (p1.detectorElement() == p2.detectorElement());
   assert (p1.charge() == p2.charge());
   assert (p1.time() == p2.time());
-  assert (p1.getBcBitMap() == p2.getBcBitMap());
   assert(p1.author() == p2.author());
   assert(p1.quality() == p2.quality());
 }
@@ -117,8 +116,7 @@ makeclusts (const MuonGM::MuonDetectorManager& muo_dd)
          std::move(cov),
          muo_dd.getsTgcReadoutElement (clusId),
          123+offs,
-         78+i,
-         1+i/2);
+         78+i);
          cl->setAuthor(Muon::sTgcPrepData::Author::SimpleClusterBuilder);
          cl->setQuality(Muon::sTgcPrepData::Quality::unKnown);
       coll->push_back (std::move (cl));

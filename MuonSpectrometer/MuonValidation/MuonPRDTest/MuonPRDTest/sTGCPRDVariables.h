@@ -23,7 +23,6 @@ namespace MuonPRDTest{
         SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_key{};
         ScalarBranch<unsigned int>& m_NSWsTGC_nPRD{parent().newScalar<unsigned int>("N_PRD_sTGC")};
         VectorBranch<int>& m_NSWsTGC_PRD_charge{parent().newVector<int>("PRD_sTGC_charge")};
-        VectorBranch<uint16_t>& m_NSWsTGC_PRD_bcTag{parent().newVector<uint16_t>("RDO_sTGC_bcTag")};
         VectorBranch<double>& m_NSWsTGC_PRD_localPosX{parent().newVector<double>("PRD_sTGC_localPosX")};
         VectorBranch<double>& m_NSWsTGC_PRD_localPosY{parent().newVector<double>("PRD_sTGC_localPosY")};
         ThreeVectorBranch m_NSWsTGC_PRD_globalPos{parent(), "PRD_sTGC_globalPos"};

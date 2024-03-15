@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrepRawData/sTgcPrepData.h"
@@ -15,7 +15,6 @@ sTgcPrepData::sTgcPrepData(const Identifier& RDOId,
                            const MuonGM::sTgcReadoutElement* detEl,
                            const int charge,
                            const short int time,
-                           const uint16_t bcBitMap,
                            std::vector<uint16_t>&& stripNumbers,
                            std::vector<short int>&& stripTimes,
                            std::vector<int>&& stripCharges)
@@ -23,7 +22,6 @@ sTgcPrepData::sTgcPrepData(const Identifier& RDOId,
   , m_detEl(detEl)
   , m_charge(charge)
   , m_time(time)
-  , m_bcBitMap(bcBitMap)
   , m_stripNumbers(std::move(stripNumbers))
   , m_stripTimes(std::move(stripTimes))
   , m_stripCharges(std::move(stripCharges)) {}
@@ -35,13 +33,11 @@ sTgcPrepData::sTgcPrepData(const Identifier& RDOId,
                            Amg::MatrixX&& locErrMat,
                            const MuonGM::sTgcReadoutElement* detEl,
                            const int charge,
-                           const short int time,
-                           const uint16_t bcBitMap)
+                           const short int time)
   : MuonCluster(RDOId, idDE, locpos, std::move(rdoList), std::move(locErrMat))
   , m_detEl(detEl)
   , m_charge(charge)
-  , m_time(time)
-  , m_bcBitMap(bcBitMap){}
+  , m_time(time){}
 
   MsgStream& sTgcPrepData::dump( MsgStream& stream) const {
       stream << MSG::INFO<<"sTgcPrepData {"<<std::endl;    

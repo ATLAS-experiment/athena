@@ -32,7 +32,6 @@ namespace MuonPRDTest {
 
                 m_NSWsTGC_PRD_id.push_back(Id);
                 m_NSWsTGC_PRD_charge.push_back(prd->charge());
-                m_NSWsTGC_PRD_bcTag.push_back(prd->getBcBitMap());
 
                 const MuonGM::sTgcReadoutElement* det = prd->detectorElement();
                 if (!det) {

@@ -148,7 +148,6 @@ StatusCode Muon::CaruanaSTgcClusterBuilderTool::getClusters(const EventContext& 
                                                                             cluster.at(0).detectorElement(),
                                                                             std::accumulate(elementsCharge.begin(), elementsCharge.end(), 0),
                                                                             (short int)0,
-                                                                            (uint16_t)0,
                                                                             std::move(elementsChannel),
                                                                             std::move(elementsTime),
                                                                             std::move(elementsCharge));
