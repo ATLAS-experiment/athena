@@ -18,9 +18,15 @@ def getStreamEVNT_TR_ItemList(flags):
 
 def getStreamHITS_ItemList(flags):
     #Add to item list
-    #TODO - make a separate function (combine with G4AtlasAlg one?)
-    ItemList = ["McEventCollection#TruthEvent",
-                "JetCollection#*"]
+
+    ItemList = ["McEventCollection#TruthEvent"]
+
+    # Legacy EVNT inputs only
+    InputTypes = [ entry.split('#')[0] for entry in flags.Input.TypedCollections ]
+    if 'JetCollection' in InputTypes:
+        # In the case that JetCollections are present in the EVNT
+        # file, they should be copied to the HITS file
+        ItemList = ["JetCollection#*"]
 
     ItemList+=["xAOD::EventInfo#EventInfo",
                "xAOD::EventAuxInfo#EventInfoAux.",
@@ -30,15 +36,27 @@ def getStreamHITS_ItemList(flags):
     if flags.Sim.IncludeParentsInG4Event:
         ItemList += ["McEventCollection#GEN_EVENT"]
 
-    ItemList += ["xAOD::JetContainer#AntiKt4TruthJets",
-                 "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
-                 "xAOD::JetContainer#AntiKt6TruthJets",
-                 "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
+    # Truth Jet Containers are only usually present in minbias
+    # background EVNT files (they should then be copied to the HITS
+    # file)
+    if 'xAOD::JetContainer#AntiKt4TruthJets' in flags.Input.TypedCollections:
+        ItemList += ["xAOD::JetContainer#AntiKt4TruthJets",
+                     "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights"]
 
-    # pile-up truth particles
-    ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles",
-                 "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
+    if 'xAOD::JetContainer#AntiKt6TruthJets' in flags.Input.TypedCollections:
+        ItemList += ["xAOD::JetContainer#AntiKt6TruthJets",
+                     "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
 
+    # pile-up TruthParticleContainers are only usually present in
+    # minbias background EVNT files (they should then be copied to the
+    # HITS file)
+    if 'xAOD::TruthParticleContainer#TruthPileupParticles' in flags.Input.TypedCollections:
+        ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles",
+                     "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
+
+    # HijingEventParams are usually only present in EVNT files
+    # produced with Hijing (they should then be copied to the HITS
+    # file)
     if 'Hijing_event_params' in flags.Input.Collections:
         ItemList += ["HijingEventParams#Hijing_event_params"]
 
@@ -100,7 +118,6 @@ def getStreamHITS_ItemList(flags):
             from MuonG4SD.MuonG4SDConfig import OutputSimContainersCfg
             ItemList += OutputSimContainersCfg(flags)
 
-    
         ItemList += ["TrackRecordCollection#MuonExitLayer"]
 
     if flags.Detector.EnableLucid:
