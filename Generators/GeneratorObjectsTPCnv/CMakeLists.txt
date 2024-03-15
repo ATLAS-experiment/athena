@@ -37,7 +37,7 @@ atlas_add_test( McEventCollectionCnv_p5_test
                 SOURCES
                 test/McEventCollectionCnv_p5_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools 
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools
                 LOG_IGNORE_PATTERN "HepMCWeightSvc +INFO|No run info" )
 
 atlas_add_test( HepMcParticleLinkCnv_p1_test
@@ -56,12 +56,18 @@ atlas_add_test( McEventCollectionCnv_p6_test
                 SOURCES
                 test/McEventCollectionCnv_p6_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools 
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools
                 LOG_IGNORE_PATTERN "HepMCWeightSvc +INFO|No run info" )
+
+atlas_add_test( HepMcParticleLinkCnv_p3_test
+                SOURCES
+                test/HepMcParticleLinkCnv_p3_test.cxx
+                INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv StoreGateLib TestTools  TruthUtils)
 
 atlas_add_test( McEventCollectionCnv_p7_test
                 SOURCES
                 test/McEventCollectionCnv_p7_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools 
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools
                 LOG_IGNORE_PATTERN "HepMCWeightSvc +INFO|No run info" )

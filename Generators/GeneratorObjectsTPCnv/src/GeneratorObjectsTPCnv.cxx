@@ -7,6 +7,7 @@
 
 #include "GeneratorObjectsTPCnv/HepMcParticleLink_p1.h"
 #include "GeneratorObjectsTPCnv/HepMcParticleLink_p2.h"
+#include "GeneratorObjectsTPCnv/HepMcParticleLink_p3.h"
 
 #include "GeneratorObjectsTPCnv/GenParticle_p1.h"
 #include "GeneratorObjectsTPCnv/GenVertex_p1.h"
@@ -54,17 +55,17 @@ DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p1,
                       McEventCollection,
                       McEventCollection_p1,
                       Athena::TPCnvVers::Old)
-                      
+
 DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p2,
                       McEventCollection,
                       McEventCollection_p2,
                       Athena::TPCnvVers::Old)
-                      
+
 DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p3,
                       McEventCollection,
                       McEventCollection_p3,
                       Athena::TPCnvVers::Old)
-                      
+
 DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p4,
                       McEventCollection,
                       McEventCollection_p4,

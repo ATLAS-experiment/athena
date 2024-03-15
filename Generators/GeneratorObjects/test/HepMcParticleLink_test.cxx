@@ -29,6 +29,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "CLHEP/Units/SystemOfUnits.h"
 
 // Athena headers
+#include "TruthUtils/MagicNumbers.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -286,10 +287,14 @@ namespace MCTesting {
 
     HepMcParticleLink gammaLink1(pGamma, 0,
                                  HepMcParticleLink::IS_EVENTNUM);
+    HepMcParticleLink gammaLink2(HepMC::uniqueID(pGamma), 0,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
     HepMcParticleLink gammaLink3(HepMC::barcode(pGamma), 0,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     HepMcParticleLink gammaLink11(pGamma, 1,
                                   HepMcParticleLink::IS_EVENTNUM);
+    HepMcParticleLink gammaLink12(HepMC::uniqueID(pGamma), 1,
+                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
     HepMcParticleLink gammaLink13(HepMC::barcode(pGamma), 1,
                                   HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
 
@@ -297,9 +302,9 @@ namespace MCTesting {
     out << "Testing HepMcParticleLink streamer "
         << gammaLink1 << " --- " << gammaLink11 <<std::endl;
 #ifdef HEPMC3
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet\n");
 #else
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet\n");
 #endif
 
 #ifdef GENP_DEBUG
@@ -315,6 +320,8 @@ namespace MCTesting {
     ASSERT_EQ(gammaLink1.barcode(), HepMC::barcode(pGamma));
 
     ASSERT_EQ(gammaLink1, gammaLink3);
+    ASSERT_EQ(*gammaLink11, *gammaLink12);
+    ASSERT_EQ(gammaLink11, gammaLink12);
     ASSERT_EQ(gammaLink11, gammaLink13);
 
     ASSERT_EQ(*gammaLink1, *gammaLink11);
@@ -346,6 +353,10 @@ namespace MCTesting {
     // the GenEvent in the McEventCollection should still work.
     HepMcParticleLink testLink1c(particle1,0,HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink1c.isValid() );
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent in the McEventCollection does not work
+    HepMcParticleLink testLink1d(HepMC::uniqueID(particle1),0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_ID);
+    ASSERT_FALSE( testLink1d.isValid() );
   }
 
   TEST_F(HepMcParticleLink_test, truth_event_link_first_event) {
@@ -391,6 +402,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink1a.isValid() );
     ASSERT_EQ(HepMC::barcode(particle1), testLink1a.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle1), testLink1a.id());
     ASSERT_EQ( refEvtNum1, testLink1a.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink1a.getEventPositionInCollection(sg));
     ASSERT_EQ(particle1,testLink1a.cptr());
@@ -400,14 +412,26 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink1b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1b.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle1), testLink1b.id());
     ASSERT_EQ( refEvtNum1, testLink1b.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink1b.getEventPositionInCollection(sg));
     ASSERT_EQ(*(testLink1a.cptr()),*(testLink1b.cptr()));
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink1c(HepMC::uniqueID(particle1),dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink1c.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle1), testLink1c.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle1), testLink1c.id());
+    ASSERT_EQ( refEvtNum1, testLink1c.eventIndex());
+    ASSERT_EQ( dummyIndex1, testLink1c.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle1,testLink1c.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
     HepMcParticleLink testLink1d(particle1,event_number1);
     ASSERT_TRUE( testLink1d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1d.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle1), testLink1d.id());
     ASSERT_NE( dummyIndex1, testLink1d.eventIndex());
     ASSERT_EQ( refEvtNum1, testLink1d.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink1d.getEventPositionInCollection(sg));
@@ -418,10 +442,22 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink1e.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1e.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle1), testLink1e.id());
     ASSERT_NE( dummyIndex1, testLink1e.eventIndex());
     ASSERT_EQ( refEvtNum1, testLink1e.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink1e.getEventPositionInCollection(sg));
     ASSERT_EQ(particle1,testLink1e.cptr());
+   // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink1f(HepMC::uniqueID(particle1),event_number1,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink1f.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle1), testLink1f.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle1), testLink1f.id());
+    ASSERT_NE( dummyIndex1, testLink1f.eventIndex());
+    ASSERT_EQ( refEvtNum1, testLink1f.eventIndex());
+    ASSERT_EQ( dummyIndex1, testLink1f.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle1,testLink1f.cptr());
   }
 
   TEST_F(HepMcParticleLink_test, truth_event_link_second_event) {
@@ -467,6 +503,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink2a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2a.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle2), testLink2a.id());
     ASSERT_EQ( refEvtNum2, testLink2a.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink2a.getEventPositionInCollection(sg));
     ASSERT_EQ(particle2,testLink2a.cptr());
@@ -476,14 +513,26 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink2b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2b.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle2), testLink2b.id());
     ASSERT_EQ( refEvtNum2, testLink2b.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink2b.getEventPositionInCollection(sg));
     ASSERT_EQ(particle2,testLink2b.cptr());
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink2c(HepMC::uniqueID(particle2),dummyIndex2,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink2c.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle2), testLink2c.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle2), testLink2c.id());
+    ASSERT_EQ( refEvtNum2, testLink2c.eventIndex());
+    ASSERT_EQ( dummyIndex2, testLink2c.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle2,testLink2c.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
     HepMcParticleLink testLink2d(particle2,event_number2);
     ASSERT_TRUE( testLink2d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2d.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle2), testLink2d.id());
     ASSERT_NE( dummyIndex2, testLink2d.eventIndex());
     ASSERT_EQ( refEvtNum2, testLink2d.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink2d.getEventPositionInCollection(sg));
@@ -494,10 +543,22 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink2e.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2e.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle2), testLink2e.id());
     ASSERT_NE( dummyIndex2, testLink2e.eventIndex());
     ASSERT_EQ( refEvtNum2, testLink2e.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink2e.getEventPositionInCollection(sg));
     ASSERT_EQ(particle2,testLink2e.cptr());
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink2f(HepMC::uniqueID(particle2),event_number2,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink2f.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle2), testLink2f.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle2), testLink2f.id());
+    ASSERT_NE( dummyIndex2, testLink2f.eventIndex());
+    ASSERT_EQ( refEvtNum2, testLink2f.eventIndex());
+    ASSERT_EQ( dummyIndex2, testLink2f.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle2,testLink2f.cptr());
   }
 
   TEST_F(HepMcParticleLink_test, truth_event_link_third_event) {
@@ -544,6 +605,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink3a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle3), testLink3a.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle3), testLink3a.id());
     ASSERT_EQ( refEvtNum3, testLink3a.eventIndex());
     ASSERT_NE( dummyIndex3, testLink3a.getEventPositionInCollection(sg)); // Returns the position of the first event with a given event number
     ASSERT_EQ( dummyIndex1, testLink3a.getEventPositionInCollection(sg));
@@ -554,15 +616,29 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink3b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle3), testLink3b.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle3), testLink3b.id());
     ASSERT_EQ( refEvtNum3, testLink3b.eventIndex());
     ASSERT_NE( dummyIndex3, testLink3b.getEventPositionInCollection(sg)); // Returns the position of the first event with a given event number
     ASSERT_EQ( dummyIndex1, testLink3a.getEventPositionInCollection(sg));
     ASSERT_EQ(particle3,testLink3b.cptr());
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink3c(HepMC::uniqueID(particle3),dummyIndex3,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink3c.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle3), testLink3c.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle3), testLink3c.id());
+    ASSERT_EQ( HepMC::uniqueID(particle3), testLink3c.id());
+    ASSERT_EQ( refEvtNum3, testLink3c.eventIndex());
+    ASSERT_NE( dummyIndex3, testLink3c.getEventPositionInCollection(sg)); // Returns the position of the first event with a given event number
+    ASSERT_EQ( dummyIndex1, testLink3a.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle3,testLink3c.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
     HepMcParticleLink testLink3d(particle3,event_number3);
     ASSERT_TRUE( testLink3d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle3), testLink3d.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle3), testLink3d.id());
     ASSERT_NE( dummyIndex3, testLink3d.eventIndex());
     ASSERT_EQ( refEvtNum3, testLink3d.eventIndex());
     ASSERT_NE( dummyIndex3, testLink3d.getEventPositionInCollection(sg)); // Returns the position of the first event with a given event number
@@ -574,12 +650,26 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink3e.isValid() );
     ASSERT_EQ( HepMC::barcode(particle3), testLink3e.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle3), testLink3e.id());
     ASSERT_NE( dummyIndex3, testLink3e.eventIndex());
     ASSERT_EQ( refEvtNum3, testLink3e.eventIndex());
     ASSERT_NE( dummyIndex3, testLink3e.getEventPositionInCollection(sg)); // Returns the position of the first event with a given event number
     ASSERT_EQ( dummyIndex1, testLink3a.getEventPositionInCollection(sg));
     ASSERT_NE(particle3,testLink3e.cptr());
     ASSERT_EQ(particle1,testLink3e.cptr()); //POINTS AT THE IDENTICAL PARTICLE IN FIRST GenEvent!!
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent. BROKEN
+    HepMcParticleLink testLink3f(HepMC::uniqueID(particle3),event_number3,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink3f.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle3), testLink3f.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle3), testLink3e.id());
+    ASSERT_NE( dummyIndex3, testLink3f.eventIndex());
+    ASSERT_EQ( refEvtNum3, testLink3f.eventIndex());
+    ASSERT_NE( dummyIndex3, testLink3f.getEventPositionInCollection(sg)); // Returns the position of the first event with a given event number
+    ASSERT_EQ( dummyIndex1, testLink3a.getEventPositionInCollection(sg));
+    ASSERT_NE(particle3,testLink3f.cptr());
+    ASSERT_EQ(particle1,testLink3f.cptr()); //POINTS AT THE IDENTICAL PARTICLE IN FIRST GenEvent!!
   }
 
   TEST_F(HepMcParticleLink_test, truth_event_link_fourth_event) {
@@ -624,15 +714,27 @@ namespace MCTesting {
     HepMcParticleLink testLink4a(particle4,event_number4);
     ASSERT_TRUE( testLink4a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle4), testLink4a.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle4), testLink4a.id());
     ASSERT_EQ( refEvtNum4, testLink4a.eventIndex());
     ASSERT_EQ( dummyIndex4, testLink4a.getEventPositionInCollection(sg));
     ASSERT_EQ( particle4, testLink4a.cptr());
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink4b(HepMC::uniqueID(particle4),event_number4,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink4b.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle4), testLink4b.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle4), testLink4b.id());
+    ASSERT_EQ( refEvtNum4, testLink4b.eventIndex());
+    ASSERT_EQ( dummyIndex4, testLink4a.getEventPositionInCollection(sg));
+    ASSERT_EQ( particle4, testLink4b.cptr());
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
     HepMcParticleLink testLink4c(HepMC::barcode(particle4),event_number4,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink4c.isValid() );
     ASSERT_EQ( HepMC::barcode(particle4), testLink4c.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle4), testLink4c.id());
     ASSERT_EQ( refEvtNum4, testLink4c.eventIndex());
     ASSERT_EQ( dummyIndex4, testLink4c.getEventPositionInCollection(sg));
     ASSERT_EQ( particle4, testLink4c.cptr());
@@ -642,15 +744,27 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink4d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle4), testLink4d.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle4), testLink4d.id());
     ASSERT_EQ( refEvtNum4, testLink4d.eventIndex());
     ASSERT_EQ( dummyIndex4, testLink4d.getEventPositionInCollection(sg));
     ASSERT_EQ( particle4, testLink4d.cptr());
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink4e(HepMC::uniqueID(particle4),dummyIndex4,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink4e.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle4), testLink4e.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle4), testLink4e.id());
+    ASSERT_EQ( refEvtNum4, testLink4e.eventIndex());
+    ASSERT_EQ( dummyIndex4, testLink4e.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle4,testLink4e.cptr());
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
     HepMcParticleLink testLink4f(HepMC::barcode(particle4), dummyIndex4,
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink4f.isValid() );
     ASSERT_EQ( HepMC::barcode(particle4), testLink4f.barcode());
+    ASSERT_EQ( HepMC::uniqueID(particle4), testLink4f.id());
     ASSERT_EQ( refEvtNum4, testLink4f.eventIndex());
     ASSERT_EQ( dummyIndex4, testLink4f.getEventPositionInCollection(sg));
     ASSERT_EQ( particle4, testLink4f.cptr());
@@ -695,6 +809,7 @@ namespace MCTesting {
 
     // Testing Links to delta-rays (barcode=0) - not recorded in McEventCollection
     const int deltaRayBarcode(0);
+    const int deltaRayID(0);
     HepMC::GenParticlePtr deltaRayPtr{};
 
     // HepMcParticleLink built using a delta-ray barcode and the event_number of
@@ -704,6 +819,7 @@ namespace MCTesting {
     ASSERT_EQ( refEvtNum1, testLink5a.eventIndex());
     ASSERT_FALSE( testLink5a.isValid() );
     ASSERT_EQ( deltaRayBarcode, testLink5a.barcode());
+    ASSERT_EQ( deltaRayID, testLink5a.id());
     ASSERT_EQ( dummyIndex1, testLink5a.getEventPositionInCollection(sg));
     ASSERT_EQ( deltaRayPtr, testLink5a.cptr());
    // HepMcParticleLink built using a delta-ray barcode and the
@@ -712,9 +828,31 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_FALSE( testLink5b.isValid() );
     ASSERT_EQ( deltaRayBarcode, testLink5b.barcode());
+    ASSERT_EQ( deltaRayID, testLink5b.id());
     ASSERT_EQ( refEvtNum1, testLink5b.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink5b.getEventPositionInCollection(sg));
     ASSERT_EQ( deltaRayPtr, testLink5b.cptr());
+
+    // HepMcParticleLink built using a delta-ray id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink5c(deltaRayID, refEvtNum1,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_EQ( refEvtNum1, testLink5c.eventIndex());
+    ASSERT_FALSE( testLink5c.isValid() );
+    ASSERT_EQ( deltaRayBarcode, testLink5c.barcode());
+    ASSERT_EQ( deltaRayID, testLink5c.id());
+    ASSERT_EQ( dummyIndex1, testLink5c.getEventPositionInCollection(sg));
+    ASSERT_EQ( deltaRayPtr, testLink5c.cptr());
+   // HepMcParticleLink built using a delta-ray id and the
+    // position of the GenEvent.
+    HepMcParticleLink testLink5d(deltaRayID, dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_FALSE( testLink5d.isValid() );
+    ASSERT_EQ( deltaRayBarcode, testLink5d.barcode());
+    ASSERT_EQ( deltaRayID, testLink5d.id());
+    ASSERT_EQ( refEvtNum1, testLink5d.eventIndex());
+    ASSERT_EQ( dummyIndex1, testLink5d.getEventPositionInCollection(sg));
+    ASSERT_EQ( deltaRayPtr, testLink5d.cptr());
 
     // HepMcParticleLink built using a delta-ray barcode and the
     // position of the GenEvent (2nd event).
@@ -722,6 +860,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_FALSE( testLink5e.isValid() );
     ASSERT_EQ( deltaRayBarcode, testLink5e.barcode());
+    ASSERT_EQ( deltaRayID, testLink5e.id());
     ASSERT_EQ( refEvtNum2, testLink5e.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink5e.getEventPositionInCollection(sg));
     ASSERT_EQ( deltaRayPtr, testLink5e.cptr());
@@ -734,9 +873,21 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_FALSE( testLink5f.isValid() );
     ASSERT_EQ( deltaRayBarcode, testLink5f.barcode());
+    ASSERT_EQ( deltaRayID, testLink5f.id());
     ASSERT_EQ( refEvtNum5, testLink5f.eventIndex());
     ASSERT_EQ( HepMcParticleLink:: ExtendedBarCode::UNDEFINED, testLink5f.getEventPositionInCollection(sg));
     ASSERT_EQ( deltaRayPtr, testLink5f.cptr());
+
+   // HepMcParticleLink built using a delta-ray id and the event_number of
+    // the GenEvent. GenEvent not recorded
+    HepMcParticleLink testLink5g(deltaRayID, refEvtNum5,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_FALSE( testLink5g.isValid() );
+    ASSERT_EQ( deltaRayBarcode, testLink5g.barcode());
+    ASSERT_EQ( deltaRayID, testLink5g.id());
+    ASSERT_EQ( refEvtNum5, testLink5g.eventIndex());
+    ASSERT_EQ( HepMcParticleLink:: ExtendedBarCode::UNDEFINED, testLink5g.getEventPositionInCollection(sg));
+    ASSERT_EQ( deltaRayPtr, testLink5g.cptr());
 
    }
 
@@ -850,6 +1001,11 @@ namespace MCTesting {
     HepMcParticleLink testLink1b(HepMC::barcode(particle1),dummyIndex1,
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink1b.isValid() );
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink1c(HepMC::uniqueID(particle1),dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink1c.isValid() );
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
     HepMcParticleLink testLink1d(particle1,event_number1);
@@ -859,19 +1015,40 @@ namespace MCTesting {
     HepMcParticleLink testLink1e(HepMC::barcode(particle1),event_number1,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink1e.isValid() );
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink1f(HepMC::uniqueID(particle1),event_number1,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink1f.isValid() );
     // Comparing links to the same particle in the first event
     ASSERT_FALSE( testLink1a < testLink1b );
     ASSERT_FALSE( testLink1a < testLink1d );
     ASSERT_FALSE( testLink1a < testLink1e );
+    ASSERT_FALSE( testLink1a < testLink1f );
     ASSERT_FALSE( testLink1b < testLink1a );
     ASSERT_FALSE( testLink1b < testLink1d );
     ASSERT_FALSE( testLink1b < testLink1e );
+    ASSERT_FALSE( testLink1b < testLink1f );
+    ASSERT_FALSE( testLink1c < testLink1a );
+    ASSERT_FALSE( testLink1c < testLink1b );
+    ASSERT_FALSE( testLink1c < testLink1d );
+    ASSERT_FALSE( testLink1c < testLink1e );
+    ASSERT_FALSE( testLink1c < testLink1f );
     ASSERT_FALSE( testLink1d < testLink1a );
     ASSERT_FALSE( testLink1d < testLink1b );
+    ASSERT_FALSE( testLink1d < testLink1c );
     ASSERT_FALSE( testLink1d < testLink1e );
+    ASSERT_FALSE( testLink1d < testLink1f );
     ASSERT_FALSE( testLink1e < testLink1a );
     ASSERT_FALSE( testLink1e < testLink1b );
+    ASSERT_FALSE( testLink1e < testLink1c );
     ASSERT_FALSE( testLink1e < testLink1d );
+    ASSERT_FALSE( testLink1e < testLink1f );
+    ASSERT_FALSE( testLink1f < testLink1a );
+    ASSERT_FALSE( testLink1f < testLink1b );
+    ASSERT_FALSE( testLink1f < testLink1c );
+    ASSERT_FALSE( testLink1f < testLink1d );
+    ASSERT_FALSE( testLink1f < testLink1e );
    // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
     HepMcParticleLink testLink2a(particle2, dummyIndex2,
@@ -882,6 +1059,11 @@ namespace MCTesting {
     HepMcParticleLink testLink2b(HepMC::barcode(particle2), dummyIndex2,
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink2b.isValid() );
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink2c(HepMC::uniqueID(particle2),dummyIndex2,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink2c.isValid() );
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
     HepMcParticleLink testLink2d(particle2,event_number2);
@@ -891,36 +1073,74 @@ namespace MCTesting {
     HepMcParticleLink testLink2e(HepMC::barcode(particle2),event_number2,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink2e.isValid() );
+    // A HepMcParticleLink built using the barcode and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink2f(HepMC::uniqueID(particle2),event_number2,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink2f.isValid() );
     // Comparing links to the same particle in the second event
     ASSERT_FALSE( testLink2a < testLink2b );
     ASSERT_FALSE( testLink2a < testLink2d );
     ASSERT_FALSE( testLink2a < testLink2e );
+    ASSERT_FALSE( testLink2a < testLink2f );
     ASSERT_FALSE( testLink2b < testLink2a );
     ASSERT_FALSE( testLink2b < testLink2d );
     ASSERT_FALSE( testLink2b < testLink2e );
+    ASSERT_FALSE( testLink2b < testLink2f );
+    ASSERT_FALSE( testLink2c < testLink2a );
+    ASSERT_FALSE( testLink2c < testLink2b );
+    ASSERT_FALSE( testLink2c < testLink2d );
+    ASSERT_FALSE( testLink2c < testLink2e );
+    ASSERT_FALSE( testLink2c < testLink2f );
     ASSERT_FALSE( testLink2d < testLink2a );
     ASSERT_FALSE( testLink2d < testLink2b );
+    ASSERT_FALSE( testLink2d < testLink2c );
     ASSERT_FALSE( testLink2d < testLink2e );
+    ASSERT_FALSE( testLink2d < testLink2f );
     ASSERT_FALSE( testLink2e < testLink2a );
     ASSERT_FALSE( testLink2e < testLink2b );
+    ASSERT_FALSE( testLink2e < testLink2c );
     ASSERT_FALSE( testLink2e < testLink2d );
+    ASSERT_FALSE( testLink2e < testLink2f );
+    ASSERT_FALSE( testLink2f < testLink2a );
+    ASSERT_FALSE( testLink2f < testLink2b );
+    ASSERT_FALSE( testLink2f < testLink2c );
+    ASSERT_FALSE( testLink2f < testLink2d );
+    ASSERT_FALSE( testLink2f < testLink2e );
     // Comparing links in two different events
     ASSERT_TRUE( testLink1a < testLink2a );
     ASSERT_TRUE( testLink1a < testLink2b );
     ASSERT_TRUE( testLink1a < testLink2d );
     ASSERT_TRUE( testLink1a < testLink2e );
+    ASSERT_TRUE( testLink1a < testLink2f );
     ASSERT_TRUE( testLink1b < testLink2a );
     ASSERT_TRUE( testLink1b < testLink2b );
     ASSERT_TRUE( testLink1b < testLink2d );
     ASSERT_TRUE( testLink1b < testLink2e );
+    ASSERT_TRUE( testLink1b < testLink2f );
+    ASSERT_TRUE( testLink1c < testLink2a );
+    ASSERT_TRUE( testLink1c < testLink2b );
+    ASSERT_TRUE( testLink1c < testLink2c );
+    ASSERT_TRUE( testLink1c < testLink2d );
+    ASSERT_TRUE( testLink1c < testLink2e );
+    ASSERT_TRUE( testLink1c < testLink2f );
     ASSERT_TRUE( testLink1d < testLink2a );
     ASSERT_TRUE( testLink1d < testLink2b );
     ASSERT_TRUE( testLink1d < testLink2d );
     ASSERT_TRUE( testLink1d < testLink2e );
+    ASSERT_TRUE( testLink1d < testLink2f );
     ASSERT_TRUE( testLink1e < testLink2a );
     ASSERT_TRUE( testLink1e < testLink2b );
+    ASSERT_TRUE( testLink1e < testLink2c );
     ASSERT_TRUE( testLink1e < testLink2d );
     ASSERT_TRUE( testLink1e < testLink2e );
+    ASSERT_TRUE( testLink1e < testLink2f );
+    ASSERT_TRUE( testLink1f < testLink2a );
+    ASSERT_TRUE( testLink1f < testLink2b );
+    ASSERT_TRUE( testLink1f < testLink2c );
+    ASSERT_TRUE( testLink1f < testLink2d );
+    ASSERT_TRUE( testLink1f < testLink2e );
+    ASSERT_TRUE( testLink1f < testLink2f );
 
     // Make links to another GenParticle from the first GenEvent
 #ifdef HEPMC3
@@ -938,6 +1158,11 @@ namespace MCTesting {
     HepMcParticleLink testLink3b(HepMC::barcode(particle3),dummyIndex1,
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink3b.isValid() );
+    // A HepMcParticleLink built using the id and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink3c(HepMC::uniqueID(particle3),dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink3c.isValid() );
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
     HepMcParticleLink testLink3d(particle3,event_number1);
@@ -947,23 +1172,45 @@ namespace MCTesting {
     HepMcParticleLink testLink3e(HepMC::barcode(particle3),event_number1,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink3e.isValid() );
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink3f(HepMC::uniqueID(particle3),event_number1,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink3f.isValid() );
     // Comparing links to two different particles in the same GenEvent
     ASSERT_TRUE( testLink1a < testLink3a );
     ASSERT_TRUE( testLink1a < testLink3b );
     ASSERT_TRUE( testLink1a < testLink3d );
     ASSERT_TRUE( testLink1a < testLink3e );
+    ASSERT_TRUE( testLink1a < testLink3f );
     ASSERT_TRUE( testLink1b < testLink3a );
     ASSERT_TRUE( testLink1b < testLink3b );
     ASSERT_TRUE( testLink1b < testLink3d );
     ASSERT_TRUE( testLink1b < testLink3e );
+    ASSERT_TRUE( testLink1b < testLink3f );
+    ASSERT_TRUE( testLink1c < testLink3a );
+    ASSERT_TRUE( testLink1c < testLink3b );
+    ASSERT_TRUE( testLink1c < testLink3c );
+    ASSERT_TRUE( testLink1c < testLink3d );
+    ASSERT_TRUE( testLink1c < testLink3e );
+    ASSERT_TRUE( testLink1c < testLink3f );
     ASSERT_TRUE( testLink1d < testLink3a );
     ASSERT_TRUE( testLink1d < testLink3b );
     ASSERT_TRUE( testLink1d < testLink3d );
     ASSERT_TRUE( testLink1d < testLink3e );
+    ASSERT_TRUE( testLink1d < testLink3f );
     ASSERT_TRUE( testLink1e < testLink3a );
     ASSERT_TRUE( testLink1e < testLink3b );
+    ASSERT_TRUE( testLink1e < testLink3c );
     ASSERT_TRUE( testLink1e < testLink3d );
     ASSERT_TRUE( testLink1e < testLink3e );
+    ASSERT_TRUE( testLink1e < testLink3f );
+    ASSERT_TRUE( testLink1f < testLink3a );
+    ASSERT_TRUE( testLink1f < testLink3b );
+    ASSERT_TRUE( testLink1f < testLink3c );
+    ASSERT_TRUE( testLink1f < testLink3d );
+    ASSERT_TRUE( testLink1f < testLink3e );
+    ASSERT_TRUE( testLink1f < testLink3f );
   }
 
   TEST_F(HepMcParticleLink_test, max_event_number) {
@@ -1007,6 +1254,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink1a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1a.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle1), testLink1a.id());
     ASSERT_EQ( refEvtNum1, testLink1a.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink1a.getEventPositionInCollection(sg));
     ASSERT_EQ(particle1,testLink1a.cptr());
@@ -1016,6 +1264,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink1b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1b.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle1), testLink1b.id());
     ASSERT_EQ( refEvtNum1, testLink1b.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink1b.getEventPositionInCollection(sg));
     ASSERT_EQ(*(testLink1a.cptr()),*(testLink1b.cptr()));
@@ -1024,10 +1273,22 @@ namespace MCTesting {
     HepMcParticleLink testLink1c(particle1,event_number1);
     ASSERT_TRUE( testLink1c.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1c.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle1), testLink1c.id());
     ASSERT_NE( dummyIndex1, testLink1c.eventIndex());
     ASSERT_EQ( refEvtNum1, testLink1c.eventIndex());
     ASSERT_EQ( dummyIndex1, testLink1c.getEventPositionInCollection(sg));
     ASSERT_EQ(particle1,testLink1c.cptr());
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink1d(HepMC::uniqueID(particle1),event_number1,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink1d.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle1), testLink1d.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle1), testLink1d.id());
+    ASSERT_NE( dummyIndex1, testLink1d.eventIndex());
+    ASSERT_EQ( refEvtNum1, testLink1d.eventIndex());
+    ASSERT_EQ( dummyIndex1, testLink1d.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle1,testLink1d.cptr());
 
     //Testing links to the second dummy GenEvent
 
@@ -1037,6 +1298,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink2a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2a.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle2), testLink2a.id());
     ASSERT_EQ( refEvtNum2, testLink2a.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink2a.getEventPositionInCollection(sg));
     ASSERT_EQ(particle2,testLink2a.cptr());
@@ -1046,6 +1308,7 @@ namespace MCTesting {
                                  HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
     ASSERT_TRUE( testLink2b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2b.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle2), testLink2b.id());
     ASSERT_EQ( refEvtNum2, testLink2b.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink2b.getEventPositionInCollection(sg));
     ASSERT_EQ(particle2,testLink2b.cptr());
@@ -1054,10 +1317,22 @@ namespace MCTesting {
     HepMcParticleLink testLink2c(particle2,event_number2);
     ASSERT_TRUE( testLink2c.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2c.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle2), testLink2c.id());
     ASSERT_NE( dummyIndex2, testLink2c.eventIndex());
     ASSERT_EQ( refEvtNum2, testLink2c.eventIndex());
     ASSERT_EQ( dummyIndex2, testLink2c.getEventPositionInCollection(sg));
     ASSERT_EQ(particle2,testLink2c.cptr());
+    // A HepMcParticleLink built using the id and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink2d(HepMC::uniqueID(particle2),event_number2,
+                                 HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+    ASSERT_TRUE( testLink2d.isValid() );
+    ASSERT_EQ( HepMC::barcode(particle2), testLink2d.barcode());
+    ASSERT_EQ(HepMC::uniqueID(particle2), testLink2d.id());
+    ASSERT_NE( dummyIndex2, testLink2d.eventIndex());
+    ASSERT_EQ( refEvtNum2, testLink2d.eventIndex());
+    ASSERT_EQ( dummyIndex2, testLink2d.getEventPositionInCollection(sg));
+    ASSERT_EQ(particle2,testLink2d.cptr());
   }
 
   TEST_F(HepMcParticleLink_test, size) {
