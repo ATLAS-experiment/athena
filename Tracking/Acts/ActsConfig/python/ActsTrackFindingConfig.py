@@ -117,6 +117,18 @@ def ActsMainTrackFindingAlgCfg(flags,
                                                ReverseFilteringPt=0,
                                                OutlierChi2Cut=30))
         )
+
+    if 'PixelCalibrator' not in kwargs:
+        from AthenaConfiguration.Enums import BeamType
+        from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
+        from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
+
+        if flags.Beam.Type is not BeamType.Cosmics:
+            if flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClustering:
+                kwargs.setdefault(
+                    'PixelCalibrator',
+                    acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+                )
         
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg

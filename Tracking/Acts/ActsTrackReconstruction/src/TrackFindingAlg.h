@@ -23,6 +23,7 @@
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsToolInterfaces/IFitterTool.h"
+#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -46,8 +47,6 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 
-#include "OnTrackCalibrator.h"
-
 class TrackingSurfaceHelper;
 namespace
 {
@@ -63,6 +62,7 @@ namespace ActsTrk
   class TrackFindingAlg : public AthReentrantAlgorithm
   {
   public:
+
     TrackFindingAlg(const std::string &name,
                     ISvcLocator *pSvcLocator);
     virtual ~TrackFindingAlg();
@@ -79,6 +79,10 @@ namespace ActsTrk
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
+    ToolHandle<ActsTrk::IOnTrackCalibratorTool<ActsTrk::MutableTrackStateBackend>> m_pixelCalibTool{
+      this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
+    ToolHandle<ActsTrk::IOnTrackCalibratorTool<ActsTrk::MutableTrackStateBackend>> m_stripCalibTool{
+      this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
 
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.

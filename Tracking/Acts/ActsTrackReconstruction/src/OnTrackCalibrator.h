@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ONTRACKCALIBRATOR_H
 #define ONTRACKCALIBRATOR_H
+
+
+#include <GaudiKernel/ToolHandle.h>
 
 #include "MeasurementCalibrator.h"
 
@@ -39,8 +42,8 @@ public:
 
     OnTrackCalibrator(const ActsTrk::IActsToTrkConverterTool &converter_tool,
 		      const TrackingSurfaceHelper &surface_helper,
-		      IOnTrackCalibratorTool<traj_t> *pixelTool,
-		      IOnTrackCalibratorTool<traj_t> *stripTool);
+		      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &pixelTool,
+		      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &stripTool);
 
     void calibrate(const Acts::GeometryContext& geoctx,
 		   const Acts::CalibrationContext& cctx,

@@ -16,6 +16,10 @@ class TrackFitterType(FlagEnum):
     KalmanFitter = 'KalmanFitter' # default ACTS fitter to choose
     GaussianSumFitter = 'GaussianSumFitter' # new experimental implementation
 
+class PixelCalibrationStrategy(FlagEnum):
+    Uncalibrated = "Uncalibrated"
+    AnalogueClustering = "AnalogueClustering"
+
 def createActsConfigFlags():
     actscf = AthConfigFlags()
     
@@ -48,6 +52,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
 
     # Track finding
+    actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.Uncalibrated, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
