@@ -61,7 +61,6 @@ if __name__=='__main__':
 
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
-   flags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    flags.LArCalib.BadChannelDB = args.badsql
    
    #Output of this job 
@@ -84,8 +83,11 @@ if __name__=='__main__':
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
    #Define the global output Level:
-   from AthenaCommon.Constants import INFO 
+   from AthenaCommon.Constants import INFO
    flags.Exec.OutputLevel = INFO
    
    flags.LArCalib.RTM.ExtractAll=True

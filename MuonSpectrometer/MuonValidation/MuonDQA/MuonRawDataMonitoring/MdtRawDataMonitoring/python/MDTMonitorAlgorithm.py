@@ -36,8 +36,6 @@ def MdtMonitoringConfig(inputFlags):
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'MdtAthMonitorCfg')
     
-    #from AthenaCommon.CfgGetter import getAlgorithm
-
     ### STEP 2 ###
     # Adding an algorithm to the helper. Here, we will use the example 
     # algorithm in the AthenaMonitoring package. Just pass the type to the 

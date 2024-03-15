@@ -161,8 +161,7 @@ class FlagAddress(object):
         raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
 
     def __getitem__(self, name):
-        merged = self._name + "." + name
-        return self._flags._get(merged)
+        return getattr(self, name)
 
     def __setitem__(self, name, value):
         setattr(self, name, value)
@@ -236,7 +235,9 @@ class AthConfigFlags(object):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
 
     def _calculateHash(self):
-        return hash(frozenset((x, repr(y)) for x, y in self._flagdict.items()))
+        fmap = self._renamed_map()
+        flags = ((fmap[x], y) for x, y in self._flagdict.items() if fmap[x])
+        return hash(frozenset((x, repr(y)) for x, y in flags))
 
     def __getattr__(self, name):
         # Avoid infinite recursion looking up our own attributes
@@ -307,7 +308,6 @@ class AthConfigFlags(object):
 
 
     def _renamed_map(self):
-        self.loadAllDynamicFlags()
         def rename(key):
             for new, old in self._renames.items():
                 if key.startswith(old + '.'):

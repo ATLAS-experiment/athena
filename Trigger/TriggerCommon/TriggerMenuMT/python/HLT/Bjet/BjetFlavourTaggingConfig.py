@@ -7,6 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.BTagConfig import BTagAlgsCfg
+from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 
 # fast btagging
 from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
@@ -20,6 +21,8 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
 
     acc = ComponentAccumulator()
 
+    acc.merge(JetTagCalibCfg(flags))
+    
     #Track Augmenter
     acc.merge(BTagTrackAugmenterAlgCfg(
         flags,
@@ -67,6 +70,8 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
 
     ca = ComponentAccumulator()
 
+    ca.merge(JetTagCalibCfg(flags))
+    
     # first add the track augmentation
     jet_name = inputJets
     if isPFlow:

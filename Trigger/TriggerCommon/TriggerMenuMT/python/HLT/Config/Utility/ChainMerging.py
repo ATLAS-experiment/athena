@@ -1,12 +1,12 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, EmptyMenuSequenceCfg
 
 from AthenaCommon.Logging import logging
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
-
+import functools
 from copy import deepcopy
 import re
 
@@ -545,10 +545,10 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
             seqName = getEmptySeqName(new_stepDict['signature'], stepNumber, alignment_group)
 
             if isFullScanRoI(chainDefList[chain_index].L1decisions[0]):
-                stepSeq.append(EmptyMenuSequence(seqName+"FS"))
+                stepSeq.append(functools.partial(EmptyMenuSequenceCfg, None, name=seqName+"FS"))
                 currentStepName = 'Empty' + alignment_group +'Align'+str(stepNumber)+'_'+new_stepDict['chainParts'][0]['multiplicity']+new_stepDict['signature']+'FS'
             else:
-                stepSeq.append(EmptyMenuSequence(seqName))
+                stepSeq.append(functools.partial(EmptyMenuSequenceCfg, None, name=seqName))
                 currentStepName = 'Empty' + alignment_group +'Align'+str(stepNumber)+'_'+new_stepDict['chainParts'][0]['multiplicity']+new_stepDict['signature']
 
             log.debug("[makeCombinedStep]  chain_index: %s, step name: %s,  empty sequence name: %s", chain_index, currentStepName, seqName)
@@ -657,10 +657,10 @@ def build_empty_sequences(emptyChainDicts, step_mult, caller, L1decisions, seqNa
     for ileg in range(len(L1decisions)):                        
         if isFullScanRoI(L1decisions[ileg]):
             log.debug("[%s] adding FS empty sequence", caller)
-            emptySequences += [EmptyMenuSequence(seqNames[ileg]+"FS")]
+            emptySequences += [functools.partial(EmptyMenuSequenceCfg, None, name=seqNames[ileg]+"FS")]
         else:
             log.debug("[%s] adding non-FS empty sequence", caller)
-            emptySequences += [EmptyMenuSequence(seqNames[ileg])]
+            emptySequences += [functools.partial(EmptyMenuSequenceCfg, None, name=seqNames[ileg])]
             
     log.verbose("[%s] emptyChainDicts %s", caller, emptyChainDicts)
     log.debug("[%s] %s has number of empty sequences %d and empty legs in stepDicts %d",

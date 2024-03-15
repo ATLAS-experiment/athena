@@ -4,8 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def getEnvelopeMap(flags):
-    #from G4AtlasApps.SimFlags import simFlags
-
     # Map of volume name to output collection name
     envelopeMap = dict()
 

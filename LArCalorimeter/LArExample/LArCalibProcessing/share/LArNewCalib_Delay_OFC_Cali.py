@@ -14,7 +14,7 @@ if __name__=='__main__':
    parser.add_argument('-r','--run', dest='run', default='00408918', help='Run number string as in input filename', type=str)
    parser.add_argument('-g','--gain', dest='gain', default="MEDIUM", help='Gain string', type=str)
    parser.add_argument('-p','--partition', dest='partition', default="Em", help='Data taking partition string', type=str)
-   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data23_calib", help='File prefix string', type=str)
+   parser.add_argument('-f','--fileprefix', dest='fprefix', default="data24_calib", help='File prefix string', type=str)
    parser.add_argument('-i','--indirprefix', dest='dprefix', default="/eos/atlas/atlastier0/rucio/", help='Input directory prefix string', type=str)
    parser.add_argument('-d','--indir', dest='indir', default="", help='Full input dir string', type=str)
    parser.add_argument('-t','--trigger', dest='trig', default='calibration_', help='Trigger string in filename', type=str)
@@ -125,7 +125,6 @@ if __name__=='__main__':
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
-   flags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
    
    #Output of this job:
@@ -150,7 +149,10 @@ if __name__=='__main__':
    flags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputCaliWaveRootFileName
    flags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPoolFileName
    flags.LArCalib.Output.ROOTFile2 = args.outrdir + "/" + OutputOFCCaliRootFileName
-   flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
+   if args.outsql.startswith("/"):
+      flags.IOVDb.DBConnection="sqlite://;schema=" + args.outsql +";dbname=CONDBR2"
+   else:   
+      flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
@@ -162,11 +164,14 @@ if __name__=='__main__':
    #Other potentially useful flags-settings:
    
    #Define the global output Level:
-   from AthenaCommon.Constants import INFO 
+   from AthenaCommon.Constants import INFO
    flags.Exec.OutputLevel = INFO
    
    from AthenaConfiguration.Enums import LHCPeriod
    flags.GeoModel.Run = LHCPeriod.Run3
+
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
    flags.lock()
    flags.dump()
@@ -175,13 +180,14 @@ if __name__=='__main__':
    
    cfg.merge(LArDelay_OFCCaliCfg(flags))
 
+   # Switch on, in case some calib. board is failing:
    # adding new patching, again needed in summer 2023
-   if flags.LArCalib.CorrectBadChannels:
-      if flags.LArCalib.doValidation:
-         cfg.getEventAlgo("CaliWaveVal").PatchCBs=[0x3df70000]
-
-      # block standard patching for this CB
-      cfg.getEventAlgo("LArCaliWavePatch").DoNotPatchCBs=[0x3df70000]
+   #if flags.LArCalib.CorrectBadChannels:
+   #   if flags.LArCalib.doValidation:
+   #      cfg.getEventAlgo("CaliWaveVal").PatchCBs=[0x3df70000]
+   #
+   #   # block standard patching for this CB
+   #   cfg.getEventAlgo("LArCaliWavePatch").DoNotPatchCBs=[0x3df70000]
 
    # ignore some channels ?
    if args.ignoreB:

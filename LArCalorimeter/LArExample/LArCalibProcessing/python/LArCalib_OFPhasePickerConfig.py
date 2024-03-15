@@ -5,11 +5,11 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from LArCalibProcessing.utils import FolderTagResolver
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
-def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="",nColl=0,loadInputs=True):
+def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="",nColl=0,loadInputs=True, storeShape=True):
 
     result=ComponentAccumulator()
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    rs=FolderTagResolver()
+    rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     if nColl > 0:
        tagstr=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+inputSuffix)
        tagpref=tagstr[0:tagstr.find(inputSuffix)+len(inputSuffix)]
@@ -25,7 +25,13 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
        outputOFCTag=rs.getFolderTag(flags.LArCalib.OFCPhys.Folder+outputSuffix)
 
     inputShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+inputSuffix)
-    outputShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+outputSuffix)
+    if flags.LArCalib.OFC.ShapeCorrection:
+       tagstr=rs.getFolderTag(flags.LArCalib.Shape.Folder+outputSuffix)
+       tagpref=tagstr[0:tagstr.find(outputSuffix)+len(outputSuffix)]
+       tagpost=tagstr[tagstr.find(outputSuffix)+len(outputSuffix):]
+       outputShapeTag=f'{tagpref}-corr{tagpost}'
+    else:
+       outputShapeTag=rs.getFolderTag(flags.LArCalib.Shape.Folder+outputSuffix)
 
 
     del rs #Close database
@@ -33,9 +39,9 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
     from LArCalibProcessing.LArCalibBaseConfig import chanSelStr
     if loadInputs:
         result.merge(addFolders(flags,flags.LArCalib.OFCPhys.Folder+inputSuffix,detDb=flags.LArCalib.Input.Database, 
-                                tag=inputOFCTag, modifiers=chanSelStr(flags)+"<key>LArOFC"+keySuffix+"_unpicked</key>"))
+                                tag=inputOFCTag, modifiers=chanSelStr(flags)+"<key>LArOFC"+keySuffix+"</key>"))
         result.merge(addFolders(flags,flags.LArCalib.Shape.Folder+inputSuffix,detDb=flags.LArCalib.Input.Database, 
-                                tag=inputShapeTag, modifiers=chanSelStr(flags)+"<key>LArShape"+keySuffix+"_unpicked</key>"))
+                                tag=inputShapeTag, modifiers=chanSelStr(flags)+"<key>LArShape"+keySuffix+"</key>"))
 
     LArOFPhasePick = CompFactory.LArOFPhasePicker("LArOFPhasePicker"+keySuffix)
     if flags.LArCalib.isSC:
@@ -48,10 +54,19 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
 
     else:    
         LArOFPhasePick.KeyPhase = ""
-    LArOFPhasePick.KeyOFC_new = "LArOFC"+keySuffix
-    LArOFPhasePick.KeyOFC = "LArOFC"+keySuffix+"_unpicked"
-    LArOFPhasePick.KeyShape_new = "LArShape"+keySuffix+"_uncorr" if flags.LArCalib.OFC.ShapeCorrection else  "LArShape"+keySuffix
-    LArOFPhasePick.KeyShape = "LArShape"+keySuffix+"_unpicked"
+
+    if nColl > 0:
+       muSuffix="_mu"
+    else:   
+           muSuffix=""
+
+    LArOFPhasePick.KeyOFC_new = "LArOFC"+muSuffix
+    LArOFPhasePick.KeyOFC = "LArOFC"+keySuffix
+    if storeShape:
+       LArOFPhasePick.KeyShape_new = "LArShape"+"_uncorr" if flags.LArCalib.OFC.ShapeCorrection else  "LArShape"
+       LArOFPhasePick.KeyShape = "LArShape"+keySuffix
+    else:   
+       LArOFPhasePick.doShape = False
     LArOFPhasePick.GroupingType = flags.LArCalib.GroupingType
     LArOFPhasePick.DefaultPhase = 4
     LArOFPhasePick.TimeOffsetCorrection = 0
@@ -59,19 +74,24 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
 
     result.addEventAlgo(LArOFPhasePick)
 
-    if flags.LArCalib.OFC.ShapeCorrection:
+    if flags.LArCalib.OFC.ShapeCorrection and storeShape:
         result.merge(addFolders(flags,"/LAR/ElecCalibOfl/Shape/Residuals/5samples","LAR_OFL"))
         resShapeCorr=CompFactory.LArShapeCorrector("LArShapeCorr"+keySuffix)
-        resShapeCorr.KeyShape= "LArShape"+keySuffix+"_uncorr" 
-        resShapeCorr.KeyShape_newcorr="LArShape"+keySuffix
+        resShapeCorr.KeyShape= "LArShape_uncorr" 
+        resShapeCorr.KeyShape_newcorr="LArShape"
         result.addEventAlgo(resShapeCorr)
 
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
+    Obj=["LArOFCComplete#LArOFC"+muSuffix+"#"+flags.LArCalib.OFCPhys.Folder+outputSuffix,]
+    Tag=[outputOFCTag,]
+    if storeShape:
+       Obj+=["LArShapeComplete#LArShape#"+flags.LArCalib.Shape.Folder+outputSuffix,]
+       Tag+=[outputShapeTag,]
+    print('Obj: ',Obj)
     result.merge(OutputConditionsAlgCfg(flags,
                                         outputFile=flags.LArCalib.Output.POOLFile,
-                                        ObjectList=["LArOFCComplete#LArOFC"+keySuffix+"#"+flags.LArCalib.OFCPhys.Folder+outputSuffix,
-                                                    "LArShapeComplete#LArShape"+keySuffix+"#"+flags.LArCalib.Shape.Folder+outputSuffix],
-                                        IOVTagList=[outputOFCTag,outputShapeTag],
+                                        ObjectList=Obj,
+                                        IOVTagList=Tag,
                                         Run1=flags.LArCalib.IOVStart,
                                         Run2=flags.LArCalib.IOVEnd
                                     ))
@@ -80,22 +100,20 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
         bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
-        if nColl > 0:
-           muSuffix="_mu"
-        else:   
-           muSuffix=""
-        OFC2Ntup=CompFactory.LArOFC2Ntuple("LArOFC2Ntuple"+keySuffix+muSuffix)
-        OFC2Ntup.ContainerKey = "LArOFC"+keySuffix
+        OFC2Ntup=CompFactory.LArOFC2Ntuple("LArOFC2Ntuple"+muSuffix)
+        OFC2Ntup.ContainerKey = "LArOFC"+muSuffix
         OFC2Ntup.NtupleName   = "OFC"+muSuffix
         OFC2Ntup.AddFEBTempInfo   = False   
+        OFC2Ntup.AddCalib   = True   
         OFC2Ntup.isSC = flags.LArCalib.isSC
         OFC2Ntup.BadChanKey = bcKey
         result.addEventAlgo(OFC2Ntup)
 
-        Shape2Ntup=CompFactory.LArShape2Ntuple("LArShape2Ntuple"+keySuffix)
-        Shape2Ntup.ContainerKey="LArShape"+keySuffix
-        Shape2Ntup.NtupleName="SHAPE"+muSuffix
+        Shape2Ntup=CompFactory.LArShape2Ntuple("LArShape2Ntuple")
+        Shape2Ntup.ContainerKey="LArShape"
+        Shape2Ntup.NtupleName="SHAPE"
         Shape2Ntup.AddFEBTempInfo   = False
+        Shape2Ntup.AddCalib   = True
         Shape2Ntup.isSC = flags.LArCalib.isSC
         Shape2Ntup.BadChanKey = bcKey
         result.addEventAlgo(Shape2Ntup)
@@ -110,13 +128,13 @@ def LArOFPhasePickerCfg(flags,loadInputs=True):
     result=LArCalibBaseCfg(flags)
 
     if flags.LArCalib.isSC:
-       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_3ns", nColl=0, loadInputs=loadInputs))
+       result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns", nColl=0, loadInputs=loadInputs))
        if flags.LArCalib.OFC.Ncoll > 0:
-          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_3ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs))
+          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples",outputSuffix="4samples1phase",keySuffix="_1ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False))
     else:
        result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="_3ns", nColl=0, loadInputs=loadInputs))
        if flags.LArCalib.OFC.Ncoll > 0:
-          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="_3ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs))
+          result.merge(_OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4samples1phase",keySuffix="_3ns_mu", nColl=flags.LArCalib.OFC.Ncoll, loadInputs=loadInputs, storeShape=False))
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))

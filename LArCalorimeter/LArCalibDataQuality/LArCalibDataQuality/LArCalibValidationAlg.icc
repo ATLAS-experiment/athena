@@ -458,9 +458,6 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::checkCoolChannelC
       }
 
       if(m_patchCBs.size()) { // loop over channels, if connected to asked CBs
-         const LArOnlineID *onlHlp=nullptr;
-         StatusCode sc= detStore()->retrieve(onlHlp, "LArOnlineID");
-         if(sc.isFailure()) return false;
          msg()<<MSG::INFO <<" m_patchCBs.size() "<<m_patchCBs.size()<<"  ";
          for(unsigned i=0; i<m_patchCBs.size();++i) msg()<<MSG::INFO <<m_patchCBs[i]<<" ";
          msg() << endmsg;
@@ -468,19 +465,30 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::checkCoolChannelC
          if(m_isSC) chmax=320;
          for(int ch=0; ch<chmax; ++ch) {
             const HWIdentifier chanId = m_onlineHelper->channel_Id(febId,ch);
+            if(! chanId.is_valid() ) {
+               //ATH_MSG_INFO("Not valid HWIdentifier for channel "<<ch<<"of FEB "<<febId.get_identifier32().get_compact());
+               ATH_MSG_INFO("Not valid HWIdentifier for channel "<<ch);
+               continue;
+            }
+            if( m_isSC && (! m_onlineHelper->is_slar(chanId)) ) {
+               ATH_MSG_WARNING("Not a SC identifier, skipping ! ");
+               continue;
+            }
+            try { const HWIdentifier chanIdd(chanId.get_identifier32().get_compact());chanIdd.show();}
+            catch (...) {
+               ATH_MSG_WARNING("Something wrong with this id, skipping ! ");
+               continue;
+            }
             const std::vector<HWIdentifier>& cLids=clCont->calibSlotLine(chanId); 
-            msg()<<MSG::INFO <<"ch. "<<ch<<" CL size: "<<cLids.size()<<": ";
-            for(unsigned cl=0; cl<cLids.size(); ++cl) msg()<<MSG::INFO <<cLids[cl].get_identifier32().get_compact()<<" ";
+            msg()<<MSG::DEBUG <<" CL size: "<<cLids.size()<<": ";
+            for(unsigned cl=0; cl<cLids.size(); ++cl) msg()<<MSG::DEBUG <<cLids[cl].get_identifier32().get_compact()<<" ";
             msg() << endmsg;
             for(unsigned cl=0; cl<cLids.size(); ++cl) {
-               const HWIdentifier calibModuleID = onlHlp->calib_module_Id(cLids[cl]);
-               msg()<<MSG::INFO <<calibModuleID.get_identifier32().get_compact()<<" ";
+               const HWIdentifier calibModuleID = m_onlineHelper->calib_module_Id(cLids[cl]);
                if (std::find(m_patchCBs.begin(),m_patchCBs.end(),calibModuleID.get_identifier32().get_compact()) != m_patchCBs.end()) { // we should patch this channel
                   missingCBs.push_back(std::make_pair(std::make_pair(febId,gain), ch));
-                  msg()<<MSG::INFO <<" found "; 
                   break;
                }
-               msg() << endmsg;
             } // over CLs
          }// over channels
          retVal1=false;

@@ -7,6 +7,8 @@
 #include "../EgammaReHadEnFex.h"
 #include "TrigT2CaloEgamma/RingerReFex.h"
 #include "../EgammaAllFex.h"
+#include "../TrigFastCalibWithRings.h"
+
 
 DECLARE_COMPONENT( T2CaloEgammaReFastAlgo )
 DECLARE_COMPONENT( T2CaloEgammaForwardReFastAlgo )
@@ -16,3 +18,4 @@ DECLARE_COMPONENT( EgammaReEmEnFex )
 DECLARE_COMPONENT( EgammaReHadEnFex )
 DECLARE_COMPONENT( RingerReFex )
 DECLARE_COMPONENT( EgammaAllFex )
+DECLARE_COMPONENT( TrigFastCalibWithRings )

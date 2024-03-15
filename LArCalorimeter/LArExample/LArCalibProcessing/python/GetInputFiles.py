@@ -5,10 +5,7 @@ from os import popen
 def GetInputFiles(inputPath,filePattern):
     print("Searching for files with pattern '",filePattern,"' in ",inputPath)
     fileList=[]
-    if (inputPath[0:5]=='/eos/'):    
-        cmd='/usr/bin/eos ls '
-    else:
-        cmd='ls -1'
+    cmd='ls -1'
 
     for f in popen("%(cmd)s %(path)s | grep '%(pattern)s'" \
                    % {'cmd':cmd,'path':inputPath,'pattern':filePattern}):

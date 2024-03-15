@@ -98,7 +98,6 @@ if __name__=='__main__':
      if len(flags.LArCalib.Preselection.Side) > 0 or len(flags.LArCalib.Preselection.BEC) > 0 or len(flags.LArCalib.Preselection.FT) > 0:
         log.warning('No preselection yet in reading physics data !!!') 
             
-
   # we need pedestals
   from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
   cfg.merge(LArElecCalibDBCfg(flags,["Pedestal"]))
@@ -117,7 +116,6 @@ if __name__=='__main__':
      ppa.Interval = 1000000 # Big number (>evtMax) to do postprocessing during finalization
      rn=flags.Input.RunNumber[0]
      ppa.FileKey = f'/{flags.DQ.FileKey}/run_{rn}/'
-
      cfg.addEventAlgo(ppa, sequenceName='AthEndSeq')
   
   if args.skipev > 0:

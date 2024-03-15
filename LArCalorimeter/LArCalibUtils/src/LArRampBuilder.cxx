@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRampBuilder.h"
@@ -648,7 +648,11 @@ StatusCode LArRampBuilder::stop()
 	}
 	else if ((m_maxADC > 0)&&(MaxADC >= m_maxADC)) { 
 	  isADCsat = true; // if ADC saturated at least once, it should be notified
-	  ATH_MSG_DEBUG("Saturated: "<<m_onlineHelper->channel_name(chid)<<" at DAC "<<dac_it->first<<" ADC "<< MaxADC);
+          if(ramppoint.DAC < 200){
+             ATH_MSG_DEBUG("Saturated low DAC: "<<m_onlineHelper->channel_name(chid)<<" at DAC "<<dac_it->first<<" ADC "<< MaxADC);
+          } else {
+             ATH_MSG_DEBUG("Saturated: "<<m_onlineHelper->channel_name(chid)<<" at DAC "<<dac_it->first<<" ADC "<< MaxADC);
+          }
 	}else{
 	  ATH_MSG_DEBUG("Fail ramp selection: "<<chid<<" "<<dac_it->first<<" "<<m_minDAC<<" "<<ramppoint.ADC<<" "<<MaxADC<<" "<<m_maxADC);
 	} 
@@ -773,8 +777,17 @@ StatusCode LArRampBuilder::rampfit(unsigned deg, const std::vector<LArRawRamp::R
     for (unsigned int DACIndex=1;DACIndex<linRange;DACIndex++){
       thisslope = (data[DACIndex].ADC - data[DACIndex-1].ADC)/(data[DACIndex].DAC - data[DACIndex-1].DAC);
 
-      //FIXME: this causes some HEC channels to have rampfrom 2 points only !!!!
-      if ( (satpoint == -1) && ((meanslope-thisslope) > meanslope/10.) ) { satpoint = DACIndex; } // saturation was reached
+      float scut;
+      if(m_onlineHelper->isHECchannel(chid) && DACIndex < 5) {
+         scut = meanslope/4.;
+      } else { scut = meanslope/10.;}
+      if ( (satpoint == -1) && ((meanslope-thisslope) > scut) ) { 
+         satpoint = DACIndex; 
+         if (satpoint <= 4) {
+            ATH_MSG_DEBUG("Only "<<satpoint<<" points to fit, chid: "<<std::hex<<chid.get_identifier32().get_compact()<<std::dec);
+            ATH_MSG_DEBUG(meanslope<<" "<<thisslope<<" | "<<data[DACIndex-1].ADC<<" "<<data[DACIndex].ADC);
+         }
+      } // saturation was reached
 
       meanslope = ( thisslope + (DACIndex-1)*(accslope[DACIndex-1]) )/DACIndex;
       accslope.push_back(meanslope);
@@ -793,9 +806,9 @@ StatusCode LArRampBuilder::rampfit(unsigned deg, const std::vector<LArRawRamp::R
   if(m_doBadChannelMask && m_bcMask.cellShouldBeMasked(bcCont,chid)) isgood=false;
   if (deg>linRange) {
     if (cabling->isOnlineConnected(chid) && isgood ) 
-      ATH_MSG_ERROR( "Not enough datapoints before saturation (" << linRange << ") to fit a polynom of degree " << deg );
+      ATH_MSG_ERROR( "Not enough datapoints before saturation (" << linRange << ") to fit a polynom of degree " << deg << "chid: "<<std::hex<<chid.get_identifier32().get_compact()<<std::dec);
     else
-      ATH_MSG_DEBUG("Not enough datapoints before saturation (" << linRange << ") to fit a polynom of degree " << deg 
+      ATH_MSG_DEBUG("Not enough datapoints before saturation (" << linRange << ") to fit a polynom of degree " << deg << "chid: "<<std::hex<<chid.get_identifier32().get_compact()<<std::dec
 		    << " (channel disconnected or known to be bad)");
     
     return StatusCode::FAILURE;

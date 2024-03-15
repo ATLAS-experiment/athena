@@ -14,9 +14,9 @@ log = logging.getLogger('TrigConfigSvcCfg')
 # Either via JSON conversion from Run-1&2 or native Run-3 (see ATR-24531).
 def l1menu_generated():
     try:
-        return l1menu_generated._hasRun
+        return l1menu_generated._hasRun # type: ignore
     except AttributeError:
-        l1menu_generated._hasRun = True
+        l1menu_generated._hasRun = True # type: ignore
         return False
 
 
@@ -362,7 +362,7 @@ if __name__ == "__main__":
 
         def setUp(self):
             # Allow multiple L1 menu generations for these tests
-            l1menu_generated._hasRun = False
+            l1menu_generated._hasRun = False # type: ignore
 
         def test_currentMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags

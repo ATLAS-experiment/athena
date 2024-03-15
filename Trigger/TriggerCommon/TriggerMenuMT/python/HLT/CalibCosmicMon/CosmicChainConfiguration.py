@@ -5,7 +5,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequence
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequenceCfg
 from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
 
@@ -53,9 +53,6 @@ def CosmicsTrkSequenceCfg(flags):
                           HypoToolGen = TrackCountHypoToolGen)
 
 
-def EmptyMSBeforeCosmicID(flags):
-    return EmptyMenuSequence("EmptyBeforeCosmicID")
-
 #----------------------------------------------------------------
 class CosmicChainConfiguration(ChainConfigurationBase):
 
@@ -73,7 +70,7 @@ class CosmicChainConfiguration(ChainConfigurationBase):
         # define here the names of the steps and obtain the chainStep configuration         
         # --------------------
         if 'cosmic_id' in self.chainName:
-            steps += [  self.getStep(flags, 1, 'Empty', [EmptyMSBeforeCosmicID]),
+            steps += [  self.getStep(flags, 1, 'Empty', [EmptyMenuSequenceCfg], name="EmptyBeforeCosmicID"),
                         self.getStep(flags, 2, 'CosmicTracking', [CosmicsTrkSequenceCfg]) ]
 
         return self.buildChain(steps)
