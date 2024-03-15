@@ -13,7 +13,7 @@ namespace CP
 
 AsgClassificationDecorationAlg::AsgClassificationDecorationAlg(const std::string &name,
                                                ISvcLocator *pSvcLocator)
-    : AnaAlgorithm(name, pSvcLocator)
+    : AnaAlgorithm(name, pSvcLocator), m_tool("",this)
 {
   declareProperty ("tool", m_tool, "classification tool");
 }
