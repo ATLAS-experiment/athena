@@ -134,9 +134,6 @@ public:
 
   virtual const xAOD::TruthParticle* getParentHadron(const xAOD::TruthParticle*) const override;
 
-  virtual int getParentHadronID(const xAOD::TruthParticle*) const override;
-
-
   enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
 
   /// \brief These helper functions return the value that the respective bit is set to in \ref MCTruthClassifier
