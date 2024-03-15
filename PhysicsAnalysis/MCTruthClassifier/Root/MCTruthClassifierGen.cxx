@@ -262,11 +262,6 @@ const xAOD::TruthParticle* MCTruthClassifier::getParentHadron(const xAOD::TruthP
   return std::get<1>(defOrigOfParticle(thePart));
 }
 
-int MCTruthClassifier::getParentHadronID(const xAOD::TruthParticle* thePart) const {
-  const xAOD::TruthParticle* parentHadron = getParentHadron(thePart);
-  return parentHadron ? parentHadron->pdgId() : 0; 
-}
-
 unsigned int MCTruthClassifier::classify(const xAOD::TruthParticle* thePart) const {
   ATH_MSG_DEBUG( "Executing classify" );
   if (!thePart) { ATH_MSG_WARNING( "Passed a nullptr" ); return 0; }

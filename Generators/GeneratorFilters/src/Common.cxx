@@ -106,7 +106,8 @@ void classify(ToolHandle<IMCTruthClassifier>& classif,
        particleOutCome = classif->getParticleOutCome();
 #endif
        result = (unsigned int)classif->classify(theParticle);
-       hadron_pdg = (int)classif->getParentHadronID(theParticle);
+       auto parent = classif->getParentHadron(theParticle);
+       hadron_pdg = parent ? parent->pdg_id() : 0;
        particleType = classification.first;
        particleOrigin = classification.second;
   }

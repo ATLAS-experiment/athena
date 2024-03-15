@@ -115,9 +115,6 @@ public:
 
   virtual const xAOD::TruthParticle* getParentHadron(const xAOD::TruthParticle*) const = 0;
 
-  virtual int getParentHadronID(const xAOD::TruthParticle*) const = 0;
-
-
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
   particleTruthClassifier(const HepMcParticleLink& theLink,Info* info = nullptr) const = 0;
