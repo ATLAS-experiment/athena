@@ -3,8 +3,8 @@
 */
 
 /**
- * @file GeneratorObjectsTPCnv/test/HepMcParticleLinkCnv_p2_test.cxx
- * @brief Tests for HepMcParticleLinkCnv_p2.
+ * @file GeneratorObjectsTPCnv/test/HepMcParticleLinkCnv_p3_test.cxx
+ * @brief Tests for HepMcParticleLinkCnv_p3.
  */
 
 
@@ -19,7 +19,7 @@
 // CLHEP includes
 #include "CLHEP/Units/SystemOfUnits.h"
 
-#include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p2.h"
+#include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p3.h"
 #include "StoreGate/WriteHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
 
@@ -29,7 +29,7 @@ void compare (const HepMcParticleLink& p1,
               const HepMcParticleLink& p2)
 {
   assert ( p1.isValid() == p2.isValid() );
-  assert ( p1.barcode() == p2.barcode() );
+  assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
@@ -49,7 +49,7 @@ int maximumBarcode(std::vector<HepMC::GenParticlePtr>& genPartList)
 void populateGenEvent(HepMC::GenEvent & ge, int pdgid1, int pdgid2, std::vector<HepMC::GenParticlePtr>& genPartList)
 {
   int maxBarcode = maximumBarcode(genPartList);
-  HepMC::FourVector myPos( 0.0, 0.0, 0.0, 0.0);
+  HepMC::FourVector  myPos( 0.0, 0.0, 0.0, 0.0);
   HepMC::GenVertexPtr myVertex = HepMC::newGenVertexPtr( myPos, -1 );
   HepMC::FourVector fourMomentum1( 0.0, 0.0, 1.0, 1.0*CLHEP::TeV);
   HepMC::GenParticlePtr inParticle1 = HepMC::newGenParticlePtr(fourMomentum1, pdgid1, 2);
@@ -80,14 +80,14 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
   genPart->set_pdg_id(999); //Geantino
   genPart->set_status(1); //!< set decay status
-  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE);
+  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
 
   HepMC::GenVertexPtr genVertex=HepMC::newGenVertexPtr();
   genVertex->add_particle_out(genPart);
   genPartList.push_back(genPart);
 
   //to set geantino vertex as a truth primary vertex
-  HepMC::GenVertexPtr hScatVx = HepMC::barcode_to_vertex(&ge,-3);
+  HepMC::GenVertexPtr  hScatVx = HepMC::barcode_to_vertex(&ge,-3);
   if(hScatVx!=nullptr) {
     HepMC::FourVector pmvxpos=hScatVx->position();
     genVertex->set_position(pmvxpos);
@@ -169,7 +169,7 @@ void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genP
   // GenEvent::event_number.
   const int event_number2(std::numeric_limits<unsigned short>::max());
   // 2^16 -1 is the largest event number supported by
-  // HepMcParticleLink_p2. A workaround is used to suppport larger
+  // HepMcParticleLink_p3. A workaround is used to suppport larger
   // values for the first event in the McEventCollection.
   const int event_number3(64);
   const int event_number4(89);
@@ -194,8 +194,8 @@ void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genP
 void testit (const HepMcParticleLink& trans1)
 {
   MsgStream log (nullptr, "test");
-  HepMcParticleLinkCnv_p2 cnv;
-  HepMcParticleLink_p2 pers;
+  HepMcParticleLinkCnv_p3 cnv;
+  HepMcParticleLink_p3 pers;
   cnv.transToPers (&trans1, &pers, log);
   HepMcParticleLink trans2;
   cnv.persToTrans (&pers, &trans2, log);
@@ -312,34 +312,31 @@ void test1()
   // Link to a GenParticle which was not recorded to the
   // McEventCollection, even though other parts of the same GenEvent
   // were recorded.
-  const int cutParticleBarcode(210001);
   const int cutParticleId(5);
   const HepMcParticleLink::index_type refEventNumber = static_cast<HepMcParticleLink::index_type>(particle1->parent_event()->event_number());
-  // By barcode + event_number
-  HepMcParticleLink trans6a(cutParticleBarcode,refEventNumber,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
-  testit (trans6a);
+  // By barcode + event_number - NOT SUPPORTED
+  // No way to get back to barcode after TP conversion if the GenParticle itself is not present
   // By id + event_number
   HepMcParticleLink trans6b(cutParticleId,refEventNumber,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
   testit (trans6b);
-  // By barcode + position
-  HepMcParticleLink trans6c(cutParticleBarcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE);
-  testit (trans6c);
+  // By barcode + position - NOT SUPPORTED
+  // No way to get back to barcode after TP conversion if the GenParticle itself is not present
   // By id + position
   HepMcParticleLink trans6d(cutParticleId,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_ID);
   testit (trans6d);
 
   // Link to a GenEvent which was not recorded to the McEventCollection
   const HepMcParticleLink::index_type missingEvtNum = static_cast<HepMcParticleLink::index_type>(460);
-  // By barcode + event_number
-  HepMcParticleLink trans7a(cutParticleBarcode, missingEvtNum,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
-  testit (trans7a);
+  // By barcode + event_number - NOT SUPPORTED
+  // No way to get back to barcode after TP conversion if the GenParticle itself is not present
   // By barcode + position - NOT SUPPORTED
+  // No way to get back to barcode after TP conversion if the GenParticle itself is not present
   // Position is meaningless if the GenEvent is not in the McEventCollection
   // By id + position - NOT SUPPORTED
-  // No way to get back to id after TP conversion if the GenParticle itself is not present
   // Position is meaningless if the GenEvent is not in the McEventCollection
-  // By id + event_number - NOT SUPPORTED
-  // No way to get back to id after TP conversion if the GenParticle itself is not present
+  // By id + event_number
+  HepMcParticleLink trans7c(cutParticleId, missingEvtNum,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
+  testit (trans7c);
 }
 
 

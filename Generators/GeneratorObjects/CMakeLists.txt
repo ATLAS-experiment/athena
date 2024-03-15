@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( GeneratorObjects )
@@ -15,7 +15,7 @@ atlas_add_library( GeneratorObjects
                    PUBLIC_HEADERS GeneratorObjects
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES AthenaKernel AtlasHepMCLib AthContainers AthLinks SGTools xAODTruth GaudiKernel RootUtils StoreGateLib )
+                   LINK_LIBRARIES AthenaKernel AtlasHepMCLib AthContainers AthLinks SGTools xAODTruth GaudiKernel RootUtils StoreGateLib TruthUtils )
 
 if (HEPMC3_USE)
   atlas_add_dictionary( GeneratorObjectsDict

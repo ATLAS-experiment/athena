@@ -114,8 +114,8 @@ public:
      */
     ExtendedBarCode (barcode_type uid,
                      index_type eventIndex,
-                     PositionFlag isIndexEventPosition /*= IS_EVENTNUM*/,
-                     UniqueIDFlag isUniqueIDBarcode /*= IS_ID*/);
+                     PositionFlag isIndexEventPosition = IS_EVENTNUM,
+                     UniqueIDFlag isUniqueIDBarcode = IS_ID);
 
     /**
      * @brief Copy constructor.  (Can't be defaulted due to the atomic member.)
@@ -140,10 +140,21 @@ public:
     ExtendedBarCode& operator= (ExtendedBarCode&& rhs) noexcept;
 
     /**
-     * @brief Barcode of target variable (0 for a null link).
+     * @brief Unique ID of target variable (0 for a null link).
      */
-    barcode_type barcode() const;
+    barcode_type uid() const;
 
+    /**
+     * @brief Return the GenParticle id/barcode.
+     * @param id[out] GenParticle::id, or @c UNDEFINEDBC.
+     * @param barcode[out] barcode (deprecated), or @c UNDEFINEDBC.
+     *
+     * The GenParticle within the GenEvent is identified either by
+     * the GenParticle::id or the barcode.
+     * This method will return this by setting either @c id or @c barcode;
+     * the other one is set to @c UNDEFINEDBC.
+     */
+    void uniqueID(barcode_type& id, barcode_type& barcode) const;
 
     /**
      * @brief Return the event index/position.
@@ -156,6 +167,12 @@ public:
      * the other one is set to @c UNDEFINED.
      */
     void eventIndex (index_type& index, index_type& position) const;
+
+
+    /**
+     * @brief return true if neither barcode nor id are valid
+     */
+    bool linkIsNull() const;
 
 
     /**
@@ -207,6 +224,22 @@ public:
 
 
     /**
+     * @brief Compare the unique ID part of two links.
+     * @param lhs First link to compare.
+     * @param rhs Second link to compare.
+     * @returns -1, 0, or 1, depending on the result of the comparison.
+     *
+     * The unique ID part of the link can be represented as either
+     * a barcode or the id.
+     * If necessary, the links will be normalized so that they
+     * both refer to an id.
+     */
+    static
+    int compareUniqueID (const HepMcParticleLink& lhs,
+                      const HepMcParticleLink& rhs);
+
+
+    /**
      * @brief Dump in textual format to a stream.
      */
     void print(std::ostream& os) const;
@@ -233,6 +266,21 @@ public:
     void makeIndex (index_type index, index_type position) const;
 
 
+    /**
+     * @brief Change m_BC from barcode to ID.
+     * @param ID GenParticle::id value to set.
+     * @param barcode existing barcode value.
+     *
+     * If the link is currently referencing a GenParticle with @c barcode,
+     * update it so that it instead references the GenParticle
+     * with id value @c ID.
+     *
+     * This may be called concurrently, as long as all such concurrent
+     * calls have the same arguments.
+     */
+    void makeID (barcode_type ID, barcode_type barcode) const;
+
+
   private:
     /// Flag marking that an index refers to an event position.
     constexpr static index_type POSITION_MASK = UNDEFINED ^ (UNDEFINED>>1);
@@ -246,11 +294,20 @@ public:
      * @param positionFlag If IS_POSITION, @c idx represents a position
      *        in the collection; otherwise, it represents an event number.
      */
-    void setIndex (index_type idx, PositionFlag isPosition);
+    void setIndex (index_type idx, PositionFlag positionFlag);
 
 
-    /// Barcode of the target particle.  0 means a null link.
-    barcode_type m_BC{0};
+    /**
+     * @brief Initialize the unique identifier part of the link.
+     * @param uid The id or barcode.
+     * @param barcodeFlag If IS_BARCODE, @c uid represents a GenParticle barcode (deprecated);
+     *        otherwise, it represents a GenParticle::id().
+     */
+    void setUniqueID (barcode_type uid, UniqueIDFlag barcodeFlag);
+
+
+    /// Unique ID of the target particle.  0 means a null link.
+    mutable std::atomic<barcode_type> m_BC;
 
     /// Identifies the target GenEvent within the event collection.
     /// If the high bit is set, then this (with the high bit clear)
@@ -455,8 +512,7 @@ public:
 
 
   /**
-   * @brief Eventually return the id of the referenced GenParticle. For
-   * now just return barcode()
+   * @brief Return the id of the target particle.  0 for a null link.
    */
   int id() const;
 

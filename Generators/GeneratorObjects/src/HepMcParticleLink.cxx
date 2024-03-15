@@ -9,6 +9,7 @@
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AthenaKernel/getMessageSvc.h"
@@ -57,16 +58,27 @@ const unsigned short CPTRMAXMSGCOUNT = 100;
 void HepMcParticleLink::ExtendedBarCode::print (std::ostream& os) const
 {
   os << "Event index " ;
-  index_type index, position;
-  eventIndex (index, position);
+  index_type event_number, position;
+  eventIndex (event_number, position);
   if (position != UNDEFINED) {
     os << position << " (position in collection) ";
   }
   else {
-    os << index;
+    os << event_number << " (event number) ";
   }
-  os << ", Barcode " << m_BC
-     << ", McEventCollection "
+  os << ", Unique ID " ;
+  barcode_type particle_id, particle_barcode;
+  uniqueID (particle_id, particle_barcode);
+  if (particle_barcode == 0 && particle_id == 0) {
+    os << " 0 (id/barcode) ";
+  }
+  else if (particle_barcode != UNDEFINEDBC) {
+    os << particle_barcode << " (barcode) ";
+  }
+  else {
+    os << particle_id << " (id) ";
+  }
+  os << ", McEventCollection "
      << HepMcParticleLink::getLastEventCollectionName();
 }
 
@@ -104,7 +116,7 @@ HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
   : m_store (sg),
     m_ptr (part),
-    m_extBarcode((nullptr != part) ? HepMC::barcode(part) : 0, eventIndex, positionFlag, HepMcParticleLink::IS_BARCODE)
+    m_extBarcode((nullptr != part) ? HepMC::uniqueID(part) : 0, eventIndex, positionFlag, IS_ID)
 {
   assert(part);
 
@@ -131,84 +143,160 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
   if (!is_valid && !m_store) {
     return nullptr;
   }
-  if (is_valid) return *m_ptr.ptr();
-    if (0 == barcode()) {
-#if 0
-      MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
-      log << MSG::DEBUG
-             << "cptr: no truth particle associated with this hit (barcode==0)."
-             << " Probably this is a noise hit" << endmsg;
-#endif
-      return nullptr;
+  if (is_valid) {
+    return *m_ptr.ptr();
+  }
+  if (m_extBarcode.linkIsNull()) {
+    #if 0
+    MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
+    log << MSG::DEBUG
+        << "cptr: no truth particle associated with this hit (barcode==0)."
+        << " Probably this is a noise hit" << endmsg;
+    #endif
+    return nullptr;
+  }
+  IProxyDict* sg = m_store;
+  if (!sg) {
+    sg = SG::CurrentEventStore::store();
+  }
+  if (const McEventCollection* pEvtColl = retrieveMcEventCollection(sg)) {
+    const HepMC::GenEvent *pEvt = nullptr;
+    index_type event_number, position;
+    m_extBarcode.eventIndex (event_number, position);
+    if (event_number == 0) {
+      pEvt = pEvtColl->at(0);
     }
-    IProxyDict* sg = m_store;
-    if (!sg) {
-      sg = SG::CurrentEventStore::store();
-    }
-    if (const McEventCollection* pEvtColl = retrieveMcEventCollection(sg)) {
-      const HepMC::GenEvent *pEvt = nullptr;
-      index_type index, position;
-      m_extBarcode.eventIndex (index, position);
-      if (index == 0) {
-        pEvt = pEvtColl->at(0);
-      }
-      else if (position != ExtendedBarCode::UNDEFINED) {
-        if (position < pEvtColl->size()) {
-          pEvt = pEvtColl->at (position);
-        }
-        else {
-#if 0
-          MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
-          log << MSG::WARNING << "cptr: position = " << position << ", McEventCollection size = "<< pEvtColl->size() << endmsg;
-#endif
-          return nullptr;
-        }
+    else if (position != ExtendedBarCode::UNDEFINED) {
+      if (position < pEvtColl->size()) {
+        pEvt = pEvtColl->at (position);
       }
       else {
-        pEvt = pEvtColl->find (index);
+        #if 0
+        MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
+        log << MSG::WARNING << "cptr: position = " << position << ", McEventCollection size = "<< pEvtColl->size() << endmsg;
+        #endif
+        return nullptr;
       }
+    }
+    else {
+      pEvt = pEvtColl->find (event_number);
+    }
 
-      if (nullptr != pEvt) {
-        // Be sure to update m_extBarcode before m_ptrs;
-        // otherwise, the logic in eventIndex() won't work correctly.
-        if (position != ExtendedBarCode::UNDEFINED) {
-          m_extBarcode.makeIndex (pEvt->event_number(), position);
-        }
-        if (barcode() != 0) {
-         const HepMC::ConstGenParticlePtr p = HepMC::barcode_to_particle(pEvt,barcode());
+    if (nullptr != pEvt) {
+      // Be sure to update m_extBarcode before m_ptrs;
+      // otherwise, the logic in eventIndex() won't work correctly.
+      if (position != ExtendedBarCode::UNDEFINED) {
+        m_extBarcode.makeIndex (pEvt->event_number(), position);
+      }
+      if (event_number == 0) {
+        m_extBarcode.makeIndex (pEvt->event_number(), position);
+      }
+      if ( !m_extBarcode.linkIsNull() ) { // Check that either the ID or Barcode is non-zero or undefined
+        barcode_type particle_id, particle_barcode;
+        m_extBarcode.uniqueID (particle_id, particle_barcode);
+        if (particle_id == ExtendedBarCode::UNDEFINEDBC) {
+          // barcode to GenParticle
+          const HepMC::ConstGenParticlePtr p = HepMC::barcode_to_particle(pEvt,int(particle_barcode));
           if (p) {
+            int genParticleID = HepMC::uniqueID(p);
+            if (genParticleID > -1) {
+              particle_id = static_cast<barcode_type>(genParticleID);
+              m_extBarcode.makeID (particle_id, particle_barcode);
+            }
             m_ptr.set (p);
             return p;
           }
         }
-      } else {
-        MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
-        if (position != ExtendedBarCode::UNDEFINED) {
-          log << MSG::WARNING
-            << "cptr: Mc Truth not stored for event at " << position
-            << endmsg;
-        } else {
-          log << MSG::WARNING
-            << "cptr: Mc Truth not stored for event with event number " << index
-            << endmsg;
+        else {
+          // id to GenParticle
+#ifdef HEPMC3
+          const auto &particles = pEvt->particles();
+          if (particle_id-1 < particles.size()) {
+            const HepMC::ConstGenParticlePtr p = particles[particle_id-1];
+            if (p) {
+              m_ptr.set (p);
+              return p;
+            }
+          }
+#else
+          const HepMC::ConstGenParticlePtr p = HepMC::barcode_to_particle(pEvt,int(particle_id)); // For HepMC2 "id" == barcode
+          if (p) {
+            m_ptr.set (p);
+            return p;
+          }
+#endif
         }
       }
     } else {
       MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
-      log << MSG::WARNING << "cptr: McEventCollection not found" << endmsg;
+      if (position != ExtendedBarCode::UNDEFINED) {
+        log << MSG::WARNING
+            << "cptr: Mc Truth not stored for event at " << position
+            << endmsg;
+      } else {
+        log << MSG::WARNING
+            << "cptr: Mc Truth not stored for event with event number " << event_number
+            << endmsg;
+      }
     }
+  } else {
+    MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
+    log << MSG::WARNING << "cptr: McEventCollection not found" << endmsg;
+  }
   return nullptr;
 }
 
 
 /**
- * @brief Eventually return the id of the referenced GenParticle. For
- * now just return barcode()
+ * @brief Return the id of the referenced GenParticle.
  */
 int HepMcParticleLink::id() const
 {
-  // Placeholder: for now just return barcode()
-  return barcode();
+  // if m_BC is zero (delta rays), then just return that same for barcode and id
+  if (m_extBarcode.uid()) {
+    // dummy link
+    if (!m_ptr.isValid() && !m_store) {
+      return 0; // TODO Decide if this is a good default - constant from MagicNumbers.h instead?
+    }
+
+    barcode_type particle_id, particle_barcode;
+    m_extBarcode.uniqueID (particle_id, particle_barcode);
+    if (particle_id == ExtendedBarCode::UNDEFINEDBC) {
+      (void) eventIndex(); // FIXME be careful to avoid an infinite loop of calls here
+    }
+    m_extBarcode.uniqueID (particle_id, particle_barcode);
+    if (particle_id != ExtendedBarCode::UNDEFINEDBC) {
+      return particle_id;
+    }
+  }
+  return 0;
+}
+
+
+/**
+ * @brief Return the barcode of the target particle.  0 for a null link.
+ * FIXME: return type.
+ */
+int HepMcParticleLink::barcode() const
+{
+  // if m_BC is zero (delta rays), then just return that same for barcode and id
+  if (m_extBarcode.uid()) {
+    barcode_type particle_id, particle_barcode;
+    m_extBarcode.uniqueID (particle_id, particle_barcode);
+    if (particle_barcode != ExtendedBarCode::UNDEFINEDBC) {
+      return int(particle_barcode);
+    }
+    // dummy link
+    if (!m_ptr.isValid() && !m_store) {
+      return 0; // TODO Decide if this is a good default - constant from MagicNumbers.h instead?
+    }
+    // we will need to look up the barcode from the GenParticle
+    (void) eventIndex(); // FIXME be careful to avoid an infinite loop of calls here
+    if (cptr()) {
+      return HepMC::barcode(cptr());
+    }
+  }
+  return 0;
 }
 
 
@@ -252,13 +340,13 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
     }
   }
   // Don't trip the assertion for a null link.
-  if (barcode() == 0 ) {  // || barcode() == 0x7fffffff)
-    if (event_number != ExtendedBarCode::UNDEFINED) {
-      return event_number;
+  if ( m_extBarcode.linkIsNull() )
+    {
+      return (event_number != ExtendedBarCode::UNDEFINED) ? event_number : 0;
     }
-    return 0;
-  }
+  // Attempt to find the GenParticle
   cptr();
+  // Check if event_number is valid once more
   m_extBarcode.eventIndex (event_number, event_position);
   assert (event_number != ExtendedBarCode::UNDEFINED);
   return event_number;
@@ -272,16 +360,16 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
 HepMcParticleLink::index_type
 HepMcParticleLink::getEventPositionInCollection (const IProxyDict* sg) const
 {
-  index_type index, position;
-  m_extBarcode.eventIndex (index, position);
+  index_type event_number, position;
+  m_extBarcode.eventIndex (event_number, position);
   if (position != ExtendedBarCode::UNDEFINED) {
     return position;
   }
-  if (index == 0) {
+  if (event_number == 0) {
     return 0;
   }
 
-  std::vector<index_type> positions = getEventPositionInCollection(index, sg);
+  std::vector<index_type> positions = getEventPositionInCollection(event_number, sg);
   return positions[0];
 }
 
@@ -291,14 +379,14 @@ HepMcParticleLink::getEventPositionInCollection (const IProxyDict* sg) const
  *        (first) GenEvent with a given event number
  */
 std::vector<HepMcParticleLink::index_type>
-HepMcParticleLink::getEventPositionInCollection (index_type index, const IProxyDict* sg)
+HepMcParticleLink::getEventPositionInCollection (index_type event_number, const IProxyDict* sg)
 {
   std::vector<index_type> positions; positions.reserve(1);
-  const int intIndex = static_cast<int>(index);
+  const int int_event_number = static_cast<int>(event_number);
   if (const McEventCollection* coll = retrieveMcEventCollection (sg)) {
     size_t sz = coll->size();
     for (size_t i = 0; i < sz; i++) {
-      if ((*coll)[i]->event_number() == intIndex) {
+      if ((*coll)[i]->event_number() == int_event_number) {
         positions.push_back(i);
       }
     }

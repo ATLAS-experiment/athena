@@ -292,7 +292,7 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
         tmpSGhit.setEventIndex(index);
       else
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
+      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
 
@@ -366,7 +366,7 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       else
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
 
-      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
+      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
       tmpSGhit.setX(0.5 * (endsOfStrip.first.x() + endsOfStrip.second.x()));
@@ -514,7 +514,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
         clusterEquiv.setEventIndex(index);
       else
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
-      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
+      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       clusterEquiv.setParentageMask(parentMask.to_ulong());
       clusterOut.setClusterEquiv(clusterEquiv);
@@ -584,7 +584,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
 
 
-      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
+      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       clusterEquiv.setParentageMask(parentMask.to_ulong());
       clusterOut.setClusterEquiv(clusterEquiv);
@@ -699,7 +699,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setPZ(track_truth_p * track_truth_costheta);
       tmpSGTrack.setPDGCode(pdgcode);
       tmpSGTrack.setStatus(particle->status());
-      tmpSGTrack.setBarcode(extBarcode2.barcode()); // FIXME
+      tmpSGTrack.setBarcode(extBarcode2.uid()); // FIXME
       index_type index2, position2;
       extBarcode2.eventIndex(index2, position2);
       tmpSGTrack.setEventIndex(index2);

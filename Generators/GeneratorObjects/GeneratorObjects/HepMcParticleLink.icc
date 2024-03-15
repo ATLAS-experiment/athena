@@ -34,10 +34,10 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode
   (barcode_type uid,
    index_type eventIndex,
    PositionFlag isIndexEventPosition /*=IS_EVENTNUM*/,
-   UniqueIDFlag /*isUniqueIDBarcode = IS_ID*/)
-    : m_BC(uid)
+   UniqueIDFlag isUniqueIDBarcode /*= IS_ID*/)
 {
   setIndex (eventIndex, isIndexEventPosition);
+  setUniqueID (uid, isUniqueIDBarcode);
 }
 
 
@@ -46,7 +46,7 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode
  */
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
-  : m_BC (rhs.m_BC),
+  : m_BC (static_cast<barcode_type> (rhs.m_BC)),
     m_evtIndex (static_cast<index_type> (rhs.m_evtIndex))
 {
 }
@@ -57,7 +57,7 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
  */
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (ExtendedBarCode&& rhs) noexcept
-  : m_BC (std::exchange(rhs.m_BC,0)),
+  : m_BC (rhs.m_BC.load()), // no move constructor for atomics
     m_evtIndex (rhs.m_evtIndex.load()) // no move constructor for atomics
 {
 }
@@ -70,7 +70,7 @@ HepMcParticleLink::ExtendedBarCode&
 HepMcParticleLink::ExtendedBarCode::operator= (const ExtendedBarCode& rhs)
 {
   if (this != &rhs) {
-    m_BC = rhs.m_BC;
+    m_BC = static_cast<barcode_type> (rhs.m_BC);
     m_evtIndex = static_cast<index_type> (rhs.m_evtIndex);
   }
   return *this;
@@ -84,18 +84,19 @@ HepMcParticleLink::ExtendedBarCode&
 HepMcParticleLink::ExtendedBarCode::operator= (ExtendedBarCode&& rhs) noexcept
 {
   if (this != &rhs) {
-    m_BC = std::exchange(rhs.m_BC, 0);
+    m_BC = static_cast<barcode_type> (rhs.m_BC.load());
     m_evtIndex = static_cast<index_type>(rhs.m_evtIndex.load());
   }
   return *this;
 }
 
+
 /**
- * @brief Barcode of target variable (0 for a null link).
+ * @brief Unique ID of target variable (0 for a null link).
  */
 inline
 HepMcParticleLink::barcode_type
-HepMcParticleLink::ExtendedBarCode::barcode() const
+HepMcParticleLink::ExtendedBarCode::uid() const
 {
   return m_BC;
 }
@@ -123,6 +124,37 @@ void HepMcParticleLink::ExtendedBarCode::eventIndex (index_type& index,
   else {
     index = idx;
     position = UNDEFINED;
+  }
+}
+
+
+/**
+ * @brief Return the GenParticle id/barcode.
+ * @param id[out] GenParticle::id, or @c UNDEFINEDBC.
+ * @param barcode[out] barcode (deprecated), or @c UNDEFINEDBC.
+ *
+ * The GenParticle within the GenEvent is identified either by
+ * the GenParticle::id or the barcode.
+ * This method will return this by setting either @c id or @c barcode;
+ * the other one is set to @c UNDEFINEDBC.
+ */
+inline
+void HepMcParticleLink::ExtendedBarCode::uniqueID (barcode_type& id,
+                                                     barcode_type& barcode) const
+{
+  barcode_type uid = m_BC;
+  if (uid == 0) // special case for delta-rays
+    {
+      id = uid;
+      barcode = uid;
+    }
+  else if (uid & BARCODE_MASK) {
+    id = UNDEFINEDBC;
+    barcode = uid & ~BARCODE_MASK;
+  }
+  else {
+    id = uid;
+    barcode = UNDEFINEDBC;
   }
 }
 
@@ -223,6 +255,75 @@ HepMcParticleLink::ExtendedBarCode::compareIndex (const HepMcParticleLink& lhs,
 }
 
 
+
+/**
+ * @brief Compare the unique ID part of two links.
+ * @param lhs First link to compare.
+ * @param rhs Second link to compare.
+ * @returns -1, 0, or 1, depending on the result of the comparison.
+ *
+ * The unique ID part of the link can be represented as either
+ * a barcode or the id.
+ * If necessary, the links will be normalized so that they
+ * both refer to an id.
+ */
+inline
+int
+HepMcParticleLink::ExtendedBarCode::compareUniqueID (const HepMcParticleLink& lhs,
+                                                  const HepMcParticleLink& rhs)
+{
+  // Get the stored indices.  The high bit will be set of they
+  // represent a position.  Do a quick test for equality.
+  barcode_type uid1 = lhs.m_extBarcode.m_BC;
+  barcode_type uid2 = rhs.m_extBarcode.m_BC;
+  if (uid1 == uid2) return 0;
+
+  // Normalize the values so that they both refer to the id;
+  // this happens as a side-effect of calling cptr().
+  if (uid1 & BARCODE_MASK) {
+    lhs.cptr();
+    uid1 = lhs.m_extBarcode.m_BC;
+  }
+  if (uid2 & BARCODE_MASK) {
+    rhs.cptr();
+    uid2 = rhs.m_extBarcode.m_BC;
+  }
+  // Compare.
+  if (uid1 == uid2) {
+    return 0;
+  }
+  else if (uid1 < uid2) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+}
+
+
+/**
+ * @brief Change m_BC from barcode to ID.
+ * @param ID GenParticle::id value to set.
+ * @param barcode existing barcode value.
+ *
+ * If the link is currently referencing a GenParticle with @c barcode,
+ * update it so that it instead references the GenParticle
+ * with id value @c ID.
+ *
+ * This may be called concurrently, as long as all such concurrent
+ * calls have the same arguments.
+ */
+inline
+void HepMcParticleLink::ExtendedBarCode::makeID (barcode_type ID,
+                                                 barcode_type barcode) const
+{
+  assert ((ID & BARCODE_MASK) == 0);
+  barcode_type old = barcode | BARCODE_MASK;
+  m_BC.compare_exchange_strong (old, ID);
+  assert (old == (barcode|BARCODE_MASK) || old == ID);
+}
+
+
 /**
  * @brief Change index from position to number.
  * @param index Event number to set.
@@ -247,6 +348,26 @@ void HepMcParticleLink::ExtendedBarCode::makeIndex (index_type index,
 
 
 /**
+ * @brief Initialize the unique identifier part of the link.
+ * @param uid The id or barcode.
+ * @param barcodeFlag If IS_BARCODE, @c uid represents a GenParticle barcode (deprecated);
+ *        otherwise, it represents a GenParticle::id().
+ */
+inline
+void
+HepMcParticleLink::ExtendedBarCode::setUniqueID (barcode_type uid,
+                                              UniqueIDFlag barcodeFlag)
+{
+  assert ((uid & BARCODE_MASK) == 0);
+  // For delta-rays barcode=id=0
+  if (uid != 0 && barcodeFlag == IS_BARCODE) {
+    uid |= BARCODE_MASK;
+  }
+  m_BC = uid;
+}
+
+
+/**
  * @brief Initialize the event index part of the link.
  * @param idx The index or position.
  * @param positionFlag If IS_POSITION, @c idx represents a position
@@ -262,6 +383,17 @@ HepMcParticleLink::ExtendedBarCode::setIndex (index_type idx,
     idx |= POSITION_MASK;
   }
   m_evtIndex = idx;
+}
+
+inline bool HepMcParticleLink::ExtendedBarCode::linkIsNull() const
+{
+  barcode_type particle_id, particle_barcode;
+  uniqueID (particle_id, particle_barcode);
+  return (
+          (particle_id == 0 && particle_barcode == 0) || // delta rays
+          (particle_id == 0 && particle_barcode == ExtendedBarCode::UNDEFINEDBC) ||
+          (particle_id  == ExtendedBarCode::UNDEFINEDBC && particle_barcode == 0)
+          );
 }
 
 
@@ -424,7 +556,7 @@ HepMcParticleLink::operator bool() const
 inline
 bool HepMcParticleLink::operator== (const HepMcParticleLink& rhs) const
 {
-  return  (m_extBarcode.barcode()==rhs.m_extBarcode.barcode() &&
+  return  (ExtendedBarCode::compareUniqueID(*this, rhs) == 0 &&
            ExtendedBarCode::compareIndex (*this, rhs) == 0);
 }
 
@@ -448,20 +580,9 @@ bool HepMcParticleLink::operator< (const HepMcParticleLink& rhs) const
   int cmpIndex = ExtendedBarCode::compareIndex (*this, rhs);
   if (cmpIndex < 0) return true;
   if (cmpIndex == 0) {
-    return m_extBarcode.barcode() < rhs.m_extBarcode.barcode();
+    if (ExtendedBarCode::compareUniqueID(*this, rhs) < 0) return true;
   }
   return false;
-}
-
-
-/**
- * @brief Return the barcode of the target particle.  0 for a null link.
- * FIXME: return type.
- */
-inline
-int HepMcParticleLink::barcode() const
-{
-  return int(m_extBarcode.barcode());
 }
 
 
@@ -471,7 +592,7 @@ int HepMcParticleLink::barcode() const
 inline
 HepMcParticleLink::barcode_type HepMcParticleLink::compress() const
 {
-  return ( ((m_extBarcode.barcode()&0xFFFF) << 16) |
+  return ( ((m_extBarcode.uid()&0xFFFF) << 16) |
            eventIndex() );
 }
 
