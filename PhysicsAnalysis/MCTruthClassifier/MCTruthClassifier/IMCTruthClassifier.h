@@ -21,7 +21,7 @@
 
 #define MCTRUTHCLASSIFIER_CONST
 
-#ifndef GENERATIONBASE // Can not be used in Generation release
+#ifndef GENERATIONBASE
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "xAODEgamma/ElectronFwd.h"
 #include "xAODEgamma/PhotonFwd.h"
@@ -30,7 +30,7 @@
 #include "xAODTracking/TrackParticleFwd.h"
 #endif
 
-#ifndef XAOD_ANALYSIS // Can not be used in AnalysisBase
+#ifndef XAOD_ANALYSIS
 #include <AtlasHepMC/GenParticle.h>
 class HepMcParticleLink;
 #endif
@@ -96,13 +96,11 @@ public:
     std::vector<MCTruthPartClassifier::ParticleType> cnvPhotPartType;
     std::vector<MCTruthPartClassifier::ParticleOrigin> cnvPhotPartOrig;
 #endif
-
   };
 
   /** Virtual destructor */
   virtual ~IMCTruthClassifier(){};
 
-  /* All get to see these*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
   particleTruthClassifier(const xAOD::TruthParticle*, Info* info = nullptr) const = 0;
 
@@ -123,7 +121,7 @@ public:
   particleTruthClassifier(HepMC::ConstGenParticlePtr, Info* info = nullptr) const = 0;
 #endif
 
-#ifndef GENERATIONBASE /*These can not run in Generation only release*/
+#ifndef GENERATIONBASE
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::TrackParticle*,Info* info = nullptr) const = 0;
 

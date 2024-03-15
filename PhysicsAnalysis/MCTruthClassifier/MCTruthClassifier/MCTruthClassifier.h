@@ -11,7 +11,6 @@ AUTHORS:  O. Fedin
 CREATED:  Sep 2007
  ********************************************************************/
 
-// INCLUDE HEADER FILES:
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgTools/AsgTool.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
@@ -50,7 +49,6 @@ CREATED:  Sep 2007
 #include "AthenaKernel/Units.h"
 #endif
 
-//std includes
 #include <cmath>
 #include <utility>
 class MCTruthClassifier : virtual public IMCTruthClassifier , public asg::AsgTool
@@ -86,7 +84,6 @@ public:
     declareProperty("inclEgammaFwrdEle", m_inclEgammaFwrdEle = true);
     declareProperty("inclEgammaPhoton", m_inclEgammaPhoton = true);
   } 
-  // destructor
   virtual ~MCTruthClassifier()  = default ;
 
     // Gaudi algorithm hooks
@@ -120,7 +117,7 @@ public:
   virtual StatusCode finalize()
 #ifndef XAOD_STANDALONE
     override
-#endif // not XAOD_STANDALONE
+#endif
   { return StatusCode::SUCCESS;}
 
   /* All get to see these*/
@@ -188,7 +185,6 @@ public:
 #endif
 
 private:
-  /* All get to see these*/
   inline double detEta(double x, double y) const { return std::abs(x - y); }
   inline double detPhi(double x, double y)  const {
     double det = x - y;
@@ -196,35 +192,35 @@ private:
     if (det < -M_PI) det = det + 2. * M_PI;
     return std::abs(det);
   }
-  //
+
   static MCTruthPartClassifier::ParticleType defTypeOfElectron(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer* xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
                                                           Info* info) const;
   static MCTruthPartClassifier::ParticleOutCome defOutComeOfElectron(const xAOD::TruthParticle*) ;
-  //
+
   static MCTruthPartClassifier::ParticleType defTypeOfMuon(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                       const xAOD::TruthParticle*,
                                                       bool& isPrompt,
                                                       Info* info) const;
   static MCTruthPartClassifier::ParticleOutCome defOutComeOfMuon(const xAOD::TruthParticle*) ;
-  //
+
   static MCTruthPartClassifier::ParticleType defTypeOfTau(MCTruthPartClassifier::ParticleOrigin);
   MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                      const xAOD::TruthParticle*,
                                                      int motherPDG,
                                                      Info* info) const;
   MCTruthPartClassifier::ParticleOutCome defOutComeOfTau(const xAOD::TruthParticle*, Info* info) const;
-  //
+
   static MCTruthPartClassifier::ParticleType defTypeOfPhoton(MCTruthPartClassifier::ParticleOrigin) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                         const xAOD::TruthParticle*,
                                                         bool& isPrompt,
                                                         Info* info) const;
   static MCTruthPartClassifier::ParticleOutCome defOutComeOfPhoton(const xAOD::TruthParticle*) ;
-  //
+
   MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
@@ -232,13 +228,11 @@ private:
   //MCTruthPartClassifier::ParticleOrigin
   std::tuple<unsigned int, const xAOD::TruthParticle*> defOrigOfParticle(const xAOD::TruthParticle*) const;
 
-  //
   MCTruthPartClassifier::ParticleOrigin defHadronType(int);
   static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);
   static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,int motherPDG);
 
-  /* Private functions */
-#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) /*Athena Only*/
+#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   bool genPartToCalo(const EventContext& ctx,
                      const xAOD::CaloCluster* clus,
                      const xAOD::TruthParticle* thePart,
@@ -250,7 +244,7 @@ private:
   const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,Info* info) const;
 #endif
 
-#ifndef GENERATIONBASE /*Disable when no recostruction packages are expected*/
+#ifndef GENERATIONBASE
   double fracParticleInJet(const xAOD::TruthParticle*, const xAOD::Jet*, bool DR, bool nparts) const;
   void findJetConstituents(const xAOD::Jet*, std::set<const xAOD::TruthParticle*>& constituents, bool DR) const;
 #endif
@@ -258,34 +252,16 @@ private:
   static MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) ;
 
   /* Data members*/
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey{
-    this,
-    "xAODTruthParticleContainerName",
-    "TruthParticles",
-    "ReadHandleKey for xAOD::TruthParticleContainer"
-  };
-
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> 
+  m_truthParticleContainerKey{this,"xAODTruthParticleContainerName","TruthParticles","ReadHandleKey for xAOD::TruthParticleContainer"};
   bool m_inclEgammaPhoton;
   bool m_inclEgammaFwrdEle;
 
-#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) /*When no Athena Reconstruction packages expected*/
-  ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{
-    this,
-    "ParticleCaloExtensionTool",
-    ""
-  };
-
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{
-    this,
-    "CaloDetDescrManager",
-    ""
-  };
-
-  ToolHandle<xAOD::ITruthParticlesInConeTool> m_truthInConeTool{
-    this,
-    "TruthInConeTool",
-    "xAOD::TruthParticlesInConeTool/TruthParticlesInConeTool"
-  };
+#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
+  ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{this,"ParticleCaloExtensionTool",""};
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager",""};
+  ToolHandle<xAOD::ITruthParticlesInConeTool> 
+  m_truthInConeTool{this,"TruthInConeTool","xAOD::TruthParticlesInConeTool/TruthParticlesInConeTool"};
 
   bool  m_FwdElectronUseG4Sel;
   float m_FwdElectronTruthExtrEtaCut;
@@ -305,15 +281,10 @@ private:
 #endif
 
 #ifndef XAOD_ANALYSIS
-  SG::ReadHandleKey<xAODTruthParticleLinkVector> m_truthLinkVecReadHandleKey{
-    this,
-    "xAODTruthLinkVector",
-    "xAODTruthLinks",
-    "ReadHandleKey for xAODTruthParticleLinkVector"
-  };
-
+  SG::ReadHandleKey<xAODTruthParticleLinkVector> 
+  m_truthLinkVecReadHandleKey{this,"xAODTruthLinkVector","xAODTruthLinks", "ReadHandleKey for xAODTruthParticleLinkVector"};
 #endif
-#ifndef GENERATIONBASE /*Disable when no recostruction packages are expected*/
+#ifndef GENERATIONBASE
   float m_deltaRMatchCut;
   float m_deltaPhiMatchCut;
   int m_NumOfSiHitsCut;
