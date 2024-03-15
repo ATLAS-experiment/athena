@@ -19,6 +19,9 @@
 #include "TROOT.h"
 
 #include "ROOT/RNTuple.hxx"
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+#include "ROOT/RNTupleReader.hxx"
+#endif
 #include "ROOT/RField.hxx"
 
 using std::string;
@@ -105,32 +108,21 @@ getAuxIdForAttribute(const std::string& attr_name, const std::string& attr_type,
 
 namespace RootAuxDynIO
 {
-// New RNTupleReader for attributes of an AuxContainer stored in Field 'field_name'
-   RNTupleAuxDynReader::RNTupleAuxDynReader(RFieldBase* field, RPageSource* page_source) :
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-      AthMessaging( std::string("RNTupleAuxDynReader[")+field->GetFieldName()+"]" ),
-      m_storeFieldName( field->GetFieldName() ),
-#else
-      AthMessaging( std::string("RNTupleAuxDynReader[")+field->GetName()+"]" ),
-      m_storeFieldName( field->GetName() ),
-#endif
-      m_pageSource( page_source )
+   // New RNTupleReader for dynamic attributes of an AuxContainer-type object
+   // stored in the Field 'field_name'
+   RNTupleAuxDynReader::RNTupleAuxDynReader(const std::string& field_name,
+                                            const std::string& field_type,
+                                            RNTupleReader* reader)
+      : AthMessaging( std::string("RNTupleAuxDynReader[")+field_name+"]" ),
+        m_storeFieldName( field_name ),
+        m_ntupleReader( reader )
    {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-      const std::string field_type = field->GetTypeName();
-#else
-      const std::string field_type = field->GetType();
-#endif
       const std::string field_prefix = field_type + "_";
       if( m_storeFieldName.rfind( field_type, 0 ) != std::string::npos ) {
          m_key = m_storeFieldName.substr( field_type.size()+1 );
       }
       ATH_MSG_VERBOSE("field name=" << m_storeFieldName << "  field_prefix=" << field_prefix << "  key=" << m_key);
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-      TClass *tc = TClass::GetClass( field->GetTypeName().c_str() );
-#else
-      TClass *tc = TClass::GetClass( field->GetName().c_str() );
-#endif
+      TClass *tc = TClass::GetClass( field_type.c_str() );
       if( tc ) {
          TClass *storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
          if( storeTC ) {
@@ -152,8 +144,12 @@ namespace RootAuxDynIO
    
       const SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
       const string field_prefix = m_storeFieldName + ':';
-      auto descGuard = m_pageSource->GetSharedDescriptorGuard();
-      for( const auto &f : descGuard->GetTopLevelFields() ) {
+      const auto& desc = m_ntupleReader->GetDescriptor();
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+      for( const auto &f : desc.GetTopLevelFields() ) {
+#else
+      for( const auto &f : desc->GetTopLevelFields() ) {
+#endif
          const string field_name = f.GetFieldName();
          if( field_name.rfind(field_prefix,0) == 0 ) {
             const string attr_infile = field_name.substr(field_prefix.size());
@@ -165,7 +161,7 @@ namespace RootAuxDynIO
             // May still be null if we don't have a dictionary for this field
             if( auxid != SG::null_auxid ) {
                m_auxids.insert(auxid);
-               m_fieldInfos[auxid].field = f.CreateField(descGuard.GetRef()); 
+               m_fieldInfos[auxid].fieldName = field_name;
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");
                msg << "Could not find auxid for " << attr_infile << " type: " << field_type
@@ -203,14 +199,9 @@ namespace RootAuxDynIO
 
          bool isFieldFound = false;
 
-         if( fieldInfo.field ) {
+         if( !fieldInfo.fieldName.empty() ) {
             const string field_prefix = m_storeFieldName + ':';
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-            const string fieldName  = fieldInfo.field->GetFieldName();
-#else
-            const string fieldName  = fieldInfo.field->GetName();
-#endif
-            const string attr_infile = fieldName.substr(field_prefix.size());
+            const string attr_infile = fieldInfo.fieldName.substr(field_prefix.size());
             isFieldFound = (attr_infile == fieldInfo.attribName);
          }
 
@@ -220,24 +211,9 @@ namespace RootAuxDynIO
             return fieldInfo;
          }
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-         if( !store.standalone() and fieldInfo.field->GetTypeName().rfind("SG::PackedContainer<", 0) == 0 )
-#else
-         if( !store.standalone() and fieldInfo.field->GetName().rfind("SG::PackedContainer<", 0) == 0 )
-#endif
+         if( !store.standalone() and fieldInfo.fieldName.rfind("SG::PackedContainer<", 0) == 0 )
             fieldInfo.isPackedContainer = true;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-         // connect the field (with subfields) to the pageSource
-         if( fieldInfo.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*fieldInfo.field, *m_pageSource);
-         }
-         for( auto& subfield : *fieldInfo.field ) {
-            if( subfield.GetState() != RFieldBase::EState::kConnectedToSource ) {
-               ROOT::Experimental::Internal::CallConnectPageSourceOnField(subfield, *m_pageSource);
-            }
-         }
-#endif
          /*
            string elem_tname, branch_tname;
            const type_info* ti = getAuxElementType( fieldInfo.tclass, typ, store.standalone(),

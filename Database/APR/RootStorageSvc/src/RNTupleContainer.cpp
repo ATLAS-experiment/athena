@@ -27,6 +27,9 @@
 
 // Root include files
 #include "ROOT/RNTuple.hxx"
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+#include "ROOT/RNTupleReader.hxx"
+#endif
 #include "ROOT/RField.hxx"
 
 #include "TError.h"
@@ -102,12 +105,10 @@ DbStatus RNTupleContainer::isShapeSupported(const DbTypeInfo* typ) const {
 
 uint64_t RNTupleContainer::size() {
   auto s = DbContainerImp::size();
-  if( m_pageSource )   s += m_pageSource->GetNEntries();
+  if( m_ntupleReader ) s += m_ntupleReader->GetNEntries();
   if( m_ntupleWriter ) s += m_ntupleWriter->size();
   return s;
 }
-#include <iostream>
-using namespace std;
 
 /// Open the container for object access
 DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
@@ -188,20 +189,14 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       }
       else if( mode & (pool::READ | pool::UPDATE) ) {
          // create (and keep in the descriptin object) the rntuple field for reading
-         m_pageSource = m_rootDb->getNTupleReader(ntupleName);
-         auto descGuard = m_pageSource->GetSharedDescriptorGuard();
+         m_ntupleReader = m_rootDb->getNTupleReader(ntupleName);
          for( auto& dsc : m_fieldDescs ) {
-            auto fieldId = descGuard->FindFieldId(dsc.fieldname);
-            if( fieldId == ROOT::Experimental::kInvalidDescriptorId ) {
-               log << DbPrintLvl::Error << "Failed to find RNTuple column " << dsc.fieldname
-                   << " when opening container " << m_name
-                   << DbPrint::endmsg;
-               return Error;
-            }
-            dsc.field = descGuard->GetFieldDescriptor(fieldId).CreateField( descGuard.GetRef() );
             if( dsc.hasAuxStore() ) {
                // atach RNTuple Reader (owned by the DB)
-               dsc.auxdyn_reader = RootAuxDynIO::getNTupleAuxDynReader( dsc.field.get(), m_pageSource );
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+               const std::string type_name = m_ntupleReader->GetView<void>(dsc.fieldname, nullptr).GetField().GetTypeName();
+               dsc.auxdyn_reader = RootAuxDynIO::getNTupleAuxDynReader( dsc.fieldname, type_name, m_ntupleReader );
+#endif
                // If we set up a reader, then disable aging
                // for this file.  That will prevent POOL from
                // deleting the file while we still have
@@ -366,7 +361,7 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
 {
    int64_t evt_id = oid.second;
    if( (evt_id >> 32) > 0 ) {
-      evt_id = m_rootDb->indexLookup(m_pageSource, evt_id);
+      evt_id = m_rootDb->indexLookup(m_ntupleReader, evt_id);
    }
    // lock access to this DB for MT safety
    std::lock_guard<std::recursive_mutex>     lock( m_rootDb->ioMutex() );
@@ -393,26 +388,15 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              break;
          }
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-         // connect the field (with subfields) to the pageSource
-         if( dsc.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*dsc.field, *m_pageSource);
-            for( auto& subfield : *dsc.field ) {
-               if( subfield.GetState() != RFieldBase::EState::kConnectedToSource ) {
-                  ROOT::Experimental::Internal::CallConnectPageSourceOnField(subfield, *m_pageSource);
-               }
-            }
-         }
-         if( p.ptr ) {
-            // read into an object given by the user
-            auto v = dsc.field->BindValue( std::shared_ptr<void>(p.ptr, [](void *) {}) );
-            v.Read( evt_id );
-         } else {
+         auto view=m_ntupleReader->GetView<void>(dsc.fieldname, nullptr);
+         if( !p.ptr ) {
             // create the object for the user and pass ownership to them
-            auto v = std::make_unique<RFieldBase::RValue>( dsc.field->CreateValue() );
-            v->Read( evt_id );
-            *obj_p = v->GetPtr<void>().get();
-            v.release(); // This leaks the RValue!
+            p.ptr = view.GetField().CreateObject<void>().release();
+            *obj_p = p.ptr;
          }
+         view.BindRawPtr( p.ptr );
+         // read into the object
+         view(evt_id);
 #endif
          numBytes += 1;
 
@@ -421,8 +405,7 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
          //    s_char_Blob.release(false);
 
          if (dsc.auxdyn_reader) {
-            dsc.auxdyn_reader->addReaderToObject(*obj_p, evt_id,
-                                                 &m_rootDb->ioMutex());
+            dsc.auxdyn_reader->addReaderToObject(*obj_p, evt_id, &m_rootDb->ioMutex());
          }
       }
       /// Update statistics
@@ -492,7 +475,7 @@ DbStatus RNTupleContainer::getOption(DbOption& opt) {
     switch (::toupper(n[8])) {
       case 'E':
         if (!strcasecmp(n + 5, "ENTRIES"))
-          return opt._setValue(int(m_pageSource->GetNEntries()));
+          return opt._setValue(int(m_ntupleReader->GetNEntries()));
         break;
       case 'T':
         if (!strcasecmp(n + 5, "TOTAL_BYTES")) {

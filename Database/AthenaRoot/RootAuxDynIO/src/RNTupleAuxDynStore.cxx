@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,8 +11,9 @@
 #include "RNTupleAuxDynStore.h"
 #include "RNTupleAuxDynReader.h"
 
-#include <ROOT/RNTuple.hxx>
-#include <ROOT/RField.hxx>
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+#include "ROOT/RNTupleReader.hxx"
+#endif
 
 using namespace RootAuxDynIO;
 
@@ -46,17 +47,14 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
          : std::unique_lock<std::recursive_mutex>();
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-      auto rfv = fieldInfo.field->BindValue(std::shared_ptr<void>(data, [](void *) {}));
-      rfv.Read(m_entry);
+      auto view = m_reader.getNativeReader()->GetView<void>(fieldInfo.fieldName, nullptr);
+      view.BindRawPtr(data);
+      view(m_entry);
 #endif
 
       int  nbytes = 1;   // MN: TODO how to get this?
       if( nbytes <= 0 ) {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-         throw std::string("Error reading field ") + fieldInfo.field->GetFieldName();
-#else
-         throw std::string("Error reading field ") + fieldInfo.field->GetName();
-#endif
+         throw std::string("Error reading field ") + fieldInfo.fieldName;
       }
       // read OK
       m_reader.addBytes(nbytes);

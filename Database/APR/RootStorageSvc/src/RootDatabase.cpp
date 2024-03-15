@@ -38,7 +38,7 @@
 
 #include "ROOT/RNTuple.hxx"
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-#include "ROOT/RPageStorage.hxx"
+#include "ROOT/RNTupleReader.hxx"
 #include "ROOT/RField.hxx"
 using ROOT::Experimental::RFieldBase;
 #else
@@ -353,7 +353,7 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
          if( byteCount(READ_COUNTER) > 0 ) {
             for( const auto& reader : m_ntupleReaderMap ) {
                if( reader.second->GetMetrics().IsEnabled() ) {
-                  DbPrint innerlog(reader.second->GetNTupleName());
+                  DbPrint innerlog(nam);
                   innerlog << DbPrintLvl::Info << "Printing I/O Statistics for " << nam << "\n";
                   reader.second->GetMetrics().Print((innerlog << DbPrintLvl::Info).stream());
                   innerlog << DbPrint::endmsg;
@@ -722,13 +722,11 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
           DbStatus s = opt._getValue(m_defTreeCacheLearnEvents);
           if( s.isSuccess() ) {
              DbPrint log("RootDatabase.setOption");
-             if ( m_file->GetListOfKeys()->Contains("CollectionTree") )  {
-                TTree *tree = (TTree*)m_file->Get("CollectionTree");
-                if (tree != nullptr && tree->GetAutoFlush() > 0) {
-                   if (m_defTreeCacheLearnEvents < tree->GetAutoFlush()) {
-                      log << DbPrintLvl::Info << n << ": Overwriting LearnEvents with CollectionTree AutoFlush" << DbPrint::endmsg;
-                      m_defTreeCacheLearnEvents = tree->GetAutoFlush();
-                   }
+             TTree *tree = getTree("CollectionTree");
+             if (tree != nullptr && tree->GetAutoFlush() > 0) {
+                if (m_defTreeCacheLearnEvents < tree->GetAutoFlush()) {
+                   log << DbPrintLvl::Info << n << ": Overwriting LearnEvents with CollectionTree AutoFlush" << DbPrint::endmsg;
+                   m_defTreeCacheLearnEvents = tree->GetAutoFlush();
                 }
              }
              TTreeCache::SetLearnEntries(m_defTreeCacheLearnEvents);
@@ -1100,19 +1098,18 @@ DbStatus RootDatabase::fillBranchContainerTrees()
 }
 
 
-RPageSource*
-RootDatabase::getNTupleReader(const std::string& ntuple_name)
+RNTupleReader*
+RootDatabase::getNTupleReader(std::string ntuple_name)
 {
    auto reader_entry = m_ntupleReaderMap.find(ntuple_name);
    if( reader_entry != m_ntupleReaderMap.end() ) {
       return reader_entry->second.get();
    }
    const std::string file_name = m_file->GetName();
-   auto native_reader = RPageSource::Create(ntuple_name, file_name);
-   RPageSource *ps = native_reader.get();
-   ps->Attach();
+   auto native_reader = RNTupleReader::Open(ntuple_name, file_name);
+   RNTupleReader *ps = native_reader.get();
    if( m_rntReaderMetricsEnabled ) {
-      native_reader->GetMetrics().Enable();
+      native_reader->EnableMetrics();
    }
    m_ntupleReaderMap.emplace(ntuple_name, std::move(native_reader));
    return ps;
@@ -1138,37 +1135,32 @@ RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
 }
 
 
-uint64_t RootDatabase::indexLookup([[maybe_unused]] RPageSource* page_source, uint64_t idx_val) {
+uint64_t RootDatabase::indexLookup([[maybe_unused]] RNTupleReader* reader, uint64_t idx_val) {
+   DbPrint log( m_file->GetName() );
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-   if( m_ntupleIndexMap.find(page_source) == m_ntupleIndexMap.end() ) {
-      // first access to RNTuple, read and store the index
-      DbPrint log( m_file->GetName() );
+   if( m_ntupleIndexMap.find(reader) == m_ntupleIndexMap.end() ) {
+      // First access the RNTuple, read and store the index
       log << DbPrintLvl::Debug << "Reading index" << DbPrint::endmsg;
-      indexLookup_t &index = m_ntupleIndexMap[page_source];
-      auto descGuard = page_source->GetSharedDescriptorGuard(); 
-      auto fieldId = descGuard->FindFieldId( "index_ref" );
-      if( fieldId != ROOT::Experimental::kInvalidDescriptorId ) {
-         auto size = page_source->GetNEntries();
-         index.reserve( size );
-         uint64_t idx;
-         auto idx_field = descGuard->GetFieldDescriptor(fieldId).CreateField( descGuard.GetRef() );
-         if( idx_field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*idx_field, *page_source);
-         }
-         auto rfv = idx_field->BindValue( std::shared_ptr<void>(&idx, [](void *) {}) );
-         for(unsigned row=0; row < size; row++) {
-            rfv.Read(row);
-            index[idx] = row;
-         }
-      } else {
-         log << DbPrintLvl::Warning << "Index column not found in " << descGuard->GetName()
-             << DbPrint::endmsg;
+      // Get the {index : row} map for this RNTuple reader
+      indexLookup_t &index = m_ntupleIndexMap[reader];
+      index.reserve(reader->GetNEntries());
+      // This is the field in which the indices are kept
+      auto indexRefField = reader->GetView<uint64_t>("index_ref");
+      // Loop over the events, read the index values and fill the map
+      uint64_t row{0};
+      for(const auto& entry : reader->GetEntryRange()) {
+        index[indexRefField(entry)] = row;
+        row++;
+      }
+      // Check for consistency
+      if(row != reader->GetNEntries()) {
+        log << DbPrintLvl::Warning << "Not enough entries read for the index field " << DbPrint::endmsg;
       }
    }
-   indexLookup_t &index = m_ntupleIndexMap[page_source];
+   indexLookup_t &index = m_ntupleIndexMap[reader];
    auto it = index.find(idx_val);
    if( it != index.end() ) {
-      // cout << "MN: remapped OID=" << hex << idx_val << " to " << it->second << endl;
+      log << DbPrintLvl::Debug << "Remapped OID=" << hex << idx_val << " to " << it->second << DbPrint::endmsg;
       idx_val = it->second;
    }
 #endif

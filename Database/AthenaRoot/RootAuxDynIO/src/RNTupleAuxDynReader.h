@@ -13,30 +13,14 @@
 #include <string>
 
 namespace RootAuxDynIO { class IRNTupleWriter; }
-namespace ROOT { namespace Experimental {
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
-  namespace Detail {
-    class RPageSource;
-    class RFieldBase;
-  }
-#else
-  namespace Internal {
-    class RPageSource;
-  }
-  class RFieldBase;
-#endif
-} }
+namespace ROOT::Experimental {
+   class RNTupleReader; 
+}
 class TClass;
 
 namespace RootAuxDynIO
 {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-   using ROOT::Experimental::RFieldBase;
-   using ROOT::Experimental::Internal::RPageSource;
-#else
-   using ROOT::Experimental::Detail::RFieldBase;
-   using ROOT::Experimental::Detail::RPageSource;
-#endif
+   using ROOT::Experimental::RNTupleReader;
 
    class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
    {
@@ -55,12 +39,12 @@ namespace RootAuxDynIO
 
          SG::auxid_t   auxid;
          std::string   attribName;
-         std::unique_ptr<RFieldBase>  field;
+         std::string   fieldName;
       };
 
 
-      /// create reader for Aux attributes of the Aux container object from @c field
-      RNTupleAuxDynReader(RFieldBase* field, RPageSource* page_source);
+      /// create Reader for Aux attributes of an AuxContainer object stored in a given field
+      RNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader);
 
       /// initialize once the mode of the Aux store is known
       void init(bool standalone);
@@ -80,6 +64,8 @@ namespace RootAuxDynIO
       /// get field informatino for @c auxid
       const FieldInfo& getFieldInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store);
 
+      RNTupleReader* getNativeReader();
+
       virtual ~RNTupleAuxDynReader() {}
 
    protected:
@@ -98,7 +84,7 @@ namespace RootAuxDynIO
       std::map<SG::auxid_t, FieldInfo>  m_fieldInfos;
 
       // not owned
-      RPageSource*                      m_pageSource;
+      RNTupleReader*                    m_ntupleReader;
    };
 
 
@@ -119,5 +105,10 @@ namespace RootAuxDynIO
       return m_auxids;
    }
 
+   inline  RNTupleReader* RNTupleAuxDynReader::getNativeReader() {
+      return m_ntupleReader;
+   }
+
 } //namespace
 #endif
+
