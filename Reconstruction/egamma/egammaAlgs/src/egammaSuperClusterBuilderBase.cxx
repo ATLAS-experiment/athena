@@ -425,39 +425,67 @@ egammaSuperClusterBuilderBase::matchesInWindow(
   const xAOD::CaloCluster* ref,
   const xAOD::CaloCluster* clus) const
 {
+  auto inRange = [](float eta1, float phi1, 
+                    float eta2, float phi2,
+                    float etaWindow, float phiWindow) {
+
+    const float dEta = std::abs(eta1 - eta2);
+    const float dPhi = std::abs(P4Helpers::deltaPhi(phi1, phi2));
+
+    return dEta < etaWindow && dPhi < phiWindow;
+  };
+
   // First the case where the seed is both endcap and barrel, i.e. in the crack
   // Check around both measurements of the seed
   if (ref->hasSampling(CaloSampling::EMB2) &&
       ref->hasSampling(CaloSampling::EME2)) {
-    const float dEta(std::abs(ref->eta() - clus->eta()));
-    const float dPhi(std::abs(P4Helpers::deltaPhi(ref->phi(), clus->phi())));
-    //
-    const float dEtaBarrel(
-      std::abs(ref->etaSample(CaloSampling::EMB2) - clus->eta()));
-    const float dPhiBarrel(std::abs(
-      P4Helpers::deltaPhi(ref->phiSample(CaloSampling::EMB2), clus->phi())));
-    //
-    const float dEtaEndcap(
-      std::abs(ref->etaSample(CaloSampling::EME2) - clus->eta()));
-    const float dPhiEndcap(std::abs(
-      P4Helpers::deltaPhi(ref->phiSample(CaloSampling::EME2), clus->phi())));
+    const bool inRangeBarrel = inRange(ref->eta(), 
+                                       ref->phi(), 
+                                       clus->eta(),
+                                       clus->phi(),
+                                       m_searchWindowEtaBarrel, 
+                                       m_searchWindowPhiBarrel);
+
+    const bool inRangeEndcap = inRange(ref->eta(), 
+                                       ref->phi(), 
+                                       clus->eta(), 
+                                       clus->phi(),
+                                       m_searchWindowEtaEndcap, 
+                                       m_searchWindowPhiEndcap);
+
+    const bool inRangeBarrelL2 = inRange(ref->etaSample(CaloSampling::EMB2), 
+                                         ref->phiSample(CaloSampling::EMB2),
+                                         clus->eta(), 
+                                         clus->phi(),
+                                         m_searchWindowEtaBarrel, 
+                                         m_searchWindowPhiBarrel);
+
+    const bool inRangeEndcapL2 = inRange(ref->etaSample(CaloSampling::EME2), 
+                                         ref->phiSample(CaloSampling::EME2),
+                                         clus->eta(), 
+                                         clus->phi(),
+                                         m_searchWindowEtaEndcap, 
+                                         m_searchWindowPhiEndcap);
+    
     // Matches any in case of split
-    return (
-      (dEta < m_searchWindowEtaBarrel && dPhi < m_searchWindowPhiBarrel) ||
-      (dEta < m_searchWindowEtaEndcap && dPhi < m_searchWindowPhiEndcap) ||
-      (dEtaBarrel < m_searchWindowEtaBarrel &&
-       dPhiBarrel < m_searchWindowPhiBarrel) ||
-      (dEtaEndcap < m_searchWindowEtaEndcap &&
-       dPhiEndcap < m_searchWindowPhiEndcap));
+    return inRangeBarrel || inRangeEndcap || inRangeBarrelL2 || inRangeEndcapL2;
   }
+
   if (xAOD::EgammaHelpers::isBarrel(clus)) {
-    const float dEta(std::abs(ref->eta() - clus->eta()));
-    const float dPhi(std::abs(P4Helpers::deltaPhi(ref->phi(), clus->phi())));
-    return (dEta < m_searchWindowEtaBarrel && dPhi < m_searchWindowPhiBarrel);
+    return inRange(ref->eta(), 
+                   ref->phi(), 
+                   clus->eta(), 
+                   clus->phi(),
+                   m_searchWindowEtaBarrel, 
+                   m_searchWindowPhiBarrel);
   }
-  const float dEta(std::abs(ref->eta() - clus->eta()));
-  const float dPhi(std::abs(P4Helpers::deltaPhi(ref->phi(), clus->phi())));
-  return (dEta < m_searchWindowEtaEndcap && dPhi < m_searchWindowPhiEndcap);
+
+  return inRange(ref->eta(), 
+                 ref->phi(), 
+                 clus->eta(), 
+                 clus->phi(),
+                 m_searchWindowEtaEndcap, 
+                 m_searchWindowPhiEndcap);
 }
 
 std::unique_ptr<xAOD::CaloCluster>
