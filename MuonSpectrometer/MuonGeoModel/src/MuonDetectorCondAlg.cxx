@@ -196,10 +196,7 @@ StatusCode MuonDetectorCondAlg::copyInertMaterial(MuonGM::MuonDetectorManager& d
         GeoVPhysVol* physVol ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(worldNode.get()) ;
         const GeoVPhysVol& pvConstLink = *worldNode;
         ATH_MSG_DEBUG("Volume in the static world "<<vname<<" "<<typeid(pvConstLink).name()
-                        <<"children: "<<worldNode->getNChildNodes()
-                        <<" getDefX(): "<<Amg::toString(worldNode->getDefX())
-                        <<" getX(): "<<Amg::toString(worldNode->getX())
-                        <<" cursor: "<<Amg::toString(transform));        
+                        <<"children: "<<worldNode->getNChildNodes()<<" cursor: "<<Amg::toString(transform));        
         condMgrWorld->add(new GeoTransform(transform));
         condMgrWorld->add(physVol);
     }
