@@ -162,31 +162,31 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
                  isPhyslite=False, noPhysliteBroken=False, noSystematics=None):
     """
     """
-    print(os.getcwd())
 
     from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
 
     config = TextConfig(configPath)
 
-    print(">>> Configuration file read in:")
+    print("\n>>> Configuration file read in:")
     config.printConfig()
 
-    print(">>> Default algorithms")
+    print("\n>>> Default algorithms:")
     config.printAlgs(printOpts=True)
 
-    print(">>> Configuring algorithms based on YAML file")
+    print("\n>>> Configuring algorithms based on YAML file:")
     configSeq = config.configure()
 
     # defaults are added to config as algs are configured
-    print(">>> Configuration used:")
+    print("\n>>> Configuration used:")
     config.printConfig()
-
-    print(">>> ConfigBlocks and their configuration")
-    configSeq.printOptions
 
     # compile
     configAccumulator = ConfigAccumulator(algSeq, dataType, isPhyslite=isPhyslite, geometry=geometry, autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     configSeq.fullConfigure(configAccumulator)
+
+    # blocks can be reordered during configSeq.fullConfigure
+    print("\n>>> ConfigBlocks and their configuration:")
+    configSeq.printOptions()
 
     from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
     if isAthena and useComponentAccumulator:

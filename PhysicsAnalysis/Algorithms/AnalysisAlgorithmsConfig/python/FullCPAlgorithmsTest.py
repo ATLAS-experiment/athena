@@ -997,10 +997,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
             disable_commands.append('disable el_select_loose.*')
     configSeq.setOptionValue ('.commands', disable_commands)
 
-    configSeq.printOptions()
-
     configAccumulator = ConfigAccumulator (algSeq, dataType, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     configSeq.fullConfigure (configAccumulator)
+
+    # order can change during fullConfigure
+    configSeq.printOptions()
 
     from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
     if isAthena and useComponentAccumulator:
