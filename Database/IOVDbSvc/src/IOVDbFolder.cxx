@@ -1331,14 +1331,17 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey /*sinc
 	  break;
 	}
       }
-
-      iovHashVect[indIOV].first.first=iov;
-      nlohmann::json payload={};
-      payload["data"]=jsIovs[std::to_string(iov)];
-      reply=payload.dump();
+      if (indIOV>=0){
+        iovHashVect[indIOV].first.first=iov;
+        nlohmann::json payload={};
+        payload["data"]=jsIovs[std::to_string(iov)];
+        reply=payload.dump();
+      } else {
+        ATH_MSG_FATAL("indIOV is negative in IOVDbFolder::dumpFile");
+      }
     }
     catch (std::exception & e) {
-      std::string errorMessage = "Failed of parce multi iovs struct of internal iovs from payload for DCS type: " + std::string{e.what()};
+      std::string errorMessage = "Failed of parse multi iovs struct of internal iovs from payload for DCS type: " + std::string{e.what()};
       ATH_MSG_FATAL(errorMessage);
       throw std::runtime_error{errorMessage};
     }
