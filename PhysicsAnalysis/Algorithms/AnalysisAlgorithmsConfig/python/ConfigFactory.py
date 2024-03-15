@@ -31,14 +31,11 @@ def getDefaultArgs(func):
 
 def getFuncArgs(func):
     """return list of input parameters"""
-    signature = inspect.signature(func)
-    return list(signature.parameters.keys())
-
-
-def getClassArgs(func):
-    """return list of args used i=ton initialize class"""
-    args = list(inspect.signature(func.__init__).parameters.keys())
-    args.remove('self')
+    if isinstance(func, dict):
+        args = list(inspect.signature(func.__init__).parameters.keys())
+        args.remove('self')
+    else:
+        args = list(inspect.signature(func).parameters.keys())
     return args
 
 
@@ -52,7 +49,7 @@ class FactoryBlock():
         self.options = options
         self.defaults = defaults
         if subAlgs is None:
-            self.subAlgs = []
+            self.subAlgs = {}
         else:
             self.subAlgs = subAlgs
 
@@ -121,10 +118,7 @@ class ConfigFactory():
         """Add class to list of available algorithms"""
         if not callable(alg):
             raise ValueError(f"{algName} is not a callable.")
-        if isinstance(alg, type):
-            opts = getClassArgs(alg)
-        else:
-            opts = getFuncArgs(alg)    
+        opts = getFuncArgs(alg)
 
         if superBlocks is None:
             superBlocks = [self.ROOTNAME]
@@ -162,24 +156,25 @@ class ConfigFactory():
                 order.insert(order.index(pos), algName)
             else:
                 raise ValueError(f"{pos} does not exit in already added config blocks")
-
         return
 
 
     def printAlgs(self, printOpts=False):
         """Prints algorithms exposed to configuration"""
-        algs = self._algs
-        for alg, algInfo in algs.items():
-            algName = algInfo.alg.__name__
-            algOptions = algInfo.options
-            algDefaults = algInfo.defaults
-            print(f"{alg} -> {algName}")
-            if printOpts and algOptions:
-                for opt in algOptions:
-                    if algDefaults and opt in algDefaults:
-                        print(f"    {opt}: {algDefaults[opt]}")
-                    else:
-                        print(f"    {opt}")
+        def printAlg(algs):
+            for alg, algInfo in algs.items():
+                algName = algInfo.alg.__name__
+                algOptions = algInfo.options
+                algDefaults = algInfo.defaults
+                print(f"{alg} -> {algName}")
+                if printOpts and algOptions:
+                    for opt in algOptions:
+                        if algDefaults and opt in algDefaults:
+                            print(f"    {opt}: {algDefaults[opt]}")
+                        else:
+                            print(f"    {opt}")
+                printAlg(algInfo.subAlgs)
+        printAlg(self._algs)
         return
 
 

@@ -53,6 +53,51 @@ class ConfigSequence:
         for block in self._blocks:
             block.makeAlgs (config)
 
+    def reorderAlgs(self):
+        """
+        Check for blocks with dependencies.
+
+        If a block requried another block that is not present, will
+        throw an error; Otherwise, will move block immediately after
+        required block. If dependency is not requried, will move
+        after other block, if it is present.
+
+        Note: this implementation can only move blocks forward.
+        """
+        def moveBlock(blocks):
+            for i, block in enumerate(blocks):
+                # the 'ignoreDependencies' option is added with a dep.
+                ignore = block.getOptionValue('ignoreDependencies')
+                if block.hasDependencies():
+                    depIdx = i
+                    for dep in block.getDependencies():
+                        if dep in ignore:
+                            continue
+                        # find dep with largest idx
+                        if dep in blocks:
+                            tmpIdx = blocks.index(dep.blockName)
+                            if tmpIdx > depIdx:
+                                depIdx = tmpIdx
+                        elif dep.required:
+                            raise ValueError(f"{dep} block is required"
+                                f" for {block} but was not found.")
+                    # check to see if block is already infront of deps
+                    if depIdx > i:
+                        print(f"> Moving {block} after {blocks[depIdx]}")
+                        # depIdx > i so after pop, depIdx -= 1 -> depIdx is after dep
+                        blocks.insert(depIdx, blocks.pop(i))
+                        return False
+            # nothing to move
+            return True
+        MAXTRIES = 1000
+        for _ in range(MAXTRIES):
+             if moveBlock(self._blocks):
+                # sorted
+                break
+        else:
+            raise Exception("Could not order blocks based on dependencies"
+                f" in {MAXTRIES} moves.")
+
 
     def fullConfigure (self, config) :
         """do the full configuration on this sequence
@@ -61,6 +106,7 @@ class ConfigSequence:
         contain all the blocks that will be configured, as it will
         perform all configuration steps at once.
         """
+        self.reorderAlgs()
         self.makeAlgs (config)
         config.nextPass ()
         self.makeAlgs (config)

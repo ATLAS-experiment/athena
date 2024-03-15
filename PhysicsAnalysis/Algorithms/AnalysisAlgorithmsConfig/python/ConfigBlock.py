@@ -10,6 +10,27 @@ class ConfigBlockOption:
         self.noneAction = noneAction
 
 
+
+class ConfigBlockDependency():
+    """Class encoding a blocks dependence on other blocks."""
+
+    def __init__(self, blockName, required=True):
+        self.blockName = blockName
+        self.required = required
+
+
+    def __eq__(self, name):
+        return self.blockName == name
+
+
+    def __str__(self):
+        return self.blockName
+
+
+    def __repr__(self):
+        return f'ConfigBlcokDependency(blockName="{self.blockName}", required={self.required})'
+
+
 class ConfigBlock:
     """the base class for classes implementing individual blocks of
     configuration
@@ -57,14 +78,45 @@ class ConfigBlock:
 
     """
 
-    # groupName is only a placeholder here
     def __init__ (self) :
+        self._blockName = ''
+        self._dependencies = []
         self._options = {}
         # used with block configuration to set arbitrary option
         self.addOption('groupName', '', type=str,
             info=('Used to specify this block when setting an'
                 ' option at an arbitrary location.'))
 
+
+    def setBlockName(self, name):
+        """Set blockName"""
+        self._blockName = name
+
+    def getBlockName(self, name):
+        """Get blockName"""
+        return self._blockName
+
+    def addDependency(self, dependencyName, required=True):
+        """
+        Add a dependency for the block. Dependency is corresponds to the
+        blockName of another block. If requried is True, will throw an
+        error if dependency is not present; otherwise will move this
+        block after the required block. If required is False, will do
+        nothing if required block is not present; otherwise, it will
+        move block after required block.
+        """
+        self._dependencies.append(ConfigBlockDependency(dependencyName, required))
+        # add option to block ignore dependencies
+        self.addOption('ignoreDependencies', [], type=list,
+            info='List of dependencies defined in the ConfigBlock to ignore.')
+
+    def hasDependencies(self):
+        """Return True if there is a dependency."""
+        return bool(self._dependencies)
+
+    def getDependencies(self):
+        """Return the list of dependencies. """
+        return self._dependencies
 
     def addOption (self, name, defaultValue, *, 
             type, info='', noneAction='ignore', required=False) :
@@ -127,3 +179,15 @@ class ConfigBlock:
         behavior, interface or be removed/replaced entirely.
         """
         return name in self._options
+
+
+    def __eq__(self, blockName):
+        """
+        Implementation of == operator. Used for seaching configSeque.
+        E.g. if blockName in configSeq:
+        """
+        return self._blockName == blockName
+
+
+    def __str__(self):
+        return self._blockName
