@@ -21,7 +21,7 @@ using std::abs;
 
 #ifndef XAOD_ANALYSIS
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
   // Retrieve the links between HepMC and xAOD::TruthParticle
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
   SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVecReadHandle(m_truthLinkVecReadHandleKey, ctx);
@@ -37,7 +37,7 @@ MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, Inf
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, Info* info /*= nullptr*/) const {
+MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
 
@@ -68,8 +68,8 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, I
 #endif
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, Info* infoin /*= nullptr*/) const {
-  Info* info = infoin;
+MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, MCTruthPartClassifier::Info* infoin /*= nullptr*/) const {
+  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing particleTruthClassifier");
 
   ParticleType partType = Unknown;
@@ -79,7 +79,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   }
 
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
-  Info tmpinfo;
+  MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
   info->genPart = thePart;
 
@@ -322,10 +322,10 @@ ParticleOrigin
 MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruthTES,
                                      const xAOD::TruthParticle* thePart,
                                      bool& isPrompt,
-                                     Info* infoin) const
+                                     MCTruthPartClassifier::Info* infoin) const
 {
 
-  Info* info = infoin;
+  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfElectron ");
 
   const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
@@ -336,7 +336,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
 
   //-- to define electron outcome status
   if (info) info->particleOutCome = defOutComeOfElectron(thePriPart);
-  Info tmpinfo;
+  MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
 
   if (!partOriVert) return NonDefined;
@@ -669,10 +669,10 @@ ParticleOrigin
 MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
                                  const xAOD::TruthParticle* thePart,
                                  bool& isPrompt,
-                                 Info* infoin) const
+                                 MCTruthPartClassifier::Info* infoin) const
 {
 
-  Info* info = infoin;
+  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfMuon ");
 
   const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
@@ -684,7 +684,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   //-- to define muon  outcome status
   if (info) info->particleOutCome = defOutComeOfMuon(thePriPart);
 
-  Info tmpinfo;
+  MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
   if (!partOriVert) return NonDefined;
 
@@ -944,9 +944,9 @@ ParticleOrigin
 MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
                                 const xAOD::TruthParticle* thePart,
                                 int motherPDG,
-                                Info* infoin) const
+                                MCTruthPartClassifier::Info* infoin) const
 {
-  Info* info = infoin;
+  MCTruthPartClassifier::Info* info = infoin;
 
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
 
@@ -961,7 +961,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
     if (info) info->particleOutCome = defOutComeOfTau(thePriPart, info);
   }
 
-  Info tmpinfo;
+  MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
   if (!partOriVert) return NonDefined;
 
@@ -1155,14 +1155,14 @@ ParticleOrigin
 MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTES,
                                    const xAOD::TruthParticle* thePart,
                                    bool& isPrompt,
-                                   Info* infoin) const
+                                   MCTruthPartClassifier::Info* infoin) const
 {
   if (!thePart) return NonDefined;
   if (!mcTruthTES) return NonDefined;
-  Info* info = infoin;
+  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfPhoton ");
 
-  Info tmpinfo;
+  MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
   if (info) {
     info->mother = nullptr;
@@ -1452,10 +1452,10 @@ ParticleOrigin
 MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruthTES,
                                      const xAOD::TruthParticle* thePart,
                                      bool& isPrompt,
-                                     Info* infoin) const
+                                     MCTruthPartClassifier::Info* infoin) const
 //-------------------------------------------------------------------------------
 {
-  Info* info = infoin;
+  MCTruthPartClassifier::Info* info = infoin;
   // author - Pierre-Antoine Delsart
   //
   ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
@@ -1470,7 +1470,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   //-- to define neutrino outcome status
   if (info) info->particleOutCome = NonInteract;
 
-  Info tmpinfo;
+  MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
   if (!partOriVert) return NonDefined;
 
@@ -1828,7 +1828,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* t
   return PartOutCome;
 }
 //---------------------------------------------------------------------------------
-ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, [[maybe_unused]] Info* info) const {
+ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, [[maybe_unused]] MCTruthPartClassifier::Info* info) const {
   ATH_MSG_DEBUG("Executing defOutComeOfTau");
   ParticleOutCome PartOutCome = UnknownOutCome;
   const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
@@ -1887,8 +1887,8 @@ ParticleOutCome MCTruthClassifier::defOutComeOfPhoton(const xAOD::TruthParticle*
 
 //---------------------------------------------------------------------------------
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* infoin /*= nullptr*/) const {
-  Info* info = infoin;
+MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, MCTruthPartClassifier::Info* infoin /*= nullptr*/) const {
+  MCTruthPartClassifier::Info* info = infoin;
   ATH_MSG_DEBUG("executing CheckOrigOfBkgElec  " << theEle);
 
   std::pair<ParticleType, ParticleOrigin> part;
@@ -1906,7 +1906,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
 
   ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
 
-  Info tmpinfo;
+  MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
   part = particleTruthClassifier(theEle, info);
 

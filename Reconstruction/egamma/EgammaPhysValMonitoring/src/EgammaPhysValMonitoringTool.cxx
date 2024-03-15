@@ -235,7 +235,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
     ATH_CHECK(truthallParticles.isValid());
 
 #ifdef MCTRUTHCLASSIFIER_CONST
-    IMCTruthClassifier::Info info;
+    MCTruthPartClassifier::Info info;
 #else
     std::pair<ParticleType, ParticleOrigin> partClass;
     MCTruthPartClassifier::ParticleType type;

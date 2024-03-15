@@ -92,7 +92,7 @@ StatusCode egammaTruthClassificationFillerTool::fill (const xAOD::Egamma& p)
   std::pair<MCTruthPartClassifier::ParticleType,
     MCTruthPartClassifier::ParticleOrigin> res;
 
-  IMCTruthClassifier::Info info;
+  MCTruthPartClassifier::Info info;
   if (const xAOD::Electron* q =
       dynamic_cast<const xAOD::Electron*>(&p))
   {

@@ -83,7 +83,7 @@ StatusCode DerivationFramework::TruthClassificationDecorator::addBranches() cons
 
     for (unsigned int i=0; i<nParticles; ++i) {
 #ifdef MCTRUTHCLASSIFIER_CONST
-        IMCTruthClassifier::Info info;
+        MCTruthPartClassifier::Info info;
         std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = 
           m_classifier->particleTruthClassifier((*truthParticles)[i], &info);
           unsigned int particleOutCome = info.particleOutCome;

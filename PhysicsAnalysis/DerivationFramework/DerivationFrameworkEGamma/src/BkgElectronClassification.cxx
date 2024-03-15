@@ -121,7 +121,7 @@ BkgElectronClassification::addBranches() const
     const xAOD::TruthParticle* firstElTruth =
       xAOD::EgammaHelpers::getBkgElectronMother(el, false);
 
-    IMCTruthClassifier::Info mcinfo(ctx);
+    MCTruthPartClassifier::Info mcinfo(ctx);
     if (firstElTruth) {
       auto res =
         m_mcTruthClassifier->particleTruthClassifier(firstElTruth, &mcinfo);

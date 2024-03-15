@@ -75,7 +75,7 @@ PhotonTruthTool::queryInterface( const InterfaceID& riid, void** ppvIf )
 const xAOD::TruthParticle*
 PhotonTruthTool::toTruthParticle (const xAOD::Photon& g) const
 {
-  IMCTruthClassifier::Info info;
+  MCTruthPartClassifier::Info info;
   m_classifier->particleTruthClassifier (&g, &info);
   return info.genPart;
 }

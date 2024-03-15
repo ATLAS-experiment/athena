@@ -8,7 +8,7 @@
 using namespace MCTruthPartClassifier;
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing trackClassifier");
   ParticleType parttype = Unknown;
@@ -25,7 +25,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, In
 // Not const due to ITruthParticlesInConeTool::particlesInCone
 // called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma electron Classifier");
   ParticleType parttype = Unknown;
@@ -61,7 +61,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, Info* inf
 // Not const due to ITruthParticlesInConeTool::particlesInCone
 // called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier");
 
@@ -108,7 +108,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, Info* info 
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing muon  Classifier");
 
@@ -136,7 +136,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, Info* info /*= 
 // Not const due to ITruthParticlesInConeTool::particlesInCone
 // called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier with cluster Input");
 
@@ -167,7 +167,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, Info* 
 }
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, Info* info /*= nullptr*/) const
+MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing Classifier with jet Input");
 
@@ -221,7 +221,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, Info* 
 }
 
 const xAOD::TruthParticle*
-MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nullptr*/) const
+MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   // return GenParticle corresponding to given TrackParticle
 
