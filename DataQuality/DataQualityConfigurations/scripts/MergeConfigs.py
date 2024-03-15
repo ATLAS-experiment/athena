@@ -13,8 +13,11 @@ def list_directories(parent_dir, recurse=True):
     returns a list of directories in parent_dir
     Directory 'common' will appear first if present
     if recurse = True, also includes all subdirectories in the tree
+    If user has defined DQCONFIG_DIR_WHITELIST env var, will filter based on that list
+    Example values would be: DQCONFIG_DIR_WHITELIST=L1Calo:HLT
     """
     import os
+    whitelist = os.getenv('DQCONFIG_DIR_WHITELIST','').split(":")
     rv = []
     if recurse:
         for root, dum1, dum2 in os.walk(parent_dir):
@@ -31,7 +34,7 @@ def list_directories(parent_dir, recurse=True):
     for x in rv:
         if 'common' in x:
             truerv = [x] + truerv
-        else:
+        elif x.split("/")[-1] in whitelist or whitelist==[]:
             truerv.append(x)
     return truerv
 
@@ -105,7 +108,7 @@ def merge_han_configs(template, parent_dir, out, options):
     outobj = open(out, 'w')
     outobj.write('# ****************************\n')
     outobj.write('metadata GitInfo {\n')
-    outobj.write('  Hash = %s\n' % release_metadata()['nightly release'])
+    outobj.write('  Hash = %s\n' % (release_metadata()['nightly release'] or "unknown"))
     outobj.write('}\n')
     outobj.write('# ****************************\n\n')
     for f in files:
