@@ -89,7 +89,7 @@ def ActsMainTrackFindingAlgCfg(flags,
             acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
         
-    if 'kwargs.setdefault' not in kwargs:
+    if 'ExtrapolationTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
         kwargs.setdefault(
             "ExtrapolationTool",
