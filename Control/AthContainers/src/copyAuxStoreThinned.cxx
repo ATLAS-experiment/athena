@@ -211,6 +211,7 @@ void lossyFloatCompress (void* dst,
   // This is where we apply in-place lossy float compression
   if(typeName == "float") {
     for (size_t i = 0; i < n; i++) {
+      //cppcheck-suppress invalidPointerCast
       *(float*) eltPtr = compressors[nmantissa].reduceFloatPrecision(*(float*) eltPtr);
       eltPtr += eltSize;
     }
