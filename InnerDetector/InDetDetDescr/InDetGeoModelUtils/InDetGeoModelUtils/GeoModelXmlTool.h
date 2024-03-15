@@ -45,6 +45,15 @@ protected:
   ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc", ""};
   Gaudi::Property<std::string> m_dtdName{this, "OverrideDtdName", "", "Override standard .dtd file from GeoModelXml"};
 
+  Gaudi::Property<bool> m_deduplicateLogVol{this, "enableLogVolDeduplication", false,
+                                            "Remove duplications of equivalent logical volumes"};  
+  Gaudi::Property<bool> m_deduplicatePhysVol{this, "enablePhysVolDeduplication", false,
+                                            "Remove duplications of equivalent physical volumes"};
+  Gaudi::Property<bool> m_deduplicateShape{this, "enableShapeDeduplication", false,
+                                            "Remove duplications of equivalent shapes"};
+  Gaudi::Property<bool> m_deduplicateTransf{this, "enableTransDeduplication", false,
+                                            "Remove duplications of equivalent transform nodes"};
+
 
 private:
 

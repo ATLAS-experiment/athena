@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGeoModelUtils/GeoModelXmlTool.h"
@@ -162,6 +162,10 @@ void GeoModelXmlTool::createVolume(GeoPhysVol* world, GmxInterface& gmxInterface
     }
     out.close();
   }
+  gmxInterface.enableLogVolDeDuplication(m_deduplicateLogVol);
+  gmxInterface.enablePhysVolDeDuplication(m_deduplicatePhysVol);
+  gmxInterface.enableShapeDeDuplication(m_deduplicateShape);
+  gmxInterface.enableTransformDeDuplication(m_deduplicateTransf);
 
   Gmx2Geo gmx2Geo(gmxInput, world, gmxInterface, flags);  
 }
