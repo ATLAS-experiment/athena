@@ -12,25 +12,26 @@ OnTrackCalibrator<traj_t> OnTrackCalibrator<traj_t>::NoCalibration(
     const ActsTrk::IActsToTrkConverterTool &converter_tool,
     const TrackingSurfaceHelper &surface_helper)
 {
-    return OnTrackCalibrator(converter_tool, surface_helper, nullptr, nullptr);
+    ToolHandle<IOnTrackCalibratorTool<traj_t>> null(nullptr);
+    return OnTrackCalibrator(converter_tool, surface_helper, null, null);
 }
 
 template <typename traj_t>
 OnTrackCalibrator<traj_t>::OnTrackCalibrator(
     const ActsTrk::IActsToTrkConverterTool &converter_tool,
     const TrackingSurfaceHelper &surface_helper,
-    IOnTrackCalibratorTool<traj_t> *pixelTool,
-    IOnTrackCalibratorTool<traj_t> *stripTool)
+    const ToolHandle<IOnTrackCalibratorTool<traj_t>>& pixelTool,
+    const ToolHandle<IOnTrackCalibratorTool<traj_t>>& stripTool)
     : MeasurementCalibratorBase(converter_tool),
       m_surfaceHelper(&surface_helper)
 {
-    if (pixelTool != nullptr) {
+    if (pixelTool.isEnabled()) {
 	pixelTool->connect(*this);
     } else {
 	pixel_calibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<2, xAOD::PixelCluster>>(this);
     }
 
-    if (stripTool != nullptr) {
+    if (stripTool.isEnabled()) {
 	stripTool->connect(*this);
     } else {
 	strip_calibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<1, xAOD::StripCluster>>(this);

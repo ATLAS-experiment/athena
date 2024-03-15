@@ -33,6 +33,7 @@ atlas_add_component( ActsTrackReconstruction
 		       InDetReadoutGeometry
 		       MagFieldConditions
 		       MagFieldElements
+		       PixelConditionsData
 		       StoreGateLib
 		       TRT_ReadoutGeometry
 		       TrkEventPrimitives

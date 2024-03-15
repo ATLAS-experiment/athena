@@ -7,6 +7,7 @@
 #include "src/ReFitterAlg.h"
 #include "src/TrackToTrackParticleCnvAlg.h"
 // Tools
+#include "src/ITkAnalogueClusteringTool.h"
 #include "src/TrackStatePrinter.h"
 #include "src/KalmanFitter.h"
 #include "src/GaussianSumFitter.h"
@@ -23,6 +24,7 @@ DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
 
 // Tools
+DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinter )
 DECLARE_COMPONENT( ActsTrk::KalmanFitter )
 DECLARE_COMPONENT( ActsTrk::GaussianSumFitter )

@@ -5,6 +5,7 @@
 #include "src/TrackFindingData.h"
 
 // Athena
+#include "AsgTools/ToolStore.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"
@@ -37,7 +38,7 @@
 #include "ActsInterop/Logger.h"
 
 #include "ActsInterop/TableUtils.h"
-#include "MeasurementCalibrator.h"
+#include "OnTrackCalibrator.h"
 // Other
 #include <sstream>
 #include <functional>
@@ -124,6 +125,8 @@ namespace ActsTrk
     ATH_CHECK(m_ATLASConverterTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
     ATH_CHECK(m_fitterTool.retrieve());
+    ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
+    ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -488,8 +491,14 @@ namespace ActsTrk
 
     ActsTrk::MutableTrackContainer tracksContainerTemp;
 
-    OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
-	::NoCalibration(*m_ATLASConverterTool, tracking_surface_helper);
+    // Measurement calibration
+    // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
+    // Therefore, passing them without checking if they are enabled is safe.
+    OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>(
+	*m_ATLASConverterTool,
+	tracking_surface_helper,
+	m_pixelCalibTool,
+	m_stripCalibTool);
 
     options.extensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
 

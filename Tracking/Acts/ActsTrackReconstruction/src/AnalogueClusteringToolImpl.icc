@@ -1,0 +1,242 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ANALOGUECLUSTERINGTOOLIMPL_ICC
+#define ANALOGUECLUSTERINGTOOLIMPL_ICC
+
+namespace ActsTrk {
+
+template <typename calib_data_t, typename traj_t>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::AnalogueClusteringToolImpl(
+    const std::string& type,
+    const std::string& name,
+    const IInterface* parent)
+    : base_class(type, name, parent)
+{}
+
+template <typename calib_data_t, typename traj_t>
+StatusCode AnalogueClusteringToolImpl<calib_data_t, traj_t>::initialize()
+{
+    ATH_MSG_DEBUG("Initializing " << AthAlgTool::name() << " ...");
+    ATH_CHECK(m_pixelDetEleCollKey.initialize());
+    ATH_CHECK(m_clusterErrorKey.initialize()); 
+    ATH_CHECK(m_lorentzAngleTool.retrieve());
+    ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
+    return StatusCode::SUCCESS;
+}
+
+template <typename calib_data_t, typename traj_t>
+const InDetDD::SiDetectorElement*
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::getDetectorElement(xAOD::DetectorIDHashType id) const
+{
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(
+	m_pixelDetEleCollKey,
+	Gaudi::Hive::currentContext());
+
+    const InDetDD::SiDetectorElementCollection* detElements(*pixelDetEleHandle);
+    
+    if (!pixelDetEleHandle.isValid() or detElements == nullptr) {
+	ATH_MSG_ERROR(m_pixelDetEleCollKey.fullKey() << " is not available.");
+	return nullptr;
+    }
+
+    const InDetDD::SiDetectorElement* element = detElements->getDetectorElement(id);
+    if (element == nullptr) {
+	ATH_MSG_ERROR("No element corresponding to hash " << id << " for " << m_pixelDetEleCollKey.fullKey());
+	return nullptr;
+    }
+
+    return element;
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<float, float>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const InDetDD::SiDetectorElement& element,
+					  const TrackStateProxy& state) const
+{
+    
+    Acts::Vector3 direction = Acts::makeDirectionFromPhiTheta(
+	state.parameters()[Acts::eBoundPhi],
+	state.parameters()[Acts::eBoundTheta]);
+
+    float projPhi = direction.dot(element.phiAxis());
+    float projEta = direction.dot(element.etaAxis());
+    float projNorm = direction.dot(element.normal());
+
+    float anglePhi = std::atan2(projPhi, projNorm);
+    float angleEta = std::atan2(projEta, projNorm);
+
+    // Map the angles of inward-going tracks onto [-PI/2, PI/2]
+    if (anglePhi > M_PI *0.5) {
+	anglePhi -= M_PI;
+    }
+    if (anglePhi < -M_PI *0.5) {
+	anglePhi += M_PI;
+    }
+
+    // settle the sign/pi periodicity issues
+    float thetaloc;
+    if (angleEta > -0.5 * M_PI && angleEta < M_PI / 2.) {
+	thetaloc = M_PI_2 - angleEta;
+    } else if (angleEta > M_PI_2 && angleEta < M_PI) {
+	thetaloc = 1.5 * M_PI - angleEta;
+    } else { // 3rd quadrant
+	thetaloc = -M_PI_2 - angleEta;
+    }
+    angleEta = -1 * log(tan(thetaloc * 0.5));
+
+    
+    // Subtract the Lorentz angle effect
+    float angleShift = m_lorentzAngleTool->getTanLorentzAngle(element.identifyHash());
+    anglePhi = std::atan(std::tan(anglePhi) - element.design().readoutSide() * angleShift);
+
+    return std::make_pair(anglePhi, angleEta);
+}
+
+template <typename calib_data_t, typename traj_t>
+const typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::error_data_t*
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::getErrorData() const
+{
+    SG::ReadCondHandle<calib_data_t> handle(
+	m_clusterErrorKey,
+	Gaudi::Hive::currentContext());
+
+    if (!handle.isValid()) {
+	ATH_MSG_ERROR(m_clusterErrorKey << " is not available.");
+	return nullptr;
+    }
+
+    const error_data_t* data = handle->getClusterErrorData();
+    if (data == nullptr) {
+	ATH_MSG_ERROR("No cluster error data corresponding to " << m_clusterErrorKey);
+	return nullptr;
+    }
+
+    return data;
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<float, float>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::getPositionCorrection(
+    const error_data_t& errorData,
+    const InDetDD::SiDetectorElement& element,
+    const std::pair<float, float>& angles,
+    const xAOD::PixelCluster& cluster) const
+{
+    // TODO validate these angles
+    auto& [anglePhi, angleEta] = angles;
+
+    float deltaX = 0;
+    float deltaY = 0;
+    
+    float omX = cluster.omegaX();
+    float omY = cluster.omegaY();
+    int nrows = cluster.channelsInPhi();
+    int ncols = cluster.channelsInEta();
+
+    if (omX > -0.5 && omY > -0.5 && (nrows > 1 || ncols > 1)) {
+	Identifier id = element.identify();
+	std::pair<double, double> delta =
+	    errorData.getDelta(
+		&id,
+		nrows,
+		anglePhi,
+		ncols,
+		angleEta);
+
+	if (nrows > 1)
+	    deltaX = delta.first * (omX - 0.5);
+
+	if (ncols > 1)
+	    deltaY = delta.second * (omY - 0.5);
+    }
+
+    return std::make_pair(deltaX, deltaY);
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<float, float>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCorrectedError(
+    const error_data_t& errorData,
+    const InDetDD::SiDetectorElement& element,
+    const std::pair<float, float>& angles,
+    const xAOD::PixelCluster& cluster) const
+{
+    float errX = 0;
+    float errY = 0;
+
+    int nrows = cluster.channelsInPhi();
+    int ncols = cluster.channelsInEta();
+
+    auto& [anglePhi, angleEta] = angles;
+
+    // Special case for very shallow tracks
+    // Error estimated from geometrical projection of
+    // the track path in silicon onto the module surface
+    if (std::abs(anglePhi) > 1) {
+	errX = m_thickness * Acts::UnitConstants::um * std::tan(std::abs(anglePhi)) / std::sqrt(12);
+	errY = m_thickness * Acts::UnitConstants::um * std::tan(std::abs(angleEta));
+	if (cluster.widthInEta() > errY) {
+	    errY = cluster.widthInEta() / std::sqrt(12);
+	} else {
+	    errY /= std::sqrt(12);
+	}
+    } else if (nrows > 1 && ncols > 1) {
+	Identifier id = element.identify();
+	std::tie(errX, errY) = errorData.getDeltaError(&id);
+    }
+
+    return std::make_pair(errX, errY);
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Pos,
+	  typename AnalogueClusteringToolImpl<calib_data_t, traj_t>::Cov>
+AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
+    const Acts::GeometryContext& /*gctx*/,
+    const Acts::CalibrationContext& /*cctx*/,
+    const xAOD::PixelCluster& cluster,
+    const TrackStateProxy& state) const
+{
+    Pos pos = cluster.template localPosition<2>();
+    Cov cov = cluster.template localCovariance<2>();
+
+    assert(!cluster.rdoList().empty());
+    const InDetDD::SiDetectorElement *detElement = getDetectorElement(cluster.identifierHash());
+    if (detElement == nullptr) {
+	throw std::runtime_error("SiDetectorElement is NULL");
+    }
+
+    const error_data_t *errorData = getErrorData();
+    if (errorData == nullptr) {
+	throw std::runtime_error("PixelClusterErrorData is NULL");
+    }
+
+    std::pair<float, float> angles = anglesOfIncidence(*detElement, state);
+
+    auto [deltaX, deltaY] = getPositionCorrection(*errorData, *detElement, angles, cluster);
+    pos[Acts::eBoundLoc0] += deltaX;
+    pos[Acts::eBoundLoc1] += deltaY;
+
+    if (m_doErrCalib) {
+	auto [errX, errY] = getCorrectedError(*errorData, *detElement, angles, cluster);
+	if (errX > 0)
+	    cov(0, 0) = errX * errX;
+	if (errY > 0)
+	    cov(1, 1) = errY * errY;
+    }
+    
+    return std::make_pair(pos, cov);
+}
+
+template <typename calib_data_t, typename traj_t>
+void AnalogueClusteringToolImpl<calib_data_t, traj_t>::connect(OnTrackCalibrator<traj_t>& calibrator) const
+{
+    calibrator.pixel_calibrator. template connect<&AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate>(this);
+}
+
+
+} // namespace ActsTrk
+
+#endif
