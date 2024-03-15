@@ -215,7 +215,7 @@ egammaTruthAssociationAlg::isPromptEgammaParticle(
       HepMC::is_simulation_particle(truth) || truth->pt() < m_minPt) {
     return false;
   }
-  IMCTruthClassifier::Info mcinfo(ctx);
+  MCTruthPartClassifier::Info mcinfo(ctx);
   auto type = m_mcTruthClassifier->particleTruthClassifier(truth, &mcinfo);
 
   // Isolated electron or photon
@@ -272,7 +272,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
   accTruthLink(*truthParticle) = TruthLink_t(truth, *oldContainer, ctx);
   accTruthLink(*truthParticle).toPersistent();
   // MCTruthClassifier info
-  IMCTruthClassifier::Info mcinfo(ctx);
+  MCTruthPartClassifier::Info mcinfo(ctx);
   auto info = m_mcTruthClassifier->particleTruthClassifier(truth, &mcinfo);
   accType(*truthParticle) = static_cast<int>(info.first);
   accOrigin(*truthParticle) = static_cast<int>(info.second);
@@ -314,7 +314,7 @@ egammaTruthAssociationAlg::particleTruthClassifier(
   const T* particle) const
 {
   MCTruthInfo_t info{};
-  IMCTruthClassifier::Info mcinfo(ctx);
+  MCTruthPartClassifier::Info mcinfo(ctx);
   auto ret = m_mcTruthClassifier->particleTruthClassifier(particle, &mcinfo);
   info.genPart = mcinfo.genPart;
   info.first = ret.first;
@@ -331,7 +331,7 @@ egammaTruthAssociationAlg::particleTruthClassifier<xAOD::Electron>(
   const xAOD::Electron* electron) const
 {
   MCTruthInfo_t info{};
-  IMCTruthClassifier::Info mcinfo(ctx);
+  MCTruthPartClassifier::Info mcinfo(ctx);
   auto ret = m_mcTruthClassifier->particleTruthClassifier(electron, &mcinfo);
   if (ret.first == MCTruthPartClassifier::Unknown &&
       !xAOD::EgammaHelpers::isFwdElectron(electron) &&

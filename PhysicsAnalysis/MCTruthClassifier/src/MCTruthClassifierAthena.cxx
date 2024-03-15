@@ -46,7 +46,8 @@ std::unique_ptr<Trk::CurvilinearParameters> extractParamFromTruth(const xAOD::Tr
 }
 
 // Methods using directly the extrapolator usable only from Athena
-const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus, bool isFwrdEle, Info* info) const
+//-----------------------------------------------------------------------------------------
+const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus, bool isFwrdEle, MCTruthPartClassifier::Info* info) const
 {
   ATH_MSG_DEBUG("Executing egammaClusMatch ");
   const xAOD::TruthParticle* theMatchPart = nullptr;

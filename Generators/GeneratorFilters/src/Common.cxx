@@ -98,7 +98,7 @@ void classify(ToolHandle<IMCTruthClassifier>& classif,
         unsigned int& particleOrigin )
   {
 #ifdef MCTRUTHCLASSIFIER_CONST
-        IMCTruthClassifier::Info info;
+        MCTruthPartClassifier::Info info;
         std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = classif->particleTruthClassifier(theParticle, &info);
          particleOutCome = info.particleOutCome;
 #else
