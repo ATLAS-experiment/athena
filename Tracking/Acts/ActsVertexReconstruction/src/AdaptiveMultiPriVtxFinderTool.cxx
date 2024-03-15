@@ -81,7 +81,9 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     Acts::AnnealingUtility annealingUtility(annealingConfig);
 
     // Linearizer for Acts::BoundParameters type test
-    TrackLinearizer::Config ltConfig(bField, m_propagator);
+    TrackLinearizer::Config ltConfig;
+    ltConfig.bField = bField;
+    ltConfig.propagator = m_propagator;
     m_linearizer.emplace(ltConfig);
 
     // Vertex fitter configuration

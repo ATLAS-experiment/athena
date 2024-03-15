@@ -74,7 +74,9 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   Acts::ImpactPointEstimator ipEst(ipEstCfg);
 
   // Linearizer for Acts::BoundParameters type test
-  TrackLinearizer::Config ltConfig(m_bField, m_propagator);
+  TrackLinearizer::Config ltConfig;
+  ltConfig.bField = m_bField;
+  ltConfig.propagator = m_propagator;
   m_linearizer.emplace(ltConfig);
 
   // Full Billoir Vertex fitter setup
