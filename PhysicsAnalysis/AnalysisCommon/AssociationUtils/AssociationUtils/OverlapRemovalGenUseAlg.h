@@ -85,7 +85,7 @@ class OverlapRemovalGenUseAlg : public EL::AnaAlgorithm
        SG::WriteDecorHandleKeyArray<ContainerType> m_writeDecorKeys{};
     };
     
-    DataKeyHandler<xAOD::JetContainer> m_jetKey{this, "JetKey", "AntiKt4EMTopoJets",
+    DataKeyHandler<xAOD::JetContainer> m_jetKey{this, "JetKey", "AntiKt4EMPFlowJets",
                                                     "StoreGate/TEvent key for jets"};
 
     DataKeyHandler<xAOD::ElectronContainer> m_electronKey{this, "ElectronKey", "Electrons",

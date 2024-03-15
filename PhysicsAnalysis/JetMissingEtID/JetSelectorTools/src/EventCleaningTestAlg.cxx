@@ -26,9 +26,16 @@ StatusCode EventCleaningTestAlg::initialize()
   // Try to retrieve the tool
   ATH_CHECK( m_ecTool.retrieve() );
   ATH_CHECK( m_jetKey.initialize());
-  ATH_CHECK(m_evtKey.initialize());
- // Create the decorator
-  m_evtInfoDecor = m_evtKey.key() + "." + m_prefix + "eventClean_"+m_cleaningLevel;
+  ATH_CHECK( m_evtKey.initialize() );
+  // Create the decorator
+  // Use an if statement to leave a legacy 
+  auto labelString = m_cleaningLevel;
+  if (m_jetKey.key() == "AntiKt4EMTopoJets") {
+    labelString = m_cleaningLevel + "_EMTopo";
+  }
+  else {}
+
+  m_evtInfoDecor = m_evtKey.key() + "." + m_prefix + "eventClean_"+labelString;
   ATH_CHECK(m_evtInfoDecor.initialize(m_doEvent));
   return StatusCode::SUCCESS;
 }

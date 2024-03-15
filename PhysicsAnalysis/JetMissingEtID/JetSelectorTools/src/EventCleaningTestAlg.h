@@ -40,7 +40,7 @@ class EventCleaningTestAlg : public AthAlgorithm
 
     ToolHandle<ECUtils::IEventCleaningTool> m_ecTool{this, "EventCleaningTool","ECUtils::EventCleaningTool/EventCleaningTool" };
 
-    SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetCollectionName", "AntiKt4EMTopoJets",
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetCollectionName", "AntiKt4EMPFlowJets",
                                                    "Jet collection name"};
     SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey",
                                                 "EventInfo"};
