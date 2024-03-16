@@ -1468,6 +1468,8 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	  ATH_MSG_WARNING("Invalid side value found for module number: " << zdcModule->zdcModule() << ", side value = " << side);
 	  continue;
 	}
+  // Ignore MC only modules
+  if(zdcModule->zdcModule() > 4) continue;
 
 	if (zdcModule->zdcType() == 1) {
 	  //  This is RPD data in Run 3
@@ -1623,6 +1625,8 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     {
         int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
         int mod = zdcModule->zdcModule();
+        // Ignore MC only modules
+        if(mod > 4) continue;
 
         if (zdcModule->zdcType() == 1 && m_LHCRun==3) {
           // this is the RPD
