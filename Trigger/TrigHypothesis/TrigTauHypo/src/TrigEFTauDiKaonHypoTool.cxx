@@ -61,27 +61,27 @@ StatusCode TrigEFTauDiKaonHypoTool::initialize()
   // ----------------------------------------------------------------------
 {
   
-  msg() << MSG::INFO << "in initialize()" << endmsg;
+  msg() << MSG::DEBUG << "in initialize()" << endmsg;
   
-  msg() << MSG::INFO << " REGTEST: EFTauDiKaonHypo will cut on "<<endmsg;
-  msg() << MSG::INFO << " REGTEST: param massTrkSysMin " << m_massTrkSysMin <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param massTrkSysMax " << m_massTrkSysMax <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param massTrkSysKaonMin " << m_massTrkSysKaonMin <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param massTrkSysKaonMax " << m_massTrkSysKaonMax <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param massTrkSysKaonPiMin " << m_massTrkSysKaonPiMin <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param massTrkSysKaonPiMax " << m_massTrkSysKaonPiMax <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param targetMassTrkSysKaonPi " << m_targetMassTrkSysKaonPi <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param leadTrkPtMin " << m_leadTrkPtMin <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param EtCalibMin " << m_EtCalibMin <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param nTrackMin (included) " << m_nTrackMin <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param nTrackMax (included) " << m_nTrackMax <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param nWideTrackMax (included) " << m_nWideTrackMax <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param EMPOverTrkSysPMax " << m_EMPOverTrkSysPMax <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param dRmaxMax " << m_dRmaxMax <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param etOverPtLeadTrkMin " << m_etOverPtLeadTrkMin <<endmsg;
-  msg() << MSG::INFO << " REGTEST: param etOverPtLeadTrkMax " << m_etOverPtLeadTrkMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: EFTauDiKaonHypo will cut on "<<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param massTrkSysMin " << m_massTrkSysMin <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param massTrkSysMax " << m_massTrkSysMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param massTrkSysKaonMin " << m_massTrkSysKaonMin <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param massTrkSysKaonMax " << m_massTrkSysKaonMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param massTrkSysKaonPiMin " << m_massTrkSysKaonPiMin <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param massTrkSysKaonPiMax " << m_massTrkSysKaonPiMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param targetMassTrkSysKaonPi " << m_targetMassTrkSysKaonPi <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param leadTrkPtMin " << m_leadTrkPtMin <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param EtCalibMin " << m_EtCalibMin <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param nTrackMin (included) " << m_nTrackMin <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param nTrackMax (included) " << m_nTrackMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param nWideTrackMax (included) " << m_nWideTrackMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param EMPOverTrkSysPMax " << m_EMPOverTrkSysPMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param dRmaxMax " << m_dRmaxMax <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param etOverPtLeadTrkMin " << m_etOverPtLeadTrkMin <<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: param etOverPtLeadTrkMax " << m_etOverPtLeadTrkMax <<endmsg;
 
-  msg() << MSG::INFO << " REGTEST: ------ "<<endmsg;
+  msg() << MSG::DEBUG << " REGTEST: ------ "<<endmsg;
 
   
   if( ( m_massTrkSysKaonPiMin >  m_massTrkSysKaonPiMax ) ||  ( m_massTrkSysKaonMin >  m_massTrkSysKaonMax ) || ( m_massTrkSysMin >  m_massTrkSysMax ) || ( m_nTrackMin > m_nTrackMax )  || (m_etOverPtLeadTrkMin > m_etOverPtLeadTrkMax) )
@@ -90,7 +90,7 @@ StatusCode TrigEFTauDiKaonHypoTool::initialize()
       return StatusCode::FAILURE;
     }
   
-  msg() << MSG::INFO
+  msg() << MSG::DEBUG
 	<< "Initialization of EFTauDiKaonHypo completed successfully"
 	<< endmsg;
   

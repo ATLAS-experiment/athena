@@ -16,7 +16,7 @@ TrigMuonEFInvMassHypoTool::~TrigMuonEFInvMassHypoTool(){
 
 StatusCode TrigMuonEFInvMassHypoTool::initialize(){
 if(m_acceptAll) {
-  ATH_MSG_INFO("Accepting all the events!");
+  ATH_MSG_DEBUG("Accepting all the events!");
  } else {
   if(m_invMassLow<0 && m_invMassHigh<0){ 
     ATH_MSG_ERROR("Both mass cuts are <0. This is probably a configuration mistake.");

@@ -33,18 +33,18 @@ TrigEFTauMVHypoTool::~TrigEFTauMVHypoTool()
 StatusCode TrigEFTauMVHypoTool::initialize()
 {
   
-  ATH_MSG_INFO( "in initialize()" );
+  ATH_MSG_DEBUG( "in initialize()" );
   
-  ATH_MSG_INFO( "TrigEFTauMVHypoTool will cut on ");
-  ATH_MSG_INFO( "param NTrackMin " << m_numTrackMin );
-  ATH_MSG_INFO( "param NTrackMax " << m_numTrackMax );
-  ATH_MSG_INFO( "param NWideTrackMax " << m_numWideTrackMax );
-  ATH_MSG_INFO( "param EtCalib " << m_EtCalibMin );
-  ATH_MSG_INFO( "param Level " << m_level );
-  ATH_MSG_INFO( "param Method " << m_method );
-  ATH_MSG_INFO( "param Highpt with thrs " << m_highpt << " " << m_highpttrkthr <<  " " << m_highptidthr << " " << m_highptjetthr );
-  if (m_perfTrackPtCut>0.) ATH_MSG_INFO( "param perfTrackPtCut: " << m_perfTrackPtCut );
-  ATH_MSG_INFO( "------ ");
+  ATH_MSG_DEBUG( "TrigEFTauMVHypoTool will cut on ");
+  ATH_MSG_DEBUG( "param NTrackMin " << m_numTrackMin );
+  ATH_MSG_DEBUG( "param NTrackMax " << m_numTrackMax );
+  ATH_MSG_DEBUG( "param NWideTrackMax " << m_numWideTrackMax );
+  ATH_MSG_DEBUG( "param EtCalib " << m_EtCalibMin );
+  ATH_MSG_DEBUG( "param Level " << m_level );
+  ATH_MSG_DEBUG( "param Method " << m_method );
+  ATH_MSG_DEBUG( "param Highpt with thrs " << m_highpt << " " << m_highpttrkthr <<  " " << m_highptidthr << " " << m_highptjetthr );
+  if (m_perfTrackPtCut>0.) ATH_MSG_DEBUG( "param perfTrackPtCut: " << m_perfTrackPtCut );
+  ATH_MSG_DEBUG( "------ ");
 
   if( (m_numTrackMin >  m_numTrackMax) || m_level == -1 || (m_highptidthr > m_highptjetthr))
   {
