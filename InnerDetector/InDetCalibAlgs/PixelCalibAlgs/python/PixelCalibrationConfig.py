@@ -1,6 +1,4 @@
-#
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#
 
 if __name__=="__main__":
     
@@ -16,24 +14,47 @@ if __name__=="__main__":
     parser.add_argument('--tot'       , required=True, help="Time over threshold file, format must be \"SCAN_SXXXXXXXXX\" ")
     parser.add_argument('--layers'    , required=True, nargs='+', choices={"Blayer","L1","L2","disk"}, help="What layers we should run to update the calibration.")
     parser.add_argument('--saveInfo'  , type=bool, default=False, help="Creates a root file with the fitting plots - Slower running time")
+    parser.add_argument('--tag'       , type=str, default="PixelChargeCalibration-DATA-RUN2-UPD4-26", help="Tag in order to read the DB")
     
     args = parser.parse_args()
-        
+    
     import subprocess
     proc = []
+    
+    print("Running PixelCalibration layers..")
+    # Executing layers
     for layer in args.layers :
         command = 'PixelCalibration directory_path=' + args.folder + ' THR=' + args.thr + ' THRintime=' + args.thr_intime + ' TOT=' + args.tot + ' ' + layer + ' > log_' + layer
-        print("%s\n" % command)
+        print("Command: %s\n" % command)
         proc.append(subprocess.Popen(command, shell=True))
-
+    
+    # Waiting to get the processes finished
     for l in range(len(args.layers)) :
         proc[l].communicate()
-
-
-    # Work in progress... 
-    # After all the processes are finished, we need to download the last IOV, modify the calibrated modules and upload
-    # do we know if we need xchecks? if so the they can be implented here as well before the upload
+    print("Done\n")
     
-    print("running Code")
+    print("Merging calibration output...")
+    from PixelCalibAlgs.FileMerger import MergeCalibFiles
+    MergeCalibFiles(args.layers)
+    print("Done\n")
+    
+    print("Creating Reference file..")
+    # Downloads the last IOV
+    command = 'MakeReferenceFile %s' % (args.tag)
+    print("Command: %s\n" % command)
+    (subprocess.Popen(command, shell=True)).communicate()
+    print("Done\n")
+    
+    print("Updating last IOV and creating calibration candidate file..")
+    # Updates last IOV with the new calibration
+    from PixelCalibAlgs.Recovery import UpdateCalib
+    UpdateCalib(args.tag)
+    print("Done\n")
+    
+    
+    # Work in progress... 
+    # Check the calibrated modules (replace the bad ones with the previous calibration) and upload
+    
+    print("Jobs finished")
     exit(0)
     
