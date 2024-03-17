@@ -299,7 +299,7 @@ def PHYSLITECfg(flags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     # Trigger content
     PHYSLITESlimmingHelper.IncludeTriggerNavigation = False

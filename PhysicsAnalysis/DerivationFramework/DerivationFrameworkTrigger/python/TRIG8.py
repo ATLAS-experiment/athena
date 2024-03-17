@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # TRIG8.py
@@ -181,7 +181,7 @@ def TRIG8Cfg(flags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     TRIG8SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",

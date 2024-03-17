@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM3.py
@@ -9,13 +9,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM3SkimmingToolCfg(ConfigFlags):
+def JETM3SkimmingToolCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    electronTriggers = TriggerLists.single_el_Trig(ConfigFlags)
-    muonTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
+    electronTriggers = TriggerLists.single_el_Trig(flags)
+    muonTriggers = TriggerLists.single_mu_Trig(flags)
 
     addRun3ElectronTriggers = ["HLT_e17_lhvloose_L1EM15VHI","HLT_e20_lhvloose_L1EM15VH", "HLT_e250_etcut_L1EM22VHI",
                                "HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_e26_lhtight_ivarloose_L1eEM26M",
@@ -44,7 +44,7 @@ def JETM3SkimmingToolCfg(ConfigFlags):
     acc.addPublicTool(JETM3OfflineSkimmingTool_ele)
     acc.addPublicTool(JETM3OfflineSkimmingTool_mu)
 
-    if not ConfigFlags.Input.isMC:
+    if not flags.Input.isMC:
 
         JETM3TriggerSkimmingTool_ele = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM3TriggerSkimmingTool_ele", TriggerListOR = electronTriggers)
         acc.addPublicTool(JETM3TriggerSkimmingTool_ele)
@@ -68,16 +68,16 @@ def JETM3SkimmingToolCfg(ConfigFlags):
 
 
 # Main algorithm config
-def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
+def JETM3KernelCfg(flags, name='JETM3Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM3"""
     acc = ComponentAccumulator()
 
     # Skimming
-    skimmingTool = acc.getPrimaryAndMerge(JETM3SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.getPrimaryAndMerge(JETM3SkimmingToolCfg(flags))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
@@ -85,7 +85,7 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
     JETM3_thinning_expression = "( abs(InDetTrackParticles.d0) < 5*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5*mm )"
     JETM3TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM3TrackParticleThinningTool",
         StreamName              = kwargs['StreamName'], 
         SelectionString         = JETM3_thinning_expression,
@@ -93,7 +93,7 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
     
     # Include inner detector tracks associated with muons
     JETM3MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM3MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
@@ -101,7 +101,7 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
     
     # Include inner detector tracks associated with electonrs
     JETM3ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM3ElectronTPThinningTool",
         StreamName              = kwargs['StreamName'],
         SGKey                   = "Electrons",
@@ -109,7 +109,7 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
 
     # Include inner detector tracks associated with photons
     JETM3PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                     = "JETM3PhotonTPThinningTool",
         StreamName               = kwargs['StreamName'],
         SGKey                    = "Photons",
@@ -118,7 +118,7 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
 
     # Include inner detector tracks associated with taus
     JETM3TauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                   = "JETM3TauTPThinningTool",
         StreamName             = kwargs['StreamName'],
         TauKey                 = "TauJets",
@@ -133,7 +133,7 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
                      JETM3PhotonTPThinningTool,
                      JETM3TauTPThinningTool]
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         truth_cond_WZH    = "((abs(TruthParticles.pdgId) >= 23) && (abs(TruthParticles.pdgId) <= 25))"                                      # W, Z and Higgs
         truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
         truth_cond_Quark  = "((abs(TruthParticles.pdgId) <=  5 && (TruthParticles.pt > 10000.)) || (abs(TruthParticles.pdgId) == 6))"       # Quarks
@@ -162,12 +162,12 @@ def JETM3KernelCfg(ConfigFlags, name='JETM3Kernel', **kwargs):
 
     
     # Extra jet content:
-    acc.merge(JETM3ExtraContentCfg(ConfigFlags))
+    acc.merge(JETM3ExtraContentCfg(flags))
 
     return acc
 
 
-def JETM3ExtraContentCfg(ConfigFlags):
+def JETM3ExtraContentCfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -192,12 +192,12 @@ def JETM3ExtraContentCfg(ConfigFlags):
     jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
-        acc.merge(JetRecCfg(ConfigFlags,jd))
+        acc.merge(JetRecCfg(flags,jd))
 
 
     # PFlow augmentation tool
     from DerivationFrameworkJetEtMiss.PFlowCommonConfig import PFlowCommonCfg
-    acc.merge(PFlowCommonCfg(ConfigFlags))
+    acc.merge(PFlowCommonCfg(flags))
 
     #=======================================
     # Add Run-2 jet trigger collections
@@ -205,7 +205,7 @@ def JETM3ExtraContentCfg(ConfigFlags):
     # In Run-3, the aux. container type is directly JetAuxContainer (no conversion needed)
     #=======================================
 
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_a10tclcwsubjesFS", "JetContainer_GSCJet"]
 
         for trigger in triggerNames:
@@ -218,7 +218,7 @@ def JETM3ExtraContentCfg(ConfigFlags):
     return acc
 
 
-def JETM3Cfg(ConfigFlags):
+def JETM3Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -227,10 +227,10 @@ def JETM3Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM3TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    JETM3TriggerListsHelper = TriggerListsHelper(flags)
 
     # Skimming, thinning, augmentation, extra content
-    acc.merge(JETM3KernelCfg(ConfigFlags, name="JETM3Kernel", StreamName = 'StreamDAOD_JETM3', TriggerListsHelper = JETM3TriggerListsHelper))
+    acc.merge(JETM3KernelCfg(flags, name="JETM3Kernel", StreamName = 'StreamDAOD_JETM3', TriggerListsHelper = JETM3TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -239,7 +239,7 @@ def JETM3Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM3SlimmingHelper = SlimmingHelper("JETM3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    JETM3SlimmingHelper = SlimmingHelper("JETM3SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     JETM3SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
@@ -262,7 +262,7 @@ def JETM3Cfg(ConfigFlags):
     JETM3SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
 
     # Truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM3SlimmingHelper)
@@ -291,7 +291,7 @@ def JETM3Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM3SlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_", 
@@ -300,7 +300,7 @@ def JETM3Cfg(ConfigFlags):
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = JETM3TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(JETM3SlimmingHelper)        
         # Run 2 is added here temporarily to allow testing/comparison/debugging
@@ -319,8 +319,8 @@ def JETM3Cfg(ConfigFlags):
 
     # Output stream
     JETM3ItemList = JETM3SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM3", ItemList=JETM3ItemList, AcceptAlgs=["JETM3Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM3", AcceptAlgs=["JETM3Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_JETM3", ItemList=JETM3ItemList, AcceptAlgs=["JETM3Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM3", AcceptAlgs=["JETM3Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

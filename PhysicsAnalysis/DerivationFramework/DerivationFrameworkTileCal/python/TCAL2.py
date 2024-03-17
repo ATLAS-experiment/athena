@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -67,31 +67,31 @@ def TCAL2KernelCfg(flags, name='TCAL2Kernel', **kwargs):
 
     return acc
 
-def TCAL2Cfg(ConfigFlags):
+def TCAL2Cfg(flags):
     """Configure the TCAL1 derivation framework"""
 
     TCAL2Prefix = 'TCAL2_'
 
     acc = ComponentAccumulator()
-    acc.merge(TCAL2KernelCfg(ConfigFlags, name="TCAL2Kernel", StreamName = "StreamDAOD_TCAL2", Prefix=TCAL2Prefix))
+    acc.merge(TCAL2KernelCfg(flags, name="TCAL2Kernel", StreamName = "StreamDAOD_TCAL2", Prefix=TCAL2Prefix))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TCAL2SlimmingHelper = SlimmingHelper("TCAL2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TCAL2SlimmingHelper = SlimmingHelper("TCAL2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TCAL2SlimmingHelper.SmartCollections = ["EventInfo"]
 
-    if ConfigFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3]:
+    if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3]:
         mbtsItems = [f'std::vector<float>#TCAL2_mbts_{item}' for item in ['energy', 'time', 'eta', 'phi']]
         mbtsItems += [f'std::vector<int>#TCAL2_mbts_{item}' for item in ['quality', 'module', 'channel', 'type']]
         TCAL2SlimmingHelper.StaticContent = mbtsItems
-    if ConfigFlags.GeoModel.Run is LHCPeriod.Run2:
+    if flags.GeoModel.Run is LHCPeriod.Run2:
         e4prItems = [f'std::vector<float>#TCAL2_e4pr_{item}' for item in ['energy', 'time']]
         e4prItems += ['std::vector<int>#TCAL2_e4pr_{item}' for item in ['quality', 'module', 'channel', 'type']]
         TCAL2SlimmingHelper.StaticContent += e4prItems
     TCAL2ItemList = TCAL2SlimmingHelper.GetItemList()
 
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TCAL2", ItemList=TCAL2ItemList, AcceptAlgs=["TCAL2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TCAL2", AcceptAlgs=["TCAL2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TCAL2", ItemList=TCAL2ItemList, AcceptAlgs=["TCAL2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TCAL2", AcceptAlgs=["TCAL2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

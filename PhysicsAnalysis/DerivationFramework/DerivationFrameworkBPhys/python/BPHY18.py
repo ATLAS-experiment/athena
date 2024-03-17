@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY18.py
 #====================================================================
@@ -11,20 +11,20 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY18"
 streamName = "StreamDAOD_BPHY18"
 
-def BPHY18Cfg(ConfigFlags):
+def BPHY18Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
     acc = ComponentAccumulator()
-    acc.merge(EGammaCommonCfg(ConfigFlags))
-    isSimulation = ConfigFlags.Input.isMC
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    acc.merge(EGammaCommonCfg(flags))
+    isSimulation = flags.Input.isMC
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
 
     #BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "BPHY18TriggerSkim",
@@ -75,7 +75,7 @@ def BPHY18Cfg(ConfigFlags):
                             OutputVtxContainerName = "BPHY18DiElectronCandidates",
                             PVContainerName        = "PrimaryVertices",
                             V0Tools                = V0Tools,
-                            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                             RefPVContainerName     = "SHOULDNOTBEUSED",
                             DoVertexType           = 7
                             )
@@ -127,7 +127,7 @@ def BPHY18Cfg(ConfigFlags):
                             RefPVContainerName     = "BPHY18RefittedPrimaryVertices",
                             RefitPV                = True,
                             V0Tools                = V0Tools,
-                            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                             MaxPVrefit             = 10000,
                             DoVertexType           = 7
                             )
@@ -161,7 +161,7 @@ def BPHY18Cfg(ConfigFlags):
                            name                   = "BPHY18_diMeson_revertex",
                            InputVtxContainerName  = "BeeKstCandidates",
                            V0Tools                = V0Tools,
-                           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY18DiMeson"
@@ -268,7 +268,7 @@ def BPHY18Cfg(ConfigFlags):
                                                     ThinningTools     = thinningCollection))
     
     from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
-    acc.merge(DerivationTrackIsoCfg(ConfigFlags, object_types=("Electrons", "Muons")))
+    acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons")))
 
     
     #====================================================================
@@ -278,7 +278,7 @@ def BPHY18Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY18SlimmingHelper = SlimmingHelper("BPHY18SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY18SlimmingHelper = SlimmingHelper("BPHY18SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent  = []
@@ -331,7 +331,7 @@ def BPHY18Cfg(ConfigFlags):
     BPHY18SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
     
     BPHY18ItemList = BPHY18SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY18", ItemList=BPHY18ItemList, AcceptAlgs=["BPHY18Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY18", AcceptAlgs=["BPHY18Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY18", ItemList=BPHY18ItemList, AcceptAlgs=["BPHY18Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY18", AcceptAlgs=["BPHY18Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

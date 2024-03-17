@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TEST3.py - derivation framework example demonstrating thinning 
 
@@ -25,17 +25,17 @@ def TEST3KernelCfg(flags, name='TEST3Kernel', **kwargs):
     return acc
 
 
-def TEST3Cfg(ConfigFlags):
+def TEST3Cfg(flags):
 
     acc = ComponentAccumulator()
-    acc.merge(TEST3KernelCfg(ConfigFlags, name="TEST3Kernel",StreamName = "StreamDAOD_TEST3"))
+    acc.merge(TEST3KernelCfg(flags, name="TEST3Kernel",StreamName = "StreamDAOD_TEST3"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST3SlimmingHelper = SlimmingHelper("TEST3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TEST3SlimmingHelper = SlimmingHelper("TEST3SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TEST3SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles"]
     TEST3ItemList = TEST3SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST3", ItemList=TEST3ItemList, AcceptAlgs=["TEST3Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TEST3", AcceptAlgs=["TEST3Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TEST3", ItemList=TEST3ItemList, AcceptAlgs=["TEST3Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TEST3", AcceptAlgs=["TEST3Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     return acc

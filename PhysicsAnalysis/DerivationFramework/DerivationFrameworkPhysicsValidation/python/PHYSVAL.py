@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_PHYSVAL.py
@@ -14,29 +14,29 @@ from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDeta
 from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 
 # Main algorithm config
-def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
+def PHYSVALKernelCfg(flags, name='PHYSVALKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for PHYSVAL"""
     acc = ComponentAccumulator()
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # LLP-specific configs
-    if ConfigFlags.Tracking.doLargeD0:
+    if flags.Tracking.doLargeD0:
         from DerivationFrameworkLLP.PhysValLLPConfig import PhysValLLPCfg
-        acc.merge(PhysValLLPCfg(ConfigFlags))
+        acc.merge(PhysValLLPCfg(flags))
 
         # LRT Egamma
         from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
-        acc.merge(EGammaLRTCfg(ConfigFlags))
+        acc.merge(EGammaLRTCfg(flags))
 
         from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronLHSelectorsCfg
-        acc.merge(LRTElectronLHSelectorsCfg(ConfigFlags))
+        acc.merge(LRTElectronLHSelectorsCfg(flags))
 
         # LRT Muons
         from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
-        acc.merge(MuonsCommonCfg(ConfigFlags,
+        acc.merge(MuonsCommonCfg(flags,
                                 suff="LRT"))
 
     # R = 0.4 LCTopo jets (for tau validation)
@@ -45,7 +45,7 @@ def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
     from JetRecConfig.JetConfigFlags import jetInternalFlags
 
     jetInternalFlags.isRecoJob = True
-    acc.merge(JetRecCfg(ConfigFlags,AntiKt4LCTopo))
+    acc.merge(JetRecCfg(flags,AntiKt4LCTopo))
 
     # Kernel algorithm
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
@@ -53,7 +53,7 @@ def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
     return acc
 
 
-def PHYSVALCfg(ConfigFlags):
+def PHYSVALCfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -62,10 +62,10 @@ def PHYSVALCfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSVALTriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    PHYSVALTriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
-    acc.merge(PHYSVALKernelCfg(ConfigFlags, name="PHYSVALKernel", StreamName = 'StreamDAOD_PHYSVAL', TriggerListsHelper = PHYSVALTriggerListsHelper))
+    acc.merge(PHYSVALKernelCfg(flags, name="PHYSVALKernel", StreamName = 'StreamDAOD_PHYSVAL', TriggerListsHelper = PHYSVALTriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -74,7 +74,7 @@ def PHYSVALCfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     PHYSVALSlimmingHelper.SmartCollections = ["EventInfo",
                                               "Electrons",
                                               "LRTElectrons",
@@ -129,7 +129,7 @@ def PHYSVALCfg(ConfigFlags):
                                            "CaloCalTopoClusters", "EMOriginTopoClusters","LCOriginTopoClusters",
                                            "JetETMissChargedParticleFlowObjects", "JetETMissNeutralParticleFlowObjects"]
 
-    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
         PHYSVALSlimmingHelper.AllVariables += ["BTagging_AntiKt4EMTopoJFVtx",
                                                "BTagging_AntiKt4EMTopoJFVtxFlip", #Flip version of JetFitter
                                                "BTagging_AntiKt4EMTopoSecVtx",
@@ -166,19 +166,19 @@ def PHYSVALCfg(ConfigFlags):
         StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices" + wp]
         StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVertices" + wp + "Aux."]
 
-    if ConfigFlags.BTagging.RunFlipTaggers is True:
+    if flags.BTagging.RunFlipTaggers is True:
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxFlipAux.-vxTrackAtVertex"]
 
-    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxAux.-vxTrackAtVertex"]
-        if ConfigFlags.BTagging.RunFlipTaggers is True:
+        if flags.BTagging.RunFlipTaggers is True:
             StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxFlipAux.-vxTrackAtVertex"]
 
  
     PHYSVALSlimmingHelper.StaticContent = StaticContent
 
     # Truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         PHYSVALSlimmingHelper.AppendToDictionary = {'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
                                                     'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
                                                     'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
@@ -215,7 +215,7 @@ def PHYSVALCfg(ConfigFlags):
                                                     'BTagging_AntiKt4EMPFlowJFVtxFlip':'xAOD::BTagVertexContainer','BTagging_AntiKt4EMPFlowJFVtxFlipAux':'xAOD::BTagVertexAuxContainer',#For Flip version of JetFitter
                                                     'BTagging_AntiKt4EMPFlowSecVtxFlip':'xAOD::VertexContainer','BTagging_AntiKt4EMPFlowSecVtxFlipAux':'xAOD::VertexAuxContainer'}
 
-        if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
+        if flags.GeoModel.Run >= LHCPeriod.Run4:
             PHYSVALSlimmingHelper.AppendToDictionary.update({'BTagging_AntiKt4EMTopoJFVtx':'xAOD::BTagVertexContainer','BTagging_AntiKt4EMTopoJFVtxAux':'xAOD::BTagVertexAuxContainer',
                                                              'BTagging_AntiKt4EMTopoSecVtx':'xAOD::VertexContainer','BTagging_AntiKt4EMTopoSecVtxAux':'xAOD::VertexAuxContainer',
                                                              'BTagging_AntiKt4EMTopoJFVtxFlip':'xAOD::BTagVertexContainer','BTagging_AntiKt4EMTopoJFVtxFlipAux':'xAOD::BTagVertexAuxContainer',#For Flip version of JetFitter
@@ -267,7 +267,7 @@ def PHYSVALCfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper,
                                          OutputContainerPrefix = "TrigMatch_",
@@ -276,7 +276,7 @@ def PHYSVALCfg(ConfigFlags):
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = PHYSVALTriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSVALSlimmingHelper)
         # Run 2 is added here temporarily to allow testing/comparison/debugging
@@ -290,12 +290,12 @@ def PHYSVALCfg(ConfigFlags):
 
     # Full trigger content (needed for T0-style monitoring)
     from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
-    addTrigEDMSetToOutput(ConfigFlags, PHYSVALSlimmingHelper, "AODFULL")
+    addTrigEDMSetToOutput(flags, PHYSVALSlimmingHelper, "AODFULL")
 
     # Output stream
     PHYSVALItemList = PHYSVALSlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYSVAL", ItemList=PHYSVALItemList, AcceptAlgs=["PHYSVALKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYSVAL", AcceptAlgs=["PHYSVALKernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_PHYSVAL", ItemList=PHYSVALItemList, AcceptAlgs=["PHYSVALKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_PHYSVAL", AcceptAlgs=["PHYSVALKernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

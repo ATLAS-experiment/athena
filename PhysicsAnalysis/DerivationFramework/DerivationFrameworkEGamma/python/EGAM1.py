@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM1.py
 # This defines DAOD_EGAM1, a skimmed DAOD format for Run 3.
@@ -511,7 +511,7 @@ def EGAM1Cfg(flags):
     EGAM1SlimmingHelper = SlimmingHelper(
         "EGAM1SlimmingHelper",
         NamesAndTypes=flags.Input.TypedCollections,
-        ConfigFlags=flags,
+        flags=flags,
     )
 
     # ------------------------------------------

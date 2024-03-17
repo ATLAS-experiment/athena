@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_MUON1.py
@@ -12,14 +12,14 @@ from AthenaConfiguration.Enums import MetadataCategory
 import AthenaCommon.SystemOfUnits as Units
 
 
-def Muon1SelectionCfg(ConfigFlags, 
+def Muon1SelectionCfg(flags, 
                       MuonContainer="Muons", 
                       IdTrackContainer="InDetTrackParticles",
                       applyTrigger = False):
     acc = ComponentAccumulator()
     from DerivationFrameworkMuons.MuonsToolsConfig import DiMuonTaggingAlgCfg
     ### Z mumu OC events
-    acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+    acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingZmumuOC",
                                   Mu1PtMin                = 24*Units.GeV,
                                   Mu1AbsEtaMax            = 2.5,
@@ -34,7 +34,7 @@ def Muon1SelectionCfg(ConfigFlags,
                                   BranchPrefix            = "Muon1ZmumuOC"))
     
     ### Z mumu SC events
-    acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+    acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingZmumuSC",
                                   Mu1PtMin                = 24*Units.GeV,
                                   Mu1AbsEtaMax            = 2.5,
@@ -48,7 +48,7 @@ def Muon1SelectionCfg(ConfigFlags,
                                   InvariantMassLow        = 60*Units.GeV,
                                   BranchPrefix            = "Muon1ZmumuSC")) 
     # Jpsi for tag-probe
-    acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+    acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingJpsiTP",
                                   Mu1PtMin                = 4*Units.GeV,
                                   Mu1AbsEtaMax            = 2.5,
@@ -64,7 +64,7 @@ def Muon1SelectionCfg(ConfigFlags,
                                   BranchPrefix            = "Muon1JPsiTP"))
   
     ### Jpsi for calibration
-    acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+    acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingJpsiCalib",
                                   Mu1PtMin                = 5.*Units.GeV,
                                   Mu1RequireQual          = True,
@@ -77,7 +77,7 @@ def Muon1SelectionCfg(ConfigFlags,
                                   InvariantMassHigh       = 4.8*Units.GeV,
                                   BranchPrefix            = "Muon1JPsiCalib"))
     ### Upsilon tagging
-    acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+    acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingUpsilon",
                                   Mu1PtMin                = 5.*Units.GeV,
                                   Mu1RequireQual          = True,
@@ -89,9 +89,9 @@ def Muon1SelectionCfg(ConfigFlags,
                                   InvariantMassHigh       = 13.*Units.GeV,
                                   applyTrigger            = applyTrigger,
                                   BranchPrefix            = "Muon1Upsilon"))
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         ### Accept every muon around a truth particle
-        acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+        acc.merge(DiMuonTaggingAlgCfg(flags,
                                       name                    = "MuonTruthTagging",
                                       Mu1PtMin                = 2.5*Units.GeV,
                                       Mu1RequireQual          = True,
@@ -109,7 +109,7 @@ def Muon1SelectionCfg(ConfigFlags,
 
 
 # Main algorithm config
-def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
+def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for MUON1"""
     acc = ComponentAccumulator()
     
@@ -123,10 +123,10 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
     # Common augmentations
     # --------------------
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     ### Basic muon selection
-    diMuonSelAcc = Muon1SelectionCfg(ConfigFlags,
+    diMuonSelAcc = Muon1SelectionCfg(flags,
                                      MuonContainer= kwargs["MuonContainer"], 
                                      IdTrackContainer=kwargs["IdTrkContainer"])
     # ------------
@@ -140,50 +140,50 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
 
 
     ## MC truth classification and isolation
-    if ConfigFlags.Input.isMC:        
+    if flags.Input.isMC:        
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MuonTruthClassifierFallbackCfg
-        MUON1MuonTruthClassifierFallback = acc.getPrimaryAndMerge(MuonTruthClassifierFallbackCfg(ConfigFlags,
+        MUON1MuonTruthClassifierFallback = acc.getPrimaryAndMerge(MuonTruthClassifierFallbackCfg(flags,
                                                                                                  name         = "MUON1MuonTruthClassifierFallback",
                                                                                                  ContainerKey = kwargs["MuonContainer"]))
         acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("MuonTruthClassifierFallBack",
                                                                           AugmentationTools=[MUON1MuonTruthClassifierFallback]))
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MuonTruthIsolationDecorAlgCfg
-        acc.merge(MuonTruthIsolationDecorAlgCfg(ConfigFlags, 
+        acc.merge(MuonTruthIsolationDecorAlgCfg(flags, 
                                                 name         = "MUON1MuonTruthIsolationAlg",
                                                 ContainerKey = kwargs["MuonContainer"]))
 
     
     ### J/psi vertexing
     from DerivationFrameworkMuons.JPsiVertexFitSetupCfg import AddMCPJPsiVertexFitCfg
-    acc.merge(AddMCPJPsiVertexFitCfg(ConfigFlags, 
+    acc.merge(AddMCPJPsiVertexFitCfg(flags, 
                                      prefix='Muon1', 
                                      IdTrkContainer = kwargs["IdTrkContainer"], 
                                      MuonContainer = kwargs["MuonContainer"]))
     ### Track isolation deccorations
     from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import TrackIsolationCfg
-    acc.merge(TrackIsolationCfg(ConfigFlags, 
+    acc.merge(TrackIsolationCfg(flags, 
                                 TrackCollection=kwargs["IdTrkContainer"], 
                                 TrackSelections = trkThinFlags))
-    acc.merge(TrackIsolationCfg(ConfigFlags,
+    acc.merge(TrackIsolationCfg(flags,
                                 TrackCollection=kwargs["MsTrkContainer"]))
     
     ### Calo deposits 
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
-    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags,
+    acc.merge(MuonCaloDepositAlgCfg(flags,
                                     ContainerKey= kwargs["MuonContainer"],
                                     TrackSelections = muonThinFlags))    
-    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags,
+    acc.merge(MuonCaloDepositAlgCfg(flags,
                                      name = "IdTrkCaloDepsitDecorator",
                                      ContainerKey= kwargs["IdTrkContainer"],
                                      TrackSelections = trkThinFlags))
     
     #### Extrapolation of the ID tracks to the trigger plane
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonTPExtrapolationAlgCfg 
-    acc.merge(MuonTPExtrapolationAlgCfg(ConfigFlags,
+    acc.merge(MuonTPExtrapolationAlgCfg(flags,
                                         ContainerKey= kwargs["MuonContainer"],
                                         TrackSelections = ["passMuon1JPsiTP"]))    
     
-    acc.merge(MuonTPExtrapolationAlgCfg(ConfigFlags,
+    acc.merge(MuonTPExtrapolationAlgCfg(flags,
                                         name = "MuonTPTrigExtrapolation",
                                         ContainerKey= kwargs["IdTrkContainer"],
                                         TrackSelections = ["passMuon1JPsiTP"]))
@@ -195,7 +195,7 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
     MUON1SkimmingTools = []
     skimming_expression = '||'.join(skimmingORs)
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
-    MUON1SkimmingTool1 = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(ConfigFlags,
+    MUON1SkimmingTool1 = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(flags,
                                                                           name       = "MUON1SkimmingTool1",
                                                                           expression = skimming_expression))
     MUON1SkimmingTools.append(MUON1SkimmingTool1) 
@@ -210,7 +210,7 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
     from DerivationFrameworkMuons.MuonsToolsConfig import AnalysisMuonThinningAlgCfg
     MUON1ThinningTools = [] 
     if kwargs["scheduleThinning"]:
-        acc.merge(AnalysisMuonThinningAlgCfg(ConfigFlags,
+        acc.merge(AnalysisMuonThinningAlgCfg(flags,
                                              MuonPassFlags = ["{cont}.{passDecor}".format(cont = kwargs["MuonContainer"],
                                                                                           passDecor = passDecor) for passDecor in muonThinFlags],
                                              TrkPassFlags =["{cont}.{passDecor}".format(cont = kwargs["IdTrkContainer"],
@@ -219,7 +219,7 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
 
 
         # keep topoclusters around muons
-        MUON1ThinningTool1 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(ConfigFlags,
+        MUON1ThinningTool1 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                            name                    = "MUON1ThinningTool4",
                                                                            StreamName              = kwargs['StreamName'],
                                                                            SGKey                   = "Muons",
@@ -229,14 +229,14 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
         MUON1ThinningTools.append(MUON1ThinningTool1)
     
         ### cell thinning
-        acc.merge(thinCaloCellsForDFCfg(ConfigFlags,
+        acc.merge(thinCaloCellsForDFCfg(flags,
                                         inputClusterKeys = ["MuonClusterCollection"],
                                         streamName       = kwargs['StreamName'],
                                         outputCellKey    = "DFMUONCellContainer"))
 
         ### Tracks associated with fitted vertices
         from DerivationFrameworkBPhys.commonBPHYMethodsCfg import Thin_vtxTrkCfg 
-        MUON1Thin_vtxTrk = acc.getPrimaryAndMerge(Thin_vtxTrkCfg(ConfigFlags,
+        MUON1Thin_vtxTrk = acc.getPrimaryAndMerge(Thin_vtxTrkCfg(flags,
                                                                  name                       = "MUON1Thin_vtxTrk",
                                                                  StreamName                 = kwargs['StreamName'],
                                                                  TrackParticleContainerName = "InDetTrackParticles",
@@ -245,9 +245,9 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
         MUON1ThinningTools.append(MUON1Thin_vtxTrk)
                                                    
         ### Truth thinning
-        if ConfigFlags.Input.isMC:
+        if flags.Input.isMC:
             from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MenuTruthThinningCfg
-            MUON1TruthThinningTool = acc.getPrimaryAndMerge(MenuTruthThinningCfg(ConfigFlags,
+            MUON1TruthThinningTool = acc.getPrimaryAndMerge(MenuTruthThinningCfg(flags,
                                                                                  name                            = "MUON1TruthThinningTool",
                                                                                  StreamName                      = kwargs['StreamName'],
                                                                                  WritePartons                    = False,
@@ -283,7 +283,7 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
     return acc
 
 
-def MUON1Cfg(ConfigFlags):
+def MUON1Cfg(flags):
     stream_name = 'StreamDAOD_MUON1'
     acc = ComponentAccumulator()
 
@@ -291,12 +291,12 @@ def MUON1Cfg(ConfigFlags):
     # This is needed at this scope (for the slimming) and further down in the config chain
     # for actually configuring the matching, so we create it here and pass it down
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    MUON1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    MUON1TriggerListsHelper = TriggerListsHelper(flags)
 
  
 
     # Common augmentations
-    acc.merge(MUON1KernelCfg(ConfigFlags, name="MUON1Kernel", StreamName = stream_name, TriggerListsHelper = MUON1TriggerListsHelper))
+    acc.merge(MUON1KernelCfg(flags, name="MUON1Kernel", StreamName = stream_name, TriggerListsHelper = MUON1TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -322,7 +322,7 @@ def MUON1Cfg(ConfigFlags):
     decoartionsMuon += tpExtrapolations
     
     
-    MUON1SlimmingHelper = SlimmingHelper("MUON1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    MUON1SlimmingHelper = SlimmingHelper("MUON1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     MUON1SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",
@@ -376,7 +376,7 @@ def MUON1Cfg(ConfigFlags):
                                            "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
 
     # Truth content
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         MUON1SlimmingHelper.AllVariables += ["TruthEvents", "TruthParticles", "TruthVertices", "MuonTruthParticles"]
 
     # Trigger content
@@ -393,7 +393,7 @@ def MUON1Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = MUON1SlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_", 
@@ -402,19 +402,19 @@ def MUON1Cfg(ConfigFlags):
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = MUON1TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
-    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(MUON1SlimmingHelper)
         ##################################################### 
         ## NOTE: This block is temporary, during validation of the doEDMVersionConversion flag.
         ## This adds a LOT of containers to the output! In order to help validate the conversion.
         ## It should be removed once doEDMVersionConversion goes into production use.
-        if ConfigFlags.Trigger.doEDMVersionConversion:   
+        if flags.Trigger.doEDMVersionConversion:   
             from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
             from AthenaCommon.Logging import logging
             msg = logging.getLogger('MUON1Cfg')
             msg.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
-            addTrigEDMSetToOutput(ConfigFlags, MUON1SlimmingHelper, "AODFULL")
+            addTrigEDMSetToOutput(flags, MUON1SlimmingHelper, "AODFULL")
             MUON1SlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer','HLTNav_R2ToR3SummaryAux':'xAOD::TrigCompositeAuxContainer'})
             MUON1SlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
         ##
@@ -422,8 +422,8 @@ def MUON1Cfg(ConfigFlags):
 
     # Output stream    
     MUON1ItemList = MUON1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_MUON1", ItemList=MUON1ItemList, AcceptAlgs=["MUON1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_MUON1", AcceptAlgs=["MUON1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_MUON1", ItemList=MUON1ItemList, AcceptAlgs=["MUON1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_MUON1", AcceptAlgs=["MUON1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 

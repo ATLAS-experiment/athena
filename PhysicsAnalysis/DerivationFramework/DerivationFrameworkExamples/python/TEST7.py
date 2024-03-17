@@ -1,24 +1,23 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
-# TEST2.py - derivation framework example demonstrating skimming via means of string 
+# TEST7.py - derivation framework example demonstrating skimming via means of string 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.CFElements import seqAND
 
-def TEST2SkimmingToolCfg(flags):
+def TEST7SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
     from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
     acc = ComponentAccumulator()
     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "TEST2StringSkimmingTool",
-                                                                             expression = "count(Muons.pt > (1 * GeV)) >= 1",
-                                                                             TrigDecisionTool=tdt), 
+    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "TEST7StringSkimmingTool",
+                                                                             expression = "( count(Muons.pt > (6 * GeV)) + count(Electrons.pt > (6 * GeV)) ) >= 3",
+                                                                             TrigDecisionTool=tdt),
                       primary = True)
     return(acc)                          
 
-def TEST2KernelCfg(flags, name='TEST2Kernel', **kwargs):
+def TEST7KernelCfg(flags, name='TEST7Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
     acc = ComponentAccumulator()
     # The next three lines are necessary in case the string skimming tool accesses containers which haven't
@@ -28,25 +27,25 @@ def TEST2KernelCfg(flags, name='TEST2Kernel', **kwargs):
     # to this sequence. The use of seqAND here isn't relevant since there is only one sequence in use.
     # This step isn't needed in case the common augmentations are run first (e.g. with PHYS/PHYSLITE etc). In 
     # such cases one can omit the next three lines and the sequenceName argument in addEventAlgo.
-    acc.addSequence( seqAND("TEST2Sequence") )
-    acc.getSequence("TEST2Sequence").ExtraDataForDynamicConsumers = ['xAOD::MuonContainer/Muons']
-    acc.getSequence("TEST2Sequence").ProcessDynamicDataDependencies = True
-    skimmingTool = acc.getPrimaryAndMerge(TEST2SkimmingToolCfg(flags))
+    acc.addSequence( seqAND("TEST7Sequence") )
+    acc.getSequence("TEST7Sequence").ExtraDataForDynamicConsumers = ['xAOD::MuonContainer/Muons','xAOD::ElectronContainer/Electrons']
+    acc.getSequence("TEST7Sequence").ProcessDynamicDataDependencies = True
+    skimmingTool = acc.getPrimaryAndMerge(TEST7SkimmingToolCfg(flags))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = [skimmingTool]), sequenceName="TEST2Sequence")       
+    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = [skimmingTool]), sequenceName="TEST7Sequence")       
     return acc
 
 
-def TEST2Cfg(flags):
+def TEST7Cfg(flags):
 
     acc = ComponentAccumulator()
-    acc.merge(TEST2KernelCfg(flags, name="TEST2Kernel"))
+    acc.merge(TEST7KernelCfg(flags, name="TEST7Kernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST2SlimmingHelper = SlimmingHelper("TEST2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    TEST2SlimmingHelper.SmartCollections = ["EventInfo",
+    TEST7SlimmingHelper = SlimmingHelper("TEST7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    TEST7SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",
                                             "Muons",
@@ -63,9 +62,9 @@ def TEST2Cfg(flags):
                                             "DiTauJetsLowPt",
                                             "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
-    TEST2ItemList = TEST2SlimmingHelper.GetItemList()
+    TEST7ItemList = TEST7SlimmingHelper.GetItemList()
 
-    acc.merge(OutputStreamCfg(flags, "DAOD_TEST2", ItemList=TEST2ItemList, AcceptAlgs=["TEST2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TEST2", AcceptAlgs=["TEST2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "D2AOD_TEST7", ItemList=TEST7ItemList, AcceptAlgs=["TEST7Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "D2AOD_TEST7", AcceptAlgs=["TEST7Kernel"], propagateMetadataFromInput=True))
 
     return acc

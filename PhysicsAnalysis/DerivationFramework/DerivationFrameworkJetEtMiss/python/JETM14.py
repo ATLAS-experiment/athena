@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM14.py
@@ -9,12 +9,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM14TriggerSkimmingToolCfg(ConfigFlags):
+def JETM14TriggerSkimmingToolCfg(flags):
     """Configure the trigger skimming tool"""
     acc = ComponentAccumulator()
 
     from DerivationFrameworkJetEtMiss import TriggerLists
-    singleMuTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
+    singleMuTriggers = TriggerLists.single_mu_Trig(flags)
 
     JETM14TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "JETM14TrigSkimmingTool1",
                                                                                   TriggerListOR          = singleMuTriggers)
@@ -23,7 +23,7 @@ def JETM14TriggerSkimmingToolCfg(ConfigFlags):
 
     return acc
 
-def JETM14StringSkimmingToolCfg(ConfigFlags):
+def JETM14StringSkimmingToolCfg(flags):
     """Configure the string skimming tool"""
 
     acc = ComponentAccumulator()
@@ -39,27 +39,27 @@ def JETM14StringSkimmingToolCfg(ConfigFlags):
 
 
 # Main algorithm config
-def JETM14KernelCfg(ConfigFlags, name='JETM14Kernel', **kwargs):
+def JETM14KernelCfg(flags, name='JETM14Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM14"""
     acc = ComponentAccumulator()
 
     # Skimming
     skimmingTools = []
-    skimmingTools.append(acc.getPrimaryAndMerge(JETM14TriggerSkimmingToolCfg(ConfigFlags)))
-    skimmingTools.append(acc.getPrimaryAndMerge(JETM14StringSkimmingToolCfg(ConfigFlags)))
+    skimmingTools.append(acc.getPrimaryAndMerge(JETM14TriggerSkimmingToolCfg(flags)))
+    skimmingTools.append(acc.getPrimaryAndMerge(JETM14StringSkimmingToolCfg(flags)))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Derivation kernel:
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import LooseMETTriggerDerivationKernelCfg
-    acc.merge(LooseMETTriggerDerivationKernelCfg(ConfigFlags, name="JETM14Kernel", skimmingTools = skimmingTools, StreamName = 'StreamDAOD_JETM14'))
+    acc.merge(LooseMETTriggerDerivationKernelCfg(flags, name="JETM14Kernel", skimmingTools = skimmingTools, StreamName = 'StreamDAOD_JETM14'))
 
     return acc
 
 
-def JETM14Cfg(ConfigFlags):
+def JETM14Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -68,10 +68,10 @@ def JETM14Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM14TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    JETM14TriggerListsHelper = TriggerListsHelper(flags)
 
     # Skimming, thinning, augmentation
-    acc.merge(JETM14KernelCfg(ConfigFlags, name="JETM14Kernel", StreamName = 'StreamDAOD_JETM14', TriggerListsHelper = JETM14TriggerListsHelper))
+    acc.merge(JETM14KernelCfg(flags, name="JETM14Kernel", StreamName = 'StreamDAOD_JETM14', TriggerListsHelper = JETM14TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -80,7 +80,7 @@ def JETM14Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM14SlimmingHelper = SlimmingHelper("JETM14SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    JETM14SlimmingHelper = SlimmingHelper("JETM14SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import addMETTriggerDerivationContent
     addMETTriggerDerivationContent(JETM14SlimmingHelper, isLoose=True)
@@ -99,8 +99,8 @@ def JETM14Cfg(ConfigFlags):
 
     # Output stream    
     JETM14ItemList = JETM14SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM14", ItemList=JETM14ItemList, AcceptAlgs=["JETM14Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM14", AcceptAlgs=["JETM14Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_JETM14", ItemList=JETM14ItemList, AcceptAlgs=["JETM14Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM14", AcceptAlgs=["JETM14Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

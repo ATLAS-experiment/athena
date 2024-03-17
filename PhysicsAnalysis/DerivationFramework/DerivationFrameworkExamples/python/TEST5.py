@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TEST5.py - derivation framework example demonstrating the use of decorators
 # Two decorations are done - one from an example tool (AugemntationToolExample)
@@ -42,20 +42,20 @@ def TEST5KernelCfg(flags, name='TEST5Kernel', **kwargs):
     return acc
 
 
-def TEST5Cfg(ConfigFlags):
+def TEST5Cfg(flags):
 
     acc = ComponentAccumulator()
-    acc.merge(TEST5KernelCfg(ConfigFlags, name="TEST5Kernel",StreamName = "OutputStreamDAOD_TEST5"))
+    acc.merge(TEST5KernelCfg(flags, name="TEST5Kernel",StreamName = "OutputStreamDAOD_TEST5"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST5SlimmingHelper = SlimmingHelper("TEST5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TEST5SlimmingHelper = SlimmingHelper("TEST5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TEST5SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles","PrimaryVertices","Muons"]
     TEST5SlimmingHelper.ExtraVariables += ["InDetTrackParticles.DFDecoratorExample"]
     TEST5SlimmingHelper.ExtraVariables += ["Muons.TEST5GoodMuons"]
     TEST5SlimmingHelper.StaticContent += ["std::vector<float>#DFAugmentationExample"]
     TEST5ItemList = TEST5SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST5", ItemList=TEST5ItemList, AcceptAlgs=["TEST5Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TEST5", AcceptAlgs=["TEST5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TEST5", ItemList=TEST5ItemList, AcceptAlgs=["TEST5Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TEST5", AcceptAlgs=["TEST5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     return acc
