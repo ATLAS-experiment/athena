@@ -369,15 +369,6 @@ class L1Config_eTAU:
     # Bitshift parameter, see https://indico.cern.ch/event/1026972/contributions/4312070/attachments/2226175/3772176/Copy%20of%20Reta_Threshold_Setting.pdf
     bitshift_rCore = 3
     bitshift_rHad = 3
-<<<<<<< HEAD
-=======
-    rCore_fw_loose = 2  # rCore = 1 - (3x2)/(9x2), rCore > threshold -> pass
-    rCore_fw_medium = 12 # PLACEHOLDER
-    rCore_fw_tight = 32
-    rHad_fw_loose = 32 # PLACEHOLDER
-    rHad_fw_medium = 72 # Only for HM, does not affect L/M/T which cut only on rCore
-    rHad_fw_tight = 152
->>>>>>> ceee5aad679 (reverting accidental changes...)
 
 
     def __call__(self, do_eFex_BDT_Tau=True) -> odict:

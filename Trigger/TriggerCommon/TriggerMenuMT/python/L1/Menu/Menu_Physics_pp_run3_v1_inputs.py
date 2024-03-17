@@ -126,17 +126,10 @@ def defineInputsMenu():
             'eTAU35', 'eTAU35M', 'eTAU40HM','eTAU60', 'eTAU80', 'eTAU140',
         
             # eTAU thresholds for production
-<<<<<<< HEAD
             #'eTAUSPARE6', 'eTAUSPARE7', 
             
             None, None,
             
-=======
-            'eTAUSPARE6', 'eTAUSPARE7',
-
-            None, None, 
-
->>>>>>> ceee5aad679 (reverting accidental changes...)
             # gLJ thresholds for commissioning
             'gLJ80p0ETA25', 'gLJ100p0ETA25', 'gLJ140p0ETA25', 'gLJ160p0ETA25',
 

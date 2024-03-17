@@ -19,11 +19,7 @@ def defineInputsMenu():
                 if conn["name"] == "Topo1Opt3":
                     conn["thresholds"] += [
                         ('jXEPerf100',1),
-<<<<<<< HEAD
                     ]
-=======
-                    ]              
->>>>>>> ceee5aad679 (reverting accidental changes...)
                 if conn["name"] == "Topo1Opt1":
                     conn["thresholds"] += [
                         ('eTAU40HT',2),
@@ -40,10 +36,6 @@ def defineInputsMenu():
                     conn["thresholds"] += [
                         ('eTAU80HL',2),
                     ]
-=======
-                    ]              
-
->>>>>>> 82487557f03 (rebase to 24.0)
                 # Add more decision algorithms
                 if conn["name"] == "Topo2El":
                     for group in conn["algorithmGroups"]:

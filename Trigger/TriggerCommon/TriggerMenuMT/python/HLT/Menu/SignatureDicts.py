@@ -146,7 +146,6 @@ JetChainParts = {
     'trkpresel'    : # Tracking preselection
       ['nopresel',
        # Single jet
-<<<<<<< HEAD
        'preslej50emf72',
        'preslej30emf72',
        'preselj20emf72',
@@ -154,9 +153,6 @@ JetChainParts = {
        'preselj20emf24',
        'preselj20emf12',
        'preselj20emf6', 
-=======
-       'preselj20emf24',
->>>>>>> ceee5aad679 (reverting accidental changes...)
        'preselj20',
        'preselj50',
        'preselj80',
