@@ -75,7 +75,7 @@ StatusCode MuonDetailedTrackTruthMaker::execute(const EventContext& ctx) const {
         SG::WriteHandle<DetailedTrackTruthCollection> dttc(m_detailedTrackTruthNames.at(i), ctx);
         ATH_CHECK(dttc.record(std::make_unique<DetailedTrackTruthCollection>()));
         dttc->setTrackCollection(tcol.cptr());
-        m_truthTool->buildDetailedTrackTruth(dttc.ptr(), *(tcol.cptr()), prdCollectionVector);
+        m_truthTool->buildDetailedTrackTruth(dttc.ptr(), *(tcol.cptr()), prdCollectionVector, ctx);
         i++;
     }
     return StatusCode::SUCCESS;
