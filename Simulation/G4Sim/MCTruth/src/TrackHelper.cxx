@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/TrackHelper.h"
@@ -47,6 +47,10 @@ int TrackHelper::GetStatus() const
 
 HepMcParticleLink TrackHelper::GetParticleLink()
 {
-  int barcode = this->GetBarcode();
-  return HepMcParticleLink(barcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based syntax
+  // FIXME update to use HepMcParticleLink::IS_POSITION ATLASSIM-6999
+#if defined(HEPMC3)
+  return HepMcParticleLink(this->GetUniqueID(), 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+#else
+  return HepMcParticleLink(this->GetBarcode(), 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+#endif
 }
