@@ -26,7 +26,8 @@ atlas_add_library( TruthRivetToolsLib
    ${FASTJET_LIBRARIES} ${ROOT_LIBRARIES} ${GSL_LIBRARIES} AsgTools AtlasHepMCLib AtlasHepMCsearchLib
    CxxUtils GenInterfacesLib )
 if( HIGHFIVE_FOUND )
-   target_link_libraries( TruthRivetToolsLib PUBLIC HighFive )
+   target_include_directories( TruthRivetToolsLib
+      PUBLIC ${HIGHFIVE_INCLUDE_DIRS} )
 endif()
 
 atlas_add_component( TruthRivetTools

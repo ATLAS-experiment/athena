@@ -9,7 +9,7 @@ find_package( FastJetContrib )
 find_package( ROOT COMPONENTS Core Hist )
 find_package( Rivet )
 find_package( YODA )
-find_package( HighFive QUIET )   #  Public dependency of Rivet 4.0.0
+find_package( HighFive QUIET )   # Private dependency of Rivet 4.0.0
 find_package( HDF5 )             # Private dependency of Rivet 4.0.0
 
 # Remove the --as-needed linker flags:
@@ -24,7 +24,8 @@ atlas_add_component( Rivet_i
    ${RIVET_LIBRARIES} ${YODA_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel GenInterfacesLib
    AthenaKernel GeneratorObjects PathResolver xAODEventInfo )
 if( HIGHFIVE_FOUND )
-   target_link_libraries( Rivet_i PRIVATE HighFive )
+   target_include_directories( Rivet_i
+      PRIVATE ${HIGHFIVE_INCLUDE_DIRS} )
 endif()
 
 # Install file(s) from the package.
