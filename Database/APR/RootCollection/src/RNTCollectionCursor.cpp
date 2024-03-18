@@ -7,13 +7,11 @@
 #include "CoralBase/Attribute.h"
 #include "POOLCore/Exception.h"
 
+#include "ROOT/REntry.hxx"
+#include "ROOT/RNTuple.hxx"
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#else
-#include "ROOT/RNTuple.hxx"
 #endif
-#include "ROOT/RField.hxx"
-
 
 using namespace pool::RootCollection;
 
@@ -22,26 +20,19 @@ RNTCollectionCursor::RNTCollectionCursor(
    const pool::CollectionRowBuffer& collectionRowBuffer,        
    RNTupleReader* reader )
    : m_description( description ),
-     m_reader( reader ),
+     m_RNTReader( reader ),
      m_collectionRowBuffer( collectionRowBuffer ),
      m_idx(-1),
-     m_entries( reader->GetNEntries() ),
      m_dummyRef( false )
 {
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+   m_RNTEntry = reader->GetModel().CreateEntry();
    for( auto& attr : m_collectionRowBuffer.attributeList() ) {
-      std::string    attrName = attr.specification().name();
-      const auto& rntuple = m_reader->GetDescriptor();
-      auto field_id = rntuple.FindFieldId( attrName );
-      auto& field_desc = rntuple.GetFieldDescriptor(field_id);
-      std::unique_ptr<RFieldBase> field = field_desc.CreateField(rntuple);
-      // MN: the move constructor is broken now, can't use this field to read
-      m_attrFields.emplace_back( std::move( field ), attr.addressOfData() );
+      m_RNTEntry->BindRawPtr( attr.specification().name(), attr.addressOfData() );
    }
-#endif
 
    if( m_description.eventReferenceColumnName() == "DummyRef" )  {
-      // Athena "fake" collection with no Tokens
+      // A collection with no Tokens, just attributes
       m_dummyRef = true;
       return;  
    }
@@ -49,9 +40,10 @@ RNTCollectionCursor::RNTCollectionCursor(
    for( pool::TokenList::iterator tokenI = m_collectionRowBuffer.tokenList().begin();
         tokenI != m_collectionRowBuffer.tokenList().end(); ++tokenI )
    {
-      // MN: the move constructor is broken now, can't use this field to read
-      m_tokenFields.emplace_back(m_reader->GetView<std::string>( tokenI.tokenName()), &*tokenI);
+      m_tokens.emplace_back( &*tokenI, std::string() );
+      m_RNTEntry->BindRawPtr( tokenI.tokenName(), &m_tokens.back().second );
    }
+#endif
 }
 
 
@@ -68,29 +60,16 @@ void RNTCollectionCursor::close()
 
 bool RNTCollectionCursor::next()
 {
-   if( ++m_idx >= m_entries ) {
+   if( ++m_idx >= size() ) {
       return false;
    }
+   // read the row
+   m_RNTReader->LoadEntry(m_idx, *m_RNTEntry);
+   // convert Token strings
+   for( auto& elem : m_tokens ) {
+      elem.first->fromString( elem.second );
+   }
 
-   // read attributes
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-   auto entry = m_reader->GetModel().CreateEntry();
-   for( auto& elem : m_attrFields ) {
-      //cout << "  field " << elem.first->GetFieldName() << " is " << 
-      //   ( (elem.first->GetState() != RFieldBase::EState::kConnectedToSource)? "not" : "")
-      //     << " connected   " << (int)elem.first->GetState() <<endl;
-      //RFieldBase::RValue val = elem.first->BindValue(std::shared_ptr<void>(elem.second, [](void *) {}));
-      //val.Read(m_idx);
-      entry->BindValue( elem.first->GetFieldName(), std::shared_ptr<void>(elem.second, [](void *) {}) );
-   }
-   // read Tokens
-   for( auto& elem : m_tokenFields ) {
-      // std::string tokenstr =  elem.first(m_idx);
-      std::string tokenstr = m_reader->GetView<std::string>( elem.first.GetField().GetFieldName() )( m_idx );
-      elem.second->fromString( tokenstr );
-   }
-   m_reader->LoadEntry(m_idx, *entry);
-#endif
 /* 
   // Get iterator over current row.
   coral::AttributeList::const_iterator iData = m_cursor.currentRow().begin();
@@ -117,7 +96,7 @@ RNTCollectionCursor::currentRow() const
 
 bool RNTCollectionCursor::seek(long long int position)
 {
-   if( position >= m_entries ) {
+   if( position >= size() ) {
       return false;
    }
    m_idx = position-1;
@@ -127,7 +106,7 @@ bool RNTCollectionCursor::seek(long long int position)
 
 int RNTCollectionCursor::size()
 {
-  return m_entries;
+  return m_RNTReader->GetNEntries();
 }
 
 
