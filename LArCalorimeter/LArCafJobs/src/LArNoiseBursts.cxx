@@ -67,7 +67,7 @@ using namespace std;
 int nlarcell=0;
 int n_noisy_cell_part[8] = {0,0,0,0,0,0,0,0};
 int n_cell_part[8] = {0,0,0,0,0,0,0,0};
-std::vector<short> v_ft_noisy, v_slot_noisy, v_channel_noisy;
+std::vector<short> v_barrelec_noisy, v_posneg_noisy,v_ft_noisy, v_slot_noisy, v_channel_noisy;
 std::vector<bool> v_isbarrel, v_isendcap, v_isfcal, v_ishec;
 std::vector<short> v_layer; 
 std::vector<int> v_partition,v_noisycellHVphi,v_noisycellHVeta;
@@ -177,6 +177,8 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
     m_nt_etacell(0),
     m_nt_signifcell(0),
     //m_nt_noisycellpercent(0),
+    m_nt_barrelec_noisy(0),
+    m_nt_posneg_noisy(0),
     m_nt_ft_noisy(0),
     m_nt_slot_noisy(0),
     m_nt_channel_noisy(0),
@@ -396,6 +398,8 @@ StatusCode LArNoiseBursts::initialize() {
   m_tree->Branch("NoisyCellIdentifier",&m_nt_cellIdentifier); // Identifier of the noisy cell
   m_tree->Branch("NoisyCellOnlineIdentifier",&m_nt_onlIdentifier); // Identifier of the noisy cell
   m_tree->Branch("NoisyCellPartition",&m_nt_partition); // Partition in 1 integer: 0:embc 1:emba 2:emecc 3:emeca 4:fcalc 5:fcala 6:hecc 7:heca
+  m_tree->Branch("NoisyCellBarrelEc",&m_nt_barrelec_noisy);            // BC 
+  m_tree->Branch("NoisyCellPosNeg",&m_nt_posneg_noisy);                // side 
   m_tree->Branch("NoisyCellFT",&m_nt_ft_noisy);                        // FT 
   m_tree->Branch("NoisyCellSlot",&m_nt_slot_noisy);                    // Slot
   m_tree->Branch("NoisyCellChannel",&m_nt_channel_noisy);              // Channel
@@ -550,6 +554,8 @@ StatusCode LArNoiseBursts::clear() {
   m_nt_partition.clear();
   m_nt_layer.clear();
   //m_nt_noisycellpercent = -1;
+  m_nt_barrelec_noisy.clear();
+  m_nt_posneg_noisy.clear();
   m_nt_ft_noisy.clear();
   m_nt_slot_noisy.clear();
   m_nt_channel_noisy.clear();
@@ -979,6 +985,7 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
   m_nb_sat = 0;
   m_noisycell =0;
   nlarcell = 0;
+  v_barrelec_noisy.clear(); v_posneg_noisy.clear();
   v_ft_noisy.clear();v_slot_noisy.clear();v_channel_noisy.clear();
   v_isbarrel.clear();v_isendcap.clear();v_isfcal.clear();v_ishec.clear();
   v_layer.clear();v_partition.clear();v_energycell.clear();v_qfactorcell.clear(); 
@@ -1136,6 +1143,8 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
       m_nt_cellIdentifier.push_back(v_cellIdentifier[i].get_identifier32().get_compact());
       m_nt_onlIdentifier.push_back(v_onlIdentifier[i].get_identifier32().get_compact());
       if(!m_keepOnlyCellID){
+        m_nt_barrelec_noisy.push_back( v_barrelec_noisy[i]);
+        m_nt_posneg_noisy.push_back( v_posneg_noisy[i]);
         m_nt_ft_noisy.push_back( v_ft_noisy[i]);
         m_nt_slot_noisy.push_back( v_slot_noisy[i]);
         m_nt_channel_noisy.push_back( v_channel_noisy[i]);
@@ -1245,6 +1254,8 @@ StatusCode LArNoiseBursts::fillCell(HWIdentifier onlID
     }
     // Store all cells in positive and negative 3 sigma tails...
     if(significance > m_sigmacut || qfactor > 4000){
+      v_barrelec_noisy.push_back(m_LArOnlineIDHelper->barrel_ec(onlID));
+      v_posneg_noisy.push_back(m_LArOnlineIDHelper->pos_neg(onlID));
       v_ft_noisy.push_back(m_LArOnlineIDHelper->feedthrough(onlID));
       v_slot_noisy.push_back(m_LArOnlineIDHelper->slot(onlID));
       v_channel_noisy.push_back(m_LArOnlineIDHelper->channel(onlID));

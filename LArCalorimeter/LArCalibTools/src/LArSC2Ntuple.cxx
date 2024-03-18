@@ -366,7 +366,7 @@ StatusCode LArSC2Ntuple::execute()
 
       if(trueMaxSample>m_Nsamples){
 	if(!m_ipass){
-	  ATH_MSG_WARNING( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+	  ATH_MSG_DEBUG( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
 	  m_ipass   = 1;
 	}
 	trueMaxSample   = m_Nsamples;
@@ -415,7 +415,7 @@ StatusCode LArSC2Ntuple::execute()
     
       if(trueMaxSample>m_Nsamples){
         if(!m_ipass){
-          ATH_MSG_WARNING( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+          ATH_MSG_DEBUG( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
           m_ipass=1;
         }
         trueMaxSample = m_Nsamples;
@@ -464,7 +464,7 @@ StatusCode LArSC2Ntuple::execute()
     
       if(trueMaxSample>m_Nsamples){
         if(!m_ipass){
-          ATH_MSG_WARNING( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+          ATH_MSG_DEBUG( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
           m_ipass=1;
         }
         trueMaxSample = m_Nsamples;
@@ -637,7 +637,7 @@ void LArSC2Ntuple::fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, co
        m_ROD_time[i] = rawChanMap[hwcell]->time();
        m_ROD_id[i] = rawChanMap[hwcell]->hardwareID().get_identifier32().get_compact();
     } else {
-       ATH_MSG_WARNING(i<<"-th cell invalid Id");
+       ATH_MSG_DEBUG(i<<"-th cell invalid Id");
     }
  }
 

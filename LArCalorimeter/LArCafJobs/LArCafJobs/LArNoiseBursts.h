@@ -218,6 +218,8 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    std::vector<float> m_nt_etacell;
    std::vector<float> m_nt_signifcell;
    //float m_nt_noisycellpercent;
+   std::vector<short> m_nt_barrelec_noisy;
+   std::vector<short> m_nt_posneg_noisy;
    std::vector<short> m_nt_ft_noisy;
    std::vector<short> m_nt_slot_noisy;
    std::vector<short> m_nt_channel_noisy;
