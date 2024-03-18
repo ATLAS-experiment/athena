@@ -113,7 +113,8 @@ StatusCode gTowerMakerFromGfexTowers::execute()
             if( (targetTower = local_gTowerContainerRaw->findTower(ID)) ) {
 
                 targetTower->setTotalEt(my_gTower->towerEt());
-
+                targetTower->setIsSaturated(my_gTower->isSaturated());
+                
             }
             else {
                 ATH_MSG_WARNING("Tower ID is officially unknown - it will be ignored. (Needs investigation).  Please report this!" );

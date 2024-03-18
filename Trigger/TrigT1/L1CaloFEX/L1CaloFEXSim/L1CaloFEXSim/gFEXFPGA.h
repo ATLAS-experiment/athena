@@ -41,8 +41,8 @@ namespace LVL1 {
     // virtual void GetEnergyMatrix(gTowersCentral &) const override ;
     // virtual void GetEnergyMatrix(gTowersForward &) const override ;
 
-    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &) override ;
-    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &) override ;
+    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &, gTowersType &) override ;
+    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &, gTowersType &) override ;
 
 
     /** Internal data */

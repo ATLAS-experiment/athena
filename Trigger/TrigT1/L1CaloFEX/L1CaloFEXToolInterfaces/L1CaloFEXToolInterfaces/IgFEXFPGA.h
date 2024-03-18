@@ -43,8 +43,8 @@ Interface definition for gFEXFPGA
     // virtual void GetEnergyMatrix(gTowersCentral &) const = 0;
     // virtual void GetEnergyMatrix(gTowersForward &) const = 0;
 
-    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &) = 0;
-    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &) = 0;
+    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &, gTowersType &) = 0;
+    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &, gTowersType &) = 0;
 
 
   private:
