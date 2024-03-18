@@ -37,9 +37,6 @@ namespace FlavorTagDiscriminants {
     RDHK m_acc_type_label {
       this, "acc_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
         "Accessor for the truth type label of the truth particle"};
-    RDHK m_acc_source_label {
-      this, "acc_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
-        "Accessor for the truth label for the immedate parent of the truth particle"};
     RDHK m_acc_vertex_index {
       this, "acc_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Accessor for the vertex index of the truth particle"};
@@ -57,7 +54,7 @@ namespace FlavorTagDiscriminants {
         "Exclusive truth type label of the track"};
     WDHK m_dec_source_label {
       this, "dec_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
-        "Exclusive truth label for the immedate parent of the truth particle"};
+        "Exclusive truth label for the source of secondary tracks"};
     WDHK m_dec_vertex_index {
       this, "dec_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "ftagTruth vertex index of the track"};
