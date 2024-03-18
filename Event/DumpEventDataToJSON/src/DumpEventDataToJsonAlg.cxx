@@ -318,6 +318,11 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TrackParticle &tp) {
   data["dof"] = tp.numberDoF();
   data["dparams"] = {tp.d0(), tp.z0(), tp.phi0(), tp.theta(), tp.qOverP()};
 
+  if (m_physlite) {
+    ATH_MSG_VERBOSE("Physlite mode enabled. Not adding track parameters.");
+    return data;
+  }
+
   if (m_extrapolator.empty()) {
     data["pos"] = {tp.perigeeParameters().position().x(),
                    tp.perigeeParameters().position().y(),
@@ -360,12 +365,14 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TrackParticle &tp) {
         data["pos"].push_back(pos.y());
         data["pos"].push_back(pos.z());
       }
+
     } else {
       ATH_MSG_WARNING(
           "Failure in extrapolation for Track with start parameters "
           << startParameters);
     }
   }
+
   return data;
 }
 

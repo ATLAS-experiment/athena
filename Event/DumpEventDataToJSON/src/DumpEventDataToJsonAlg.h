@@ -113,6 +113,7 @@ protected:
   Gaudi::Property<std::string> m_outputJSON_Name{this, "OutputLocation", "EventData.json", "Default filename for "};
 
   Gaudi::Property<bool> m_dumpTestEvent{this, "DumpTestEvent", false, "If true, prepend a test event with some calibration data in it."};
+  Gaudi::Property<bool> m_physlite{this, "PHYSLITE", false, "If true, do not try to access data which is not available in PHYSLITE files."};
 
   nlohmann::json m_eventData;
 };
