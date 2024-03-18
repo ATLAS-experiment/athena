@@ -136,23 +136,13 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
 
   const xAOD::TruthVertex* partOriVert = thePart->hasProdVtx() ? thePart->prodVtx() : nullptr;
 
-  long motherBarcode = 0;
-  int motherStatus = 0;
-  int motherPDG = 0;
   const xAOD::TruthParticle* theMoth{};
   if (partOriVert != nullptr) {
-    for (const auto& temp: partOriVert->particles_in()) {
-      theMoth = temp;
-      if (!theMoth) continue;
-      motherPDG = theMoth->pdgId();
-      motherStatus = theMoth->status();
-      motherBarcode = theMoth->barcode();
-    }
+    for (const auto& temp: partOriVert->particles_in()) {if (temp)  theMoth = temp;}
   }
-  info->mother = theMoth;
-  info->motherPDG = motherPDG;
-  info->motherStatus = motherStatus;
-  info->motherBarcode = motherBarcode;
+  int motherStatus = theMoth?theMoth->status():0;
+  int motherPDG = theMoth?theMoth->pdg_id():0;
+  info->setMotherProperties(theMoth);
 
   if (!partOriVert && HepMC::is_simulation_particle(thePart)) {
     return std::make_pair(NonPrimary, partOrig);
@@ -346,18 +336,12 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron  has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
-  if (info){
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
   if (!mother) {
     return NonDefined;
   }
   int motherPDG = mother->pdgId();
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
   bool samePart = false;
@@ -415,10 +399,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   numOfParents = partOriVert->nIncomingParticles();
   int numOfDaug = partOriVert->nOutgoingParticles();
 
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
 
   int NumOfPhot(0);
   int NumOfEl(0);
@@ -692,17 +673,13 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon  has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
-  if (info) info->mother = mother;
+  if (info) info->setMotherProperties(mother);
   if (!mother) {
     return NonDefined;
   }
 
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   int motherPDG = mother->pdgId();
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
 
   if ((MC::isTau(motherPDG)|| MC::isW(motherPDG)) && mothOriVert != nullptr) {
     long pPDG(0);
@@ -739,10 +716,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
         pPDG = MotherParent->pdgId();
         if (abs(pPDG) == 13 || abs(pPDG) == 15 || abs(pPDG) == 24) {
           mother = MotherParent;
-          if (info){
-            info->mother = mother;
-            info->setMotherProperties(mother);
-          }
+          if (info) info->setMotherProperties(mother);
         }
       }
     } while ((abs(pPDG) == 13 || abs(pPDG) == 15 || abs(pPDG) == 24));
@@ -751,10 +725,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
         abs(pPDG) == 36 || abs(pPDG) == 37 || abs(pPDG) == 32 || abs(pPDG) == 33 || abs(pPDG) == 34 || abs(pPDG) == 6 ||
         abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 || abs(pPDG) == 9900016 ||
         (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) {
-      if (info) {
-        info->mother = mother;
-        info->setMotherProperties(mother); 
-      }
+      if (info) info->setMotherProperties(mother); 
     }
   }
 
@@ -764,10 +735,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   numOfParents = partOriVert->nIncomingParticles();
   int numOfDaug = partOriVert->nOutgoingParticles();
 
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
   auto DP = DecayProducts(partOriVert);  
   int NumOfPhot = DP.pd(22);
   int NumOfEl = DP.pd(11);
@@ -969,10 +937,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau  has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
   if (!mother) {
     return NonDefined;
   }
@@ -988,19 +953,13 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
       pPDG = MotherParent->pdgId();
       if (abs(pPDG) == 6) {
         mother = MotherParent; //...so mother cannot be nullptr
-        if (info) {
-          info->mother = mother;
-          info->setMotherProperties(mother);
-        }
+        if (info) info->setMotherProperties(mother);
       }
     }
   }
 
   motherPDG = mother->pdgId();
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-}
+  if (info) info->setMotherProperties(mother);
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   partOriVert = mother->decayVtx();
   if (!partOriVert) {
@@ -1165,13 +1124,11 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
   if (info) {
-    info->mother = nullptr;
+    info->resetMotherProperties();
     info->photonMother = nullptr;
-    info->motherStatus = 0;
     info->photonMotherBarcode = 0;
     info->photonMotherPDG = 0;
     info->photonMotherStatus = 0;
-    info->motherBarcode = 0;
   }
 
   const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
@@ -1190,20 +1147,15 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   int numOfParents = partOriVert->nIncomingParticles();
   if (partOriVert->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon  has more than one mother ");
 
+
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
   if (!mother) return NonDefined;
   int motherPDG = mother->pdgId();
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   int motherStatus = mother->status();
   long motherBarcode = mother->barcode();
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
   partOriVert = mother->decayVtx();
   numOfParents = partOriVert->nIncomingParticles();  
   int numOfDaug = partOriVert->nOutgoingParticles();
@@ -1479,15 +1431,11 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino  has more than one mother ");
 
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
-  if (info) info->mother = mother;
+  if (info) info->setMotherProperties(mother);
   if (!mother) {
     return NonDefined;
   }
   int motherPDG = mother->pdgId();
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
   // to resolve Sherpa loop
@@ -1528,10 +1476,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       }
       if (abs(pPDG) == nuFlav || abs(pPDG) == 15 || abs(pPDG) == 24 ) {
         mother = MotherParent;
-        if (info) {
-          info->mother = mother;
-          info->setMotherProperties(mother);
-        }
+        if (info) info->setMotherProperties(mother);
       }
 
     } while ((std::abs(pPDG) == nuFlav || std::abs(pPDG) == 15 || std::abs(pPDG) == 24));
@@ -1541,10 +1486,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
         std::abs(pPDG) == 34 || std::abs(pPDG) == 6 || std::abs(pPDG) == 9900024 || std::abs(pPDG) == 9900012 || std::abs(pPDG) == 9900014 ||
         std::abs(pPDG) == 9900016 || (std::abs(pPDG) < 2000040 && std::abs(pPDG) > 1000001)) {
       mother = MotherParent;
-      if (info) {
-        info->mother = mother;
-        info->setMotherProperties(mother);
-     }
+      if (info) info->setMotherProperties(mother);
     }
   }
   //if mother is still nullptr, we have a problem
@@ -1558,10 +1500,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   numOfParents = partOriVert->nIncomingParticles();
   int numOfDaug = partOriVert->nOutgoingParticles();
 
-  if (info) {
-    info->mother = mother;
-    info->setMotherProperties(mother);
-  }
+  if (info) info->setMotherProperties(mother);
 
   int NumOfPhot(0);
   int NumOfquark(0);
