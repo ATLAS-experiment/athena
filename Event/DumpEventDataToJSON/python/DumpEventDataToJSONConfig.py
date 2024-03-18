@@ -35,6 +35,12 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
         kwargs.setdefault('JetContainerKeys', ['AnalysisJets','AnalysisLargeRJets'])
         # AnalysisMuons are the standard calibrated muon container
         kwargs.setdefault('MuonContainerKeys', ['AnalysisMuons'])
+        # AnalysisTauJets are the calibrated tau jet container
+        kwargs.setdefault('TauJetContainerKeys', ['AnalysisTauJets'])
+        # AnalysisElectrons are the standard calibrated electron container
+        kwargs.setdefault('ElectronContainerKeys', ['AnalysisElectrons'])
+        # AnalysisPhotons are the standard calibrated photon container
+        kwargs.setdefault('PhotonContainerKeys', ['AnalysisPhotons'])
         # No clusters or cells in DAOD_PHYSLITE
         kwargs.setdefault('CaloClusterContainerKeys', [])
         kwargs.setdefault('CaloCellContainerKey', [])

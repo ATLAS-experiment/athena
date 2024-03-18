@@ -14,6 +14,9 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODTau/TauJetContainer.h"
+#include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "TrkTrack/TrackCollection.h"
@@ -78,6 +81,12 @@ protected:
   SG::ReadHandleKeyArray<xAOD::JetContainer> m_jetKeys{this, "JetContainerKeys", {"AntiKt4EMTopoJets"}, "Keys for Jet Containers"};
 
   SG::ReadHandleKeyArray<xAOD::MuonContainer> m_muonKeys{this, "MuonContainerKeys", {"Muons"}, "Keys for Muon Containers"};
+
+  SG::ReadHandleKeyArray<xAOD::TauJetContainer> m_tauJetKeys{this, "TauJetContainerKeys", {"TauJets"}, "Keys for Tau Containers"};
+
+  SG::ReadHandleKeyArray<xAOD::ElectronContainer> m_electronKeys{this, "ElectronContainerKeys", {"Electrons"}, "Keys for Electron Containers"};
+
+  SG::ReadHandleKeyArray<xAOD::PhotonContainer> m_photonKeys{this, "PhotonContainerKeys", {"Photons"}, "Keys for Photon Containers"};
 
   SG::ReadHandleKeyArray<xAOD::CaloClusterContainer> m_caloClustersKeys{this, "CaloClusterContainerKeys", {"CaloCalTopoClusters"}, "Keys for CaloClusters Containers"};
 
