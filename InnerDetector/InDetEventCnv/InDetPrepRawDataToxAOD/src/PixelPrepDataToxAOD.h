@@ -26,6 +26,8 @@
 #include "xAODTracking/TrackMeasurementValidation.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
 
+#include "GeneratorObjects/xAODTruthParticleLink.h"
+
 #include "PixelConditionsData/PixelDCSStateData.h"
 #include "PixelConditionsData/PixelDCSStatusData.h"
 #include "PixelConditionsData/PixelDCSHVData.h"
@@ -145,6 +147,9 @@ private:
   {this, "ClusterSplitProbabilityName", "",""};
 
   // -- Private members   
+  mutable std::atomic<unsigned int> m_haveTruthLink {};
+  mutable std::atomic<unsigned int> m_missingTruthParticle {};
+  mutable std::atomic<unsigned int> m_missingParentParticle {};
   bool m_firstEventWarnings;
   bool m_need_sihits;
 
@@ -152,6 +157,8 @@ private:
   SG::ReadHandleKey<SiHitCollection> m_sihitContainer_key;
   SG::ReadHandleKey<InDetSimDataCollection> m_SDOcontainer_key;
   SG::ReadHandleKey<PRD_MultiTruthCollection> m_multiTruth_key;
+  SG::ReadHandleKey<xAODTruthParticleLinkVector> m_truthParticleLinks
+     {this,"InputTruthParticleLinks","","The key for the truth particle link collection."};
 
   SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key;
   SG::WriteHandleKey<std::vector<unsigned int>> m_write_offsets;

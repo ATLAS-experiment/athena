@@ -26,6 +26,8 @@
 #include "xAODTracking/TrackMeasurementValidation.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
 
+#include "GeneratorObjects/xAODTruthParticleLink.h"
+
 #include <atomic>
 #include <string>
 
@@ -77,6 +79,9 @@ class SCT_PrepDataToxAOD : public AthReentrantAlgorithm {
   SG::ReadHandleKey<InDetSimDataCollection> m_SDOcontainer{this, "MC_SDOs", "SCT_SDO_Map"};
   SG::ReadHandleKey<SiHitCollection> m_sihitContainer{this, "MC_Hits", "SCT_Hits"};
   SG::ReadHandleKey<PRD_MultiTruthCollection> m_multiTruth{this, "PRD_MultiTruth", "PRD_MultiTruthSCT"};
+  SG::ReadHandleKey<xAODTruthParticleLinkVector> m_truthParticleLinks
+     {this,"InputTruthParticleLinks","","The key for the truth particle link collection."};
+
   SG::ReadHandleKey<SCT_RDO_Container> m_rdoContainer{this, "SctRdoContainer", "SCT_RDOs"};
   SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_xAodContainer{this, "SctxAodContainer", "SCT_Clusters"};
   SG::WriteHandleKey<std::vector<unsigned int>> m_xAodOffset{this, "SctxAodOffset", "SCT_ClustersOffsets"};
@@ -88,8 +93,11 @@ class SCT_PrepDataToxAOD : public AthReentrantAlgorithm {
   BooleanProperty m_writeRDOinformation{this, "WriteRDOinformation", true};
   BooleanProperty m_writeSDOs{this, "WriteSDOs", false};
   BooleanProperty m_writeSiHits{this, "WriteSiHits", false};
-  
+
   // --- private members
+  mutable std::atomic<unsigned int> m_haveTruthLink {};
+  mutable std::atomic<unsigned int> m_missingTruthParticle {};
+  mutable std::atomic<unsigned int> m_missingParentParticle {};
   mutable std::atomic_bool m_firstEventWarnings{false};
 };
 

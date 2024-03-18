@@ -83,8 +83,8 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
      float_decor( IDPVM::createDecoratorsIfNeeded(*ptruth, m_decor, ctx, msgLvl(MSG::DEBUG)) );
 
   ///truthbarcode-cluster maps to be pre-stored at event level
-  std::map< int, float> barcodeSCTclustercount;
-  std::map< int, float> barcodePIXclustercount;
+  std::vector< std::array<uint16_t, kNClusterTypes> > tp_clustercount;
+  tp_clustercount.resize(ptruth->size(),std::array<uint16_t,kNClusterTypes>{});
   
   //Loop over the pixel and sct clusters to fill the truth barcode - cluster count maps
   SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> sctClusters(m_truthSCTClusterName, ctx); 
@@ -93,28 +93,26 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
   if (sctClusters.isValid() && pixelClusters.isValid()) {
     for (const auto *const sct : *sctClusters) {
       const xAOD::TrackMeasurementValidation* sctCluster = sct;
-      std::vector<int> truth_barcode;
-      static const SG::AuxElement::ConstAccessor< std::vector<int> > barcodeAcc("truth_barcode");
-      if (barcodeAcc.isAvailable(*sctCluster)) {
-        truth_barcode = barcodeAcc(*sctCluster);
-        std::map<int, float>::iterator it;
-        for (auto barcode = truth_barcode.begin(); barcode != truth_barcode.end();  ++barcode) {
-          auto result = barcodeSCTclustercount.emplace( std::pair<int, float>(*barcode, 0.0) ); 
-          ++(result.first->second);
+      static const SG::AuxElement::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
+      if (truthIndexAcc.isAvailable(*sctCluster)) {
+        const std::vector<unsigned int> &truth_indices = truthIndexAcc(*sctCluster);
+        for (auto index : truth_indices) {
+           if (index != std::numeric_limits<unsigned int>::max()) {
+              ++tp_clustercount.at(index)[kSCT];
+           }
         }
       }
     } // Loop over SCT clusters
    
     for (const auto *const pix : *pixelClusters) {
       const xAOD::TrackMeasurementValidation* pixCluster = pix;
-      std::vector<int> truth_barcode;
-      static const SG::AuxElement::ConstAccessor< std::vector<int> > barcodeAcc("truth_barcode");
-      if (barcodeAcc.isAvailable(*pixCluster)) {
-        truth_barcode = barcodeAcc(*pixCluster);
-        std::map<int, float>::iterator it;
-        for (auto barcode = truth_barcode.begin(); barcode != truth_barcode.end();  ++barcode) {
-          auto result = barcodePIXclustercount.emplace( std::pair<int, float>(*barcode, 0.0) ); 
-          ++(result.first->second);
+      static const SG::AuxElement::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
+      if (truthIndexAcc.isAvailable(*pixCluster)) {
+        const std::vector<unsigned int> &truth_indices = truthIndexAcc(*pixCluster);
+        for (auto index : truth_indices) {
+           if (index != std::numeric_limits<unsigned int>::max()) {
+              ++tp_clustercount.at(index)[kPixel];
+           }
         }
       }
     } // Loop over PIX clusters
@@ -131,14 +129,14 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
            auto passed = m_truthSelectionTool->accept(truth_particle);
            tmp_cut_flow.update( passed.missingCuts() );
            if (not passed) continue;
-           decorateTruth(*truth_particle, float_decor, beamPos, barcodePIXclustercount, barcodeSCTclustercount);
+           decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
         }
         std::lock_guard<std::mutex> lock(m_mutex);
         m_cutFlow.merge(std::move(tmp_cut_flow));
      }
      else {
         for (const xAOD::TruthParticle *truth_particle : *ptruth) {
-           decorateTruth(*truth_particle, float_decor, beamPos, barcodePIXclustercount, barcodeSCTclustercount);
+           decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
         }
      }
   }
@@ -150,7 +148,8 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
 bool
 InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle,
                                              std::vector<IDPVM::OptionalDecoration<xAOD::TruthParticleContainer, float> > &float_decor,
-                                             const Amg::Vector3D& beamPos, std::map<int, float> pixelMap, std::map<int, float> sctMap) const {
+                                             const Amg::Vector3D& beamPos,
+                                             const std::vector<std::array<uint16_t,kNClusterTypes> > &counts) const {
   ATH_MSG_VERBOSE("Decorate truth with d0 etc");
   if (particle.isNeutral()) {
     return false;
@@ -165,13 +164,8 @@ InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle
     return false;
   }
    
-  //Retrieve the cluster count from the pre-filled maps   
-  std::map<int, float>::iterator it1, it2;
-  it1 =pixelMap.find(particle.barcode());
-  it2 =sctMap.find(particle.barcode());
-  float nSiHits = 0;
-  if (it1 !=pixelMap.end()) nSiHits += (*it1).second; 
-  if (it2 !=sctMap.end()) nSiHits += (*it2).second; 
+  // @TODO float?
+  float nSiHits = std::accumulate(counts.at(particle.index()).begin(), counts[particle.index()].end(), 0u);
  
   IDPVM::decorateOrRejectQuietly(particle,float_decor[kDecorNSilHits], nSiHits);
 

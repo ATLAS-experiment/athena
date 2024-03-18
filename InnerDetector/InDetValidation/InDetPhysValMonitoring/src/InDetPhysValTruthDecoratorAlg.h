@@ -42,10 +42,12 @@ public:
   virtual StatusCode execute(const EventContext &ctx) const;
 
 private:
+  enum {kPixel,kSCT,kNClusterTypes};
   bool decorateTruth(const xAOD::TruthParticle& particle,
                      std::vector< std::pair<SG::WriteDecorHandle<xAOD::TruthParticleContainer,float>,
                                             bool > > &float_decor,
-                     const Amg::Vector3D& beamPos, std::map<int, float> pixelMap, std::map<int, float> sctMap) const;
+                     const Amg::Vector3D& beamPos,
+                     const std::vector<std::array<uint16_t, kNClusterTypes> > &counts) const;
 
   PublicToolHandle<Trk::IExtrapolator> m_extrapolator
      {this,"Extrapolator","Trk::Extrapolator/AtlasExtrapolator",""};

@@ -26,6 +26,7 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
 
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     kwargs.setdefault("WriteExtendedPRDinformation", True)
 
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
@@ -70,6 +71,7 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     kwargs.setdefault("MC_SDOs", "ITkPixelSDO_Map")
     kwargs.setdefault("MC_Hits", "ITkPixelHits")
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkPixel")
+    kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     kwargs.setdefault("OutputClusterContainer", "ITkPixelClusters")
 
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
@@ -84,6 +86,7 @@ def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
 
@@ -101,6 +104,7 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("MC_SDOs", "ITkStripSDO_Map")
     kwargs.setdefault("MC_Hits", "ITkStripHits")
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkStrip")
+    kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     kwargs.setdefault("SctRdoContainer", "ITkStripRDOs")
     kwargs.setdefault("SctxAodContainer", "ITkStripClusters")
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
