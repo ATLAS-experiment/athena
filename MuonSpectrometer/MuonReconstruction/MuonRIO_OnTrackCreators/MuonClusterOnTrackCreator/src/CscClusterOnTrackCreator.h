@@ -53,7 +53,6 @@ namespace Muon {
         CscClusterOnTrackCreator(const std::string&, const std::string&, const IInterface*);
         virtual ~CscClusterOnTrackCreator();
         virtual StatusCode initialize() override;
-        virtual StatusCode finalize() override;
 
         /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a predicted Trk::TrackParameter.
             @param RIO Trk::PrepRawData object to be calibrated
@@ -95,30 +94,15 @@ namespace Muon {
         ToolHandle<ICscClusterFitter> m_clusterFitter{this, "CscClusterFitter", "QratCscClusterFitter/QratCscClusterFitter"};
         ToolHandle<ICscClusterUtilTool> m_clusterUtilTool{this, "CscClusterUtilTool", "CscClusterUtilTool/CscClusterUtilTool"};
 
-        bool m_have_csc_tools;
-
         SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_cscErrorScalingKey{
             this, "CSCErrorScalingKey", "" /*"/MUON/TrkErrorScalingCSC"*/,
             "Key for CSC error scaling conditions data. No error scaling if empty."};
 
-        SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_tgcErrorScalingKey{
-            this, "TGCErrorScalingKey", "" /*"/MUON/TrkErrorScalingTGC"*/,
-            "Key for TGC error scaling conditions data. No error scaling if empty."};
 
-        SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_rpcErrorScalingKey{
-            this, "RPCErrorScalingKey", "" /*"/MUON/TrkErrorScalingRPC"*/,
-            "Key for RPC error scaling conditions data. No error scaling if empty."};
+        Gaudi::Property<double> m_errorScaler{this, "ErrorScaler" , 1.};
+        Gaudi::Property<double> m_errorScalerBeta{this, "ErrorScalerBeta", 0.};
+        Gaudi::Property<double> m_minimumError{this, "MinimumError" , 0.05};
 
-        bool m_doCsc;
-        bool m_doRpc;
-        bool m_doTgc;
-
-        double m_fixedError;
-        double m_errorScaler;
-        double m_errorScalerBeta;
-        double m_minimumError;
-
-        std::string m_cscStripLocation;
     };
 }  // namespace Muon
 #endif  // CscClusterOnTrackCreator_H
