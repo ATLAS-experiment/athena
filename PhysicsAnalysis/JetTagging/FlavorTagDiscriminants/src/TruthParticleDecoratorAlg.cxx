@@ -97,7 +97,7 @@ namespace FlavorTagDiscriminants {
       if ( (!MC::isStable(truth_particle) or truth_particle->pt() < 500) and !truth_particle->isCharmHadron()) {
         dec_origin_label(*truth_particle) = InDet::ExclusiveOrigin::Pileup;
         dec_type_label(*truth_particle) = TruthDecoratorHelpers::TruthType::Label::NoTruth;
-        dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
+        // dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth; 
         tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
         dec_parent_barcode(*truth_particle) = -1;
@@ -108,10 +108,15 @@ namespace FlavorTagDiscriminants {
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
       dec_parent_barcode(*truth_particle) = truth_parent ? truth_parent->barcode() : -2;
 
-      // get exclusive truth origin
+      // get truth origin and use it for exclusive origing and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);
+
       int truth_origin_label = InDet::ExclusiveOrigin::getExclusiveOrigin(truth_origin);
       dec_origin_label(*truth_particle) = truth_origin_label;
+
+      int truth_source_label = TruthDecoratorHelpers::get_source_type(truth_origin);
+      dec_source_label(*truth_particle) = truth_source_label;
+
       
       // get the truth vertex of the particle and store for now
       auto truth_vertex = TruthDecoratorHelpers::get_truth_vertex(truth_particle);
@@ -119,9 +124,6 @@ namespace FlavorTagDiscriminants {
 
       // decorate truth type
       dec_type_label(*truth_particle) = TruthDecoratorHelpers::get_truth_type(truth_particle);
-
-      // decorate truth source
-      dec_source_label(*truth_particle) = TruthDecoratorHelpers::get_source_type(truth_particle);
     }
 
     // check sorted_truth_particles and tp_truth_vertices have the same length
