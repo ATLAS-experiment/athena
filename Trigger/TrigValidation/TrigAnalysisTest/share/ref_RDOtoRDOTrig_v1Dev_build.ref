@@ -342,6 +342,12 @@ HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L:
     0: 1
 HLT_2g13_loose_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
+HLT_2g13_loose_L113DR25-25M70-2eEM12L:
+  eventCount: 0
+HLT_2g13_loose_L12DR15-0M30-2eEM12L:
+  eventCount: 0
+  stepFeatures:
+    0: 1
 HLT_2g13_medium_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
 HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9:
@@ -14290,6 +14296,14 @@ HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_DarkJetPEBTLA_L1HT190-jJ40s5pETA21:
     1: 6
     2: 6
 HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 1
+  stepFeatures:
+    0: 2
+    1: 6
+HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
   eventCount: 1
   stepCounts:
     0: 2
