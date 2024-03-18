@@ -275,8 +275,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
             xxuv_to_uvxx(recon,thisPlane,pars[station]);
           }
 
-          //We're doing everything by the variable known as "athena_event" to reflect C++ vs MATLAB indexing
-          int btime=(event+1)*10+(BC_id-1);
           int special_time = thisTime + (event+1)*100;
 
           hitData_entry hit_entry(event,
@@ -294,7 +292,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
                                tru_theta,
                                tru_phi,
                                true,
-                               btime,
+                               BC_id,
                                special_time,
                                mazin_check,
                                mazin_check);
