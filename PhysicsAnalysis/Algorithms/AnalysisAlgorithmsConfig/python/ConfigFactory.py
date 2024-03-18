@@ -220,6 +220,11 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="FlavourTagging", alg=makeFTagAnalysisConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
+        from FTagAnalysisAlgorithms.FTagEventSFAnalysisConfig import makeFTagEventSFConfig
+        self.addAlgConfigBlock(algName="FlavourTaggingEventSF",
+                               alg=makeFTagEventSFConfig,
+                               defaults={'selectionName': ''},
+                               superBlocks="Jets")
 
         # electrons
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig 
