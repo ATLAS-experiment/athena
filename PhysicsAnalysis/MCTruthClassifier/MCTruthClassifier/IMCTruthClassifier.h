@@ -19,8 +19,6 @@
 #include <unordered_map>
 #include <vector>
 
-#define MCTRUTHCLASSIFIER_CONST
-
 #ifndef GENERATIONBASE
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "xAODEgamma/ElectronFwd.h"

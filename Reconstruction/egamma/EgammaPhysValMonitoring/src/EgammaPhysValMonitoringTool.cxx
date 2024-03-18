@@ -234,12 +234,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
       m_truthParticleContainerKey, ctx);
     ATH_CHECK(truthallParticles.isValid());
 
-#ifdef MCTRUTHCLASSIFIER_CONST
     MCTruthPartClassifier::Info info;
-#else
-    std::pair<ParticleType, ParticleOrigin> partClass;
-    MCTruthPartClassifier::ParticleType type;
-#endif
     bool elecPrompt = false;
     bool photonPrompt = false;
 
@@ -252,23 +247,10 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           MC::isStable(truthallParticle) &&
           HepMC::generations(truthallParticle) == 0) {
 
-#ifdef MCTRUTHCLASSIFIER_CONST
         auto type =
           m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
         if (type.first == IsoElectron)
           elecPrompt = true;
-#else
-        partClass = std::make_pair(Unknown, NonDefined);
-        type = Unknown;
-
-        if (truthallParticle->isAvailable<int>("truthType")) {
-          MCTruthPartClassifier::ParticleType type =
-            (MCTruthPartClassifier::ParticleType)truthallParticle->auxdata<int>(
-              "truthType");
-        }
-        if (type == IsoElectron)
-          elecPrompt = true;
-#endif
 
         m_oElectronValidationPlots.m_oTruthAllPlots.fill(*truthallParticle,
                                                          *eventInfo);
@@ -285,23 +267,11 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           MC::isStable(truthallParticle) &&
           HepMC::generations(truthallParticle) == 0) {
 
-#ifdef MCTRUTHCLASSIFIER_CONST
         auto type =
           m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
         if (type.first == IsoPhoton)
           photonPrompt = true;
-#else
-        partClass = std::make_pair(Unknown, NonDefined);
-        type = Unknown;
 
-        if (truthallParticle->isAvailable<int>("truthType")) {
-          MCTruthPartClassifier::ParticleType type =
-            (MCTruthPartClassifier::ParticleType)truthallParticle->auxdata<int>(
-              "truthType");
-        }
-        if (type == IsoPhoton)
-          photonPrompt = true;
-#endif
 
         m_oPhotonValidationPlots.m_oTruthAllPlots.fill(*truthallParticle,
                                                        *eventInfo);
@@ -312,12 +282,8 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
             fabs(truthallParticle->eta()) < 2.47) {
           m_oPhotonValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle,
                                                             *eventInfo);
-#ifdef MCTRUTHCLASSIFIER_CONST
           m_truthClassifier->particleTruthClassifier(truthallParticle, &info);
           ParticleOutCome photOutCome = info.particleOutCome;
-#else
-          ParticleOutCome photOutCome = m_truthClassifier->getParticleOutCome();
-#endif
 
           float convTruthR = 9999.;
           if (truthallParticle->decayVtx())
