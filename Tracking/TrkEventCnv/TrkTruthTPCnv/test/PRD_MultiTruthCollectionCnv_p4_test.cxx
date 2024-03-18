@@ -4,16 +4,17 @@
 
 // $Id$
 /**
- * @file TrkTruthTPCnv/test/TrackTruthCollectionCnv_p2_test.cxx
+ * @file TrkTruthTPCnv/test/PRD_MultiTruthCollectionCnv_p4_test.cxx
  * @date Feb, 2018
- * @brief Tests for TrackTruthCollectionCnv_p2.
+ * @brief Tests for PRD_MultiTruthCollectionCnv_p4.
  */
 
 
 #undef NDEBUG
-#include "TrkTruthTPCnv/TrackTruthCollectionCnv_p2.h"
-#include "TrkTruthTPCnv/TrackTruthCollection_p2.h"
-#include "TrkTruthData/TrackTruthCollection.h"
+#include "TrkTruthTPCnv/PRD_MultiTruthCollectionCnv_p4.h"
+#include "TrkTruthTPCnv/PRD_MultiTruthCollection_p4.h"
+#include "TrkTruthData/PRD_MultiTruthCollection.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "SGTools/TestStore.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
@@ -35,29 +36,27 @@ void compare (const HepMcParticleLink& p1,
 }
 
 
-void compare (const TrackTruthCollection& p1,
-              const TrackTruthCollection& p2)
+void compare (const PRD_MultiTruthCollection& p1,
+              const PRD_MultiTruthCollection& p2)
 {
-  assert (p1.trackCollectionLink() == p2.trackCollectionLink());
   assert (p1.size() == p2.size());
-  TrackTruthCollection::const_iterator i1 = p1.begin();
-  TrackTruthCollection::const_iterator i2 = p2.begin();
+  PRD_MultiTruthCollection::const_iterator i1 = p1.begin();
+  PRD_MultiTruthCollection::const_iterator i2 = p2.begin();
   for (; i1 != p1.end(); ++i1, ++i2) {
-    assert (i1->first.index() == i2->first.index());
-    compare (i1->second.particleLink(), i2->second.particleLink());
-    assert (i1->second.particleLink() == i2->second.particleLink());
-    assert (i1->second.probability() == i2->second.probability());
+    assert (i1->first == i2->first);
+    compare (i1->second, i2->second);
+    assert (i1->second == i2->second);
   }
 }
 
 
-void testit (const TrackTruthCollection& trans1)
+void testit (const PRD_MultiTruthCollection& trans1)
 {
   MsgStream log (nullptr, "test");
-  TrackTruthCollectionCnv_p2 cnv;
-  Trk::TrackTruthCollection_p2 pers;
+  PRD_MultiTruthCollectionCnv_p4 cnv;
+  Trk::PRD_MultiTruthCollection_p4 pers;
   cnv.transToPers (&trans1, &pers, log);
-  TrackTruthCollection trans2;
+  PRD_MultiTruthCollection trans2;
   cnv.persToTrans (&pers, &trans2, log);
 
   compare (trans1, trans2);
@@ -68,13 +67,12 @@ void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
 {
   std::cout << "test1\n";
 
-  TrackTruthCollection trans1 (DataLink<TrackCollection>("tpc"));
+  PRD_MultiTruthCollection trans1;
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle), pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    Trk::TrackTruthKey key (ElementLink<TrackCollection> ("tpc", i));
-    TrackTruth val (trkLink, (float)i/10);
-    trans1[key] = val;
+    const Identifier chanId(i+100);
+    trans1.insert(trans1.end(), std::make_pair(chanId, trkLink) );
   }
 
   testit (trans1);
@@ -89,7 +87,6 @@ int main()
     std::cerr << "This test can not be run" << std::endl;
     return 0;
   }
-
   //SGTest::initTestStore();
   test1(genPartVector);
   return 0;

@@ -4,15 +4,15 @@
 
 // $Id$
 /**
- * @file TrkTruthTPCnv/test/TrackTruthCollectionCnv_p2_test.cxx
+ * @file TrkTruthTPCnv/test/TrackTruthCollectionCnv_p3_test.cxx
  * @date Feb, 2018
- * @brief Tests for TrackTruthCollectionCnv_p2.
+ * @brief Tests for TrackTruthCollectionCnv_p3.
  */
 
 
 #undef NDEBUG
-#include "TrkTruthTPCnv/TrackTruthCollectionCnv_p2.h"
-#include "TrkTruthTPCnv/TrackTruthCollection_p2.h"
+#include "TrkTruthTPCnv/TrackTruthCollectionCnv_p3.h"
+#include "TrkTruthTPCnv/TrackTruthCollection_p3.h"
 #include "TrkTruthData/TrackTruthCollection.h"
 #include "SGTools/TestStore.h"
 #include "TruthUtils/MagicNumbers.h"
@@ -54,8 +54,8 @@ void compare (const TrackTruthCollection& p1,
 void testit (const TrackTruthCollection& trans1)
 {
   MsgStream log (nullptr, "test");
-  TrackTruthCollectionCnv_p2 cnv;
-  Trk::TrackTruthCollection_p2 pers;
+  TrackTruthCollectionCnv_p3 cnv;
+  Trk::TrackTruthCollection_p3 pers;
   cnv.transToPers (&trans1, &pers, log);
   TrackTruthCollection trans2;
   cnv.persToTrans (&pers, &trans2, log);

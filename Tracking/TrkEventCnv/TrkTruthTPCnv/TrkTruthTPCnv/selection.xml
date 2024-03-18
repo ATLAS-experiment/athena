@@ -10,11 +10,14 @@
     <class name="Trk::PRD_MultiTruthCollection_p3" id="68703476-9D09-4504-B492-E5E4DC933E71" />
     <class name="std::vector<Trk::PRD_MultiTruthCollection_p3::Entry>" />
     <class name="Trk::PRD_MultiTruthCollection_p3::Entry" />
+    <class name="Trk::PRD_MultiTruthCollection_p4" id="018E41E8-F175-7EB8-AF1D-5CA0794CAF9B" />
+    <class name="std::vector<Trk::PRD_MultiTruthCollection_p4::Entry>" />
+    <class name="Trk::PRD_MultiTruthCollection_p4::Entry" />
 
     <!-- Track Truth p0 -->
     <class name="TrackTruthVector"  id="8BC86D69-DBC4-4B34-8273-513D9BE771D5" />
-    <class name="std::vector<std::pair<ElementLink<TrackCollection>,TrackTruth> >" /> 
-    <class name="std::pair<ElementLink<TrackCollection >,TrackTruth>" /> 
+    <class name="std::vector<std::pair<ElementLink<TrackCollection>,TrackTruth> >" />
+    <class name="std::pair<ElementLink<TrackCollection >,TrackTruth>" />
 
     <!-- Track Truth p1 -->
     <class name="Trk::TrackTruthCollection_p1" id="ED2B4B64-7CF6-48B3-8C40-29F8501A6090" />
@@ -24,6 +27,10 @@
     <class name="Trk::TrackTruthCollection_p2" id="44F35B21-838A-4C4E-B09B-971CEA0EB70A" />
     <class name="std::vector<Trk::TrackTruthCollection_p2::Entry>" />
     <class name="Trk::TrackTruthCollection_p2::Entry" />
+    <!-- Track Truth p3 -->
+    <class name="Trk::TrackTruthCollection_p3" id="018E41F8-0857-7D8C-A062-A3947683EB99" />
+    <class name="std::vector<Trk::TrackTruthCollection_p3::Entry>" />
+    <class name="Trk::TrackTruthCollection_p3::Entry" />
 
     <!-- DetailedTrackTruth stuff -->
 
@@ -52,8 +59,16 @@
 
     <class name="Trk::DetailedTrackTruthCollection_p3" id="F5A1DC75-C3FB-4575-8178-905223CF1277" />
     <class name="Trk::DetailedTrackTruth_p3" />
+
     <class name="std::vector<Trk::DetailedTrackTruthCollection_p3::Entry>" />
     <class name="Trk::DetailedTrackTruthCollection_p3::Entry" />
     <class name="Trk::TruthTrajectory_p2" />
+
+    <class name="Trk::DetailedTrackTruthCollection_p4" id="018E422D-E420-7894-9245-A824C0ECE535" />
+    <class name="Trk::DetailedTrackTruth_p4" />
+
+    <class name="std::vector<Trk::DetailedTrackTruthCollection_p4::Entry>" />
+    <class name="Trk::DetailedTrackTruthCollection_p4::Entry" />
+    <class name="Trk::TruthTrajectory_p3" />
 
 </lcgdict>

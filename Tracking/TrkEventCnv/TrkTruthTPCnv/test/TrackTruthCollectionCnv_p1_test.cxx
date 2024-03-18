@@ -15,6 +15,7 @@
 #include "TrkTruthTPCnv/TrackTruthCollection_p1.h"
 #include "TrkTruthData/TrackTruthCollection.h"
 #include "SGTools/TestStore.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -27,6 +28,7 @@ void compare (const HepMcParticleLink& p1,
 {
   assert ( p1.isValid() == p2.isValid() );
   assert ( p1.barcode() == p2.barcode() );
+  assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
@@ -69,7 +71,7 @@ void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
   TrackTruthCollection trans1 (DataLink<TrackCollection>("tpc"));
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+    HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle), pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
     Trk::TrackTruthKey key (ElementLink<TrackCollection> ("tpc", i));
     TrackTruth val (trkLink, (float)i/10);
     trans1[key] = val;
