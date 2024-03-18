@@ -100,14 +100,9 @@ void classify(ToolHandle<IMCTruthClassifier>& classif,
         unsigned int& particleType,
         unsigned int& particleOrigin )
   {
-#ifdef MCTRUTHCLASSIFIER_CONST
         MCTruthPartClassifier::Info info;
         std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = classif->particleTruthClassifier(theParticle, &info);
          particleOutCome = info.particleOutCome;
-#else
-        std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = classif->particleTruthClassifier(theParticle);
-       particleOutCome = classif->getParticleOutCome();
-#endif
        result = (unsigned int)classif->classify(theParticle);
        auto parent = classif->getParentHadron(theParticle);
        hadron_pdg = parent ? parent->pdg_id() : 0;
