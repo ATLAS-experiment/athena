@@ -198,14 +198,14 @@ TEST_F(CollectionMerger_test, integration_with_data) {
   ASSERT_EQ( mergedCollectionHandle->size(), 3u+2u+3u );
 
   const auto& mergedCollectionVector = mergedCollectionHandle->getVector();
-  ASSERT_EQ( mergedCollectionVector.at(0).trackNumber(), 1  ); // inputPixelCollectionIntegrationTestA
-  ASSERT_EQ( mergedCollectionVector.at(1).trackNumber(), 20 ); // inputPixelCollectionIntegrationTestA
-  ASSERT_EQ( mergedCollectionVector.at(2).trackNumber(), 5  ); // inputPixelCollectionIntegrationTestA
-  ASSERT_EQ( mergedCollectionVector.at(3).trackNumber(), 20 ); // inputPixelCollectionIntegrationTestC
-  ASSERT_EQ( mergedCollectionVector.at(4).trackNumber(), 5  ); // inputPixelCollectionIntegrationTestC
-  ASSERT_EQ( mergedCollectionVector.at(5).trackNumber(), 1  ); // inputPixelCollectionIntegrationTestC
-  ASSERT_EQ( mergedCollectionVector.at(6).trackNumber(), 50 ); // inputPixelCollectionIntegrationTestB
-  ASSERT_EQ( mergedCollectionVector.at(7).trackNumber(), 1  ); // inputPixelCollectionIntegrationTestB
+  ASSERT_EQ( mergedCollectionVector.at(0).truthBarcode(), 1  ); // inputPixelCollectionIntegrationTestA
+  ASSERT_EQ( mergedCollectionVector.at(1).truthBarcode(), 20 ); // inputPixelCollectionIntegrationTestA
+  ASSERT_EQ( mergedCollectionVector.at(2).truthBarcode(), 5  ); // inputPixelCollectionIntegrationTestA
+  ASSERT_EQ( mergedCollectionVector.at(3).truthBarcode(), 20 ); // inputPixelCollectionIntegrationTestC
+  ASSERT_EQ( mergedCollectionVector.at(4).truthBarcode(), 5  ); // inputPixelCollectionIntegrationTestC
+  ASSERT_EQ( mergedCollectionVector.at(5).truthBarcode(), 1  ); // inputPixelCollectionIntegrationTestC
+  ASSERT_EQ( mergedCollectionVector.at(6).truthBarcode(), 50 ); // inputPixelCollectionIntegrationTestB
+  ASSERT_EQ( mergedCollectionVector.at(7).truthBarcode(), 1  ); // inputPixelCollectionIntegrationTestB
 }
 
 
@@ -245,9 +245,9 @@ TEST_F(CollectionMerger_test, one_empty_one_filled_input_collection___expect_fil
   ASSERT_EQ( 3u, mergedCollectionHandle->size() );
 
   const auto& mergedCollectionVector = mergedCollectionHandle->getVector();
-  ASSERT_EQ( mergedCollectionVector.at(0).trackNumber(), 1  ); // inputPixelCollectionIntegrationTestA
-  ASSERT_EQ( mergedCollectionVector.at(1).trackNumber(), 20 ); // inputPixelCollectionIntegrationTestA
-  ASSERT_EQ( mergedCollectionVector.at(2).trackNumber(), 5  ); // inputPixelCollectionIntegrationTestA
+  ASSERT_EQ( mergedCollectionVector.at(0).truthBarcode(), 1  ); // inputPixelCollectionIntegrationTestA
+  ASSERT_EQ( mergedCollectionVector.at(1).truthBarcode(), 20 ); // inputPixelCollectionIntegrationTestA
+  ASSERT_EQ( mergedCollectionVector.at(2).truthBarcode(), 5  ); // inputPixelCollectionIntegrationTestA
 }
 
 

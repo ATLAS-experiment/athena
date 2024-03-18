@@ -36,7 +36,7 @@ Function particleGamma returns the value of gamma factor for Qball particle.
 double particleGamma(const MDTSimHit& hit, unsigned short eventId = 0) {
     double QGamma = -9999.;
     const HepMcParticleLink::PositionFlag idxFlag = (eventId == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-    const HepMcParticleLink trkParticle(hit.trackNumber(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+    const HepMcParticleLink trkParticle(hit.truthBarcode(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
     HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
     if (genParticle) {
         int particleEncoding = genParticle->pdg_id();

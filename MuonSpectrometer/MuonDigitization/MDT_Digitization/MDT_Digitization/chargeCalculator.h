@@ -38,7 +38,7 @@ to the third digit of decimal number of the  pdgid.
 //
 double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
     const HepMcParticleLink::PositionFlag idxFlag = (eventId == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-    const HepMcParticleLink trkParticle(hit.trackNumber(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+    const HepMcParticleLink trkParticle(hit.truthBarcode(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
     HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
     double qcharge = 1.;
     if (genParticle) {

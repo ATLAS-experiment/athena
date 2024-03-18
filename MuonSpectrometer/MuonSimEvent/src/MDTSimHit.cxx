@@ -43,11 +43,11 @@ MDTSimHit::MDTSimHit(HitID id,
 		     double time,
 	             double radius,
 	             const Amg::Vector3D& position,
-		     const int trackNumber)
+		     const int truthBarcode)
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
     , m_localPosition(position)
-    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
 {
  m_stepLength       = -9999999.; //total lenght of particle
  m_energyDeposit    = -1.;   //Geant4 deposited energy
@@ -59,7 +59,7 @@ MDTSimHit::MDTSimHit(HitID id,
 		     double time,
 		     double radius,
 		     const Amg::Vector3D& position,
-		     const int trackNumber,
+		     const int truthBarcode,
 		     const double stepLength,
 		     const double energyDeposit,
 		     const int particleEncoding,
@@ -67,7 +67,7 @@ MDTSimHit::MDTSimHit(HitID id,
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
     , m_localPosition(position)
-    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_stepLength(static_cast<float>(stepLength))
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_particleEncoding(particleEncoding)
@@ -115,6 +115,8 @@ std::string MDTSimHit::print() const {
     return ss.str();
 }
 
-int MDTSimHit::trackNumber() const
+int MDTSimHit::truthBarcode() const
  { return m_partLink.barcode(); }
 
+int MDTSimHit::truthID() const
+{ return m_partLink.id(); }

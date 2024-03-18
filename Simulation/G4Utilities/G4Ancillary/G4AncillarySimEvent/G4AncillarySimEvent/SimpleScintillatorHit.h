@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -38,8 +38,8 @@ public:
   CLHEP::Hep3Vector GetPosition() const;
   float GetGlobalTime() const;
   int GetCopyNo() const;
-  int GetTrackID() const;
-  
+  int truthBarcode() const;
+  int truthID() const;
   // link to the particle generating the hit
   const HepMcParticleLink& particleLink() const;
 

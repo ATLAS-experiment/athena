@@ -42,7 +42,11 @@ public:
   int GetHitID() const
   {return m_hitID;}
 
-  int GetTrackID() const;
+  // truth barcode of the track which released this energy:
+  int truthBarcode() const;
+
+  // GenParticle::id of the track which released this energy:
+  int truthID() const;
 
   // link to the particle generating the hit
   const HepMcParticleLink& particleLink() const;

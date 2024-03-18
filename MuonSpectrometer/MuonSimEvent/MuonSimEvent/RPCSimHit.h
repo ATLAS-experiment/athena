@@ -28,10 +28,10 @@ public:
     // Destructor:
     ~RPCSimHit();
     RPCSimHit(int id, double time, const Amg::Vector3D& position);
-    RPCSimHit(int id, double time, const Amg::Vector3D& position, const int trackNumber);
+    RPCSimHit(int id, double time, const Amg::Vector3D& position, const int truthBarcode);
     RPCSimHit(int id, double time,
 	      const Amg::Vector3D& prePosition,
-	      const int trackNumber,
+	      const int truthBarcode,
 	      const Amg::Vector3D& postPosition,
 	      const double energyDeposit,
 	      const double stepLength,
@@ -66,8 +66,11 @@ public:
     	{ return m_RPCid < rhs.m_RPCid; }
     double meanTime() const;
 
-// number of track which released this energy:
-    int trackNumber() const;
+    // truth barcode of the track which released this energy:
+    int truthBarcode() const;
+
+    // GenParticle::id of the track which released this energy:
+    int truthID() const;
 
 // link to the particle generating the hit
     const HepMcParticleLink& particleLink() const;

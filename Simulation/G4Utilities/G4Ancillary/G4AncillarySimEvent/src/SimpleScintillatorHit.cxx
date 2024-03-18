@@ -39,6 +39,11 @@ SimpleScintillatorHit::SimpleScintillatorHit(const int particleEncoding,
   m_partLink(track, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based syntax
 {}
 
-int SimpleScintillatorHit::GetTrackID() const {
+int SimpleScintillatorHit::truthBarcode() const {
   return m_partLink.barcode();
+}
+
+int SimpleScintillatorHit::truthID() const
+{
+  return m_partLink.id();
 }

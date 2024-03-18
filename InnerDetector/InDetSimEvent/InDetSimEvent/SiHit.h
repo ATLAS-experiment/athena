@@ -34,14 +34,14 @@ public:
         const HepGeom::Point3D<double> &localEndPosition,
         const double energyLoss,
         const double meanTime,
-        const int trackNumber,
+        const int truthBarcode,
         const unsigned int id);
 
   SiHit(const HepGeom::Point3D<double> &localStartPosition,
         const HepGeom::Point3D<double> &localEndPosition,
         const double energyLoss,
         const double meanTime,
-        const int trackNumber,
+        const int truthBarcode,
         const int, const int, const int, const int, const int, const int);
   // Constructor with parameters:
   //   local start position of the energy deposit
@@ -99,8 +99,11 @@ public:
   // Set the time of energy deposition: FIXME name!
   void setMeanTime(float meanTime);
 
-  // number of track which released this energy:
-  int trackNumber() const;
+  // truth barcode of the track which released this energy:
+  int truthBarcode() const;
+
+  // GenParticle::id of the track which released this energy:
+  int truthID() const;
 
   // link to the particle generating the hit
   const HepMcParticleLink& particleLink() const;

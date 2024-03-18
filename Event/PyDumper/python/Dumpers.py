@@ -4234,13 +4234,13 @@ def dump_SiHit (t, f):
     fprint (f, t.identify())
     dump_Threevec (t.localStartPosition(), f)
     dump_Threevec (t.localEndPosition(), f)
-    fprint (f, t.energyLoss(), t.meanTime(), t.trackNumber())
+    fprint (f, t.energyLoss(), t.meanTime(), t.truthBarcode())
     dump_HepMcParticleLink (t.particleLink(), f)
     return
 
 
 def dump_TRTUncompressedHit (t, f):
-    fprint (f, t.GetHitID(), t.GetTrackID(), t.GetParticleEncoding(),
+    fprint (f, t.GetHitID(), t.truthBarcode(), t.GetParticleEncoding(),
             t.GetKineticEnergy(), t.GetEnergyDeposit(),
             t.GetPreStepX(),  t.GetPreStepY(),  t.GetPreStepZ(),
             t.GetPostStepX(), t.GetPostStepY(), t.GetPostStepZ(),

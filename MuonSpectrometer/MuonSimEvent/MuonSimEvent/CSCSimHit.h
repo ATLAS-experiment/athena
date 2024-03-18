@@ -32,11 +32,11 @@ public:
 
     CSCSimHit(int id, double time, double energy,
     const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID,
-    const int trackNumber);
+    const int truthBarcode);
 
     CSCSimHit(int id, double time, double energy,
     const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID,
-	      const int trackNumber, double kineticEnergy);
+	      const int truthBarcode, double kineticEnergy);
 
     CSCSimHit(int id, double time, double energy,
     const Amg::Vector3D& HitStart, const Amg::Vector3D& HitEnd, int particleID,
@@ -57,8 +57,10 @@ public:
     	{ return m_CSCid < rhs.m_CSCid; }
     double meanTime() const;
 
-// number of track which released this energy:
-    int trackNumber() const;
+    // truth barcode of the track which released this energy:
+    int truthBarcode() const;
+    // GenParticle::id of the track which released this energy:
+    int truthID() const;
     double kineticEnergy() const { return static_cast<double>(m_kineticEnergy); }
 
 

@@ -29,7 +29,7 @@ class GenericMuonSimHit final{
                     const Amg::Vector3D& local_preposition,
                     const int particleEncoding, const double kineticEnergy,
                     const Amg::Vector3D& direction, const double depositEnergy,
-                    const double StepLength, const int trackNumber);
+                    const double StepLength, const int truthBarcode);
   GenericMuonSimHit(HitID id, double time, double pretime,
                     const Amg::Vector3D& position,
                     const Amg::Vector3D& local_position,
@@ -74,8 +74,11 @@ class GenericMuonSimHit final{
   void setGlobalDirection ( const Amg::Vector3D& globalDirection ) { m_globalDirection = globalDirection ;} //!< sets the direction expressed in global coordinates
   void setKineticEnergy ( const double kineticEnergy ) { m_kineticEnergy = kineticEnergy ;}
 
-  // number of track which released this energy:
-  int trackNumber() const;
+  // truth barcode of the track which released this energy:
+  int truthBarcode() const;
+
+  // GenParticle::id of the track which released this energy:
+  int truthID() const;
 
   // link to the particle generating the hit
   const HepMcParticleLink& particleLink() const;

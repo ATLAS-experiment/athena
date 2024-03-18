@@ -30,7 +30,7 @@ GenericMuonSimHit::GenericMuonSimHit(HitID id, double time, double pretime,
                                      const Amg::Vector3D& direction,
                                      const double depositEnergy,
                                      const double StepLength,
-                                     const int trackNumber)
+                                     const int truthBarcode)
   : m_GenericId(id), m_globalTime(time), m_globalpreTime(pretime)
   , m_globalPosition(position)
   , m_localPosition(lposition)
@@ -41,7 +41,7 @@ GenericMuonSimHit::GenericMuonSimHit(HitID id, double time, double pretime,
   , m_globalDirection(direction)
   , m_depositEnergy(depositEnergy)
   , m_StepLength(StepLength)
-  , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+  , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
 {
 }
 
@@ -92,6 +92,9 @@ std::string GenericMuonSimHit::print() const {
   return ss.str();
 }
 /*******************************************************************************/
-int GenericMuonSimHit::trackNumber() const
+int GenericMuonSimHit::truthBarcode() const
 { return m_partLink.barcode(); }
+/*******************************************************************************/
+int GenericMuonSimHit::truthID() const
+{ return m_partLink.id(); }
 /*******************************************************************************/

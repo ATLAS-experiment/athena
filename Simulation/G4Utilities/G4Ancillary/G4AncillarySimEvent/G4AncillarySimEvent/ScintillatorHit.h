@@ -43,7 +43,8 @@ public:
   virtual ~ScintillatorHit(); //temporary make it virtual for Pool!
 
   int GetVolNumber() const;
-  int GetTrackID() const;
+  int truthBarcode() const;
+  int truthID() const;
   int GetParticleEncoding() const;
   float GetKineticEnergy() const;
   float GetEnergyDeposit() const;

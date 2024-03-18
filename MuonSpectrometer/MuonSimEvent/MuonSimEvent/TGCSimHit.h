@@ -29,7 +29,7 @@ public:
     ~TGCSimHit();
     TGCSimHit(const int id, const double time, const Amg::Vector3D& position, const Amg::Vector3D& direcos);
     TGCSimHit(const int id, const double time, const Amg::Vector3D& position, const Amg::Vector3D& direcos,
-	      const int trackNumber, const double energyDeposit, const double stepLength,
+	      const int truthBarcode, const double energyDeposit, const double stepLength,
 	      const int particleEncoding=0, const double kineticEnergy=-9999.);
     TGCSimHit(const int id, const double time, const Amg::Vector3D& position, const Amg::Vector3D& direcos,
 	      const HepMcParticleLink& hmpl, const double energyDeposit, const double stepLength,
@@ -53,8 +53,11 @@ public:
     	{ return m_TGCid < rhs.m_TGCid; }
     double meanTime() const;
 
-// number of track which released this energy:
-    int trackNumber() const;
+    // truth barcode of the track which released this energy:
+    int truthBarcode() const;
+
+    // GenParticle::id of the track which released this energy:
+    int truthID() const;
 
 // link to the particle generating the hit
     const HepMcParticleLink& particleLink() const;
