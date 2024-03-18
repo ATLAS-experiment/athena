@@ -67,29 +67,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
 
     acc = ComponentAccumulator()
 
-    # Get the lists of triggers needed for trigger matching.
-    # This is needed at this scope (for the slimming) and further down in the config chain
-    # for actually configuring the matching, so we create it here and pass it down
-    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
-    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSTriggerListsHelper = TriggerListsHelper(flags)
-
-    # for AOD produced before 24.0.17, the electron removal tau is not available
-    TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
-    if TauJets_EleRM_in_input:
-        logPHYS.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
-    else:
-        logPHYS.info("TauJets_EleRM is Not in the input AOD. No relevant containers will be written")
-
-    # Common augmentations
-    acc.merge(PHYSKernelCfg(
-        flags, 
-        name="PHYSKernel", 
-        StreamName = stream_name, 
-        TriggerListsHelper = PHYSTriggerListsHelper, 
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
-    ))
-    
     ## Higgs augmentations - create 4l vertex
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
     acc.merge(HiggsAugmentationAlgsCfg(flags))
