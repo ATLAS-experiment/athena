@@ -1,12 +1,11 @@
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import sys
-import os
 import re
 
 def parsePosition(header_line):
   #negative signs can appear on the second and last numbers
-  coords=re.match('^\s*{\s*(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*(-?\d+)\s*},?', header_line)
+  coords=re.match(r'^\s*{\s*(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*(-?\d+)\s*},?', header_line)
   if coords is None:
     return None
   return [int(x) for x in coords.groups()]
@@ -25,7 +24,7 @@ def convertToNewFormat(oldFormat):
 def convertToOldFormat(newFormat):
   newFormatPosition = str(newFormat[1:])
   joinedPosition = "".join(newFormatPosition)[1:-1]
-  spaceStripped = re.sub('[\s+]', '', joinedPosition)
+  spaceStripped = re.sub(r'[\s+]', '', joinedPosition)
   newFormatHash = str(newFormat[0])
   return " : "+newFormatHash.rjust(4)+" "+spaceStripped
 
@@ -126,7 +125,6 @@ def create_mapping(fname):
   module_file = open(fname, 'r')
   module_data = module_file.read()
   module_lines = module_data.splitlines()
-  found_names=False
   for module in module_lines:
     if '#' in module:
       continue

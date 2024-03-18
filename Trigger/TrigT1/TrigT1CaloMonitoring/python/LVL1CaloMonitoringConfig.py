@@ -135,6 +135,9 @@ thresholds th_AnyBinIsError {
         if fillGroup is None: fillGroup = self.alg.name + "_fillGroup"
         if fillGroup not in self.fillGroups:
             self.fillGroups[fillGroup] = self.helper.addGroup(self.alg,fillGroup,topPath="L1Calo")
+
+        if "merge" not in kwargs and kwargs.get("type","") !="TEfficiency":
+            kwargs["merge"] = "merge" # ensures we don't get a warning about not specifying merge method
         out = self.fillGroups[fillGroup].defineHistogram(*argsCopy,**kwargs)
         histName = argsCopy[0].split(";")[-1]
 
@@ -155,6 +158,9 @@ thresholds th_AnyBinIsError {
         if ";" not in args[0]:
             raise Exception("Must specify a tree name using ';name' suffix")
         treeName = args[0].split(";")[-1]
+
+        if "," in args[1]: # catch a subtle typo that can screw up monitoring
+            raise Exception("Should not have comma in list of branch names and types")
 
         if kwargs.get("path",None) is None:
             # put in the Developer path, under the name of the algorithm
@@ -177,10 +183,11 @@ thresholds th_AnyBinIsError {
         argsCopy = list(args)
         argsCopy[0] = argsCopy[0].replace(";"+treeName,";"+histName)
         kwargsCopy = dict(kwargs)
-        kwargsCopy["title"] = f"Number of Entries in {treeName} TTree" + ";" + kwargsCopy.get("title","").split(";",1)[-1]
+        kwargsCopy["title"] = f"Number of Entries in {treeName} TTree" + ";" + ";".join(kwargsCopy.get("title","").split(";")[1:])
         kwargsCopy["opt"] = ['kCanRebin']
         kwargsCopy["merge"] = "merge"
-        self.defineHistogram(argsCopy[0],type="TH1I",xbins=1,xmin=0,xmax=1,fillGroup=fillGroup,**kwargsCopy)
+        is2d = (kwargsCopy["title"].count(";")>1)
+        self.defineHistogram(argsCopy[0],type="TH2I" if is2d else "TH1I",xbins=1,xmin=0,xmax=1,ybins=1 if is2d else None,ymin=0,ymax=1,fillGroup=fillGroup,**kwargsCopy)
         if not any([x in self.dqEnv for x in ['tier0','online']]):
             out = self.fillGroups[fillGroup].defineTree(*args,**kwargs)
         else:

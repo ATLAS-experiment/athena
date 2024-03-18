@@ -15,7 +15,7 @@ std::stringstream CalibFrontEndInfo::printDBformat()    const {
     
     std::stringstream mytext;
     
-    if(m_FEid == 0) mytext << m_MODid << " " <<m_MODid_str << "\n";
+    if(m_FEid == 0) mytext << m_MODid_str << " " << m_MODid << "\n";
     
     mytext  << "I" << m_FEid
             << " " << m_NormalTheshold << " " << m_NormalRms << " " << m_NormalNoise << " " << m_NormalIntime 

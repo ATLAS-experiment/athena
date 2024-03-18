@@ -329,7 +329,7 @@ def IDTIDECfg(flags):
     IDTIDESlimmingHelper = SlimmingHelper(
         "IDTIDESlimmingHelper",
         NamesAndTypes=flags.Input.TypedCollections,
-        ConfigFlags=flags)
+        flags=flags)
 
     AllVariables = []
     StaticContent = []

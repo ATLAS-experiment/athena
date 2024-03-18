@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY3.py
 #====================================================================
@@ -10,17 +10,17 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY3"
 streamName = "StreamDAOD_BPHY3"
 
-def BPHY3Cfg(ConfigFlags):
+def BPHY3Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
     BPHY3JpsiFinder = CompFactory.Analysis.JpsiFinder(
                     name                        = "BPHY3JpsiFinder",
@@ -50,7 +50,7 @@ def BPHY3Cfg(ConfigFlags):
                     VertexSearchTool             = BPHY3JpsiFinder,
                     OutputVtxContainerName = "BPHY3VertexCandidates",
                     V0Tools                = V0Tools,
-                    PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                    PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                     PVContainerName        = "PrimaryVertices",
                     RefPVContainerName     = "BPHY3RefittedPrimaryVertices")
     BPHY3_Select_PiPi = CompFactory.DerivationFramework.Select_onia2mumu(
@@ -125,7 +125,7 @@ def BPHY3Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY3SlimmingHelper = SlimmingHelper("BPHY3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY3SlimmingHelper = SlimmingHelper("BPHY3SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
@@ -143,7 +143,7 @@ def BPHY3Cfg(ConfigFlags):
     BPHY3SlimmingHelper.AllVariables = AllVariables
     BPHY3SlimmingHelper.StaticContent = StaticContent
     BPHY3ItemList = BPHY3SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY3", ItemList=BPHY3ItemList, AcceptAlgs=["BPHY3Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY3", AcceptAlgs=["BPHY3Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY3", ItemList=BPHY3ItemList, AcceptAlgs=["BPHY3Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY3", AcceptAlgs=["BPHY3Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

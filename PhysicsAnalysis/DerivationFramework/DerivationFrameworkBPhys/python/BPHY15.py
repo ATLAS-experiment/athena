@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY15.py
@@ -12,21 +12,21 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY15"
 streamName = "StreamDAOD_BPHY15"
 
-def BPHY15Cfg(ConfigFlags):
+def BPHY15Cfg(flags):
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
-   V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-   vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+   V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+   vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
    acc.addPublicTool(vkalvrt)
    acc.addPublicTool(V0Tools)
-   trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+   trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
    acc.addPublicTool(trackselect)
-   vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+   vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
    acc.addPublicTool(vpest)
-   PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags))
+   PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
    acc.addPublicTool(PVrefit)
-   isSimulation = ConfigFlags.Input.isMC
+   isSimulation = flags.Input.isMC
    BPHY15_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
                                           name = "BPHY15_AugOriginalCounts",
                                           VertexContainer = "PrimaryVertices",
@@ -292,7 +292,7 @@ def BPHY15Cfg(ConfigFlags):
       LxyMin                = 0.1,
       DoVertexType          = 1)
 
-   BcJpsiDxVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName + "BcJpsiDx", CascadeCnstPrecision = 1e-6))
+   BcJpsiDxVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName + "BcJpsiDx", CascadeCnstPrecision = 1e-6))
    acc.addPublicTool(BcJpsiDxVertexFit)
    BPHY15JpsiDs = CompFactory.DerivationFramework.JpsiPlusDsCascade(
        name                     = "BPHY15JpsiDs",
@@ -338,7 +338,7 @@ def BPHY15Cfg(ConfigFlags):
        CascadeVertexCollections = ["BcJpsiDpCascadeSV2", "BcJpsiDpCascadeSV1"],
        DxVertices               = "BPHY15Dh3Candidates")
 
-   BcJpsiDstVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName + "BcJpsiDst", CascadeCnstPrecision = 1e-6))
+   BcJpsiDstVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName + "BcJpsiDst", CascadeCnstPrecision = 1e-6))
    acc.addPublicTool(BcJpsiDstVertexFit)
 
    BPHY15JpsiDpst = CompFactory.DerivationFramework.JpsiPlusDpstCascade(
@@ -368,7 +368,7 @@ def BPHY15Cfg(ConfigFlags):
        D0Vertices               = "BPHY15DiTrkCandidates")
 
    from TrkConfig.TrkV0FitterConfig import TrkV0VertexFitter_InDetExtrCfg
-   v0Vertexfit = acc.popToolsAndMerge(TrkV0VertexFitter_InDetExtrCfg(ConfigFlags))
+   v0Vertexfit = acc.popToolsAndMerge(TrkV0VertexFitter_InDetExtrCfg(flags))
    acc.addPublicTool(v0Vertexfit)
    BPHY15K0Finder = CompFactory.Analysis.JpsiFinder(
        name                       = "BPHY15K0Finder",
@@ -418,7 +418,7 @@ def BPHY15Cfg(ConfigFlags):
        LxyMin                = 0.2,
        Chi2Max               = 200)
 
-   BcJpsiDs1VertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName + "BcJpsiDs1", CascadeCnstPrecision = 1e-6))
+   BcJpsiDs1VertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName + "BcJpsiDs1", CascadeCnstPrecision = 1e-6))
    acc.addPublicTool(BcJpsiDs1VertexFit)
 
    BPHY15JpsiDps1 = CompFactory.DerivationFramework.JpsiPlusDs1Cascade(
@@ -500,7 +500,7 @@ def BPHY15Cfg(ConfigFlags):
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-   BPHY15SlimmingHelper = SlimmingHelper("BPHY15SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+   BPHY15SlimmingHelper = SlimmingHelper("BPHY15SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
    StaticContent = []
@@ -556,7 +556,7 @@ def BPHY15Cfg(ConfigFlags):
    BPHY15SlimmingHelper.StaticContent = StaticContent
 
    BPHY15ItemList = BPHY15SlimmingHelper.GetItemList()
-   acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY15", ItemList=BPHY15ItemList, AcceptAlgs=["BPHY15Kernel"]))
-   acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY15", AcceptAlgs=["BPHY15Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+   acc.merge(OutputStreamCfg(flags, "DAOD_BPHY15", ItemList=BPHY15ItemList, AcceptAlgs=["BPHY15Kernel"]))
+   acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY15", AcceptAlgs=["BPHY15Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
    return acc

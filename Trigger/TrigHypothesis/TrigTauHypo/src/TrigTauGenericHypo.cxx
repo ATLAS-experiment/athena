@@ -46,14 +46,14 @@ StatusCode TrigTauGenericHypo::initialize() {
 
   // Here we store the formulas since they need to compile
   m_store.reserve(m_member.size());
-  msg(MSG::INFO) << "Cuts: ";
+  msg(MSG::DEBUG) << "Cuts: ";
   for(unsigned int i=0; i<m_member.size(); i++)
   {
     m_store.push_back(TFormula(("TauHypoCut"+m_formula.at(i)).c_str(), m_formula.at(i).c_str()));
-    msg(MSG::INFO) << "(" << m_formula.at(i) << ") ";
+    msg(MSG::DEBUG) << "(" << m_formula.at(i) << ") ";
     // x is the ID variables, y is Tau pT and z is Tau eta
   }
-  msg(MSG::INFO) << endmsg;
+  msg(MSG::DEBUG) << endmsg;
 
   return StatusCode::SUCCESS;
 }

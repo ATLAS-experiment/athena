@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # STDM7.py - derivation for exclusive dilepton analyses
 #            skimms dilepton (e or mu) events, contains InDetTracks and AFP information
@@ -120,7 +120,7 @@ def STDM7Cfg(flags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    STDM7SlimmingHelper = SlimmingHelper("STDM7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    STDM7SlimmingHelper = SlimmingHelper("STDM7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     STDM7SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",

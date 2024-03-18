@@ -17,6 +17,3 @@ atlas_add_library( TrigT1CaloMonitoringToolsLib
 atlas_add_component( TrigT1CaloMonitoringTools
                      src/components/*.cxx
                      LINK_LIBRARIES TrigT1CaloMonitoringToolsLib )
-
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

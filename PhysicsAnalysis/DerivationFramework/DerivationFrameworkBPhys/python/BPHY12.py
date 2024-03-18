@@ -18,19 +18,19 @@ streamName = "StreamDAOD_BPHY12"
 
 skimTruth = False
 
-def BPHY12Cfg(ConfigFlags):
+def BPHY12Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
+    isSimulation = flags.Input.isMC
 
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
     BPHY12_Finder_DiMuon = CompFactory.Analysis.JpsiFinder(
                              name                        = "BPHY12_Finder_DiMuon",
@@ -66,7 +66,7 @@ def BPHY12Cfg(ConfigFlags):
                              OutputVtxContainerName = "BPHY12_DiMuon_Candidates",
                              PVContainerName        = "PrimaryVertices",
                              V0Tools                = V0Tools,  
-                             PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                             PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                              RefPVContainerName     = "SHOULDNOTBEUSED",
                              DoVertexType           = 7)
 
@@ -117,7 +117,7 @@ def BPHY12Cfg(ConfigFlags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "BPHY12_BdKstarKpiMuMu_refitPV",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                = True,
         MaxPVrefit             = 10000,
         DoVertexType           = 7
@@ -149,7 +149,7 @@ def BPHY12Cfg(ConfigFlags):
                            name                   = "BPHY12_ReVertex_Kstar",
                            InputVtxContainerName  = "BPHY12_BdKstarKpiMuMu_Candidates",
                            V0Tools                = V0Tools,
-                           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates"
@@ -241,7 +241,7 @@ def BPHY12Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY12SlimmingHelper = SlimmingHelper("BPHY12SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY12SlimmingHelper = SlimmingHelper("BPHY12SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
@@ -283,7 +283,7 @@ def BPHY12Cfg(ConfigFlags):
     BPHY12SlimmingHelper.AllVariables = AllVariables
     BPHY12SlimmingHelper.StaticContent = StaticContent
     BPHY12ItemList = BPHY12SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY12", ItemList=BPHY12ItemList, AcceptAlgs=["BPHY12Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY12", AcceptAlgs=["BPHY12Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY12", ItemList=BPHY12ItemList, AcceptAlgs=["BPHY12Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY12", AcceptAlgs=["BPHY12Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

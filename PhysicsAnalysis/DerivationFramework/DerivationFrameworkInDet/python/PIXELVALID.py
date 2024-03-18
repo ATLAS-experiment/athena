@@ -210,7 +210,7 @@ def PixelVALIDCfg(flags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     PixelVALIDSlimmingHelper = SlimmingHelper("PixelVALIDSlimmingHelper",
                                               NamesAndTypes = flags.Input.TypedCollections,
-                                              ConfigFlags   = flags)
+                                              flags         = flags)
 
     AllVariables = []
     StaticContent = []

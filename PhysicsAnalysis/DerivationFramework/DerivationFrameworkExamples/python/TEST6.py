@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TEST6.py - derivation framework example demonstrating pre-selection, such that only
 # after passing the skimming do heavier augmentation tools run 
@@ -41,15 +41,15 @@ def TEST6KernelCfg(flags, name='TEST6Kernel', **kwargs):
     return(acc)
 
 
-def TEST6Cfg(ConfigFlags):
+def TEST6Cfg(flags):
 
     acc = ComponentAccumulator()
-    acc.merge(TEST6KernelCfg(ConfigFlags, name="TEST6Kernel", PreselectionName="TEST6PreselectionKernel"))
+    acc.merge(TEST6KernelCfg(flags, name="TEST6Kernel", PreselectionName="TEST6PreselectionKernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST6SlimmingHelper = SlimmingHelper("TEST6SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TEST6SlimmingHelper = SlimmingHelper("TEST6SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TEST6SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",
@@ -69,7 +69,7 @@ def TEST6Cfg(ConfigFlags):
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
     TEST6ItemList = TEST6SlimmingHelper.GetItemList()
 
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST6", ItemList=TEST6ItemList, AcceptAlgs=["TEST6Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TEST6", AcceptAlgs=["TEST6Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TEST6", ItemList=TEST6ItemList, AcceptAlgs=["TEST6Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TEST6", AcceptAlgs=["TEST6Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

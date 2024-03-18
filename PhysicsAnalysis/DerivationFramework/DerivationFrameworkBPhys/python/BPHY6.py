@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY6.py
 #====================================================================
@@ -10,26 +10,26 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY6"
 streamName = "StreamDAOD_BPHY6"
 
-def BPHY6Cfg(ConfigFlags):
+def BPHY6Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
+    isSimulation = flags.Input.isMC
     # General Variables
     dimuon_chi2_max = 50.
     dimuon_mass_min = 100.
     dimuon_mass_max = 150e3
 
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    extrap = acc.popToolsAndMerge(InDetExtrapolatorCfg(ConfigFlags))
+    extrap = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
     acc.addPublicTool(extrap)
     BPHY6_Extrap_Tool = CompFactory.DerivationFramework.MuonExtrapolationTool(name = "BPHY6_ExtrapolationTool", Extrapolator = extrap)
     BPHY6JpsiFinder = CompFactory.Analysis.JpsiFinder(
@@ -58,7 +58,7 @@ def BPHY6Cfg(ConfigFlags):
                 VertexSearchTool             = BPHY6JpsiFinder,
                 OutputVtxContainerName = "BPHY6OniaCandidates",
                 V0Tools                = V0Tools,
-                PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                 PVContainerName        = "PrimaryVertices",
                 RefPVContainerName     = "BPHY6RefittedPrimaryVertices")
 
@@ -164,7 +164,7 @@ def BPHY6Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY6SlimmingHelper = SlimmingHelper("BPHY6SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY6SlimmingHelper = SlimmingHelper("BPHY6SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     
     # Needed for trigger objects
     BPHY6SlimmingHelper.IncludeMuonTriggerContent = True
@@ -223,7 +223,7 @@ def BPHY6Cfg(ConfigFlags):
     BPHY6SlimmingHelper.AllVariables = AllVariables
     BPHY6SlimmingHelper.StaticContent = StaticContent
     BPHY6ItemList = BPHY6SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY6", ItemList=BPHY6ItemList, AcceptAlgs=["BPHY6Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY6", AcceptAlgs=["BPHY6Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY6", ItemList=BPHY6ItemList, AcceptAlgs=["BPHY6Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY6", AcceptAlgs=["BPHY6Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

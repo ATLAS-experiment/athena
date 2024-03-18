@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY24.py
@@ -505,7 +505,7 @@ def BPHY24Cfg(flags):
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    BPHY24SlimmingHelper = SlimmingHelper("BPHY24SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    BPHY24SlimmingHelper = SlimmingHelper("BPHY24SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from AthenaConfiguration.Enums import MetadataCategory
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
