@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DetailedTrackTruthCollectionCnv.h"
@@ -9,6 +9,7 @@
 #include "TrkTruthTPCnv/DetailedTrackTruthCollection_p1.h"
 #include "TrkTruthTPCnv/DetailedTrackTruthCollection_p2.h"
 #include "TrkTruthTPCnv/DetailedTrackTruthCollection_p3.h"
+#include "TrkTruthTPCnv/DetailedTrackTruthCollection_p4.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/MsgStream.h"
@@ -22,9 +23,10 @@ const pool::Guid DetailedTrackTruthCollectionCnv::s_p0_guid("8F573396-F26F-47FD-
 const pool::Guid DetailedTrackTruthCollectionCnv::s_p1_guid("1BA26DEE-BACE-43D6-8F19-E9490CDE8BB8");
 const pool::Guid DetailedTrackTruthCollectionCnv::s_p2_guid("B30AE3A0-F34E-45B6-A8A1-B9CB5E669EB2");
 const pool::Guid DetailedTrackTruthCollectionCnv::s_p3_guid("F5A1DC75-C3FB-4575-8178-905223CF1277");
+const pool::Guid DetailedTrackTruthCollectionCnv::s_p4_guid("018E422D-E420-7894-9245-A824C0ECE535");
 
 //================================================================
-DetailedTrackTruthCollectionCnv::DetailedTrackTruthCollectionCnv(ISvcLocator* svcLoc) : 
+DetailedTrackTruthCollectionCnv::DetailedTrackTruthCollectionCnv(ISvcLocator* svcLoc) :
   DetailedTrackTruthCollectionCnvBase(svcLoc)
 {}
 
@@ -45,7 +47,14 @@ DetailedTrackTruthCollection* DetailedTrackTruthCollectionCnv::createTransient()
   MsgStream log(msgSvc(), "DetailedTrackTruthCollectionCnv" );
   DetailedTrackTruthCollection *trans(nullptr);
 
-  if (compareClassGuid(s_p3_guid)) {
+  if (compareClassGuid(s_p4_guid)) {
+    trans = new DetailedTrackTruthCollection();
+    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p4. GUID="<<m_classID.toString()<<endmsg;
+    Trk::DetailedTrackTruthCollection_p4* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p4>();
+    m_converter_p4.persToTrans(pers, trans, log);
+    delete pers;
+  }
+  else if (compareClassGuid(s_p3_guid)) {
     trans = new DetailedTrackTruthCollection();
     log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p3. GUID="<<m_classID.toString()<<endmsg;
     Trk::DetailedTrackTruthCollection_p3* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p3>();
@@ -71,7 +80,7 @@ DetailedTrackTruthCollection* DetailedTrackTruthCollectionCnv::createTransient()
     log<<MSG::FATAL<<info<<endmsg;
     throw std::runtime_error(info);
   }
-  
+
   return trans;
 }
 

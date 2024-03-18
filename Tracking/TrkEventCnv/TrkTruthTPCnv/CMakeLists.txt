@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkTruthTPCnv )
@@ -26,6 +26,11 @@ atlas_add_test( TrackTruthCollectionCnv_p2_test
                 test/TrackTruthCollectionCnv_p2_test.cxx
                 LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv SGTools TrkTruthData TrkTruthTPCnv )
 
+atlas_add_test( TrackTruthCollectionCnv_p3_test
+                SOURCES
+                test/TrackTruthCollectionCnv_p3_test.cxx
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv SGTools TrkTruthData TrkTruthTPCnv )
+
 atlas_add_test( TruthTrajectoryCnv_p1_test
                 SOURCES
                 test/TruthTrajectoryCnv_p1_test.cxx
@@ -36,6 +41,11 @@ atlas_add_test( TruthTrajectoryCnv_p2_test
                 test/TruthTrajectoryCnv_p2_test.cxx
                 LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv SGTools TrkTruthData TrkTruthTPCnv )
 
+atlas_add_test( TruthTrajectoryCnv_p3_test
+                SOURCES
+                test/TruthTrajectoryCnv_p3_test.cxx
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv SGTools TrkTruthData TrkTruthTPCnv )
+
 atlas_add_test( PRD_MultiTruthCollectionCnv_p2_test
                 SOURCES
                 test/PRD_MultiTruthCollectionCnv_p2_test.cxx
@@ -44,4 +54,9 @@ atlas_add_test( PRD_MultiTruthCollectionCnv_p2_test
 atlas_add_test( PRD_MultiTruthCollectionCnv_p3_test
                 SOURCES
                 test/PRD_MultiTruthCollectionCnv_p3_test.cxx
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv SGTools StoreGateLib TrkTruthData TrkTruthTPCnv )
+
+atlas_add_test( PRD_MultiTruthCollectionCnv_p4_test
+                SOURCES
+                test/PRD_MultiTruthCollectionCnv_p4_test.cxx
                 LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv SGTools StoreGateLib TrkTruthData TrkTruthTPCnv )

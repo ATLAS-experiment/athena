@@ -4,16 +4,16 @@
 
 // $Id$
 /**
- * @file TrkTruthTPCnv/test/TrackTruthCollectionCnv_p2_test.cxx
- * @date Feb, 2018
- * @brief Tests for TrackTruthCollectionCnv_p2.
+ * @file TrkTruthTPCnv/test/TruthTrajectoryCnv_p3_test.cxx
+ * @date March, 2024
+ * @brief Tests for TruthTrajectoryCnv_p3.
  */
 
 
 #undef NDEBUG
-#include "TrkTruthTPCnv/TrackTruthCollectionCnv_p2.h"
-#include "TrkTruthTPCnv/TrackTruthCollection_p2.h"
-#include "TrkTruthData/TrackTruthCollection.h"
+#include "TrkTruthTPCnv/TruthTrajectoryCnv_p3.h"
+#include "TrkTruthTPCnv/TruthTrajectory_p3.h"
+#include "TrkTruthData/TruthTrajectory.h"
 #include "SGTools/TestStore.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
@@ -35,29 +35,26 @@ void compare (const HepMcParticleLink& p1,
 }
 
 
-void compare (const TrackTruthCollection& p1,
-              const TrackTruthCollection& p2)
+void compare (const TruthTrajectory& p1,
+              const TruthTrajectory& p2)
 {
-  assert (p1.trackCollectionLink() == p2.trackCollectionLink());
   assert (p1.size() == p2.size());
-  TrackTruthCollection::const_iterator i1 = p1.begin();
-  TrackTruthCollection::const_iterator i2 = p2.begin();
+  TruthTrajectory::const_iterator i1 = p1.begin();
+  TruthTrajectory::const_iterator i2 = p2.begin();
   for (; i1 != p1.end(); ++i1, ++i2) {
-    assert (i1->first.index() == i2->first.index());
-    compare (i1->second.particleLink(), i2->second.particleLink());
-    assert (i1->second.particleLink() == i2->second.particleLink());
-    assert (i1->second.probability() == i2->second.probability());
+    compare (*i1, *i2);
+    assert (*i1 == *i2);
   }
 }
 
 
-void testit (const TrackTruthCollection& trans1)
+void testit (const TruthTrajectory& trans1)
 {
   MsgStream log (nullptr, "test");
-  TrackTruthCollectionCnv_p2 cnv;
-  Trk::TrackTruthCollection_p2 pers;
+  TruthTrajectoryCnv_p3 cnv;
+  Trk::TruthTrajectory_p3 pers;
   cnv.transToPers (&trans1, &pers, log);
-  TrackTruthCollection trans2;
+  TruthTrajectory trans2;
   cnv.persToTrans (&pers, &trans2, log);
 
   compare (trans1, trans2);
@@ -68,13 +65,11 @@ void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
 {
   std::cout << "test1\n";
 
-  TrackTruthCollection trans1 (DataLink<TrackCollection>("tpc"));
+  TruthTrajectory trans1;
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle), pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    Trk::TrackTruthKey key (ElementLink<TrackCollection> ("tpc", i));
-    TrackTruth val (trkLink, (float)i/10);
-    trans1[key] = val;
+    trans1.push_back(trkLink);
   }
 
   testit (trans1);

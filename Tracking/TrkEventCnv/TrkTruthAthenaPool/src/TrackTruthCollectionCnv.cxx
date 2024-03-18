@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackTruthCollectionCnv.h"
@@ -8,8 +8,10 @@
 #include "TrkTruthTPCnv/TrackTruthCollection_p0.h"
 #include "TrkTruthTPCnv/TrackTruthCollection_p1.h"
 #include "TrkTruthTPCnv/TrackTruthCollection_p2.h"
+#include "TrkTruthTPCnv/TrackTruthCollection_p3.h"
 #include "TrkTruthTPCnv/TrackTruthCollectionCnv_p1.h"
 #include "TrkTruthTPCnv/TrackTruthCollectionCnv_p2.h"
+#include "TrkTruthTPCnv/TrackTruthCollectionCnv_p3.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/MsgStream.h"
@@ -22,10 +24,11 @@
 const pool::Guid TrackTruthCollectionCnv::s_p0_guid("8BC86D69-DBC4-4B34-8273-513D9BE771D5");
 const pool::Guid TrackTruthCollectionCnv::s_p1_guid("ED2B4B64-7CF6-48B3-8C40-29F8501A6090");
 const pool::Guid TrackTruthCollectionCnv::s_p2_guid("44F35B21-838A-4C4E-B09B-971CEA0EB70A");
+const pool::Guid TrackTruthCollectionCnv::s_p3_guid("018E41F8-0857-7D8C-A062-A3947683EB99");
 
 
 //================================================================
-TrackTruthCollectionCnv::TrackTruthCollectionCnv(ISvcLocator* svcLoc) : 
+TrackTruthCollectionCnv::TrackTruthCollectionCnv(ISvcLocator* svcLoc) :
   TrackTruthCollectionCnvBase(svcLoc)
 {}
 
@@ -43,7 +46,13 @@ TrackTruthCollection* TrackTruthCollectionCnv::createTransient() {
   MsgStream log(msgSvc(), "TrackTruthCollectionCnv" );
   std::unique_ptr<TrackTruthCollection> trans(new TrackTruthCollection());
 
-  if (compareClassGuid(s_p2_guid)) {
+  if (compareClassGuid(s_p3_guid)) {
+    log<<MSG::DEBUG<<"Read TrackTruthCollection_p3. GUID="<<m_classID.toString()<<endmsg;
+    Trk::TrackTruthCollection_p3* pers=poolReadObject<Trk::TrackTruthCollection_p3>();
+    m_converter_p3.persToTrans(pers, trans.get(), log);
+    delete pers;
+  }
+  else if (compareClassGuid(s_p2_guid)) {
     log<<MSG::DEBUG<<"Read TrackTruthCollection_p2. GUID="<<m_classID.toString()<<endmsg;
     Trk::TrackTruthCollection_p2* pers=poolReadObject<Trk::TrackTruthCollection_p2>();
     m_converter_p2.persToTrans(pers, trans.get(), log);
@@ -66,7 +75,7 @@ TrackTruthCollection* TrackTruthCollectionCnv::createTransient() {
        <<m_classID.toString()<<endmsg;
     throw std::runtime_error("Unsupported persistent version of Data Collection");
   }
-  
+
   return trans.release();
 }
 
