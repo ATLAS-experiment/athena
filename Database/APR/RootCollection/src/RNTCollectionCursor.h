@@ -18,25 +18,16 @@
 #include <memory>
 #include <map>
 
-// for version checks
-#include "TROOT.h"
-
 namespace ROOT::Experimental {
    class RNTupleReader;
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-   template<typename, bool> class RNTupleView;
-#else
-   template<typename> class RNTupleView;
-#endif
-   class RFieldBase;
+   class REntry;
 }
 
 namespace pool {
    namespace RootCollection {
 
       using ROOT::Experimental::RNTupleReader;
-      using ROOT::Experimental::RNTupleView;
-      using ROOT::Experimental::RFieldBase;
+      using ROOT::Experimental::REntry;
 
       /** 
        * @class RNTCollectionCursor RNTCollectionCursor.h Rootcollection/RNTCollectionCursor.h
@@ -80,20 +71,18 @@ namespace pool {
 
          const ICollectionDescription&  m_description;
 
-         RNTupleReader*                 m_reader;
+         RNTupleReader*                 m_RNTReader;
+
+         /// RNtuple row with Field addresses set to collectionRowBuffer attributes
+         std::unique_ptr< REntry >      m_RNTEntry;
 
          /// Row buffer containing Tokens and Attributes selected by query.
          pool::CollectionRowBuffer      m_collectionRowBuffer;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-         std::vector< std::pair< std::unique_ptr<RFieldBase>, void* > >  m_attrFields;
-         std::vector< std::pair< RNTupleView< std::string, false >, Token* > >  m_tokenFields;
-#else
-         std::vector< std::pair< RNTupleView< std::string >, Token* > >  m_tokenFields;
-#endif
+         /// "Token rowBuffer" for reading Tokens as strings and converting them later
+         std::vector< std::pair< Token*, std::string > >  m_tokens;
 
          int                            m_idx;
-         int64_t                        m_entries;
          bool                           m_dummyRef;
       };
    }
