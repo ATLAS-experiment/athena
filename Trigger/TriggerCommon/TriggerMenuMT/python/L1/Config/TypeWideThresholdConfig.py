@@ -81,6 +81,10 @@ def eFEXfwToFloatConversion_wstot(fw,bitshift):
     decimal = pow(2,bitshift)/fw
     return float("{:.3f}".format(decimal))
 
+def eFEXfwToFloatConversion_minIsoEt(fw):
+    decimal = fw * 100.0 # To MeV units
+    return float("{:.3f}".format(decimal))
+
 # jFEX conversion based on ATR-21235
 def jFEXfloatToFWConversion(decimal):
     fw = round((1-decimal)/decimal)
@@ -396,7 +400,8 @@ class L1Config_eTAU:
         ]
         confObj["ptMinToTopo"] = 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
-        confObj["maxEt"] = 50 # PLACEHOLDER
+        confObj["minIsoEt"] = 0.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
+        confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
         confObj["algoVersion"] = int(do_eFex_BDT_Tau)
 
         # Check that FW values are integers

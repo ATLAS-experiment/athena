@@ -500,7 +500,9 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
 
       if(thrType == "eTAU") {
          auto & eeminfo = l1menu.thrExtraInfo().eTAU();
+         jThrType["minIsoEt"] = (int)eeminfo.minIsoEt();
          jThrType["maxEt"] = (int)eeminfo.maxEt();
+         jThrType["algoVersion"] = (int)eeminfo.algoVersion();
          for( auto wp : {TrigConf::Selection::WP::LOOSE, TrigConf::Selection::WP::MEDIUM, TrigConf::Selection::WP::TIGHT, 
                          TrigConf::Selection::WP::HADLOOSE, TrigConf::Selection::WP::HADMEDIUM, TrigConf::Selection::WP::HADTIGHT} ) {
             auto wpstr = TrigConf::Selection::wpToString(wp);
