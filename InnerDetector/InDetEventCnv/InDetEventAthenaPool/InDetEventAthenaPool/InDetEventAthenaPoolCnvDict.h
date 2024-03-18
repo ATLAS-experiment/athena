@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INDETEVENTATHENAPOOLDICT_H
-#define INDETEVENTATHENAPOOLDICT_H
+#ifndef INDETEVENTATHENAPOOL_INDETEVENTATHENAPOOLDICT_H
+#define INDETEVENTATHENAPOOL_INDETEVENTATHENAPOOLDICT_H
 
 #include "InDetEventAthenaPool/InDetSimData_p1.h"
 #include "InDetEventAthenaPool/InDetSimData_p2.h"
+#include "InDetEventAthenaPool/InDetSimData_p3.h"
 #include "InDetEventAthenaPool/InDetSimDataCollection_p1.h"
 #include "InDetEventAthenaPool/InDetSimDataCollection_p2.h"
 #include "InDetEventAthenaPool/InDetSimDataCollection_p3.h"
+#include "InDetEventAthenaPool/InDetSimDataCollection_p4.h"
 #include "InDetEventAthenaPool/InDetRawData_p1.h"
 #include "InDetEventAthenaPool/SCT3_RawData_p1.h"
 #include "InDetEventAthenaPool/SCT3_RawData_p2.h"
@@ -31,6 +33,7 @@ namespace InDetEventAthenaPoolCnvDict
     std::pair<unsigned long long, InDetSimData_p2> t2;
     std::vector<std::pair<unsigned int, InDetSimData_p2> > t3;
     std::vector<std::pair<unsigned long long, InDetSimData_p2> > t4;
+    std::vector<std::pair<unsigned long long, InDetSimData_p3> > t5;
 }
 
-#endif
+#endif // INDETEVENTATHENAPOOL_INDETEVENTATHENAPOOLDICT_H

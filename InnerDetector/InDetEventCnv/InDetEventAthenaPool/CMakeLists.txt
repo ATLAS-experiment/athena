@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetEventAthenaPool )
@@ -11,7 +11,7 @@ atlas_add_library( InDetEventAthenaPool
    AthenaBaseComps AthenaKernel SGTools StoreGateLib AthenaPoolCnvSvcLib
    AthenaPoolUtilities GaudiKernel InDetIdentifier
    InDetReadoutGeometry TRT_ReadoutGeometry InDetEventTPCnv InDetRawData InDetSimData
-   InDetLowBetaInfo InDetPrepRawData SCT_ConditionsData TrkTrack )   
+   InDetLowBetaInfo InDetPrepRawData SCT_ConditionsData TrkTrack )
 
 atlas_add_poolcnv_library( InDetEventAthenaPoolPoolCnv
    FILES InDetRawData/PixelRDO_Container.h InDetRawData/SCT_RDO_Container.h
@@ -55,6 +55,7 @@ foreach( name
          InDetSimDataCollectionCnv_p1_test
          InDetSimDataCollectionCnv_p2_test
          InDetSimDataCollectionCnv_p3_test
+         InDetSimDataCollectionCnv_p4_test
          TRT_LoLumRawDataContainerCnv_p1_test
          TRT_LoLumRawDataContainerCnv_p2_test
          TRT_LoLumRawDataContainerCnv_p3_test )
@@ -62,7 +63,7 @@ foreach( name
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       LINK_LIBRARIES
-      AtlasHepMCLib IdDict IdDictParser InDetEventAthenaPool TestTools CxxUtils
+      AtlasHepMCLib IdDict IdDictParser InDetEventAthenaPool TruthUtils TestTools CxxUtils
       ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
       POST_EXEC_SCRIPT nopost.sh )
    set_target_properties ( InDetEventAthenaPool_${name} PROPERTIES ENABLE_EXPORTS True )

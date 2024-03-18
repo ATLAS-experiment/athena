@@ -1,0 +1,22 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef INDETEVENTATHENAPOOL_INDETSIMDATA_P3_H
+#define INDETEVENTATHENAPOOL_INDETSIMDATA_P3_H
+
+#include <vector>
+#include "GeneratorObjectsTPCnv/HepMcParticleLink_p3.h"
+
+class InDetSimData_p3 {
+ public:
+  InDetSimData_p3():m_word(0), m_links{}, m_enDeposits{}  {};
+// List of Cnv classes that convert this into SimData objects
+  friend class InDetSimDataCnv_p3;
+ private:
+  unsigned int m_word; // sim data word
+  std::vector<HepMcParticleLink_p3> m_links; // HepMCPLs
+  std::vector<float> m_enDeposits; //  energy deposits
+};
+
+#endif // INDETEVENTATHENAPOOL_INDETSIMDATA_P3_H
