@@ -126,7 +126,7 @@ StatusCode InDetDetailedTrackTruthMaker::execute(const EventContext &ctx) const
   }
   else {
     ATH_MSG_DEBUG ("DetailedTrackTruthCollection '" << m_detailedTrackTruthName.key()	<< "' is registered in StoreGate, size="<<dttc->size());
-    m_truthTool->buildDetailedTrackTruth(&(*dttc), *tracks, prdCollectionVector);
+    m_truthTool->buildDetailedTrackTruth(&(*dttc), *tracks, prdCollectionVector, ctx);
     return StatusCode::SUCCESS;
   }
 

@@ -21,9 +21,8 @@
 #include "TrkTruthData/SubDetHitStatistics.h"
 
 namespace Trk {
-  
-  class DetailedTrackTruthBuilder final: virtual public IDetailedTrackTruthBuilder,
-				   public AthAlgTool
+
+  class DetailedTrackTruthBuilder final: virtual public extends<AthAlgTool, IDetailedTrackTruthBuilder>
   {
   public:
     DetailedTrackTruthBuilder(const std::string& type, const std::string& name, const IInterface* parent);
@@ -32,22 +31,24 @@ namespace Trk {
 
     /** See description for IDetailedTrackTruthBuilder::buildDetailedTrackTruth() */
     virtual void buildDetailedTrackTruth(DetailedTrackTruthCollection *output,
-					 const TrackCollection& tracks,
-					 const std::vector<const PRD_MultiTruthCollection*>& prdTruth) const;
+                                         const TrackCollection& tracks,
+                                         const std::vector<const PRD_MultiTruthCollection*>& prdTruth,
+                                         const EventContext& ctx) const;
 
   private:
     typedef InverseMultiMap<PRD_MultiTruthCollection> PRD_InverseTruth;
 
-    const AtlasDetectorID *m_idHelper;
+    const AtlasDetectorID *m_idHelper{};
 
-    ToolHandle<Trk::ITruthTrajectoryBuilder> m_truthTrajBuilder;
+    PublicToolHandle<Trk::ITruthTrajectoryBuilder> m_truthTrajBuilder{this, "TruthTrajectoryTool", "Trk::ElasticTruthTrajectoryBuilder"};
 
     SubDetHitStatistics::SubDetType findSubDetType(const Identifier& id) const;
-    
+
     void addTrack(DetailedTrackTruthCollection *output,
-		  const ElementLink<DataVector<Trk::Track> > &track,
-		  const std::vector<const PRD_MultiTruthCollection*>& orderedPRD_Truth,
-		  const PRD_InverseTruth& inverseTruth) const;
+                  const ElementLink<DataVector<Trk::Track> > &track,
+                  const std::vector<const PRD_MultiTruthCollection*>& orderedPRD_Truth,
+                  const PRD_InverseTruth& inverseTruth,
+                  const EventContext& ctx) const;
 
     static void makeTruthToRecMap( PRD_InverseTruth& result, const PRD_MultiTruthCollection& rec2truth) ;
 
@@ -55,7 +56,7 @@ namespace Trk {
                                          const PRD_InverseTruth& inverseTruth) const;
 
   };
-  
+
 } // end namespace Trk
 
 #endif/*DETAILEDTRACKTRUTHBUILDER_H*/
