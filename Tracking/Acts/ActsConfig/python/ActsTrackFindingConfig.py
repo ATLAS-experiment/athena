@@ -54,7 +54,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
-    kwargs.setdefault("numMeasurementsCutOff", [3])
+    kwargs.setdefault("numMeasurementsCutOff", [1])
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
