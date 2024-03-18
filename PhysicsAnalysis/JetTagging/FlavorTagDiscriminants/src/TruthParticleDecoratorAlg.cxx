@@ -45,7 +45,6 @@ namespace FlavorTagDiscriminants {
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
-    CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
     
