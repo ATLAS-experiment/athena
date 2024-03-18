@@ -34,11 +34,9 @@ namespace FlavorTagDiscriminants {
 
     // Initialize accessors
     m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
-    m_acc_source_label = "TruthParticles." + m_acc_source_label.key();
     m_acc_vertex_index = "TruthParticles." + m_acc_vertex_index.key();
     m_acc_parent_barcode = "TruthParticles." + m_acc_parent_barcode.key();
     ATH_CHECK( m_acc_type_label.initialize() );
-    ATH_CHECK( m_acc_source_label.initialize() );
     ATH_CHECK( m_acc_vertex_index.initialize() );
     ATH_CHECK( m_acc_parent_barcode.initialize() );
 
