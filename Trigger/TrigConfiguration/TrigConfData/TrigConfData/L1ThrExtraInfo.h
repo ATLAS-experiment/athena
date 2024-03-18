@@ -269,9 +269,12 @@ namespace TrigConf {
          L1ThrExtraInfoBase(thrTypeName, data) { load(); }
       virtual ~L1ThrExtraInfo_eTAU() override = default;
       virtual std::string className() const override { return "L1ThrExtraInfo_eTAU"; }
-      unsigned int maxEtMeV()  const { return m_maxEt; }
-      unsigned int maxEtCounts(const unsigned int resolutionMeV)  const { return TrigConf::energyInCounts( m_maxEt, resolutionMeV ); }
-      float maxEt()  const { return m_maxEt/1000.0f; }
+      unsigned int minIsoEtMeV() const { return m_minIsoEt; }
+      unsigned int minIsoEtCounts(const unsigned int resolutionMeV) const { return TrigConf::energyInCounts( m_minIsoEt, resolutionMeV ); }
+      float minIsoEt() const { return m_minIsoEt/1000.0f; }
+      unsigned int maxEtMeV() const { return m_maxEt; }
+      unsigned int maxEtCounts(const unsigned int resolutionMeV) const { return TrigConf::energyInCounts( m_maxEt, resolutionMeV ); }
+      float maxEt() const { return m_maxEt/1000.0f; }
       float ptMinToTopo() const { return m_ptMinToTopoMeV/1000.0f; }
       unsigned int ptMinToTopoMeV() const { return m_ptMinToTopoMeV; }
       unsigned int ptMinToTopoCounts() const { return energyInCounts( m_ptMinToTopoMeV, resolutionMeV() ); }
@@ -282,7 +285,8 @@ namespace TrigConf {
       /** Update the internal members */
       void load();
       /** eTAU specific data */
-      unsigned int m_maxEt { 0 };
+      unsigned int m_minIsoEt { 0 }; // In MeV
+      unsigned int m_maxEt { 0 }; // In MeV
       unsigned int m_ptMinToTopoMeV{0};
       std::map<TrigConf::Selection::WP, ValueWithEtaDependence<WorkingPoints_eTAU>> m_isolation{};
       unsigned int m_algoVersion { 0 };

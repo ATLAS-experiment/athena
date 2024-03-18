@@ -393,7 +393,9 @@ TrigConf::L1ThrExtraInfo_eTAU::load()
 {
    for( auto & x : m_extraInfo ) {
       if( x.first == "maxEt" ){
-         m_maxEt = 1000*x.second.getValue<unsigned int>();
+         m_maxEt = 1000*x.second.getValue<unsigned int>(); // Original in units of GeV
+      } else if( x.first == "minIsoEt" ){
+         m_minIsoEt = lround(1000 * x.second.getValue<float>()); // Original in units of GeV
       } else if( x.first == "ptMinToTopo" ) {
          m_ptMinToTopoMeV = lround(1000 * x.second.getValue<float>());
       } else if( x.first == "workingPoints" ) {
