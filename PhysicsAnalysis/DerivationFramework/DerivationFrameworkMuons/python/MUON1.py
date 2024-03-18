@@ -21,10 +21,10 @@ def Muon1SelectionCfg(flags,
     ### Z mumu OC events
     acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingZmumuOC",
-                                  Mu1PtMin                = 24*Units.GeV,
-                                  Mu1AbsEtaMax            = 2.5,
+                                  Mu1PtMin                = 4.*Units.GeV,
+                                  Mu1AbsEtaMax            = 2.75,
                                   Mu1RequireQual          = True,
-                                  Mu2PtMin                = 2.5*Units.GeV,
+                                  Mu2PtMin                = 2.*Units.GeV,
                                   UseTrackProbe           = True,
                                   MuonContainerKey        = MuonContainer,
                                   TrackContainerKey       = IdTrackContainer, 
@@ -36,53 +36,38 @@ def Muon1SelectionCfg(flags,
     ### Z mumu SC events
     acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingZmumuSC",
-                                  Mu1PtMin                = 24*Units.GeV,
-                                  Mu1AbsEtaMax            = 2.5,
+                                  Mu1PtMin                = 4.*Units.GeV,
+                                  Mu1AbsEtaMax            = 2.75,
                                   Mu1RequireQual          = True,
-                                  Mu2PtMin                = 2.5*Units.GeV,
+                                  Mu2PtMin                = 2.*Units.GeV,
                                   UseTrackProbe           = True,
                                   MuonContainerKey        = MuonContainer,
                                   TrackContainerKey       = IdTrackContainer,
                                   OppositeCharge          = False,
                                   applyTrigger            = applyTrigger,
                                   InvariantMassLow        = 60*Units.GeV,
-                                  BranchPrefix            = "Muon1ZmumuSC")) 
-    # Jpsi for tag-probe
+                                  BranchPrefix            = "Muon1ZmumuSC"))
+    # Jpsi
     acc.merge(DiMuonTaggingAlgCfg(flags,
-                                  name                    = "DiMuonTaggingJpsiTP",
-                                  Mu1PtMin                = 4*Units.GeV,
-                                  Mu1AbsEtaMax            = 2.5,
+                                  name                    = "DiMuonTaggingJpsi",
+                                  Mu1PtMin                = 4.*Units.GeV,
+                                  Mu1AbsEtaMax            = 2.75,
                                   Mu1RequireQual          = True,
-                                  Mu2PtMin                = 2.5*Units.GeV,
-                                  Mu2AbsEtaMax            = 2.5,
+                                  Mu2PtMin                = 2.*Units.GeV,
                                   UseTrackProbe           = True,
                                   MuonContainerKey        = MuonContainer,
                                   TrackContainerKey       = IdTrackContainer,
                                   applyTrigger            = applyTrigger,
                                   InvariantMassLow        = 2.0*Units.GeV,
                                   InvariantMassHigh       = 4.8*Units.GeV,
-                                  BranchPrefix            = "Muon1JPsiTP"))
-  
-    ### Jpsi for calibration
-    acc.merge(DiMuonTaggingAlgCfg(flags,
-                                  name                    = "DiMuonTaggingJpsiCalib",
-                                  Mu1PtMin                = 5.*Units.GeV,
-                                  Mu1RequireQual          = True,
-                                  Mu2PtMin                = 5.*Units.GeV,
-                                  Mu2RequireQual          = True,
-                                  MuonContainerKey        = MuonContainer,
-                                  TrackContainerKey       = IdTrackContainer,
-                                  applyTrigger            = applyTrigger,
-                                  InvariantMassLow        = 2.0*Units.GeV,
-                                  InvariantMassHigh       = 4.8*Units.GeV,
-                                  BranchPrefix            = "Muon1JPsiCalib"))
+                                  BranchPrefix            = "Muon1JPsi"))
     ### Upsilon tagging
     acc.merge(DiMuonTaggingAlgCfg(flags,
                                   name                    = "DiMuonTaggingUpsilon",
-                                  Mu1PtMin                = 5.*Units.GeV,
+                                  Mu1PtMin                = 4.*Units.GeV,
+                                  Mu1AbsEtaMax            = 2.75,
                                   Mu1RequireQual          = True,
                                   Mu2PtMin                = 2.*Units.GeV,
-                                  Mu2RequireQual          = True,
                                   MuonContainerKey        = MuonContainer,
                                   TrackContainerKey       = IdTrackContainer,
                                   InvariantMassLow        = 7.0*Units.GeV,
@@ -93,7 +78,7 @@ def Muon1SelectionCfg(flags,
         ### Accept every muon around a truth particle
         acc.merge(DiMuonTaggingAlgCfg(flags,
                                       name                    = "MuonTruthTagging",
-                                      Mu1PtMin                = 2.5*Units.GeV,
+                                      Mu1PtMin                = 2.*Units.GeV,
                                       Mu1RequireQual          = True,
                                       Mu2PtMin                = 60.*Units.TeV, # Dummy value
                                       UseTrackProbe           = True,
@@ -181,12 +166,12 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonTPExtrapolationAlgCfg 
     acc.merge(MuonTPExtrapolationAlgCfg(flags,
                                         ContainerKey= kwargs["MuonContainer"],
-                                        TrackSelections = ["passMuon1JPsiTP"]))    
+                                        TrackSelections = ["passMuon1JPsi"]))
     
     acc.merge(MuonTPExtrapolationAlgCfg(flags,
                                         name = "MuonTPTrigExtrapolation",
                                         ContainerKey= kwargs["IdTrkContainer"],
-                                        TrackSelections = ["passMuon1JPsiTP"]))
+                                        TrackSelections = ["passMuon1JPsi"]))
 
 
     # --------
