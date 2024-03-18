@@ -141,8 +141,8 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
   int motherPDG = 0;
   const xAOD::TruthParticle* theMoth{};
   if (partOriVert != nullptr) {
-    for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ++ipIn) {
-      theMoth = partOriVert->incomingParticle(ipIn);
+    for (const auto& temp: partOriVert->particles_in()) {
+      theMoth = temp;
       if (!theMoth) continue;
       motherPDG = theMoth->pdgId();
       motherStatus = theMoth->status();
@@ -361,7 +361,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
   bool samePart = false;
-  for (const auto & theDaug: partOriVert->particles_out()) {
+  for (const auto& theDaug: partOriVert->particles_out()) {
     if (!theDaug)  continue;
     if (motherPDG == theDaug->pdgId() &&  info && info->Mother() && HepMC::is_same_generator_particle(theDaug, info->Mother())) samePart = true;
   }
@@ -599,7 +599,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     int NumOfEleLoop = 0;
     int NumOfLepLoop = 0;
     int NumOfEleNeuLoop = 0;
-    for ( const auto pout: partOriVert->particles_out()) {
+    for (const auto pout: partOriVert->particles_out()) {
       if (!pout) continue;
       for (const auto pin: partOriVert->particles_in()) {
         if (!pin) continue;
@@ -883,14 +883,14 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
     int NumOfMuLoop = 0;
     int NumOfMuNeuLoop = 0;
     int NumOfLepLoop = 0;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-        if (!partOriVert->outgoingParticle(ipOut)) continue;
-        if (!partOriVert->incomingParticle(ipIn)) continue;
-        if (partOriVert->outgoingParticle(ipOut)->barcode() == partOriVert->incomingParticle(ipIn)->barcode()) {
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 13) NumOfMuLoop++;
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 14) NumOfMuNeuLoop++;
-          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut))) NumOfLepLoop++;
+    for (const auto & pout: partOriVert->particles_out()) {
+      for (const auto & pin: partOriVert->particles_in()) {
+        if (!pout) continue;
+        if (!pin) continue;
+        if (pout->barcode() == pin->barcode()) {
+          if (std::abs(pout->pdg_id()) == 13) NumOfMuLoop++;
+          if (std::abs(pout->pdg_id()) == 14) NumOfMuNeuLoop++;
+          if (MC::isSMLepton(pout)) NumOfLepLoop++;
         }
       }
     }
@@ -1220,9 +1220,9 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   long NumOfNeut(0);
   long NumOfPartons(0);
   const xAOD::TruthParticle* Daug = nullptr;
-  for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-    if (!partOriVert->outgoingParticle(ipOut)) continue;
-    DaugType = partOriVert->outgoingParticle(ipOut)->pdgId();
+  for (const auto& pout: partOriVert->particles_out()) {
+    if (!pout) continue;
+    DaugType = pout->pdg_id();
     if (numOfParents == 1 && (motherPDG == 22 || abs(motherPDG) == 11 || abs(motherPDG) == 211) &&
         (DaugType > 1000000000 || DaugType == 0 || DaugType == 2212 || DaugType == 2112))
       NumOfNucFr++;
@@ -1237,8 +1237,8 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     if (abs(DaugType) < 11 || (abs(DaugType) > 16 && abs(DaugType) < 43 && abs(DaugType) != 22)) NumOfPartons++;
 
     if (DaugType == motherPDG) {
-      DaugBarcode = partOriVert->outgoingParticle(ipOut)->barcode();
-      Daug = partOriVert->outgoingParticle(ipOut);
+      DaugBarcode = pout->barcode();
+      Daug = pout;
      }
   } // cycle itrDaug
 
@@ -1417,7 +1417,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   //--New Sherpa single photon
   if (partOriVert == mothOriVert && partOriVert != nullptr) {
     int NumOfPhtLoop = 0;
-    for ( const auto pout: partOriVert->particles_out()) {
+    for (const auto pout: partOriVert->particles_out()) {
       if (!pout) continue;
       for (const auto pin: partOriVert->particles_in()) {
         if (!pin) continue;
@@ -1688,7 +1688,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (partOriVert == mothOriVert && partOriVert != nullptr) {
     int NumOfLepLoop = 0;
     int NumOfNeuLoop = 0;
-    for ( const auto pout: partOriVert->particles_out()) {
+    for (const auto pout: partOriVert->particles_out()) {
       if (!pout) continue;
       for (const auto pin: partOriVert->particles_in()) {
         if (!pin) continue;
