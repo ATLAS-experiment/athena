@@ -6,22 +6,29 @@
     <class name="Muon::CSCSimHitCollection_p1" id="E45CD293-4599-41BE-8B65-945A18F41AB7"/>
     <class name="Muon::CSCSimHitCollection_p2" id="7E5A120C-E64F-4519-A24B-B485A58724BF"/>
     <class name="Muon::CSCSimHitCollection_p3" id="6BFFE81C-C99E-43D9-B06F-1A998C3B3E40"/>
+    <class name="Muon::CSCSimHitCollection_p4" id="018E2DAC-18EB-71D2-A246-66F818B3681B"/>
     <class name="Muon::RPCSimHitCollection_p1" id="C4C57487-41DC-4706-9604-721D76F0AA52"/>
     <class name="Muon::RPCSimHitCollection_p2" id="1B611C70-CC6F-42AE-9F6D-7DA6A9A22546"/>
     <class name="Muon::RPCSimHitCollection_p3" id="B48E5E17-FB26-4BC0-A0E2-5324925EAE2F"/>
+    <class name="Muon::RPCSimHitCollection_p4" id="018E2DAC-18EB-714B-B9BD-F9354E30CB51"/>
     <class name="Muon::TGCSimHitCollection_p1" id="BD569381-2489-4402-BBD3-91EE8C009F26"/>
     <class name="Muon::TGCSimHitCollection_p2" id="710241EE-D5F7-4CB6-A1D7-6E80D040E637"/>
     <class name="Muon::TGCSimHitCollection_p3" id="BACD19A8-4737-4857-A22D-B9DF833A0A80"/>
     <class name="Muon::TGCSimHitCollection_p4" id="F8F77562-BBD9-45DB-A276-6A21018EA7FA"/>
+    <class name="Muon::TGCSimHitCollection_p5" id="018E2DAC-18EB-7E5B-9F18-CC2E36343F17"/>
     <class name="Muon::MDTSimHitCollection_p1" id="EA781971-65C5-4B30-9D22-EEFB764BA0B3"/>
     <class name="Muon::MDTSimHitCollection_p2" id="92880B97-75BB-4C5D-8183-577338059FCC"/>
     <class name="Muon::MDTSimHitCollection_p3" id="0E9EEEE2-304F-44B8-B1DF-E75297183A02"/>
+    <class name="Muon::MDTSimHitCollection_p4" id="018E2DAC-18EB-7BBC-92AF-EFE3F0E400C2"/>
     <class name="Muon::GenericMuonSimHitCollection_p1" id="C2D5D558-2671-11E1-AAFA-001E4F3E5646"/>
     <class name="Muon::GenericMuonSimHitCollection_p2" id="3760C0D8-C7EA-42C7-925A-E841196F2138"/>
-    <class name="Muon::sTGCSimHitCollection_p1" id="f8b975d2-8130-11e8-abf4-4b4a6a2b6ee5"/> 
-    <class name="Muon::sTGCSimHitCollection_p2" id="b9521cc6-6e3b-11e8-adbb-02163e01bddd"/> 
-    <class name="Muon::sTGCSimHitCollection_p3" id="8f3ffd1c-c9a0-4da7-b99e-a3828b6ac789"/> 
+    <class name="Muon::GenericMuonSimHitCollection_p3" id="018E2DAC-18EB-7635-A068-B08EFB5CD64A"/>
+    <class name="Muon::sTGCSimHitCollection_p1" id="f8b975d2-8130-11e8-abf4-4b4a6a2b6ee5"/>
+    <class name="Muon::sTGCSimHitCollection_p2" id="b9521cc6-6e3b-11e8-adbb-02163e01bddd"/>
+    <class name="Muon::sTGCSimHitCollection_p3" id="8f3ffd1c-c9a0-4da7-b99e-a3828b6ac789"/>
+    <class name="Muon::sTGCSimHitCollection_p4" id="018E2DAC-18EB-79C4-B562-FD7C035C92C1"/>
     <class name="Muon::MMSimHitCollection_p1" id="ac0b677c-fe08-11e8-b174-02163e018187"/>
     <class name="Muon::MMSimHitCollection_p2" id="b9bdd436-fe08-11e8-a40f-02163e018187"/>
-    
+    <class name="Muon::MMSimHitCollection_p3" id="018E2DAC-18EB-7EAA-A141-F0FD2A6E1E06"/>
+
 </lcgdict>
