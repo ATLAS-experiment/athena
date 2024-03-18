@@ -30,6 +30,7 @@
 #include "xAODMuon/MuonContainer.h"
 #include "MuonPrepRawData/MMPrepDataContainer.h"
 #include "MuonPrepRawData/MMPrepData.h"
+#include "xAODMuonRDO/NSWMMTPRDOContainer.h"
 #include "StoreGate/ReadHandleKey.h"
 
 
@@ -66,13 +67,15 @@ class MMRawDataMonAlg: public AthMonitorAlgorithm {
   SG::ReadHandleKey<Muon::MMPrepDataContainer> m_MMContainerKey{this,"MMPrepDataContainerName","MM_Measurements"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this,"MuonKey","Muons","muons"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_meTrkKey{this, "METrkContainer", "ExtrapolatedMuonTrackParticles"};
-
+  SG::ReadHandleKey<xAOD::NSWMMTPRDOContainer> m_mmtpRdoKey{this, "NSW_MMTPDataKey", "NSW_MMTrigProcessor_RDO"};
+  
   StatusCode  fillMMOverviewVects(const Muon::MMPrepData*, MMOverviewHistogramStruct& vects, MMByPhiStruct (&occupancyPlots)[16][2]) const;
   void  fillMMOverviewHistograms(const MMOverviewHistogramStruct& vects, MMByPhiStruct (&occupancyPlots)[16][2], const int lb) const;
   StatusCode  fillMMSummaryVects( const Muon::MMPrepData*, MMSummaryHistogramStruct (&vects)[2][16][2][2][4]) const; //[side][stationPhi][stationEta][multiplet][gas_gap]
   StatusCode  fillMMHistograms( const Muon::MMPrepData* ) const;                                      
   StatusCode  fillMMSummaryHistograms( const MMSummaryHistogramStruct (&vects)[2][16][2][2][4]) const;
 
+  
   void clusterFromTrack(const xAOD::TrackParticleContainer*,const int lb) const;
   void clusterFromSegments(const Trk::SegmentCollection*, const int lb) const;
   
@@ -98,7 +101,7 @@ class MMRawDataMonAlg: public AthMonitorAlgorithm {
   int get_bin_for_occ_lb_pcb_hist(const int multiplet, const int gas_gap, const int PCB) const;
 
   void MMEfficiency(const xAOD::TrackParticleContainer*) const;
-
+  StatusCode  fillMMTrigger( const xAOD::NSWMMTPRDOContainer*, const int)  const;
 
   Gaudi::Property<bool> m_doMMESD{this,"DoMMESD",true};
   Gaudi::Property<bool> m_do_mm_overview{this,"do_mm_overview",true};
