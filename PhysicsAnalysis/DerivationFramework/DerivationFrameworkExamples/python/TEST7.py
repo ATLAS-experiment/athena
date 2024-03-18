@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TEST7.py - derivation framework example demonstrating skimming via means of string 
 
@@ -36,15 +36,15 @@ def TEST7KernelCfg(flags, name='TEST7Kernel', **kwargs):
     return acc
 
 
-def TEST7Cfg(ConfigFlags):
+def TEST7Cfg(flags):
 
     acc = ComponentAccumulator()
-    acc.merge(TEST7KernelCfg(ConfigFlags, name="TEST7Kernel"))
+    acc.merge(TEST7KernelCfg(flags, name="TEST7Kernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST7SlimmingHelper = SlimmingHelper("TEST7SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TEST7SlimmingHelper = SlimmingHelper("TEST7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TEST7SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",
@@ -64,7 +64,7 @@ def TEST7Cfg(ConfigFlags):
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
     TEST7ItemList = TEST7SlimmingHelper.GetItemList()
 
-    acc.merge(OutputStreamCfg(ConfigFlags, "D2AOD_TEST7", ItemList=TEST7ItemList, AcceptAlgs=["TEST7Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "D2AOD_TEST7", AcceptAlgs=["TEST7Kernel"], propagateMetadataFromInput=True))
+    acc.merge(OutputStreamCfg(flags, "D2AOD_TEST7", ItemList=TEST7ItemList, AcceptAlgs=["TEST7Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "D2AOD_TEST7", AcceptAlgs=["TEST7Kernel"], propagateMetadataFromInput=True))
 
     return acc

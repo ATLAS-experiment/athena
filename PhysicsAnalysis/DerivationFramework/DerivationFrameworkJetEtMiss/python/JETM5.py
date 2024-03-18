@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM5.py
@@ -9,7 +9,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM5SkimmingToolCfg(ConfigFlags):
+def JETM5SkimmingToolCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
@@ -23,24 +23,24 @@ def JETM5SkimmingToolCfg(ConfigFlags):
 
 
 # Main algorithm config
-def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
+def JETM5KernelCfg(flags, name='JETM5Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM5"""
     acc = ComponentAccumulator()
 
     # Skimming
-    if not ConfigFlags.Input.isMC:
-        skimmingTool = acc.getPrimaryAndMerge(JETM5SkimmingToolCfg(ConfigFlags))
+    if not flags.Input.isMC:
+        skimmingTool = acc.getPrimaryAndMerge(JETM5SkimmingToolCfg(flags))
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
 
     # Include inner detector tracks associated with muons
     JETM5MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM5MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
@@ -48,7 +48,7 @@ def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
     
     # Include inner detector tracks associated with electonrs
     JETM5ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "JETM5ElectronTPThinningTool",
         StreamName              = kwargs['StreamName'],
         SGKey                   = "Electrons",
@@ -56,7 +56,7 @@ def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
 
     # Include inner detector tracks associated with photons
     JETM5PhotonTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                     = "JETM5PhotonTPThinningTool",
         StreamName               = kwargs['StreamName'],
         SGKey                    = "Photons",
@@ -69,7 +69,7 @@ def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
                      JETM5PhotonTPThinningTool]
 
     # Truth particle thinning
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         truth_cond_WZH    = "((abs(TruthParticles.pdgId) >= 23) && (abs(TruthParticles.pdgId) <= 25))"                                      # W, Z and Higgs
         truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
         truth_cond_Quark  = "((abs(TruthParticles.pdgId) <=  5 && (TruthParticles.pt > 10000.)) || (abs(TruthParticles.pdgId) == 6))"       # Quarks
@@ -94,17 +94,17 @@ def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
                                       ThinningTools = thinningTools,
-                                      SkimmingTools = [skimmingTool] if not ConfigFlags.Input.isMC else []))       
+                                      SkimmingTools = [skimmingTool] if not flags.Input.isMC else []))       
 
 
     # PFlow augmentation tool
     from DerivationFrameworkJetEtMiss.PFlowCommonConfig import PFlowCommonCfg
-    acc.merge(PFlowCommonCfg(ConfigFlags))
+    acc.merge(PFlowCommonCfg(flags))
     
     return acc
 
 
-def JETM5Cfg(ConfigFlags):
+def JETM5Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -113,10 +113,10 @@ def JETM5Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM5TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    JETM5TriggerListsHelper = TriggerListsHelper(flags)
 
     # Skimming, thinning, augmentation, extra content
-    acc.merge(JETM5KernelCfg(ConfigFlags, name="JETM5Kernel", StreamName = 'StreamDAOD_JETM5', TriggerListsHelper = JETM5TriggerListsHelper))
+    acc.merge(JETM5KernelCfg(flags, name="JETM5Kernel", StreamName = 'StreamDAOD_JETM5', TriggerListsHelper = JETM5TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -125,7 +125,7 @@ def JETM5Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM5SlimmingHelper = SlimmingHelper("JETM5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    JETM5SlimmingHelper = SlimmingHelper("JETM5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     JETM5SlimmingHelper.SmartCollections = ["EventInfo", "InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
@@ -143,7 +143,7 @@ def JETM5Cfg(ConfigFlags):
 
     JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         JETM5SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer',
                                                        'TruthVertices': 'xAOD::TruthVertexContainer',
@@ -166,8 +166,8 @@ def JETM5Cfg(ConfigFlags):
 
     # Output stream    
     JETM5ItemList = JETM5SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM5", ItemList=JETM5ItemList, AcceptAlgs=["JETM5Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM5", AcceptAlgs=["JETM5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_JETM5", ItemList=JETM5ItemList, AcceptAlgs=["JETM5Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM5", AcceptAlgs=["JETM5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

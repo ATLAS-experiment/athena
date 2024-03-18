@@ -109,7 +109,7 @@ def main():
              continue
  
          if "TriggerSummary" in alg.getName():            
-             alg.OutputLevel = DEBUG
+             alg.OutputLevel = DEBUG  # noqa: ATL900 (testing script)
 
     return cfg
 

@@ -248,7 +248,7 @@ def IDTRKVALIDCfg(flags):
     IDTRKVALIDSlimmingHelper = SlimmingHelper(
         "IDTRKVALIDSlimmingHelper",
         NamesAndTypes = flags.Input.TypedCollections,
-        ConfigFlags   = flags)
+        flags         = flags)
 
     AllVariables = []
     StaticContent = []

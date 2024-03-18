@@ -56,7 +56,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG1SlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    FTAG1SlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     # Many of these are added to AllVariables below as well. We add
     # these items in both places in case some of the smart collections

@@ -12,13 +12,13 @@ set -e   # exit on failure
 
 echo "Fast menu generation of ${menu}"
 mkdir -p ${menu}_fast && cd ${menu}_fast
-time test_HLTmenu.py Trigger.triggerMenuSetup="${menu}" Trigger.fastMenuGeneration=True &> athena.log
+{ time test_HLTmenu.py Trigger.triggerMenuSetup="${menu}" Trigger.fastMenuGeneration=True &> athena.log; } 2>&1
 cd ..
 
 echo
 echo "Slow menu generation of ${menu}"
 mkdir -p ${menu}_slow && cd ${menu}_slow
-time test_HLTmenu.py Trigger.triggerMenuSetup="${menu}" Trigger.fastMenuGeneration=False &> athena.log
+{ time test_HLTmenu.py Trigger.triggerMenuSetup="${menu}" Trigger.fastMenuGeneration=False &> athena.log; } 2>&1
 cd ..
 
 set +e
@@ -33,7 +33,7 @@ for json in `ls ${menu}_fast/*.json`; do
 done
 
 echo "Comparing job configuration"
-confTool.py --color --diff ${menu}_fast/${menu}.pkl ${menu}_slow/${menu}.pkl
+confTool.py --diff ${menu}_fast/${menu}.pkl ${menu}_slow/${menu}.pkl
 status=$((status + $?))
 
 if [ $status -eq 0 ]; then

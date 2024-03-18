@@ -34,7 +34,7 @@ StatusCode TrigmuCombHypoTool::initialize()
    ATH_MSG_DEBUG( "Tool configured for chain/id: " << m_decisionId );
  
    if (m_acceptAll) {
-      ATH_MSG_INFO("Accepting all the events!");
+      ATH_MSG_DEBUG("Accepting all the events!");
    } else {
       ATH_MSG_DEBUG("AcceptAll = False");
       m_bins.resize (m_ptBins.size());

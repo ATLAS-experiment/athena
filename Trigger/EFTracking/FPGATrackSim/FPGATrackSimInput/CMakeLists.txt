@@ -22,7 +22,7 @@ atlas_add_component( FPGATrackSimInput
 # Install files from the package:
 atlas_install_joboptions( share/*.py test/*.py)
 atlas_install_scripts( scripts/*)
-atlas_install_python_modules( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 ) 
+atlas_install_python_modules( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 ) 
 
 # Test in the package:
 atlas_add_test(             testReadRawHit

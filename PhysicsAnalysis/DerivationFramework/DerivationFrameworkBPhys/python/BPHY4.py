@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY4.py
 #====================================================================
@@ -10,15 +10,15 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY4"
 streamName = "StreamDAOD_BPHY4"
 
-def BPHY4Cfg(ConfigFlags):
+def BPHY4Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
 
     BPHY4FourMuonTool = CompFactory.DerivationFramework.FourMuonTool(
@@ -35,7 +35,7 @@ def BPHY4Cfg(ConfigFlags):
             name                    = "BPHY4_Reco_4mu",
             FourMuonTool            = BPHY4FourMuonTool,
             V0Tools                 = V0Tools,
-            PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+            PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
             PairContainerName       = "BPHY4Pairs",
             QuadrupletContainerName = "BPHY4Quads",
             PVContainerName         = "PrimaryVertices",
@@ -68,7 +68,7 @@ def BPHY4Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY4SlimmingHelper = SlimmingHelper("BPHY4SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY4SlimmingHelper = SlimmingHelper("BPHY4SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     BPHY4AllVariables  = getDefaultAllVariables()
     BPHY4StaticContent = []
@@ -112,7 +112,7 @@ def BPHY4Cfg(ConfigFlags):
     BPHY4SlimmingHelper.StaticContent = BPHY4StaticContent
     BPHY4SlimmingHelper.SmartCollections = BPHY4SmartVariables
     BPHY4ItemList = BPHY4SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY4", ItemList=BPHY4ItemList, AcceptAlgs=["BPHY4Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY4", AcceptAlgs=["BPHY4Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY4", ItemList=BPHY4ItemList, AcceptAlgs=["BPHY4Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY4", AcceptAlgs=["BPHY4Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

@@ -124,8 +124,8 @@ class ThresholdDef:
             eEMThreshold('eEM%i' %thrV, 'eEM').addThrValue(max(get_threshold_cut('eEM', thrV), ptMin))
 
         # eEM beam splashes    
-        eEMVarThreshold('eEM22A', 'eEM').addThrValue(get_threshold_cut('eEM',255),priority=1).addThrValue(get_threshold_cut('eEM',22),16,20,priority=2)
-        eEMVarThreshold('eEM22C', 'eEM').addThrValue(get_threshold_cut('eEM',255),priority=1).addThrValue(get_threshold_cut('eEM',22),-16,-20,priority=2)
+        eEMThreshold('eEM22A', 'eEM').addThrValue(get_threshold_cut('eEM',22),16,20)
+        eEMThreshold('eEM22C', 'eEM').addThrValue(get_threshold_cut('eEM',22),-20,-16)
         
         # eEM SPARES
         for thrV in range(1,3):

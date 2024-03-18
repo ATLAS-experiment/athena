@@ -18,14 +18,14 @@ TrigTauCaloRoiUpdater::TrigTauCaloRoiUpdater(const std::string & name, ISvcLocat
 
 StatusCode TrigTauCaloRoiUpdater::initialize() {
 
-  ATH_MSG_INFO( "Initializing " << name() );
-  ATH_MSG_INFO( "z0HalfWidth  " << m_z0HalfWidth );
+  ATH_MSG_DEBUG( "Initializing " << name() );
+  ATH_MSG_DEBUG( "z0HalfWidth  " << m_z0HalfWidth );
   if(m_z0HalfWidth <= 0.) {
-    ATH_MSG_INFO( "z0HalfWidth <= 0:  will use the original RoIInput z0HalfWidth" );
+    ATH_MSG_DEBUG( "z0HalfWidth <= 0:  will use the original RoIInput z0HalfWidth" );
   }
-  ATH_MSG_INFO( "etaHalfWidth " << m_etaHalfWidth );
-  ATH_MSG_INFO( "phiHalfWidth " << m_phiHalfWidth );
-  ATH_MSG_INFO( "dRForCenter  " << m_dRForCenter );
+  ATH_MSG_DEBUG( "etaHalfWidth " << m_etaHalfWidth );
+  ATH_MSG_DEBUG( "phiHalfWidth " << m_phiHalfWidth );
+  ATH_MSG_DEBUG( "dRForCenter  " << m_dRForCenter );
 
   ATH_MSG_DEBUG( "Initialising HandleKeys" );
   CHECK( m_roIInputKey.initialize()        );

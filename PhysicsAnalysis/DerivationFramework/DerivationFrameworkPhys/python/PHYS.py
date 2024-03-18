@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_PHYS.py
@@ -15,14 +15,14 @@ from AthenaCommon.Logging import logging
 logPHYS = logging.getLogger('PHYS')
 
 # Main algorithm config
-def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
+def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for PHYS"""
     acc = ComponentAccumulator()
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(
-        ConfigFlags, 
+        flags, 
         TriggerListsHelper     = kwargs['TriggerListsHelper'], 
         TauJets_EleRM_in_input = kwargs['TauJets_EleRM_in_input']
     ))
@@ -43,7 +43,7 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
         thinningToolsArgs['TauJets_EleRMThinningToolName'] = "PHYSTauJets_EleRMThinningTool"
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
-    acc.merge(PhysCommonThinningCfg(ConfigFlags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
+    acc.merge(PhysCommonThinningCfg(flags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
     # Get them from the CA so they can be added to the kernel
     thinningTools = []
     for key in thinningToolsArgs:
@@ -55,33 +55,32 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
     return acc
 
 
-def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None, TauJets_EleRM_in_input=None):
+def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None, TauJets_EleRM_in_input=None):
     
     if TriggerListsHelper is None:
         from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-        TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+        TriggerListsHelper = TriggerListsHelper(flags)
     
     if TauJets_EleRM_in_input is None:
         # for AOD produced before 24.0.17, the electron removal tau is not available
-        TauJets_EleRM_in_input = (ConfigFlags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
-    
+        TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
+
     acc = ComponentAccumulator()
 
     ## Higgs augmentations - create 4l vertex
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
-    acc.merge(HiggsAugmentationAlgsCfg(ConfigFlags))
+    acc.merge(HiggsAugmentationAlgsCfg(flags))
     
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_"+name_tag, isPhysLite = False, stream_name = StreamName))
-
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_"+name_tag, isPhysLite = False, stream_name = StreamName))
 
     #===================================================
     # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
     #===================================================
     from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
-    acc.merge(HFClassificationCommonCfg(ConfigFlags))
+    acc.merge(HFClassificationCommonCfg(flags))
     
     # ============================
     # Define contents of the format
@@ -90,7 +89,7 @@ def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', Trig
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    PHYSSlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    PHYSSlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     PHYSSlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",
                                            "Photons",
@@ -146,7 +145,7 @@ def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', Trig
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
  
     # Truth extra content
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSSlimmingHelper)
@@ -156,12 +155,12 @@ def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', Trig
                                               "Photons.TruthLink"]
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
-        acc.merge(AddTauAndDownstreamParticlesCfg(ConfigFlags))
+        acc.merge(AddTauAndDownstreamParticlesCfg(flags))
         PHYSSlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
 
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
-    setupHiggsSlimmingVariables(ConfigFlags, PHYSSlimmingHelper)
+    setupHiggsSlimmingVariables(flags, PHYSSlimmingHelper)
    
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False
@@ -177,7 +176,7 @@ def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', Trig
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_", 
@@ -186,17 +185,17 @@ def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', Trig
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
-    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)
         ##################################################### 
         ## NOTE: This block is temporary, during validation of the doEDMVersionConversion flag.
         ## This adds a LOT of containers to the output! In order to help validate the conversion.
         ## It should be removed once doEDMVersionConversion goes into production use.
-        if ConfigFlags.Trigger.doEDMVersionConversion:   
+        if flags.Trigger.doEDMVersionConversion:   
             from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
             logPHYS.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
-            addTrigEDMSetToOutput(ConfigFlags, PHYSSlimmingHelper, "AODFULL")
+            addTrigEDMSetToOutput(flags, PHYSSlimmingHelper, "AODFULL")
             PHYSSlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer','HLTNav_R2ToR3SummaryAux':'xAOD::TrigCompositeAuxContainer'})
             PHYSSlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
         ##
@@ -204,13 +203,13 @@ def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', Trig
 
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_"+name_tag, ItemList=PHYSItemList, AcceptAlgs=[name_tag+"Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_"+name_tag, AcceptAlgs=[name_tag+"Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=PHYSItemList, AcceptAlgs=[name_tag+"Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_"+name_tag, AcceptAlgs=[name_tag+"Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 
-def PHYSCfg(ConfigFlags):
-    
+def PHYSCfg(flags):
+
     logPHYS.info('****************** STARTING PHYS *****************')
 
     stream_name = 'StreamDAOD_PHYS'
@@ -221,10 +220,10 @@ def PHYSCfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSTriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    PHYSTriggerListsHelper = TriggerListsHelper(flags)
 
     # for AOD produced before 24.0.17, the electron removal tau is not available
-    TauJets_EleRM_in_input = (ConfigFlags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
+    TauJets_EleRM_in_input = (flags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
     if TauJets_EleRM_in_input:
         logPHYS.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
     else:
@@ -232,15 +231,15 @@ def PHYSCfg(ConfigFlags):
 
     # Common augmentations
     acc.merge(PHYSKernelCfg(
-        ConfigFlags, 
-        name="PHYSKernel", 
+        flags,
+        name="PHYSKernel",
         StreamName = stream_name, 
         TriggerListsHelper = PHYSTriggerListsHelper, 
         TauJets_EleRM_in_input=TauJets_EleRM_in_input
     ))
     # PHYS content
     acc.merge(PHYSCoreCfg(
-        ConfigFlags, 
+        flags,
         "PHYS",
         StreamName = stream_name, 
         TriggerListsHelper = PHYSTriggerListsHelper, 
@@ -248,4 +247,3 @@ def PHYSCfg(ConfigFlags):
         ))
     
     return acc
-

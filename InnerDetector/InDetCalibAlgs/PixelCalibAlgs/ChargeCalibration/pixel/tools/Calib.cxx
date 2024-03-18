@@ -56,7 +56,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
         TDirectoryFile* rodDir = static_cast<TDirectoryFile*>(rodKey->ReadObj());
         TIter modItr = getModuleIterator(rodDir);
         const TString rodName(rodKey->GetName());
-        
+        printf("%s\n",rodName.Data());
         TKey* modKey;
         while ((modKey=static_cast<TKey*>(modItr()))) {
             const TString modName(modKey->GetName());
@@ -68,7 +68,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                 continue;
             }    
             
-            printf("%s -> %s\n",rodName.Data(),modName.Data());
+            printf("  -> %s\n",modName.Data());
             
             //creates arrays for the Tgraph
             std::array<std::array<float, m_ncharge>, m_nFE> totArrI{};
@@ -150,6 +150,8 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
             
             // loop over FE and create a graph for fitting            
             for(unsigned int FE = 0; FE < m_nFE; FE++) {
+
+                TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                 
                 std::vector<float> v_Q;
                 std::vector<float> v_Qerr;
@@ -199,8 +201,6 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     
                     if(m_savefile){
                         
-                        TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
-                        
                         m_wFile->cd();
                         if( !m_wFile->Get(rodName+"/"+modName+"/TOTfits/"+subdir) ){
                             m_wFile->mkdir(rodName+"/"+modName+"/TOTfits/"+subdir,rodName);
@@ -222,7 +222,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     graphnormal.reset();
                     graphsig.reset();
                     
-                }while(reFit_normalPix(pixNormalParams, v_Q, v_Qerr, v_TOT, v_TOTerr, v_TOTsig, v_TOTsigerr)     );
+                }while(reFit_normalPix(pixNormalParams, v_Q, v_Qerr, v_TOT, v_TOTerr, v_TOTsig, v_TOTsigerr, FE )     );
                 
                 
                 // Since we have modified the vector size we need to clear it and refill it for the long and gange pixels
@@ -299,10 +299,12 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
 
 
 
-bool Calib::reFit_normalPix(std::vector<float> &params, std::vector<float> &q, std::vector<float> &qerr, std::vector<float> &tot, std::vector<float> &toterr, std::vector<float> &sig, std::vector<float> &sigerr){
+bool Calib::reFit_normalPix(std::vector<float> &params, std::vector<float> &q, std::vector<float> &qerr, std::vector<float> &tot, std::vector<float> &toterr, std::vector<float> &sig, std::vector<float> &sigerr, const unsigned int fe){
     
-    float vecFit_size = q.size() - m_qthresh;
-    float stopFit = (m_ncharge - m_qthresh)/2.0;
+    float vecFit_size = q.size()+1;
+    // float vecFit_size = q.size() - m_qthresh;
+    float stopFit = m_ncharge/2.0;
+    // float stopFit = (m_ncharge - m_qthresh)/2.0;
     if(vecFit_size < stopFit) {
 
         // Default values for the fit
@@ -335,7 +337,7 @@ bool Calib::reFit_normalPix(std::vector<float> &params, std::vector<float> &q, s
     if(*itr_max > m_chi_error){
         
         size_t n_max = std::distance(v_discrepancy.begin(), itr_max);
-        
+        printf("FE %02u Refitted, removing charge %5.0f with chi_error %7.5f\n", fe ,q.at(n_max),*itr_max);
         q.erase(q.begin()+n_max);
         qerr.erase(qerr.begin()+n_max);
         tot.erase(tot.begin()+n_max);
@@ -432,7 +434,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
             int modID = pm.getID(std::string(modName));
             auto itr = map_info.find( modID );
             if (itr == map_info.end()) {
-                printf("Mod ID not found. Creating it -----> Inform Pixel Offline Software Experts... \n");
+                printf("Calib::fillTiming: ERROR - Mod ID= %16s not found. Creating it -----> Inform Pixel Offline Software Experts... \n",std::string(modName).c_str());
                 
                 map_info[modID] = std::vector<std::unique_ptr<CalibFrontEndInfo>> ();
                 
@@ -460,7 +462,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                             map_info[modID].at(FE)->set_GangedIntime(tim_mean);
                         }
                         else{
-                            printf("Error - Bad pixel in Calib::FillThresholds\n");
+                            printf("Error - Bad pixel in Calib::fillTiming\n");
                             return false;
                         }
                         
@@ -491,7 +493,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                             (itr->second).at(FE)->set_GangedIntime(tim_mean);
                         }
                         else{
-                            printf("Error - Bad pixel in Calib::FillThresholds\n");
+                            printf("Error - Bad pixel in Calib::fillTiming\n");
                             return false;
                         }
                     } // End of pixel type loop
@@ -609,6 +611,8 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
             
             int modID = pm.getID(std::string(modName));
             auto itr = map_info.find( modID );
+
+            // Map should be empty and therefore we need to create the key - if the key is repeated then it will throw an error
             if (itr == map_info.end()) {
 
                 map_info[modID] = std::vector<std::unique_ptr<CalibFrontEndInfo>> ();
@@ -646,7 +650,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                             map_info[modID].at(FE)->set_GangedNoise(sig_mean);                            
                         }
                         else{
-                            printf("Error - Bad pixel in Calib::FillThresholds\n");
+                            printf("Calib::fillThresholds: ERROR - Bad pixel in Calib::fillThresholds\n");
                             return false;
                         }
                     }
@@ -654,7 +658,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                 
             }
             else{
-                printf("Error - REPEATED MOD ID! Contact Offline team\n");
+                printf("Calib::fillThresholds: ERROR - REPEATED MOD ID: %s! Contact Offline team\n",std::string(modName).c_str());
                 return false;
             }
         } // End of MOD loop 

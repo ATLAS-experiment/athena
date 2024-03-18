@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelCalibAlgs )
@@ -30,11 +30,6 @@ atlas_add_executable( makeInactiveModuleList
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelConditionsData PixelCalibAlgsLib )
    
-atlas_add_executable( PixelCalib
-   ChargeCalibration/pixel/PixelCalib.C
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils PixelCalibAlgsLib )
-   
 atlas_add_executable( PixelCalibration
    ChargeCalibration/pixel/PixelCalibration.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -56,4 +51,4 @@ atlas_add_test( PixelMapping_test
 
 atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat ChargeCalibration/common/mapping.csv)
 
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_python_modules( python/*.py ChargeCalibration/pixel/python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TRUTH1.py - format containing extended common ATLAS truth record
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import MetadataCategory
 
-def TRUTH1Cfg(ConfigFlags):
+def TRUTH1Cfg(flags):
     """Main config for TRUTH1"""
     acc = ComponentAccumulator()
 
@@ -13,19 +13,19 @@ def TRUTH1Cfg(ConfigFlags):
     # Add all the particle derivation tools
     # This sets up its own common kernel and adds the common tools to it
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddStandardTruthContentsCfg
-    acc.merge(AddStandardTruthContentsCfg(ConfigFlags))
+    acc.merge(AddStandardTruthContentsCfg(flags))
 
     #==============================================================================
     # HEAVY FLAVOR DECORATIONS (ttbar)
     #==============================================================================
     from DerivationFrameworkMCTruth.HFHadronsCommonConfig import HFHadronsCommonCfg
-    acc.merge(HFHadronsCommonCfg(ConfigFlags))
+    acc.merge(HFHadronsCommonCfg(flags))
 
     #==============================================================================
     # Set up slimming content list
     #==============================================================================
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TRUTH1SlimmingHelper = SlimmingHelper("TRUTH1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TRUTH1SlimmingHelper = SlimmingHelper("TRUTH1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TRUTH1SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
                                                'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
                                                'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
@@ -88,7 +88,7 @@ def TRUTH1Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     TRUTH1ItemList = TRUTH1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRUTH1", ItemList=TRUTH1ItemList))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TRUTH1", createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TRUTH1", ItemList=TRUTH1ItemList))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TRUTH1", createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc

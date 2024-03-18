@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     
     for(int i=1; i<argc; i++){
         std::string aux(argv[i]);
-        //0=BLayer, 1=L1, 2=L2, 3=L3
+        //0=BLayer, 1=L1, 2=L2, 3=disk
         if(aux.compare("Blayer") == 0)      whichPart = 0;
         else if(aux.compare("L1") == 0)     whichPart = 1;
         else if(aux.compare("L2") == 0)     whichPart = 2;       
@@ -99,16 +99,30 @@ int main(int argc, char *argv[]) {
     
     time(&start); 
     //Setting up the Calibration functions.
-    Calib Calibration(whichPart,saveInfo);
+    printf("Time to calculate threshold calibration\n");
+    std::string moduleName = "";
+    Calib Calibration(whichPart,saveInfo, moduleName);
     if(!(Calibration.fillThresholds(pixmap ,thres_f ,map_values )) ){
         printf("Error - The threshold calibration was not properly finished.\n");
         return 1;
     }
     time(&end);
     printf("Time taken for threshold calibration:%7.1f seconds\n",double(end - start));
+
+    if(map_values.size() == 0){
+
+        // If we are running over just one module, and it is not created already in the map means that this is not the correct layer
+        if( std::strcmp(moduleName.c_str(), "") != 0 ){
+            printf("main::main: Running only one module: %s - It does not belog to %s\n",moduleName.c_str(), sWhichPart.at(whichPart).c_str());
+            return 0;
+        }
+        printf("main::main: ERROR - Size of filled map is 0. Does the %s exist in the %s file?\n",sWhichPart.at(whichPart).c_str(),thres_f.c_str());
+        return 1;
+    }
     
     time(&start); 
     //Setting up the Timing functions.
+    printf("Time to take timing calibration\n");
     if(!(Calibration.fillTiming(pixmap ,timin_f ,map_values )) ){
         printf("Error - The timing calibration was not properly finished.\n");
         return 1;
@@ -117,7 +131,8 @@ int main(int argc, char *argv[]) {
     printf("Time taken for timing calibration:%7.1f seconds\n",double(end - start));
     
     time(&start); 
-    //Setting up the Timing functions.
+    //Setting up the tot functions.
+    printf("Time to take TOT calibration\n");
     if(!(Calibration.totFitting(pixmap ,totin_f ,map_values )) ){
         printf("Error - The TOT calibration was not properly finished.\n");
         return 1;
@@ -125,7 +140,7 @@ int main(int argc, char *argv[]) {
     time(&end);
     printf("Time taken for TOT calibration:%7.1f seconds\n",double(end - start));
     
-    std::ofstream myFile("log_"+sWhichPart.at(whichPart)+".txt");
+    std::ofstream myFile("calibration_"+sWhichPart.at(whichPart)+".txt");
     //cppcheck-suppress invalidPrintfArgType_uint
     printf("Total MODs:%4lu\n",map_values.size());
     for(const auto & [key, MOD] : map_values){

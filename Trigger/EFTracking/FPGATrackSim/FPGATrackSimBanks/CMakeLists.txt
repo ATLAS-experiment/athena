@@ -21,7 +21,7 @@ atlas_add_component( FPGATrackSimBanks
    LINK_LIBRARIES FPGATrackSimBanksLib )
 
 # Install files from the package and run flake8 test:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )  
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 )  
 
 
 #atlas_add_test(             FPGATrackSimFitConstantBank_test

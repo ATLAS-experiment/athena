@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_NCB1.py
@@ -13,13 +13,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def NCB1KernelCfg(ConfigFlags, name='NCB1Kernel', **kwargs):
+def NCB1KernelCfg(flags, name='NCB1Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for NCB1"""
     acc = ComponentAccumulator()
 
     # Common augmentations
     from DerivationFrameworkNCB.NCBCommonConfig import NCBCommonAugmentationsCfg
-    acc.merge(NCBCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(NCBCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # The kernel algorithm itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
@@ -28,7 +28,7 @@ def NCB1KernelCfg(ConfigFlags, name='NCB1Kernel', **kwargs):
     return acc
 
 
-def NCB1Cfg(ConfigFlags):
+def NCB1Cfg(flags):
 
     from AthenaCommon.Logging import logging
     logNCB1 = logging.getLogger('NCB1')
@@ -37,9 +37,9 @@ def NCB1Cfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    NCB1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    NCB1TriggerListsHelper = TriggerListsHelper(flags)
 
-    acc.merge(NCB1KernelCfg(ConfigFlags, name='NCB1Kernel', StreamName = 'StreamDAOD_NCB1', TriggerListsHelper = NCB1TriggerListsHelper))
+    acc.merge(NCB1KernelCfg(flags, name='NCB1Kernel', StreamName = 'StreamDAOD_NCB1', TriggerListsHelper = NCB1TriggerListsHelper))
     
         
     # ============================
@@ -50,7 +50,7 @@ def NCB1Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
        
-    NCB1SlimmingHelper = SlimmingHelper("NCB1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    NCB1SlimmingHelper = SlimmingHelper("NCB1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     NCB1SlimmingHelper.SmartCollections = [
         "MET_Baseline_AntiKt4EMTopo",
@@ -73,7 +73,7 @@ def NCB1Cfg(ConfigFlags):
 
        
     # Truth extra content
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(NCB1SlimmingHelper)
         NCB1SlimmingHelper.AllVariables += [
@@ -97,7 +97,7 @@ def NCB1Cfg(ConfigFlags):
 
     # Output stream    
     NCB1ItemList = NCB1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_NCB1", ItemList=NCB1ItemList, AcceptAlgs=["NCB1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_NCB1", AcceptAlgs=["NCB1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_NCB1", ItemList=NCB1ItemList, AcceptAlgs=["NCB1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_NCB1", AcceptAlgs=["NCB1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
