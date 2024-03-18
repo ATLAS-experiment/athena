@@ -61,11 +61,13 @@ namespace MCTruthPartClassifier {
     int motherPDG = 0;
     const xAOD::TruthParticle* Mother() const { return mother;}
     inline void setMotherProperties(const xAOD::TruthParticle* from) {
+      mother = from;
       if (!from) return; 
       motherStatus = from->status(); 
       motherBarcode = from->barcode(); 
       motherPDG = from->pdg_id(); 
     }
+    inline void resetMotherProperties() { mother = nullptr; motherStatus = 0; motherBarcode = 0; motherPDG = 0; }
 
     long photonMotherBarcode = 0;
     long photonMotherStatus = 0;
