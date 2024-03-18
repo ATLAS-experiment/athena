@@ -6,6 +6,7 @@ atlas_subdir( TrigEFMissingET )
 # External dependencies:
 find_package( Eigen )
 find_package( lwtnn )
+find_package( ROOT )
 
 atlas_add_library( TrigEFMissingETLib 
    Root/*.cxx
