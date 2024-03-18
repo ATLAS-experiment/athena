@@ -31,18 +31,25 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
         kwargs.setdefault('TrackContainerKeys', [])
 
     if 'StreamDAOD_PHYSLITE' in flags.Input.Collections:
+        # Not all data is available in PhysLite files.
+        kwargs.setdefault('PHYSLITE', True)
         # AnalysisJets and AnalysisLargeRJets are the standard jet containers
         kwargs.setdefault('JetContainerKeys', ['AnalysisJets','AnalysisLargeRJets'])
         # AnalysisMuons are the standard calibrated muon container
         kwargs.setdefault('MuonContainerKeys', ['AnalysisMuons'])
+        # AnalysisTauJets are the calibrated tau jet container
+        kwargs.setdefault('TauJetContainerKeys', ['AnalysisTauJets'])
+        # AnalysisElectrons are the standard calibrated electron container
+        kwargs.setdefault('ElectronContainerKeys', ['AnalysisElectrons'])
+        # AnalysisPhotons are the standard calibrated photon container
+        kwargs.setdefault('PhotonContainerKeys', ['AnalysisPhotons'])
         # No clusters or cells in DAOD_PHYSLITE
         kwargs.setdefault('CaloClusterContainerKeys', [])
         kwargs.setdefault('CaloCellContainerKey', [])
         # No real track collections in DAOD_PHYSLITE
         kwargs.setdefault('TrackCollectionKeys', [])
         kwargs.setdefault('TrackContainerKeys', [])
-        # InDetTrackParticles are heavily skimmed, so not useful output - keep only muons
-        kwargs.setdefault('TrackParticleContainerKeys', []) #['CombinedMuonTrackParticles'])
+        kwargs.setdefault('TrackParticleContainerKeys', ['InDetTrackParticles', 'CombinedMuonTrackParticles']) #['CombinedMuonTrackParticles'])
         # No prep raw data in DAOD_PHYSLITE
         kwargs.setdefault('MdtPrepRawDataKey', '')
         kwargs.setdefault('RpcPrepRawDataKey', '')
@@ -59,7 +66,8 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
 
 
 if __name__ == "__main__":
-    # Run this with python -m DumpEventDataToJSON.DumpEventDataToJSONConfig myESD.pool.root
+    # Run this with python -m DumpEventDataToJSON.DumpEventDataToJSONConfig --filesInput myESD.pool.root
+    # For help, python -m DumpEventDataToJSON.DumpEventDataToJSONConfig --help
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     parser = flags.getArgumentParser()
@@ -145,4 +153,4 @@ if __name__ == "__main__":
     
     cfg.merge(topoAcc)
 
-    cfg.run(2)
+    cfg.run()

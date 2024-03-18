@@ -37,6 +37,9 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
   ATH_CHECK(m_caloClustersKeys.initialize(!m_caloClustersKeys.empty()));
   ATH_CHECK(m_caloCellKey.initialize(!m_caloCellKey.empty()));
   ATH_CHECK(m_muonKeys.initialize(!m_muonKeys.empty()));
+  ATH_CHECK(m_tauJetKeys.initialize(!m_tauJetKeys.empty()));
+  ATH_CHECK(m_electronKeys.initialize(!m_electronKeys.empty()));
+  ATH_CHECK(m_photonKeys.initialize(!m_photonKeys.empty()));
   ATH_CHECK(m_trackCollectionKeys.initialize(!m_trackCollectionKeys.empty()));
 
   // ACTS
@@ -152,6 +155,9 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   ATH_CHECK(getAndFillArrayOfContainers(j, m_jetKeys, "Jets"));
   ATH_CHECK(getAndFillArrayOfContainers(j, m_trackParticleKeys, "Tracks"));
   ATH_CHECK(getAndFillArrayOfContainers(j, m_muonKeys, "Muons"));
+  ATH_CHECK(getAndFillArrayOfContainers(j, m_tauJetKeys, "Taus"));
+  ATH_CHECK(getAndFillArrayOfContainers(j, m_electronKeys, "Electrons"));
+  ATH_CHECK(getAndFillArrayOfContainers(j, m_photonKeys, "Photons"));
   ATH_CHECK(getAndFillArrayOfContainers(j, m_caloClustersKeys, "CaloClusters"));
   ATH_CHECK(getAndFillArrayOfContainers(j, m_caloCellKey, "CaloCells"));
   ATH_CHECK(getAndFillArrayOfContainers(j, m_trackCollectionKeys, "Tracks"));
@@ -312,6 +318,11 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TrackParticle &tp) {
   data["dof"] = tp.numberDoF();
   data["dparams"] = {tp.d0(), tp.z0(), tp.phi0(), tp.theta(), tp.qOverP()};
 
+  if (m_physlite) {
+    ATH_MSG_VERBOSE("Physlite mode enabled. Not adding track parameters.");
+    return data;
+  }
+
   if (m_extrapolator.empty()) {
     data["pos"] = {tp.perigeeParameters().position().x(),
                    tp.perigeeParameters().position().y(),
@@ -354,12 +365,14 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TrackParticle &tp) {
         data["pos"].push_back(pos.y());
         data["pos"].push_back(pos.z());
       }
+
     } else {
       ATH_MSG_WARNING(
           "Failure in extrapolation for Track with start parameters "
           << startParameters);
     }
   }
+
   return data;
 }
 
@@ -425,6 +438,38 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Muon &muon) {
   addLink(muon.muonSpectrometerTrackParticleLink(), data["LinkedTracks"]);
   addLink(muon.extrapolatedMuonSpectrometerTrackParticleLink(),
           data["LinkedTracks"]);
+
+  return data;
+}
+
+// Specialisation for Tau Jets
+template <>
+nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TauJet &tauJet) {
+  nlohmann::json data;
+  data["phi"] = tauJet.phi();
+  data["eta"] = tauJet.eta();
+  data["energy"] = tauJet.e();
+  return data;
+}
+
+// Specialisation for Electrons
+template <>
+nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Electron &electron) {
+  nlohmann::json data;
+  data["phi"] = electron.phi();
+  data["eta"] = electron.eta();
+  data["energy"] = electron.e();
+
+  return data;
+}
+
+// Specialisation for Photons
+template <>
+nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Photon &photon) {
+  nlohmann::json data;
+  data["phi"] = photon.phi();
+  data["eta"] = photon.eta();
+  data["energy"] = photon.e();
 
   return data;
 }

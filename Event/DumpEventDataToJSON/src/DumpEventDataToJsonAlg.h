@@ -14,6 +14,9 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODTau/TauJetContainer.h"
+#include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "TrkTrack/TrackCollection.h"
@@ -79,6 +82,12 @@ protected:
 
   SG::ReadHandleKeyArray<xAOD::MuonContainer> m_muonKeys{this, "MuonContainerKeys", {"Muons"}, "Keys for Muon Containers"};
 
+  SG::ReadHandleKeyArray<xAOD::TauJetContainer> m_tauJetKeys{this, "TauJetContainerKeys", {"TauJets"}, "Keys for Tau Containers"};
+
+  SG::ReadHandleKeyArray<xAOD::ElectronContainer> m_electronKeys{this, "ElectronContainerKeys", {"Electrons"}, "Keys for Electron Containers"};
+
+  SG::ReadHandleKeyArray<xAOD::PhotonContainer> m_photonKeys{this, "PhotonContainerKeys", {"Photons"}, "Keys for Photon Containers"};
+
   SG::ReadHandleKeyArray<xAOD::CaloClusterContainer> m_caloClustersKeys{this, "CaloClusterContainerKeys", {"CaloCalTopoClusters"}, "Keys for CaloClusters Containers"};
 
   SG::ReadHandleKeyArray<CaloCellContainer> m_caloCellKey{this, "CaloCellContainerKey", {"AllCalo"}, "Key for CaloCell Container"};
@@ -104,6 +113,7 @@ protected:
   Gaudi::Property<std::string> m_outputJSON_Name{this, "OutputLocation", "EventData.json", "Default filename for "};
 
   Gaudi::Property<bool> m_dumpTestEvent{this, "DumpTestEvent", false, "If true, prepend a test event with some calibration data in it."};
+  Gaudi::Property<bool> m_physlite{this, "PHYSLITE", false, "If true, do not try to access data which is not available in PHYSLITE files."};
 
   nlohmann::json m_eventData;
 };
