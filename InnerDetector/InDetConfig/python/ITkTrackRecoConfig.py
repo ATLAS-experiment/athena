@@ -279,7 +279,7 @@ def ITkTrackSeedsFinalCfg(flags):
         TrackContainer = "SiSPSeedSegments"+extension
 
         if flags.Tracking.doTruth:
-            from InDetConfig.TrackTruthConfig import ITkTrackTruthCfg
+            from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
             result.merge(ITkTrackTruthCfg(
                 flags,
                 Tracks=TrackContainer,
