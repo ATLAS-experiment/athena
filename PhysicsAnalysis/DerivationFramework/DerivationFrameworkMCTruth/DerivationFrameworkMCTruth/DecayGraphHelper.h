@@ -231,9 +231,8 @@ namespace DerivationFramework {
             static const SG::AuxElement::ConstAccessor<unsigned int> acc_class{"Classification"};
             for (xAOD::TruthParticleContainer::const_iterator pItr=allParticles->begin(); pItr!=allParticles->end(); ++pItr) {
                 const xAOD::TruthParticle *particle = *pItr;
-                
-                if (!MC::isStable(particle) ) continue;
-                
+
+                if (!MC::isStable(particle) ) continue;                
                 if (!skipPdgCheck && find(pdgId.begin(), pdgId.end(), abs(particle->pdgId())) == pdgId.end()) continue;
                 
                 //ensure particles are not from GEANT

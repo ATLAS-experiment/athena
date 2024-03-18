@@ -133,16 +133,10 @@ public:
 
   enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
 
-  /// \brief These helper functions return the value that the respective bit is set to in \ref MCTruthClassifier
-  static unsigned int isGeant(const unsigned int classify) { return std::bitset<MCTC_bits::totalBits> (classify).test(MCTC_bits::isgeant); }
-  static unsigned int isBSM(const unsigned int classify) { return std::bitset<MCTC_bits::totalBits> (classify).test(MCTC_bits::isbsm); }
-  static unsigned int fromBSM(const unsigned int classify) { return std::bitset<MCTC_bits::totalBits> (classify).test(MCTC_bits::frombsm); }
-
   /*! \brief This helper function returns the value -1 by checking the bit set in \ref MCTruthClassifier.
    * It returns the value -1 if uncategorised, 0 if non-prompt, 1 if prompt
    * It also checks for prompt taus
    */
-
   static int isPrompt(const unsigned int classify, bool allow_prompt_tau_decays = true) {
     std::bitset<MCTC_bits::totalBits> res(classify);
     if (res.test(MCTC_bits::uncat)) return -1;
@@ -150,7 +144,6 @@ public:
     if (fromPromptTau) return int(allow_prompt_tau_decays);
     return !res.test(MCTC_bits::hadron);
   }
-
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
