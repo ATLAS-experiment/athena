@@ -261,7 +261,7 @@ double TrigInDetTrackFollowingTool::processHit(const InDet::SCT_Cluster* pPRD, i
 const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDet::PixelCluster* pInputHit, const InDet::PixelClusterCollection* pColl, TrigFTF_ExtendedTrackState& ets) const {
 
   const InDet::PixelCluster* bestHit = pInputHit;
-
+  if(pColl == nullptr && pInputHit == nullptr) return nullptr;
   double resid[2];
   double invcov[3];
 
@@ -317,7 +317,7 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
 const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDet::SCT_Cluster* pInputHit, const InDet::SCT_ClusterCollection* pColl, int shape, TrigFTF_ExtendedTrackState& ets) const {
 
   const InDet::SCT_Cluster* bestHit = pInputHit;
-
+  if(pColl == nullptr && pInputHit == nullptr) return nullptr;
   double resid, invcov;
   double H[2];//linearized observation matrix
   
