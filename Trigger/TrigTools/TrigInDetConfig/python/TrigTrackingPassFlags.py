@@ -182,8 +182,6 @@ def createTrigTrackingPassFlags(mode="InDet"):
   flags.addFlag(f'{category}.RoiZedWidthDefault', 180.0 * Units.mm)
 
   flags.addFlag(f'{category}.doGPU', False)
-  #TODO: remove when decision made
-  flags.addFlag(f'{category}.fixSeedPhi', True)
 
   return flags
 
