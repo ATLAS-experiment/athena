@@ -25,7 +25,7 @@ class MMSimHit {
   MMSimHit(HitID id, double time, const Amg::Vector3D& position,
            const int particleEncoding, const double kineticEnergy,
            const Amg::Vector3D& direction, const double depositEnergy,
-           const int trackNumber);
+           const int truthBarcode);
   MMSimHit(HitID id, double time, const Amg::Vector3D& position,
            const int particleEncoding, const double kineticEnergy,
            const Amg::Vector3D& direction, const double depositEnergy,
@@ -55,8 +55,11 @@ class MMSimHit {
   void setGlobalDirection ( const Amg::Vector3D& globalDirection ) { m_globalDirection = globalDirection ;} //!< sets the direction expressed in global coordinates
   void setKineticEnergy ( const double kineticEnergy ) { m_kineticEnergy = kineticEnergy ;}
 
-  // number of track which released this energy:
-  int trackNumber() const;
+  // truth barcode of the track which released this energy:
+  int truthBarcode() const;
+
+  // GenParticle::id of the track which released this energy:
+  int truthID() const;
 
   // link to the particle generating the hit
   const HepMcParticleLink& particleLink() const;

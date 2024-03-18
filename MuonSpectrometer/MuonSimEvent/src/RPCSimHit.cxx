@@ -43,11 +43,11 @@ RPCSimHit::RPCSimHit(int id,
 RPCSimHit::RPCSimHit(int id,
 		     double time,
 	             const Amg::Vector3D& position,
-		     const int trackNumber)
+		     const int truthBarcode)
     : m_RPCid(id),
       m_globalTime(time),
       m_localPosition(position),
-      m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
+      m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
       m_localPostStepPosition(0.,0.,0.), // post-step position
       m_energyDeposit(-1.),              //Geant4 de/dx
       m_stepLength(-1.),                 //Geant4 step Length
@@ -59,13 +59,13 @@ RPCSimHit::RPCSimHit(int id,
 RPCSimHit::RPCSimHit(int id,
 		     double time,
 	             const Amg::Vector3D& prePosition,
-		     const int trackNumber,
+		     const int truthBarcode,
 	             const Amg::Vector3D& postPosition,
 		     const double energyDeposit, const double stepLength,
 		     const int particleEncoding, const double kineticEnergy)
     : m_RPCid(id), m_globalTime(time)
     , m_localPosition(prePosition)
-    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_localPostStepPosition(postPosition)
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_stepLength(static_cast<float>(stepLength))
@@ -114,6 +114,8 @@ std::string RPCSimHit::print() const {
     return ss.str();
 }
 
-int RPCSimHit::trackNumber() const
+int RPCSimHit::truthBarcode() const
  { return m_partLink.barcode(); }
 
+int RPCSimHit::truthID() const
+{ return m_partLink.id(); }

@@ -45,13 +45,13 @@ CSCSimHit::CSCSimHit(int id,
 	             const Amg::Vector3D& HitStart,
 		     const Amg::Vector3D& HitEnd,
 	             int particleID,
-		     const int trackNumber)
+		     const int truthBarcode)
     : m_CSCid(id), m_globalTime(time)
     , m_energyDeposit(energy)
     , m_hitStart(HitStart)
     , m_hitEnd(HitEnd)
     , m_particleID(particleID)
-    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_kineticEnergy(-1.)
 {
 
@@ -63,14 +63,14 @@ CSCSimHit::CSCSimHit(int id,
 	             const Amg::Vector3D& HitStart,
 		     const Amg::Vector3D& HitEnd,
 	             int particleID,
-		     const int trackNumber,
+		     const int truthBarcode,
                      const double kineticEnergy)
     : m_CSCid(id), m_globalTime(time)
     , m_energyDeposit(energy)
     , m_hitStart(HitStart)
     , m_hitEnd(HitEnd)
     , m_particleID(particleID)
-    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_kineticEnergy(static_cast<float>(kineticEnergy))
 {
 
@@ -132,5 +132,8 @@ std::string CSCSimHit::print() const {
 
 }
 
-int CSCSimHit::trackNumber() const
+int CSCSimHit::truthBarcode() const
  { return m_partLink.barcode(); }
+
+int CSCSimHit::truthID() const
+{ return m_partLink.id(); }

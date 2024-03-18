@@ -51,7 +51,7 @@ namespace D3PD {
       *m_particleEncoding = obj.particleEncoding();
       *m_kineticEnergy    = obj.kineticEnergy();
       *m_MDTid            = obj.MDTid();
-      *m_trackNumber      = obj.trackNumber();
+      *m_trackNumber      = obj.truthBarcode();
 
       return StatusCode::SUCCESS;
    }

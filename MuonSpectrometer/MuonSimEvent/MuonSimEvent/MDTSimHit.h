@@ -32,9 +32,9 @@ public:
     MDTSimHit(HitID id, double time, double radius,
               const Amg::Vector3D& position);
     MDTSimHit(HitID id, double time, double radius,
-              const Amg::Vector3D& position, const int trackNumber);
+              const Amg::Vector3D& position, const int truthBarcode);
     MDTSimHit(HitID id, double time, double radius,
-              const Amg::Vector3D& position, const int trackNumber,
+              const Amg::Vector3D& position, const int truthBarcode,
               const double stepLength, const double energyDeposit,
               const int particleEncoding, const double kineticEnergy);
     MDTSimHit(HitID id, double time, double radius,
@@ -60,8 +60,11 @@ public:
     	{ return m_MDTid < rhs.m_MDTid; }
     double meanTime() const;
 
-// number of track which released this energy:
-    int trackNumber() const;
+    // truth barcode of the track which released this energy:
+    int truthBarcode() const;
+
+    // GenParticle::id of the track which released this energy:
+    int truthID() const;
 
 // link to the particle generating the hit
     const HepMcParticleLink& particleLink() const;

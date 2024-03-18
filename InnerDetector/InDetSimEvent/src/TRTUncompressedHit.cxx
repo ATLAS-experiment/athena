@@ -54,8 +54,14 @@ TRTUncompressedHit::TRTUncompressedHit( ) :
 {
 }
 
-// barcode
-int TRTUncompressedHit::GetTrackID() const
+ // truth barcode of the track which released this energy:
+ int TRTUncompressedHit::truthBarcode() const
 {
   return m_partLink.barcode();
+}
+
+// GenParticle::id of the track which released this energy:
+int TRTUncompressedHit::truthID() const
+{
+  return m_partLink.id();
 }

@@ -455,7 +455,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
       std::vector<HepMcParticleLink> hit_vector; //Store the hits in merged cluster
 
-      const int trkn = hit->trackNumber();
+      const int trkn = hit->truthBarcode();
 
       const Identifier hitId = hitSiDetElement->identify(); // Isn't this is identical to moduleID?
       //const IdentifierHash hitIdHash = hitSiDetElement->identifyHash();

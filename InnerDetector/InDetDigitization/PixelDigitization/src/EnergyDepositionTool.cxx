@@ -143,7 +143,7 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
   const HepMcParticleLink::PositionFlag idxFlag =
     (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
   const HepMcParticleLink McLink {
-    HepMcParticleLink(phit->trackNumber(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx) // FIXME
+    HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx) // FIXME
   };
   HepMC::ConstGenParticlePtr genPart = McLink.cptr();
   bool delta_hit = true;

@@ -535,7 +535,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 
             if (m_validationSetup) {
                 ATH_MSG_VERBOSE("Validation:  globalHitTime, G4Time, BCtime = " << globalHitTime << " " << G4Time << " " << bunchTime);
-                inputSimHitColl->Emplace(idHit, globalHitTime, hit.localPosition(), hit.trackNumber(), hit.postLocalPosition(),
+                inputSimHitColl->Emplace(idHit, globalHitTime, hit.localPosition(), hit.truthBarcode(), hit.postLocalPosition(),
                                          hit.energyDeposit(), hit.stepLength(), hit.particleEncoding(), hit.kineticEnergy());
             }
 
@@ -609,7 +609,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
             const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(atlasRpcIdeta);  // first add time jitter to the time:
             const HepMcParticleLink::PositionFlag idxFlag =
                 (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            const HepMcParticleLink particleLink(phit->trackNumber(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+            const HepMcParticleLink particleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
 
             ATH_CHECK(DetectionEfficiency(ctx, atlasRpcIdeta, atlasRpcIdphi, undefPhiStripStat, rndmEngine, particleLink));
 

@@ -282,7 +282,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
 
           // Process only one hit by the same particle in the same detector element
           bool isRep = false;
-          const int trkn = currentSiHit->trackNumber();
+          const int trkn = currentSiHit->truthBarcode();
           const Identifier detElId = hitSiDetElement->identify();
           for (int j : trkNo)
             {

@@ -23,13 +23,13 @@ sTGCSimHit::sTGCSimHit(HitID id, double time,
                                      const int particleEncoding,
                                      const Amg::Vector3D& direction,
                                      const double depositEnergy,
-                                     const int trackNumber)
+                                     const int truthBarcode)
   : m_sTGCId(id), m_globalTime(time)
   , m_globalPosition(position)
   , m_particleEncoding(particleEncoding)
   , m_globalDirection(direction)
   , m_depositEnergy(depositEnergy)
-  , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+  , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
   , m_kineticEnergy(-1.0)
 {
 }
@@ -97,7 +97,13 @@ std::string sTGCSimHit::print() const {
 
   return ss.str();
 }
+
 /*******************************************************************************/
-int sTGCSimHit::trackNumber() const
+int sTGCSimHit::truthBarcode() const
 { return m_partLink.barcode(); }
+
+/*******************************************************************************/
+int sTGCSimHit::truthID() const
+{ return m_partLink.id(); }
+
 /*******************************************************************************/

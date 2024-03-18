@@ -140,12 +140,12 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       m_time = (*ih).globalTime();
       m_drift = (*ih).driftRadius();
       m_edeposit = (*ih).energyDeposit();
-      m_barcode = (*ih).trackNumber();
+      m_barcode = (*ih).truthBarcode();
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
       ++ih;
-      while (ih!=mdtHits->end() && m_id==(*ih).MDTid() && m_barcode==(*ih).trackNumber() ) {
+      while (ih!=mdtHits->end() && m_id==(*ih).MDTid() && m_barcode==(*ih).truthBarcode() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
         ++ih;
@@ -164,12 +164,12 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       m_time = (*ih).globalTime();
       m_drift = 0.;
       m_edeposit = (*ih).energyDeposit();
-      m_barcode = (*ih).trackNumber();
+      m_barcode = (*ih).truthBarcode();
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
       ++ih;
-      while (ih!=rpcHits->end() && m_id==(*ih).RPCid() && m_barcode==(*ih).trackNumber() ) {
+      while (ih!=rpcHits->end() && m_id==(*ih).RPCid() && m_barcode==(*ih).truthBarcode() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
         ++ih;
@@ -188,12 +188,12 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       m_time = (*ih).globalTime();
       m_drift = 0.;
       m_edeposit = (*ih).energyDeposit();
-      m_barcode = (*ih).trackNumber();
+      m_barcode = (*ih).truthBarcode();
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
       ++ih;
-      while (ih!=tgcHits->end() && m_id==(*ih).TGCid() && m_barcode==(*ih).trackNumber() ) {
+      while (ih!=tgcHits->end() && m_id==(*ih).TGCid() && m_barcode==(*ih).truthBarcode() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
         ++ih;
@@ -212,12 +212,12 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       m_time = (*ih).globalTime();
       m_drift = 0.;
       m_edeposit = (*ih).energyDeposit();
-      m_barcode = (*ih).trackNumber();
+      m_barcode = (*ih).truthBarcode();
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
       ++ih;
-      while (ih!=cscHits->end() && m_id==(*ih).CSCid() && m_barcode==(*ih).trackNumber() ) {
+      while (ih!=cscHits->end() && m_id==(*ih).CSCid() && m_barcode==(*ih).truthBarcode() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
         ++ih;
@@ -241,11 +241,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
         m_time = (*ih).meanTime();
         m_drift = 0.;
         m_edeposit = (*ih).energyLoss();
-        m_barcode = (*ih).trackNumber();
+        m_barcode = (*ih).truthBarcode();
         this->addHepMcParticleLinkInfoToTree(HMPL);
 
         ++ih;
-        while (ih!=pixHits->end() && ((unsigned int)m_id)==(*ih).identify() && m_barcode==(*ih).trackNumber() ) {
+        while (ih!=pixHits->end() && ((unsigned int)m_id)==(*ih).identify() && m_barcode==(*ih).truthBarcode() ) {
           // merge energy deposits and move on
           m_edeposit += (*ih).energyLoss();
           ++ih;
@@ -266,11 +266,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
         m_time = (*ih).meanTime();
         m_drift = 0.;
         m_edeposit = (*ih).energyLoss();
-        m_barcode = (*ih).trackNumber();
+        m_barcode = (*ih).truthBarcode();
         this->addHepMcParticleLinkInfoToTree(HMPL);
 
         ++ih;
-        while (ih!=sctHits->end() && ((unsigned int)m_id)==(*ih).identify() && m_barcode==(*ih).trackNumber() ) {
+        while (ih!=sctHits->end() && ((unsigned int)m_id)==(*ih).identify() && m_barcode==(*ih).truthBarcode() ) {
           // merge energy deposits and move on
           m_edeposit += (*ih).energyLoss();
           ++ih;
@@ -290,11 +290,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
         m_time = (*ih).GetGlobalTime();
         m_drift = 0.;
         m_edeposit = (*ih).GetEnergyDeposit();
-        m_barcode = (*ih).GetTrackID();
+        m_barcode = (*ih).truthBarcode();
         this->addHepMcParticleLinkInfoToTree(HMPL);
 
         ++ih;
-        while (ih!=trtHits->end() && m_id==(*ih).GetHitID() && m_barcode==(*ih).GetTrackID() ) {
+        while (ih!=trtHits->end() && m_id==(*ih).GetHitID() && m_barcode==(*ih).truthBarcode() ) {
           // merge energy deposits and move on
           m_edeposit += (*ih).GetEnergyDeposit();
           ++ih;

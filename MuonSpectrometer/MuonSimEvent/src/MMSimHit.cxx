@@ -21,14 +21,14 @@ MMSimHit::MMSimHit(HitID id, double time,
                                      const double kineticEnergy,
                                      const Amg::Vector3D& direction,
                                      const double depositEnergy,
-                                     const int trackNumber)
+                                     const int truthBarcode)
   : m_MMId(id), m_globalTime(time)
   , m_globalPosition(position)
   , m_particleEncoding(particleEncoding)
   , m_kineticEnergy(kineticEnergy)
   , m_globalDirection(direction)
   , m_depositEnergy(depositEnergy)
-  , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+  , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
 {
 }
 
@@ -66,6 +66,9 @@ std::string MMSimHit::print() const {
   return ss.str();
 }
 /*******************************************************************************/
-int MMSimHit::trackNumber() const
+int MMSimHit::truthBarcode() const
 { return m_partLink.barcode(); }
+/*******************************************************************************/
+int MMSimHit::truthID() const
+{ return m_partLink.id(); }
 /*******************************************************************************/

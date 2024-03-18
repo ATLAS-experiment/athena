@@ -68,7 +68,7 @@ public:
     NTuple::Array<float> m_SimHit_globalx;      // Return the strip pos x  global frame
     NTuple::Array<float> m_SimHit_globaly;      // Return the strip pos y
     NTuple::Array<float> m_SimHit_globalz;      // Return the strip pos z
-    NTuple::Array<float> m_SimHit_trackNumber;  // Return the trackNumber of associated track
+    NTuple::Array<float> m_SimHit_truthBarcode;  // Return the truthBarcode of associated track
     NTuple::Array<float> m_SimHit_stepLen;      // length of the G4 step
     NTuple::Array<float> m_SimHit_energyDep;    // G4 energy loss along step
     NTuple::Array<float> m_SimHit_kinEnergy;    // initial kin energy of particle producing the hit
@@ -206,7 +206,7 @@ StatusCode RPC_SimHitToPrdCBNTAlgo::initialize() {
         ATH_CHECK(nt->addIndexedItem("rpc_simhit_globalx", m_c->m_SimHit_nRpc, m_c->m_SimHit_globalx));
         ATH_CHECK(nt->addIndexedItem("rpc_simhit_globaly", m_c->m_SimHit_nRpc, m_c->m_SimHit_globaly));
         ATH_CHECK(nt->addIndexedItem("rpc_simhit_globalz", m_c->m_SimHit_nRpc, m_c->m_SimHit_globalz));
-        ATH_CHECK(nt->addIndexedItem("rpc_simhit_trackNumber", m_c->m_SimHit_nRpc, m_c->m_SimHit_trackNumber));
+        ATH_CHECK(nt->addIndexedItem("rpc_simhit_truthBarcode", m_c->m_SimHit_nRpc, m_c->m_SimHit_truthBarcode));
         ATH_CHECK(nt->addIndexedItem("rpc_simhit_stepLen", m_c->m_SimHit_nRpc, m_c->m_SimHit_stepLen));
         ATH_CHECK(nt->addIndexedItem("rpc_simhit_energyDep", m_c->m_SimHit_nRpc, m_c->m_SimHit_energyDep));
         ATH_CHECK(nt->addIndexedItem("rpc_simhit_kinEnergy", m_c->m_SimHit_nRpc, m_c->m_SimHit_kinEnergy));
@@ -509,7 +509,7 @@ StatusCode RPC_SimHitToPrdCBNTAlgo::doRPCSimHit(const EventContext& ctx) {
         m_c->m_SimHit_gasGap[myCounter] = gasGap;
         m_c->m_SimHit_measuresPhi[myCounter] = measphi;
 
-        m_c->m_SimHit_trackNumber[myCounter] = rpcsimhit->trackNumber();
+        m_c->m_SimHit_truthBarcode[myCounter] = rpcsimhit->truthBarcode();
         m_c->m_SimHit_stepLen[myCounter] = rpcsimhit->stepLength();
         m_c->m_SimHit_energyDep[myCounter] = rpcsimhit->energyDeposit();
         m_c->m_SimHit_kinEnergy[myCounter] = rpcsimhit->kineticEnergy();

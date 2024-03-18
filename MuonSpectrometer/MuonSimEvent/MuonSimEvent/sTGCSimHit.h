@@ -24,7 +24,7 @@ class sTGCSimHit final{
   ~sTGCSimHit();
   sTGCSimHit(HitID id, double time, const Amg::Vector3D& position,
              const int particleEncoding, const Amg::Vector3D& direction,
-             const double depositEnergy, const int trackNumber);
+             const double depositEnergy, const int truthBarcode);
   sTGCSimHit(HitID id, double time, const Amg::Vector3D& position,
              const int particleEncoding, const Amg::Vector3D& direction,
              const double depositEnergy, const HepMcParticleLink& hmpl);
@@ -61,8 +61,11 @@ class sTGCSimHit final{
   void setGlobalPosition ( const Amg::Vector3D& globalPosition ) { m_globalPosition = globalPosition ;} //!< sets the position expressed in global coordinates
   void setGlobalDirection ( const Amg::Vector3D& globalDirection ) { m_globalDirection = globalDirection ;} //!< sets the direction expressed in global coordinates
 
-  // number of track which released this energy:
-  int trackNumber() const;
+  // truth barcode of the track which released this energy:
+  int truthBarcode() const;
+
+  // GenParticle::id of the track which released this energy:
+  int truthID() const;
 
   // link to the particle generating the hit
   const HepMcParticleLink& particleLink() const;

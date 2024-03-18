@@ -27,7 +27,7 @@ SiHit::SiHit(const HepGeom::Point3D<double> &localStartPosition,
              const HepGeom::Point3D<double> &localEndPosition,
              const double energyLoss,
              const double meanTime,
-             const int trackNumber,
+             const int truthBarcode,
              const unsigned int id) :
   //  m_localStartPosition(localStartPosition),
   //  m_localEndPosition(localEndPosition),
@@ -39,7 +39,7 @@ SiHit::SiHit(const HepGeom::Point3D<double> &localStartPosition,
   m_enZ( (float) localEndPosition.z() ),
   m_energyLoss(energyLoss),
   m_meanTime(meanTime),
-  m_partLink(trackNumber,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE), //FIXME barcode-based
+  m_partLink(truthBarcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE), //FIXME barcode-based
   m_ID(id)
 {
 }
@@ -49,7 +49,7 @@ SiHit::SiHit(const HepGeom::Point3D<double> &localStartPosition,
              const HepGeom::Point3D<double> &localEndPosition,
              const double energyLoss,
              const double meanTime,
-             const int trackNumber,
+             const int truthBarcode,
              const int Part, const int BrlECap, const int LayerDisk,
              const int etaM, const int phiM, const int side) :
   //  m_localStartPosition(localStartPosition),
@@ -62,7 +62,7 @@ SiHit::SiHit(const HepGeom::Point3D<double> &localStartPosition,
   m_enZ( (float) localEndPosition.z() ),
   m_energyLoss(energyLoss),
   m_meanTime(meanTime),
-  m_partLink(trackNumber,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE), //FIXME barcode-based
+  m_partLink(truthBarcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE), //FIXME barcode-based
   m_ID(0)
 {
   // Compress the location info into the integer:
@@ -199,7 +199,14 @@ void SiHit::print() const {
 
 
 
-int SiHit::trackNumber() const
+int SiHit::truthBarcode() const
 {
   return m_partLink.barcode();
 }
+
+
+int SiHit::truthID() const
+{
+  return m_partLink.id();
+}
+

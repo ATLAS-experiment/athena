@@ -457,7 +457,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
                                               : HepMcParticleLink::IS_EVENTNUM;
                     std::vector<MuonSimData::Deposit> deposits;
                     deposits.emplace_back(
-                        HepMcParticleLink(phit->trackNumber(), phit.eventId(),
+                        HepMcParticleLink(phit->truthBarcode(), phit.eventId(),
                                           idxFlag, HepMcParticleLink::IS_BARCODE), // FIXME
                         MuonMCData(tof, 0));
                     MuonSimData simData(deposits, 0);
