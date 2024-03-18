@@ -30,7 +30,8 @@ namespace LVL1 {
     m_eta(ieta),
     m_phi(iphi),
     m_tower_id(id_modifier + iphi + (nphi * ieta)),
-    m_posneg(posneg)
+    m_posneg(posneg),
+    m_saturated(0)
   {
     this->clear_scIDs();
     this->clearET();
@@ -170,6 +171,15 @@ namespace LVL1 {
     return m_et_float_perlayer[1];
 
   }
+
+  void gTower::setIsSaturated(char isSaturated) {
+    m_saturated = isSaturated;
+  }
+
+  char gTower::isSaturated() const {
+    return m_saturated;
+  }
+
 
   int gTower::getFWID() const {
     int iPhiFW, iEtaFW;

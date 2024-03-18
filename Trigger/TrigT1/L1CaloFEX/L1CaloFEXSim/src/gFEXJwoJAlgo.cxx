@@ -417,12 +417,13 @@ void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
                             int C_MET_x, int C_MET_y,
                             int & MET_x, int & MET_y) const {
 
+  
   MET_x = A_MET_x + B_MET_x + C_MET_x;
   MET_y = A_MET_y + B_MET_y+ C_MET_y;
 
   // Truncation of the result, as the individual quantities are 16 bits, while the TOB field is 12 bits
-  MET_x = MET_x >> 4;
-  MET_y = MET_y >> 4;
+  // MET_x = MET_x >> 4;
+  // MET_y = MET_y >> 4;
 
   if (MET_x < -0x0007FF) MET_x = -0x0007FF;
   if (MET_y < -0x0007FF) MET_y = -0x0007FF;

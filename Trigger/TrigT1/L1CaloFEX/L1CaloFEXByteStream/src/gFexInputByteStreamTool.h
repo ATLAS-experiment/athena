@@ -113,6 +113,12 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         virtual void undoMLE(int &datumPtr ) const;
         
         virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const;
+
+        virtual void signExtend(int *xptr, int upto) const;
+
+        virtual void gtCalib(gtFPGA &gtf, int towerLSB,  int fpga, unsigned int offset) const;
+
+
         
         void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
         

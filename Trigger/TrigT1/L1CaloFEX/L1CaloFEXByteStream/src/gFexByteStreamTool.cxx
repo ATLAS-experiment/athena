@@ -438,7 +438,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         }
     }
     return StatusCode::SUCCESS;
-}
+} 
 
 // For MHT, MST, and MET, it sums the x and y components across FPGAs, and also returnes
 // the sum in quadrature (which is actually only used for MET, and discared for MHT and MST)
@@ -453,29 +453,25 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     int16_t sum_x = 0;
     int16_t sum_y = 0;
 
+    // Extract the x and y components and sum them for the three FPGAs
+    for (size_t fpga = 0; fpga < 3; fpga++) {
+        int16_t x = tob[fpga] >> gPos::GLOBAL_X_BIT & gPos::GLOBAL_X_MASK;
+        int16_t y = tob[fpga] >> gPos::GLOBAL_Y_BIT & gPos::GLOBAL_Y_MASK;
+        if (x & 0x00080000) { x  = 0xFFFF0000 | x;  }
+        if (y & 0x00080000) { y  = 0xFFFF0000 | y;  }
+        sum_x += x;
+        sum_y += y;
+    }
+
+    if (sum_x < -0x0007FF) sum_x = -0x0007FF;
+    if (sum_y < -0x0007FF) sum_y = -0x0007FF;
+
+    if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
+    if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
+
     if (type == 1) {
         ATH_MSG_DEBUG("  scalar tob, saving " << scalar << " in X component");
         sum_x = scalar;
-        sum_y = 0;
-
-    } else {
-
-        // Extract the x and y components and sum them for the three FPGAs
-        for (size_t fpga = 0; fpga < 3; fpga++) {
-            int16_t x = tob[fpga] >> gPos::GLOBAL_X_BIT & gPos::GLOBAL_X_MASK;
-            int16_t y = tob[fpga] >> gPos::GLOBAL_Y_BIT & gPos::GLOBAL_Y_MASK;
-            sum_x += x;
-            sum_y += y;
-        }
-        // Apply truncation
-        sum_x = sum_x >> gPos::GLOBAL_BIT_TRUNCATION;
-        sum_y = sum_y >> gPos::GLOBAL_BIT_TRUNCATION;
-
-        if (sum_x < -0x0007FF) sum_x = -0x0007FF;
-        if (sum_y < -0x0007FF) sum_y = -0x0007FF;
-
-        if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
-        if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
     }
 
     ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);
