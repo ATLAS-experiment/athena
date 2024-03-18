@@ -92,7 +92,6 @@ namespace FlavorTagDiscriminants {
       int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
       dec_origin_label(*track) = InDet::ExclusiveOrigin::getExclusiveOrigin(trackTruthOrigin);
       dec_source_label(*track) = TruthDecoratorHelpers::get_source_type(trackTruthOrigin);
-      
 
       // everything else is already decorated to the associated truth particle
       const auto truth = m_trackTruthOriginTool->getTruth(track);
