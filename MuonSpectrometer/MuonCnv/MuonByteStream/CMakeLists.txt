@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonByteStream )
@@ -13,5 +13,3 @@ atlas_add_component( MuonByteStream
                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamCnvSvcBaseLib ByteStreamData GaudiKernel AthenaPoolUtilities CSCcablingLib IRegionSelector MuonIdHelpersLib MuonRDO TrigSteeringEvent MuonMDT_CnvToolsLib MuonCSC_CnvToolsLib MuonRPC_CnvToolsLib MuonCnvToolInterfacesLib ViewAlgsLib MuonReadoutGeometry )
 
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
