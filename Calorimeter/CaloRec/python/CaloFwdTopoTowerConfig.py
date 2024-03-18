@@ -28,9 +28,12 @@ def CaloFwdTopoTowerCfg(flags,**kwargs):
 
     #This property is for the algorithm, not for tool doing most of the work
     towerContainerKey=kwargs.pop('towerContainerKey','CaloCalFwdTopoTowers')
+    signalContainerKey=kwargs.pop('signalContainerKey','CaloCalTopoSignals')
+    towerBuilderName=kwargs.pop('TowerBuilderName','CaloTopoTowerFromClusterMaker')
+    towerMergerName=kwargs.pop('TowerMergerName','CaloTopoSignalMaker')
 
     #instatiate tool using kwargs
-    towerBuilder=CompFactory.CaloTopoTowerFromClusterMaker(**kwargs)
+    towerBuilder=CompFactory.CaloTopoTowerFromClusterMaker(towerBuilderName,**kwargs)
 
     #Remember oderedByPt to (possibly) apply later:
     orderbyPt=towerBuilder.OrderClusterByPt
@@ -134,13 +137,14 @@ def CaloFwdTopoTowerCfg(flags,**kwargs):
     result.addEventAlgo(towerMaker)
 
     #merging
-    caloTowerMerger                         = CompFactory.CaloTopoClusterTowerMerger("CaloTopoSignalMaker")
-    caloTowerMerger.TopoClusterRange        = towerBuilder.TopoClusterRange                       #### caloTowerAlgo.CaloFwdTopoTowerBuilder.TopoClusterRange
-    caloTowerMerger.TopoClusterContainerKey = towerBuilder.CaloTopoClusterContainerKey
-    caloTowerMerger.TopoTowerContainerKey   = towerMaker.TowersOutputName
-    caloTowerMerger.TopoSignalContainerKey  = 'CaloCalTopoSignals'
-    
-    result.addEventAlgo(caloTowerMerger)
+    if towerBuilder.TopoClusterRange > 0.:
+        caloTowerMerger                         = CompFactory.CaloTopoClusterTowerMerger(towerMergerName)
+        caloTowerMerger.TopoClusterRange        = towerBuilder.TopoClusterRange                       #### caloTowerAlgo.CaloFwdTopoTowerBuilder.TopoClusterRange
+        caloTowerMerger.TopoClusterContainerKey = towerBuilder.CaloTopoClusterContainerKey
+        caloTowerMerger.TopoTowerContainerKey   = towerMaker.TowersOutputName
+        caloTowerMerger.TopoSignalContainerKey  = signalContainerKey
+ 
+        result.addEventAlgo(caloTowerMerger)
 
     #Output Config: 
     from OutputStreamAthenaPool.OutputStreamConfig import  addToAOD, addToESD
