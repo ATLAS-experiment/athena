@@ -209,7 +209,7 @@ int CopyTruthJetParticles::execute() const {
     int pdgid = tp->pdgId();
     if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->hasProdVtx()){
       // If this is a prompt, generator stable lepton, then we can use it
-      if(tp->status()==1 && !HepMC::is_simulation_particle(tp) && MCTruthClassifier::isPrompt(getTCresult(tp, tc_results))) {
+      if(MC::isStable(tp) && !HepMC::is_simulation_particle(tp) && MCTruthClassifier::isPrompt(getTCresult(tp, tc_results))) {
         promptLeptons.push_back(tp);
       }
     }
