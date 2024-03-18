@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -8,6 +8,7 @@
 #include <cassert>
 #include <iostream>
 
+#include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -19,6 +20,7 @@ void compare (const HepMcParticleLink& p1,
 {
   assert ( p1.isValid() == p2.isValid() );
   assert ( HepMC::barcode(p1) == HepMC::barcode(p2) );
+  assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
@@ -67,7 +69,7 @@ void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+  HepMcParticleLink dummyHMPL(HepMC::uniqueID(particle),particle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
   assert(dummyHMPL.cptr()==particle);
   // Create DVL info outside of leak check.
   MMSimHitCollection dum ("coll");
@@ -75,7 +77,7 @@ void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
   MMSimHitCollection trans1 ("coll");
   for (int i=0; i < 10; i++) {
     auto pGenParticle = genPartVector.at(i);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+    HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
     trans1.Emplace (123, 10.5,
                     Amg::Vector3D (12.5, 13.5, 14.5),
                     pGenParticle->pdg_id(), 25.5,

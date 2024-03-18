@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSIMEVENTATHENAPOOL_GENERICMUONSIMHITCOLLECTIONCNV_H
@@ -10,6 +10,7 @@
 
 #include "MuonSimEventTPCnv/GenericMuonSimHitCollectionCnv_p1.h"
 #include "MuonSimEventTPCnv/GenericMuonSimHitCollectionCnv_p2.h"
+#include "MuonSimEventTPCnv/GenericMuonSimHitCollectionCnv_p3.h"
 
 // the latest persistent representation type of DataCollection:
 typedef  Muon::GenericMuonSimHitCollection_p2  GenericMuonSimHitCollection_PERS;
@@ -19,22 +20,23 @@ typedef  T_AthenaPoolCustomCnv<GenericMuonSimHitCollection, GenericMuonSimHitCol
  ** Create derived converter to customize the saving of identifiable
  ** container
  **/
-class GenericMuonSimHitCollectionCnv : 
-    public GenericMuonSimHitCollectionCnvBase 
+class GenericMuonSimHitCollectionCnv :
+    public GenericMuonSimHitCollectionCnvBase
 {
-    
+
     friend class CnvFactory<GenericMuonSimHitCollectionCnv>;
-    
+
 public:
     GenericMuonSimHitCollectionCnv(ISvcLocator* svcloc);
     virtual ~GenericMuonSimHitCollectionCnv();
-    
+
     virtual GenericMuonSimHitCollection_PERS*   createPersistent (GenericMuonSimHitCollection* transCont);
     virtual GenericMuonSimHitCollection*        createTransient ();
-        
+
 private:
     GenericMuonSimHitCollectionCnv_p1    m_TPConverter_p1;
     GenericMuonSimHitCollectionCnv_p2    m_TPConverter_p2;
+    GenericMuonSimHitCollectionCnv_p3    m_TPConverter_p3;
 };
 
 #endif

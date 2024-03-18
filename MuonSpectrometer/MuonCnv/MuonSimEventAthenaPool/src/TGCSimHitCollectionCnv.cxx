@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGCSimHitCollectionCnv.h"
@@ -13,6 +13,10 @@
 
 #include "MuonSimEvent/TGCSimHitCollection.h"
 #include "MuonSimEventTPCnv/TGCSimHitCollection_p1.h"
+#include "MuonSimEventTPCnv/TGCSimHitCollection_p2.h"
+#include "MuonSimEventTPCnv/TGCSimHitCollection_p3.h"
+#include "MuonSimEventTPCnv/TGCSimHitCollection_p4.h"
+#include "MuonSimEventTPCnv/TGCSimHitCollection_p5.h"
 #include "HitManagement/AthenaHitsVector.h" //for back-compatibility
 
 
@@ -33,13 +37,20 @@ TGCSimHitCollection_PERS*    TGCSimHitCollectionCnv::createPersistent (TGCSimHit
 TGCSimHitCollection* TGCSimHitCollectionCnv::createTransient() {
     MsgStream log(msgSvc(), "TGCSimHitCollectionCnv" );
     static const pool::Guid   p0_guid("D7C91818-4730-4717-A650-107F52C0221E"); // before t/p split
-    static const pool::Guid   p1_guid("BD569381-2489-4402-BBD3-91EE8C009F26"); 
-    static const pool::Guid   p2_guid("710241EE-D5F7-4CB6-A1D7-6E80D040E637"); 
+    static const pool::Guid   p1_guid("BD569381-2489-4402-BBD3-91EE8C009F26");
+    static const pool::Guid   p2_guid("710241EE-D5F7-4CB6-A1D7-6E80D040E637");
     static const pool::Guid   p3_guid("BACD19A8-4737-4857-A22D-B9DF833A0A80");
     static const pool::Guid   p4_guid("F8F77562-BBD9-45DB-A276-6A21018EA7FA");
+    static const pool::Guid   p5_guid("018E2DAC-18EB-7E5B-9F18-CC2E36343F17");
     log<<MSG::DEBUG<<"createTransient(): main converter"<<endmsg;
     TGCSimHitCollection* p_collection(nullptr);
-    if(compareClassGuid(p4_guid) ) {
+    if(compareClassGuid(p5_guid) ) {
+      log<<MSG::DEBUG<<"createTransient(): T/P version 5 detected"<<endmsg;
+      std::unique_ptr< Muon::TGCSimHitCollection_p5 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p5 >() );
+      p_collection = m_TPConverter_p5.createTransient( col_vect.get(), log );
+    }
+  //----------------------------------------------------------------
+    else if(compareClassGuid(p4_guid) ) {
       log<<MSG::DEBUG<<"createTransient(): T/P version 4 detected"<<endmsg;
       std::unique_ptr< Muon::TGCSimHitCollection_p4 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p4 >() );
       p_collection = m_TPConverter_p4.createTransient( col_vect.get(), log );
@@ -71,7 +82,7 @@ TGCSimHitCollection* TGCSimHitCollectionCnv::createTransient() {
         p_collection->reserve(size);
         //do the copy
         for (const TGCSimHit* hit : *oldColl) {
-            p_collection->push_back(*hit); 
+            p_collection->push_back(*hit);
         }
         delete oldColl;
     }

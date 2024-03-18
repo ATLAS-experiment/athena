@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSIMEVENTTPCNV_MUONSIMEVENTTPCNVDICT_H
@@ -14,22 +14,29 @@
 #include "MuonSimEventTPCnv/CSCSimHitCollection_p1.h"
 #include "MuonSimEventTPCnv/CSCSimHitCollection_p2.h"
 #include "MuonSimEventTPCnv/CSCSimHitCollection_p3.h"
+#include "MuonSimEventTPCnv/CSCSimHitCollection_p4.h"
 #include "MuonSimEventTPCnv/RPCSimHitCollection_p1.h"
 #include "MuonSimEventTPCnv/RPCSimHitCollection_p2.h"
 #include "MuonSimEventTPCnv/RPCSimHitCollection_p3.h"
+#include "MuonSimEventTPCnv/RPCSimHitCollection_p4.h"
 #include "MuonSimEventTPCnv/TGCSimHitCollection_p1.h"
 #include "MuonSimEventTPCnv/TGCSimHitCollection_p2.h"
 #include "MuonSimEventTPCnv/TGCSimHitCollection_p3.h"
 #include "MuonSimEventTPCnv/TGCSimHitCollection_p4.h"
+#include "MuonSimEventTPCnv/TGCSimHitCollection_p5.h"
 #include "MuonSimEventTPCnv/MDTSimHitCollection_p1.h"
 #include "MuonSimEventTPCnv/MDTSimHitCollection_p2.h"
 #include "MuonSimEventTPCnv/MDTSimHitCollection_p3.h"
+#include "MuonSimEventTPCnv/MDTSimHitCollection_p4.h"
 #include "MuonSimEventTPCnv/GenericMuonSimHitCollection_p1.h"
 #include "MuonSimEventTPCnv/GenericMuonSimHitCollection_p2.h"
+#include "MuonSimEventTPCnv/GenericMuonSimHitCollection_p3.h"
 #include "MuonSimEventTPCnv/sTGCSimHitCollection_p1.h"
 #include "MuonSimEventTPCnv/sTGCSimHitCollection_p2.h"
 #include "MuonSimEventTPCnv/sTGCSimHitCollection_p3.h"
+#include "MuonSimEventTPCnv/sTGCSimHitCollection_p4.h"
 #include "MuonSimEventTPCnv/MMSimHitCollection_p1.h"
 #include "MuonSimEventTPCnv/MMSimHitCollection_p2.h"
+#include "MuonSimEventTPCnv/MMSimHitCollection_p3.h"
 
 #endif // MUONSIMEVENTTPCNV_MUONSIMEVENTTPCNVDICT_H
