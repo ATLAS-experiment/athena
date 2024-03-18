@@ -2,15 +2,13 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
- * @file InDetSimEventTPCnv/test/TRT_HitCollectionCnv_p2_test.cxx
- * @author scott snyder <snyder@bnl.gov>
- * @date Feb, 2016
- * @brief Tests for TRT_HitCollectionCnv_p2.
+ * @file InDetSimEventTPCnv/test/SiHitCollectionCnv_p4_test.cxx
+ * @brief Tests for SiHitCollectionCnv_p4.
  */
 
 
 #undef NDEBUG
-#include "InDetSimEventTPCnv/InDetHits/TRT_HitCollectionCnv_p2.h"
+#include "InDetSimEventTPCnv/InDetHits/SiHitCollectionCnv_p4.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include <cassert>
@@ -21,6 +19,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/Operators.h"
+
 
 void compare (const HepMcParticleLink& p1,
               const HepMcParticleLink& p2)
@@ -33,27 +32,21 @@ void compare (const HepMcParticleLink& p1,
   assert ( p1 == p2 );
 }
 
-void compare (const TRTUncompressedHit& p1,
-              const TRTUncompressedHit& p2)
+void compare (const SiHit& p1,
+              const SiHit& p2)
 {
-  assert (p1.GetHitID() == p2.GetHitID());
+  assert (p1.localStartPosition() == p2.localStartPosition());
+  assert (p1.localEndPosition() == p2.localEndPosition());
+  assert (p1.energyLoss() == p2.energyLoss());
+  assert (p1.meanTime() == p2.meanTime());
   compare(p1.particleLink(), p2.particleLink());
   assert (p1.particleLink() == p2.particleLink());
-  assert (p1.GetParticleEncoding() == p2.GetParticleEncoding());
-  assert (p1.GetKineticEnergy() == p2.GetKineticEnergy());
-  assert (p1.GetEnergyDeposit() == p2.GetEnergyDeposit());
-  assert (p1.GetPreStepX() == p2.GetPreStepX());
-  assert (p1.GetPreStepY() == p2.GetPreStepY());
-  assert (p1.GetPreStepZ() == p2.GetPreStepZ());
-  assert (p1.GetPostStepX() == p2.GetPostStepX());
-  assert (p1.GetPostStepY() == p2.GetPostStepY());
-  assert (p1.GetPostStepZ() == p2.GetPostStepZ());
-  assert (p1.GetGlobalTime() == p2.GetGlobalTime());
+  assert (p1.identify() == p2.identify());
 }
 
 
-void compare (const TRTUncompressedHitCollection& p1,
-              const TRTUncompressedHitCollection& p2)
+void compare (const SiHitCollection& p1,
+              const SiHitCollection& p2)
 {
   //assert (p1.Name() == p2.Name());
   assert (p1.size() == p2.size());
@@ -62,13 +55,13 @@ void compare (const TRTUncompressedHitCollection& p1,
 }
 
 
-void testit (const TRTUncompressedHitCollection& trans1)
+void testit (const SiHitCollection& trans1)
 {
   MsgStream log (nullptr, "test");
-  TRT_HitCollectionCnv_p2 cnv;
-  TRT_HitCollection_p2 pers;
+  SiHitCollectionCnv_p4 cnv;
+  SiHitCollection_p4 pers;
   cnv.transToPers (&trans1, &pers, log);
-  TRTUncompressedHitCollection trans2;
+  SiHitCollection trans2;
   cnv.persToTrans (&pers, &trans2, log);
 
   compare (trans1, trans2);
@@ -83,28 +76,30 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   HepMcParticleLink dummyHMPL(HepMC::uniqueID(particle),particle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
   assert(dummyHMPL.cptr()==particle);
   // Create DVL info outside of leak check.
-  TRTUncompressedHitCollection dum ("coll");
+  SiHitCollection dum ("coll");
   Athena_test::Leakcheck check;
 
-  TRTUncompressedHitCollection trans1 ("coll");
+  SiHitCollection trans1 ("coll");
   for (int i=0; i < 10; i++) {
-    int o = i*100;
-    auto pGenParticle = genPartVector.at(0);
+    auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    trans1.Emplace (101+o, trkLink, pGenParticle->pdg_id(),
-                    104.5+o, 105.5+o,
-                    (106.5+o)/1000, (107.5+o)/1000, 108.5+o,
-                    (109.5+o)/1000, (110.5+o)/1000, 111.5+o,
-                    112.5+o);
+    const double angle = i*0.2*M_PI;
+    std::vector< HepGeom::Point3D<double> > stepPoints(11);
+    for (int j=0; j<11; ++j) {
+      const double jd(j);
+      const double r(30.+110.*jd);
+      stepPoints.emplace_back(r*std::cos(angle),
+                              r*std::sin(angle),
+                              350.*jd);
+    }
+    const int o = i*100;
+    trans1.Emplace (stepPoints.at(i), stepPoints.at(i+1),
+                    16.5+o,
+                    17.5+o,
+                    trkLink,
+                    19+o);
+
   }
-  // Special case for photons
-  auto pGenParticle = genPartVector.at(10);
-  HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-  trans1.Emplace (131, trkLink, 22,
-                  134.5, 135.5,
-                  10, 3, 138.5,
-                  3, 10, 148.5,
-                  142.5);
 
   testit (trans1);
 }

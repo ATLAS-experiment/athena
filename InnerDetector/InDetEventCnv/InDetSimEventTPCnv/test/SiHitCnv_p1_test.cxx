@@ -16,6 +16,7 @@
 #include <cassert>
 #include <iostream>
 
+#include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
@@ -27,6 +28,7 @@ void compare (const HepMcParticleLink& p1,
 {
   assert ( p1.isValid() == p2.isValid() );
   assert ( HepMC::barcode(p1) == HepMC::barcode(p2) );
+  assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
@@ -63,12 +65,12 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+  HepMcParticleLink dummyHMPL(HepMC::uniqueID(particle),particle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
   assert(dummyHMPL.cptr()==particle);
   Athena_test::Leakcheck check;
 
   auto pGenParticle = genPartVector.at(0);
-  HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+  HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
   SiHit trans1 (HepGeom::Point3D<double> (10.5, 11.5, 12.5),
                 HepGeom::Point3D<double> (13.5, 14.5, 15.5),
                 16.5,
