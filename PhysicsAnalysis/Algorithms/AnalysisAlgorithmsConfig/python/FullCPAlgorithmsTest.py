@@ -717,9 +717,16 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
-
+    
     configSeq += config.makeConfig( 'Jets.JVT',
         containerName='AnaJets' )
+
+    if not forCompare:
+        configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
+            containerName='AnaJets',
+            selectionName='ftag')
+        configSeq.setOptionValue ('.btagger', btagger)
+        configSeq.setOptionValue ('.btagWP', btagWP)
 
     if largeRJets :
         configSeq += config.makeConfig( 'Jets',
@@ -959,7 +966,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq += config.makeConfig ('Thinning',
             containerName='AnaTrackJets')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
-
+        
     # disabling comparisons for triggers, because the config blocks do a lot
     # more than the sequences
     if not forCompare :

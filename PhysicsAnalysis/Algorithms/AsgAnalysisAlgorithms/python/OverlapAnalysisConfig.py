@@ -1,14 +1,15 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 
 class OverlapAnalysisConfig (ConfigBlock):
-    """the ConfigBlock for the MET configuration"""
+    """the ConfigBlock for the OverlapRemoval configuration"""
 
     def __init__ (self) :
         super (OverlapAnalysisConfig, self).__init__ ()
+        self.setBlockName('OverlapRemoval')
         self.addOption ('inputLabel', '', type=str)
         self.addOption ('outputLabel', 'passesOR', type=str)
         self.addOption ('selectionName', None, type=str)
