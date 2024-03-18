@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef SIHITCOLLECTIONCNV
-#define SIHITCOLLECTIONCNV
+#ifndef INDETSIMEVENTATHENAPOOL_SIHITCOLLECTIONCNV_H
+#define INDETSIMEVENTATHENAPOOL_SIHITCOLLECTIONCNV_H
 
 #include "InDetSimEvent/SiHitCollection.h"
 #include "InDetSimEventTPCnv/InDetHits/SiHitCollection_p1.h"
@@ -12,6 +12,8 @@
 #include "InDetSimEventTPCnv/InDetHits/SiHitCollectionCnv_p2.h"
 #include "InDetSimEventTPCnv/InDetHits/SiHitCollection_p3.h"
 #include "InDetSimEventTPCnv/InDetHits/SiHitCollectionCnv_p3.h"
+#include "InDetSimEventTPCnv/InDetHits/SiHitCollection_p4.h"
+#include "InDetSimEventTPCnv/InDetHits/SiHitCollectionCnv_p4.h"
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
@@ -30,4 +32,4 @@ protected:
 };
 
 
-#endif
+#endif // INDETSIMEVENTATHENAPOOL_SIHITCOLLECTIONCNV_H

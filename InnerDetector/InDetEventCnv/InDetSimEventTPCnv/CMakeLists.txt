@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetSimEventTPCnv )
@@ -24,34 +24,44 @@ atlas_add_dictionary( InDetSimEventTPCnvDict
 atlas_add_test( SiHitCnv_p1_test
                 SOURCES
                 test/SiHitCnv_p1_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
 
 atlas_add_test( SiHitCollectionCnv_p2_test
                 SOURCES
                 test/SiHitCollectionCnv_p2_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
 
 atlas_add_test( SiHitCollectionCnv_p3_test
                 SOURCES
                 test/SiHitCollectionCnv_p3_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
+
+atlas_add_test( SiHitCollectionCnv_p4_test
+                SOURCES
+                test/SiHitCollectionCnv_p4_test.cxx
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
 
 atlas_add_test( TRT_HitCnv_p1_test
                 SOURCES
                 test/TRT_HitCnv_p1_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
 
 atlas_add_test( TRT_HitCollectionCnv_p2_test
                 SOURCES
                 test/TRT_HitCollectionCnv_p2_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
 
 atlas_add_test( TRT_HitCollectionCnv_p3_test
                 SOURCES
                 test/TRT_HitCollectionCnv_p3_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
 
 atlas_add_test( TRT_HitCollectionCnv_p4_test
                 SOURCES
                 test/TRT_HitCollectionCnv_p4_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
+
+atlas_add_test( TRT_HitCollectionCnv_p5_test
+                SOURCES
+                test/TRT_HitCollectionCnv_p5_test.cxx
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv InDetSimEventTPCnv TestTools TruthUtils )
