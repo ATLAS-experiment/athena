@@ -144,13 +144,12 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
 
     # Acts Main pass
     if flags.Tracking.ActiveConfig.extension == "Acts":
-
         acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                              SeedLabels = isdet(flags, ["PPP"], ["SSS"]) if not flags.Tracking.doITkFastTracking else ["PPP"], 
                                              EstimatedTrackParametersKeys = isdet(flags, ["ITkPixelEstimatedTrackParams"], ["ITkStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else ["ITkPixelEstimatedTrackParams"],
                                              SeedContainerKeys = isdet(flags, ["ITkPixelSeeds"], ["ITkStripSeeds"]) if not flags.Tracking.doITkFastTracking else ["ITkPixelSeeds"],
-                                             UncalibratedMeasurementContainerKeys = ["ITkPixelClusters_InView", "ITkStripClusters_InView"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkStripClusters"]))
-        # Acts Conversion pass
+                                             UncalibratedMeasurementContainerKeys = isdet(flags, ["ITkPixelClusters_InView"], ["ITkStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"])))
+    # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
         acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                              name="ActsConversionTrackFindingAlg",
@@ -158,7 +157,7 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
                                              SeedLabels=["SSS"],
                                              EstimatedTrackParametersKeys=["ITkConversionStripEstimatedTrackParams"],
                                              SeedContainerKeys=["ITkConversionStripSeeds"],
-                                             UncalibratedMeasurementContainerKeys=["ITkPixelClusters_InView", "ITkConversionStripClusters"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkConversionStripClusters"] # for the time being we do not pass InView collections for strips here due to issue with the CKF stage
+                                             UncalibratedMeasurementContainerKeys=isdet(flags, ["ITkPixelClusters_InView"], ["ITkConversionStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, ["ITkPixelClusters"], ["ITkConversionStripClusters"])
                                              ))
     # Any other pass -> mainly validation
     else:
