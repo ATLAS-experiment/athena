@@ -126,11 +126,11 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
 
             const MuonGM::MMReadoutElement* rdoEl = m_detManager->getMMReadoutElement(id);
 
-            std::vector<float>  time          = digit->stripTimeForTrigger();
-            std::vector<float>  charge        = digit->stripChargeForTrigger();
-            std::vector<int>    stripPosition = digit->stripPositionForTrigger();
-            std::vector<int>    MMFE_VMM = digit->MMFE_VMM_idForTrigger();
-            std::vector<int>    VMM = digit->VMM_idForTrigger();
+            std::vector<float>  time{digit->stripResponseTime()};
+            std::vector<float>  charge{digit->stripResponseCharge()};
+            std::vector<int>    stripPosition{channel};
+            std::vector<int>    MMFE_VMM{channel};
+            std::vector<int>    VMM{channel};
 
             bool isValid = false;
             histDigVars.NSWMM_dig_stationName.push_back(stName);
@@ -253,12 +253,12 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
           Identifier tmpID      = dW.id();
           int thisMultiplet     = m_MmIdHelper->multilayer( tmpID );
           int thisGasGap        = m_MmIdHelper->gasGap( tmpID );
-          int thisTime          = dW.digit->stripTimeForTrigger()[0];
+          int thisTime          = dW.digit->stripResponseTime();
           int thisCharge        = 2; //dW.digit->stripChargeForTrigger().at(0);
-          int thisStripPosition = dW.digit->stripPositionForTrigger()[0];
+          int thisStripPosition = m_MmIdHelper->channel(tmpID);
           double thisLocalPosX  = dW.strip_lpos.X();
-          int thisVMM           = dW.digit->VMM_idForTrigger()[0];
-          int thisMMFE_VMM      = dW.digit->MMFE_VMM_idForTrigger()[0];
+          int thisVMM           = m_MmIdHelper->channel( tmpID);
+          int thisMMFE_VMM      = m_MmIdHelper->channel( tmpID);
           int thisStationEta    = m_MmIdHelper->stationEta( tmpID );
           int thisStationPhi    = m_MmIdHelper->stationPhi( tmpID );
           int thisPlane = (thisMultiplet-1)*4+thisGasGap-1;

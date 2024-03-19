@@ -23,6 +23,7 @@ StatusCode MM_DigitToRDO::execute(const EventContext& ctx) const {
     using namespace Muon;
     ATH_MSG_DEBUG("in execute()");
     SG::ReadHandle<MmDigitContainer> digits(m_digitContainer, ctx);
+    ATH_CHECK(digits.isPresent());
     std::unique_ptr<MM_RawDataContainer> rdos = std::make_unique<MM_RawDataContainer>(m_idHelperSvc->mmIdHelper().module_hash_max());
 
     const Nsw_CablingMap* mmCablingMap{nullptr};
@@ -34,88 +35,49 @@ StatusCode MM_DigitToRDO::execute(const EventContext& ctx) const {
         }
         mmCablingMap = readCondHandle.cptr();
     }
+   
+    for (const MmDigitCollection* digitColl : *digits) {
+        // the identifier of the digit collection is the detector element Id ( multilayer granularity )
+        Identifier digitId = digitColl->identify();
 
-    if (digits.isValid()) {
-        for (const MmDigitCollection* digitColl : *digits) {
-            // the identifier of the digit collection is the detector element Id ( multilayer granularity )
-            Identifier digitId = digitColl->identify();
-
-            // get the hash of the RDO collection
-            IdentifierHash hash;
-            int getRdoCollHash = m_idHelperSvc->mmIdHelper().get_module_hash(digitId, hash);
-            if (getRdoCollHash != 0) {
-                ATH_MSG_ERROR("Could not get the module hash Id");
-                return StatusCode::FAILURE;
-            }
-
-            MM_RawDataCollection* coll = new MM_RawDataCollection(hash);
-            if (rdos->addCollection(coll, hash).isFailure()) {
-                ATH_MSG_WARNING("Failed to add collection with hash " << (int)hash);
-                delete coll;
-                continue;
-            }
-
-            for (const MmDigit* digit : *digitColl) {
-                Identifier id = digit->identify();
-
-                // for now keep the digit structure as vector of firing strips
-                // (will have to be reviewed )
-                // number of strips
-                unsigned int nstrips = digit->stripResponsePosition().size();
-
-                for (unsigned int i = 0; i < nstrips; ++i) {
-                    // For the sTGCs there is a timing cut in DigitToRDO converter while for the MMs this cut is already applied in the
-                    // simulation of the electronics response.    pscholer May 2022
-
-                    ///
-                    /// set the rdo id to a value consistent with the channel number
-                    ///
-                    bool isValid{false};
-                    int stationName = m_idHelperSvc->mmIdHelper().stationName(id);
-                    int stationEta = m_idHelperSvc->mmIdHelper().stationEta(id);
-                    int stationPhi = m_idHelperSvc->mmIdHelper().stationPhi(id);
-                    int multilayer = m_idHelperSvc->mmIdHelper().multilayer(id);
-                    int gasGap = m_idHelperSvc->mmIdHelper().gasGap(id);
-                    ///
-                    int channel = digit->stripResponsePosition().at(i);
-
-                    Identifier newId =
-                        m_idHelperSvc->mmIdHelper().channelID(stationName, stationEta, stationPhi, multilayer, gasGap, channel, isValid);
-
-                    if (!isValid) {
-                        ATH_MSG_WARNING("Invalid MM identifier. StationName=" << stationName << " stationEta=" << stationEta
-                                                                              << " stationPhi=" << stationPhi << " multi=" << multilayer
-                                                                              << " gasGap=" << gasGap << " channel=" << channel);
-                        continue;
-                    }
-
-                    // RDO has time and charge in counts
-                    int tdo = 0;
-                    int relBcid = 0;
-                    int pdo = 0;
-                    m_calibTool->timeToTdo(ctx, digit->stripResponseTime().at(i), newId, tdo, relBcid);
-                    m_calibTool->chargeToPdo(ctx, digit->stripResponseCharge().at(i), newId, pdo);
-
-                    // the cabling map is introduced here for studies of the MM strip misalignment. It does not run in standart jobs (read key is empty) 
-                    if (mmCablingMap) {
-                       std::optional<Identifier> correctedChannelId = mmCablingMap->correctChannel(newId, msgStream());
-                       if (!correctedChannelId) {
-                           ATH_MSG_DEBUG("Channel was shifted outside its connector and is therefore not decoded into and RDO");
-                           continue;
-                       }
-                       newId = (*correctedChannelId);
-                       channel = m_idHelperSvc->mmIdHelper().channel(newId);
-                    }
-
-                    // Fill object
-                    MM_RawData* rdo = new MM_RawData(newId, channel, tdo, pdo, relBcid, true);
-                    coll->push_back(rdo);
-                }
-            }
+        // get the hash of the RDO collection
+        IdentifierHash hash;
+        int getRdoCollHash = m_idHelperSvc->mmIdHelper().get_module_hash(digitId, hash);
+        if (getRdoCollHash != 0) {
+            ATH_MSG_ERROR("Could not get the module hash Id");
+            return StatusCode::FAILURE;
         }
-    } else {
-        ATH_MSG_WARNING("Unable to find MM digits");
+
+        MM_RawDataCollection* coll = new MM_RawDataCollection(hash);
+        if (rdos->addCollection(coll, hash).isFailure()) {
+            ATH_MSG_WARNING("Failed to add collection with hash " << (int)hash);
+            delete coll;
+            continue;
+        }
+
+        for (const MmDigit* digit : *digitColl) {
+            Identifier newId = digit->identify();               
+            // RDO has time and charge in counts
+            int tdo{0}, relBcid{0}, pdo{0};
+            m_calibTool->timeToTdo(ctx, digit->stripResponseTime(), newId, tdo, relBcid);
+            m_calibTool->chargeToPdo(ctx, digit->stripResponseCharge(), newId, pdo);
+
+            // the cabling map is introduced here for studies of the MM strip misalignment. It does not run in standart jobs (read key is empty) 
+            if (mmCablingMap) {
+                std::optional<Identifier> correctedChannelId = mmCablingMap->correctChannel(newId, msgStream());
+                if (!correctedChannelId) {
+                    ATH_MSG_DEBUG("Channel was shifted outside its connector and is therefore not decoded into and RDO");
+                    continue;
+                }
+                newId = (*correctedChannelId);
+            }
+            // Fill object
+            std::unique_ptr<MM_RawData> rdo = std::make_unique<MM_RawData>(newId, m_idHelperSvc->mmIdHelper().channel(newId), 
+                                                                           tdo, pdo, relBcid, true);
+            coll->push_back(std::move(rdo));                
+        }
     }
+    
     SG::WriteHandle<MM_RawDataContainer> writeHanlde(m_rdoContainer, ctx);
     ATH_CHECK(writeHanlde.record(std::move(rdos)));
 
