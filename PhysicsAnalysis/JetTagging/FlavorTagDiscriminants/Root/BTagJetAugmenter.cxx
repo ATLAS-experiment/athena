@@ -219,19 +219,25 @@ void BTagJetAugmenter::augmentIpRatios(const xAOD::BTagging& btag) const {
   m_ip3d_bc(btag) = safelog_prob(m_ip3d_pb(btag) , m_ip3d_pc(btag));
 
 }
-void BTagJetAugmenter::augmentBtagJes(const xAOD::BTagging &btag,
-                                      const xAOD::BTagging &uncalib_tag) const {
 
-  auto uncalib_link = m_jetLink(uncalib_tag);
+void BTagJetAugmenter::augmentBtagJes(const xAOD::BTagging &target,
+                                      const xAOD::BTagging &uncalib) const {
+  auto uncalib_link = m_jetLink(uncalib);
   if (!uncalib_link.isValid()) {
     throw std::runtime_error("missing jetLink");
   }
-  const xAOD::Jet& uncalib = **uncalib_link;
+  const xAOD::Jet& uncalib_jet = **uncalib_link;
 
-  m_pt_uncalib(btag) = uncalib.pt();
-  m_eta_uncalib(btag) = uncalib.eta();
-  m_abs_eta_uncalib(btag) = std::abs(uncalib.eta());
+  m_pt_uncalib(target) = uncalib_jet.pt();
+  m_eta_uncalib(target) = uncalib_jet.eta();
+  m_abs_eta_uncalib(target) = std::abs(uncalib_jet.eta());
+}
 
+void BTagJetAugmenter::augmentBtagJes(const xAOD::Jet &target,
+                                      const xAOD::Jet &uncalib) const {
+  m_pt_uncalib(target) = uncalib.pt();
+  m_eta_uncalib(target) = uncalib.eta();
+  m_abs_eta_uncalib(target) = std::abs(uncalib.eta());
 }
 
 void BTagJetAugmenter::augment(const xAOD::BTagging &btag) const {
