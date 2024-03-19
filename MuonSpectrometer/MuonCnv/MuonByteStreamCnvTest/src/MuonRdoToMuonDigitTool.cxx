@@ -268,7 +268,7 @@ StatusCode MuonRdoToMuonDigitTool::decodeMM_RDO(const EventContext& ctx, MmDigit
     ATH_MSG_DEBUG("Converting MM RDOs to Digits");
     for (const Muon::MM_RawDataCollection* rdoColl : *MmRDO) {  // Go through RDO container
         ATH_MSG_DEBUG("rdoColl size = " << rdoColl->size());
-        ATH_CHECK(decodeMM(*rdoColl, mmDigitMap));
+        ATH_CHECK(decodeMM(ctx, *rdoColl, mmDigitMap));
     }
 
     for (auto& p : mmDigitMap) { ATH_CHECK(mmContainer->addCollection(p.second.release(), p.first)); }
@@ -637,33 +637,26 @@ StatusCode MuonRdoToMuonDigitTool::decodeSTGC(const Muon::STGC_RawDataCollection
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonRdoToMuonDigitTool::decodeMM(const Muon::MM_RawDataCollection& rdoColl, MmDigitMap_t& mmDigitMap) const {
+StatusCode MuonRdoToMuonDigitTool::decodeMM(const EventContext& ctx,
+                                            const Muon::MM_RawDataCollection& rdoColl, 
+                                            MmDigitMap_t& mmDigitMap) const {
     if (!rdoColl.empty()) {
         ATH_MSG_DEBUG(" Number of RawData in this rdo " << rdoColl.size());
-        IdContext mmContext = m_idHelperSvc->mmIdHelper().module_context();
-
         /** for each Rdo, loop over RawData, converter RawData to digit
             retrieve/create digit collection, and insert digit into collection */
         for (const Muon::MM_RawData* data : rdoColl) {
-            std::unique_ptr<MmDigit> newDigit(m_mmRdoDecoderTool->getDigit(data));
-
+            std::unique_ptr<MmDigit> newDigit(m_mmRdoDecoderTool->getDigit(ctx, data));
             if (!newDigit) {
                 ATH_MSG_WARNING("Error in MM RDO decoder");
                 continue;
             }
             ATH_MSG_DEBUG("MM RDO->MMDigit: " << m_idHelperSvc->mmIdHelper().show_to_string(newDigit->identify()));
 
-            Identifier elementId = m_idHelperSvc->mmIdHelper().elementID(newDigit->identify());
-            IdentifierHash coll_hash;
-            if (m_idHelperSvc->mmIdHelper().get_hash(elementId, coll_hash, &mmContext)) {
-                ATH_MSG_WARNING("Unable to get MM digit collection hash id "
-                                << "context begin_index = " << mmContext.begin_index() << " context end_index  = " << mmContext.end_index()
-                                << " the identifier is ");
-                elementId.show();
-            }
+            IdentifierHash coll_hash = m_idHelperSvc->moduleHash(newDigit->identify());          
 
             std::unique_ptr<MmDigitCollection>& coll = mmDigitMap[coll_hash];
-            if (!coll) { coll = std::make_unique<MmDigitCollection>(elementId, coll_hash); }
+            if (!coll) { coll = std::make_unique<MmDigitCollection>(m_idHelperSvc->chamberId(newDigit->identify()), 
+                                                                    coll_hash); }
             coll->push_back(std::move(newDigit));
         }
     }

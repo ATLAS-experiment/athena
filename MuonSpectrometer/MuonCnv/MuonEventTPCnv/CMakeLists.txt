@@ -67,12 +67,6 @@ foreach( name CscMcDataCnv_p1_test CscSimDataCnv_p1_test
       TgcCoinDataCnv_p1_test TgcCoinDataCnv_p2_test TgcCoinDataCnv_p3_test
       RpcCoinDataContainerCnv_p1_test TgcCoinDataContainerCnv_p1_test
       TgcCoinDataContainerCnv_p2_test TgcCoinDataContainerCnv_p3_test
-      MM_DigitCnv_p1_test
-      MM_DigitCnv_p2_test
-      MM_DigitContainerCnv_p1_test
-      MM_DigitContainerCnv_p2_test
-      STGC_DigitCnv_p1_test
-      STGC_DigitContainerCnv_p1_test
       STGC_RawDataContainerCnv_p1_test
       STGC_RawDataContainerCnv_p2_test
       sTgcPrepDataCnv_p2_test sTgcPrepDataContainerCnv_p2_test 

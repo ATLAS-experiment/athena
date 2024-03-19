@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Andrei Gaponenko <agaponenko@lbl.gov>, 2006, 2007
@@ -33,54 +33,30 @@ namespace Overlay
     if (!parent) {
       throw std::runtime_error("mergeChannelData<MmDigit>() called by a wrong parent algorithm? Must be MM_Overlay.");
     }
+    float sig_time = signalDigit.stripResponseTime(); 
+    float bkg_time = bkgDigit.stripResponseTime(); 
 
-    // This is a needed temporary hack for which I dont fully understand the source. Alexandre Laurier 2020-10-06
-    // For some reason, sometimes the "main digit"'s size is empty.
-    // In these cases, dataContainer is larger than mcContainer which goes against the basic overlay assumption
-    // These happen in cases where we create very busy signal events.
-    // A MicroMega digit is a vector of strips, so an empty digit makes no sense.
-    bool skipOverlay = false;
-    if (signalDigit.stripResponseTime().size() == 0) {
-      signalDigit = bkgDigit;
-      skipOverlay = true;
-    }
-
-    float sig_time = signalDigit.stripResponseTime()[0]; 
-    float bkg_time = bkgDigit.stripResponseTime()[0]; 
-
-    if (skipOverlay) { // do nothing since 1 digit was empty. Keep the original
-      algorithm->msg(MSG::WARNING)
-        << "Skipping overlay of empty MM digit!"
-        << endmsg;
-    }
 
     // As of now, we need to decide how to overlay MM digits
     // NEEDS TO BE ADDRESSED
     // For this preliminary version of July 2019, use only the data from the 1st digit in vector. 
     /** signal masks the background */
-    else if ( abs(sig_time - bkg_time) > parent->timeIntegrationWindow() && sig_time < bkg_time ) {
+    if ( std::abs(sig_time - bkg_time) > parent->timeIntegrationWindow() && sig_time < bkg_time ) {
       // do nothing - keep baseDigit.
     }
     /** Background hit masks the signal hit */
-    else if ( abs(sig_time - bkg_time) > parent->timeIntegrationWindow() && sig_time > bkg_time ) {
+    else if ( std::abs(sig_time - bkg_time) > parent->timeIntegrationWindow() && sig_time > bkg_time ) {
       // Use the background digit as the final answer
       signalDigit = bkgDigit;
     }
     /** the 2 hits overlap withing the time integration window
       For now, just add total charge */     
-    else if ( abs(sig_time - bkg_time) < parent->timeIntegrationWindow() )  {
+    else if ( std::abs(sig_time - bkg_time) < parent->timeIntegrationWindow() )  {
       // Use the earliest time
       // And use all the other values of the signal digit.
       float time = std::min( sig_time, bkg_time );
-      float charge = signalDigit.stripResponseCharge()[0] + bkgDigit.stripResponseCharge()[0];
-      int pos = signalDigit.stripResponsePosition()[0];
-      std::vector<float> Time;
-      std::vector<float> Charge;
-      std::vector<int> Position;
-      Time.push_back(time);
-      Charge.push_back(charge);
-      Position.push_back(pos);
-      signalDigit = MmDigit(signalDigit.identify(), Time, Position, Charge, signalDigit.chipResponseTime(), signalDigit.chipResponsePosition(), signalDigit.chipResponseCharge(), signalDigit.stripTimeForTrigger(), signalDigit.stripPositionForTrigger(), signalDigit.stripChargeForTrigger(), signalDigit.MMFE_VMM_idForTrigger(), signalDigit.VMM_idForTrigger());
+      float charge = signalDigit.stripResponseCharge() + bkgDigit.stripResponseCharge();
+      signalDigit = MmDigit(signalDigit.identify(), time,  charge);
     }
   }
 } // namespace Overlay

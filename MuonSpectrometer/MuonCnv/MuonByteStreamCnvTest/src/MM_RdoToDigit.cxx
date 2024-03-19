@@ -26,7 +26,7 @@ StatusCode MM_RdoToDigit::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Decoding MM RDO into MM Digit");
     DigitCollection digitMap{};
     for (const Muon::MM_RawDataCollection* coll : *rdoContainer) { 
-        ATH_CHECK(decodeMM(*coll, digitMap)); 
+        ATH_CHECK(decodeMM(ctx, *coll, digitMap)); 
     }
     
     for (auto& [hash, collection]: digitMap) {
@@ -36,7 +36,9 @@ StatusCode MM_RdoToDigit::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MM_RdoToDigit::decodeMM(const Muon::MM_RawDataCollection& rdoColl, DigitCollection& digitContainer) const {
+StatusCode MM_RdoToDigit::decodeMM(const EventContext& ctx,
+                                   const Muon::MM_RawDataCollection& rdoColl, 
+                                   DigitCollection& digitContainer) const {
     if (rdoColl.empty()) {
         return StatusCode::SUCCESS;
     }
@@ -46,7 +48,7 @@ StatusCode MM_RdoToDigit::decodeMM(const Muon::MM_RawDataCollection& rdoColl, Di
     // for each RDO, loop over RawData, converter RawData to digit
     // retrieve/create digit collection, and insert digit into collection
     for (const Muon::MM_RawData* data : rdoColl) {
-        std::unique_ptr<MmDigit> newDigit{m_mmRdoDecoderTool->getDigit(data)};
+        std::unique_ptr<MmDigit> newDigit{m_mmRdoDecoderTool->getDigit(ctx, data)};
         if (!newDigit) {
             ATH_MSG_WARNING("Error in MM RDO decoder");
             continue;
