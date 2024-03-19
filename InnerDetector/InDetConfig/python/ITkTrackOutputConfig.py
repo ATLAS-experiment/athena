@@ -51,7 +51,8 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
         # get list of extensions requesting track candidates. Add always the Primary Pass.
         listOfExtensionsRequesting = [
             e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+            if (e == '' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks) ]
+
         for extension in listOfExtensionsRequesting:
             toAOD += [
                 f"xAOD::TrackParticleContainer#SiSPSeededTracks{extension}TrackParticles",
@@ -60,7 +61,8 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
     if flags.Tracking.doStoreTrackSeeds:
         listOfExtensionsRequesting = [
             e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+            if (e == '' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeTrackSeeds) ]
+
         for extension in listOfExtensionsRequesting:
             toESD += ["TrackCollection#SiSPSeedSegments"+extension]
 

@@ -273,7 +273,7 @@ def ITkTrackSeedsFinalCfg(flags):
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
         e for e in _extensions_list
-        if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+        if (e == '' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeTrackSeeds) ]
 
     for extension in listOfExtensionsRequesting:
         TrackContainer = "SiSPSeedSegments"+extension
@@ -305,7 +305,7 @@ def ITkSiSPSeededTracksFinalCfg(flags):
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
         e for e in _extensions_list
-        if (e=='' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+        if (e=='' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks) ]
 
     for extension in listOfExtensionsRequesting:
         AssociationMapNameKey="PRDtoTrackMapCombinedITkTracks"
