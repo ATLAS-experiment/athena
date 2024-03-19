@@ -22,9 +22,6 @@
 
 #include <cmath>
 
-
-
-
 using namespace CaloRecGPU;
 using namespace ClusterMomentsCalculator;
 
@@ -452,58 +449,6 @@ constexpr int WarpSize = 32;
 static_assert(NumSamplings <= 28, "We wrote the code under the assumption of 28 samplings at most.");
 
 /******************************************************************************
- * Clear invalid cells first. (The algorithm doesn't invalidate clusters.)    *
- ******************************************************************************/
-/*
-__global__ static
-void clearInvalidCells(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                       const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr)
-{
-  const int index = blockIdx.x * blockDim.x + threadIdx.x;
-  const int grid_size = gridDim.x * blockDim.x;
-  for (const int cell = index; cell < NCaloCells; cell += grid_size)
-    {
-      const ClusterTag tag = cell_state_arr->clusterTag[cell];
-      if (tag.is_part_of_cluster())
-        {
-          if (tag.is_shared_between_clusters())
-            {
-              const int first_cluster = tag.cluster_index();
-              const int second_cluster = tag.secondary_cluster_index();
-
-              const int first_seed = clusters_arr->seedCellID[first_cluster];
-              const int second_seed = clusters_arr->seedCellID[second_cluster];
-
-              if (first_seed < 0 && second_seed < 0)
-                {
-                  cell_state_arr->clusterTag[cell] = ClusterTag:: make_invalid_tag();
-                }
-              else if (first_seed < 0)
-                {
-                  cell_state_arr->clusterTag[cell] = ClusterTag::make_tag(second_cluster);
-                }
-              else if (second_seed < 0)
-                {
-                  cell_state_arr->clusterTag[cell] = ClusterTag::make_tag(first_cluster);
-                }
-              else / * if (first_seed >= 0 && second_seed >= 0) * /
-                {
-                  //Do nothing: the tag's already OK.
-                }
-            }
-          else
-            {
-              if (clusters_arr->seedCellID[tag.cluster_index()] < 0)
-                {
-                  cell_state_arr->clusterTag[cell] = ClusterTag:: make_invalid_tag();
-                }
-            }
-        }
-    }
-}
-*/
-
-/******************************************************************************
  * First Pass                                                                 *
  ******************************************************************************/
 
@@ -760,16 +705,11 @@ void firstCellPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_
               //of course there's no issue here.
             }
 
-          for (int i = 1; i < num_relevant_neighbours; ++i)
+          for (int thread_to_check = 0; thread_to_check < num_relevant_neighbours; ++thread_to_check)
             {
-              const int to_check = in_warp_index + i;
-              const int warp_to_check = to_check % num_relevant_neighbours;
-              const int other = __shfl_sync(mask, cluster_to_check, warp_to_check);
-              if (warp_to_check < to_check && abs(other) == cluster_to_check)
-                {
-                  cluster_to_check = -cluster_to_check;
-                  //Mark this cluster as already considered.
-                }
+              const int other = __shfl_sync(mask, cluster_to_check, thread_to_check);
+              cluster_to_check *= 1 - 2 * (thread_to_check < in_warp_index && abs(other) == cluster_to_check);
+              //Potentially mark this cluster as already considered.
             }
 
           //Maybe there is a solution that uses sorting instead?
@@ -834,11 +774,11 @@ void firstClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> momen
           const int sampling_empty = CMCHack::get_temporary_array<NumberEmptySamplings>(moments_arr)[sampling][cluster];
           const int sampling_non_empty = CMCHack::get_temporary_array<NumberNonEmptySamplings>(moments_arr)[sampling][cluster];
 
-          int total = sampling_empty + sampling_non_empty;
+          const float total = sampling_empty + sampling_non_empty;
 
           float isolation = 0.f, isolation_norm = 0.f, eng_frac_core = sampling_max_energy;
 
-          if (total > 0 && sampling_energy > 0.f)
+          if (total > 0.f && sampling_energy > 0.f)
             {
               isolation = (sampling_energy * sampling_empty) / total;
               isolation_norm = sampling_energy;
@@ -850,15 +790,12 @@ void firstClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> momen
           for (int i = 1; i < WarpSize; i *= 2)
             {
               const int origin = sampling ^ i;
-              const float other_isol = __shfl_xor_sync(mask, isolation, i);
-              const float other_isol_norm = __shfl_xor_sync(mask, isolation_norm, i);
-              const float other_efc = __shfl_xor_sync(mask, eng_frac_core, i);
-              if (origin < NumSamplings)
-                {
-                  isolation += other_isol;
-                  isolation_norm += other_isol_norm;
-                  eng_frac_core += other_efc;
-                }
+              const float other_isol = __shfl_xor_sync(mask, isolation, i) * (origin < NumSamplings);
+              const float other_isol_norm = __shfl_xor_sync(mask, isolation_norm, i) * (origin < NumSamplings);
+              const float other_efc = __shfl_xor_sync(mask, eng_frac_core, i) * (origin < NumSamplings);
+              isolation += other_isol;
+              isolation_norm += other_isol_norm;
+              eng_frac_core += other_efc;
             }
 
           switch (moment)
@@ -928,12 +865,6 @@ void firstClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> momen
                       clusters_arr->clusterEt[cluster] = temp_ET;
                       clusters_arr->clusterPhi[cluster] = Helpers::regularize_angle(clusters_arr->clusterPhi[cluster] / abs_energy, 0.f);
                     }
-                  /*
-                  else
-                    {
-                      clusters_arr->seedCellID[cluster] = -1;
-                    }
-                  // */
                 }
                 break;
               default:
@@ -1204,9 +1135,114 @@ void secondCellPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments
 }
 
 __global__ static
+void showerAxisPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
+                          Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                          const float max_axis_angle, const bool skip_invalid)
+{
+  const int cluster_number = clusters_arr->number;
+  const int index   = blockIdx.x * blockDim.x + threadIdx.x;
+  const int grid_size = gridDim.x * blockDim.x;
+
+  for (int cluster = index; cluster < cluster_number; cluster += grid_size)
+    {
+      if (skip_invalid && clusters_arr->seedCellID[cluster] < 0)
+        {
+          continue;
+        }
+
+      const float center_x   = moments_arr->centerX[cluster];
+      const float center_y   = moments_arr->centerY[cluster];
+      const float center_z   = moments_arr->centerZ[cluster];
+      const float center_mag_inv = rnorm3df(center_x, center_y, center_z);
+      moments_arr->centerMag[cluster] = 1.0f / center_mag_inv;
+      float axis_x = center_x * center_mag_inv;
+      float axis_y = center_y * center_mag_inv;
+      float axis_z = center_z * center_mag_inv;
+      float delta_phi = 0, delta_theta = 0, delta_alpha = 0;
+
+      if (CMCHack::get_temporary_array<NumPositiveEnergyCells>(moments_arr)[cluster] > 2)
+        {
+          const float norm = 1.f / CMCHack::get_temporary_array<SumSquareEnergies>(moments_arr)[cluster];
+          RealSymmetricMatrixSolver solver { CMCHack::get_temporary_array<Matrix00>(moments_arr)[cluster] * norm,
+                                             CMCHack::get_temporary_array<Matrix11>(moments_arr)[cluster] * norm,
+                                             CMCHack::get_temporary_array<Matrix22>(moments_arr)[cluster] * norm,
+                                             CMCHack::get_temporary_array<Matrix10>(moments_arr)[cluster] * norm,
+                                             CMCHack::get_temporary_array<Matrix21>(moments_arr)[cluster] * norm,
+                                             CMCHack::get_temporary_array<Matrix20>(moments_arr)[cluster] * norm  };
+
+          float lambdas[3], vecs[3][3];
+
+          solver.get_solution(lambdas, vecs, true);
+          
+
+          constexpr float min_lambdas = 1.e-6f;
+
+          if (fabsf(lambdas[0]) >= min_lambdas && fabsf(lambdas[1]) >= min_lambdas && fabsf(lambdas[2]) >= min_lambdas)
+            {
+              int chosen_vec = -1;
+              float prev_angle = 9e99;
+              for (int i = 0; i < 3; ++i)
+                {
+                  const float prod = (vecs[i][0] * axis_x + vecs[i][1] * axis_y + vecs[i][2] * axis_z);
+                  float raw_angle = acosf(prod > 1.f ? 1.f : (prod < -1.f ? -1.f : prod));
+
+                  bool reverse = raw_angle > Helpers::Constants::pi<float> / 2;
+
+                  if (reverse)
+                    {
+                      raw_angle = Helpers::Constants::pi<float> - raw_angle;
+                    }
+
+                  if (chosen_vec == -1 || prev_angle > raw_angle)
+                    {
+                      chosen_vec = i;
+                      prev_angle = raw_angle;
+                      if (reverse)
+                        {
+                          vecs[i][0] *= -1;
+                          vecs[i][1] *= -1;
+                          vecs[i][2] *= -1;
+                        }
+                    }
+                }
+
+              auto calc_phi = [](const float x, const float y, const float z)
+              {
+                return atan2f(y, x);
+              };
+              auto calc_theta = [](const float x, const float y, const float z)
+              {
+                return atan2f(1.0f, z * rhypotf(x, y));
+              };
+
+              delta_alpha = prev_angle;
+
+              delta_phi = Helpers::angular_difference(calc_phi(axis_x, axis_y, axis_z), calc_phi(vecs[chosen_vec][0], vecs[chosen_vec][1], vecs[chosen_vec][2]));
+
+              delta_theta = calc_theta(axis_x, axis_y, axis_z) - calc_theta(vecs[chosen_vec][0], vecs[chosen_vec][1], vecs[chosen_vec][2]);
+
+
+              if (prev_angle < max_axis_angle)
+                {
+                  axis_x = vecs[chosen_vec][0];
+                  axis_y = vecs[chosen_vec][1];
+                  axis_z = vecs[chosen_vec][2];
+                }
+            }
+        }
+      CMCHack::get_temporary_array<ShowerAxisX>(moments_arr)[cluster] = axis_x;
+      CMCHack::get_temporary_array<ShowerAxisY>(moments_arr)[cluster] = axis_y;
+      CMCHack::get_temporary_array<ShowerAxisZ>(moments_arr)[cluster] = axis_z;
+      moments_arr->deltaPhi[cluster] = delta_phi;
+      moments_arr->deltaTheta[cluster] = delta_theta;
+      moments_arr->deltaAlpha[cluster] = delta_alpha;
+    }
+}
+
+__global__ static
 void secondClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_arr,
                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                             const float max_axis_angle, const bool skip_invalid)
+                             const bool skip_invalid)
 {
   const int cluster_number = clusters_arr->number;
 
@@ -1223,303 +1259,7 @@ void secondClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> mome
 
       const float sum_energies = moments_arr->engPos[cluster];
       const float cluster_energy = clusters_arr->clusterEnergy[cluster];
-      switch (moment)
-        {
-          case WarpSize - 1:
-          case WarpSize - 2:
-          case WarpSize - 3:
-            {
-              const float center_x   = moments_arr->centerX[cluster];
-              const float center_y   = moments_arr->centerY[cluster];
-              const float center_z   = moments_arr->centerZ[cluster];
-              const float center_mag_inv = rnorm3df(center_x, center_y, center_z);
-              moments_arr->centerMag[cluster] = 1.0f / center_mag_inv;
-              float axis_x = center_x * center_mag_inv;
-              float axis_y = center_y * center_mag_inv;
-              float axis_z = center_z * center_mag_inv;
-              float delta_phi = 0, delta_theta = 0, delta_alpha = 0;
 
-              if (CMCHack::get_temporary_array<NumPositiveEnergyCells>(moments_arr)[cluster] > 2)
-                {
-                  const float norm = 1.f / CMCHack::get_temporary_array<SumSquareEnergies>(moments_arr)[cluster];
-                  RealSymmetricMatrixSolver solver { CMCHack::get_temporary_array<Matrix00>(moments_arr)[cluster] * norm,
-                                                     CMCHack::get_temporary_array<Matrix11>(moments_arr)[cluster] * norm,
-                                                     CMCHack::get_temporary_array<Matrix22>(moments_arr)[cluster] * norm,
-                                                     CMCHack::get_temporary_array<Matrix10>(moments_arr)[cluster] * norm,
-                                                     CMCHack::get_temporary_array<Matrix21>(moments_arr)[cluster] * norm,
-                                                     CMCHack::get_temporary_array<Matrix20>(moments_arr)[cluster] * norm  };
-
-                  float lambda = 0, vec[3];
-
-                  switch (moment)
-                    {
-                      case WarpSize - 1:
-                        solver.get_solution_pair_2(lambda, vec, true);
-                        break;
-                      case WarpSize - 2:
-                        solver.get_solution_pair_3(lambda, vec, true);
-                        break;
-                      //2 and 3 are switched compared to the Eigen solution.
-                      case WarpSize - 3:
-                        solver.get_solution_pair_1(lambda, vec, true);
-                        break;
-                      default:
-                        break;
-                    }
-
-                  const float min_lambdas = 1.e-6f;
-
-                  const unsigned int mask = 0xE0000000U;
-                  //The last three threads.
-
-                  const float lambda_1 = __shfl_sync(mask, lambda, WarpSize - 3);
-                  const float lambda_2 = __shfl_sync(mask, lambda, WarpSize - 2);
-                  const float lambda_3 = __shfl_sync(mask, lambda, WarpSize - 1);
-
-                  if ( solver.well_defined(lambda_1, lambda_2, lambda_3, min_lambdas)  &&
-                       fabsf(lambda_1) >= min_lambdas                                  &&
-                       fabsf(lambda_2) >= min_lambdas                                  &&
-                       fabsf(lambda_3) >= min_lambdas                                     )
-                    {
-                      const float prod = (vec[0] * axis_x + vec[1] * axis_y + vec[2] * axis_z);
-                      const float raw_angle = acosf(prod > 1.f ? 1.f : (prod < -1.f ? -1.f : prod));
-
-                      float this_angle = raw_angle;
-
-                      if (raw_angle > Helpers::Constants::pi<float> / 2)
-                        {
-                          this_angle = Helpers::Constants::pi<float> - raw_angle;
-                          vec[0] *= -1;
-                          vec[1] *= -1;
-                          vec[2] *= -1;
-                        }
-
-                      const float angle_1 = __shfl_sync(mask, this_angle, WarpSize - 3);
-                      const float angle_2 = __shfl_sync(mask, this_angle, WarpSize - 2);
-                      const float angle_3 = __shfl_sync(mask, this_angle, WarpSize - 1);
-
-
-                      float chosen_angle = 0, chosen_vec[3] = {0, 0, 0};
-
-                      if (angle_1 <= angle_2 && angle_1 <= angle_3)
-                        {
-                          chosen_angle = angle_1;
-                          chosen_vec[0] = __shfl_sync(mask, vec[0], WarpSize - 3);
-                          chosen_vec[1] = __shfl_sync(mask, vec[1], WarpSize - 3);
-                          chosen_vec[2] = __shfl_sync(mask, vec[2], WarpSize - 3);
-                        }
-                      else if (angle_2 < angle_1 && angle_2 <= angle_3)
-                        {
-                          chosen_angle = angle_2;
-                          chosen_vec[0] = __shfl_sync(mask, vec[0], WarpSize - 2);
-                          chosen_vec[1] = __shfl_sync(mask, vec[1], WarpSize - 2);
-                          chosen_vec[2] = __shfl_sync(mask, vec[2], WarpSize - 2);
-                        }
-                      else if (angle_3 < angle_2 && angle_3 < angle_1)
-                        {
-                          chosen_angle = angle_3;
-                          chosen_vec[0] = __shfl_sync(mask, vec[0], WarpSize - 1);
-                          chosen_vec[1] = __shfl_sync(mask, vec[1], WarpSize - 1);
-                          chosen_vec[2] = __shfl_sync(mask, vec[2], WarpSize - 1);
-                        }
-                      /*
-                      else
-                        {
-                          clusters_arr->seedCellID[cluster] = -1;
-                        }
-                      // */
-
-                      auto calc_phi = [](const float x, const float y, const float z)
-                      {
-                        return atan2f(y, x);
-                      };
-                      auto calc_theta = [](const float x, const float y, const float z)
-                      {
-                        return atan2f(1.0f, z * rhypotf(x, y));
-                      };
-
-                      switch (moment)
-                        {
-                          case WarpSize - 3:
-                            delta_phi = Helpers::angular_difference(calc_phi(axis_x, axis_y, axis_z), calc_phi(chosen_vec[0], chosen_vec[1], chosen_vec[2]));
-                            if (chosen_angle < max_axis_angle)
-                              {
-                                axis_x = chosen_vec[0];
-                              }
-                            /*
-                            else
-                              {
-                                clusters_arr->seedCellID[cluster] = -1;
-                              }
-                            // */
-                            break;
-                          case WarpSize - 2:
-                            delta_theta = calc_theta(axis_x, axis_y, axis_z) - calc_theta(chosen_vec[0], chosen_vec[1], chosen_vec[2]);
-                            if (chosen_angle < max_axis_angle)
-                              {
-                                axis_y = chosen_vec[1];
-                              }
-                            /*
-                            else
-                              {
-                                clusters_arr->seedCellID[cluster] = -1;
-                              }
-                            // */
-                            break;
-                          case WarpSize - 1:
-                            delta_alpha = chosen_angle;
-                            if (chosen_angle < max_axis_angle)
-                              {
-                                axis_z = chosen_vec[2];
-                              }
-                            /*
-                            else
-                              {
-                                clusters_arr->seedCellID[cluster] = -1;
-                              }
-                            // */
-                            break;
-                          default:
-                            break;
-                        }
-
-                      __syncwarp(mask);
-
-                    }
-                  /*
-                  else
-                    {
-                      clusters_arr->seedCellID[cluster] = -1;
-                    }
-                  // */
-                }
-
-              switch (moment)
-                {
-                  case WarpSize - 3:
-                    CMCHack::get_temporary_array<ShowerAxisX>(moments_arr)[cluster] = axis_x;
-                    moments_arr->deltaPhi[cluster] = delta_phi;
-                    break;
-                  case WarpSize - 2:
-                    CMCHack::get_temporary_array<ShowerAxisY>(moments_arr)[cluster] = axis_y;
-                    moments_arr->deltaTheta[cluster] = delta_theta;
-                    break;
-                  case WarpSize - 1:
-                    CMCHack::get_temporary_array<ShowerAxisZ>(moments_arr)[cluster] = axis_z;
-                    moments_arr->deltaAlpha[cluster] = delta_alpha;
-                    break;
-                  default:
-                    break;
-                }
-
-            }
-            break;
-          case 0:
-            {
-              moments_arr->badLArQFrac[cluster] /= (cluster_energy != 0.f ? cluster_energy : 1.f);
-            }
-            break;
-          case 1:
-            {
-              const float prev_v = moments_arr->significance[cluster];
-              moments_arr->significance[cluster] = (prev_v > 0.f ? cluster_energy * rsqrtf(prev_v) : 0.f);
-            }
-            break;
-          case 2:
-            {
-              const unsigned long long int max_sig_and_samp = CMCHack::get_temporary_array<MaxSignificanceAndSampling>(moments_arr)[cluster];
-              const float max_sig = __uint_as_float(max_sig_and_samp >> 32);
-              const int max_samp = (max_sig_and_samp & 0xFFFFFFFEU) >> 1;
-              moments_arr->cellSignificance[cluster] = max_sig * (max_sig_and_samp & 1 ? 1.f : -1.f);
-              moments_arr->cellSigSampling[cluster] = max_samp;
-            }
-            break;
-          case 3:
-            {
-              const float norm_LAr = CMCHack::get_temporary_array<AverageLArQNorm>(moments_arr)[cluster];
-              moments_arr->avgLArQ[cluster] /= (norm_LAr > 0.f ? norm_LAr : 1.0f);
-            }
-            break;
-          case 4:
-            {
-              const float norm_Tile = CMCHack::get_temporary_array<AverageTileQNorm>(moments_arr)[cluster];
-              moments_arr->avgTileQ[cluster] /= (norm_Tile > 0.f ? norm_Tile : 1.0f);
-            }
-            break;
-          case 5:
-            {
-              const float old = moments_arr->PTD[cluster];
-              moments_arr->PTD[cluster] = 1.0f / ((sum_energies > 0.f ? sum_energies : 1.f) * rsqrtf(old));
-              //See before: maybe to be revised?
-            }
-            break;
-          case 6:
-            {
-              const float time_norm = CMCHack::get_temporary_array<TimeNormalization>(moments_arr)[cluster];
-              if (time_norm != 0.f)
-                {
-                  const float real_norm = 1.0f / time_norm;
-                  const float time = moments_arr->time[cluster] * real_norm;
-                  const float second_sum = moments_arr->secondTime[cluster];
-                  moments_arr->time[cluster] = time;
-                  moments_arr->secondTime[cluster] = (second_sum * real_norm) - (time * time);
-                }
-              else
-                {
-                  moments_arr->time[cluster] = 0.f;
-                  moments_arr->secondTime[cluster] = 0.f;
-                }
-            }
-            break;
-          case 7:
-            if (moments_arr->numCells[cluster] <= 0)
-              {
-                clusters_arr->seedCellID[cluster] = -1;
-              }
-            break;
-          default:
-            break;
-        }
-
-      __syncwarp();
-
-      //Now zero out what we need for the final (!) moments.
-      //Avoid overburdening WarpSize - 3 to WarpSize - 1.
-      //Also use 0 to NumSamplings - 1 for the sampling-based ones,
-      //so try to load-balance with those that did less before.
-
-      switch (moment)
-        {
-          case 8:
-            moments_arr->firstPhi[cluster] = 0.f;
-            break;
-          case 9:
-            moments_arr->firstEta[cluster] = 0.f;
-            break;
-          case 10:
-            moments_arr->secondR[cluster] = 0.f;
-            break;
-          case 11:
-            moments_arr->secondLambda[cluster] = 0.f;
-            break;
-          case 12:
-            moments_arr->lateral[cluster] = 0.f;
-            break;
-          case 13:
-            moments_arr->longitudinal[cluster] = 0.f;
-            break;
-          case 14:
-            moments_arr->nExtraCellSampling[cluster] = 0;
-            break;
-          case 15:
-            CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster] = 0.f;
-            break;
-          case 16:
-            CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster] = 0.f;
-            break;
-          default:
-            break;
-        }
       if (moment < NumSamplings)
         {
           const int sampling = moment;
@@ -1527,6 +1267,72 @@ void secondClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> mome
           moments_arr->etaPerSample[sampling][cluster] = 0.f;
           moments_arr->phiPerSample[sampling][cluster] = 0.f;
           CMCHack::get_temporary_array<AbsoluteEnergyPerSample>(moments_arr)[sampling][cluster] = 0.f;
+        }
+      else
+        {
+          switch (moment - NumSamplings)
+            {
+              case 0:
+                {
+                  if (moments_arr->numCells[cluster] <= 0)
+                    {
+                      clusters_arr->seedCellID[cluster] = -1;
+                    }
+                  moments_arr->badLArQFrac[cluster] /= (cluster_energy != 0.f ? cluster_energy : 1.f);
+                  const float prev_v = moments_arr->significance[cluster];
+                  moments_arr->significance[cluster] = (prev_v > 0.f ? cluster_energy * rsqrtf(prev_v) : 0.f);
+                  moments_arr->firstPhi[cluster] = 0.f;
+                  CMCHack::get_temporary_array<LateralNormalization>(moments_arr)[cluster] = 0.f;
+                }
+                break;
+              case 1:
+                {
+                  const unsigned long long int max_sig_and_samp = CMCHack::get_temporary_array<MaxSignificanceAndSampling>(moments_arr)[cluster];
+                  const float max_sig = __uint_as_float(max_sig_and_samp >> 32);
+                  const int max_samp = (max_sig_and_samp & 0xFFFFFFFEU) >> 1;
+                  moments_arr->cellSignificance[cluster] = max_sig * (max_sig_and_samp & 1 ? 1.f : -1.f);
+                  moments_arr->cellSigSampling[cluster] = max_samp;
+                  moments_arr->firstEta[cluster] = 0.f;
+                  moments_arr->secondR[cluster] = 0.f;
+                  CMCHack::get_temporary_array<LongitudinalNormalization>(moments_arr)[cluster] = 0.f;
+                }
+                break;
+              case 2:
+                {
+                  const float norm_LAr = CMCHack::get_temporary_array<AverageLArQNorm>(moments_arr)[cluster];
+                  moments_arr->avgLArQ[cluster] /= (norm_LAr > 0.f ? norm_LAr : 1.0f);
+                  const float norm_Tile = CMCHack::get_temporary_array<AverageTileQNorm>(moments_arr)[cluster];
+                  moments_arr->avgTileQ[cluster] /= (norm_Tile > 0.f ? norm_Tile : 1.0f);
+                  moments_arr->secondLambda[cluster] = 0.f;
+                  moments_arr->lateral[cluster] = 0.f;
+                }
+                break;
+              case 3:
+                {
+                  const float old = moments_arr->PTD[cluster];
+                  moments_arr->PTD[cluster] = 1.0f / ((sum_energies > 0.f ? sum_energies : 1.f) * rsqrtf(old));
+                  //See before: maybe to be revised?
+                  const float time_norm = CMCHack::get_temporary_array<TimeNormalization>(moments_arr)[cluster];
+                  if (time_norm != 0.f)
+                    {
+                      const float real_norm = 1.0f / time_norm;
+                      const float time = moments_arr->time[cluster] * real_norm;
+                      const float second_sum = moments_arr->secondTime[cluster];
+                      moments_arr->time[cluster] = time;
+                      moments_arr->secondTime[cluster] = (second_sum * real_norm) - (time * time);
+                    }
+                  else
+                    {
+                      moments_arr->time[cluster] = 0.f;
+                      moments_arr->secondTime[cluster] = 0.f;
+                    }
+                  moments_arr->longitudinal[cluster] = 0.f;
+                  moments_arr->nExtraCellSampling[cluster] = 0;
+                }
+                break;
+              default:
+                break;
+            }
         }
     }
 }
@@ -1574,17 +1380,6 @@ void thirdCellPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_
             const int   max_cell        = CMCHack::get_temporary_array<MaxCells>(moments_arr)[cluster];
             const int   second_max_cell = CMCHack::get_temporary_array<SecondMaxCells>(moments_arr)[cluster];
 
-            /*
-            auto cross_p_mag = [](const float x1, const float x2, const float x3,
-                                  const float y1, const float y2, const float y3)
-            {
-              const float a = x2 * y3 - x3 * y2;
-              const float b = x3 * y1 - x1 * y3;
-              const float c = x1 * y2 - x2 * y1;
-              return norm3df(a, b, c);
-            };
-            */
-
             auto dot_p = [](const float x1, const float x2, const float x3,
                             const float y1, const float y2, const float y3)
             {
@@ -1612,10 +1407,6 @@ void thirdCellPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> moments_
             const float cos_theta = lambda * d_mag_inv;
 
             const float r = 1.0f / (rsqrtf(1 - cos_theta * cos_theta) * d_mag_inv);
-
-
-            //const float r      = cross_p_mag(x - center_x, y - center_y, z - center_z, axis_x, axis_y, axis_z);
-            //const float lambda = dot_p(x - center_x, y - center_y, z - center_z, axis_x, axis_y, axis_z);
 
             switch (this_moment)
               {
@@ -1805,19 +1596,7 @@ void thirdClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> momen
                           const float branch_2 = quot - rootdet;
                           lambda_c = min(fabsf(branch_1), fabsf(branch_2));
                         }
-                      /*
-                      else
-                        {
-                          clusters_arr->seedCellID[cluster] = -1;
-                        }
-                      // */
                     }
-                  /*
-                  else
-                    {
-                      clusters_arr->seedCellID[cluster] = -1;
-                    }
-                  // */
 
                 }
             }
@@ -1857,16 +1636,13 @@ void thirdClusterPassKernel(Helpers::CUDA_kernel_object<ClusterMomentsArr> momen
                   //The last 4 threads.
 
                   const float new_one = __shfl_down_sync(mask, this_calc, 1);
-                  if (this_calc == 0.f)
-                    {
-                      this_calc = new_one;
-                    }
+
+                  this_calc += new_one * (this_calc == 0.f);
                   //(0, 1) and (2, 3) get the wanted between the both of them.
+
                   const float new_two = __shfl_down_sync(mask, this_calc, 2);
-                  if (this_calc == 0.f)
-                    {
-                      this_calc = new_two;
-                    }
+
+                  this_calc += new_two * (this_calc == 0.f);
                   //0 got the correct one.
 
                   if (this_calc != 0.f && axis_z != 0.f)
@@ -2043,6 +1819,8 @@ void calculateClusterPropertiesAndMomentsDeferKernel(Helpers::CUDA_kernel_object
       const int i_dimGridClusters = Helpers::int_ceil_div(cluster_number, Helpers::int_floor_div(i_dimBlockClusters, WarpSize));
       const int i_dimGridCells = Helpers::int_ceil_div(NCaloCells, Helpers::int_floor_div(i_dimBlockCells, WarpSize));
 
+      const int i_dimGridAxis = Helpers::int_ceil_div(cluster_number, i_dimBlockClusters);
+
       zerothClusterPassKernel <<< i_dimGridClusters, i_dimBlockClusters>>>(moments_arr, clusters_arr, geometry,
                                                                            opts->skip_invalid_clusters);
 
@@ -2054,8 +1832,9 @@ void calculateClusterPropertiesAndMomentsDeferKernel(Helpers::CUDA_kernel_object
 
       secondCellPassKernel <<< i_dimGridCells, i_dimBlockCells>>>(moments_arr, cell_state_arr, cell_info_arr, geometry, noise_arr,
                                                                   opts->use_abs_energy, opts->use_two_gaussian_noise, opts->min_LAr_quality);
-      secondClusterPassKernel <<< i_dimGridClusters, i_dimBlockClusters>>>(moments_arr, clusters_arr,
-                                                                           opts->max_axis_angle, opts->skip_invalid_clusters);
+      showerAxisPassKernel <<< i_dimGridAxis, i_dimBlockClusters>>>(moments_arr, clusters_arr,
+                                                                    opts->max_axis_angle, opts->skip_invalid_clusters);
+      secondClusterPassKernel <<< i_dimGridClusters, i_dimBlockClusters>>>(moments_arr, clusters_arr, opts->skip_invalid_clusters);
 
 
       thirdCellPassKernel <<< i_dimGridCells, i_dimBlockCells>>>(moments_arr, cell_state_arr, cell_info_arr, geometry, opts->use_abs_energy,
@@ -2067,8 +1846,6 @@ void calculateClusterPropertiesAndMomentsDeferKernel(Helpers::CUDA_kernel_object
       finalClusterPassKernel <<< i_dimGridClusters, i_dimBlockClusters>>>(moments_arr, clusters_arr, cell_state_arr, cell_info_arr,
                                                                           geometry, opts->skip_invalid_clusters);
 
-
-      //clearInvalidCells <<< i_dimGridCells, i_dimBlockCells>>>(cell_state_arr, clusters_arr);
 
       //We could have split this up and not rely so much on dynamic parallelism.
       //However, if not using CUDA 12 (which we probably won't be for a while),
@@ -2094,10 +1871,11 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
   const CUDAKernelLaunchConfiguration cfg_1_cel = optimizer.get_launch_configuration("ClusterMomentsCalculator", 1);
   const CUDAKernelLaunchConfiguration cfg_1_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 2);
   const CUDAKernelLaunchConfiguration cfg_2_cel = optimizer.get_launch_configuration("ClusterMomentsCalculator", 3);
-  const CUDAKernelLaunchConfiguration cfg_2_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 4);
-  const CUDAKernelLaunchConfiguration cfg_3_cel = optimizer.get_launch_configuration("ClusterMomentsCalculator", 5);
-  const CUDAKernelLaunchConfiguration cfg_3_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 6);
-  const CUDAKernelLaunchConfiguration cfg_f_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 7);
+  const CUDAKernelLaunchConfiguration cfg_2_axs = optimizer.get_launch_configuration("ClusterMomentsCalculator", 4);
+  const CUDAKernelLaunchConfiguration cfg_2_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 5);
+  const CUDAKernelLaunchConfiguration cfg_3_cel = optimizer.get_launch_configuration("ClusterMomentsCalculator", 6);
+  const CUDAKernelLaunchConfiguration cfg_3_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 7);
+  const CUDAKernelLaunchConfiguration cfg_f_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 8);
 
   if (optimizer.use_minimal_kernel_sizes() && optimizer.can_use_dynamic_parallelism())
     {
@@ -2141,9 +1919,12 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
                                                                                         options.m_options->use_abs_energy,
                                                                                         options.m_options->use_two_gaussian_noise,
                                                                                         options.m_options->min_LAr_quality);
+      showerAxisPassKernel <<< cfg_2_axs.grid_x, cfg_2_axs.block_x, 0, stream_to_use>>>(holder.m_moments_dev,
+                                                                                        holder.m_clusters_dev,
+                                                                                        options.m_options->max_axis_angle,
+                                                                                        options.m_options->skip_invalid_clusters);
       secondClusterPassKernel <<< cfg_2_clu.grid_x, cfg_2_clu.block_x, 0, stream_to_use>>>(holder.m_moments_dev,
                                                                                            holder.m_clusters_dev,
-                                                                                           options.m_options->max_axis_angle,
                                                                                            options.m_options->skip_invalid_clusters);
 
 
@@ -2167,9 +1948,6 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
                                                                                           holder.m_cell_info_dev,
                                                                                           instance_data.m_geometry_dev,
                                                                                           options.m_options->skip_invalid_clusters);
-
-
-      //clearInvalidCells <<< dimGridCells, dimBlockCells, 0, stream_to_use>>>(holder.m_cell_state_dev, holder.m_clusters_dev);
     }
 
   if (synchronize)
@@ -2187,6 +1965,7 @@ void ClusterMomentsCalculator::register_kernels(IGPUKernelSizeOptimizer & optimi
                        (void *) firstCellPassKernel,
                        (void *) firstClusterPassKernel,
                        (void *) secondCellPassKernel,
+                       (void *) showerAxisPassKernel,
                        (void *) secondClusterPassKernel,
                        (void *) thirdCellPassKernel,
                        (void *) thirdClusterPassKernel,
@@ -2198,6 +1977,7 @@ void ClusterMomentsCalculator::register_kernels(IGPUKernelSizeOptimizer & optimi
                        ClusterPassBlockSize,
                        CellPassBlockSize,
                        ClusterPassBlockSize,
+                       ClusterPassBlockSize,
                        CellPassBlockSize,
                        ClusterPassBlockSize,
                        ClusterPassBlockSize,
@@ -2207,6 +1987,7 @@ void ClusterMomentsCalculator::register_kernels(IGPUKernelSizeOptimizer & optimi
                        Helpers::int_ceil_div(NCaloCells,   Helpers::int_floor_div(CellPassBlockSize,    WarpSize)),
                        Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
                        Helpers::int_ceil_div(NCaloCells,   Helpers::int_floor_div(CellPassBlockSize,    WarpSize)),
+                       Helpers::int_ceil_div(NMaxClusters,                                   ClusterPassBlockSize),
                        Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
                        Helpers::int_ceil_div(NCaloCells,   Helpers::int_floor_div(CellPassBlockSize,    WarpSize)),
                        Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
@@ -2217,11 +1998,12 @@ void ClusterMomentsCalculator::register_kernels(IGPUKernelSizeOptimizer & optimi
                        NCaloCells   * WarpSize,
                        NMaxClusters * WarpSize,
                        NCaloCells   * WarpSize,
+                       NMaxClusters,
                        NMaxClusters * WarpSize,
                        NCaloCells   * WarpSize,
                        NMaxClusters * WarpSize,
                        NMaxClusters * WarpSize
                      };
-                     
-  optimizer.register_kernels("ClusterMomentsCalculator", 8, kernels, blocksizes, gridsizes, maxsizes);
+
+  optimizer.register_kernels("ClusterMomentsCalculator", 9, kernels, blocksizes, gridsizes, maxsizes);
 }
