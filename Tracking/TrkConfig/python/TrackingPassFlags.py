@@ -468,6 +468,12 @@ def createITkTrackingPassFlags():
     # --- flags for GNN tracking
     icf.addFlag("doGNNTrack", False)
 
+    # --- Flags for detailed information. 
+    #     Ignored for Primary Pass (always active); 
+    #     Enable for other passes with dedicated output container, if desired.
+    icf.addFlag("storeTrackSeeds", False)
+    icf.addFlag("storeSiSPSeededTracks", False)
+
     return icf
 
 
@@ -475,7 +481,7 @@ def createITkTrackingPassFlags():
 ## Heavyion mode #######################
 def createITkHeavyIonTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension        = "ITkHeavyIon"
+    icf.extension        = "HeavyIon"
    
     icf.minClusters      = [9]
     icf.minSiNotShared   = [7]
