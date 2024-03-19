@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import sys
 import AthenaConfiguration.AtlasSemantics # noqa: F401 (load ATLAS-specific semantics)
@@ -16,9 +16,10 @@ def isComponentAccumulatorCfg():
     else:
         return False
 
-#This version of CompFactory provides the RecExCommon-style configurables 
-# used by athena.py. Internally works like CfgMgr
+
 class _compFactory1():
+    """Factory providing legacy Configurables with global namespace"""
+
     def __getattr__(self,cfgName):
         if not cfgName.startswith("__"):
             return getConfigurable(cfgName.replace("::","__"),assumeCxxClass=False)
@@ -29,9 +30,10 @@ class _compFactory1():
     def getComps(self, *manyNames):
         return [getConfigurable(cfgName.replace("::","__"),assumeCxxClass=False) for cfgName in manyNames]
 
-#This version of the CompFactory provides GaudiConfig2-style Configurables
+
 class _compFactory2():
-    #Get Configurable database from Gaudi:
+    """Factory providing GaudiConfig2 Configurable without global namespace"""
+
     def __getattr__(self,cfgName):
         if not cfgName.startswith("__"):
             return getattr(_cfgs,cfgName)
@@ -43,18 +45,14 @@ class _compFactory2():
         return [_cfgs.getByType(cfgName) for cfgName in manyNames]
 
 
-#Dynamically switch between the two versions
 class _compFactory():
-    def _getFactory(self):
+    """Return Configurable factory for legacy/CA jobs"""
 
-        if isComponentAccumulatorCfg():
-            return _compFactory2()
-        else:
-            return _compFactory1()
+    def _getFactory(self):
+        return _compFactory2() if isComponentAccumulatorCfg() else _compFactory1()
 
     def __getattr__(self,cfgName):
         return getattr(self._getFactory(),cfgName)
-
 
     def getComp(self, oneName):
         return self._getFactory().getComp(oneName)

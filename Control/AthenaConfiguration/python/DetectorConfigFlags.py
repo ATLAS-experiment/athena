@@ -2,33 +2,6 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
-# This module is based upon Control/AthenaCommon/python/DetFlags.py
-# Only some flags have been migrated. A full list of what the old
-# DetFlags provided is given for reference below:
-# detectors : ID = Bpipe Pixel SCT TRT BCM
-#             ITk = Bpipe ITkPixel ITkStrip BCMPrime PLR
-#             HGTD
-#             Forward = Lucid ZDC ALFA AFP FwdRegion
-#             Calo = LAr Tile MBTS
-#             Muon = MDT CSC TGC RPC sTGC MM
-# tasks:
-#   geometry : setup the geometry
-#   dcs : DCS information is available
-#   simulate : simulate
-#   simulateLVL1 : LVL1 simulation
-#   detdescr : setup detector description (for anything which is not geant)
-#   pileup   : collect hits from physics and min bias events
-#   digitize : hit -> RDO (raw data objects)
-#   makeRIO  : RDO -> RIO (Reconstruction Input Objects)
-#   writeBS  : write RDO byte stream
-#   readRDOBS : read RDO from byte stream
-#   readRDOPool : read RDO from pool
-#   readRIOBS : read RIO directly from BS
-#   writeRDOPool : write RDO in pool
-#   readRIOPool  : read RIO from pool
-#   writeRIOPool : write RIO in pool
-#   overlay : overlay setup
-
 
 # all detectors - used in helper functions
 allDetectors = [
