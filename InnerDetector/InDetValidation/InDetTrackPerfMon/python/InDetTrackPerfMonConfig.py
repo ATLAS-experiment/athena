@@ -46,9 +46,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
                        refToTestDecoName + flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
     if flags.PhysVal.IDTPM.currentTrkAna.TestType == "Trigger":
-        ## get configured list of chains from regex
-        from InDetTrackPerfMon.ConfigUtils import getChainList
-        kwargs.setdefault( "ChainNames", getChainList( flags ) )
+        kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
 
     ## TODO - to be uncommented in future MRs
     kwargs.setdefault( "doTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.doTrackParameters )
@@ -125,47 +123,56 @@ def InDetTrackPerfMonCfg( flags ):
     log = logging.getLogger( "InDetTrackPerfMonCfg" )
     acc = ComponentAccumulator()
 
-    ## Configuring IDTPM tool instances
-    tools = [] 
-
+    ## Truth-hit decorator
     useTruth = False
-    useOfflineObject = False
     for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
         if "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ):
             useTruth = True
             break
-        if getattr( flags.PhysVal.IDTPM, trkAnaName+".SelectOfflineObject" ):
-            if "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".SelectOfflineObject" ):
-                continue # Do not schedule algorithm for Truth-match offline selection
-            useOfflineObject = True
-            break
 
-    ## Truth-hit decorator
     if useTruth:
         from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
         acc.merge( TruthHitDecoratorAlgCfg(flags) )
 
     ## Offline track-object decorator
+    useOfflineObject = False
+    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
+        obj = getattr( flags.PhysVal.IDTPM, trkAnaName+".SelectOfflineObject" )
+        if ( not obj or "Truth" in obj ) :
+            # Do not schedule algorithm
+            # if SelectOfflineObject id empty or
+            # for Truth-match offline selection
+            continue
+        useOfflineObject = True
+        break
+
     if useOfflineObject:
         from InDetTrackPerfMon.InDetAlgorithmConfig import OfflineObjectDecoratorAlgCfg
         acc.merge( OfflineObjectDecoratorAlgCfg(flags) )
 
-    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames:
+    ## IDTPM tool instances
+    tools = []
+
+    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
         ## cloning flags of current TrackAnalysis to PhysVal.IDTPM.currentTrkAna
         flags_thisTrkAna = flags.cloneAndReplace( "PhysVal.IDTPM.currentTrkAna",
                                                   "PhysVal.IDTPM."+trkAnaName )
 
-        ## further cloning into different sets of flags if unpackTrigChains = True
-        from InDetTrackPerfMon.ConfigUtils import getFlagsList
-        for iflags in getFlagsList( flags_thisTrkAna ):
-            if iflags.PhysVal.IDTPM.currentTrkAna.enabled:
-                log.debug( "Scheduling TrackAnalysis: %s",
-                           iflags.PhysVal.IDTPM.currentTrkAna.anaTag )
-                tools.append(
-                    acc.popToolsAndMerge( InDetTrackPerfMonToolCfg( iflags,
-                            name="InDetTrackPerfMonTool"+
-                                 iflags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+        if flags_thisTrkAna.PhysVal.IDTPM.currentTrkAna.enabled:
+            log.debug( "Scheduling TrackAnalysis: %s",
+                       flags_thisTrkAna.PhysVal.IDTPM.currentTrkAna.anaTag )
+
+            tools.append(
+                acc.popToolsAndMerge( InDetTrackPerfMonToolCfg( flags_thisTrkAna,
+                    name="InDetTrackPerfMonTool"+
+                         flags_thisTrkAna.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
     acc.merge( PhysValMonitoringCfg( flags, tools=tools ) )
+
+    ## Adding additional output stream for reprocessing file
+    if flags.Output.doWriteAOD_IDTPM :
+        from InDetTrackPerfMon.InDetOutputConfig import InDetOutputCfg
+        acc.merge( InDetOutputCfg(flags) )
+
     return acc
