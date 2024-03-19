@@ -111,19 +111,19 @@ def runStep(inputFile):
         inputType="RDO"
         inputDataType=inputType
         outputType="ESD"
-        preExec='''from RecExConfig.RecFlags import rec;rec.doTrigger=False;rec.doBTagging=False'''
+        preExec='''flags.Reco.EnableTrigger=False; flags.Reco.EnableBTagging=False'''
 
     elif "RAW" in inputFileBase:
         inputType="RAW"
         inputDataType="BS" #bytestream
         outputType="ESD"
-        preExec='''from RecExConfig.RecFlags import rec;rec.doTrigger=False'''
+        preExec='''flags.Reco.EnableTrigger=False'''
 
     elif 'ESD' in inputFileBase:
         inputType="ESD"
         inputDataType=inputType
         outputType="AOD"
-        preExec='''from RecExConfig.RecFlags import rec;rec.doTrigger=False;from JetValidation.RTTConfig import scheduleRTTJetTests;rec.UserExecs = ["scheduleRTTJetTests()"]'''
+        preExec='''flags.Reco.EnableTrigger=False'''
 
     else:
         print ("ERROR RunStep: Input file does not appear to be a supported type (RAW, HITS, RDO, ESD)")
