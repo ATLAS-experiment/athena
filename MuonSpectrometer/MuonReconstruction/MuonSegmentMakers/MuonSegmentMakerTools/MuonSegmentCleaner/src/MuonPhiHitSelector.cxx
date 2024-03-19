@@ -31,19 +31,7 @@ MuonPhiHitSelector::MuonPhiHitSelector(const std::string& type, const std::strin
 {
     declareInterface<IMuonHitSelector>(this);
 
-    m_cosmics = false;
-    declareProperty("DoCosmics", m_cosmics);
 
-    m_summary = false;
-    declareProperty("DoSummary", m_summary);
-
-    // Create and write out the phi clusters or hits
-
-    m_makeClusters = false;
-    declareProperty("MakeClusters", m_makeClusters);
-    m_competingRios = false;
-
-    declareProperty("CompetingRios", m_competingRios);
 }
 
 StatusCode
@@ -53,6 +41,7 @@ MuonPhiHitSelector::initialize()
     ATH_CHECK(m_competingRIOsOnTrackTool.retrieve());
     ATH_CHECK(m_clusterCreator.retrieve());
     ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(m_cscRotCreator.retrieve(EnableTool{!m_cscRotCreator.empty()}));
     ATH_MSG_VERBOSE("End of Initializing");
     return StatusCode::SUCCESS;
 }
@@ -186,7 +175,7 @@ MuonPhiHitSelector::select_rio(const double pmom, const std::vector<const Trk::R
             } else if (phiSelect[i] == 3) {
                 const Muon::CscPrepData*        prd = dynamic_cast<const Muon::CscPrepData*>(phiPrep[i]);
                 const Amg::Vector3D             globalpos(phiHitx[i], phiHity[i], phiHitz[i]);
-                std::unique_ptr<const Muon::MuonClusterOnTrack> rio{m_clusterCreator->createRIO_OnTrack(*prd, globalpos)};
+                std::unique_ptr<const Muon::MuonClusterOnTrack> rio{m_cscRotCreator->createRIO_OnTrack(*prd, globalpos)};
                 if (rio) selectedHits.push_back(std::move(rio));
             }
 
@@ -249,7 +238,7 @@ MuonPhiHitSelector::select_rio(const double pmom, const std::vector<const Trk::R
                 } else if (phiSelect[ip] == 3) {
                     ATH_MSG_DEBUG("Phi CSC rio");
                     const Muon::CscPrepData*        prd = dynamic_cast<const Muon::CscPrepData*>(phiPrep[ip]);
-                    std::unique_ptr<const Muon::MuonClusterOnTrack> rio{m_clusterCreator->createRIO_OnTrack(*prd, globalpos)};
+                    std::unique_ptr<const Muon::MuonClusterOnTrack> rio{m_cscRotCreator->createRIO_OnTrack(*prd, globalpos)};
                     if (rio) selectedClusters.push_back(std::move(rio));
                 }
             } else {

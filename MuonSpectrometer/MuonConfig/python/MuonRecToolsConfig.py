@@ -200,14 +200,21 @@ def MuonTrackCleanerCfg(flags, name="MuonTrackCleaner", seg=False, **kwargs):
 
 def MuonPhiHitSelectorCfg(flags, name="MuonPhiHitSelector",**kwargs):
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
-
+    result = ComponentAccumulator()
     kwargs.setdefault("MakeClusters", True)
     kwargs.setdefault("CompetingRios", True)
     kwargs.setdefault("DoCosmics", flags.Beam.Type is BeamType.Cosmics)
-    result=MuonClusterOnTrackCreatorCfg(flags)
-    cluster_creator = result.popPrivateTools()
-    kwargs.setdefault("MuonCompetingClustersOnTrackCreator", CompFactory.Muon.MuonCompetingClustersOnTrackCreator(name='MuonCompetingClustersOnTrackCreator', ClusterCreator=cluster_creator) )
+    
+    cluster_creator = result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags))
     kwargs.setdefault("MuonClusterOnTrackCreator", cluster_creator )
+
+    kwargs.setdefault("MuonCompetingClustersOnTrackCreator", CompFactory.Muon.MuonCompetingClustersOnTrackCreator(name='MuonCompetingClustersOnTrackCreator', ClusterCreator=cluster_creator) )
+
+    if flags.Detector.GeometryCSC:
+        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import CscClusterOnTrackCreatorCfg
+        kwargs.setdefault("CscRotCreator", result.popToolsAndMerge(CscClusterOnTrackCreatorCfg(flags)))
+    else:
+        kwargs.setdefault("CscRotCreator", "")    
     result.setPrivateTools(CompFactory.MuonPhiHitSelector(name,**kwargs))
     return result
 

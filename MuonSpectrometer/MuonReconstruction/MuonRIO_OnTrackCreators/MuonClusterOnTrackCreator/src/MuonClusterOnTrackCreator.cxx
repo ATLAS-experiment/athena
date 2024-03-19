@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,11 +11,9 @@
 #include <cmath>
 #include <sstream>
 
-#include "MuonPrepRawData/CscPrepData.h"
 #include "MuonPrepRawData/RpcPrepData.h"
 #include "MuonPrepRawData/TgcPrepData.h"
 #include "MuonPrepRawData/sTgcPrepData.h"
-#include "MuonRIO_OnTrack/CscClusterOnTrack.h"
 #include "MuonRIO_OnTrack/RpcClusterOnTrack.h"
 #include "MuonRIO_OnTrack/TgcClusterOnTrack.h"
 #include "MuonRIO_OnTrack/MMClusterOnTrack.h"
@@ -36,27 +34,10 @@ namespace Muon {
         declareInterface<IMuonClusterOnTrackCreator>(this);
         declareInterface<IRIO_OnTrackCreator>(this);
 
-        declareProperty("DoFixedErrorTgcEta", m_doFixedErrorTgcEta = false);
-        declareProperty("DoFixedErrorRpcEta", m_doFixedErrorRpcEta = false);
-        declareProperty("DoFixedErrorCscEta", m_doFixedErrorCscEta = false);
-        declareProperty("DoFixedErrorTgcPhi", m_doFixedErrorTgcPhi = false);
-        declareProperty("DoFixedErrorRpcPhi", m_doFixedErrorRpcPhi = false);
-        declareProperty("DoFixedErrorCscPhi", m_doFixedErrorCscPhi = false);
-        declareProperty("FixedErrorTgcEta", m_fixedErrorTgcEta = 5.);
-        declareProperty("FixedErrorRpcEta", m_fixedErrorRpcEta = 5.);
-        declareProperty("FixedErrorCscEta", m_fixedErrorCscEta = 5.);
-        declareProperty("FixedErrorTgcPhi", m_fixedErrorTgcPhi = 5.);
-        declareProperty("FixedErrorRpcPhi", m_fixedErrorRpcPhi = 5.);
-        declareProperty("FixedErrorCscPhi", m_fixedErrorCscPhi = 5.);
     }
 
     //================================================================================
     StatusCode MuonClusterOnTrackCreator::initialize() {
-        if (AthAlgTool::initialize().isFailure()) {
-            ATH_MSG_ERROR(" AthAlgTool::initialize() failed ");
-            return StatusCode::FAILURE;
-        }
-
         ATH_CHECK(m_idHelperSvc.retrieve());
 
         ATH_CHECK(m_clusterBuilderToolMM.retrieve(DisableTool{m_calibToolNSW.empty()}));
@@ -222,33 +203,6 @@ namespace Muon {
             }
 
             MClT = new TgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
-
-        } else if (m_idHelperSvc->isCsc(RIO.identify())) {
-
-            //***************************
-            // CSC: cast to CscPrepData
-            //***************************
-
-            const CscPrepData* MClus = static_cast<const CscPrepData*>(&RIO);
-
-            bool measphi = m_idHelperSvc->measuresPhi(RIO.identify());
-            double fixedError = 1.;
-            bool scale = false;
-            // check whether to scale eta/phi hit
-            if (m_doFixedErrorCscEta && !measphi) {
-                scale = true;
-                fixedError = m_fixedErrorCscEta;
-            } else if (m_doFixedErrorCscPhi && measphi) {
-                scale = true;
-                fixedError = m_fixedErrorCscPhi;
-            }
-            if (scale) {
-                Amg::MatrixX mat(1, 1);
-                mat(0, 0) = fixedError * fixedError;
-                loce = mat;
-            }
-            // current not changing CscClusterStatus but passing status of RIO
-            MClT = new CscClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip, MClus->status(), MClus->timeStatus());
 
         } else if (m_idHelperSvc->issTgc(RIO.identify())) {
 
