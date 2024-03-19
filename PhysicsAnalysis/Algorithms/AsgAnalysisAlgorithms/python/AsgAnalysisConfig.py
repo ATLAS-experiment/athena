@@ -324,6 +324,7 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('selectionName', '', type=str)
         self.addOption ('outputName', None, type=str)
         self.addOption ('deepCopy', False, type=bool)
+        self.addOption ('sortPt', False, type=bool, info="whether to sort objects in pt")
         self.addOption ('noUniformSelection', False, type=bool)
 
     def makeAlgs (self, config) :
@@ -357,6 +358,9 @@ class OutputThinningBlock (ConfigBlock):
         else :
             alg.selection = []
         alg.deepCopy = self.deepCopy
+        if self.sortPt and not config.noSystematics() :
+            raise ValueError ("Sorting by pt is not supported with systematics")
+        alg.sortPt = self.sortPt
 
 
 class IFFLeptonDecorationBlock (ConfigBlock):
