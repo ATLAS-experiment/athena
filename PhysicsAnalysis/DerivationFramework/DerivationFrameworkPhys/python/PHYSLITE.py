@@ -58,6 +58,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisMuons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
@@ -81,6 +82,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisElectrons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
@@ -102,6 +104,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisSiHitElectrons')
     subConfig.setOptionValue ('.selectionName', 'SiHits')
     subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
@@ -125,6 +128,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisPhotons')
     subConfig.setOptionValue ('.selectionName', 'loose')
     subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
@@ -141,6 +145,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisTauJets')
     subConfig.setOptionValue ('.selectionName', 'baseline')
     subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
@@ -154,6 +159,7 @@ def CPAlgorithmsCfg(flags):
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisJets')
     subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
@@ -165,12 +171,13 @@ def CPAlgorithmsCfg(flags):
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning', containerName='AnalysisLargeRJets')
     subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
     from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
     configAccumulator = ConfigAccumulator (dataType=None, algSeq=None,
-        autoconfigFromFlags=flags, noSysSuffix=True)
+        autoconfigFromFlags=flags, noSysSuffix=True, noSystematics=True)
     configSeq.fullConfigure (configAccumulator)
     return configAccumulator.CA
 
