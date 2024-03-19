@@ -88,7 +88,7 @@ public:
 
 private:
   Gaudi::Property<int> m_particleType {this,
-      "ParticleType", xAOD::EgammaParameters::electron,
+      "ParticleType", xAOD::EgammaParameters::NumberOfEgammaTypes,
       "What type of particle do we use"};
 
   Gaudi::Property<int> m_shiftType {this,
