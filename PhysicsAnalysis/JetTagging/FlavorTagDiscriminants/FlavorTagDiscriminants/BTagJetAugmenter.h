@@ -27,6 +27,8 @@ public:
   void augmentIpRatios(const xAOD::BTagging &btag) const;
   void augmentBtagJes(const xAOD::BTagging &target,
                       const xAOD::BTagging &uncalib) const;
+  void augmentBtagJes(const xAOD::Jet &target,
+                      const xAOD::Jet &uncalib) const;
   void augment(const xAOD::BTagging &btag) const;
   void augment(const xAOD::BTagging &btag,
                const xAOD::BTagging &uncalibrated_btag) const;
