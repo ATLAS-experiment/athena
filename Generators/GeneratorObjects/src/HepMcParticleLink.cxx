@@ -262,9 +262,9 @@ int HepMcParticleLink::id() const
     barcode_type particle_id, particle_barcode;
     m_extBarcode.uniqueID (particle_id, particle_barcode);
     if (particle_id == ExtendedBarCode::UNDEFINEDBC) {
-      (void) eventIndex(); // FIXME be careful to avoid an infinite loop of calls here
+      (void) cptr(); // FIXME be careful to avoid an infinite loop of calls here
+      m_extBarcode.uniqueID (particle_id, particle_barcode);
     }
-    m_extBarcode.uniqueID (particle_id, particle_barcode);
     if (particle_id != ExtendedBarCode::UNDEFINEDBC) {
       return particle_id;
     }
