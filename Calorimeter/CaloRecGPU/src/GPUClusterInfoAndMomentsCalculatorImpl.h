@@ -19,209 +19,287 @@ namespace ClusterMomentsCalculator
 {
 
   struct RealSymmetricMatrixSolver
-//See https://hal.science/hal-01501221/document
+  //Taken from the Eigen implementation of direct_selfadjoint_eigenvalues
   {
-    float a, b, c, d, e, f;
+    float a, b, c, d, e, f, shift, scale;
     // +--     --+
     // | a  d  f |
     // | d  b  e |
     // | f  e  c |
     // +--     --+
 
-    constexpr static float sqr(const float & x)
-    {
-      return x * x;
-    }
-
-    constexpr static float cub(const float & x)
-    {
-      return x * x * x;
-    }
-
-    CUDA_HOS_DEV float x_1() const
-    {
-      return sqr(a) + sqr(b) + sqr(c) - a * b - a * c - b * c + 3.f * (sqr(d) + sqr(e) + sqr(f));
-      //sqr(a - b) / 2 + sqr(a - c) / 2 + sqr(b - c) / 2 + 3 * (sqr(d) + sqr(e) + sqr(f));
-      //The sum of half-squares can be (re)written as
-      //sqr(a) + sqr(b) + sqr(c) - a * b - a * c - b*c
-      //but I think this gives a greater numerical error
-      //due to potential catastrophic cancellations.
-    }
-
-    CUDA_HOS_DEV float x_2() const
-    {
-      const float t1 = 2.f * a - b - c,
-                  t2 = 2.f * b - a - c,
-                  t3 = 2.f * c - a - b;
-      return 9.f * (t1 * sqr(e) + t2 * sqr(f) + t3 * sqr(d)) - (t1 * t2 * t3) - 54.f * d * e * f;
-    }
-
-    CUDA_HOS_DEV float phi() const
-    {
-      const float temp = x_2();
-
-      using namespace std;
-
-#ifdef __CUDA_ARCH__
-      return atan2f(1.0f, temp * rsqrtf(4.f * cub(x_1()) - sqr(temp)));
-#else
-      return atan2f(sqrtf(4.f * cub(x_1()) - sqr(temp)), temp);
-#endif
-    }
-
-    CUDA_HOS_DEV float lambda_1() const
-    {
-      using namespace std;
-      return ( a + b + c - 2.f * sqrtf(x_1()) * cosf( phi() / 3.f ) ) / 3.f;
-      //Could this be simplified?
-    }
-
-    CUDA_HOS_DEV float lambda_2() const
-    {
-      using namespace std;
-      return ( a + b + c + 2.f * sqrtf(x_1()) * cosf( (phi() - CaloRecGPU::Helpers::Constants::pi<float>) / 3.f ) ) / 3.f;
-      //Could this be simplified?
-    }
-
-    CUDA_HOS_DEV float lambda_3() const
-    {
-      using namespace std;
-      return ( a + b + c + 2.f * sqrtf(x_1()) * cosf( (phi() + CaloRecGPU::Helpers::Constants::pi<float>) / 3.f ) ) / 3.f;
-      //Could this be simplified?
-    }
-
-    CUDA_HOS_DEV void get_values(float & l1, float & l2, float & l3) const
+    CUDA_HOS_DEV RealSymmetricMatrixSolver(const float a_orig, const float b_orig, const float c_orig, const float d_orig, const float e_orig, const float f_orig)
     {
       using namespace std;
 
-      const float sum = a + b + c;
-      const float troot = 2.f * sqrtf(x_1());
-      const float angl = phi();
-
-      l1 = ( sum - troot * cosf(angl / 3.f) ) / 3.f;
-      l2 = ( sum + troot * cosf( (angl - CaloRecGPU::Helpers::Constants::pi<float>) / 3.f ) ) / 3.f;
-      l3 = ( sum + troot * cosf( (angl + CaloRecGPU::Helpers::Constants::pi<float>) / 3.f ) ) / 3.f;
-
-    }
-
-    CUDA_HOS_DEV float m(const float lambda) const
-    {
-      return (d * (c - lambda) - e * f) / (f * (b - lambda) - d * e);
-      //Probably alternative formulae
-      //without catastrophic cancellation?
-    }
-
-    CUDA_HOS_DEV float m1() const
-    {
-      return m(lambda_1());
-    }
-    CUDA_HOS_DEV float m2() const
-    {
-      return m(lambda_2());
-    }
-    CUDA_HOS_DEV float m3() const
-    {
-      return m(lambda_3());
-    }
-
-    CUDA_HOS_DEV void get_v(float (&a)[3], const float v, const bool normalized = false) const
-    {
-      const float mv = m(v);
-      const float first = (v - c - e * mv) / f;
-      if (normalized)
+      shift = (a_orig + b_orig + c_orig) / 3.f;
+      a = a_orig - shift;
+      b = b_orig - shift;
+      c = c_orig - shift;
+      scale = max(fabsf(a), max(fabsf(b), max(fabsf(c), max(fabsf(d_orig), max(fabsf(e_orig), fabsf(f_orig))))));
+      if (scale == 0.f)
         {
-          using namespace std;
+          scale = 1.f;
+        }
+      a /= scale;
+      b /= scale;
+      c /= scale;
+      d = d_orig / scale;
+      e = e_orig / scale;
+      f = f_orig / scale;
+    }
+
+    ///@brief Calculate shifted and scaled eigenvalues of the matrix, in ascending value.
+    ///
+    ///To get the actual eigenvalues, you should multiply by @c scale and then add @c shift.
+    CUDA_HOS_DEV void get_eigenvalues(float & e_1, float & e_2, float & e_3) const
+    {
+      using namespace std;
+
+      const float c_0 = a * b * c + 2.f * d * f * e - a * e * e - b * f * f - c * d * d;
+      const float c_1 = a * b - d * d + a * c - f * f + b * c - e * e;
+      const float c_2 = a + b + c;
+
+      constexpr float inv_3 = 1.f / 3.f;
+
+      const float c_2_over_3 = c_2 * inv_3;
+
+      const float a_over_3 = max((c_2 * c_2_over_3 - c_1) * inv_3, 0.f);
+
+      const float half_b = 0.5f * (c_0 + c_2_over_3 * (2.f * c_2_over_3 * c_2_over_3 - c_1));
+
+      const float q = max(a_over_3 * a_over_3 * a_over_3 - half_b * half_b, 0.f);
+
+      const float rho = sqrtf(a_over_3);
+
 #ifdef __CUDA_ARCH__
-          float norm = rnorm3df(first, mv, 1.f) * (first < 0.f ? -1.f : 1.f);
+      const float theta = atan2f(1.0f, rsqrtf(q) * half_b) * inv_3;
 #else
-          float norm = (first < 0.f ? -1.0f : 1.0f) / hypot(first, mv, 1.0f);
+      const float theta = atan2f(sqrtf(q), half_b) * inv_3;
 #endif
-          a[0] = first * norm;
-          a[1] = mv * norm;
-          a[2] = norm;
+
+#ifdef __CUDA_ARCH__
+      float sin_theta, cos_theta;
+      sincosf(theta, &sin_theta, &cos_theta);
+#else
+      const float sin_theta = sinf(theta);
+      const float cos_theta = cosf(theta);
+#endif
+
+      const float sqrt_3 = sqrtf(3.f);
+
+      e_1 = c_2_over_3 - rho * (cos_theta + sqrt_3 * sin_theta);
+      e_2 = c_2_over_3 - rho * (cos_theta - sqrt_3 * sin_theta);
+      e_3 = c_2_over_3 + 2.f * rho * cos_theta;
+    }
+
+    CUDA_HOS_DEV static void cross_prod(float (&res)[3], const float a1, const float a2, const float a3, const float b1, const float b2, const float b3)
+    {
+      res[0] = a2 * b3 - a3 * b2;
+      res[1] = a3 * b1 - a1 * b3;
+      res[2] = a1 * b2 - a2 * b1;
+    }
+
+    CUDA_HOS_DEV static void cross_prod(float (&res)[3], const float (&x)[3], const float (&y)[3])
+    {
+      cross_prod(res, x[0], x[1], x[2], y[0], y[1], y[2]);
+    }
+
+    CUDA_HOS_DEV static float dot_prod(const float a1, const float a2, const float a3, const float b1, const float b2, const float b3)
+    {
+      return a1 * b1 + a2 * b2 + a3 * b3;
+    }
+
+    CUDA_HOS_DEV static float dot_prod(const float (&x)[3], const float (&y)[3])
+    {
+      return dot_prod(x[0], x[1], x[2], y[0], y[1], y[2]);
+    }
+
+    CUDA_HOS_DEV void extract_one(const float eigenvalue, float (&res)[3], float (&representative)[3]) const
+    {
+      using namespace std;
+
+      const float diag_0 = a - eigenvalue;
+      const float diag_1 = b - eigenvalue;
+      const float diag_2 = c - eigenvalue;
+
+      float vec_1[3], vec_2[3];
+
+      if (fabsf(diag_0) > fabsf(diag_1) && fabsf(diag_0) > fabsf(diag_2))
+        {
+          representative[0] = diag_0;
+          representative[1] = d;
+          representative[2] = f;
+
+          vec_1[0] = d;
+          vec_1[1] = diag_1;
+          vec_1[2] = e;
+
+          vec_2[0] = f;
+          vec_2[1] = e;
+          vec_2[2] = diag_2;
+        }
+      else if (/*(fabsf(diag_0) <= fabsf(diag_1) || fabsf(diag_0) <= fabsf(diag_2)) &&*/ fabsf(diag_1) > fabsf(diag_2))
+        {
+          representative[0] = d;
+          representative[1] = diag_1;
+          representative[2] = e;
+
+          vec_1[0] = f;
+          vec_1[1] = e;
+          vec_1[2] = diag_2;
+
+          vec_2[0] = diag_0;
+          vec_2[1] = d;
+          vec_2[2] = f;
+
+        }
+      else /*if ((fabsf(diag_0) <= fabsf(diag_1) || fabsf(diag_0) <= fabsf(diag_2)) && fabsf(diag_1) <= fabsf(diag_2))*/
+        {
+          representative[0] = f;
+          representative[1] = e;
+          representative[2] = diag_2;
+
+          vec_1[0] = diag_0;
+          vec_1[1] = d;
+          vec_1[2] = f;
+
+          vec_2[0] = d;
+          vec_2[1] = diag_1;
+          vec_2[2] = e;
+        }
+
+      cross_prod(res, representative, vec_1);
+      cross_prod(vec_1, representative, vec_2);
+      //Can safely override previous value...
+
+#ifdef __CUDA_ARCH__
+      const float norm_1 = rnorm3df(res[0], res[1], res[2]);
+      const float norm_2 = rnorm3df(vec_1[0], vec_1[1], vec_1[2]);
+#else
+      const float norm_1 = 1.f / hypot(res[0], res[1], res[2]);
+      const float norm_2 = 1.f / hypot(vec_1[0], vec_1[1], vec_1[2]);
+#endif
+
+      if (norm_1 <= norm_2)
+        //Greater magnitude -> multiply by a smaller value
+        {
+          res[0] *= norm_1;
+          res[1] *= norm_1;
+          res[2] *= norm_1;
         }
       else
         {
-          a[0] = first;
-          a[1] = mv;
-          a[2] = 1.f;
+          res[0] = vec_1[0] * norm_2;
+          res[1] = vec_1[1] * norm_2;
+          res[2] = vec_1[2] * norm_2;
         }
     }
+    
+    static constexpr float s_typical_epsilon = 5e-4;
 
-    CUDA_HOS_DEV void get_v_1(float (&a)[3], const bool normalized = false) const
-    {
-      get_v(a, lambda_1(), normalized);
-    }
-
-    CUDA_HOS_DEV void get_v_2(float (&a)[3], const bool normalized = false) const
-    {
-      get_v(a, lambda_2(), normalized);
-    }
-
-    CUDA_HOS_DEV void get_v_3(float (&a)[3], const bool normalized = false) const
-    {
-      get_v(a, lambda_3(), normalized);
-    }
-
-    CUDA_HOS_DEV void get_solution_pair_1(float & lambda, float (&v)[3], const bool normalized = false)
-    {
-      lambda = lambda_1();
-      get_v(v, lambda, normalized);
-    }
-
-    CUDA_HOS_DEV void get_solution_pair_2(float & lambda, float (&v)[3], const bool normalized = false)
-    {
-      lambda = lambda_2();
-      get_v(v, lambda, normalized);
-    }
-
-    CUDA_HOS_DEV void get_solution_pair_3(float & lambda, float (&v)[3], const bool normalized = false)
-    {
-      lambda = lambda_3();
-      get_v(v, lambda, normalized);
-    }
-
-    CUDA_HOS_DEV void get_full_solution( float & lambda_1, float (&v_1)[3],
-                                         float & lambda_2, float (&v_2)[3],
-                                         float & lambda_3, float (&v_3)[3],
-                                         const bool normalized = false  ) const
-    {
-      get_values(lambda_1, lambda_2, lambda_3);
-      get_v(v_1, lambda_1, normalized);
-      get_v(v_2, lambda_2, normalized);
-      get_v(v_3, lambda_3, normalized);
-    }
-
-    CUDA_HOS_DEV bool well_defined(const float la1, const float la2, const float la3, const float tolerance = 0.f) const
+    ///@brief Calculate the eigenvectors of the matrix,
+    ///       using the (possibly unscaled) eigenvalues @p e_1, @p e_2, @p e_3
+    ///       (in ascending order of magnitude) and @p epsilon to guard against undefined cases.
+    CUDA_HOS_DEV void get_eigenvectors(float (&res)[3][3], const float e_1, const float e_2, const float e_3, const float epsilon = s_typical_epsilon) const
     {
       using namespace std;
 
-      const float factor = d * e;
-      const float real_tolerance = fabsf(factor) * tolerance;
+      if (e_3 - e_1 <= epsilon)
+        {
+          res[0][0] = 1.f;
+          res[0][1] = 0.f;
+          res[0][2] = 0.f;
 
-      return ( fabsf(f) >= tolerance                            &&
-               fabsf(f * (b - la1) - factor) >= real_tolerance  &&
-               fabsf(f * (b - la2) - factor) >= real_tolerance  &&
-               fabsf(f * (b - la3) - factor) >= real_tolerance     );
+          res[1][0] = 0.f;
+          res[1][1] = 1.f;
+          res[1][2] = 0.f;
+
+          res[2][0] = 0.f;
+          res[2][1] = 0.f;
+          res[2][2] = 1.f;
+        }
+      else
+        {
+          const float d_0 = e_3 - e_2;
+          const float d_1 = e_2 - e_1;
+
+          const float d_min = min(d_0, d_1);
+
+          int k, j;
+          float first_e, second_e;
+
+          if (d_0 > d_1)
+            {
+              k = 2;
+              j = 0;
+
+              first_e  = e_3;
+              second_e = e_1;
+            }
+          else
+            {
+              k = 0;
+              j = 2;
+
+              first_e  = e_1;
+              second_e = e_3;
+            }
+
+          extract_one(first_e, res[k], res[j]);
+
+          if (d_min <= 2 * epsilon * d_1)
+            {
+#ifdef __CUDA_ARCH__
+              const float base_norm = rnorm3df(res[j][0], res[j][1], res[j][2]);
+#else
+              const float base_norm = 1.f / hypot(res[j][0], res[j][1], res[j][2]);
+#endif
+              const float extra_factor = 1.f - dot_prod(res[k], res[j]);
+
+              const float norm = base_norm / extra_factor;
+
+              res[j][0] *= norm;
+              res[j][1] *= norm;
+              res[j][2] *= norm;
+            }
+          else
+            {
+              float extra_vector[3];
+
+              extract_one(second_e, res[j], extra_vector);
+            }
+
+          cross_prod(res[1], res[2], res[0]);
+
+#ifdef __CUDA_ARCH__
+          const float norm = rnorm3df(res[1][0], res[1][1], res[1][2]);
+#else
+          const float norm = 1.f / hypot(res[1][0], res[1][1], res[1][2]);
+#endif
+
+          res[1][0] *= norm;
+          res[1][1] *= norm;
+          res[1][2] *= norm;
+        }
     }
 
-    CUDA_HOS_DEV bool well_defined(const float tolerance = 0.f) const
+    ///@brief Get the full eigenvalues and eigenvectors for this matrix.
+    ///
+    ///If @p rescale_and_reshift_values is @c true, the eigenvalues are scaled and shifted back to
+    ///their proper value, given the original matrix.
+    CUDA_HOS_DEV void get_solution(float (&eigenvalues)[3], float (&eigenvectors)[3][3], bool rescale_and_reshift_values = true, const float epsilon = s_typical_epsilon)
     {
-      float la1, la2, la3;
-      get_values(la1, la2, la3);
-      return well_defined(la1, la2, la3, tolerance);
-    }
+      get_eigenvalues(eigenvalues[0], eigenvalues[1], eigenvalues[2]);
+      get_eigenvectors(eigenvectors, eigenvalues[0], eigenvalues[1], eigenvalues[2], epsilon);
 
-    CUDA_HOS_DEV bool ill_defined(const float la1, const float la2, const float la3, const float tolerance = 0.f) const
-    {
-      return !well_defined(la1, la2, la3, tolerance);
+      if (rescale_and_reshift_values)
+        {
+          eigenvalues[0] = eigenvalues[0] * scale + shift;
+          eigenvalues[1] = eigenvalues[1] * scale + shift;
+          eigenvalues[2] = eigenvalues[2] * scale + shift;
+        }
     }
-
-    CUDA_HOS_DEV bool ill_defined(const float tolerance = 0.f) const
-    {
-      return !well_defined(tolerance);
-    }
-
   };
 
   struct ClusterMomentCalculationOptions
