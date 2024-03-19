@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
-#ifndef ATLASHEPMC_MAGICNUMBERS_H
-#define ATLASHEPMC_MAGICNUMBERS_H
+#ifndef TRUTHUTILS_MAGICNUMBERS_H
+#define TRUTHUTILS_MAGICNUMBERS_H
 
 #include <limits>
 #include <cstdint>
@@ -122,6 +122,7 @@ template <>  inline int uniqueID(const GenParticlePtr& p1){ return p1->id();}
 #endif
 
 
+/// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
 template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, int direction=0) {
   if (direction < 0) {
     if (p->status()>SIM_STATUS_INCREMENT) {
@@ -150,10 +151,10 @@ template <class T> inline void get_particle_history(const T& p, std::deque<int>&
     }
   }
 }
+/// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
 template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
 
 /// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
-
 template <class T> void old_to_new_simulation_scheme(T& evt) {
   auto particle_status = [] (int barcode, int status) {
     if ((barcode % SIM_REGENERATION_INCREMENT) > SIM_BARCODE_THRESHOLD)

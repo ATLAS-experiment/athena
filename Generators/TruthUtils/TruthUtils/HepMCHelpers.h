@@ -111,7 +111,8 @@ namespace MC
     }
     return ptrPart;
   }
-
+  /// @brief Function to find all ancestors of the particle.
+  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
   template <class T> void findAllJetMothers(T thePart, std::set<T>& allJetMothers) {
     auto partOriVert = thePart->production_vertex();
     if (!partOriVert) return;
@@ -122,7 +123,6 @@ namespace MC
       findAllJetMothers(theMoth, allJetMothers);
     }
   }
-/** MCTruthCalssifier functions */
 
   /// @brief Function to get the particle stable MC daughters.
   /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
@@ -206,6 +206,9 @@ namespace MC
     return fromHad;
   }
 
+  /// @brief Function to find the end vertex of a particle.
+  /// This algorithm allows for 1->1 decays. 
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
   template <class V, class T> V findEndVert(T thePart) {
     V EndVert = thePart->end_vertex();
     V pVert(nullptr);
@@ -232,6 +235,8 @@ namespace MC
     return EndVert;
   }
 
+  /// @brief Function to find the stable particle descendants of the gived vertex..
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
   template <class V, class T>
   std::vector<T> findFinalStatePart(V EndVert)  {
     if (!EndVert) return {};
