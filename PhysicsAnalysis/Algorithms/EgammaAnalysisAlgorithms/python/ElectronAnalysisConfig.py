@@ -174,10 +174,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
                 alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
                 # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
+                # which differ from the one used for scale factors
                 if config.geometry() >= LHCPeriod.Run3:
-                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
+                    alg.selectionTool.WorkingPoint = self.likelihoodWP.replace("BLayer","BL") + 'Electron'
                 elif config.geometry() == LHCPeriod.Run2:
-                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
+                    alg.selectionTool.WorkingPoint = self.likelihoodWP.replace("BLayer","BL") + 'Electron_Run2'
             else:
                 # Select from Derivation Framework flags
                 config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
