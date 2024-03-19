@@ -2,10 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include "GaudiKernel/SystemOfUnits.h"
+
 
 #include "TrkParameters/TrackParameters.h"
 #include "TrkPrepRawData/PrepRawData.h"
@@ -14,7 +11,7 @@
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "InDetIdentifier/PixelID.h"
 
-
+#include "MagFieldElements/AtlasFieldCache.h"
 #include "TrigInDetRoadPredictorTool.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -22,7 +19,11 @@
 
 #include "TrkSurfaces/Surface.h"
 #include "InDetPrepRawData/PixelCluster.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
+#include <array>
+#include <cmath>
+#include <memory>
 
 
 TrigInDetRoadPredictorTool::TrigInDetRoadPredictorTool(const std::string& t,
