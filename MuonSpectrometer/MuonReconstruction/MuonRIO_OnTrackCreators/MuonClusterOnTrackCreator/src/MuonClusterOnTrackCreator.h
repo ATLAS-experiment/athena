@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -86,18 +86,14 @@ namespace Muon {
         MuonClusterOnTrack* calibratedClusterMMG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
         MuonClusterOnTrack* calibratedClusterSTG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
         
-        bool m_doFixedErrorTgcEta;
-        bool m_doFixedErrorRpcEta;
-        bool m_doFixedErrorCscEta;
-        bool m_doFixedErrorTgcPhi;
-        bool m_doFixedErrorRpcPhi;
-        bool m_doFixedErrorCscPhi;
-        double m_fixedErrorTgcEta;
-        double m_fixedErrorRpcEta;
-        double m_fixedErrorCscEta;
-        double m_fixedErrorTgcPhi;
-        double m_fixedErrorRpcPhi;
-        double m_fixedErrorCscPhi;
+        Gaudi::Property<bool> m_doFixedErrorTgcEta{this, "DoFixedErrorTgcEta", false};
+        Gaudi::Property<bool> m_doFixedErrorRpcEta{this, "DoFixedErrorRpcEta", false};
+        Gaudi::Property<bool> m_doFixedErrorTgcPhi{this, "DoFixedErrorTgcPhi", false};
+        Gaudi::Property<bool> m_doFixedErrorRpcPhi{this, "DoFixedErrorRpcPhi", false};
+        Gaudi::Property<double> m_fixedErrorTgcEta{this, "FixedErrorTgcEta", 5.};
+        Gaudi::Property<double> m_fixedErrorRpcEta{this, "FixedErrorRpcEta", 5.};
+        Gaudi::Property<double> m_fixedErrorTgcPhi{this, "FixedErrorTgcPhi", 5.};
+        Gaudi::Property<double> m_fixedErrorRpcPhi{this, "FixedErrorRpcPhi", 5.};
     };
 }  // namespace Muon
 #endif  // MuonClusterOnTrackCreator_H

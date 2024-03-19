@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonSegmentCleaner_MuonPhiHitSelector_H
@@ -47,20 +47,18 @@ class MuonPhiHitSelector : public AthAlgTool, virtual public Muon::IMuonHitSelec
         "Muon::MuonCompetingClustersOnTrackCreator/MuonCompetingClustersOnTrackCreator",
     };
     /** Toolhandle to ClusterOnTrackTool creator */
-    ToolHandle<Muon::IMuonClusterOnTrackCreator> m_clusterCreator{
-        this,
-        "MuonClusterOnTrackCreator",
-        "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackCreator",
-    };
+    ToolHandle<Muon::IMuonClusterOnTrackCreator> m_clusterCreator{this, "MuonClusterOnTrackCreator",""};
+    
+    ToolHandle<Muon::IMuonClusterOnTrackCreator> m_cscRotCreator{this, "CscRotCreator",""};
 
     /** flag to print out a summary of what comes in and what comes out */
-    bool m_summary;
+    Gaudi::Property<bool> m_summary{this, "DoSummary", false};
     /** flag for use of cosmics, straight line model will be used, no interaction point constraint */
-    bool m_cosmics;
+    Gaudi::Property<bool> m_cosmics{this, "DoCosmics", false};
     /** flag that performs a clusterization and return clusters (default: false) */
-    bool m_makeClusters;
+    Gaudi::Property<bool> m_makeClusters{this, "MakeClusters", false};
     /** flag that build competing rios on track for amibguous trigger hits (default: false) */
-    bool m_competingRios;
+    Gaudi::Property<bool> m_competingRios{this, "CompetingRios", false};
 
     /** fit method curved track model */
     void fitRecPhi(const double pmom, const std::vector<Identifier>& phiId, const std::vector<double>& phiHitx,
