@@ -468,6 +468,12 @@ def createITkTrackingPassFlags():
     # --- flags for GNN tracking
     icf.addFlag("doGNNTrack", False)
 
+    # --- Flags for detailed information. 
+    #     Ignored for Primary Pass (always active); 
+    #     Enable for other passes with dedicated output container, if desired.
+    icf.addFlag("storeTrackSeeds", False)
+    icf.addFlag("storeSiSPSeededTracks", False)
+
     return icf
 
 
