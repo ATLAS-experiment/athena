@@ -8,7 +8,7 @@
 #include <TObjString.h>
 #include <TObject.h>
 
-#include <iostream>
+#include <iosfwd>
 #include <map>
 #include <nlohmann/json.hpp>
 #include <optional>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -8,13 +8,10 @@
 
 #include "DataQualityUtils/MonitoringFile.h"
 
-#include <cmath>
-#include <vector>
+
 
 #include <TCanvas.h>
 #include <TF1.h>
-#include <TFile.h>
-#include <TH1.h>
 #include <TH2.h>
 #include <TH3.h>
 #include <TKey.h>
@@ -25,7 +22,8 @@
 #include <locale>
 #include <sstream>
 #include <string>
-
+#include <cmath>
+#include <vector>
 
 namespace dqutils {
 
@@ -297,10 +295,10 @@ fitMergedFile_IDAlignMonTrackSegments( TFile* file, const std::string & run_dir,
   //==================================================
 
   //The input histograms
-  TH2F* oldHists[30*3];
+  TH2F* oldHists[30*3]={};
   
   //The output histograms
-  TH1F* newHists[30*3*2];
+  TH1F* newHists[30*3*2]={};
   
   //The names of the input files
   std::string histNames[30];

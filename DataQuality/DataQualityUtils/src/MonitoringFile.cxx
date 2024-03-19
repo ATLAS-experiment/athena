@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -21,13 +21,11 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/lexical_cast.hpp>
 #include <regex>
-#include <TObject.h>
 #include <TSystem.h>
 
 #include <TDirectory.h>
-#include <TFile.h>
+
 #include <TGraph.h>
-#include <TH1.h>
 #include <TH2.h>
 #include <TIterator.h>
 #include <TKey.h>
@@ -885,8 +883,11 @@ mergeFiles( const std::string & outFileName, const std::string & listFileName )
   */
   mergeFiles(outFileName, tmpIntermediateFiles);
   for (const auto& tmpFile : tmpIntermediateFiles) {
-    std::remove(tmpFile.c_str());
+    int retCode = std::remove(tmpFile.c_str());
+    if (retCode != 0){
+      std::cerr << "MonitoringFile::mergeFiles; file "<<tmpFile<<" was not deleted.\n";
     }
+  }
 }
 
 
@@ -1535,7 +1536,7 @@ dirHasHistogramsInMetadata( TDirectory* dir )
     }
     
     return true;
-    ++counter;
+    //program never reaches this line, the counter is never incremented;
   }
   
   return false;

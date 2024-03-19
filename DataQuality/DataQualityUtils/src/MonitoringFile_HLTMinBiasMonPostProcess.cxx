@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -106,6 +106,13 @@ namespace dqutils {
     TH1F* h_triggEffic 	    = dynamic_cast<TH1F*>(gDirectory->Get("TriggerEfficiencies"));
     TH1F* h_triggEfficPass  = dynamic_cast<TH1F*>(gDirectory->Get("TriggerEfficienciesPassed"));
     TH1F* h_triggEfficAll   = dynamic_cast<TH1F*>(gDirectory->Get("TriggerEfficienciesAll"));
+    if (!h_triggEffic or !h_triggEfficPass or !h_triggEfficAll){
+      std::cerr<<"Dynamic cast failed in MonitoringFile::HLTMinBiasMonPostProcess\n";
+      f->Close();
+      delete f;
+      delete v_targetNames;
+      return;
+    }
     
     h_triggEffic->Divide(h_triggEfficPass,h_triggEfficAll,1.,1.,"B");
     h_triggEffic->GetYaxis()->SetRangeUser(0.,1.2);

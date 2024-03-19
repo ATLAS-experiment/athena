@@ -1,20 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsMonitoringFile_h
 #define dqutilsMonitoringFile_h
 
-#include <map>
-#include <string>
-#include <vector>
-#include <set>
+
 
 #include <TObject.h>
 #include <TFile.h>
-#include <TH1.h>
 #include <TString.h>
 #include "RooRealVar.h"
+#include <TH1.h>
 
 #ifndef __CINT__
 #include <regex>
@@ -25,10 +22,13 @@ namespace std { class regex; }
 
 #include "CxxUtils/checker_macros.h"
 
+#include <map>
+#include <string>
+#include <vector>
+#include <set>
+
 class TDirectory;
-class TFile;
 class TGraph;
-class TH1;
 class TH1F;
 class TH2F;
 class TH1D;
@@ -41,7 +41,6 @@ class TProfile2D;
 class TObjArray;
 class TKey;
 class TTree;
-class TString;
 class RooPlot;
 class TEfficiency;
 
@@ -76,7 +75,7 @@ namespace dqutils {
 
     protected:
       void makeBranch(const char* branchName, const char* branchstr);
-      TTree* m_metadata;
+      TTree* m_metadata{};
     };
 
 
@@ -218,7 +217,7 @@ namespace dqutils {
     private:
       std::set<TObject*> m_garbage;
       std::string m_name;
-      bool m_error;
+      bool m_error{};
     };
     //
     //static bool TGCCheckFile(std::string inFilename, std::string& run_dir);
@@ -353,9 +352,9 @@ namespace dqutils {
 
     protected:
       void fillMD(const MetaData& md);
-      TDirectory*  m_target;
+      TDirectory*  m_target{};
       std::string  m_dirName;
-      TTree* m_metadata;
+      TTree* m_metadata{};
     };
 
     class GatherStatistics : public HistogramOperation {
@@ -366,14 +365,14 @@ namespace dqutils {
       virtual bool execute(TEfficiency* eff);
 
       std::string  m_dirName;
-      int m_nHist1D;
-      int m_nHist1DBins;
-      int m_nGraph;
-      int m_nGraphPoints;
-      int m_nHist2D;
-      int m_nHist2DBins;
-      int m_nEfficiency;
-      int m_nEfficiencyBins;
+      int m_nHist1D{};
+      int m_nHist1DBins{};
+      int m_nGraph{};
+      int m_nGraphPoints{};
+      int m_nHist2D{};
+      int m_nHist2DBins{};
+      int m_nEfficiency{};
+      int m_nEfficiencyBins{};
     };
 
     class GatherNames : public HistogramOperation {
@@ -399,7 +398,7 @@ namespace dqutils {
     static bool setListFromFile(std::vector<std::string>& filelist, 
 				 const std::string& listFileName);
 
-    TFile*  m_file;
+    TFile*  m_file{};
 
     /*   Methods for merging luminosity block intervals
      */
@@ -420,11 +419,11 @@ namespace dqutils {
     static int mergeLB_processRun(TDirectory*, debugLevel_t&);
 
     static Int_t getNumBins(const TH1& hist);
-    std::regex *m_mergeMatchHistoRE;
-    std::regex *m_mergeMatchDirRE;
+    std::regex *m_mergeMatchHistoRE{};
+    std::regex *m_mergeMatchDirRE{};
     std::string m_mergeMatchHistoREString;
     std::string m_mergeMatchDirREString;
-    bool m_useRE;
+    bool m_useRE{};
     static std::atomic<int> m_debugLevel;
     static std::atomic<int> m_fileCompressionLevel;
   public:
