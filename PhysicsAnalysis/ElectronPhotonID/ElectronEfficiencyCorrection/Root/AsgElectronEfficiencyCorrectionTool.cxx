@@ -841,9 +841,9 @@ AsgElectronEfficiencyCorrectionTool::getFile(const std::string& recokey,
         "Map file does not exist, Please set the path and version properly..");
     } else {
       ATH_MSG_ERROR(
-        "Key"
+        "Key "
         << key
-        << "does not exist in the map file, Please configure it properly..");
+        << " does not exist in the map file, Please configure it properly..");
     }
     return StatusCode::FAILURE;
   }
