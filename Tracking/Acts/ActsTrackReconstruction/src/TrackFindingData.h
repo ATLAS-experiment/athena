@@ -373,10 +373,9 @@ namespace
       xAOD::UncalibMeasType last_measurement_type = xAOD::UncalibMeasType::Other;
       xAOD::DetectorIDHashType last_id_hash = std::numeric_limits<xAOD::DetectorIDHashType>::max();
       unsigned int range_idx = m_measurementRanges.size();
-      std::size_t max_measurement_index = 0;
+      std::size_t sl_idx = 0;
       for (auto *measurement : clusterContainer)
       {
-        max_measurement_index = std::max(max_measurement_index, measurement->index());
         const InDetDD::SiDetectorElement *elem =
             detElems.getDetectorElement(measurement->identifierHash());
         if (!elem)
@@ -384,7 +383,6 @@ namespace
           throw std::domain_error("No detector element for measurement");
         }
 
-        unsigned int sl_idx = measurement->index();
         if (measurement->identifierHash() != last_id_hash || measurement->type() != last_measurement_type)
         {
           const Acts::Surface &surface = ATLASConverterTool->trkSurfaceToActsSurface(elem->surface());
@@ -403,7 +401,7 @@ namespace
           {
             std::stringstream msg;
             msg << "Measurement not clustered by identifierHash / geometryId. New measurement "
-                << measurement->index() << " with geo Id " << surface.geometryId()
+                << sl_idx << " with geo Id " << surface.geometryId()
                 << " type = " << static_cast<unsigned int>(measurement->type())
                 << " idHash=" << measurement->identifierHash()
                 << " but already recorded for this geo ID the range : " << m_measurementRanges[range_idx].first
@@ -415,8 +413,9 @@ namespace
           last_measurement_type = measurement->type();
         }
         m_measurementRanges[range_idx].setRangeEnd(typeIndex, sl_idx + 1);
+        ++sl_idx;
       }
-      m_measurementsTotal = std::max(max_measurement_index + 1, clusterContainer.size());
+      m_measurementsTotal += clusterContainer.size();
     }
 
     std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> measurementOffsets() const
