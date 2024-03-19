@@ -390,22 +390,12 @@ class AthInpFile(object):
             f = root.TFile.Open(self._filename, 'READ')
 
             if f:
-                # Get the number of entries in the file
-                pool_cont_token = re.compile(r'.*POOLContainer(?!Form)').match
-
-                for key in f.GetListOfKeys():
-                    key_name = key.GetName()
-                    match  = pool_cont_token(key_name)
-                    if not match:
-                        continue
-                    obj = f.Get(key_name)
-                    if isinstance(obj, root.TTree):
-                        nentries = obj.GetEntriesFast()
-                        break
-                    elif isinstance(obj, root.Experimental.RNTuple):
-                        reader = root.Experimental.RNTupleReader.Open(obj)
-                        nentries = reader.GetNEntries()
-                        break
+                # Get the number of entries in the file from the DataHeader
+                if f.GetListOfKeys().Contains(root.APRDefaults.TTreeNames.DataHeader):
+                    nentries = f.Get(root.APRDefaults.TTreeNames.DataHeader).GetEntriesFast()
+                elif f.GetListOfKeys().Contains(root.APRDefaults.RNTupleNames.DataHeader):
+                    reader = root.Experimental.RNTupleReader.Open(f.Get(root.APRDefaults.RNTupleNames.DataHeader))
+                    nentries = reader.GetNEntries()
 
                 # _get_guid() code from FilePeeker class by Sebastian Binet
                 pool = f.Get('##Params')
