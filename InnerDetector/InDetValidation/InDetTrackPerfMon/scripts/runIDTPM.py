@@ -6,11 +6,12 @@ from glob import glob
 def GetCustomAthArgs() :
     from argparse import ArgumentParser
     IDTPMparser = ArgumentParser( description='Parser for IDTPM configuration' )
-    IDTPMparser.add_argument( "--filesInput", required=True)
+    IDTPMparser.add_argument( "--inputFileNames", help="Comma-separated list of input files", required=True)
     IDTPMparser.add_argument( "--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int )
     IDTPMparser.add_argument( "--debug", help="Enable debugging messages", action="store_true", default=False )
     IDTPMparser.add_argument( "--dirName", help="Main directory name for storing plots", default="InDetTrackPerfMonPlots/" )
-    IDTPMparser.add_argument( "--outputFile", help='Name of output file', default="M_output.root" )
+    IDTPMparser.add_argument( "--outputFileName", help='Name of output file', default="myIDTPM_out" )
+    IDTPMparser.add_argument( "--writeAOD_IDTPM", help="Write output file for reprocessing", action="store_true", default=False )
     IDTPMparser.add_argument( "--trkAnaCfgFile", help='File with track analysis setup (.json format)', default='Default' )
     IDTPMparser.add_argument( "--unpackTrigChains", help="Run each configured trigger chain in a separate track analysis", action="store_true", default=False )
     # TODO - to be included in next MRs
@@ -26,11 +27,19 @@ MyArgs = GetCustomAthArgs()
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 
+## Inputs
 flags.Input.Files = []
-for path in MyArgs.filesInput.split( ',' ):
+for path in MyArgs.inputFileNames.split( ',' ):
     flags.Input.Files += glob( path )
-flags.PhysVal.OutputFileName = MyArgs.outputFile
 
+## Outputs
+flags.PhysVal.OutputFileName = MyArgs.outputFileName + '.HIST.root'
+if MyArgs.writeAOD_IDTPM:
+    flags.addFlag( 'Output.doWriteAOD_IDTPM', True )
+    flags.addFlag( 'Output.AOD_IDTPMFileName',
+                   MyArgs.outputFileName + '.AOD_IDTPM.pool.root' )
+
+## Set output log level
 if MyArgs.debug:
     from AthenaCommon.Constants import DEBUG
     flags.Exec.OutputLevel = DEBUG
@@ -42,7 +51,6 @@ flags.addFlagsCategory( "PhysVal.IDTPM",
                         prefix=True )
 
 flags.PhysVal.IDTPM.DirName = MyArgs.dirName
-flags.PhysVal.IDTPM.unpackTrigChains = MyArgs.unpackTrigChains
 # TODO - to be included in next MRs
 #flags.PhysVal.IDTPM.histoDefFormat = MyArgs.histoDefFormat
 #flags.PhysVal.IDTPM.HistoDefFileList = MyArgs.histoDefFileList
@@ -59,7 +67,7 @@ flags.addFlagsCategory( "PhysVal.IDTPM.Default",
  
 ## Filling TrkAnalyses setup dictionary
 from InDetTrackPerfMon.ConfigUtils import getTrkAnaDicts
-analysesDict = getTrkAnaDicts( MyArgs.trkAnaCfgFile )
+analysesDict = getTrkAnaDicts( flags, MyArgs.trkAnaCfgFile, MyArgs.unpackTrigChains )
 trkAnaNames = []
 
 if analysesDict:

@@ -3,7 +3,7 @@
 import json
 from AthenaCommon.Utils.unixtools import find_datafile
 
-def getTrkAnaDicts( input_file ):
+def getTrkAnaDicts( flags, input_file, unpackChains=False ):
     '''
     utility function to retrieve the flag dictionary
     for every TrackAnalysis from an input JSON file
@@ -24,29 +24,64 @@ def getTrkAnaDicts( input_file ):
     with open( dataPath, "r" ) as input_json_file:
         analysesDictTmp = json.load( input_json_file )
 
-    ## Update each analysis dictionary with flags from template
+    ## Update each analysis dictionary with their anaTag and ChainNames list
     if analysesDictTmp:
         for trkAnaName, trkAnaDict in analysesDictTmp.items():
             ## Update entry with flags read from json
             analysesDict.update( { trkAnaName : trkAnaDict } )
             ## Update TrkAnalysis tag for this entry
             analysesDict[trkAnaName]["anaTag"] = "_" + trkAnaName
+            ## Update TrkAnalysis ChainNames to full chain list (not regex)
+            if "ChainNames" in analysesDict[trkAnaName]:
+                fullChainList = getChainList( flags, analysesDict[trkAnaName]["ChainNames"] )
+                analysesDict[trkAnaName]["ChainNames"] = fullChainList
 
-    return analysesDict
+    return unpackTrkAnaDicts( analysesDict ) if unpackChains else analysesDict
 
 
-def getChainList( flags ):
+def unpackTrkAnaDicts( analysesDictIn ):
+    '''
+    utility function to define a separate TrackAnalysis
+    for each configured trigger chain
+    '''
+    if not analysesDictIn : return analysesDictIn
+
+    analysesDictOut = {}
+    for trkAnaName, trkAnaDict in analysesDictIn.items():
+        if "ChainNames" in trkAnaDict:
+            chainList = trkAnaDict["ChainNames"]
+            for chain in chainList:
+                trkAnaName_new = trkAnaName + "_" + chain
+                trkAnaDict_new = dict( trkAnaDict )
+                trkAnaDict_new["anaTag"] = trkAnaDict["anaTag"] + "_" + chain
+                trkAnaDict_new["ChainNames"] = [ chain ]
+                analysesDictOut.update( { trkAnaName_new : trkAnaDict_new } )
+        else:
+            analysesDictOut.update( { trkAnaName : trkAnaDict } )
+
+    return analysesDictOut
+
+
+
+def getChainList( flags, regexChainList=[] ):
     '''
     utility function to retrieve full list of
     configured trigger chains matching
-    (regex) list of current TrkAnalysis
+    the passed regex list of chains
     '''
+    if not regexChainList: return regexChainList
+
+    if not flags.locked():
+        flags_tmp = flags.clone()
+        flags_tmp.lock()
+        flags = flags_tmp
+
     from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
     chainsMenu = getHLTMenuAccess( flags )
 
     import re
     configChains = []
-    for regexChain in flags.PhysVal.IDTPM.currentTrkAna.ChainNames:
+    for regexChain in regexChainList:
         for item in chainsMenu:
             chains = re.findall( regexChain, item )
             for chain in chains:
@@ -54,25 +89,3 @@ def getChainList( flags ):
                     configChains.append( chain )
 
     return configChains
-
-
-def getFlagsList( flags ):
-    '''
-    utility function to produce a list of sets of flags
-    with a separate trackAnalysis for each configured chain
-    '''
-    fList = []
-    isTrig = ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType  or
-               "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType )
-    if isTrig and flags.PhysVal.IDTPM.unpackTrigChains:
-        for configChain in getChainList( flags ):
-            ## clone the flags
-            flags_new = flags.clone()
-            flags_new.PhysVal.IDTPM.currentTrkAna.anaTag = flags.PhysVal.IDTPM.currentTrkAna.anaTag + "_" + configChain
-            flags_new.PhysVal.IDTPM.currentTrkAna.ChainNames = [ configChain ]
-            flags_new.lock()
-            fList.append( flags_new )
-    else:
-        fList.append( flags )
-
-    return fList
