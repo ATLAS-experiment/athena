@@ -44,6 +44,10 @@ namespace CP
     ANA_CHECK (m_systematicsList.initialize());
     ANA_CHECK (m_outOfValidity.initialize());
 
+    if (!m_isJESbtag.empty()) m_decIsJESbtag.emplace(m_isJESbtag);
+    const std::string labelB = "PartonTruthLabelID";
+    m_accTruthLabel.emplace(labelB);
+
     // CPU-optimisation: differentiate the systematics for the two tools
     // in initialisation rather than execution
     for (const auto&sys : m_systematicsList.systematicsVector())
@@ -70,6 +74,10 @@ namespace CP
 	ANA_CHECK (m_jetHandle.getCopy (jets, sys));
 	for (xAOD::Jet *jet : *jets)
 	  {
+	    // we need to tell the JES flavour uncertainty tool whether each jet is b-tagged at truth-level
+	    if (m_decIsJESbtag) {
+	      (*m_decIsJESbtag)(*jet) =  (*m_accTruthLabel)(*jet) == 5 ;
+	    }
 	    if (m_preselection.getBool (*jet, sys))
 	      {
 		ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_uncertaintiesTool->applyCorrection (*jet));
