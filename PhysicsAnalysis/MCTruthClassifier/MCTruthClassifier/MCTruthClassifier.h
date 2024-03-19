@@ -127,22 +127,16 @@ public:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
   checkOrigOfBkgElec(const xAOD::TruthParticle* thePart,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  virtual unsigned int classify(const xAOD::TruthParticle*) const override;
-
-  virtual const xAOD::TruthParticle* getParentHadron(const xAOD::TruthParticle*) const override;
-
-  enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
-
   /*! \brief This helper function returns the value -1 by checking the bit set in \ref MCTruthClassifier.
    * It returns the value -1 if uncategorised, 0 if non-prompt, 1 if prompt
    * It also checks for prompt taus
    */
   static int isPrompt(const unsigned int classify, bool allow_prompt_tau_decays = true) {
-    std::bitset<MCTC_bits::totalBits> res(classify);
-    if (res.test(MCTC_bits::uncat)) return -1;
-    bool fromPromptTau = res.test(MCTC_bits::Tau) && !res.test(MCTC_bits::HadTau);
+    std::bitset<MCTruthPartClassifier::MCTC_bits::totalBits> res(classify);
+    if (res.test(MCTruthPartClassifier::MCTC_bits::uncat)) return -1;
+    bool fromPromptTau = res.test(MCTruthPartClassifier::MCTC_bits::Tau) && !res.test(MCTruthPartClassifier::MCTC_bits::HadTau);
     if (fromPromptTau) return int(allow_prompt_tau_decays);
-    return !res.test(MCTC_bits::hadron);
+    return !res.test(MCTruthPartClassifier::MCTC_bits::hadron);
   }
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
@@ -218,8 +212,6 @@ private:
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
                                                           MCTruthPartClassifier::Info* info) const;
-  //MCTruthPartClassifier::ParticleOrigin
-  std::tuple<unsigned int, const xAOD::TruthParticle*> defOrigOfParticle(const xAOD::TruthParticle*) const;
 
   MCTruthPartClassifier::ParticleOrigin defHadronType(int);
   static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);

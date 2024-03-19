@@ -124,7 +124,7 @@ unsigned int CopyTruthJetParticles::getTCresult(const xAOD::TruthParticle* tp,
                                                 std::map<const xAOD::TruthParticle*,unsigned int>& tc_results) const
 {
   if(tc_results.find(tp) == tc_results.end()) {
-    const unsigned int result = m_classif->classify( tp );
+    const unsigned int result = tp ? std::get<0>(MCTruthPartClassifier::defOrigOfParticle(tp)) : 0;
     tc_results[tp] = result;
   }
   return tc_results[tp];

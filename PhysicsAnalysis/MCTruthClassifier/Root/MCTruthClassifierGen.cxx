@@ -256,20 +256,7 @@ ParticleOrigin MCTruthClassifier::defJetOrig(const std::set<const xAOD::TruthPar
   return partOrig;
 }
 
-const xAOD::TruthParticle* MCTruthClassifier::getParentHadron(const xAOD::TruthParticle* thePart) const {
-  ATH_MSG_DEBUG( "Executing getParentHadron" );
-  if(!thePart) { ATH_MSG_WARNING( "Passed a nullptr" ); return nullptr; }
-  return std::get<1>(defOrigOfParticle(thePart));
-}
-
-unsigned int MCTruthClassifier::classify(const xAOD::TruthParticle* thePart) const {
-  ATH_MSG_DEBUG( "Executing classify" );
-  if (!thePart) { ATH_MSG_WARNING( "Passed a nullptr" ); return 0; }
-  return std::get<0>(defOrigOfParticle(thePart));
-}
-
-std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthClassifier::defOrigOfParticle(const xAOD::TruthParticle *thePart) const {
-  ATH_MSG_DEBUG( "Executing DefOrigOfParticle " );
+std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthPartClassifier::defOrigOfParticle(const xAOD::TruthParticle *thePart) {
 
   const xAOD::TruthParticle *parent_hadron_ptr = nullptr;
 
