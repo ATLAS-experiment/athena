@@ -286,6 +286,9 @@ atlas_add_citest( ACTS_ActsGSFRefitting
 atlas_add_citest( ACTS_ActsGSFInEgamma
    SCRIPT ActsGSFInEgamma.sh )
 
+atlas_add_citest( ACTS_ActsPersistifySeeds
+   SCRIPT ActsPersistifySeeds.sh )
+ 
 atlas_add_citest( ACTS_ActsBenchmarkWithSpot
    SCRIPT ActsBenchmarkWithSpot.sh 8 100
    PROPERTIES PROCESSOR 8
