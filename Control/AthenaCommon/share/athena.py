@@ -11,17 +11,13 @@
 export USETCMALLOC=0
 export USEIMF=0
 export USEEXCTRACE=0
-USECA=0
 otherargs=()
 # but use tcmalloc by default if TCMALLOCDIR is defined
 if [ -n "$TCMALLOCDIR" ]; then
     export USETCMALLOC=1
 fi
 
-# parse command line arguments
-# If the first .py file we encounter starts with a shebang, then assume
-# this is a CA file.
-firstpy=1
+# parse LD_PRELOAD related command line arguments
 for a in "$@"
 do
     case "$a" in
@@ -34,15 +30,6 @@ do
         --exctrace)      USEEXCTRACE=1;;
         --preloadlib*)     export ATHENA_ADD_PRELOAD=${a#*=};;
         --drop-and-reload) ATHENA_DROP_RELOAD=1;;
-        --CA)              USECA=1;;
-        *.py)            if [ $firstpy -eq 1 -a -r "$a" ]; then
-                             head=`head -c2 "$a"`
-                             if [ "${head}" = "#!" ]; then
-                                 USECA=1
-                             fi
-                             firstpy=0
-                         fi
-                         otherargs+=("$a");;
         *)               otherargs+=("$a");;
     esac
 done
@@ -52,18 +39,11 @@ done
 export LD_PRELOAD_ORIG=${LD_PRELOAD}
 source `which athena_preload.sh `
 
-if [ $USECA -eq 1 ] 
-then
-    source `which ThinCAWrapper.sh` "${otherargs[@]}"
-    exit 0
-fi
-
 # Now resurrect ourselves as python script
 python_path=`which python`
 "exec" "$python_path" "-tt" "$0" "$@";
 
 """
-
 
 # File: athena.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -95,7 +75,6 @@ python_path=`which python`
 # python installation).
 #
 
-__version__ = '3.3.0'
 __author__  = 'Wim Lavrijsen (WLavrijsen@lbl.gov)'
 __doc__     = 'For details about athena.py, run "less `which athena.py`"'
 
@@ -103,21 +82,40 @@ import sys, os
 
 ### parse the command line arguments -----------------------------------------
 import AthenaCommon.AthOptionsParser as aop
-opts = aop.parse()
+aop.enable_athenaCLI()
+opts = aop.parse(legacy_args=True)
+
+### inspect first script or pickle to determine legacy/CA mode
+if opts.scripts:
+   from AthenaCommon.Utils.unixtools import FindFile
+   path_list = ['./'] + os.environ.get('PYTHONPATH', '').split(os.pathsep)
+   file_path = FindFile( os.path.expanduser( os.path.expandvars(opts.scripts[0]) ),
+                         path_list, os.R_OK )
+
+   if file_path is not None:
+      with open(file_path) as f:
+         if f.readline().startswith('#!'):  # shebang means CA mode
+            opts.CA = True
+
+      if opts.CA:
+         sys.argv.remove(opts.scripts[0])  # drop script path from args
+         opts.scripts[0] = file_path       # replace with resolved path
+
+elif opts.fromdb:
+   import pickle
+   with open(opts.fromdb, 'rb') as f:
+      try:
+         acc = pickle.load(f)
+         opts.CA = not isinstance(acc, dict)  # legacy pkl is a dict
+         if not opts.CA:
+            del acc   # legacy pkl is loaded in Execution.py
+      except ModuleNotFoundError:
+         pass   # in case ComponentAccumulator class is not available in release
 
 ### remove preload libs for proper execution of child-processes --------------
 if 'LD_PRELOAD_ORIG' in os.environ:
    os.environ['LD_PRELOAD'] = os.getenv('LD_PRELOAD_ORIG')
    os.unsetenv('LD_PRELOAD_ORIG')
-
-### start profiler, if requested
-if opts.profile_python:
-   import cProfile
- # profiler is created and controlled programmatically b/c a CLI profiling of
- # athena.py doesn't work (globals are lost from include() execfile() calls),
- # and because this allows easy excluding of the (all C++) Gaudi run
-   cProfile._athena_python_profiler = cProfile.Profile()
-   cProfile._athena_python_profiler.enable()
 
 ### debugging setup
 from AthenaCommon.Debugging import DbgStage
@@ -155,37 +153,65 @@ else:
    # when Athena components dereference ROOT objects that have been deleted.
    import ROOT  # noqa: F401
 
-## setup interactive prompt
-if opts.interactive:
-   from AthenaCommon.Interactive import configureInteractivePrompt
-   configureInteractivePrompt()
-   del configureInteractivePrompt
+### CA mode
+if opts.CA:
+   from AthenaCommon import ExitCodes
+   exitcode = 0
+   try:
+      if opts.scripts:  # CA script
+         if not opts.tracelevel:
+            import runpy
+            runpy.run_path( opts.scripts[0], run_name='__main__' )
+         else:
+            from AthenaCommon.Debugging import traceExecution
+            traceExecution( opts.scripts[0], opts.tracelevel )
 
-### logging and messages -----------------------------------------------------
-from AthenaCommon.Logging import logging, log
-_msg = log
+      elif opts.fromdb:  # pickle
+         from AthenaCommon.AthOptionsParser import configureCAfromArgs
+         configureCAfromArgs( acc, opts )
+         sys.exit(acc.run(opts.evtMax).isFailure())
 
-## test and set log level
-try:
-   _msg.setLevel (getattr(logging, opts.loglevel))
-except Exception:
-   aop._help_and_exit()
+   except SystemExit as e:
+      # Failure in ComponentAccumulator.run() is very likely an algorithm error
+      exitcode = ExitCodes.EXE_ALG_FAILURE if e.code==1 else e.code
 
+   # FIXME: change the print to log (requires ref updates)
+   #from AthenaCommon import Logging
+   #Logging.log.info( 'leaving with code %d: "%s"',
+   #                  e.code, ExitCodes.what(e.code) )
+   print( 'leaving with code %d: "%s"' % (exitcode, ExitCodes.what(exitcode)) )
+   sys.exit( exitcode )
 
-if not (opts.scripts or opts.fromdb) and not opts.interactive:
-   _msg.error( "batch mode requires at least one script" )
-   from AthenaCommon.ExitCodes import INCLUDE_ERROR
-   aop._help_and_exit( INCLUDE_ERROR )
+### Legacy mode
+else:
+   # logging and messages
+   from AthenaCommon.Logging import logging, log
+   _msg = log
 
+   # test and set log level
+   try:
+      _msg.setLevel (getattr(logging, opts.loglevel))
+   except Exception:
+      aop._help_and_exit()
 
-### file inclusion and tracing -----------------------------------------------
-from AthenaCommon.Include import include
-include.setShowIncludes(opts.showincludes)
+   # start profiler, if requested
+   if opts.profile_python:
+      import cProfile
+      # profiler is created and controlled programmatically b/c a CLI profiling of
+      # athena.py doesn't work (globals are lost from include() execfile() calls),
+      # and because this allows easy excluding of the (all C++) Gaudi run
+      cProfile._athena_python_profiler = cProfile.Profile()
+      cProfile._athena_python_profiler.enable()
 
+   # Fill athena job properties
+   aop.fill_athenaCommonFlags(opts)
 
-### pre-execution step -------------------------------------------------------
-include( "AthenaCommon/Preparation.py" )
+   # file inclusion and tracing
+   from AthenaCommon.Include import include
+   include.setShowIncludes(opts.showincludes)
 
+   # pre-execution step
+   include( "AthenaCommon/Preparation.py" )
 
-### execution of user script and drop into batch or interactive mode ---------
-include( "AthenaCommon/Execution.py" )
+   # execution of user script and drop into batch or interactive mode ---------
+   include( "AthenaCommon/Execution.py" )

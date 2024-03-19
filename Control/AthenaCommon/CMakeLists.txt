@@ -7,7 +7,8 @@ if (XAOD_STANDALONE)
     # Install files from the package:
     atlas_install_python_modules( python/SystemOfUnits.py
                                   python/Logging.py
-                                  python/Constants.py )
+                                  python/Constants.py
+                                  python/AthOptionsParser.py )
 else()
     # Set up specific Athena runtime environment:
     set( AthenaCommonEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
@@ -23,8 +24,7 @@ else()
                               share/Atlas_Gen.UnixStandardJob.py
                               share/runbatch.py )
     
-    atlas_install_scripts( share/athena_preload.sh
-                           share/ThinCAWrapper.sh )
+    atlas_install_scripts( share/athena_preload.sh )
 
     # Python scripts checked by flake8:
     atlas_install_scripts( share/athena.py

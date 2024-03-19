@@ -7,7 +7,14 @@ import argparse
 import os
 import sys
 
-## argparse 'action' helpers:
+# Are we running within athena.py ?
+__athenaCLI = False
+
+def enable_athenaCLI():
+    """Enable athena-specific command linea arguments"""
+    global __athenaCLI
+    __athenaCLI = True
+
 
 class JobOptAction(argparse.Action):
     """Check filename extension and fill relevant options"""
@@ -109,21 +116,46 @@ def fill_athenaCommonFlags(opts):
         athenaCommonFlags.SkipEvents.set_Value_and_Lock(opts.skipEvents)
 
 
-def getArgumentParser():
+def configureCAfromArgs(acc, opts):
+    """Configure CA from relevant command line arguments if running from pkl"""
 
-    parser = argparse.ArgumentParser(prog='athena.py', formatter_class=
+    if opts.interactive:
+        acc.interactive = opts.interactive
+
+    if opts.skipEvents:
+        try:
+            acc.getService('EventSelector').SkipEvents = opts.skipEvents
+        except Exception:
+            raise AthOptionsError("--skipEvents is not supported by this CA")
+
+    if opts.debug:
+        acc.setDebugStage(opts.debug)
+
+    if opts.loglevel:
+        from AthenaCommon import Constants
+        acc.getService('MessageSvc').OutputLevel = getattr(Constants, opts.loglevel)
+
+
+def getArgumentParser(legacy_args=False, **kwargs):
+    """Create default argument parser"""
+
+    parser = argparse.ArgumentParser(formatter_class=
                                      lambda prog : argparse.HelpFormatter(
                                          prog, max_help_position=40, width=100),
-                                     usage = '%(prog)s [OPTION]... [scripts ...]',
-                                     add_help=False)
+                                     add_help=False, **kwargs)
 
     parser.expert_groups = []   # List of expert option groups
 
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Main options')
 
-    g.add_argument('scripts', nargs='*', action=JobOptAction,
-                   help='scripts or pickle file to run')
+    if __athenaCLI and legacy_args:
+        g.add_argument('scripts', nargs='*', action=JobOptAction,
+                       help='scripts or pickle file to run')
+
+    g.add_argument('-l', '--loglevel', metavar='LVL', type=str.upper, default='INFO',
+                   choices=['ALL', 'VERBOSE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL'],
+                   help='logging level: %(choices)s')
 
     g.add_argument('--filesInput', metavar='FILES',
                    help='set FilesInput property (comma-separated list with wildcards)')
@@ -134,13 +166,6 @@ def getArgumentParser():
     g.add_argument('--skipEvents', metavar='N', type=int,
                    help='number of events to skip')
 
-    g.add_argument('-c', '--command', metavar='CMD',
-                   help='one-liner, runs before any scripts')
-
-    g.add_argument('-l', '--loglevel', metavar='LVL', type=str.upper, default='INFO',
-                   choices=['ALL', 'VERBOSE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL'],
-                   help='logging level: %(choices)s')
-
     g.add_argument('--nprocs', metavar='N', type=int,
                    help='enable AthenaMP if %(metavar)s>=1 or %(metavar)s==-1')
 
@@ -149,6 +174,12 @@ def getArgumentParser():
 
     g.add_argument('--concurrent-events', metavar='N', type=int,
                    help='number of concurrent events for AthenaMT')
+
+    g.add_argument('--CA', action='store_true',
+                   help='force ComponentAccumulator mode')
+
+    g.add_argument('--config-only', metavar='FILE', nargs='?', default=False, const=True,
+                   help='run only configuration and optionally store in %(metavar)s')
 
     g.add_argument('--mtes', action='store_true',
                    help='activate multi-threaded event service')
@@ -163,28 +194,13 @@ def getArgumentParser():
                    help='show help message')
 
     # --------------------------------------------------------------------------
-    g = parser.add_argument_group('Run mode')
-
-    g.add_argument('--CA', action='store_true',
-                   help='ComponentAccumulator mode')
-
-    g.add_argument('-i', '--interactive', action='store_true',
-                   help='interactive mode')
-
-    g.add_argument('--drop-and-reload', action='store_true', dest='drop_reload',
-                   help='offload configuration and start new process')
-
-    g.add_argument('--config-only', metavar='FILE', nargs='?', default=False, const=True,
-                   help='run only configuration and optionally store in %(metavar)s')
-
-    g.add_argument('--dump-configuration', metavar='FILE', dest='config_dump_file',
-                   help='dump an ASCII version of the configuration to %(metavar)s')
-
-    # --------------------------------------------------------------------------
     g = parser.add_argument_group('Monitoring and debugging')
 
     g.add_argument('--perfmon', metavar='MODE', nargs='?', const='fastmonmt',
                    help='enable performance monitoring toolkit in MODE')
+
+    g.add_argument('-i', '--interactive', nargs='?', choices=['init', 'run'], const='init',
+                   help='interactive mode with optional stage (default: init)')
 
     g.add_argument('--profile-python', metavar='FILE',
                    help='profile python code, dump in %(metavar)s (.pkl or .txt)')
@@ -206,32 +222,52 @@ def getArgumentParser():
                             'endrun', 'stop', 'full', 'full-athena', 'all'],
                    help='perform double delete checking, disables the use of tcmalloc.')
 
-    g.add_argument('-s', '--showincludes', action='store_true',
-                   help='show printout of included files')
-
-    g.add_argument('--trace', metavar='PATTERN', dest='trace_pattern',
-                   help='also show files that match %(metavar)s')
+    g.add_argument('--tracelevel', metavar='LEVEL', nargs='?', type=int, choices=range(0,4), const=3,
+                   help='trace level for python configuration')
 
     # --------------------------------------------------------------------------
-    g = parser.add_argument_group('System options')
+    if legacy_args:
+        g = parser.add_argument_group('Legacy options')
 
-    g.add_argument('--tcmalloc', action='store_true', dest='tcmalloc', default=True,
-                   help='use tcmalloc.so for memory allocation [DEFAULT]')
+        g.add_argument('-c', '--command', metavar='CMD',
+                       help='one-liner, runs before any scripts')
 
-    g.add_argument('--stdcmalloc', action='store_false', dest='tcmalloc',
-                   help='use libc malloc for memory allocation')
+        g.add_argument('--drop-and-reload', action='store_true', dest='drop_reload',
+                       help='offload configuration and start new process')
 
-    g.add_argument('--stdcmath', action='store_true', default=True,
-                   help='use libc malloc for memory allocation [DEFAULT]')
+        g.add_argument('--dump-configuration', metavar='FILE', dest='config_dump_file',
+                       help='dump an ASCII version of the configuration to %(metavar)s')
 
-    g.add_argument('--imf', action='store_true',
-                   help='use Intel Math Function library')
+        g.add_argument('-s', '--showincludes', action='store_true',
+                       help='show printout of included files')
 
-    g.add_argument('--preloadlib', metavar='LIB',
-                   help='localized preload of library %(metavar)s')
+        g.add_argument('--trace', metavar='PATTERN', dest='trace_pattern',
+                       help='also show files that match %(metavar)s')
 
-    g.add_argument('--enable-ers-hdlr', metavar='y/n', default='n', choices=['y','n'],
-                   help='enable or not the ERS handler [%(default)s]')
+    # --------------------------------------------------------------------------
+    if __athenaCLI:
+        g = parser.add_argument_group('System options')
+
+        g.add_argument('--tcmalloc', action='store_true', dest='tcmalloc', default=True,
+                       help='use tcmalloc.so for memory allocation [DEFAULT]')
+
+        g.add_argument('--stdcmalloc', action='store_false', dest='tcmalloc',
+                       help='use libc malloc for memory allocation')
+
+        g.add_argument('--stdcmath', action='store_true', default=True,
+                       help='use libc malloc for memory allocation [DEFAULT]')
+
+        g.add_argument('--imf', action='store_true',
+                       help='use Intel Math Function library')
+
+        g.add_argument('--exctrace', action='store_true',
+                       help='preload exception trace collector')
+
+        g.add_argument('--preloadlib', metavar='LIB',
+                       help='localized preload of library %(metavar)s')
+
+        g.add_argument('--enable-ers-hdlr', metavar='y/n', default='n', choices=['y','n'],
+                       help='enable or not the ERS handler [%(default)s]')
 
     return parser
 
@@ -253,7 +289,7 @@ def _help_and_exit(reason=None):
     raise AthOptionsError(reason)
 
 
-def parse(chk_tcmalloc=True):
+def parse(legacy_args=False):
     """parses command line arguments and returns an ``Options`` instance"""
 
     # Everything after a single "-" is treated as "user options". This is for
@@ -268,13 +304,20 @@ def parse(chk_tcmalloc=True):
         args = sys.argv[1:dashpos]
         user_opts = sys.argv[dashpos+1:]
 
-    parser = getArgumentParser()
-    opts = parser.parse_args(args)
+    parser = getArgumentParser(legacy_args)
+    opts, leftover = parser.parse_known_args(args)
     setattr(opts, 'user_opts', user_opts)
+
+    # If the argument parser has been extended, the script name(s) may end up
+    # in the leftovers. Try to find them there:
+    if not (opts.scripts or opts.fromdb) and leftover:
+        JobOptAction([], 'scripts')(parser, opts, leftover)
+
+    if not (opts.scripts or opts.fromdb) and not opts.interactive:
+        parser.error("the following arguments are required: scripts")
 
     set_environment(opts)
     check_tcmalloc(opts)
-    fill_athenaCommonFlags(opts)
 
     return opts
 
