@@ -86,7 +86,7 @@ StatusCode GeoModelMmTest::execute() {
          return StatusCode::FAILURE;
       }
       ATH_CHECK(dumpToTree(ctx,gctx,reElement));
-      const Amg::Transform3D& globToLocal{reElement->globalToLocalTrans(gctx)};
+      const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
       const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;
@@ -153,7 +153,7 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
     m_chamberDesign = reElement->chamberDesign();
     ///
    /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform{reElement->globalToLocalTrans(gctx)};
+   const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
   ///
     m_moduleHeight = reElement->moduleHeight();

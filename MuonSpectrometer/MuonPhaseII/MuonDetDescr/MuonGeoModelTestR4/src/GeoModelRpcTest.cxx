@@ -88,7 +88,7 @@ StatusCode GeoModelRpcTest::execute() {
          return StatusCode::FAILURE;
       }
       ATH_CHECK(dumpToTree(ctx,gctx,reElement));
-      const Amg::Transform3D& globToLocal{reElement->globalToLocalTrans(gctx)};
+      const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
       const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;

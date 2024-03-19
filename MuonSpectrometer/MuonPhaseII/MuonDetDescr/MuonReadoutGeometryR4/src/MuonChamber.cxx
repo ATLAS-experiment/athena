@@ -43,9 +43,8 @@ const Amg::Transform3D& MuonChamber::localToGlobalTrans(const ActsGeometryContex
     SubDetAlignments::const_iterator itr = gctx.alignmentStores.find(detectorType());
     return m_localToGlobal.getTransform(itr != gctx.alignmentStores.end() ? itr->second.get() : nullptr);
 }            
-const Amg::Transform3D& MuonChamber::globalToLocalTrans(const ActsGeometryContext& gctx) const {
-    SubDetAlignments::const_iterator itr = gctx.alignmentStores.find(detectorType());
-    return m_globalToLocal.getTransform(itr != gctx.alignmentStores.end() ? itr->second.get() : nullptr); 
+Amg::Transform3D MuonChamber::globalToLocalTrans(const ActsGeometryContext& gctx) const {
+    return localToGlobalTrans(gctx).inverse(); 
 }
 Amg::Transform3D MuonChamber::fromLayerToGlobal(ActsTrk::RawGeomAlignStore* store) const {
     ActsGeometryContext gctx{};
@@ -59,7 +58,6 @@ Amg::Transform3D MuonChamber::fromLayerToGlobal(ActsTrk::RawGeomAlignStore* stor
 bool MuonChamber::storeAlignment(ActsTrk::RawGeomAlignStore& store) const {
     if (store.detType != detectorType()) return false;
     m_localToGlobal.storeAlignment(store);
-    m_globalToLocal.storeAlignment(store);
     return true;
 }
 double MuonChamber::halfXLong() const { return m_args.halfXLong; }

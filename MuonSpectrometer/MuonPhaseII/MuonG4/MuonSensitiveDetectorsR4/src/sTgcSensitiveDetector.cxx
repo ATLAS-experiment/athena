@@ -93,7 +93,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return true;
   }
   const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
-  const Amg::Transform3D& gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
+  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
   const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
   const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
   /// Final check that the hit is located at zero
@@ -102,7 +102,10 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       throw std::runtime_error("Picked wrong gas gap");
   }
 
-  
+  /// At the very last clear the cache of the readout element
+  readOutEle->releaseUnAlignedTrfs();
+
+
   xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
   m_writeHandle->push_back(hit);  
   

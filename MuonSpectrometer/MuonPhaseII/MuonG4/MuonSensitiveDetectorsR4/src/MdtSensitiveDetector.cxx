@@ -93,7 +93,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
         return true;
     }
 
-    const Amg::Transform3D& globalToLocal{reEle->globalToLocalTrans(m_gctx, reEle->measurementHash(HitID))};
+    const Amg::Transform3D globalToLocal{reEle->globalToLocalTrans(m_gctx, reEle->measurementHash(HitID))};
 
     // transform pre and post step positions to local positions
     const Amg::Vector3D trackPosition{Amg::Hep3VectorToEigen(currentTrack->GetPosition())};
@@ -119,17 +119,20 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
                   <<", direction "<<Amg::toString(trackLocDir, 2)
                   <<" to SimHit container ahead. ");
 
-  xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
-  m_writeHandle->push_back(hit);  
-  hit->setIdentifier(HitID); 
-  hit->setLocalPosition(xAOD::toStorage(driftHit));  
-  hit->setLocalDirection(xAOD::toStorage(trackLocDir));
-  hit->setStepLength(aStep->GetStepLength());
-  hit->setGlobalTime(globalTime);
-  hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
-  hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
-  hit->setKineticEnergy(currentTrack->GetKineticEnergy());
-  hit->setGenParticleLink(trHelp.GetParticleLink());
+    /// At the very last clear the cache of the readout element
+    reEle->releaseUnAlignedTrfs();
+
+    xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
+    m_writeHandle->push_back(hit);  
+    hit->setIdentifier(HitID); 
+    hit->setLocalPosition(xAOD::toStorage(driftHit));  
+    hit->setLocalDirection(xAOD::toStorage(trackLocDir));
+    hit->setStepLength(aStep->GetStepLength());
+    hit->setGlobalTime(globalTime);
+    hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
+    hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit());
+    hit->setKineticEnergy(currentTrack->GetKineticEnergy());
+    hit->setGenParticleLink(trHelp.GetParticleLink());
 
   return true;
 }

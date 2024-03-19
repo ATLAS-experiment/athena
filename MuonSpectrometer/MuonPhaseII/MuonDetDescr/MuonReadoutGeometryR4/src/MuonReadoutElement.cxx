@@ -39,18 +39,7 @@ IdentifierHash MuonReadoutElement::geoTransformHash() {
     return hash;
 }
 
-const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
-                                                               const IdentifierHash& hash) const {
-    SubDetAlignments::const_iterator map_itr = ctx.alignmentStores.find(detectorType());
-    const ActsTrk::AlignmentStore* store = map_itr != ctx.alignmentStores.end() ? 
-                                                        map_itr->second.get() : nullptr;
 
-    ActsTrk::TransformCacheSet::const_iterator cache = m_globalToLocalCaches.find(hash);
-    if (cache != m_globalToLocalCaches.end()) return (*cache)->getTransform(store);
-    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- "
-                <<idHelperSvc()->toString(measurementId(hash))<<" is unknown.");
-    return dummyTrans;
-}
 const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, 
                                                                const IdentifierHash& hash) const {
     SubDetAlignments::const_iterator map_itr = ctx.alignmentStores.find(detectorType());
@@ -67,6 +56,11 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometr
 Amg::Transform3D MuonReadoutElement::toStation(RawGeomAlignStore* alignStore) const {
    return getMaterialGeom()->getAbsoluteTransform(alignStore ? alignStore->geoModelAlignment.get() : nullptr);
 }
+void MuonReadoutElement::releaseUnAlignedTrfs() const {
+    for (const std::unique_ptr<ActsTrk::TransformCache>& cache : m_localToGlobalCaches) {
+        cache->releaseNominalCache();
+    }
+}
 
 
 StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
@@ -79,19 +73,12 @@ StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
         return StatusCode::FAILURE;
     }
     m_localToGlobalCaches.insert(std::make_unique<ActsTrk::TransformCache>(hash, make, this));
-    m_globalToLocalCaches.insert(std::make_unique<ActsTrk::TransformCache>(hash,
-                                            [make](RawGeomAlignStore* store, const IdentifierHash& hash){
-                                                return make(store,hash).inverse();
-                                            }, this));
     return StatusCode::SUCCESS;
 }
 bool MuonReadoutElement::storeAlignment(RawGeomAlignStore& store) const{ 
     if (store.detType != detectorType()) return false;
     for (const std::unique_ptr<ActsTrk::TransformCache>& cache: m_localToGlobalCaches) {
        cache->storeAlignment(store);
-    }
-    for (const std::unique_ptr<ActsTrk::TransformCache>& cache : m_globalToLocalCaches){
-        cache->storeAlignment(store);
     }
 #ifndef SIMULATIONBASE
     if (m_chambLink && m_chambLink->readOutElements()[0] == this){
@@ -100,7 +87,7 @@ bool MuonReadoutElement::storeAlignment(RawGeomAlignStore& store) const{
 #endif
     return true;
 }
-const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx) const {
+Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx) const {
     return globalToLocalTrans(ctx, geoTransformHash());
 }
 const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx) const {

@@ -41,6 +41,7 @@ namespace {
             return StatusCode::FAILURE;                                             \
         }                                                                           \
         ATH_CHECK(element->initElement());                                          \
+        element->releaseUnAlignedTrfs();                                            \
         size_t idx = static_cast<unsigned int>(element->identHash());               \
         if (idx >= STORAGE_VEC.size())                                              \
             STORAGE_VEC.resize(idx + 1);                                            \

@@ -61,7 +61,7 @@ namespace MuonGMR4 {
             const ReadoutSet& readOutElements() const;
             /// Returns the transformation of the MuonChamber
             const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& gctx) const;
-            const Amg::Transform3D& globalToLocalTrans(const ActsGeometryContext& gctx) const;
+            Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
             /// Applies the alignment transformations to the middle layers
             /// Returns false if the alignment store does not cache the constants
             /// for the correpsonding detector element
@@ -85,11 +85,6 @@ namespace MuonGMR4 {
                     [this](ActsTrk::RawGeomAlignStore* store, const IdentifierHash&){
                         return fromLayerToGlobal(store);
            }};
-           ActsTrk::TransformCache m_globalToLocal{IdentifierHash{0}, 
-                    [this](ActsTrk::RawGeomAlignStore* store, const IdentifierHash& hash){
-                        return m_localToGlobal.transformMaker()(store,hash).inverse();
-           }};
-
     };
     
     std::ostream& operator<<(std::ostream& ostr,

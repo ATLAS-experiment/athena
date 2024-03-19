@@ -45,6 +45,8 @@ namespace ActsTrk {
       const TransformMaker& transformMaker() const;
       /** @brief Returns the parent IDetectorElement owning the cache*/
       const IDetectorElement* parent() const;
+      /** @brief resets the nominal cache associated with the detector element*/
+      void releaseNominalCache() const;
     private:
       IdentifierHash m_hash{0};
       TransformMaker m_transform{};

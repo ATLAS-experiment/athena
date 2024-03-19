@@ -22,7 +22,9 @@ namespace ActsTrk {
     const IDetectorElement* TransformCache::parent() const{
         return m_parent;
     }
- 
+    void TransformCache::releaseNominalCache() const {
+        m_nomCache.release();
+    } 
     const Amg::Transform3D& TransformCache::getTransform(const ActsTrk::AlignmentStore* alignStore) const {    
         /// Valid alignment store is given -> Take the transformation from the cache there
         if (alignStore){

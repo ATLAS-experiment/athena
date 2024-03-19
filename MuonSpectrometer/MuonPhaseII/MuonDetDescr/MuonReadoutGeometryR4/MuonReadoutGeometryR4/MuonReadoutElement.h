@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_MUONREADOUTELEMENT_H
 #define MUONGEOMODELR4_MUONREADOUTELEMENT_H
@@ -121,15 +121,15 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     ///   the alignment system
     /// Returns the global to local transformation into the rest frame of the
     /// detector (Coincides with the first measurement layer)
-    const Amg::Transform3D& globalToLocalTrans(const ActsGeometryContext& ctx) const;
+    Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& ctx) const;
     /// Returns the global to local transformation into the rest frame of a
     /// given measurement layer
-    const Amg::Transform3D& globalToLocalTrans(const ActsGeometryContext& ctx,
-                                               const Identifier& id) const;
+    Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& ctx,
+                                        const Identifier& id) const;
     /// Returns the global to local transformation into the rest frame of a
     /// given measurement layer
-    const Amg::Transform3D& globalToLocalTrans(const ActsGeometryContext& ctx, 
-                                               const IdentifierHash& hash) const;
+    Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& ctx, 
+                                        const IdentifierHash& hash) const;
 
     /// Returns the local to global transformation into the ATLAS coordinate
     /// system
@@ -162,7 +162,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /// in its interface.
     virtual double thickness() const = 0;
 #endif
-
+    /// Releases all cached transforms that are not connected with alignment
+    void releaseUnAlignedTrfs() const;
    protected:
      using TransformMaker = ActsTrk::TransformCache::TransformMaker;
       
@@ -198,8 +199,6 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /// Cache the station phi of the identifier
     int m_stPhi{-1};
 
-    /// Cache all global to local transformations
-    ActsTrk::TransformCacheSet m_globalToLocalCaches{};
     /// Cache all local to global transformations
     ActsTrk::TransformCacheSet m_localToGlobalCaches{};
 #ifndef SIMULATIONBASE

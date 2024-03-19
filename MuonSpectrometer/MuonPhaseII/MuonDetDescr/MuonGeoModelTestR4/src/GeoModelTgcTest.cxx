@@ -80,7 +80,7 @@ StatusCode GeoModelTgcTest::execute() {
                       <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
          return StatusCode::FAILURE;
       }
-      const Amg::Transform3D& globToLocal{reElement->globalToLocalTrans(gctx)};
+      const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
       const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;
