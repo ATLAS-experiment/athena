@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiDatabaseConfig_h
 #define dqiDatabaseConfig_h
 
-#include <iostream>
-#include <optional>
-#include <nlohmann/json.hpp>
-#include "CoolKernel/IFolder.h"
-#include "CoolKernel/IDatabase.h"
 
+#include <nlohmann/json.hpp>
+#include "CoolKernel/pointers.h" //for IFolderPtr, IDatabasePtr typedef
+#include <unordered_map>
+#include <string>
 namespace dqi {
 
 class DatabaseConfig {
@@ -24,10 +23,10 @@ public:
 
 private:
   const std::string m_connectionString;
-  const long m_runNumber;
+  const long m_runNumber{};
 
-  bool m_dbConnected;
-  bool m_folderConnected;
+  bool m_dbConnected{};
+  bool m_folderConnected{};
 
   std::unordered_map<std::string, nlohmann::json> m_jsonData;
   cool::IFolderPtr m_folder;

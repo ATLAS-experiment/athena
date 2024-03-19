@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************
@@ -18,8 +18,6 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "TH1F.h"
-#include "TFile.h"
 #include "TClass.h"
 #include "TKey.h"
 
@@ -1092,22 +1090,22 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
 	  
 	 ///create and insert entries in SQLite DB 
          //  bool do_asciiCoolFile1  = true;
-	   float effeta            = -9999;	  float effphi  	  = -9999;  	 char arr_effeta  	  [10];      char arr_effphi	      [10];	    
-           float erreffeta         = -1; 	  float erreffphi	  =-1;  	 char arr_erreffeta	  [10];      char arr_erreffphi	      [10];	    
-	   float reseta_cs1        = -9999;	  float resphi_cs1	  = -9999;  	 char arr_reseta_cs1	  [10];      char arr_resphi_cs1        [10];	    
-           float errreseta_cs1     = -1; 	  float errresphi_cs1	  =-1;  	 char arr_errreseta_cs1	  [10];      char arr_errresphi_cs1     [10];	    
-	   float reseta_cs2        = -9999;	  float resphi_cs2	  = -9999;  	 char arr_reseta_cs2	  [10];      char arr_resphi_cs2        [10];	    
-           float errreseta_cs2     = -1; 	  float errresphi_cs2	  =-1;  	 char arr_errreseta_cs2	  [10];      char arr_errresphi_cs2     [10];	    
-	   float reseta_csother    = -9999;	  float resphi_csother	  = -9999;  	 char arr_reseta_csother    [10];      char arr_resphi_csother    [10];	    
-           float errreseta_csother = -1; 	  float errresphi_csother =-1;  	 char arr_errreseta_csother [10];      char arr_errresphi_csother [10];	    
-	   float timeeta           = -9999;	  float timephi 	  = -9999;  	 char arr_timeeta 	  [10];      char arr_timephi	      [10];	    
-           float errtimeeta        = -1; 	  float errtimephi	  =-1;  	 char arr_errtimeeta	  [10];      char arr_errtimephi        [10];	    
-	   float noiseeta          = -9999;	  float noisephi	  = -9999;  	 char arr_noiseeta	  [10];      char arr_noisephi	      [10];	    
-           float errnoiseeta       = -1; 	  float errnoisephi	  =-1;  	 char arr_errnoiseeta	  [10];      char arr_errnoisephi       [10];	    
-	   float noiseeta_cor      = -9999;	  float noisephi_cor	  = -9999;  	 char arr_noiseeta_cor	  [10];      char arr_noisephi_cor      [10];	    
-           float errnoiseeta_cor   = -1; 	  float errnoisephi_cor   =-1;  	 char arr_errnoiseeta_cor   [10];      char arr_errnoisephi_cor   [10];	    
-	   float cl_sizeeta        = -9999;	  float cl_sizephi	  = -9999;  	 char arr_cl_sizeeta	  [10];      char arr_cl_sizephi        [10];	    
-           float errcl_sizeeta     = -1; 	  float errcl_sizephi	  =-1;  	 char arr_errcl_sizeeta	  [10];      char arr_errcl_sizephi     [10];	    
+	   float effeta            = -9999;	  float effphi  	  = -9999;  	 char arr_effeta  	  [10]={};      char arr_effphi	      [10]={};	    
+           float erreffeta         = -1; 	  float erreffphi	  =-1;  	 char arr_erreffeta	  [10]={};      char arr_erreffphi	      [10]={};	    
+	   float reseta_cs1        = -9999;	  float resphi_cs1	  = -9999;  	 char arr_reseta_cs1	  [10]={};      char arr_resphi_cs1        [10]={};	    
+           float errreseta_cs1     = -1; 	  float errresphi_cs1	  =-1;  	 char arr_errreseta_cs1	  [10]={};      char arr_errresphi_cs1     [10]={};	    
+	   float reseta_cs2        = -9999;	  float resphi_cs2	  = -9999;  	 char arr_reseta_cs2	  [10]={};      char arr_resphi_cs2        [10]={};	    
+           float errreseta_cs2     = -1; 	  float errresphi_cs2	  =-1;  	 char arr_errreseta_cs2	  [10]={};      char arr_errresphi_cs2     [10]={};	    
+	   float reseta_csother    = -9999;	  float resphi_csother	  = -9999;  	 char arr_reseta_csother    [10]={};      char arr_resphi_csother    [10]={};	    
+           float errreseta_csother = -1; 	  float errresphi_csother =-1;  	 char arr_errreseta_csother [10]={};      char arr_errresphi_csother [10]={};	    
+	   float timeeta           = -9999;	  float timephi 	  = -9999;  	 char arr_timeeta 	  [10]={};      char arr_timephi	      [10]={};	    
+           float errtimeeta        = -1; 	  float errtimephi	  =-1;  	 char arr_errtimeeta	  [10]={};      char arr_errtimephi        [10]={};	    
+	   float noiseeta          = -9999;	  float noisephi	  = -9999;  	 char arr_noiseeta	  [10]={};      char arr_noisephi	      [10]={};	    
+           float errnoiseeta       = -1; 	  float errnoisephi	  =-1;  	 char arr_errnoiseeta	  [10]={};      char arr_errnoisephi       [10]={};	    
+	   float noiseeta_cor      = -9999;	  float noisephi_cor	  = -9999;  	 char arr_noiseeta_cor	  [10]={};      char arr_noisephi_cor      [10]={};	    
+           float errnoiseeta_cor   = -1; 	  float errnoisephi_cor   =-1;  	 char arr_errnoiseeta_cor   [10]={};      char arr_errnoisephi_cor   [10]={};	    
+	   float cl_sizeeta        = -9999;	  float cl_sizephi	  = -9999;  	 char arr_cl_sizeeta	  [10]={};      char arr_cl_sizephi        [10]={};	    
+           float errcl_sizeeta     = -1; 	  float errcl_sizephi	  =-1;  	 char arr_errcl_sizeeta	  [10]={};      char arr_errcl_sizephi     [10]={};	    
   		
            float eta_effphi        =  0;          float phi_effeta        = 0;      		
 	 
@@ -1430,7 +1428,7 @@ MonitoringFile::RPCPostProcess( const std::string & inFilename, bool /* isIncrem
                                 coolrpc.setSince(0U,0U);		
                                 coolrpc.setUntil(4294967295U,0U);	
  			        coolrpc.insertCondDB_withTag(run_number*0+429496729U,PanelCode,PanelRes, StripStatus,cool_tagCondDB);
-			        if(printout&&EffThreshold)std::cout << stripProfile_name << " under THR "<< EffThreshold <<" "<< PanelCode << " ibin " << ibin << " h_EffEta " << h_Eff->GetBinContent(ibin) <<" h_EffPhi " << h_Eff->GetBinContent(ibin_perp) << " h_GapEffEta " << h_GapEff->GetBinContent(ibin) <<" h_GapEffPhi " << h_GapEff->GetBinContent(ibin_perp) << " cool_EtaEff "<< effeta <<" cool_GapEffEta "<< gapeffeta <<" --- Eta Summary " << PanelRes<< " --- StripStatus " << StripStatus << std::endl;
+			        if(printout and EffThreshold and h_GapEff)std::cout << stripProfile_name << " under THR "<< EffThreshold <<" "<< PanelCode << " ibin " << ibin << " h_EffEta " << h_Eff->GetBinContent(ibin) <<" h_EffPhi " << h_Eff->GetBinContent(ibin_perp) << " h_GapEffEta " << h_GapEff->GetBinContent(ibin) <<" h_GapEffPhi " << h_GapEff->GetBinContent(ibin_perp) << " cool_EtaEff "<< effeta <<" cool_GapEffEta "<< gapeffeta <<" --- Eta Summary " << PanelRes<< " --- StripStatus " << StripStatus << std::endl;
 				if(printout&&EffThreshold)std::cout<<"inCOOL_ETA_id_ntrk_panelEff_gapEff "<<PanelCode<<" "<<n_tr_peta<<" "<<(int)(n_tr_peta*effeta)<<" "<<(int)(n_tr_peta*gapeffeta)<<std::endl;	
 			        countpanelindb++;
 			        if(effeta==0.0)countpaneleff0++;

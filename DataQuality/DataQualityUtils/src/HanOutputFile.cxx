@@ -38,6 +38,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "DataQualityInterfaces/HanUtils.h"
 #include "TPluginManager.h"
@@ -1330,9 +1331,12 @@ namespace dqutils
   {
     gVirtualPS->Open(myC->GetName(), 114);
     myC->Paint();
-    (*img) = dynamic_cast<TImageDump*>(gVirtualPS)->GetImage();
-    if (*img) {
-      (*img)->GetImageBuffer(x, y, TImage::kPng);
+    auto pImgDump = dynamic_cast<TImageDump*>(gVirtualPS);
+    if (pImgDump){
+      (*img) = pImgDump->GetImage();
+      if (*img) {
+        (*img)->GetImageBuffer(x, y, TImage::kPng);
+      }
     }
   }
 
@@ -1404,8 +1408,9 @@ namespace dqutils
     gStyle->SetStatW(0.2);
     gStyle->SetStatH(0.1);
 
+    //Used in  TASImage::GetImageBuffer, Buffer must be deallocated after usage with free(buffer) call
     char* x = nullptr;
-    int y;
+    int y{};
     std::string json;
     TImage* img = nullptr;
 
@@ -2289,10 +2294,10 @@ namespace dqutils
     std::string rv;
     if (cnvsType & GENERATE_PNG)
     {
-      rv.assign(x, y);
+      if (x) rv.assign(x, y);
     };
     std::pair<std::string, std::string> rvPair{ rv, json };
-
+    //deallocate image buffer with free(x), see https://root.cern.ch/doc/master/classTASImage.html
     free(x);
     delete hobj;
     delete hRef;

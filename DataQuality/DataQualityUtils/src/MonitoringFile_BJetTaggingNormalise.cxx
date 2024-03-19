@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Methods to perform post-processing on "run_nnnnnn/JetTagging/ *2D" histograms
@@ -322,8 +322,8 @@ namespace dqutils{
 	    working1DHistogramNom = dynamic_cast<TH1F*> (f->Get(nom1DHistos));
 	    working1DHistogramDen = dynamic_cast<TH1F*> (f->Get(den1DHistos));
 	    working1DHistogramEff = dynamic_cast<TH1F*> (f->Get(eff1DHistos));
-
-	    if (working1DHistogramNom == 0 || working1DHistogramDen == 0) {
+      //if xomething goes wrong, do nothing and loop around
+	    if (!working1DHistogramNom or !working1DHistogramDen or !working1DHistogramEff) {
 	      continue;
 	    }
 
