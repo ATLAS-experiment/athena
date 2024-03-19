@@ -459,6 +459,8 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Electron &electron) {
   data["phi"] = electron.phi();
   data["eta"] = electron.eta();
   data["energy"] = electron.e();
+  addLink(electron.caloClusterLink(), data["LinkedClusters"]);
+  addLink(electron.trackParticleLink(), data["LinkedTracks"]);
 
   return data;
 }
@@ -470,6 +472,7 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Photon &photon) {
   data["phi"] = photon.phi();
   data["eta"] = photon.eta();
   data["energy"] = photon.e();
+  addLink(photon.caloClusterLink(), data["LinkedClusters"]);
 
   return data;
 }
