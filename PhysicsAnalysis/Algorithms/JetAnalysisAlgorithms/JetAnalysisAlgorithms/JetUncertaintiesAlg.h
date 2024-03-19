@@ -15,6 +15,8 @@
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 
+#include <optional>
+
 namespace CP
 {
   /// \brief an algorithm for calling \ref ICPJetUncertaintiesTool
@@ -68,6 +70,11 @@ namespace CP
     /// \brief the vector of pseudo-data JER systematics (for CPU-optimisation)
   private:
     std::vector<CP::SystematicSet> m_systematicsVectorOnlyJERPseudoData;
+
+  private:
+    Gaudi::Property<std::string> m_isJESbtag {this, "isJESbtagLabel", "IsBjet", "The label to apply to truth b-tagged jets, for JES flavour uncertainties"};
+    std::optional<SG::AuxElement::Decorator<char>> m_decIsJESbtag;
+    std::optional<SG::AuxElement::Accessor<int>> m_accTruthLabel;
 
   };
 }
