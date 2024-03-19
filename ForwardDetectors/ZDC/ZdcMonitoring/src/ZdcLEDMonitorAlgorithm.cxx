@@ -189,6 +189,14 @@ StatusCode ZdcLEDMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
         return StatusCode::SUCCESS;
     }
     
+    auto bcid = Monitored::Scalar<unsigned int>("bcid", eventInfo->bcid());
+    auto l1TriggerType = Monitored::Scalar<unsigned int>("l1TriggerType", eventInfo->level1TriggerType());
+    auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
+
+    // fill in the lumi block, BCID and L1 trigger type information without any check
+    // for diagnosis of bad events that, e.g, fail the reconstruction
+    fill("ZdcLEDAllEventsDiagnosis", lumiBlock, bcid, l1TriggerType);
+    
     unsigned int eventType = ZdcEventInfo::ZdcEventUnknown;
     unsigned int DAQMode = ZdcEventInfo::DAQModeUndef;
 
