@@ -93,9 +93,12 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return true;
   }
   const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
-  const Amg::Transform3D& gapTrans{readOutEle->globalToLocalTrans(m_gctx, hitID)};
+  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(m_gctx, hitID)};
   const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
   const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
+
+  /// At the very last clear the cache of the readout element
+  readOutEle->releaseUnAlignedTrfs();
 
   xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
   m_writeHandle->push_back(hit);  

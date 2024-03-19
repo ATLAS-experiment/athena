@@ -150,7 +150,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         newElement->m_nsteps = step;
         
         /// Define the tube staggering
-        const Amg::Transform3D& globToLoc{copyMe->globalToLocalTrans(gctx)};
+        const Amg::Transform3D globToLoc{copyMe->globalToLocalTrans(gctx)};
         double xOffSet{pars.halfY}, yOffSet{pars.halfHeight};
         if (newElement->barrel())  std::swap(xOffSet, yOffSet);
         for (unsigned lay = 1; lay <= copyMe->numLayers(); ++lay) {

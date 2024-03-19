@@ -123,7 +123,7 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setTime(hitTime);
         prd->setAmbiguityFlag(0);
         const Amg::Vector3D strip3D  = lPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D& globToCenter{readOutEle->getChamber()->globalToLocalTrans(gctx)};
+        const Amg::Transform3D globToCenter{readOutEle->getChamber()->globalToLocalTrans(gctx)};
         prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D));
     };
 

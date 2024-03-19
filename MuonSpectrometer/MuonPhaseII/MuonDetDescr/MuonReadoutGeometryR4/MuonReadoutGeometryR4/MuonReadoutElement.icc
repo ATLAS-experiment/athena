@@ -29,8 +29,12 @@ inline Amg::Vector3D MuonReadoutElement::center(const ActsGeometryContext& ctx,
                                                 const IdentifierHash& hash) const {
     return localToGlobalTrans(ctx, hash).translation();
 }
-inline const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
-                                                                      const Identifier& id) const {
+inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
+                                                               const IdentifierHash& hash) const {   
+    return localToGlobalTrans(ctx, hash).inverse();
+}
+inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
+                                                               const Identifier& id) const {
     return globalToLocalTrans(ctx, layerHash(id));
 }
 inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, 
