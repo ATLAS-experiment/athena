@@ -34,7 +34,10 @@ egammaMVACalibTool::~egammaMVACalibTool() = default;
 
 StatusCode egammaMVACalibTool::initialize()
 {
-
+  if (m_particleType == xAOD::EgammaParameters::NumberOfEgammaTypes) {
+    ATH_MSG_FATAL("Particle type not set: you have to set property ParticleType to a valid value");
+    return StatusCode::FAILURE;
+  }
   ATH_MSG_DEBUG("Initializing with particle " << m_particleType);
 
   if (m_shiftType == MEAN10TOTRUE) {
