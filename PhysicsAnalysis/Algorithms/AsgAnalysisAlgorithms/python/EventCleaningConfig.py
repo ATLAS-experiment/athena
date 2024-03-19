@@ -19,13 +19,34 @@ class EventCleaningBlock (ConfigBlock):
         # in AnalysisBase, but we can evade this with numerical values
         self.addOption ('invertFlags', [0], type=None)
 
+    def getDefaultGRLs (self, data_year) :
+        """ returns a reasonable set of GRLs that should be suited for most analyses """
+
+        if data_year == 2015:
+            return ['GoodRunsLists/data15_13TeV/20170619/data15_13TeV.periodAllYear_DetStatus-v89-pro21-02_Unknown_PHYS_StandardGRL_All_Good_25ns.xml']
+        elif data_year == 2016:
+            return ['GoodRunsLists/data16_13TeV/20180129/data16_13TeV.periodAllYear_DetStatus-v89-pro21-01_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns.xml']
+        elif data_year == 2017:
+            return ['GoodRunsLists/data17_13TeV/20180619/data17_13TeV.periodAllYear_DetStatus-v99-pro22-01_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml']
+        elif data_year == 2018:
+            return ['GoodRunsLists/data18_13TeV/20190318/data18_13TeV.periodAllYear_DetStatus-v102-pro22-04_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml']
+        elif data_year == 2022:
+            return ['GoodRunsLists/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+        elif data_year == 2023:
+            return ['GoodRunsLists/data23_13p6TeV/20230712/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-05_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+        else:
+            raise ValueError (f"Data year {data_year} is not recognised for automatic GRL retrieval!")
+
     def makeAlgs (self, config) :
 
         if config.dataType() is DataType.Data:
             # Set up the GRL selection:
             alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )
             config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
-            alg.Tool.GoodRunsListVec = self.userGRLFiles
+            if self.userGRLFiles:
+                alg.Tool.GoodRunsListVec = self.userGRLFiles
+            else:
+                alg.Tool.GoodRunsListVec = self.getDefaultGRLs( config.dataYear() )
 
         # Skip events with no primary vertex:
         if self.runPrimaryVertexSelection:

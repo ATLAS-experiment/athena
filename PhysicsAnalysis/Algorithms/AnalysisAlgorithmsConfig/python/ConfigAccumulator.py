@@ -111,7 +111,7 @@ class ConfigAccumulator :
 
     def __init__ (self, algSeq, dataType=None, isPhyslite=False, geometry=None, dsid=0,
             campaign=None, runNumber=None, autoconfigFromFlags=None, noSysSuffix=False,
-            noSystematics=None):
+            noSystematics=None, dataYear=0):
         self._autoconfigFlags = autoconfigFromFlags
         if autoconfigFromFlags is not None:
             if autoconfigFromFlags.Input.isMC:
@@ -130,6 +130,8 @@ class ConfigAccumulator :
                 campaign = autoconfigFromFlags.Input.MCCampaign
             if runNumber is None:
                 runNumber = int(autoconfigFromFlags.Input.RunNumbers[0])
+            if dataYear == 0:
+                dataYear = autoconfigFromFlags.Input.DataYear
             generatorInfo = autoconfigFromFlags.Input.GeneratorsInfo
         else:
             # legacy mappings of string arguments
@@ -154,6 +156,7 @@ class ConfigAccumulator :
         self._dsid = dsid
         self._campaign = campaign
         self._runNumber = runNumber
+        self._dataYear = dataYear
         self._generatorInfo = generatorInfo
         self._algSeq = algSeq
         self._noSystematics = noSystematics
@@ -211,6 +214,10 @@ class ConfigAccumulator :
     def runNumber(self) :
         """the MC runNumber"""
         return self._runNumber
+
+    def dataYear(self) :
+        """for data, the corresponding year; for MC, zero"""
+        return self._dataYear
 
     def generatorInfo(self) :
         """the dictionary of MC generators and their versions for the sample we run on"""
