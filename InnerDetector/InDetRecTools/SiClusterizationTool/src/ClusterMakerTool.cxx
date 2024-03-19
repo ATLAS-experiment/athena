@@ -241,7 +241,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
       unsigned int FE = m_pixelReadout->getFE(pixid, moduleID);
       InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(pixid);
       charge = calibData->getCharge(type, moduleHash, FE, ToT);
-      if (moduleHash<12 || moduleHash>2035) {
+      if (design->getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash<12 || moduleHash>2035)) {
         charge = ToT/8.0*(8000.0-1200.0)+1200.0;
       }
       chargeList.push_back(charge);

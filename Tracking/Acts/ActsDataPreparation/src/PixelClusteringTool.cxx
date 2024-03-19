@@ -107,7 +107,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 				    m_pixelReadout->getFE(id, moduleID),
 				    tot);
       // These numbers are taken from the Cluster Maker Tool
-      if (moduleHash < 12 or moduleHash > 2035) {
+      if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash < 12 or moduleHash > 2035)) {
         charge = tot/8.0*(8000.0-1200.0)+1200.0;
       }
       chargeList.push_back(charge);
