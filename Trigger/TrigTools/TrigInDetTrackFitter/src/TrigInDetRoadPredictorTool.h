@@ -14,11 +14,11 @@
 
 // MagField cache
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
-#include "MagFieldElements/AtlasFieldCache.h"
 
-#include <fstream>
-#include <array>
+
+#include <vector>
 #include <map>
+#include <algorithm> //std::accumulate etc
 
 namespace InDetDD {
   class PixelDetectorManager;
@@ -46,25 +46,25 @@ private:
 
   struct DetectorElementDescription {
     DetectorElementDescription(unsigned int h) : m_hash(h) {};
-    unsigned int m_hash;
-    short m_index;
-    float m_ref;//z or Phi
-    float m_c[4][3];
-    float m_minBound, m_maxBound;
+    unsigned int m_hash{};
+    short m_index{};
+    float m_ref{};//z or Phi
+    float m_c[4][3]={};
+    float m_minBound{}, m_maxBound{};
   };
   
   struct DetectorElementsCollection {
     DetectorElementsCollection(short idx, float min, float max) : m_index(idx), m_minCoord(min), m_maxCoord(max) {};
-    short m_index;
-    float m_minCoord, m_maxCoord; //phi or R
+    short m_index{};
+    float m_minCoord{}, m_maxCoord{}; //phi or R
     std::vector<DetectorElementDescription> m_vDE;
   };
 
   struct LayerDescription {
     LayerDescription(unsigned int id, int nSL, unsigned int mType) : m_id(id), m_nSubLayers(nSL), m_mappingType(mType) {};
-    unsigned int m_id;
-    int m_nSubLayers;
-    unsigned int m_mappingType;
+    unsigned int m_id{};
+    int m_nSubLayers{};
+    unsigned int m_mappingType{};
     std::map<short, DetectorElementsCollection> m_colls[2];
   };
 
@@ -106,20 +106,20 @@ private:
 
     std::vector<float> m_vZx;
     std::vector<float> m_vRx;
-    float m_r;
-    float m_z;
-    float m_phi;
+    float m_r{};
+    float m_z{};
+    float m_phi{};
   };
   
   struct VolumeBoundary {
-    int m_index;
-    float m_zr[4];
-    int m_vol_id;
+    int m_index{};
+    float m_zr[4]={};
+    int m_vol_id{};
     std::vector<int> m_layers;
   };
 
   struct LayerBoundary {
-    int m_index, m_lay_id, m_nVertices;
+    int m_index{}, m_lay_id{}, m_nVertices{};
     std::vector<float> m_z;
     std::vector<float> m_r;
   };
