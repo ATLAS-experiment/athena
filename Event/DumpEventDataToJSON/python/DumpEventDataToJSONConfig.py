@@ -30,9 +30,8 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
         kwargs.setdefault('TrackingGeometryTool', '')
         kwargs.setdefault('TrackContainerKeys', [])
 
+    # Special container names in DAOD_PHYSLITE for calibrated objects
     if 'StreamDAOD_PHYSLITE' in flags.Input.Collections:
-        # Not all data is available in PhysLite files.
-        kwargs.setdefault('PHYSLITE', True)
         # AnalysisJets and AnalysisLargeRJets are the standard jet containers
         kwargs.setdefault('JetContainerKeys', ['AnalysisJets','AnalysisLargeRJets'])
         # AnalysisMuons are the standard calibrated muon container
@@ -43,14 +42,15 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
         kwargs.setdefault('ElectronContainerKeys', ['AnalysisElectrons'])
         # AnalysisPhotons are the standard calibrated photon container
         kwargs.setdefault('PhotonContainerKeys', ['AnalysisPhotons'])
-        # No clusters or cells in DAOD_PHYSLITE
-        kwargs.setdefault('CaloClusterContainerKeys', [])
+
+    # Reduced information in PHYS and PHYSLITE compared to AOD/ESD
+    if 'StreamDAOD_PHYS' in flags.Input.Collections or 'StreamDAOD_PHYSLITE' in flags.Input.Collections:
+        # Not all data is available in PHYS/LITE files
+        kwargs.setdefault('PHYSLITE', True)
+        # Only egamma clusters in DAOD_PHYS/LITE
+        kwargs.setdefault('CaloClusterContainerKeys', ['egammaClusters'])
         kwargs.setdefault('CaloCellContainerKey', [])
-        # No real track collections in DAOD_PHYSLITE
-        kwargs.setdefault('TrackCollectionKeys', [])
-        kwargs.setdefault('TrackContainerKeys', [])
-        kwargs.setdefault('TrackParticleContainerKeys', ['InDetTrackParticles', 'CombinedMuonTrackParticles']) #['CombinedMuonTrackParticles'])
-        # No prep raw data in DAOD_PHYSLITE
+        # No prep raw data in DAOD_PHYS/LITE
         kwargs.setdefault('MdtPrepRawDataKey', '')
         kwargs.setdefault('RpcPrepRawDataKey', '')
         kwargs.setdefault('TgcPrepRawDataKey', '')
@@ -59,6 +59,11 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs)
         kwargs.setdefault('TrtPrepRawDataKey', '')
         # These are set based on detector flags and can simply be disabled (no point)
         kwargs.update( {'MMPrepRawDataKey':'', 'CscPrepRawDataKey':'', 'sTgcPrepRawDataKey':''} )
+        # No real track collections in DAOD_PHYS/LITE
+        kwargs.setdefault('TrackCollectionKeys', [])
+        kwargs.setdefault('TrackContainerKeys', [])
+        kwargs.setdefault('TrackParticleContainerKeys', ['InDetTrackParticles', 'CombinedMuonTrackParticles']) #, 'GSFTrackParticles'])
+
 
     dumpAlg = CompFactory.DumpEventDataToJsonAlg( **kwargs)
     result.addEventAlgo(dumpAlg)
