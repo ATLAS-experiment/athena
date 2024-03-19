@@ -68,9 +68,9 @@ else:
       opts.fromdb = None
 
  ## let command line decide if one wants to enable PerfMon
-   if opts.do_pmon:
+   if opts.pmon:
       import PerfMonComps.PerfMonFlags as _pmf
-      _pmf._decode_pmon_opts(opts.do_pmon)
+      _pmf._decode_pmon_opts(opts.pmon.split(','))
 
  ## now is a good time to tweak the event selector according to command line opt
    if opts.nbr_repeat_evts:
