@@ -239,8 +239,6 @@ if __name__=='__main__':
     # #######################################################################
     # Add BeamSpotDecoratorAlg to solve muon monitoring issue 
     # reported in https://its.cern.ch/jira/browse/ATLASRECTS-7281
-    # In the old style config, a similar fix was included 
-    # in RecExCommon_topOptions.py
     # This needs to be fixed by muon experts 
     # ######################################################################
 
