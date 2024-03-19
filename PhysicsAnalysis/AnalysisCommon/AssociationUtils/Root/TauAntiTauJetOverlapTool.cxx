@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -11,6 +11,8 @@
 // Local includes
 #include "AssociationUtils/TauAntiTauJetOverlapTool.h"
 #include "AssociationUtils/DeltaRMatcher.h"
+#include "AsgTools/CurrentContext.h"
+#include "AsgDataHandles/ReadHandle.h"
 
 namespace ORUtils
 {
@@ -35,6 +37,8 @@ namespace ORUtils
                     "Decoration which labels ID-ed taus");
     declareProperty("AntiTauLabel", m_antiTauLabel,
                     "Decoration which labels anti-taus");
+    declareProperty("antiTauEventCategory", m_antiTauEventCategoryDecorName="antiTauEventCategory",
+                    "Decoration which labels event type");
     declareProperty("DR", m_dR, "Maximum dR for overlap match");
     declareProperty("UseRapidity", m_useRapidity,
                     "Calculate delta-R using rapidity");
@@ -52,6 +56,7 @@ namespace ORUtils
     }
 
     // Initialize the dR matcher
+    ATH_CHECK(m_evtKey.initialize());
     m_dRMatcher = std::make_unique<DeltaRMatcher>(m_dR, m_useRapidity);
 
     // Initialize the IDed-tau decoration helper
@@ -69,7 +74,6 @@ namespace ORUtils
         std::make_unique<OverlapDecorationHelper>
           (m_antiTauLabel, m_outputLabel, m_outputPassValue);
     }
-
     return StatusCode::SUCCESS;
   }
 
@@ -104,19 +108,21 @@ namespace ORUtils
                const xAOD::TauJetContainer& taus) const
   {
     ATH_MSG_DEBUG("Removing overlapping taus and jets");
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Initialize output decorations if necessary
     m_decHelper->initializeDecorations(taus);
     m_decHelper->initializeDecorations(jets);
 
     // Remove bjets overlapping with ID taus
+    int ntaus = 0;
     for(const auto tau : taus) {
       if(!m_decHelper->isSurvivingObject(*tau)) continue;
       // Only consider ID taus
       if(!isSurvivingTau(*tau)) continue;
+      ntaus++;
       for(const auto jet : jets) {
         if(!m_decHelper->isSurvivingObject(*jet)) continue;
-        if(!isBJet(*jet)) continue;
         if(m_dRMatcher->objectsMatch(*tau, *jet)){
           ATH_CHECK( handleOverlap(jet, tau) );
         }
@@ -135,10 +141,43 @@ namespace ORUtils
       }
     }
 
+    int nantitaus = 0;
+    int antiTauCategory = 0;
+    static const SG::AuxElement::ConstAccessor<int> categoryAcc(m_antiTauEventCategoryDecorName);
+    for(const auto tau : taus) {
+      if(!m_decHelper->isSurvivingObject(*tau) &&
+         !isSurvivingAntiTau(*tau) ) continue;
+      nantitaus++;
+      antiTauCategory = categoryAcc(*tau);
+    }
+
+    int nAntiTauMax = int(ntaus<antiTauCategory);
+
+    // AntiTauCategory = 1 for lephad event, 2 for hadhad events
+    // nAntiTauMax = 1 if we didn't get enough ID taus, 0 otherwise 
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtKey,ctx);
+    auto eventIndex = eventInfo->eventNumber();    // pseudo-random selection of anti-taus    // pseudo-random selection of anti-taus
+    if (nantitaus > 0) {
+      int selIndex = eventIndex%nantitaus;
+
+      int nSelectedAntitaus = 0;
+      int idx = 0;
+      for(const auto tau : taus) {
+        if(!m_decHelper->isSurvivingObject(*tau) &&
+           !isSurvivingAntiTau(*tau) ) continue;
+          if (idx == selIndex  && nSelectedAntitaus < nAntiTauMax) nSelectedAntitaus++;
+          else {
+            // remove excess anti-taus by applying OR fail (it trivially overlaps with itself)
+            ATH_CHECK( handleOverlap(tau, tau) );
+          }
+          idx++;
+      }
+    }
     // Remove light jets from remaining anti-taus.
     for(const auto tau : taus) {
       if(!m_decHelper->isSurvivingObject(*tau) &&
          !isSurvivingAntiTau(*tau) ) continue;
+      // if isSurviving
       for(const auto jet : jets) {
         if(!m_decHelper->isSurvivingObject(*jet)) continue;
         // We don't need to check the bjet label, but it might save CPU.
@@ -179,5 +218,6 @@ namespace ORUtils
       return true;
     return false;
   }
+  
 
 } // namespace ORUtils

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_TAU_ANTITAU_JET_OVERLAPTOOL_H
@@ -9,6 +9,8 @@
 #include "AsgTools/AsgTool.h"
 
 // EDM includes
+#include "AsgDataHandles/ReadHandleKey.h"
+#include <xAODEventInfo/EventInfo.h>
 #include "xAODTau/TauJetContainer.h"
 #include "xAODJet/JetContainer.h"
 
@@ -128,6 +130,9 @@ namespace ORUtils
 
       /// Decoration helper for the anti-taus
       std::unique_ptr<OverlapDecorationHelper> m_antiTauDecHelper;
+
+      std::string m_antiTauEventCategoryDecorName;
+      SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey", "EventInfo", "xAOD::EventInfo ReadHandleKey"};
 
       /// @}
 
