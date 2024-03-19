@@ -93,6 +93,12 @@ namespace MCTruthPartClassifier {
     std::vector<MCTruthPartClassifier::ParticleOrigin> cnvPhotPartOrig;
 #endif
   };
+
+  enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
+
+  //MCTruthPartClassifier::ParticleOrigin
+  std::tuple<unsigned int, const xAOD::TruthParticle*> defOrigOfParticle(const xAOD::TruthParticle*);
+
 }
 
 class IMCTruthClassifier : virtual public asg::IAsgTool
@@ -107,12 +113,6 @@ public:
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
   checkOrigOfBkgElec(const xAOD::TruthParticle*, MCTruthPartClassifier::Info* info = nullptr) const = 0;
-
-  /// \brief main function used in \ref MCTruthClassifier returning the value
-  /// from defOrigofParticle to \ref TruthClassificationDecorator
-  virtual unsigned int classify(const xAOD::TruthParticle*) const = 0;
-
-  virtual const xAOD::TruthParticle* getParentHadron(const xAOD::TruthParticle*) const = 0;
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 

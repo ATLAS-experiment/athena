@@ -86,8 +86,7 @@ StatusCode DerivationFramework::TruthClassificationDecorator::addBranches() cons
         std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = 
           m_classifier->particleTruthClassifier((*truthParticles)[i], &info);
           unsigned int particleOutCome = info.particleOutCome;
-
-        unsigned int result = (unsigned int)m_classifier->classify((*truthParticles)[i]);
+        unsigned int result = (unsigned int)( (*truthParticles)[i] ? std::get<0>(MCTruthPartClassifier::defOrigOfParticle((*truthParticles)[i])) : 0 );
         unsigned int particleType = classification.first;
         unsigned int particleOrigin = classification.second;
         typeDecorator(*((*truthParticles)[i])) = particleType;
