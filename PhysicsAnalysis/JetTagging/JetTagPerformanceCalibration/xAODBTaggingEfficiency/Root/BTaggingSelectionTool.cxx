@@ -151,7 +151,7 @@ StatusCode BTaggingSelectionTool::initialize() {
       std::vector<std::string> workingpoints = split(m_wps_raw, ',');
       std::sort(workingpoints.begin(), workingpoints.end());
       std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
-      for(std::string wp : workingpoints){
+      for(const std::string& wp : workingpoints){
         cutname = m_taggerName + "/" + m_jetAuthor + "/" + wp + "/cutvalue";
         m_tagger.constcut = (TVector*) m_inf->Get(cutname);
         if (m_tagger.constcut != nullptr) {

@@ -1876,7 +1876,7 @@ int main(int argc, char** argv)
     }
 
     //// get the reference tracks
-    for (std::string rc : refChains){
+    for (const std::string& rc : refChains){
       for (unsigned int ic=0 ; ic<chains.size() ; ic++ ) {
         if ( chains[ic].name()==rc ) {
           offTracks.selectTracks( chains[ic][0].tracks() );

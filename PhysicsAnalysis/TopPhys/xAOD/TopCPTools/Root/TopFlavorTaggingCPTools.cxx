@@ -220,7 +220,7 @@ namespace top {
     ATH_MSG_INFO(" ------------------------------------------------ ");
     ATH_MSG_INFO(" AnalysisTop - Checking excludedSysts for flavour tagging EV");
     ATH_MSG_INFO(" This has been split on the semi-colon delimiter to find...");
-    for (auto s : listOfExcludedSysts) ATH_MSG_INFO("... " + s);
+    for (const auto& s : listOfExcludedSysts) ATH_MSG_INFO("... " + s);
     // Get the map(string, vector<string>) from the CDI tool
     // Don't care about the flavours (this will be handled in the CDI)
     std::vector<std::string> listOfScaleFactorSystematics;
@@ -250,13 +250,13 @@ namespace top {
     if (unionOfSystematics.size() != listOfExcludedSysts.size()) {
       ATH_MSG_WARNING("Have not found all systematics listed to be excluded from b-tagging eigenvector method");
       ATH_MSG_INFO("Permitted values are...");
-      for (auto sys : setOfScaleFactorSystematics) {
+      for (const auto& sys : setOfScaleFactorSystematics) {
         ATH_MSG_INFO(" ... " + sys);
       }
       return StatusCode::FAILURE;
     } else {
       ATH_MSG_INFO(" Summary of EV impact ");
-      for (auto sysRemove : listOfExcludedSysts) {
+      for (const auto& sysRemove : listOfExcludedSysts) {
         std::string flavourAffected = "";
         for (auto flavour : btageff->listScaleFactorSystematics(false)) {
           for (auto sysCDI : flavour.second) {

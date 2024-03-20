@@ -49,7 +49,7 @@ namespace top {
     std::vector<std::string> tokens;
     tokenize(m_cutvalueString, tokens, delim);
     if (tokens.size() > 1) {
-      for (auto cutString : tokens) {
+      for (const auto& cutString : tokens) {
         m_cutvalueStringDelimReplace += cutString;
         m_cutvalueStringDelimReplace += replace;
       }
