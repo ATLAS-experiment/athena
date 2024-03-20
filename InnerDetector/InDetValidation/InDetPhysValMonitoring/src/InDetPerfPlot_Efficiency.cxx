@@ -29,11 +29,11 @@ InDetPerfPlot_Efficiency::initializePlots() {
 
     std::string bin_low = std::to_string(m_eta_bins[i]);
     size_t dotPos = bin_low.find('.');
-    bin_low = bin_low.substr(0, dotPos+2);
+    bin_low.resize(dotPos+2);
     bin_low.replace(dotPos, 1, 1, 'p');
     std::string bin_up = std::to_string(m_eta_bins[i+1]);
     dotPos = bin_up.find('.');
-    bin_up = bin_up.substr(0, dotPos+2);
+    bin_up.resize(dotPos+2);
     bin_up.replace(dotPos, 1, 1, 'p');
 
     book(m_efficiency_vs_truthMu_eta_bin.back(),
