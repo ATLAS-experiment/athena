@@ -11,5 +11,5 @@ atlas_add_library( TrkDetDescrGeoModelCnv
                    src/*.cxx
                    PUBLIC_HEADERS TrkDetDescrGeoModelCnv
                    PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES GeoPrimitives TrkGeometry AthenaBaseComps
+                   LINK_LIBRARIES GeoModelUtilities GeoPrimitives TrkGeometry AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GaudiKernel TrkVolumes )

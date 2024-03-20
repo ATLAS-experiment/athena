@@ -28,6 +28,7 @@
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoTubs.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
+#include "GeoModelUtilities/GeoVisitVolumes.h"
 
 int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
                                           const GeoVPhysVol* gv2,
@@ -84,8 +85,9 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
         } else
             return diff;
     }
+    unsigned int nChild1 = gv1->getNChildVols();
     // CASE 5: difference in the number of child volumes
-    if (gv1->getNChildVols() != gv2->getNChildVols()) {
+    if (nChild1 != gv2->getNChildVols()) {
         diff = 1000 * level + 5;
         if (dumpInfo) {
             std::cout << "CASE 5: number of child vols differ at level:"
@@ -98,12 +100,29 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
     }
 
     // CASE 6 & 7: transform to child difference
-    for (unsigned int ic = 0; ic < gv1->getNChildVols(); ic++) {
-        GeoTrf::Transform3D transf1 = gv1->getXToChildVol(ic);
-        GeoTrf::Transform3D transf2 = gv2->getXToChildVol(ic);
+    // We used to do this with something like
+    //  for (unsigned int ic = 0; ic < gv1->getNChildVols(); ic++) {
+    //    GeoTrf::Transform3D transf1 = gv1->getXToChildVol(ic);
+    //    const GeoVPhysVol* cv1 = &(*(gv1->getChildVol(ic)));
+    //
+    // But getXToChildVol and getChildVol need to walk all the children
+    // until they reach the given index.  So this would be N^2,
+    // and each time we repeat it for the transform and the volume.
+    // Better to use geoGetVolumes so that we only need do the walk once.
+    // And examination of profiling data shows that almost never
+    // fail a comparison from here on, so we'll almost always be examining
+    // all children anyway.
+    // (It would be even better if GeoVPhysVol has some sort of iterator
+    // interface.  Maybe we can use a generator with C++23...)
+    GeoVolumeVec_t children1 = geoGetVolumes (gv1, 1, nChild1);
+    GeoVolumeVec_t children2 = geoGetVolumes (gv2, 1, nChild1);
+    assert (children1.size() == nChild1 && children2.size() == nChild1);
+    for (unsigned int ic = 0; ic < nChild1; ic++) {
+        GeoTrf::Transform3D& transf1 = children1.at(ic).second;
+        GeoTrf::Transform3D& transf2 = children2.at(ic).second;
 
-        const GeoVPhysVol* cv1 = &(*(gv1->getChildVol(ic)));
-        const GeoVPhysVol* cv2 = &(*(gv2->getChildVol(ic)));
+        const GeoVPhysVol* cv1 = children1.at(ic).first;
+        const GeoVPhysVol* cv2 = children2.at(ic).first;
 
         if ((transf1.translation() - transf2.translation()).norm() >
             tolerance) {
@@ -117,8 +136,9 @@ int Trk::GMTreeBrowser::compareGeoVolumes(const GeoVPhysVol* gv1,
             } else
                 return diff;
         }
+        // For rotation matrices, transpose is the same as inverse.
         GeoTrf::RotationMatrix3D rot =
-            transf1.rotation() * transf2.rotation().inverse();
+            transf1.rotation() * transf2.rotation().transpose();
         if (std::abs(rot(0, 1)) > tolerance ||
             std::abs(rot(0, 2)) > tolerance ||
             std::abs(rot(1, 2)) > tolerance) {
@@ -345,7 +365,8 @@ bool Trk::GMTreeBrowser::compareShapes(const GeoShape* sh1, const GeoShape* sh2,
         if ((transf1.translation() - transf2.translation()).norm() > tol)
             return false;
 
-        if (!identity_check(transf1.rotation() * transf2.rotation().inverse(),
+        // For rotation matrices, transpose is the same as inverse.
+        if (!identity_check(transf1.rotation() * transf2.rotation().transpose(),
                             tol))
             return false;
 
