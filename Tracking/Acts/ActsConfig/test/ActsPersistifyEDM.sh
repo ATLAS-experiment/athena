@@ -6,13 +6,15 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=2
 
 # Run reconstruction and produce AOD with persistified Acts EDM
+export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
   --preExec "flags.Exec.FPE=500;" "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;flags.Acts.EDM.PersistifyTracks=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --postInclude "InDetConfig.InDetPrepRawDataFormationConfig.HGTDInDetToXAODClusterConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
-  --maxEvents ${n_events}
+  --maxEvents ${n_events} \
+  --multithreaded
 
 rc=$?
 if [ $rc != 0 ]; then

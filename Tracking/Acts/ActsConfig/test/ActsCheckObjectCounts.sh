@@ -8,13 +8,15 @@ log_file="reco.acts.log"
 
 ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters"
 
+export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
   --preExec "flags.Acts.doITkConversion=True;flags.Tracking.doTruth=False;flags.Tracking.doITkConversion=False;" \
   --preInclude "ActsConfig.ActsCIFlags.actsAloneWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
-  --maxEvents ${n_events} > ${log_file} 2>&1
+  --maxEvents ${n_events} \
+  --multithreaded > ${log_file} 2>&1
 
 rc=$?
 if [ $rc != 0 ]; then

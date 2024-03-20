@@ -8,10 +8,12 @@ n_events=2
 
 ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters"
 
+export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
   --preExec "flags.Acts.doITkConversion=True;flags.Tracking.doTruth=False;flags.Tracking.doITkConversion=False;" \
   --preInclude "ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
-  --maxEvents ${n_events}
+  --maxEvents ${n_events} \
+  --multithreaded

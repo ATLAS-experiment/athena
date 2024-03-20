@@ -9,6 +9,7 @@ n_events=5
 #  1) use the --preExec option: flags.Acts.fitFromPRD=True (in addition to all the other ones needed)
 #  2) in addition to only use the --postInclude option:  ActsConfig.ActsTrackFittingConfig.forceITkActsReFitterAlgCfg
 
+export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
    --preExec "flags.Exec.FPE=500;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
@@ -16,4 +17,5 @@ Reco_tf.py --CA \
    --inputRDOFile ${input_rdo} \
    --outputESDFile ESD.pool.root \
    --outputAODFile AOD.pool.root \
-   --maxEvents ${n_events}
+   --maxEvents ${n_events} \
+   --multithreaded
