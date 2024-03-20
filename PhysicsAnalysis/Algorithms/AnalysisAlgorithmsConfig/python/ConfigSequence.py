@@ -57,9 +57,9 @@ class ConfigSequence:
         """
         Check for blocks with dependencies.
 
-        If a block requried another block that is not present, will
+        If a block required another block that is not present, will
         throw an error; Otherwise, will move block immediately after
-        required block. If dependency is not requried, will move
+        required block. If dependency is not required, will move
         after other block, if it is present.
 
         Note: this implementation can only move blocks forward.
