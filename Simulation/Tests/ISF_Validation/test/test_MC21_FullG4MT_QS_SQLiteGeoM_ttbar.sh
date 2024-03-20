@@ -17,12 +17,15 @@ status=$rc
 rc1=-9999
 if [ $rc -eq 0 ]
 then
-    DATAPATH=.:$DATAPATH Sim_tf.py \
+    Sim_tf.py \
             --CA True \
+            --multithreaded True \
+            --athenaopts "default:--threads=1" \
             --geometrySQLite True \
             --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
             --simulator 'FullG4MT_QS' \
             --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
+            --preExec "default:from AtlasGeoModel import CommonGeoDB;CommonGeoDB.SetupLocalSqliteGeometryDb(\"Geometry/ATLAS-R3S-2021-03-00-00.db\",flags.GeoModel.AtlasVersion)" \
             --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation' \
             --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
             --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1' \
