@@ -129,7 +129,6 @@ class ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._roi          = "HLT_Roi_JetSuper"
       self._etaHalfWidth = 0.3
       self._phiHalfWidth = 0.3
-      self._zedHalfWidth = 180.0
       self._doFullScan   = True
       self._pTmin        = 1*GeV
       #-----
