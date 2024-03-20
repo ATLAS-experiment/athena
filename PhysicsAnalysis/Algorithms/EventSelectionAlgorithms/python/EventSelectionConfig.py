@@ -104,6 +104,10 @@ class EventSelectionConfig(ConfigBlock):
             self.add_SAVE(text, cfg)
         elif "IMPORT" in text.split():
             self.add_IMPORT(text, cfg)
+        elif "EVENTFLAG" in text.split():
+            self.add_EVENTFLAG(text, cfg)
+        elif "GLOBALTRIGMATCH" in text.split():
+            self.add_GLOBALTRIGMATCH(text, cfg)
         else:
             raise ValueError (f"[EventSelectionConfig] The following selection cut is not recognised! --> {text}")
 
@@ -166,11 +170,12 @@ class EventSelectionConfig(ConfigBlock):
         return self.cutflow
 
     def setDecorationName(self, algorithm, config, decoration):
-        algorithm.decorationName = f'{decoration}'
         self.currentDecoration = decoration
         self.cutflow.append( decoration )
-        if self.debugMode:
-            config.addOutputVar('EventInfo', decoration, decoration.split("_%SYS%")[0])
+        if algorithm is not None:
+            algorithm.decorationName = f'{decoration}'
+            if self.debugMode:
+                config.addOutputVar('EventInfo', decoration, decoration.split("_%SYS%")[0])
         config.addSelection('EventInfo', '', decoration)
         return
 
@@ -617,6 +622,25 @@ class EventSelectionConfig(ConfigBlock):
         alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
         alg.eventPreselection = f'{self.currentDecoration}'
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_EVENTFLAG(self, text, config):
+        items = text.split()
+        if items[0] != "EVENTFLAG":
+            self.raise_misconfig(text, "EVENTFLAG")
+        if len(items) != 2:
+            self.raise_misconfig(text, "number of arguments")
+        existingDecoration = self.check_string(items[1])
+        self.setDecorationName(None, config, existingDecoration)
+        return
+
+    def add_GLOBALTRIGMATCH(self, text, config):
+        items = text.split()
+        if items[0] != "GLOBALTRIGMATCH":
+            self.raise_misconfig(text, "GLOBALTRIGMATCH")
+        if len(items) != 1:
+            self.raise_misconfig(text, "number of arguments")
+        self.setDecorationName(None, config, "globalTriggerMatch_dontsave_%SYS%")
         return
 
     def add_SAVE(self, text, config):

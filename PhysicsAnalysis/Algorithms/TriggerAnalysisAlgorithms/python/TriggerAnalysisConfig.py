@@ -117,7 +117,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg.isRun3Geo = config.geometry() == LHCPeriod.Run3
         alg.scaleFactorDecoration = 'globalTriggerEffSF_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch_%SYS%'
-        alg.eventDecisionOutputDecoration = 'dontsave_%SYS%'
+        alg.eventDecisionOutputDecoration = 'globalTriggerMatch_dontsave_%SYS%'
         alg.doMatchingOnly = config.dataType() is DataType.Data or noSF
         alg.noFilter = self.noFilter
         alg.electronID = self.electronID
@@ -135,7 +135,7 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         if config.dataType() != DataType.Data and not alg.doMatchingOnly:
             config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF')
-        config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch', noSys=True)
+        config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch', noSys=False)
 
         return
 
