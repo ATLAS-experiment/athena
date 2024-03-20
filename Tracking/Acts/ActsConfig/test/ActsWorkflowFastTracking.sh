@@ -8,6 +8,7 @@ n_events=1
 
 ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters"
 
+export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
   --preExec "flags.Exec.FPE=500;" "flags.Tracking.doITkFastTracking=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
@@ -15,4 +16,5 @@ Reco_tf.py --CA \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --outputESDFile ESD.pool.root \
-  --maxEvents ${n_events}
+  --maxEvents ${n_events} \
+  --multithreaded

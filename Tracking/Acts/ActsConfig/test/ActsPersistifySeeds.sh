@@ -6,6 +6,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=1
 
 # Run Athena
+export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
     --CA \
     --inputRDOFile  ${input_rdo} \
@@ -13,7 +14,8 @@ Reco_tf.py \
     --outputESDFile ESD.athena.pool.root \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;" \
-    --maxEvents ${n_events}
+    --maxEvents ${n_events} \
+    --multithreaded
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -28,7 +30,8 @@ Reco_tf.py \
     --outputESDFile ESD.acts.pool.root \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSeedsFlags" \
     --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkValidateActsSeedsPass.storeTrackSeeds=True;flags.Tracking.ITkValidateActsSeedsPass.storeSiSPSeededTracks=False;" \
-    --maxEvents ${n_events}
+    --maxEvents ${n_events} \
+    --multithreaded
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
