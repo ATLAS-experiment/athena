@@ -23,7 +23,8 @@ namespace Muon {
      */
     DeclareInterfaceID(Muon::IMM_RDO_Decoder, 1, 0);
     
-    virtual MmDigit * getDigit(const Muon::MM_RawData * Rawdata) const = 0;
+    virtual std::unique_ptr<MmDigit> getDigit(const EventContext& ctx,
+                                              const Muon::MM_RawData* Rawdata) const = 0;
     
   };
   

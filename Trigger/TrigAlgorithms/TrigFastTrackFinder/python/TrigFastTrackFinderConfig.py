@@ -445,7 +445,6 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         MonTool = monTool,
         Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
         RoIs = RoIs,
-        FixSeedPhi = flags.Trigger.InDetTracking.fixSeedPhi,
         ITkMode = True if flags.Detector.GeometryITk else False,
     )
     

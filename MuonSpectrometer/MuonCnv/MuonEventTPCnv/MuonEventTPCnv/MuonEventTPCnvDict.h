@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONEVENTTPCNV_MUONEVENTTPCNVDICT_H
@@ -31,8 +31,6 @@
 #include "MuonEventTPCnv/TgcCoinDataContainer_tlp3.h"
 #include "MuonEventTPCnv/MuonPrepRawData/MdtTwinPrepData_p1.h"
 #include "MuonEventTPCnv/MuonChamberT0s/ChamberT0s_p1.h"
-#include "MuonEventTPCnv/MuonDigitContainer/MuonDigitContainer_p1.h"
-#include "MuonEventTPCnv/MuonDigitContainer/MuonDigitContainer_p2.h"
 #include "MuonEventTPCnv/MuonDigitContainer/MuonSimDataCollection_p1.h"
 #include "MuonEventTPCnv/MuonDigitContainer/MuonSimDataCollection_p2.h"
 #include "MuonEventTPCnv/MuonDigitContainer/CscSimDataCollection_p1.h"
