@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_EVENTTPCNVDICT_H
@@ -15,8 +15,10 @@
 #include "LUCID_EventTPCnv/LUCID_DigitContainer_p2.h"
 
 #include "LUCID_EventTPCnv/LUCID_SimHit_p2.h"
+#include "LUCID_EventTPCnv/LUCID_SimHit_p3.h"
 #include "LUCID_EventTPCnv/LUCID_SimHitCollection_p1.h"
 #include "LUCID_EventTPCnv/LUCID_SimHitCollection_p2.h"
+#include "LUCID_EventTPCnv/LUCID_SimHitCollection_p3.h"
 
 namespace LUCID_EventTPCnv_Dict {
 
@@ -30,6 +32,7 @@ namespace LUCID_EventTPCnv_Dict {
   std::vector<LUCID_DigitContainer_p2>          t6;
 
   std::vector<LUCID_SimHit_p2>                  t7;
+  std::vector<LUCID_SimHit_p3>                  t8;
 }
 
 #endif

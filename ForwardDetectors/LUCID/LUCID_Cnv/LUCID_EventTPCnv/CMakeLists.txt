@@ -55,3 +55,8 @@ atlas_add_test( LUCID_SimHitCnv_p2_test
                 SOURCES
                 test/LUCID_SimHitCnv_p2_test.cxx
                 LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv LUCID_EventTPCnv TestTools CxxUtils )
+
+atlas_add_test( LUCID_SimHitCnv_p3_test
+                SOURCES
+                test/LUCID_SimHitCnv_p3_test.cxx
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv LUCID_EventTPCnv TestTools CxxUtils TruthUtils )

@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_SimHitCollectionCnv.h"
 #include "LUCID_EventTPCnv/LUCID_SimHitCollectionCnv_p1.h"
 #include "LUCID_EventTPCnv/LUCID_SimHitCollectionCnv_p2.h"
+#include "LUCID_EventTPCnv/LUCID_SimHitCollectionCnv_p3.h"
 #include "LUCID_EventTPCnv/LUCID_SimHit_p1.h"
 #include "LUCID_EventTPCnv/LUCID_SimHit_p2.h"
+#include "LUCID_EventTPCnv/LUCID_SimHit_p3.h"
 
 
 LUCID_SimHitCollection_PERS* LUCID_SimHitCollectionCnv::createPersistent(LUCID_SimHitCollection* transCont) {
@@ -23,12 +25,18 @@ LUCID_SimHitCollection* LUCID_SimHitCollectionCnv::createTransient() {
   mlog << MSG::DEBUG << "In LUCID_SimHitCollectionCnv::createTransient " << endmsg;
   LUCID_SimHitCollectionCnv_p1 converter_p1;
   LUCID_SimHitCollectionCnv_p2 converter_p2;
+  LUCID_SimHitCollectionCnv_p3 converter_p3;
+  static const pool::Guid p3_guid ("018E3850-0AAE-776B-9BDE-69C14B881C19");
   static const pool::Guid p2_guid ("149F1834-1D98-4F35-A1B3-C9AA083D6838");
   static const pool::Guid p1_guid ("9ACC906C-74CA-4F77-AC16-2A503358C2D1");
   static const pool::Guid old_guid("7BCDF079-FD96-4B18-B1E7-FA5EDDB026F2");
 
   LUCID_SimHitCollection* trans_cont{};
-  if (this->compareClassGuid(p2_guid)) {
+  if (this->compareClassGuid(p3_guid)) {
+    std::unique_ptr< LUCID_SimHitCollection_p3 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p3 >());
+    trans_cont = converter_p3.createTransient(col_vect.get(), mlog);
+  }
+  else if (this->compareClassGuid(p2_guid)) {
     std::unique_ptr< LUCID_SimHitCollection_p2 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p2 >());
     trans_cont = converter_p2.createTransient(col_vect.get(), mlog);
   }
