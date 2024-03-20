@@ -1,6 +1,4 @@
-# 
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -76,10 +74,10 @@ if __name__ == "__main__":
     from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
             
     def SetupHistSvc(flags, streamName, dataFile):
-        result = ComponentAccumulator()
+        acc = ComponentAccumulator()
         histSvc = CompFactory.THistSvc(Output= ["{streamName} DATAFILE='{data_file}', OPT='RECREATE'".format(streamName=streamName, data_file = dataFile )])
-        result.addService(histSvc, primary=True)
-        return result
+        acc.addService(histSvc, primary=True)
+        return acc
     
     # Key names for the different track containers
     ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"

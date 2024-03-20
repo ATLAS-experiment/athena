@@ -73,7 +73,6 @@ def ActsPixelClusterizationAlgCfg(flags,
     kwargs.setdefault('ClusterCacheBackend', 'ActsPixelClusterCache_Back')
     kwargs.setdefault('ClusterCache', 'ActsPixelClustersCache')
 
-
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
@@ -103,7 +102,6 @@ def ActsStripClusterizationAlgCfg(flags,
     kwargs.setdefault('EnableCache', flags.Acts.useCache)
     kwargs.setdefault('ClusterCacheBackend', 'ActsStripClusterCache_Back')
     kwargs.setdefault('ClusterCache', 'ActsStripClustersCache')
-
 
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg

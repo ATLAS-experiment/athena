@@ -1,19 +1,19 @@
-
-
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
 
-def extractChildKwargs(kwargs: dict, prefix: str) :
+def extractChildKwargs(kwargs: dict,
+                       prefix: str) -> dict:
     args={}
     for k,v in kwargs.items() :
         if len(k)>len(prefix) and k[0:len(prefix)]==prefix :
            args[k[len(prefix)]:]=v
     return args
 
-def MapToInDetSimDataWrapCfg(flags,collection_name) :
+def MapToInDetSimDataWrapCfg(flags,
+                             collection_name: str) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     AddressRemappingSvc = CompFactory.AddressRemappingSvc(
@@ -23,7 +23,9 @@ def MapToInDetSimDataWrapCfg(flags,collection_name) :
     return acc
 
 
-def PixelClusterToTruthAssociationCfg(flags, name: str = 'PixelClusterToTruthAssociationAlg', **kwargs) :
+def PixelClusterToTruthAssociationCfg(flags,
+                                      name: str = 'PixelClusterToTruthAssociationAlg',
+                                      **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkPixelSDO_Map') )
     kwargs.setdefault('InputTruthParticleLinks','xAODTruthLinks')
@@ -34,7 +36,9 @@ def PixelClusterToTruthAssociationCfg(flags, name: str = 'PixelClusterToTruthAss
     acc.addEventAlgo( CompFactory.ActsTrk.PixelClusterToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
-def StripClusterToTruthAssociationCfg(flags, name: str = 'StripClusterToTruthAssociationAlg', **kwargs) :
+def StripClusterToTruthAssociationCfg(flags,
+                                      name: str = 'StripClusterToTruthAssociationAlg',
+                                      **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
 
@@ -46,7 +50,9 @@ def StripClusterToTruthAssociationCfg(flags, name: str = 'StripClusterToTruthAss
     acc.addEventAlgo( CompFactory.ActsTrk.StripClusterToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
-def TrackToTruthAssociationCfg(flags, name: str = 'ActsTracksToTruthAssociationAlg', **kwargs) :
+def TrackToTruthAssociationCfg(flags,
+                               name: str = 'ActsTracksToTruthAssociationAlg',
+                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
@@ -57,7 +63,8 @@ def TrackToTruthAssociationCfg(flags, name: str = 'ActsTracksToTruthAssociationA
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
-def ITkTruthAssociationCfg(flags, **kwargs) :
+def ITkTruthAssociationCfg(flags,
+                           **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel :
         acc.merge(PixelClusterToTruthAssociationCfg(flags, **extractChildKwargs(kwargs,"PixelClusterToTruthAssociation.") ))

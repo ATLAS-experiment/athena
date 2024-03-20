@@ -2,10 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
 from ActsConfig.ActsConfigFlags import SeedingStrategy
-from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
 from ActsInterop import UnitConstants
 
 # ACTS tools
@@ -19,7 +16,7 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
 
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name=name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
 def ActsFastPixelSeedingToolCfg(flags,
@@ -48,7 +45,7 @@ def ActsFastPixelSeedingToolCfg(flags,
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
 
-    return ActsPixelSeedingToolCfg(flags, name=name, **kwargs)
+    return ActsPixelSeedingToolCfg(flags, name, **kwargs)
 
 def ActsStripSeedingToolCfg(flags,
                             name: str = "ActsStripSeedingTool",
@@ -109,7 +106,7 @@ def ActsFastPixelOrthogonalSeedingToolCfg(flags,
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
     kwargs.setdefault("useExperimentCuts", True)
     
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name=name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
     return acc
 
 def ActsStripOrthogonalSeedingToolCfg(flags,
@@ -215,44 +212,46 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
 # ACTS algorithm using Athena objects upstream
 def ActsPixelSeedingAlgCfg(flags,
                            name: str = 'ActsPixelSeedingAlg',
-                           **kwargs):
+                           **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Need To add additional tool(s)
     # Tracking Geometry Tool
-    geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
-    acc.addPublicTool(geoTool)
-
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+        acc.addPublicTool(geoTool)
+        kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name))
+        
     # ATLAS Converter Tool
-    converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
-
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+ 
     # Track Param Estimation Tool
-    trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
 
-    seedTool = None
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
             if flags.Tracking.doITkFastTracking:
-                seedTool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags)))
             else:
-                seedTool = acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags))
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags)))
         else:
             if flags.Tracking.doITkFastTracking:
-                seedTool = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags))
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags)))
             else:
-                seedTool = acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags))
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags)))
 
     kwargs.setdefault("useFastTracking", flags.Tracking.doITkFastTracking)
     kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
-    kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
-    kwargs.setdefault('SeedTool', seedTool)
-    kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
-    kwargs.setdefault('ATLASConverterTool', converterTool)
-    kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
-    kwargs.setdefault('OutputEstimatedTrackParameters', 'ITkPixelEstimatedTrackParams')
+    kwargs.setdefault('OutputSeeds', 'ActsPixelSeeds')
+    kwargs.setdefault('OutputEstimatedTrackParameters', 'ActsPixelEstimatedTrackParams')
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
-    if flags.Acts.doMonitoring:
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
@@ -262,37 +261,39 @@ def ActsPixelSeedingAlgCfg(flags,
 
 def ActsStripSeedingAlgCfg(flags,
                            name: str = 'ActsStripSeedingAlg',
-                           **kwargs):
+                           **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Need To add additional tool(s)
     # Tracking Geometry Tool
-    geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
-    acc.addPublicTool(geoTool)
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        geoTool = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+        acc.addPublicTool(geoTool)
+        kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name))
 
     # ATLAS Converter Tool
-    converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     # Track Param Estimation Tool
-    trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
 
-    seedTool = None
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags)))
         else:
-            seedTool = acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags))
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags)))
 
     kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
-    kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')
-    kwargs.setdefault('SeedTool', seedTool)
-    kwargs.setdefault('TrackingGeometryTool', acc.getPublicTool(geoTool.name)) # PublicToolHandle
-    kwargs.setdefault('ATLASConverterTool', converterTool)
-    kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
-    kwargs.setdefault('OutputEstimatedTrackParameters', 'ITkStripEstimatedTrackParams')
+    kwargs.setdefault('OutputSeeds', 'ActsStripSeeds')
+    kwargs.setdefault('OutputEstimatedTrackParameters', 'ActsStripEstimatedTrackParams')
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
-    if flags.Acts.doMonitoring:
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkStripSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
 
@@ -329,8 +330,8 @@ def ActsConversionSeedingCkf(flags) -> ComponentAccumulator:
         acc.merge(ActsStripSeedingAlgCfg(flags,
                                          name="ActsConversionStripSeedingAlg",
                                          InputSpacePoints=["ITkConversionStripSpacePoints", "ITkConversionStripOverlapSpacePoints"],
-                                         OutputSeeds="ITkConversionStripSeeds",
-                                         OutputEstimatedTrackParameters="ITkConversionStripEstimatedTrackParams"))
+                                         OutputSeeds="ActsConversionStripSeeds",
+                                         OutputEstimatedTrackParameters="ActsConversionStripEstimatedTrackParams"))
 
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -339,11 +340,11 @@ def ActsConversionSeedingCkf(flags) -> ComponentAccumulator:
             acc.merge(ActsStripSeedAnalysisAlgCfg(flags,
                                                   name="ActsConversionStripSeedAnalysisAlg",
                                                   extension="ActsConversion",
-                                                  InputSeedCollection="ITkConversionStripSeeds"))            
+                                                  InputSeedCollection="ActsConversionStripSeeds"))            
             acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags,
                                                                   name="ActsConversionStripEstimatedTrackParamsAnalysisAlg",
                                                                   extension="ActsConversion",
-                                                                  InputTrackParamsCollection="ITkConversionStripEstimatedTrackParams"))
+                                                                  InputTrackParamsCollection="ActsConversionStripEstimatedTrackParams"))
             
     return acc
 

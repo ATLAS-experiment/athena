@@ -53,7 +53,7 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 
     if flags.Acts.EDM.PersistifyTracks:
 
-        trackPrefixes = ['Acts', 'ResolvedActs']
+        trackPrefixes = ['Acts', 'ActsResolved', 'ActsConversion', 'ActsConversionResolved']
         for prefix in trackPrefixes:
             toAOD +=  [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
                        f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
