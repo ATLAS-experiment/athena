@@ -29,7 +29,10 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_Rlayer2   (0.),
       m_MultiWithPrimary(true),
       m_minD0(0.2),
-      m_existIBL(true)
+      m_existIBL(true),
+      m_SingleHFTrack(false),
+      m_HFTrackRatio(true),
+      m_HFRatioThres(0.)            
       {
   declareInterface<IGNNVertexConstructorInterface>(this);
   declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
@@ -52,6 +55,9 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
   declareProperty("Rlayer2",   m_Rlayer2  );
   declareProperty("MultiWithPrimary", m_MultiWithPrimary, "Find Multiple Secondary Vertices + primary vertex in jet.MultiVertex Finder only!"  );
   declareProperty("mind0", m_minD0, "D0 cut on tracks");
+  declareProperty("SingleHFTracks", m_SingleHFTrack, "Select any vertice with at least one HF track identified by the GNN");
+  declareProperty("HFTrackRatio", m_HFTrackRatio, "Select any vertice that passes the threshold for number of HF tracks to all tracks in vertice");
+  declareProperty("HFRatio", m_HFRatioThres, "The threshold for the ratio between HF tracks and all tracks for a vertex");
   m_massPi  = 139.5702 ;
 }
 
@@ -196,15 +202,9 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
   SG::AuxElement::Decorator<float> decor_badChi2("badChi");
   SG::AuxElement::Decorator<float> decor_JetN("JetN");
   
-  // Create a map of track links and track vertexing values (Using mutlimap)
-  std::multimap<int, TL> vertexMap;
-  
   // Loop over the jets
   for (const auto &jet : *inJetContainer) {
         
-    //Ensure map is empty from previous iterations
-    vertexMap.clear();
-
     //Retrieve the Vertex and Track Collections
     auto vertexCollection = vertexLinksHandle(*jet);
     auto trackCollection = trackLinksHandle(*jet);
@@ -216,14 +216,16 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
        
     indexList iList(vertexCollection.size());
         
-    vertexHFMap v2HFMap;
+    vertexHFMap   v2HFMap;
     trackCountMap v2TLMap;
+    trackCountMap v2NHFTLMap;
     trackCountMap FittingMap;
+    
     FittingMap.clear();
     
     std::for_each(boost::make_zip_iterator(boost::make_tuple(vertexCollection.cbegin(), trackOriginCollection.cbegin(), trackCollection.cbegin())),
 		boost::make_zip_iterator(boost::make_tuple(vertexCollection.cend(), trackOriginCollection.cend(), trackCollection.cend())),
-		[&v2HFMap, &v2TLMap, &FittingMap](const boost::tuple<const char &, const char &, const TL &> &e)
+		[&v2HFMap, &v2NHFTLMap, &v2TLMap, &FittingMap](const boost::tuple<const char &, const char &, const TL &> &e)
 		{
 		  auto v  = e.get<0>();
 		  auto to = e.get<1>();
@@ -231,31 +233,44 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       
       v2TLMap[v].insert(tl);
       
-      if (3==to||4==to|| 5==to){
+      if (3==to||4==to|| 5==to){    //Checking if vertex has a heavy flavour track
         v2HFMap[v]=(true);
+        v2NHFTLMap[v].insert(tl);
       }
-    }
-    );
+    });
     
-    //Heavy Flavor Numbers of Interest are 3, 4, 5
-    //Want to check if present
-    //Ignore any that arent above a threshold?
-    //Threshold #HF/#Tracks > 0.4?
+    auto InclusiveFunc =[&FittingMap](const auto &c){
+      const auto&[v,tcm] =c;
+        FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));
+    };
+    
+    auto HFRatioFunc =[&v2NHFTLMap, &HFRatio=m_HFRatioThres, &FittingMap](const auto &d){
+      const auto&[v,tcm] =d;
+      if(v2NHFTLMap.find(v)!=v2NHFTLMap.end() && (static_cast<float>(v2NHFTLMap[v].size())/tcm.size())>=0.3){
+        FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));
+      };    
+    };
 
     auto vertex2trackOrigin = [&v2HFMap, &FittingMap](const auto &e){
       const auto &[v, tcm] = e;
-      //if vertex has true value in v2HF map
-      //get track collection from v2TLMap
-      //insert into fitting map
-      
       if (v2HFMap.find(v) !=v2HFMap.end() && v2HFMap[v]==true)  //if exists and is true
       {
         FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));  //check if copies set or just takes a reference - 
       };
     };    
     
-    std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), vertex2trackOrigin);    
-    
+    if(m_SingleHFTrack==true){
+      ATH_MSG_INFO("At least ONE HF Track vertex");
+      std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), vertex2trackOrigin);    
+    }
+    else if(m_HFTrackRatio==true){
+      ATH_MSG_INFO("Vertex with HF Ratio ");
+      std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), HFRatioFunc);    
+    }
+    else if (m_SingleHFTrack==true && m_HFTrackRatio==true){
+      ATH_MSG_INFO("No Requirement on Track Origins");
+      std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), InclusiveFunc);    
+    }
     //Working xAOD
     workVectorArrxAOD *xAODwrk = new workVectorArrxAOD();
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle{m_beamSpotKey, ctx};

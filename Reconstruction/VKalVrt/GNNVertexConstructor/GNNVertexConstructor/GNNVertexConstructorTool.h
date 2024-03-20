@@ -215,7 +215,11 @@ private:
     double m_Rlayer3;
     bool   m_MultiWithPrimary;
     double m_minD0;
-    double m_massPi ;
+    double m_massPi;
+    
+    bool   m_SingleHFTrack;
+    bool   m_HFTrackRatio;
+    float  m_HFRatioThres;
     
 };
 } // namespace Rec
