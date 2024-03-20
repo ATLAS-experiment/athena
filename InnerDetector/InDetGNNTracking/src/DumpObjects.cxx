@@ -63,6 +63,7 @@ StatusCode InDet::DumpObjects::initialize() {
   ATH_CHECK(m_stripSDOKey.initialize());
   ATH_CHECK(m_pixelSpacePointContainerKey.initialize());
   ATH_CHECK(m_stripSpacePointContainerKey.initialize());
+  ATH_CHECK(m_overlapSpacePointCollectionKey.initialize());
   ATH_CHECK(m_tracksKey.initialize());
   ATH_CHECK(m_tracksTruthKey.initialize());
   ATH_CHECK(m_detailedTracksTruthKey.initialize());
@@ -192,6 +193,7 @@ StatusCode InDet::DumpObjects::initialize() {
     m_SPz = new double[m_maxSP];
     m_SPCL1_index = new int[m_maxSP];
     m_SPCL2_index = new int[m_maxSP];
+    m_SPisOverlap = new int[m_maxSP];
 
     m_TRKindex = new int[m_maxTRK];
     m_TRKtrack_fitter = new int[m_maxTRK];
@@ -293,6 +295,7 @@ StatusCode InDet::DumpObjects::initialize() {
     m_nt->Branch("SPz", m_SPz, "SPz[nSP]/D");
     m_nt->Branch("SPCL1_index", m_SPCL1_index, "SPCL1_index[nSP]/I");
     m_nt->Branch("SPCL2_index", m_SPCL2_index, "SPCL2_index[nSP]/I");
+    m_nt->Branch("SPisOverlap", m_SPisOverlap, "SPisOverlap[nSP]/I");
 
     m_nt->Branch("nTRK", &m_nTRK, "nTRK/I");
     m_nt->Branch("TRKindex", m_TRKindex, "TRKindex[nTRK]/I");
@@ -864,6 +867,11 @@ StatusCode InDet::DumpObjects::execute() {
     }
   }
 
+
+  ////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////// SPACE POINTS ///////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////
+
   const SpacePointContainer *PixelSpacePointContainer = 0;
   SG::ReadHandle<SpacePointContainer> pixelSpacePointContainerHandle{m_pixelSpacePointContainerKey, ctx};
   if (not pixelSpacePointContainerHandle.isValid()) {
@@ -880,9 +888,18 @@ StatusCode InDet::DumpObjects::execute() {
   }
   SCT_SpacePointContainer = stripSpacePointContainerHandle.cptr();
 
+  const SpacePointOverlapCollection *OverlapSpacePointCollection =0;
+  SG::ReadHandle<SpacePointOverlapCollection> overlapSpacePointCollectionHandle{m_overlapSpacePointCollectionKey, ctx};
+  if (not overlapSpacePointCollectionHandle.isValid()) {
+    ATH_MSG_ERROR(" SpacePointContainer not found: " << m_overlapSpacePointCollectionKey.key());
+    return StatusCode::FAILURE;
+  }
+  OverlapSpacePointCollection = overlapSpacePointCollectionHandle.cptr();
+
   int sp_index = 0;
 
   m_nSP = 0;
+
   if (PixelSpacePointContainer && PixelSpacePointContainer->size() > 0) {
     for (const auto &spCollection : *PixelSpacePointContainer) {
       // skip empty collections
@@ -900,6 +917,7 @@ StatusCode InDet::DumpObjects::execute() {
           m_SPz[m_nSP] = sp->globalPosition().z();
           m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl->identify()];
           m_SPCL2_index[m_nSP] = -1;
+          m_SPisOverlap[m_nSP] = -1;
         }
         sp_index++;
 
@@ -930,6 +948,7 @@ StatusCode InDet::DumpObjects::execute() {
           m_SPz[m_nSP] = sp->globalPosition().z();
           m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
           m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
+          m_SPisOverlap[m_nSP] = 0;
         }
         sp_index++;
 
@@ -941,6 +960,33 @@ StatusCode InDet::DumpObjects::execute() {
       }
     }
   }
+
+  // loop over collection
+  for (const auto &sp : *OverlapSpacePointCollection) {
+    // save sp x, y, z and the index of the cluster associated to that one
+    const InDet::SiCluster *cl_1 = static_cast<const InDet::SiCluster *>(sp->clusterList().first);
+    const InDet::SiCluster *cl_2 = static_cast<const InDet::SiCluster *>(sp->clusterList().second);
+    if (m_rootFile) {
+      m_SPindex[m_nSP] = sp_index;
+      m_SPx[m_nSP] = sp->globalPosition().x();
+      m_SPy[m_nSP] = sp->globalPosition().y();
+      m_SPz[m_nSP] = sp->globalPosition().z();
+      m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
+      m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
+      m_SPisOverlap[m_nSP] = 1;
+    }
+    sp_index++;
+
+    m_nSP++;
+    if (m_nSP == m_maxSP) {
+      ATH_MSG_WARNING("DUMP : hit max number of space points");
+      break;
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  /////////////////////////////// TRACKS ///////////////////////////////
+  //////////////////////////////////////////////////////////////////////
 
   const TrackCollection *trackCollection = 0;
   SG::ReadHandle<TrackCollection> trackCollectionHandle{m_tracksKey, ctx};
@@ -1240,6 +1286,7 @@ StatusCode InDet::DumpObjects::finalize() {
     delete[] m_SPz;
     delete[] m_SPCL1_index;
     delete[] m_SPCL2_index;
+    delete[] m_SPisOverlap;
 
     delete[] m_TRKindex;
     delete[] m_TRKtrack_fitter;
