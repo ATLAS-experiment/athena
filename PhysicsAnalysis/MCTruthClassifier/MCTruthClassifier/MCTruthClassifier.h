@@ -199,7 +199,7 @@ private:
                                                      const xAOD::TruthParticle*,
                                                      int motherPDG,
                                                      MCTruthPartClassifier::Info* info) const;
-  MCTruthPartClassifier::ParticleOutCome defOutComeOfTau(const xAOD::TruthParticle*, MCTruthPartClassifier::Info* info) const;
+  MCTruthPartClassifier::ParticleOutCome defOutComeOfTau(const xAOD::TruthParticle*) const;
 
   static MCTruthPartClassifier::ParticleType defTypeOfPhoton(MCTruthPartClassifier::ParticleOrigin) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
