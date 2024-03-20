@@ -14,9 +14,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, MC
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
   const xAOD::TruthParticle* genPart = getGenPart(trkPtr);
-  if (info) {
-    info->genPart = genPart;
-  }
+  if (info) info->genPart = genPart;
   if (!genPart) return std::make_pair(parttype, partorig);
   ATH_MSG_DEBUG("trackClassifier  succeeded ");
   return particleTruthClassifier(genPart, info);
@@ -30,13 +28,10 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPa
   ATH_MSG_DEBUG("Executing egamma electron Classifier");
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
-
   const xAOD::TruthParticle* genPart = nullptr;
   const xAOD::TrackParticle* trkPtr = elec->trackParticle();
   if (elec->author() != xAOD::EgammaParameters::AuthorFwdElectron || trkPtr) { // Central electron or forward electron with track (when reco implemented in the future)
-    if (!trkPtr) {
-      return std::make_pair(parttype, partorig);
-    }
+    if (!trkPtr) return std::make_pair(parttype, partorig);
     genPart = getGenPart(trkPtr);
   } else {
 #ifndef XAOD_ANALYSIS // Fwd electron available only in Athena
@@ -47,13 +42,8 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPa
 #endif
   }
 
-  if (info) {
-    info->genPart = genPart;
-  }
-
-  if (!genPart) {
-    return std::make_pair(parttype, partorig);
-  }
+  if (info)  info->genPart = genPart;
+  if (!genPart) return std::make_pair(parttype, partorig);
   ATH_MSG_DEBUG("egamma electron Classifier  succeeded ");
   return particleTruthClassifier(genPart, info);
 }
@@ -64,24 +54,19 @@ std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier");
-
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
-
   const xAOD::CaloCluster* clus = phot->caloCluster();
   if (!clus) return std::make_pair(parttype, partorig);
-  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > 6.28 || (clus->et()) <= 0.)
-    return std::make_pair(parttype, partorig);
+  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > 6.28 || (clus->et()) <= 0.)  return std::make_pair(parttype, partorig);
 
   const xAOD::Vertex* VxCvPtr = phot->vertex();
-
   if (VxCvPtr != nullptr) {
     for (int itrk = 0; itrk < (int)VxCvPtr->nTrackParticles(); itrk++) {
       if (itrk > 1) continue;
       const xAOD::TrackParticle* trkPtr = VxCvPtr->trackParticle(itrk);
       if (!trkPtr) continue;
       const xAOD::TruthParticle* thePart = getGenPart(trkPtr);
-
       std::pair<ParticleType, ParticleOrigin> classif = particleTruthClassifier(thePart, info);
       if (info) {
         info->cnvPhotTrkPtr.push_back(trkPtr);
@@ -98,12 +83,9 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, MCTruthPart
 #else
   ATH_MSG_WARNING("Photon  Classification using extrapolation to Calo is  available only in Athena , check your enviroment. ");
 #endif
-  if (!genPart) {
-    return std::make_pair(parttype, partorig);
-  }
+  if (!genPart) return std::make_pair(parttype, partorig);
   if (info) info->genPart = genPart;
   ATH_MSG_DEBUG("egamma photon  Classifier  succeeded ");
-
   return particleTruthClassifier(genPart, info);
 }
 
@@ -111,12 +93,9 @@ std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing muon  Classifier");
-
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
-
   const xAOD::TrackParticle* trkPtr = nullptr;
-
   if (mu->primaryTrackParticleLink().isValid()) trkPtr = *mu->primaryTrackParticleLink();
   else if (mu->combinedTrackParticleLink().isValid()) trkPtr = *mu->combinedTrackParticleLink();
   else if (mu->inDetTrackParticleLink().isValid()) trkPtr = *mu->combinedTrackParticleLink();
@@ -127,42 +106,29 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClas
   const xAOD::TruthParticle* genPart = getGenPart(trkPtr);
   if (!genPart) return std::make_pair(parttype, partorig);
   if (info) info->genPart = genPart;
-
   ATH_MSG_DEBUG("muon Classifier  succeeded ");
   return particleTruthClassifier(genPart, info);
 }
 
-//-----------------------------------------------------------------------------------------
 // Not const due to ITruthParticlesInConeTool::particlesInCone
 // called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing egamma photon Classifier with cluster Input");
-
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
-
-  if (!clus) {
-    return std::make_pair(parttype, partorig);
-  }
-  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > M_PI || (clus->et()) <= 0.) {
-    return std::make_pair(parttype, partorig);
-  }
+  if (!clus) return std::make_pair(parttype, partorig);
+  if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > M_PI || (clus->et()) <= 0.) return std::make_pair(parttype, partorig);
   const xAOD::TruthParticle* genPart = nullptr;
 #ifndef XAOD_ANALYSIS // Fwd electron available only in Athena
   genPart = egammaClusMatch(clus, false, info);
 #else
   ATH_MSG_WARNING("Cluster  Classification using extrapolation to Calo is available only in Athena , check your enviroment. ");
 #endif
-
-  if (!genPart) {
-    return std::make_pair(parttype, partorig);
-  }
+  if (!genPart) return std::make_pair(parttype, partorig);
   ATH_MSG_DEBUG("Calo Cluster  Classifier  succeeded ");
-  if (info) {
-    info->genPart = genPart;
-  }
+  if (info) info->genPart = genPart;
   return particleTruthClassifier(genPart, info);
 }
 
@@ -170,17 +136,12 @@ std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   ATH_MSG_DEBUG("Executing Classifier with jet Input");
-
   ParticleType parttype = UnknownJet;
   ParticleOrigin partorig = NonDefined;
   ParticleType tempparttype = UnknownJet;
   std::set<const xAOD::TruthParticle*> allJetMothers;
   std::set<const xAOD::TruthParticle*> constituents;
-
-  if (!jet) {
-    return std::make_pair(parttype, partorig);
-  }
-
+  if (!jet) return std::make_pair(parttype, partorig);
   allJetMothers.clear();
   constituents.clear();
   findJetConstituents(jet, constituents, DR);
@@ -212,10 +173,8 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
 
   // clasify the jet origin
   partorig = defJetOrig(allJetMothers);
-
   allJetMothers.clear();
   constituents.clear();
-
   ATH_MSG_DEBUG(" jet Classifier succeeded");
   return std::make_pair(parttype, partorig);
 }
@@ -224,7 +183,6 @@ const xAOD::TruthParticle*
 MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
   // return GenParticle corresponding to given TrackParticle
-
   ATH_MSG_DEBUG("Executing getGenPart ");
   if (!trk) return nullptr;
   if (info) {
@@ -277,35 +235,20 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
       int itr = 0;
       do {
         theGenPartTmp = nullptr;
-        for (unsigned int ipOut = 0; ipOut < EndVrtx->nOutgoingParticles(); ipOut++) {
-          const xAOD::TruthParticle* theDaugt = EndVrtx->outgoingParticle(ipOut);
-          if (!theDaugt) {
-            continue;
-          }
-          if (theDaugt->pdgId() == theGenParticle->pdgId()) {
-            theGenPartTmp = theDaugt;
-          }
-          if (theDaugt->pdgId() != theGenParticle->pdgId() && theDaugt->pdgId() != 22) {
-            theGenPartTmp = nullptr;
-          }
+        for (const auto & theDaugt: EndVrtx->particles_out()) {
+          if (!theDaugt) continue;
+          if (theDaugt->pdgId() == theGenParticle->pdgId()) theGenPartTmp = theDaugt;
+          if (theDaugt->pdgId() != theGenParticle->pdgId() && theDaugt->pdgId() != 22) theGenPartTmp = nullptr;
         }
-
         itr++;
         if (itr > 100) {
           ATH_MSG_WARNING("getGenPart infinite while");
           break;
         }
-
-        if (theGenPartTmp != nullptr) {
-          EndVrtx = theGenPartTmp->decayVtx();
-        } else {
-          EndVrtx = nullptr;
-        }
+        EndVrtx = theGenPartTmp ? theGenPartTmp->decayVtx() : nullptr;
       } while (theGenPartTmp && theGenPartTmp->pdgId() == theGenParticle->pdgId() && MC::isDecayed(theGenPartTmp) && EndVrtx != nullptr);
 
-      if (theGenPartTmp && theGenPartTmp->pdgId() == theGenParticle->pdgId()) {
-        theGenParticle = theGenPartTmp;
-      }
+      if (theGenPartTmp && theGenPartTmp->pdgId() == theGenParticle->pdgId()) theGenParticle = theGenPartTmp;
     }
   }
 
@@ -325,31 +268,24 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, MCTruthPartClassif
     info->deltaPhi = deltaPhi;
     info->numOfSiHits = NumOfSiHits;
   }
-
   ATH_MSG_DEBUG("getGenPart  succeeded ");
   return (theGenParticle);
 }
 
-
-void
-MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
+void MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
                                        std::set<const xAOD::TruthParticle*>& constituents,
                                        bool DR) const
 {
-
   if (DR) {
     // use a DR matching scheme (default)
     // retrieve collection and get a pointer
-
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey);
 
     if (!truthParticleContainerReadHandle.isValid()) {
       ATH_MSG_WARNING(" Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
       return;
     }
-
     ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
-
     // find the matching truth particles
     for (const auto *const thePart : *truthParticleContainerReadHandle) {
       // match truth particles to the jet
@@ -357,7 +293,7 @@ MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
         constituents.insert(thePart);
       }
     }
-  } // end if DR
+  }
   else {
     xAOD::JetConstituentVector vec = jet->getConstituents();
     for (const auto *particle0 : vec) {
@@ -366,7 +302,7 @@ MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
         constituents.insert(thePart);
       }
     }
-  } // end if !DR
+  }
 }
 double MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart, const xAOD::Jet* jet, bool DR, bool nparts) const
 {
@@ -376,9 +312,7 @@ double MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart, 
 
   findJetConstituents(jet, constituents, DR);
   MC::findParticleDaughters(thePart, daughters);
-
   if (daughters.empty()) daughters.insert(thePart);
-
   // Get the intersection of constituents and daughters
   std::set_intersection(constituents.begin(),
                         constituents.end(),

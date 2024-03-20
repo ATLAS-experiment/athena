@@ -23,14 +23,10 @@
 using namespace MCTruthPartClassifier;
 
 namespace {
-
-std::unique_ptr<Trk::CurvilinearParameters> extractParamFromTruth(const xAOD::TruthParticle& particle)
-{
+std::unique_ptr<Trk::CurvilinearParameters> extractParamFromTruth(const xAOD::TruthParticle& particle) {
   // get start parameters
   const xAOD::TruthVertex* pvtx = particle.prodVtx();
-  if (pvtx == nullptr) {
-    return nullptr;
-  }
+  if (pvtx == nullptr) return nullptr;
   double charge = particle.charge();
   Amg::Vector3D pos(pvtx->x(), pvtx->y(), pvtx->z());
   Amg::Vector3D mom(particle.px(), particle.py(), particle.pz());
@@ -42,17 +38,14 @@ std::unique_ptr<Trk::CurvilinearParameters> extractParamFromTruth(const xAOD::Tr
   }
   return std::make_unique<Trk::CurvilinearParameters>(pos, mom, charge);
 }
-
 }
 
 // Methods using directly the extrapolator usable only from Athena
-//-----------------------------------------------------------------------------------------
 const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus, bool isFwrdEle, MCTruthPartClassifier::Info* info) const
 {
   ATH_MSG_DEBUG("Executing egammaClusMatch ");
   const xAOD::TruthParticle* theMatchPart = nullptr;
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
-
   // retrieve collection and get a pointer
   SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey, ctx);
 
@@ -73,14 +66,10 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
   const xAOD::TruthParticle* theBestPartOutCone(nullptr);
   const xAOD::TruthParticle* theBestPartdR(nullptr);
   double LeadingPhtPT(0);
-
   double LeadingPartPT(0);
   double LeadingPhtdR(999.);
-
   double LeadingPartdR(999.);
-
   double BestPartdR(999.);
-
   double etaClus = clus->etaBE(2);
   double phiClus = clus->phiBE(2);
   if (etaClus < -900) {
@@ -89,7 +78,6 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
   if (phiClus < -900) {
     phiClus = clus->phi();
   }
-
   std::vector<const xAOD::TruthParticle*> tps;
   if (!m_truthInConeTool->particlesInCone(ctx, etaClus, phiClus, 0.5, tps)) {
     ATH_MSG_WARNING("Truth Particle in Cone failed");
@@ -101,11 +89,9 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     if (!MC::isStable(thePart)) continue;
     // excluding G4 particle
     if ((!isFwrdEle || (isFwrdEle && m_FwdElectronUseG4Sel)) && HepMC::is_simulation_particle(thePart)) continue;
-
     long iParticlePDG = thePart->pdgId();
     // excluding neutrino
     if (std::abs(iParticlePDG) == 12 || std::abs(iParticlePDG) == 14 || std::abs(iParticlePDG) == 16) continue;
-
     double pt = thePart->pt() / Athena::Units::GeV;
     double q = thePart?thePart->charge():0.0;
     // exclude charged particles with pT<1 GeV
@@ -116,39 +102,27 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     if (!isFwrdEle && m_ROICone && std::hypot( detPhi(phiClus, thePart->phi())/m_partExtrConePhi, detEta(etaClus, thePart->eta())/m_partExtrConeEta) > 1.0) {
       continue;
     }
-
-    // Also check if the clus and true have different sign , i they need both to
-    // be <0 or >0
+    // Also check if the clus and true have different sign , i they need both to be <0 or >0
     if (isFwrdEle && // It is forward and
         (((etaClus < 0) - (thePart->eta() < 0) != 0)
          // The truth eta has different sign wrt to the fwd electron
-         || (std::fabs(thePart->eta()) < m_FwdElectronTruthExtrEtaCut) // or the truth is less than 2.4
-                                           // (default cut)
-         || (std::fabs(thePart->eta() - etaClus) > m_FwdElectronTruthExtrEtaWindowCut) // or if the delta Eta between
-                                                 // el and truth is  > 0.15
+         || (std::fabs(thePart->eta()) < m_FwdElectronTruthExtrEtaCut) // or the truth is less than 2.4 (default cut)
+         || (std::fabs(thePart->eta() - etaClus) > m_FwdElectronTruthExtrEtaWindowCut) // or if the delta Eta between el and truth is  > 0.15
          ) // then do no extrapolate this truth Particle for this fwd electron
     ) {
       continue;
     }
-
     double dR(-999.);
     bool isNCone = false;
-
     bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
-    if (!isExt) {
-      continue;
-    }
-
+    if (!isExt) continue;
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(), thePart);
-
     if (info) {
       info->egPartPtr.push_back(thePart);
       info->egPartdR.push_back(dR);
       info->egPartClas.push_back(particleTruthClassifier(theMatchPart, info));
     }
-
-    // Gen particles
-    // Not forward
+    // Gen particles Not forward
     if (!isFwrdEle) {
       // the leading photon or electron  inside narrow eleptical cone
       // m_phtClasConePhi  X m_phtClasConeEta
@@ -180,42 +154,29 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
   if (theEgamma != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(), theEgamma);
-    if (info) {
-      info->deltaRMatch = LeadingPhtdR;
-    }
+    if (info) info->deltaRMatch = LeadingPhtdR;
   } else if (theLeadingPartInCone != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
-    if (info) {
-      info->deltaRMatch = LeadingPartdR;
-    }
+    if (info) info->deltaRMatch = LeadingPartdR;
   } else if (theBestPartOutCone != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
-    if (info) {
-      info->deltaRMatch = BestPartdR;
-    }
+    if (info) info->deltaRMatch = BestPartdR;
   } else if (isFwrdEle && theBestPartdR != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theBestPartdR );
-    if (info) {
-      info->deltaRMatch = BestPartdR;
-    }
+    if (info) info->deltaRMatch = BestPartdR;
   } else {
     theMatchPart = nullptr;
   }
-  if (isFwrdEle || theMatchPart != nullptr || !m_inclG4part) {
-    return theMatchPart;
-  }
+  if (isFwrdEle || theMatchPart != nullptr || !m_inclG4part) return theMatchPart;
 
   // additional loop over G4 particles,
   for (const auto* const thePart : tps) {
     if (!MC::isStable(thePart)) continue;
     if (!HepMC::is_simulation_particle(thePart)) continue;
-
     long iParticlePDG = thePart->pdgId();
     // exclude neutrino
     if (std::abs(iParticlePDG) == 12 || std::abs(iParticlePDG) == 14 || std::abs(iParticlePDG) == 16) continue;
-
     if (thePart->decayVtx() != nullptr) continue;
-
     if (std::hypot( detPhi(phiClus, thePart->phi())/m_partExtrConePhi, detEta(etaClus, thePart->eta())/m_partExtrConeEta ) > 1.0) continue;
 
     double pt = thePart->pt() / Athena::Units::GeV;
@@ -227,18 +188,14 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     double dR(-999.);
     bool isNCone = false;
     bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
-    if (!isExt) {
-      continue;
-    }
+    if (!isExt) continue;
 
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),thePart);
-
     if (info) {
       info->egPartPtr.push_back(thePart);
       info->egPartdR.push_back(dR);
       info->egPartClas.push_back(particleTruthClassifier(theMatchPart, info));
     }
-
     // the leading photon or electron  inside narrow eleptical cone
     // m_phtClasConePhi  X m_phtClasConeEta
     if ((iParticlePDG == 22 || std::abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
@@ -246,41 +203,33 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
       LeadingPhtPT = pt;
       LeadingPhtdR = dR;
     }
-
     // leading particle (excluding photon or electron) inside narrow eleptic
     // cone m_phtClasConePhi  X m_phtClasConeEta
     if ((iParticlePDG != 22 && std::abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
       theLeadingPartInCone = thePart;
       LeadingPartPT = pt;
       LeadingPartdR = dR;
-    };
+    }
     // the best dR matched particle outside  narrow eleptic cone cone
     // m_phtClasConePhi  X m_phtClasConeEta
     if (!isNCone && dR < BestPartdR) {
       theBestPartOutCone = thePart;
       BestPartdR = dR;
-    };
-  } // end cycle for G4 particle
+    }
+  }
 
   if (theEgamma != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theEgamma);
-    if (info) {
-      info->deltaRMatch = LeadingPhtdR;
-    }
+    if (info) info->deltaRMatch = LeadingPhtdR;
   } else if (theLeadingPartInCone != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
-    if (info) {
-      info->deltaRMatch = LeadingPartdR;
-    }
+    if (info)  info->deltaRMatch = LeadingPartdR;
   } else if (theBestPartOutCone != nullptr) {
     theMatchPart = MC::find_matching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
-    if (info) {
-      info->deltaRMatch = BestPartdR;
-    }
+    if (info) info->deltaRMatch = BestPartdR;
   } else {
     theMatchPart = nullptr;
   }
-
   ATH_MSG_DEBUG("succeeded  egammaClusMatch ");
   return theMatchPart;
 }
@@ -295,11 +244,7 @@ bool MCTruthClassifier::genPartToCalo(const EventContext& ctx,
 {
   dRmatch = -999.;
   isNarrowCone = false;
-
-  if (thePart == nullptr) {
-    return false;
-  }
-
+  if (thePart == nullptr) return false;
   double phiClus = clus->phiBE(2);
   double etaClus = clus->etaBE(2);
   if (etaClus < -900) {
@@ -308,13 +253,11 @@ bool MCTruthClassifier::genPartToCalo(const EventContext& ctx,
   if (phiClus < -900) {
     phiClus = clus->phi();
   }
-
   //--FixMe
   if (isFwrdEle || (etaClus == 0. && phiClus == 0.)) {
     phiClus = clus->phi();
     etaClus = clus->eta();
   }
-
   // define calo sample
   CaloSampling::CaloSample sample = CaloSampling::EMB2;
   if ((clus->inBarrel() && !clus->inEndcap()) ||
@@ -332,10 +275,7 @@ bool MCTruthClassifier::genPartToCalo(const EventContext& ctx,
     return false;
   }
   std::unique_ptr<Trk::CurvilinearParameters> params = extractParamFromTruth(*thePart);
-  if (!params) {
-    return false;
-  }
-
+  if (!params) return false;
   // create extension to sample
   std::vector<CaloSampling::CaloSample> samples = { sample };
   auto  extension = m_caloExtensionTool->layersCaloExtension(ctx, *params, samples, etaClus, caloDDMgr);
