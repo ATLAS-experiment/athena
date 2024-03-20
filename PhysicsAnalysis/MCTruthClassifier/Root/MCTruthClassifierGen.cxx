@@ -1615,7 +1615,7 @@ ParticleType MCTruthClassifier::defTypeOfHadron(int pdg) {
 
 ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
+  auto EndVert = MC::findEndVert(thePart);
   if (EndVert == nullptr) return NonInteract;
   int ElecOutNumOfNucFr(0);
   int ElecOutNumOfElec(0);
@@ -1636,7 +1636,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticl
 
 ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
+  auto EndVert = MC::findEndVert(thePart);
   if (EndVert == nullptr) return NonInteract;
   int MuOutNumOfNucFr(0);
   int NumOfHadr(0);
@@ -1662,10 +1662,10 @@ ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* t
 ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, [[maybe_unused]] MCTruthPartClassifier::Info* info) const {
   ATH_MSG_DEBUG("Executing defOutComeOfTau");
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
+  auto EndVert = MC::findEndVert(thePart);
   if (EndVert == nullptr) return NonInteract;
   int NumOfTauDaug = EndVert->nOutgoingParticles();
-  std::vector<const xAOD::TruthParticle*> tauFinalStatePart = MC::findFinalStatePart<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(EndVert);
+  auto tauFinalStatePart = MC::findFinalStatePart(EndVert);
   auto PD = DecayProducts(tauFinalStatePart);
   int NumOfElec = PD.apd(11);
   int NumOfMuon = PD.apd(13);
@@ -1687,7 +1687,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* th
 
 ParticleOutCome MCTruthClassifier::defOutComeOfPhoton(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
+  auto EndVert = MC::findEndVert(thePart);
   if (EndVert == nullptr) return UnConverted;
   int PhtOutNumOfNucFr(0);
   int PhtOutNumOfEl(0);

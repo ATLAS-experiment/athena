@@ -209,9 +209,9 @@ namespace MC
   /// @brief Function to find the end vertex of a particle.
   /// This algorithm allows for 1->1 decays. 
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
-  template <class V, class T> V findEndVert(T thePart) {
-    V EndVert = thePart->end_vertex();
-    V pVert(nullptr);
+  template <class T> auto findEndVert(T thePart) -> decltype(thePart->end_vertex()) {
+     decltype(thePart->end_vertex()) EndVert = thePart->end_vertex();
+     decltype(thePart->end_vertex()) pVert(nullptr);
     if (EndVert != nullptr) {
       do {
         bool samePart = false;
@@ -237,19 +237,19 @@ namespace MC
 
   /// @brief Function to find the stable particle descendants of the gived vertex..
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
-  template <class V, class T>
-  std::vector<T> findFinalStatePart(V EndVert)  {
+  template <class V>
+  auto findFinalStatePart(V EndVert) -> decltype(EndVert->particles_out()) {
     if (!EndVert) return {};
-    std::vector<T> finalStatePart;
+    decltype(EndVert->particles_out()) finalStatePart;
     auto outgoing = EndVert->particles_out();
     for (const auto& thePart: outgoing) {
       if (!thePart) continue;
       finalStatePart.push_back(thePart);
       if (isStable(thePart)) continue;
-      V pVert = findEndVert<V,T>(thePart);
+      V pVert = findEndVert(thePart);
       if (pVert == EndVert) break; // to prevent Sherpa  loop
       if (pVert != nullptr) {
-          std::vector<T>  vecPart = findFinalStatePart<V,T>(pVert);
+          auto  vecPart = findFinalStatePart<V>(pVert);
           finalStatePart.insert(finalStatePart.end(),vecPart.begin(),vecPart.end());
       }
     }
