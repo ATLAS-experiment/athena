@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -20,15 +20,6 @@
 
 namespace CP
 {
-  EventCutFlowHistAlg ::
-  EventCutFlowHistAlg (const std::string& name, 
-		       ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("histPattern", m_histPattern, "the pattern for histogram names");
-  }
-
-
 
   StatusCode EventCutFlowHistAlg ::
   initialize ()

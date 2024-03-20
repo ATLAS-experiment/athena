@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -23,28 +23,6 @@
 
 namespace CP
 {
-  MetMakerAlg ::
-  MetMakerAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_makerTool ("METMaker", this)
-    , m_systematicsTool ("", this)
-  {
-    declareProperty ("makerTool", m_makerTool, "the METMaker tool we apply");
-    declareProperty ("systematicsTool", m_systematicsTool, "the systematics tool we apply");
-    declareProperty ("metCore", m_metCoreName, "the name of the core MissingETContainer");
-    declareProperty ("metAssociation", m_metAssociationName, "the name of the core MissingETContainer");
-    declareProperty ("electronsKey", m_electronsKey, "the key for the electrons");
-    declareProperty ("photonsKey", m_photonsKey, "the key for the photons");
-    declareProperty ("muonsKey", m_muonsKey, "the key for the muons");
-    declareProperty ("tausKey", m_tausKey, "the key for the taus");
-    declareProperty ("jetsKey", m_jetsKey, "the key for jets");
-    declareProperty ("softTermKey", m_softTermKey, "the soft term key");
-    declareProperty ("doTrackMet", m_doTrackMet, "whether to use track-met instead of jet-met");
-    declareProperty ("doJetJVT", m_doJetJVT, "whether to do jet JVT");
-  }
-
-
 
   StatusCode MetMakerAlg ::
   initialize ()

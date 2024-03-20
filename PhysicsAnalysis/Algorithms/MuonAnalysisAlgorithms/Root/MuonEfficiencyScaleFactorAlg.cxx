@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -20,16 +20,6 @@
 
 namespace CP
 {
-  MuonEfficiencyScaleFactorAlg ::
-  MuonEfficiencyScaleFactorAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_efficiencyScaleFactorTool ("CP::MuonEfficiencyScaleFactors", this)
-  {
-    declareProperty ("efficiencyScaleFactorTool", m_efficiencyScaleFactorTool, "the calibration and smearing tool we apply");
-  }
-
-
 
   StatusCode MuonEfficiencyScaleFactorAlg ::
   initialize ()

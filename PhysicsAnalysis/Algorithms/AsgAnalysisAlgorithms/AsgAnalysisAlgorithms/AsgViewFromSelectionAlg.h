@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,6 +15,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <limits>
 
 namespace CP
@@ -31,14 +32,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    AsgViewFromSelectionAlg (const std::string& name, 
-                             ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
 
 
@@ -56,26 +51,28 @@ namespace CP
     SysWriteHandle<xAOD::IParticleContainer> m_outputHandle {
       this, "output", "", "the output view container to produce"};
 
+    /// \todo this would probably better be an std::map, but this
+    /// isn't supported as a property type for AnaAlgorithm right now
   private:
-    std::vector<std::string> m_selection;
+    Gaudi::Property<std::vector<std::string>> m_selection {this, "selection", {}, "the list of selection decorations"};
 
   private:
-    std::vector<SelectionType> m_ignore;
+    Gaudi::Property<std::vector<SelectionType>> m_ignore {this, "ignore", {}, "the list of cuts to *ignore* for each selection"};
 
     /// \brief Sort the output (view) container by pT
   private:
-    bool m_sortPt {false};
+    Gaudi::Property<bool> m_sortPt {this, "sortPt", false, "whether to sort objects in pt"};
 
     /// \brief Allow the input container to be missing
   private:
-    bool m_allowMissing {false};
+    Gaudi::Property<bool> m_allowMissing {this, "allowMissing", false, "Allow the input container to be missing"};
 
     /// \brief Perform a deep copy for creating the output container
   private:
-    bool m_deepCopy {false};
+    Gaudi::Property<bool> m_deepCopy {this, "deepCopy", false, "perform a deep copy"};
 
   private:
-    std::size_t m_sizeLimit {std::numeric_limits<std::size_t>::max()};
+    Gaudi::Property<std::size_t> m_sizeLimit {this, "sizeLimit", std::numeric_limits<std::size_t>::max(), "the limit on the size of the output container"};
 
     /// the list of accessors and cut ignore list
   private:

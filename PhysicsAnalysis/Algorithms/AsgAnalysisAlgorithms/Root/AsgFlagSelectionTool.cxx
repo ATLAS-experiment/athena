@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /// @author Teng Jian Khoo
@@ -20,15 +20,6 @@
 
 namespace CP
 {
-    AsgFlagSelectionTool ::
-    AsgFlagSelectionTool (const std::string& name)
-    : AsgTool (name)
-    {
-      declareProperty ("selectionFlags", m_selFlags, "list of flags to use as selection criteria");
-      declareProperty ("invertFlags",    m_invertFlags, "toggles for inverting the selection (index-parallel to selectionFlags)");
-    }
-
-
 
     StatusCode AsgFlagSelectionTool ::
     initialize ()
@@ -48,7 +39,11 @@ namespace CP
           } else {
               // Extend m_invertFlags until the size matches m_selectionFlags
               // Only done in the case that m_invert was empty
-              if(m_invertFlags.size()<index+1) {m_invertFlags.push_back(false);}
+              if(m_invertFlags.size()<index+1) {
+		std::vector<bool> flags = m_invertFlags.value();
+		flags.resize(index + 1, false);
+		m_invertFlags = flags;
+	      }
               std::string doInvertStr = m_invertFlags[index] ? "!" : "";
               m_accept.addCut (doInvertStr + thisflag, doInvertStr + thisflag);
               std::unique_ptr<ISelectionReadAccessor> accessor;

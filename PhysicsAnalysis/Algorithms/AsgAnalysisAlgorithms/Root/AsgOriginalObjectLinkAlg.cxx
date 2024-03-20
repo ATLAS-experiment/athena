@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -17,15 +17,6 @@
 
 namespace CP
 {
-  AsgOriginalObjectLinkAlg ::
-  AsgOriginalObjectLinkAlg (const std::string& name, 
-                            ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("baseContainerName", m_baseContainerName, "base particle container name");
-  }
-
-
 
   StatusCode AsgOriginalObjectLinkAlg ::
   initialize ()
@@ -38,6 +29,7 @@ namespace CP
 
     ANA_CHECK (m_particleHandle.initialize (m_systematicsList));
     ANA_CHECK (m_systematicsList.initialize());
+    ANA_CHECK (m_baseContainerName.initialize());
     return StatusCode::SUCCESS;
   }
 
@@ -51,8 +43,7 @@ namespace CP
       xAOD::IParticleContainer *particles = nullptr;
       ANA_CHECK (m_particleHandle.getCopy (particles, sys));
 
-      const xAOD::IParticleContainer *baseParticles = nullptr;
-      ANA_CHECK (evtStore()->retrieve(baseParticles, m_baseContainerName));
+      SG::ReadHandle<xAOD::IParticleContainer> baseParticles(m_baseContainerName);
 
       if (!xAOD::setOriginalObjectLink (*baseParticles, *particles))
       {

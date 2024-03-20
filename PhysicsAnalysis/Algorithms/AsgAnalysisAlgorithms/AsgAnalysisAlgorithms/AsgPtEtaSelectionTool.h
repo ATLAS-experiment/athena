@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -12,6 +12,7 @@
 #include <AsgTools/AsgTool.h>
 #include <AthContainers/AuxElement.h>
 #include <PATCore/IAsgSelectionTool.h>
+#include "AsgTools/PropertyWrapper.h"
 #include <atomic>
 
 namespace CP
@@ -47,9 +48,7 @@ namespace CP
     /// \par Failures
     ///   out of memory II
   public:
-    AsgPtEtaSelectionTool (const std::string& name);
-
-
+    using asg::AsgTool::AsgTool;
 
 
     //
@@ -72,15 +71,15 @@ namespace CP
     /// \{
 
   private:
-    float m_minPt {0};
-    float m_maxPt {0};
-    float m_maxEta {0};
-    float m_etaGapLow {0};
-    float m_etaGapHigh {0};
-    bool m_useClusterEta {false};
-    bool m_useDressedProperties {false};
-    bool m_printCastWarning {true};
-    bool m_printClusterWarning {true};
+    Gaudi::Property<float> m_minPt {this, "minPt", 0, "minimum pt to require (or 0 for no pt cut)"};
+    Gaudi::Property<float> m_maxPt {this, "maxPt", 0, "maximum pt to require (or 0 for no pt cut)"};
+    Gaudi::Property<float> m_maxEta {this, "maxEta", 0, "maximum abs(eta) to allow (or 0 for no eta cut)"};
+    Gaudi::Property<float> m_etaGapLow {this, "etaGapLow", 0, "low end of the eta gap"};
+    Gaudi::Property<float> m_etaGapHigh {this, "etaGapHigh", 0, "high end of the eta gap (or 0 for no eta gap)"};
+    Gaudi::Property<bool> m_useClusterEta {this, "useClusterEta", false, "whether to use the cluster eta (for electrons only)"};
+    Gaudi::Property<bool> m_useDressedProperties {this, "useDressedProperties", false, "whether to use the dressed kinematic properties (for truth particles only)"};
+    Gaudi::Property<bool> m_printCastWarning {this, "printCastWarning", true, "whether to print a warning/error when the cast fails"};
+    Gaudi::Property<bool> m_printClusterWarning {this, "printClusterWarning", true, "whether to print a warning/error when the cluster is missing"};
 
     /// \}
 

@@ -27,12 +27,7 @@ namespace CP
     /// \brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
-
-
-  public:
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 

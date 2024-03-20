@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -7,14 +7,6 @@
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <EventBookkeeperTools/FilterReporter.h>
 #include <xAODEventInfo/EventInfo.h>
-
-CP::EventFlagSelectionAlg::EventFlagSelectionAlg(const std::string &name,
-                                             ISvcLocator *svcLoc)
-  : EL::AnaAlgorithm(name, svcLoc)
-{
-  declareProperty ("selectionFlags", m_selFlags, "list of flags to use as selection criteria");
-  declareProperty ("invertFlags",    m_invertFlags, "toggles for inverting the selection (index-parallel to selectionFlags)");
-}
 
 StatusCode CP::EventFlagSelectionAlg::initialize()
 {
@@ -31,7 +23,11 @@ StatusCode CP::EventFlagSelectionAlg::initialize()
     } else {
       // Extend m_invertFlags until the size matches m_selectionFlags
       // Only done in the case that m_invert was empty
-      if (m_invertFlags.size() < index + 1) { m_invertFlags.push_back(false); }
+      if (m_invertFlags.size() < index + 1) {
+	std::vector<bool> flags = m_invertFlags.value();
+	flags.resize(index + 1, false);
+	m_invertFlags = flags;
+      }
 
       std::unique_ptr<ISelectionReadAccessor> accessor;
       ANA_CHECK (makeSelectionReadAccessor (m_selFlags[index], accessor));

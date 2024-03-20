@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,6 +14,7 @@
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODJet/JetContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -23,21 +24,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    JvtUpdateAlg (const std::string& name, 
-                  ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the update tool
   private:
-    ToolHandle<IJetUpdateJvt> m_jvtTool;
+    ToolHandle<IJetUpdateJvt> m_jvtTool {this, "jvtTool", "", "the jvt tool we apply"};
 
     /// \brief the systematics list we run
   private:
@@ -55,7 +50,7 @@ namespace CP
 
     /// \brief the name of the decoration we create
   private:
-    std::string m_decorationName {"Jvt"};
+    Gaudi::Property<std::string> m_decorationName {this, "decorationName", "Jvt", "the decoration name to use"};
 
     /// \brief the decoration accessor we use
   private:

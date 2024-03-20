@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,6 +14,7 @@
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -23,22 +24,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    OverlapRemovalAlg (const std::string& name, 
-                       ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// The OR toolbox
   private:
-    ToolHandle<ORUtils::IOverlapRemovalTool> m_overlapTool {
-      "ORUtils::OverlapRemovalTool", this};
+    ToolHandle<ORUtils::IOverlapRemovalTool> m_overlapTool { this, "overlapTool", "ORUtils::OverlapRemovalTool", "the overlap removal tool"};
 
     /// \brief the systematics list we run
   private:
@@ -75,7 +69,7 @@ namespace CP
 
     /// \brief the tool output decoration for the overlap removal status
   private:
-    std::string m_overlapRemovalDecoration;
+    Gaudi::Property<std::string> m_overlapRemovalDecoration {this, "OutputLabel", "", "the decoration for the overlap removal tool output"};
 
     /// \brief the accessor for \ref m_overlapRemovalDecoration
   private:

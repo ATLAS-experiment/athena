@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef TRACKINGANALYSISALGORITHMS_VERTEXSELECTIONALG_H
 #define TRACKINGANALYSISALGORITHMS_VERTEXSELECTIONALG_H
@@ -8,6 +8,12 @@
 // Framework include(s):
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <EventBookkeeperTools/FilterReporterParams.h>
+#include <AsgTools/PropertyWrapper.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/ReadHandle.h>
+
+// EDM include(s):
+#include "xAODTracking/VertexContainer.h"
 
 // System include(s):
 #include <string>
@@ -26,7 +32,7 @@ namespace CP {
 
    public:
       /// Algorithm constructor
-      VertexSelectionAlg( const std::string& name, ISvcLocator* svcLoc );
+     using EL::AnaAlgorithm::AnaAlgorithm;
 
       /// @name Function(s) inherited from @c EL::AnaAlgorithm
       /// @{
@@ -47,11 +53,11 @@ namespace CP {
       /// @{
 
       /// Event store key of the vertex container
-      std::string m_vertexKey;
+     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey {this, "VertexContainer", "PrimaryVertices", "Vertex container to check"};
       /// Number of vertices required in the event
-      unsigned m_minVertices;
+     Gaudi::Property<unsigned> m_minVertices {this, "MinVertices", 1, "Minimum number of vertices required"};
       /// Number of track particles required per vertex
-      unsigned m_minTracks;
+     Gaudi::Property<unsigned> m_minTracks {this, "MinTracks", 0, "Minimum number of track particles required per vertex"};
 
       FilterReporterParams m_filterParams {this, "VertexSelection", "vertex selection"};
 

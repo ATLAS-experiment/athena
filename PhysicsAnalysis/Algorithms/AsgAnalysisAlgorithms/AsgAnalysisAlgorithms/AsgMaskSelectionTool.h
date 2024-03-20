@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /// @author RD Schaffer 
@@ -13,6 +13,7 @@
 #include <PATCore/IAsgSelectionTool.h>
 #include <SelectionHelpers/ISelectionReadAccessor.h>
 #include <xAODBase/IParticle.h>
+#include "AsgTools/PropertyWrapper.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -41,8 +42,7 @@ namespace CP
     /// \par Failures
     ///   out of memory II
   public:
-    AsgMaskSelectionTool (const std::string& name);
-
+    using asg::AsgTool::AsgTool;
 
 
 
@@ -65,8 +65,8 @@ namespace CP
     /// tool properties
     /// \{
   private:
-    std::vector<std::string>  m_selVars;
-    std::vector<unsigned int> m_selMasks;
+    Gaudi::Property<std::vector<std::string>> m_selVars {this, "selectionVars", {}, "list of variables to use as selection criteria"};
+    Gaudi::Property<std::vector<unsigned int>> m_selMasks {this, "selectionMasks", {}, "list of masks, one per variable, for applying the selection"};
     std::vector<std::unique_ptr<ISelectionReadAccessor> > m_acc_selVars;
 
     /// \}

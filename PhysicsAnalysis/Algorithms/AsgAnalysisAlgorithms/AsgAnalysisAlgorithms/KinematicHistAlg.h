@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -13,6 +13,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODBase/IParticleContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -26,14 +27,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    KinematicHistAlg (const std::string& name, 
-                            ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
 
 
@@ -53,7 +48,7 @@ namespace CP
 
     /// \brief the pattern for histogram names
   private:
-    std::string m_histPattern {"%VAR%_%SYS%"};
+    Gaudi::Property<std::string> m_histPattern {this, "histPattern", "%VAR%_%SYS%", "the pattern for histogram names"};
 
 
     /// \brief the histograms we fill per systematic and object

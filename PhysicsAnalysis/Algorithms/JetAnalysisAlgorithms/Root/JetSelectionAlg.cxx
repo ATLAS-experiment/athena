@@ -19,16 +19,6 @@
 
 namespace CP
 {
-  JetSelectionAlg ::
-  JetSelectionAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_selectionTool ("", this)
-  {
-    declareProperty ("selectionTool", m_selectionTool, "the selection tool we apply");
-  }
-
-
 
   StatusCode JetSelectionAlg ::
   initialize ()

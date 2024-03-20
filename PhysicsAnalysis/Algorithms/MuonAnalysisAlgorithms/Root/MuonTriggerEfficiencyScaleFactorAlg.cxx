@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -21,18 +21,6 @@
 
 namespace CP
 {
-  MuonTriggerEfficiencyScaleFactorAlg ::
-  MuonTriggerEfficiencyScaleFactorAlg (const std::string& name, ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_efficiencyScaleFactorTool ("CP::MuonTriggerScaleFactors", this)
-  {
-    declareProperty ("efficiencyScaleFactorTool", m_efficiencyScaleFactorTool, "the trigger efficiency scale factor tool we apply");
-    declareProperty ("trigger", m_trigger, "trigger or trigger leg to calculate efficiency for");
-    declareProperty ("minRunNumber", m_minRunNumber = 0, "trigger or trigger leg to calculate efficiency for");
-    declareProperty ("maxRunNumber", m_maxRunNumber = 999999, "trigger or trigger leg to calculate efficiency for");
-  }
-
-
 
   StatusCode MuonTriggerEfficiencyScaleFactorAlg ::
   initialize ()

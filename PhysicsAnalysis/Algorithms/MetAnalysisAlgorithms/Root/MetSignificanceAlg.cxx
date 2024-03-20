@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -20,20 +20,6 @@
 //
 namespace CP
 {
-  MetSignificanceAlg ::
-  MetSignificanceAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_significanceTool ("METMaker", this)
-  {
-    declareProperty ("significanceTool", m_significanceTool, "the significance tool we apply");
-    declareProperty ("significanceDecoration", m_significanceDecoration, "the decoration to use for the significance");
-    declareProperty ("totalMETName", m_totalMETName, "the key for the final met term");
-    declareProperty ("jetTermName", m_jetTermName, "the key for the jets term");
-    declareProperty ("softTermName", m_softTermName, "the key for the soft term");
-  }
-
-
 
   StatusCode MetSignificanceAlg ::
   initialize ()

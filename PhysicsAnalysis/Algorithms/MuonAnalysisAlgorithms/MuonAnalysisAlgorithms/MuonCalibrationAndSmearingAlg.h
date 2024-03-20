@@ -26,21 +26,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MuonCalibrationAndSmearingAlg (const std::string& name, 
-                                   ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IMuonCalibrationAndSmearingTool> m_calibrationAndSmearingTool;
+    ToolHandle<IMuonCalibrationAndSmearingTool> m_calibrationAndSmearingTool {this, "calibrationAndSmearingTool", "CP::MuonCalibrationAndSmearingTool", "the calibration and smearing tool we apply"};
 
     /// \brief whether to skip the nominal correction (for PHYSLITE)
   private:

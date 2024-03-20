@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -171,23 +171,6 @@ namespace CP
     return StatusCode::SUCCESS;
   }
 
-
-
-  AsgViewFromSelectionAlg ::
-  AsgViewFromSelectionAlg (const std::string& name, 
-                           ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    /// \todo this would probably better be an std::map, but this
-    /// isn't supported as a property type for AnaAlgorithm right now
-    declareProperty ("selection", m_selection, "the list of selection decorations");
-    declareProperty ("ignore", m_ignore, "the list of cuts to *ignore* for each selection");
-    declareProperty ("sortPt", m_sortPt, "whether to sort objects in pt");
-    declareProperty ("allowMissing", m_allowMissing,
-                     "Allow the input container to be missing");
-    declareProperty ("sizeLimit", m_sizeLimit, "the limit on the size of the output container");
-    declareProperty ("deepCopy", m_deepCopy, "perform a deep copy");
-  }
 
 
 

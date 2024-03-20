@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,6 +15,9 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
+#include <AsgTools/PropertyWrapper.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/ReadHandle.h>
 
 namespace CP
 {
@@ -24,21 +27,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    PileupReweightingAlg (const std::string& name, 
-                          ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IPileupReweightingTool> m_pileupReweightingTool;
+    ToolHandle<IPileupReweightingTool> m_pileupReweightingTool {this, "pileupReweightingTool", "PileupReweightingTool", "the pileup reweighting tool we apply"};
 
     /// \brief the systematics list we run
   private:
@@ -56,19 +53,21 @@ namespace CP
 
     /// \brief the name of the original event info (this should usually be the same as eventiNfoHandle and EventInfo)
   private:
-    std::string m_baseEventInfoName{"EventInfo"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_baseEventInfoName {this, "baseEventInfo", "EventInfo",       "The name of the original event info. The non-systematic dependent decorations will be applied to this "
+      "object so it should be at least a base of the shallow copies read in by the 'eventInfo' handle. "
+      "The default (and strongly recommended behaviour) is to leave all of these pointed at the central 'EventInfo' object!"};
 
     /// \brief the decoration for the corrected and scaled average interactions per crossing
   private:
-    std::string m_correctedScaledAverageMuDecoration;
+    Gaudi::Property<std::string> m_correctedScaledAverageMuDecoration {this, "correctedScaledAverageMuDecoration", "", "the decoration for the corrected and scaled average interactions per crossing"};
 
     /// \brief the decoration for the corrected actual interactions per crossing
   private:
-    std::string m_correctedActualMuDecoration;
+    Gaudi::Property<std::string> m_correctedActualMuDecoration {this, "correctedActualMuDecoration", "", "the decoration for the corrected actual interactions per crossing"};
 
     /// \brief the decoration for the corrected and scaled actual interactions per crossing
   private:
-    std::string m_correctedScaledActualMuDecoration;
+    Gaudi::Property<std::string> m_correctedScaledActualMuDecoration {this, "correctedScaledActualMuDecoration", "", "the decoration for the corrected and scaled actual interactions per crossing"};
 
     /// \brief the accessor for \ref m_correctedScaledAverageMuDecoration
   private:

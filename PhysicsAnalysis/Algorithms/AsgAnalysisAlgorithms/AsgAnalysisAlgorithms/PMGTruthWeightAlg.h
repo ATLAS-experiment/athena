@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -21,20 +21,13 @@ namespace CP
   class PMGTruthWeightAlg final : public EL::AnaAlgorithm
   {
     /// \brief the standard constructor
-  public:
-    PMGTruthWeightAlg (const std::string& name, 
-                       ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
 
     /// \brief the tool
   private:
-    ToolHandle<PMGTools::IPMGTruthWeightTool> m_truthWeightTool;
+    ToolHandle<PMGTools::IPMGTruthWeightTool> m_truthWeightTool {this, "truthWeightTool", "PMGTools::PMGTruthWeightTool", "the truth weight tool"};
 
     /// \brief the systematics list we run
   private:

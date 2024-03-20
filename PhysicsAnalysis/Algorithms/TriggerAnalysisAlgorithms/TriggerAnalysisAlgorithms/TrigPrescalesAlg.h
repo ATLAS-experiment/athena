@@ -12,6 +12,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgAnalysisInterfaces/IPileupReweightingTool.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -27,32 +28,26 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    TrigPrescalesAlg (const std::string& name, 
-                      ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
 
 
     /// \brief the pile-up reweighting tool
   private:
-    ToolHandle<IPileupReweightingTool> m_pileupReweightingTool;
+    ToolHandle<IPileupReweightingTool> m_pileupReweightingTool {this, "pileupReweightingTool", "PileupReweightingTool", "the pileup reweighting tool to be used"};
 
     /// \brief list of prescaled triggers or trigger chains
   private:
-    std::vector<std::string> m_trigList;
+    Gaudi::Property<std::vector<std::string>> m_trigList {this, "triggers", {}, "trigger list"};
   
     /// \brief list of all triggers or trigger chains
   private:
-    std::vector<std::string> m_trigListAll;
+    Gaudi::Property<std::vector<std::string>> m_trigListAll {this, "triggersAll", {}, "all trigger list"};
 
     /// \brief list of all triggers or trigger chains
   private:
-    std::string m_trigFormula;
+    Gaudi::Property<std::string> m_trigFormula {this, "triggersFormula", "", "produce prescale based on formula instead of per trigger, e.g. (trigA||trigB)"};
 
     /// \brief list of helper functions to compute the prescales
   private:
@@ -60,7 +55,7 @@ namespace CP
 
     /// \brief the decoration for trigger prescales
   private:
-    std::string m_prescaleDecoration;
+    Gaudi::Property<std::string> m_prescaleDecoration {this, "prescaleDecoration", "", "decoration to store prescales"};
 
     /// \brief the accessors for \ref m_prescaleDecoration and \ref m_trigList combination
   private:

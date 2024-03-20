@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -18,18 +18,6 @@
 
 namespace CP
 {
-  BTaggingInformationDecoratorAlg ::
-  BTaggingInformationDecoratorAlg (const std::string& name, 
-                                   ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_selectionTool ("", this)
-  {
-    declareProperty ("selectionTool", m_selectionTool, "the b-tagging selection tool");
-    declareProperty ("taggerWeightDecoration", m_taggerWeightDecoration, "the decoration for the tagger weight");
-    declareProperty ("quantileDecoration", m_quantileDecoration, "the decoration for the continuous WP quantile");
-  }
-
-
 
   StatusCode BTaggingInformationDecoratorAlg ::
   initialize ()

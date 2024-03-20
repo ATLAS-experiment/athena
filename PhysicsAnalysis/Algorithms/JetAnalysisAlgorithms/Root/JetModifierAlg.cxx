@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,16 +17,6 @@
 
 namespace CP
 {
-  JetModifierAlg ::
-  JetModifierAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_modifierTool ("JetForwardJvtTool", this)
-  {
-    declareProperty ("modifierTool", m_modifierTool, "the modifier tool we apply");
-  }
-
-
 
   StatusCode JetModifierAlg ::
   initialize ()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -25,25 +25,19 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    JetUncertaintiesAlg (const std::string& name, 
-                         ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the main jet uncertainties tool
   private:
-    ToolHandle<ICPJetUncertaintiesTool> m_uncertaintiesTool;
+    ToolHandle<ICPJetUncertaintiesTool> m_uncertaintiesTool {this, "uncertaintiesTool", "JetUncertaintiesTool", "the uncertainties tool we apply"};
 
     /// \brief the secondary jet uncertainties tool, for pseudo-data JER smearing
   private:
-    ToolHandle<ICPJetUncertaintiesTool> m_uncertaintiesToolPD;
+    ToolHandle<ICPJetUncertaintiesTool> m_uncertaintiesToolPD {this, "uncertaintiesToolPD", "", "the uncertainties tool we apply specifically for the 'Full'/'All' JER systematic models"};
 
     /// \brief the systematics list we run
   private:

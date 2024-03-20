@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -24,21 +24,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    TauTruthMatchingAlg (const std::string& name, 
-                                   ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the matching tool
   private:
-    ToolHandle<TauAnalysisTools::ITauTruthMatchingTool> m_matchingTool;
+    ToolHandle<TauAnalysisTools::ITauTruthMatchingTool> m_matchingTool {this, "matchingTool", "TauAnalysisTools::TauTruthMatchingTool", "the matching tool we apply"};
 
     /// \brief the systematics list we run
   private:

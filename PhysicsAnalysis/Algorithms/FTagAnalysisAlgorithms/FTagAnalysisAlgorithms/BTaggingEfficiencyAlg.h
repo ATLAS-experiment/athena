@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,6 +17,7 @@
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODJet/JetContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <memory>
 
 namespace CP
@@ -27,21 +28,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    BTaggingEfficiencyAlg (const std::string& name, 
-                           ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IBTaggingEfficiencyTool> m_efficiencyTool;
+    ToolHandle<IBTaggingEfficiencyTool> m_efficiencyTool {this, "efficiencyTool", "BTaggingEfficiencyTool", "the calibration and smearing tool we apply"};
 
     /// \brief the systematics list we run
   private:
@@ -73,11 +68,11 @@ namespace CP
 
     /// \brief only run the efficency for all jets
   private:
-    bool m_onlyEfficiency {false};
+    Gaudi::Property<bool> m_onlyEfficiency {this, "onlyEfficiency", false, "whether only to calculate efficiencies"};
 
     /// \brief only run the inefficency for all jets
   private:
-    bool m_onlyInefficiency {false};
+    Gaudi::Property<bool> m_onlyInefficiency {this, "onlyInefficiency", false, "whether only to calculate inefficiencies"};
   };
 }
 

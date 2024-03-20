@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef STANDALONEANALYSISALGORITHMS_XAODWRITERALG_H
 #define STANDALONEANALYSISALGORITHMS_XAODWRITERALG_H
@@ -14,6 +14,7 @@
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "SystematicsHandles/SysListHandle.h"
 #include "xAODRootAccess/TEvent.h"
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP {
 
@@ -29,7 +30,7 @@ namespace CP {
 
    public:
       /// Algorithm constructor
-      xAODWriterAlg( const std::string& name, ISvcLocator* svcLoc );
+     using EL::AnaAlgorithm::AnaAlgorithm;
 
       /// @name Function(s) inherited from @c EL::AnaAlgorithm
       /// @{
@@ -53,14 +54,13 @@ namespace CP {
       /// @{
 
       /// Name of the output stream to write to
-      std::string m_outputStreamName;
+     Gaudi::Property<std::string> m_outputStreamName {this, "OutputStreamName", "ANALYSIS", "Stream name of the output file to use"};
       /// Item list to write to the output file
-      std::vector< std::string > m_itemList;
-
+     Gaudi::Property<std::vector<std::string>> m_itemList {this, "ItemList", {}, "Objects to write to the output file"};
       /// (Starter) Basket size for the created branches
-      int m_basketSize;
+     Gaudi::Property<int> m_basketSize {this, "BasketSize", 32000, "(Starter) Basket size for the created branches"};
       /// Split level for the created branches
-      int m_splitLevel;
+     Gaudi::Property<int> m_splitLevel {this, "SplitLevel", 0, "Split level for the created branches"};
 
       /// @}
 

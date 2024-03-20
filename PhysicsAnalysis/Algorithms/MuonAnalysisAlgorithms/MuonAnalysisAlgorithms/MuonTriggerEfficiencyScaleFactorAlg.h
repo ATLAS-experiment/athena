@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -18,6 +18,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODMuon/MuonContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -27,14 +28,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MuonTriggerEfficiencyScaleFactorAlg (const std::string& name, 
-                                         ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
@@ -68,15 +63,15 @@ namespace CP
 
     /// \brief trigger to run efficiency for
   private:
-    std::string m_trigger;
+    Gaudi::Property<std::string> m_trigger {this, "trigger", "", "trigger or trigger leg to calculate efficiency for"};
     
     /// \brief minimum run number this trigger is valid for
   private:
-    uint32_t m_minRunNumber;
+    Gaudi::Property<uint32_t> m_minRunNumber {this, "minRunNumber", 0, "minimum run number for the trigger or trigger leg to calculate efficiency for"};
 
     /// \brief maximum run number this trigger is valid for
   private:
-    uint32_t m_maxRunNumber;
+    Gaudi::Property<uint32_t> m_maxRunNumber {this, "maxRunNumber", 999999, "maximum run number for the trigger or trigger leg to calculate efficiency for"};
 
     /// \brief the decoration for the muon scale factor
   private:

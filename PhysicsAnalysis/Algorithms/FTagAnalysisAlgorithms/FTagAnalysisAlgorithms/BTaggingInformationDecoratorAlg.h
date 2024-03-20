@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -17,6 +17,7 @@
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <xAODJet/JetContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -24,14 +25,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    BTaggingInformationDecoratorAlg (const std::string& name, 
-                                     ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
@@ -41,7 +36,7 @@ namespace CP
 
     /// \brief the selection tool
   private:
-    ToolHandle<IBTaggingSelectionTool> m_selectionTool;
+    ToolHandle<IBTaggingSelectionTool> m_selectionTool {this, "selectionTool", "", "the b-tagging selection tool"};
 
     /// \brief the jets continer we run on
   private:
@@ -59,7 +54,7 @@ namespace CP
 
     /// \brief the decoration for the b-tagging weight
   private:
-    std::string m_taggerWeightDecoration {};
+    Gaudi::Property<std::string> m_taggerWeightDecoration {this, "taggerWeightDecoration", "", "the decoration for the tagger weight"};
 
     /// \brief the decorator for \ref m_taggerWeightDecoration
   private:
@@ -67,7 +62,7 @@ namespace CP
 
     /// \brief the decoration for the b-tagging quantiles
   private:
-    std::string m_quantileDecoration {};
+    Gaudi::Property<std::string> m_quantileDecoration {this, "quantileDecoration", "", "the decoration for the continuous WP quantile"};
 
     /// \brief the decorator for \ref m_quantileDecoration
   private:

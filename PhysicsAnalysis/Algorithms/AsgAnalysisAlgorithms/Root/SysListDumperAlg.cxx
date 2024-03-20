@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -19,17 +19,6 @@
 
 namespace CP
 {
-  SysListDumperAlg :: 
-  SysListDumperAlg (const std::string& name, 
-                    ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("systematicsService", m_systematicsService, "systematics service");
-    declareProperty ("systematicsRegex", m_regex, "systematics regex");
-    declareProperty ("histogramName", m_histogramName, "the name of the output histogram");
-  }
-
-
 
   StatusCode SysListDumperAlg ::
   initialize ()
@@ -59,7 +48,7 @@ namespace CP
 
     const std::vector<CP::SystematicSet> systematics = makeSystematicsVector (m_regex);
 
-    ANA_CHECK (book (TH1F (m_histogramName.c_str(), "systematics", systematics.size(), 0, systematics.size())));
+    ANA_CHECK (book (TH1F (m_histogramName.value().c_str(), "systematics", systematics.size(), 0, systematics.size())));
     TH1 *histogram = hist (m_histogramName);
 
     int i = 1;

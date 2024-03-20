@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak <tadej@cern.ch>
@@ -12,6 +12,7 @@
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODBase/IParticleContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 
 namespace CP
@@ -22,14 +23,8 @@ class AsgPriorityDecorationAlg final : public EL::AnaAlgorithm
 {
   /// \brief the standard constructor
 public:
-  AsgPriorityDecorationAlg(const std::string& name, 
-                           ISvcLocator* pSvcLocator);
-
-
-public:
+  using EL::AnaAlgorithm::AnaAlgorithm;
   virtual StatusCode initialize() override;
-
-public:
   virtual StatusCode execute() override;
 
 
@@ -49,11 +44,11 @@ private:
 
   /// \brief the values of the priorities
 private:
-  std::vector<int> m_priorities {};
+  Gaudi::Property<std::vector<int>> m_priorities {this, "priorities", {}, "priorities to use with the highest one first"};
 
   /// \brief the decoration for the priority
 private:
-  std::string m_priorityDecoration {};
+  Gaudi::Property<std::string> m_priorityDecoration {this, "priorityDecoration", "", "the decoration for the priority"};
 
   /// \brief the accessor for \ref m_priorityDecoration
 private:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,16 +18,6 @@
 
 namespace CP
 {
-  PhotonEfficiencyCorrectionAlg ::
-  PhotonEfficiencyCorrectionAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_efficiencyCorrectionTool ("AsgPhotonEfficiencyCorrectionTool", this)
-  {
-    declareProperty ("efficiencyCorrectionTool", m_efficiencyCorrectionTool, "the efficiency correction tool we apply");
-  }
-
-
 
   StatusCode PhotonEfficiencyCorrectionAlg ::
   initialize ()

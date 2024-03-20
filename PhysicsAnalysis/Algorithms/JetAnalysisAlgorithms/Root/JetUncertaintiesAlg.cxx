@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,18 +17,6 @@
 
 namespace CP
 {
-  JetUncertaintiesAlg ::
-  JetUncertaintiesAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_uncertaintiesTool ("JetUncertaintiesTool", this)
-    , m_uncertaintiesToolPD ("", this)
-  {
-    declareProperty ("uncertaintiesTool", m_uncertaintiesTool, "the uncertainties tool we apply");
-    declareProperty ("uncertaintiesToolPD", m_uncertaintiesToolPD, "the uncertainties tool we apply specifically for the 'Full'/'All' JER systematic models");
-  }
-
-
 
   StatusCode JetUncertaintiesAlg ::
   initialize ()

@@ -35,7 +35,7 @@ def makeTriggerAnalysisSequence( dataType,
 
     if triggerChains:
         # Set up the trigger selection:
-        alg = createAlgorithm( 'CP::TrigEventSelectionAlg', 'TrigEventSelectorAlg' )
+        alg = createAlgorithm( 'CP::TrigEventSelectionAlg', 'TrigEventSelectionAlg' )
         alg.tool = '%s/%s' % \
             ( decisionTool.getType(), decisionTool.getName() )
         alg.triggers = list(triggerChains)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -21,16 +21,6 @@
 
 namespace CP
 {
-  MetBuilderAlg ::
-  MetBuilderAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("finalKey", m_finalKey, "the key for the final met term");
-    declareProperty ("softTerm", m_softTerm, "the key for the soft term");
-  }
-
-
 
   StatusCode MetBuilderAlg ::
   initialize ()

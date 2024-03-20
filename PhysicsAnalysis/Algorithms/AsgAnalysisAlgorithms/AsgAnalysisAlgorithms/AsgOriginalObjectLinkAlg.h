@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -12,7 +12,9 @@
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODBase/IParticleContainer.h>
-
+#include <AsgTools/PropertyWrapper.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/ReadHandle.h>
 
 namespace CP
 {
@@ -27,19 +29,13 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    AsgOriginalObjectLinkAlg (const std::string& name, 
-                              ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
 
     /// \brief base container name
   private:
-    std::string m_baseContainerName {""};
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_baseContainerName {this, "baseContainerName", "", "base particle container name"};
 
     /// \brief the systematics list we run
   private:

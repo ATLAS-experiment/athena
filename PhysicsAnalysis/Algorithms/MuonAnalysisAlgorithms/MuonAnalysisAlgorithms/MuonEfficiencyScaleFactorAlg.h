@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -27,21 +27,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MuonEfficiencyScaleFactorAlg (const std::string& name, 
-                                   ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IMuonEfficiencyScaleFactors> m_efficiencyScaleFactorTool;
+    ToolHandle<IMuonEfficiencyScaleFactors> m_efficiencyScaleFactorTool {this, "efficiencyScaleFactorTool", "CP::MuonTriggerScaleFactors", "the trigger efficiency scale factor tool we apply"};
 
     /// \brief the systematics list we run
   private:

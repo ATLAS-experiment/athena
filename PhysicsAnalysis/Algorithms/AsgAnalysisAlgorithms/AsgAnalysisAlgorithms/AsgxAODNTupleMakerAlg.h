@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ASGANALYSISALGORITHMS_ASGXAODNTUPLEMAKERALG_H
 #define ASGANALYSISALGORITHMS_ASGXAODNTUPLEMAKERALG_H
@@ -18,6 +18,7 @@
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 #include "SystematicsHandles/SysListHandle.h"
+#include <AsgTools/PropertyWrapper.h>
 
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxTypeVector.h"
@@ -59,7 +60,7 @@ namespace CP {
 
    public:
       /// Algorithm constructor
-      AsgxAODNTupleMakerAlg( const std::string& name, ISvcLocator* svcLoc );
+     using EL::AnaAlgorithm::AnaAlgorithm;
 
       /// @name Functions inherited from @c EL::AnaAlgorithm
       /// @{
@@ -87,9 +88,9 @@ namespace CP {
       /// @{
 
       /// The name of the output tree to write
-      std::string m_treeName;
+      Gaudi::Property<std::string> m_treeName {this, "TreeName", "physics", "Name of the tree to write"};
       /// The branches to write into this output tree
-      std::vector< std::string > m_branches;
+      Gaudi::Property<std::vector<std::string>> m_branches {this, "Branches", {}, "Branches to write to the output tree"};
 
       /// @}
 
@@ -360,7 +361,7 @@ namespace CP {
       bool m_isInitialized = false;
 
       /// \brief the handle for the systematics service
-      ServiceHandle<ISystematicsSvc> m_systematicsService {"SystematicsSvc", ""};
+      ServiceHandle<ISystematicsSvc> m_systematicsService {this, "systematicsService", "SystematicsSvc", "systematics service"};
 
       /// @}
 

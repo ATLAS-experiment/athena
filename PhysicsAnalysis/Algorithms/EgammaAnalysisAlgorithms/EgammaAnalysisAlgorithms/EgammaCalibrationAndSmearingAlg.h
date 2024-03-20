@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -27,21 +27,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    EgammaCalibrationAndSmearingAlg (const std::string& name, 
-                                     ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_calibrationAndSmearingTool;
+    ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_calibrationAndSmearingTool {this, "calibrationAndSmearingTool", "EgammaCalibrationAndSmearingTool", "the smearing tool  we apply"};
 
     /// \brief whether to ignore all tool systematics
     ///
