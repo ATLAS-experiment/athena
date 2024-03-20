@@ -469,9 +469,12 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
     if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
 
-    if (type == 1) {
+    if (type == 1) {//we are considering the scalar case (sum_x = MET and sum_y = SumEt) 
         ATH_MSG_DEBUG("  scalar tob, saving " << scalar << " in X component");
-        sum_x = scalar;
+        sum_x = scalar; //Total MET 
+        if( sum_y > 0x000FFF) sum_y = 0x000FFF; //Overflow control for SumEt
+        if( sum_y < 0) sum_y = 0;
+
     }
 
     ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);
@@ -490,9 +493,10 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
 
     int MET2 = sum_x * sum_x + sum_y * sum_y;
     int16_t MET = 0x0;
+    MET2 = MET2 >> 12;
+    MET = std::sqrt(MET2);
 
-    if (MET2 > 0x000FFF) MET = 0x000FFF;
-    else MET = std::sqrt(MET2);
+    if (MET > 0x000FFF) MET = 0x000FFF;
 
     return MET;
 
