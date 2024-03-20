@@ -47,9 +47,9 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
          : std::unique_lock<std::recursive_mutex>();
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-      auto view = m_reader.getNativeReader()->GetView<void>(fieldInfo.fieldName, nullptr);
-      view.BindRawPtr(data);
-      view(m_entry);
+      //auto view = m_reader.getNativeReader()->GetView<void>(fieldInfo.fieldName, nullptr);
+      fieldInfo.view_p->BindRawPtr(data);
+      (*fieldInfo.view_p)(m_entry);
 #endif
 
       int  nbytes = 1;   // MN: TODO how to get this?

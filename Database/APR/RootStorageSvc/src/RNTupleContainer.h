@@ -21,31 +21,18 @@
 
 // Forward declarations
 class TClass;
-class IRootAuxDynWriter;
 namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO { class IRNTupleWriter; }
-namespace ROOT::Experimental {
-  class RNTupleReader;
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
-  namespace Detail {
-    class RFieldBase;
-  }
-#else
-  class RFieldBase;
-#endif
-}
+namespace ROOT::Experimental { class RNTupleReader; }
 
+#include "ROOT/RNTupleView.hxx"
 /*
  * POOL namespace declaration
  */
 namespace pool {
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-using ROOT::Experimental::RFieldBase;
-#else
-using ROOT::Experimental::Detail::RFieldBase;
-#endif
 using ROOT::Experimental::RNTupleReader;
+using ROOT::Experimental::RNTupleView;
 
 // Forward declaration
 class DbColumn;
@@ -63,6 +50,9 @@ class RNTupleContainer : public DbContainerImp
   struct FieldDesc : public DbColumn
   {
     std::string fieldname;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+    std::unique_ptr< RNTupleView<void, true> > view_p;  // pointer because lack of default xtor
+#endif
     std::string sgkey;
     TClass*     clazz = nullptr;
     void*       object = nullptr;

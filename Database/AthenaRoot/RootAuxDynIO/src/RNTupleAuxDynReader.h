@@ -9,6 +9,8 @@
 #include "AthContainers/AuxStoreInternal.h" 
 #include "RootAuxDynIO/RootAuxDynIO.h" 
 
+#include "ROOT/RNTupleView.hxx"
+
 #include <map>
 #include <string>
 
@@ -21,6 +23,7 @@ class TClass;
 namespace RootAuxDynIO
 {
    using ROOT::Experimental::RNTupleReader;
+   using ROOT::Experimental::RNTupleView;
 
    class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
    {
@@ -40,6 +43,9 @@ namespace RootAuxDynIO
          SG::auxid_t   auxid;
          std::string   attribName;
          std::string   fieldName;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+         std::unique_ptr< RNTupleView<void, true> > view_p;  // pointer because lack of default xtor
+#endif
       };
 
 

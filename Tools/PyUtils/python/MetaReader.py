@@ -149,16 +149,24 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             import ROOT
             # open the file using ROOT.TFile
             current_file = ROOT.TFile.Open( _get_pfn(filename) )
-
-            # open the tree 'POOLContainer' to read the number of entries
-            if current_file.GetListOfKeys().Contains('POOLContainer'):
-                meta_dict[filename]['nentries'] = current_file.Get('POOLContainer').GetEntriesFast()
+            # open the DataHeader Container to read the number of entries
+            dataHeaderTree = current_file.Get(ROOT.APRDefaults.TTreeNames.DataHeader)
+            if isinstance(dataHeaderTree, ROOT.TTree):
+                meta_dict[filename]['nentries'] = dataHeaderTree.GetEntriesFast()
             else:
-                meta_dict[filename]['nentries'] = None
+                # check early to avoid scary ROOT read errors
+                if current_file.GetListOfKeys().Contains(ROOT.APRDefaults.RNTupleNames.DataHeader) and ROOT.gROOT.GetVersionInt() < 63100:
+                    raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files") 
+                dataHeaderRNT = current_file.Get(ROOT.APRDefaults.RNTupleNames.DataHeader)
+                if isinstance(dataHeaderRNT, ROOT.Experimental.RNTuple):
+                    meta_dict[filename]['nentries'] = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
+                else:
+                    meta_dict[filename]['nentries'] = None
 
-            # open the tree 'CollectionTree' to read auto flush
-            if current_file.GetListOfKeys().Contains('CollectionTree'):
-                meta_dict[filename]['auto_flush'] = current_file.Get('CollectionTree').GetAutoFlush()
+            # get auto flush setting from the main EventData TTree
+            collectionTree = current_file.Get(ROOT.APRDefaults.TTreeNames.EventData)
+            if isinstance(collectionTree, ROOT.TTree):
+                meta_dict[filename]['auto_flush'] = collectionTree.GetAutoFlush()
 
             # read and add the 'GUID' value
             meta_dict[filename]['file_guid'] = _read_guid(filename)
@@ -470,7 +478,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
 
             # If AnalysisBase the itemList must be grabbed another way
             if not isGaudiEnv():
-                meta_dict[filename]['itemList'] = _extract_itemlist_from_collectiontree(current_file)
+                if isinstance(collectionTree, ROOT.TTree):
+                    meta_dict[filename]['itemList'] = [ (b.GetClassName(), b.GetName()) for b in collectionTree.GetListOfBranches() ]
 
         # ----- retrieves metadata from bytestream (BS) files (RAW, DRAW) ------------------------------------------#
         elif current_file_type == 'BS':
@@ -1084,10 +1093,6 @@ def _extract_fields_triggermenujson(interface, aux):
         msg.warn('Problem reading xAOD::TriggerMenuJson')
 
     return result
-
-def _extract_itemlist_from_collectiontree(current_file):
-    tcoll = current_file.Get('CollectionTree')
-    return [ (b.GetClassName(), b.GetName()) for b in tcoll.GetListOfBranches() ]
 
 def _convert_event_type_user_type(value):
     if 'user_type' in value:
