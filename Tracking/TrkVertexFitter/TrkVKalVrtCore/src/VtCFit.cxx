@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "TrkVKalVrtCore/VtCFit.h"
@@ -706,8 +706,11 @@ int vtcfit( VKVertex * vk) {
     double tt2=vk->tmpArr[kt]->tt[1];
     double tt3=vk->tmpArr[kt]->tt[2];
     vk->tmpArr[kt]->parf0[0] = twci[0]*tt1 + twci[1]*tt2 + twci[3]*tt3 - twbci[0]*dxyz[0] - twbci[1]*dxyz[1] - twbci[2]*dxyz[2];
+    if( !std::isfinite(vk->tmpArr[kt]->parf0[0]) ) return -19; // Rare FPE presumably seen in trigger
     vk->tmpArr[kt]->parf0[1] = twci[1]*tt1 + twci[2]*tt2 + twci[4]*tt3 - twbci[3]*dxyz[0] - twbci[4]*dxyz[1] - twbci[5]*dxyz[2];
+    if( !std::isfinite(vk->tmpArr[kt]->parf0[1]) ) return -19; // Rare FPE presumably seen in trigger
     vk->tmpArr[kt]->parf0[2] = twci[3]*tt1 + twci[4]*tt2 + twci[5]*tt3 - twbci[6]*dxyz[0] - twbci[7]*dxyz[1] - twbci[8]*dxyz[2];
+    if( !std::isfinite(vk->tmpArr[kt]->parf0[2]) ) return -19; // Rare FPE presumably seen in trigger
     if( (vk->TrackList[kt]->iniP[2] + vk->tmpArr[kt]->parf0[2]) * vk->TrackList[kt]->iniP[2] < 0 ){
       vk->tmpArr[kt]->parf0[2]= - vk->TrackList[kt]->iniP[2]/4.; } // VK 15.12.2009 - Protection against change of sign
     vk->TrackList[kt]->fitP[0] = vk->TrackList[kt]->iniP[0] + vk->tmpArr[kt]->parf0[0];
