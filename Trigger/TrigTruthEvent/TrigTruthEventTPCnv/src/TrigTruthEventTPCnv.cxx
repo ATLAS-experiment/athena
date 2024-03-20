@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -13,6 +13,9 @@
 
 #include "TrigTruthEventTPCnv/TrigInDetTrackTruthMap_tlp3.h"
 #include "TrigTruthEventTPCnv/TrigInDetTrackTruthMapCnv_tlp3.h"
+
+#include "TrigTruthEventTPCnv/TrigInDetTrackTruthMap_tlp4.h"
+#include "TrigTruthEventTPCnv/TrigInDetTrackTruthMapCnv_tlp4.h"
 
 #include "TrigTruthEventTPCnv/TrigInDetTrackTruthMap_p1.h"
 #include "TrigTruthEventTPCnv/TrigInDetTrackTruthMap_old.h"
@@ -34,3 +37,8 @@ DECLARE_TPCNV_FACTORY(TrigInDetTrackTruthMapCnv_tlp3,
                       TrigInDetTrackTruthMap,
                       TrigInDetTrackTruthMap_tlp3,
                       Athena::TPCnvVers::Current)
+
+DECLARE_TPCNV_FACTORY(TrigInDetTrackTruthMapCnv_tlp4,
+                      TrigInDetTrackTruthMap,
+                      TrigInDetTrackTruthMap_tlp4,
+                      Athena::TPCnvVers::Old)
