@@ -181,7 +181,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
       return std::make_pair(IsoMuon, SingleMuon);
     }
     if (MC::isTau(thePart)) {
-      info->particleOutCome = defOutComeOfTau(thePart, info);
+      info->particleOutCome = defOutComeOfTau(thePart);
       return std::make_pair(IsoTau, SingleTau);
     }
     if (MC::isPhoton(thePart)) {
@@ -867,7 +867,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   const xAOD::TruthVertex* partOriVert = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define tau  outcome status
-  if (MC::isPhysical(thePriPart) && info) info->particleOutCome = defOutComeOfTau(thePriPart, info);
+  if (MC::isPhysical(thePriPart) && info) info->particleOutCome = defOutComeOfTau(thePriPart);
 
   MCTruthPartClassifier::Info tmpinfo;
   if (!info) { info = &tmpinfo; }
@@ -1658,8 +1658,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* t
   if (NumOfMuDaug == 3 && NumOfElec == 1 && NumOfEleNeutr == 1 && NumOfMuonNeutr == 1) PartOutCome = DecaytoElectron;
   return PartOutCome;
 }
-
-ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, [[maybe_unused]] MCTruthPartClassifier::Info* info) const {
+ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart) const {
   ATH_MSG_DEBUG("Executing defOutComeOfTau");
   ParticleOutCome PartOutCome = UnknownOutCome;
   const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
