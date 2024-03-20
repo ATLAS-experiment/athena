@@ -20,3 +20,22 @@ StatusCode MM_RDO_Decoder::initialize() {
 
   return StatusCode::SUCCESS;
 }
+
+
+std::unique_ptr<MmDigit> Muon::MM_RDO_Decoder::getDigit(const EventContext& ctx,
+                                                        const Muon::MM_RawData* data) const {
+
+  // unit conversion
+  const Identifier Id = data->identify(); 
+  int tdo             = data->time();
+  int pdo             = data->charge();
+  uint16_t relBcid    = data->relBcid();
+  // MM_RawData has time and charge in counts, need physical units
+  float charge{0}, time{0.};
+  m_calibTool->tdoToTime  (ctx, data->timeAndChargeInCounts(), tdo, Id, time  , relBcid); 
+  m_calibTool->pdoToCharge(ctx, data->timeAndChargeInCounts(), pdo, Id, charge         ); 
+  
+  
+  // MM_RawData is built using only the first 4 values. The others are now simply filled proper objects. 
+  return std::make_unique<MmDigit>(Id, time, charge);
+}

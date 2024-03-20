@@ -102,7 +102,7 @@ private:
 
     using MmDigitMap_t = std::unordered_map<IdentifierHash, std::unique_ptr<MmDigitCollection> >;
     StatusCode decodeMM_RDO(const EventContext& ctx, MmDigitContainer*) const;
-    StatusCode decodeMM(const Muon::MM_RawDataCollection& rdoColl, MmDigitMap_t& mmDigitMap) const;
+    StatusCode decodeMM(const EventContext& ctx, const Muon::MM_RawDataCollection& rdoColl, MmDigitMap_t& mmDigitMap) const;
 
     StatusCode getTgcCabling();
 

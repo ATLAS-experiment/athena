@@ -42,6 +42,9 @@ namespace LVL1 {
     virtual std::vector<std::unique_ptr<gFEXJetTOB>> largeRfinder(const gTowersType& Atwr, 
                                                                   const gTowersType& Btwr,
                                                                   const gTowersType& CNtwr,
+                                                                  const gTowersType& Asat, 
+                                                                  const gTowersType& Bsat,
+                                                                  const gTowersType& CNsat,
                                                                   int pucA, int pucB, int pucC, int gLJ_seedThrA, int gLJ_seedThrB, int gLJ_seedThrC,
                                                                   int gJ_ptMinToTopoCounts1, int gJ_ptMinToTopoCounts2, 
                                                                   int jetThreshold, int gLJ_ptMinToTopoCounts1, int gLJ_ptMinToTopoCounts2,
@@ -63,7 +66,7 @@ namespace LVL1 {
 
     virtual void ZeroNegative( gTowersType & jets ) const;
 
-    virtual void SaturateJets( gTowersType & jets, gTowersType & sat ) const;
+    virtual void SaturateJets( gTowersType & jets, gTowersType sat ) const;
 
     virtual void gBlockAB(const gTowersType& twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
     

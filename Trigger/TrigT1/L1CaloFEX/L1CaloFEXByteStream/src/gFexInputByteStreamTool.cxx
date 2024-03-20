@@ -174,6 +174,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                          gPos::AMSK,
                          Asatur  );
 
+        gtCalib(Atwr,200, 0,gPos::CAL_OFF);
+
 
         b_gtrx_map(Bfiber, BMapped);
 
@@ -194,6 +196,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::BMSK,
                           Bsatur  );
 
+        gtCalib(Btwr,200, 0,gPos::CAL_OFF);
+
         c_gtrx_map(Cfiber, CMapped);
 
         int fpgaC = 2; 
@@ -212,6 +216,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::CMPD_DTYP_ARR, 
                           gPos::CMSK, 
                           Csatur );
+
+        gtCalib(Ctwr,200, 0,gPos::CAL_OFF);
 
         // Fill the gTower EDM with the corresponding towers
         int iEta = 0;
@@ -240,13 +246,13 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 Et = Atwr[irow][icol];
                 EtF = AtwrF[irow][icol];
                 IsSaturated = Asatur[irow][icol];
+
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
                 gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
                 gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
                 gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID);
                 towerID += 1;
-
   
             }
         }
@@ -455,19 +461,26 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
 
 
     for(unsigned int i=0; i<100; i++){
+
         if( ( Xfiber[i][gPos::W280-1] & 0x000000FF ) == 0x000000BC ) {
+
           fiberFields[i][16] = 1;
         }
+        else {
+          fiberFields[i][16] = 0;
+        }
+
       
         fiberFields[i][18] = ( Xfiber[i][gPos::W280-1] & 0x007F0000) >>16 ;
         fiberFields[i][19] = ( Xfiber[i][gPos::W280-1] & 0xFF800000) >>23  ;
       
         if (XMPD_DTYP_ARR[ XMPD_NFI[i] ][17] == 8) {
+
           fiberFields[i][17] = ( Xfiber[i][gPos::W280-1] & 0x0000FF00) >>8  ;         
           // fill in saturation bits
             for(unsigned int k=0; k<8; k++){
                 if( fiberFields[i][17] & (1<<k) ) { 
-                    fiberSaturation[i][k] = 1; 
+                    fiberSaturation[i][k] = 1;
                 }
             }
         }
@@ -1058,18 +1071,22 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
             // 200 MeV towers 
             int x   = ( (etowerData[itower]>>2) + (htowerData[itower]>>2) );
 
+            signExtend(&xF,18);
+            signExtend(&x,18);
+
             Xgt[irow][icolumn]  = x;
             XgtF[irow][icolumn] = xF;
 
             // etra  region in FPGA A  (eta ~ -2.5)
             if ( icolumn == 0) {
                 int xx =  ( (xetowerData[irow]>>2) + (xhtowerData[irow]>>2) );
-
+                signExtend(&xx,18);
                 Xgt[irow][icolumn]  = Xgt[irow][icolumn]  + xx;
             }
             if ( icolumn == 4) {
                 // 200 MeV towers
                 int ox =  (ohtowerData[irow] >> 2 ) ; 
+                signExtend(&ox,18);
                 Xgt[irow][icolumn]  = Xgt[irow][icolumn]   + ox ;
             }
         }
@@ -1084,19 +1101,28 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
             // 200 MeV towers 
             int x  =  ( (etowerData[itower]>>2) +  (htowerData[itower] >> 2) );
 
+            signExtend(&xF,18);
+            signExtend(&x,18);
+
             Xgt[irow][icolumn]  = x;
             XgtF[irow][icolumn] = xF;
 
             // extra region FPGA B (eta ~ 2.5) 
             if ( icolumn == 11) {
+                // 50 MeV towers 
+                // int xxF = xetower_dataF[irow]  + xhtower_dataF[irow] ;
                 // 200 MeV towers 
                 int xx = ( (xetowerData[irow]>>2) + (xhtowerData[irow]>>2) );
-
+                // signExtend(&xxF,18);
+                signExtend(&xx,18);
                 Xgt[irow][icolumn]  = Xgt[irow][icolumn]  + xx;
             }
             if ( icolumn == 7 ) {
                 // 200 MeV towers
+                // int xoF = ohtowerData[irow];
                 int xo =  ohtowerData[irow]>>2;
+                // signExtend(&xoF,18);
+                signExtend(&xo,18);
                 Xgt[irow][icolumn]  = Xgt[irow][icolumn]   + xo;
             }
         }  
@@ -1110,6 +1136,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
             int xF =   etowerDataF[itower] + htowerDataF[itower] ;
             // 200 MeV towers 
             int x =  ( (etowerData[itower]>>2 ) + (htowerData[itower]>>2));
+            signExtend(&xF,18);
+            signExtend(&x,18);
 
             Xgt[irow][icolumn] = x;
             XgtF[irow][icolumn] = xF;
@@ -1370,6 +1398,8 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
         dout = 0; 
     }
 
+    signExtend(&dout,15);
+
     datumPtr = dout;
 }
 
@@ -1460,6 +1490,78 @@ void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int 
     else {
        Phi = (Phi_gFex - 2*M_PI);
     }
+}
+
+void gFexInputByteStreamTool::signExtend(int *xptr, int upto) const{
+
+  // sign extend x to 32 bits assuming a hardware word length upto+1 bits (e.g. for 16 bit word upto should be 15 as in firmware) 
+  // xptr pointer to input datum
+  // word length in hardware 
+  int x = *xptr; 
+  //printf("before %x \n", x);
+  //printf("masks %x %x  \n", (0x00000001<<upto) , (0xFFFFFFFF<<(upto+1))  );
+  if( x & (0x00000001<<upto) ) {
+    x = ( x | (0xFFFFFFFF<<(upto+1)) );
+  } else {
+    // for now assume 17 bits -- but could be up to 18 bits 
+    x = ( x & 0x000FFFF); 
+  }
+  *xptr = x; 
+
+}
+
+void gFexInputByteStreamTool::gtCalib(gtFPGA &gtf, int towerLSB,  int fpga, unsigned int offset  ) const{
+  // does calibration of input gTowers according the fpga and the 
+
+  int ABCrows = gtf.size();
+  int ABcolumns = gtf[0].size();
+  // check on fpga number to fool compiler into not giving a warning.
+  // eventually will use for possilbe look up table modification 
+  if(fpga <0 || fpga >2 ) printf("*E: gtCalib FPGA number %d out of range\n",fpga); 
+
+  // regular towers 200 MeV towers
+  // for now just do and undo offset and simulate tuncation effect 
+  
+  for(int irow=0; irow<ABCrows; irow++){
+    for( int icolumn=0; icolumn<ABcolumns; icolumn++){
+
+      // 200  MEV Towers 
+      if( towerLSB == 200 ) {
+    if(  gtf[irow][icolumn] > 1500 ){
+      // printf( "*I gtCalib:  gtf before calibration  %x offset %x \n", gtf[irow][icolumn], offset);
+    }
+    gtf[irow][icolumn] =  gtf[irow][icolumn] + offset;
+
+    if( gtf[irow][icolumn] > 2047 ) {
+      gtf[irow][icolumn] = 2047;
+    }  else if( gtf[irow][icolumn] < 0 ){
+      gtf[irow][icolumn] = 0;
+    }
+    gtf[irow][icolumn] = gtf[irow][icolumn]  - offset;
+
+    if(  gtf[irow][icolumn] > 1500 ){
+      // printf( "*I gtCalib:  gtf after calibration  %x \n", gtf[irow][icolumn] );
+    }
+
+    //printf( "gtf out %x \n ", gtf[irow][icolumn] ); 
+    //#endif
+
+    
+      // 50 MEV Towers 
+      } else {
+    
+    gtf[irow][icolumn] =  gtf[irow][icolumn] + offset;
+    
+    if( gtf[irow][icolumn] > 1023 ){
+      gtf[irow][icolumn] = 1023;
+    } else if ( gtf[irow][icolumn] < 0 ){
+      gtf[irow][icolumn] = 0; 
+    }
+    gtf[irow][icolumn] = gtf[irow][icolumn]  - offset;
+        
+      }
+    }
+  }
 }
 
 

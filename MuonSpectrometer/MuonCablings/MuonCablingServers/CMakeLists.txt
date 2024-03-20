@@ -1,6 +1,4 @@
-################################################################################
-# Package: MuonCablingServers
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonCablingServers )
@@ -15,7 +13,4 @@ atlas_add_library( MuonCablingServersLib
 atlas_add_component( MuonCablingServers
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel TGCcablingInterfaceLib StoreGateLib EventInfoMgtLib MuonCablingServersLib )
-
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 

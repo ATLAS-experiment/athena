@@ -76,6 +76,10 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    gTowersType Btwr50 = {{{0}}};
    gTowersType Ctwr50 = {{{0}}};
 
+   gTowersType Asat = {{{0}}};
+   gTowersType Bsat = {{{0}}};
+   gTowersType Csat = {{{0}}};
+
 
    //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
    gTowersCentral tmp_gTowersIDs_subset_centralFPGA;
@@ -86,7 +90,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
       }
    }
    ATH_CHECK(m_gFEXFPGA_Tool->init(0));
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA, Atwr, Atwr50);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA, Atwr, Atwr50, Asat);
    m_gFEXFPGA_Tool->reset();
 
    //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +104,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
       }
    }
    ATH_CHECK(m_gFEXFPGA_Tool->init(1));
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA_B, Btwr, Btwr50);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA_B, Btwr, Btwr50, Bsat);
    m_gFEXFPGA_Tool->reset();
 
    //FPGA B----------------------------------------------------------------------------------------------------------------------------------------------
@@ -143,7 +147,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    }
 
    ATH_CHECK(m_gFEXFPGA_Tool->init(2));
-   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50);
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50, Csat);
    m_gFEXFPGA_Tool->reset();
 
    //FPGA C----------------------------------------------------------------------------------------------------------------------------------------------
@@ -214,8 +218,15 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
 
    // Use the gFEXJetAlgoTool
 
+  //  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+  //   for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
+  //     // set 18 bits on
+  //     std::cout<<"[executegFEXSim] A: [" << irow << "][" << icolumn << "] " << Asat[irow][icolumn] << ", " << static_cast<unsigned>(Asat[irow][icolumn]) << ", " << static_cast<bool>(Asat[irow][icolumn]) << std::endl;
+  //   }
+  // }
+
    // Pass the energy matrices to the algo tool, and run the algorithms
-   auto tobs_v = m_gFEXJetAlgoTool->largeRfinder(Atwr, Btwr, Ctwr, pucA, pucB, pucC,
+   auto tobs_v = m_gFEXJetAlgoTool->largeRfinder(Atwr, Btwr, Ctwr, Asat, Bsat, Csat, pucA, pucB, pucC,
                                                  gLJ_seedThrA, gLJ_seedThrB, gLJ_seedThrC, gJ_ptMinToTopoCounts1, gJ_ptMinToTopoCounts2, 
                                                  jetThreshold, gLJ_ptMinToTopoCounts1, gLJ_ptMinToTopoCounts2,
                                                  ATOB1_dat, ATOB2_dat,

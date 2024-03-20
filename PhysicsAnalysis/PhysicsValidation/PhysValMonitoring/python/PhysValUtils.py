@@ -1,78 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Defining a python module with helpers for Physics Validation
 
 from AthenaCommon.Logging import logging
 logger = logging.getLogger('PhysValUtils')
 
-################################################################################################
-
-def addPhysValAODContent(algseq,doJets,doTopoCluster):
-    '''
-    Schedule the addition of collections needed for validation of
-    primary xAODs: AntiKt4TruthJets and LC/EMOriginTopoClusters
-    '''
-
-    logger.info( '****************** Adding content for AOD PhysVal *****************' )
-    
-    # Check some flags for steering
-    from RecExConfig.AutoConfiguration import IsInInputFile
-    requiresTruthJets  = IsInInputFile('xAOD::TruthParticleContainer','TruthParticles') and not IsInInputFile('xAOD::JetContainer','AntiKt4TruthJets')
-    requiresLCOriginTC = not IsInInputFile('xAOD::CaloClusterContainer','LCOriginTopoClusters')
-    requiresEMOriginTC = not IsInInputFile('xAOD::CaloClusterContainer','EMOriginTopoClusters')
-
-    # Truth jets
-    if doJets and requiresTruthJets:
-        addAntiKt4TruthJets(algseq)
-
-    ## Origin-corrected topoclusters
-    if doTopoCluster and (requiresLCOriginTC or requiresEMOriginTC):
-        addOriginCorrectedClusters(algseq,requiresLCOriginTC,requiresEMOriginTC)
-
-    logger.info( '******************              Done              *****************' )
-    
-################################################################################################
-
-def addAntiKt4TruthJets(algseq):
-
-    from JetRecConfig.StandardSmallRJets import AntiKt4Truth
-    from JetRecConfig.JetRecConfig import getJetAlgs
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    algs, jetdef_i = getJetAlgs(ConfigFlags, AntiKt4Truth, True)
-    sortJetAlgs(algseq, algs)
-
-################################################################################################
-
-def addOriginCorrectedClusters(algseq,doLC,doEM):
-    from JetRecConfig.JetRecConfig import getInputAlgs
-    from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    logger.info( 'Configuring origin-corrected cluster collections:' )
-
-    if doLC:
-        logger.info( '    * LCOriginTopoClusters' )
-        constit_algs = getInputAlgs(cst.LCTopoOrigin, flags=ConfigFlags)
-        sortJetAlgs(algseq, constit_algs)
-    if doEM:
-        logger.info( '    * EMOriginTopoClusters' )
-        constit_algs = getInputAlgs(cst.EMTopoOrigin, flags=ConfigFlags)
-        sortJetAlgs(algseq, constit_algs)
-
-################################################################################################
-
-def sortJetAlgs(algseq, algs):
-
-    from JetRecConfig.JetRecConfig import reOrderAlgs
-    from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-
-    algs, ca = reOrderAlgs( [a for a in algs if a is not None])
-    # ignore dangling CA instance in legacy config
-    ca.wasMerged()
-    for a in algs:
-        if hasattr(algseq,a.getName()):
-            continue
-        algseq += conf2toConfigurable(a)
 
 ################################################################################################
 

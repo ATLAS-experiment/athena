@@ -562,6 +562,10 @@ def setupMenu(menu_name):
         # Very LowMass DiPhoton, EGammaPEB
         ChainProp(name='HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['EgammaPEBTLA'], groups=PrimaryPhIGroup+Topo2Group),
         ChainProp(name='HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['EgammaPEBTLA'], groups=PrimaryPhIGroup+Topo2Group),
+        # FullBuild support for DiPhoton EGammaPEB
+        ChainProp(name='HLT_2g13_loose_L12DR15-0M30-2eEM12L',l1SeedThresholds=['eEM12L'], groups=SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_2g13_loose_L113DR25-25M70-2eEM12L',l1SeedThresholds=['eEM12L'], groups=SupportPhIGroup+Topo2Group),
+
 
         # Non-L1Topo backups
         ChainProp(name='HLT_2g9_loose_25dphiAA_invmAA80_L12eEM9', l1SeedThresholds=['eEM9'], groups=EOFEgammaPhIGroup+MultiPhotonGroup+['RATE:CPS_2eEM9']),  # Phase-1 ATR-27156
@@ -1246,6 +1250,10 @@ def setupMenu(menu_name):
         
         # ATR-21596 HT Delayed for Dark Showers 
         ChainProp(name='HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleJetGroup+Topo3Group),
+        # ATR-21596 HT chain for DarkPEBTLA
+        ChainProp(name='HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_DarkJetPEBTLA_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['DarkJetPEBTLA'],groups=SupportPhIGroup+MultiJetGroup+Topo3Group+['RATE:CPS_HT190-jJ40s5pETA21']),
+        # FullBuild support
+        ChainProp(name='HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'],groups=SupportPhIGroup+MultiJetGroup+Topo3Group+['RATE:CPS_HT190-jJ40s5pETA21']),
 
         # ATR-25512
         ChainProp(name='HLT_j0_HT940_pf_ftf_preselj190_L1J100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleJetGroup),

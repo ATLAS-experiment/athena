@@ -66,6 +66,7 @@ namespace LVL1::gFEXPos {
         constexpr int FINE_CEILING  =  255; //ceiling value used for 50 MeV gTowers
         constexpr int FINE_FLOOR    = -256; //floor value used for 50 MeV gTowers
 
+        constexpr int CAL_OFF       = 0x0030; // offset for calibration.
 
 
         constexpr std::array<unsigned int, 80>  GTRX_MAP_A_IND =  
