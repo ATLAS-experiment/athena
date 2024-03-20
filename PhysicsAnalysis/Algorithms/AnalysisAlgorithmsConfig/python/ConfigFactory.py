@@ -94,7 +94,7 @@ class FactoryBlock():
                     # cannot handle arbitrary parameters
                     continue
                 else:
-                    raise ValueError(f"{arg} is requried for {funcName}")
+                    raise ValueError(f"{arg} is required for {funcName}")
             if isinstance(func, type):
                 configSeq.append(func(**args))
             else:

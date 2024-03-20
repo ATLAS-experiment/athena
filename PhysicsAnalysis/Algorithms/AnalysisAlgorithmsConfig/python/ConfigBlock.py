@@ -28,7 +28,7 @@ class ConfigBlockDependency():
 
 
     def __repr__(self):
-        return f'ConfigBlcokDependency(blockName="{self.blockName}", required={self.required})'
+        return f'ConfigBlockDependency(blockName="{self.blockName}", required={self.required})'
 
 
 class ConfigBlock:
@@ -99,16 +99,17 @@ class ConfigBlock:
     def addDependency(self, dependencyName, required=True):
         """
         Add a dependency for the block. Dependency is corresponds to the
-        blockName of another block. If requried is True, will throw an
+        blockName of another block. If required is True, will throw an
         error if dependency is not present; otherwise will move this
         block after the required block. If required is False, will do
         nothing if required block is not present; otherwise, it will
         move block after required block.
         """
+        if not self.hasDependencies():
+            # add option to block ignore dependencies
+            self.addOption('ignoreDependencies', [], type=list,
+                           info='List of dependencies defined in the ConfigBlock to ignore.')
         self._dependencies.append(ConfigBlockDependency(dependencyName, required))
-        # add option to block ignore dependencies
-        self.addOption('ignoreDependencies', [], type=list,
-            info='List of dependencies defined in the ConfigBlock to ignore.')
 
     def hasDependencies(self):
         """Return True if there is a dependency."""
