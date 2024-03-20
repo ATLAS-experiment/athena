@@ -30,7 +30,6 @@
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
 #endif
-#include "ROOT/RField.hxx"
 
 #include "TError.h"
 // for version checks
@@ -190,13 +189,13 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       else if( mode & (pool::READ | pool::UPDATE) ) {
          // create (and keep in the descriptin object) the rntuple field for reading
          m_ntupleReader = m_rootDb->getNTupleReader(ntupleName);
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          for( auto& dsc : m_fieldDescs ) {
+            dsc.view_p = std::make_unique<RNTupleView<void,true>>( m_ntupleReader->GetView<void>(dsc.fieldname, nullptr) );
             if( dsc.hasAuxStore() ) {
                // atach RNTuple Reader (owned by the DB)
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-               const std::string type_name = m_ntupleReader->GetView<void>(dsc.fieldname, nullptr).GetField().GetTypeName();
+               const std::string type_name = dsc.view_p->GetField().GetTypeName();
                dsc.auxdyn_reader = RootAuxDynIO::getNTupleAuxDynReader( dsc.fieldname, type_name, m_ntupleReader );
-#endif
                // If we set up a reader, then disable aging
                // for this file.  That will prevent POOL from
                // deleting the file while we still have
@@ -204,6 +203,7 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
                dbH.setAge(-10);
             }
          }
+#endif
       }
 
       log << DbPrintLvl::Debug << "Opened container " << m_name << " of type "
@@ -388,15 +388,14 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              break;
          }
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-         auto view=m_ntupleReader->GetView<void>(dsc.fieldname, nullptr);
          if( !p.ptr ) {
             // create the object for the user and pass ownership to them
-            p.ptr = view.GetField().CreateObject<void>().release();
+            p.ptr = dsc.view_p->GetField().CreateObject<void>().release();
             *obj_p = p.ptr;
          }
-         view.BindRawPtr( p.ptr );
+         dsc.view_p->BindRawPtr( p.ptr );
          // read into the object
-         view(evt_id);
+         (*dsc.view_p)(evt_id);
 #endif
          numBytes += 1;
 
