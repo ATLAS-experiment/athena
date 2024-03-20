@@ -262,6 +262,12 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
     # --------------------
     # The kernel algorithm
     # --------------------
+    
+    ## CloseByIsolation correction augmentation
+    from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
+    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = True))
+
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,
                                                                       SkimmingTools     = MUON1SkimmingTools, 
                                                                       ThinningTools     = MUON1ThinningTools))
@@ -341,7 +347,9 @@ def MUON1Cfg(flags):
     StaticContent += ["xAOD::VertexAuxContainer#Muon1JpsiCandidatesAux."+excludedVertexAuxData]
     
     MUON1SlimmingHelper.StaticContent = StaticContent
-   
+    
+    from IsolationSelection.IsolationSelectionConfig import setupIsoCloseBySlimmingVariables
+    setupIsoCloseBySlimmingVariables(MUON1SlimmingHelper)
     # Extra content
     MUON1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
