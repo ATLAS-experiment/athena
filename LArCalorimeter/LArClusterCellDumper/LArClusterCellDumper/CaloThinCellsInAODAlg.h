@@ -20,6 +20,7 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 
+#include "LArSimEvent/LArHitContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
@@ -44,15 +45,18 @@ private:
   const LArOnlineID* m_onlineID = nullptr;
   const CaloCell_ID* m_caloCellId  = nullptr;
 
+  typedef ConstDataVector<LArHitContainer>   ConstLArHitCont_t;
   typedef ConstDataVector<LArDigitContainer> ConstLArDigitCont_t;
   typedef ConstDataVector<CaloCellContainer> ConstCaloCellCont_t;
 
   Gaudi::Property<float> m_clusterPtCut {this, "ClusterPtCut", 1000, "Cluster pt cut in MeV."};
   Gaudi::Property<float> m_clusterEtaCut {this, "ClusterEtaCut", 1.4, "Cluster abs(eta) cut."};
+  Gaudi::Property<bool>  m_isMC {this, "isMC", false, "Input data is MC."};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
 
-  /// Name of the containers being thinned.
+  // Name of the containers being thinned.
+  SG::ReadHandleKey<LArHitContainer> m_hitsInputKey{this, "InputHitsContainerName","LArHitEMB", "SG Key of LArHitsContainer"};
   SG::ReadHandleKey<LArDigitContainer> m_digitsInputKey{this, "InputDigitsContainerName","LArDigitContainer_MC", "SG Key of LArDigitContainer"};
   SG::ReadHandleKey<LArRawChannelContainer> m_rawChInputKey{this, "InputRawChannelContainerName","LArRawChannels", "SG Key of LArRawChannel container"};
   SG::ReadHandleKey<CaloCellContainer> m_caloCellInputKey{this, "InputCaloCellContainerName","AllCalo", "SG Key of CaloCell container"};
@@ -61,9 +65,10 @@ private:
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCntKey{this, "CaloClusterContainerKey", "CaloCalTopoClusters", "Name of the Electrons Container"};
 
   // Output containers
+  SG::WriteHandleKey<LArHitContainer> m_hitsOutputKey{this, "OutputHitsContainerName","LArHitEMB_ClusterThinned", "SG Key of thinned LArHitEMB container"};
   SG::WriteHandleKey<ConstLArDigitCont_t> m_digitsOutputKey{this, "OutputDigitsContainerName","LArDigitContainer_ClusterThinned", "SG Key of thinned LArDigitContainer"};
-  SG::WriteHandleKey<LArRawChannelContainer> m_rawChOutputKey{this, "OutputRawChannelContainerName","LArRawChannels_TestThinned", "SG Key of LArRawChannel container"};
-  SG::WriteHandleKey<ConstCaloCellCont_t> m_caloCellOutputKey{this, "OutputCaloCellContainerName","AllCalo_TestThinned", "SG Key of CaloCell container"};
+  SG::WriteHandleKey<LArRawChannelContainer> m_rawChOutputKey{this, "OutputRawChannelContainerName","LArRawChannels_ClusterThinned", "SG Key of LArRawChannel container"};
+  SG::WriteHandleKey<ConstCaloCellCont_t> m_caloCellOutputKey{this, "OutputCaloCellContainerName","AllCalo_ClusterThinned", "SG Key of CaloCell container"};
 
 };
 

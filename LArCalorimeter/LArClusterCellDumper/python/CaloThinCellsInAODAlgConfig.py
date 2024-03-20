@@ -17,6 +17,7 @@ def CaloThinCellsInAODAlgCfg(flags, **kwargs):
     
     kwargs.setdefault("ClusterPtCut", 1000) # MeV
     kwargs.setdefault("ClusterEtaCut", 1.4)
+    kwargs.setdefault("isMC", flags.Input.isMC)
         
     # Input Containers
     if not flags.Input.isMC and not flags.Overlay.DataOverlay:
@@ -33,16 +34,20 @@ def CaloThinCellsInAODAlgCfg(flags, **kwargs):
     kwargs.setdefault("CaloClusterContainerKey"     ,"CaloCalTopoClusters")
     
     # Output Containers
+    outputHitCntName      = 'LArHitEMB_ClusterThinned'
     outputDigCntName      = "LArDigitContainer_ClusterThinned"
     outputRawChCntName    = "LArRawChannels_ClusterThinned"
     outputCaloCellCntName = "AllCalo_ClusterThinned"
     
+    kwargs.setdefault("OutputHitsContainerName"      ,outputHitCntName)
     kwargs.setdefault("OutputDigitsContainerName"    ,outputDigCntName)
     kwargs.setdefault("OutputRawChannelContainerName",outputRawChCntName)
     kwargs.setdefault("OutputCaloCellContainerName"  ,outputCaloCellCntName)
     
     acc.addEventAlgo(CompFactory.CaloThinCellsInAODAlg(**kwargs))
     
+    if flags.Input.isMC:
+        acc.merge(addToAOD(flags,[f"LArHitContainer#{outputHitCntName}"]))
     acc.merge(addToAOD(flags,[f"LArDigitContainer#{outputDigCntName}"]))
     acc.merge(addToAOD(flags,[f"LArRawChannelContainer#{outputRawChCntName}"]))
     acc.merge(addToAOD(flags,[f"CaloCellContainer#{outputCaloCellCntName}"]))

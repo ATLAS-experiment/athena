@@ -87,6 +87,13 @@ StatusCode EventReaderAlg::initialize() {
       return StatusCode::FAILURE;
     }
 
+  if      (m_doTagAndProbe && m_doElecSelectByTrackOnly)  ATH_MSG_INFO("Entering single_e mode...");
+  else if (m_doTagAndProbe && !m_doElecSelectByTrackOnly) ATH_MSG_INFO("Entering Zee T&P mode...");
+  else {
+    ATH_MSG_ERROR("No valid electron chain selected!");
+    return StatusCode::FAILURE;
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -203,7 +210,7 @@ StatusCode EventReaderAlg::execute(){
     myElectronsSelection = SG::makeHandle(m_myElecSelectionSgKey,ctx);
     // Optional: Skip empty events.
     if (m_skipEmptyEvents && (myElectronsSelection->size() == 0)){
-      ATH_MSG_INFO("This event has no electrons! Cleanning event variables and skipping writing to NTuple...");
+      ATH_MSG_INFO("This event has no selected electrons! Cleanning event variables and skipping writing to NTuple...");
       clear();  // clear all variables selected to dump to the output NTuple.
       return StatusCode::SUCCESS;
     }
@@ -228,7 +235,7 @@ StatusCode EventReaderAlg::execute(){
 
 StatusCode EventReaderAlg::FillNTupleWithSelectedElectrons(SG::ReadHandle<xAOD::EventInfo> &ei, SG::ReadHandle<xAOD::VertexContainer> &primVertexCnt, SG::ReadHandle<xAOD::ElectronContainer> &elContainer, std::string& eSelectionText, const EventContext& ctx){
 
-  ATH_MSG_DEBUG(eSelectionText << elContainer->size() );
+  ATH_MSG_INFO(eSelectionText << elContainer->size() );
 
   int electronIndex = 0;
   for (const xAOD::Electron *elec : *elContainer){
