@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-# Configuration of InDetPriVxFinderTool package
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 
 def ActsGaussAdaptiveMultiFindingCfg(flags,
                                      name="ActsAdaptiveMultiPriVtxFinderTool",
-                                     **kwargs):
+                                     **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:
@@ -40,10 +40,9 @@ def ActsGaussAdaptiveMultiFindingCfg(flags,
         CompFactory.ActsTrk.AdaptiveMultiPriVtxFinderTool(name, **kwargs))
     return acc
 
-def TrigActsGaussAdaptiveMultiFindingCfg(
-        flags,
-        name="ActsAdaptiveMultiPriVtxFinderTool",
-        **kwargs):
+def TrigActsGaussAdaptiveMultiFindingCfg(flags,
+                                         name="ActsAdaptiveMultiPriVtxFinderTool",
+                                         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:
@@ -64,7 +63,7 @@ def TrigActsGaussAdaptiveMultiFindingCfg(
 
 def ActsIterativeFindingCfg(flags,
                             name="ActsIterativePriVtxFinderTool",
-                            **kwargs):
+                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:

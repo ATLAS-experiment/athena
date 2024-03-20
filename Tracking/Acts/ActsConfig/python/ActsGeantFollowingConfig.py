@@ -1,13 +1,14 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ActsGeantFollowerToolCfg(configFlags, name="ActsGeantFollowerTool", **kwargs):
+def ActsGeantFollowerToolCfg(flags,
+                             name: str = "ActsGeantFollowerTool",
+                             **kwargs) -> ComponentAccumulator:
   THistSvc= CompFactory.THistSvc
-  result = ComponentAccumulator()
+  acc = ComponentAccumulator()
   histsvc = THistSvc(name="THistSvc")
   histsvc.Output = ["val DATAFILE='GeantFollowing.root' OPT='RECREATE'"]
-  result.addService(histsvc)
-  result.setPrivateTools(CompFactory.ActsGeantFollowerTool(name, **kwargs))
-  
-  return result
+  acc.addService(histsvc)
+  acc.setPrivateTools(CompFactory.ActsGeantFollowerTool(name, **kwargs))  
+  return acc

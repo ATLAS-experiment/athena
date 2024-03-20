@@ -21,6 +21,8 @@ if [ $rc != 0 ]; then
     exit $rc
 fi
 
+checkxAOD.py AOD.pool.root
+
 # Check we can retrieve the EDM, and related quantities, with our analysis algorithms
 ActsReadEDM.py \
    --filesInput AOD.pool.root -- \

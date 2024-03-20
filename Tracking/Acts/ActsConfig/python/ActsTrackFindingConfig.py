@@ -7,7 +7,9 @@ from ActsInterop import UnitConstants
 
 # Tools
 
-def isdet(flags, pixel, strip):
+def isdet(flags,
+          pixel: list,
+          strip: list) -> list:
     keys = []
     if flags.Detector.EnableITkPixel:
         keys += pixel
@@ -40,8 +42,8 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     # Seed labels and collections. These 3 lists must match element for element.
     kwargs.setdefault("SeedLabels", isdet(flags, ["PPP"], ["SSS"]))
-    kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, ["ITkPixelEstimatedTrackParams"], ["ITkStripEstimatedTrackParams"]))
-    kwargs.setdefault("SeedContainerKeys", isdet(flags, ["ITkPixelSeeds"], ["ITkStripSeeds"]))
+    kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, ["ActsPixelEstimatedTrackParams"], ["ActsStripEstimatedTrackParams"]))
+    kwargs.setdefault("SeedContainerKeys", isdet(flags, ["ActsPixelSeeds"], ["ActsStripSeeds"]))
     # Measurement collections. These 2 lists must match element for element.
     kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"]))
     kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, ["ITkPixelDetectorElementCollection"], ["ITkStripDetectorElementCollection"]))
@@ -146,8 +148,8 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
     if flags.Tracking.ActiveConfig.extension == "Acts":
         acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                              SeedLabels = isdet(flags, ["PPP"], ["SSS"]) if not flags.Tracking.doITkFastTracking else ["PPP"], 
-                                             EstimatedTrackParametersKeys = isdet(flags, ["ITkPixelEstimatedTrackParams"], ["ITkStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else ["ITkPixelEstimatedTrackParams"],
-                                             SeedContainerKeys = isdet(flags, ["ITkPixelSeeds"], ["ITkStripSeeds"]) if not flags.Tracking.doITkFastTracking else ["ITkPixelSeeds"],
+                                             EstimatedTrackParametersKeys = isdet(flags, ["ActsPixelEstimatedTrackParams"], ["ActsStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else ["ActsPixelEstimatedTrackParams"],
+                                             SeedContainerKeys = isdet(flags, ["ActsPixelSeeds"], ["ActsStripSeeds"]) if not flags.Tracking.doITkFastTracking else ["ActsPixelSeeds"],
                                              UncalibratedMeasurementContainerKeys = isdet(flags, ["ITkPixelClusters_InView"], ["ITkStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"])))
     # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
@@ -155,8 +157,8 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
                                              name="ActsConversionTrackFindingAlg",
                                              ACTSTracksLocation="ActsConversionTracks",
                                              SeedLabels=["SSS"],
-                                             EstimatedTrackParametersKeys=["ITkConversionStripEstimatedTrackParams"],
-                                             SeedContainerKeys=["ITkConversionStripSeeds"],
+                                             EstimatedTrackParametersKeys=["ActsConversionStripEstimatedTrackParams"],
+                                             SeedContainerKeys=["ActsConversionStripSeeds"],
                                              UncalibratedMeasurementContainerKeys=isdet(flags, ["ITkPixelClusters_InView"], ["ITkConversionStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, ["ITkPixelClusters"], ["ITkConversionStripClusters"])
                                              ))
     # Any other pass -> mainly validation
@@ -171,7 +173,7 @@ def ActsMainAmbiguityResolutionAlgCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault('TracksLocation', 'ActsTracks')
-    kwargs.setdefault('ResolvedTracksLocation', 'ResolvedActsTracks')
+    kwargs.setdefault('ResolvedTracksLocation', 'ActsResolvedTracks')
     kwargs.setdefault('MaximumSharedHits', 3)
     kwargs.setdefault('MaximumIterations', 10000)
     kwargs.setdefault('NMeasurementsMin', 7)
@@ -197,7 +199,7 @@ def ActsAmbiguityResolutionCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
                                                     name="ActsConversionAmbiguityResolution",
                                                     TracksLocation="ActsConversionTracks",
-                                                    ResolvedTracksLocation="ResolvedActsConversionTracks"))
+                                                    ResolvedTracksLocation="ActsConversionResolvedTracks"))
     # Any other pass -> mainly validation
     else:
         acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags))
@@ -208,16 +210,13 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
                                       name: str = "ActsTrackToTrackParticleCnvAlg",
                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault('ExtrapolationTool',    acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
 
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        kwargs.setdefault('ACTSTracksLocation', 'ResolvedActsConversionTracks')
-        kwargs.setdefault('TrackParticlesOutKey','ResolvedActsConversionTrackParticles')
-    else:
-        kwargs.setdefault('ACTSTracksLocation', 'ResolvedActsTracks')
-        kwargs.setdefault('TrackParticlesOutKey','ResolvedActsTrackParticles')
-        
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+
+    kwargs.setdefault('ACTSTracksLocation', f'{flags.Tracking.ActiveConfig.extension}ResolvedTracks')
+    kwargs.setdefault('TrackParticlesOutKey', f'{flags.Tracking.ActiveConfig.extension}ResolvedTrackParticles')
     kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
     kwargs.setdefault('FirstAndLastParameterOnly',True)
 

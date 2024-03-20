@@ -1,25 +1,31 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def ActsToTrkConverterToolCfg(flags, name="ActsToTrkConverterTool", **kwargs):
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    result = ComponentAccumulator()
-    kwargs.setdefault("TrackingGeometryTool", result.popToolsAndMerge(
-        ActsTrackingGeometryToolCfg(flags)))  # PrivateToolHandle
-    result.setPrivateTools(
-        CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
-    return result
+def ActsToTrkConverterToolCfg(flags,
+                              name: str = "ActsToTrkConverterTool",
+                              **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
+    return acc
 
 
-def TrkToActsConvertorAlgCfg(flags, name="", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("ConvertorTool", result.popToolsAndMerge(
-        ActsToTrkConverterToolCfg(flags)))  # PrivateToolHandle
-    result.addEventAlgo(
-        CompFactory.ActsTrk.TrkToActsConvertorAlg(name, **kwargs))
-    return result
+def TrkToActsConvertorAlgCfg(flags,
+                             name: str = "",
+                             **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    
+    if 'ConvertorTool' not in kwargs:
+        kwargs.setdefault("ConvertorTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.TrkToActsConvertorAlg(name, **kwargs))
+    return acc
 
 def ActsToTrkConvertorAlgCfg(flags,
                              name: str = "ActsToTrkConvertorAlg",
@@ -28,37 +34,35 @@ def ActsToTrkConvertorAlgCfg(flags,
 
     # convert proper ACTS track collection
     # this depends on the ambi resol. activation
-    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ResolvedActsTracks')
+    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ActsResolvedTracks')
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
 
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
-    BoundaryCheckToolCfg = None
-    if flags.Detector.GeometryITk:
-        from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
-        BoundaryCheckToolCfg = ITkBoundaryCheckToolCfg
-    else:
-        from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-        BoundaryCheckToolCfg = InDetBoundaryCheckToolCfg
+    if 'BoundaryCheckTool' not in kwargs:
+        if flags.Detector.GeometryITk:
+            from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
+            kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(ITkBoundaryCheckToolCfg(flags)))
+        else:
+            from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
+            kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
 
-    kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(BoundaryCheckToolCfg(flags)))
+    if 'SummaryTool' not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+        kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags)))
 
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags)))
-
-    if flags.Acts.doRotCorrection:
-        RotCreatorCfg = None
+    if flags.Acts.doRotCorrection and 'RotCreatorTool' not in kwargs:
         if flags.Detector.GeometryITk:
             from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-            RotCreatorCfg = ITkRotCreatorCfg
+            kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(ITkRotCreatorCfg(flags, name="ActsRotCreatorTool")))
         else:
             from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-            RotCreatorCfg = InDetRotCreatorCfg
-
-        kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(RotCreatorCfg(flags, name="ActsRotCreatorTool")))
+            kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(InDetRotCreatorCfg(flags, name="ActsRotCreatorTool")))
 
     acc.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, **kwargs))
     return acc
