@@ -80,16 +80,24 @@ StatusCode ViewCreatorJetSuperROITool::attachROILinks( TrigCompositeUtils::Decis
       double phiMinus = CxxUtils::wrapToPi( jetPhi - m_roiPhiWidth );
       double phiPlus  = CxxUtils::wrapToPi( jetPhi + m_roiPhiWidth );
 
-      // Should retrieve beamspot offset from somewhere
-      double zMinus = -1. * m_roiZWidth;
-      double zPlus  = m_roiZWidth;
 
-      /// don't mess about with unique_ptr here as the pointer management is 
-      /// done by the Roi itself
-      superRoI->push_back( new TrigRoiDescriptor( jetEta, etaMinus, etaPlus,
-						  jetPhi, phiMinus, phiPlus,
-						  0.,zMinus,zPlus ) );
+      if ( m_roiZWidth > 0 ) { 
+	// Should retrieve beamspot offset from somewhere
+	double zMinus = -1. * m_roiZWidth;
+	double zPlus  = m_roiZWidth;
+	
+	/// don't mess about with unique_ptr here as the pointer management is 
+	/// done by the Roi itself
+	superRoI->push_back( new TrigRoiDescriptor( jetEta, etaMinus, etaPlus,
+						    jetPhi, phiMinus, phiPlus,
+						    0.,zMinus,zPlus ) );
+      }
+      else {
+	superRoI->push_back( new TrigRoiDescriptor( jetEta, etaMinus, etaPlus,
+						    jetPhi, phiMinus, phiPlus ) );
+      }
 
+	
       /// only set this to true here, just in case. It will still be false, 
       /// if there are no constituents, but it doesn;t really matter one way 
       /// or another in that case 

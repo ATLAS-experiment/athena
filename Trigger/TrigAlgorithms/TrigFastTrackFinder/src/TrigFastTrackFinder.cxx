@@ -430,6 +430,7 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("No Roi found for " << m_roiCollectionKey.key() );
       return StatusCode::FAILURE;
     }
+
     TrigRoiDescriptor internalRoI = **roiCollection->begin();
 
     ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
