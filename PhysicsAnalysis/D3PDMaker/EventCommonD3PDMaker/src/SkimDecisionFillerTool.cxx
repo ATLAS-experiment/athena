@@ -52,7 +52,7 @@ if any flags in this block are true.");
 StatusCode SkimDecisionFillerTool::book()
 {
   m_vars.reserve (m_flags.size());
-  for (std::string s : m_flags) {
+  for (const std::string& s : m_flags) {
     Var var;
     std::string::size_type ipos = s.find (':');
     var.key = s.substr (0, ipos);

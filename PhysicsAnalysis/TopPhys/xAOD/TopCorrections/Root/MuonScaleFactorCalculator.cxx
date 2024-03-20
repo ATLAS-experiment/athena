@@ -550,7 +550,7 @@ namespace top {
       for (auto syst : implemented)
         ATH_MSG_WARNING("\t" << syst);
       ATH_MSG_WARNING("WE ARE MISSING THE FOLLOWING SYSTEMATICS:");
-      for (auto syst : different_systematics)
+      for (const auto& syst : different_systematics)
         ATH_MSG_WARNING("\t" << syst);
       return StatusCode::FAILURE;
     }

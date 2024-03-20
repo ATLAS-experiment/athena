@@ -203,7 +203,7 @@ namespace top {
         ATH_MSG_INFO("Jet flavour : " << var.first);
         std::vector<std::string> systs = var.second;
         std::sort(systs.begin(), systs.end());
-        for (auto sys : systs) {
+        for (const auto& sys : systs) {
           ATH_MSG_INFO(" (" << var.first << ") - " << sys);
         }
         ATH_MSG_INFO(" ");
@@ -215,7 +215,7 @@ namespace top {
         ATH_MSG_INFO("Jet flavour : " << var.first);
         std::vector<std::string> systs = var.second;
         std::sort(systs.begin(), systs.end());
-        for (auto sys : systs) {
+        for (const auto& sys : systs) {
           ATH_MSG_INFO(" (" << var.first << ") - " << sys);
         }
         ATH_MSG_INFO(" ");

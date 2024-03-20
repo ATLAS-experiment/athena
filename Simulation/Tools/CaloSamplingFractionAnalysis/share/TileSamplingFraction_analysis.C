@@ -12,7 +12,7 @@ void TileSamplingFraction_analysis()
   SF->GetYaxis()->SetTitle("Sampling Fractions");
   SF->SetMinimum(30);
   SF->SetStats(0);
-  for(auto theta : thetalist) {
+  for(const auto& theta : thetalist) {
     TFile* file=TFile::Open(Form("hist%s.root",theta.c_str()));
     if(!file) continue;
     if(!file->IsOpen()) continue;

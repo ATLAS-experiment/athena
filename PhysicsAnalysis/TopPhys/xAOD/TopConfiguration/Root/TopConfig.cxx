@@ -1972,7 +1972,7 @@ namespace top {
       if (s != "None") {
         tokenize(s, outVector, ","); // list of DSIDs separated by commas
         if (outVector.size() != 1) // if size is !=1, we need to check if these are DSIDs
-          for (auto s : outVector) {
+          for (const auto& s : outVector) {
             int i = std::atoi(s.c_str());
             if (i < 300000 || i >= 1000000) throw std::runtime_error {
                       "TopConfig: jetUncertainties_QGHistPatterns string doesn't look like a list of DISDs! You can either specify a single string pattern or a list of DSIDs separated by commas."

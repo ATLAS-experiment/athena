@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
     // separate in intput files and prefixes
     std::vector<std::string> inFileNames;
     std::vector<std::string> prefixes;
-    for (auto s: tempStringVector) {
+    for (const auto& s: tempStringVector) {
         std::vector<std::string> tmp;
         std::string::size_type st = 0, ed = 0;
         while ((ed = s.find(":", st)) != std::string::npos) {
