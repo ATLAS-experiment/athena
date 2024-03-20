@@ -524,12 +524,12 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
         return Error;
       else if ( !strcasecmp(n,"READ_CALLS") )             // int
         return opt._setValue(int(m_file->GetReadCalls()));
-      else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // bool
-        return opt._setValue(bool(m_rntBufferedWriteEnabled));
-      else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) // bool
-        return opt._setValue(bool(m_rntReaderMetricsEnabled));
-      else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // bool
-        return opt._setValue(bool(m_rntWriterMetricsEnabled));
+      else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // int
+        return opt._setValue(int(m_rntBufferedWriteEnabled));
+      else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) // int
+        return opt._setValue(int(m_rntReaderMetricsEnabled));
+      else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // int
+        return opt._setValue(int(m_rntWriterMetricsEnabled));
       break;
     case 'T':
       if( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
