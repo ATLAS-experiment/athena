@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -18,15 +18,6 @@
 
 namespace CP
 {
-  AsgUnionSelectionAlg ::
-  AsgUnionSelectionAlg (const std::string& name, 
-                        ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("selectionDecoration", m_selectionDecoration, "the decoration for the union selection");
-  }
-
-
 
   StatusCode AsgUnionSelectionAlg ::
   initialize ()

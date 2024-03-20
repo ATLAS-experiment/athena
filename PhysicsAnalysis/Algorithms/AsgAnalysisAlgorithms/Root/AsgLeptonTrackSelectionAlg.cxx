@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -13,10 +13,8 @@
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
 
 #include <xAODEgamma/Electron.h>
-#include <xAODEventInfo/EventInfo.h>
 #include <xAODMuon/Muon.h>
 #include <xAODTracking/TrackParticlexAODHelpers.h>
-#include <xAODTracking/VertexContainer.h>
 
 //
 // method implementations
@@ -24,22 +22,6 @@
 
 namespace CP
 {
-  AsgLeptonTrackSelectionAlg ::
-  AsgLeptonTrackSelectionAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("maxD0Significance", m_maxD0Significance, "maximum d0 significance (or 0 for no cut)");
-    declareProperty ("maxDeltaZ0SinTheta", m_maxDeltaZ0SinTheta, "maximum Delta z0 sin theta (or 0 for no cut)");
-    declareProperty ("nMinPixelHits", m_nMinPixelHits, "minimum number of required Pixel hits (or -1 for no cut)");
-    declareProperty ("nMaxPixelHits", m_nMaxPixelHits, "minimum number of required Pixel hits (or -1 for no cut)");
-    declareProperty ("nMinSCTHits", m_nMinSCTHits, "minimum number of required SCT hits (or -1 for no cut)");
-    declareProperty ("nMaxSCTHits", m_nMaxSCTHits, "minimum number of required SCT hits (or -1 for no cut)");
-    declareProperty ("eventInfo", m_eventInfo, "the name of the EventInfo object to retrieve");
-    declareProperty ("primaryVertices", m_primaryVertices, "the name of the PrimaryVertex container to retrieve");
-  }
-
-
 
   StatusCode AsgLeptonTrackSelectionAlg ::
   initialize ()
@@ -71,6 +53,9 @@ namespace CP
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_particlesHandle));
     ANA_CHECK (m_systematicsList.initialize());
 
+    ANA_CHECK (m_eventInfoKey.initialize());
+    ANA_CHECK (m_primaryVerticesKey.initialize());
+
     if (!m_nameSvc.empty())
     {
       ANA_CHECK (m_nameSvc.retrieve());
@@ -86,15 +71,12 @@ namespace CP
   StatusCode AsgLeptonTrackSelectionAlg ::
   execute ()
   {
-    const xAOD::EventInfo *eventInfo {nullptr};
-    if (m_maxD0Significance > 0)
-      ANA_CHECK (evtStore()->retrieve (eventInfo, m_eventInfo));
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
 
     const xAOD::Vertex *primaryVertex {nullptr};
     if (m_maxDeltaZ0SinTheta > 0)
     {
-      const xAOD::VertexContainer *vertices {nullptr};
-      ANA_CHECK (evtStore()->retrieve (vertices, m_primaryVertices));
+      SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey);
       for (const xAOD::Vertex *vertex : *vertices)
       {
         if (vertex->vertexType() == xAOD::VxType::PriVtx)

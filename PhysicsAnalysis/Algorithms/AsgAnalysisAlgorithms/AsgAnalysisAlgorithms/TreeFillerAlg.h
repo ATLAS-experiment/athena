@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ASGANALYSISALGORITHMS_TREEFILLERALG_H
 #define ASGANALYSISALGORITHMS_TREEFILLERALG_H
@@ -16,6 +16,7 @@
 #include "AsgMessaging/AsgMessaging.h"
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "SystematicsHandles/SysListHandle.h"
+#include <AsgTools/PropertyWrapper.h>
 
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxTypeVector.h"
@@ -50,7 +51,7 @@ namespace CP {
 
    public:
       /// Algorithm constructor
-      TreeFillerAlg( const std::string& name, ISvcLocator* svcLoc );
+     using EL::AnaAlgorithm::AnaAlgorithm;
 
       /// @name Functions inherited from @c EL::AnaAlgorithm
       /// @{
@@ -65,7 +66,7 @@ namespace CP {
       /// @{
 
       /// The name of the output tree to write
-      std::string m_treeName;
+     Gaudi::Property<std::string> m_treeName {this, "TreeName", "physics", "Name of the tree to write"};
 
       /// @}
 

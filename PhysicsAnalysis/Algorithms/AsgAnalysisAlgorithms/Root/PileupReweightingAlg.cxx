@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -24,24 +24,6 @@ namespace {
 
 namespace CP
 {
-  PileupReweightingAlg ::
-  PileupReweightingAlg (const std::string& name, 
-                        ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_pileupReweightingTool ("CP::PileupReweightingTool", this)
-  {
-    declareProperty ("pileupReweightingTool", m_pileupReweightingTool, "the pileup reweighting tool we apply");
-    declareProperty ("baseEventInfo", m_baseEventInfoName,
-      "The name of the original event info. The non-systematic dependent decorations will be applied to this "
-      "object so it should be at least a base of the shallow copies read in by the 'eventInfo' handle. "
-      "The default (and strongly recommended behaviour) is to leave all of these pointed at the central 'EventInfo' object!"
-    );
-    declareProperty ("correctedScaledAverageMuDecoration", m_correctedScaledAverageMuDecoration, "the decoration for the corrected and scaled average interactions per crossing");
-    declareProperty ("correctedActualMuDecoration", m_correctedActualMuDecoration, "the decoration for the corrected actual interactions per crossing");
-    declareProperty ("correctedScaledActualMuDecoration", m_correctedScaledActualMuDecoration, "the decoration for the corrected and scaled actual interactions per crossing");
-  }
-
-
 
   StatusCode PileupReweightingAlg ::
   initialize ()
@@ -65,6 +47,7 @@ namespace CP
     ANA_CHECK (m_systematicsList.addSystematics (*m_pileupReweightingTool));
     ANA_CHECK (m_systematicsList.initialize());
     ANA_CHECK (m_outOfValidity.initialize());
+    ANA_CHECK (m_baseEventInfoName.initialize());
     return StatusCode::SUCCESS;
   }
 
@@ -74,8 +57,7 @@ namespace CP
   execute ()
   {
 
-    const xAOD::EventInfo* evtInfo = nullptr;
-    ANA_CHECK(evtStore()->retrieve(evtInfo, m_baseEventInfoName));
+    SG::ReadHandle<xAOD::EventInfo> evtInfo(m_baseEventInfoName);
 
     // Add additional decorations - these apply to data (and on MC just redecorate the same value as
     // before)

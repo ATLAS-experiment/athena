@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -27,25 +27,11 @@
 
 namespace CP
 {
-  AsgCutBookkeeperAlg ::
-  AsgCutBookkeeperAlg (const std::string &name,
-                      ISvcLocator *pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_truthWeightTool ("PMGTools::PMGTruthWeightTool", this)
-  {
-    declareProperty ("runNumber", m_runNumber, "the run number we are processing");
-    declareProperty ("histPattern", m_histPattern, "the pattern for histogram names");
-    declareProperty ("truthWeightTool", m_truthWeightTool, "the truth weight tool");
-    declareProperty ("enableSystematics", m_enableSystematics, "enable systematics");
-    declareProperty ("systematics", m_systematics, "systematics service");
-  }
-
-
 
   StatusCode AsgCutBookkeeperAlg ::
   initialize ()
   {
-    if (m_runNumber == 0)
+    if (m_runNumber.value() == 0)
     {
       ANA_MSG_ERROR ("Run number should be set");
       return StatusCode::FAILURE;

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef EGAMMAANALYSISALGORITHMS_EGAMMAISGOODOQSELECTIONTOOL_H
 #define EGAMMAANALYSISALGORITHMS_EGAMMAISGOODOQSELECTIONTOOL_H
@@ -10,6 +10,11 @@
 #include "PATCore/IAsgSelectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
+
+// EDM include(s):
+#include "xAODEgamma/Egamma.h"
+#include "xAODEgamma/EgammaDefs.h"
 
 namespace CP {
 
@@ -30,7 +35,7 @@ namespace CP {
       ASG_TOOL_CLASS( EgammaIsGoodOQSelectionTool, IAsgSelectionTool )
 
       /// AsgTool constructor
-      EgammaIsGoodOQSelectionTool( const std::string& name );
+      using asg::AsgTool::AsgTool;
 
       /// @name Interface inherited from @c IAsgSelectionTool
       /// @{
@@ -57,7 +62,7 @@ namespace CP {
       /// @{
 
       /// The mask to require good object quality with
-      int m_mask;
+     Gaudi::Property<int> m_mask {this, "Mask", static_cast<int>(xAOD::EgammaParameters::ALLOQ), "Mask to require passing object quality bits with"};
 
       /// @}
 

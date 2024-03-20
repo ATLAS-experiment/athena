@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -30,11 +30,6 @@ namespace CP
                     ISvcLocator* pSvcLocator)
     : AsgService (name, pSvcLocator)
   {
-    declareProperty ("systematicsList", m_systematicsList, "the list of systematics to run");
-    declareProperty ("systematicsRegex", m_systematicsRegex, "systematics filter regex");
-    declareProperty ("sigmaRecommended", m_sigmaRecommended, "the sigma with which to run recommended systematics");
-    declareProperty ("nominalSystematicsName", m_nominalSystematicsName, "the name to use for the nominal systematic (instead of the empty string)");
-
     declareServiceInterface<ISystematicsSvc>();
   }
 
@@ -77,7 +72,7 @@ namespace CP
       sys.setSigma (m_sigmaRecommended);
       sys.calc (m_recommendedSystematics);
 
-      std::regex expr (m_systematicsRegex);
+      std::regex expr (m_systematicsRegex.value());
       for (const CP::SystematicSet& mysys : sys.result(""))
       {
         if (!regex_match (mysys.name(), expr))

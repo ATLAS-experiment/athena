@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -23,21 +23,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    DiTauSmearingAlg (const std::string& name, 
-                                   ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<TauAnalysisTools::IDiTauSmearingTool> m_smearingTool;
+    ToolHandle<TauAnalysisTools::IDiTauSmearingTool> m_smearingTool {this, "smearingTool", "TauAnalysisTools::DiTauSmearingTool", "the calibration and smearing tool we apply"};
 
     /// \brief the systematics list we run
   private:

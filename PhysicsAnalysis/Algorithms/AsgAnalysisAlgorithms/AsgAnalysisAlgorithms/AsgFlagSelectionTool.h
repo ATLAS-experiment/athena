@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /// @author Teng Jian Khoo
@@ -13,6 +13,7 @@
 #include <PATCore/IAsgSelectionTool.h>
 #include <SelectionHelpers/ISelectionReadAccessor.h>
 #include <xAODBase/IParticle.h>
+#include "AsgTools/PropertyWrapper.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -49,7 +50,7 @@ namespace CP
     /// \par Failures
     ///   out of memory II
   public:
-    AsgFlagSelectionTool (const std::string& name);
+    using asg::AsgTool::AsgTool;
 
 
 
@@ -73,8 +74,8 @@ namespace CP
     /// tool properties
     /// \{
   private:
-    std::vector<std::string> m_selFlags;
-    std::vector<bool> m_invertFlags;
+    Gaudi::Property<std::vector<std::string>> m_selFlags {this, "selectionFlags", {}, "list of flags to use as selection criteria"};
+    Gaudi::Property<std::vector<bool>> m_invertFlags {this, "invertFlags", {}, "toggles for inverting the selection (index-parallel to selectionFlags)"};
     std::vector<std::unique_ptr<ISelectionReadAccessor> > m_acc_selFlags;
 
     /// \}

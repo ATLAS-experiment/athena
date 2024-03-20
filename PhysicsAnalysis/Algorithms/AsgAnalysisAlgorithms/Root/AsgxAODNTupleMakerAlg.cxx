@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s):
 #include "AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h"
@@ -352,19 +352,6 @@ namespace {
 } // private namespace
 
 namespace CP {
-
-   AsgxAODNTupleMakerAlg::AsgxAODNTupleMakerAlg( const std::string& name,
-                                                 ISvcLocator* svcLoc )
-   : EL::AnaAlgorithm( name, svcLoc ) {
-
-      // Declare the algorithm's properties.
-      declareProperty( "TreeName", m_treeName = "physics",
-                       "Name of the tree to write" );
-      declareProperty( "Branches", m_branches,
-                       "Branches to write to the output tree" );
-      declareProperty( "systematicsService", m_systematicsService,
-                       "systematics service" );
-   }
 
    StatusCode AsgxAODNTupleMakerAlg::initialize() {
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,6 +15,7 @@
 #include <SystematicsHandles/SysWriteHandle.h>
 #include <METInterface/IMETSignificance.h>
 #include <xAODMissingET/MissingETContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -24,21 +25,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MetSignificanceAlg (const std::string& name, 
-                 ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IMETSignificance> m_significanceTool;
+    ToolHandle<IMETSignificance> m_significanceTool {this, "significanceTool", "METMaker", "the significance tool we apply"};
 
     /// \brief the systematics list we run
   private:
@@ -51,19 +46,19 @@ namespace CP
 
     /// \brief the key for the final met term
   private:
-    std::string m_totalMETName {"Final"};
+    Gaudi::Property<std::string> m_totalMETName {this, "totalMETName", "Final", "the key for the final met term"};
 
     /// \brief the key for the jets term
   private:
-    std::string m_jetTermName {"RefJet"};
+    Gaudi::Property<std::string> m_jetTermName {this, "jetTermName", "RefJet", "the key for the jets term"};
 
     /// \brief the key for the soft term
   private:
-    std::string m_softTermName {"PVSoftTrk"};
+    Gaudi::Property<std::string> m_softTermName {this, "softTermName", "PVSoftTrk", "the key for the soft term"};
 
     /// \brief the decoration for the significance
   private:
-    std::string m_significanceDecoration {"significance"};
+    Gaudi::Property<std::string> m_significanceDecoration {this, "significanceDecoration", "significance", "the decoration to use for the significance"};
 
     /// \brief the accessor for \ref m_selectionDecoration
   private:

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s):
 #include "AsgAnalysisAlgorithms/TreeFillerAlg.h"
@@ -22,15 +22,6 @@
 #include <sstream>
 
 namespace CP {
-
-   TreeFillerAlg::TreeFillerAlg( const std::string& name,
-                                                 ISvcLocator* svcLoc )
-   : EL::AnaAlgorithm( name, svcLoc ) {
-
-      // Declare the algorithm's properties.
-      declareProperty( "TreeName", m_treeName = "physics",
-                       "Name of the tree to write" );
-   }
 
    StatusCode TreeFillerAlg::execute() {
       // get the output tree for the first time

@@ -21,15 +21,6 @@
 
 namespace CP
 {
-  ObjectCutFlowHistAlg ::
-  ObjectCutFlowHistAlg (const std::string& name, 
-		       ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("histPattern", m_histPattern, "the pattern for histogram names");
-  }
-
-
 
   StatusCode ObjectCutFlowHistAlg ::
   initialize ()

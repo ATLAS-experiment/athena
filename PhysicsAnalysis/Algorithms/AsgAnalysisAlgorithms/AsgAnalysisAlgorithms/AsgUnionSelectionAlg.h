@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -13,6 +13,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODBase/IParticleContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 
 namespace CP
@@ -24,14 +25,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    AsgUnionSelectionAlg (const std::string& name,
-                          ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     virtual StatusCode initialize () override;
-
-  public:
     virtual StatusCode execute () override;
     
 
@@ -52,7 +47,7 @@ namespace CP
 
     /// \brief the decoration of the selection
   private:
-    std::string m_selectionDecoration;
+    Gaudi::Property<std::string> m_selectionDecoration {this, "selectionDecoration", "", "the decoration for the union selection"};
 
     /// \brief the accessor for \ref m_selectionDecoration
   private:

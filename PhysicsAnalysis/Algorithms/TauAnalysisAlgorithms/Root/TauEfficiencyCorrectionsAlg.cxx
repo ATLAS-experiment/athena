@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,16 +18,6 @@
 
 namespace CP
 {
-  TauEfficiencyCorrectionsAlg ::
-  TauEfficiencyCorrectionsAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_efficiencyCorrectionsTool ("TauAnalysisTools::TauEfficiencyCorrectionsTool", this)
-  {
-    declareProperty ("efficiencyCorrectionsTool", m_efficiencyCorrectionsTool, "the calibration and smearing tool we apply");
-  }
-
-
 
   StatusCode TauEfficiencyCorrectionsAlg ::
   initialize ()

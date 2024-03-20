@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -16,10 +16,10 @@
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <METInterface/IMETMaker.h>
 #include <METInterface/IMETSystematicsTool.h>
-
 #include <xAODBase/IParticleContainer.h>
 #include <xAODMissingET/MissingETContainer.h>
 #include <xAODMissingET/MissingETAuxContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -37,33 +37,27 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MetMakerAlg (const std::string& name, 
-                 ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the maker tool
   private:
-    ToolHandle<IMETMaker> m_makerTool;
+    ToolHandle<IMETMaker> m_makerTool {this, "makerTool", "METMaker", "the METMaker tool we apply"};
 
     /// \brief the systematics tool
   private:
-    ToolHandle<IMETSystematicsTool> m_systematicsTool;
+    ToolHandle<IMETSystematicsTool> m_systematicsTool {this, "systematicsTool", "", "the systematics tool we apply"};
 
     /// \brief the name of the core MissingETContainer
   private:
-    std::string m_metCoreName;
+    Gaudi::Property<std::string> m_metCoreName {this, "metCore", "",  "the name of the core MissingETContainer"};
 
     /// \brief the name of the MissingETAssociationMap
   private:
-    std::string m_metAssociationName;
+    Gaudi::Property<std::string> m_metAssociationName {this, "metAssociation", "", "the name of the core MissingETContainer"};
 
     /// \brief the systematics list we run
   private:
@@ -81,7 +75,7 @@ namespace CP
 
     /// \brief the key for \ref m_electronsHandle
   private:
-    std::string m_electronsKey {"RefEle"};
+    Gaudi::Property<std::string> m_electronsKey {this, "electronsKey", "RefEle", "the key for the electrons"};
 
     /// \brief the photon container to use
   private:
@@ -95,7 +89,7 @@ namespace CP
 
     /// \brief the key for \ref m_photonsHandle
   private:
-    std::string m_photonsKey {"RefGamma"};
+    Gaudi::Property<std::string> m_photonsKey {this, "photonsKey", "RefGamma", "the key for the photons"};
 
     /// \brief the muon container to use
   private:
@@ -109,7 +103,7 @@ namespace CP
 
     /// \brief the key for \ref m_muonsHandle
   private:
-    std::string m_muonsKey {"Muons"};
+    Gaudi::Property<std::string> m_muonsKey {this, "muonsKey", "Muons", "the key for the muons"};
 
     /// \brief the electron container to use
   private:
@@ -123,7 +117,7 @@ namespace CP
 
     /// \brief the key for \ref m_tausHandle
   private:
-    std::string m_tausKey {"RefTau"};
+    Gaudi::Property<std::string> m_tausKey {this, "tausKey", "RefTau", "the key for the taus"};
 
     /// \brief the input jet collection we run on
   private:
@@ -136,19 +130,19 @@ namespace CP
 
     /// \brief the key for \ref m_jetsHandle
   private:
-    std::string m_jetsKey {"RefJet"};
+    Gaudi::Property<std::string> m_jetsKey {this, "jetsKey", "RefJet", "the key for the jets"};
 
     /// \brief the soft term key
   private:
-    std::string m_softTermKey {"PVSoftTrk"};
+    Gaudi::Property<std::string> m_softTermKey {this, "softTermKey", "PVSoftTrk", "the soft term key"};
 
     /// \brief whether to use track-met instead of jet-met
   private:
-    bool m_doTrackMet {false};
+    Gaudi::Property<bool> m_doTrackMet {this, "doTrackMet", false, "whether to use track-met instead of jet-met"};
 
     /// \brief whether to do jet JVT
   private:
-    bool m_doJetJVT {true};
+    Gaudi::Property<bool> m_doJetJVT {this, "doJetJVT", true, "whether to do jet JVT"};
 
     /// \brief the met collection we run on
   private:

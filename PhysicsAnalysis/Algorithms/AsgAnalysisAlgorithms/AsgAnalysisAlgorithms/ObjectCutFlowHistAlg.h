@@ -25,13 +25,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    ObjectCutFlowHistAlg (const std::string& name, 
-			 ISvcLocator* pSvcLocator);
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
 
 
@@ -51,7 +46,7 @@ namespace CP
 
     /// \brief the pattern for histogram names
   private:
-    std::string m_histPattern {"cutflow_%SYS%"};
+    Gaudi::Property<std::string> m_histPattern {this, "histPattern", "cutflow_%SYS%", "the pattern for histogram names"};
 
     /// \brief the selection name service
   private:

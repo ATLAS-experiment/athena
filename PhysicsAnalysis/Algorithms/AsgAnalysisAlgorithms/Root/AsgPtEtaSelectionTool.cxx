@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -22,22 +22,6 @@
 
 namespace CP
 {
-  AsgPtEtaSelectionTool :: 
-  AsgPtEtaSelectionTool (const std::string& name)
-    : AsgTool (name)
-  {
-    declareProperty ("minPt", m_minPt, "minimum pt to require (or 0 for no pt cut)");
-    declareProperty ("maxPt", m_maxPt, "maximum pt to require (or 0 for no pt cut)");
-    declareProperty ("maxEta", m_maxEta, "maximum abs(eta) to allow (or 0 for no eta cut)");
-    declareProperty ("etaGapLow", m_etaGapLow, "low end of the eta gap");
-    declareProperty ("etaGapHigh", m_etaGapHigh, "high end of the eta gap (or 0 for no eta gap)");
-    declareProperty ("useClusterEta", m_useClusterEta, "whether to use the cluster eta (for electrons only)");
-    declareProperty ("useDressedProperties", m_useDressedProperties, "whether to use the dressed kinematic properties (for truth particles only)");
-    declareProperty ("printCastWarning", m_printCastWarning, "whether to print a warning/error when the cast fails");
-    declareProperty ("printClusterWarning", m_printClusterWarning, "whether to print a warning/error when the cluster is missing");
-  }
-
-
 
   StatusCode AsgPtEtaSelectionTool ::
   initialize ()

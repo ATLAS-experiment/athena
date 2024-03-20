@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak <tadej@cern.ch>
@@ -24,22 +24,16 @@ namespace CP
 /// on the \ref CP::IClassificationTool
 class AsgClassificationDecorationAlg final : public EL::AnaAlgorithm
 {
+ public:
   /// \brief the standard constructor
-public:
-  AsgClassificationDecorationAlg(const std::string& name, 
-                                 ISvcLocator* pSvcLocator);
-
-
-public:
+  using EL::AnaAlgorithm::AnaAlgorithm;
   virtual StatusCode initialize() override;
-
-public:
   virtual StatusCode execute() override;
 
 
   /// \brief truth classifier tool handle
 private:
-    ToolHandle<IClassificationTool> m_tool;
+  ToolHandle<IClassificationTool> m_tool {this, "tool", "", "classification tool"};
 
   /// \brief the systematics list we run
 private:

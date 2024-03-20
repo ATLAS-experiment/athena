@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -26,21 +26,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MuonIsolationAlg (const std::string& name, 
-                                   ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IIsolationSelectionTool> m_isolationTool;
+    ToolHandle<IIsolationSelectionTool> m_isolationTool {this, "isolationTool", "CP::IsolationSelectionTool", "the isolation tool we apply"};
 
     /// \brief the systematics list we run
   private:

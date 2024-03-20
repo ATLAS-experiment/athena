@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -14,7 +14,6 @@ CP::TrigGlobalEfficiencyAlg::TrigGlobalEfficiencyAlg(const std::string &name,
 						     ISvcLocator *svcLoc)
   : EL::AnaAlgorithm(name, svcLoc)
 {
-  declareProperty("decisionTool", m_trigDecisionTool, "trigger decision tool");
   declareProperty("matchingTool", m_trigMatchingTool, "trigger matching tool");
 }
 
@@ -40,9 +39,6 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   ANA_CHECK(m_matchingDecoration.initialize(m_systematicsList, m_eventInfoHandle));
 
   ANA_CHECK (m_filterParams.initialize(m_systematicsList));
-
-  // retrieve the trigger decision tool
-  ANA_CHECK(m_trigDecisionTool.retrieve());
 
   // retrieve the trigger matching tool
   ANA_CHECK(m_trigMatchingTool.retrieve());

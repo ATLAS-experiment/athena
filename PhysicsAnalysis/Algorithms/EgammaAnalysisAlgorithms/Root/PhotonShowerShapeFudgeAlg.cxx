@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,16 +18,6 @@
 
 namespace CP
 {
-  PhotonShowerShapeFudgeAlg ::
-  PhotonShowerShapeFudgeAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_showerShapeFudgeTool ("ElectronPhotonShowerShapeFudgeTool", this)
-  {
-    declareProperty ("showerShapeFudgeTool", m_showerShapeFudgeTool, "the smearing tool we apply");
-  }
-
-
 
   StatusCode PhotonShowerShapeFudgeAlg ::
   initialize ()

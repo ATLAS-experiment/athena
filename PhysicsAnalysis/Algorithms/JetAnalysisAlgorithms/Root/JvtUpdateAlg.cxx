@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,17 +17,6 @@
 
 namespace CP
 {
-  JvtUpdateAlg ::
-  JvtUpdateAlg (const std::string& name, 
-                ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_jvtTool ("", this)
-  {
-    declareProperty ("jvtTool", m_jvtTool, "the jvt tool we apply");
-    declareProperty ("decorationName", m_decorationName, "the decoration name to use");
-  }
-
-
 
   StatusCode JvtUpdateAlg ::
   initialize ()

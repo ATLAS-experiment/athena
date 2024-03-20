@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -11,6 +11,7 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgServices/ServiceHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -24,16 +25,9 @@ namespace CP
     /// \par Failures
     ///   out of memory II
   public:
-    SysListDumperAlg (const std::string& name, 
-                      ISvcLocator* pSvcLocator);
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     virtual ::StatusCode initialize () override;
-
-  public:
     virtual ::StatusCode execute () override;
-
-  public:
     virtual ::StatusCode finalize () override;
 
     /// \brief make the systematics vector using a regex
@@ -42,15 +36,15 @@ namespace CP
 
     /// \brief the handle for the systematics service
   private:
-    ServiceHandle<ISystematicsSvc> m_systematicsService {"SystematicsSvc", ""};
+    ServiceHandle<ISystematicsSvc> m_systematicsService {this, "systematicsService", "SystematicsSvc", "systematics service"};
 
     /// \brief the regex
   private:
-    std::string m_regex {};
+    Gaudi::Property<std::string> m_regex {this, "systematicsRegex", "", "systematics regex"};
 
     /// \brief the name of the histogram to use
   private:
-    std::string m_histogramName {"systematics"};
+    Gaudi::Property<std::string> m_histogramName {this, "histogramName", "systematics", "the name of the output histogram"};
 
     /// \brief whether the next event will be the first event
   private:

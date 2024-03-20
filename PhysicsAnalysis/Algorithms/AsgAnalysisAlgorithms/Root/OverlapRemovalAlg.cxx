@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,16 +17,6 @@
 
 namespace CP
 {
-  OverlapRemovalAlg ::
-  OverlapRemovalAlg (const std::string& name, 
-                        ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("overlapTool", m_overlapTool);
-    declareProperty ("OutputLabel", m_overlapRemovalDecoration, "the decoration for the overlap removal tool output");
-  }
-
-
 
   StatusCode OverlapRemovalAlg ::
   initialize ()

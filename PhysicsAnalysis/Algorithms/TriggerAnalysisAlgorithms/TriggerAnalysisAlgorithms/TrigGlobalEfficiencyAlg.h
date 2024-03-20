@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -29,7 +29,6 @@
 
 // Trigger includes
 #include <TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h>
-#include <TrigDecisionInterface/ITrigDecisionTool.h>
 #include <TriggerMatchingTool/IMatchingTool.h>
 #include <TrigGlobalEfficiencyCorrection/ImportData.h>
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
@@ -51,9 +50,6 @@ namespace CP
 
     /// \brief whether to use Run 3 settings
     Gaudi::Property<bool> m_isRun3Geo {this, "isRun3Geo", false, "use Run 3 settings for efficiency correction tools?"};
-
-    /// \brief trigger decision tool
-    ToolHandle<Trig::ITrigDecisionTool> m_trigDecisionTool;
 
     /// \brief trigger matching tool
     ToolHandle<Trig::IMatchingTool> m_trigMatchingTool;

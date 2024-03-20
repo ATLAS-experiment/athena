@@ -24,21 +24,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    JetSelectionAlg (const std::string& name, 
-                         ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
 
     /// \brief the selection tool
   private:
-    ToolHandle<IJetSelector> m_selectionTool;
+    ToolHandle<IJetSelector> m_selectionTool {this, "selectionTool", "", "the selection tool we apply"};
 
     /// \brief the systematics list we run
   private:

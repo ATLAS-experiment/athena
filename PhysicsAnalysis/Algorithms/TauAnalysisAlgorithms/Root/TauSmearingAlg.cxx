@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,16 +18,6 @@
 
 namespace CP
 {
-  TauSmearingAlg ::
-  TauSmearingAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_smearingTool ("TauAnalysisTools::TauSmearingTool", this)
-  {
-    declareProperty ("smearingTool", m_smearingTool, "the calibration and smearing tool we apply");
-  }
-
-
 
   StatusCode TauSmearingAlg ::
   initialize ()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -14,6 +14,7 @@
 #include <PMGAnalysisInterfaces/IPMGTruthWeightTool.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
 #include <xAODCutFlow/CutBookkeeper.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -24,8 +25,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    AsgCutBookkeeperAlg (const std::string& name, 
-                         ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
   public:
     /// \brief initialize
@@ -46,19 +46,19 @@ namespace CP
 
     /// \brief flag to enable systematics
   private:
-    bool m_enableSystematics{false};
+    Gaudi::Property<bool> m_enableSystematics {this, "enableSystematics", false, "enable systematics"};
 
     /// \brief the truth weight tool
   private:
-    ToolHandle<PMGTools::IPMGTruthWeightTool> m_truthWeightTool;
+    ToolHandle<PMGTools::IPMGTruthWeightTool> m_truthWeightTool {this, "truthWeightTool", "PMGTools::PMGTruthWeightTool", "the truth weight tool"};
 
     /// \brief the systematics service
   private:
-    ServiceHandle<ISystematicsSvc> m_systematics {"SystematicsSvc", ""};
+    ServiceHandle<ISystematicsSvc> m_systematics {this, "systematics", "SystematicsSvc", "systematics service"};
 
     /// \brief run number we are processing
   private:
-    uint32_t m_runNumber {};
+    Gaudi::Property<uint32_t> m_runNumber {this, "runNumber", 0, "the run number we are processing"};
 
     /// \brief MC channel number we are processing
   private:
@@ -79,7 +79,7 @@ namespace CP
 
     /// \brief the pattern for histogram names
   private:
-    std::string m_histPattern {"CutBookkeeper_%DSID%_%RUN%_%SYS%"};
+    Gaudi::Property<std::string> m_histPattern {this, "histPattern", "CutBookkeeper_%DSID%_%RUN%_%SYS%", "the pattern for histogram names"};
   };
 }
 

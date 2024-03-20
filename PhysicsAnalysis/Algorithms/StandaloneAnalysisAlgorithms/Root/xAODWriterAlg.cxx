@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 // System include(s):
@@ -17,20 +17,6 @@
 #include "StandaloneAnalysisAlgorithms/xAODWriterAlg.h"
 
 namespace CP {
-
-   xAODWriterAlg::xAODWriterAlg( const std::string& name, ISvcLocator* svcLoc )
-      : EL::AnaAlgorithm( name, svcLoc ) {
-
-      // Declare the algorithm's properties.
-      declareProperty( "OutputStreamName", m_outputStreamName = "ANALYSIS",
-                       "Stream name of the output file to use" );
-      declareProperty( "ItemList", m_itemList,
-                       "Objects to write to the output file" );
-      declareProperty( "BasketSize", m_basketSize = 32000,
-                       "(Starter) Basket size for the created branches" );
-      declareProperty( "SplitLevel", m_splitLevel = 0,
-                       "Split level for the created branches" );
-   }
 
    StatusCode xAODWriterAlg::initialize() {
 

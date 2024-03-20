@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,18 +18,6 @@
 
 namespace CP
 {
-  BTaggingEfficiencyAlg ::
-  BTaggingEfficiencyAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_efficiencyTool ("BTaggingEfficiencyTool", this)
-  {
-    declareProperty ("efficiencyTool", m_efficiencyTool, "the calibration and smearing tool we apply");
-    declareProperty ("onlyEfficiency", m_onlyEfficiency, "whether only to calculate efficiencies");
-    declareProperty ("onlyInefficiency", m_onlyInefficiency, "whether only to calculate inefficiencies");
-  }
-
-
 
   StatusCode BTaggingEfficiencyAlg ::
   initialize ()

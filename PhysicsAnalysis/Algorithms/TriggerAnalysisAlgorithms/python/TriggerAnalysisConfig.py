@@ -59,7 +59,7 @@ class TriggerAnalysisBlock (ConfigBlock):
     def makeTriggerSelectionAlg(self, config, decisionTool):
 
         # Set up the trigger selection:
-        alg = config.createAlgorithm( 'CP::TrigEventSelectionAlg', 'TrigEventSelectorAlg' )
+        alg = config.createAlgorithm( 'CP::TrigEventSelectionAlg', 'TrigEventSelectionAlg' )
         alg.tool = '%s/%s' % \
             ( decisionTool.getType(), decisionTool.getName() )
         alg.triggers = self.triggerChainsForSelection
@@ -112,7 +112,6 @@ class TriggerAnalysisBlock (ConfigBlock):
             elif config.campaign() is Campaign.MC20e:
                 if not alg.triggers_2018:
                     raise ValueError( 'TriggerAnalysisConfig: you must provide a set of triggers for the year 2018!' )
-        alg.decisionTool = '%s/%s' % ( decisionTool.getType(), decisionTool.getName() )
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() == LHCPeriod.Run3
         alg.scaleFactorDecoration = 'globalTriggerEffSF_%SYS%'

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak <tadej@cern.ch>
@@ -10,16 +10,6 @@
 
 namespace CP
 {
-
-AsgPriorityDecorationAlg::AsgPriorityDecorationAlg(const std::string &name,
-                                                   ISvcLocator *pSvcLocator)
-    : AnaAlgorithm(name, pSvcLocator)
-{
-  declareProperty ("priorityDecoration", m_priorityDecoration, "the decoration for the priority");
-  declareProperty ("priorities", m_priorities, "priorities to use with the highest one first");
-}
-
-
 
 StatusCode AsgPriorityDecorationAlg::initialize()
 {
@@ -35,7 +25,7 @@ StatusCode AsgPriorityDecorationAlg::initialize()
     return StatusCode::FAILURE;
   }
 
-  if (!std::is_sorted(std::rbegin(m_priorities), std::rend(m_priorities)))
+  if (!std::is_sorted(std::rbegin(m_priorities.value()), std::rend(m_priorities.value())))
   {
     ANA_MSG_ERROR ("Priorities need to be provided in reverse order.");
     return StatusCode::FAILURE;

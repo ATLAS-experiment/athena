@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -12,6 +12,7 @@
 #include <CxxUtils/checker_macros.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
+#include "AsgTools/PropertyWrapper.h"
 #include <mutex>
 #include <unordered_map>
 
@@ -78,11 +79,11 @@ namespace CP
 
     /// \brief the names of the systematics to request
   private:
-    std::vector<std::string> m_systematicsList;
+    Gaudi::Property<std::vector<std::string>> m_systematicsList {this, "systematicsList", {}, "the list of systematics to run"};
 
     /// \brief the regular expression for filterinf systematics
   private:
-    std::string m_systematicsRegex {"(.*)"};
+    Gaudi::Property<std::string> m_systematicsRegex {this, "systematicsRegex", "(.*)", "systematics filter regex"};
 
     /// \brief load all recommended systematics at the given number of
     /// sigmas
@@ -91,11 +92,11 @@ namespace CP
     /// itself without having to generate the list of systematics
     /// manually.
   private:
-    float m_sigmaRecommended = 0;
+    Gaudi::Property<float> m_sigmaRecommended {this, "sigmaRecommended", 0, "the sigma with which to run recommended systematics"};
 
     /// \brief nominal systematics name
   private:
-    std::string m_nominalSystematicsName {"NOSYS"};
+    Gaudi::Property<std::string> m_nominalSystematicsName {this, "nominalSystematicsName", "NOSYS", "the name to use for the nominal systematic (instead of the empty string)"};
 
 
     /// \brief the list of affecting systematics

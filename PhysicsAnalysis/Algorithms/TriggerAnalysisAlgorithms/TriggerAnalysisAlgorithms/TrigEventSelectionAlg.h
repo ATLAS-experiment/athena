@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -14,6 +14,7 @@
 #include <EventBookkeeperTools/FilterReporterParams.h>
 #include <TrigDecisionInterface/ITrigDecisionTool.h>
 #include <TrigDecisionInterface/Conditions.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -32,10 +33,10 @@ namespace CP
     ToolHandle<Trig::ITrigDecisionTool> m_trigDecisionTool;
 
     /// \brief list of triggers or trigger chains
-    std::vector<std::string> m_trigList;
+    Gaudi::Property<std::vector<std::string>> m_trigList {this, "triggers", {}, "trigger selection list"};
     
     /// \brief the decoration for trigger selection
-    std::string m_selectionDecoration;
+    Gaudi::Property<std::string> m_selectionDecoration {this, "selectionDecoration", "", "the decoration the trigger pass status"};
 
     /// \brief whether to not apply an event filter
     Gaudi::Property<bool> m_noFilter {this, "noFilter", false, "whether to not apply an event filter"};

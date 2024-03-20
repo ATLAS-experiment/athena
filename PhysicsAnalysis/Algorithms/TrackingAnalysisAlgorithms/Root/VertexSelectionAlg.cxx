@@ -1,30 +1,13 @@
 //
-// Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s):
 #include "TrackingAnalysisAlgorithms/VertexSelectionAlg.h"
 
-// EDM include(s):
-#include "xAODTracking/VertexContainer.h"
-
 #include <EventBookkeeperTools/FilterReporter.h>
 
 namespace CP {
-
-   VertexSelectionAlg::VertexSelectionAlg( const std::string& name,
-                                           ISvcLocator* svcLoc )
-   : EL::AnaAlgorithm( name, svcLoc ) {
-
-      // Declare the algorithm's properties:
-      declareProperty( "VertexContainer", m_vertexKey = "PrimaryVertices",
-                       "Vertex container to check" );
-      declareProperty( "MinVertices", m_minVertices = 1,
-                       "Minimum number of vertices required" );
-      declareProperty( "MinTracks", m_minTracks = 0,
-                       "Minimum number of track particles required per "
-                       "vertex" );
-   }
 
    StatusCode VertexSelectionAlg::initialize() {
 
@@ -34,6 +17,7 @@ namespace CP {
                     << " track(s) each" );
 
       ANA_CHECK (m_filterParams.initialize());
+      ANA_CHECK (m_vertexKey.initialize());
 
       // Return gracefully:
       return StatusCode::SUCCESS;
@@ -51,8 +35,7 @@ namespace CP {
       FilterReporter filter (m_filterParams, false);
 
       // Retrieve the vertex container:
-      const xAOD::VertexContainer* vertices = nullptr;
-      ATH_CHECK( evtStore()->retrieve( vertices, m_vertexKey ) );
+      SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexKey);
 
       // The number of "good" vertices found:
       unsigned goodVertices = 0;

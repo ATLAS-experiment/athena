@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,6 +14,7 @@
 #include <SystematicsHandles/SysListHandle.h>
 #include <METInterface/IMETMaker.h>
 #include <xAODMissingET/MissingETContainer.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -23,14 +24,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MetBuilderAlg (const std::string& name, 
-                 ISvcLocator* pSvcLocator);
-
-
-  public:
+    using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-
-  public:
     StatusCode execute () override;
     
 
@@ -46,11 +41,11 @@ namespace CP
 
     /// \brief the key for the final met term
   private:
-    std::string m_finalKey {"Final"};
+    Gaudi::Property<std::string> m_finalKey {this, "finalKey", "Final", "the key for the final met term"};
 
     /// \brief the key for the soft term
   private:
-    std::string m_softTerm {"PVSoftTrk"};
+    Gaudi::Property<std::string> m_softTerm {this, "softTerm", "PVSoftTrk", "the key for the soft term"};
   };
 }
 

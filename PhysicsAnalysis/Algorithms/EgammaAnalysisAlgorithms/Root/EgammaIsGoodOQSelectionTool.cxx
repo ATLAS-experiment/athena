@@ -1,27 +1,15 @@
 //
-// Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s):
 #include "EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h"
 
-// EDM include(s):
-#include "xAODEgamma/Egamma.h"
-#include "xAODEgamma/EgammaDefs.h"
 
 // System include(s):
 #include <iomanip>
 
 namespace CP {
-
-   EgammaIsGoodOQSelectionTool::
-   EgammaIsGoodOQSelectionTool( const std::string& name )
-   : asg::AsgTool( name ) {
-
-      // Declare the tool's properties.
-      declareProperty( "Mask", m_mask = xAOD::EgammaParameters::ALLOQ,
-                       "Mask to require passing object quality bits with" );
-   }
 
    const asg::AcceptInfo& EgammaIsGoodOQSelectionTool::getAcceptInfo() const {
 

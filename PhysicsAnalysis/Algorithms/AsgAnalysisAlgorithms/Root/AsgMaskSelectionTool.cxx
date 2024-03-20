@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /// @author RD Schaffer
@@ -20,15 +20,6 @@
 
 namespace CP
 {
-    AsgMaskSelectionTool ::
-    AsgMaskSelectionTool (const std::string& name)
-    : AsgTool (name)
-    {
-      declareProperty ("selectionVars", m_selVars, "list of variables to use as selection criteria");
-      declareProperty ("selectionMasks", m_selMasks, "list of masks, one per variable, for applying the selection");
-    }
-
-
 
     StatusCode AsgMaskSelectionTool ::
     initialize ()

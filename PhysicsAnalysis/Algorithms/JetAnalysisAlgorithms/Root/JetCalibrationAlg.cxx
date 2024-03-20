@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,16 +17,6 @@
 
 namespace CP
 {
-  JetCalibrationAlg ::
-  JetCalibrationAlg (const std::string& name, 
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_calibrationTool ("JetCalibrationTool", this)
-  {
-    declareProperty ("calibrationTool", m_calibrationTool, "the calibration tool we apply");
-  }
-
-
 
   StatusCode JetCalibrationAlg ::
   initialize ()

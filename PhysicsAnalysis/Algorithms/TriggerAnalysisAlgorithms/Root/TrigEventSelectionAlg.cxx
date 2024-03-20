@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -15,8 +15,6 @@ CP::TrigEventSelectionAlg::TrigEventSelectionAlg(const std::string &name,
     m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool")
 {
   declareProperty("tool", m_trigDecisionTool, "trigger decision tool");
-  declareProperty("triggers", m_trigList, "trigger selection list");
-  declareProperty("selectionDecoration", m_selectionDecoration, "the decoration the trigger pass status");
 }
 
 StatusCode CP::TrigEventSelectionAlg::initialize()

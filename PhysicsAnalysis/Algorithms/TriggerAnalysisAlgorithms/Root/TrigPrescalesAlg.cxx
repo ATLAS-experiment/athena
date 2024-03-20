@@ -20,21 +20,6 @@
 
 namespace CP
 {
-  TrigPrescalesAlg ::
-  TrigPrescalesAlg (const std::string& name, 
-                    ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-    , m_pileupReweightingTool ("CP::PileupReweightingTool", this)
-  {
-    declareProperty ("pileupReweightingTool", m_pileupReweightingTool, "the pileup reweighting tool to be used");
-    declareProperty ("triggers", m_trigList, "trigger list");
-    declareProperty ("triggersAll", m_trigListAll, "all trigger list");
-    declareProperty ("triggersFormula", m_trigFormula, "produce prescale based on formula instead of per trigger, "
-                                                       "e.g. (trigA||trigB)");
-    declareProperty ("prescaleDecoration", m_prescaleDecoration, "decoration to store prescales");
-  }
-
-
 
   StatusCode TrigPrescalesAlg ::
   initialize ()
@@ -69,7 +54,8 @@ namespace CP
       // By putting the formula into` m_trigListAll` 
       // the logic in `execute` does not have to change 
       // depending on if `m_trigFormula` or `m_trigList` is used
-      m_trigListAll = {m_trigFormula}; 
+      std::vector<std::string> formulaVector = {m_trigFormula.value()};
+      m_trigListAll = formulaVector;
       return StatusCode::SUCCESS;
     }
 
