@@ -6,7 +6,7 @@
 //        Root Database file implementation
 //--------------------------------------------------------------------
 //
-//        Package    : RootStorageSvc (The POOL project)
+//   Package  : Athena APR RootStorageSvc (earlier the POOL project)
 //
 //====================================================================
 #include "RootDatabase.h"
@@ -16,6 +16,7 @@
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbDomain.h"
 #include "POOLCore/DbPrint.h"
+#include "POOLCore/APRDefaults.h"
 #include "RootAuxDynIO/RootAuxDynIO.h"
 
 #include "GaudiKernel/Bootstrap.h"
@@ -39,10 +40,6 @@
 #include "ROOT/RNTuple.hxx"
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#include "ROOT/RField.hxx"
-using ROOT::Experimental::RFieldBase;
-#else
-using ROOT::Experimental::Detail::RFieldBase;
 #endif
 
 using namespace pool;
@@ -722,7 +719,7 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
           DbStatus s = opt._getValue(m_defTreeCacheLearnEvents);
           if( s.isSuccess() ) {
              DbPrint log("RootDatabase.setOption");
-             TTree *tree = getTree("CollectionTree");
+             TTree *tree = getTree(APRDefaults::TTreeNames::EventData);
              if (tree != nullptr && tree->GetAutoFlush() > 0) {
                 if (m_defTreeCacheLearnEvents < tree->GetAutoFlush()) {
                    log << DbPrintLvl::Info << n << ": Overwriting LearnEvents with CollectionTree AutoFlush" << DbPrint::endmsg;
