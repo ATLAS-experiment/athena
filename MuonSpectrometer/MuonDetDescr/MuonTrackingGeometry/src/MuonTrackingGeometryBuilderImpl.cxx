@@ -315,14 +315,14 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
                 ATH_MSG_DEBUG( "glue barrel R  + barrel Z buffer");
                 barrelZP = (m_trackingVolumeHelper->glueTrackingVolumeArrays(*tvol, 
                                                                              Trk::positiveFaceXY, 
-                                                                             *barrelZPBuffer,
+                                                                             *barrelZPBuffer.release(),
                                                                              Trk::negativeFaceXY, "All::Gaps::BarrelZP"));
                 // set name
                 std::string nameEncl = msEntryDefined ? "All::Gaps::Barrel" : m_entryVolume;
                 ATH_MSG_DEBUG(" nameEncl " << nameEncl);
                 enclosed = m_trackingVolumeHelper->glueTrackingVolumeArrays(*barrelZP, 
                                                                              Trk::negativeFaceXY, 
-                                                                             *barrelZMBuffer,
+                                                                             *barrelZMBuffer.release(),
                                                                              Trk::positiveFaceXY, 
                                                                              nameEncl);
 
