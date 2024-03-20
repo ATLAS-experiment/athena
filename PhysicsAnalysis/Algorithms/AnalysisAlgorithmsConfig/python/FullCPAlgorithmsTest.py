@@ -723,7 +723,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     if not forCompare:
         configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
-            containerName='AnaJets',
+            containerName='AnaJets.baselineJvt',
             selectionName='ftag')
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)

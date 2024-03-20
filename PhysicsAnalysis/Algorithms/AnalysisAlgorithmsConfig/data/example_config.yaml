@@ -17,6 +17,11 @@ Jets:
         btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_60'
         kinematicSelection: True
+    FlavourTaggingEventSF:
+      - containerName: 'AnaJets.baselineJvt'
+        selectionName: 'ftag'
+        btagger: 'DL1dv01'
+        btagWP: 'FixedCutBEff_60'
     JVT: {}
     PtEtaSelection: {}
 

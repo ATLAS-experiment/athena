@@ -30,12 +30,12 @@ class FTagEventSFConfig(ConfigBlock):
         if config.dataType() is not DataType.Data:
             alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg',
                                          'FTagEventScaleFactorAlg' + postfix)
-            preselection = config.getFullSelection(self.containerName, '')
+            particles, preselection = config.readNameAndSelection(self.containerName)
+            alg.particles = particles
             alg.preselection = ((preselection + '&&' if preselection else '')
                                 + 'ftag_kin_select_' + selectionName + ',as_char')
             alg.scaleFactorInputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
             alg.scaleFactorOutputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
-            alg.particles = config.readName(self.containerName)
 
             config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
                                 'weight_ftag_effSF_' + selectionName)
