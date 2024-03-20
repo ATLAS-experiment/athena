@@ -25,8 +25,9 @@ class TriggerAnalysisBlock (ConfigBlock):
         self.addOption ('muons', '', type=str)
         self.addOption ('photons', '', type=str)
         self.addOption ('noEffSF', False, type=bool)
+        self.addOption ('noGlobalTriggerEff', False, type=bool)
 
-    def makeTriggerDecisionAlg(self, config):
+    def makeTriggerDecisionTool(self, config):
 
         # Create public trigger tools
         xAODConfTool = config.createPublicTool( 'TrigConf::xAODConfigTool', 'xAODConfigTool' )
@@ -39,7 +40,7 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         return decisionTool
 
-    def makeTriggerMatchingAlg(self, config, decisionTool):
+    def makeTriggerMatchingTool(self, config, decisionTool):
 
         # Create public trigger tools
         drScoringTool = config.createPublicTool( 'Trig::DRScoringTool', 'DRScoringTool' )
@@ -154,70 +155,16 @@ class TriggerAnalysisBlock (ConfigBlock):
             self.triggerChainsForSelection = list(triggers)
 
         # Create the decision algorithm, keeping track of the decision tool for later
-        decisionTool = self.makeTriggerDecisionAlg(config)
+        decisionTool = self.makeTriggerDecisionTool(config)
 
         # Now pass it to the matching algorithm, keeping track of the matching tool for later
-        matchingTool = self.makeTriggerMatchingAlg(config, decisionTool)
+        matchingTool = self.makeTriggerMatchingTool(config, decisionTool)
 
         if self.triggerChainsForSelection:
             self.makeTriggerSelectionAlg(config, decisionTool)
 
         # Calculate multi-lepton (electron/muon/photon) trigger efficiencies and SFs
-        if self.triggerChainsPerYear:
+        if self.triggerChainsPerYear and not self.noGlobalTriggerEff:
             self.makeTriggerGlobalEffCorrAlg(config, decisionTool, matchingTool, self.noEffSF)
 
         return
-
-
-def makeTriggerAnalysisConfig( seq,
-                               triggerChainsPerYear = None,
-                               triggerChainsForSelection = None,
-                               prescaleLumiCalcFiles = None,
-                               noFilter = None,
-                               noL1 = None,
-                               electronWorkingPoint = None,
-                               muonWorkingPoint = None,
-                               photonWorkingPoint = None,
-                               electrons = None,
-                               muons = None,
-                               photons = None,
-                               noEffSF = None,
-                               configName = 'Trigger'):
-    """Create a basic trigger analysis algorithm sequence
-
-    Keyword arguments:
-      triggerChainsPerYear -- a dictionary with key (str) the year and value (list of strings) the trigger chains
-      triggerChainsForSelection -- a list of trigger chains to be used for trigger selection, only set it if you need a different setup than for SFs!
-      prescaleLumiCalcFiles -- a list of lumicalc files to calculate trigger prescales
-      noFilter -- do not apply an event filter (i.e. don't skip any events)
-      noL1 -- do not check the L1 decision
-      noEffSF -- Disables the calculation of efficiencies and scale factors (just matching)
-    """
-
-    config = TriggerAnalysisBlock (configName)
-    config.setOptionValue ('triggerChainsPerYear', triggerChainsPerYear)
-    config.setOptionValue ('triggerChainsForSelection', triggerChainsForSelection)
-    config.setOptionValue ('prescaleLumiCalcFiles', prescaleLumiCalcFiles)
-    config.setOptionValue ('noFilter', noFilter)
-    config.setOptionValue ('noL1', noL1)
-    if electronWorkingPoint is not None:
-        splitWP = electronWorkingPoint.split ('.')
-        if len (splitWP) != 2 :
-            raise ValueError (f'electron working point should be of format "likelihood.isolation", not {electronWorkingPoint}')
-        config.setOptionValue ('electronID', splitWP[0])
-        config.setOptionValue ('electronIsol', splitWP[1])
-    if muonWorkingPoint is not None:
-        splitWP = muonWorkingPoint.split ('.')
-        if len (splitWP) != 2 :
-            raise ValueError (f'muon working point should be of format "likelihood.isolation", not {muonWorkingPoint}')
-        config.setOptionValue ('muonID', splitWP[0])
-    if photonWorkingPoint is not None:
-        splitWP = photonWorkingPoint.split ('.')
-        if len (splitWP) != 2 :
-            raise ValueError (f'photon working point should be of format "likelihood.isolation", not {photonWorkingPoint}')
-        config.setOptionValue ('photonIsol', splitWP[1])
-    config.setOptionValue('electrons', electrons)
-    config.setOptionValue('muons', muons)
-    config.setOptionValue('photons', photons)
-    config.setOptionValue('noEffSF', noEffSF)
-    seq.append (config)
