@@ -10,7 +10,6 @@ LUCID_SimHit::LUCID_SimHit(): m_partLink() {
 
   m_tubeID        = 0;
   m_pdgCode       = 0;
-  m_track         = 0;
   m_genVolume     = 0;
   m_stepStartPosX = 0;
   m_stepStartPosY = 0;
@@ -28,7 +27,7 @@ LUCID_SimHit::LUCID_SimHit(const LUCID_SimHit& simhit)  { *this = simhit; }
 
 LUCID_SimHit::LUCID_SimHit(short tubeID,
                            int   pdgCode,
-                           int   track,
+                           int   truthBarcode,
                            int   genVolume,
                            float stepStartPosX,
                            float stepStartPosY,
@@ -43,8 +42,7 @@ LUCID_SimHit::LUCID_SimHit(short tubeID,
 
   m_tubeID       (tubeID),
   m_pdgCode      (pdgCode),
-  m_track        (track), // Susumu Oda 2011.04.03
-  m_partLink     (track, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
+  m_partLink     (truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
   m_genVolume    (genVolume),
   m_stepStartPosX(stepStartPosX),
   m_stepStartPosY(stepStartPosY),
@@ -74,7 +72,6 @@ LUCID_SimHit::LUCID_SimHit(short tubeID,
 
   m_tubeID       (tubeID),
   m_pdgCode      (pdgCode),
-  m_track        (partLink.barcode()), // Susumu Oda 2011.04.03
   m_partLink     (partLink),
   m_genVolume    (genVolume),
   m_stepStartPosX(stepStartPosX),
@@ -110,7 +107,6 @@ const LUCID_SimHit& LUCID_SimHit::operator=(const LUCID_SimHit& simhit) {
 
   m_tubeID        = simhit.m_tubeID;
   m_pdgCode       = simhit.m_pdgCode;
-  m_track         = simhit.m_track;
   m_partLink      = simhit.m_partLink;
   m_genVolume     = simhit.m_genVolume;
   m_stepStartPosX = simhit.m_stepStartPosX;
@@ -139,5 +135,3 @@ bool LUCID_SimHit::isDetected(CLHEP::HepRandomEngine* rndEngine) const {
 int LUCID_SimHit::operator == (const LUCID_SimHit& simhit) const { return (this==&simhit) ? 1 : 0; }
 
 bool LUCID_SimHit::operator < (const LUCID_SimHit&    rhs) const { return m_tubeID < rhs.m_tubeID; }
-
-int LUCID_SimHit::GetTrackID() const { return m_partLink.barcode(); }

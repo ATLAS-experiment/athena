@@ -22,7 +22,7 @@ class LUCID_SimHit  {
   LUCID_SimHit(const LUCID_SimHit&);
   LUCID_SimHit(short tubeID,
                int   pdgCode,
-               int   track,
+               int   truthBarcode,
                int   genVolume,
                float stepStartPosX,
                float stepStartPosY,
@@ -51,8 +51,6 @@ class LUCID_SimHit  {
 
   std::string print() const;
 
-  int GetTrackID() const;
-
   const LUCID_SimHit& operator=(const LUCID_SimHit& t);
 
   int  operator == (const LUCID_SimHit&) const;
@@ -69,7 +67,8 @@ class LUCID_SimHit  {
   inline float GetEPZ() const { return m_stepEndPosZ; }
 
   inline short GetTubeID      () const { return m_tubeID; }
-  inline int   GetTrack       () const { return m_track; }
+  inline int   truthBarcode    () const { return m_partLink.barcode(); }
+  inline int   truthID    () const { return m_partLink.id(); }
   inline int   GetPdgCode     () const { return m_pdgCode; }
   inline int   GetGenVolume   () const { return m_genVolume; }
   inline float GetPreStepTime () const { return m_preStepTime; }
@@ -83,7 +82,6 @@ class LUCID_SimHit  {
 
   short m_tubeID{};
   int   m_pdgCode{};
-  int   m_track{};
   HepMcParticleLink m_partLink; // link to the particle generating the hit
   int   m_genVolume{};
   float m_stepStartPosX{};

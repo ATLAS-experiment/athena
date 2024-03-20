@@ -27,6 +27,7 @@ void compare (const HepMcParticleLink& p1,
 {
   assert ( p1.isValid() == p2.isValid() );
   assert ( p1.barcode() == p2.barcode() );
+  assert ( p1.id() == p2.id() );
   assert ( p1.eventIndex() == p2.eventIndex() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
@@ -38,7 +39,8 @@ void compare (const LUCID_SimHit& p1,
 {
   assert (p1.GetTubeID() == p2.GetTubeID());
   assert (p1.GetPdgCode() == p2.GetPdgCode());
-  assert (p1.GetTrack() == p2.GetTrack());
+  assert (p1.truthBarcode() == p2.truthBarcode());
+  assert (p1.truthID() == p2.truthID());
   compare (p1.particleLink(), p2.particleLink());
   assert (p1.particleLink() == p2.particleLink());
   assert (p1.GetGenVolume() == p2.GetGenVolume());

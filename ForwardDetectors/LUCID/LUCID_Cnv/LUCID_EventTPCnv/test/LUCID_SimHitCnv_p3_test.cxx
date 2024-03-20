@@ -2,19 +2,20 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
- * @file LUCID_EventTPCnv/test/LUCID_SimHitCnv_p2_test.cxx
+ * @file LUCID_EventTPCnv/test/LUCID_SimHitCnv_p3_test.cxx
  * @date Feb, 2018
- * @brief Tests for LUCID_SimHitCnv_p2.
+ * @brief Tests for LUCID_SimHitCnv_p3.
  */
 
 
 #undef NDEBUG
-#include "LUCID_EventTPCnv/LUCID_SimHitCnv_p2.h"
+#include "LUCID_EventTPCnv/LUCID_SimHitCnv_p3.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include <cassert>
 #include <iostream>
 
+#include "TruthUtils/MagicNumbers.h"
 #include "GeneratorObjectsTPCnv/initMcEventCollection.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -59,8 +60,8 @@ void compare (const LUCID_SimHit& p1,
 void testit (const LUCID_SimHit& trans1)
 {
   MsgStream log (nullptr, "test");
-  LUCID_SimHitCnv_p2 cnv;
-  LUCID_SimHit_p2 pers;
+  LUCID_SimHitCnv_p3 cnv;
+  LUCID_SimHit_p3 pers;
   cnv.transToPers (&trans1, &pers, log);
   LUCID_SimHit trans2;
   cnv.persToTrans (&pers, &trans2, log);
@@ -74,13 +75,13 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number(),
-                              HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
+  HepMcParticleLink dummyHMPL(HepMC::uniqueID(particle),particle->parent_event()->event_number(),
+                              HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
   assert(dummyHMPL.cptr()==particle);
   Athena_test::Leakcheck check;
 
-  HepMcParticleLink trkLink(HepMC::barcode(genPartVector.at(0)),genPartVector.at(0)->parent_event()->event_number(),
-                              HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
+  HepMcParticleLink trkLink(HepMC::uniqueID(genPartVector.at(0)),genPartVector.at(0)->parent_event()->event_number(),
+                              HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID);
   LUCID_SimHit trans1 (1, genPartVector.at(0)->pdg_id(), trkLink, 4,
                        5.5, 6.5, 7.5,
                        8.5, 9.5, 10.5,

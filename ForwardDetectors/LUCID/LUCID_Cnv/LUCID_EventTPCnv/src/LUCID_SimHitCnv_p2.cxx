@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_SimEvent/LUCID_SimHit.h"
@@ -37,7 +37,7 @@ void LUCID_SimHitCnv_p2::transToPers(const LUCID_SimHit* transObj, LUCID_SimHit_
   HepMcParticleLinkCnv_p2 HepMcPLCnv;
 
   persObj->m_tubeID        = transObj->GetTubeID();
-  persObj->m_track         = transObj->GetTrack();
+  persObj->m_track         = transObj->truthBarcode();
   persObj->m_pdgCode       = transObj->GetPdgCode();
   persObj->m_genVolume     = transObj->GetGenVolume();
   persObj->m_stepStartPosX = transObj->GetX();

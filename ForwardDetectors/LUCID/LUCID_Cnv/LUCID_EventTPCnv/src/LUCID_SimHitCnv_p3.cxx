@@ -4,14 +4,14 @@
 
 #include "LUCID_SimEvent/LUCID_SimHit.h"
 #include "Identifier/Identifier.h"
-#include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p1.h"
-#include "LUCID_EventTPCnv/LUCID_SimHitCnv_p1.h"
+#include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p3.h"
+#include "LUCID_EventTPCnv/LUCID_SimHitCnv_p3.h"
 
-void LUCID_SimHitCnv_p1::persToTrans(const LUCID_SimHit_p1* persObj, LUCID_SimHit* transObj, MsgStream& log) {
+void LUCID_SimHitCnv_p3::persToTrans(const LUCID_SimHit_p3* persObj, LUCID_SimHit* transObj, MsgStream& log) {
 
-  log << MSG::DEBUG << "LUCID_SimHitCnv_p1::persToTrans called " << endmsg;
+  log << MSG::DEBUG << "LUCID_SimHitCnv_p3::persToTrans called " << endmsg;
 
-  HepMcParticleLinkCnv_p1 HepMcPLCnv;
+  HepMcParticleLinkCnv_p3 HepMcPLCnv;
   HepMcParticleLink link;
   HepMcPLCnv.persToTrans(&(persObj->m_partLink),&(link), log);
   *transObj = LUCID_SimHit (persObj->m_tubeID,
@@ -30,14 +30,13 @@ void LUCID_SimHitCnv_p1::persToTrans(const LUCID_SimHit_p1* persObj, LUCID_SimHi
                             persObj->m_energy);
 }
 
-void LUCID_SimHitCnv_p1::transToPers(const LUCID_SimHit* transObj, LUCID_SimHit_p1* persObj, MsgStream& log) {
+void LUCID_SimHitCnv_p3::transToPers(const LUCID_SimHit* transObj, LUCID_SimHit_p3* persObj, MsgStream& log) {
 
-  log << MSG::DEBUG << "LUCID_SimHitCnv_p1::transToPers called " << endmsg;
+  log << MSG::DEBUG << "LUCID_SimHitCnv_p3::transToPers called " << endmsg;
 
-  HepMcParticleLinkCnv_p1 HepMcPLCnv;
+  HepMcParticleLinkCnv_p3 HepMcPLCnv;
 
   persObj->m_tubeID        = transObj->GetTubeID();
-  persObj->m_track         = transObj->truthBarcode();
   persObj->m_pdgCode       = transObj->GetPdgCode();
   persObj->m_genVolume     = transObj->GetGenVolume();
   persObj->m_stepStartPosX = transObj->GetX();
