@@ -30,7 +30,7 @@ def EventReaderAlgCfg(flags, name="EventReaderAlgCfg", **kwargs):
     # Electrons and crosstalk studies
     kwargs.setdefault("electronEtaCut", 1.4) # Electron |eta| cut value
     kwargs.setdefault("doTagAndProbe", True)  # select by tag and probe method, electron pairs (start the chain of selection: track + T&P)
-    kwargs.setdefault("doElecSelectByTrackOnly", True)  # select only single electrons which pass track criteria (only track)
+    kwargs.setdefault("doElecSelectByTrackOnly", True)  # select only single electrons which pass track criteria (only track), overrides T&P
     kwargs.setdefault("getAssociatedTopoCluster", True)  # Get the topo cluster associated to a super cluster, which was linked to an Electron
     kwargs.setdefault("getLArCalibConstants", True)  # Get the LAr calorimeter calibration constants, related to cells energy and time (online and offline).
     kwargs.setdefault("etMinProbe", 15)    # Min electron Pt value for Zee probe selection loose (GeV).
@@ -45,19 +45,15 @@ def EventReaderAlgCfg(flags, name="EventReaderAlgCfg", **kwargs):
     kwargs.setdefault("TruthParticleContainerKey"   , "TruthParticles")
     kwargs.setdefault("ElectronContainerKey"        , "Electrons")
     kwargs.setdefault("TruthEventContainerKey"      , "TruthEvents")
-    kwargs.setdefault("LArEMBHitContainerKey"       , "LArHitEMB")
-    kwargs.setdefault("LArRawChannelContainerKey"   , "LArRawChannels")
-    kwargs.setdefault("CaloCellContainerKey"        , "AllCalo")
+    kwargs.setdefault("LArEMBHitContainerKey"       , "LArHitEMB_ClusterThinned")
+    kwargs.setdefault("LArRawChannelContainerKey"   , "LArRawChannels_ClusterThinned")
+    kwargs.setdefault("CaloCellContainerKey"        , "AllCalo_ClusterThinned")
+    kwargs.setdefault("LArDigitContainerKey"        , "LArDigitContainer_ClusterThinned")
 
     if (kwargs.get("doElecSelectByTrackOnly")):
         kwargs.setdefault("MyElectronSelectionKey"      , "MySelectedElectrons")
     else:
         kwargs.setdefault("MyElectronSelectionKey"      , "MyTagAndProbeElectrons")
-        
-    if isMC:
-        kwargs.setdefault("LArDigitContainerKey","LArDigitContainer_MC")
-    else:       
-        kwargs.setdefault("LArDigitContainerKey","FREE")
 
     kwargs.setdefault("isMC", isMC)  # set to True in case of MC sample.
 
@@ -212,7 +208,6 @@ if __name__ == "__main__":
     
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     dumperFlags.Input.Files                 = defaultTestFiles.ESD
-    dumperFlags.Input.Files                 = ['/eos/user/m/mhufnage/scripts_lxplus/Reco/ALP_reco/MC_Zee_EVNTtoESD_standardBeamSpot/ESD_Zee_0.pool.root']
     dumperFlags.Exec.MaxEvents              = 50
     
     if not dumperFlags.Input.isMC:

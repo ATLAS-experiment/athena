@@ -17,17 +17,20 @@
 StatusCode CaloThinCellsInAODAlg::initialize()
 {
   ATH_MSG_INFO("Thinning cells from '"<< m_clusterCntKey.key()<<"' container with "<< m_clusterPtCut <<" MeV and "<< m_clusterEtaCut <<".");
-  ATH_MSG_INFO("Outputs are: CaloCells ('"<< m_caloCellOutputKey.key() <<"'), rawCh ('"<< m_rawChOutputKey.key()<<"') and digits ('"<< m_digitsOutputKey.key() <<"').");  
+  if    (!m_isMC) ATH_MSG_INFO("Outputs are: CaloCells ('"<< m_caloCellOutputKey.key() <<"'), rawCh ('"<< m_rawChOutputKey.key()<<"') and digits ('"<< m_digitsOutputKey.key() <<"').");
+  else  ATH_MSG_INFO("Outputs are: CaloCells ('"<< m_caloCellOutputKey.key() <<"'), rawCh ('"<< m_rawChOutputKey.key()<<"'), digits ('"<< m_digitsOutputKey.key() <<"') and hits ('"<< m_hitsOutputKey.key() <<"')");
   
   ATH_CHECK(m_cablingKey.initialize());
   
   // inputs
   ATH_CHECK(m_clusterCntKey.initialize());
+  ATH_CHECK(m_hitsInputKey.initialize(m_isMC));
   ATH_CHECK(m_digitsInputKey.initialize());
   ATH_CHECK(m_rawChInputKey.initialize());
   ATH_CHECK(m_caloCellInputKey.initialize());
   
   // outputs
+  ATH_CHECK(m_hitsOutputKey.initialize());
   ATH_CHECK(m_digitsOutputKey.initialize());
   ATH_CHECK(m_rawChOutputKey.initialize());
   ATH_CHECK(m_caloCellOutputKey.initialize());
@@ -65,6 +68,9 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
 
   SG::WriteHandle<LArRawChannelContainer> outputRawChannels(m_rawChOutputKey,ctx);
   ATH_CHECK(outputRawChannels.record(std::make_unique<LArRawChannelContainer>()));
+
+  SG::WriteHandle<LArHitContainer> outputHits = SG::makeHandle(m_hitsOutputKey, ctx);
+  ATH_CHECK(outputHits.record(std::make_unique<LArHitContainer>()));
 
   std::bitset<200000> keepCellSet;
   size_t nCellsAllClus = 0;
@@ -130,12 +136,28 @@ StatusCode CaloThinCellsInAODAlg::execute (const EventContext& ctx) const
         outputDigits->push_back(dig);
       }
     } //end loop over input container
-
     ATH_MSG_DEBUG("\tCopied " << outputDigits->size() << " of " << inputDigitsContainer->size() << " digits.");
   }
-  else{
-    ATH_MSG_DEBUG("Event has no selected calo cluster.");
-  }
+  
+  //(MC) start loop over hits container
+  if (m_isMC){
+    if (keepCellSet.any()){  
+      SG::ReadHandle<LArHitContainer> inputHitsContainer(m_hitsInputKey,ctx);
+
+      for (const LArHit* hit : *inputHitsContainer) {
+        const HWIdentifier   hwid    = larCabling->createSignalChannelID(hit->cellID());
+        const IdentifierHash onlHash = m_onlineID->channel_Hash(hwid);
+
+        if (keepCellSet.test(onlHash)) {
+          LArHit* clusHit = new LArHit(hit->cellID(),hit->energy(),hit->time());
+          clusHit->finalize();
+          outputHits->push_back(clusHit);
+        }
+      } //end loop over input container
+
+    ATH_MSG_DEBUG("\tCopied " << outputHits->size() << " of " << inputHitsContainer->size() << " hits.");
+    } // end keepCellSet.any()
+  } // end-if MC
 
   return StatusCode::SUCCESS;
 }
