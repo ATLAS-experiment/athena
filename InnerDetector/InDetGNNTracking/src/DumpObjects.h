@@ -13,6 +13,7 @@
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "TrkSpacePoint/SpacePointContainer.h"
+#include "TrkSpacePoint/SpacePointOverlapCollection.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTruthData/DetailedTrackTruthCollection.h"
 #include "TrkTruthData/TrackTruthCollection.h"
@@ -80,6 +81,9 @@ private:
                                                                        "ITkPixelSpacePoints"};
   SG::ReadHandleKey<SpacePointContainer> m_stripSpacePointContainerKey{this, "StripSpacePointContainerKey",
                                                                        "ITkStripSpacePoints"};
+  SG::ReadHandleKey<SpacePointOverlapCollection> m_overlapSpacePointCollectionKey{this, "OverlapSpacePointCollectionKey",
+                                                                       "ITkOverlapSpacePoints"};
+
 
   SG::ReadHandleKey<TrackCollection> m_tracksKey{this, "TracksKey", "CombinedITkTracks"};
   SG::ReadHandleKey<TrackTruthCollection> m_tracksTruthKey{this, "TracksTruthKey", "CombinedITkTracksTruthCollection"};
@@ -158,6 +162,7 @@ private:
   int *m_SPindex;
   double *m_SPx, *m_SPy, *m_SPz;
   int *m_SPCL1_index, *m_SPCL2_index;
+  int *m_SPisOverlap; // -1: pixel not applicable, 0: strip not overlap, 1: strip overlap
 
   int m_nTRK;
   int *m_TRKindex;
