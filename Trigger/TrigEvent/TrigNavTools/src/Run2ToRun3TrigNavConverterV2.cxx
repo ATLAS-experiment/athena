@@ -2,8 +2,9 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <boost/functional/hash.hpp>
+#include <GaudiKernel/StatusCode.h>
 #include "AthLinks/ElementLinkVector.h"
-#include "TrigConfHLTUtils/HLTUtils.h"
 #include "xAODTrigger/TrigPassBitsContainer.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
@@ -220,6 +221,10 @@ StatusCode Run2ToRun3TrigNavConverterV2::finalize()
 
 StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) const
 {
+  // ATH_MSG_INFO("EVENT " << context.evt());
+  // if ( 4 == context.evt() )  return StatusCode::SUCCESS;
+  // ATH_MSG_INFO("EVENT processing " << context.evt());
+
   {
     // configuration reading could not be done before the event loop
     // it needs to be done only once though
@@ -340,7 +345,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
       // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
       // 
       ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
-      std::vector<unsigned int> teIdsLastHealthyStep;
+      std::vector<unsigned int> teIdsLastHealthyStepIds;
 
       for (auto ptrHLTSignature : ptrChain->signatures())
         {
@@ -360,17 +365,19 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
 
           ATH_MSG_DEBUG("TE multiplicities seen in this step " << teCounts);
           if ( multiplicities == teCounts ) {
-            teIdsLastHealthyStep = teIds;
-            ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts);
+            teIdsLastHealthyStepIds = teIds;
+            ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts << " " << teIds);
             for ( size_t legNumber = 0; legNumber < teIds.size(); ++ legNumber){
               HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
               allTEs[teIds[legNumber]].insert(chainLegId);
             }
           } 
         }
-        for ( size_t legNumber = 0; legNumber < teIdsLastHealthyStep.size(); ++ legNumber ) {
+        for ( size_t legNumber = 0; legNumber < teIdsLastHealthyStepIds.size(); ++ legNumber ) {
           HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
-          finalTEs[teIdsLastHealthyStep[legNumber]].insert(chainLegId);
+
+          ATH_MSG_DEBUG("created leg id " << chainLegId << " that will replace TE ID " << teIdsLastHealthyStepIds[legNumber]);
+          finalTEs[teIdsLastHealthyStepIds[legNumber]].insert(chainLegId);
         }
     }
 
@@ -442,6 +449,23 @@ StatusCode Run2ToRun3TrigNavConverterV2::mirrorTEsStructure(ConvProxySet_t &conv
 
   ATH_MSG_DEBUG("Created " << convProxies.size() << " proxy objects");
   return StatusCode::SUCCESS;
+}
+
+
+void Run2ToRun3TrigNavConverterV2::printProxies(const ConvProxySet_t& proxies, 
+                                                std::function<bool(const ConvProxy*)> selector,
+                                                std::vector<std::function<void(const ConvProxy*)>> printers) const {
+  ATH_MSG_DEBUG("Printing proxies");
+  ATH_MSG_DEBUG("" );
+  for ( auto p: proxies) {
+    if ( selector(p) ){
+      ATH_MSG_DEBUG("Proxy " << p->description() );
+      for (auto& printer: printers) {
+        printer(p);
+      }
+      ATH_MSG_DEBUG("" );
+    }
+  }
 }
 
 StatusCode Run2ToRun3TrigNavConverterV2::associateChainsToProxies(ConvProxySet_t &convProxies, const TEIdToChainsMap_t &allTEs) const
@@ -600,21 +624,22 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturesProxies(ConvProxySet_t 
       ATH_MSG_VERBOSE("FEA: " << fea);
     }
   }
-  if (m_doSelfValidation)
+
+  for (auto [feaHash, proxies] : feaToProxyMap)
   {
-    for (auto [feaHash, proxies] : feaToProxyMap)
+    auto first = *proxies.begin();
+    for (auto p : proxies)
     {
-      auto first = *proxies.begin();
-      for (auto p : proxies)
+      if (not feaEqual(p->te->getFeatureAccessHelpers(), first->te->getFeatureAccessHelpers()))
       {
-        if (not feaEqual(p->te->getFeatureAccessHelpers(), first->te->getFeatureAccessHelpers()))
-        {
-          ATH_MSG_ERROR("Proxies grouped by FEA hash have actually distinct features (specific FEAs are different)");
-          return StatusCode::FAILURE;
-        }
+        ATH_MSG_ERROR("Proxies grouped by FEA hash have actually distinct features (specific FEAs are different)");
+        for (auto id: p->passChains ) ATH_MSG_ERROR("... chain id for this proxy " << id);
+        ATH_MSG_ERROR(".... TE id of this proxy: " << TrigConf::HLTUtils::hash2string(p->te->getId()));
+        return StatusCode::FAILURE;
       }
     }
   }
+
 
   ATH_CHECK(collapseProxies(convProxies, feaToProxyMap));
   ATH_MSG_DEBUG("Proxies with features collapsing reduces size from " << beforeCount << " to " << convProxies.size());
@@ -1116,13 +1141,13 @@ bool feaToSkip(const HLT::TriggerElement::FeatureAccessHelper &fea)
 uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TriggerElement *te_ptr, const HLT::TrigNavStructure &navigationDecoder) const
 {
   // FEA vectors hashing
-
+  ATH_MSG_VERBOSE("Calculating FEA hash");
   uint64_t hash = 0;
   for (auto fea : feaVector)
   {
     if (feaToSkip(fea))
     {
-      ATH_MSG_VERBOSE("Skipping TrigPassBits in FEA hash calculation");
+      ATH_MSG_VERBOSE("Skipping in FEA hash calculation");
       continue;
     }
 
@@ -1130,28 +1155,33 @@ uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerE
 
     if (sgKey == 0)
     {
-      ATH_MSG_VERBOSE("Skipping TrigPassBits in FEA hash calculation - CLID not present: " << sgCLID);
+      ATH_MSG_VERBOSE("Skipping unrecorded (missing in SG) FEA hash calculation - name in SG: " << sgName << " FEA " << fea);
       continue;
     }
 
-    ATH_MSG_DEBUG("feature CLID: " << fea.getCLID() << " te Id: " << te_ptr->getId());
-    uint64_t repr64 = static_cast<uint64_t>(fea.getCLID()) << 32 | static_cast<uint64_t>(fea.getIndex().subTypeIndex()) << 24 | (fea.getIndex().objectsBegin() << 16 ^ fea.getIndex().objectsEnd());
-    hash ^= repr64;
+    ATH_MSG_VERBOSE("Including FEA in hash CLID: " << fea.getCLID() << " te Id: " << te_ptr->getId());
+    boost::hash_combine(hash, fea.getCLID());
+    boost::hash_combine(hash, fea.getIndex().subTypeIndex());
+    boost::hash_combine(hash, fea.getIndex().objectsBegin());
+    boost::hash_combine(hash, fea.getIndex().objectsEnd());
   }
+  ATH_MSG_VERBOSE("Obtained FEA hash " << hash);
   return hash;
 }
 
 bool Run2ToRun3TrigNavConverterV2::feaEqual(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &a,
                                             const std::vector<HLT::TriggerElement::FeatureAccessHelper> &b) const
 {
+  ATH_MSG_VERBOSE("Comparison of FEAs");
   if (a.size() != b.size())
     return false;
 
   for (size_t i = 0; i < a.size(); ++i)
   {
+    ATH_MSG_VERBOSE("Comparison FEA a:" << a[i] << " FEA b:"  << b[i]);
     if (feaToSkip(a[i]) and feaToSkip(b[i]))
     {
-      ATH_MSG_VERBOSE("Skipping TrigPassBits in FEA comparison");
+      ATH_MSG_VERBOSE("Skipping FEA in comparison helper");
       continue;
     }
     if (not(a[i] == b[i]))

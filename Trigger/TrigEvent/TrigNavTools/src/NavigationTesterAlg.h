@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
 #include "TriggerMatchingTool/IIParticleRetrievalTool.h"
@@ -11,14 +11,14 @@
 #include <vector>
 
 namespace Trig {
-    class NavigationTesterAlg : public AthAlgorithm
+    class NavigationTesterAlg : public AthReentrantAlgorithm
     {
     public:
         NavigationTesterAlg(const std::string &name, ISvcLocator *pSvcLocator);
         ~NavigationTesterAlg() override = default;
 
         StatusCode initialize() override;
-        StatusCode execute() override;
+        StatusCode execute(const EventContext &context) const override;
 
     private:
         PublicToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "", "When enabled read navigation from TDT/off by default"};

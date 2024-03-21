@@ -21,6 +21,7 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TrigConfHLTData/HLTSignature.h"
 #include "TrigConfHLTData/HLTTriggerElement.h"
+#include "TrigConfHLTUtils/HLTUtils.h"
 
 // STL includes
 #include <string>
@@ -135,6 +136,17 @@ private:
   bool feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea) const;
 
   bool roiToSave(const HLT::TrigNavStructure &run2Nav, const HLT::TriggerElement::FeatureAccessHelper &fea) const;
+
+  // debugging aid, prints selected proxies
+  void printProxies(const ConvProxySet_t& proxies,
+                    std::function<bool(const ConvProxy*)> selector=[](const ConvProxy*){return true;},
+                    std::vector<std::function<void(const ConvProxy*)>> printers={}) const;
+
+  // useful printers
+  std::function<void(const ConvProxy*)> m_chainIdsPrinter = [&](const ConvProxy* p){ for (auto id: p->passChains ) ATH_MSG_DEBUG("chain id " << id); };
+  std::function<void(const ConvProxy*)> m_teIDPrinter = [&](const ConvProxy* p){ ATH_MSG_DEBUG("TE id " << TrigConf::HLTUtils::hash2string(p->te->getId())); };
+
+
 
   std::size_t getFeaSize(const ConvProxy &) const;
 

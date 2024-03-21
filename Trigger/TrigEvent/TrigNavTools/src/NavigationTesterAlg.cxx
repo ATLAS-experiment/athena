@@ -54,7 +54,7 @@ namespace std {
 namespace Trig {
 
     NavigationTesterAlg::NavigationTesterAlg(const std::string &name, ISvcLocator *pSvcLocator) :
-        AthAlgorithm(name, pSvcLocator)
+        AthReentrantAlgorithm(name, pSvcLocator)
     {}
 
     StatusCode NavigationTesterAlg::initialize()
@@ -67,7 +67,7 @@ namespace Trig {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode NavigationTesterAlg::execute()
+    StatusCode NavigationTesterAlg::execute(const EventContext &) const
     {
         for (const std::string &chain : m_chains)
         {
