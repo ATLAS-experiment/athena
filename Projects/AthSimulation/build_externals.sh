@@ -11,7 +11,7 @@ ATLAS_EXT_PROJECT_NAME="AthSimulationExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
                         -DLCG_VERSION_POSTFIX="d_ATLAS_9"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v38r0.000/Gaudi-v38r0.000.tar.gz;URL_MD5;af374562de2c29151881f49b4d8b49cf"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v38r0.001/Gaudi-v38r0.001.tar.gz;URL_MD5;36f071bb81c0a85331c047107f829537"
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/5.3.0/GeoModel-5.3.0.tar.bz2;URL_MD5;69c41f2c12ada4d953b6452454f92a04"
 			-DATLAS_GEOMODEL_PATCH=""
 			-DATLAS_GEOMODEL_FORCEDOWNLOAD_MESSAGE="Forcing_the_re-download_of_GeoModel_(2024.01.27.)")
