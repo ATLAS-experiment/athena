@@ -24,11 +24,19 @@ def ActsTrackStatePrinterCfg(flags,
 
     kwargs.setdefault("InputSpacePoints", isdet(flags, ["ITkPixelSpacePoints"], ["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
 
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault(
-        "ATLASConverterTool",
-        acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
-    )
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault(
+            "ATLASConverterTool",
+            acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
+        )
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinter(name, **kwargs))
     return acc

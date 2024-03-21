@@ -16,8 +16,10 @@
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/TrackSelector.hpp"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "src/ITrackStatePrinter.h"
 
@@ -339,25 +341,51 @@ namespace
   // === TrackFindingMeasurements ============================================
 
   // Helper class to convert xAOD::PixelClusterContainer or xAOD::StripClusterContainer to UncalibSourceLinkMultiset.
-  class TrackFindingMeasurements
-  {
+  class TrackFindingMeasurements {
   public:
-    TrackFindingMeasurements(const std::vector<Acts::GeometryIdentifier> &ordered_geo_ids)
-        : m_orderedGeoIds(&ordered_geo_ids)
-    {
-      m_measurementRanges.resize(m_orderedGeoIds->size(), MeasurementRange());
-      m_measurementOffset.reserve(2); // pixels+strips
+    TrackFindingMeasurements(std::size_t measTotal) {
+      m_orderedGeoIds.reserve(measTotal);
+      m_measurementOffset.reserve(2);  // pixels+strips
     }
 
     TrackFindingMeasurements() = delete;
     TrackFindingMeasurements(const TrackFindingMeasurements &) = delete;
     TrackFindingMeasurements &operator=(const TrackFindingMeasurements &) = delete;
 
+    void addDetectorElements(const InDetDD::SiDetectorElementCollection &detElems,
+                             const xAOD::UncalibratedMeasurementContainer &clusterContainer,
+                             const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool) {
+      auto measType = static_cast<std::size_t>(clusterContainerMeasType(clusterContainer));
+      if (!(measType < m_actsSurfaces.size())) {
+        std::stringstream msg;
+        msg << "Measurements of type " << measType << " larger than " << m_actsSurfaces.size() - 1;
+        throw std::runtime_error(msg.str());
+      }
+      m_actsSurfaces[measType].reserve(m_actsSurfaces[measType].size() + clusterContainer.size());  // may extend previous data, but usually starts from empty
+      gatherGeoIds(*ATLASConverterTool, detElems, m_orderedGeoIds, m_actsSurfaces[measType]);
+      m_sorted = false;
+    }
+
+    // NB. all addDetectorElements() must have been done before calling first addMeasurements().
     void addMeasurements(size_t typeIndex,
                          const xAOD::UncalibratedMeasurementContainer &clusterContainer,
                          const InDetDD::SiDetectorElementCollection &detElems,
-                         const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool)
-    {
+                         const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool) {
+      if (!m_sorted) {
+        std::sort(m_orderedGeoIds.begin(), m_orderedGeoIds.end());
+        m_sorted = true;
+        m_measurementRanges.resize(m_orderedGeoIds.size());
+      }
+
+      if (!m_trackingSurfaceHelper) {
+        m_trackingSurfaceHelper = std::make_unique<TrackingSurfaceHelper>(std::move(m_actsSurfaces));
+      }
+
+      xAOD::UncalibMeasType measType = clusterContainerMeasType(clusterContainer);
+      if (measType != xAOD::UncalibMeasType::Other) {
+        m_trackingSurfaceHelper->setSiDetectorElements(measType, &detElems);
+      }
+
       // m_measurementOffset only needed for TrackStatePrinter, but it is trivial overhead to save it for each event
       if (!(typeIndex < m_measurementOffset.size()))
         m_measurementOffset.resize(typeIndex + 1);
@@ -387,8 +415,8 @@ namespace
         {
           const Acts::Surface &surface = ATLASConverterTool->trkSurfaceToActsSurface(elem->surface());
           std::vector<Acts::GeometryIdentifier>::const_iterator
-              geo_iter = std::lower_bound(m_orderedGeoIds->begin(), m_orderedGeoIds->end(), surface.geometryId());
-          if (geo_iter == m_orderedGeoIds->end() || *geo_iter != surface.geometryId())
+              geo_iter = std::lower_bound(m_orderedGeoIds.begin(), m_orderedGeoIds.end(), surface.geometryId());
+          if (geo_iter == m_orderedGeoIds.end() || *geo_iter != surface.geometryId())
           {
             std::stringstream msg;
             msg << "Measurement with unexpected Acts geometryId: " << surface.geometryId()
@@ -396,7 +424,7 @@ namespace
                 << " idHash=" << measurement->identifierHash();
             throw std::runtime_error(msg.str());
           }
-          range_idx = geo_iter - m_orderedGeoIds->begin();
+          range_idx = geo_iter - m_orderedGeoIds.begin();
           if (m_measurementRanges[range_idx].first != std::numeric_limits<unsigned int>::max())
           {
             std::stringstream msg;
@@ -434,16 +462,23 @@ namespace
 
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffset.size() ? m_measurementOffset[typeIndex] : 0u; }
     std::vector<size_t> measurementOffsetVector() const { return m_measurementOffset; }
-
-    const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return *m_orderedGeoIds; }
+    const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return m_orderedGeoIds; }
     const MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
+    const TrackingSurfaceHelper &trackingSurfaceHelper() const { return *m_trackingSurfaceHelper; }
 
   private:
-    std::vector<size_t> m_measurementOffset;
-    const std::vector<Acts::GeometryIdentifier> *m_orderedGeoIds;
+    static xAOD::UncalibMeasType clusterContainerMeasType(const xAOD::UncalibratedMeasurementContainer &clusterContainer) {
+      return !clusterContainer.empty() ? clusterContainer.at(0)->type()
+                                       : xAOD::UncalibMeasType::Other;
+    }
 
+    std::vector<size_t> m_measurementOffset;
+    std::vector<Acts::GeometryIdentifier> m_orderedGeoIds;
+    std::array<std::vector<const Acts::Surface *>, TrackingSurfaceHelper::s_NMeasTypes> m_actsSurfaces;
+    std::unique_ptr<TrackingSurfaceHelper> m_trackingSurfaceHelper;
     MeasurementRangeList m_measurementRanges;
     std::size_t m_measurementsTotal = 0;
+    bool m_sorted = false;
   };
 
 } // anonymous namespace
