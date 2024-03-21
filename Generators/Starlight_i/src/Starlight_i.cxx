@@ -149,9 +149,6 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     // Set the event number
     evt->set_event_number( m_events );
 
-    // Set the generator id
-    HepMC::set_signal_process_id(evt,0);
-
     // Create the event vertex
     HepMC::GenVertexPtr v1 = HepMC::newGenVertexPtr();
     evt->add_vertex( v1 );

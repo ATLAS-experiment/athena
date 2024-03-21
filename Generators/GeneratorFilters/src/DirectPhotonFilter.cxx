@@ -59,7 +59,6 @@ StatusCode DirectPhotonFilter::filterEvent() {
 
   int phot = 0;
   for(const HepMC::GenEvent* genEvt : *events_const()) {
-    ATH_MSG_DEBUG("----->>> Process : " << HepMC::signal_process_id(genEvt));
     // Find all prompt photons with within given eta range
     for (const auto& pitr: *genEvt) {
       if (MC::isPhoton(pitr) &&
