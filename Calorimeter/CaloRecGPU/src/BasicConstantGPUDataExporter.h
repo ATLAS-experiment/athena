@@ -40,7 +40,7 @@ class BasicConstantGPUDataExporter :
 
   virtual StatusCode finalize() override;
 
-  virtual ~BasicConstantGPUDataExporter();
+  virtual ~BasicConstantGPUDataExporter() = default;
 
  private:
 

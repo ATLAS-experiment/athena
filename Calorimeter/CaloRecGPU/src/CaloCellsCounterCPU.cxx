@@ -66,7 +66,7 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
 
 
@@ -304,8 +304,3 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
 
 }
 
-
-CaloCellsCounterCPU::~CaloCellsCounterCPU()
-{
-  //Nothing!
-}

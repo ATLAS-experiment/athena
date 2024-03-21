@@ -209,11 +209,5 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
 
   return StatusCode::SUCCESS;
 
-
 }
 
-
-CaloCellsCounterGPU::~CaloCellsCounterGPU()
-{
-  //Nothing!
-}

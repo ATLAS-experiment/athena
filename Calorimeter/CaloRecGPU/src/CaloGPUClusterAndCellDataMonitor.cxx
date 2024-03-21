@@ -274,7 +274,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::convert_to_GPU_data_structures(cons
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
 
   ret_info.allocate();
@@ -1099,11 +1099,6 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters_perfectly(sample_com
 
   return StatusCode::SUCCESS;
 
-}
-
-CaloGPUClusterAndCellDataMonitor::~CaloGPUClusterAndCellDataMonitor()
-{
-  //Nothing!
 }
 
 namespace

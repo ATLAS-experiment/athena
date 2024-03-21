@@ -237,7 +237,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
   const DataLink<CaloCellContainer> cell_collection_link (cell_collection.name(), ctx);
 
@@ -584,11 +584,11 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
       CALORECGPU_MOMENTS_CONVERSION_HELPER(AVG_LAR_Q,         avgLArQ           );
       CALORECGPU_MOMENTS_CONVERSION_HELPER(AVG_TILE_Q,        avgTileQ          );
 
-      if (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS])
+      if (m_doHVMoments && m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS])
         {
           cluster->insertMoment(xAOD::CaloCluster::ENG_BAD_HV_CELLS, HV_energy[cluster_index]);
         }
-      if (m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
+      if (m_doHVMoments && m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS])
         {
           cluster->insertMoment(xAOD::CaloCluster::N_BAD_HV_CELLS, HV_number[cluster_index]);
         }
@@ -684,10 +684,4 @@ StatusCode GPUToAthenaImporterWithMoments::finalize()
       print_times("Preprocessing Cluster_Number Clusters Cells Cell_Cycle Ordering Cluster_Creation Moments_Transfer Moments_Fill", 9);
     }
   return StatusCode::SUCCESS;
-}
-
-
-GPUToAthenaImporterWithMoments::~GPUToAthenaImporterWithMoments()
-{
-  //Nothing!
 }

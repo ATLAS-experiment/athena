@@ -108,7 +108,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
   const DataLink<CaloCellContainer> cell_collection_link (cell_collection.name(), ctx);
 
@@ -337,8 +337,3 @@ StatusCode BasicGPUToAthenaImporter::finalize()
   return StatusCode::SUCCESS;
 }
 
-
-BasicGPUToAthenaImporter::~BasicGPUToAthenaImporter()
-{
-  //Nothing!
-}

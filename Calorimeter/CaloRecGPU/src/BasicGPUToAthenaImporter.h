@@ -40,7 +40,7 @@ class BasicGPUToAthenaImporter :
 
   virtual StatusCode finalize() override;
 
-  virtual ~BasicGPUToAthenaImporter();
+  virtual ~BasicGPUToAthenaImporter() = default;
 
  private:
 

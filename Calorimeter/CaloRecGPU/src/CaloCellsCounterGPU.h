@@ -32,7 +32,7 @@ class CaloCellsCounterGPU :
                               CaloRecGPU::EventDataHolder & event_data,
                               void * temporary_buffer) const override;
 
-  virtual ~CaloCellsCounterGPU();
+  virtual ~CaloCellsCounterGPU() = default;
 
  private:
 

@@ -163,9 +163,3 @@ StatusCode CaloGPUOutput::execute(const EventContext & ctx, const ConstantDataHo
 
 
 }
-
-
-CaloGPUOutput::~CaloGPUOutput()
-{
-  //Nothing!
-}

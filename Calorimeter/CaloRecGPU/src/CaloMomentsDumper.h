@@ -34,7 +34,7 @@ class CaloMomentsDumper :
   
   virtual StatusCode execute (const EventContext& ctx, xAOD::CaloClusterContainer* cluster_collection) const override;
 
-  virtual ~CaloMomentsDumper();
+  virtual ~CaloMomentsDumper() = default;
 
  private:
 

@@ -25,12 +25,6 @@
 using namespace CaloRecGPU;
 using namespace ClusterMomentsCalculator;
 
-void ClusterMomentsCalculator::CMCOptionsHolder::allocate()
-{
-  m_options.allocate();
-  m_options_dev.allocate();
-}
-
 void ClusterMomentsCalculator::CMCOptionsHolder::sendToGPU(const bool clear_CPU)
 {
   m_options_dev = m_options;

@@ -536,7 +536,7 @@ def MainTestConfiguration(flags, testoptions, PlotterConfigurator, cellsname, cl
                                             
         
     if testoptions.TestMoments:
-        AthenaClusterImporter = result.popToolsAndMerge( AthenaClusterAndMomentsImporterToolCfg(flags, cellsname,"AthenaClusterImporter") )
+        AthenaClusterImporter = result.popToolsAndMerge( AthenaClusterAndMomentsImporterToolCfg(flags, cellsname, False, "AthenaClusterImporter") )
     else:
         AthenaClusterImporter = result.popToolsAndMerge( BasicAthenaClusterImporterToolCfg(flags, cellsname,"AthenaClusterImporter") )
             
@@ -572,7 +572,7 @@ def MainTestConfiguration(flags, testoptions, PlotterConfigurator, cellsname, cl
                 HybridClusterProcessor.BeforeGPUTools += [CPUOut2]
         
         if testoptions.TestMoments:
-            CPUMoments = result.popToolsAndMerge( DefaultClusterMomentsCalculatorToolCfg(flags,"CPUMoments") )
+            CPUMoments = result.popToolsAndMerge( DefaultClusterMomentsCalculatorToolCfg(flags, False,"CPUMoments") )
             HybridClusterProcessor.BeforeGPUTools += [CPUMoments]
             if testoptions.OutputCounts:
                 CPUDumper = result.popToolsAndMerge( MomentsDumperToolCfg(flags,"CPUMomentsDumper", SavePath = "./moments", FilePrefix = "CPU") )

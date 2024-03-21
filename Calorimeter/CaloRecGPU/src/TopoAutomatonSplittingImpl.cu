@@ -28,12 +28,6 @@
 using namespace CaloRecGPU;
 using namespace TASplitting;
 
-void TASplitting::TASOptionsHolder::allocate()
-{
-  m_options.allocate();
-  m_options_dev.allocate();
-}
-
 void TASplitting::TASOptionsHolder::sendToGPU(const bool clear_CPU)
 {
   m_options_dev = m_options;

@@ -320,7 +320,11 @@ namespace ClusterMomentsCalculator
 
     CaloRecGPU::Helpers::CUDA_object<ClusterMomentCalculationOptions> m_options_dev;
 
-    void allocate();
+    void allocate()
+    {
+      m_options.allocate();
+    }
+    
     void sendToGPU(const bool clear_CPU = false);
   };
 

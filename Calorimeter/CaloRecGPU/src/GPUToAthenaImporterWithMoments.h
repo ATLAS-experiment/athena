@@ -44,7 +44,7 @@ class GPUToAthenaImporterWithMoments :
 
   virtual StatusCode finalize() override;
 
-  virtual ~GPUToAthenaImporterWithMoments();
+  virtual ~GPUToAthenaImporterWithMoments() = default;
 
  private:
 

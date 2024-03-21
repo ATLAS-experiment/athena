@@ -28,12 +28,6 @@
 using namespace CaloRecGPU;
 using namespace TAGrowing;
 
-void TAGrowing::TACOptionsHolder::allocate()
-{
-  m_options.allocate();
-  m_options_dev.allocate();
-}
-
 void TAGrowing::TACOptionsHolder::sendToGPU(const bool clear_CPU)
 {
   m_options_dev = m_options;

@@ -26,8 +26,3 @@ StatusCode CaloClusterStoreRawProperties::execute (const EventContext &, xAOD::C
 
 }
 
-
-CaloClusterStoreRawProperties::~CaloClusterStoreRawProperties()
-{
-  //Nothing!
-}

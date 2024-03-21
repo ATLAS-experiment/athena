@@ -46,7 +46,7 @@ class CaloGPUClusterAndCellDataMonitor :
 
   virtual StatusCode initialize() override;
 
-  virtual ~CaloGPUClusterAndCellDataMonitor();
+  virtual ~CaloGPUClusterAndCellDataMonitor() = default;
 
 
   virtual StatusCode update_plots_start(const EventContext & ctx,
