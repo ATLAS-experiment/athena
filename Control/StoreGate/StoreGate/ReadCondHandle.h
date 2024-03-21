@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READCONDHANDLE_H
@@ -261,6 +261,14 @@ namespace SG {
   ReadCondHandle<T>::range(const EventIDBase& eid, EventIDRange& r) const {
     
     return ( m_cc->range(eid, r) );
+  }
+
+
+  // helper methods to create a read cond handle from the corresponding key.
+  template <class T>
+  SG::ReadCondHandle<T> makeHandle(const SG::ReadCondHandleKey<T> &key,
+                                   const EventContext& ctx = Gaudi::Hive::currentContext()) {
+     return SG::ReadCondHandle<T>(key, ctx);
   }
 
 }

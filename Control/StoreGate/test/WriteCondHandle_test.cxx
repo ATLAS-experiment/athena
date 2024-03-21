@@ -466,6 +466,26 @@ void test3( StoreGateSvc* cs )
     assert ( h1.record (tsrange (1, 2), std::make_unique<MyObj>(1)).isSuccess() );
     assert ( h2.record (tsrange (1, 2), std::make_unique<MyObj>(2)).isSuccess() );
   }
+  {
+    SG::WriteCondHandleKey<MyObj>  k1 ("test3_1_mh");
+    SG::WriteCondHandleKey<MyObj>  k2 ("test3_2_mh");
+    assert ( k1.initialize().isSuccess() );
+    assert ( k2.initialize().isSuccess() );
+
+    auto h1 = SG::makeHandle(k1, ctx);
+    auto h2 = SG::makeHandle(k2);
+    assert ( h1.record (tsrange (1, 2), std::make_unique<MyObj>(1)).isSuccess() );
+    assert ( h2.record (tsrange (1, 2), std::make_unique<MyObj>(2)).isSuccess() );
+  }
+  {
+    SG::ReadCondHandleKey<MyObj>  k1 ("test3_1_mh");
+    SG::ReadCondHandleKey<MyObj>  k2 ("test3_2_mh");
+    assert ( k1.initialize().isSuccess() );
+    assert ( k2.initialize().isSuccess() );
+    auto h1 = SG::makeHandle(k1, ctx);
+    auto h2 = SG::makeHandle(k2);
+  }
+
 
   SG::ReadCondHandleKey<MyObj>  k1 ("test3_1");
   SG::ReadCondHandleKey<MyObj>  k2 ("test3_2");
