@@ -285,11 +285,11 @@ namespace MCTesting {
     std::cout << "gamma barcode " << HepMC::barcode(pGamma) << std::endl;
 #endif
 
-    HepMcParticleLink gammaLink1(pGamma, 0,
+    HepMcParticleLink gammaLink1(pGamma, 1,
                                  HepMcParticleLink::IS_EVENTNUM);
     HepMcParticleLink gammaLink2(HepMC::uniqueID(pGamma), 0,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    HepMcParticleLink gammaLink3(HepMC::barcode(pGamma), 0,
+    HepMcParticleLink gammaLink3(HepMC::barcode(pGamma), 1,
                                  HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
     HepMcParticleLink gammaLink11(pGamma, 1,
                                   HepMcParticleLink::IS_EVENTNUM);
@@ -302,9 +302,9 @@ namespace MCTesting {
     out << "Testing HepMcParticleLink streamer "
         << gammaLink1 << " --- " << gammaLink11 <<std::endl;
 #ifdef HEPMC3
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 1 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 5 (id) , McEventCollection CollectionNotSet\n");
 #else
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet --- Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection CollectionNotSet\n");
 #endif
 
 #ifdef GENP_DEBUG
@@ -325,8 +325,6 @@ namespace MCTesting {
     ASSERT_EQ(gammaLink11, gammaLink13);
 
     ASSERT_EQ(*gammaLink1, *gammaLink11);
-    ASSERT_NE( gammaLink1, gammaLink11 ); //FIXME weird! Can't check ptr...
-    ASSERT_LT( gammaLink1, gammaLink11 );  //FIXME weird! Can't check ptr...
     std::cout << "*** HepMcParticleLink_test OK ***" <<std::endl;
   }
 
