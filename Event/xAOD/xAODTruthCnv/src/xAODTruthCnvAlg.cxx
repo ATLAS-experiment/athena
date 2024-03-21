@@ -360,13 +360,7 @@ namespace xAODMaker {
           // If this is a disconnected vertex, add it manually or won't be added from the loop over particles below.
            auto disconnectedSignalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
           if (disconnectedSignalProcessVtx) {
-#ifdef HEPMC3
-            if (disconnectedSignalProcessVtx->particles_in().empty() &&
-                disconnectedSignalProcessVtx->particles_out().empty() ) {
-#else
-            if (disconnectedSignalProcessVtx->particles_in_size() == 0 &&
-                disconnectedSignalProcessVtx->particles_out_size() == 0 ) {
-#endif
+            if (disconnectedSignalProcessVtx->particles_in_size() == 0 && disconnectedSignalProcessVtx->particles_out_size() == 0 ) {
               //This is a disconnected vertex, add it manually
               vertices.push_back (disconnectedSignalProcessVtx);
             }

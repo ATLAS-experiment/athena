@@ -54,15 +54,6 @@ StatusCode HepMCTruthReader::execute(const EventContext& ctx) const {
     // Print the event particle/vtx contents
     if (cntr==0) ATH_MSG_INFO("Printing signal event...");
     if (cntr>0) ATH_MSG_INFO("Printing pileup events...");  
-
-    if (cntr==0) {
-      auto signalProcessVtx = HepMC::signal_process_vertex(genEvt);
-      ATH_MSG_INFO("Signal process vertex position: (" << (signalProcessVtx?signalProcessVtx->position().x():0)
-		   << ", " << (signalProcessVtx?signalProcessVtx->position().y():0)
-           << ", " << (signalProcessVtx?signalProcessVtx->position().z():0)
-           << "). Pointer: " << signalProcessVtx);
-    }
-
     printEvent(genEvt, m_do4momPtEtaPhi);
 
   }
