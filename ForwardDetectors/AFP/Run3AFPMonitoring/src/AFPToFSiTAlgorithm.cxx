@@ -51,7 +51,7 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
         ATH_MSG_WARNING( "evtStore() does not contain hits collection with name " << m_afpTrackContainerKey );
         return StatusCode::SUCCESS;
     }
-    ATH_CHECK( afpSiHitContainer.initialize() );
+    ATH_CHECK( afpTrackContainer.initialize() );
 
     SG::ReadHandle<xAOD::AFPToFHitContainer> afpToFHitContainer( m_afpToFHitContainerKey, ctx );
     if ( !afpToFHitContainer.isValid() ) {
