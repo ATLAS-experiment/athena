@@ -72,12 +72,14 @@ AntiKt10LCTopo_withmoms = AntiKt10LCTopo.clone(
 )
 
 AntiKt10LCTopoTrimmed = JetTrimming(AntiKt10LCTopo,
-                                    modifiers = ("Calib:CombinedMass:mc","Filter:100000")+standardrecomods+substrmods+lctopo_trimmed_mods+truthlabels,
+                                    #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after trimming
+                                    modifiers = ("Filter:1000","Calib:CombinedMass:mc","Filter:100000",)+standardrecomods+substrmods+lctopo_trimmed_mods+truthlabels,
                                     PtFrac = 0.05, RClus = 0.2,                                    
                                     )
 
 AntiKt10LCTopoTrimmed_trigger = JetTrimming(AntiKt10LCTopo_noVR,
-                                            modifiers = ("Calib:CombinedMass:mc","Filter:50000","Sort","ConstitFourMom"),
+                                            #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after trimming
+                                            modifiers = ("Filter:1000","Calib:CombinedMass:mc","Filter:50000","Sort","ConstitFourMom"),
                                             PtFrac = 0.05, RClus = 0.2,
 )
 
@@ -98,14 +100,16 @@ AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 )
 
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
-                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
+                                      #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
+                                      modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
                                       Beta = 1., ZCut= 0.1,
                                      )
 
 AntiKt10UFOCSSKSoftDrop_trigger = JetSoftDrop(AntiKt10UFOCSSK,
-                                            modifiers = ("Calib:SoftDrop:mc","Filter:50000","Sort","ConstitFourMom"),
-                                            Beta = 1., ZCut= 0.1,
-                                            )
+                                              #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
+                                              modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:50000","Sort","ConstitFourMom"),
+                                              Beta = 1., ZCut= 0.1,
+                                              )
 
 
 
