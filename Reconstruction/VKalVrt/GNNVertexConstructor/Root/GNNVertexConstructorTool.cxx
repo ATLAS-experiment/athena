@@ -55,6 +55,7 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
   declareProperty("RlayerB",   m_RlayerB  );
   declareProperty("Rlayer1",   m_Rlayer1  );
   declareProperty("Rlayer2",   m_Rlayer2  );
+  declareProperty("fitHists", m_fitHists, "Fit extra histograms on numer of vertices within jet and combined energy fraction");
   declareProperty("mind0", m_minD0, "D0 cut on vertices");
   declareProperty("minSig3D", m_minSig3D, "Sig 3D cut on vertices");
   declareProperty("maxChi2", m_maxChi2, "Maximum Chi2 for fitted vertices");
@@ -231,7 +232,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       
       v2TLMap[v].insert(tl);
       
-      if (3==to||4==to|| 5==to){    //Checking if vertex has a heavy flavour track
+      if (InDet::ExclusiveOrigin::FromB==to||InDet::ExclusiveOrigin::FromBC==to|| InDet::ExclusiveOrigin::FromC==to){    //Checking if vertex has a heavy flavour track
         v2HFMap[v]=(true);
         v2NHFTLMap[v].insert(tl);
       }

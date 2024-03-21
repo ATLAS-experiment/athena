@@ -23,6 +23,7 @@
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
 #include "TMath.h"
 
 #include "vector"

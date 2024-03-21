@@ -48,7 +48,8 @@ atlas_add_component( GNNVertexConstructor
                                     VxSecVertex 
                                     VxVertex
                                     xAODTruth
-                                    TrkToolInterfaces                                    
+                                    TrkToolInterfaces
+                                    InDetTrackSystematicsToolsLib                                    
  )
 
 atlas_add_library(   GNNVertexConstructorLib
@@ -87,13 +88,14 @@ atlas_add_library(   GNNVertexConstructorLib
                                     VxSecVertex
                                     VxVertex 
                                     xAODTruth
-                                    TrkToolInterfaces                                    
+                                    TrkToolInterfaces
+                                    InDetTrackSystematicsToolsLib                                    
  )
                      
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_install_data( data/* )
+#atlas_install_data( data/* )
 
 
 
