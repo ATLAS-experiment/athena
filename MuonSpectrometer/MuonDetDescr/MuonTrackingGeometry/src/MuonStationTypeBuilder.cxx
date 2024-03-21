@@ -1334,10 +1334,10 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         Trk::MaterialProperties material(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                         Trk::HomogeneousLayerMaterial spacerMaterial(material, 0.);
                         
-                        auto layx = std::make_unique<Trk::SubtractedPlaneLayer>(subPlane.release(), spacerMaterial, thickness, nullptr, 0);
+                        auto layx = std::make_unique<Trk::SubtractedPlaneLayer>(subPlane.get(), spacerMaterial, thickness, nullptr, 0);
                         layers.push_back(std::move(layx));
                        
-                        auto layxx = std::make_unique<Trk::SubtractedPlaneLayer>(subPlaneX.release(), spacerMaterial, thickness, nullptr, 0);
+                        auto layxx = std::make_unique<Trk::SubtractedPlaneLayer>(subPlaneX.get(), spacerMaterial, thickness, nullptr, 0);
                         layers.push_back(std::move(layxx));
 
                         bounds = std::make_shared<const Trk::RectangleBounds>( boxB->getXHalfLength(), box->getZHalfLength());
@@ -1350,7 +1350,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
                         auto subPlaneBis = std::make_unique<Trk::SubtractedPlaneSurface>(std::move(surf), volEx.release(), false);
                         material = Trk::MaterialProperties(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                         spacerMaterial = Trk::HomogeneousLayerMaterial(material, 0.);
-                        auto lay = std::make_unique<Trk::SubtractedPlaneLayer>(subPlaneBis.release(), spacerMaterial, thickness, nullptr, 0);
+                        auto lay = std::make_unique<Trk::SubtractedPlaneLayer>(subPlaneBis.get(), spacerMaterial, thickness, nullptr, 0);
                         layers.push_back(std::move(lay));
                     }
                 }

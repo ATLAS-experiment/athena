@@ -1307,7 +1307,7 @@ void Muon::MuonStationBuilderImpl::checkLayerId(
 
         Amg::Transform3D check_layer_identity = lay->surfaceRepresentation().transform().inverse() * trid;
         if (!Amg::doesNotDeform(check_layer_identity)) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<comment<<" "<<Amg::toString(check_layer_identity));
+            ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" "<<comment<<" "<<Amg::toString(check_layer_identity));
         }
 
     } else if (m_idHelperSvc->isTgc(id)) {
