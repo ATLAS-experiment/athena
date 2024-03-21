@@ -403,7 +403,7 @@ namespace MuonGM {
             AlignPosIterator apit;
             AlignPos ap;
             npos_ss = 0;
-            for (pit = station->begin(); pit != station->end(); pit++) {
+            for (pit = station->begin(); pit != station->end(); ++pit) {
                 int zi = (*pit).second.zindex;
                 int fi = (*pit).second.phiindex;
                 int sign = 1;

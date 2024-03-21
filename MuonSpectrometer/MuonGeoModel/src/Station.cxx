@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Station.h"
@@ -329,11 +329,11 @@ namespace MuonGM {
             os << "\t" << s.m_components[i].get() << std::endl;
 
         PositionIterator k;
-        for (k = s.begin(); k != s.end(); k++)
+        for (k = s.begin(); k != s.end(); ++k)
             os << "\t\t" << (*k).second << std::endl;
 
         AlignPosIterator ak;
-        for (ak = s.abegin(); ak != s.aend(); ak++)
+        for (ak = s.abegin(); ak != s.aend(); ++ak)
             os << "\t\t" << (*ak).second << std::endl;
 
         os << "--------------------------------------------------" << std::endl;
