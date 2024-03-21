@@ -172,11 +172,14 @@ class FlagAddress(object):
 
     def __iter__(self):
         self._flags.loadAllDynamicFlags()
+        rmap = self._flags._renamed_map()
         used = set()
         for flag in self._flags._flagdict.keys():
             if flag.startswith(self._name.rstrip('.') + '.'):
+                newflag = rmap[flag]
                 ntrim = len(self._name) + 1
-                remaining = flag[ntrim:].split('.',1)[0]
+                n_dots_in = flag[:ntrim].count('.')
+                remaining = newflag.split('.')[n_dots_in]
                 if remaining not in used:
                     yield remaining
                     used.add(remaining)
@@ -290,9 +293,10 @@ class AthConfigFlags(object):
 
     def __iter__(self):
         self.loadAllDynamicFlags()
+        rmap = self._renamed_map()
         used = set()
         for flag in self._flagdict:
-            first = flag.split('.',1)[0]
+            first = rmap[flag].split('.',1)[0]
             if first not in used:
                 yield first
                 used.add(first)
@@ -308,6 +312,11 @@ class AthConfigFlags(object):
 
 
     def _renamed_map(self):
+        """mapping from the old names to the new names
+
+        This is the inverse of _renamed, which maps new names to old
+        names
+        """
         def rename(key):
             for new, old in self._renames.items():
                 if key.startswith(old + '.'):
@@ -420,7 +429,7 @@ class AthConfigFlags(object):
         return False
 
     def hasFlag(self, name):
-        return name in self._flagdict
+        return name in self._renamed_map().values()
 
     def _set(self,name,value):
         self._tryModify()
@@ -465,6 +474,7 @@ class AthConfigFlags(object):
         cln = AthConfigFlags()
         cln._flagdict = deepcopy(self._flagdict)
         cln._dynaflags = copy(self._dynaflags)
+        cln._renames = deepcopy(self._renames)
         return cln
 
 
