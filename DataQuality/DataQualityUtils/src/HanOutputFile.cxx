@@ -32,6 +32,7 @@
 #include <TStyle.h>
 #include <TText.h>
 #include <TImageDump.h>
+#include <TFrame.h>
 
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/lexical_cast.hpp>
@@ -632,7 +633,7 @@ namespace dqutils
         return "Undefined";
       }
       // Extract JSON object
-      TObjString* JSON_obj = dynamic_cast<TObjString*>(gDirectory->GetKey(JSON_name.c_str())->ReadObj());
+      std::unique_ptr<TObjString> JSON_obj(dynamic_cast<TObjString*>(gDirectory->GetKey(JSON_name.c_str())->ReadObj()));
       if (not JSON_obj)
       {
         std::cerr << "HanOutputFile::getInfo : dynamic cast failed\n";
@@ -1051,6 +1052,7 @@ namespace dqutils
             {
               o << " title " << hisTitle << "\n";
             }
+            delete h;
           }
           else
           {
@@ -1887,7 +1889,7 @@ namespace dqutils
             if (colln)
             {
               WasCollectionReference = true;
-              TIterator* icolln = colln->MakeIterator();
+              std::unique_ptr<TIterator> icolln(colln->MakeIterator());
               TObject* ref2;
               while ((ref2 = icolln->Next()))
               {
@@ -2295,7 +2297,7 @@ namespace dqutils
 
     free(x);
     delete hobj;
-    delete hRef;
+    delete ref;
     delete legend;
     return rvPair;
   }
@@ -3183,36 +3185,41 @@ namespace dqutils
     //////
     TProfile* phRef = dynamic_cast<TProfile*>(hRef);
     TProfile* ph = dynamic_cast<TProfile*>(h);
-    TH1F* clonehist;
-    TH1F* clonehistref;
+    std::unique_ptr<TH1F> clonehist; // we will release this later, but use a unique_ptr in case we return early
+    std::unique_ptr<TH1F> clonehistref;
     // transform if profiles
     if (ph != 0)
     {
-      clonehist = (TH1F*)ph->ProjectionX();
+      clonehist.reset((TH1F*)ph->ProjectionX());
     }
     else
     {
-      clonehist = (TH1F*)h->Clone();
-      clonehist->Sumw2();
+      clonehist.reset((TH1F*)h->Clone());
+      if (!clonehist->GetSumw2()) {
+        clonehist->Sumw2();
+      }
     }
     if (phRef != 0)
     {
-      clonehistref = (TH1F*)phRef->ProjectionX();
+      clonehistref.reset((TH1F*)phRef->ProjectionX());
     }
     else
     {
-      clonehistref = (TH1F*)hRef->Clone();
-      clonehistref->Sumw2();
+      clonehistref.reset((TH1F*)hRef->Clone());
+      if (!clonehist->GetSumw2()) {
+        clonehistref->Sumw2();
+      }
     }
     if (!clonehist or !clonehistref)
     {
       return;
     }
-    clonehist->Divide(clonehistref);
+    clonehist->SetBit(kCanDelete);
+    clonehist->Divide(clonehistref.get());
     /// Error Bars fixed
     //////
 
-    formatTH1(myC_ratiopad.get(), clonehist);
+    formatTH1(myC_ratiopad.get(), clonehist.get());
     clonehist->SetTitle("");
 
     // extract delta value from string that holds the draw options
@@ -3225,42 +3232,69 @@ namespace dqutils
 
     clonehist->GetYaxis()->SetNdivisions(3, true);
     clonehist->SetMarkerStyle(1);
-    clonehist->Draw("E");
+    clonehist->Draw("E"); // plots into myC_ratiopad
     clonehist->GetXaxis()->SetTitleSize(0.11);
     clonehist->GetXaxis()->SetLabelSize(0.11);
     clonehist->GetYaxis()->SetTitleSize(0.11);
     clonehist->GetYaxis()->SetLabelSize(0.11);
-    myC_main->cd();
-    TPad* lowerPad = new TPad("lowerPad", "lowerPad", .005, .060, .995, .250);
+    myC_main->cd(); // lowerPad and upperPad plotted into myC_main
+    TPad* lowerPad = new TPad("lowerPad", "lowerPad", .005, .060, .995, .250); // deleted by myC_main
     lowerPad->SetTopMargin(0);
     lowerPad->SetFillStyle(0);
     lowerPad->Draw();
-    TPad* upperPad = new TPad("upperPad", "upperPad", .005, .250, .995, .995);
+    TPad* upperPad = new TPad("upperPad", "upperPad", .005, .250, .995, .995); // deleted by myC_main
     upperPad->SetBottomMargin(0);
     upperPad->SetFillStyle(0);
     upperPad->Draw();
 
     lowerPad->cd();
-    myC_ratiopad->DrawClonePad();
+    myC_ratiopad->DrawClonePad(); // clone contents of myC_ratiopad to lowerPad (will fix ownership later)
     // Draw y=1 lineon ratio plot
-    TLine* line = new TLine;
-    line->SetLineColor(kRed);
-    line->SetLineWidth(1);
+    TLine line;
+    line.SetLineColor(kRed);
+    line.SetLineWidth(1);
     // method belove might be a problem when axis range changed
     double xmin = clonehist->GetXaxis()->GetXmin();
     double xmax = clonehist->GetXaxis()->GetXmax();
     // double xmin = BINLOEDGE(clonehist, 1)-BINWIDTH(clonehist, 1);
     // double xmax = BINLOEDGE(clonehist, clonehist->GetNbinsX() ) +  2.0*BINWIDTH(clonehist, clonehist->GetNbinsX() ) ;
-    line->DrawLine(xmin, 1, xmax, 1);
+    line.DrawLine(xmin, 1, xmax, 1);
     upperPad->cd();
     myC_upperpad->SetBottomMargin(0);
     myC_upperpad->SetFillStyle(0);
     h->GetXaxis()->SetLabelSize(0.);
     h->GetXaxis()->SetTitleSize(0.);
-    myC_upperpad->DrawClonePad();
+    myC_upperpad->DrawClonePad(); // clone original canvas (i.e. main plot) into upperPad (will fix ownership later)
     myC_upperpad->cd();
-    myC_upperpad->Clear();
-    myC_main->DrawClonePad();
+    myC_upperpad->Clear(); // reset original canvas
+    myC_main->DrawClonePad(); // clone contents of myC_main back into original canvas (will fix ownership shortly)
+    clonehist.release(); // this will be deleted by lowerpad cleanup
+    // At this point myC_main contains the original lowerPad and upperPad, which contain clones of the original canvas
+    // and ownership of clonehist. Iterate one level down and mark contained objects as deleteable. This will delete
+    // the pads, as well as clonehist.
+    for (TObject* o : *(myC_main->GetListOfPrimitives())) {
+      o->SetBit(kCanDelete);
+      if (auto* o2 = dynamic_cast<TPad*>(o)) {
+        for (auto* o3: *(o2->GetListOfPrimitives())) {
+          if (!dynamic_cast<TFrame*>(o3)) {
+            o3->SetBit(kCanDelete);
+          }
+        }
+      }
+    }
+    // At this point myC_upperpad contains clones of all its objects, including the pads. None of them have pointers
+    // outside of myC_upperpad and its contained cloned pads. Mark them all deleteable. The original plot will be deleted
+    // in the calling code.
+    for (TObject* o : *(myC_upperpad->GetListOfPrimitives())) {
+      o->SetBit(kCanDelete);
+      if (auto* o2 = dynamic_cast<TPad*>(o)) {
+        for (auto* o3: *(o2->GetListOfPrimitives())) {
+          if (!dynamic_cast<TFrame*>(o3)) {
+            o3->SetBit(kCanDelete);
+          }
+        }
+      }
+    }
   }
 
   void HanOutputFile::ratioplot2D(TCanvas* canvas_top, TH2* h2, TH2* h2Ref, std::string display)
