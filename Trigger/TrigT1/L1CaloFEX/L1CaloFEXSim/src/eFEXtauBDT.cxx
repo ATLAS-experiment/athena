@@ -66,9 +66,14 @@ void LVL1::eFEXtauBDT::setPointerToETThresholdParam(unsigned int *etThreshold) {
   m_etThreshold = etThreshold;
 }
 
-void LVL1::eFEXtauBDT::setPointerToETThresholdForFracParam(
-    unsigned int *etThresholdForFrac) {
-  m_etThresholdForFrac = etThresholdForFrac;
+void LVL1::eFEXtauBDT::setPointerToMaxETParam(
+    unsigned int *maxEtThreshold) {
+  m_maxEtThreshold = maxEtThreshold;
+}
+
+void LVL1::eFEXtauBDT::setPointerToBDTMinETParam(
+    unsigned int *bdtMinEtThreshold) {
+  m_bdtMinEtThreshold = bdtMinEtThreshold;
 }
 
 unsigned int *LVL1::eFEXtauBDT::superCellToPtr(int eta, int phi, int layer) {
@@ -171,6 +176,9 @@ void LVL1::eFEXtauBDT::initBDTVars() {
 void LVL1::eFEXtauBDT::next() {
   buildBDTVariables();
   computeTowers();
+  computeETEstimate();
+  computeHADETEstimate();
+  computeEMETEstimate();
   computeBDTCondition();
   computeFracCondition();
   computeIsCentralTowerSeed();
@@ -345,13 +353,9 @@ unsigned int LVL1::eFEXtauBDT::BitLeftShift(unsigned int number, int by,
 }
 
 void LVL1::eFEXtauBDT::computeFracCondition() {
-  computeETEstimate();
-  computeHADETEstimate();
-  computeEMETEstimate();
-
   int n_multipliers = sizeof(m_fracMultipliers) / sizeof(m_fracMultipliers[0]);
 
-  if ((m_eTEstimate >= *m_etThresholdForFrac) or m_eTEstimateOverflow or
+  if ((m_eTEstimate >= *m_maxEtThreshold) or m_eTEstimateOverflow or
       m_HAD_eTEstimateOverflow) {
 
     m_fracCondition = (1 << (n_multipliers - 1)) - 1;
@@ -388,6 +392,13 @@ void LVL1::eFEXtauBDT::computeBDTCondition() {
   // Only compare the MSB bits of the BDT score to the thresholds provided in
   // the parameters
   m_bdtScoreShifted = (m_bdtScore >> toShiftRight);
+
+  if ((m_eTEstimate >= *m_maxEtThreshold) or m_eTEstimateOverflow or
+      m_eTEstimate < *m_bdtMinEtThreshold) {
+
+    m_bdtCondition = (1 << (n_thresholds - 1)) - 1;
+    return;
+  }
 
   int i = 0;
   for (; i < n_thresholds; i++) {

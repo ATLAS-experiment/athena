@@ -317,6 +317,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       unsigned int RhadBitS = 3;
 
       unsigned int maxEtCountsTau = thr_eTAU.maxEtCounts(m_eFexStep);
+      unsigned int bdtMinEtCounts = thr_eTAU.minIsoEtCounts(m_eFexStep);
       if (eTauTobEt >= maxEtCountsTau) {
         rCoreWP = 3;
         rHadWP = 3;
@@ -331,7 +332,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       threshBDT.push_back(iso_loose.rCore_fw());
       threshBDT.push_back(iso_medium.rCore_fw());
       threshBDT.push_back(iso_tight.rCore_fw());
-      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau);
+      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau, bdtMinEtCounts);
       // Re-compute after setting thresholds. 
       // Threshold bits in the BDT algorithm's implementation are computed inside the algorithm class
       m_eFEXtauBDTAlgoTool->compute();
@@ -354,9 +355,12 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       std::vector<uint32_t> xtobwords;
       std::vector<uint32_t> xtobwordsBDT;
 
-      ATH_MSG_DEBUG("m_id: " << m_id << ", eta_ind: " <<eta_ind << ", phi_ind: " 
-		      <<phi_ind << ", eTauBDTTobEt: " <<eTauBDTTobEt
-		      <<", eTauTobEt: "<<eTauTobEt << ", ptTauMinToTopoCounts: " << ptTauMinToTopoCounts<< ", maxEtCountsTau: " <<maxEtCountsTau << ", bdtScore: "<<bdtScore);
+      ATH_MSG_DEBUG("m_id: " << m_id << ", eta_ind: " << eta_ind << ", phi_ind: "
+		      << phi_ind << ", eTauBDTTobEt: " << eTauBDTTobEt
+		      << ", eTauTobEt: " << eTauTobEt << ", ptTauMinToTopoCounts: "
+		      << ptTauMinToTopoCounts << ", maxEtCountsTau: " << maxEtCountsTau
+		      << ", bdtScore: " << bdtScore << "bdtMinEtCounts: " << bdtMinEtCounts);
+
       uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts);
       xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts, bdtScore);
       uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
