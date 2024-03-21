@@ -5,14 +5,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
 
-// helper methods and macros to read contaier
-namespace SG {
-   template <class T>
-   SG::ReadCondHandle<T> makeHandle(const SG::ReadCondHandleKey<T> &key, const EventContext& ctx) {
-      return SG::ReadCondHandle<T>(key, ctx);
-   }
-}
-
 /** Macro to create a data handle and get the pointer to the container.
  * @param ctx the event context
  * @param handle_key the data handle key for which the data handle should be created which must not be empty.

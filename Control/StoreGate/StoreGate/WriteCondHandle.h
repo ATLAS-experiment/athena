@@ -312,6 +312,12 @@ namespace SG {
      return addDependency( args... );
   }
              
+  // helper methods to create a read cond handle from the corresponding key.
+  template <class T>
+  SG::WriteCondHandle<T> makeHandle(const SG::WriteCondHandleKey<T> &key,
+                                    const EventContext& ctx = Gaudi::Hive::currentContext()) {
+     return SG::WriteCondHandle<T>(key, ctx);
+  }
              
 }
 
