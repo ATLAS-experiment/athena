@@ -13,8 +13,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 // ISF includes
 #include "ISF_Interfaces/IParticleFilter.h"
-// Barcode Includes
-#include "BarcodeEvent/Barcode.h"
 
 namespace ISF {
 
