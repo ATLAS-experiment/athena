@@ -138,6 +138,8 @@ namespace ActsTrk
     unsigned int track_i=0;
     std::array<unsigned int,s_NCounterForAssociatedTruth> tracks_with_associated_truth{};
 
+    std::vector<unsigned int> counted_truth_particles;
+    counted_truth_particles.reserve(10);
     --track_i; // to have track_i at the begining of the loop
     for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
        ++track_i;
@@ -153,7 +155,9 @@ namespace ActsTrk
            &n_measurements,
            &measurement_to_truth_association_maps,
            &truth_particle_counts,
-           &reco_hits](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+           &reco_hits,
+           &counted_truth_particles
+           ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             if (!state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag) && state.hasUncalibratedSourceLink()) {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
@@ -164,19 +168,27 @@ namespace ActsTrk
               const ActsTrk::MeasurementToTruthParticleAssociation *association_map = measurement_to_truth_association_maps.at(to_underlying(uncalibMeas.type()));
               if (association_map) {
                  ++n_measurements;
+                 counted_truth_particles.clear();
                  for (const xAOD::TruthParticle *truth_particle : association_map->at(uncalibMeas.index()) ) {
                     const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
-                    ActsTrk::HitCountsPerTrack::container::iterator
-                       hit_count_iter = std::find_if(truth_particle_counts.begin(),
-                                                     truth_particle_counts.end(),
-                                                     [mother_particle](const std::pair<const xAOD::TruthParticle *, HitCounterArray > &a) {
-                                                        return a.first == mother_particle;
-                                                     });
-                    if (hit_count_iter == truth_particle_counts.end()) {
-                       truth_particle_counts.push_back( std::make_pair(mother_particle, HitCounterArray{}));
-                       hit_count_iter = truth_particle_counts.end()-1;
+
+                    // do not count hits of associated truth particles again if they are associated to the same elastic decay chain:
+                    if (std::find(counted_truth_particles.begin(), counted_truth_particles.end(), mother_particle->index())
+                        ==counted_truth_particles.end()) {
+                       counted_truth_particles.push_back(mother_particle->index());
+
+                       ActsTrk::HitCountsPerTrack::container::iterator
+                          hit_count_iter = std::find_if(truth_particle_counts.begin(),
+                                                        truth_particle_counts.end(),
+                                                        [mother_particle](const std::pair<const xAOD::TruthParticle *, HitCounterArray > &a) {
+                                                           return a.first == mother_particle;
+                                                        });
+                       if (hit_count_iter == truth_particle_counts.end()) {
+                          truth_particle_counts.push_back( std::make_pair(mother_particle, HitCounterArray{}));
+                          hit_count_iter = truth_particle_counts.end()-1;
+                       }
+                       ++(hit_count_iter->second.at( to_underlying(uncalibMeas.type())));
                     }
-                    ++(hit_count_iter->second.at( to_underlying(uncalibMeas.type())));
                  }
               }
               ++reco_hits.at( to_underlying(uncalibMeas.type()));
