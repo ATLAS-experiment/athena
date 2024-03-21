@@ -263,10 +263,7 @@ namespace ActsTrk
 
     // MEASUREMENTS
     std::vector<const xAOD::UncalibratedMeasurementContainer *> uncalibratedMeasurementContainers;
-    std::vector<xAOD::UncalibMeasType> measType;
-    std::array<std::size_t, TrackingSurfaceHelper::s_NMeasTypes> measCount{};
     uncalibratedMeasurementContainers.reserve(m_uncalibratedMeasurementContainerKeys.size());
-    measType.reserve(m_uncalibratedMeasurementContainerKeys.size());
     std::size_t measTotal = 0;
     for (const auto &uncalibratedMeasurementContainerKey : m_uncalibratedMeasurementContainerKeys)
     {
@@ -275,18 +272,6 @@ namespace ActsTrk
       ATH_CHECK(uncalibratedMeasurementContainerHandle.isValid());
       uncalibratedMeasurementContainers.push_back(uncalibratedMeasurementContainerHandle.cptr());
       ATH_MSG_DEBUG("Retrieved " << uncalibratedMeasurementContainers.back()->size() << " input elements from key " << uncalibratedMeasurementContainerKey.key());
-
-      xAOD::UncalibMeasType typ = !uncalibratedMeasurementContainers.back()->empty()
-                                      ? uncalibratedMeasurementContainers.back()->at(0)->type()
-                                      : xAOD::UncalibMeasType::Other;
-      auto ind = static_cast<std::size_t>(typ);
-      if (!(ind < TrackingSurfaceHelper::s_NMeasTypes))
-      {
-        ATH_MSG_FATAL("Measurements " << uncalibratedMeasurementContainerKey.key() << " type " << ind << " larger than " << TrackingSurfaceHelper::s_NMeasTypes - 1);
-        return StatusCode::FAILURE;
-      }
-      measType.push_back(typ);
-      measCount.at(ind) += uncalibratedMeasurementContainers.back()->size();
       measTotal += uncalibratedMeasurementContainers.back()->size();
     }
 
@@ -314,34 +299,20 @@ namespace ActsTrk
       duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer]);
     }
 
+    TrackFindingMeasurements measurements(measTotal);
+
     // @TODO make this condition data
-    std::array<std::vector<const Acts::Surface *>, TrackingSurfaceHelper::s_NMeasTypes> acts_surfaces;
-    std::vector<Acts::GeometryIdentifier> geo_ids;
-    geo_ids.reserve(measTotal);
-    for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer)
-    {
-      auto ind = static_cast<std::size_t>(measType[icontainer]);
-      acts_surfaces.at(ind).reserve(measCount[ind]);
-      gatherGeoIds(*m_ATLASConverterTool, *detEleColl[icontainer], geo_ids, acts_surfaces.at(ind));
+    for (std::size_t icontainer = 0; icontainer < detEleColl.size(); ++icontainer) {
+      measurements.addDetectorElements(*detEleColl[icontainer], *uncalibratedMeasurementContainers[icontainer], m_ATLASConverterTool);
     }
-    std::sort(geo_ids.begin(), geo_ids.end());
 
-    TrackingSurfaceHelper tracking_surface_helper(std::move(acts_surfaces));
-
-    TrackFindingMeasurements measurements(geo_ids);
-
-    for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer)
-    {
-      if (measType[icontainer] != xAOD::UncalibMeasType::Other)
-      {
-        tracking_surface_helper.setSiDetectorElements(measType[icontainer], detEleColl[icontainer]);
-      }
+    // NB. must complete all addDetectorElements() before addMeasurements(), so don't combine these loops!
+    for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer) {
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
       measurements.addMeasurements(icontainer, *uncalibratedMeasurementContainers[icontainer], *detEleColl[icontainer], m_ATLASConverterTool);
     }
 
-    if (!m_trackStatePrinter.empty())
-    {
+    if (!m_trackStatePrinter.empty()) {
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, detEleColl, measurements.measurementOffsetVector());
     }
 
@@ -370,7 +341,6 @@ namespace ActsTrk
         continue;
       ATH_CHECK(findTracks(ctx,
                            measurements,
-                           tracking_surface_helper,
                            duplicateSeedDetector,
                            *estimatedTrackParametersContainers[icontainer],
                            seedContainers[icontainer],
@@ -448,7 +418,6 @@ namespace ActsTrk
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
                               const TrackFindingMeasurements &measurements,
-                              const TrackingSurfaceHelper &tracking_surface_helper,
                               DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                               const ActsTrk::SeedContainer *seeds,
@@ -496,7 +465,7 @@ namespace ActsTrk
     // Therefore, passing them without checking if they are enabled is safe.
     OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>(
 	*m_ATLASConverterTool,
-	tracking_surface_helper,
+	measurements.trackingSurfaceHelper(),
 	m_pixelCalibTool,
 	m_stripCalibTool);
 
@@ -558,7 +527,7 @@ namespace ActsTrk
         // Perform KF before CKF
         const auto fittedSeedCollection = m_fitterTool->fit(ctx, *(*seeds)[iseed], *initialParameters,
                                                             tgContext, mfContext, calContext,
-                                                            tracking_surface_helper);
+                                                            measurements.trackingSurfaceHelper());
         if (not fittedSeedCollection)
         {
           ATH_MSG_WARNING("KF Fitted Track is nullptr");

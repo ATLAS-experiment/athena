@@ -33,7 +33,6 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 // Other
 #include <limits>
@@ -47,7 +46,6 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 
-class TrackingSurfaceHelper;
 namespace
 {
   // Forward-declare internal classes defined in TrackFindingData.h and used only in TrackFindingAlg.cxx.
@@ -156,7 +154,6 @@ namespace ActsTrk
     StatusCode
     findTracks(const EventContext &ctx,
                const TrackFindingMeasurements &measurements,
-               const TrackingSurfaceHelper &tracking_surface_helper,
                DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,
