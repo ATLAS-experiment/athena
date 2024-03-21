@@ -37,11 +37,7 @@ namespace G4UA
 
     if (m_mcEvtColl.isValid()) {
       McEventCollection::const_iterator iEvt = m_mcEvtColl->begin();
-#ifdef HEPMC3
-      auto p = (*iEvt)->particles().begin();
-#else
-      HepMC::GenEvent::particle_const_iterator p = (*iEvt)->particles_begin();
-#endif
+      auto p = HepMC::begin(**iEvt);
       m_xcoord = (*p)->production_vertex()->position().x();
     }
    
