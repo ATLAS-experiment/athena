@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -261,9 +261,9 @@ namespace InDetDD
             else {
                 // Should not be any other keys specified in raw alignment object.
                 ATH_MSG_ERROR("Unrecognized folder name "<<key<<". Expected names are:");
-                for (auto out:m_globalFolders) ATH_MSG_ERROR("--"<<out);
-                for (auto out:m_folders) ATH_MSG_ERROR("--"<<out);
-                for (auto out:m_specialFolders) ATH_MSG_ERROR("--"<<out);
+                for (const std::string& out:m_globalFolders) ATH_MSG_ERROR("--"<<out);
+                for (const std::string& out:m_folders) ATH_MSG_ERROR("--"<<out);
+                for (const std::string&  out:m_specialFolders) ATH_MSG_ERROR("--"<<out);
 
                 return StatusCode::RECOVERABLE;
             }

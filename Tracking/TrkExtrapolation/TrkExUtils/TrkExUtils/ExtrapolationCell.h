@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -523,7 +523,7 @@ ExtrapolationCell<T>::emptyGarbageBin(const ExtrapolationCode& ec)
   m_garbageCollection.clear();
   // in case of failure of the extrapolation stream, clear all the caches
   if (ec.isFailure()) {
-    for (auto es : extrapolationSteps) {
+    for (auto& es : extrapolationSteps) {
       delete es.parameters;
       delete es.transportJacobian;
     }
