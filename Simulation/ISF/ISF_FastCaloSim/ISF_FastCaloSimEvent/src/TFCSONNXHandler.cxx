@@ -325,6 +325,8 @@ void TFCSONNXHandler::readSerializedSession() {
   ATH_MSG_DEBUG("Transforming bytes to session.");
   Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "test");
   Ort::SessionOptions opts{nullptr};
+  // Prevent ONNX from spawning additional threads
+  opts.SetIntraOpNumThreads( 1 );
   m_session =
       std::make_unique<Ort::Session>(env, m_bytes.data(), m_bytes.size(), opts);
   ATH_MSG_DEBUG("Transformed bytes to session.");
