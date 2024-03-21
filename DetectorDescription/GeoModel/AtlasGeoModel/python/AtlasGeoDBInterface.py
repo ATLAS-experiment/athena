@@ -243,7 +243,8 @@ class AtlasGeoDBInterface_SQLite:
             self.dbFile=sqliteDBFullPath
         else:
             from AthenaCommon.Utils.unixtools import find_datafile
-            self.dbFile=find_datafile("Geometry/"+geoTag+".db")
+            pathlist = os.getenv('CALIBPATH').split(os.pathsep)
+            self.dbFile=find_datafile("Geometry/"+geoTag+".db",pathlist)
 
     def ConnectToDB(self):
 
