@@ -21,7 +21,7 @@ namespace FlavorTagDiscriminants {
   // TODO: make this work with more input nodes
   DL2::DL2(const lwt::GraphConfig& graph_config,
            const std::vector<FTagInputConfig>& inputs,
-           const std::vector<FTagTrackSequenceConfig>& track_sequences,
+           const std::vector<ConstituentsInputConfig>& tracks_configs,
            const FTagOptions& options):
     m_jetLink(jetLinkName),
     m_input_node_name(""),
@@ -44,11 +44,10 @@ namespace FlavorTagDiscriminants {
     m_varsFromBTag = vb;
     m_varsFromJet = vj;
     m_dataDependencyNames += ds;
-
-    auto [tsb, td, rt] = dataprep::createTrackGetters(
-      track_sequences, options);
-    m_dataDependencyNames += td;
-    m_trackSequenceBuilders = tsb;
+    
+    for (auto config : tracks_configs){
+      m_tracksLoaders.push_back(std::make_shared<TracksLoader>(config, options));
+    }
 
     auto [decorators, dd, rd] = dataprep::createDecorators(
       graph_config, options);
@@ -61,9 +60,13 @@ namespace FlavorTagDiscriminants {
     m_is_defaults = is_defaults;
     m_dataDependencyNames += ipdd;
 
+    // Update dependencies and used remap from the tracks loaders.
+    for (auto loader : m_tracksLoaders){
+      m_dataDependencyNames += loader->getDependencies();
+      rd.merge(loader->getUsedRemap());
+    }
     // check that all remapping was used
     rd.merge(rc);
-    rd.merge(rt);
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
   }
 
@@ -111,15 +114,11 @@ namespace FlavorTagDiscriminants {
     // add track sequences, check if any are invalid
     char invalid = 0;
     std::map<std::string, std::map<std::string, std::vector<double>>> seqs;
-    for (const auto& builder: m_trackSequenceBuilders) {
 
-      Tracks sorted_tracks = builder.tracksFromJet(jet, btag);
-      if (m_invalid_track_checker(sorted_tracks)) invalid = 1;
-      Tracks flipped_tracks = builder.flipFilter(sorted_tracks, jet);
-
-      for (const auto& seq_builder: builder.sequencesFromTracks) {
-        seqs[builder.name].insert(seq_builder(jet, flipped_tracks));
-      }
+    for (auto loader : m_tracksLoaders){
+      std::map<std::string, std::vector<double>> feats;
+      std::tie(invalid, feats) = loader->getDL2Data(jet, btag, m_invalid_track_checker);
+      seqs[loader->getName()] = feats;
     }
 
     for (const auto& def: m_is_defaults) {

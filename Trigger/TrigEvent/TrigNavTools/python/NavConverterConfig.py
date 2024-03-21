@@ -43,7 +43,7 @@ def NavConverterCfg(flags, chainsFilter = []):
     log.info("Assuming these collections are relevant for trigger: %s", " ".join(types))
     cnvAlg.Collections = types
     cnvAlg.Chains = chainsFilter
-    cnvAlg.doCompression = False # set True for compression
+    cnvAlg.doCompression = True # set True for compression
     acc.addEventAlgo(cnvAlg)
 
     checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = True, TrigDecisionTool = tdt) # optional: OutputLevel = DEBUG
@@ -59,15 +59,15 @@ def NavConverterCfg(flags, chainsFilter = []):
     checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
     checker.Chains = chainsFilter
     acc.addEventAlgo(checker)
-
     return acc
 
 
 if __name__ == "__main__":
+    # this is only config test, actual tests are in share/testTrigR2... scripts
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.Input.Files = defaultTestFiles.AOD_RUN2_DATA
     flags.Trigger.doEDMVersionConversion = True
     flags.lock()
 

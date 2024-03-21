@@ -67,7 +67,7 @@ using namespace std;
 int nlarcell=0;
 int n_noisy_cell_part[8] = {0,0,0,0,0,0,0,0};
 int n_cell_part[8] = {0,0,0,0,0,0,0,0};
-std::vector<short> v_ft_noisy, v_slot_noisy, v_channel_noisy;
+std::vector<short> v_barrelec_noisy, v_posneg_noisy,v_ft_noisy, v_slot_noisy, v_channel_noisy;
 std::vector<bool> v_isbarrel, v_isendcap, v_isfcal, v_ishec;
 std::vector<short> v_layer; 
 std::vector<int> v_partition,v_noisycellHVphi,v_noisycellHVeta;
@@ -77,6 +77,7 @@ std::vector<bool> v_isbadcell;
 std::vector<IdentifierHash>  v_IdHash;
 std::vector<int> v_cellpartlayerindex;
 std::vector<Identifier> v_cellIdentifier;
+std::vector<HWIdentifier> v_onlIdentifier;
 
 //////////////////////////////////////////////////////////////////////////////////////
 /// Constructor
@@ -87,7 +88,6 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
   : AthAlgorithm(name, pSvcLocator),
     m_thistSvc(nullptr),
     m_tree(nullptr),
-    m_trigDec( "Trig::TrigDecisionTool/TrigDecisionTool" ),
     m_LArOnlineIDHelper(nullptr),
     m_LArHVLineIDHelper(nullptr),
     m_LArElectrodeIDHelper(nullptr),
@@ -177,11 +177,14 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
     m_nt_etacell(0),
     m_nt_signifcell(0),
     //m_nt_noisycellpercent(0),
+    m_nt_barrelec_noisy(0),
+    m_nt_posneg_noisy(0),
     m_nt_ft_noisy(0),
     m_nt_slot_noisy(0),
     m_nt_channel_noisy(0),
     m_nt_cellpartlayerindex(0),
     m_nt_cellIdentifier(0),
+    m_nt_onlIdentifier(0),
     m_nt_noisycellpart(0),
     m_nt_noisycellHVphi(0),
     m_nt_noisycellHVeta(0),
@@ -204,10 +207,6 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
     m_nt_cellIdentifier_sat(0)
  {
 
-   // Trigger
-   declareProperty( "TrigDecisionTool", m_trigDec );
-   
-   
    //event cuts
    declareProperty("SigmaCut", m_sigmacut = 3.0);
    declareProperty("NumberOfBunchesInFront",m_frontbunches = 36);
@@ -252,13 +251,7 @@ StatusCode LArNoiseBursts::initialize() {
   ATH_MSG_DEBUG ( "Initializing LArNoiseBursts" );
  
   // Trigger Decision Tool
-  if(!m_trigDec.empty()){
-    if(m_trigDec.retrieve().isFailure()){
-      ATH_MSG_WARNING ( "Failed to retrieve trigger decision tool " << m_trigDec );
-    }else{
-      ATH_MSG_INFO ( "Retrieved tool " << m_trigDec );
-    }
-   }
+  ATH_CHECK( m_trigDec.retrieve() );
   
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_BCKey.initialize() );
@@ -402,8 +395,11 @@ StatusCode LArNoiseBursts::initialize() {
 
   // Properties of cells with fabs(energy/noise)>3
   m_tree->Branch("NoisyCellPartitionLayerIndex",&m_nt_cellpartlayerindex); /// NEW Identifier of the cell
-  m_tree->Branch("NoisyCellOnlineIdentifier",&m_nt_cellIdentifier); // Identifier of the noisy cell
+  m_tree->Branch("NoisyCellIdentifier",&m_nt_cellIdentifier); // Identifier of the noisy cell
+  m_tree->Branch("NoisyCellOnlineIdentifier",&m_nt_onlIdentifier); // Identifier of the noisy cell
   m_tree->Branch("NoisyCellPartition",&m_nt_partition); // Partition in 1 integer: 0:embc 1:emba 2:emecc 3:emeca 4:fcalc 5:fcala 6:hecc 7:heca
+  m_tree->Branch("NoisyCellBarrelEc",&m_nt_barrelec_noisy);            // BC 
+  m_tree->Branch("NoisyCellPosNeg",&m_nt_posneg_noisy);                // side 
   m_tree->Branch("NoisyCellFT",&m_nt_ft_noisy);                        // FT 
   m_tree->Branch("NoisyCellSlot",&m_nt_slot_noisy);                    // Slot
   m_tree->Branch("NoisyCellChannel",&m_nt_channel_noisy);              // Channel
@@ -558,6 +554,8 @@ StatusCode LArNoiseBursts::clear() {
   m_nt_partition.clear();
   m_nt_layer.clear();
   //m_nt_noisycellpercent = -1;
+  m_nt_barrelec_noisy.clear();
+  m_nt_posneg_noisy.clear();
   m_nt_ft_noisy.clear();
   m_nt_slot_noisy.clear();
   m_nt_channel_noisy.clear();
@@ -565,6 +563,7 @@ StatusCode LArNoiseBursts::clear() {
   m_nt_cellsize    = -1;
   m_nt_cellpartlayerindex.clear();
   m_nt_cellIdentifier.clear();
+  m_nt_onlIdentifier.clear();
   m_nt_noisycellpart.clear();
   m_nt_samples.clear();
   m_nt_gain.clear();
@@ -986,12 +985,13 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
   m_nb_sat = 0;
   m_noisycell =0;
   nlarcell = 0;
+  v_barrelec_noisy.clear(); v_posneg_noisy.clear();
   v_ft_noisy.clear();v_slot_noisy.clear();v_channel_noisy.clear();
   v_isbarrel.clear();v_isendcap.clear();v_isfcal.clear();v_ishec.clear();
   v_layer.clear();v_partition.clear();v_energycell.clear();v_qfactorcell.clear(); 
   v_phicell.clear();v_etacell.clear();v_signifcell.clear();v_isbadcell.clear();
   v_IdHash.clear();v_noisycellHVeta.clear();v_noisycellHVphi.clear();
-  v_cellpartlayerindex.clear();v_cellIdentifier.clear();
+  v_cellpartlayerindex.clear();v_cellIdentifier.clear();v_onlIdentifier.clear();
 
   float eCalo;
   float qfactor;
@@ -1141,7 +1141,10 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
       m_nt_signifcell.push_back( v_signifcell[i]);
       m_nt_partition.push_back( v_partition[i]);   
       m_nt_cellIdentifier.push_back(v_cellIdentifier[i].get_identifier32().get_compact());
+      m_nt_onlIdentifier.push_back(v_onlIdentifier[i].get_identifier32().get_compact());
       if(!m_keepOnlyCellID){
+        m_nt_barrelec_noisy.push_back( v_barrelec_noisy[i]);
+        m_nt_posneg_noisy.push_back( v_posneg_noisy[i]);
         m_nt_ft_noisy.push_back( v_ft_noisy[i]);
         m_nt_slot_noisy.push_back( v_slot_noisy[i]);
         m_nt_channel_noisy.push_back( v_channel_noisy[i]);
@@ -1251,6 +1254,8 @@ StatusCode LArNoiseBursts::fillCell(HWIdentifier onlID
     }
     // Store all cells in positive and negative 3 sigma tails...
     if(significance > m_sigmacut || qfactor > 4000){
+      v_barrelec_noisy.push_back(m_LArOnlineIDHelper->barrel_ec(onlID));
+      v_posneg_noisy.push_back(m_LArOnlineIDHelper->pos_neg(onlID));
       v_ft_noisy.push_back(m_LArOnlineIDHelper->feedthrough(onlID));
       v_slot_noisy.push_back(m_LArOnlineIDHelper->slot(onlID));
       v_channel_noisy.push_back(m_LArOnlineIDHelper->channel(onlID));
@@ -1272,6 +1277,7 @@ StatusCode LArNoiseBursts::fillCell(HWIdentifier onlID
       v_partition.push_back(partition);
       v_IdHash.push_back(channelHash);
       v_cellIdentifier.push_back(cabling->cnvToIdentifier(onlID));
+      v_onlIdentifier.push_back(onlID);
     // ...but count only cells in positive 3 sigma tails!
       if (significance > m_sigmacut){
 	m_noisycell++;

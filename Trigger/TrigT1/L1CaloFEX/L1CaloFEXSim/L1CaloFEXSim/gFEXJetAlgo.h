@@ -37,7 +37,7 @@ namespace LVL1 {
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize() override;
 
-    virtual void pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp) const override;
+    virtual void pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp) const override;
     
     virtual std::vector<std::unique_ptr<gFEXJetTOB>> largeRfinder(const gTowersType& Atwr, 
                                                                   const gTowersType& Btwr,

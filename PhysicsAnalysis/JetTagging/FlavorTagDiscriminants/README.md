@@ -107,9 +107,9 @@ Some components of Hbb tagging also live here. These include:
 
 There are also several tools that you _probably_ don't have to touch:
 
- - `customGetter`: DL2 relies on some information that isn't stored in
+ - `CustomGetterUtils`: DL2 relies on some information that isn't stored in
    accessors that we can get with a string (i.e. `pt`, `eta`,
-   ...). These are defined in `customGetter`.
+   ...). These are defined in `CustomGetterUtils`.
 
 
 

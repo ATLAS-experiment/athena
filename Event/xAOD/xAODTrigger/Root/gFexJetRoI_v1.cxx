@@ -138,14 +138,6 @@ namespace xAOD {
   int16_t gFexJetRoI_v1::unpackEt() const {
   // Data content = TOB
     int16_t energy = (word() >> s_etBit) & s_etMask; 
-    int SIGNMASK = 0x0800;
-    int EXTENDS =  0xF000;
-    if (gFexType() == gRho){
-      if( (SIGNMASK & energy ) ) {
-            energy = ( EXTENDS  | energy); 
-      }
-    }
-
     return energy; 
   }
 

@@ -39,7 +39,9 @@ public:
                                         unsigned int *fracMultipliers);
   void setPointerToBDTThresholdsParam(int index, unsigned int *bdtThresholds);
   void setPointerToETThresholdParam(unsigned int *etThreshold);
-  void setPointerToETThresholdForFracParam(unsigned int *etThresholdForFrac);
+  void setPointerToMaxETParam(unsigned int *maxEtThreshold);
+  void setPointerToBDTMinETParam(unsigned int *bdtMinEtThreshold);
+
   void buildBDTVariables();
   void computeBDTScore();
   void computeETEstimate();
@@ -109,7 +111,8 @@ private:
   unsigned int *m_fracMultipliers[3]{};
   unsigned int *m_bdtThresholds[3]{};
   unsigned int *m_etThreshold{};
-  unsigned int *m_etThresholdForFrac{};
+  unsigned int *m_maxEtThreshold{};
+  unsigned int *m_bdtMinEtThreshold{};
   unsigned int m_bdtScore = 0;
   unsigned int m_bdtScoreShifted = 0;
   unsigned int m_eTEstimate = 0;

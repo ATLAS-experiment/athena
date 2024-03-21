@@ -174,17 +174,11 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    float gLJ_rhoMaxA = 0;
    float gLJ_rhoMaxB = 0;
    float gLJ_rhoMaxC = 0;
-   float gLJ_rhoMinA = 0;
-   float gLJ_rhoMinB = 0;
-   float gLJ_rhoMinC = 0;
+ 
+   gLJ_rhoMaxA = 200;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
+   gLJ_rhoMaxB = 200;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
+   gLJ_rhoMaxC = 200;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
 
-   gLJ_rhoMaxA = (thr_gLJ.rhoTowerMax('A'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMaxB = (thr_gLJ.rhoTowerMax('B'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMaxC = (thr_gLJ.rhoTowerMax('C'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMinA = (thr_gLJ.rhoTowerMin('A'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMinB = (thr_gLJ.rhoTowerMin('B'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMinC = (thr_gLJ.rhoTowerMin('C'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   
 
    //Parameters related to gJ (small-R jet objects - gBlock)
    auto & thr_gJ = l1Menu->thrExtraInfo().gJ();
@@ -201,9 +195,9 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int jetThreshold = FEXAlgoSpaceDefs::jetThr; //this threshold is set by the online software 
 
    if (FEXAlgoSpaceDefs::ENABLE_PUC == true){
-      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA, gLJ_rhoMinA,  1,  pucA);
-      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB, gLJ_rhoMinB,  1,  pucB);
-      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC, gLJ_rhoMinC,  1,  pucC);
+      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA,  1,  pucA);
+      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB,  1,  pucB);
+      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC,  1,  pucC);
    }
    
    
@@ -216,14 +210,6 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    std::array<uint32_t, 7> CTOB1_dat = {0};
    std::array<uint32_t, 7> CTOB2_dat = {0};
 
-   // Use the gFEXJetAlgoTool
-
-  //  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
-  //   for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
-  //     // set 18 bits on
-  //     std::cout<<"[executegFEXSim] A: [" << irow << "][" << icolumn << "] " << Asat[irow][icolumn] << ", " << static_cast<unsigned>(Asat[irow][icolumn]) << ", " << static_cast<bool>(Asat[irow][icolumn]) << std::endl;
-  //   }
-  // }
 
    // Pass the energy matrices to the algo tool, and run the algorithms
    auto tobs_v = m_gFEXJetAlgoTool->largeRfinder(Atwr, Btwr, Ctwr, Asat, Bsat, Csat, pucA, pucB, pucC,

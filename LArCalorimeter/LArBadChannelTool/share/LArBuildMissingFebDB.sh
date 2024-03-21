@@ -163,7 +163,8 @@ IFS=' '
 
 
 echo "Running athena to read current database content..."
-athena.py -c "OutputFile=\"${oldTextFile}\";RunNumber=${runnumber};LBNumber=${lbnumber};Folder=\"${Folder}\";GlobalTag=\"${gtag}\";tag=\"${fldtag}-${upd4TagName}\";" LArBadChannelTool/LArMissingFebs2Ascii.py > oracle2ascii.log 2>&1
+python -m LArBadChannelTool.LArMissingFebs2Ascii  -r ${runnumber} -l ${lbnumber} -o ${oldTextFile} -t ${upd4TagName} -f ${Folder} > oracle2ascii.log 2>&1
+
 if [ $? -ne 0 ];  then
     echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii.log!"
     exit 5
@@ -195,9 +196,7 @@ fi
 
 echo "TagSuffix: " $upd4TagName
 echo "Running athena to build sqlite database file ..."
-prefix="${prefix}IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};sqlite=\"${outputSqlite}.tmp\";Folder=\"${Folder}\";GlobalTag=\"${gtag}\";TagPostfix=\"-${upd4TagName}\";"
-echo "prefix: ${prefix}"
-athena.py -c $prefix LArBadChannelTool/LArMissingFebDbAlg.py > ascii2sqlite.log 2>&1
+python -m LArBadChannelTool.LArMissingFebsDBAlg  -r ${runnumber} -l ${lbnumber} -o ${outputSqlite}.tmp -f ${Folder} -t ${upd4TagName}  $inputTextFile > ascii2sqlite.log 2>&1
 
 if [ $? -ne 0 ];  then
     echo "Athena reported an error! Please check ascii2sqlite.log!"
@@ -220,13 +219,13 @@ fi
 cp ${outputSqlite}.tmp ${outputSqlite}
 
 if [ $onerun -eq 1 ] || [ $lbnumbere -ge 0 ]; then
-   pref="RunNumber=${runnumber};LBNumber=${lbnumber};"
+   pref="-r ${runnumber} -l=${lbnumber};"
 else   
    pref=""
 fi
-pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";Folder=\"${Folder}\";GlobalTag=\"${gtag}\";tag=\"${fldtag}-${upd4TagName}\";"
+
 echo "Running athena to test readback of sqlite database file"
-athena.py  -c ${pref} LArBadChannelTool/LArMissingFebs2Ascii.py > sqlite2ascii.log 2>&1
+python -m LArBadChannelTool.LArMissingFebs2Ascii  -d ${outputSqlite} -o ${outputTextFile} -t ${upd4TagName} -f ${Folder} $pref > sqlite2ascii.log 2>&1
 
 if [ $? -ne 0 ];  then
     echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii.log!"
