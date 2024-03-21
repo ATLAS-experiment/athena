@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeoModelUtilities/GeoVisitVolumes.h
@@ -140,6 +140,8 @@ void geoVisitVolumes (FUNCTION f, const GeoGraphNode* node, int depthLimit = 1)
  * @brief Return the child volumes and associated transforms.
  * @param node Root of the graph to traverse.
  * @param depthLimit Depth limit for the traversal.
+ * @param sizeHint Hint about the number of volumes to be returned,
+ *                 to allow avoiding resizes of the output vector.
  *
  * Returns a vector of (volume, transform) pairs for volumes in the graph.
  * The same volume may be returned multiple times with different transforms
@@ -147,7 +149,9 @@ void geoVisitVolumes (FUNCTION f, const GeoGraphNode* node, int depthLimit = 1)
  */
 typedef std::vector<std::pair<const GeoVPhysVol*, GeoTrf::Transform3D> >
   GeoVolumeVec_t;
-GeoVolumeVec_t geoGetVolumes (const GeoGraphNode* node, int depthLimit = 1);
+GeoVolumeVec_t geoGetVolumes (const GeoGraphNode* node,
+                              int depthLimit = 1,
+                              int sizeHint = 20);
 
 
 #endif // not GEOMODELUTILITIES_GEOVISITVOLUMES_H
