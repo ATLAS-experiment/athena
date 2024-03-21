@@ -245,7 +245,7 @@ namespace DerivationFramework {
                 if (!allowFromHadron) {
                   if (!acc_class.isAvailable(*particle))  return false;
                   unsigned int result = acc_class(*particle);
-                  const bool isPrompt = MCTruthClassifier::isPrompt(result, true);
+                  const bool isPrompt = MCTruthPartClassifier::isPrompt(result, true);
                   if (!isPrompt)  continue;
                 }
                 

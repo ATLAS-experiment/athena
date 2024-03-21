@@ -65,7 +65,7 @@ namespace MC
 
   /// @brief Function to get a mother of particle. MCTruthClassifier legacy.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T>  T getMother(T thePart) {
+  template <class T> T getMother(T thePart) {
     auto partOriVert = thePart->production_vertex();
     if (!partOriVert) return nullptr;
 
@@ -237,8 +237,7 @@ namespace MC
 
   /// @brief Function to find the stable particle descendants of the gived vertex..
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
-  template <class V>
-  auto findFinalStatePart(V EndVert) -> decltype(EndVert->particles_out()) {
+  template <class V> auto findFinalStatePart(V EndVert) -> decltype(EndVert->particles_out()) {
     if (!EndVert) return {};
     decltype(EndVert->particles_out()) finalStatePart;
     auto outgoing = EndVert->particles_out();

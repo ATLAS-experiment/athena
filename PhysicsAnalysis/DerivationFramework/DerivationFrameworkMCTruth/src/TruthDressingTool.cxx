@@ -157,7 +157,7 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
               ATH_MSG_WARNING("MCTruthClassifier "<<m_truthClassKey.fullKey() <<" not available, cannot apply notFromHadron veto!");
             }
             unsigned int result = acc_origin(*listOfParticlesToDress[i]);
-            const bool isPrompt = MCTruthClassifier::isPrompt(result, true);
+            const bool isPrompt = MCTruthPartClassifier::isPrompt(result, true);
             if (!isPrompt)  continue;
           }
           xAOD::TruthParticle::FourMom_t bare_part;

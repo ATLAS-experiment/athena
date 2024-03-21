@@ -14,6 +14,8 @@
 #include "AsgTools/IAsgTool.h"
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
 #include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthVertex.h"
+#include "TruthUtils/TruthClassifiers.h"
 
 #include <memory>
 #include <unordered_map>
@@ -36,6 +38,7 @@ class HepMcParticleLink;
 #if !defined(XAOD_ANALYSIS) &&  !defined(GENERATIONBASE)
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #endif
+
 namespace MCTruthPartClassifier {
   // Additional information that can be returned by the classifier.
   // Originally, these were all held in member variables in the classifier,
@@ -93,11 +96,6 @@ namespace MCTruthPartClassifier {
     std::vector<MCTruthPartClassifier::ParticleOrigin> cnvPhotPartOrig;
 #endif
   };
-
-  enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
-
-  //MCTruthPartClassifier::ParticleOrigin
-  std::tuple<unsigned int, const xAOD::TruthParticle*> defOrigOfParticle(const xAOD::TruthParticle*);
 
 }
 
