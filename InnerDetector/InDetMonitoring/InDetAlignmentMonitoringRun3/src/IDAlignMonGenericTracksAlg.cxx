@@ -212,6 +212,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   
   // Get EventInfo
   int lb       = GetEventInfo(ctx)->lumiBlock();
+  auto lb_event_m    = Monitored::Scalar<int>( "m_lb_event", lb );
   auto lb_m    = Monitored::Scalar<int>( "m_lb", lb );
   int run      = GetEventInfo(ctx)->runNumber();
   auto run_m   = Monitored::Scalar<int>( "m_run", run );
@@ -234,6 +235,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     // beam spot vs LB
     fill(genericTrackGroup, lb_m, beamSpotY_m);
     fill(genericTrackGroup, lb_m, beamSpotX_m);
+    fill(genericTrackGroup, lb_event_m);
 
     // interactions per beam crossing
     fill(genericTrackGroup, mu_m);
@@ -263,6 +265,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     }
   }
   
+  //
+  // Start loop on tracks
+  //
+
   ATH_MSG_DEBUG ("Start loop on tracks. Number of tracks " << trks->size());
   for (const Trk::Track* trksItr: *trks) {
 
@@ -333,7 +339,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       if (trketa > m_barrelEta) isTrackECA = true;
       if (!isTrackECA and !isTrackECC) isTrackBarrel = true;
 
-
       // correct the track d0 for the vertex position
       // would rather corrected for the beamline but could not find beamline
       trkd0c=trkd0-(yv*cos(trkphi)-xv*sin(trkphi));
@@ -359,7 +364,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     ATH_MSG_DEBUG(nTracks << " is a good track!");  
 
     // fill lb histogram for each accepted track 
-    // fill(genericTrackGroup, lb_m);	
+    auto lb_track_m = Monitored::Scalar<int>( "m_lb_track", lb );
+    fill(genericTrackGroup, lb_track_m);	
 
     int nhpixB=0, nhpixECA=0, nhpixECC=0, nhsctB=0, nhsctECA=0, nhsctECC=0, nhtrtB=0, nhtrtECA=0, nhtrtECC=0;
 
@@ -439,6 +445,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, npixelhits_per_track_m);
     auto npixelhits_per_track_barrel_m = Monitored::Scalar<float>( "m_npixelhits_per_track_barrel", nhpixB );
     fill(genericTrackGroup, npixelhits_per_track_barrel_m);
+    auto npixelhits_per_track_eca_m = Monitored::Scalar<float>( "m_npixelhits_per_track_eca", nhpixECA );
+    fill(genericTrackGroup, npixelhits_per_track_eca_m);
+    auto npixelhits_per_track_ecc_m = Monitored::Scalar<float>( "m_npixelhits_per_track_ecc", nhpixECC );
+    fill(genericTrackGroup, npixelhits_per_track_ecc_m);
     auto nscthits_per_track_m = Monitored::Scalar<float>( "m_nscthits_per_track", nhsct );
     fill(genericTrackGroup, nscthits_per_track_m);
     auto nscthits_per_track_barrel_m = Monitored::Scalar<float>( "m_nscthits_per_track_barrel", nhsctB );
@@ -517,7 +527,9 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);
 
-  } // end of loop on trks
+  } //
+  // end of loop on trks
+  //
 
   // histo with the count of used(good) tracks
   auto ngTracks_m = Monitored::Scalar<float>( "m_ngTracks", ngTracks );

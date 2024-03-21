@@ -44,8 +44,12 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = '#LT#mu#GT average interactions per crossing;#LT#mu#GT;Events'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=101, xmin=-0.5, xmax= 100.5)
 
-    varName = 'm_lb;LumiBlock'
-    title = 'Lumiblock of the tracks;Lumiblock;Tracks'
+    varName = 'm_lb_event;LumiBlock'
+    title = 'Lumiblock of the events;Lumiblock;Events'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=1024, xmin=-0.5, xmax=1023.5)
+
+    varName = 'm_lb_track;TracksPerLumiBlock'
+    title = 'Tracks Per LumiBlock;Lumiblock;Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=1024, xmin=-0.5, xmax=1023.5)
 
     varName = 'm_beamSpotX,m_beamSpotY;YBs_vs_XBs'
@@ -78,6 +82,14 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_npixelhits_per_track_barrel;Npixhits_per_track_barrel'
     title = 'Number of PIXEL (PIX+IBL) hits per track (Barrel);Number of Pixel hits in Barrel (PIX+IBL);Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
+    
+    varName = 'm_npixelhits_per_track_eca;Npixhits_per_track_eca'
+    title = 'Number of PIXEL (PIX+IBL) hits per track (ECA);Number of Pixel hits in EndCap A (PIX+IBL);Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
+    
+    varName = 'm_npixelhits_per_track_ecc;Npixhits_per_track_ecc'
+    title = 'Number of PIXEL (PIX+IBL) hits per track (ECC);Number of Pixel hits in EndCap C (PIX+IBL);Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
     
     varName = 'm_nscthits_per_track;Nscthits_per_track'
