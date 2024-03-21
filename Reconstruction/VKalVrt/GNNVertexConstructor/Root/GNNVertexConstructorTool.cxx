@@ -28,11 +28,14 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_Rlayer1   (0.),
       m_Rlayer2   (0.),
       m_MultiWithPrimary(true),
-      m_minD0(0.2),
-      m_existIBL(true),
+      m_fitHists(false),
+      m_minD0(1),
+      m_minSig3D(20),
+      m_maxChi2(20),
+      m_minPerp(0.5),
       m_SingleHFTrack(false),
-      m_HFTrackRatio(true),
-      m_HFRatioThres(0.)            
+      m_HFTrackRatio(false),
+      m_HFRatioThres(0.3)            
       {
   declareInterface<IGNNVertexConstructorInterface>(this);
   declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
@@ -40,7 +43,6 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
   declareProperty("JetVertexLinks",m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_VertexIndex");
   declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
-  declareProperty("ExistIBL",   m_existIBL, "Inform whether 3-layer or 4-layer detector is used "  );
   declareProperty("Xbeampipe", m_Xbeampipe);
   declareProperty("Ybeampipe", m_Ybeampipe);
   declareProperty("XlayerB",   m_XlayerB  );
@@ -53,8 +55,10 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
   declareProperty("RlayerB",   m_RlayerB  );
   declareProperty("Rlayer1",   m_Rlayer1  );
   declareProperty("Rlayer2",   m_Rlayer2  );
-  declareProperty("MultiWithPrimary", m_MultiWithPrimary, "Find Multiple Secondary Vertices + primary vertex in jet.MultiVertex Finder only!"  );
-  declareProperty("mind0", m_minD0, "D0 cut on tracks");
+  declareProperty("mind0", m_minD0, "D0 cut on vertices");
+  declareProperty("minSig3D", m_minSig3D, "Sig 3D cut on vertices");
+  declareProperty("maxChi2", m_maxChi2, "Maximum Chi2 for fitted vertices");
+  declareProperty("minPerp", m_minPerp, "Perpendicular distance from primary cut on fitted vertices");
   declareProperty("SingleHFTracks", m_SingleHFTrack, "Select any vertice with at least one HF track identified by the GNN");
   declareProperty("HFTrackRatio", m_HFTrackRatio, "Select any vertice that passes the threshold for number of HF tracks to all tracks in vertice");
   declareProperty("HFRatio", m_HFRatioThres, "The threshold for the ratio between HF tracks and all tracks for a vertex");
@@ -70,18 +74,11 @@ StatusCode GNNVertexConstructorTool::initialize() {
 
   ATH_MSG_DEBUG("GNNVertexConstructor Tool in initialize()");
 
-  if(m_existIBL){ // 4-layer pixel detector
    if( m_Rbeampipe==0.)  m_Rbeampipe=24.0;    
    if( m_RlayerB  ==0.)  m_RlayerB  =34.0;
    if( m_Rlayer1  ==0.)  m_Rlayer1  =51.6;
    if( m_Rlayer2  ==0.)  m_Rlayer2  =90.0;
    m_Rlayer3  =122.5;
-  } else {   // 3-layer pixel detector
-   if( m_Rbeampipe==0.)  m_Rbeampipe=29.4;    
-   if( m_RlayerB  ==0.)  m_RlayerB  =51.5;
-   if( m_Rlayer1  ==0.)  m_Rlayer1  =90.0;
-   if( m_Rlayer2  ==0.)  m_Rlayer2  =122.5;
-  } 
   
   // Initialize keys
   ATH_CHECK(m_trackLinksKey.initialize());
@@ -94,16 +91,17 @@ StatusCode GNNVertexConstructorTool::initialize() {
   m_jetWriteDecorKeyVertexNumber = m_jetCollection + ".GNNVerticesNumber";
   ATH_CHECK( m_jetWriteDecorKeyVertexNumber.initialize()); 
 
-  //Hists
-  ATH_CHECK(service("THistSvc", m_thistSvc));
 
-  StatusCode sc;
-  
-  m_eFrac                   = new TH1F("eFrac","Energy Fraction of vertices within a jet and jet energy",25,0,1);  
-  ATH_CHECK( m_thistSvc->regHist("/GNNPlots/EFrac/", m_eFrac));
-  m_vertexN                 = new TH1F("vertexN","No. of Vertices within a Jet",8,-0.5,7.5);  
-  ATH_CHECK(m_thistSvc->regHist("/GNNPlots/VertexN/", m_vertexN));
-  
+  //ADD a config for histogramming
+  //Hists
+  if (m_fitHists==true){
+    ATH_CHECK(service("THistSvc", m_thistSvc));
+    StatusCode sc; 
+    m_eFrac                   = new TH1F("eFrac","Energy Fraction of vertices within a jet and jet energy",25,0,1);  
+    ATH_CHECK( m_thistSvc->regHist("/GNNPlots/EFrac/", m_eFrac));
+    m_vertexN                 = new TH1F("vertexN","No. of Vertices within a Jet",8,-0.5,7.5);  
+    ATH_CHECK(m_thistSvc->regHist("/GNNPlots/VertexN/", m_vertexN));
+  }
   // Retrieve tools
   ATH_CHECK(m_gnn_Tool.retrieve());
   ATH_CHECK(m_vertexFitterTool.retrieve());
@@ -246,7 +244,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     
     auto HFRatioFunc =[&v2NHFTLMap, &HFRatio=m_HFRatioThres, &FittingMap](const auto &d){
       const auto&[v,tcm] =d;
-      if(v2NHFTLMap.find(v)!=v2NHFTLMap.end() && (static_cast<float>(v2NHFTLMap[v].size())/tcm.size())>=0.3){
+      if(v2NHFTLMap.find(v)!=v2NHFTLMap.end() && (static_cast<float>(v2NHFTLMap[v].size())/tcm.size())>=HFRatio){
         FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));
       };    
     };
@@ -267,7 +265,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       ATH_MSG_INFO("Vertex with HF Ratio ");
       std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), HFRatioFunc);    
     }
-    else if (m_SingleHFTrack==true && m_HFTrackRatio==true){
+    else if (m_SingleHFTrack==false && m_HFTrackRatio==false){
       ATH_MSG_INFO("No Requirement on Track Origins");
       std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), InclusiveFunc);    
     }
@@ -343,7 +341,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         //Chi2 Cut       
         auto NDOF = 2*(newvrt.trkAtVrt.size())-3.0;  //From VrtSecInclusive
         
-        if (newvrt.chi2/NDOF<=20 ){ 
+        if (newvrt.chi2/NDOF>=m_maxChi2 ) continue;
         ATH_MSG_DEBUG("Found IniVertex=" << newvrt.vertex[0] << ", " << newvrt.vertex[1] << ", "
                                          << newvrt.vertex[2] << " trks " << newvrt.trkAtVrt.size());
 
@@ -364,16 +362,12 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         int NGTatVtx=newvrt.trkAtVrt.size(); //# Tracks in Vertex
        
         double xvt=newvrt.vertex[0]; double yvt=newvrt.vertex[1];
-        double Dist2DBP=sqrt( (xvt-m_Xbeampipe)*(xvt-m_Xbeampipe) + (yvt-m_Ybeampipe)*(yvt-m_Ybeampipe) ); 
-        double Dist2DBL=sqrt( (xvt-m_XlayerB)*(xvt-m_XlayerB) + (yvt-m_YlayerB)*(yvt-m_YlayerB) ); 
-        double Dist2DL1=sqrt( (xvt-m_Xlayer1)*(xvt-m_Xlayer1) + (yvt-m_Ylayer1)*(yvt-m_Ylayer1) );
+        //double Dist2DBP=sqrt( (xvt-m_Xbeampipe)*(xvt-m_Xbeampipe) + (yvt-m_Ybeampipe)*(yvt-m_Ybeampipe) ); 
+        //double Dist2DBL=sqrt( (xvt-m_XlayerB)*(xvt-m_XlayerB) + (yvt-m_YlayerB)*(yvt-m_YlayerB) ); 
+        //double Dist2DL1=sqrt( (xvt-m_Xlayer1)*(xvt-m_Xlayer1) + (yvt-m_Ylayer1)*(yvt-m_Ylayer1) );
         double Dist2DL2=sqrt( (xvt-m_Xlayer2)*(xvt-m_Xlayer2) + (yvt-m_Ylayer2)*(yvt-m_Ylayer2) );
         double minDstMat=39.9;      
-        minDstMat=TMath::Min(minDstMat,fabs(Dist2DBL-m_RlayerB));
-        minDstMat=TMath::Min(minDstMat,fabs(Dist2DL1-m_Rlayer1));
-        minDstMat=TMath::Min(minDstMat,fabs(Dist2DL2-m_Rlayer2));
-        minDstMat=TMath::Min(minDstMat,fabs(Dist2DBP-m_Rbeampipe));
-        if(m_existIBL) minDstMat=TMath::Min(minDstMat,fabs(Dist2DL2-m_Rlayer3));  // 4-layer pixel detector
+        minDstMat=TMath::Min(minDstMat,fabs(Dist2DL2-m_Rlayer3));  // 4-layer pixel detector
        
         TLorentzVector MomentumVtx = TotalMom(xAODwrk->listSelTracks);
         TrackE+=newvrt.vertexMom.E();
@@ -383,9 +377,9 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         double signif3D;
         double Signif3D=vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);          
         
-        if(newvrt.vertex.perp()>m_Rbeampipe && Signif3D<20.)  continue; 
-        if(Lxy<=1 )  continue;
-        if(newvrt.vertex.perp()<0.5) continue;
+        if(newvrt.vertex.perp()>m_Rbeampipe && Signif3D<m_minSig3D)  continue; 
+        if(Lxy<=m_minD0 )  continue;
+        if(newvrt.vertex.perp()<m_minPerp) continue;
         
         //Make New Container        
         xAOD::Vertex *GNNvertex = new xAOD::Vertex;
@@ -422,17 +416,17 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         linkVertex.setElement(GNNvertex);
         linkVertex.setStorableObject(*outVertexContainer);
         jetWriteDecorHandleVertexLink(*jet).push_back(linkVertex);
-       
-      }//end of Chi2 cut
-      
+             
       }//end of 2 Track requirement
     }
-    m_vertexN->Fill(vertexN, 1.);
-    if(TrackE==0)continue;
-    else{
-    float eFracNew = TrackE/jet->p4().E();
-    m_eFrac->Fill(eFracNew, 1.);
-    }    
+    if (m_fitHists==true){
+      m_vertexN->Fill(vertexN, 1.);
+      if(TrackE==0)continue;
+      else{
+      float eFracNew = TrackE/jet->p4().E();
+      m_eFrac->Fill(eFracNew, 1.);
+      }   
+    } 
     delete xAODwrk;
   } // end loop over jets
   return StatusCode::SUCCESS;

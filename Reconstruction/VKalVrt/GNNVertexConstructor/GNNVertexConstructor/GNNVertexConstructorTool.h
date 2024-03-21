@@ -170,6 +170,7 @@ public:
   const xAOD::Vertex* m_thePV;
   
   //Histograms
+  bool m_fitHists;
   ITHistSvc* m_thistSvc{nullptr};
   TH1F* m_vertexN  =nullptr;  
   TH1F* m_eFrac    =nullptr;
@@ -199,7 +200,6 @@ private:
     double BDT=1.1;
     };//end WrkVrt
     
-    bool m_existIBL;
     double m_Xbeampipe;
     double m_Ybeampipe;
     double m_XlayerB;
@@ -216,7 +216,9 @@ private:
     bool   m_MultiWithPrimary;
     double m_minD0;
     double m_massPi;
-    
+    double m_minSig3D;
+    double m_maxChi2;
+    double m_minPerp;
     bool   m_SingleHFTrack;
     bool   m_HFTrackRatio;
     float  m_HFRatioThres;
