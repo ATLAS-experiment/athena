@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -8,7 +8,7 @@
 #include "AthenaKernel/StoreID.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/tools/SGImplSvc.h"
-#include "SGHiveMgrSvc.h"
+#include "StoreGate/SGHiveMgrSvc.h"
 
 using namespace SG;
 
@@ -24,6 +24,18 @@ HiveMgrSvc::HiveMgrSvc(const std::string& name,
 }
 
 
+/** Set number of concurrent processes
+ *
+ * This can only be called by "friends" of this class. Its sole purpose
+ * is to have a common entry point within ATLAS to call the private
+ * methods of Gaudi::ConcurrencyFlags.
+ *
+ * @param numProcs  [IN]   Number of concurrent processes
+ */
+void HiveMgrSvc::setNumProcs(size_t numProcs)
+{
+  Gaudi::Concurrency::ConcurrencyFlags::setNumProcs(numProcs);
+}
 
 /** Activate an given 'slot' for all subsequent calls within the
  * same thread id.
