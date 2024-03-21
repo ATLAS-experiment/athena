@@ -30,7 +30,7 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
 
     from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorAlgCfg
     import AthenaCommon.Constants as Lvl
-    acc.merge(GNNVertexConstructorAlgCfg(flags, name="LME_devAlg", OutputLevel=Lvl.DEBUG))
+    acc.merge(GNNVertexConstructorAlgCfg(flags, name="FTAG1GNNVertexConstructorAlg", OutputLevel=Lvl.DEBUG))
 
     # thinning tools
     thinningTools = []
