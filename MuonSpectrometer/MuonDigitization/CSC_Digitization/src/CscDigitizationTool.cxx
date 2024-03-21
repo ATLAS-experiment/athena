@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -209,7 +209,7 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
         continue;
       }
       const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-      const HepMcParticleLink trackLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+      const HepMcParticleLink trackLink(phit->truthID(), phit.eventId(), idxFlag, HepMcParticleLink::IS_ID);
       const auto cscd = CscMcData(energy, ypos, zpos);
       for (; vecBeg != vecEnd; ++vecBeg) {
         myDeposits[(*vecBeg)].emplace_back(trackLink,cscd);

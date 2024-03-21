@@ -332,7 +332,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   //*** Now diffuse charges to surface *** //
   //**************************************//
   // pre-make HepMcParticleLink
-  const auto particleLink = HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx); // FIXME barcode-based syntax
+  const auto particleLink = HepMcParticleLink(phit->truthID(), phit.eventId(), idxFlag, HepMcParticleLink::IS_ID, ctx);
   const double pHitTime = hitTime(phit);
 
   const double halfEtaPitch = 0.5*Module.etaPitch();

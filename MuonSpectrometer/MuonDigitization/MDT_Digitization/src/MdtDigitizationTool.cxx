@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -767,7 +767,7 @@ bool MdtDigitizationTool::createDigits(const EventContext& ctx, Collections_t& c
             // Create the Deposit for MuonSimData
             const HepMcParticleLink::PositionFlag idxFlag =
                 (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            MuonSimData::Deposit deposit(HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE), // FIXME
+            MuonSimData::Deposit deposit(HepMcParticleLink(phit->truthID(), phit.eventId(), idxFlag, HepMcParticleLink::IS_ID),
                                          MuonMCData(driftRadius, hit.localPosition().z()));
 
             // Record the SDO collection in StoreGate
@@ -857,14 +857,13 @@ bool MdtDigitizationTool::insideMaskWindow(double time) const {
 //+emulate deformations here
 MDTSimHit MdtDigitizationTool::applyDeformations(const MDTSimHit& hit, const MuonGM::MdtReadoutElement* element,
                                                  const Identifier& DigitId) {
-    const int id = hit.MDTid();
-
     // make the deformation
     Amg::Vector3D hitAtGlobalFrame = element->nodeform_localToGlobalTransf(DigitId) * hit.localPosition();
     Amg::Vector3D hitDeformed = element->globalToLocalTransf(DigitId) * hitAtGlobalFrame;
-
-    MDTSimHit simhit2{id, hit.globalTime(), hitDeformed.perp(), hitDeformed, hit.truthBarcode()};
-
+    MDTSimHit simhit2(hit);
+    // apply the deformation
+    simhit2.setDriftRadius(hitDeformed.perp());
+    simhit2.setLocalPosition(hitDeformed);
     return simhit2;
 }
 
