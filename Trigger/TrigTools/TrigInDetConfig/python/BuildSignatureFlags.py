@@ -471,10 +471,11 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.Xi2max              = 60.  if recoMode=="InDet" else [60.]
   flags.Xi2maxNoAdd         = 100. if recoMode=="InDet" else [100.] 
   flags.nWeightedClustersMin= 8
-  flags.minTRTonTrk         = 20
   flags.useSeedFilter       = True
   flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
   flags.roadWidth =        75.
+  if recoMode=="InDet":
+    flags.minTRTonTrk         = 20
 
   return flags
 
