@@ -41,6 +41,7 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     // The following job properties enable/disable and affect the calibration of the ZDC energies
     //
     declareProperty("DoCalib", m_doCalib = true);
+    declareProperty("CalibVersion", m_calibVersion = "");
     declareProperty("DoTrigEff", m_doTrigEff = true);
     declareProperty("DoTimeCalib", m_doTimeCalib = true);
     declareProperty("ZdcAnalysisConfigPath", m_zdcAnalysisConfigPath = "$ROOTCOREBIN/data/ZdcAnalysis", "ZDC Analysis config file path");
@@ -1757,13 +1758,17 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
 
     std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> splines;
 
+    // "m_calibVersion", called CalibVersion when settings parameters in python, is a directory within the run-based calibration file
+    TString calibVersion;
+    if (m_calibVersion != "") calibVersion = m_calibVersion + "/";
+    
     for (int iside = 0; iside < 2; iside++)
     {
         for (int imod = 0; imod < 4; imod++)
         {
             sprintf(name, "ZDC_Ecalib_run%u_s%d_m%d", runNumber, iside, imod);
             ATH_MSG_DEBUG("Searching for spline " << name);
-            TSpline3* s = (TSpline3*) fCalib->GetObjectChecked(name, "TSpline3");
+            TSpline3* s = (TSpline3*) fCalib->GetObjectChecked(calibVersion+TString(name), "TSpline3");
             if (!s && m_doCalib)
             {
                 ATH_MSG_WARNING("No calibrations for run " << runNumber);
@@ -1809,6 +1814,10 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
     ATH_MSG_INFO("Opening time calibration file " << filename);
     std::unique_ptr<TFile> fCalib (TFile::Open(filename.c_str(), "READ"));
 
+    // "m_calibVersion", called CalibVersion when settings parameters in python, is a directory within the run-based calibration file
+    TString calibVersion = "";
+    if (m_calibVersion != "") calibVersion = m_calibVersion + "/";
+
     if (fCalib && !fCalib->IsZombie())
     {
       bool success = true;
@@ -1820,26 +1829,26 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
             for (int imod = 0; imod < 4; imod++)
             {
                 sprintf(name, "ZDC_T0calib_run%u_HG_s%d_m%d", runNumber, iside, imod);
-                spline.reset (static_cast<TSpline3*>(fCalib->GetObjectChecked(name, "TSpline3")));
+                spline.reset (static_cast<TSpline3*>(fCalib->GetObjectChecked(calibVersion+TString(name), "TSpline3")));
                 if (spline)
                 {
                     T0HGOffsetSplines[iside][imod] = std::move (spline);
                 }
                 else
                 {
-                    ATH_MSG_WARNING("No time calib. spline " << name);
+                    ATH_MSG_WARNING("No time calib. spline " << calibVersion+name);
 		    success = false;
                 }
 
                 sprintf(name, "ZDC_T0calib_run%u_LG_s%d_m%d", runNumber, iside, imod);
-                spline.reset (static_cast<TSpline3*>(fCalib->GetObjectChecked(name, "TSpline3")));
+                spline.reset (static_cast<TSpline3*>(fCalib->GetObjectChecked(calibVersion+TString(name), "TSpline3")));
                 if (spline)
                 {
                     T0LGOffsetSplines[iside][imod] = std::move (spline);
                 }
                 else
                 {
-                    ATH_MSG_WARNING("No time calib. spline " << name);
+                    ATH_MSG_WARNING("No time calib. spline " << calibVersion+name);
 		    success = false;
                 }
             }
@@ -1848,13 +1857,13 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
         if (success) 
 	  m_zdcDataAnalyzer->LoadT0Calibrations(T0HGOffsetSplines, T0LGOffsetSplines);
 	else
-	  ATH_MSG_WARNING("Time calibration failed - no T0 offsets loaded " << name);
+	  ATH_MSG_WARNING("Time calibration failed - no T0 offsets loaded " << calibVersion+name);
 
         fCalib->Close();
     }
     else
     {
-        ATH_MSG_WARNING("No time calibration file " << name);
+        ATH_MSG_WARNING("No time calibration file " << filename);
     }
 }
 
