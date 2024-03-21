@@ -56,8 +56,8 @@ class RadialStripDesign: public StripDesign {
         int numStrips() const override;
         /// Returns the associated channel number of an external vector
         int stripNumber(const Amg::Vector2D& extPos) const override final;
-
-
+        /// Returns the length of the associated strip
+        double stripLength(int stripNumb) const override;
     private:
         CheckVector2D leftInterSect(int stripNum, bool uncapped = false) const override final;
         CheckVector2D rightInterSect(int stripNum, bool uncapped = false) const override final;

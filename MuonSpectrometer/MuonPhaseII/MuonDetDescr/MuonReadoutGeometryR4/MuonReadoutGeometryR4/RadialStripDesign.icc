@@ -32,6 +32,16 @@ namespace MuonGMR4{
                                                       m_strips[stripNum +1].bottomMounting()));
     }
 
+    inline double RadialStripDesign::stripLength(int stripNumb) const {
+        const int stripCh = (stripNumb - firstStripNumber());
+        if (stripCh < 0 ||  stripCh >= numStrips()) {
+            ATH_MSG_WARNING(__func__<<"() -- Invalid strip number given "
+                         <<stripNumb<<" allowed range [" 
+                         <<firstStripNumber()<<";"<<(firstStripNumber() +numStrips())<<"]");
+            return 0.;
+        }
+        return m_strips[stripCh].fromBottomToTop().mag();
+    }
     inline Amg::Vector2D RadialStripDesign::stripLeftEdge(int stripNumber) const{
         CHECK_STRIPRANGE(stripNumber);
         return m_strips[stripCh].fromBottomToTop().unit();
