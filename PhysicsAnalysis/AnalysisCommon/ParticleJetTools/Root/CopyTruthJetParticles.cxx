@@ -74,7 +74,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
 
   // Extra catch.  If we aren't supposed to include prompt leptons, we aren't supposed to include prompt neutrinos
   unsigned int tc_res = getTCresult(tp, tc_results);
-  if (!m_includePromptLeptons && MC::isNeutrino(pdgid) && MCTruthClassifier::isPrompt(tc_res)) {
+  if (!m_includePromptLeptons && MC::isNeutrino(pdgid) && MCTruthPartClassifier::isPrompt(tc_res)) {
     return false;
   }
 
@@ -93,7 +93,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   if (!m_includePromptPhotons && MC::isPhoton(pdgid) && tp->hasProdVtx()){
     //ParticleOrigin orig = getPartOrigin(tp, originMap);
     //if (orig==Higgs || orig==HiggsMSSM) return false;
-    if (MCTruthClassifier::isPrompt(tc_res))  return false;
+    if (MCTruthPartClassifier::isPrompt(tc_res))  return false;
   }
 
   // If we want to remove photons via the dressing decoration
@@ -209,7 +209,7 @@ int CopyTruthJetParticles::execute() const {
     int pdgid = tp->pdgId();
     if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->hasProdVtx()){
       // If this is a prompt, generator stable lepton, then we can use it
-      if(MC::isStable(tp) && !HepMC::is_simulation_particle(tp) && MCTruthClassifier::isPrompt(getTCresult(tp, tc_results))) {
+      if(MC::isStable(tp) && !HepMC::is_simulation_particle(tp) && MCTruthPartClassifier::isPrompt(getTCresult(tp, tc_results))) {
         promptLeptons.push_back(tp);
       }
     }

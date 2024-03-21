@@ -22,6 +22,7 @@ CREATED:  Sep 2007
 // For making PID selections easier
 #include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/DecayProducts.h"
 
 #ifndef XAOD_ANALYSIS
 #include "GaudiKernel/ToolHandle.h"
@@ -127,17 +128,6 @@ public:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
   checkOrigOfBkgElec(const xAOD::TruthParticle* thePart,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  /*! \brief This helper function returns the value -1 by checking the bit set in \ref MCTruthClassifier.
-   * It returns the value -1 if uncategorised, 0 if non-prompt, 1 if prompt
-   * It also checks for prompt taus
-   */
-  static int isPrompt(const unsigned int classify, bool allow_prompt_tau_decays = true) {
-    std::bitset<MCTruthPartClassifier::MCTC_bits::totalBits> res(classify);
-    if (res.test(MCTruthPartClassifier::MCTC_bits::uncat)) return -1;
-    bool fromPromptTau = res.test(MCTruthPartClassifier::MCTC_bits::Tau) && !res.test(MCTruthPartClassifier::MCTC_bits::HadTau);
-    if (fromPromptTau) return int(allow_prompt_tau_decays);
-    return !res.test(MCTruthPartClassifier::MCTC_bits::hadron);
-  }
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
@@ -180,42 +170,31 @@ private:
     return std::abs(det);
   }
 
-  static MCTruthPartClassifier::ParticleType defTypeOfElectron(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
+
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer* xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
                                                           MCTruthPartClassifier::Info* info) const;
-  static MCTruthPartClassifier::ParticleOutCome defOutComeOfElectron(const xAOD::TruthParticle*) ;
 
-  static MCTruthPartClassifier::ParticleType defTypeOfMuon(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                       const xAOD::TruthParticle*,
                                                       bool& isPrompt,
                                                       MCTruthPartClassifier::Info* info) const;
-  static MCTruthPartClassifier::ParticleOutCome defOutComeOfMuon(const xAOD::TruthParticle*) ;
 
-  static MCTruthPartClassifier::ParticleType defTypeOfTau(MCTruthPartClassifier::ParticleOrigin);
   MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                      const xAOD::TruthParticle*,
                                                      int motherPDG,
                                                      MCTruthPartClassifier::Info* info) const;
-  MCTruthPartClassifier::ParticleOutCome defOutComeOfTau(const xAOD::TruthParticle*) const;
 
-  static MCTruthPartClassifier::ParticleType defTypeOfPhoton(MCTruthPartClassifier::ParticleOrigin) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                         const xAOD::TruthParticle*,
                                                         bool& isPrompt,
                                                         MCTruthPartClassifier::Info* info) const;
-  static MCTruthPartClassifier::ParticleOutCome defOutComeOfPhoton(const xAOD::TruthParticle*) ;
 
   MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer* m_xTruthParticleContainer,
                                                           const xAOD::TruthParticle*,
                                                           bool& isPrompt,
                                                           MCTruthPartClassifier::Info* info) const;
-
-  MCTruthPartClassifier::ParticleOrigin defHadronType(int);
-  static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);
-  static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,int motherPDG);
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   bool genPartToCalo(const EventContext& ctx,
@@ -233,8 +212,6 @@ private:
   double fracParticleInJet(const xAOD::TruthParticle*, const xAOD::Jet*, bool DR, bool nparts) const;
   void findJetConstituents(const xAOD::Jet*, std::set<const xAOD::TruthParticle*>& constituents, bool DR) const;
 #endif
-
-  static MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) ;
 
   /* Data members*/
   SG::ReadHandleKey<xAOD::TruthParticleContainer> 

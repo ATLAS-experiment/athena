@@ -2,6 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/Common.h"
+#include "TruthUtils/TruthClassifiers.h"
 namespace Common {
 bool prompt( const xAOD::TruthParticle* part,ToolHandle<IMCTruthClassifier>& classif ) {
     MCTruthPartClassifier::ParticleOrigin orig = classif->particleTruthClassifier( part ).second;
