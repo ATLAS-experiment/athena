@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -18,6 +18,7 @@
 #include "ByteStreamData/ByteStreamMetadataContainer.h"
 #include "EventInfoUtils/EventInfoFromxAOD.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/SGHiveMgrSvc.h"
 
 // Gaudi includes
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -133,6 +134,20 @@ StatusCode HltAsyncEventLoopMgr::initialize()
     ATH_MSG_INFO(" ---> NumThreads                = " << threads);
   else
     ATH_MSG_WARNING("Failed to retrieve the job property AvalancheSchedulerSvc.ThreadPoolSize");
+
+  const std::string& procs = m_jobOptionsSvc->get("DataFlowConfig.DF_NumberOfWorkers");
+  if (!procs.empty()) {
+    ATH_MSG_INFO(" ---> NumProcs                  = " << procs);
+    try {
+      SG::HiveMgrSvc::setNumProcs(std::stoi(procs));
+    }
+    catch (const std::logic_error& ex) {
+      ATH_MSG_ERROR("Cannot convert " << procs << "to integer: " << ex.what());
+      return StatusCode::FAILURE;
+    }
+  }
+  else
+    ATH_MSG_WARNING("Failed to retrieve the job property DataFlowconfig.DF_NumberOfWorkers");
 
   if (m_maxParallelIOTasks.value() <= 0) {
     ATH_CHECK(m_maxParallelIOTasks.fromString(threads));
