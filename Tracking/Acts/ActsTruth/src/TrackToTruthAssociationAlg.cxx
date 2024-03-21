@@ -148,6 +148,7 @@ namespace ActsTrk
        unsigned int n_measurements=0u;
 
        HitCounterArray &reco_hits = track_association->at(track_i).totalCounts();
+       HitCounterArray &noise_hits = track_association->at(track_i).noiseCounts();
        ActsTrk::HitCountsPerTrack::container  &truth_particle_counts = track_association->at(track_i).countsPerTruthParticle();
        tracksContainer->trackStateContainer().visitBackwards(
           lastMeasurementIndex,
@@ -156,6 +157,7 @@ namespace ActsTrk
            &measurement_to_truth_association_maps,
            &truth_particle_counts,
            &reco_hits,
+           &noise_hits,
            &counted_truth_particles
            ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
@@ -189,6 +191,9 @@ namespace ActsTrk
                        }
                        ++(hit_count_iter->second.at( to_underlying(uncalibMeas.type())));
                     }
+                 }
+                 if (association_map->at(uncalibMeas.index()).empty()) {
+                    ++noise_hits.at( to_underlying(uncalibMeas.type()));
                  }
               }
               ++reco_hits.at( to_underlying(uncalibMeas.type()));

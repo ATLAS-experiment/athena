@@ -236,6 +236,7 @@ namespace ActsTrk
     unsigned int n_tracks_without_associated_truth_particle =0u;
     unsigned int n_tracks_without_selected_truth_particle =0u;
     unsigned int n_truth_particle_wihtout_associated_measurements=0u;
+    unsigned int n_truth_particle_nonoise_mismatches=0u;
 
     unsigned int n_truth_cuts=m_truthSelectionTool->nCuts();
     ActsUtils::StatHist tmp_truthSelectionCuts(n_truth_cuts+1, -0.5,n_truth_cuts+.5);
@@ -244,10 +245,17 @@ namespace ActsTrk
        std::array<unsigned int,2> best_match_i{std::numeric_limits<unsigned int>::max(),std::numeric_limits<unsigned int>::max()};
        std::array<float,2> best_match_prob {};
 
+       std::array<unsigned int,2> best_match_i_nonoise{std::numeric_limits<unsigned int>::max(),std::numeric_limits<unsigned int>::max()};
+       std::array<float,2> best_match_prob_nonoise{};
+
        const HitCounterArray &total_counts = track_hit_counts.totalCounts();
+       const HitCounterArray &noise_counts = track_hit_counts.noiseCounts();
 
        double total_sum=weightedCountSum(total_counts, m_weights.value() );
        double total_sum_for_prob=weightedCountSum(total_counts, m_weightsForProb.value() );
+       double noise_sum=noiseCorrection(noise_counts, m_weightsForProb.value() );
+       double total_sum_for_prob_nonoise=total_sum_for_prob;
+       total_sum_for_prob += noise_sum;
 
        if (total_sum_for_prob>0.) {
        // compute total hit count per truth particle and remember the highest and second highest
@@ -259,10 +267,12 @@ namespace ActsTrk
                hit_counts_for_associated_truth_particle : track_hit_counts.countsPerTruthParticle() ) {
           ++truth_i;
           double truth_sum_for_prob=weightedCountSum(hit_counts_for_associated_truth_particle.second, m_weightsForProb.value() );
+          float match_prob_nonoise = truth_sum_for_prob /total_sum_for_prob_nonoise;
           float match_prob = truth_sum_for_prob /total_sum_for_prob;
           if (match_prob>1 || match_prob<0.) {
              ATH_MSG_ERROR("Negative or too large truth match \"probability\". This should not happen."
                            << " Track hits: " << dumpCounts(total_counts)
+                           << " noise hits of those: " << dumpCounts(noise_counts)
                            << " truth hits: " << dumpCounts(hit_counts_for_associated_truth_particle.second));
           }          // remember the highest and next-to-highest hit count per truth particle
           if (match_prob>best_match_prob[1]) {
@@ -272,9 +282,20 @@ namespace ActsTrk
              best_match_prob[dest_i]=match_prob;
              best_match_i[dest_i]=truth_i;
           }
+          if (match_prob_nonoise>best_match_prob_nonoise[1]) {
+             int dest_i=match_prob_nonoise<best_match_prob_nonoise[0];
+             best_match_i_nonoise[1]=best_match_i_nonoise[0];
+             best_match_prob_nonoise[1]=best_match_prob_nonoise[0];
+             best_match_prob_nonoise[dest_i]=match_prob_nonoise;
+             best_match_i_nonoise[dest_i]=truth_i;
+          }
+
        }
        }
 
+       if (best_match_i_nonoise[0] != best_match_i[0]) {
+          ++n_truth_particle_nonoise_mismatches;
+       }
        if (   best_match_i[0] < track_hit_counts.countsPerTruthParticle().size()
            && track_hit_counts.countsPerTruthParticle()[ best_match_i[0] ].first) {
           const xAOD::TruthParticle *best_match = track_hit_counts.countsPerTruthParticle()[ best_match_i[0] ].first;
@@ -369,6 +390,7 @@ namespace ActsTrk
        m_counter[MissingTruthParticleHitCounts] += n_truth_particle_without_associated_counts;
        m_counter[NoAssociatedTruthParticle] += n_tracks_without_associated_truth_particle;
        m_counter[NoSelectedTruthParticle] += n_tracks_without_selected_truth_particle;
+       m_counter[TruthParticleNoNoiseMismatch]+=n_truth_particle_nonoise_mismatches;
        m_counter[NTracksTotal]+=track_to_truth_handle->size();
        m_counter[NTruthWithCountsTotal]+=truth_particle_hit_counts_handle->size();
 
@@ -547,7 +569,8 @@ namespace ActsTrk
                                                               std::string("Number of truth particles with hit counts"),
                                                               std::string("Associated truth particles without hit counts"),
                                                               std::string("Tracks without associated truth particle"),
-                                                              std::string("Tracks without selected, associated truth particle")
+                                                              std::string("Tracks without selected, associated truth particle"),
+                                                              std::string("Best truth particle without noise correction mismatch")
           };
           msg() << makeTable( m_counter, counter_labels) << std::endl;
        }
@@ -789,6 +812,16 @@ namespace ActsTrk
      double sum=0.;
      for (unsigned int count_i=0; count_i < counts.size(); ++count_i) {
         sum += counts[count_i] * weights[count_i];
+     }
+     return sum;
+  }
+
+  inline double TrackFindingValidationAlg::noiseCorrection(const ActsTrk::HitCounterArray &noise_counts,
+                                                           const std::vector<float> &weights) {
+     assert( weights.size() == noise_counts.size());
+     double sum=0.;
+     for (unsigned int count_i=0; count_i < noise_counts.size(); ++count_i) {
+        sum -= weights[count_i] * noise_counts[count_i] - noise_counts[count_i];
      }
      return sum;
   }

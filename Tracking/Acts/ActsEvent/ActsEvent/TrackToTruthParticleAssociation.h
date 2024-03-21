@@ -45,15 +45,24 @@ namespace ActsTrk
 
       /** Total hit counts per track.
        */
-      HitCounterArray &totalCounts()               { return m_totalCounts; }
+      HitCounterArray &totalCounts()               { return m_recoCounts[kTotal]; }
 
       /** Total hit counts per track (read only).
        */
-      const HitCounterArray &totalCounts() const   { return m_totalCounts; }
+      const HitCounterArray &totalCounts() const   { return m_recoCounts[kTotal]; }
+
+      /** Noise hit counts per track.
+       */
+      HitCounterArray &noiseCounts()               { return m_recoCounts[kNoise]; }
+
+      /** Noise hit counts per track (read only).
+       */
+      const HitCounterArray &noiseCounts() const   { return m_recoCounts[kNoise]; }
 
    private:
       container m_counts;
-      HitCounterArray m_totalCounts;
+      enum ECounts {kTotal, kNoise, kNRecoCounts };
+      std::array<HitCounterArray,kNRecoCounts> m_recoCounts;
    };
 
    using TrackToTruthParticleAssociation = std::vector<HitCountsPerTrack> ;

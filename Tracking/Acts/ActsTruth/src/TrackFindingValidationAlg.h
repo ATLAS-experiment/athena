@@ -114,6 +114,7 @@ namespace ActsTrk
         MissingTruthParticleHitCounts,
         NoAssociatedTruthParticle,
         NoSelectedTruthParticle,
+        TruthParticleNoNoiseMismatch,
         kNCounter
      };
      //     mutable std::array< std::atomic<std::size_t>, kNCounter > m_counter ATLAS_THREAD_SAFE {};
@@ -181,6 +182,8 @@ namespace ActsTrk
 
      static  double weightedCountSum(const ActsTrk::HitCounterArray &counts,
                                      const std::vector<float> &weights);
+     static  double noiseCorrection(const ActsTrk::HitCounterArray &noise_counts,
+                                    const std::vector<float> &weights);
   };
 
 } // namespace
