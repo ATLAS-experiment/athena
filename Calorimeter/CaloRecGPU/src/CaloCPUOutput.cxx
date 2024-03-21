@@ -40,7 +40,7 @@ StatusCode CaloCPUOutput::execute (const EventContext & ctx, xAOD::CaloClusterCo
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
 
 
@@ -189,10 +189,4 @@ StatusCode CaloCPUOutput::execute (const EventContext & ctx, xAOD::CaloClusterCo
 
   return StatusCode::SUCCESS;
 
-}
-
-
-CaloCPUOutput::~CaloCPUOutput()
-{
-  //Nothing!
 }

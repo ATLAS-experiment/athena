@@ -20,7 +20,7 @@ find_package( Boost COMPONENTS chrono )
 atlas_add_library( CaloRecGPULib
    CaloRecGPU/*.h src/*.cxx src/*.cu src/*.h
    PUBLIC_HEADERS CaloRecGPU
-   LINK_LIBRARIES AthenaBaseComps CaloEvent CaloInterfaceLib CxxUtils GaudiKernel TileEvent TrigT2CaloCommonLib xAODTrigCalo
+   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess CaloEvent CaloInterfaceLib CxxUtils GaudiKernel TileEvent TrigT2CaloCommonLib xAODTrigCalo
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 
 atlas_add_component( CaloRecGPU

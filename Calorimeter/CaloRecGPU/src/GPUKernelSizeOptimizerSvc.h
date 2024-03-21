@@ -15,6 +15,7 @@
 #include "AthenaBaseComps/AthService.h"
 
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
+#include "CaloRecGPU/CaloGPUCUDAInitialization.h"
 
 #include <nlohmann/json.hpp>
 
@@ -25,7 +26,7 @@
  * @brief .
  */
 
-class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOptimizerSvc>
+class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOptimizerSvc>, public CaloGPUCUDAInitialization
 {
  public:
 
@@ -70,9 +71,15 @@ class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOpti
     return false;
   }
 
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override
+  {
+    return CaloGPUCUDAInitialization::initialize();
+  }
+  
+  virtual StatusCode initialize_CUDA() override;
+  
   virtual StatusCode finalize() override;
-
+  
  private:
 
   bool m_dynpar_support = false;

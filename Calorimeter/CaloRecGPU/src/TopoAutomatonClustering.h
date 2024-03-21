@@ -21,6 +21,9 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
+#include "CaloRecGPU/CaloGPUCUDAInitialization.h"
+
+#include "GaudiKernel/ServiceHandle.h"
 
 /**
  * @class TopoAutomatonClustering
@@ -31,13 +34,20 @@
  
 
 class TopoAutomatonClustering :
-  public AthAlgTool, virtual public CaloClusterGPUProcessor, public CaloGPUTimed
+  public AthAlgTool, virtual public CaloClusterGPUProcessor, public CaloGPUTimed, public CaloGPUCUDAInitialization
 {
  public:
 
   TopoAutomatonClustering(const std::string & type, const std::string & name, const IInterface * parent);
 
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override
+  {
+    return CaloGPUCUDAInitialization::initialize();
+  }
+  
+  virtual StatusCode initialize_non_CUDA() override;
+  
+  virtual StatusCode initialize_CUDA() override;
   
   virtual StatusCode execute (const EventContext & ctx,
                               const CaloRecGPU::ConstantDataHolder & constant_data,
@@ -46,7 +56,7 @@ class TopoAutomatonClustering :
 
   virtual StatusCode finalize() override;
   
-  virtual ~TopoAutomatonClustering();
+  virtual ~TopoAutomatonClustering() = default;
   
  private:
 

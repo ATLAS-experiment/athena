@@ -40,7 +40,7 @@ class CaloCPUOutput :
   
   virtual StatusCode execute (const EventContext& ctx, xAOD::CaloClusterContainer* cluster_collection) const override;
 
-  virtual ~CaloCPUOutput();
+  virtual ~CaloCPUOutput() = default;
 
  private:
 

@@ -18,6 +18,7 @@
 #include "CaloRecGPU/CaloClusterGPUTransformers.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
+#include "CaloRecGPU/CaloGPUCUDAInitialization.h"
 #include "CaloRecGPU/DataHolders.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
@@ -47,13 +48,22 @@
  * with adequate memory sharing between them to minimize transfers
  * and (re-)conversions from and to the GPU-friendly data representation.  */
 
-class CaloGPUHybridClusterProcessor : public AthReentrantAlgorithm, public CaloGPUTimed
+class CaloGPUHybridClusterProcessor : public AthReentrantAlgorithm, public CaloGPUTimed, public CaloGPUCUDAInitialization
 {
  public:
 
   CaloGPUHybridClusterProcessor(const std::string & name, ISvcLocator * pSvcLocator);
-  virtual ~CaloGPUHybridClusterProcessor() override;
-  virtual StatusCode initialize() override;
+  virtual ~CaloGPUHybridClusterProcessor() override = default;
+
+  virtual StatusCode initialize() override
+  {
+    return CaloGPUCUDAInitialization::initialize();
+  }
+
+  virtual StatusCode initialize_non_CUDA() override;
+
+  virtual StatusCode initialize_CUDA() override;
+
   virtual StatusCode execute(const EventContext & ctx) const override;
   virtual StatusCode finalize() override;
 

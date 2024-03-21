@@ -41,7 +41,7 @@ class BasicEventDataGPUExporter :
 
   virtual StatusCode finalize() override;
 
-  virtual ~BasicEventDataGPUExporter();
+  virtual ~BasicEventDataGPUExporter() = default;
 
  private:
 

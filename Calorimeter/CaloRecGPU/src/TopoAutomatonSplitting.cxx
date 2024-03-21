@@ -29,11 +29,9 @@ TopoAutomatonSplitting::TopoAutomatonSplitting(const std::string & type, const s
 
 }
 
-StatusCode TopoAutomatonSplitting::initialize()
+StatusCode TopoAutomatonSplitting::initialize_non_CUDA()
 {
-
   m_options.allocate();
-
 
   using PackType = decltype(m_options.m_options->valid_sampling_primary);
 
@@ -196,13 +194,17 @@ StatusCode TopoAutomatonSplitting::initialize()
   m_options.m_options->limit_HECIW_and_FCal_neighs = m_restrictHECIWandFCalNeighbors;
   m_options.m_options->limit_PS_neighs = m_restrictPSNeighbors;
   
-  m_options.sendToGPU();
-
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TopoAutomatonSplitting::initialize_CUDA()
+{
+  m_options.sendToGPU();
   register_kernels( *(m_kernelSizeOptimizer.get()) );
   
   return StatusCode::SUCCESS;
-
 }
 
 StatusCode TopoAutomatonSplitting::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
@@ -265,10 +267,4 @@ StatusCode TopoAutomatonSplitting::finalize()
       print_times("Preprocessing Fill_List_of_Intra-Cluster_Neighbours Find_Local_Maxima Find_Secondary_Maxima Splitter_Tag_Propagation Cell_Weighting_And_Finalization", 6);
     }
   return StatusCode::SUCCESS;
-}
-
-
-TopoAutomatonSplitting::~TopoAutomatonSplitting()
-{
-  //Nothing!
 }

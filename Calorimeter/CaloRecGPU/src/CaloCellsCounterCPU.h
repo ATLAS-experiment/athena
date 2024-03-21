@@ -37,7 +37,7 @@ class CaloCellsCounterCPU :
   
   virtual StatusCode execute (const EventContext& ctx, xAOD::CaloClusterContainer* cluster_collection) const override;
 
-  virtual ~CaloCellsCounterCPU();
+  virtual ~CaloCellsCounterCPU() = default;
 
  private:
 

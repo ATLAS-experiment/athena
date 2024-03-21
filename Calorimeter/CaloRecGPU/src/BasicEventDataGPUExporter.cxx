@@ -58,7 +58,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
-      return StatusCode::RECOVERABLE;
+      return StatusCode::FAILURE;
     }
   
   /*
@@ -309,10 +309,4 @@ StatusCode BasicEventDataGPUExporter::finalize()
       print_times("Cells Clusters Transfer_to_GPU", 3);
     }
   return StatusCode::SUCCESS;
-}
-
-
-BasicEventDataGPUExporter::~BasicEventDataGPUExporter()
-{
-  //Nothing!
 }

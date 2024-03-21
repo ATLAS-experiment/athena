@@ -14,6 +14,9 @@
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
 #include "BasicGPUClusterInfoCalculatorImpl.h"
+#include "CaloRecGPU/CaloGPUCUDAInitialization.h"
+
+#include "GaudiKernel/ServiceHandle.h"
 
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
 
@@ -29,13 +32,20 @@
 
 
 class BasicGPUClusterInfoCalculator:
-  public AthAlgTool, virtual public CaloClusterGPUProcessor, public CaloGPUTimed
+  public AthAlgTool, virtual public CaloClusterGPUProcessor, public CaloGPUTimed, public CaloGPUCUDAInitialization
 {
  public:
 
   BasicGPUClusterInfoCalculator(const std::string & type, const std::string & name, const IInterface * parent);
 
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override
+  {
+    return CaloGPUCUDAInitialization::initialize();
+  }
+  
+  virtual StatusCode initialize_non_CUDA() override;
+  
+  virtual StatusCode initialize_CUDA() override;
 
   virtual StatusCode execute (const EventContext & ctx,
                               const CaloRecGPU::ConstantDataHolder & constant_data,
@@ -44,7 +54,7 @@ class BasicGPUClusterInfoCalculator:
 
   virtual StatusCode finalize() override;
 
-  virtual ~BasicGPUClusterInfoCalculator();
+  virtual ~BasicGPUClusterInfoCalculator() = default;
 
   virtual size_t size_of_temporaries() const
   {
@@ -57,7 +67,7 @@ class BasicGPUClusterInfoCalculator:
         return 0;
       }
   };
-
+  
  private:
 
   /**

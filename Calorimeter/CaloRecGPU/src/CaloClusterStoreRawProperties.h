@@ -34,7 +34,7 @@ class CaloClusterStoreRawProperties :
   
   virtual StatusCode execute (const EventContext& ctx, xAOD::CaloClusterContainer* cluster_collection) const override;
 
-  virtual ~CaloClusterStoreRawProperties();
+  virtual ~CaloClusterStoreRawProperties() = default;
 
 };
 

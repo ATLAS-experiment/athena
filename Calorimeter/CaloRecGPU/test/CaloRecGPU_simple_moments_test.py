@@ -11,8 +11,7 @@ if __name__=="__main__":
             
     flags.lock()
     
-    testopts.TestGrow = True
-    testopts.TestSplit = True
+    testopts.TestMoments = True
     
     PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_moments", "GPU_moments"], ["moments"], DoMoments = True)
     
