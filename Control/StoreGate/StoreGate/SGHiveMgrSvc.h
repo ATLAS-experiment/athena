@@ -19,7 +19,8 @@
 
 class StoreGateSvc;
 class ISvcLocator;
-class HltEventLoopMgr;  // for friend declaration
+class HltEventLoopMgr;       // friend
+class HltAsyncEventLoopMgr;  // friend
 
 /** @class HiveMgrSvc
  *  @brief A service that manages a multi-event collection of StoreGateSvc
@@ -30,6 +31,7 @@ namespace SG {
 class HiveMgrSvc : public extends<Service, IHiveWhiteBoard> {
   friend class TestSGHiveMgrSvc;
   friend class ::HltEventLoopMgr;
+  friend class ::HltAsyncEventLoopMgr;
 public:
   //@{ @name IHiveWhiteBoard implementation
   /** Activate an given 'slot' for all subsequent calls within the

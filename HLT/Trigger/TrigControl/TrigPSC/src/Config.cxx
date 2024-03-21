@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -332,6 +332,7 @@ void psc::Config::fillopt_common(const ptree& hlt)
   optmap["SOFTTIMEOUTFRACTION"] = hltmppu.get_child("softTimeoutFraction").data();
   optmap["NEVENTSLOTS"]         = hltmppu.get_child("numberOfEventSlots").data();
   optmap["NTHREADS"]            = hltmppu.get_child("numberOfAthenaMTThreads").data();
+  optmap["NPROCS"]              = hltmppu.get_child("numForks").data();
   optmap["MAXEVENTSIZEMB"]      = hltmppu.get_child("maximumHltResultMb").data();
 }
 
