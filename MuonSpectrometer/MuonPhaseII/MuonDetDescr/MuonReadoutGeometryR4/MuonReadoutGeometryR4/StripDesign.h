@@ -89,7 +89,7 @@ namespace MuonGMR4 {
             /// Odering operator
             bool operator<(const StripDesign& other) const;
             /// Returns length of the strip
-            double stripLength(int stripNumb) const;
+            virtual double stripLength(int stripNumb) const;
             /// Dump properties to the ostr
             virtual void print(std::ostream&ostr) const;
             /// Checks whether an external point is inside the trapezoidal area
