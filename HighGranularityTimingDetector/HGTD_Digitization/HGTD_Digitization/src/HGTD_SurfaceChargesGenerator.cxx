@@ -68,9 +68,9 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
   // some Truth information is cut for pile up events
   unsigned short eventId = timed_hit_ptr.eventId();
   const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink trklink{HepMcParticleLink(hit.truthBarcode(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME barcode-based
+  const HepMcParticleLink trklink{HepMcParticleLink(hit.truthID(), eventId, idxFlag, HepMcParticleLink::IS_ID, ctx)};
   SiCharge::Process hitproc{SiCharge::track};
-  if (hit.truthBarcode() != 0) {
+  if (hit.truthID() != 0) {
     if (not trklink.isValid()) {
       hitproc = SiCharge::cut_track;
     }

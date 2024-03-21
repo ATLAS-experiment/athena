@@ -255,7 +255,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
   while (thpcsi.nextDetectorElement(i, e))
     {
       SCT_detElement_RIO_map SCT_DetElClusterMap;
-      std::vector<int> trkNo;
+      std::vector<int> truthIdList;
       std::vector<Identifier> detEl;
       while (i != e)
         {
@@ -282,18 +282,18 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
 
           // Process only one hit by the same particle in the same detector element
           bool isRep = false;
-          const int trkn = currentSiHit->truthBarcode();
+          const int truthID = currentSiHit->truthID();
           const Identifier detElId = hitSiDetElement->identify();
-          for (int j : trkNo)
+          for (int j : truthIdList)
             {
               for (auto & k : detEl)
                 {
-                  if ((trkn > 0) && (trkn == j) && (detElId == k)) {isRep = true; break;}
+                  if ((truthID > 0) && (truthID == j) && (detElId == k)) {isRep = true; break;}
                 }
               if (isRep) { break; }
             }
           if (isRep) { continue; }
-          trkNo.push_back(trkn);
+          truthIdList.push_back(truthID);
           detEl.push_back(detElId);
 
           const double hitDepth  = hitSiDetElement->hitDepthDirection();

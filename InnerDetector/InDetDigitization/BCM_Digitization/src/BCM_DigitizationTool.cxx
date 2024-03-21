@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -116,8 +116,8 @@ void BCM_DigitizationTool::processSiHit(const SiHit &currentHit, double eventTim
   m_timeVect[moduleNo].push_back(hitTime);
   // Create new deposit and add to vector
   const HepMcParticleLink::PositionFlag idxFlag = (evtIndex==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink particleLink{HepMcParticleLink(currentHit.truthBarcode(), evtIndex, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME
-  const int barcode = particleLink.barcode();
+  const HepMcParticleLink particleLink{HepMcParticleLink(currentHit.truthID(), evtIndex, idxFlag, HepMcParticleLink::IS_ID, ctx)};
+  const int barcode = particleLink.barcode(); // FIXME barcode-based
   if (barcode == 0 || barcode == HepMC::SINGLE_PARTICLE){
     return;
   }

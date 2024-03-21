@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "EnergyDepositionTool.h"
@@ -143,7 +143,7 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
   const HepMcParticleLink::PositionFlag idxFlag =
     (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
   const HepMcParticleLink McLink {
-    HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx) // FIXME
+    HepMcParticleLink(phit->truthID(), phit.eventId(), idxFlag, HepMcParticleLink::IS_ID, ctx)
   };
   HepMC::ConstGenParticlePtr genPart = McLink.cptr();
   bool delta_hit = true;

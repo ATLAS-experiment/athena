@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSIMEVENT_MDTSimHit_H
@@ -20,86 +20,90 @@ typedef int HitID;
 
 class MDTSimHit final{
 public:
-    //
-    // construction/destruction
-    //
-    // needed by athenaRoot
-    MDTSimHit();
+  //
+  // construction/destruction
+  //
+  // needed by athenaRoot
+  MDTSimHit();
 
-    // Destructor:
-    ~MDTSimHit();
+  // Destructor:
+  ~MDTSimHit();
 
-    MDTSimHit(HitID id, double time, double radius,
-              const Amg::Vector3D& position);
-    MDTSimHit(HitID id, double time, double radius,
-              const Amg::Vector3D& position, const int truthBarcode);
-    MDTSimHit(HitID id, double time, double radius,
-              const Amg::Vector3D& position, const int truthBarcode,
-              const double stepLength, const double energyDeposit,
-              const int particleEncoding, const double kineticEnergy);
-    MDTSimHit(HitID id, double time, double radius,
-              const Amg::Vector3D& position, const HepMcParticleLink& hmpl,
-              const double stepLength, const double energyDeposit,
-              const int particleEncoding, const double kineticEnergy);
+  MDTSimHit(HitID id, double time, double radius,
+            const Amg::Vector3D& position);
+  MDTSimHit(HitID id, double time, double radius,
+            const Amg::Vector3D& position, const int truthBarcode);
+  MDTSimHit(HitID id, double time, double radius,
+            const Amg::Vector3D& position, const int truthBarcode,
+            const double stepLength, const double energyDeposit,
+            const int particleEncoding, const double kineticEnergy);
+  MDTSimHit(HitID id, double time, double radius,
+            const Amg::Vector3D& position, const HepMcParticleLink& hmpl,
+            const double stepLength, const double energyDeposit,
+            const int particleEncoding, const double kineticEnergy);
 
-    //
-    // member functions
-    //
-    double            globalTime()    const { return (double) m_globalTime; }
-    double            driftRadius()   const { return (double) m_driftRadius; }
-    const Amg::Vector3D& localPosition() const { return m_localPosition; }
+  //
+  // member functions
+  //
+  double globalTime() const { return (double) m_globalTime; }
+  void setGlobalTime( double time ) { m_globalTime = time; }
 
-    double            stepLength()    const { return static_cast<double>(m_stepLength); }
-    double            energyDeposit()    const { return static_cast<double>(m_energyDeposit); }
-    int               particleEncoding() const { return m_particleEncoding; }
-    double            kineticEnergy()    const { return static_cast<double>(m_kineticEnergy); }
+  double driftRadius() const { return (double) m_driftRadius; }
+  void setDriftRadius( double radius ) { m_driftRadius = radius; } // Need to adjust this when applyin deformations during digitization
 
-    HitID	      MDTid()	      const { return m_MDTid; }
-    std::string       print()         const;
-    bool operator< (const MDTSimHit& rhs) const
-    	{ return m_MDTid < rhs.m_MDTid; }
-    double meanTime() const;
+  const Amg::Vector3D& localPosition() const { return m_localPosition; }
+  void setLocalPosition( Amg::Vector3D& localPosition ) { m_localPosition = localPosition; } // Need to adjust this when applyin deformations during digitization
 
-    // truth barcode of the track which released this energy:
-    int truthBarcode() const;
+  double stepLength()    const { return static_cast<double>(m_stepLength); }
+  double energyDeposit()    const { return static_cast<double>(m_energyDeposit); }
+  int particleEncoding() const { return m_particleEncoding; }
+  double kineticEnergy()    const { return static_cast<double>(m_kineticEnergy); }
 
-    // GenParticle::id of the track which released this energy:
-    int truthID() const;
+  HitID MDTid() const { return m_MDTid; }
+  std::string print() const;
+  bool operator< (const MDTSimHit& rhs) const
+  { return m_MDTid < rhs.m_MDTid; }
+  double meanTime() const;
 
-// link to the particle generating the hit
-    const HepMcParticleLink& particleLink() const;
+  // truth barcode of the track which released this energy:
+  int truthBarcode() const;
 
-    void setGlobalTime( const double time ) { m_globalTime = time; }
+  // GenParticle::id of the track which released this energy:
+  int truthID() const;
+
+  // link to the particle generating the hit
+  const HepMcParticleLink& particleLink() const;
+
 
 private:
-    //
-    // member data
-    //
-    HitID m_MDTid;
-    float     m_globalTime;
-    float     m_driftRadius;
-    Amg::Vector3D m_localPosition;
-    HepMcParticleLink m_partLink;
+  //
+  // member data
+  //
+  HitID m_MDTid;
+  float     m_globalTime;
+  float     m_driftRadius;
+  Amg::Vector3D m_localPosition;
+  HepMcParticleLink m_partLink;
 
-    float m_stepLength;
-    float m_energyDeposit;  //Geant4 de/dx
-    int m_particleEncoding; // PDG id
-    float m_kineticEnergy;  // kinetic energy of the particle
+  float m_stepLength;
+  float m_energyDeposit;  //Geant4 de/dx
+  int m_particleEncoding; // PDG id
+  float m_kineticEnergy;  // kinetic energy of the particle
 
 
 };
 //inline methods
 
 inline double MDTSimHit::meanTime() const
-	{ return (double) m_globalTime; }
+{ return (double) m_globalTime; }
 
 inline const HepMcParticleLink& MDTSimHit::particleLink() const
- 	{ return m_partLink; }
+{ return m_partLink; }
 
 
 // open functions
 
 inline float hitTime(const MDTSimHit& hit)
-	{ return (float) hit.meanTime(); }
+{ return (float) hit.meanTime(); }
 
 #endif
