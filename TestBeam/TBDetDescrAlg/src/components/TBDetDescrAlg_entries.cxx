@@ -1,5 +1,4 @@
-#include "TBDetDescrAlg/TBDetDescrLoader.h"
-
+#include "../TBDetDescrLoader.h"
 
 DECLARE_COMPONENT( TBDetDescrLoader )
 
