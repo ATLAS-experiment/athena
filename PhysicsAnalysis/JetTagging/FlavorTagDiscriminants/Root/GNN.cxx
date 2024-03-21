@@ -50,19 +50,31 @@ namespace FlavorTagDiscriminants {
     auto lwt_config = m_onnxUtil->getLwtConfig();
 
     // Create configuration objects for data preprocessing.
-    auto [inputs, track_sequences, options] = dataprep::createGetterConfig(
+    auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
+    
+    int n_track_sequences = 0;
+    for (auto config : constituents_configs){
+      switch (config.type){
+      case ConstituentsType::TRACK:
+        m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
+        n_track_sequences++;
+        break;
+      case ConstituentsType::IPARTICLE:
+        m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
+        break;
+      }
+    }
 
+    if ((n_track_sequences != 1) && m_decorate_tracks){
+      throw std::runtime_error("Only one track sequence is supported when decorating tracks.");
+    }
+    
     // Initialize jet and b-tagging input getters.
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromBTag = vb;
     m_varsFromJet = vj;
     m_dataDependencyNames = ds;
-
-    // Initialize track input getters.
-    auto [tsb, td, rt] = dataprep::createTrackGetters(track_sequences, options);
-    m_trackSequenceBuilders = tsb;
-    m_dataDependencyNames += td;
 
     // Retrieve the configuration for the model outputs.
     OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
@@ -71,8 +83,11 @@ namespace FlavorTagDiscriminants {
     auto [dd, rd] = createDecorators(gnn_output_config, options);
     m_dataDependencyNames += dd;
 
-    // Check that all remaps have been used.
-    rd.merge(rt);
+    // Update dependencies and used remap from the constituents loaders.
+    for (auto loader : m_constituentsLoaders){
+      m_dataDependencyNames += loader->getDependencies();
+      rd.merge(loader->getUsedRemap());
+    }
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
   }
 
@@ -130,42 +145,17 @@ namespace FlavorTagDiscriminants {
     input_pair jet_info (jet_feat, jet_feat_dim);
     gnn_input.insert({"jet_features", jet_info});
 
-    // Only one track sequence is allowed because the tracks are declared
-    // outside the loop over sequences.
-    // Having more than one sequence would overwrite them.
-    // These are only used outside the loop to write the track links.
-    if (m_trackSequenceBuilders.size() > 1) {
-      throw std::runtime_error("Only one track sequence is supported");
-    }
     Tracks input_tracks;
-    for (const auto& builder: m_trackSequenceBuilders) {
-      std::vector<float> track_feat; // (#tracks, #feats).flatten
-      int num_track_vars = static_cast<int>(builder.sequencesFromTracks.size());
-      int num_tracks = 0;
 
-      Tracks sorted_tracks = builder.tracksFromJet(jet, btag);
-      input_tracks = builder.flipFilter(sorted_tracks, jet);
-
-      int track_var_idx=0;
-      for (const auto& seq_builder: builder.sequencesFromTracks) {
-        auto double_vec = seq_builder(jet, input_tracks).second;
-
-        if (track_var_idx==0){
-          num_tracks = static_cast<int>(double_vec.size());
-          track_feat.resize(num_tracks * num_track_vars);
+    for (auto loader : m_constituentsLoaders){
+      auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(jet, btag);
+      gnn_input.insert({sequence_name, sequence_data});
+      // collect tracks for decoration
+      if ((loader->getType() == ConstituentsType::TRACK) && m_decorate_tracks){
+        for (auto constituent : sequence_constituents){
+          input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
         }
-
-        // need to transpose + flatten
-        for (unsigned int track_idx=0; track_idx<double_vec.size(); track_idx++){
-          track_feat.at(track_idx*num_track_vars + track_var_idx)
-            = double_vec.at(track_idx);
-        }
-        track_var_idx++;
       }
-      std::vector<int64_t> track_feat_dim = {num_tracks, num_track_vars};
-
-      input_pair track_info (track_feat, track_feat_dim);
-      gnn_input.insert({"track_features", track_info});
     }
 
     // run inference
