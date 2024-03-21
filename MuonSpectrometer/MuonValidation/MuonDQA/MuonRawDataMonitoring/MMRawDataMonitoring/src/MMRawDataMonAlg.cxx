@@ -394,7 +394,7 @@ StatusCode MMRawDataMonAlg::fillMMHistograms( const Muon::MMPrepData* ) const{
   return StatusCode::SUCCESS;
 }
 
-StatusCode  MMRawDataMonAlg::fillMMTrigger(const xAOD::NSWMMTPRDOContainer* mmtp, const int lb) const{
+void  MMRawDataMonAlg::fillMMTrigger(const xAOD::NSWMMTPRDOContainer* mmtp, const int lb) const{
 
     auto lb_tri=Monitored::Scalar<int>("lb_tri",lb);
 
@@ -422,7 +422,7 @@ StatusCode  MMRawDataMonAlg::fillMMTrigger(const xAOD::NSWMMTPRDOContainer* mmtp
 
        fill("mmTrigger", trig_sector, lb_tri);
 
-       for (int i=0; i< rdo->art_BCID().size(); i++ ){
+       for (long unsigned int i=0; i< rdo->art_BCID().size(); i++ ){
 	 auto art_layer=static_cast<unsigned int>(layers[i]);
 	 auto art_channel = Monitored::Scalar<int>("art_channel", channels[i]);
 	 auto art_sector_layer = Monitored::Scalar<int>("art_sector_layer", s_side*8*(s_sector-1)+art_layer);
@@ -491,8 +491,6 @@ StatusCode  MMRawDataMonAlg::fillMMTrigger(const xAOD::NSWMMTPRDOContainer* mmtp
 
      }
   }
-  
-  return StatusCode::SUCCESS;
   
 }
 

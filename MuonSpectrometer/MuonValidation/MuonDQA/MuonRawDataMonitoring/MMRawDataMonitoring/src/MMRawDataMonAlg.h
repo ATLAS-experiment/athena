@@ -101,7 +101,7 @@ class MMRawDataMonAlg: public AthMonitorAlgorithm {
   int get_bin_for_occ_lb_pcb_hist(const int multiplet, const int gas_gap, const int PCB) const;
 
   void MMEfficiency(const xAOD::TrackParticleContainer*) const;
-  StatusCode  fillMMTrigger( const xAOD::NSWMMTPRDOContainer*, const int)  const;
+  void fillMMTrigger( const xAOD::NSWMMTPRDOContainer*, const int)  const;
 
   Gaudi::Property<bool> m_doMMESD{this,"DoMMESD",true};
   Gaudi::Property<bool> m_do_mm_overview{this,"do_mm_overview",true};
