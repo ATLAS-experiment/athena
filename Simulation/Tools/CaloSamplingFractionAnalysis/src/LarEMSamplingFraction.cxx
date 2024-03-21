@@ -149,11 +149,7 @@ StatusCode LarEMSamplingFraction::execute()
       ATH_MSG_ERROR("No McEventCollection found");
       return StatusCode::FAILURE;
     }
-#ifdef HEPMC3
-  const HepMC::ConstGenParticlePtr&  gen = truthEvent->at(0)->particles().front();
-#else
-  HepMC::ConstGenParticlePtr   gen  = *(truthEvent->at(0)->particles_begin());
-#endif
+  auto  gen = *HepMC::begin(*truthEvent->at(0));
   m_mc_pdg = gen->pdg_id();
   m_mc_eta = gen->momentum().pseudoRapidity();
   m_mc_phi = gen->momentum().phi();

@@ -51,13 +51,7 @@ StatusCode CalibHitValidate::execute()
     ATH_MSG_ERROR ( "No  McEventCollection found");
     return StatusCode::FAILURE;
   }
-#ifdef HEPMC3
-  auto gen  = truthEvent->at(0)->particles().front();
-#else
-  HepMC::GenEvent::particle_const_iterator pit  = truthEvent->at(0)->particles_begin();
-  HepMC::ConstGenParticlePtr   gen  = *pit;
-#endif
-
+  auto gen  = *HepMC::begin(*truthEvent->at(0));
 
   std::vector<std::string>::iterator containerNameIter;
 

@@ -39,11 +39,10 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
 	  // Verify if we got a valid pointer and retrieve the number of parents
 	  if (!productionVtx) continue;
 	  // Incoming particle range check
+	  if (productionVtx->particles_in_size() < 2) continue; //  we are looking for excited tau-leptons produced in b-quark b-antiquark scattering
 #ifdef HEPMC3
-	  if (productionVtx->particles_in().size() < 2) continue; //  we are looking for excited tau-leptons produced in b-quark b-antiquark scattering
 	  for (const auto& thisParent:  productionVtx->particles_in()) {
 #else
-	  if (productionVtx->particles_in_size() < 2) continue; //  we are looking for excited tau-leptons produced in b-quark b-antiquark scattering
 	  HepMC::GenVertex::particles_in_const_iterator firstParentIt = productionVtx->particles_in_const_begin();
 	  HepMC::GenVertex::particles_in_const_iterator endParentIt = productionVtx->particles_in_const_end();
 	  for (HepMC::GenVertex::particles_in_const_iterator thisParentIt = firstParentIt ; thisParentIt != endParentIt; ++thisParentIt) {

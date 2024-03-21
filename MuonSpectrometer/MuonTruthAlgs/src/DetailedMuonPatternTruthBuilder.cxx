@@ -1125,17 +1125,14 @@ namespace Trk {
         for (; dit != dit_end; ++dit) {
 #ifdef HEPMC3
             HepMC::ConstGenParticlePtr gp = dit->first.scptr();
-            if (gp == genPart) {
-                deposit = &*dit;
-                break;
-            }
 #else
             const HepMC::GenParticle* gp = dit->first;
+#endif
             if (gp == genPart) {
                 deposit = &*dit;
                 break;
             }
-#endif
+
         }
         return deposit;
     }
