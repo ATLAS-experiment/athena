@@ -51,6 +51,8 @@ def LArSC2NtupleCfg(flags, **kwargs):
 
        alg=CompFactory.LArSC2Ntuple('LArSC2Ntuple',**kwargs)
 
+       print(alg)
+
        cfg.addEventAlgo(alg)
 
        return cfg

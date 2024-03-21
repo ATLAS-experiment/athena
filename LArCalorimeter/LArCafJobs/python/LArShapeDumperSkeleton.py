@@ -20,6 +20,8 @@ def fromRunArgs(runArgs):
     processPreInclude(runArgs, flags)
     processPreExec(runArgs, flags)
 
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.LAr.ROD.forceIter=True
     flags.LAr.OFCShapeFolder="4samples3bins17phases"
     flags.Input.Files=runArgs.inputBSFile
