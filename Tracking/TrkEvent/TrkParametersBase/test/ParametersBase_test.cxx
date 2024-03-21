@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -44,11 +44,14 @@ namespace Trk{
     static std::string str() {
       return std::string("TestSurface");
     }
+    static std::ostream& dump(std::ostream& out) {
+      out << str();
+      return out;
+    }
   };
 
   std::ostream & operator<< (std::ostream & out, const Surface &  /*s*/){
-    out<<Trk::Surface::str();
-    return out;
+    return Trk::Surface::dump(out);
   }
 }
 //dont ever do this in real code

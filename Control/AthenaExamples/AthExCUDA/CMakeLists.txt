@@ -15,6 +15,7 @@ find_package( vecmem COMPONENTS CUDA )
 # Add a component library that has some CUDA code in it.
 atlas_add_component( AthExCUDA
    src/*.h src/*.cxx src/*.cu src/components/*.cxx
+   DEFINITIONS EIGEN_NO_CUDA
    LINK_LIBRARIES vecmem::core vecmem::cuda AthenaBaseComps GaudiKernel
    StoreGateLib xAODTracking AthCUDAInterfacesLib AthCUDAKernelLib )
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -149,7 +149,7 @@ std::ostream& ParametersBase<DIM, T>::dump(std::ostream& sl) const {
   sl << std::setprecision(-1);
   if (this->hasSurface()) {
     sl << "associated surface:" << nl;
-    sl << this->associatedSurface() << std::endl;
+    this->associatedSurface().dump(sl) << std::endl;
   } else {
     sl << "no associated surface" << std::endl;
   }
