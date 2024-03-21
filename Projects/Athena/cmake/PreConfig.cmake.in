@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Pre-config script to propagate variables to downstream projects
 #
@@ -8,6 +8,12 @@ set( CMAKE_CXX_STANDARD "@CMAKE_CXX_STANDARD@"
    CACHE STRING "C++ standard used for the build" )
 set( CMAKE_CXX_EXTENSIONS "@CMAKE_CXX_EXTENSIONS@"
    CACHE STRING "(Dis)Allow the usage of C++ extensions" )
+set( CMAKE_CUDA_STANDARD "@CMAKE_CUDA_STANDARD@"
+   CACHE STRING "C++ standard used for building CUDA sources" )
+
+# Set the CUDA architectures to build for.
+set( CMAKE_CUDA_ARCHITECTURES "@CMAKE_CUDA_ARCHITECTURES@" CACHE STRING
+   "CUDA architectures to build code for" )
 
 # HepMC3
 set( HEPMC3_USE @HEPMC3_USE@ CACHE BOOL "Use HepMC3 in the project" )

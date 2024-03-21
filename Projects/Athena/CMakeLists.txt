@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
@@ -12,12 +12,14 @@ include( CheckLanguage )
 check_language( CUDA )
 if( CMAKE_CUDA_COMPILER )
    enable_language( CUDA )
-   # Force the compilation of CUDA code for only compute capability 5.2 for now.
-   # To get rid of warnings from 11.0 about not supporting older compute
-   # capabilities anymore.
-   set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
-      "CUDA architectures to build code for" )
 endif()
+# Use C++20 with CUDA.
+set( CMAKE_CUDA_STANDARD 20 CACHE STRING "CUDA C++ standard to use" )
+# Force the compilation of CUDA code for only compute capability 5.2 for now.
+# Mainly to get rid of warnings from 11.0 about not supporting older compute
+# capabilities anymore.
+set( CMAKE_CUDA_ARCHITECTURES "52" CACHE STRING
+   "CUDA architectures to build code for" )
 
 # Set the versions of the TDAQ externals to pick up for the build:
 if( NOT LCG_NIGHTLY )
