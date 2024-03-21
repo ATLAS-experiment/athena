@@ -68,7 +68,8 @@ void test1 ATLAS_NOT_THREAD_SAFE (const std::vector<HepMC::GenParticlePtr>& genP
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),0,
+  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),
+                              particle->parent_event()->event_number(),
                               HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
   assert(dummyHMPL.cptr()==particle);
   // Get proxy created outside of leak checking.
