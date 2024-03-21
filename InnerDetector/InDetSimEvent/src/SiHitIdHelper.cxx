@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <mutex>
@@ -128,7 +128,7 @@ int SiHitIdHelper::buildHitId(const int Part, const int BrlECap, const int Layer
   return theID;
 }
 
-int SiHitIdHelper::buildHitIdFromStringITk(int part, std::string physVolName) const
+int SiHitIdHelper::buildHitIdFromStringITk(int part, const std::string& physVolName) const
 {
     int brlEcap = 0;
     int layerDisk = 0;
@@ -146,7 +146,7 @@ int SiHitIdHelper::buildHitIdFromStringITk(int part, std::string physVolName) co
     return buildHitId(part,brlEcap,layerDisk,etaMod,phiMod,side);
 }
 
-int SiHitIdHelper::buildHitIdFromStringHGTD(int part, std::string physVolName) const
+int SiHitIdHelper::buildHitIdFromStringHGTD(int part, const std::string& physVolName) const
 {
     int endcap = 0;
     int layer = 0;

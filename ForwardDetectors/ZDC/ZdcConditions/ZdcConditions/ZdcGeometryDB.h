@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCGEOMETRYDB_H
@@ -21,7 +21,7 @@ public:
 
   static const ZdcGeometryDB* getInstance();
   const nlohmann::json& getDB();
-  void loadJSONFile(std::string geoStr="ZDCgeom_Run3.json");
+  void loadJSONFile(const std::string& geoStr="ZDCgeom_Run3.json");
 
 };
 
