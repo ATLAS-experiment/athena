@@ -52,6 +52,8 @@ def commonRunArgsToFlags(runArgs,configFlags):
 
     if hasattr(runArgs,"threads"):
         configFlags.Concurrency.NumThreads = runArgs.threads
+        if hasattr(runArgs, "eventService"):
+            configFlags.Exec.MTEventService=True
 
     if hasattr(runArgs,"concurrentEvents"):
         configFlags.Concurrency.NumConcurrentEvents = runArgs.concurrentEvents
