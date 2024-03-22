@@ -50,9 +50,9 @@ StatusCode RoRSeqFilter::initialize()
 
   for ( size_t i = 0; i < m_ioMapping.size(); ++i ) {
     for ( unsigned inIndex: m_ioMapping[i] ) {
-      ATH_MSG_INFO("Input collection: " << m_inputKeys[inIndex] );
+      ATH_MSG_DEBUG("Input collection: " << m_inputKeys[inIndex] );
     }
-    ATH_MSG_INFO("   Routed to output collection " << m_outputKeys[i] );
+    ATH_MSG_DEBUG("   Routed to output collection " << m_outputKeys[i] );
   }
 
   // crosscheck mapping (also the default one)
