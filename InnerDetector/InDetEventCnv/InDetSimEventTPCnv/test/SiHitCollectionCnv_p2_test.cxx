@@ -86,6 +86,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
     const double angle = i*0.2*M_PI;
+    // build step points for this particle
     std::vector< HepGeom::Point3D<double> > stepPoints(11);
     for (int j=0; j<11; ++j) {
       const double jd(j);
@@ -95,11 +96,16 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
                               350.*jd);
     }
     const int o = i*100;
-    trans1.Emplace (stepPoints.at(i), stepPoints.at(i+1),
-                    16.5+o,
-                    17.5+o,
-                    trkLink,
-                    19+o);
+    // Add multiple SiHits per particle
+    for (int j=0; j<10; ++j) {
+      trans1.Emplace (stepPoints.at(j), //   local start position of the energy deposit
+                      stepPoints.at(j+1), //   local end position of the energy deposit
+                      16.5+o, //   deposited energy
+                      17.5+o, //   time of energy deposition
+                      trkLink, //   link to particle which released this energy
+                      19+o // SiHitIdentifier (int) - dummy value
+                      );
+    }
 
   }
 
