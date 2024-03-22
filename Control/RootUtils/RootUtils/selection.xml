@@ -14,5 +14,8 @@
     <class name="RootUtils::ScatterH2::Pair" />
     <class name="std::vector<RootUtils::ScatterH2::Pair>" />
 
+    <class name="APRDefaults::TTreeNames" />
+    <class name="APRDefaults::RNTupleNames" />
+
     <class name="RootUtilsTest::TreeTest" />
 </lcgdict>

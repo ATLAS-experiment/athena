@@ -9,7 +9,7 @@
 
 #include "PersistentDataModel/Token.h"
 #include "POOLCore/Exception.h"
-#include "POOLCore/APRDefaults.h"
+#include "RootUtils/APRDefaults.h"
 
 #include "CollectionBase/ICollectionColumn.h"
 #include "CollectionBase/CollectionBaseNames.h"

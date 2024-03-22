@@ -16,7 +16,7 @@
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbDomain.h"
 #include "POOLCore/DbPrint.h"
-#include "POOLCore/APRDefaults.h"
+#include "RootUtils/APRDefaults.h"
 #include "RootAuxDynIO/RootAuxDynIO.h"
 
 #include "GaudiKernel/Bootstrap.h"

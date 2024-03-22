@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTSELECTORATHENAPOOL_H
@@ -16,7 +16,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "PersistentDataModel/Guid.h"
-#include "POOLCore/APRDefaults.h"
+#include "RootUtils/APRDefaults.h"
 
 #include "AthenaKernel/IAthenaIPCTool.h"
 #include "AthenaKernel/IAthenaSelectorTool.h"
