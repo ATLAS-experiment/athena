@@ -247,10 +247,10 @@ def addOriginCorrectedClustersToSlimmingTool(slimhelper,writeLC=False,writeEM=Fa
         if "LCOriginTopoClusters" not in slimhelper.AppendToDictionary:
             slimhelper.AppendToDictionary.update({"LCOriginTopoClusters":'xAOD::CaloClusterContainer',
                                                   "LCOriginTopoClustersAux":'xAOD::ShallowAuxContainer'})
-            slimhelper.ExtraVariables.append('LCOriginTopoClusters.calEta.calPhi')
+            slimhelper.ExtraVariables.append('LCOriginTopoClusters.calEta.calPhi.originalObjectLink')
 
     if writeEM:
         if "EMOriginTopoClusters" not in slimhelper.AppendToDictionary:
             slimhelper.AppendToDictionary.update({"EMOriginTopoClusters":'xAOD::CaloClusterContainer',
                                                   "EMOriginTopoClustersAux":'xAOD::ShallowAuxContainer'})
-            slimhelper.ExtraVariables.append('EMOriginTopoClusters.calE.calEta.calPhi')
+            slimhelper.ExtraVariables.append('EMOriginTopoClusters.calE.calEta.calPhi.originalObjectLink')
