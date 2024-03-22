@@ -128,10 +128,6 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
            << "           L1Topo steering structure: configuring from L1 Topo Menu          " << endl
            << "/***************************************************************************/" << endl;
 
-   // Fill cTau and jTau isolation information (to be used in multiplicity algorithms)
-   setIsolationFW_CTAU(l1menu);
-   setIsolationFW_JTAU(l1menu);
-
    //   set<TCS::inputTOBType_t> neededInputs; // Stores inputs for DecisionConnectors
    vector<string> storedConn; // Stores decision connectors in order to avoid double counting
    vector<vector<string>> confAlgorithms; // Stores algorithm name/category that have been configured in L1Menu to be used for setting the parameters
@@ -517,46 +513,3 @@ TCS::TopoSteeringStructure::countingConnector(const std::string & output) {
    return 0;
 }
 
-
-void
-TCS::TopoSteeringStructure::setIsolationFW_CTAU(const TrigConf::L1Menu& l1menu) {
-   const TrigConf::L1ThrExtraInfo_cTAU &cTauExtraInfo = l1menu.thrExtraInfo().cTAU();
-
-   using WP = TrigConf::Selection::WP;
-   for(const WP wp : {WP::LOOSE, WP::MEDIUM, WP::TIGHT, WP::LOOSE12, WP::LOOSE20, WP::LOOSE30, WP::LOOSE35, WP::MEDIUM12, WP::MEDIUM20, WP::MEDIUM30, WP::MEDIUM35, WP::TIGHT12, WP::TIGHT20, WP::TIGHT30, WP::TIGHT35}) {
-      const TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU& isol = cTauExtraInfo.isolation(wp, 0);
-
-      m_isolationFW_CTAU[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_fw());
-      m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_jTAUCoreScale_fw());
-   }
-}
-
-
-void
-TCS::TopoSteeringStructure::setIsolationFW_JTAU(const TrigConf::L1Menu& l1menu) {
-   const TrigConf::L1ThrExtraInfo_jTAU &jTauExtraInfo = l1menu.thrExtraInfo().jTAU();
-
-   using WP = TrigConf::Selection::WP;
-   for(const WP wp : {WP::LOOSE, WP::MEDIUM, WP::TIGHT}) {
-      m_isolationFW_JTAU[TrigConf::Selection::wpToString(wp)] = static_cast<int>(jTauExtraInfo.isolation(wp, 0).isolation_fw());
-   }
-}
-
-
-// Functions used by HLT seeding 
-#ifndef TRIGCONF_STANDALONE
-
-void
-TCS::TopoSteeringStructure::setIsolationFW_CTAU(std::map<std::string, int>& isoFW_CTAU, std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale, const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) {
-   const TrigConf::L1ThrExtraInfo_cTAU& cTauExtraInfo = dynamic_cast<const TrigConf::L1ThrExtraInfo_cTAU&>(menuExtraInfo);
-
-   using WP = TrigConf::Selection::WP;
-   for(const WP wp : {WP::LOOSE, WP::MEDIUM, WP::TIGHT, WP::LOOSE12, WP::LOOSE20, WP::LOOSE30, WP::LOOSE35, WP::MEDIUM12, WP::MEDIUM20, WP::MEDIUM30, WP::MEDIUM35, WP::TIGHT12, WP::TIGHT20, WP::TIGHT30, WP::TIGHT35}) {
-      const TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU& isol = cTauExtraInfo.isolation(wp, 0);
-
-      isoFW_CTAU[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_fw());
-      isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_jTAUCoreScale_fw());
-   }
-}
-
-#endif

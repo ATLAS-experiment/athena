@@ -230,6 +230,7 @@ namespace TrigConf {
       Selection::WP m_rHad { Selection::WP::NONE };
    };
 
+   class L1ThrExtraInfo_jTAU;
    class L1Threshold_jTAU final : public L1Threshold_Calo {
    public:
       L1Threshold_jTAU( const std::string & name, const std::string & type, std::weak_ptr<L1ThrExtraInfoBase> extraInfo, const ptree & data) :
@@ -238,6 +239,7 @@ namespace TrigConf {
       virtual std::string className() const override { return "L1Threshold_jTAU"; }
       // access functions
       Selection::WP isolation() const { return m_isolation; }
+      const std::shared_ptr<L1ThrExtraInfo_jTAU> getExtraInfo() const;
    protected:
       virtual void update() override {
          L1Threshold_Calo::update();
@@ -249,6 +251,7 @@ namespace TrigConf {
       Selection::WP m_isolation { Selection::WP::NONE };
    };
 
+   class L1ThrExtraInfo_cTAU;
    class L1Threshold_cTAU final : public L1Threshold_Calo {
    public:
       L1Threshold_cTAU( const std::string & name, const std::string & type, std::weak_ptr<L1ThrExtraInfoBase> extraInfo, const ptree & data) :
@@ -257,6 +260,7 @@ namespace TrigConf {
       virtual std::string className() const override { return "L1Threshold_cTAU"; }
       // access functions
       Selection::WP isolation() const { return m_isolation; }
+      const std::shared_ptr<L1ThrExtraInfo_cTAU> getExtraInfo() const;
    protected:
       virtual void update() override {
          L1Threshold_Calo::update();
