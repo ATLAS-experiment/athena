@@ -144,7 +144,7 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
     SG::ReadCondHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
 
     auto channelDir = [hasEtaMeas, defineBuckets, &gctx](const MuonSpacePoint & p) {
-        const Amg::Vector3D d = xAOD::chDirectionInChamber(**gctx, p.primaryMeasurement());
+        const Amg::Vector3D d = xAOD::channelDirInChamber(**gctx, p.primaryMeasurement());
         return std::abs(hasEtaMeas || !defineBuckets ? d.y() : d.z());
     };
 
