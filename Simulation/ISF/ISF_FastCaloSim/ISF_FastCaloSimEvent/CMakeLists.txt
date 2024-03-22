@@ -145,7 +145,7 @@ atlas_add_test( TFCSEnergyAndHitGANV2_test
                 SOURCES test/TFCSEnergyAndHitGANV2_test.cxx 
                 INCLUDE_DIRS ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
                 LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ALL_ONNX_LIBS} ISF_FastCaloSimEvent
-                LOG_IGNORE_PATTERN "*(TFCSCenterPositionCalculation*)0x*" # it's a pointer 
+                LOG_IGNORE_PATTERN ".*(TFCSCenterPositionCalculation*)0x*." # it's a pointer 
                 PROPERTIES TIMEOUT 1200 )
 
 atlas_add_test( TFCSPredictExtrapWeights_test
