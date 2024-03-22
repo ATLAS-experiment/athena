@@ -287,12 +287,6 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import ObjectCutFlowBlock
         self.addAlgConfigBlock(algName='ObjectCutFlow', alg=ObjectCutFlowBlock)
 
-        # thinning
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
-        self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,
-            defaults={'configName': 'Thinning'},
-            superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
-
         # trigger
         from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
         self.addAlgConfigBlock(algName="Trigger", alg=TriggerAnalysisBlock,
@@ -314,6 +308,11 @@ class ConfigFactory():
         # per-event scale factor calculation
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PerEventSFBlock
         self.addAlgConfigBlock(algName='PerEventSF', alg=PerEventSFBlock)
+
+        # thinning
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
+        self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,
+            defaults={'configName': 'Thinning'})
 
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
