@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef HITSTRUTHRELINKBASE_H
-#define HITSTRUTHRELINKBASE_H
+#ifndef MCEVENTCOLLECTIONFILTER_HITSTRUTHRELINKBASE_H
+#define MCEVENTCOLLECTIONFILTER_HITSTRUTHRELINKBASE_H
 
 // Base class include
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <GeneratorObjects/McEventCollection.h>
+#include <GeneratorObjects/HepMcParticleLink.h>
 
 
 class HitsTruthRelinkBase : public AthReentrantAlgorithm
@@ -19,8 +20,10 @@ public:
 
 protected:
   StatusCode getReferenceBarcode(const EventContext &ctx, int *barcode) const;
+  StatusCode getReferenceId(const EventContext &ctx, int *id) const;
+  virtual HepMcParticleLink updatedLink(const EventContext &ctx, const HepMcParticleLink& oldLink, int referenceId, int pdgID=0) const;
 
   SG::ReadHandleKey<McEventCollection> m_inputTruthCollectionKey {this, "InputTruthCollection", "TruthEvent", "Input truth collection name"};
 };
 
-#endif
+#endif // MCEVENTCOLLECTIONFILTER_HITSTRUTHRELINKBASE_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_HitsTruthRelink.h"
@@ -44,19 +44,11 @@ StatusCode TGC_HitsTruthRelink::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Recorded output hits collection " << outputCollection.name() << " in store " << outputCollection.store());
 
   // Do relinking
-  int referenceBarcode{};
-  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode)); // FIXME
+  int referenceId{};
+  ATH_CHECK(getReferenceId(ctx, &referenceId));
 
   for (const TGCSimHit &hit : *inputCollection) {
-    const HepMcParticleLink& oldLink = hit.particleLink();
-
-    int currentBarcode{};
-    if (oldLink.barcode() != 0) {
-      currentBarcode = referenceBarcode;
-    }
-
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
-
+    HepMcParticleLink particleLink = updatedLink(ctx, hit.particleLink(), referenceId);
     int    id               = hit.TGCid();
     double time             = hit.globalTime();
     Amg::Vector3D position  = hit.localPosition();
