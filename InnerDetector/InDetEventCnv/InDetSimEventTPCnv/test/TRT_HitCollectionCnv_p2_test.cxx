@@ -91,20 +91,28 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
     int o = i*100;
     auto pGenParticle = genPartVector.at(0);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    trans1.Emplace (101+o, trkLink, pGenParticle->pdg_id(),
-                    104.5+o, 105.5+o,
-                    (106.5+o)/1000, (107.5+o)/1000, 108.5+o,
-                    (109.5+o)/1000, (110.5+o)/1000, 111.5+o,
-                    112.5+o);
+    trans1.Emplace (101+o, // hit ID
+                    trkLink, // link to truth particle
+                    pGenParticle->pdg_id(), // pdg code (particleEncoding)
+                    104.5+o, // kinetic energy
+                    105.5+o, // energy deposit
+                    (106.5+o)/1000, (107.5+o)/1000, 108.5+o, // PreStep (X,Y,Z)
+                    (109.5+o)/1000, (110.5+o)/1000, 111.5+o, // PostStep (X,Y,Z)
+                    112.5+o // time
+                    );
   }
   // Special case for photons
   auto pGenParticle = genPartVector.at(10);
   HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-  trans1.Emplace (131, trkLink, 22,
-                  134.5, 135.5,
-                  10, 3, 138.5,
-                  3, 10, 148.5,
-                  142.5);
+  trans1.Emplace (131, // hit ID
+                  trkLink, // link to truth particle
+                  22, // pdg code (particleEncoding)
+                  134.5, // kinetic energy
+                  135.5, // energy deposit
+                  10, 3, 138.5, // PreStep (X,Y,Z)
+                  3, 10, 148.5, // PostStep (X,Y,Z)
+                  142.5 // time
+                  );
 
   testit (trans1);
 }
