@@ -17,7 +17,7 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "StorageSvc/DbType.h"
-#include "POOLCore/APRDefaults.h"
+#include "RootUtils/APRDefaults.h"
 
 //__________________________________________________________________________
 AthenaPoolConverter::~AthenaPoolConverter() {

@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: RootUtilsDict.h,v 1.11 2008-01-15 05:02:52 ssnyder Exp $
 
 /**
  * @file  RootUtils/RootUtilsDict.h
@@ -27,3 +25,8 @@ struct TreeTest
 #include "RootUtils/InitHist.h"
 #include "RootUtils/ILogger.h"
 #include "RootUtils/ScatterH2.h"
+
+// Default names of ROOT file storage elements used by APR
+#include "RootUtils/APRDefaults.h"
+
+

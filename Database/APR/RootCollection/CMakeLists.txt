@@ -23,7 +23,7 @@ atlas_add_library( RootCollection
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES}
                    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CollectionBase
-                   FileCatalog GaudiKernel POOLCore PersistencySvc PersistentDataModel )
+                   FileCatalog GaudiKernel POOLCore PersistencySvc PersistentDataModel RootUtils )
 
 atlas_add_library( RootCollectionComponents
                    src/components/*.cpp

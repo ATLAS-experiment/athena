@@ -11,7 +11,7 @@
 #include "GaudiKernel/FileIncident.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "POOLCore/APRDefaults.h"
+#include "RootUtils/APRDefaults.h"
 #include "CxxUtils/starts_with.h"
 
 #include "H5Cpp.h"

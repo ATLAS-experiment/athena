@@ -8,7 +8,7 @@
 #include "RNTCollectionSchemaEditor.h"
 
 #include "POOLCore/Exception.h"
-#include "POOLCore/APRDefaults.h"
+#include "RootUtils/APRDefaults.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
@@ -18,10 +18,8 @@
 #include "TROOT.h"
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#else
-#include "ROOT/RNTuple.hxx"
 #endif
-#include "ROOT/RField.hxx"
+#include "ROOT/RNTuple.hxx"
 
 
 pool::RootCollection::RNTCollectionSchemaEditor::
