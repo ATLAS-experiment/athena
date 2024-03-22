@@ -44,23 +44,16 @@ StatusCode SiliconHitsTruthRelink::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Recorded output hits collection " << outputCollection.name() << " in store " << outputCollection.store());
 
   // Do relinking
-  int referenceBarcode{};
-  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode)); // FIXME
+  int referenceId{};
+  ATH_CHECK(getReferenceId(ctx, &referenceId));
 
   for (const SiHit &hit : *inputCollection) {
-    const HepMcParticleLink& oldLink = hit.particleLink();
-
+    HepMcParticleLink particleLink = updatedLink(ctx, hit.particleLink(), referenceId);
     HepGeom::Point3D<double> lP1 = hit.localStartPosition();
     HepGeom::Point3D<double> lP2 = hit.localEndPosition();
     double       energyLoss = hit.energyLoss();
     double       meanTime   = hit.meanTime();
     unsigned int id         = hit.identify();
-
-    int currentBarcode{};
-    if (oldLink.barcode() != 0) {
-      currentBarcode = referenceBarcode;
-    }
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
     outputCollection->Emplace(lP1, lP2, energyLoss, meanTime, particleLink, id);
   }
 

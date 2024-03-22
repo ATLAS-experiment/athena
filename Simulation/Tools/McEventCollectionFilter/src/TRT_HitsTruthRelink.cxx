@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_HitsTruthRelink.h"
@@ -44,21 +44,12 @@ StatusCode TRT_HitsTruthRelink::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Recorded output hits collection " << outputCollection.name() << " in store " << outputCollection.store());
 
   // Do relinking
-  int referenceBarcode{};
-  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode)); // FIXME
+  int referenceId{};
+  ATH_CHECK(getReferenceId(ctx, &referenceId));
 
   for (const TRTUncompressedHit &hit : *inputCollection) {
-    const HepMcParticleLink& oldLink = hit.particleLink();
-
     int pdgID = hit.GetParticleEncoding();
-    int currentBarcode = oldLink.barcode();
-    if (currentBarcode != 0) {
-      if (!(m_keepElectronsLinkedToTRTHits && std::abs(pdgID) == 11)) {
-        currentBarcode = referenceBarcode;
-      }
-    }
-
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
+    HepMcParticleLink particleLink = updatedLink(ctx, hit.particleLink(), referenceId, pdgID);
     int   id            = hit.GetHitID();
     float kineticEnergy = hit.GetKineticEnergy();
     float energyDeposit = hit.GetEnergyDeposit();
@@ -74,4 +65,19 @@ StatusCode TRT_HitsTruthRelink::execute(const EventContext &ctx) const
   }
 
   return StatusCode::SUCCESS;
+}
+
+
+HepMcParticleLink TRT_HitsTruthRelink::updatedLink(const EventContext &ctx, const HepMcParticleLink& oldLink, int referenceId, int pdgId) const {
+  ATH_MSG_DEBUG ("oldLink.id() = " << oldLink.id());
+  int currentId = oldLink.id();
+  // Hits previously linked to truth particles should now be linked to the reference truthParticle
+  if (oldLink.id() != 0 || oldLink.barcode() !=0) { // FIXME barcode-based for now to work around reading in HepMcParticleLink_p2 based EDM
+    // For the TRT truth electrons may optionally be kept
+    if (!(m_keepElectronsLinkedToTRTHits && std::abs(pdgId) == 11)) {
+      currentId = referenceId;
+    }
+  }
+
+  return HepMcParticleLink(currentId, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID, ctx);
 }
