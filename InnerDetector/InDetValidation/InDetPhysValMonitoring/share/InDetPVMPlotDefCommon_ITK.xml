@@ -398,6 +398,7 @@ end of hit residuals & cluster width plots
     =======================================================
 -->
 
+<!--Tracks-->
 <h id="reco_time" type="TH1F" title="reco_{time}">
   <x title="reco_{time} [ns]" n="160" lo="-&TIMEPARA;" hi="&TIMEPARA;"/>
   <y title="Number of Entries"/>
@@ -406,6 +407,27 @@ end of hit residuals & cluster width plots
 <h id="reco_hasValidTime_eff_vs_eta" type="TEfficiency" title="hasValidTime efficiency vs eta">
   <x title="#eta" n="100" lo="-&ETA;" hi="&ETA;"/>
   <y title="efficiency"/>
+</h>
+
+<!--Vertices-->
+<h id="vx_time" type="TH1F" title="Time of vertex">
+  <x title="time (ns)" n="40" lo="-&TIMEPARA;" hi="&TIMEPARA;"/>
+  <y title="Entries"/>
+</h>
+
+<h id="vx_err_time" type="TH1F" title="Time error of vertex">
+  <x title="#sigma(time) (ns)" n="40" lo="0.0" hi="0.05"/>
+  <y title="Entries"/>
+</h>
+
+<h id="vx_time_diff" type="TH1F" title="PV selected-truth time difference">
+  <x title="time_{reco} - time_{truth} [ns]" n="40" lo="-0.15" hi="0.15"/>
+  <y title="Entries"/>
+</h>
+
+<h id="vx_time_diff_pull" type="TH1F" title="PV selected-truth time difference pull">
+  <x title="(time_{reco} - time_{truth}) / #sigma(time_{reco})" n="40" lo="-5.0" hi="5.0"/>
+  <y title="Entries"/>
 </h>
 
 <!--

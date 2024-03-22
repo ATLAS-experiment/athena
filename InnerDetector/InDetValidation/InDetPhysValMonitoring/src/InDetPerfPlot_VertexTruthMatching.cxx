@@ -14,6 +14,7 @@
 #include "InDetPerfPlot_nTracks.h"
 #include "TFitResult.h"
 #include "TFitResultPtr.h"
+#include "GaudiKernel/PhysicalConstants.h"
 
 using namespace IDPVM;
 
@@ -199,6 +200,8 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
     book(m_vx_type_truth,"vx_type_truth");
     book(m_vx_z_diff,"vx_z_diff");
     book(m_vx_z_diff_pull,"vx_z_diff_pull");
+    book(m_vx_time_diff,"vx_time_diff");
+    book(m_vx_time_diff_pull,"vx_time_diff_pull");
     if (m_detailLevel >= 200) {
         book(m_vx_hs_classification,"vx_hs_classification");
         book(m_vx_nReco_vs_nTruth_inclusive,"vx_nReco_vs_nTruth_inclusive");
@@ -549,6 +552,20 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex& vertex, const x
       float err_z = fabs(Amg::error(covariance, 2)) > 1e-7 ? Amg::error(covariance, 2) : 1000.;
       fillHisto(m_vx_z_diff,diff_z, weight);
       fillHisto(m_vx_z_diff_pull,diff_z/err_z, weight);
+
+      static const SG::AuxElement::Accessor<uint8_t> accHasValidTime("hasValidTime");
+      static const SG::AuxElement::Accessor<float> accTime("time");
+      static const SG::AuxElement::Accessor<float> accTimeResolution("timeResolution");
+      if (accHasValidTime.isAvailable(vertex) && accTime.isAvailable(vertex) &&
+          accTimeResolution.isAvailable(vertex)) {
+
+        if (vertex.hasValidTime()) {
+            float diff_time = vertex.time()-tvrt->t()/Gaudi::Units::c_light;
+            float err_time = vertex.timeResolution();
+            fillHisto(m_vx_time_diff, diff_time, weight);
+            fillHisto(m_vx_time_diff_pull, diff_time/err_time, weight);
+        }
+      }
     }
 
     // Get the match type info for each vertex:

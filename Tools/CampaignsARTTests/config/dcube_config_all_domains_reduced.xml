@@ -146,10 +146,14 @@
       <hist1D name="vx_x" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_y" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_z" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_time" plotopts="" tests="KS" type="TH1F" />
       <hist1D name="vx_err_x" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_err_y" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_err_z" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_err_time" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_nTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_time_diff" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_time_diff_pull" plotopts="" tests="KS" type="TH1F"/>
      </TDirectory>
     </TDirectory>
    </TDirectory>

@@ -50,6 +50,11 @@ private:
     TH1* m_vx_type_truth{};
     TH1* m_vx_z_diff{};
     TH1* m_vx_z_diff_pull{};
+
+    ///vertex time
+    TH1* m_vx_time_diff{};
+    TH1* m_vx_time_diff_pull{};
+
     ///hardscatter classification
     TH1* m_vx_hs_classification{};
     ///vertex reco efficiency
