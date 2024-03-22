@@ -107,7 +107,7 @@ namespace FlavorTagDiscriminants {
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
       dec_parent_barcode(*truth_particle) = truth_parent ? truth_parent->barcode() : -2;
 
-      // get truth origin and use it for exclusive origing and secondary origin
+      // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);
 
       int truth_origin_label = InDet::ExclusiveOrigin::getExclusiveOrigin(truth_origin);
