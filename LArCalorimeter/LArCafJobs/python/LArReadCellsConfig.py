@@ -39,6 +39,7 @@ def LArReadCellsCfg(flags):
     dumperAlg=CompFactory.LArReadCells("LArReadCells")
     dumperAlg.output = flags.LArShapeDump.outputNtup
     dumperAlg.etCut = -1500.
+    dumperAlg.etCut2 = -1500.
 
     result.addEventAlgo(dumperAlg)
 

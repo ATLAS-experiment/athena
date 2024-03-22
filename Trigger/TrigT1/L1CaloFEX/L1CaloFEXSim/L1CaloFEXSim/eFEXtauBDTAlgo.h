@@ -53,7 +53,8 @@ public:
   virtual void setThresholds(const std::vector<unsigned int> &rHadThreshold,
                              const std::vector<unsigned int> &bdtThreshold,
                              unsigned int etThreshold,
-                             unsigned int etThresholdForRHad) override;
+                             unsigned int etThresholdForRHad,
+			     unsigned int bdtMinEtThreshold) override;
 
   // Seed is hard-coded to 1 to reduce eta asymmetry 
   // which is stronger when it's hard-coded to 0 and 
@@ -70,7 +71,8 @@ private:
   unsigned int m_hadFracMultipliers[3];
   unsigned int m_bdtThresholds[3];
   unsigned int m_etThreshold;
-  unsigned int m_etThresholdForHadFrac;
+  unsigned int m_maxEtThreshold;
+  unsigned int m_bdtMinEtThreshold;
 
   unsigned int m_bdtScore;
 

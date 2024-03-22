@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -14,7 +14,7 @@
 #include "TestTools/initGaudi.h"
 #include "TestTools/SGassert.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
-#include "../src/SGHiveMgrSvc.h"
+#include "StoreGate/SGHiveMgrSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/SGtests.h"
 

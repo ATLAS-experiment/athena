@@ -27,12 +27,13 @@ def LArNoiseCfg(flags):
     result.merge(LArCollisionTimeCfg(flags))
 
     from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    result.merge(TrigDecisionToolCfg(flags))
+    tdt = result.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
     noiseAlg=CompFactory.LArNoiseBursts("LArNoiseBursts")
     noiseAlg.SigmaCut = flags.LArNoise.SigmaCut
     noiseAlg.NumberOfBunchesInFront = flags.LArNoise.NumberOfBunchesInFront
     noiseAlg.KeepOnlyCellID = flags.LArNoise.KeepOnlyCellID
+    noiseAlg.TrigDecisionTool = tdt
     result.addEventAlgo(noiseAlg)
 
     if (flags.LArNoise.outNtupLAr!=""):
@@ -59,16 +60,16 @@ def LArNoiseFromRawCfg(flags):
 
     result=ComponentAccumulator()
 
-    from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-    result.merge(LArRawDataReadingCfg(flags))
+    #from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
+    #result.merge(LArRawDataReadingCfg(flags))
 
-    #Setup cabling
-    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    result.merge(LArOnOffIdMappingCfg(flags))
-    # setup bad chan and missing febs
-    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg,LArBadFebCfg
-    LArBadChannelCfg(flags)
-    LArBadFebCfg(flags)
+    ##Setup cabling
+    #from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+    #result.merge(LArOnOffIdMappingCfg(flags))
+    ## setup bad chan and missing febs
+    #from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg,LArBadFebCfg
+    #LArBadChannelCfg(flags)
+    #LArBadFebCfg(flags)
 
     from CaloRec.CaloRecoConfig import CaloRecoCfg
     result.merge(CaloRecoCfg(flags))
@@ -87,9 +88,11 @@ def LArNoiseFromRawCfg(flags):
        from LArCellRec.LArTimeVetoAlgConfig import LArTimeVetoAlgCfg
        result.merge(LArTimeVetoAlgCfg(flags))
 
-       if (flags.LArNoise.outHistLAr == ""):
-          from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-          result.merge(TrigDecisionToolCfg(flags))
+       from LArCafJobs.LArSCDumperSkeleton import L1CaloMenuCfg
+       result.merge(L1CaloMenuCfg(flags))
+
+       from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+       tdt = result.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
 
     if (flags.LArNoise.outNtupLAr != ""):
@@ -97,6 +100,7 @@ def LArNoiseFromRawCfg(flags):
        noiseAlg.SigmaCut = flags.LArNoise.SigmaCut
        noiseAlg.NumberOfBunchesInFront = flags.LArNoise.NumberOfBunchesInFront
        noiseAlg.KeepOnlyCellID = flags.LArNoise.KeepOnlyCellID
+       noiseAlg.TrigDecisionTool = tdt
        result.addEventAlgo(noiseAlg)
 
        result.addService(CompFactory.THistSvc(Output=["TTREE DATAFILE='"+flags.LArNoise.outNtupLAr+"' OPT='RECREATE'",]))
@@ -133,9 +137,17 @@ if __name__=="__main__":
     
     from LArNoiseFlags import addNoiseFlags
     addNoiseFlags(flags)
-    #flags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MetadataTests/data18/data18_13TeV.00363979.physics_Main.daq.ESD.0750._0001.pool.root']
-    flags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExOnline/data16_13TeV.00302347.express_express.merge.RAW._lb0432._SFO-ALL._0001.1']
+    #flags.Input.Files=['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data23_cos.00457007.physics_CosmicMuons.merge.RAW._lb0043._SFO-ALL._0001.1']
+    flags.Input.Files=['/eos/atlas/atlastier0/rucio/data23_13p6TeV/express_express/00461002/data23_13p6TeV.00461002.express_express.merge.RAW/data23_13p6TeV.00461002.express_express.merge.RAW._lb0922._SFO-ALL._0001.1']
 
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
+    flags.Trigger.triggerConfig = 'DB'    
+    flags.Trigger.doID=False
+    flags.Trigger.doMuon=False
+    flags.Trigger.doLVL1=False
+    flags.Trigger.doHLT=False
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

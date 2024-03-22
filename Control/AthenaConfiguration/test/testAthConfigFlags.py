@@ -324,6 +324,30 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.assertTrue( self.flags.hasFlag("Z.A") )
         self.assertTrue( self.flags.hasCategory("Z.C") )
 
+    def test_cloneExists(self):
+        """test if flags can be found after cloning"""
+        clonef = self.flags.cloneAndReplace('W', 'Z')
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W.A'))
+        self.assertFalse(clonef.hasFlag('Z.A'))
+
+    def test_cloneIter(self):
+        # top level check
+        self.assertTrue('Z' in self.flags)
+        self.assertTrue('A' in self.flags.Z)
+        clonez2w = self.flags.cloneAndReplace('W', 'Z')
+        self.assertFalse('Z' in clonez2w)
+        self.assertTrue('W' in clonez2w)
+        self.assertFalse('Z' in clonez2w.W)
+        self.assertTrue('A' in clonez2w.W)
+
+        # check one level down
+        self.assertTrue('C' in self.flags.Z)
+        clonec2x = self.flags.cloneAndReplace('Z.X', 'Z.C')
+        self.assertTrue('X' in clonec2x.Z)
+        self.assertFalse('C' in clonec2x.Z)
+
+
     def test_cloneHash(self):
         # compare copy hash to clone hash, should be equal
         copyflags = copy.deepcopy(self.flags)

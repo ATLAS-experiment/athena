@@ -18,6 +18,8 @@
 #include "FlavorTagDiscriminants/GNNOptions.h"
 
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
+#include "FlavorTagDiscriminants/TracksLoader.h"
+#include "FlavorTagDiscriminants/IParticlesLoader.h"
 
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"
@@ -58,7 +60,6 @@ namespace FlavorTagDiscriminants {
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
     std::shared_ptr<const OnnxUtil> m_onnxUtil;
-
   private:
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
@@ -87,7 +88,7 @@ namespace FlavorTagDiscriminants {
     std::string m_input_node_name;
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
-    std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
+    std::vector<std::shared_ptr<IConstituentsLoader>> m_constituentsLoaders;
 
     Decorators m_decorators;
     float m_defaultValue;

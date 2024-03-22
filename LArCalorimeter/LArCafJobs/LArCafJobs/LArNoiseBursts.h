@@ -99,7 +99,7 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    SG::ReadCondHandleKey<BunchCrossingCondData> m_bcDataKey 
      {this, "BunchCrossingCondDataKey", "BunchCrossingData" ,"SG Key of BunchCrossing CDO"};
    /*Tools*/
-   ToolHandle< Trig::TrigDecisionTool > m_trigDec;
+   PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};
 
    /*services*/
    const LArOnlineID* m_LArOnlineIDHelper;
@@ -218,11 +218,14 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    std::vector<float> m_nt_etacell;
    std::vector<float> m_nt_signifcell;
    //float m_nt_noisycellpercent;
+   std::vector<short> m_nt_barrelec_noisy;
+   std::vector<short> m_nt_posneg_noisy;
    std::vector<short> m_nt_ft_noisy;
    std::vector<short> m_nt_slot_noisy;
    std::vector<short> m_nt_channel_noisy;
    std::vector<short>    m_nt_cellpartlayerindex;
    std::vector< unsigned int > m_nt_cellIdentifier;
+   std::vector< unsigned int > m_nt_onlIdentifier;
    std::vector<float> m_nt_noisycellpart;
    std::vector<int> m_nt_noisycellHVphi;
    std::vector<int> m_nt_noisycellHVeta;

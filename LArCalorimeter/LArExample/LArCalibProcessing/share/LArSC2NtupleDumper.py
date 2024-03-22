@@ -23,24 +23,24 @@ if __name__=='__main__':
   parser.add_argument('-m','--maxev', dest='maxev', default=-1, help='Max number of events to dump', type=int)
   parser.add_argument('-x','--outlevel', dest='olevel', default=5, help='OuputLevel for dumping algo', type=int)
   parser.add_argument('-o','--outfile', dest='outfile', default="Digits.root", help='Output root filename', type=str)
-  parser.add_argument('-s','--addSamples', dest='samples', default=True, help='Add Samples to output ntuple', type=bool)
-  parser.add_argument('-a','--addSampBas', dest='samplesBas', default=False, help='Add ADC_BAS to output ntuple', type=bool)
-  parser.add_argument('-z','--addEt', dest='Et', default=False, help='Add ET to output ntuple', type=bool)
-  parser.add_argument('-g','--addEtId', dest='EtId', default=False, help='Add ET_ID to output ntuple', type=bool)
-  parser.add_argument('-l','--addLatHeader', dest='lheader', default=True, help='Add LATOME Header to output ntuple', type=bool)
-  parser.add_argument('-b','--addBCID', dest='bcid', default=True, help='Add BCID info to output ntuple', type=bool)
-  parser.add_argument('-e','--expandId', dest='expid', default=False, help='Expand online Id to fields', type=bool)
+  parser.add_argument('-s','--addSamples', dest='samples', default=False, help='Add Samples to output ntuple', action="store_true")
+  parser.add_argument('-a','--addSampBas', dest='samplesBas', default=False, help='Add ADC_BAS to output ntuple', action="store_true")
+  parser.add_argument('-z','--addEt', dest='Et', default=False, help='Add ET to output ntuple', action="store_true")
+  parser.add_argument('-g','--addEtId', dest='EtId', default=False, help='Add ET_ID to output ntuple', action="store_true")
+  parser.add_argument('-l','--noLatHeader', dest='lheader', default=True, help='Add LATOME Header to output ntuple', action='store_false')
+  parser.add_argument('-b','--noBCID', dest='bcid', default=True, help='Add BCID info to output ntuple', action='store_false')
+  parser.add_argument('-e','--expandId', dest='expid', default=False, help='Expand online Id to fields', action='store_true')
   parser.add_argument('-n','--nsamp', dest='nsamp', default=0, help='Number of samples to dump', type=int)
-  parser.add_argument('-c','--overEvNumber', dest='overEvN', default=False, help='Overwrite event number', type=bool)
-  parser.add_argument('-d','--addHash', dest='ahash', default=False, help='Add hash number to output ntuple', type=bool)
-  parser.add_argument('-j','--addOffline', dest='offline', default=False, help='Add offline Id to output ntuple', type=bool)
-  parser.add_argument('-k','--addCalib', dest='calib', default=False, help='Add calib. info to output ntuple', type=bool)
-  parser.add_argument('-t','--addGeom', dest='geom', default=False, help='Add real geom info to output ntuple', type=bool)
-  parser.add_argument('-u','--addBC', dest='bc', default=False, help='Add Bad. chan info to output ntuple', type=bool)
-  parser.add_argument('-w','--addROD', dest='rod', default=False, help='Add ROD energies sum to output ntuple', type=bool)
-  parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', type=bool)
-  parser.add_argument('-q','--addNoisyRO', dest='noisyRO', default=False, help='Add reco and info from LArNoisyROSummary to output ntuple', type=bool)
-  parser.add_argument('--addTT', dest='TT', default=False, help='Add info from LArTriggerTowers to output ntuple', type=bool)
+  parser.add_argument('-c','--overEvNumber', dest='overEvN', default=False, help='Overwrite event number', action='store_true')
+  parser.add_argument('-d','--addHash', dest='ahash', default=False, help='Add hash number to output ntuple', action='store_true')
+  parser.add_argument('-j','--addOffline', dest='offline', default=False, help='Add offline Id to output ntuple', action='store_true')
+  parser.add_argument('-k','--addCalib', dest='calib', default=False, help='Add calib. info to output ntuple', action='store_true')
+  parser.add_argument('-t','--addGeom', dest='geom', default=False, help='Add real geom info to output ntuple', action='store_true')
+  parser.add_argument('-u','--noBC', dest='bc', default=False, help='Add Bad. chan info to output ntuple', action='store_true')
+  parser.add_argument('-w','--addROD', dest='rod', default=False, help='Add ROD energies sum to output ntuple', action='store_true')
+  parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', action='store_true')
+  parser.add_argument('-q','--addNoisyRO', dest='noisyRO', default=False, help='Add reco and info from LArNoisyROSummary to output ntuple', action='store_true')
+  parser.add_argument('--addTT', dest='TT', default=False, help='Add info from LArTriggerTowers to output ntuple', action='store_true')
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -69,6 +69,10 @@ if __name__=='__main__':
 
   if args.run != 0:
      flags.Input.RunNumbers = [args.run]
+
+  # geometry
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
   # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
@@ -159,6 +163,8 @@ if __name__=='__main__':
   #flags.Debug.DumpEvtStore=True
 
   flags.lock()
+  flags.dump('LArSCDump.*')
+
 
   #Import the MainServices (boilerplate)
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -182,17 +188,13 @@ if __name__=='__main__':
      acc.merge(LArBadFebCfg(flags))
 
   if args.geom:
-      log.warning("Adding real geometry is not working yet")
-      args.geom=False
-      # FIXME
-      #acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
-      #acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
-      #AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')) 
+      acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
+      acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
 
   from LArCalibTools.LArSC2NtupleConfig import LArSC2NtupleCfg
   acc.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, # from LArCond2NtupleBase 
-                            NSamples=flags.LArSCDump.nSamples, FTlist={}, FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
+                            NSamples=flags.LArSCDump.nSamples, FTlist=[], FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
                             FillRODEnergy = flags.LArSCDump.doRawChan,
                             FillLB=args.evtree, FillTriggerType = args.evtree,

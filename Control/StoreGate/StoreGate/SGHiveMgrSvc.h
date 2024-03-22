@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_HIVEMGRSVC_H
@@ -19,17 +19,19 @@
 
 class StoreGateSvc;
 class ISvcLocator;
-
+class HltEventLoopMgr;       // friend
+class HltAsyncEventLoopMgr;  // friend
 
 /** @class HiveMgrSvc
  *  @brief A service that manages a multi-event collection of StoreGateSvc
  *  It implements the IHiveWhiteBoard interface
  *
- *  $Id: SGHiveMgrSvc.h 794852 2017-01-31 23:24:04Z leggett $
  **/
 namespace SG {
 class HiveMgrSvc : public extends<Service, IHiveWhiteBoard> {
   friend class TestSGHiveMgrSvc;
+  friend class ::HltEventLoopMgr;
+  friend class ::HltAsyncEventLoopMgr;
 public:
   //@{ @name IHiveWhiteBoard implementation
   /** Activate an given 'slot' for all subsequent calls within the
@@ -106,12 +108,21 @@ public:
   virtual ~HiveMgrSvc() {}
 
 private:
+  /** Set number of concurrent processes
+   *
+   * This can only be called by "friends" of this class. Its sole purpose
+   * is to have a common entry point within ATLAS to call the private
+   * methods of Gaudi::ConcurrencyFlags.
+   *
+   * @param numProcs  [IN]   Number of concurrent processes
+   */
+  static void setNumProcs(size_t numProcs);
+
   ServiceHandle<StoreGateSvc> m_hiveStore;
   size_t m_nSlots; //property settable also by setNumberOfStores
   std::vector<SG::HiveEventSlot> m_slots;
   std::mutex m_mutex; //< protects m_slots access
   std::atomic<size_t> m_freeSlots {0};
-  //maybe  ServiceHandle<ActiveStoreSvc> m_active;
 
 };
 } //namespace SG

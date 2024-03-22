@@ -127,7 +127,7 @@ def fromRunArgs(runArgs):
 
     cfg.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=flags.LArSCDump.doBC, AddFEBTempInfo=False, isSC=True, isFlat=False,
                             OffId=flags.LArSCDump.doOfflineId, AddHash=flags.LArSCDump.doHash, AddCalib=flags.LArSCDump.doCalib, RealGeometry=flags.LArSCDump.doGeom, ExpandId=flags.LArSCDump.expandId, # from LArCond2NtupleBase 
-                            NSamples=flags.LArSCDump.nSamples, FTlist={}, FillBCID=flags.LArSCDump.doBCID, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
+                            NSamples=flags.LArSCDump.nSamples, FTlist=[], FillBCID=flags.LArSCDump.doBCID, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = flags.LArSCDump.overwriteEvN, Net=flags.LArSCDump.nEt, # from LArSC2Ntuple
                             FillRODEnergy = flags.LArSCDump.doRawChan, FillLB = True, FillTriggerType = True,
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],

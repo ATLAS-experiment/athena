@@ -156,7 +156,8 @@ private:
   bool m_doTrigEff;
   int m_forceCalibRun;
   int m_forceCalibLB;
-
+  std::string m_calibVersion;
+  
   //  Parameters that control the pulse fitting analysis
   //
   unsigned int m_numSample;

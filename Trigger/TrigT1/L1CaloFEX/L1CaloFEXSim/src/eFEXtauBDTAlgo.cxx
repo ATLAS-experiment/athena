@@ -108,8 +108,9 @@ void LVL1::eFEXtauBDTAlgo::setThresholdPointers() {
     m_bdtAlgoImpl->setPointerToBDTThresholdsParam(i, &(m_bdtThresholds[i]));
   }
 
-  m_bdtAlgoImpl->setPointerToETThresholdForFracParam(&m_etThresholdForHadFrac);
+  m_bdtAlgoImpl->setPointerToMaxETParam(&m_maxEtThreshold);
   m_bdtAlgoImpl->setPointerToETThresholdParam(&m_etThreshold);
+  m_bdtAlgoImpl->setPointerToBDTMinETParam(&m_bdtMinEtThreshold);
 }
 
 // Calculate reconstructed ET value
@@ -160,11 +161,12 @@ bool LVL1::eFEXtauBDTAlgo::isBDT() const { return true; }
 void LVL1::eFEXtauBDTAlgo::setThresholds(
     const std::vector<unsigned int> &rHadThreshold,
     const std::vector<unsigned int> &bdtThreshold, unsigned int etThreshold,
-    unsigned int etThresholdForRHad) {
+    unsigned int maxEtThreshold, unsigned int bdtMinEtThreshold) {
   for (int i = 0; i < 3; i++) {
     m_hadFracMultipliers[i] = rHadThreshold[i];
     m_bdtThresholds[i] = bdtThreshold[i];
   }
   m_etThreshold = etThreshold;
-  m_etThresholdForHadFrac = etThresholdForRHad;
+  m_maxEtThreshold = maxEtThreshold;
+  m_bdtMinEtThreshold = bdtMinEtThreshold;
 }

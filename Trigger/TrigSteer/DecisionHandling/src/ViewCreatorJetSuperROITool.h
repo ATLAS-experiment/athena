@@ -61,7 +61,7 @@ public:
     "Extent of the ROI in phi from its centre"};
 
   // Need to get beamspot position from somewhere to recentre?
-  Gaudi::Property< double > m_roiZWidth {this,"RoIZWidth",150.0,
+  Gaudi::Property< double > m_roiZWidth {this,"RoIZWidth",-999,
       "Z Half Width in mm"};
 
 };

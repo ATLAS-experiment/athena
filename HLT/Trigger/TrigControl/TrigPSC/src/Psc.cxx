@@ -315,7 +315,9 @@ bool psc::Psc::configure(const ptree& config)
     {"DF_Ppid", "DF_PPID"},
     {"DF_Pid", "DF_PID"},
     {"DF_HostId", "DF_HOST_ID"},
-    {"DF_RandomSeed", "DF_RANDOM_SEED"}};
+    {"DF_RandomSeed", "DF_RANDOM_SEED"},
+    {"DF_NumberOfWorkers", "NPROCS"}
+  };
   if(!setDFProperties(props))
     return false;
 
