@@ -25,7 +25,6 @@ namespace TCS {
    
    class cTauMultiplicity : public CountingAlg {
    public:
-      
       cTauMultiplicity(const std::string & name);
       virtual ~cTauMultiplicity();
 
@@ -41,19 +40,18 @@ namespace TCS {
       static size_t cTauMatching(const xAOD::eFexTauRoI& eTau, const xAOD::jFexTauRoIContainer& jTauRoIs);
       // Returns true when a matching is found
       static bool cTauMatching(const xAOD::eFexTauRoI& eTau, const xAOD::jFexTauRoI& jTau);
-      // Converts the isolation score to bit to be used for the working point assignement 
-      static bool checkIsolationWP(const std::map<std::string, int>& isoFW_CTAU, const std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale, const float jTauCoreEt, const float jTauIsoEt, const float eTauEt, const std::string& isolation_wp);
+      // Check cTAU isolation
+      static bool checkIsolationWP(const xAOD::eFexTauRoI& eTau, const xAOD::jFexTauRoI& jTau, const TrigConf::L1Threshold_cTAU& thr);
+      // Check eTAU rCore/BDT and rHad WPs
+      static bool checkeTAUWP(const xAOD::eFexTauRoI& eTau, const TrigConf::L1Threshold_cTAU& thr);
       #endif
 
    private:
-
       const TrigConf::L1Threshold_cTAU* m_threshold{nullptr};
-      std::map<std::string, int> m_isoFW_CTAU;
-      std::map<std::string, int> m_isoFW_CTAU_jTAUCoreScale;
+      std::shared_ptr<TrigConf::L1ThrExtraInfo_cTAU> m_extraInfo;
 
-      // This function is used to map the ctau isolation working points into a common format with eFEX EM and taus.
-      // This allows us to use same functionalities from ConfigurableAlg (L1TopoInterfaces) to apply isolation cuts in multiplicity algorithms for all flavour of TOBS 
-      bool checkIsolationWP(const TCS::cTauTOB* etauCand, const TCS::cTauTOB* jtauCand, const std::string& isolation_wp) const; 
+      bool checkIsolationWP(const TCS::cTauTOB* etauCand, const TCS::cTauTOB* jtauCand) const; 
+      bool checkeTAUWP(const TCS::cTauTOB* etauCand) const;
 
       // Matching function for L1Topo
       bool cTauMatching(const TCS::cTauTOB* etauCand, const TCS::cTauTOB* jtauCand) const; 
@@ -70,6 +68,8 @@ namespace TCS {
      std::vector<std::string> m_histcTauPartialIsoMedium35;
      std::vector<std::string> m_histcTauPartialIsoTight;
      std::vector<std::string> m_histcTauIsoMatchedPass;
+
+     using WP = TrigConf::Selection::WP;
 
    };
 

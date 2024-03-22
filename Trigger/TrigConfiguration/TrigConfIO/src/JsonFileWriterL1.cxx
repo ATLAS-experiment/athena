@@ -561,6 +561,14 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
                stream << std::fixed << std::setprecision(3) << iso.value().isolation_jTAUCoreScale_d();
                jWPIso["isolation_jTAUCoreScale"] = std::stod(stream.str());
                jWPIso["isolation_jTAUCoreScale_fw"] = iso.value().isolation_jTAUCoreScale_fw();
+	       stream.str("");
+               stream << std::fixed << std::setprecision(3) << iso.value().eTAU_rCoreMin_WP_d();
+               jWPIso["eTAU_rCoreMin"] = std::stod(stream.str());
+               jWPIso["eTAU_rCoreMin_WP_fw"] = iso.value().eTAU_rCoreMin_WP_fw();
+	       stream.str("");
+               stream << std::fixed << std::setprecision(3) << iso.value().eTAU_rHadMin_WP_d();
+               jWPIso["eTAU_rHadMin"] = std::stod(stream.str());
+               jWPIso["eTAU_rHadMin_WP_fw"] = iso.value().eTAU_rHadMin_WP_fw();
                jThrType["workingPoints"][wpstr] += jWPIso;
             }
          }
