@@ -60,11 +60,9 @@ class sTgcReadoutGeomTool : public AthAlgTool,
       std::vector<double> firstPadHeight; //firstPadH
       std::vector<double> padHeight; //padH
       ///Extra Pad Variables 
-      std::vector<int> PadPhiShift_A;
-      std::vector<int> PadPhiShift_C;
+      std::vector<int> PadPhiShift;
       double anglePadPhi{0.};
-      std::vector<double> firstPadPhiDivision_A;
-      std::vector<double> firstPadPhiDivision_C;
+      std::vector<double> firstPadPhiDivision;
       std::vector<int> firstPadRow;
       double lPadWidth{0.};
       std::vector<int> rankPadEta; //rankPadH
