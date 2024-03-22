@@ -25,7 +25,7 @@ EW_SCHEME: 22
           if k == 'EW_parameters':
               for key,value in v.items():
                   if key[0] == 'SIN2THETAW':
-                      strpair = '\n' + str(key[0])+'='+str(value) '\n'
+                      strpair = '\n'+str(key[0])+'='+str(value)+'\n'
                       genSeq.Sherpa_i.BaseFragment += strpair
                       break
               break
