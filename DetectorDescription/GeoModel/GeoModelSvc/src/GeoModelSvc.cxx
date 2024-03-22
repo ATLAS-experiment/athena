@@ -157,7 +157,7 @@ StatusCode GeoModelSvc::geoInit()
   if(m_sqliteDb) {
     std::string sqliteDbName = "Geometry/" + m_atlasVersion + ".db";
     std::string sqliteDbPath = m_sqliteDbFullPath.empty()
-	    ? PathResolver::find_file (sqliteDbName, "DATAPATH")
+	    ? PathResolver::find_file (sqliteDbName, "CALIBPATH")
 	    : m_sqliteDbFullPath.value();
     if(sqliteDbPath.empty() && m_sqliteDbFullPath.empty()) {
       ATH_MSG_FATAL("Failed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");

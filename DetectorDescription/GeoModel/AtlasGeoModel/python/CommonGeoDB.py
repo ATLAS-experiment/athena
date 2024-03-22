@@ -85,7 +85,7 @@ def SetupLocalSqliteGeometryDb(geometryFilePath,geometryTag):
     This process consists of three steps
     1. It is necessary to create ./Geometry directory
     2. Place in this directory a symlink to the geometryFilePath with the name 'geometryTag.db'
-    3. Prepend '.' to the DATAPATH environment
+    3. Prepend '.' to the CALIBPATH environment
     """
 
     import os
@@ -95,10 +95,10 @@ def SetupLocalSqliteGeometryDb(geometryFilePath,geometryTag):
     linkPath = os.path.join("Geometry",linkName)
     if not os.path.exists(linkPath):
         os.symlink(geometryFilePath,linkPath)
-    if 'DATAPATH' in os.environ.keys():
-        os.environ['DATAPATH']='.:'+ os.environ['DATAPATH']
+    if 'CALIBPATH' in os.environ.keys():
+        os.environ['CALIBPATH']='.:'+ os.environ['CALIBPATH']
     else:
-        os.environ['DATAPATH']='.'
+        os.environ['CALIBPATH']='.'
 
     return
 
