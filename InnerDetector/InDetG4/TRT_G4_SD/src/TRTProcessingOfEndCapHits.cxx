@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -166,7 +166,7 @@ bool TRTProcessingOfEndCapHits::ProcessHit(G4Step* pStep)
           std::cout << "!!!!! End-caps. Error in local coordinates of hits!" << std::endl;
           std::cout << "  endCapID=" << endCapID << "  wheelID=" << wheelID
                     << "  planeID=" << planeID << "  strawID=" << strawID
-                    << "  trackID=" << trHelp.GetBarcode() << std::endl;
+                    << "  trackID=" << trHelp.GetUniqueID() << std::endl;
           std::cout << "  particleEncoding=" << particleEncoding;
 
           if (kineticEnergy < 0.0001)
