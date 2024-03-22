@@ -1,5 +1,5 @@
 #!/bin/env python3
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 """Updates reference files for a given MR, as well as related files (digest ref files, References.py)
@@ -16,6 +16,8 @@ This is a good way to check that the proposed changes look rational before actua
 """
 
 from collections import defaultdict
+import os
+import sys
 import subprocess
 import re
 import argparse
@@ -89,7 +91,7 @@ def process_log_file(url, branch, test_name):
     if not mr_match:
         print('FATAL: Could not process the URL as expected. Aborting.')
         print(url)
-        exit(1)
+        sys.exit(1)
 
     mr_number = mr_match.group('mr_number')
     date = mr_match.group('date')
@@ -115,14 +117,14 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
     copied_file_match = re.search(r'^ERROR    Copied.*', text, flags=re.MULTILINE)
     if not copied_file_match:
         print("FATAL: Could not find matching copied file")
-        exit(1)
+        sys.exit(1)
     copied_file_path = copied_file_match.group().split('to')[1].strip().strip("'")+'/'
 
     # Reference file paths
     ref_file_match = re.search(r'INFO     Reading the reference file from location.*', text)
     if not ref_file_match:
         print("FATAL: Could not find matching reference file")
-        exit(1)
+        sys.exit(1)
 
     ref_file_path = ref_file_match.group().split('location')[1].strip()
     existing_version_number= ref_file_path.split('/')[-2]
@@ -135,13 +137,13 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
     copied_file_match = re.search(r'^ERROR    Copied.*', text, flags=re.MULTILINE)
     if not copied_file_match:
         print("FATAL: Could not find matching copied file")
-        exit(1)
+        sys.exit(1)
     
     # Sanity checks
     ami_tag_check = ref_file_path.split('/')[-3].strip()
     if ami_tag_check!=ami_tag:
         print('FATAL: Sanity check: "{}" from reference file path "{}" does not match ami tag "{}" extracted previously.'.format(ami_tag_check, ref_file_path, ami_tag))
-        exit(1)
+        sys.exit(1)
 
 
     test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = old_version_directory, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, digest_old=None, digest_new=None, type='DiffPool')
@@ -158,7 +160,7 @@ def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_na
     ref_file_match = re.search(r'(.*differs from the reference \')(.*)(\')', text)
     if not ref_file_match:
         print("FATAL: Could not find matching reference file")
-        exit(1)
+        sys.exit(1)
     ref_file_path = ref_file_match.groups()[1]
 
     old_diff_lines = []
@@ -243,7 +245,7 @@ def update_reference_files(actually_update=True, update_local_files=False):
                         # So, we expect first two numbers to be run/event respectively
                         if (not split_curr_line[0].isnumeric()) or (not split_curr_line[1].isnumeric()):
                             print('FATAL: Found a line in current digest which does not start with run/event numbers: {}'.format(line))
-                            exit(1)
+                            sys.exit(1)
                         
                         split_old_diff_line = test.digest_old[diff_line].split()
                         split_old_diff_line.pop(0) # Remove the < character
@@ -257,7 +259,7 @@ def update_reference_files(actually_update=True, update_local_files=False):
                                print('FATAL: It seems like this line was already changed.')
                                print('Line we expected: {}'.format(test.old_diff_lines[diff_line]))
                                print('Line we got     : {}'.format(line))
-                               exit(1)
+                               sys.exit(1)
 
                         # Check if the new run/event numbers match
                         if split_curr_line[0] == split_new_diff_line[0] and split_curr_line[1] == split_new_diff_line[1]:
@@ -300,7 +302,7 @@ def create_dir_and_copy_refs(test, actually_update=False):
                     print('Do you have EOS available on this machine?') 
         except Exception as e:
             print('FATAL: Unable to copy files due to:', e)
-            exit(1)
+            sys.exit(1)
 
         f = open(test.new_version_directory+'/info.txt', 'w')
         f.write('Merge URL: https://gitlab.cern.ch/atlas/athena/-/merge_requests/{}\n'.format(test.mr))
@@ -365,13 +367,18 @@ def summarise_failing_tests(check_for_duplicates = True):
         print (' * Branch: {}'.format(branch))
         for test in tests:
             print('   - ', test)
+            if os.path.exists(test.new_version_directory):
+                msg = f'WARNING: The directory {test.new_version_directory} already exists. Are you sure you want to overwrite the existing references?'
+                if input("%s (y/N) " % msg).lower() != 'y':
+                    sys.exit(1)
+
             if (test.existing_ref not in reference_folders):
                 reference_folders.append(test.existing_ref)
             elif check_for_duplicates:
                 print('FATAL: Found two tests which both change the same reference file: {}, which is not supported.'.format(test.existing_ref))
                 print('Consider running again in --test-run mode, to get a copy of the copy commands that could be run.')
                 print('The general advice is to take the largest file (since it will have the most events), and/or take the non-legacy one.')
-                exit(1)
+                sys.exit(1)
             mr = test.mr
     return 'https://gitlab.cern.ch/atlas/athena/-/merge_requests/'+mr
 
@@ -387,7 +394,7 @@ if __name__ == '__main__':
         print('invalid url - should start with http:// or https://')
         print(args.url)
         print('Aborting.')
-        exit(1)
+        sys.exit(1)
  
     if args.test_run:
         print(' -> Running in test mode so will not touch EOS, but will only modify files locally (these changes can easily be reverted with "git checkout" etc).')
@@ -396,7 +403,7 @@ if __name__ == '__main__':
     extract_links_from_json(args.url)
     mr_url = summarise_failing_tests(not args.test_run)
     if not mr_url:
-        exit(1)
+        sys.exit(1)
     print('========================')
     print("The next step is to update the MR with the new content i.e. the References.py file and the digest files.")
     print(" IMPORTANT: before you do this, you must first make sure that the local repository is on same branch as the MR!")
@@ -414,7 +421,7 @@ if __name__ == '__main__':
         not_in_athena_dir = subprocess.call("git rev-parse --is-inside-work-tree", shell=True)
         if not_in_athena_dir:
             print('FATAL: You must run this script from within the athena directory.')
-            exit(1)
+            sys.exit(1)
         update_local_files = True
         
     commands = update_reference_files(not args.test_run, update_local_files)
