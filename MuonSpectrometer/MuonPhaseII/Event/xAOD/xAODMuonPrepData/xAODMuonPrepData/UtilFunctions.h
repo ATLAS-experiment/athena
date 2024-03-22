@@ -12,19 +12,24 @@ namespace xAOD{
      *         Muon chamber frame
      * @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
      * @param meas: Uncalibrated muon measurement
-     *  
-    */
+     */
     Amg::Vector3D positionInChamber(const ActsGeometryContext& gctx,
                                     const UncalibratedMeasurement* meas);
 
-    /** @brief Returns the direction of the measurement channel in the attached muon chamber frame
-     * @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
-     * @param meas: Uncalibrated muon measurement
-     *  
+    /*** @brief Returns the direction of the measurement channel in the attached muon chamber frame
+     *   @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
+     *   @param meas: Uncalibrated muon measurement
+     */
+    Amg::Vector3D channelDirInChamber(const ActsGeometryContext& gctx,
+                                      const UncalibratedMeasurement* meas);
+    /*** @brief Returns the precision axis of the measurement, i.e. the vector pointing to the
+     *          next strip or tube, in the attached muon chamber frame
+     *   @param gctx: Geometry context to calculate the relative alignment between chamber & measurement
+     *   @param meas: Uncalibrated muon measurement         
     */
-    Amg::Vector3D chDirectionInChamber(const ActsGeometryContext& gctx,
-                                       const UncalibratedMeasurement* meas);
-
+    Amg::Vector3D channelNormalInChamber(const ActsGeometryContext& gctx,
+                                         const UncalibratedMeasurement* meas);
+    
     /** @brief Returns the associated readout element to the measurement*/
     const MuonGMR4::MuonReadoutElement* readoutElement(const UncalibratedMeasurement* meas);
 

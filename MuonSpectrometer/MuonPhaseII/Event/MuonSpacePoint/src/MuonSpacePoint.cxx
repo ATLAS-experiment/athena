@@ -15,38 +15,47 @@ namespace MuonR4{
                                    const xAOD::UncalibratedMeasurement* secondaryMeas):
         m_primaryMeas{primaryMeas},
         m_secondaryMeas{secondaryMeas} {        
+        AmgSymMatrix(2) Jac{AmgSymMatrix(2)::Identity()}, uvcov {AmgSymMatrix(2)::Identity()};
         
-         if (primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+        if (primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             m_driftR = primaryMeas->localPosition<1>()[0];
          }
-        m_measUncerts[0] = std::sqrt(primaryMeas->localCovariance<1>()[0]);
+        uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
+        Jac.col(0)  = xAOD::channelNormalInChamber(gctx, primaryMeas).block<2,1>(0,0);
         if (secondaryMeas) {
+            /// Position of the measurements expressed in the chamber frame
             const Amg::Vector3D pos1{xAOD::positionInChamber(gctx, primaryMeas)};
             const Amg::Vector3D pos2{xAOD::positionInChamber(gctx, secondaryMeas)};
-
-            const Amg::Vector3D dir1{xAOD::chDirectionInChamber(gctx, primaryMeas)};
-            const Amg::Vector3D dir2{xAOD::chDirectionInChamber(gctx, secondaryMeas)};
-            /// In cases of a secondary measurement this collapses to a primary measurement
+            /// Direction along which the measurement strips point to
+            const Amg::Vector3D dir1{xAOD::channelDirInChamber(gctx, primaryMeas)};
+            const Amg::Vector3D dir2{xAOD::channelDirInChamber(gctx, secondaryMeas)};
+            /// Intersect the two channels to define the space point
             m_pos = pos1 + Amg::intersect<3>(pos2,dir2, pos1, dir1).value_or(0) * dir1;
-            m_measUncerts[1] = std::sqrt(secondaryMeas->localCovariance<1>()[0]);
-        } else {
+            Jac.col(1)  = xAOD::channelNormalInChamber(gctx, secondaryMeas).block<2,1>(0,0);             
+            uvcov(1,1) = secondaryMeas->localCovariance<1>()[0]; 
+        } else { 
             m_pos = xAOD::positionInChamber(gctx, primaryMeas);
+            Jac.col(1) = xAOD::channelDirInChamber(gctx, primaryMeas).block<2,1>(0,0);
             if (primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
                 const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(primaryMeas);
-                m_measUncerts[1] = 0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash());
+                uvcov(1,1) = 0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash());
             } else if (primaryMeas->type() == xAOD::UncalibMeasType::RpcStripType) {
                 const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(primaryMeas);
-                m_measUncerts[1] = strip->measuresPhi() ? 0.5* strip->readoutElement()->stripPhiLength():
-                                                          0.5* strip->readoutElement()->stripEtaLength();
+                uvcov(1,1) = strip->measuresPhi() ? 0.5* strip->readoutElement()->stripPhiLength():
+                                                    0.5* strip->readoutElement()->stripEtaLength();
             } else if (primaryMeas->type() == xAOD::UncalibMeasType::TgcStripType) {
                 const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(primaryMeas);
+                const Amg::Vector3D dir1{xAOD::channelDirInChamber(gctx, primaryMeas)};
                 if (strip->measuresPhi()) {
-                    m_measUncerts[1] = strip->readoutElement()->stripLayout(strip->gasGap()).stripLength(strip->channelNumber());
+                    uvcov(1,1) = 0.5 * strip->readoutElement()->stripLayout(strip->gasGap()).stripLength(strip->channelNumber());
                 } else {
-                    m_measUncerts[1] = strip->readoutElement()->wireGangLayout(strip->gasGap()).stripLength(strip->channelNumber());
+                    uvcov(1,1) = 0.5 * strip->readoutElement()->wireGangLayout(strip->gasGap()).stripLength(strip->channelNumber());
                 }
             }
+            uvcov(1,1) = std::pow(uvcov(1,1), 2);
         }
+        AmgSymMatrix(2) cov = Jac.inverse() * uvcov * Jac; 
+        m_measUncerts =  Amg::Vector2D(std::sqrt(cov(0,0)), std::sqrt(cov(1,1)));
     }
             
     const xAOD::UncalibratedMeasurement* MuonSpacePoint::primaryMeasurement() const {
