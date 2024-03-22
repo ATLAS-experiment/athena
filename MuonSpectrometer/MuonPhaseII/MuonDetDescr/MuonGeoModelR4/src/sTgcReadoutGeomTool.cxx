@@ -260,11 +260,9 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.firstPadHeight = tokenizeDouble(record->getString("firstPadH"), ";");
         parBook.padHeight = tokenizeDouble(record->getString("padH"), ";");
         ///Extra Pad Variables
-        parBook.PadPhiShift_A = tokenizeInt(record->getString("PadPhiShift_A"), ";");
-        parBook.PadPhiShift_C = tokenizeInt(record->getString("PadPhiShift_C"), ";");
+        parBook.PadPhiShift = tokenizeInt(record->getString("PadPhiShift"), ";");
         parBook.anglePadPhi = record->getDouble("anglePadPhi");
-        parBook.firstPadPhiDivision_A = tokenizeDouble(record->getString("firstPadPhiDivision_A"), ";");
-        parBook.firstPadPhiDivision_C = tokenizeDouble(record->getString("firstPadPhiDivision_C"), ";");
+        parBook.firstPadPhiDivision = tokenizeDouble(record->getString("firstPadPhiDivision"), ";");
         parBook.firstPadRow = tokenizeInt(record->getString("firstPadRow"), ";");
         parBook.lPadWidth = record->getDouble("lPadWidth");
         parBook.rankPadEta = tokenizeInt(record->getString("rankPadH"), ";");
@@ -291,11 +289,9 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
                         << " firstPadHeight: " << parBook.firstPadHeight
                         << " padHeight: " << parBook.padHeight
                         ///ExtraPadVariables
-                        << " PadPhiShift_A: " << parBook.PadPhiShift_A
-                        << " PadPhiShift_C: " << parBook.PadPhiShift_C
+                        << " PadPhiShift: " << parBook.PadPhiShift
                         << " anglePadPhi: " << parBook.anglePadPhi
-                        << " firstPadPhiDivision_A: " << parBook.firstPadPhiDivision_A
-                        << " firstPadPhiDivision_C: " << parBook.firstPadPhiDivision_C
+                        << " firstPadPhiDivision: " << parBook.firstPadPhiDivision
                         << " firstPadRow: " << parBook.firstPadRow
                         << " lPadWidth: " << parBook.lPadWidth
                         << " rankPadEta: " << parBook.rankPadEta
