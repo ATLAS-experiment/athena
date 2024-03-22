@@ -46,6 +46,8 @@ constexpr int FORWARDTRANSPORTMODELSTATUS = 212;
 /// @brief This barcode is used by objects matched to particles from pile-up interactions in standard MC Production
 constexpr int SUPPRESSED_PILEUP_BARCODE(std::numeric_limits<int32_t>::max());
 
+constexpr int UNDEFINED_ID = 0;
+
 constexpr int INVALID_PARTICLE_BARCODE = -1;
 
 constexpr int SINGLE_PARTICLE = 10001;
