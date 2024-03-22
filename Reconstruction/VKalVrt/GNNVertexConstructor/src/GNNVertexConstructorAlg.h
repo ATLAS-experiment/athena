@@ -20,7 +20,7 @@ private:
   ToolHandle<Rec::GNNVertexConstructorTool>   m_VtxTool;
   // Input jets
   SG::ReadHandleKey<xAOD::JetContainer>       m_inJetsKey{
-      this, "inputJetContainer", "AntiKt4EMPFlowJets", "Input jet container"};
+      this, "inputJetContainer", "", "Input jet container"};
   // Output vertices
   SG::WriteHandleKey<xAOD::VertexContainer>   m_outVertexKey{
       this, "outputVertexContainer", "GNNVertices", "Output vertex container"};

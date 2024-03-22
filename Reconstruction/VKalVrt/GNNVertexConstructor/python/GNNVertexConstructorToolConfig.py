@@ -6,7 +6,7 @@ from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def GNNVertexConstructorToolCfg(flags, name="FTAG1GNNVertexConstructorTool", outfile="HIST.pool.root", **kwargs):
+def GNNVertexConstructorToolCfg(flags, name="GNNVertexFitterTool", outfile="HIST.pool.root", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
     gnnTool = acc.getPrimaryAndMerge(
@@ -26,11 +26,11 @@ def GNNVertexConstructorToolCfg(flags, name="FTAG1GNNVertexConstructorTool", out
     return acc
     
 
-def GNNVertexConstructorAlgCfg(flags, name="FTAG1GNNVertexConstructorAlg", jetkey="AntiKt4EMPFlowJets",  **kwargs):
+def GNNVertexConstructorAlgCfg(flags, jet_col="AntiKt4EMPFlowJets",  **kwargs):
     acc = ComponentAccumulator()
     
     tool = acc.popToolsAndMerge(GNNVertexConstructorToolCfg(flags)) 
-    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, VtxTool=tool, inputJetContainer=jetkey, **kwargs))
+    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(VtxTool=tool, inputJetContainer=jet_col, **kwargs))
         
     return acc
 

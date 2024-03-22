@@ -34,7 +34,7 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_maxChi2(20),
       m_minPerp(0.5),
       m_SingleHFTrack(false),
-      m_HFTrackRatio(false),
+      m_HFTrackRatio(true),
       m_HFRatioThres(0.3)            
       {
   declareInterface<IGNNVertexConstructorInterface>(this);
@@ -215,60 +215,63 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
        
     indexList iList(vertexCollection.size());
         
-    vertexHFMap   v2HFMap;
-    trackCountMap v2TLMap;
-    trackCountMap v2NHFTLMap;
-    trackCountMap FittingMap;
+    vertexHFMap   HeavyFlavourTracksMap;   //Map with does a vertex contain at least 1 heavy flavour track
+    trackCountMap AllTracksMap;            //All the vertices and the corresponding track links
+    trackCountMap HeavyFlavourVertexMap;   //All HEavy Flavour Tracks associated with a vertex
+    trackCountMap FittingMap;              //Map filled with vertices to be fitted
     
     FittingMap.clear();
     
     std::for_each(boost::make_zip_iterator(boost::make_tuple(vertexCollection.cbegin(), trackOriginCollection.cbegin(), trackCollection.cbegin())),
 		boost::make_zip_iterator(boost::make_tuple(vertexCollection.cend(), trackOriginCollection.cend(), trackCollection.cend())),
-		[&v2HFMap, &v2NHFTLMap, &v2TLMap, &FittingMap](const boost::tuple<const char &, const char &, const TL &> &e)
+		[&HeavyFlavourTracksMap, &HeavyFlavourVertexMap, &AllTracksMap, &FittingMap](const boost::tuple<const char &, const char &, const TL &> &e)
 		{
-		  auto v  = e.get<0>();
-		  auto to = e.get<1>();
-      auto tl = e.get<2>();    
+      //0,1,2 correspond to the first, second and third tuple/collection inserted into the boost iterator function
+		  auto vertex  = e.get<0>();
+		  auto trackOrigin = e.get<1>();
+      auto trackLink = e.get<2>();    
       
-      v2TLMap[v].insert(tl);
+      AllTracksMap[vertex].insert(trackLink);
       
-      if (InDet::ExclusiveOrigin::FromB==to||InDet::ExclusiveOrigin::FromBC==to|| InDet::ExclusiveOrigin::FromC==to){    //Checking if vertex has a heavy flavour track
-        v2HFMap[v]=(true);
-        v2NHFTLMap[v].insert(tl);
+      //Checking if vertex has a heavy flavour track
+      if (InDet::ExclusiveOrigin::FromB==trackOrigin||InDet::ExclusiveOrigin::FromBC==trackOrigin|| InDet::ExclusiveOrigin::FromC==trackOrigin){ 
+        HeavyFlavourTracksMap[vertex]=(true);
+        HeavyFlavourVertexMap[vertex].insert(trackLink);
       }
     });
     
     auto InclusiveFunc =[&FittingMap](const auto &c){
-      const auto&[v,tcm] =c;
-        FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));
+      const auto&[vertex,tcm] =c;
+        FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm));
     };
     
-    auto HFRatioFunc =[&v2NHFTLMap, &HFRatio=m_HFRatioThres, &FittingMap](const auto &d){
-      const auto&[v,tcm] =d;
-      if(v2NHFTLMap.find(v)!=v2NHFTLMap.end() && (static_cast<float>(v2NHFTLMap[v].size())/tcm.size())>=HFRatio){
-        FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));
+    auto HFRatioFunc =[&HeavyFlavourVertexMap, &HFRatio=m_HFRatioThres, &FittingMap](const auto &d){
+      const auto&[vertex,tcm] =d;
+      if(HeavyFlavourVertexMap.find(vertex)!=HeavyFlavourVertexMap.end() && (static_cast<float>(HeavyFlavourVertexMap[vertex].size())/tcm.size())>=HFRatio){
+      std::cout<< (static_cast<float>(HeavyFlavourVertexMap[vertex].size())/tcm.size()) << "RATIO " <<"\n" ;
+        FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm));
       };    
     };
 
-    auto vertex2trackOrigin = [&v2HFMap, &FittingMap](const auto &e){
-      const auto &[v, tcm] = e;
-      if (v2HFMap.find(v) !=v2HFMap.end() && v2HFMap[v]==true)  //if exists and is true
+    auto vertex2trackOrigin = [&HeavyFlavourTracksMap, &FittingMap](const auto &e){
+      const auto &[vertex, tcm] = e;
+      if (HeavyFlavourTracksMap.find(vertex) !=HeavyFlavourTracksMap.end() && HeavyFlavourTracksMap[vertex]==true)  //if exists and is true
       {
-        FittingMap.insert(std::pair<char, std::set<TL>>(v, tcm));  //check if copies set or just takes a reference - 
+        FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm));  //check if copies set or just takes a reference - 
       };
     };    
     
     if(m_SingleHFTrack==true){
       ATH_MSG_INFO("At least ONE HF Track vertex");
-      std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), vertex2trackOrigin);    
+      std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), vertex2trackOrigin);    
     }
     else if(m_HFTrackRatio==true){
       ATH_MSG_INFO("Vertex with HF Ratio ");
-      std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), HFRatioFunc);    
+      std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), HFRatioFunc);    
     }
     else if (m_SingleHFTrack==false && m_HFTrackRatio==false){
       ATH_MSG_INFO("No Requirement on Track Origins");
-      std::for_each(v2TLMap.cbegin(), v2TLMap.cend(), InclusiveFunc);    
+      std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), InclusiveFunc);    
     }
     //Working xAOD
     workVectorArrxAOD *xAODwrk = new workVectorArrxAOD();
@@ -288,8 +291,8 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     std::vector<const xAOD::NeutralParticle *> neutralPartDummy(0);
     Amg::Vector3D IniVrt(0.,0.,0.);
 
-    float vertexN=1;
-    float TrackE=0;
+    float vertexN=1;     //Number of vertices within a Jet
+    float TrackE=0;      //Energy Fraction of all vertices within a Jet
       
     for(const auto& pair : FittingMap){
           
@@ -314,7 +317,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
        ATH_MSG_DEBUG("#Tracks test " << xAODwrk->listSelTracks.size());
         
        Amg::Vector3D FitVertex, vDist;
-       TLorentzVector jetDir(jet->p4().Px(),jet->p4().Py(),jet->p4().Pz(), jet->p4().E()); //Jet Direction
+       TLorentzVector jetDir(jet->p4()); //Jet Direction
         
        //Get Estimate
        StatusCode sc=m_vertexFitterTool->VKalVrtFitFast(xAODwrk->listSelTracks, FitVertex, *state);
