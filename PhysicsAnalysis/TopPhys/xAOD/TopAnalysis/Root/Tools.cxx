@@ -92,12 +92,13 @@ namespace top {
     // workaround for PMGTruthWeightTool returning ZERO weights, when sample has ONLY ONE weight...
     const std::size_t modifiedSize = (size == 0) ? 1 : size;
 
+    std::vector<int> maxCycle;
+
     for (std::size_t icbk = 0; icbk < modifiedSize; ++icbk) {
       const std::string cbkName = (icbk == 0) ? "CutBookkeepers" : "CutBookkeepers_weight_" + std::to_string(icbk);
       const xAOD::CutBookkeeperContainer* cutBookKeepers = nullptr;
       top::check(xaodEvent.retrieveMetaInput(cutBookKeepers, cbkName), "Cannot retrieve CutBookkeepers: " + cbkName);
 
-      std::vector<int> maxCycle;
       for (const xAOD::CutBookkeeper *cbk : *cutBookKeepers) {
         // skip RDO and ESD numbers, which are nonsense; and
         // skip the derivation number, which is the one after skimming
