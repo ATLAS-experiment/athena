@@ -81,9 +81,6 @@ public:
     declareProperty("NumOfSiHitsCut", m_NumOfSiHitsCut = 3);
     declareProperty("jetPartDRMatch", m_jetPartDRMatch = 0.4);
 #endif
-    // Properties Available in all
-    declareProperty("inclEgammaFwrdEle", m_inclEgammaFwrdEle = true);
-    declareProperty("inclEgammaPhoton", m_inclEgammaPhoton = true);
   } 
   virtual ~MCTruthClassifier()  = default ;
 
@@ -216,8 +213,6 @@ private:
   /* Data members*/
   SG::ReadHandleKey<xAOD::TruthParticleContainer> 
   m_truthParticleContainerKey{this,"xAODTruthParticleContainerName","TruthParticles","ReadHandleKey for xAOD::TruthParticleContainer"};
-  bool m_inclEgammaPhoton;
-  bool m_inclEgammaFwrdEle;
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{this,"ParticleCaloExtensionTool",""};
