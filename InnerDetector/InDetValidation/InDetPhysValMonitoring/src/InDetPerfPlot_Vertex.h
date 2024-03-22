@@ -34,6 +34,8 @@ private:
   TH1* m_vx_y;
   ///Position z
   TH1* m_vx_z;
+  ///Time
+  TH1* m_vx_time;
   ///@}
 
   ///@name Errors of vertex
@@ -43,6 +45,8 @@ private:
   TH1* m_vx_err_y;
   ///Error z
   TH1* m_vx_err_z;
+  ///Error time
+  TH1* m_vx_err_time;
   ///@}
 
   ///@name Vertex quality and type
