@@ -31,14 +31,13 @@ namespace TCS {
       virtual StatusCode process( const TCS::InputTOBArray & input,
 				  Count & count ) override final ;
 
-
-
    private:
-     
-      TrigConf::L1Threshold const * m_threshold{nullptr};
-      std::map<std::string, int> m_isoFW_JTAU;
+      TrigConf::L1Threshold_jTAU const * m_threshold{nullptr};
+      std::shared_ptr<TrigConf::L1ThrExtraInfo_jTAU> m_extraInfo;
 
-      unsigned int convertIsoToBit( const TCS::jTauTOB * jtau ) const; 
+      bool checkIsolation( const TCS::jTauTOB* jtau ) const; 
+
+      using WP = TrigConf::Selection::WP;
    };
 
 }

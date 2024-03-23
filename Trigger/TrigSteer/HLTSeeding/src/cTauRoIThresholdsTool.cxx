@@ -6,7 +6,6 @@
 #include "StoreGate/exceptions.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
-#include "L1TopoCoreSim/TopoSteeringStructure.h"
 
 
 StatusCode cTauRoIThresholdsTool::initialize() {
@@ -17,15 +16,7 @@ StatusCode cTauRoIThresholdsTool::initialize() {
 
 uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
                                            const RoIThresholdsTool::ThrVec& menuThresholds,
-                                           const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const {
-
-  std::map<std::string, int> isoFW_CTAU, isoFW_CTAU_jTAUCoreScale;
-  TCS::TopoSteeringStructure::setIsolationFW_CTAU(isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, menuExtraInfo);
-
-  unsigned int eFexEt{eTau.etTOB()}; // eTAU Et in units of 100 MeV
-  int eFexEta{eTau.iEta()};
-
-  unsigned int jFexCoreEt = 0, jFexIsoEt = 0; // jTAU core and isolation Et in units of 200 MeV
+                                           const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
 
   // Get the jTau matched to the eTau
   using jTauLink_t = ElementLink<xAOD::jFexTauRoIContainer>;
@@ -40,15 +31,14 @@ uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
   if (matched) {
     const xAOD::jFexTauRoI* jTau = *jTauLink;
 
-    jFexIsoEt = jTau->tobIso();
-    jFexCoreEt = jTau->tobEt();
-
     ATH_MSG_DEBUG("eFex tau eta,phi = " << eTau.iEta() << ", " << eTau.iPhi()
                   << ", jFex tau eta,phi = " << jTau->globalEta() << ", " << jTau->globalPhi()
-                  << ", eFex et (100 MeV/counts) = " << eFexEt << ", jFex et (200 MeV/counts) = " << jTau->tobEt() << ", jFex iso (200 MeV/counts) = " << jTau->tobIso());
+                  << ", eFex et (100 MeV/counts) = " << eTau.etTOB() << ", jFex et (200 MeV/counts) = " << jTau->tobEt() << ", jFex iso (200 MeV/counts) = " << jTau->tobIso()
+                  << ", eFex rCore/BDT = " << eTau.tauOneThresholds() << ", eFex rHad = " << eTau.tauTwoThresholds());
   } else {
     ATH_MSG_DEBUG("eFex tau eta,phi = " << eTau.iEta() << ", " << eTau.iPhi()
-                  << ", eFex et (100 MeV/counts) = " << eFexEt << ", no matching jTau found");
+                  << ", eFex et (100 MeV/counts) = " << eTau.etTOB() << ", no matching jTau found"
+                  << ", eFex rCore/BDT = " << eTau.tauOneThresholds() << ", eFex rHad = " << eTau.tauTwoThresholds());
   }
 
 
@@ -60,13 +50,16 @@ uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
 
     // Check isolation threshold - unmatched eTau treated as perfectly isolated, ATR-25927
     // The core and isolation E_T values are multiplied by 2 to normalise to 100 MeV/counts units
-    bool passIso = matched ? TCS::cTauMultiplicity::checkIsolationWP(isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, 2*static_cast<float>(jFexCoreEt), 2*static_cast<float>(jFexIsoEt), static_cast<float>(eFexEt), TrigConf::Selection::wpToString(thr->isolation())) : true;
+    bool passIso = matched ? TCS::cTauMultiplicity::checkIsolationWP(eTau, **jTauLink, *thr) : true;
 
-    // Check pt threshold - using iEta coordinate for the eFEX ensures a 0.1 granularity of the eta coordinate,
+    // Check eTAU rCore/BDT and rHad thresholds
+    bool passeTAUWP = TCS::cTauMultiplicity::checkeTAUWP(eTau, *thr);
+
+    // Check et threshold - using iEta coordinate for the eFEX ensures a 0.1 granularity of the eta coordinate,
     // as expected from the menu method thrValue100MeV
-    bool passPt = eFexEt > thr->thrValue100MeV(eFexEta);
+    bool passEt = eTau.etTOB() > thr->thrValue100MeV(eTau.iEta());
 
-    if ( passIso && passPt ) {
+    if (passIso && passeTAUWP && passEt) {
       thresholdMask |= (1<<thr->mapping());
     }
 

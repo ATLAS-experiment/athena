@@ -30,10 +30,9 @@ namespace TCS {
 
       parType_t      m_numberOfjTaus = { 0 };
       parType_t      m_iso = { 0 };
+      parType_t      m_passIsolation = { 0 };
 
-      std::map<std::string, int> m_isoFW_JTAU;
-
-      unsigned int convertIsoToBit( const TCS::jTauTOB * jtau ) const;
+      bool checkIsolation(const TCS::jTauTOB* jtau) const;
 
    };
 
