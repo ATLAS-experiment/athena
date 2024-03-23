@@ -45,7 +45,6 @@ namespace MuonR4{
                                                     0.5* strip->readoutElement()->stripEtaLength();
             } else if (primaryMeas->type() == xAOD::UncalibMeasType::TgcStripType) {
                 const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(primaryMeas);
-                const Amg::Vector3D dir1{xAOD::channelDirInChamber(gctx, primaryMeas)};
                 if (strip->measuresPhi()) {
                     uvcov(1,1) = 0.5 * strip->readoutElement()->stripLayout(strip->gasGap()).stripLength(strip->channelNumber());
                 } else {
