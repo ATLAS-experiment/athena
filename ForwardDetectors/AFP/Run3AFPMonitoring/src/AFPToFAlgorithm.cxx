@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 *
 *
 *	AFPToFAlgorithm
@@ -368,27 +368,29 @@ StatusCode AFPToFAlgorithm::fillHistograms_crossBarDeltaT(
 		if (multihit[side]) continue;
 		//Cut on maximum 1 train per event
 		uint8_t multrain[2] = {};
-		for (uint8_t train; train < 4; ++train)
-			if (train_count[side][train]>1)
+		for (uint8_t train = 0; train < 4; ++train) {
+			if (train_count[side][train]>1) {
 				++multrain[side];
-		if (multrain[side]>1)
-			continue;
+			}
+		}
+		if (multrain[side]>1) continue;
 		//fill histos
-		for (uint8_t train = 0; train < 4; ++train)
-			for (uint8_t bar1 = 0; bar1 < 4; ++bar1)
-				for (uint8_t bar2 = 0; bar2 < 4; bar2++)
-					if (bar2>bar1)
-					{
+		for (uint8_t train = 0; train < 4; ++train) {
+			for (uint8_t bar1 = 0; bar1 < 4; ++bar1) {
+				for (uint8_t bar2 = 0; bar2 < 4; ++bar2) {
+					if (bar2>bar1) {
 						int comb = bar1*bar2+bar2-1;
 						if (comb==5) {comb=4;}
 						if (comb==8) {comb=5;}
 						int global_comb = train*6 + comb;
-						if (times[side][train][bar1]>-10000 && times[side][train][bar2]>-10000)
-						{
+						if (times[side][train][bar1]>-10000 && times[side][train][bar2]>-10000) {
 							crossBarDeltaT[side] = (times[side][train][bar1] - times[side][train][bar2]);
 							fill(m_tools[m_GroupChanCombDeltaT.at(m_chanComb.at(global_comb))], crossBarDeltaT[side]);
 						}
-					}   
+					}
+				}
+			}
+		}
 	}
 
     return StatusCode::SUCCESS;
