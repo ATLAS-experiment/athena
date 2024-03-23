@@ -81,6 +81,13 @@ Trigger.FPGATrackSim.tracking=True \
 Trigger.FPGATrackSim.bankDir=./banks/ &&
 ls -l &&
 
+python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
+--filesInput=rdo_small.root \
+Trigger.FPGATrackSim.mapsDir=./maps \
+Trigger.FPGATrackSim.tracking=True \
+Trigger.FPGATrackSim.sampleType='skipTruth' \
+Trigger.FPGATrackSim.bankDir=./banks/ &&
+ls -l &&
  
 cat << EOF > checkHist.C
 {
@@ -88,7 +95,7 @@ cat << EOF > checkHist.C
     TH1* h = (TH1*)gDirectory->Get("nroads_1st"); 
     h->Print(); 
     if ( h->GetEntries() == 0 ) {
-        throw std::runtime_error("oh deear, after all of this there are no roads");
+        throw std::runtime_error("oh dear, after all of this there are no roads");
     }
 }
 EOF

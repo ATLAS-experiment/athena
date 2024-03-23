@@ -410,21 +410,21 @@ if __name__ == "__main__":
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
     
-    if flags.Trigger.FPGATrackSim.wrapperFileName == [] or flags.Trigger.FPGATrackSim.wrapperFileName is None:
+    if not flags.Trigger.FPGATrackSim.wrapperFileName:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         acc.merge(PoolReadCfg(flags))
     
-    if flags.Input.isMC:
-        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-        acc.merge(GEN_AOD2xAODCfg(flags))
-    
-    if flags.Detector.EnableCalo:
-        from CaloRec.CaloRecoConfig import CaloRecoCfg
-        acc.merge(CaloRecoCfg(flags))
-    
-    if not flags.Reco.EnableTrackOverlay:
-        from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-        acc.merge(InDetTrackRecoCfg(flags))
+        if flags.Input.isMC:
+            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+            acc.merge(GEN_AOD2xAODCfg(flags))
+        
+        if flags.Detector.EnableCalo:
+            from CaloRec.CaloRecoConfig import CaloRecoCfg
+            acc.merge(CaloRecoCfg(flags))
+        
+        if not flags.Reco.EnableTrackOverlay:
+            from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+            acc.merge(InDetTrackRecoCfg(flags))
 
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
