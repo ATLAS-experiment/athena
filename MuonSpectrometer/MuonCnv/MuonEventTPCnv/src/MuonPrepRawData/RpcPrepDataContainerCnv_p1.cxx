@@ -171,7 +171,7 @@ void  Muon::RpcPrepDataContainerCnv_p1::persToTrans(const Muon::MuonPRD_Containe
             (*coll)[ichan] = chan;
             
             // check to handle cases explained in bug#56227
-            if (de->NgasGaps(true) == 1 && de->NphiStripPanels() == 2){
+            if (de->nGasGapPerLay() == 1 && de->NphiStripPanels() == 2){
                 // okay, so this was originally on a large surface and needs correcting.
                 const Amg::Vector3D& globalposHIT = de->stripPos( chan->identify() );
                 

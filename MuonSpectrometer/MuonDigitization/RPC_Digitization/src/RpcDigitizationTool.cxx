@@ -1195,9 +1195,9 @@ double RpcDigitizationTool::PropagationTimeNew(const EventContext& ctx,
     int measuresPhi = m_idHelper->measuresPhi(id);
     const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(id);
     if (measuresPhi) {
-        distance = ele->distanceToPhiReadout(globPos, id);
+        distance = ele->distanceToPhiReadout(globPos);
     } else {
-        distance = ele->distanceToEtaReadout(globPos, id);
+        distance = ele->distanceToEtaReadout(globPos);
     }
 
     // distance in mm, SIG_VEL in ns/m
@@ -1261,7 +1261,7 @@ Amg::Vector3D RpcDigitizationTool::posInPanel(const EventContext& ctx,
     float panelXlength = ele->stripPanelSsize(measuresPhi);
     Amg::Vector3D result = posInGap;
 
-    if (ele->NgasGaps(true) != 1)
+    if (ele->nGasGapPerLay() != 1)
         return result;  // all but BMS/F and ribs chambers
 
     else if (ele->NphiStripPanels() == 1)

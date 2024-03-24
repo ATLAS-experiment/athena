@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELRPCTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELRPCTEST_H
@@ -13,6 +13,7 @@
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
+#include "MuonTesterTree/TwoVectorBranch.h"
 #include "MuonTesterTree/CoordTransformBranch.h"
 
 namespace MuonGM {
@@ -72,7 +73,6 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")};
     /// Number of eta & phi gas gaps
     MuonVal::ScalarBranch<uint8_t>& m_numRpcLayers{m_tree.newScalar<uint8_t>("numRpcLayers")}; 
-    MuonVal::ScalarBranch<uint8_t>& m_numGasGapsPhi{m_tree.newScalar<uint8_t>("numPhiGasGaps")};
     MuonVal::ScalarBranch<uint8_t>& m_numPhiPanels{m_tree.newScalar<uint8_t>("numPhiPanels")};
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
@@ -97,7 +97,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     MuonVal::VectorBranch<uint8_t>& m_stripPosGasGap{m_tree.newVector<uint8_t>("stripPosGasGap")};
     MuonVal::VectorBranch<uint8_t>& m_stripPosNum{m_tree.newVector<uint8_t>("stripPosNum")};
     MuonVal::VectorBranch<uint8_t>& m_stripDblPhi{m_tree.newVector<uint8_t>("stripPosDoubletPhi")};
-    
+    MuonVal::TwoVectorBranch m_locPos{m_tree, "stripLocPos"};
 
 };
 

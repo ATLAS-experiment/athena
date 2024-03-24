@@ -734,13 +734,5 @@ namespace MuonGM {
             m_genericTGC.tck[i] = tc.tck[i];
         }
     }
-    void MuonDetectorManager::setGenericRpcDescriptor(const GenericRPCCache& rc) {
-        m_genericRPC.stripSeparation = rc.stripSeparation;
-        m_genericRPC.stripPanelThickness = rc.stripPanelThickness;
-        m_genericRPC.rpcLayerThickness = rc.rpcLayerThickness;
-        m_genericRPC.centralSupPanelThickness = rc.centralSupPanelThickness;
-        m_genericRPC.GasGapThickness = rc.GasGapThickness;
-        m_genericRPC.frontendBoardWidth = rc.frontendBoardWidth;
-    }
 
 }  // namespace MuonGM

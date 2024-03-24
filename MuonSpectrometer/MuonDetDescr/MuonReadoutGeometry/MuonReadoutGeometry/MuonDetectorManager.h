@@ -18,7 +18,6 @@
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometry/GenericRPCCache.h"
 #include "MuonReadoutGeometry/GenericTGCCache.h"
 
 #ifndef SIMULATIONBASE
@@ -122,8 +121,6 @@ namespace MuonGM {
         inline const MmIdHelper* mmIdHelper() const;
 
         // Generic Technology descriptors
-        void setGenericRpcDescriptor(const GenericRPCCache& rc);
-        inline const GenericRPCCache* getGenericRpcDescriptor() const;
         void setGenericTgcDescriptor(const GenericTGCCache& tc);
         inline const GenericTGCCache* getGenericTgcDescriptor() const;
 
@@ -241,7 +238,6 @@ namespace MuonGM {
 
         std::vector<PVLink> m_envelope;  // Tree-top...
 
-        GenericRPCCache m_genericRPC;
         GenericTGCCache m_genericTGC;
 
         // Geometry versioning
@@ -312,7 +308,6 @@ namespace MuonGM {
         return  m_idHelperSvc->hasMM() ? &(m_idHelperSvc->mmIdHelper()) : nullptr; 
     }
 
-    const GenericRPCCache* MuonDetectorManager::getGenericRpcDescriptor() const { return &m_genericRPC; }
 
     const GenericTGCCache* MuonDetectorManager::getGenericTgcDescriptor() const { return &m_genericTGC; }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -11,6 +11,8 @@
 #define MUONREADOUTGEOMETRY_MUONSTRIPDESIGN_H
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include <algorithm>
+#include <cstdint>
 namespace MuonGM {
 
     struct MuonStripDesign {
@@ -22,7 +24,7 @@ namespace MuonGM {
         double stripWidth;
         double readoutLocY{0.};
         double signY{0.};
-        Amg::Vector2D firstStripPos{0., 0.};
+        Amg::Vector2D firstStripPos{Amg::Vector2D::Zero()};
 
         /** distance to readout */
         double distanceToReadout(const Amg::Vector2D& pos) const;
@@ -39,10 +41,7 @@ namespace MuonGM {
     inline double MuonStripDesign::distanceToReadout(const Amg::Vector2D& pos) const { return distanceToReadout(pos.y()); }
 
     inline double MuonStripDesign::distanceToReadout(double locY) const {
-        double dist = signY * (locY - readoutLocY);
-        if (dist < 0.) return 0.;
-        if (dist > stripLength) return stripLength;
-        return dist;
+        return std::clamp(locY - readoutLocY, 0., stripLength);
     }
 
     inline int MuonStripDesign::stripNumber(const Amg::Vector2D& pos) const { return stripNumber(pos.x()); }

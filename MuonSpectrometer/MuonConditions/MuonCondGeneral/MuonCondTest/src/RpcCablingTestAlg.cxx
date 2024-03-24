@@ -54,7 +54,7 @@ StatusCode RpcCablingTestAlg::execute(){
     ATH_MSG_DEBUG("Check station "<<m_idHelperSvc->toString(station_id));
     
     for (bool measPhi : {true, false}) {
-      for (int gap = 1 ; gap <= readEle->NgasGaps(measPhi); ++gap) {
+      for (int gap = 1 ; gap <= readEle->numberOfLayers(measPhi); ++gap) {
         for (int strip = 1; strip <= readEle->Nstrips(measPhi); ++strip) {
           	  bool is_valid{false};
               const Identifier chanId = idHelper.channelID(station_id, 

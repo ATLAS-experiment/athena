@@ -24,16 +24,16 @@ persToTrans( const Muon::RpcClusterOnTrack_p1 *persObj,
    // check to handle cases explained in bug#56227
 
    const MuonGM::RpcReadoutElement * de = transObj->detectorElement();
-   if (de->NgasGaps(true) == 1 && de->NphiStripPanels() == 2){
-      // okay, so this was originally on a large surface and needs correcting.
-      const Amg::Vector3D& globalposHIT = de->stripPos( transObj->identify() );
-      Amg::Vector2D tmpLocal;
-      if (!de->surface( transObj->identify() ).globalToLocal(globalposHIT,globalposHIT,tmpLocal))
-        throw std::runtime_error("RpcClusterOnTrackCnv_p1 - couldn't globalToLocal to surface");    
-      
-      Trk::DefinedParameter  xPar(tmpLocal[Trk::locX],Trk::locX);
-      transObj->m_localParams = Trk::LocalParameters(xPar);
-   }   
+   
+    // okay, so this was originally on a large surface and needs correcting.
+    const Amg::Vector3D globalposHIT = de->stripPos( transObj->identify() );
+    Amg::Vector2D tmpLocal;
+    if (!de->surface( transObj->identify() ).globalToLocal(globalposHIT,globalposHIT,tmpLocal))
+      throw std::runtime_error("RpcClusterOnTrackCnv_p1 - couldn't globalToLocal to surface");    
+    
+    Trk::DefinedParameter  xPar(tmpLocal[Trk::locX],Trk::locX);
+    transObj->m_localParams = Trk::LocalParameters(xPar);
+     
 }
 
 

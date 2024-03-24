@@ -1,0 +1,102 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/***************************************************************************
+ Rpc Readout Element properties
+ -----------------------------------------
+***************************************************************************/
+
+#ifndef MUONREADOUTGEOMETRY_RPCREADOUTELEMENT_ICC
+#define MUONREADOUTGEOMETRY_RPCREADOUTELEMENT_ICC
+
+namespace MuonGM {
+    inline int RpcReadoutElement::getDoubletR() const { return m_dbR; }
+    inline int RpcReadoutElement::getDoubletZ() const { return m_dbZ; }
+    inline int RpcReadoutElement::getDoubletPhi() const { return m_dbPhi; }
+    inline bool RpcReadoutElement::hasDEDontop() const { return m_hasDEDontop; }
+
+    inline int RpcReadoutElement::nGasGapPerLay() const { return  m_nphigasgaps; }
+    inline int RpcReadoutElement::NphiStripPanels() const { return m_nphistrippanels; }
+    inline int RpcReadoutElement::NphiStrips() const { return m_nphistripsperpanel; }
+    inline int RpcReadoutElement::NetaStrips() const { return m_netastripsperpanel; }
+    inline int RpcReadoutElement::numberOfLayers(bool) const { return m_nlayers; }
+    inline int RpcReadoutElement::Nstrips(bool measphi) const { return measphi ? m_nphistripsperpanel : m_netastripsperpanel; }
+    inline double RpcReadoutElement::StripWidth(bool measphi) const { return measphi ? m_phistripwidth : m_etastripwidth; }
+    inline double RpcReadoutElement::StripLength(bool measphi) const { return measphi ? m_phistriplength : m_etastriplength; }
+    inline double RpcReadoutElement::StripPitch(bool measphi) const { return measphi ? m_phistrippitch : m_etastrippitch; }
+    inline double RpcReadoutElement::StripPanelDead(bool measphi) const { return measphi ? m_phipaneldead : m_etapaneldead; }
+    inline double RpcReadoutElement::gasGapSsize() const { return m_gasgapssize; }
+    inline double RpcReadoutElement::gasGapZsize() const { return m_gasgapzsize; }
+    inline int RpcReadoutElement::numberOfStrips(int, bool measuresPhi) const { return Nstrips(measuresPhi); }
+    inline int RpcReadoutElement::boundaryHash(const Identifier& id) const { return measuresPhi(id); }
+    inline bool RpcReadoutElement::measuresPhi(const Identifier& id) const { return m_idHelper.measuresPhi(id); }
+
+    inline double RpcReadoutElement::stripPanelSsize(bool measphi) const {
+        if (measphi) {
+            return Nstrips(measphi) * StripPitch(measphi) - (StripPitch(measphi) - StripWidth(measphi));
+        }
+        return StripLength(measphi);
+    }
+
+    inline double RpcReadoutElement::stripPanelZsize(bool measphi) const {
+        if (!measphi){
+            return Nstrips(measphi) * StripPitch(measphi) - (StripPitch(measphi) - StripWidth(measphi));
+        }
+       return StripLength(measphi);
+    }
+
+
+    inline int RpcReadoutElement::surfaceHash(const Identifier& id) const {
+        return surfaceHash(m_idHelper.doubletPhi(id), m_idHelper.gasGap(id), m_idHelper.measuresPhi(id));
+    }
+
+    inline const Amg::Vector3D RpcReadoutElement::REcenter() const {
+        if (NphiStripPanels() == 1) return MuonClusterReadoutElement::center(0);
+        return 0.5 * (MuonClusterReadoutElement::center(0) + MuonClusterReadoutElement::center(2));
+    }
+
+    inline int RpcReadoutElement::layerHash(const Identifier& id) const {
+        return layerHash(m_idHelper.doubletPhi(id), m_idHelper.gasGap(id));
+    }
+
+
+
+    inline double RpcReadoutElement::distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const {
+        const MuonStripDesign* design = getDesign(id);
+        throw std::runtime_error("Method is not implemented");
+        return design ? design->distanceToReadout(pos) : 0.;
+    }
+    inline int RpcReadoutElement::stripNumber(const Amg::Vector2D& pos, const Identifier& id) const {
+        const MuonStripDesign* design = getDesign(id);
+        return design ? design->stripNumber(pos) : -1;
+    }
+    inline bool RpcReadoutElement::stripPosition(const Identifier& id, Amg::Vector2D& pos) const {
+        const MuonStripDesign* design = getDesign(id);
+        return design && design->stripPosition(m_idHelper.strip(id), pos);
+    }
+    inline int RpcReadoutElement::numberOfStrips(const Identifier& layerId) const {
+        return numberOfStrips(1, m_idHelper.measuresPhi(layerId));
+    }
+
+    inline bool RpcReadoutElement::spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector2D& pos) const {
+        Amg::Vector2D phiPos{Amg::Vector2D::Zero()}, etaPos{Amg::Vector2D::Zero()};
+        if (!stripPosition(phiId, phiPos) || !stripPosition(etaId, etaPos)) return false;
+        spacePointPosition(phiPos, etaPos, pos);
+        return true;
+    }
+
+    inline bool RpcReadoutElement::spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const {
+        Amg::Vector2D lpos{Amg::Vector2D::Zero()};
+        spacePointPosition(phiId, etaId, lpos);
+        surface(phiId).localToGlobal(lpos, pos, pos);
+        return true;
+    }
+    inline void RpcReadoutElement::spacePointPosition(const Amg::Vector2D& phiPos, const Amg::Vector2D& etaPos, Amg::Vector2D& pos) const {
+        pos[0] = phiPos.x();
+        pos[1] = etaPos.x();
+    }
+
+}  // namespace MuonGM
+
+#endif  // MUONREADOUTGEOMETRY_RPCREADOUTELEMENT_ICC
