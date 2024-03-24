@@ -97,7 +97,6 @@ void MuonChamber::makeRpc (const Identifier& id)
   auto elt = std::make_unique<MuonGM::RpcReadoutElement>(&m_pvol, "BIL", 1, 2, false, &m_muo_dd);
   elt->setIdentifier (id);
   elt->m_nphistrippanels = 1;
-  elt->m_netastrippanels = 1;
   elt->fillCache();
   m_muo_dd.addRpcReadoutElement (std::move(elt));
 }

@@ -14,7 +14,6 @@
 #include "MuonGeoModel/MuonChamberLite.h"
 #include "MuonGeoModel/RDBReaderAtlas.h"
 #include "MuonGeoModel/Station.h"
-#include "MuonReadoutGeometry/GenericRPCCache.h"
 #include "MuonReadoutGeometry/GenericTGCCache.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "MuonReadoutGeometry/MMReadoutElement.h"
@@ -120,18 +119,6 @@ namespace MuonGM {
       return;
     }
        
-    // now store detector-generic-descriptors into the manager
-    const RPC *r = dynamic_cast<const RPC*>(mysql->GetATechnology("RPC0"));
-    GenericRPCCache rpcCache;
-    rpcCache.stripSeparation = r->stripSeparation;
-    rpcCache.stripPanelThickness = r->stripPanelThickness;
-    rpcCache.rpcLayerThickness = r->rpcLayerThickness;
-    rpcCache.centralSupPanelThickness = r->centralSupPanelThickness;
-    rpcCache.GasGapThickness = r->GasGapThickness;
-    rpcCache.frontendBoardWidth = r->frontendBoardWidth;
-    m_manager->setGenericRpcDescriptor(rpcCache);
-
-
     const TGC *t = dynamic_cast<const TGC*>(mysql->GetATechnology("TGC0"));
     GenericTGCCache tgcCache;
     tgcCache.frame_h = t->frame_h;

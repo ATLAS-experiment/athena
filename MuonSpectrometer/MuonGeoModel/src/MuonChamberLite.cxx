@@ -806,7 +806,7 @@ namespace MuonGM {
 
                 std::unique_ptr<RpcReadoutElement> det = std::make_unique<RpcReadoutElement>(lvr, stName, zi, fi + 1, is_mirrored, manager);
                 Position ip = mysql.GetStationPosition(stName.substr(0, 3), fi, zi);
-                setRpcReadoutGeom(mysql, det.get(), rp, ip, "R.ANYTHING", manager);
+                setRpcReadoutGeom(mysql, det.get(), rp, ip);
                 det->setHasCutouts(ncutouts > 0);
                 Identifier id = rpc_id->channelID(stationType, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, measuresPhi, strip);
                 det->setIdentifier(id);
@@ -943,7 +943,9 @@ namespace MuonGM {
     }
 
     void MuonChamberLite::setRpcReadoutGeom(const MYSQL& mysql,
-                                        RpcReadoutElement *re, const RpcComponent *cc, const Position &ip, const std::string& /*gVersion*/, MuonDetectorManager *manager) {
+                                            RpcReadoutElement *re, 
+                                            const RpcComponent *cc, 
+                                            const Position &ip) {
        
         re->m_Ssize = cc->dx1;
         re->m_LongSsize = cc->dx2;
@@ -959,73 +961,76 @@ namespace MuonGM {
         if (ip.isAssigned) {
             re->setStationS(ip.shift);
         } else {
-            throw std::runtime_error(" MuonChamberLite::setRpcReadoutGeom: position not found ");
+            ATH_MSG_ERROR( " MuonChamber::setRpcReadoutGeom: position not found " );
+            assert(0);
         }
 
         std::string tname = cc->name;
         re->setTechnologyName(tname);
         const RPC *thisr = dynamic_cast<const RPC*>(mysql.GetTechnology(tname));
         re->m_nphigasgaps = thisr->NGasGaps_in_s;
-        re->m_netagasgaps = thisr->NGasGaps_in_z;
         re->m_gasgapssize = re->m_Ssize / re->m_nphigasgaps - 2. * thisr->bakeliteframesize;
-        re->m_gasgapzsize = re->m_Zsize / re->m_netagasgaps - 2. * thisr->bakeliteframesize;
-        re->m_nphistrippanels = thisr->NstripPanels_in_s;
-        re->m_netastrippanels = thisr->NstripPanels_in_z;
+        re->m_gasgapzsize = re->m_Zsize - 2. * thisr->bakeliteframesize;
+        re->m_nphistrippanels = thisr->NstripPanels_in_s; 
         re->m_phistrippitch = thisr->stripPitchS;
         re->m_etastrippitch = thisr->stripPitchZ;
-        re->m_exthonthick = thisr->externalSupPanelThickness;
 
-        const GenericRPCCache *rc = manager->getGenericRpcDescriptor();
-        re->m_phistripwidth = re->m_phistrippitch - rc->stripSeparation;
-        re->m_etastripwidth = re->m_etastrippitch - rc->stripSeparation;
-        re->m_nphistripsperpanel = int((re->m_Ssize / re->m_nphistrippanels) / re->m_phistrippitch);
-        if (re->getStationName().compare(0, 3, "BME") != 0)
-            while ((re->m_nphistripsperpanel % 8) != 0) {
-                re->m_nphistripsperpanel--;
+        if (re->getStationName().find("BI") != std::string::npos) {
+            re->setNumberOfLayers(3); // all BI RPCs always have 3 gas gaps
+
+        }
+        const RPC* genericRpc = dynamic_cast<const RPC*>(mysql.GetATechnology("RPC0"));
+
+        if (re->numberOfLayers() == 3) {
+            constexpr double rpc3GapLayerThickness = 11.8;  // gas vol. + ( bakelite + graphite + PET )x2
+            for (int gasGap =1 ; gasGap <= re->numberOfLayers(); ++gasGap) {
+                /// the values from MuonGeoModel have an offset of 0.74, TO BE INVESTIGATED, cf. ATLASSIM-5021
+                /// On the other hand this detector has never sent any good data. So the investigation doesn't really matter
+                re->m_gasGap_xPos[gasGap -1] = (gasGap - 2) * rpc3GapLayerThickness - 0.74; 
             }
-        re->m_netastripsperpanel = int((re->m_Zsize / re->m_netastrippanels) / re->m_etastrippitch);
-        while ((re->m_netastripsperpanel % 8) != 0) {
-            re->m_netastripsperpanel--;
+        } else {
+            re->m_gasGap_xPos[0] = -re->m_Rsize / 2. + thisr->externalSupPanelThickness + genericRpc->stripPanelThickness
+                                    + genericRpc->GasGapThickness / 2;
+            re->m_gasGap_xPos[1] = re->m_gasGap_xPos[0] + genericRpc->rpcLayerThickness + 
+                                   genericRpc->centralSupPanelThickness;
+            if (!re->m_hasDEDontop) {
+                std::swap(re->m_gasGap_xPos[0], re->m_gasGap_xPos[1]);
+            }
         }
 
-        re->m_phipaneldead = re->m_Ssize / re->m_nphistrippanels - re->m_nphistripsperpanel * re->m_phistrippitch + rc->stripSeparation;
+        re->m_phistripwidth = re->m_phistrippitch - genericRpc->stripSeparation;
+        re->m_etastripwidth = re->m_etastrippitch - genericRpc->stripSeparation;
+        re->m_nphistripsperpanel = int((re->m_Ssize / re->m_nphistrippanels) / re->m_phistrippitch);
+        if (re->getStationName().compare(0, 3, "BME") != 0) {
+            re->m_nphistripsperpanel-=(re->m_nphistripsperpanel % 8) ;
+        }
+        re->m_netastripsperpanel = int((re->m_Zsize) / re->m_etastrippitch);
+        re->m_netastripsperpanel -= (re->m_netastripsperpanel % 8);
+
+        re->m_phipaneldead = re->m_Ssize / re->m_nphistrippanels - 
+                             re->m_nphistripsperpanel * re->m_phistrippitch +
+                            genericRpc->stripSeparation;
         re->m_phipaneldead = re->m_phipaneldead / 2.;
-        re->m_etapaneldead = re->m_Zsize / re->m_netastrippanels - re->m_netastripsperpanel * re->m_etastrippitch + rc->stripSeparation;
+        re->m_etapaneldead = re->m_Zsize - re->m_netastripsperpanel * re->m_etastrippitch + genericRpc->stripSeparation;
         re->m_etapaneldead = re->m_etapaneldead / 2.;
-        re->m_phistriplength = re->m_LongZsize / re->m_netastrippanels;
+        re->m_phistriplength = re->m_LongZsize;
         re->m_etastriplength = re->m_LongSsize / re->m_nphistrippanels;
 
-        // first strip position on each phi panel
-        for (int is = 0; is < re->m_nphistrippanels; ++is)
-            re->m_first_phistrip_s[is] = -999999.;
         re->m_first_phistrip_s[0] = -re->m_Ssize / 2. + re->m_phipaneldead + re->m_phistripwidth / 2.;
         if (re->m_nphistrippanels == 2) {
             re->m_first_phistrip_s[1] = re->m_phipaneldead + re->m_phistripwidth / 2.;
         }
 
         double offset = 0.;
-
-        for (int is = 0; is < re->m_netastrippanels; ++is)
-            re->m_phistrip_z[is] = -999999.;
-        re->m_phistrip_z[0] = -re->m_Zsize / 2. + offset + re->m_phistriplength / 2.;
-        if (re->m_netastrippanels == 2) {
-            re->m_phistrip_z[1] = re->m_Zsize / 2. - offset - re->m_phistriplength / 2.;
-        }
-
+        re->m_phistrip_z = -re->m_Zsize / 2. + offset + re->m_phistriplength / 2.;
+       
         // first strip position on each eta panel
-        for (int is = 0; is < re->m_netastrippanels; ++is)
-            re->m_first_etastrip_z[is] = -999999.;
-        re->m_first_etastrip_z[0] = -re->m_Zsize / 2. + re->m_etapaneldead + re->m_etastripwidth / 2.;
-        if (re->m_netastrippanels == 2) {
-            re->m_first_etastrip_z[1] = re->m_etapaneldead + re->m_etastripwidth / 2.;
-        }
-
-        for (int is = 0; is < re->m_nphistrippanels; ++is)
-            re->m_etastrip_s[is] = -999999.;
+        re->m_first_etastrip_z = -re->m_Zsize / 2. + re->m_etapaneldead + re->m_etastripwidth / 2.;
         re->m_etastrip_s[0] = -re->m_Ssize / 2. + offset + re->m_etastriplength / 2.;
         if (re->m_nphistrippanels == 2) {
             re->m_etastrip_s[1] = re->m_Ssize / 2. - offset - re->m_etastriplength / 2.;
         }
+
     }
 
     void MuonChamberLite::setTgcReadoutGeom(const MYSQL& mysql,
