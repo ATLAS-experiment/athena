@@ -15,6 +15,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('varsOnlyForMC', [], type=None)
         self.addOption ('metVars', [], type=None)
         self.addOption ('containers', {}, type=None)
+        self.addOption ('containersOnlyForMC', [], type=None)
         self.addOption ('treeName', 'analysis', type=str)
         self.addOption ('metTermName', 'Final', type=str)
         self.addOption ('storeSelectionFlags', True, type=bool)
@@ -27,9 +28,10 @@ class OutputAnalysisConfig (ConfigBlock):
 
         self.vars = set(self.vars)
         self.varsOnlyForMC = set(self.varsOnlyForMC)
-        # merge the MC-specific branches into the main list only if we are not running on data
+        # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
         if config.dataType() is not DataType.Data:
             self.vars |= self.varsOnlyForMC
+            self.containers.update(self.containersOnlyForMC)
 
         if self.storeSelectionFlags:
             self.createSelectionFlagBranches(config)
