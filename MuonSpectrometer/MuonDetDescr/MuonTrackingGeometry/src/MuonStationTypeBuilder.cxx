@@ -176,7 +176,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
     double xc = xVol[0].first;
     for (const auto& xb : xVol) {
         if (xb.first > xc && xb.first - xb.second < xc + xl) {
-            ATH_MSG_WARNING("Inconsistent sensitive overlap");
+            ATH_MSG_DEBUG("Inconsistent sensitive overlap");
             return nullptr;  //  overlap of sensitive volumes : not suitable for
                              //  x-binned array
         }
