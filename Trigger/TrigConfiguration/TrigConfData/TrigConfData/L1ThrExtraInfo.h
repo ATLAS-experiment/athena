@@ -352,16 +352,26 @@ namespace TrigConf {
       public:
          WorkingPoints_cTAU( const boost::property_tree::ptree & );
          bool isDefined() const { return m_isDefined; }
-         int isolation_fw() const { return m_isolation_fw; }
+         unsigned int isolation_fw() const { return m_isolation_fw; }
          float isolation_d() const { return m_isolation_d; }
-         int isolation_jTAUCoreScale_fw() const { return m_isolation_jTAUCoreScale_fw; }
+         unsigned int isolation_jTAUCoreScale_fw() const { return m_isolation_jTAUCoreScale_fw; }
          float isolation_jTAUCoreScale_d() const { return m_isolation_jTAUCoreScale_d; }
+         float eTAU_rCoreMin_WP_d() const { return m_eTAU_rCoreMin_WP_d; }
+         unsigned int eTAU_rCoreMin_WP_fw() const { return m_eTAU_rCoreMin_WP_fw; }
+         Selection::WP eTAU_rCoreMin_WP() const { return static_cast<Selection::WP>(m_eTAU_rCoreMin_WP_fw); }
+         float eTAU_rHadMin_WP_d() const { return m_eTAU_rHadMin_WP_d; }
+         unsigned int eTAU_rHadMin_WP_fw() const { return m_eTAU_rHadMin_WP_fw; }
+         Selection::WP eTAU_rHadMin_WP() const { return static_cast<Selection::WP>(m_eTAU_rHadMin_WP_fw); }
       private:
          bool m_isDefined {false};
-         int m_isolation_fw {0};
+         unsigned int m_isolation_fw {0};
          float m_isolation_d {0};
-         int m_isolation_jTAUCoreScale_fw {0};
+         unsigned int m_isolation_jTAUCoreScale_fw {0};
          float m_isolation_jTAUCoreScale_d {0};
+         float m_eTAU_rCoreMin_WP_d {0};
+         unsigned int m_eTAU_rCoreMin_WP_fw {0};
+         float m_eTAU_rHadMin_WP_d {0};
+         unsigned int m_eTAU_rHadMin_WP_fw {0};
       };
       L1ThrExtraInfo_cTAU(const std::string & thrTypeName, const ptree & data) :
          L1ThrExtraInfoBase(thrTypeName, data) { load(); }

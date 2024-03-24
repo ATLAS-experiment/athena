@@ -13,7 +13,11 @@
 
 #include "L1TopoEvent/TOBArray.h"
 #include "L1TopoEvent/cTauTOBArray.h"
+#include "TrigConfData/L1ThrExtraInfo.h"
+
 #include <cmath>
+
+
 REGISTER_ALG_TCS(cTauMultiplicity)
 
 TCS::cTauMultiplicity::cTauMultiplicity(const std::string & name) : CountingAlg(name) {
@@ -31,15 +35,8 @@ TCS::StatusCode TCS::cTauMultiplicity::initialize() {
     return StatusCode::FAILURE;
   }
 
-  m_isoFW_CTAU = isolationFW_CTAU();
-  m_isoFW_CTAU_jTAUCoreScale = isolationFW_CTAU_jTAUCoreScale();
+  m_extraInfo = m_threshold->getExtraInfo();
 
-  TRG_MSG_DEBUG("Initializing cTauMultiplicity L1Topo Algorithm");
-  for(const auto& [wp, iso] : m_isoFW_CTAU) {
-    TRG_MSG_DEBUG("WP \"" << wp << "\": R=" << iso << ", jTAUCoreScale=" << m_isoFW_CTAU_jTAUCoreScale[wp]);
-  }
-
- 
   // book histograms
   std::string hname_accept = "cTauMultiplicity_accept_EtaPt_"+m_threshold->name();
   bookHistMult(m_histAccept, hname_accept, "Mult_"+m_threshold->name(), "#eta#times40", "E_{t} [GeV]", 200, -200, 200, 100, 0, 100);
@@ -98,22 +95,27 @@ TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input
       
       if((*jtauCand)->tobType() != TCS::JTAU) continue;
 
-      isMatched = cTauMatching( *etauCand, *jtauCand );
+      isMatched = cTauMatching(*etauCand, *jtauCand);
 
       if(isMatched) {
+        float etauCand_et = static_cast<float>((*etauCand)->Et());
+        float etauCand_eta = static_cast<float>((*etauCand)->etaDouble());
+        float jtauCand_et = static_cast<float>((*jtauCand)->Et());
+        float jtauCand_etIso = static_cast<float>((*jtauCand)->EtIso());
 	// Updated isolation condition, WP-dependent (ATR-28641)
 	// "Partial" isolation formula: I = (E_T^{jTAU Iso} + jTAUCoreScale * E_T^{jTAU Core}) / E_T^{eTAU}
 	// This formula is missing the eTAU Core substraction from the numerator, grouped with the isolation cut value
-	isolation_partial_loose = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Loose")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
-	isolation_partial_loose = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Medium")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
-	isolation_partial_medium12 = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Medium12")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
-	isolation_partial_medium20 = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Medium20")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
-	isolation_partial_medium30 = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Medium30")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
-	isolation_partial_medium35 = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Medium35")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
-	isolation_partial_tight = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Tight")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
+	isolation_partial_loose = (jtauCand_etIso + m_extraInfo->isolation(WP::LOOSE, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
+	isolation_partial_loose = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
+	isolation_partial_medium12 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM12, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
+	isolation_partial_medium20 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM20, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
+	isolation_partial_medium30 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM30, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
+	isolation_partial_medium35 = (jtauCand_etIso + m_extraInfo->isolation(WP::MEDIUM35, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
+	isolation_partial_tight = (jtauCand_etIso + m_extraInfo->isolation(WP::TIGHT, etauCand_eta).isolation_jTAUCoreScale_fw()/1024.0 * jtauCand_et) / etauCand_et; // Internal variable for monitoring
         // Old isolation condition coded as in firmware: https://indico.cern.ch/event/1079697/contributions/4541419/attachments/2315137/3940824/cTAU_FirmwareAlgoProposal.pdf page 8
 
-	isIsolated = checkIsolationWP(*etauCand, *jtauCand, TrigConf::Selection::wpToString(m_threshold->isolation()));
+	isIsolated = checkIsolationWP(*etauCand, *jtauCand);
+
         break; // Break loop when a match is found
       }
 
@@ -137,6 +139,8 @@ TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input
     if(isMatched && isIsolated) accept = true; // This is a good matched cTau
     if(!isMatched) accept = true; // This is a non-matched eTau
 
+    if(!checkeTAUWP(*etauCand)) accept = false; // Check eTAU rCore/BDT and rHad WP
+
     // Menu threshold uses 0.1 eta granularity but eFex objects have 0.025 eta granularity
     // eFex eta is calculated as 4*eta_tower (0.1 gran.) + seed (0.025 gran.), eta from -25 to 24
     int eta_thr;
@@ -144,6 +148,7 @@ TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input
     else                          eta_thr = (*etauCand)->eta() - (*etauCand)->eta()%4 - 4;
 
     accept = accept && (*etauCand)->Et() > m_threshold->thrValue100MeV(eta_thr/4); // Convert eta_thr to units of 0.1 to pass as an argument
+
     if(accept) {
       counting++;
       fillHist2D(m_histAccept[0], (*etauCand)->eta(), (*etauCand)->EtDouble());
@@ -162,10 +167,17 @@ TCS::StatusCode TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input
 }
 
 
-bool TCS::cTauMultiplicity::checkIsolationWP(const TCS::cTauTOB* etauCand, const TCS::cTauTOB* jtauCand, const std::string& isolation_wp) const {
-  if(isolation_wp == "None") return true;
-  if(jtauCand->EtIso()*1024 + jtauCand->Et()*m_isoFW_CTAU_jTAUCoreScale.at(isolation_wp) < etauCand->Et()*m_isoFW_CTAU.at(isolation_wp)) return true;
-  return false;
+bool TCS::cTauMultiplicity::checkIsolationWP(const TCS::cTauTOB* etauCand, const TCS::cTauTOB* jtauCand) const {
+  if(m_threshold->isolation() == WP::NONE) return true;
+  auto iso_wp = m_extraInfo->isolation(m_threshold->isolation(), etauCand->etaDouble());
+  return jtauCand->EtIso()*1024 + jtauCand->Et()*iso_wp.isolation_jTAUCoreScale_fw() < etauCand->Et()*iso_wp.isolation_fw();
+}
+
+
+bool TCS::cTauMultiplicity::checkeTAUWP(const TCS::cTauTOB* etauCand) const {
+  if(m_threshold->isolation() == WP::NONE) return true;
+  auto iso_wp = m_extraInfo->isolation(m_threshold->isolation(), etauCand->etaDouble());
+  return etauCand->RCore() >= iso_wp.eTAU_rCoreMin_WP_fw() && etauCand->RHad() >= iso_wp.eTAU_rHadMin_WP_fw();
 }
 
 
@@ -232,6 +244,7 @@ size_t TCS::cTauMultiplicity::cTauMatching(const xAOD::eFexTauRoI& eTau, const x
 
 }
 
+
 bool TCS::cTauMultiplicity::cTauMatching(const xAOD::eFexTauRoI& eTau, const xAOD::jFexTauRoI& jTau) {
 
   // eFEX: etaTower = iEta, phiTower = iPhi
@@ -254,11 +267,18 @@ bool TCS::cTauMultiplicity::cTauMatching(const xAOD::eFexTauRoI& eTau, const xAO
 
 }
 
-bool
-TCS::cTauMultiplicity::checkIsolationWP(const std::map<std::string, int>& isoFW_CTAU, const std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale, const float jTauCoreEt, const float jTauIsoEt, const float eTauEt, const std::string& isolation_wp) {
-  if(isolation_wp == "None") return true;
-  if(jTauIsoEt*1024 + jTauCoreEt*isoFW_CTAU_jTAUCoreScale.at(isolation_wp) < eTauEt*isoFW_CTAU.at(isolation_wp)) return true;
-  return false;
+
+bool TCS::cTauMultiplicity::checkIsolationWP(const xAOD::eFexTauRoI& eTau, const xAOD::jFexTauRoI& jTau, const TrigConf::L1Threshold_cTAU& thr) {
+  if(thr.isolation() == WP::NONE) return true;
+  auto iso_wp = thr.getExtraInfo()->isolation(thr.isolation(), eTau.eta());
+  return jTau.tobIso()*2*1024 + jTau.tobEt()*2*iso_wp.isolation_jTAUCoreScale_fw() < eTau.etTOB()*iso_wp.isolation_fw();
+}
+
+
+bool TCS::cTauMultiplicity::checkeTAUWP(const xAOD::eFexTauRoI& eTau, const TrigConf::L1Threshold_cTAU& thr) {
+  if(thr.isolation() == WP::NONE) return true;
+  auto iso_wp = thr.getExtraInfo()->isolation(thr.isolation(), eTau.eta());
+  return eTau.tauOneThresholds() >= iso_wp.eTAU_rCoreMin_WP_fw() && eTau.tauTwoThresholds() >= iso_wp.eTAU_rHadMin_WP_fw();
 }
 
 #endif
