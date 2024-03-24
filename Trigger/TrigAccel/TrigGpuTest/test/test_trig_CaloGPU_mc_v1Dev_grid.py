@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger Calo GPU test on mc 
-# art-type: build
+# art-description: Trigger RDO->RDO_TRIG athena CaloGPU test of the Dev_pp_run3_v1 menu
+# art-type: grid
 # art-include: main/Athena
-# Skipping art-output which has no effect for build tests.
-# If you create a grid version, check art-output in existing grid tests.
+# art-include: 24.0/Athena
+# art-athena-mt: 4
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log
@@ -27,12 +27,14 @@ ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar'
-ex.threads = 1
-ex.flags = ['CaloRecGPU.GlobalFlags.UseCaloRecGPU=True','Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"']
+ex.threads = 4
+ex.concurrent_events = 4
+ex.flags = ['CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
+     'Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"']
 ex.args = '--CA'
 
 test = Test.Test()
-test.art_type = 'build'
+test.art_type = 'grid'
 test.exec_steps = [ex]
 test.check_steps = CheckSteps.default_check_steps(test)
 
