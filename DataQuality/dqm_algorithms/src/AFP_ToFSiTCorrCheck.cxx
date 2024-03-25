@@ -46,7 +46,8 @@ dqm_algorithms::AFP_ToFSiTCorrCheck::execute( const std::string& name,
     auto rthreshold_tr = static_cast<uint32_t>( dqm_algorithms::tools::GetFromMap( "NbadTrains", config.getRedThresholds() ) );
     auto gthreshold_st = static_cast<uint32_t>( dqm_algorithms::tools::GetFromMap( "NbadStairs", config.getGreenThresholds() ) );
     auto rthreshold_st = static_cast<uint32_t>( dqm_algorithms::tools::GetFromMap( "NbadStairs", config.getRedThresholds() ) );
-    auto pronounciation_level   = static_cast<double>( dqm_algorithms::tools::GetFirstFromMap( "pronounciation_level", config.getParameters() ) );
+    auto pronounciation_level_down   = static_cast<double>( dqm_algorithms::tools::GetFirstFromMap( "pronounciation_level_down", config.getParameters() ) );
+    auto pronounciation_level_up   = static_cast<int>( dqm_algorithms::tools::GetFirstFromMap( "pronounciation_level_up", config.getParameters() ) );
     const std::string RANGES = dqm_algorithms::tools::GetFirstFromMap( "RANGES", config.getGenericParameters() );
 
     //from string of ranges to int array
@@ -106,7 +107,7 @@ dqm_algorithms::AFP_ToFSiTCorrCheck::execute( const std::string& name,
             if (i != j) 
             {
                 check_devided_bins[i][j] = max_bins_content[i]/all_bins_content[i][j];
-                if ((check_devided_bins[i][j] < pronounciation_level) || (check_devided_bins[i][j] > 50))
+                if ((check_devided_bins[i][j] < pronounciation_level_down) || (check_devided_bins[i][j] > pronounciation_level_up))
                     false_bins_devided[i]++;
             }  
         if (false_bins_devided[i] > 1)
@@ -145,6 +146,7 @@ dqm_algorithms::AFP_ToFSiTCorrCheck::execute( const std::string& name,
 
 void dqm_algorithms::AFP_ToFSiTCorrCheck::printDescriptionTo( std::ostream& out ) {
     out << "AFP_ToFSiTCorrCheck: Print out how many stairs are not on their places and how many are not pronounced\n"
-        << "Required Parameter: pronounciation_level: how pronounced the stair is\n" 
+        << "Required Parameter: pronounciation_level_down: how pronounced the stair is (down limit)\n" 
+        << "Required Parameter: pronounciation_level_up: how pronounced the stair is (upper limit)\n" 
         << "Required Parameter: RANGES: ranges of SiT, corresponding to ToF trains, in bins of hist"<< std::endl;
 }

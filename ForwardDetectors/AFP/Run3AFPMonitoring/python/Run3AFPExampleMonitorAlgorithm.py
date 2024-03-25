@@ -241,8 +241,8 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     chan_combinations_list = [  "0AB", "0AC", "0AD", "0BC", "0BD", "0CD", "1AB", "1AC", "1AD", "1BC", "1BD", "1CD", 
                     "2AB", "2AC", "2AD", "2BC", "2BD", "2CD", "3AB", "3AC", "3AD", "3BC", "3BD", "3CD"]
     arrayToFCrossBarDeltaT = helper.addArray([chan_combinations_list], afpToFAlgorithm, 'AFPToFTool', topPath='AFP/ToF/')
-    arrayToFCrossBarDeltaT.defineHistogram('crossBarDeltaT_A', title='ToF cross-bar <delta> time (channel combination {0}), side A; <delta> t, [ps]; events', type='TH1D', path='CrossBar/sideA', xbins=400, xmin=-1500.0, xmax=1500.0)
-    arrayToFCrossBarDeltaT.defineHistogram('crossBarDeltaT_C', title='ToF cross-bar <delta> time (channel combination {0}), side C; <delta> t, [ps]; events', type='TH1D', path='CrossBar/sideC', xbins=400, xmin=-1500.0, xmax=1500.0)
+    arrayToFCrossBarDeltaT.defineHistogram('crossBarDeltaT_A', title='ToF cross-bar <delta> time (channel combination {0}), side A; <delta> t, [ps]; events', type='TH1D', path='DeltaTime/sideA', xbins=400, xmin=-1500.0, xmax=1500.0)
+    arrayToFCrossBarDeltaT.defineHistogram('crossBarDeltaT_C', title='ToF cross-bar <delta> time (channel combination {0}), side C; <delta> t, [ps]; events', type='TH1D', path='DeltaTime/sideC', xbins=400, xmin=-1500.0, xmax=1500.0)
     # Finalize. The return value should be a tuple of the ComponentAccumulator
     result.merge(helper.result())
     return result
