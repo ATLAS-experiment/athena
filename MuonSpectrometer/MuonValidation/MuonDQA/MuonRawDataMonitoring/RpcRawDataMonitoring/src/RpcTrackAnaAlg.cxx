@@ -1097,16 +1097,27 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
     ATH_MSG_DEBUG(" RpcPrepDataContainer size = " << rpcContainer->size());
     ATH_MSG_DEBUG(" results size = " << results.size());
 
-    std::vector<std::pair<GasGapResult, const Muon::RpcPrepData*>>
-        v_PRDHit_TrackMatched;
-
+    ATH_MSG_INFO(" RpcPrepDataContainer Test 1 ");
+    
     auto i_hitTime_sec = Scalar<int>("hitTime_sec", 0);
+
+    auto isOutTime_prd = Scalar<bool>("isOutTime_prd", false);
+    auto isOutTime_onTrack = Scalar<bool>("isOutTime_prd_onTrack", false);
+    auto i_panelIndex = Scalar<int>("panelInd_prd", 0);
+    auto i_panelIndex_onTrack = Scalar<int>("panelInd_prd_onTrack", 0);
+
+    auto res_eta = Scalar<int>("residual_eta", 0);
+    auto res_phi = Scalar<int>("residual_phi", 0);
+    auto closest_res_eta = Scalar<int>("closest_residual_eta", 0);
+    auto closest_res_phi = Scalar<int>("closest_residual_phi", 0);
 
     for (GasGapResult& exr : results) {
         const std::shared_ptr<GasGapData> gap = exr.second;
 
         int sector = (gap->RpcPanel_eta_phi.first->getSectorLayer()).first;
-
+        
+        float clo_res_eta = 1001.; // initial value; no sense
+        float clo_res_phi = 1001.;
         int NHit_perEvt_eta = 0;
         int NHit_perEvt_phi = 0;
         std::vector<const Muon::RpcPrepData*> view_hits_eta;
@@ -1142,21 +1153,80 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                     doubletR == gap->doubletR && gasGap == gap->gasgap &&
                     doubletPhi == gap->doubletPhi &&
                     doubletZ == gap->doubletZ) {
-                    if (measuresPhi) {
-                        NHit_perEvt_phi++;
-                        view_hits_phi.push_back(rpcData);
-                    } else {
-                        NHit_perEvt_eta++;
-                        view_hits_eta.push_back(rpcData);
-                    }
 
-                    v_PRDHit_TrackMatched.push_back(
-                        std::make_pair(exr, rpcData));
 
                     i_hitTime_sec = rpcData->time();
                     fill(m_tools[m_SectorGroup.at(
                              "sector" + std::to_string(std::abs(sector)))],
                          i_hitTime_sec);
+
+                    // ---------------------------------
+                    // Calculate distance between extrapolated muon track position and hit
+                    Amg::Vector3D hitPos_global = rpcData->globalPosition();
+                    const Amg::Vector3D hitPos_local =
+                        gap->readoutEl->globalToLocalCoords(hitPos_global, gap->gapid);
+
+                    float trackPos_localY = exr.first.localPos.y();
+                    float trackPos_localZ = exr.first.localPos.z();
+
+                    float residual_phi = trackPos_localY-hitPos_local.y();
+                    float residual_eta = trackPos_localZ-hitPos_local.z();
+
+                    // If hit is out-of-time
+                    // bool isOutTime = (std::abs(i_hitTime_sec+50.) > m_outtime); // for run 3
+                    bool isOutTime = (std::abs(i_hitTime_sec) > m_outtime); // for run 2 test
+
+                    // Fill histograms of out-of-time hit fraction
+                    if (muon_source == ZCand) {
+                        
+                        isOutTime_prd = isOutTime;
+                        isOutTime_onTrack = isOutTime;
+                        
+                        if (measuresPhi) {
+                            int i_panel_phi = gap->RpcPanel_eta_phi.second->panel_index;
+                            i_panelIndex = i_panel_phi;
+                            fill(tool, i_panelIndex, isOutTime_prd);
+                            if (std::abs(residual_phi) < m_diffHitTrackPostion) {
+                                i_panelIndex_onTrack = i_panel_phi;
+                                fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
+                            }
+                        } else {
+                            int i_panel_eta = gap->RpcPanel_eta_phi.first->panel_index;
+                            i_panelIndex = i_panel_eta;
+                            fill(tool, i_panelIndex, isOutTime_prd);
+                            if (std::abs(residual_eta) < m_diffHitTrackPostion) {
+                                i_panelIndex_onTrack = i_panel_eta;
+                                fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
+                            }
+                        }
+                    }
+
+                    // process hit within |time| < 12.5 ns && on Track
+                    if (isOutTime){
+                        continue;
+                    }
+
+                    if (measuresPhi) {
+                        res_phi = residual_phi;
+                        clo_res_phi = std::min(clo_res_phi, residual_phi);
+
+                        fill(tool, res_phi);
+
+                        if (std::abs(residual_phi) < m_diffHitTrackPostion) {
+                            NHit_perEvt_phi++;
+                            view_hits_phi.push_back(rpcData);
+                        }
+                    } else {
+                        res_eta = residual_eta;
+                        clo_res_eta = std::min(clo_res_eta, residual_eta);
+
+                        fill(tool, res_eta);
+
+                        if (std::abs(residual_eta) < m_diffHitTrackPostion){
+                            NHit_perEvt_eta++;
+                            view_hits_eta.push_back(rpcData);
+                        }
+                    }
                 }
             }
         }
@@ -1189,6 +1259,11 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
             ATH_CHECK(fillClusterSize(view_hits_eta, etaPanel_ind, lumiBlock,
                                       sector, 0));  // isPhi = 0
 
+            if (clo_res_eta < 1000.) {
+                closest_res_eta = clo_res_eta;
+                fill(tool, closest_res_eta);
+            }
+
             //
             // Phi panel
             hitMulti = NHit_perEvt_phi;
@@ -1199,6 +1274,11 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
             fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_LB);
             ATH_CHECK(fillClusterSize(view_hits_phi, phiPanel_ind, lumiBlock,
                                       sector, 1));  // isPhi = 1
+
+            if (clo_res_phi < 1000.) {
+                closest_res_phi = clo_res_phi;
+                fill(tool, closest_res_phi);
+            }
         } else {
             auto i_panelIndex = Scalar<int>("panelInd_hM_allMu", 0);
             auto i_passExtrap = Scalar<bool>("muon_passExtrap_allMu", false);
@@ -1217,57 +1297,6 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                 i_passExtrap = true;
 
             fill(tool, i_panelIndex, i_passExtrap);
-        }
-    }
-
-    if (muon_source == AllMuon) {
-        return StatusCode::SUCCESS;
-    }
-
-    bool isOutTime = false;
-    for (const std::pair<GasGapResult, const Muon::RpcPrepData*>& i_hit :
-         v_PRDHit_TrackMatched) {
-        const std::shared_ptr<GasGapData> gap = i_hit.first.second;
-        const Identifier id = i_hit.second->identify();
-        const int measuresPhi = rpcIdHelper.measuresPhi(id);
-
-        isOutTime = false;
-        if (std::abs(i_hit.second->time()+50.) > m_outtime) {
-            isOutTime = true;
-        }
-
-        auto isOutTime_prd = Scalar<bool>("isOutTime_prd", isOutTime);
-        auto isOutTime_onTrack =
-            Scalar<bool>("isOutTime_prd_onTrack", isOutTime);
-        auto i_panelIndex = Scalar<int>("panelInd_prd", 0);
-        auto i_panelIndex_onTrack = Scalar<int>("panelInd_prd_onTrack", 0);
-
-        // hit within ±30 mm of the extrapolated muon track position
-        Amg::Vector3D hitPos_global = i_hit.second->globalPosition();
-        const Amg::Vector3D hitPos_local =
-            gap->readoutEl->globalToLocalCoords(hitPos_global, gap->gapid);
-
-        float trackPos_localY = i_hit.first.first.localPos.y();
-        float trackPos_localZ = i_hit.first.first.localPos.z();
-
-        if (measuresPhi) {
-            int i_panel_phi = gap->RpcPanel_eta_phi.second->panel_index;
-            i_panelIndex = i_panel_phi;
-            fill(tool, i_panelIndex, isOutTime_prd);
-            if (std::abs(trackPos_localY - hitPos_local.y()) <
-                m_diffHitTrackPostion) {
-                i_panelIndex_onTrack = i_panel_phi;
-                fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
-            }
-        } else {
-            int i_panel_eta = gap->RpcPanel_eta_phi.first->panel_index;
-            i_panelIndex = i_panel_eta;
-            fill(tool, i_panelIndex, isOutTime_prd);
-            if (std::abs(trackPos_localZ - hitPos_local.z()) <
-                m_diffHitTrackPostion) {
-                i_panelIndex_onTrack = i_panel_eta;
-                fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
-            }
         }
     }
 
