@@ -10,9 +10,6 @@ atlas_add_poolcnv_library( LArCondAthenaPoolPoolCnv
                            MULT_CHAN_TYPES LArAutoCorrComplete LArAutoCorrMC LArCaliPulseParamsComplete LArDAC2uAComplete LArDAC2uAMC LArDetCellParamsComplete LArfSamplComplete LArfSamplMC LArH6OscillationComplete LArMinBiasComplete LArMinBiasMC LArMinBiasAverageComplete LArMinBiasAverageMC LArMphysOverMcalComplete LArMphysOverMcalMC LArNoiseComplete LArNoiseMC LArOFCComplete LArPedestalComplete LArPhysCaliTdiffComplete LArRampComplete LArRampMC LArShapeComplete LArShape32MC LArTdriftComplete LAruA2MeVComplete LAruA2MeVMC LArOFCBinComplete LArRinjComplete LArCableLengthComplete LArCableAttenuationComplete LArTshaperComplete LArEMEC_CphiComplete LArEMEC_HValphaComplete LArEMEC_HVbetaComplete LArCaliWaveContainer LArPhysWaveContainer LArHVScaleCorrComplete LArDSPThresholdsComplete
                            LINK_LIBRARIES AthenaPoolUtilities AthenaPoolCnvSvcLib LArCondTPCnv LArRawConditions )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
 
 atlas_add_test( LArAutoCorrCompleteCnv_test
                 SOURCES
