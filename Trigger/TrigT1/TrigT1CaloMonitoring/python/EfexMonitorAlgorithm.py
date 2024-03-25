@@ -64,6 +64,12 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
 
     # First, define the histograms with no Pt cut
     # add monitoring algorithm to group, with group name and main directory
+
+    locIdxs = []
+    for phiOct in range(0,8):
+        for etaIdx in range(-25,25):
+            locIdxs += [str(phiOct) + ":" + str(etaIdx)]
+
     for containerKey in EfexMonAlg.eFexEMTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
         tobTypeStr += "copy" if 'Copy' in containerKey else ""
@@ -75,6 +81,12 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
         helper.defineHistogram(containerKey + "_seedMax;h_emTob_seedMax", title='EM TOB Seedmax bit;Seedmax bit;Number of TOBs',
                                fillGroup = baseGroupName,
                                    type='TH1I',path=trigPath+tobStr, xbins=2,xmin=-0.5,xmax=1.5)
+
+        helper.defineHistogram("LBN,locIdx,tobEt;h_"+containerKey+"_et_posLbnMap", title = "Average " + containerKey + " ET;LBN;Position (Octant:Eta)",
+                            fillGroup = baseGroupName + "_" + containerKey,
+                               type="TProfile2D",
+                               xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
+
     for containerKey in EfexMonAlg.eFexTauTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
         tobTypeStr += "copy" if 'Copy' in containerKey else ""
@@ -86,6 +98,11 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
         helper.defineHistogram(containerKey + "_seedMax;h_tauTob_seedMax", title='Tau TOB SeedMax;Seedmax bit;Number of TOBs',
                                fillGroup = baseGroupName,
                                    type='TH1I',path=trigPath+tobStr, xbins=2,xmin=-0.5,xmax=1.5)
+
+        helper.defineHistogram("LBN,locIdx,tobEt;h_"+containerKey+"_et_posLbnMap", title = "Average " + containerKey + " ET;LBN;Position (Octant:Eta)",
+                               fillGroup = baseGroupName + "_" + containerKey,
+                               type="TProfile2D",
+                               xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
 
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):

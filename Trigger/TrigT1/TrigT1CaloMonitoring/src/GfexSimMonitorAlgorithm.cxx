@@ -94,8 +94,8 @@ StatusCode GfexSimMonitorAlgorithm::initialize() {
 
 StatusCode GfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
-    compareJetRoI("gLJ",m_data_gFexJet,m_simu_gFexJet,ctx);
-    compareJetRoI("gJ",m_data_gFexBlock,m_simu_gFexBlock,ctx);
+    compareJetRoI("gLJ",m_data_gFexJet,m_simu_gFexJet,ctx,true);
+    compareJetRoI("gJ",m_data_gFexBlock,m_simu_gFexBlock,ctx,true);
     compareJetRoI("gLJRho",m_data_gFexRho,m_simu_gFexRho,ctx);
     compareGlobalRoI("gXEJWOJ",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx);
     compareGlobalRoI("gXEJWOJ",m_data_gMETComponentsJwoj,m_simu_gMETComponentsJwoj,ctx);
@@ -112,7 +112,7 @@ StatusCode GfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
                                             const SG::ReadHandleKey<xAOD::gFexJetRoIContainer>& tobs1Key,
                                             const SG::ReadHandleKey<xAOD::gFexJetRoIContainer>& tobs2Key,
-                                            const EventContext& ctx) const {
+                                            const EventContext& ctx, bool simReadyFlag) const {
     SG::ReadHandle<xAOD::gFexJetRoIContainer> tobs1Cont{tobs1Key, ctx};
     if(!tobs1Cont.isValid()) {
         return false;
@@ -128,6 +128,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
     auto eventType = Monitored::Scalar<std::string>("EventType","DataTowers"); // always have data towers
     auto Signature = Monitored::Scalar<std::string>("Signature",label);
     auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
+    auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
 
     for(const auto tob1 : *tobs1Cont) {
         bool isMatched = false;
@@ -149,7 +150,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
             mismatches = true;
         }
         tobMismatched = (isMatched) ? 0 : 100;
-        fill("mismatches",eventType,Signature,tobMismatched);
+        fill("mismatches",eventType,Signature,tobMismatched,simReady);
     }
 
 
@@ -157,7 +158,17 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
     if(mismatches) {
         // fill the debugging tree with all the words for this signature
         auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
+        auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
         auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
+        {
+            std::scoped_lock lock(m_firstEventsMutex);
+            auto itr = m_firstEvents.find(lbn);
+            if(itr==m_firstEvents.end()) {
+                m_firstEvents[lbn] = std::to_string(lbn)+":"+std::to_string(evtNumber);
+                itr = m_firstEvents.find(lbn);
+            }
+            lbnString = itr->second;
+        }
         std::vector<float> detas{};std::vector<float> setas{};
         std::vector<float> dphis{};std::vector<float> sphis{};
         std::vector<unsigned int> dword0s{};std::vector<unsigned int> sword0s{};
@@ -177,7 +188,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
             for (const auto w: sword0s) std::cout << w << " ";
             std::cout << std::endl << std::dec;
         }
-        fill("mismatches",lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature);
+        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature);
     }
 
     return !mismatches;
