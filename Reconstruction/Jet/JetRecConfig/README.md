@@ -46,17 +46,34 @@ is done by passing the jet definition to `DependencyHelper.solveDependencies`,
 allowing quick checking of the elements that will be integrated to form the
 jet collection, including input collections, ghosts and modifiers.
 
-If working with standard objects, the user can to do something like
+### Examples
+
+#### (1) Jet definitions
+
+Standard jet definitions are defined in [StandardSmallRJets.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardSmallRJets.py) and  [StandardLargeRJets.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardLargeRJets.py). The default small-R jet collection `AntiKt4EMPFlowJets` is defined as follows: 
+
+```
+AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
+                               ghostdefs=("BHadronsFinal", "Track", "Truth"),
+                               modifiers=("Filter:10000","JVT","CaloEnergies","Calib:T0")
+)
+```
+where
+
+- cst is the dictionary of standard constituents defined in [StandardJetConstits.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardJetConstits.py). 
+- ghostdefs: objects to be ghost-associated to the jets (see [StandardJetConstits.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardJetConstits.py))
+- modifiers: e.g. apply calibration, filter on jets with pT > 10 GeV, calculate JVT, ... , defined in [StandardJetMods.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardJetMods.py). More details can be found below on the configuration of JetModifiers.
+
+If working with standard objects, users can simply add these definitions to their configuration:
 ```
 from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
 acc = JetRecConfig.JetRecCfg(AntiKt4LCTopo)
 ```
-For minor variations, one can copy and modify the standard definitions:
+For minor variations (e.g. apply Constituent Subtraction + Soft Killer) , one can copy and modify the standard definitions:
 ```
 from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 AntiKt4LCTopoCSSK = AntiKt4LCTopo.clone(inputdef = cst.LCTopoCSSK, modifiers=["Filter:13000"] )
-
 ```
 The definitions can of course be built up from scratch by users who want full
 control.
@@ -67,7 +84,7 @@ present and therefore need not be built.
 See:
 https://indico.cern.ch/event/697121/contributions/2859415/attachments/1585431/2506572/JobConfig_SoftCoord_Jan18.pdf
 
-### Note on JetModifier configuration
+#### (2) JetModifier configuration
 
 To provide a large variety of modifier tool configurations in an organised way,
 each modifier tool is configured via the `JetModifier` helper class. This in
@@ -91,7 +108,7 @@ jvt = JetModifier("JetVertexTaggerTool", "jvt",
 One can pass the properties need for the tool in the ctor of the modifier
 
 ```
-    ktdr       = JetModifier("KtDeltaRTool", "ktdr", JetRadius = 0.4),
+ktdr = JetModifier("KtDeltaRTool", "ktdr", JetRadius = 0.4),
 ```
 
 Instead of a simple value, the property can be a function. This is
@@ -103,7 +120,7 @@ args : the jet definition and a specifier (defaulting to "", see below).
 def _jetname(jetdef,modspec):
     return jetdef.fullname()
 
-Width =  JetModifier("JetWidthTool", "width", JetContainer = _jetname),
+Width = JetModifier("JetWidthTool", "width", JetContainer = _jetname),
 ```
 A helper function can potentially be provided for the prereqs as well.
 
@@ -126,6 +143,25 @@ C++ implementations. This allows a local lookup of the specific default
 configurations, while making it easy to determine where the source code
 for those tools live.
 
+#### (3) Constituent definition
+
+`JetInputConstitSeq` is used to define a new jet constituent type that depends on a sequence of algorithms, otherwise `JetInputConstit` can be used. The inputs for the above defined particle flow jets are defined as follows:
+
+```
+JetInputConstitSeq("EMPFlow", xAODType.FlowElement, ["CorrectPFO", "CHS"],
+                   "JetETMissParticleFlowObjects", ’CHSParticleFlowObjects’)
+```
+
+with:
+- name
+- input container type: e.g. `xAODType.FlowElement`, `xAODType.CaloCluster`, `xAODType.TrackParticle`
+- list of constituent modifiers (`JetConstitModifier`, see [StandardJetConstits.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardJetConstits.py))
+- input container name
+- output container name
+
+Some additional examples can be found in these talks: [talk1](https://indico.cern.ch/event/1240663/contributions/5245889/attachments/2590220/4469561/JETMX_derivations.pdf), [talk2](https://indico.cern.ch/event/1188525/contributions/4994885/attachments/2496654/4288407/JSV_intro.pdf).
+
+
 ### Instructions
 
 To run:
@@ -137,6 +173,3 @@ python test_StandardJets.py --help # Get instructions
 ```
 You can dump printouts of the dependency dict and/or component accumulators
 for each jet collection or run a full job in serial or multithreaded modes.
-
-# TODO
-
