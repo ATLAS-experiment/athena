@@ -116,12 +116,12 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     }
     if (!m_eEMSliceWriteKey.empty()) {
         ATH_CHECK( StatusCode(addContainer<xAOD::eFexEMRoIContainer,xAOD::eFexEMRoIAuxContainer>(
-                eContainers,L1CaloRdoFexTob::TobSource::EfexTob,true,m_eEMSliceWriteKey,ctx)) );
+                eContainers,L1CaloRdoFexTob::TobSource::EfexXtob,true,m_eEMSliceWriteKey,ctx)) );
         multislice=true;
     }
     if (!m_eTAUSliceWriteKey.empty()) {
         ATH_CHECK( StatusCode(addContainer<xAOD::eFexTauRoIContainer,xAOD::eFexTauRoIAuxContainer>(
-                tContainers,L1CaloRdoFexTob::TobSource::EfexTob,true,m_eTAUSliceWriteKey,ctx)) );
+                tContainers,L1CaloRdoFexTob::TobSource::EfexXtob,true,m_eTAUSliceWriteKey,ctx)) );
         multislice=true;
     }
 
