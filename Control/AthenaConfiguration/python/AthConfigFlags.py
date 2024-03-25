@@ -757,21 +757,13 @@ class AthConfigFlags(object):
             self.Exec.MTEventServiceChannel = args.mtes_channel
 
         if args.profile_python is not None:
-            import cProfile, atexit
+            from AthenaCommon.Debugging import dumpPythonProfile
+            import atexit, cProfile, functools
             cProfile._athena_python_profiler = cProfile.Profile()
             cProfile._athena_python_profiler.enable()
-            #Save stats to file at exit
-            def stop_prof():
-                if args.profile_python.endswith(".txt"):
-                     import pstats
-                     pstats.Stats(cProfile._athena_python_profiler,
-                                  stream=open(args.profile_python, 'w')).strip_dirs().sort_stats("time").print_stats()
-                     _msg.info("Python profile summary stored in %s", args.profile_python)
-                else:
-                     cProfile._athena_python_profiler.dump_stats(args.profile_python)
-                     _msg.info("Python profile stored in %s", args.profile_python)
 
-            atexit.register(stop_prof)
+            # Save stats to file at exit
+            atexit.register(functools.partial(dumpPythonProfile, args.profile_python))
 
 
         #All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
