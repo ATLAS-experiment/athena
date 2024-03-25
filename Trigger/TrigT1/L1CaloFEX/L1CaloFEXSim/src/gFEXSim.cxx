@@ -162,9 +162,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int gLJ_seedThrB = 0;
    int gLJ_seedThrC = 0;
    gLJ_seedThrA = thr_gLJ.seedThrCounts('A'); //defined in GeV by default
-   // gLJ_seedThrA = gLJ_seedThrA/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
    gLJ_seedThrB = thr_gLJ.seedThrCounts('B'); //defined in GeV by default
-   // gLJ_seedThrB = gLJ_seedThrB/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
    gLJ_seedThrC = thr_gLJ.seedThrCounts('C'); //defined in GeV by default
 
    int gLJ_ptMinToTopoCounts1 = 0;
@@ -175,9 +173,9 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    float gLJ_rhoMaxB = 0;
    float gLJ_rhoMaxC = 0;
  
-   gLJ_rhoMaxA = 200;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMaxB = 200;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMaxC = 200;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
+   gLJ_rhoMaxA = (thr_gLJ.rhoTowerMax('A')*1000)/50;//Values are given in GeV, need to be converted with 50MeV scale to be used in PU calculation
+   gLJ_rhoMaxB = (thr_gLJ.rhoTowerMax('B')*1000)/50;//Values are given in GeV, need to be converted with 50MeV scale to be used in PU calculation
+   gLJ_rhoMaxC = (thr_gLJ.rhoTowerMax('C')*1000)/50;//Values are given in GeV, need to be converted with 50MeV scale to be used in PU calculation
 
 
    //Parameters related to gJ (small-R jet objects - gBlock)
