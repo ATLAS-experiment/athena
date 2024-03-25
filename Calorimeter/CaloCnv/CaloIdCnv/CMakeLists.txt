@@ -8,5 +8,3 @@ atlas_add_component( CaloIdCnv
                      src/*.cxx
                      LINK_LIBRARIES CaloIdentifier AthenaKernel DetDescrCnvSvcLib StoreGateLib IdDictDetDescr Identifier GaudiKernel )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
