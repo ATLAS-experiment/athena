@@ -10,6 +10,4 @@ atlas_add_poolcnv_library( CaloCondAthenaPoolPoolCnv
                            TYPES_WITH_NAMESPACE CaloRec::ToolConstants CaloRec::CaloCellFactor CaloRec::CaloCellPositionShift
                            LINK_LIBRARIES CaloConditions CaloTriggerToolLib AthenaKernel GaudiKernel AthenaPoolCnvSvcLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 
