@@ -3,6 +3,7 @@
 from copy import copy, deepcopy
 from difflib import get_close_matches
 from enum import EnumMeta
+import glob
 import importlib
 from AthenaCommon.Logging import logging
 from PyUtils.moduleExists import moduleExists
@@ -586,7 +587,7 @@ class AthConfigFlags(object):
         parser.add_argument("-i","--interactive", default=None, choices=["init","run"], help="Drop into interactive mode at <stage>")
         parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
         parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
-        parser.add_argument("--filesInput", default=None,nargs='+', help="Input file(s), supports * wildcard")
+        parser.add_argument("--filesInput", type=str, default=None, help="Input file(s), comma-separated list with wildcards")
         parser.add_argument("-l", "--loglevel", default=None, choices=["ALL","VERBOSE","DEBUG","INFO","WARNING","ERROR","FATAL"], help="logging level")
         parser.add_argument("--config-only", metavar='FILE', type=str, default=None, const=True, nargs='?', help="Stop after configuration and optionally pickle configuration to FILE (may not be respected by all diver scripts)")
         parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
@@ -706,17 +707,10 @@ class AthConfigFlags(object):
 
         if args.filesInput is not None:
             self.Input.Files = [] # remove generic
-            for f in args.filesInput:
-                #because of argparse used with nargs+, fileInput will also swallow arguments meant to be flags
-                if "=" in f:
-                    leftover.append(f)
-                else:
-                    for ffile in f.split(","):
-                        if '*' in ffile: # handle wildcard
-                            import glob
-                            self.Input.Files += glob.glob(ffile)
-                        else:
-                            self.Input.Files += [ffile]
+            for f in args.filesInput.split(","):
+                found = glob.glob(f)
+                # if not found, add string directly
+                self.Input.Files += found if found else [f]
 
         if args.loglevel is not None:
             from AthenaCommon import Constants
