@@ -324,7 +324,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
         log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
 
-        stepName = "CRVARStep_"+self.chainName
+        stepName = "CRVARStep_"
         jetSeq = jetCRVARMenuSequence(flags, jetsIn=jetCollectionName)
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
@@ -344,7 +344,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
         log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
 
-        stepName = "CRStep_"+self.chainName
+        stepName = "CRStep_"
         jetSeq = jetCRMenuSequence(flags, jetsIn=jetCollectionName)
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
