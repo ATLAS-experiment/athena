@@ -57,12 +57,46 @@ void compare (const SiHitCollection& p1,
 }
 
 
+void checkPersistentVersion(const SiHitCollection_p2& pers, const SiHitCollection& trans)
+{
+  constexpr int numberOfStrings{20}; // The number of groups of hits caused by consecutive steps of "the same particle"
+  assert ( numberOfStrings == pers.m_hit1_meanTime.size());
+  assert ( numberOfStrings == pers.m_hit1_meanTime.size());
+  assert ( numberOfStrings == pers.m_hit1_x0.size());
+  assert ( numberOfStrings == pers.m_hit1_y0.size());
+  assert ( numberOfStrings == pers.m_hit1_z0.size());
+  assert ( numberOfStrings == pers.m_hit1_theta.size());
+  assert ( numberOfStrings == pers.m_hit1_phi.size());
+  assert ( numberOfStrings == pers.m_nHits.size());
+  //  1 element per hit
+  assert (trans.size() == pers.m_hitEne_2b.size());
+  assert (trans.size() == pers.m_hitLength_2b.size());
+  //  1 element per hit except for first hit in string
+  assert (trans.size()-numberOfStrings == pers.m_dTheta.size());
+  assert (trans.size()-numberOfStrings == pers.m_dPhi.size());
+  //  1 element per hit with  m_hitEne_2b[i] == 2**16
+  assert ( 110 == pers.m_hitEne_4b.size());
+  //  1 element per hit with  m_hitLength_2b[i] == 2**16
+  assert ( 0 == pers.m_hitLength_4b.size());
+  constexpr int numberOfUniqueParticles{11};
+  // Less than the numberOfStrings as we don't require the start/end
+  // positions of consecutive SiHits to match up in this case, so as all
+  // delta-ray hits are grouped together they get a single entry
+  assert (numberOfUniqueParticles == pers.m_barcode.size());
+  assert (numberOfUniqueParticles == pers.m_nBC.size());
+  constexpr int numberOfIdentifierGroups{20}; // store id once for set of consecutive hits with same identifier
+  assert(numberOfIdentifierGroups == pers.m_id.size());
+  assert(numberOfIdentifierGroups == pers.m_nId.size());
+}
+
+
 void testit (const SiHitCollection& trans1)
 {
   MsgStream log (nullptr, "test");
   SiHitCollectionCnv_p2 cnv;
   SiHitCollection_p2 pers;
   cnv.transToPers (&trans1, &pers, log);
+  checkPersistentVersion(pers, trans1);
   SiHitCollection trans2;
   cnv.persToTrans (&pers, &trans2, log);
 
@@ -74,14 +108,36 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
 {
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
+  const int eventNumber = particle->parent_event()->event_number();
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::uniqueID(particle),particle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+  HepMcParticleLink dummyHMPL(HepMC::uniqueID(particle), eventNumber, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
   assert(dummyHMPL.cptr()==particle);
   // Create DVL info outside of leak check.
   SiHitCollection dum ("coll");
   Athena_test::Leakcheck check;
 
   SiHitCollection trans1 ("coll");
+  //check behaviour for delta-rays
+  {
+    for (int i=0; i < 10; i++) {
+      const double angle = i*0.2*M_PI;
+      HepMcParticleLink deltaRayLink(0, eventNumber, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+      std::vector< HepGeom::Point3D<double> > stepPoints(11);
+      for (int j=0; j<11; ++j) {
+        const double jd(j);
+        const double r(30.+110.*jd);
+        stepPoints.emplace_back(r*std::cos(angle),
+                                r*std::sin(angle),
+                                350.*jd);
+      }
+      const int o = i*100;
+      trans1.Emplace (stepPoints.at(i), stepPoints.at(i+1),
+                      16.5+o,
+                      17.5+o,
+                      deltaRayLink,
+                      19+o);
+    }
+  }
   for (int i=0; i < 10; i++) {
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
