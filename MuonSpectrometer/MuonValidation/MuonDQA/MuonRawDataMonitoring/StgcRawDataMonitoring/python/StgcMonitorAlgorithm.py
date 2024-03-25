@@ -39,7 +39,9 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
 
     #Shifter
     sTgcOverviewGroup  = helper.addGroup(sTgcMonAlg, 'sTgcOverview', globalPath + 'Shifter')
-    sTgcQuadOccupancyGroup     = helper.addGroup(sTgcMonAlg, 'sTgcQuadOccupancy', globalPath + 'Shifter/Occupancy')
+    sTgcQuadOccupancyGroupPad = helper.addGroup(sTgcMonAlg, 'sTgcQuadOccupancyPad', globalPath + 'Shifter/Occupancy')
+    sTgcQuadOccupancyGroupStrip = helper.addGroup(sTgcMonAlg, 'sTgcQuadOccupancyStrip', globalPath + 'Shifter/Occupancy')
+    sTgcQuadOccupancyGroupWire = helper.addGroup(sTgcMonAlg, 'sTgcQuadOccupancyWire', globalPath + 'Shifter/Occupancy')
     sTgcTimingGroup = helper.addGroup(sTgcMonAlg, 'sTgcTiming', globalPath + 'Shifter/Timing')
     sTgcPadTriggerShifterGroup = helper.addGroup(sTgcMonAlg, 'padTriggerShifter', globalPath + 'Shifter/')
     sTgcLBshifterGroup = helper.addGroup(sTgcMonAlg, 'sTgcLumiblock', globalPath + 'Shifter/Lumiblock/')
@@ -243,15 +245,15 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
         
         titleStationEtaSectorPadHitMap  = f'L{layerIndex}; Sector; Quad; Hits'
         varStationEtaSectorPadHitMap    = f'sector_layer_{layerIndex},stationEta_layer_{layerIndex};Pad_quad_occupancy_per_sector_Layer{layerIndex}'
-        sTgcQuadOccupancyGroup.defineHistogram(varStationEtaSectorPadHitMap, type = 'TH2F', title = titleStationEtaSectorPadHitMap, path = 'Pad', xbins = sectorMax, xmin = 0.5, xmax = sectorMax + 0.5, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
+        sTgcQuadOccupancyGroupPad.defineHistogram(varStationEtaSectorPadHitMap, type = 'TH2F', title = titleStationEtaSectorPadHitMap, path = 'Pad', xbins = sectorMax, xmin = 0.5, xmax = sectorMax + 0.5, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
             
         titleStationEtaSectorStripHitMap  = f'L{layerIndex}; Sector; Quad; Hits'
         varStationEtaSectorStripHitMap    = f'sector_layer_{layerIndex},stationEta_layer_{layerIndex};Strip_quad_occupancy_per_sector_Layer{layerIndex}'
-        sTgcQuadOccupancyGroup.defineHistogram(varStationEtaSectorStripHitMap, type = 'TH2F', title = titleStationEtaSectorStripHitMap, path = 'Strip', xbins = sectorMax, xmin = 0.5, xmax = sectorMax + 0.5, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
+        sTgcQuadOccupancyGroupStrip.defineHistogram(varStationEtaSectorStripHitMap, type = 'TH2F', title = titleStationEtaSectorStripHitMap, path = 'Strip', xbins = sectorMax, xmin = 0.5, xmax = sectorMax + 0.5, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
 
         titleStationEtaSectorWireGroupHitMap  = f'L{layerIndex}; Sector; Quad; Hits'
         varStationEtaSectorWireGroupHitMap    = f'sector_layer_{layerIndex},stationEta_layer_{layerIndex};Wire_quad_occupancy_per_sector_Layer{layerIndex}'
-        sTgcQuadOccupancyGroup.defineHistogram(varStationEtaSectorWireGroupHitMap, type = 'TH2F', title = titleStationEtaSectorWireGroupHitMap, path = 'Wire', xbins = sectorMax, xmin = 0.5, xmax = sectorMax + 0.5, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
+        sTgcQuadOccupancyGroupWire.defineHistogram(varStationEtaSectorWireGroupHitMap, type = 'TH2F', title = titleStationEtaSectorWireGroupHitMap, path = 'Wire', xbins = sectorMax, xmin = 0.5, xmax = sectorMax + 0.5, ybins = 2*stationEtaMax + 1, ymin = -stationEtaMax - 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
 
         titleTimingPadTrack  = f'L{layerIndex}; Sector; Pad Timing (on-track) [ns]; Hits'
         varTimingPadTrack    = f'padTrackSectorSided_layer_{layerIndex},padTrackTiming_layer_{layerIndex};All_pad_timing_per_sector_Layer{layerIndex}'
