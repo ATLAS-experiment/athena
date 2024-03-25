@@ -23,61 +23,6 @@ from RecExConfig.RecFlags import rec
 ## This handels multiple output streams
 from OutputStreamAthenaPool.MultipleStreamManager import MSMgr # For release 14.1.0.2 and newer
 
-
-# Method for adding items from the input file to the output file,
-# except the ones specified in the exclude list
-def addAllItemsFromInputExceptExcludeList(streamName,ExcludeList):
-    try:
-        stream = MSMgr.GetStream(streamName)
-    except Exception:
-        raise RuntimeError("Unable to get stream %s"%streamName)
-    
-    # Get the list of all input event-type containers
-    try :
-        # This is the new way, in 15.4.0
-        from RecExConfig.InputFilePeeker import inputFileSummary
-        pass
-    except ImportError :
-        # This is here for backwards compatibility
-        from RecExCommon.InputFilePeeker import inputFileSummary
-        pass
-    fullList = []
-    if inputFileSummary['file_type'] == 'pool' :
-        fullListTuple = inputFileSummary['eventdata_items']
-        for iTuple in fullListTuple :
-            item = iTuple[0]+"#"+iTuple[1]
-            fullList += [item]
-            pass
-        stream.AddItem(fullList)
-        pass
-    else:
-        primaryDPD_BasicOutput_msg.info( 'Input file is NOT a pool file! Cannot build the list of eventdata_items from a non-pool input file for the output stream %s!', streamName )
-        pass
-
-    # Now, process the ExcludeList and only try to exclude what is actually there
-    _exclList = []
-    for excludeItem in ExcludeList :
-        if fullList.__contains__(excludeItem):
-            _exclList.append(excludeItem)
-            pass
-        # Deal with a wildcard
-        if excludeItem.endswith("*"):
-            for fullItem in fullList:
-                if fullItem.startswith( excludeItem.rstrip("*") ):
-                    _exclList.append(fullItem)
-                    pass
-                pass
-            pass
-        pass
-
-    # Actually remove the scheduled items from the output stream
-    stream.RemoveItem(_exclList)
-    return
-
-
-
-
-
 ##====================================================================
 ## The basic output is needed for all output streams, if you build your output up by hand
 ##====================================================================
