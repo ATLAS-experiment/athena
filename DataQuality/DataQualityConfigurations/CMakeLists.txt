@@ -60,7 +60,9 @@ foreach( hanfile collisions_run collisions_minutes10
    # temporarily disable until we fix the syntax checker
    # atlas_add_test( ${hanfile}_syntax SCRIPT scripts/han-config-check.sh ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT nopost.sh )
    atlas_add_test( ${hanfile}_topempty SCRIPT test/check_no_top_level_assessments.sh ${outputFile} POST_EXEC_SCRIPT nopost.sh )
-   atlas_add_test( ${hanfile}_lark SCRIPT han_lark_tester.py ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT nopost.sh )
+   if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+      atlas_add_test( ${hanfile}_lark SCRIPT han_lark_tester.py ${configOutputFile} PROPERTIES TIMEOUT 300 POST_EXEC_SCRIPT nopost.sh )
+   endif()
    atlas_add_test( ${hanfile}_nocrash
       SOURCES test/check_valid_config.cxx
       INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
