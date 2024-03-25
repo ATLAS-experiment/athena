@@ -620,15 +620,15 @@ def getConfig_gLJ():
     confObj = odict()
     confObj["ptMinToTopo1"] = 6 
     confObj["ptMinToTopo2"] = 6 
-    confObj["seedThrA"] = 3
-    confObj["seedThrB"] = 3
-    confObj["seedThrC"] = 3 
+    confObj["seedThrA"] = 20
+    confObj["seedThrB"] = 20
+    confObj["seedThrC"] = 20 
     confObj["rhoTowerMinA"] = -9.6 
     confObj["rhoTowerMinB"] = -9.6 
     confObj["rhoTowerMinC"] = -9.6 
-    confObj["rhoTowerMaxA"] = 0.25 
-    confObj["rhoTowerMaxB"] = 0.25 
-    confObj["rhoTowerMaxC"] = 0.25 
+    confObj["rhoTowerMaxA"] = 10 
+    confObj["rhoTowerMaxB"] = 10 
+    confObj["rhoTowerMaxC"] = 10 
     confObj["resolutionMeV"] = 200
 
     # Check that all values are integers in MeV
@@ -687,7 +687,7 @@ def getConfig_gXE():
     confObj["XEJWOJ_a_C"] = 1003 
     confObj["XEJWOJ_b_A"] = 409 
     confObj["XEJWOJ_b_B"] = 409 
-    confObj["XEJWOJ_b_C"] = 409 
+    confObj["XEJWOJ_b_C"] = 0 
     confObj["XEJWOJ_c_A"] = 0 
     confObj["XEJWOJ_c_B"] = 0 
     confObj["XEJWOJ_c_C"] = 0 
