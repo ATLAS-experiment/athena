@@ -21,6 +21,7 @@
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include <memory>
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 
 namespace Analysis {
 
@@ -276,8 +277,9 @@ namespace Analysis {
             // Collect up tracks
 	    if(m_excludeCrossJpsiTracks){
                 // Extract tracks from J/psi
-                const xAOD::TrackParticle* jpsiTP1 = (*vxcItr)->trackParticle(0);
-                const xAOD::TrackParticle* jpsiTP2 = (*vxcItr)->trackParticle(1);
+                // Find the original track particle of GSF track particles
+                const xAOD::TrackParticle* jpsiTP1 = m_useGSFTrack[0] ? xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( (*vxcItr)->trackParticle(0) ) : (*vxcItr)->trackParticle(0);
+                const xAOD::TrackParticle* jpsiTP2 = m_useGSFTrack[1] ? xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( (*vxcItr)->trackParticle(1) ) : (*vxcItr)->trackParticle(1);
             	jpsiTracks.push_back(jpsiTP1);
             	jpsiTracks.push_back(jpsiTP2);
 	    }
@@ -333,8 +335,10 @@ namespace Analysis {
 	    //If requested, only exclude duplicates in the same tripplet
             if(!m_excludeCrossJpsiTracks){
                 jpsiTracks.resize(2);
-                jpsiTracks[0] = jpsiTP1;
-                jpsiTracks[1] = jpsiTP2;
+
+                // Find the original track particle of GSF track particles
+                jpsiTracks[0] = m_useGSFTrack[0] ? xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( jpsiTP1 ) : jpsiTP1;
+                jpsiTracks[1] = m_useGSFTrack[1] ? xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( jpsiTP2 ) : jpsiTP2;
             }
 
             // Loop over ID tracks, call vertexing
