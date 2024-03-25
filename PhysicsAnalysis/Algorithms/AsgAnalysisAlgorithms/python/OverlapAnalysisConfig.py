@@ -19,6 +19,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('boostedLeptons', False, type=bool)
         self.addOption ('postfix', '', type=str)
         self.addOption ('nominalOnly', False, type=bool)
+        self.addOption ('nominalOnlyUnifiedSelection', False, type=bool)
         self.addOption ('jets', "", type=str)
         self.addOption ('fatJets', "", type=str)
         self.addOption ('electrons', "", type=str)
@@ -54,6 +55,18 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('doEleFatJetOR', True, type=bool)
         self.addOption ('doJetFatJetOR', True, type=bool)
 
+    def makeUnionPreselectionAlg(self, config, inputCollection):
+        """
+        Create a new selection for the inputCollection ('container.selection')
+        that is the union over all systematics of 'selection'. This allows us
+        to run nominal-only overlap removal while taking into account the impact
+        of systematics on object acceptance.
+        """
+        container, selection = config.readNameAndSelection( inputCollection )
+        alg = config.createAlgorithm( 'CP::AsgUnionSelectionAlg', 'UnionSelectionAlgForOR_' + inputCollection.split(".")[0] )
+        alg.preselection = selection
+        alg.particles = container
+        alg.selectionDecoration = 'unifiedSelectForOR'
 
     def makeAlgs (self, config) :
 
@@ -107,64 +120,88 @@ class OverlapAnalysisConfig (ConfigBlock):
 
         electrons = None
         if self.electrons != "" :
+            if self.nominalOnlyUnifiedSelection:
+                self.makeUnionPreselectionAlg(config, self.electrons)
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORElectronsSelectAlg' + postfix )
             electrons, alg.preselection = config.readNameAndSelection (self.electrons)
             alg.particles = electrons
             alg.selectionDecoration = self.inputLabel + ',as_char'
             # if  OR added to all selections, don't need standalone selection flag
             if self.selectionName != '':
-                config.addOutputVar (self.electrons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
+                config.addOutputVar (self.electrons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            if self.nominalOnlyUnifiedSelection:
+                alg.preselection = 'unifiedSelectForOR'
 
         photons = None
         if self.photons != "" :
+            if self.nominalOnlyUnifiedSelection:
+                self.makeUnionPreselectionAlg(config, self.photons)
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORPhotonsSelectAlg' + postfix )
             photons, alg.preselection = config.readNameAndSelection (self.photons)
             alg.particles = photons
             alg.selectionDecoration = self.inputLabel + ',as_char'
             if self.selectionName != '':
-                config.addOutputVar (self.photons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
+                config.addOutputVar (self.photons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            if self.nominalOnlyUnifiedSelection:
+                alg.preselection = 'unifiedSelectForOR'
 
         muons = None
         if self.muons != "" :
+            if self.nominalOnlyUnifiedSelection:
+                self.makeUnionPreselectionAlg(config, self.muons)
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORMuonsSelectAlg' + postfix )
             muons, alg.preselection = config.readNameAndSelection (self.muons)
             alg.particles = muons
             alg.selectionDecoration = self.inputLabel + ',as_char'
             if self.selectionName != '':
-                config.addOutputVar (self.muons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
+                config.addOutputVar (self.muons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            if self.nominalOnlyUnifiedSelection:
+                alg.preselection = 'unifiedSelectForOR'
 
         taus = None
         if self.taus != "" :
+            if self.nominalOnlyUnifiedSelection:
+                self.makeUnionPreselectionAlg(config, self.taus)
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORTausSelectAlg' + postfix )
             taus, alg.preselection = config.readNameAndSelection (self.taus)
             alg.particles = taus
             alg.selectionDecoration = self.inputLabel + ',as_char'
             if self.selectionName != '':
-                config.addOutputVar (self.taus.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
+                config.addOutputVar (self.taus.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            if self.nominalOnlyUnifiedSelection:
+                alg.preselection = 'unifiedSelectForOR'
 
         jets = None
         if self.jets != "" :
+            if self.nominalOnlyUnifiedSelection:
+                self.makeUnionPreselectionAlg(config, self.jets)
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORJetsSelectAlg' + postfix )
             jets, alg.preselection = config.readNameAndSelection (self.jets)
             alg.particles = jets
             alg.selectionDecoration = self.inputLabel + ',as_char'
             if self.selectionName != '':
-                config.addOutputVar (self.jets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
+                config.addOutputVar (self.jets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            if self.nominalOnlyUnifiedSelection:
+                alg.preselection = 'unifiedSelectForOR'
 
         fatJets = None
         if self.fatJets != "" :
+            if self.nominalOnlyUnifiedSelection:
+                self.makeUnionPreselectionAlg(config, self.fatJets)
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg','ORFatJetsSelectAlg' + postfix )
             fatJets, alg.preselection = config.readNameAndSelection (self.fatJets)
             alg.particles = fatJets
             alg.selectionDecoration = self.inputLabel + ',as_char'
             if self.selectionName != '':
-                config.addOutputVar (self.fatJets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly)
+                config.addOutputVar (self.fatJets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or', noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            if self.nominalOnlyUnifiedSelection:
+                alg.preselection = 'unifiedSelectForOR'
 
 
         # Create the overlap removal algorithm:
         alg = config.createAlgorithm( 'CP::OverlapRemovalAlg', 'OverlapRemovalAlg' + postfix )
         alg.OutputLabel = self.outputLabel
-        if self.nominalOnly :
+        if self.nominalOnly or self.nominalOnlyUnifiedSelection :
             alg.affectingSystematicsFilter = '.*'
         if electrons :
             alg.electrons = electrons
@@ -332,7 +369,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.JetFatJetORT.DR = 1.0
             alg.overlapTool.JetFatJetORT.OutputPassValue = True
         
-        if self.nominalOnly :
+        if self.nominalOnly or self.nominalOnlyUnifiedSelection :
             if electrons :
                 alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORElectronsCopyAlg' + postfix)
                 alg.particles = electrons
