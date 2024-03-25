@@ -130,6 +130,7 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   defaultTrigTrackingFlags(flags)
   
   flags.minPT               = [flags.pTmin] #ITk flags have eta dependant settings
+  flags.minClusters         = [9,8,7]       #offline defaults are [9,8,7]
   flags.Xi2max              = [9.]
   flags.Xi2maxNoAdd         = [25.]
   flags.nHolesMax           = [2]
@@ -141,8 +142,8 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   flags.doTRT               = False
   flags.doZFinder           = False
   flags.DoPhiFiltering      = True
-  flags.UsePixelSpacePoints = True # In LRT cases they use only SCT SP, but for ITk we want pixel SP
-  flags.doDisappearingTrk   = False # Not working yet for ITk
+  flags.UsePixelSpacePoints = True          # In LRT they use only SCT SP, but for ITk we want pixel SP
+  flags.doDisappearingTrk   = False         # Not working yet for ITk
   flags.doCaloSeededBremSi  = False
   flags.doCaloSeededAmbiSi  = False
   flags.DoubletDR_Max       = 150.0
@@ -235,6 +236,24 @@ def signatureActions(func):
   return invokeSteps
 
 
+def tsetter(var, value):
+  """ use previous type of the var and convert value to it
+      for the moment just makes list of a value if needed
+  """
+  type2set = type(var)
+  typeOfValue = type(value)
+  if type2set == typeOfValue:
+    var = value
+  else:
+    basic = (bool, str, int, float, type(None))
+    if isinstance(var,basic):
+      var = value
+    else:
+      var = [value]
+
+  return var
+    
+  
 @signatureActions
 def electron(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
   
@@ -246,7 +265,8 @@ def electron(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.phiHalfWidth        = 0.1
   flags.doCloneRemoval      = True 
   flags.doSeedRedundancyCheck = True
-  flags.doTRT               = True
+  if recoMode=="InDet":
+    flags.doTRT             = True
   flags.keepTrackParameters = True
   flags.electronPID         = True
   return flags
@@ -284,7 +304,9 @@ def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.name     = "tauCore"
   flags.suffix   = "TauCore"
   flags.roi      = "HLT_Roi_TauCore"
-  flags.pTmin    = flags.minPT = 0.8*Units.GeV
+  flags.pTmin    = 0.8*Units.GeV
+  flags.minPT    = tsetter(flags.minPT, flags.pTmin)
+
   flags.holeSearch_FTF = True
   return flags
   
@@ -302,7 +324,8 @@ def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.addSingleTrackVertices = True
   flags.vertex         = "HLT_IDVertex_Tau"
   flags.electronPID    = False
-  flags.pTmin          = flags.minPT = 0.8*Units.GeV
+  flags.pTmin          = 0.8*Units.GeV
+  flags.minPT = tsetter(flags.minPT, flags.pTmin)
   return flags
 
 @signatureActions
@@ -315,8 +338,9 @@ def bjet(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFl
   flags.etaHalfWidth    = 0.4
   flags.phiHalfWidth    = 0.4
   flags.zedHalfWidth    = 10.0
-  flags.pTmin           = flags.minPT = 0.8*Units.GeV
-  flags.Xi2max          = 12.
+  flags.pTmin           = 0.8*Units.GeV
+  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.Xi2max = tsetter(flags.Xi2max,12.)
   return flags
 
 @signatureActions
@@ -332,7 +356,8 @@ def jetSuper(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.etaHalfWidth = 0.3
   flags.phiHalfWidth = 0.3
   flags.doFullScan   = True
-  flags.pTmin = flags.minPT       = 1*Units.GeV
+  flags.pTmin        = 1*Units.GeV
+  flags.minPT = tsetter(flags.minPT, flags.pTmin)
   #-----
   flags.doTRT           = False
   flags.DoubletDR_Max   = 200
@@ -352,7 +377,9 @@ def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.suffix   = "MinBias"
   flags.roi      = "HLT_Roi_MinBias"
   flags.doFullScan      = True
-  flags.pTmin  = flags.minPT         = 0.1*Units.GeV # TODO: double check
+  flags.pTmin    = 0.1*Units.GeV # TODO: double check
+  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+
   flags.doTRT           = False      #backward compatibility with EFIDTracking.py:makeInDetPatternRecognition
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
@@ -413,7 +440,7 @@ def fullScan(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.UseTrigSeedML   = 4
   flags.dodEdxTrk         = True
   flags.doHitDV           = True
-  flags.doDisappearingTrk = True
+  flags.doDisappearingTrk = True if recoMode=="InDet" else False
   flags.roadWidth =         5.
   return flags
 
@@ -456,24 +483,27 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
 
-  flags.minPT = flags.pTmin = 0.5*Units.GeV
+  flags.minPT = tsetter(flags.minPT, 0.5*Units.GeV)
+
   flags.nClustersMin        = 4
   flags.minSiNotShared      = 3
   flags.maxShared           = 0
   flags.nHolesMax           = 3
   flags.maxSiHoles          = 3
   flags.maxSCTHoles         = 3
-  flags.maxPixelHoles       = 3
-  flags.maxDoubleHoles      = 1
+  flags.maxPixelHoles       = tsetter(flags.maxPixelHoles,3)
   flags.maxPrimaryImpact    = 1000.
   flags.maxRPhiImpact       = 1000.
-  flags.maxZImpact          = 10000.
-  flags.Xi2max              = 60.  if recoMode=="InDet" else [60.]
-  flags.Xi2maxNoAdd         = 100. if recoMode=="InDet" else [100.] 
+
+  flags.Xi2max         = tsetter(flags.Xi2max,        60.)
+  flags.Xi2maxNoAdd    = tsetter(flags.Xi2maxNoAdd,   100.)
+  flags.maxDoubleHoles = tsetter(flags.maxDoubleHoles,1)
+  
   flags.nWeightedClustersMin= 8
   flags.useSeedFilter       = True
   flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
   flags.roadWidth =        75.
+  flags.maxZImpact=        tsetter(flags.maxZImpact,    10000.)
   if recoMode=="InDet":
     flags.minTRTonTrk         = 20
 
@@ -514,15 +544,9 @@ def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.nClustersMin        = 8
   flags.isLRT               = True
   #pt config
-  flags.maxZImpact        = 500.
   flags.maxRPhiImpact     = 300.
   flags.maxRPhiImpactEM   = 300.
   flags.maxEta            = 2.7
-  flags.maxDoubleHoles    = 0
-  flags.maxSiHoles        = 2
-  flags.maxPixelHoles     = 1
-  flags.maxSCTHoles       = 1
-  flags.minSiClusters     = 8
   flags.doEmCaloSeed      = False
   return flags
 
@@ -547,16 +571,11 @@ def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.doResMon            = True
   flags.DoPhiFiltering      = False
   #pt config
-  flags.maxZImpact        = 500.
   flags.maxRPhiImpact     = 300.
   flags.maxRPhiImpEM      = 300.
   flags.maxEta            = 2.7
-  flags.maxDoubleHoles    = 0
-  flags.maxSiHoles        = 2
-  flags.maxPixelHoles     = 1
-  flags.maxSCTHoles       = 1
-  flags.minSiClusters     = 8
   flags.doEmCaloSeed      = False
+
   return flags
 
 
@@ -569,11 +588,11 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.suffix   = "TauLRT"
   flags.roi      = "HLT_Roi_TauLRT"
   flags.vertex   = "HLT_IDVertex_Tau" # TODO: does this need renaming?
-  flags.pTmin = flags.minPT       = 0.8*Units.GeV
+  flags.pTmin    = 0.8*Units.GeV
+  flags.minPT = tsetter(flags.minPT, flags.pTmin)
   flags.etaHalfWidth = 0.4
   flags.phiHalfWidth = 0.4
   flags.zedHalfWidth = 225.
-  flags.doTRT        = True
   flags.UsePixelSpacePoints = False
   flags.Triplet_D0Max       = 300.
   flags.TrackInitialD0Max   = 300.
@@ -581,16 +600,13 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.nClustersMin        = 8
   flags.isLRT               = True
   #pt config
-  flags.maxZImpact        = 500.
   flags.maxRPhiImpact     = 300.
   flags.maxRPhiImpEM      = 300.
   flags.maxEta            = 2.7
-  flags.maxDoubleHoles    = 0
-  flags.maxSiHoles        = 2
-  flags.maxPixelHoles     = 1
-  flags.maxSCTHoles       = 1
-  flags.minSiClusters     = 8
   flags.doEmCaloSeed      = False
+  if recoMode=="InDet":
+    flags.doTRT        = True
+    
   return flags
 
 
@@ -610,16 +626,11 @@ def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.nClustersMin        = 8
   flags.isLRT               = True
   #pt config
-  flags.maxZImpact        = 500.
   flags.maxRPhiImpact     = 300.
   flags.maxRPhiImpactEM   = 300.
   flags.maxEta            = 2.7
-  flags.maxDoubleHoles    = 0
-  flags.maxSiHoles        = 2
-  flags.maxPixelHoles     = 1
-  flags.maxSCTHoles       = 1
-  flags.minSiClusters     = 8
   flags.doEmCaloSeed      = False
+
   return flags
 
 
@@ -644,16 +655,11 @@ def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.nClustersMin          = 8
   flags.isLRT                 = True
   #pt config
-  flags.maxZImpact        = 500.
   flags.maxRPhiImpact     = 300.
   flags.maxRPhiImpactEM   = 300.
   flags.maxEta            = 2.7
-  flags.maxDoubleHoles    = 0
-  flags.maxSiHoles        = 2
-  flags.maxPixelHoles     = 1
-  flags.maxSCTHoles       = 1
-  flags.minSiClusters     = 8
   flags.doEmCaloSeed      = False
+  
   return flags
 
 
@@ -679,16 +685,11 @@ def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.nClustersMin          = 8
   flags.isLRT                 = True
   #pt config
-  flags.maxZImpact        = 500.
   flags.maxRPhiImpact     = 300.
   flags.maxRPhiImpactEM   = 300.
   flags.maxEta            = 2.7
-  flags.maxDoubleHoles    = 0
-  flags.maxSiHoles        = 2
-  flags.maxPixelHoles     = 1
-  flags.maxSCTHoles       = 1
-  flags.minSiClusters     = 8
   flags.doEmCaloSeed      = False
+  
   return flags
 
 
@@ -713,16 +714,11 @@ def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.nClustersMin          = 8
   flags.isLRT                 = True
   #pt config
-  flags.maxZImpact        = 500.
   flags.maxRPhiImpact     = 300.
   flags.maxRPhiImpactEM   = 300.
   flags.maxEta            = 2.7
-  flags.maxDoubleHoles    = 0
-  flags.maxSiHoles        = 2
-  flags.maxPixelHoles     = 1
-  flags.maxSCTHoles       = 1
-  flags.minSiClusters     = 8
   flags.doEmCaloSeed      = False
+
   return flags
 
 
@@ -734,17 +730,22 @@ def derivedFromFlags(flags: AthConfigFlags, recoMode : str):
   flags.tracks_IDTrig = \
     collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau"))
 
-  if flags.isLRT:
-    flags.minClusters         = 8 if recoMode=="InDet" else [8]
-    flags.nHolesGapMax        = 1 if recoMode=="InDet" else [1]
-    flags.nWeightedClustersMin= 8 if recoMode=="InDet" else [8]
-    flags.maxSiHoles          = 2 if recoMode=="InDet" else [2]
-    flags.maxSCTHoles         = 1 if recoMode=="InDet" else [1]
-    flags.maxPixelHoles       = 1 if recoMode=="InDet" else [1]
-    flags.maxDoubleHoles      = 0 if recoMode=="InDet" else [0]
+  if flags.isLRT:             # to be moved to a separate function once LRTs differ 
+    flags.minClusters         = tsetter(flags.minClusters         , 8)
+    flags.nHolesGapMax        = tsetter(flags.nHolesGapMax        , 1)
+    flags.nWeightedClustersMin= tsetter(flags.nWeightedClustersMin, 8)
+    flags.maxSiHoles          = tsetter(flags.maxSiHoles          , 2)
+    flags.maxSCTHoles         = tsetter(flags.maxSCTHoles         , 1)
+    flags.maxPixelHoles       = tsetter(flags.maxPixelHoles       , 1)
+    flags.maxDoubleHoles      = tsetter(flags.maxDoubleHoles      , 0)
+    flags.maxZImpact          = tsetter(flags.maxZImpact          , 500.)
+    
     
   if recoMode == "ITk":
     flags.extension           = flags.input_name       #needed in the ITk mode?
+    
+    if flags.isLRT:
+      flags.UsePixelSpacePoints = True                 #In LRT cases they use only SCT SP, but for ITk we want pixel SP
 
 
 def collToRecordable(flags,name):
@@ -771,7 +772,6 @@ def collToRecordable(flags,name):
 def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.RoiZedWidthDefault', 180.0 * Units.mm)
   flags.addFlag(f'{category}.doGPU', False)
-  flags.addFlag(f'{category}.fixSeedPhi', True)
 
   
 import unittest
