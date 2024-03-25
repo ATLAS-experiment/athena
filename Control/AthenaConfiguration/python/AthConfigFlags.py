@@ -486,7 +486,7 @@ class AthConfigFlags(object):
         newflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon')
         """
 
-        _msg.info("cloning flags and replacing %s by %s", subsetToReplace, replacementSubset)
+        _msg.debug("cloning flags and replacing %s by %s", subsetToReplace, replacementSubset)
 
         self._loadDynaFlags( subsetToReplace )
         self._loadDynaFlags( replacementSubset )
