@@ -74,7 +74,7 @@ StatusCode RoIsUnpackingToolBase::decodeMapping( std::function<bool(const std::s
           HLT::Identifier legIdentifier = TrigCompositeUtils::createLegName(chainIdentifier, counter);
           m_thresholdToChainMapping[ thresholdIdentifier ].push_back( legIdentifier );
           m_legToChainMapping.insert( std::make_pair( legIdentifier,  chainIdentifier ) );
-          ATH_MSG_INFO( "Associating additional chain leg " << legIdentifier
+          ATH_MSG_DEBUG( "Associating additional chain leg " << legIdentifier
                         << " with threshold " << thresholdIdentifier );
         }
       }
