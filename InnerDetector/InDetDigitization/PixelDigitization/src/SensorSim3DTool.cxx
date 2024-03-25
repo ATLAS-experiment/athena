@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SensorSim3DTool.h"
@@ -119,7 +119,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
 
   // pre-make HepMcParticleLink
-  auto particleLink = HepMcParticleLink(phit->truthID(), phit.eventId(), idxFlag, HepMcParticleLink::IS_ID, ctx);
+  auto particleLink = HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
   const double pHitTime = hitTime(phit);
 
   if (m_radiationDamageSimulationType != RadiationDamageSimulationType::NO_RADIATION_DAMAGE) {
@@ -264,7 +264,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
       float ramoInit_mizj  = ramoPotentialMap.getContent(ramo_init_bin_x_zj, ramo_init_bin_y_mi);
       float ramoInit_mimj  = ramoPotentialMap.getContent(ramo_init_bin_x_mj, ramo_init_bin_y_mi);
 
-      auto mc_particle_link = HepMcParticleLink(phit->truthID(), phit.eventId(), idxFlag, HepMcParticleLink::IS_ID, ctx);
+      auto mc_particle_link = HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
       const auto hit_time = hitTime(phit);
 
       //Loop over charge-carrier pairs, we're looping over electrons and holes at the same time

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////
@@ -424,14 +424,14 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
   SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibData(m_offlineCalibDataKey, ctx);
-  std::vector<int> truthIdList;
+  std::vector<int> trkNo;
   std::vector<Identifier> detEl;
 
   while (thpcsi.nextDetectorElement(i, e)) {
 
     Pixel_detElement_RIO_map PixelDetElClusterMap;
 
-    truthIdList.clear();
+    trkNo.clear();
     detEl.clear();
 
     while (i != e) {
@@ -455,7 +455,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
       std::vector<HepMcParticleLink> hit_vector; //Store the hits in merged cluster
 
-      const int truthID = hit->truthID();
+      const int trkn = hit->truthBarcode();
 
       const Identifier hitId = hitSiDetElement->identify(); // Isn't this is identical to moduleID?
       //const IdentifierHash hitIdHash = hitSiDetElement->identifyHash();
@@ -463,16 +463,16 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
       bool isRep = false;
 
-      for (int j : truthIdList) {
+      for (int j : trkNo) {
         for (auto & k : detEl) {
-          if ((truthID > 0) && (truthID == j) && (hitId == k)) {isRep = true; break;}
+          if ((trkn > 0) && (trkn == j) && (hitId == k)) {isRep = true; break;}
         }
         if (isRep) break;
       }
 
       if (isRep) continue;
 
-      truthIdList.push_back(truthID);
+      trkNo.push_back(trkn);
       detEl.push_back(hitId);
 
       HepGeom::Point3D<double> localStartPosition = hit->localStartPosition();
