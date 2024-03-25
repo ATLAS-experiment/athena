@@ -386,9 +386,9 @@ void SCT_SurfaceChargesGenerator::processSiHit(const SiDetectorElement* element,
   // check the status of truth information for this SiHit
   // some Truth information is cut for pile up events
   const HepMcParticleLink::PositionFlag idxFlag = (p_eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink trklink{HepMcParticleLink(phit.truthID(), p_eventId, idxFlag, HepMcParticleLink::IS_ID, ctx)};
+  const HepMcParticleLink trklink{HepMcParticleLink(phit.truthBarcode(), p_eventId, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME
   SiCharge::Process hitproc{SiCharge::track};
-  if (phit.truthID() != 0) {
+  if (phit.truthBarcode() != 0) {
     if (not trklink.isValid()) {
       hitproc = SiCharge::cut_track;
     }

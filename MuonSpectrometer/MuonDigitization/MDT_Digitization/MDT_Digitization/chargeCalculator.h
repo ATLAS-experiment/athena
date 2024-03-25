@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_CHARGECALCULATOR_H
@@ -38,7 +38,7 @@ to the third digit of decimal number of the  pdgid.
 //
 double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
     const HepMcParticleLink::PositionFlag idxFlag = (eventId == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-    const HepMcParticleLink trkParticle(hit.truthID(), eventId, idxFlag, HepMcParticleLink::IS_ID);
+    const HepMcParticleLink trkParticle(hit.truthBarcode(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
     HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
     double qcharge = 1.;
     if (genParticle) {
