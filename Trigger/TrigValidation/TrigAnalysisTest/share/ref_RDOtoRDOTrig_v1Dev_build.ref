@@ -435,6 +435,10 @@ HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9:
     3: 5
 HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9L:
   eventCount: 0
+HLT_2j100_2timeSig15_L1jJ90:
+  eventCount: 0
+HLT_2j100_2timeSig_L1jJ90:
+  eventCount: 0
 HLT_2j100_L1CEP-CjJ100:
   eventCount: 0
 HLT_2j100_L1CEP-CjJ90:
@@ -1345,6 +1349,30 @@ HLT_2j45_0eta290_020jvt_bgn270_j0_HT290_j0_DJMASS700j35_pf_ftf_L1HT150-jJ50s5pET
     0: 12
     1: 54
     2: 1
+HLT_2j45_2j45_2timeSig15_L14jJ40:
+  eventCount: 2
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 32
+HLT_2j45_2j45_2timeSig_L14jJ40:
+  eventCount: 2
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 32
+HLT_2j45_2j45_3timeSig15_L14jJ40:
+  eventCount: 2
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 27
+HLT_2j45_2j45_3timeSig_L14jJ40:
+  eventCount: 2
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 27
 HLT_2j45c_2j35c_85bdips_roiftf_presel4c45_L14jJ40p0ETA25:
   eventCount: 6
   stepCounts:
@@ -2630,6 +2658,12 @@ HLT_3j45_j45_2timing_L14jJ40:
     0: 3
   stepFeatures:
     0: 37
+HLT_3j45_j45_3timeSig15_L14jJ40:
+  eventCount: 3
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 35
 HLT_3j45_j45_3timeSig_L14jJ40:
   eventCount: 3
   stepCounts:
@@ -16220,7 +16254,11 @@ HLT_j220_320eta490_L1J75p31ETA49:
   eventCount: 0
 HLT_j220_j150_2timeSig_L1jJ160:
   eventCount: 0
+HLT_j220_j150_2timing15_L1jJ160:
+  eventCount: 0
 HLT_j220_j150_2timing_L1jJ160:
+  eventCount: 0
+HLT_j220_j150_3timeSig15_L1jJ160:
   eventCount: 0
 HLT_j220_j150_3timeSig_L1jJ160:
   eventCount: 0
