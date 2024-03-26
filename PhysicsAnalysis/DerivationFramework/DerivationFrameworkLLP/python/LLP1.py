@@ -591,7 +591,7 @@ def LLP1Cfg(flags):
     # Output stream
     LLP1ItemList = LLP1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_LLP1", ItemList=LLP1ItemList, AcceptAlgs=["LLP1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_LLP1", AcceptAlgs=["LLP1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_LLP1", AcceptAlgs=["LLP1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 
