@@ -60,6 +60,20 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
 
     return acc
 
+def HLTJetFTagDecorationCfg(cfgFlags):
+    from ParticleJetTools.ParticleJetToolsConfig import getJetDeltaRFlavorLabelTool
+
+    acc = ComponentAccumulator()
+
+    jetDec = CompFactory.JetDecorationAlg(
+        name='hltJetLabelingAlg', 
+        JetContainer='HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
+        Decorators=[getJetDeltaRFlavorLabelTool()]) 
+
+    acc.addEventAlgo(jetDec)
+
+    return acc
+
 def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'):
 
     # Doesn't need to be configurable at the moment

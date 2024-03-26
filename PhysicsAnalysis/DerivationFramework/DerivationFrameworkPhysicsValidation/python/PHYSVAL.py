@@ -225,6 +225,9 @@ def PHYSVALCfg(flags):
         addTruth3ContentToSlimmerTool(PHYSVALSlimmingHelper)
         PHYSVALSlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupEvents','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         PHYSVALSlimmingHelper.SmartCollections += ['AntiKt4TruthJets']
+        # Decorate HLT jets with truth labels
+        from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
+        acc.merge(HLTJetFTagDecorationCfg(flags))
         # End of isMC clause
 
     PHYSVALSlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
