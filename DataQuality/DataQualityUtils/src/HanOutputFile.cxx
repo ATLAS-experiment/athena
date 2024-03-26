@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -40,6 +40,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <tuple> //for std::ignore
 
 #include "DataQualityInterfaces/HanUtils.h"
 #include "TPluginManager.h"
@@ -3273,7 +3274,7 @@ namespace dqutils
     myC_upperpad->cd();
     myC_upperpad->Clear(); // reset original canvas
     myC_main->DrawClonePad(); // clone contents of myC_main back into original canvas (will fix ownership shortly)
-    clonehist.release(); // this will be deleted by lowerpad cleanup
+    std::ignore = clonehist.release(); // this will be deleted by lowerpad cleanup
     // At this point myC_main contains the original lowerPad and upperPad, which contain clones of the original canvas
     // and ownership of clonehist. Iterate one level down and mark contained objects as deleteable. This will delete
     // the pads, as well as clonehist.
