@@ -1,0 +1,60 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_PADDESIGN_ICC
+#define MUONREADOUTGEOMETRYR4_PADDESIGN_ICC
+
+#include <MuonReadoutGeometryR4/PadDesign.h>
+
+namespace MuonGMR4 {
+    using CheckVector2D = PadDesign::CheckVector2D;   
+    inline int PadDesign::numPads() const { return m_numPadPhi * m_numPadEta; }
+    inline double PadDesign::firstPadPhiDiv() const { return m_firstPadPhiDiv; }
+    inline int PadDesign::numPadPhi() const { return m_numPadPhi; }
+    inline double PadDesign::anglePadPhi() const { return m_anglePadPhi; }
+    inline double PadDesign::padPhiShift() const { return m_padPhiShift; }
+    inline double PadDesign::firstPadHeight() const { return m_firstPadHeight; }
+    inline int PadDesign::numPadEta() const { return m_numPadEta; }
+    inline double PadDesign::padHeight() const { return m_padHeight; }
+    inline int PadDesign::maxPadEta() const { return m_maxPadEta; }
+    inline int PadDesign::padNumber(const int channel) const {
+        int padEta = padEtaPhi(channel).first;
+        int padPhi = padEtaPhi(channel).second;  
+        int padNumber = (padPhi - 1) * maxPadEta() + padEta;
+        return padNumber;
+    };
+    inline std::pair<int, int> PadDesign::padEtaPhi(const int channel) const {  
+        int padEta = (channel -1) % numPadEta() + 1;
+        int padPhi = (channel -1) / numPadEta() + 1; 
+        if (channel < 0 || padEta > numPadEta() || padPhi > numPadPhi()) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Pad channel " << channel << " is out of range. Maximum range: " << numPads());
+            ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" Pad channel: "<< channel<< " padEta: "<<padEta<<" numPadEta: "<<numPadEta()<<" padPhi "<<padPhi<<" numPadPhi: "<<numPadPhi()<<" total pads "<<numPads());
+            return std::make_pair(0, 0);
+        }
+        return std::make_pair(padEta, padPhi);
+    }
+    inline int PadDesign::padEta(const int channel) const {
+        return padEtaPhi(channel).first;
+    }
+    inline int PadDesign::padPhi(const int channel) const {
+        return padEtaPhi(channel).second;
+    }
+    inline double PadDesign::beamlineRadius() const {
+        return m_radius;
+    }
+    using localCornerArray = std::array<Amg::Vector2D, 4>;  
+    inline localCornerArray PadDesign::padCorners(const int channel) const {
+        return padCorners(padEtaPhi(channel));
+    }
+    inline Amg::Vector2D PadDesign::stripPosition(int channel) const {
+        if (padEta(channel) == 0 || padPhi(channel) == 0) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The pad number "<<channel
+                           <<" is out of range. Maximum range: " << numPads());
+            return Amg::Vector2D::Zero();
+        }
+        localCornerArray Corners = padCorners(channel);
+        Amg::Vector2D padCenter = 0.25 * (Corners[botLeft] + Corners[botRight] + Corners[topLeft] + Corners[topRight]);
+        return padCenter;
+    }
+}
+#endif

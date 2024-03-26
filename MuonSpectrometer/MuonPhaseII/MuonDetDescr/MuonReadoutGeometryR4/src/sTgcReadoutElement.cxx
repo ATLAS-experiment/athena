@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
@@ -14,6 +14,7 @@ using parameterBook = sTgcReadoutElement::parameterBook;
 std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
   if (pars.stripDesign) ostr<<"Strips: "<<(*pars.stripDesign)<<std::endl;
   if (pars.wireGroupDesign) ostr<<"Wire Groups: "<<(*pars.wireGroupDesign)<<std::endl;   
+  if (pars.padDesign) ostr<<"Pads: "<<(*pars.padDesign)<<std::endl;   
   return ostr;
 }
 
@@ -57,6 +58,17 @@ StatusCode sTgcReadoutElement::initElement() {
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
    }
+   for (unsigned int layer = 0; layer < m_pars.padLayers.size(); ++layer) {
+      IdentifierHash layHash{layer};
+      if (gasGapNumber(m_pars.padLayers[layer].hash()) != layHash) {
+         ATH_MSG_FATAL("Layer "<<m_pars.padLayers[layer]<<" has a very strange hash. Expect "<<layer);
+       return StatusCode::FAILURE;
+      }
+      ATH_CHECK(insertTransform(m_pars.padLayers[layer].hash(), 
+                                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
+                                    return toStation(store) * fromGapToChamOrigin(hash); 
+                                 }));     
+   }
    ActsGeometryContext gctx{};
    m_gasGapPitch = (center(gctx, createHash(1, sTgcIdHelper::sTgcChannelTypes::Strip, 0)) -
                    center(gctx, createHash(2, sTgcIdHelper::sTgcChannelTypes::Strip, 0))).mag(); 
@@ -72,8 +84,11 @@ Amg::Transform3D sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& m
    else if (chType(measHash) == ReadoutChannelType::Wire && gasGap < m_pars.wireGroupLayers.size()) {
       return m_pars.wireGroupLayers[gasGap].toOrigin();
    }
+   else if (chType(measHash) == ReadoutChannelType::Pad && gasGap < m_pars.padLayers.size()) {
+      return m_pars.padLayers[gasGap].toOrigin();
+   }
    else {
-      unsigned int maxReadoutLayers =  m_pars.stripLayers.size() + m_pars.wireGroupLayers.size();
+      unsigned int maxReadoutLayers =  m_pars.stripLayers.size() + m_pars.wireGroupLayers.size() + m_pars.padLayers.size();
       ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<< maxReadoutLayers);
       return Amg::Transform3D::Identity();
@@ -83,41 +98,51 @@ Amg::Transform3D sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& m
 Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& measHash) const {
    if (chType(measHash) == ReadoutChannelType::Strip) {
       Amg::Vector2D stripCenter{Amg::Vector2D::Zero()};
-      std::optional<Amg::Vector2D> stripCenterOpt = stripDesign(measHash).center(stripNumber(measHash));
+      std::optional<Amg::Vector2D> stripCenterOpt = stripDesign(measHash).center(channelNumber(measHash));
       if (!stripCenterOpt) {
-         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip" << stripNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip" << channelNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
          return stripCenter;
       }
       stripCenter = std::move(*stripCenterOpt);
-      if (stripNumber(measHash) == 1 && firstStripPitch(measHash) < stripPitch(measHash)) {
+      if (channelNumber(measHash) == 1 && firstStripPitch(measHash) < stripPitch(measHash)) {
          stripCenter.x() += 0.25 * stripWidth(measHash);
       }
-      if (stripNumber(measHash) == numStrips(measHash) && firstStripPitch(measHash) == stripPitch(measHash)) {
+      if (channelNumber(measHash) == numStrips(measHash) && firstStripPitch(measHash) == stripPitch(measHash)) {
          stripCenter.x() -= 0.25 * stripWidth(measHash);
       }
       return stripCenter;
    }
    else if (chType(measHash) == ReadoutChannelType::Wire) {
       Amg::Vector2D wireGroupCenter{Amg::Vector2D::Zero()};
-      std::optional<Amg::Vector2D> wireGroupCenterOpt = wireDesign(measHash).center(stripNumber(measHash));
+      std::optional<Amg::Vector2D> wireGroupCenterOpt = wireDesign(measHash).center(channelNumber(measHash));
       if (!wireGroupCenterOpt) {
-         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wireGroup" << stripNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wireGroup" << channelNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
          return wireGroupCenter;
       }
       wireGroupCenter = std::move(*wireGroupCenterOpt);
       unsigned int gasGap = gasGapNumber(measHash) + 1;
-      if (stripNumber(measHash) == 1) {
+      if (channelNumber(measHash) == 1) {
          ATH_MSG_DEBUG("The first wire pos is: " << wireGroupCenter.x() + (0.5 * firstWireGroupWidth(gasGap))* wirePitch(measHash) );
          wireGroupCenter.x() = 0.5*(wireGroupCenter.x() + (0.5 * firstWireGroupWidth(gasGap) - 1)* wirePitch(measHash) - 0.5 * lGapLength(measHash));
       }
 
-      else if (stripNumber(measHash) == numWireGroups(gasGap)) {
+      else if (channelNumber(measHash) == numWireGroups(gasGap)) {
          ATH_MSG_DEBUG("The last wire center before modification is: " << wireGroupCenter.x());
          wireGroupCenter.x() = 0.5 * (wireGroupCenter.x() + 0.5*lGapLength(measHash) - 
                               (wireGroupWidth(gasGap) * wirePitch(measHash)));
          ATH_MSG_DEBUG("The last wire center after modification is: " << wireGroupCenter.x());
       }
       return wireGroupCenter;
+   }
+   else if (chType(measHash) == ReadoutChannelType::Pad) {
+      Amg::Vector2D padCenter{Amg::Vector2D::Zero()};
+      std::optional<Amg::Vector2D> padCenterOpt = padDesign(measHash).stripPosition(channelNumber(measHash));
+      if (!padCenterOpt) {
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The pad" << channelNumber(measHash) << "doesn't is not a valid pad number.");
+         return padCenter;
+      }
+      padCenter = std::move(*padCenterOpt);
+      return padCenter;
    }
    else {
       ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<"Invalid channel type: " << chType(measHash));
@@ -129,7 +154,7 @@ Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContex
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    unsigned int gasGap = gasGapNumber(measHash);
    if (chType(measHash) == ReadoutChannelType::Strip && gasGap < m_pars.stripLayers.size()) {
-      return localToGlobalTrans(ctx, lHash) * m_pars.stripLayers[gasGap].localStripPos(stripNumber(measHash));
+      return localToGlobalTrans(ctx, lHash) * m_pars.stripLayers[gasGap].localStripPos(channelNumber(measHash));
    }
    else if (chType(measHash) == ReadoutChannelType::Wire && gasGap < m_pars.wireGroupLayers.size()) {
       Amg::Vector3D wireGrPos{Amg::Vector3D::Zero()};
@@ -137,16 +162,41 @@ Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContex
       wireGrPos.block<2,1>(0,0) = std::move(localWireGroup);
       return localToGlobalTrans(ctx, lHash) * wireGrPos;
    }
+   else if (chType(measHash) == ReadoutChannelType::Pad && gasGap < m_pars.padLayers.size()) {
+      Amg::Vector3D padPos{Amg::Vector3D::Zero()};
+      Amg::Vector2D localPad = localChannelPosition(measHash);
+      padPos.block<2,1>(0,0) = std::move(localPad);
+      return localToGlobalTrans(ctx, lHash) * padPos;
+   }
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
    return Amg::Vector3D::Zero();
 }
-
+using localCornerArray = std::array<Amg::Vector2D, 4>;
+using globalCornerArray = std::array<Amg::Vector3D, 4>;
+globalCornerArray sTgcReadoutElement::globalPadCorners(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+   const IdentifierHash lHash = layerHash(measHash);
+   unsigned int layIdx = static_cast<unsigned int>(lHash);
+   unsigned int gasGap = gasGapNumber(measHash);
+   globalCornerArray gPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
+   if (chType(measHash) == ReadoutChannelType::Pad && gasGap < m_pars.padLayers.size()) {
+      localCornerArray lPadCorners = localPadCorners(measHash);
+      for (unsigned int corner = 0; corner < lPadCorners.size(); ++corner) {
+         gPadCorners[corner].block<2,1>(0,0) = std::move(lPadCorners[corner]);
+         gPadCorners[corner] = localToGlobalTrans(ctx, lHash) * gPadCorners[corner];
+      }
+      return gPadCorners;
+   }
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.padLayers.size());
+   return gPadCorners;
+}
+   
 Amg::Vector3D sTgcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    if (layIdx < m_pars.stripLayers.size()) {
-      return  m_pars.stripLayers[layIdx].stripPosition(stripNumber(measHash));
+      return  m_pars.stripLayers[layIdx].stripPosition(channelNumber(measHash));
    }
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());

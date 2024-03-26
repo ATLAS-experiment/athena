@@ -105,18 +105,35 @@ struct sTgcChamber{
     };
 
     //// Pads
+    double sPadLength{0.f};
+    double lPadLength{0.f};
+    double anglePadPhi{0.f};
+    double beamlineRadius{0.f};
+
     std::vector<uint> numPads;
     std::vector<uint> numPadEta;
     std::vector<uint> numPadPhi;
+    std::vector<float> firstPadHeight;
+    std::vector<float> padHeight;
+    std::vector<float> padPhiShift;
+    std::vector<float> firstPadPhiDiv;
 
     //// Pads
     struct sTgcPad{
-        Amg::Vector3D position{Amg::Vector3D::Zero()};
-        Amg::Vector3D padCornerBR{Amg::Vector3D::Zero()};
-        Amg::Vector3D padCornerBL{Amg::Vector3D::Zero()};
-        Amg::Vector3D padCornerTR{Amg::Vector3D::Zero()};
-        Amg::Vector3D padCornerTL{Amg::Vector3D::Zero()};
-
+        /// @brief local pad postion
+        Amg::Vector2D localPosition{Amg::Vector2D::Zero()};
+        /// @brief global pad postion
+        Amg::Vector3D globalPosition{Amg::Vector3D::Zero()};
+        /// @brief local pad corner positions
+        Amg::Vector2D localPadCornerBL{Amg::Vector2D::Zero()};
+        Amg::Vector2D localPadCornerBR{Amg::Vector2D::Zero()};
+        Amg::Vector2D localPadCornerTL{Amg::Vector2D::Zero()};
+        Amg::Vector2D localPadCornerTR{Amg::Vector2D::Zero()};
+        /// @brief global pad corner positions
+        Amg::Vector3D globalPadCornerBL{Amg::Vector3D::Zero()};
+        Amg::Vector3D globalPadCornerBR{Amg::Vector3D::Zero()};
+        Amg::Vector3D globalPadCornerTL{Amg::Vector3D::Zero()};
+        Amg::Vector3D globalPadCornerTR{Amg::Vector3D::Zero()};
         /// @brief  Pad  Eta number
         short padEta{0};
         /// @brief  Pad  Phi number
@@ -174,11 +191,17 @@ std::ostream& operator<<(std::ostream& ostr,const sTgcChamber::sTgcPad & pad) {
     ostr<<"pad (gasGap/padEta/padPhi): ";
     ostr<<pad.gasGap<<"/";
     ostr<<pad.padEta<<"/"<<pad.padPhi<<", ";
-    ostr<<"position: "<<Amg::toString(pad.position, 2);
-    ostr<<"Bottom-right padCorner: "<<Amg::toString(pad.padCornerBR, 2);
-    ostr<<"Bottom-left padCorner: "<<Amg::toString(pad.padCornerBL, 2);
-    ostr<<"Top-right padCorner: "<<Amg::toString(pad.padCornerTR, 2);
-    ostr<<"Top-left padCorner: "<<Amg::toString(pad.padCornerTL, 2);
+    ostr<<"global position: "<<Amg::toString(pad.globalPosition, 2);
+    ostr<<"Bottom-left globalPadCorner: "<<Amg::toString(pad.globalPadCornerBL, 2);
+    ostr<<"Bottom-right globalpadCorner: "<<Amg::toString(pad.globalPadCornerBR, 2);
+    ostr<<"Top-left globalpadCorner: "<<Amg::toString(pad.globalPadCornerTL, 2);
+    ostr<<"Top-right globalpadCorner: "<<Amg::toString(pad.globalPadCornerTR, 2);
+
+    ostr<<"local position: "<<Amg::toString(pad.localPosition, 2);
+    ostr<<"Bottom-left localPadCorner: "<<Amg::toString(pad.localPadCornerBL, 2);
+    ostr<<"Bottom-right localpadCorner: "<<Amg::toString(pad.localPadCornerBR, 2);
+    ostr<<"Top-left localpadCorner: "<<Amg::toString(pad.localPadCornerTL, 2);
+    ostr<<"Top-right localpadCorner: "<<Amg::toString(pad.localPadCornerTR, 2);
     return ostr;
 }
 
@@ -246,7 +269,6 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<uint> numStrips{treeReader, "numStrips"};
     TTreeReaderValue<float> stripPitch{treeReader, "stripPitch"};
     TTreeReaderValue<float> stripWidth{treeReader, "stripWidth"};
-    //TTreeReaderValue<std::vector<float>> firstStripPitch{treeReader, "firstStripPitch"};
 
     TTreeReaderValue<std::vector<float>> globalStripPosX{treeReader, "globalStripPosX"};
     TTreeReaderValue<std::vector<float>> globalStripPosY{treeReader, "globalStripPosY"};
@@ -258,11 +280,19 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<uint>> stripNum{treeReader, "stripNumber"};
     TTreeReaderValue<std::vector<uint8_t>> stripGasGap{treeReader, "stripGasGap"};
     TTreeReaderValue<std::vector<float>> stripLengths{treeReader, "stripLengths"};
-/*
+
    /// Pad dimensions 
+    TTreeReaderValue<float> sPadLength{treeReader, "sPadLength"};
+    TTreeReaderValue<float> lPadLength{treeReader, "lPadLength"};
+    TTreeReaderValue<float> anglePadPhi{treeReader, "anglePadPhi"};
+    TTreeReaderValue<float> beamlineRadius{treeReader, "beamlineRadius"};
     TTreeReaderValue<std::vector<uint>> numPads{treeReader, "numPads"};
     TTreeReaderValue<std::vector<uint>> numPadEta{treeReader, "numPadEta"};
     TTreeReaderValue<std::vector<uint>> numPadPhi{treeReader, "numPadPhi"};
+    TTreeReaderValue<std::vector<float>> firstPadHeight{treeReader, "firstPadHeight"};
+    TTreeReaderValue<std::vector<float>> padHeight{treeReader, "padHeight"};
+    TTreeReaderValue<std::vector<float>> padPhiShift{treeReader, "padPhiShift"};    
+    TTreeReaderValue<std::vector<float>> firstPadPhiDiv{treeReader, "firstPadPhiDiv"};    
 
     TTreeReaderValue<std::vector<float>> globalPadCornerBRX{treeReader, "globalPadCornerBRX"};
     TTreeReaderValue<std::vector<float>> globalPadCornerBRY{treeReader, "globalPadCornerBRY"};
@@ -284,10 +314,25 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> globalPadPosY{treeReader, "globalPadPosY"};
     TTreeReaderValue<std::vector<float>> globalPadPosZ{treeReader, "globalPadPosZ"};
 
+    TTreeReaderValue<std::vector<float>> localPadCornerBRX{treeReader, "localPadCornerBRX"};
+    TTreeReaderValue<std::vector<float>> localPadCornerBRY{treeReader, "localPadCornerBRY"};
+
+    TTreeReaderValue<std::vector<float>> localPadCornerBLX{treeReader, "localPadCornerBLX"};
+    TTreeReaderValue<std::vector<float>> localPadCornerBLY{treeReader, "localPadCornerBLY"};
+
+    TTreeReaderValue<std::vector<float>> localPadCornerTRX{treeReader, "localPadCornerTRX"};
+    TTreeReaderValue<std::vector<float>> localPadCornerTRY{treeReader, "localPadCornerTRY"};
+
+    TTreeReaderValue<std::vector<float>> localPadCornerTLX{treeReader, "localPadCornerTLX"};
+    TTreeReaderValue<std::vector<float>> localPadCornerTLY{treeReader, "localPadCornerTLY"};
+
+    TTreeReaderValue<std::vector<float>> localPadPosX{treeReader, "localPadPosX"};
+    TTreeReaderValue<std::vector<float>> localPadPosY{treeReader, "localPadPosY"};
+
     TTreeReaderValue<std::vector<uint8_t>> padGasGap{treeReader, "padGasGap"};
     TTreeReaderValue<std::vector<uint>> padEta{treeReader, "padEtaNumber"};
     TTreeReaderValue<std::vector<uint>> padPhi{treeReader, "padPhiNumber"};
-*/
+
     /// Geo Model transformation
     TTreeReaderValue<std::vector<float>> geoModelTransformX{treeReader, "GeoModelTransformX"};
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
@@ -330,6 +375,25 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
 
     TTreeReaderValue<std::vector<uint8_t>> wireGroupRotGasGap{treeReader, "wireGroupRotGasGap"};
 
+    /// Local to Global pad Transformation
+    TTreeReaderValue<std::vector<float>> padRotCol1X{treeReader, "padRotLinearCol1X"};
+    TTreeReaderValue<std::vector<float>> padRotCol1Y{treeReader, "padRotLinearCol1Y"};
+    TTreeReaderValue<std::vector<float>> padRotCol1Z{treeReader, "padRotLinearCol1Z"};
+
+    TTreeReaderValue<std::vector<float>> padRotCol2X{treeReader, "padRotLinearCol2X"};
+    TTreeReaderValue<std::vector<float>> padRotCol2Y{treeReader, "padRotLinearCol2Y"};
+    TTreeReaderValue<std::vector<float>> padRotCol2Z{treeReader, "padRotLinearCol2Z"};
+
+    TTreeReaderValue<std::vector<float>> padRotCol3X{treeReader, "padRotLinearCol3X"};
+    TTreeReaderValue<std::vector<float>> padRotCol3Y{treeReader, "padRotLinearCol3Y"};
+    TTreeReaderValue<std::vector<float>> padRotCol3Z{treeReader, "padRotLinearCol3Z"};
+
+    TTreeReaderValue<std::vector<float>> padRotTransX{treeReader, "padRotTranslationX"};
+    TTreeReaderValue<std::vector<float>> padRotTransY{treeReader, "padRotTranslationY"};
+    TTreeReaderValue<std::vector<float>> padRotTransZ{treeReader, "padRotTranslationZ"};
+
+    TTreeReaderValue<std::vector<uint8_t>> padRotGasGap{treeReader, "padRotGasGap"};
+
     while (treeReader.Next()) {
         sTgcChamber newchamber{};
 
@@ -367,12 +431,20 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         newchamber.numStrips = (*numStrips);
         newchamber.stripPitch = (*stripPitch);
         newchamber.stripWidth = (*stripWidth);
-/*
+
         //// Pads
+        newchamber.sPadLength = (*sPadLength);
+        newchamber.lPadLength = (*lPadLength);
+        newchamber.anglePadPhi = (*anglePadPhi);
+        newchamber.beamlineRadius = (*beamlineRadius);
         newchamber.numPads = (*numPads);
         newchamber.numPadEta = (*numPadEta);
         newchamber.numPadPhi = (*numPadPhi);
-*/
+        newchamber.firstPadHeight = (*firstPadHeight);
+        newchamber.padHeight = (*padHeight);
+        newchamber.padPhiShift = (*padPhiShift);
+        newchamber.firstPadPhiDiv = (*firstPadPhiDiv);
+
         Amg::Vector3D geoTrans{(*geoModelTransformX)[0], (*geoModelTransformY)[0], (*geoModelTransformZ)[0]};
         Amg::RotationMatrix3D geoRot{Amg::RotationMatrix3D::Identity()};
         geoRot.col(0) = Amg::Vector3D((*geoModelTransformX)[1], (*geoModelTransformY)[1], (*geoModelTransformZ)[1]);
@@ -388,7 +460,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newWireGroup.gasGap = (*wireGroupGasGap)[wg];
             newWireGroup.channelNumber = (*wireGroupNum)[wg];
             newWireGroup.channelType = 2;
-            //if (newWireGroup.channelNumber > 0) continue;
+            if (newWireGroup.channelNumber > 0) continue;
             newchamber.channels.insert(std::move(newWireGroup));
         }
 
@@ -400,26 +472,34 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newStrip.gasGap = (*stripGasGap)[s];
             newStrip.channelNumber = (*stripNum)[s];
             newStrip.channelType = 1;
-            //if (newStrip.channelNumber > 2 && newStrip.channelNumber < newchamber.numStrips) continue;
+            if (newStrip.channelNumber > 0 && newStrip.channelNumber < newchamber.numStrips) continue;
             newchamber.channels.insert(std::move(newStrip));
         }
 
-/*
+
         //Pads
         for (size_t p = 0; p < globalPadPosX->size(); ++p){
             sTgcChamber::sTgcPad newPad{};
-            newPad.position = Amg::Vector3D{(*globalPadPosX)[p], (*globalPadPosY)[p], (*globalPadPosZ)[p]};
-            newPad.padCornerBR = Amg::Vector3D{(*globalPadCornerBRX)[p], (*globalPadCornerBRY)[p], (*globalPadCornerBRZ)[p]};
-            newPad.padCornerBL = Amg::Vector3D{(*globalPadCornerBLX)[p], (*globalPadCornerBLY)[p], (*globalPadCornerBLZ)[p]};
-            newPad.padCornerTR = Amg::Vector3D{(*globalPadCornerTRX)[p], (*globalPadCornerTRY)[p], (*globalPadCornerTRZ)[p]};
-            newPad.padCornerTL = Amg::Vector3D{(*globalPadCornerTLX)[p], (*globalPadCornerTLY)[p], (*globalPadCornerTLZ)[p]};
+           
+            newPad.globalPosition = Amg::Vector3D{(*globalPadPosX)[p], (*globalPadPosY)[p], (*globalPadPosZ)[p]};
+            newPad.globalPadCornerBR = Amg::Vector3D{(*globalPadCornerBRX)[p], (*globalPadCornerBRY)[p], (*globalPadCornerBRZ)[p]};
+            newPad.globalPadCornerBL = Amg::Vector3D{(*globalPadCornerBLX)[p], (*globalPadCornerBLY)[p], (*globalPadCornerBLZ)[p]};
+            newPad.globalPadCornerTR = Amg::Vector3D{(*globalPadCornerTRX)[p], (*globalPadCornerTRY)[p], (*globalPadCornerTRZ)[p]};
+            newPad.globalPadCornerTL = Amg::Vector3D{(*globalPadCornerTLX)[p], (*globalPadCornerTLY)[p], (*globalPadCornerTLZ)[p]};
+
+            newPad.localPosition = Amg::Vector2D{(*localPadPosX)[p], (*localPadPosY)[p]};
+            newPad.localPadCornerBR = Amg::Vector2D{(*localPadCornerBRX)[p], (*localPadCornerBRY)[p]};
+            newPad.localPadCornerBL = Amg::Vector2D{(*localPadCornerBLX)[p], (*localPadCornerBLY)[p]};
+            newPad.localPadCornerTR = Amg::Vector2D{(*localPadCornerTRX)[p], (*localPadCornerTRY)[p]};
+            newPad.localPadCornerTL = Amg::Vector2D{(*localPadCornerTLX)[p], (*localPadCornerTLY)[p]};
 
             newPad.gasGap = (*padGasGap)[p];
             newPad.padEta = (*padEta)[p];
             newPad.padPhi = (*padPhi)[p];
+            if (newPad.padEta > 1 || newPad.padPhi > 2) continue;
             newchamber.pads.insert(std::move(newPad));
         }
-*/
+
         for (size_t l = 0; l < stripRotGasGap->size(); ++l){
             sTgcChamber::sTgcLayer stripLayer{};
             stripLayer.gasGap = (*stripRotGasGap)[l];
@@ -442,6 +522,18 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             Amg::Vector3D layTrans{(*wireGroupRotTransX)[l], (*wireGroupRotTransY)[l], (*wireGroupRotTransZ)[l]};
             wireGroupLayer.transform = Amg::getTransformFromRotTransl(std::move(wireGroupRot), std::move(layTrans));
             newchamber.layers.insert(std::move(wireGroupLayer));
+        }
+
+        for (size_t l = 0; l < padRotGasGap->size(); ++l){
+            sTgcChamber::sTgcLayer padLayer{};
+            padLayer.gasGap = (*padRotGasGap)[l];
+            Amg::RotationMatrix3D padRot{Amg::RotationMatrix3D::Identity()};
+            padRot.col(0) = Amg::Vector3D((*padRotCol1X)[l],(*padRotCol1Y)[l], (*padRotCol1Z)[l]);
+            padRot.col(1) = Amg::Vector3D((*padRotCol2X)[l],(*padRotCol2Y)[l], (*padRotCol2Z)[l]);
+            padRot.col(2) = Amg::Vector3D((*padRotCol3X)[l],(*padRotCol3Y)[l], (*padRotCol3Z)[l]);
+            Amg::Vector3D layTrans{(*padRotTransX)[l], (*padRotTransY)[l], (*padRotTransZ)[l]};
+            padLayer.transform = Amg::getTransformFromRotTransl(std::move(padRot), std::move(layTrans));
+            newchamber.layers.insert(std::move(padLayer));
         }
 
         auto insert_itr = to_ret.insert(std::move(newchamber));
@@ -532,6 +624,11 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(stripPitch, "pitch of a normal strip");
         TEST_BASICPROP(stripWidth, "width of a normal strip");
 
+        TEST_BASICPROP(sPadLength, "gasGap length on the short side for pads and wires");
+        TEST_BASICPROP(lPadLength, "gasGap length on the long side for pads and wires");
+        TEST_BASICPROP(anglePadPhi, "angular width of a pad in phi direction");
+        TEST_BASICPROP(beamlineRadius, "distance from the gapCenter to beamline");
+
         int c = 0;
         using sTgcLayer = sTgcChamber::sTgcLayer;
         for (const sTgcLayer& refLayer : reference.layers) {
@@ -545,11 +642,19 @@ int main( int argc, char** argv ) {
             const sTgcLayer& testLayer{*lay_itr};
             const Amg::Transform3D layAlignment = testLayer.transform.inverse() *
                                                   refLayer.transform;
-            TEST_BASICPROP(numWires[c], "number of wires in a chamber");
-            TEST_BASICPROP(firstWireGroupWidth[c], "number of wires in first wire group");
-            
-            ///Dumping local to global layer transformation
+            /// Testing Wire Vectors
+            TEST_BASICPROP(numWires[c], "number of wires in the layer "<< c + 1 << " are ");
+            TEST_BASICPROP(firstWireGroupWidth[c], "number of wires in first wire group in the layer "<< c + 1 << " are ");
+            /// Testing Pad Vectors
+            TEST_BASICPROP(numPads[c], "number of pads in the layer "<< c + 1 << " are ");
+            TEST_BASICPROP(numPadEta[c], "number of pads in the eta direction in the layer "<< c + 1 << " are ");
+            TEST_BASICPROP(numPadPhi[c], "number of in the phi direction in the layer "<< c + 1 << " are ");
+            TEST_BASICPROP(firstPadHeight[c], "height of the first pad row in the layer "<< c + 1 << " are ");
+            TEST_BASICPROP(padHeight[c], "height of pads in the rest of the rows in the layer "<< c + 1 << " are ");
+            TEST_BASICPROP(padPhiShift[c], "shift of inner pad edges in phi direction in the layer "<< c + 1 << " are ");
+            TEST_BASICPROP(firstPadPhiDiv[c], "angular position of the outer edge of the first pad in the layer "<< c + 1 << " are ");
             ++c;
+            ///Dumping local to global layer transformation
 /*
             std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                       << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 
@@ -576,25 +681,23 @@ int main( int argc, char** argv ) {
             const sTgcChannel& testChannel{*channel_itr};
         
             const Amg::Vector3D diffGlobalPos{testChannel.globalPosition - refChannel.globalPosition};
-            const Amg::Vector2D diffLocalPos{testChannel.localPosition - refChannel.localPosition};
-/*                        
+            const Amg::Vector2D diffLocalPos{testChannel.localPosition - refChannel.localPosition};        
             if (diffGlobalPos.mag() > tolerance) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"channel (gasGap/number): "
-                            <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", "<<testChannel.channelType<<", "<< " global position: "
+                            <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", chType: "<<testChannel.channelType<<", "<< " global position: "
                             <<Amg::toString(testChannel.globalPosition, 2)<<" should be located at "<<Amg::toString(refChannel.globalPosition, 2)
                             <<" displacement: "<<Amg::toString(diffGlobalPos,2)<<std::endl;
                 chamberOkay = false;
             }
-*/
             if (diffLocalPos.mag() > tolerance) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"channel (gasGap/number): "
-                            <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", "<<testChannel.channelType<<", "<< " local position: "
+                            <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", chType: "<<testChannel.channelType<<", "<< " local position: "
                             <<Amg::toString(testChannel.localPosition, 2)<<" should be located at "<<Amg::toString(refChannel.localPosition, 2)
                             <<" displacement: "<<Amg::toString(diffLocalPos,2)<<std::endl;
                                 chamberOkay = false;
             }
         }
-/*
+
         using sTgcPad = sTgcChamber::sTgcPad;    
         for (const sTgcPad& refPad : reference.pads) {
             std::set<sTgcPad>::const_iterator pad_itr = test.pads.find(refPad);
@@ -605,50 +708,104 @@ int main( int argc, char** argv ) {
                 continue;
             }
             const sTgcPad& testPad{*pad_itr};
-            const Amg::Vector3D diffPadPos{testPad.position - refPad.position};
-            if (diffPadPos.mag() > tolerance) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                         <<testPad<<" should be located at "<<Amg::toString(refPad.position, 2)
-                         <<" displacement: "<<Amg::toString(diffPadPos,2)<<std::endl;
+            /// Local Pad position dump
+            const Amg::Vector2D diffLocalPadPos{testPad.localPosition - testPad.localPosition};
+            if (diffLocalPadPos.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " local position: "
+                            <<Amg::toString(testPad.localPosition, 2)<<" should be located at "<<Amg::toString(refPad.localPosition, 2)
+                            <<" displacement: "<<Amg::toString(diffLocalPadPos,2)<<std::endl;
+                chamberOkay = false;
+            } 
+            /// bottom-left pad Corner          
+            const Amg::Vector2D diffLocalPadCornerBL{testPad.localPadCornerBL - refPad.localPadCornerBL};
+            if (diffLocalPadCornerBL.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " bottom-left corner: "
+                            <<Amg::toString(testPad.localPadCornerBL, 2)<<"  should be located at "<<Amg::toString(refPad.localPadCornerBL, 2)
+                            <<" displacement: "<<Amg::toString(diffLocalPadCornerBL,2)<<std::endl;
                 chamberOkay = false;
             }
-            
-            const Amg::Vector3D diffPadCornerBR{testPad.padCornerBR - refPad.padCornerBR};
-            if (diffPadCornerBR.mag() > tolerance) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                         <<testPad<<" bottom-right corner should be located at "<<Amg::toString(refPad.padCornerBR, 2)
-                         <<" displacement: "<<Amg::toString(diffPadCornerBR,2)<<std::endl;
+            /// bottom-right pad corner
+            const Amg::Vector2D diffLocalPadCornerBR{testPad.localPadCornerBR - refPad.localPadCornerBR};
+            if (diffLocalPadCornerBR.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " bottom-right corner: "
+                            <<Amg::toString(testPad.localPadCornerBR, 2)<<"  should be located at "<<Amg::toString(refPad.localPadCornerBR, 2)
+                            <<" displacement: "<<Amg::toString(diffLocalPadCornerBR,2)<<std::endl;
+                chamberOkay = false;
+            }  
+            /// top-left pad corner        
+            const Amg::Vector2D diffLocalPadCornerTL{testPad.localPadCornerTL - refPad.localPadCornerTL};
+            if (diffLocalPadCornerTL.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " top-left corner: "
+                            <<Amg::toString(testPad.localPadCornerTL, 2)<<"  should be located at "<<Amg::toString(refPad.localPadCornerTL, 2)
+                            <<" displacement: "<<Amg::toString(diffLocalPadCornerTL,2)<<std::endl;
                 chamberOkay = false;
             }
-            const Amg::Vector3D diffPadCornerBL{testPad.padCornerBL - refPad.padCornerBL};
-            if (diffPadCornerBL.mag() > tolerance) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                         <<testPad<<" bottom-left corner should be located at "<<Amg::toString(refPad.padCornerBL, 2)
-                         <<" displacement: "<<Amg::toString(diffPadCornerBL,2)<<std::endl;
+            /// top-right pad corner            
+            const Amg::Vector2D diffLocalPadCornerTR{testPad.localPadCornerTR - refPad.localPadCornerTR};
+            if (diffLocalPadCornerTR.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " top-right corner: "
+                            <<Amg::toString(testPad.localPadCornerTR, 2)<<"  should be located at "<<Amg::toString(refPad.localPadCornerTR, 2)
+                            <<" displacement: "<<Amg::toString(diffLocalPadCornerTR,2)<<std::endl;
                 chamberOkay = false;
             }
-            const Amg::Vector3D diffPadCornerTR{testPad.padCornerTR - refPad.padCornerTR};
-            if (diffPadCornerTR.mag() > tolerance) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                         <<testPad<<" top-right corner should be located at "<<Amg::toString(refPad.padCornerTR, 2)
-                         <<" displacement: "<<Amg::toString(diffPadCornerTR,2)<<std::endl;
+           
+            /// Global Pad position dump
+            const Amg::Vector3D diffGlobalPadPos{testPad.globalPosition - testPad.globalPosition};
+            if (diffGlobalPadPos.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " global position: "
+                            <<Amg::toString(testPad.globalPosition, 2)<<" should be located at "<<Amg::toString(refPad.globalPosition, 2)
+                            <<" displacement: "<<Amg::toString(diffGlobalPadPos,2)<<std::endl;
                 chamberOkay = false;
-            }   
-            const Amg::Vector3D diffPadCornerTL{testPad.padCornerTL - refPad.padCornerTL};
-            if (diffPadCornerTL.mag() > tolerance) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                         <<testPad<<" top-left corner should be located at "<<Amg::toString(refPad.padCornerTL, 2)
-                         <<" displacement: "<<Amg::toString(diffPadCornerTL,2)<<std::endl;
+            }
+            /// bottom-left pad Corner          
+            const Amg::Vector3D diffGlobalPadCornerBL{testPad.globalPadCornerBL - refPad.globalPadCornerBL};
+            if (diffGlobalPadCornerBL.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " bottom-left corner: "
+                            <<Amg::toString(testPad.globalPadCornerBL, 2)<<"  should be located at "<<Amg::toString(refPad.globalPadCornerBL, 2)
+                            <<" displacement: "<<Amg::toString(diffGlobalPadCornerBL,2)<<std::endl;
                 chamberOkay = false;
-            }    
+            }
+            /// bottom-right pad corner
+            const Amg::Vector3D diffGlobalPadCornerBR{testPad.globalPadCornerBR - refPad.globalPadCornerBR};
+            if (diffGlobalPadCornerBR.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " bottom-right corner: "
+                            <<Amg::toString(testPad.globalPadCornerBR, 2)<<"  should be located at "<<Amg::toString(refPad.globalPadCornerBR, 2)
+                            <<" displacement: "<<Amg::toString(diffGlobalPadCornerBR,2)<<std::endl;
+                chamberOkay = false;
+            }  
+            /// top-left pad corner        
+            const Amg::Vector3D diffGlobalPadCornerTL{testPad.globalPadCornerTL - refPad.globalPadCornerTL};
+            if (diffGlobalPadCornerTL.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " top-left corner: "
+                            <<Amg::toString(testPad.globalPadCornerTL, 2)<<"  should be located at "<<Amg::toString(refPad.globalPadCornerTL, 2)
+                            <<" displacement: "<<Amg::toString(diffGlobalPadCornerTL,2)<<std::endl;
+                chamberOkay = false;
+            }
+            /// top-right pad corner            
+            const Amg::Vector3D diffGlobalPadCornerTR{testPad.globalPadCornerTR - refPad.globalPadCornerTR};
+            if (diffGlobalPadCornerTR.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
+                            <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " top-right corner: "
+                            <<Amg::toString(testPad.globalPadCornerTR, 2)<<"  should be located at "<<Amg::toString(refPad.globalPadCornerTR, 2)
+                            <<" displacement: "<<Amg::toString(diffGlobalPadCornerTR,2)<<std::endl;
+                chamberOkay = false;
+            }  
         }
-*/
+
         if (!chamberOkay) {
             return_code = EXIT_FAILURE;
         }
     }
     return return_code;
-
 }
 
 
