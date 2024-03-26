@@ -92,7 +92,7 @@ StatusCode MuonTruthHitsFillerTool::book()
  */
 StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& p)
 {
-  CHECK( fillHitCounts (p.GetBarCode()) );
+  CHECK( fillHitCounts (p.barcode()) ); // FIXME barcode-based
   return StatusCode::SUCCESS;
 }
 

@@ -27,7 +27,7 @@ SimHitHandle_TrackRecord::SimHitHandle_TrackRecord(const TrackRecord* tr)
     m_trkrecord(const_cast<TrackRecord*>(tr)),
     m_mom(m_trkrecord->GetMomentum().mag()),
     m_momdir( Amg::Hep3VectorToEigen( m_trkrecord->GetMomentum().unit() ) ),
-    m_link( new HepMcParticleLink(m_trkrecord->GetBarCode(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE))// FIXME barcode-based
+    m_link( new HepMcParticleLink(m_trkrecord->barcode(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE))// FIXME barcode-based
 {
 }
 

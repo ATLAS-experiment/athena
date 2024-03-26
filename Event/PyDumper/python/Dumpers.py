@@ -3208,7 +3208,7 @@ def dump_TrackRecord (t, f):
     fprint (f, t.GetEnergy(),
             t.GetPDGCode(),
             t.GetTime(),
-            t.GetBarCode(),
+            t.barcode(),
             t.GetVolName())
     return
 

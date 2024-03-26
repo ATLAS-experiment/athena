@@ -85,7 +85,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
   const int barcodepart = HepMC::barcode(part);
   for (const auto & record : *recordCollection){
 
-    if ( record.GetBarCode() != barcodepart ) continue;
+    if ( record.barcode() != barcodepart ) continue; // FIXME barcode-based
 
       id = record.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
@@ -153,7 +153,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   for (const auto & record : *recordCollection){
 
-    if ( record.GetBarCode() == part->barcode() ) {
+    if ( record.barcode() == part->barcode() ) { // FIXME barcode-based
 
       id = record.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
