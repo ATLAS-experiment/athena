@@ -47,61 +47,20 @@ def TileDQFragMonitoringConfig(flags, **kwargs):
 
     kwargs.setdefault('TileRawChannelContainer', rawChannelContainer)
 
+    from AthenaCommon.SystemOfUnits import GeV
+    kwargs.setdefault('MinEnergyChan', -5.0 * GeV)
+    kwargs.setdefault('MinEnergyGap', -10.0 * GeV)
+
+    runNumber = flags.Input.RunNumbers[0]
+    run = str(runNumber)
+
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, 'TileDQFragMonAlgCfg')
 
-    runNumber = flags.Input.RunNumbers[0]
     from AthenaConfiguration.ComponentFactory import CompFactory
-    _TileDQFragMonitoringCore(helper, CompFactory.TileDQFragMonitorAlgorithm,
-                             runNumber, **kwargs)
-
-    accumalator = helper.result()
-    result.merge(accumalator)
-    return result
-
-
-def TileDQFragMonitoringConfigOld(flags, **kwargs):
-
-    ''' Function to configure TileDQFragMonitorAlgorithm algorithm in the old monitoring system.'''
-
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from AthenaCommon.GlobalFlags import globalflags
-
-    if globalflags.InputFormat().lower() == 'pool':
-        kwargs.setdefault('TileDigitsContainer', 'TileDigitsFlt')
-
-    from TileRecUtils.TileRecFlags import jobproperties
-    rawChannelContainer = jobproperties.TileRecFlags.TileRawChannelContainer()
-    kwargs.setdefault('TileRawChannelContainer', rawChannelContainer)
-
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSequence = AthSequencer("AthCondSeq")
-    kwargs.setdefault('CheckDCS', hasattr(condSequence, 'TileDCSCondAlg'))
-
-    helper = AthMonitorCfgHelperOld(flags, 'TileDQFragMonAlgCfg')
-
-    from RecExConfig.AutoConfiguration import GetRunNumber
-    runNumber = GetRunNumber()
-
-    from TileMonitoring.TileMonitoringConf import TileDQFragMonitorAlgorithm
-    _TileDQFragMonitoringCore(helper, TileDQFragMonitorAlgorithm, runNumber, **kwargs)
-
-    return helper.result()
-
-def _TileDQFragMonitoringCore(helper, algConfObj, runNumber, **kwargs):
-
-    ''' Function to configure TileDQFragMonitorAlgorithm algorithm in the monitoring system.'''
-
-    from AthenaCommon.SystemOfUnits import GeV
-    kwargs.setdefault('MinEnergyChan', -5.0 * GeV)
-    kwargs.setdefault('MinEnergyGap', -10.0 * GeV)
-
-    run = str(runNumber)
-
-    # Adding an TileDQFragMonitorAlgorithm algorithm to the helper; try to accommodate old/new configuration styles
-    tileDQFragMonAlg = helper.addAlgorithm(algConfObj, 'TileDQFragMonAlg')
+    tileDQFragMonAlg = helper.addAlgorithm(CompFactory.TileDQFragMonitorAlgorithm, 'TileDQFragMonAlg')
 
     for k, v in kwargs.items():
         setattr(tileDQFragMonAlg, k, v)
@@ -242,6 +201,10 @@ def _TileDQFragMonitoringCore(helper, algConfObj, runNumber, **kwargs):
     negEneMapTitle = f"# Negative energy below {kwargs['MinEnergyChan']/GeV} ({kwargs['MinEnergyGap']/GeV} for E cels) GeV"
     addTileModuleChannelMapsArray(helper, tileDQFragMonAlg, path = 'Tile/DMUErrors/BadDrawers',
                                   name = 'TileNegativeEnergyMap', run = run, title = negEneMapTitle)
+
+    accumalator = helper.result()
+    result.merge(accumalator)
+    return result
 
 
 if __name__=='__main__':
