@@ -28,8 +28,9 @@ __device__ static float getEta (float dr, float dz, float dL) {
  * @param eta pseudorapidity of a doublet
  */
 __device__ static float getMaxDeltaLEta (float eta) {
-  if(std::abs(eta) < 3.5) return eta*eta*eta*eta*9.38522907 + eta*eta*88.1729 + 177.363;
-  else return eta*eta*eta*eta*1.7582417 + eta*eta*-129.67033 + 3324.61538;
+  float hardCut = 1300;
+  float maxDL = eta*eta*eta*eta*1.97572003 + eta*eta*92.29732795 + 168.54257599;
+  return (maxDL > hardCut) ? hardCut : maxDL;
 }
 
 __device__ static int getInnerDoubletIdx (int pairIdx, int nOuter) {
