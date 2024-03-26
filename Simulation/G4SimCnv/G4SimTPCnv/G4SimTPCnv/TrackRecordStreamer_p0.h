@@ -29,7 +29,7 @@ public:
      new_obj.SetMomentum(a.GetMomentum());
      new_obj.SetPosition(a.GetPosition());
      new_obj.SetTime(0.);
-     new_obj.SetBarCode(0);
+     new_obj.SetBarcode(0);
      new_obj.SetVolName("None"); 
   }
   

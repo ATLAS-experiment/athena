@@ -46,7 +46,7 @@ namespace D3PD {
       if ( m_OnlyMuon && abs( obj.GetPDGCode() ) != 13 ) pass = false;
       if ( obj.GetEnergy() < m_EnergyThreshold ) pass = false;
       if ( pass ){
-         *m_barcode   = obj.GetBarCode();
+         *m_barcode   = obj.barcode(); // FIXME barcode-based
          *m_pdgid     = obj.GetPDGCode();
          *m_energy    = obj.GetEnergy();
          *m_pt        = obj.GetMomentum().rho();

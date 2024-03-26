@@ -140,7 +140,7 @@ namespace Muon {
             // only use segment that are matched
             ATH_MSG_DEBUG("Match reco segment " << m_printer->print(*(result.first)) << " truth " << result.second.truthTrack);
             if (!result.second.truthTrack) continue;
-            int barcode = result.second.truthTrack->GetBarCode();
+            int barcode = result.second.truthTrack->barcode(); // FIXME barcode-based
 
             // get chamber Identifier
             Identifier id;

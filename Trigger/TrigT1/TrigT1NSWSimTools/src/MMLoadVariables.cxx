@@ -50,7 +50,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
             for(const auto & mit : *trackRecordCollection ) {
               const CLHEP::Hep3Vector mumomentum = mit.GetMomentum();
               const CLHEP::Hep3Vector muposition = mit.GetPosition();
-              if(!trackRecordCollection->empty() && HepMC::barcode(particle) ==mit.GetBarCode()) {
+              if(!trackRecordCollection->empty() && HepMC::barcode(particle) == mit.barcode()) { // FIXME barcode-based
                 pdg_tmp         = particle->pdg_id();
                 phiEntry_tmp    = mumomentum.getPhi();
                 etaEntry_tmp    = mumomentum.getEta();

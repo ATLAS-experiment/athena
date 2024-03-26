@@ -35,7 +35,7 @@ void compare (const TrackRecord& p1,
   assert ( p1.GetPDGCode()  ==  p2.GetPDGCode() );
   assert ( p1.GetEnergy()   ==  p2.GetEnergy()  );
   assert ( p1.GetTime()     ==  p2.GetTime()  );
-  assert ( p1.GetBarCode()  ==  p2.GetBarCode()  );
+  assert ( p1.barcode()  ==  p2.barcode()  );
   assert ( p1.GetVolName()  ==  p2.GetVolName()  );
   compare ( p1.GetPosition(), p2.GetPosition() );
   compare ( p1.GetMomentum(), p2.GetMomentum() );

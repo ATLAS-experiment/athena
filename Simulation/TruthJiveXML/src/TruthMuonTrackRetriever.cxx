@@ -108,7 +108,7 @@ namespace JiveXML {
       phiVertex.push_back(DataType( vertex.phi() < 0 ? vertex.phi() + 2*M_PI : vertex.phi() ));
       zVertex.push_back(DataType( vertex.z()*CLHEP::mm/CLHEP::cm ));
       code.push_back(DataType( pdgCode ));
-      id.push_back(DataType( record.GetBarCode() ));
+      id.push_back(DataType( record.barcode() )); // FIXME barcode-based
     }
     
     //Finall add everything to the datamap

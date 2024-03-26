@@ -66,8 +66,8 @@ namespace Muon {
         if (t1.truthTrack && !t2.truthTrack) return true;
         if (!t1.truthTrack && t2.truthTrack) return false;
         if (!t1.truthTrack && !t2.truthTrack) return false;
-        if (t1.truthTrack->GetBarCode() == t2.truthTrack->GetBarCode()) return t1.numberOfMatchedHits() > t2.numberOfMatchedHits();
-        return t1.truthTrack->GetBarCode() < t2.truthTrack->GetBarCode();
+        if (t1.truthTrack->barcode() == t2.truthTrack->barcode()) return t1.numberOfMatchedHits() > t2.numberOfMatchedHits(); // FIXME barcode-based
+        return t1.truthTrack->barcode() < t2.truthTrack->barcode(); // FIXME barcode-based
     }
 
     MuonTrackTruthTool::ResultVec MuonTrackTruthTool::match(const TruthTree& truth_tree, const TrackCollection& tracks) const {
@@ -135,7 +135,7 @@ namespace Muon {
         TrackRecordConstIterator tr_it_end = truthTrackCol->end();
         for (; tr_it != tr_it_end; ++tr_it) {
             int PDGCode((*tr_it).GetPDGCode());
-            int barcode = (*tr_it).GetBarCode();
+            int barcode = (*tr_it).barcode(); // FIXME barcode-based
             if (!m_matchAllParticles && !selectPdg(PDGCode)) {
                 ATH_MSG_VERBOSE(" discarding truth track: pdg " << PDGCode << "  barcode " << barcode);
                 continue;
@@ -151,7 +151,7 @@ namespace Muon {
             std::unique_ptr<TruthTrajectory> truthTrajectory;
             // associate the muon truth with the gen event info
             if (genEvent) {
-                HepMC::ConstGenParticlePtr genParticle = HepMC::barcode_to_particle(genEvent, (*tr_it).GetBarCode());
+                HepMC::ConstGenParticlePtr genParticle = HepMC::barcode_to_particle(genEvent, (*tr_it).barcode()); // FIXME barcode-based
                 if (genParticle) {
                     truthTrajectory = std::make_unique<TruthTrajectory>();
                     m_truthTrajectoryBuilder->buildTruthTrajectory(truthTrajectory.get(), genParticle);
@@ -224,13 +224,13 @@ namespace Muon {
             if (nhits < m_minHits) erase = true;
 
             if (erase) {
-                ATH_MSG_VERBOSE(" Erasing entry: barcode " << it->second.truthTrack->GetBarCode() << " manip "
-                                                           << manipulateBarCode(it->second.truthTrack->GetBarCode()) << " hits " << nhits);
+                ATH_MSG_VERBOSE(" Erasing entry: barcode " << it->second.truthTrack->barcode() << " manip "
+                                                           << manipulateBarCode(it->second.truthTrack->barcode()) << " hits " << nhits); // FIXME barcode-based
                 badBarcodes.push_back(it->first);
             } else {
                 ++ngood;
-                ATH_MSG_VERBOSE(" Keeping entry: barcode " << it->second.truthTrack->GetBarCode() << " manip "
-                                                           << manipulateBarCode(it->second.truthTrack->GetBarCode()) << " hits " << nhits);
+                ATH_MSG_VERBOSE(" Keeping entry: barcode " << it->second.truthTrack->barcode() << " manip "
+                                                           << manipulateBarCode(it->second.truthTrack->barcode()) << " hits " << nhits); // FIXME barcode-based
             }
         }
 
@@ -250,8 +250,8 @@ namespace Muon {
                 if (!it->second.truthTrack)
                     ATH_MSG_INFO(" no TrackRecord ");
                 else {
-                    ATH_MSG_INFO(" PDG " << it->second.truthTrack->GetPDGCode() << " barcode " << it->second.truthTrack->GetBarCode()
-                                         << " manip " << manipulateBarCode(it->second.truthTrack->GetBarCode()));
+                    ATH_MSG_INFO(" PDG " << it->second.truthTrack->GetPDGCode() << " barcode " << it->second.truthTrack->barcode()
+                                         << " manip " << manipulateBarCode(it->second.truthTrack->barcode())); // FIXME barcode-based
                 }
                 if (!it->second.mdtHits.empty()) ATH_MSG_INFO(" mdt  " << it->second.mdtHits.size());
                 if (!it->second.rpcHits.empty()) ATH_MSG_INFO(" rpc  " << it->second.rpcHits.size());

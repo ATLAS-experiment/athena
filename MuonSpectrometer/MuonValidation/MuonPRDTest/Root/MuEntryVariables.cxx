@@ -26,7 +26,7 @@ namespace MuonPRDTest{
       m_MuEntry_nParticles = trackRecordCollection->size();
       for(const auto& it : *trackRecordCollection ) {
         m_MuEntry_particlePdg_id.push_back(it.GetPDGCode());
-        m_MuEntry_particleBarcode.push_back(it.GetBarCode());
+        m_MuEntry_particleBarcode.push_back(it.barcode()); // FIXME barcode-based
         const Amg::Vector3D threeMom = Amg::Hep3VectorToEigen(it.GetMomentum());     
         m_MuEntry_mom.push_back(threeMom.perp(), threeMom.eta(), threeMom.phi(), it.GetEnergy());
         m_MuEntry_pos.push_back(Amg::Hep3VectorToEigen(it.GetPosition()));

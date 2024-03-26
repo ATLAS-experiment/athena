@@ -1143,7 +1143,7 @@ std::string MuonTrackPerformanceAlg::print(const MuonTrackPerformanceAlg::TrackD
                              Amg::Vector3D(trackData.truthTrack->GetMomentum().x(), trackData.truthTrack->GetMomentum().y(),
                                            trackData.truthTrack->GetMomentum().z()),
                              charge, Trk::PerigeeSurface(Amg::Vector3D(0., 0., 0.)));
-        sout << "Truth: " << m_printer->print(perigee);  // << " barcode " << trackData.truthTrack->GetBarCode();
+        sout << "Truth: " << m_printer->print(perigee);  // << " barcode " << trackData.truthTrack->barcode();
         if (std::abs(trackData.truthTrack->GetPDGCode()) == 13) {
             if (trackData.motherPdg != -1) sout << " mother " << trackData.motherPdg;
         } else {
