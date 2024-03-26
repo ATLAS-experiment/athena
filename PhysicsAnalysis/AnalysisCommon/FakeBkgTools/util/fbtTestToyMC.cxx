@@ -64,6 +64,8 @@ struct fbtTestToyMC_config {
 using namespace FakeBkgTools;
 using namespace std;
 
+
+
 TH1F  *h_realeff_e, *h_fakeeff_e,  *h_realeff_mu, *h_fakeeff_mu;
 TFile *rootEffFile;
 
@@ -98,7 +100,7 @@ StatusCode doMerge( const std::vector<std::string> & input, const std::string & 
   
 StatusCode Loop(fbtTestToyMC_config config);
 
-double comboProb(vector<FakeBkgTools::ParticleData> leptons_data, std::bitset<64> tights, std::bitset<64> reals);
+double comboProb(const vector<FakeBkgTools::ParticleData> & leptons_data, const std::bitset<64> & tights, const std::bitset<64> &reals) ;
 
 StatusCode usage();
 
@@ -1018,7 +1020,7 @@ StatusCode lookupEfficiencies(xAOD::IParticle& lepton, FakeBkgTools::ParticleDat
   return StatusCode::SUCCESS;
 }
 
-double comboProb(vector<FakeBkgTools::ParticleData> leptons_data, std::bitset<64> tights, std::bitset<64> reals) {
+double comboProb(const vector<FakeBkgTools::ParticleData> & leptons_data, const std::bitset<64> & tights, const std::bitset<64> &reals) {
 
   double prob(1.);
   for (unsigned ilep = 0; ilep < leptons_data.size(); ilep++) {
@@ -1040,7 +1042,7 @@ double comboProb(vector<FakeBkgTools::ParticleData> leptons_data, std::bitset<64
   return prob;
 }
 
-double comboProb_FF(vector<FakeBkgTools::ParticleData> leptons_data, std::bitset<64> tights, std::bitset<64> reals) {
+double comboProb_FF(const vector<FakeBkgTools::ParticleData> & leptons_data, const std::bitset<64> &tights, const std::bitset<64> & reals) {
 
   // like comboProb, but with real efficiencies set to 1.  
   double prob(1.);
