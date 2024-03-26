@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
 
@@ -179,8 +179,9 @@ def ITkRecPreProcessingSiliconCfg(flags):
             acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
 
         if flags.Tracking.ActiveConfig.doActsCluster or flags.Tracking.ActiveConfig.doAthenaToActsCluster:
-            from ActsConfig.ActsTruthConfig import ITkTruthAssociationCfg
+            from ActsConfig.ActsTruthConfig import ITkTruthAssociationCfg, TruthParticleHitCountAlgCfg
             acc.merge(ITkTruthAssociationCfg(flags))
+            acc.merge(TruthParticleHitCountAlgCfg(flags))
 
 
     return acc

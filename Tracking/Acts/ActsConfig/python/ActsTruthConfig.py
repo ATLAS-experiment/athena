@@ -63,6 +63,20 @@ def TrackToTruthAssociationCfg(flags,
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
+def TruthParticleHitCountAlgCfg(flags,
+                                name: str = 'TruthParticleHitCountAlg',
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
+    kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
+    kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
+    kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
+    kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
+    kwargs.setdefault('NHitsMin',4)
+    acc.addEventAlgo( CompFactory.ActsTrk.TruthParticleHitCountAlg(name=name, **kwargs) )
+    return acc
+
+
 def ITkTruthAssociationCfg(flags,
                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -70,4 +84,31 @@ def ITkTruthAssociationCfg(flags,
         acc.merge(PixelClusterToTruthAssociationCfg(flags, **extractChildKwargs(kwargs,"PixelClusterToTruthAssociation.") ))
     if flags.Detector.EnableITkStrip :
         acc.merge(StripClusterToTruthAssociationCfg(flags, **extractChildKwargs(kwargs,"StripClusterToTruthAssociation.") ))
+    return acc
+
+
+def TrackFindingValidationAlgCfg(flags,
+                                 name: str = 'ActsTracksValidationAlg',
+                                 **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('TruthParticleHitCounts','TruthParticleHitCounts')
+    kwargs.setdefault('TrackToTruthAssociationMap','ActsTracksToTruthParticles')
+    kwargs.setdefault('MatchWeights',[0.,               # other
+                                      10., 5.,           # ID (pixel, strips)
+                                      0.,  0., 0. , 0.,  # MS
+                                      0. ])             # HGTD
+    kwargs.setdefault('CountWeights',[0.,               # other
+                                      1.,1.,            # ID (pixel, strips)
+                                      0., 0., 0. , 0.,  # MS
+                                      0. ])             # HGTD
+    kwargs.setdefault('StatisticPtBins',[1e3,2.5e3,5e3,10e3,100e3])
+    kwargs.setdefault('ShowDetailedTables',False)
+    kwargs.setdefault('PdgIdCategorisation',False)
+    if 'TruthSelectionTool' not in kwargs:
+        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
+        kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+            InDetRttTruthSelectionToolCfg(flags)))
+
+    kwargs.setdefault('StatisticEtaBins',[eta/10. for eta in range(5, 40, 5)])
+    acc.addEventAlgo( CompFactory.ActsTrk.TrackFindingValidationAlg(name=name, **kwargs) )
     return acc

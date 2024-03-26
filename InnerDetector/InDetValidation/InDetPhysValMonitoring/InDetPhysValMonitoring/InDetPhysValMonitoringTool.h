@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPHYSVALMONITORINGTOOL_H
@@ -12,7 +12,7 @@
 **/
 
 //local include
-#include "InDetPhysValMonitoring/IAthSelectionTool.h"
+#include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
 #include "InDetPhysValMonitoring/CutFlow.h"
 
 //#include "PATCore/IAsgSelectionTool.h"

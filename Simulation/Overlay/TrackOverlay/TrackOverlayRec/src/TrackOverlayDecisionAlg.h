@@ -13,7 +13,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include <EventBookkeeperTools/FilterReporterParams.h>
 // local includes
-#include "InDetPhysValMonitoring/IAthSelectionTool.h"
+#include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
 //#gaudi includes
 #include "GaudiKernel/ToolHandle.h"
 //

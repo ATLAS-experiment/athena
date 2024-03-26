@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TABLE_UTILS_H
 #define TABLE_UTILS_H
@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <vector>
 #include <utility>
+#include <limits>
 
 // Utility class to wrap a constant variable length array interface over static sized arrays
 // This avoid duplication of compiled code for arrays which only differ
@@ -23,18 +24,21 @@ namespace TableUtils {
    struct Range {
       const T     *m_ptr  = nullptr;
       std::size_t  m_size = 0u;
+      std::size_t  m_offset = 1u;
 
       struct const_iterator {
-         const_iterator &operator++() { ++m_ptr; return *this; }
+         const_iterator &operator++() { m_ptr += m_offset; return *this; }
          const T &operator*() const { return *m_ptr; }
          bool operator!=(const const_iterator &other) const { return m_ptr != other.m_ptr; }
          const T *m_ptr;
+         std::size_t m_offset;
       };
       const_iterator begin() const {
-         return const_iterator{ m_ptr };
+         return const_iterator{ m_ptr, m_offset };
       }
       const_iterator end() const {
-         return const_iterator{ m_ptr+m_size };
+         assert( (m_size % m_offset) == 0 );
+         return const_iterator{ m_ptr+m_size, m_offset };
       }
       const T &operator[](std::size_t index) const { assert(index<m_size && m_ptr); return m_ptr[index]; }
 
@@ -58,25 +62,29 @@ namespace TableUtils {
       std::size_t  m_rows    = 0u;
       std::size_t  m_columns = 0u;
       std::size_t  m_columnOffset = 0u;
+      std::size_t  m_firstColumnIndex = 0u;
+      std::size_t  m_offset  = 1u;
 
       struct const_iterator {
          const_iterator &operator++() { m_ptr += m_columnOffset; return *this; }
-         Range<T> operator*() const { return Range<T> { m_ptr, m_columns }; }
+         Range<T> operator*() const { return Range<T> { m_ptr, m_columns, m_offset }; }
          bool operator!=(const const_iterator &other) const { return m_ptr != other.m_ptr; }
          const T *m_ptr;
          std::size_t m_columns;
          std::size_t m_columnOffset;
+         std::size_t m_firstColumnIndex;
+         std::size_t m_offset;
       };
 
       const_iterator begin() const {
-         return const_iterator{ m_ptr, m_columns, m_columnOffset};
+         return const_iterator{ m_ptr, m_columns, m_columnOffset, m_firstColumnIndex, m_offset};
       }
       const_iterator end() const {
-         return const_iterator{ m_ptr+m_rows * m_columnOffset, m_columns, m_columnOffset };
+         return const_iterator{ m_ptr+m_rows * m_columnOffset, m_columns, m_columnOffset, m_firstColumnIndex, m_offset };
       }
       Range<T> operator[](std::size_t index) const {
          assert(index<m_rows && m_ptr);
-         return Range<T>{m_ptr + m_columnOffset * index, m_columns};
+         return Range<T>{m_ptr + m_columnOffset * index, m_columns, m_offset};
       }
 
       std::size_t nColumns() const { return m_columns; }
@@ -99,7 +107,8 @@ namespace TableUtils {
                        const std::size_t column_width,
                        const std::size_t min_label_width,
                        const bool dump_footer,
-                       const bool separate_last_row ) {
+                       const bool separate_last_row,
+                       const unsigned int precision) {
       if (counter && label && counter.equalSize(label)) {
          std::size_t max_size =min_label_width;
          for (const std::string &name : label ) {
@@ -114,6 +123,7 @@ namespace TableUtils {
          out << line << std::endl;
          std::size_t idx=0;
          std::string empty;
+         auto default_precision = out.precision();
          for (const T_Counter &a : counter) {
             if (separate_last_row && idx+1 == label.size()) {
                out << line << std::endl;
@@ -122,9 +132,11 @@ namespace TableUtils {
             out << "| " << (label_prefix.empty() ? std::left : std::right)
                 << std::setw(label_prefix.size()) << ( idx==0 ? label_prefix : empty)
                 << std::setw(max_size-label_prefix.size()) << label[idx] << std::right
+                << std::setprecision( precision != std::numeric_limits<unsigned int>::max() ? precision : default_precision)
                 << " | " << std::setw(column_width) << a << " |" << std::endl;
             ++idx;
          }
+         out << std::setprecision(default_precision);
          if (dump_footer) {
             out << line << std::endl;
          }
@@ -146,7 +158,8 @@ namespace TableUtils {
                        const std::size_t min_label_width,
                        const bool dump_header,
                        const bool dump_footer,
-                       const bool separate_last_row) {
+                       const bool separate_last_row,
+                       const std::vector<unsigned int> &precision) {
       if (counter && row_label && column_label
           && counter.equalSize(row_label)
           && counter.nColumns() == column_label.size()) {
@@ -181,6 +194,7 @@ namespace TableUtils {
          out << line << std::endl;
          std::size_t idx=0;
          std::string empty;
+         auto default_precision = out.precision();
          for (const Range<T_Counter> &a_row : counter) {
             if (separate_last_row && idx+1 == row_label.size()) {
                out << line << std::endl;
@@ -189,12 +203,20 @@ namespace TableUtils {
             out << "| " << (label_prefix.empty() ? std::left : std::right)
                 << std::setw(label_prefix.size()) << ( idx==0 ? label_prefix : empty)
                 << std::setw(max_size-label_prefix.size()) << row_label[idx] << std::right << " |";
+            unsigned int col_i=0;
             for (const T_Counter &a : a_row) {
-               out << " " << std::setw(the_width) << a << " |";
+               out << " "
+                   << std::setprecision( (col_i < precision.size()
+                                          && precision[col_i] != std::numeric_limits<unsigned int>::max())
+                                         ? precision[col_i]
+                                         : default_precision)
+                   << std::setw(the_width) << a << " |";
+               ++col_i;
             }
             out << std::endl;
             ++idx;
          }
+         out << std::setprecision(default_precision);
          if (dump_footer) {
             out << line;
          }
@@ -213,10 +235,12 @@ namespace TableUtils {
       StatTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       StatTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
       StatTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
+      StatTable &precision(unsigned int precision) { m_precision=precision; return *this;}
 
       std::string        m_labelPrefix {};
       std::size_t        m_columnWidth=12;
       std::size_t        m_minLabelWidth=0;
+      unsigned int       m_precision = std::numeric_limits<unsigned int>::max();
       bool               m_dumpHeader=true;
       bool               m_dumpFooter=true;
       bool               m_separateLastRow=false;
@@ -234,10 +258,12 @@ namespace TableUtils {
       MultiColumnTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       MultiColumnTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
       MultiColumnTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
+      MultiColumnTable &precision(std::vector<unsigned int> &&precision) { m_precision=std::move(precision); return *this;}
 
       std::string        m_labelPrefix {};
       std::size_t        m_columnWidth=12;
       std::size_t        m_minLabelWidth=0;
+      std::vector<unsigned int> m_precision{};
       bool               m_dumpHeader=true;
       bool               m_dumpFooter=true;
       bool               m_separateLastRow=false;
@@ -454,32 +480,41 @@ namespace TableUtils {
                                     const std::size_t sub_categories,
                                     const std::vector< std::size_t> &counter);
 
-   inline std::string makeEtaBinLabel(const std::vector<float> &eta_bins,
-                               std::size_t eta_bin_i,
-                               bool abs_eta=false) {
-     std::stringstream eta_range_label;
-     eta_range_label << std::fixed << std::setprecision(1);
-     if (eta_bin_i==eta_bins.size()+1) {
-         eta_range_label << " All eta";
+   inline std::string makeBinLabel(const std::string &variable_name,
+                                   const std::vector<float> &bins,
+                                   std::size_t bin_i,
+                                   bool abs_value=false,
+                                   int precision=1) {
+     std::stringstream range_label;
+     range_label << std::fixed << std::setprecision(precision);
+     if (bin_i==bins.size()+1) {
+         range_label << " All " << variable_name;
      }
      else {
-         if (eta_bin_i==0) {
-           eta_range_label << std::setw(4) <<  (abs_eta ? "0.0" : "-inf") << "-";
+         if (bin_i==0) {
+            std::stringstream value_str;
+            value_str << std::fixed << std::setprecision(precision) << 0.;
+            range_label << std::setw(4) <<  (abs_value ? value_str.str().c_str() : "-inf") << "-";
          }
          else {
-           eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i-1) <<"-";
+           range_label << std::setw(4) << bins.at(bin_i-1) <<"-";
          }
-         if (eta_bin_i>=eta_bins.size()) {
-           eta_range_label << std::setw(4) << "+inf";
+         if (bin_i>=bins.size()) {
+           range_label << std::setw(4) << "+inf";
          }
          else {
-           eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i);
+           range_label << std::setw(4) << bins.at(bin_i);
          }
      }
-     return eta_range_label.str();
+     return range_label.str();
+   }
+
+   inline std::string makeEtaBinLabel(const std::vector<float> &eta_bins,
+                                   std::size_t eta_bin_i,
+                                   bool abs_eta=false) {
+      return TableUtils::makeBinLabel("eta",eta_bins, eta_bin_i,abs_eta, 1);
    }
 }
-
 // Helper method to wrap data that should be dumped in table form to an output stream
 // Usage:   out << makeTable( array, labels);
 template <typename T, std::size_t N>
@@ -499,10 +534,12 @@ TableUtils::MultiColumnTable<T> makeTable(const std::array<std::array<T, Ncolumn
                                           const std::string &top_left_label="") {
    return TableUtils::MultiColumnTable<T> {
       TableUtils::Range2D<T>         {!counter.empty() ? counter[0].data() : nullptr,
-                          counter.size(), column_label.size(),
-                          !counter.empty() ? static_cast<std::size_t>(&counter[1][0] - &counter[0][0]) : 0u},
-      TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
-      TableUtils::Range<std::string> {column_label.data(), column_label.size()},
+                                      counter.size(), column_label.size(),
+                                      !counter.empty() ? static_cast<std::size_t>(&counter[1][0] - &counter[0][0]) : 0u,
+                                      0u,  // index of first column
+                                      1u}, // offset between columns
+      TableUtils::Range<std::string> {row_label.data(),    row_label.size(),   1u},
+      TableUtils::Range<std::string> {column_label.data(), column_label.size(),1u},
       top_left_label
    };
 }
@@ -537,12 +574,64 @@ TableUtils::MultiColumnTable<T> makeTable(const std::vector<T> &counter,
       TableUtils::Range2D<T>         {!counter.empty() ? &counter[start_idx] : nullptr,
                                       row_label.size(),      // n-rows
                                       column_label.size(),   // n-columns
-                                      row_stride},  // offset between rows
+                                      row_stride,            // offset between rows
+                                      0u,                    // first column index
+                                      1u},                   // offset between columns
       TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
       TableUtils::Range<std::string> {column_label.data(), column_label.size()},
       top_left_label
    };
 }
+
+template <typename T, std::size_t N>
+TableUtils::MultiColumnTable<T> makeTable(const std::vector<std::array<T,N> > &counter,
+                                          std::size_t start_row_idx,
+                                          std::size_t row_stride,
+                                          std::size_t start_column_idx,
+                                          std::size_t column_stride,
+                                          const std::vector<std::string>    &row_label,
+                                          const std::vector<std::string> &column_label,
+                                          const std::string &top_left_label="") {
+   if (start_row_idx + (row_label.size()-1) * row_stride >= counter.size()*N
+       || start_column_idx + (column_label.size()-1) * column_stride >= counter.size()*N
+       || (row_stride*row_label.size()>column_stride && column_stride*column_label.size()>row_stride) ) {
+      std::stringstream msg;
+      msg << "Counter dimension and label dimensions (" << row_label.size() << " * " << column_label.size()
+          << ") do not match: [" << start_row_idx << ", "
+          <<  start_row_idx << " + " << (row_label.size()-1) << " * " << row_stride << " = "
+          << (start_row_idx + (row_label.size()-1) * row_stride)
+          << " or "
+          <<  start_column_idx << " + " << (column_label.size()-1) << " * " << column_stride << " = "
+          << (start_column_idx + (column_label.size()-1) * column_stride)
+          << " !< " << counter.size()
+          << std::endl
+          << (start_row_idx + (row_label.size()-1) * row_stride) << "  >= " << (counter.size()*N)
+          << " || " << (start_column_idx + (column_label.size()-1) * column_stride) << "  >= " << (counter.size()*N)
+          << " || ( " << (row_stride*row_label.size()) << " > " << column_stride << " &&  " << (column_stride*column_label.size()) << " > " << (row_stride)
+          << ")";
+      msg << " [row_labels:";
+      for (const std::string &label : row_label) {
+         msg << " " << label;
+      }
+      msg << "; column_labels:";
+      for (const std::string &label : column_label) {
+         msg << " " << label;
+      }
+      msg << "]";
+      throw std::logic_error(msg.str());
+   }
+   return TableUtils::MultiColumnTable<T> {
+      TableUtils::Range2D<T>         {!counter.empty() && N>0 ? counter[start_row_idx].data() : nullptr,
+                                      row_label.size(),      // n-rows
+                                      column_label.size(),   // n-columns
+                                      row_stride,            // offset between rows
+                                      start_column_idx,                    // first column index
+                                      column_stride},                   // offset between columns
+      TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
+      TableUtils::Range<std::string> {column_label.data(), column_label.size()},
+      top_left_label};
+}
+
 
 // Helper method to wrap two dimensional data that should be dumped in table form to an output stream
 template <typename T>
@@ -568,7 +657,8 @@ inline MsgStream &operator<<(MsgStream &out,
                     stat.m_columnWidth,
                     stat.m_minLabelWidth,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 
 // convenience method to dump wrapped two dimensional arrays in table form to a MsgStream
@@ -588,7 +678,8 @@ inline MsgStream &operator<<(MsgStream &out,
                     stat.m_minLabelWidth,
                     stat.m_dumpHeader,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 #endif
 
@@ -605,7 +696,8 @@ inline std::ostream &operator<<(std::ostream &out,
                     stat.m_columnWidth,
                     stat.m_minLabelWidth,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 
 // convenience method to dump wrapped two dimensional arrays in table form to a std output stream
@@ -624,7 +716,8 @@ inline std::ostream &operator<<(std::ostream &out,
                     stat.m_minLabelWidth,
                     stat.m_dumpHeader,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 
 #endif
