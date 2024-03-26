@@ -303,7 +303,10 @@ namespace ActsTrk
 
     // @TODO make this condition data
     for (std::size_t icontainer = 0; icontainer < detEleColl.size(); ++icontainer) {
-      measurements.addDetectorElements(*detEleColl[icontainer], *uncalibratedMeasurementContainers[icontainer], m_ATLASConverterTool);
+      xAOD::UncalibMeasType measType =
+          !uncalibratedMeasurementContainers[icontainer]->empty() ? uncalibratedMeasurementContainers[icontainer]->at(0)->type()
+                                                                  : xAOD::UncalibMeasType::Other;
+      measurements.addDetectorElements(measType, *detEleColl[icontainer], m_ATLASConverterTool);
     }
 
     // NB. must complete all addDetectorElements() before addMeasurements(), so don't combine these loops!
@@ -313,7 +316,7 @@ namespace ActsTrk
     }
 
     if (!m_trackStatePrinter.empty()) {
-      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, detEleColl, measurements.measurementOffsetVector());
+      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, detEleColl, measurements.measurementOffsets());
     }
 
     // ================================================== //
@@ -382,7 +385,7 @@ namespace ActsTrk
     {
       if (!alg.m_trackStatePrinter.empty())
       {
-        alg.m_trackStatePrinter->printTrackState(tgContext, trackState, measurementOffset, true);
+        alg.m_trackStatePrinter->printTrackState(tgContext, trackState, measurementContainerOffsets, true);
       }
 
       if (!alg.m_doBranchHoleCut)
@@ -409,7 +412,7 @@ namespace ActsTrk
 
     const TrackFindingAlg &alg;
     const Acts::GeometryContext &tgContext;
-    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &measurementOffset;
+    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &measurementContainerOffsets;
     const std::size_t &category_i;
     // keep references to stats variables so we can update them.
     EventStats &event_stat ATLAS_THREAD_SAFE;
@@ -472,7 +475,8 @@ namespace ActsTrk
     options.extensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
 
     std::size_t category_i = 0;
-    CkfBranchStopper ckfBranchStopper{*this, tgContext, measurements.measurementOffsets(), category_i, event_stat};
+    const auto measurementContainerOffsets = measurements.measurementContainerOffsets();
+    CkfBranchStopper ckfBranchStopper{*this, tgContext, measurementContainerOffsets, category_i, event_stat};
     options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
 
     // Perform the track finding for all initial parameters
@@ -573,7 +577,7 @@ namespace ActsTrk
 
       if (!m_trackStatePrinter.empty())
       {
-        m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, tracksForSeed, measurements.measurementOffsets());
+        m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, tracksForSeed, measurementContainerOffsets);
       }
 
       // Fill the track infos into the duplicate seed detector
