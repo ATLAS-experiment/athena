@@ -4,9 +4,8 @@ theApp.EvtMax = -1
 
 import AthenaPoolCnvSvc.ReadAthenaPool
 svcMgr.EventSelector.InputCollections = ["!TESTSAMPLE!"]
-from PyUtils import AthFile
-af = AthFile.fopen(svcMgr.EventSelector.InputCollections[0]) #opens the first file from the InputCollections list
-af.fileinfos #this is a dict of dicts, take a look at what's available (e.g. do af.fileinfos.keys() to see the main keys)!
+from PyUtils.MetaReader import read_metadata
+filename = svcMgr.EventSelector.InputCollections[0]
 #Below are some example
 systWeights=None
 
@@ -19,7 +18,7 @@ def safeFileName(name):
  return name
 
 
-metadata = af.fileinfos['metadata']
+metadata = read_metadata(filename, None, 'full')[filename]
 if '/Generation/Parameters' in metadata:
     genpars=metadata['/Generation/Parameters']
     if 'HepMCWeightNames' in genpars:
