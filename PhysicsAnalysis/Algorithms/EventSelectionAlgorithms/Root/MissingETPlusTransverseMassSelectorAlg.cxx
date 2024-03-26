@@ -46,22 +46,22 @@ namespace CP {
       const xAOD::MissingETContainer *met = nullptr;
       ANA_CHECK(m_metHandle.retrieve(met, sys));
       // retrieve the electron container
-      const xAOD::ElectronContainer *electrons = nullptr;
+      const xAOD::IParticleContainer *electrons = nullptr;
       if (m_electronsHandle)
 	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
       // retrieve the electron container
-      const xAOD::MuonContainer *muons = nullptr;
+      const xAOD::IParticleContainer *muons = nullptr;
       if (m_muonsHandle)
 	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
       // compute the W boson transverse mass
-      float etmiss_pt = (*met)["Final"]->met();
-      float etmiss_phi = (*met)["Final"]->phi();
+      float etmiss_pt = (*met)[m_metTerm.value()]->met();
+      float etmiss_phi = (*met)[m_metTerm.value()]->phi();
       float lep_pt, lep_phi;
       int lep_count = 0;
 
       if (m_electronsHandle) {
-	for (const xAOD::Electron *el : *electrons) {
+	for (const xAOD::IParticle *el : *electrons) {
 	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
 	    lep_pt = el->pt();
 	    lep_phi = el->phi();
@@ -71,7 +71,7 @@ namespace CP {
 	}
       }
       if (m_muonsHandle) {
-	for (const xAOD::Muon *mu : *muons) {
+	for (const xAOD::IParticle *mu : *muons) {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
 	    lep_pt = mu->pt();
 	    lep_phi = mu->phi();

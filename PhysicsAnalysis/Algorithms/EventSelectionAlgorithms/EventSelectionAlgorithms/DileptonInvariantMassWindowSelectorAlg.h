@@ -17,8 +17,7 @@
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 
 // Framework includes
-#include <xAODEgamma/ElectronContainer.h>
-#include <xAODMuon/MuonContainer.h>
+#include <xAODBase/IParticleContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
 namespace CP {
@@ -50,7 +49,7 @@ namespace CP {
       CP::SysListHandle m_systematicsList {this};
 
       /// \brief the electrons handle
-      CP::SysReadHandle<xAOD::ElectronContainer> m_electronsHandle {
+      CP::SysReadHandle<xAOD::IParticleContainer> m_electronsHandle {
         this, "electrons", "", "the electron container to use"
       };
 
@@ -60,7 +59,7 @@ namespace CP {
       };
 
       /// \brief the muons handle
-      CP::SysReadHandle<xAOD::MuonContainer> m_muonsHandle {
+      CP::SysReadHandle<xAOD::IParticleContainer> m_muonsHandle {
         this, "muons", "", "the muon container to use"
       };
 

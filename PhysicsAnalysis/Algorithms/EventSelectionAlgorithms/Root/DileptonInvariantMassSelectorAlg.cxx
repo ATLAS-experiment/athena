@@ -42,11 +42,11 @@ namespace CP {
         continue;
 
       // retrieve the electron container
-      const xAOD::ElectronContainer *electrons = nullptr;
+      const xAOD::IParticleContainer *electrons = nullptr;
       if (m_electronsHandle)
 	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
       // retrieve the electron container
-      const xAOD::MuonContainer *muons = nullptr;
+      const xAOD::IParticleContainer *muons = nullptr;
       if (m_muonsHandle)
 	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
@@ -55,7 +55,7 @@ namespace CP {
       int total_leptons = 0;
       bool isfilled0(false), isfilled1(false);
       if (m_electronsHandle) {
-	for (const xAOD::Electron *el : *electrons) {
+	for (const xAOD::IParticle *el : *electrons) {
 	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
 	    total_leptons++;
 	    if (!isfilled0){
@@ -71,7 +71,7 @@ namespace CP {
 	}
       }
       if (m_muonsHandle) {
-	for (const xAOD::Muon *mu : *muons) {
+	for (const xAOD::IParticle *mu : *muons) {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
 	    total_leptons++;
 	    if (!isfilled0){

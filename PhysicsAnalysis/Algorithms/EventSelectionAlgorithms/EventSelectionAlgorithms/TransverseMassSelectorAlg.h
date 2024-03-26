@@ -17,8 +17,7 @@
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 
 // Framework includes
-#include <xAODEgamma/ElectronContainer.h>
-#include <xAODMuon/MuonContainer.h>
+#include <xAODBase/IParticleContainer.h>
 #include <xAODMissingET/MissingETContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
@@ -52,7 +51,7 @@ namespace CP {
       CP::SysListHandle m_systematicsList {this};
 
       /// \brief the electron handle
-      CP::SysReadHandle<xAOD::ElectronContainer> m_electronsHandle {
+      CP::SysReadHandle<xAOD::IParticleContainer> m_electronsHandle {
         this, "electrons", "", "the electron container to use"
       };
 
@@ -62,7 +61,7 @@ namespace CP {
       };
 
       /// \brief the muons handle
-      CP::SysReadHandle<xAOD::MuonContainer> m_muonsHandle {
+      CP::SysReadHandle<xAOD::IParticleContainer> m_muonsHandle {
         this, "muons", "", "the muon container to use"
       };
 
@@ -75,6 +74,9 @@ namespace CP {
       CP::SysReadHandle<xAOD::MissingETContainer> m_metHandle {
         this, "met", "SetMe", "the MET container to use"
       };
+
+      /// \brief the MET term
+    Gaudi::Property<std::string> m_metTerm {this, "metTerm", "Final", "the MET term to use"};
 
       /// \brief the event info handle
       CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {

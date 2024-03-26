@@ -54,6 +54,9 @@ namespace CP {
         this, "met", "SetMe", "the MET container to use"
       };
 
+      /// \brief the MET term
+    Gaudi::Property<std::string> m_metTerm {this, "metTerm", "Final", "the MET term to use"};
+
       /// \brief the event info handle
       CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
         this, "eventInfo", "EventInfo", "the EventInfo container to read selection decisions from"
