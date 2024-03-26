@@ -114,6 +114,15 @@ namespace ORUtils
     m_decHelper->initializeDecorations(taus);
     m_decHelper->initializeDecorations(jets);
 
+    // Start by discarding all taus which are not ID or anti-ID
+    for(const auto tau : taus) {
+      if(!m_decHelper->isSurvivingObject(*tau)) continue;
+      if(isSurvivingTau(*tau)) continue;
+      if(isSurvivingAntiTau(*tau)) continue;
+      // remove it with trivial overlap with itself
+      ATH_CHECK( handleOverlap(tau, tau) );
+    }
+
     // Remove bjets overlapping with ID taus
     int ntaus = 0;
     for(const auto tau : taus) {
@@ -134,6 +143,7 @@ namespace ORUtils
       if(!m_decHelper->isSurvivingObject(*jet)) continue;
       if(!isBJet(*jet)) continue;
       for(const auto tau : taus) {
+        if(!m_decHelper->isSurvivingObject(*jet)) continue;
         if(!isSurvivingAntiTau(*tau)) continue;
         if(m_dRMatcher->objectsMatch(*tau, *jet)) {
           ATH_CHECK( handleOverlap(tau, jet) );
@@ -145,8 +155,8 @@ namespace ORUtils
     int antiTauCategory = 0;
     static const SG::AuxElement::ConstAccessor<int> categoryAcc(m_antiTauEventCategoryDecorName);
     for(const auto tau : taus) {
-      if(!m_decHelper->isSurvivingObject(*tau) &&
-         !isSurvivingAntiTau(*tau) ) continue;
+      if(!m_decHelper->isSurvivingObject(*tau)) continue;
+      if(!isSurvivingAntiTau(*tau)) continue;
       nantitaus++;
       antiTauCategory = categoryAcc(*tau);
     }
@@ -163,20 +173,21 @@ namespace ORUtils
       int nSelectedAntitaus = 0;
       int idx = 0;
       for(const auto tau : taus) {
-        if(!m_decHelper->isSurvivingObject(*tau) &&
-           !isSurvivingAntiTau(*tau) ) continue;
-          if (idx == selIndex  && nSelectedAntitaus < nAntiTauMax) nSelectedAntitaus++;
-          else {
-            // remove excess anti-taus by applying OR fail (it trivially overlaps with itself)
-            ATH_CHECK( handleOverlap(tau, tau) );
-          }
-          idx++;
+        if(!m_decHelper->isSurvivingObject(*tau)) continue;
+        if(!isSurvivingAntiTau(*tau) ) continue;
+        if (idx == selIndex  && nSelectedAntitaus < nAntiTauMax) nSelectedAntitaus++;
+        else {
+          // remove excess anti-taus by applying OR fail (it trivially overlaps with itself)
+          ATH_CHECK( handleOverlap(tau, tau) );
+        }
+        idx++;
       }
     }
+
     // Remove light jets from remaining anti-taus.
     for(const auto tau : taus) {
-      if(!m_decHelper->isSurvivingObject(*tau) &&
-         !isSurvivingAntiTau(*tau) ) continue;
+      if(!m_decHelper->isSurvivingObject(*tau)) continue;
+      if(!isSurvivingAntiTau(*tau)) continue;
       // if isSurviving
       for(const auto jet : jets) {
         if(!m_decHelper->isSurvivingObject(*jet)) continue;
