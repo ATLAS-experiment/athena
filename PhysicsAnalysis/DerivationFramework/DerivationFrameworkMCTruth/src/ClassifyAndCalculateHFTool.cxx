@@ -69,8 +69,8 @@ namespace DerivationFramework {
     // The PDG Id of quark composite states has 7-digits.
     // The 3rd and 4th digits of the PDG Id starting from the end correspond to the largest PDG Id of the quarks.
 
-    int rest1(abs(pdgId)%1000);  // Three last digits of the PDG Id.
-    int rest2(abs(pdgId)%10000); // Four last digits of the PDF Id.
+    int rest1(std::abs(pdgId)%1000);  // Three last digits of the PDG Id.
+    int rest2(std::abs(pdgId)%10000); // Four last digits of the PDF Id.
 
     // If the 3rd digit or 4th one is 5, then the hadron has a b-quark.
 
@@ -92,8 +92,8 @@ namespace DerivationFramework {
     // The PDG Id of quark composite states has 7-digits.
     // The 3rd and 4th digits of the PDG Id starting from the end correspond to the largest PDG Id of the quarks.
 
-    int rest1(abs(pdgId)%1000);  // Three last digits of the PDG Id.
-    int rest2(abs(pdgId)%10000); // Four last digits of the PDF Id.
+    int rest1(std::abs(pdgId)%1000);  // Three last digits of the PDG Id.
+    int rest2(std::abs(pdgId)%10000); // Four last digits of the PDF Id.
 
     // If the 3rd digit or 4th one is 4, then the hadron has a c-quark.
     // The function does not consider if the case where the hadron has also a b-quark.
@@ -115,12 +115,20 @@ namespace DerivationFramework {
                                             const std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>&  hadronMap,
                                             const std::string& hfDecorationName) const{
 
+    SG::AuxElement::Decorator< int > decorator_flav(hfDecorationName + "_flav");
+    SG::AuxElement::Decorator< int > decorator_id(hfDecorationName + "_id");
+    SG::AuxElement::Decorator< int > decorator_count(hfDecorationName + "_count");
+
     for(const xAOD::Jet* jet : *jets){
 
       // Check if the jet passes the cuts and if it does not, then skip it.
 
-      if(jet->p4().Pt() < m_jetPtCut) continue;
-      if(fabs(jet->p4().Eta()) > m_jetEtaCut) continue;
+      if(jet->p4().Pt() < m_jetPtCut || std::abs(jet->p4().Eta()) > m_jetEtaCut) {
+	decorator_flav(*jet) = -999;
+	decorator_id(*jet) = -999;
+	decorator_count(*jet) = -999;
+	continue;
+      }
 
       // Create a set of integer variables to save the necessary variables for the HF classifier:
       //  -flav:  Flavour of the jet.
@@ -220,7 +228,7 @@ namespace DerivationFramework {
           
             // In this case, hftype is not 4 neither 5 so print an error.
 
-            ATH_MSG_ERROR("Hadron type '" << hftype << "' is not 4 or 5");
+            ATH_MSG_WARNING("Hadron type '" << hftype << "' is not 4 or 5");
 
           }
         
@@ -253,16 +261,9 @@ namespace DerivationFramework {
       }
 
       // Dectorate the jet with the flav, id and count.
-
-      SG::AuxElement::Decorator< int > decorator_flav(hfDecorationName + "_flav"); 
       decorator_flav(*jet) = flav;
-
-      SG::AuxElement::Decorator< int > decorator_id(hfDecorationName + "_id"); 
       decorator_id(*jet) = id;
-
-      SG::AuxElement::Decorator< int > decorator_count(hfDecorationName + "_count"); 
       decorator_count(*jet) = count;
-
     }
 
   }
@@ -297,7 +298,7 @@ namespace DerivationFramework {
       // Check if the jet passes the cuts and if it does not, then skip it.
 
       if(jet->p4().Pt() < m_jetPtCut) continue;
-      if(fabs(jet->p4().Eta()) > m_jetEtaCut) continue;
+      if(std::abs(jet->p4().Eta()) > m_jetEtaCut) continue;
       
       // Get the flavour, the id and the number of hadrons of the considered jet.
 
@@ -306,21 +307,21 @@ namespace DerivationFramework {
       int count = 0;
 
       if(jet->isAvailable<int>(hfDecorationName + "_flav")){
-        flav=jet->auxdata<int>(hfDecorationName + "_flav");
+        flav=jet->auxdataConst<int>(hfDecorationName + "_flav");
       }else{
         ATH_MSG_WARNING("variable '" + hfDecorationName + "_flav' not found.");
         continue;
       }
 
       if(jet->isAvailable<int>(hfDecorationName + "_id")){
-        id=jet->auxdata<int>(hfDecorationName + "_id");
+        id=jet->auxdataConst<int>(hfDecorationName + "_id");
       }else{
         ATH_MSG_WARNING("variable '" + hfDecorationName + "_id' not found.");
         continue;
       }
 
       if(jet->isAvailable<int>(hfDecorationName + "_count")){
-        count=jet->auxdata<int>(hfDecorationName + "_count");
+        count=jet->auxdataConst<int>(hfDecorationName + "_count");
       }else{
         ATH_MSG_WARNING("variable '" + hfDecorationName + "_count' not found.");
         continue;
@@ -465,7 +466,7 @@ namespace DerivationFramework {
 
     // Check the value of the HF classifier (hfclassif) which is computed with the function computeHFClassification.
 
-    if(abs(hfclassif)>=100){
+    if(std::abs(hfclassif)>=100){
 
       // If the absolute value of hfclassif is greater than 100, then there is at least one jet with a B-hadron.
       // In this case, return 1. 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -26,10 +26,11 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 #include "DerivationFrameworkMCTruth/JetMatchingTool.h"
 #include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFTool.h"
-
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
 
 #include "xAODEventInfo/EventInfo.h"
@@ -88,14 +89,17 @@ namespace DerivationFramework {
 
     private:
 
+      SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticlesKey {this, "TruthParticleContainerName", "TruthParticles", "Name of the truth particles collection that is used to compute the HF Classification"};
+      SG::ReadHandleKey<xAOD::JetContainer> m_jetCollectionKey {this, "jetCollectionName", "AntiKt4TruthWZJets", "Name of the jet collection that is used to compute the HF Classification"};
+      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfo", "EventInfo", ""};
+
+      SG::WriteDecorHandleKey<xAOD::EventInfo> m_hfDecorKey {this, "EventInfoHFDecorName", "", "Name that is used to store the HF Classification."};
+      SG::WriteDecorHandleKey<xAOD::EventInfo> m_SimplehfDecorKey {this, "EventInfoSimpleHFDecorName", "", "Name that is used to store the simple HF Classification."};
+
       // Declare a set of strings variables:
-      //  -m_jetCollectionName:          It contains the name of the jets container.
-      //  -m_TruthParticleContainerName: It contains the name of the truth particles containers.
       //  -m_hfDecorationName:           It contains the name used to save the HF classifier.
       //  -m_SimplehfDecorationName:     It contains the name used to save the simple HF classifier.
-      
-      Gaudi::Property<std::string> m_jetCollectionName{this, "jetCollectionName", "AntiKt4TruthWZJets", "Name of the jet collection that is used to compute the HF Classification."};
-      Gaudi::Property<std::string> m_TruthParticleContainerName{this, "TruthParticleContainerName", "TruthParticles", "Name of the truth particles collection that is used to compute the HF Classification."};
+
       Gaudi::Property<std::string> m_hfDecorationName{this, "hfDecorationName", "HF_Classification", "Name that is used to store the HF Classification."};
       Gaudi::Property<std::string> m_SimplehfDecorationName{this, "SimplehfDecorationName", "SimpleHFClassification", "Name that is used to store the simple HF Classification."};
       
