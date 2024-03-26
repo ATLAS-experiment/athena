@@ -21,7 +21,6 @@ def TLAJetCommonCfg(ConfigFlags):
     acc.merge(StandardTLAJetsCfg(ConfigFlags))
 
 
-
     if "McEventCollection#GEN_EVENT" not in ConfigFlags.Input.TypedCollections:
         acc.merge(AddBadBatmanCfg(ConfigFlags))
     acc.merge(AddDistanceInTrainCfg(ConfigFlags))
@@ -89,7 +88,7 @@ def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
 
   
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList += [        acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
+    augmentationToolsList += [ acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
 
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3

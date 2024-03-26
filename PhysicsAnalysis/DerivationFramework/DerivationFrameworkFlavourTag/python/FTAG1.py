@@ -181,6 +181,8 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     # Add truth containers
     if flags.Input.isMC:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAG1SlimmingHelper)
+        from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
+        acc.merge(HLTJetFTagDecorationCfg(flags))
 
     # Add ExtraVariables
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper)

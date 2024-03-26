@@ -121,6 +121,8 @@ def FTAG2Cfg(flags):
     # Add truth containers
     if flags.Input.isMC:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAG2SlimmingHelper)
+        from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
+        acc.merge(HLTJetFTagDecorationCfg(flags))
 
     # Add ExtraVariables
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG2SlimmingHelper)
@@ -128,7 +130,6 @@ def FTAG2Cfg(flags):
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG2SlimmingHelper, 'FTAG2')
     FtagBaseContent.trigger_matching(FTAG2SlimmingHelper, FTAG2TriggerListsHelper, flags)
-
 
     # Output stream    
     FTAG2ItemList = FTAG2SlimmingHelper.GetItemList()

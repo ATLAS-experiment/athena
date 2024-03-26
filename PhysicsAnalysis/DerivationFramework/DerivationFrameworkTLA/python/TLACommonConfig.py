@@ -70,12 +70,13 @@ def TLACommonAugmentationsCfg(ConfigFlags,**kwargs):
     # Egamma common augmentations
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
     acc.merge(EGammaCommonCfg(ConfigFlags))
+
     # Jets, flavour tagging
     from DerivationFrameworkTLA.TLACommonConfigFunctions import TLAJetCommonCfg
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg, HLTJetFTagDecorationCfg
     acc.merge(TLAJetCommonCfg(ConfigFlags))
-    
-
+    if ConfigFlags.Input.isMC:
+        acc.merge(HLTJetFTagDecorationCfg(ConfigFlags))
 
     FTagJetColl = ['AntiKt4EMPFlowJets']
     if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4: 
