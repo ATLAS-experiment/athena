@@ -1259,8 +1259,8 @@ void MuonStationBuilderImpl::checkLayerId(std::string_view comment, const MuonGM
         const MuonGM::RpcReadoutElement* rpcRE = muonMgr->getRpcReadoutElement(id);
         Amg::Transform3D trid = rpcRE->transform(id);
         Amg::Transform3D check_layer_identity = lay->surfaceRepresentation().transform().inverse() * trid;
-        if (!Amg::doesNotDeform(check_layer_identity) && !rpcRE->rotatedGasGap(id)) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<comment<<" "<<Amg::toString(check_layer_identity));
+        if (!Amg::doesNotDeform(check_layer_identity)) {
+            ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" "<<comment<<" "<<Amg::toString(check_layer_identity));
         }
 
     } else if (m_idHelperSvc->isTgc(id)) {
