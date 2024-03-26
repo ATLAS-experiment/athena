@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
-//  Package    : StorageSvc (The POOL project)
+//  Package    : Athena APR StorageSvc (former POOL project)
 //
 //  @author      M.Frank
 //====================================================================
@@ -17,10 +17,12 @@ using namespace pool;
 DbType DbType::getType(const std::string& name)  {
   if ( "ROOT_Key" == name )
     return ROOTKEY_StorageType;
-  else if ( "ROOT_Tree" == name )
+  else if ( "ROOT_Tree" == name or name == "ROOTTREE" )
     return ROOTTREE_StorageType;
-  else if ( "ROOT_TreeIndex" == name )
+  else if ( "ROOT_TreeIndex" == name  or name == "ROOTTREEINDEX")
     return ROOTTREEINDEX_StorageType;
+  else if ( "ROOT_RNTuple" == name or name == "ROOTRNTUPLE")
+    return ROOTRNTUPLE_StorageType;
   else if ( "ROOT_All" == name )
     return ROOT_StorageType;
   else if ( "POOL_RDBMS" == name )

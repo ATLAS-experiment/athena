@@ -26,6 +26,7 @@
 
 #include "StorageSvc/DbReflex.h"
 #include "FileCatalog/IFileCatalog.h"
+#include "RootUtils/APRDefaults.h"
 
 #include "AuxDiscoverySvc.h"
 
@@ -82,15 +83,17 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       }
    }
    ATH_MSG_DEBUG("Setting StorageType to " << m_storageTechProp.value());
-   #define CHECK_TECH(TECH) \
-      if(m_storageTechProp.value() == #TECH) m_dbType = pool::TECH##_StorageType
-   CHECK_TECH(ROOTTREE);
-   CHECK_TECH(ROOTTREEINDEX);
-   CHECK_TECH(ROOTRNTUPLE);
+   m_dbType = pool::DbType::getType( m_storageTechProp.value() );
    if( m_dbType == TEST_StorageType ) {
       ATH_MSG_FATAL("Unknown StorageType rquested: " << m_storageTechProp.value());
       return StatusCode::FAILURE;
    }
+   if( m_containerPrefixProp.value() == "Default" ) {
+      // select default storage element name accoring to storage tech
+      if( m_dbType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) m_containerPrefixProp.setValue( APRDefaults::RNTupleNames::EventData );
+      else m_containerPrefixProp.setValue( APRDefaults::TTreeNames::EventData );
+   }
+
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
    // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
