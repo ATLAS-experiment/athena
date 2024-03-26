@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # This function reads the layers that have been recalibrated (using the PixelCalibrationConfig python) and creates a merge file of all of them
-# the "layers" aregument is an array i.e: ["Blayer","L1","L2","disk"] meaning that it will look for files like "calibration_Blayer.txt"... etc
+# the "layers" argument is an array i.e: ["Blayer","L1","L2","disk"] meaning that it will look for files like "calibration_Blayer.txt"... etc
 
 import os.path
 

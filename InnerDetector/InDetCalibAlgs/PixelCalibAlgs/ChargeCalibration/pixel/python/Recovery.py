@@ -2,7 +2,7 @@
 
 import json
 
-# Reading from the gerenated file in MakeReferenceFile
+# Reading from the generated file in MakeReferenceFile
 # It converts the DB payload into a python dictionary using json
 def ReadDbFile(name):
     mydict = dict()
@@ -78,7 +78,7 @@ def avg(a, b):
   return 1/2*(a + b)    
 
 
-# This fucntion recovers the thresholds for the normal, long and ganged pixels
+# This function recovers the thresholds for the normal, long and ganged pixels
 def recover_thr(thr1, thr2, listarray, ref_val):
     recovered_value =  avg(thr1, thr2)
     
@@ -89,7 +89,7 @@ def recover_thr(thr1, thr2, listarray, ref_val):
             recovered_value = sum(listarray)/len(listarray)
     return recovered_value
 
-# This fucntion recovers other than the thresholds
+# This function recovers other than the thresholds
 def recover(listarray, ref_val):
     
     if not listarray:
@@ -143,7 +143,7 @@ def recover_empties(new_calib, ref_calib):
                                 
                             # rest of parameters
                             else:
-                                # itr_par 13 or 16 are the fit parameters for the demominator. Bad values are 0 or -28284.3 so we need to exclude them from the list
+                                # itr_par 13 or 16 are the fit parameters for the denominator. Bad values are 0 or -28284.3 so we need to exclude them from the list
                                 if itr_par == 13 or itr_par == 16:
                                     new_calib[module][itr_fe][itr_par] = recover(val_list_fit, ref_calib[module][itr_fe][itr_par])
                                 else:
@@ -178,7 +178,7 @@ def UpdateAndSave(new_calib, ref_calib):
     # Commented out since it could be used for comparison - Experts only
     # Fprint(new_calib    , "final_new_calib.txt")
     # Fprint(ref_calib    , "final_ref_calib.txt")
-    Fprint(updated_calib, "final_calibration_candidate.txt")
+    Fprint(updated_calib, "FINAL_calibration_candidate.txt")
 
     return updated_calib
 
@@ -223,9 +223,9 @@ def UpdateCalib(tag):
     print("NEW CALIBRATION file to update the DB: final_calibration_candidate.txt")
     
     str += """Positions of single 0's:
-    0: normal_threhold,  1: normal_RMS,  2: normal_noise,  3: normal_intime
-    4: long_threhold  ,  5: long_RMS  ,  6: long_noise  ,  7: long_intime  
-    8: ganged_threhold,  9: ganged_RMS, 10: ganged_noise, 11: ganged_intime
+    0: normal_threshold,  1: normal_RMS,  2: normal_noise,  3: normal_intime
+    4: long_threshold  ,  5: long_RMS  ,  6: long_noise  ,  7: long_intime  
+    8: ganged_threshold,  9: ganged_RMS, 10: ganged_noise, 11: ganged_intime
     12: 13: 14: Fitting for normal pixels
     15: 16: 17: Fitting for long and ganged pixels
     18: 19: quality and smearing (used for MC)\n\n"""

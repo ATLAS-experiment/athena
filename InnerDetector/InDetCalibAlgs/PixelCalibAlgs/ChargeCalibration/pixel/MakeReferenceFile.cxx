@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <ctime>
 #include <sstream>
+#include <unordered_map>
 
 #ifdef ATLAS_GCC_CHECKERS
 #include "CxxUtils/checker_macros.h"
@@ -291,15 +292,26 @@ int main(int argc, char *argv[])
     FolderSpec fs(folderName, tagName);
     Folder f(connection, fs);
     const std::string fileName = tagName + ".log";
-    std::ofstream opFile(fileName);
-    auto objectsIterator = f.objectIterator(true); // True tu use the last IOV
+    bool useLastIOV = true;
+    cool::IObjectIteratorPtr objectsIterator = f.objectIterator(useLastIOV); // True to use the last IOV
+    std::vector<std::string> myIOVs;
     while (objectsIterator->goToNext())
     {
-        const auto &thisObject = objectsIterator->currentRef();
+        const cool::IObject &thisObject = objectsIterator->currentRef();
         std::string display = iovToString(thisObject) + " (" + std::to_string(thisObject.channelId()) + ")\n";
         display += payloadToString(thisObject);
-        opFile << display;
+        myIOVs.push_back(display);
     }
+
+    std::ofstream opFile(fileName);
+    if(!useLastIOV){
+        // Saving in file the previous to last IOV - testing only so far.
+        opFile << myIOVs.at(myIOVs.size()-2);
+    }
+    else{
+        opFile << myIOVs.back();
+    }
+
     opFile << std::endl;
     opFile.close();
     return returnCode;
