@@ -8,6 +8,9 @@ from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from FlavorTagDiscriminants.FoldDecoratorConfig import FoldDecoratorCfg
+from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
+from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
+from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
@@ -118,10 +121,21 @@ def getFtagComponent(cfgFlags, jet_col, pv_col,
         prefix=trackAugmenterPrefix
     ))
 
-    # decorate tracks with leptonID
+    # decorate tracks with lepton info                                                                                            
+    electronID_tool = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(cfgFlags,
+                                                                        name = "electronID_tool",
+                                                                        quality = LikeEnum.VeryLoose))
+
+    muonID_tool = acc.popToolsAndMerge(MuonSelectionToolCfg(cfgFlags,
+                                                            name = "muonID_tool",
+                                                            MuQuality = 2,          #Loose muon selection
+                                                            MaxEta = 2.5))
+    
     acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackLeptonDecoratorAlg(
         'TrackLeptonDecoratorAlg',
         trackContainer=track_collection,
+        electronSelectionTool = electronID_tool,
+        muonSelectionTool = muonID_tool,
     ))
 
     # decorate detailed truth info
