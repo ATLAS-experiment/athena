@@ -62,12 +62,43 @@ void compare (const TRTUncompressedHitCollection& p1,
 }
 
 
+void checkPersistentVersion(const TRT_HitCollection_p2& pers, const TRTUncompressedHitCollection& trans)
+{
+  constexpr unsigned int numberOfStrings{11}; // The number of groups of hits caused by consecutive steps of "the same particle"
+  //constexpr unsigned int radiusVectorSize{10};
+  //  1 element per string (a string resides in one straw; there may be more than one string in a straw)
+  assert(numberOfStrings == pers.m_hit1_startX.size());      // hit start x
+  assert(numberOfStrings == pers.m_hit1_startY.size());      // hit start y
+  assert(numberOfStrings == pers.m_hit1_startZ.size());      // hit start z
+  assert(numberOfStrings == pers.m_nHits.size());       // number of hits in the string (0,1,2 ... ,hundreds).
+
+  //  1 element per hit, there are typically 1 or 2 hits per string, but can be hundreds!
+  //constexpr unsigned int numberOfPhotons{1};
+  assert(trans.size() == pers.m_hitEne.size()); // energy deposited.size(); *only stored for photons* (m_id=22)
+  assert(trans.size() == pers.m_meanTime.size());    // time to center of the hit, and 1-bit idZsign and 1-bit endRflag.
+  assert(trans.size() == pers.m_kinEne.size());      // short float, kinematic energy of the particle causing the hit.
+  assert(trans.size() == pers.m_endX.size());      // hit end x
+  assert(trans.size() == pers.m_endY.size());      // hit end y
+  assert(trans.size() == pers.m_endZ.size());      // hit end z
+  assert(trans.size() == pers.m_hitId.size());
+
+  // much less frequent
+  constexpr unsigned int numberOfUniqueParticles{2};
+  assert(numberOfUniqueParticles == pers.m_barcode.size());
+  assert(numberOfUniqueParticles == pers.m_nBC.size());
+  constexpr int numberOfPdgCodeGroups{11}; // This should also be 2, but we force it to differ in the test setup
+  assert(numberOfPdgCodeGroups == pers.m_nId.size());
+  assert(numberOfPdgCodeGroups == pers.m_id.size());     // particle code.
+}
+
+
 void testit (const TRTUncompressedHitCollection& trans1)
 {
   MsgStream log (nullptr, "test");
   TRT_HitCollectionCnv_p2 cnv;
   TRT_HitCollection_p2 pers;
   cnv.transToPers (&trans1, &pers, log);
+  checkPersistentVersion(pers, trans1);
   TRTUncompressedHitCollection trans2;
   cnv.persToTrans (&pers, &trans2, log);
 
@@ -93,7 +124,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
     trans1.Emplace (101+o, // hit ID
                     trkLink, // link to truth particle
-                    pGenParticle->pdg_id(), // pdg code (particleEncoding)
+                    20+o, // pdg code (particleEncoding) NB really this should be consistent with the GenParticle (forcing it to differ)
                     104.5+o, // kinetic energy
                     105.5+o, // energy deposit
                     (106.5+o)/1000, (107.5+o)/1000, 108.5+o, // PreStep (X,Y,Z)
