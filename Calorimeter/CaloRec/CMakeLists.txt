@@ -41,7 +41,7 @@ atlas_add_test( CaloBCIDLumiCondAlg_test
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py share/*.txt )
+atlas_install_joboptions( share/*.txt )
 
 
 atlas_add_test( CaloBCIDAvgAlgConfig_test
