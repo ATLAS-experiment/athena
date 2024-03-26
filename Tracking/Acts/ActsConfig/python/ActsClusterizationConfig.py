@@ -67,7 +67,7 @@ def ActsPixelClusterizationAlgCfg(flags,
     kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("ClustersKey", "ITkPixelClusters")
     # Regional selection
-    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+    kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
     kwargs.setdefault('EnableCache', flags.Acts.useCache)
     kwargs.setdefault('ClusterCacheBackend', 'ActsPixelClusterCache_Back')
@@ -97,7 +97,7 @@ def ActsStripClusterizationAlgCfg(flags,
     kwargs.setdefault("expectedClustersPerRDO", 6)
     kwargs.setdefault("IDHelper", "SCT_ID")
     # Regional selection
-    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+    kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
     kwargs.setdefault('EnableCache', flags.Acts.useCache)
     kwargs.setdefault('ClusterCacheBackend', 'ActsStripClusterCache_Back')
@@ -132,7 +132,7 @@ def ActsPixelClustersViewFillerAlgCfg(flags,
     acc = ComponentAccumulator()
     kwargs.setdefault("InputIDC", "ActsPixelClustersCache")
     kwargs.setdefault("Output", "ITkPixelClusters_InView")
-    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+    kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
@@ -147,7 +147,7 @@ def ActsStripClustersViewFillerAlgCfg(flags,
     acc = ComponentAccumulator()
     kwargs.setdefault("InputIDC", "ActsStripClustersCache")
     kwargs.setdefault("Output", "ITkStripClusters_InView")
-    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+    kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
@@ -157,22 +157,27 @@ def ActsStripClustersViewFillerAlgCfg(flags,
     return acc
 
 
-def ActsMainClusterizationCfg(flags) -> ComponentAccumulator:
+def ActsMainClusterizationCfg(flags,
+                              RoIs: str = "ActsRegionOfInterest") -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if flags.Acts.useCache:
         acc.merge(ActsClusterCacheCreatorAlgCfg(flags))
 
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsPixelClusterizationAlgCfg(flags))
+        acc.merge(ActsPixelClusterizationAlgCfg(flags,
+                                                RoIs=RoIs))
     if flags.Detector.EnableITkStrip:
-        acc.merge(ActsStripClusterizationAlgCfg(flags))
+        acc.merge(ActsStripClusterizationAlgCfg(flags,
+                                                RoIs=RoIs))
 
     if flags.Acts.useCache:
         if flags.Detector.EnableITkPixel:
-            acc.merge(ActsPixelClustersViewFillerAlgCfg(flags))
+            acc.merge(ActsPixelClustersViewFillerAlgCfg(flags,
+                                                        RoIs=RoIs))
         if flags.Detector.EnableITkStrip:
-            acc.merge(ActsStripClustersViewFillerAlgCfg(flags))
+            acc.merge(ActsStripClustersViewFillerAlgCfg(flags,
+                                                        RoIs=RoIs))
             
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -193,14 +198,14 @@ def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
                                                 name="ActsConversionStripClusterizationAlg",
                                                 ClustersKey="ITkConversionStripClusters",
                                                 EnableCache=False,
-                                                RoIs="OfflineCaloBasedRegion"))
+                                                RoIs="ActsConversionRegionOfInterest"))
 
     if flags.Acts.useCache:
         if flags.Detector.EnableITkStrip:
             acc.merge(ActsStripClustersViewFillerAlgCfg(flags,
                                                         name="ActsConversionStripClustersViewFiller",
                                                         Output="ITkConversionStripClusters_InView",
-                                                        RoIs="OfflineCaloBasedRegion"))
+                                                        RoIs="ActsConversionRegionOfInterest"))
     
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -225,6 +230,7 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsConversionClusterizationCfg(flags))
     # Any other pass -> Validation mainly
     else:
-        acc.merge(ActsMainClusterizationCfg(flags))
+        acc.merge(ActsMainClusterizationCfg(flags,
+                                            RoIs = f"{flags.Tracking.ActiveConfig.extension}RegionOfInterest"))
 
     return acc

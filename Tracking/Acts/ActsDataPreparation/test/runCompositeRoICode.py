@@ -8,7 +8,6 @@ def TestCompositeRoIToolCfg(flags,
                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault('RoIs', 'TestCompositeRoI')
     kwargs.setdefault('EtaCenters', [-1.2, 2.3, 3.8])
     kwargs.setdefault('PhiCenters', [0, 1, 2])
     kwargs.setdefault('HalfEtaWidths', [0.3, 0.1, 0.05])
@@ -19,7 +18,7 @@ def TestCompositeRoIToolCfg(flags,
 
     kwargs.setdefault('OutputLevel', 2)
 
-    acc.setPrivateTools(CompFactory.TestRoICreatorTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.TestRoICreatorTool(name, **kwargs))
     return acc
     
 if __name__ == "__main__":
@@ -50,9 +49,10 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
 
     # RoI creator
-    from ActsConfig.ActsViewConfig import ActsEventViewCreatorAlgCfg
-    acc.merge(ActsEventViewCreatorAlgCfg(flags,
-                                         RoICreatorTool=acc.popToolsAndMerge(TestCompositeRoIToolCfg(flags))))
+    from ActsConfig.ActsRegionsOfInterestConfig import ActsMainRegionsOfInterestCreatorAlgCfg
+    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags,
+                                                     RoIs='TestCompositeRoI',
+                                                     RoICreatorTool=acc.popToolsAndMerge(TestCompositeRoIToolCfg(flags))))
 
     # Data Preparation - Clustering
     from ActsConfig.ActsClusterizationConfig import ActsPixelClusterizationAlgCfg

@@ -4,6 +4,8 @@
 
 #include "src/CaloBasedRoICreatorTool.h"
 
+namespace ActsTrk {
+
 CaloBasedRoICreatorTool::CaloBasedRoICreatorTool(const std::string& type,
 						 const std::string& name,
 						 const IInterface* parent)
@@ -15,22 +17,18 @@ StatusCode CaloBasedRoICreatorTool::initialize()
   ATH_MSG_DEBUG("Inizializing " << name() << " ..." );
 
   ATH_CHECK(m_caloClusterROIKey.initialize());
-  ATH_CHECK(m_roiCollectionKey.initialize());
   ATH_CHECK(m_beamSpotKey.initialize());
   
   return StatusCode::SUCCESS;
 }
 
 StatusCode CaloBasedRoICreatorTool::defineRegionsOfInterest(const EventContext& ctx,
-							   std::vector< ElementLink< TrigRoiDescriptorCollection > >& ELs) const 
+							    TrigRoiDescriptorCollection& collectionRoI) const
 {
-  // RoI collection gets stored in the SG
-  ATH_MSG_DEBUG("Storing ROI with ket " << m_roiCollectionKey.key());
-  SG::WriteHandle< TrigRoiDescriptorCollection > roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
-  ATH_CHECK( roiCollectionHandle.record( std::make_unique< TrigRoiDescriptorCollection >() ) );
-  TrigRoiDescriptorCollection *collectionRoI = roiCollectionHandle.ptr();
-  collectionRoI->push_back( new TrigRoiDescriptor(false) );
-  collectionRoI->back()->setComposite(true);
+  // Define RoI as not a FS RoI
+  collectionRoI.push_back( new TrigRoiDescriptor(false) );
+  // Define RoI as composite RoI
+  collectionRoI.back()->setComposite(true);
 
   // Retrieve Beam Spot data
   SG::ReadCondHandle< InDet::BeamSpotData > beamSpotHandle{ m_beamSpotKey, ctx };
@@ -45,7 +43,7 @@ StatusCode CaloBasedRoICreatorTool::defineRegionsOfInterest(const EventContext& 
   ATH_MSG_DEBUG("   \\__ Retrived " << caloClusters->size() << " elements");
 
   // Add component RoIs
-  collectionRoI->back()->reserve(caloClusters->size());
+  collectionRoI.back()->reserve(caloClusters->size());
   double beamZ = beamSpotData->beamVtx().position().z();
   for (const ROIPhiRZ& calo_roi : *caloClusters) {
     double phi = calo_roi.phi();
@@ -62,16 +60,13 @@ StatusCode CaloBasedRoICreatorTool::defineRegionsOfInterest(const EventContext& 
     double roiZMin = beamZ - m_deltaZ;
     double roiZMax = beamZ + m_deltaZ;
     
-    collectionRoI->back()->push_back( new TrigRoiDescriptor(eta, roiEtaMin, roiEtaMax,
-							    phi, roiPhiMin ,roiPhiMax,
-							    z, roiZMin, roiZMax ) );
+    collectionRoI.back()->push_back( new TrigRoiDescriptor(eta, roiEtaMin, roiEtaMax,
+							   phi, roiPhiMin ,roiPhiMax,
+							   z, roiZMin, roiZMax ) );
   }
 
-  ATH_MSG_DEBUG("Created composite RoI from Calo with " << collectionRoI->back()->size() << " RoIs");
-  
-  // Return element links to the created RoIs so that they can be used from the outside
-  ELs.push_back( ElementLink< TrigRoiDescriptorCollection >( *collectionRoI, 0ul ) );
-  ATH_CHECK( ELs.back().isValid() );
-
+  ATH_MSG_DEBUG("Created composite RoI from Calo with " << collectionRoI.back()->size() << " RoIs"); 
   return StatusCode::SUCCESS;
+}
+
 }
