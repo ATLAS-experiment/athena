@@ -19,6 +19,7 @@ namespace {
    void gatherActsSurfaces(const ActsTrk::IActsToTrkConverterTool &converter_tool,
                      const InDetDD::SiDetectorElementCollection &detectorElements,
                      std::vector<const Acts::Surface *> &acts_surfaces) {
+      acts_surfaces.reserve(detectorElements.size());
       for (const auto *det_el :  detectorElements) {
          const Acts::Surface &surface =
             converter_tool.trkSurfaceToActsSurface(det_el->surface());
@@ -98,11 +99,8 @@ namespace ActsTrk
     /// via the ContainerAccessor.
 
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
-    std::array<std::vector< const Acts::Surface * >, 4> acts_surfaces;
-    acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType) )
-       .reserve(   elements.size() );
-    gatherActsSurfaces(*m_ATLASConverterTool, elements, acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType) ));
-    TrackingSurfaceHelper tracking_surface_helper(std::move(acts_surfaces));
+    TrackingSurfaceHelper tracking_surface_helper;
+    gatherActsSurfaces(*m_ATLASConverterTool, elements, tracking_surface_helper.actsSurfaces(xAOD::UncalibMeasType::StripClusterType));
     tracking_surface_helper.setSiDetectorElements(xAOD::UncalibMeasType::StripClusterType, &elements);
 
     ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };

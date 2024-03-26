@@ -7,6 +7,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "Acts/Surfaces/Surface.hpp"
 
 #include  <stdexcept>
 
@@ -16,9 +17,15 @@ class TrackingSurfaceHelper
 {
 public:
    static constexpr unsigned int s_NMeasTypes = 4;  // depends on definition in UncalibMeasType
+   TrackingSurfaceHelper() {}
    TrackingSurfaceHelper(std::array<std::vector< const Acts::Surface *>, s_NMeasTypes>  &&acts_surfaces)
       : m_actsSurfaces(std::move(acts_surfaces))
    {}
+   // return mutable reference to allow filling the vector by element.
+   std::vector< const Acts::Surface *> &actsSurfaces(xAOD::UncalibMeasType type) {
+      assert(static_cast<std::size_t>(type) < m_actsSurfaces.size());
+      return m_actsSurfaces[static_cast<std::size_t>(type)];
+   }
    void setSiDetectorElements(xAOD::UncalibMeasType type, const InDetDD::SiDetectorElementCollection *det_element_collection) {
       assert(static_cast<std::size_t>(type) < m_siDetectorElements.size() );
       m_siDetectorElements[static_cast<unsigned int>(type)] = det_element_collection;

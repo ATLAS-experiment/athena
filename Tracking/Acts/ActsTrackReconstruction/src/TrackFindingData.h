@@ -15,8 +15,10 @@
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/TrackSelector.hpp"
+#include "Acts/Surfaces/Surface.hpp"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/TrackingSurfaceHelper.h"
@@ -102,14 +104,28 @@ namespace
   };
 
   // List of measurement ranges and the measurement container targeted by the ranges.
-  struct MeasurementRangeList : public std::vector<MeasurementRange>
+  class MeasurementRangeList : public std::vector<MeasurementRange>
   {
+  private:
+    std::vector<const xAOD::UncalibratedMeasurementContainer *> m_measurementContainer;
+
+  public:
     const xAOD::UncalibratedMeasurementContainer *container(unsigned int container_index) const
     {
       assert(container_index < m_measurementContainer.size());
       return m_measurementContainer[container_index];
     }
-    std::vector<const xAOD::UncalibratedMeasurementContainer *> m_measurementContainer;
+
+    // set container, resizing if necessary. That is just in case we call addMeasurements out of order or not for 2 types of measurements
+    void setContainer(unsigned int container_index, const xAOD::UncalibratedMeasurementContainer *container) {
+      if (!(container_index < m_measurementContainer.size()))
+      {
+        m_measurementContainer.resize(container_index + 1, nullptr);
+      }
+      m_measurementContainer[container_index] = container;
+    }
+
+    std::size_t numContainers() const { return m_measurementContainer.size(); }
   };
 
   /// Accessor for the above source link container
@@ -196,20 +212,6 @@ namespace
               Iterator(BaseIterator(*m_eventContext, container, range.elementEndIndex(), surface.geometryId()))};
     }
   };
-
-  void gatherGeoIds(const ActsTrk::IActsToTrkConverterTool &converter_tool,
-                    const InDetDD::SiDetectorElementCollection &detectorElements,
-                    std::vector<Acts::GeometryIdentifier> &geo_ids,
-                    std::vector<const Acts::Surface *> &acts_surfaces)
-  {
-    for (const auto *det_el : detectorElements)
-    {
-      const Acts::Surface &surface =
-          converter_tool.trkSurfaceToActsSurface(det_el->surface());
-      geo_ids.push_back(surface.geometryId());
-      acts_surfaces.push_back(&surface);
-    }
-  }
 
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
 
@@ -345,24 +347,36 @@ namespace
   public:
     TrackFindingMeasurements(std::size_t measTotal) {
       m_orderedGeoIds.reserve(measTotal);
-      m_measurementOffset.reserve(2);  // pixels+strips
+      m_measurementOffsets.reserve(2);  // pixels+strips
     }
 
     TrackFindingMeasurements() = delete;
     TrackFindingMeasurements(const TrackFindingMeasurements &) = delete;
     TrackFindingMeasurements &operator=(const TrackFindingMeasurements &) = delete;
 
-    void addDetectorElements(const InDetDD::SiDetectorElementCollection &detElems,
-                             const xAOD::UncalibratedMeasurementContainer &clusterContainer,
+    void addDetectorElements(xAOD::UncalibMeasType measType,
+                             const InDetDD::SiDetectorElementCollection &detElems,
                              const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool) {
-      auto measType = static_cast<std::size_t>(clusterContainerMeasType(clusterContainer));
-      if (!(measType < m_actsSurfaces.size())) {
+      assert (m_sorted == false);  // should not call this again after addMeasurements()
+
+      if (!(static_cast<std::size_t>(measType) < TrackingSurfaceHelper::s_NMeasTypes)) {
         std::stringstream msg;
-        msg << "Measurements of type " << measType << " larger than " << m_actsSurfaces.size() - 1;
+        msg << "Measurements of type " << static_cast<std::size_t>(measType) << " larger than " << TrackingSurfaceHelper::s_NMeasTypes - 1;
         throw std::runtime_error(msg.str());
       }
-      m_actsSurfaces[measType].reserve(m_actsSurfaces[measType].size() + clusterContainer.size());  // may extend previous data, but usually starts from empty
-      gatherGeoIds(*ATLASConverterTool, detElems, m_orderedGeoIds, m_actsSurfaces[measType]);
+
+      if (measType != xAOD::UncalibMeasType::Other) {
+        m_trackingSurfaceHelper.setSiDetectorElements(measType, &detElems);
+      }
+
+      auto &actsSurfaces = m_trackingSurfaceHelper.actsSurfaces(measType);
+      actsSurfaces.reserve(actsSurfaces.size() + detElems.size());  // may extend previous data, but usually starts from empty
+      for (const auto *det_el : detElems)
+      {
+        const Acts::Surface &surface = ATLASConverterTool->trkSurfaceToActsSurface(det_el->surface());
+        m_orderedGeoIds.push_back(surface.geometryId());
+        actsSurfaces.push_back(&surface);
+      }
       m_sorted = false;
     }
 
@@ -377,26 +391,12 @@ namespace
         m_measurementRanges.resize(m_orderedGeoIds.size());
       }
 
-      if (!m_trackingSurfaceHelper) {
-        m_trackingSurfaceHelper = std::make_unique<TrackingSurfaceHelper>(std::move(m_actsSurfaces));
-      }
+      // m_measurementOffsets only needed for TrackStatePrinter, but it is trivial overhead to save it for each event
+      if (!(typeIndex < m_measurementOffsets.size()))
+        m_measurementOffsets.resize(typeIndex + 1);
+      m_measurementOffsets[typeIndex] = m_measurementsTotal;
 
-      xAOD::UncalibMeasType measType = clusterContainerMeasType(clusterContainer);
-      if (measType != xAOD::UncalibMeasType::Other) {
-        m_trackingSurfaceHelper->setSiDetectorElements(measType, &detElems);
-      }
-
-      // m_measurementOffset only needed for TrackStatePrinter, but it is trivial overhead to save it for each event
-      if (!(typeIndex < m_measurementOffset.size()))
-        m_measurementOffset.resize(typeIndex + 1);
-      m_measurementOffset[typeIndex] = m_measurementsTotal;
-
-      // the following is just in case we call addMeasurements out of order or not for 2 types of measurements
-      if (typeIndex >= m_measurementRanges.m_measurementContainer.size())
-      {
-        m_measurementRanges.m_measurementContainer.resize(typeIndex + 1, nullptr);
-      }
-      m_measurementRanges.m_measurementContainer[typeIndex] = &clusterContainer;
+      m_measurementRanges.setContainer(typeIndex, &clusterContainer);
 
       xAOD::UncalibMeasType last_measurement_type = xAOD::UncalibMeasType::Other;
       xAOD::DetectorIDHashType last_id_hash = std::numeric_limits<xAOD::DetectorIDHashType>::max();
@@ -446,36 +446,32 @@ namespace
       m_measurementsTotal += clusterContainer.size();
     }
 
-    std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> measurementOffsets() const
+    std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> measurementContainerOffsets() const
     {
       std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> offsets;
-      offsets.reserve(m_measurementRanges.m_measurementContainer.size() - 1); // first one usually 0
-      for (std::size_t typeIndex = 0; typeIndex < m_measurementRanges.m_measurementContainer.size(); ++typeIndex)
+      if (m_measurementRanges.numContainers() == 0) return offsets;
+      offsets.reserve(m_measurementRanges.numContainers() - 1); // first one usually 0
+      for (std::size_t typeIndex = 0; typeIndex < m_measurementRanges.numContainers(); ++typeIndex)
       {
-        if (measurementOffset(typeIndex) > 0 && m_measurementRanges.m_measurementContainer[typeIndex] != nullptr)
+        if (measurementOffset(typeIndex) > 0 && m_measurementRanges.container(typeIndex) != nullptr)
         {
-          offsets.emplace_back(m_measurementRanges.m_measurementContainer[typeIndex], measurementOffset(typeIndex));
+          offsets.emplace_back(m_measurementRanges.container(typeIndex), measurementOffset(typeIndex));
         }
       }
       return offsets;
     }
 
-    size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffset.size() ? m_measurementOffset[typeIndex] : 0u; }
-    std::vector<size_t> measurementOffsetVector() const { return m_measurementOffset; }
+    size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffsets.size() ? m_measurementOffsets[typeIndex] : 0u; }
+    std::vector<size_t> measurementOffsets() const { return m_measurementOffsets; }
     const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return m_orderedGeoIds; }
     const MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
-    const TrackingSurfaceHelper &trackingSurfaceHelper() const { return *m_trackingSurfaceHelper; }
+    const TrackingSurfaceHelper &trackingSurfaceHelper() const { return m_trackingSurfaceHelper; }
 
   private:
-    static xAOD::UncalibMeasType clusterContainerMeasType(const xAOD::UncalibratedMeasurementContainer &clusterContainer) {
-      return !clusterContainer.empty() ? clusterContainer.at(0)->type()
-                                       : xAOD::UncalibMeasType::Other;
-    }
 
-    std::vector<size_t> m_measurementOffset;
+    std::vector<size_t> m_measurementOffsets;
     std::vector<Acts::GeometryIdentifier> m_orderedGeoIds;
-    std::array<std::vector<const Acts::Surface *>, TrackingSurfaceHelper::s_NMeasTypes> m_actsSurfaces;
-    std::unique_ptr<TrackingSurfaceHelper> m_trackingSurfaceHelper;
+    TrackingSurfaceHelper m_trackingSurfaceHelper;
     MeasurementRangeList m_measurementRanges;
     std::size_t m_measurementsTotal = 0;
     bool m_sorted = false;

@@ -81,19 +81,18 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
   }
 
-  std::array<std::vector<const Acts::Surface *>, TrackingSurfaceHelper::s_NMeasTypes> acts_surfaces;
+  TrackingSurfaceHelper tracking_surface_helper;
   for (auto & coll : detEleColl)
   {
     for (const auto *det_el : *coll){
       const Acts::Surface &surface =
           m_ATLASConverterTool->trkSurfaceToActsSurface(det_el->surface());
-          xAOD::UncalibMeasType type = xAOD::UncalibMeasType::Other; 
-          if (det_el->isPixel()) type = xAOD::UncalibMeasType::PixelClusterType;  
-          else if (det_el->isSCT()) type = xAOD::UncalibMeasType::StripClusterType;  
-          acts_surfaces[static_cast<std::size_t>(type)].push_back(&surface);
+      xAOD::UncalibMeasType type = xAOD::UncalibMeasType::Other;
+      if (det_el->isPixel()) type = xAOD::UncalibMeasType::PixelClusterType;
+      else if (det_el->isSCT()) type = xAOD::UncalibMeasType::StripClusterType;
+      tracking_surface_helper.actsSurfaces(type).push_back(&surface);
     }
   }
-  TrackingSurfaceHelper tracking_surface_helper(std::move(acts_surfaces));
   for (const auto & coll : detEleColl)
   {
     xAOD::UncalibMeasType measType = xAOD::UncalibMeasType::Other;
