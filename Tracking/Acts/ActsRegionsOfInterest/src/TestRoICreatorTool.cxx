@@ -1,8 +1,10 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TestRoICreatorTool.h"
+
+namespace ActsTrk {
 
 TestRoICreatorTool::TestRoICreatorTool(const std::string& type,
 				       const std::string& name,
@@ -13,8 +15,6 @@ TestRoICreatorTool::TestRoICreatorTool(const std::string& type,
 StatusCode TestRoICreatorTool::initialize()
 {
   ATH_MSG_DEBUG("Inizializing " << name() << " ..." );
-
-  ATH_CHECK(m_roiCollectionKey.initialize());
 
   // Check consistency
   // We need at least one entry
@@ -45,19 +45,14 @@ StatusCode TestRoICreatorTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestRoICreatorTool::defineRegionsOfInterest(const EventContext& ctx,
-						       std::vector< ElementLink< TrigRoiDescriptorCollection > >& ELs) const 
+StatusCode TestRoICreatorTool::defineRegionsOfInterest(const EventContext& /*ctx*/,
+						       TrigRoiDescriptorCollection& collectionRoI) const
 {
-  // RoI collection gets stored in the SG
-  SG::WriteHandle< TrigRoiDescriptorCollection > roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
-  ATH_CHECK( roiCollectionHandle.record( std::make_unique< TrigRoiDescriptorCollection >() ) );
-  TrigRoiDescriptorCollection *collectionRoI = roiCollectionHandle.ptr();
-
   bool isComposite = m_eta_center_rois.size() > 1;
   // Add a composite RoI
   if (isComposite) {
-    collectionRoI->push_back( new TrigRoiDescriptor() );
-    collectionRoI->back()->setComposite(true);
+    collectionRoI.push_back( new TrigRoiDescriptor() );
+    collectionRoI.back()->setComposite(true);
   }
 
   bool useZconstraint = m_z_center_rois.size() != 0;
@@ -83,20 +78,19 @@ StatusCode TestRoICreatorTool::defineRegionsOfInterest(const EventContext& ctx,
     // if composite roi, add the consituent to it (already in the collection)
     // if not, the collection is empty and we have to add this one to it
     if (isComposite) {
-      collectionRoI->back()->push_back( std::move(toAdd) );
+      collectionRoI.back()->push_back( std::move(toAdd) );
     } else {
-      collectionRoI->push_back( std::move(toAdd) );
+      collectionRoI.push_back( std::move(toAdd) );
     }
   }
 
-  ATH_MSG_DEBUG("RoI collection size: " << collectionRoI->size());
+  ATH_MSG_DEBUG("RoI collection size: " << collectionRoI.size());
   ATH_MSG_DEBUG("Created a test RoI");
-  if (collectionRoI->back()->composite()) {
-    ATH_MSG_DEBUG("This is a composite RoI made from " << collectionRoI->back()->size() << " constituents");
+  if (collectionRoI.back()->composite()) {
+    ATH_MSG_DEBUG("This is a composite RoI made from " << collectionRoI.back()->size() << " constituents");
   }
 
-  // Return element links to the created RoIs so that they can be used from the outside
-  ELs.push_back( ElementLink< TrigRoiDescriptorCollection >( *collectionRoI, 0 ) );
-  ATH_CHECK( ELs.back().isValid() );
   return StatusCode::SUCCESS;
+}
+
 }

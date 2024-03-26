@@ -1,3 +1,4 @@
+
 /* 
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
@@ -6,13 +7,15 @@
 #define CALO_BASED_ROI_CREATOR_TOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ActsView/IRoICreatorTool.h"
+#include "ActsToolInterfaces/IRoICreatorTool.h"
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
+namespace ActsTrk {
+
 class
 CaloBasedRoICreatorTool
-  : public extends<AthAlgTool, ::IRoICreatorTool> {
+  : public extends<AthAlgTool, ActsTrk::IRoICreatorTool> {
  public:
   CaloBasedRoICreatorTool(const std::string& type,
 			  const std::string& name,
@@ -24,16 +27,13 @@ CaloBasedRoICreatorTool
 
    virtual
    StatusCode defineRegionsOfInterest(const EventContext& ctx,
-				      std::vector< ElementLink< TrigRoiDescriptorCollection > >& ELs) const override;
+				      TrigRoiDescriptorCollection& collectionRoI) const override;
   
 private:
   SG::ReadHandleKey< ROIPhiRZContainer > m_caloClusterROIKey
     {this, "CaloClusterRoIContainer", "",
 	"Name of the calo cluster ROIs in Phi,R,Z parameterization"};
   
-  SG::WriteHandleKey< TrigRoiDescriptorCollection > m_roiCollectionKey
-    {this, "RoIs", ""};
-
   SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey
     {this, "BeamSpotKey", "BeamSpotData",
 	"SG key for beam spot"};
@@ -45,5 +45,7 @@ private:
   Gaudi::Property< double > m_deltaZ
     {this, "DeltaZCaloRoI", 300.};
 };
+
+}
 
 #endif

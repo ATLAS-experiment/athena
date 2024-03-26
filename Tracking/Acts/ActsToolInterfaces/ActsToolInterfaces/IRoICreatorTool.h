@@ -11,6 +11,8 @@
 
 #include <vector>
 
+namespace ActsTrk {
+  
 class IRoICreatorTool 
 : virtual public IAlgTool {
  public:
@@ -19,7 +21,8 @@ class IRoICreatorTool
   virtual
     StatusCode
     defineRegionsOfInterest(const EventContext& ctx,
-			    std::vector< ElementLink< TrigRoiDescriptorCollection > >& ELs) const = 0;
+			    TrigRoiDescriptorCollection& collectionRoI) const = 0;
 };
 
+}
 #endif

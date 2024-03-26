@@ -8,13 +8,12 @@ def TestSingleRoIToolCfg(flags,
                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault('RoIs', 'TestSingleRoI')
     kwargs.setdefault('EtaCenters', [2.3])
     kwargs.setdefault('PhiCenters', [0])
     kwargs.setdefault('HalfEtaWidths', [0.05])
     kwargs.setdefault('HalfPhiWidths', [0.1])
 
-    acc.setPrivateTools(CompFactory.TestRoICreatorTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.TestRoICreatorTool(name, **kwargs))
     return acc
     
 if __name__ == "__main__":
@@ -45,9 +44,10 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
 
     # RoI creator
-    from ActsConfig.ActsViewConfig import ActsEventViewCreatorAlgCfg
-    acc.merge(ActsEventViewCreatorAlgCfg(flags,
-                                         RoICreatorTool=acc.popToolsAndMerge(TestSingleRoIToolCfg(flags))))
+    from ActsConfig.ActsRegionsOfInterestConfig import ActsMainRegionsOfInterestCreatorAlgCfg
+    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags,
+                                                     RoIs='TestSingleRoI',
+                                                     RoICreatorTool=acc.popToolsAndMerge(TestSingleRoIToolCfg(flags))))
 
     # Data Preparation - Clustering
     from ActsConfig.ActsClusterizationConfig import ActsPixelClusterizationAlgCfg

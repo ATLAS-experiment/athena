@@ -29,8 +29,8 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
 
     # RoI creator
-    from ActsConfig.ActsViewConfig import ActsEventViewCreatorAlgCfg
-    acc.merge(ActsEventViewCreatorAlgCfg(flags))
+    from ActsConfig.ActsRegionsOfInterestConfig import ActsMainRegionsOfInterestCreatorAlgCfg
+    acc.merge(ActsMainRegionsOfInterestCreatorAlgCfg(flags))
 
     # Data Preparation - Clustering
     from ActsConfig.ActsClusterizationConfig import ActsPixelClusterizationAlgCfg
