@@ -77,6 +77,8 @@ atlas_add_library( FlavorTagDiscriminants
     xAODMuon
     xAODEgamma
     ElectronPhotonSelectorToolsLib
+    MuonAnalysisInterfacesLib
+    EgammaAnalysisInterfacesLib
   )
 
 

@@ -15,6 +15,9 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
 #include "ElectronPhotonSelectorTools/AsgElectronLikelihoodTool.h"
+#include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
+#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
+
 
 
 
@@ -32,10 +35,10 @@ namespace FlavorTagDiscriminants {
   private:
 
     // electron ID tool
-    Gaudi::Property<std::string> m_electronID_wp {
-      this, "electronID_wp", "VeryLooseLHElectron",
-        "Likelihood working point for electron ID selection"};
-    AsgElectronLikelihoodTool m_electronID_tool;
+    ToolHandle<IAsgElectronLikelihoodTool> m_electronID_tool{this, "electronSelectionTool", "", "Applying preselection on electrons"};
+    
+    // muon ID tool
+    ToolHandle<CP::IMuonSelectionTool> m_muonID_tool{this, "muonSelectionTool", "", "Applying preselection on muons"};
 
     // Input Containers
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_TrackContainerKey {
