@@ -44,6 +44,7 @@ namespace LArSamples {
     void PlotFebtime();
     
     bool EnergyThreshold( int calo, int layer, int quality, int ft, int slot, double energy, double time );
+    bool FileEmptyCheck( const std::string& fname);
 
     double Median[2][32][16]{};
     double param[4][2][32][16]{};
