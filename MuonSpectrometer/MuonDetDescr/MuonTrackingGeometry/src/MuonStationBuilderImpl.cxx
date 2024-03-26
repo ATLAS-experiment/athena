@@ -1248,20 +1248,13 @@ void MuonStationBuilderImpl::checkLayerId(std::string_view comment, const MuonGM
     // RE
     if (m_idHelperSvc->isMdt(id)) {
         const MuonGM::MdtReadoutElement* mdtRE = muonMgr->getMdtReadoutElement(id);  
-
-        if (mdtRE) {
-            Amg::Transform3D trid = mdtRE->transform(id);
-            if (!lay->surfaceRepresentation().isOnSurface(trid.translation(), 
-                                                          0.5 * Gaudi::Units::mm,
-                                                          0.5 * Gaudi::Units::mm) ){
-                ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" "<<comment << ":tube(id) "
-                            <<m_idHelperSvc->toString(id)<<" "<<Amg::toString(trid.translation())
-                            <<" not on surface:"<<lay->surfaceRepresentation()<<std::endl<<
-                            " "<<Amg::toString(lay->surfaceRepresentation().transform().inverse()*(trid.translation())) );
-            }
+        constexpr double tol = 0.5*Gaudi::Units::mm;
+        if (mdtRE && !lay->surfaceRepresentation().isOnSurface(mdtRE->transform(id).translation(), tol, tol)) {
+            ATH_MSG_DEBUG(__FILE__<<":"<<__LINE__<<" "<<comment << ":tube(id) "
+                        <<m_idHelperSvc->toString(id)<<" "<<Amg::toString(mdtRE->transform(id).translation())
+                        <<" not on surface:"<<lay->surfaceRepresentation()<<std::endl<<
+                        " "<<Amg::toString(lay->surfaceRepresentation().transform().inverse()*(mdtRE->transform(id).translation())) );
         }
-
-
     } else if (m_idHelperSvc->isRpc(id)) {
         const MuonGM::RpcReadoutElement* rpcRE = muonMgr->getRpcReadoutElement(id);
         Amg::Transform3D trid = rpcRE->transform(id);
