@@ -43,7 +43,7 @@ namespace CP {
       ANA_CHECK(m_metHandle.retrieve(met, sys));
 
       // calculate decision
-      float etmiss = (*met)["Final"]->met();
+      float etmiss = (*met)[m_metTerm.value()]->met();
       bool decision = SignEnum::checkValue(m_metref.value(), m_signEnum, etmiss);
       m_decoration.setBool(*evtInfo, decision, sys);
     }

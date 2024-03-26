@@ -17,6 +17,10 @@ namespace CP {
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_electronsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_electronTruthSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_muonsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
@@ -47,23 +51,51 @@ namespace CP {
       const xAOD::MuonContainer *muons = nullptr;
       if (m_muonsHandle)
 	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      // retrieve the truth electron container
+      const xAOD::TruthParticleContainer *truthElectrons = nullptr;
+      if (m_electronsTruthHandle)
+	ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys));
+      // retrieve the truth muon container
+      const xAOD::TruthParticleContainer *truthMuons = nullptr;
+      if (m_muonsTruthHandle)
+	ANA_CHECK(m_muonsTruthHandle.retrieve(truthMuons, sys));
 
       // apply the requested selection and compute the local charge
       int total_charge = 0;
       int total_leptons = 0;
-      if (m_electronsHandle) {
-	for (const xAOD::Electron *el : *electrons) {
-	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
-	    total_charge += el->charge();
-	    total_leptons++;
+      if (m_electronsHandle || m_muonsHandle) {
+	if (m_electronsHandle) {
+	  for (const xAOD::Electron *el : *electrons) {
+	    if (!m_electronSelection || m_electronSelection.getBool(*el, sys)){
+	      total_charge += el->charge();
+	      total_leptons++;
+	    }
+	  }
+	}
+	if (m_muonsHandle) {
+	  for (const xAOD::Muon *mu : *muons) {
+	    if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)){
+	      total_charge += mu->charge();
+	      total_leptons++;
+	    }
 	  }
 	}
       }
-      if (m_muonsHandle) {
-	for (const xAOD::Muon *mu : *muons) {
-	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)){
-	    total_charge += mu->charge();
-	    total_leptons++; 
+      else {
+	if (m_electronsTruthHandle) {
+	  for (const xAOD::TruthParticle *el : *truthElectrons) {
+	    if (!m_electronTruthSelection || m_electronTruthSelection.getBool(*el, sys)){
+	      total_charge += el->charge();
+	      total_leptons++;
+	    }
+	  }
+	}
+	if (m_muonsTruthHandle) {
+	  for (const xAOD::TruthParticle *mu : *truthMuons) {
+	    if (!m_muonTruthSelection || m_muonTruthSelection.getBool(*mu, sys)){
+	      total_charge += mu->charge();
+	      total_leptons++;
+	    }
 	  }
 	}
       }

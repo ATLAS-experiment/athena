@@ -40,12 +40,12 @@ namespace CP {
         continue;
 
       // retrieve the large-R jet container
-      const xAOD::JetContainer *ljets = nullptr;
+      const xAOD::IParticleContainer *ljets = nullptr;
       ANA_CHECK(m_ljetsHandle.retrieve(ljets, sys));
 
       // apply selection and calculate the jet-wise decision
       int count = 0;
-      for (const xAOD::Jet *lj : *ljets) {
+      for (const xAOD::IParticle *lj : *ljets) {
         if (!m_ljetSelection || m_ljetSelection.getBool(*lj, sys)) {
 	  double mass = lj->m();
 	  bool in_range = ( mass > m_mlower && mass < m_mupper );

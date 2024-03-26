@@ -17,7 +17,7 @@
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 
 // Framework includes
-#include <xAODJet/JetContainer.h>
+#include <xAODBase/IParticleContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
 #include <EventSelectionAlgorithms/SignEnums.h>
@@ -60,7 +60,7 @@ namespace CP {
       CP::SysListHandle m_systematicsList {this};
 
       /// \brief the large-R jet handle
-      CP::SysReadHandle<xAOD::JetContainer> m_ljetsHandle {
+      CP::SysReadHandle<xAOD::IParticleContainer> m_ljetsHandle {
         this, "ljets", "", "the large-R jet container to use"
       };
 

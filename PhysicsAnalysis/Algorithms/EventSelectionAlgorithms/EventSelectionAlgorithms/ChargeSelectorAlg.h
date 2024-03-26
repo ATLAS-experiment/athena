@@ -19,6 +19,7 @@
 // Framework includes
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODMuon/MuonContainer.h>
+#include <xAODTruth/TruthParticleContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
 namespace CP {
@@ -60,6 +61,26 @@ namespace CP {
       /// \brief the muon selection handle
       CP::SysReadSelectionHandle m_muonSelection {
         this, "muonSelection", "", "the selection on the input muons"
+      };
+
+      /// \brief the truth electron input handle
+      CP::SysReadHandle<xAOD::TruthParticleContainer> m_electronsTruthHandle {
+        this, "truthElectrons", "", "the truth electron container to use"
+      };
+
+      /// \brief the truth electron selection handle
+      CP::SysReadSelectionHandle m_electronTruthSelection {
+        this, "truthElectronSelection", "", "the selection on the input truth electrons"
+      };
+
+      /// \brief the truth muon input handle
+      CP::SysReadHandle<xAOD::TruthParticleContainer> m_muonsTruthHandle {
+        this, "truthMuons", "", "the truth muon container to use"
+      };
+
+      /// \brief the truth muon selection handle
+      CP::SysReadSelectionHandle m_muonTruthSelection {
+        this, "truthMuonSelection", "", "the selection on the input muons"
       };
 
       /// \brief the event info handle
