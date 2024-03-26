@@ -201,7 +201,7 @@ def UpdateCalib(tag):
     ref_calib = ReadDbFile(tag+".log")
     new_calib, read_report = ReadNewCalib("calibration_merged.txt")
     
-    # modifying the new_calib dictionary in order to revover the empty FE 
+    # modifying the new_calib dictionary in order to recover the empty FE 
     report, counter_report = recover_empties(new_calib,ref_calib)
     
     UpdateAndSave(new_calib,ref_calib)
