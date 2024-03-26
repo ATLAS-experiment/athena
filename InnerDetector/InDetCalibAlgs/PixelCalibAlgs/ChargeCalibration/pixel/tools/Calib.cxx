@@ -635,17 +635,17 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                         histogramsSIG.at(FE).at(pixel)->Reset("ICESM");
                         
                         if(pixel == 0){ // normal
-                            map_info[modID].at(FE)->set_NormalTheshold(thr_mean);
+                            map_info[modID].at(FE)->set_NormalThreshold(thr_mean);
                             map_info[modID].at(FE)->set_NormalRms(thr_rms);
                             map_info[modID].at(FE)->set_NormalNoise(sig_mean);
                         }
                         else if(pixel == 1){ // long
-                            map_info[modID].at(FE)->set_LongTheshold(thr_mean);
+                            map_info[modID].at(FE)->set_LongThreshold(thr_mean);
                             map_info[modID].at(FE)->set_LongRms(thr_rms);
                             map_info[modID].at(FE)->set_LongNoise(sig_mean);                            
                         }
                         else if(pixel == 2){ // ganged
-                            map_info[modID].at(FE)->set_GangedTheshold(thr_mean);
+                            map_info[modID].at(FE)->set_GangedThreshold(thr_mean);
                             map_info[modID].at(FE)->set_GangedRms(thr_rms);
                             map_info[modID].at(FE)->set_GangedNoise(sig_mean);                            
                         }
@@ -732,7 +732,7 @@ TH2F* Calib::get2DHistogramFromPath( TDirectoryFile* rodDir, const TString & mod
     TDirectoryFile *histDir = static_cast<TDirectoryFile *>(rodDir->GetDirectory(fullHistoPath));
     
     if(!histDir){
-        printf("Error - Directory \"%s\" not found. Exiting..",fullHistoPath.Data());
+        printf("Error - Directory \"%s\" not found. Exiting..\n",fullHistoPath.Data());
         return nullptr;
     }
     TH2F *pTH2 = static_cast<TH2F*>((static_cast<TKey*>(histDir->GetListOfKeys()->First()))->ReadObj());
