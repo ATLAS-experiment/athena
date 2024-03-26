@@ -222,7 +222,6 @@
 + InnerDetector/InDetSimUtils/TRT_TR_Process
 + LArCalorimeter/LArCOOLConditions
 + LArCalorimeter/LArCabling
-+ LArCalorimeter/LArCnv/LArDetMgrDetDescrCnv
 + LArCalorimeter/LArCnv/LArIdCnv
 + LArCalorimeter/LArCnv/LArSimEventAthenaPool
 + LArCalorimeter/LArCnv/LArSimEventTPCnv
