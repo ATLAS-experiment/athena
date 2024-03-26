@@ -45,7 +45,8 @@ def LArSuperCellMonConfig(flags, **kwargs):
     cfg.merge(emulateSC_Cfg(flags))
 
     from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
-    cfg.merge(LArRAWtoSuperCellCfg(flags,SCellContainerOut="EmulatedSuperCells",mask=mask) )
+    # removed 5.3.2024 on Denis suggestion
+    #cfg.merge(LArRAWtoSuperCellCfg(flags,mask=mask) )
 
     # Reco SC:
     #get SC onl-offl mapping from DB    
@@ -83,8 +84,7 @@ def LArSuperCellMonConfig(flags, **kwargs):
     
     #return cfg
     algname='LArSuperCellMonAlg'
-    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO",CaloCellContainerRef=flags.Trigger.L1.L1CaloSuperCellContainerName,doSCReco=True,CaloCellContainer='EmulatedSuperCells')
-
+    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO", CaloCellContainerRef=flags.Trigger.L1.L1CaloSuperCellContainerName, doSCReco=True)
 
     if flags.Input.isMC is False and not flags.Common.isOnline:
        from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
