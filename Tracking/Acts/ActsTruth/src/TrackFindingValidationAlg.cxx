@@ -235,7 +235,6 @@ namespace ActsTrk
     unsigned int n_truth_particle_without_associated_counts =0u;
     unsigned int n_tracks_without_associated_truth_particle =0u;
     unsigned int n_tracks_without_selected_truth_particle =0u;
-    unsigned int n_truth_particle_wihtout_associated_measurements=0u;
     unsigned int n_truth_particle_nonoise_mismatches=0u;
 
     unsigned int n_truth_cuts=m_truthSelectionTool->nCuts();
@@ -350,9 +349,6 @@ namespace ActsTrk
                    ++counterPerEta[eta_category_i][kNParticleWithAssociatedTrack];
                    ++counterPerPdgId[pdg_id_category_i][kNParticleWithAssociatedTrack];
                 }
-             }
-             else {
-                ++n_truth_particle_wihtout_associated_measurements;
              }
           }
           else {
