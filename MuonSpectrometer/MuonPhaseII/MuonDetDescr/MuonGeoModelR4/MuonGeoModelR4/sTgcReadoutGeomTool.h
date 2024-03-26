@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_STGCREAOUDGEOMTOOL_H
@@ -59,21 +59,13 @@ class sTgcReadoutGeomTool : public AthAlgTool,
       std::vector<int> numPadPhi; //nPadPhi
       std::vector<double> firstPadHeight; //firstPadH
       std::vector<double> padHeight; //padH
-      ///Extra Pad Variables 
       std::vector<int> PadPhiShift;
       double anglePadPhi{0.};
       std::vector<double> firstPadPhiDivision;
-      std::vector<int> firstPadRow;
-      double lPadWidth{0.};
-      std::vector<int> rankPadEta; //rankPadH
-      std::vector<int> rankPadPhi; //rankPadPhi
-      double sPadWidth{0.};
-      
-
-
+      double lPadLength{0.};
+      double sPadLength{0.};
 
       double gasTck{0.}; //gasTck
-
     };
 
     struct FactoryCache {
@@ -83,10 +75,10 @@ class sTgcReadoutGeomTool : public AthAlgTool,
 
        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
        std::set<WireDesignPtr, WireDesignSorter> wireGroupDesigns{};
+       std::set<PadDesignPtr, PadDesignSorter> padDesigns{};
 
        ParamBookTable parameterBook{};
        CutOutTable cutOuts{};
-       
     };
 
     /// Helper struct to translate the GeoModelShape into the parameters 
@@ -110,7 +102,6 @@ class sTgcReadoutGeomTool : public AthAlgTool,
     StatusCode readParameterBook(FactoryCache& cache);
     /// Loads the chamber dimensions from GeoModel
     StatusCode loadDimensions(sTgcReadoutElement::defineArgs& args, FactoryCache& factory);
-
 };
 
 }  // namespace MuonGMR4

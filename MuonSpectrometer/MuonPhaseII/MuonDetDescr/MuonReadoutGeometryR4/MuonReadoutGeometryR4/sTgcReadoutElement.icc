@@ -37,6 +37,10 @@ inline double sTgcReadoutElement::sGapLength(const Identifier& measId) const { r
 inline double sTgcReadoutElement::sGapLength(const IdentifierHash& measHash) const { return 2*stripDesign(measHash).shortHalfHeight(); }
 inline double sTgcReadoutElement::lGapLength(const Identifier& measId) const { return 2*stripDesign(measId).longHalfHeight(); }
 inline double sTgcReadoutElement::lGapLength(const IdentifierHash& measHash) const { return 2*stripDesign(measHash).longHalfHeight(); }
+inline double sTgcReadoutElement::sPadLength(const Identifier& measId) const { return 2*padDesign(measId).shortHalfHeight(); }
+inline double sTgcReadoutElement::sPadLength(const IdentifierHash& measHash) const { return 2*padDesign(measHash).shortHalfHeight(); }
+inline double sTgcReadoutElement::lPadLength(const Identifier& measId) const { return 2*padDesign(measId).longHalfHeight(); }
+inline double sTgcReadoutElement::lPadLength(const IdentifierHash& measHash) const { return 2*padDesign(measHash).longHalfHeight(); }
 inline double sTgcReadoutElement::gapHeight(const Identifier& measId) const { return 2*stripDesign(measId).halfWidth(); }
 inline double sTgcReadoutElement::gapHeight(const IdentifierHash& measHash) const { return 2*stripDesign(measHash).halfWidth(); }
 
@@ -61,6 +65,42 @@ inline unsigned int sTgcReadoutElement::numWireGroups(unsigned int gasGap) const
 inline unsigned int sTgcReadoutElement::firstWireGroupWidth(unsigned int gasGap) const { return wireDesign(gasGap).numWiresInGroup(1); }
 inline double sTgcReadoutElement::wireCutout(unsigned int gasGap) const { return wireDesign(gasGap).wireCutout(); }
 
+inline unsigned int sTgcReadoutElement::numPads(const Identifier& measId) const { return padDesign(measId).numPads(); }
+inline unsigned int sTgcReadoutElement::numPads(const IdentifierHash& measHash) const { return padDesign(measHash).numPads(); }
+inline unsigned int sTgcReadoutElement::numPadEta(const Identifier& measId) const { return padDesign(measId).numPadEta(); }
+inline unsigned int sTgcReadoutElement::numPadEta(const IdentifierHash& measHash) const { return padDesign(measHash).numPadEta(); }
+inline unsigned int sTgcReadoutElement::numPadPhi(const Identifier& measId) const { return padDesign(measId).numPadPhi(); }
+inline unsigned int sTgcReadoutElement::numPadPhi(const IdentifierHash& measHash) const { return padDesign(measHash).numPadPhi(); }
+inline double sTgcReadoutElement::firstPadHeight(const Identifier& measId) const { return padDesign(measId).firstPadHeight(); }
+inline double sTgcReadoutElement::firstPadHeight(const IdentifierHash& measHash) const { return padDesign(measHash).firstPadHeight(); }
+inline double sTgcReadoutElement::padHeight(const Identifier& measId) const { return padDesign(measId).padHeight(); }
+inline double sTgcReadoutElement::padHeight(const IdentifierHash& measHash) const { return padDesign(measHash).padHeight(); }
+inline double sTgcReadoutElement::padPhiShift(const Identifier& measId) const { return padDesign(measId).padPhiShift(); }
+inline double sTgcReadoutElement::padPhiShift(const IdentifierHash& measHash) const { return padDesign(measHash).padPhiShift(); }
+inline double sTgcReadoutElement::firstPadPhiDiv(const Identifier& measId) const { return padDesign(measId).firstPadPhiDiv(); }
+inline double sTgcReadoutElement::firstPadPhiDiv(const IdentifierHash& measHash) const { return padDesign(measHash).firstPadPhiDiv(); }
+inline double sTgcReadoutElement::anglePadPhi(const Identifier& measId) const { return padDesign(measId).anglePadPhi(); }
+inline double sTgcReadoutElement::anglePadPhi(const IdentifierHash& measHash) const { return padDesign(measHash).anglePadPhi(); }
+inline unsigned int sTgcReadoutElement::maxPadEta(const Identifier& measId) const { return padDesign(measId).anglePadPhi(); }
+inline unsigned int sTgcReadoutElement::maxPadEta(const IdentifierHash& measHash) const { return padDesign(measHash).anglePadPhi(); }
+inline unsigned int sTgcReadoutElement::padNumber(const Identifier& measId) const { return padNumber(measurementHash(measId)); }
+inline unsigned int sTgcReadoutElement::padNumber(const IdentifierHash& measHash) const { return padDesign(measHash).padNumber(channelNumber(measHash)); }
+inline std::pair<uint, uint> sTgcReadoutElement::padEtaPhi(const Identifier& measId) const { return padEtaPhi(measurementHash(measId)); }
+inline std::pair<uint, uint> sTgcReadoutElement::padEtaPhi(const IdentifierHash& measHash) const { return padDesign(measHash).padEtaPhi(channelNumber(measHash)); }
+inline unsigned int sTgcReadoutElement::padEta(const Identifier& measId) const { return padEta(measurementHash(measId)); }
+inline unsigned int sTgcReadoutElement::padEta(const IdentifierHash& measHash) const { return padDesign(measHash).padEta(channelNumber(measHash)); }
+inline unsigned int sTgcReadoutElement::padPhi(const Identifier& measId) const { return padPhi(measurementHash(measId)); }
+inline unsigned int sTgcReadoutElement::padPhi(const IdentifierHash& measHash) const { return padDesign(measHash).padPhi(channelNumber(measHash)); }
+inline double sTgcReadoutElement::beamlineRadius(const Identifier& measId) const { return padDesign(measId).beamlineRadius(); }
+inline double sTgcReadoutElement::beamlineRadius(const IdentifierHash& measHash) const { return padDesign(measHash).beamlineRadius(); }
+using localCornerArray = std::array<Amg::Vector2D, 4>;
+inline localCornerArray sTgcReadoutElement::localPadCorners(const Identifier& measId) const { return localPadCorners(measurementHash(measId)); }
+inline localCornerArray sTgcReadoutElement::localPadCorners(const IdentifierHash& measHash) const { return padDesign(measHash).padCorners(channelNumber(measHash)); }
+using globalCornerArray = std::array<Amg::Vector3D, 4>;
+inline globalCornerArray sTgcReadoutElement::globalPadCorners(const ActsGeometryContext& ctx, const Identifier& measId) const { 
+    return globalPadCorners(ctx, measurementHash(measId)); 
+}
+
 inline const StripDesign& sTgcReadoutElement::stripDesign(const Identifier& measId) const {
     unsigned int gasGap = m_idHelper.gasGap(measId);
     return m_pars.stripLayers[gasGap-1].design();
@@ -81,6 +121,17 @@ inline const WireGroupDesign& sTgcReadoutElement::wireDesign(const IdentifierHas
  }
 inline const WireGroupDesign& sTgcReadoutElement::wireDesign(unsigned int gasGap) const {
     return static_cast<const WireGroupDesign&>(m_pars.wireGroupLayers[gasGap-1].design());
+ }
+
+inline const PadDesign& sTgcReadoutElement::padDesign(const Identifier& measId) const {
+    unsigned int gasGap = m_idHelper.gasGap(measId);
+    return static_cast<const PadDesign&>(m_pars.padLayers[gasGap-1].design());
+ }
+inline const PadDesign& sTgcReadoutElement::padDesign(const IdentifierHash& measHash) const {
+    return padDesign(measurementId(measHash));
+ }
+inline const PadDesign& sTgcReadoutElement::padDesign(unsigned int gasGap) const {
+    return static_cast<const PadDesign&>(m_pars.padLayers[gasGap-1].design());
  }
 
 inline IdentifierHash sTgcReadoutElement::measurementHash(const Identifier& measId) const {
@@ -111,7 +162,7 @@ inline IdentifierHash sTgcReadoutElement::layerHash(const IdentifierHash& measHa
     return IdentifierHash{static_cast<unsigned int>(measHash) & (~mask)};
 }
 
-inline  unsigned int sTgcReadoutElement::stripNumber(const IdentifierHash& measHash) {
+inline  unsigned int sTgcReadoutElement::channelNumber(const IdentifierHash& measHash) {
     using namespace sTgcIdMeasHashFields;
     constexpr unsigned int mask = (minusOne << wireInGrpShift);
     const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
@@ -130,7 +181,7 @@ inline unsigned int sTgcReadoutElement::gasGapNumber(const IdentifierHash& measH
     return (static_cast<unsigned int>(measHash) &(~mask) );
 }
 inline Identifier sTgcReadoutElement::measurementId(const IdentifierHash& measHash) const {
-    return m_idHelper.channelID(identify(), multilayer(), gasGapNumber(measHash) + 1, chType(measHash), stripNumber(measHash));  
+    return m_idHelper.channelID(identify(), multilayer(), gasGapNumber(measHash) + 1, chType(measHash), channelNumber(measHash));  
 }
 inline IdentifierHash sTgcReadoutElement::layerHash(const Identifier& measId) const {
     if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
@@ -146,13 +197,13 @@ inline Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometr
         return globalChannelPosition(ctx, measurementHash(measId));
 }
 
- inline const StripLayer& sTgcReadoutElement::stripLayer(const IdentifierHash& measHash) const {
+inline const StripLayer& sTgcReadoutElement::stripLayer(const IdentifierHash& measHash) const {
     unsigned int gasGap = gasGapNumber(measHash);
     return m_pars.stripLayers[gasGap];
- }
+}
  inline const StripLayer& sTgcReadoutElement::stripLayer(const Identifier& measId) const {
     return stripLayer(measurementHash(measId));
- }
+}
 
 }  // namespace MuonGMR4
 #endif

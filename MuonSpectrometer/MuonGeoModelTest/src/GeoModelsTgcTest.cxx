@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelsTgcTest.h"
 
@@ -110,8 +110,6 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
     const Identifier genPadID =id_helper.channelID(stIndex, stEta, stPhi, 
                     stML, 1, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
 
-    
-
 //// Chamber Details from sTGCDetectorDescription 
     int numLayers = readoutEle->numberOfLayers(true); 
     double yCutout = readoutEle->getDesign(genStripID)->yCutout();
@@ -125,9 +123,15 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
     double lGapLength = readoutEle->getDesign(genStripID)->maxYSize();
     double gapHeight = readoutEle->getDesign(genStripID)->xSize();
 
+    double sPadLength = readoutEle->getPadDesign(genPadID)->sPadWidth;
+    double lPadLength = readoutEle->getPadDesign(genPadID)->lPadWidth;
+
     m_sGapLength = sGapLength;
     m_lGapLength = lGapLength;
     m_gapHeight = gapHeight;
+
+    m_sPadLength = sPadLength;
+    m_lPadLength = lPadLength;
 //// Chamber lengths for debug
     double sChamberLength = readoutEle->getPadDesign(genPadID)->sWidth;
     double lChamberLength = readoutEle->getPadDesign(genPadID)->lWidth;
@@ -147,8 +151,8 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                         stML, lay, sTgcIdHelper::sTgcChannelTypes::Wire, 1);
         const Identifier layStripID =id_helper.channelID(stIndex, stEta, stPhi, 
                         stML, lay, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
-//        const Identifier layPadID =id_helper.channelID(stIndex, stEta, stPhi, 
-//                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
+        const Identifier layPadID =id_helper.padID(stIndex, stEta, stPhi, 
+                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Pad, 1, 1);
 
 //// Wire Dimensions
         unsigned int numWires = readoutEle->numberOfWires(layWireID); 
@@ -225,16 +229,28 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
             m_stripRot.push_back(locToGlob);                    
             m_stripRotGasGap.push_back(lay);
         }
-/*
+
 ////Pad Dimensions
-        int numPads = readoutEle->numberOfPads(layPadID);
+        unsigned int numPads = readoutEle->numberOfPads(layPadID);
         int numPadEta = readoutEle->getPadDesign(layPadID)->nPadH;
         int numPadPhi = readoutEle->getPadDesign(layPadID)->nPadColumns;
+        double firstPadHeight = readoutEle->getPadDesign(layPadID)->firstRowPos;
+        double padHeight = readoutEle->getPadDesign(layPadID)->inputRowPitch;
+        double padPhiShift = readoutEle->getPadDesign(layPadID)->PadPhiShift;
+        double firstPadPhiDiv = readoutEle->getPadDesign(layPadID)->firstPhiPos;
+        double anglePadPhi = readoutEle->getPadDesign(layPadID)->inputPhiPitch;
+        double beamlineRadius = readoutEle->getPadDesign(layPadID)->radialDistance;
                 
         m_numPads.push_back(numPads);
         m_numPadEta.push_back(numPadEta);
         m_numPadPhi.push_back(numPadPhi);
-        
+        m_firstPadHeight.push_back(firstPadHeight);
+        m_padHeight.push_back(padHeight);
+        m_padPhiShift.push_back(padPhiShift);
+        m_firstPadPhiDiv.push_back(firstPadPhiDiv);
+        m_anglePadPhi = anglePadPhi;
+        m_beamlineRadius = beamlineRadius;
+
 //// Global transformations for pads
         for (int phiIndex = 1; phiIndex <= numPadPhi; ++phiIndex) {
             for(int etaIndex = 1; etaIndex <= numPadEta; ++etaIndex) {
@@ -244,25 +260,38 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 if(!isValid) {
                     ATH_MSG_WARNING("The following pad ID is not valid: " << padID);
                 }
-                Amg::Vector3D padPos(Amg::Vector3D::Zero());
-                std::array<Amg::Vector3D,4> padCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
+                Amg::Vector2D localPadPos(Amg::Vector2D::Zero());
+                Amg::Vector3D globalPadPos(Amg::Vector3D::Zero());
+                std::array<Amg::Vector2D,4> localPadCorners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
+                std::array<Amg::Vector3D,4> globalPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
+                
+                readoutEle->padPosition(padID, localPadPos);
+                readoutEle->padGlobalPosition(padID, globalPadPos);
+                readoutEle->padCorners(padID, localPadCorners);
+                readoutEle->padGlobalCorners(padID, globalPadCorners);
 
-                readoutEle->padGlobalPosition(padID, padPos);
-                readoutEle->padGlobalCorners(padID, padCorners);
+                m_localPadPos.push_back(localPadPos);
+                m_localPadCornerBL.push_back(localPadCorners[0]);
+                m_localPadCornerBR.push_back(localPadCorners[1]);
+                m_localPadCornerTL.push_back(localPadCorners[2]);
+                m_localPadCornerTR.push_back(localPadCorners[3]);
                
-                m_globalPadPos.push_back(padPos);
-                m_globalPadCornerBR.push_back(padCorners[0]);
-                m_globalPadCornerBL.push_back(padCorners[1]);
-                m_globalPadCornerTR.push_back(padCorners[2]);
-                m_globalPadCornerTL.push_back(padCorners[3]);
+                m_globalPadPos.push_back(globalPadPos);
+                m_globalPadCornerBR.push_back(globalPadCorners[0]);
+                m_globalPadCornerBL.push_back(globalPadCorners[1]);
+                m_globalPadCornerTR.push_back(globalPadCorners[2]);
+                m_globalPadCornerTL.push_back(globalPadCorners[3]);
 
                 m_padEta.push_back(etaIndex);
                 m_padPhi.push_back(phiIndex);
                 m_padGasGap.push_back(lay);
-            }
 
+                if (etaIndex != 1 || phiIndex != 1) continue;
+                const Amg::Transform3D locToGlob = readoutEle->transform(padID);
+                m_padRot.push_back(locToGlob);                    
+                m_padRotGasGap.push_back(lay);
+            }
         }
-*/
     }
 
     return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;

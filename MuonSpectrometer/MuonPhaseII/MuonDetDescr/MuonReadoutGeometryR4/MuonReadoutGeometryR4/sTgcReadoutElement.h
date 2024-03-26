@@ -7,7 +7,7 @@
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/StripDesign.h>
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
-//#include <MuonReadoutGeometryR4/DiamondStripDesign.h>
+#include <MuonReadoutGeometryR4/PadDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 #ifndef SIMULATIONBASE
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
@@ -34,7 +34,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
 
     };
 
-
     /// Set of parameters to describe an sTGC chamber
     struct parameterBook {
         /// sTGC Chamber Details
@@ -59,15 +58,17 @@ class sTgcReadoutElement : public MuonReadoutElement {
         unsigned int nChTypes{0};
         /// Diamond cutout height
         double yCutout{0.};
-
         //// firstStripPitch needed for the globalChannelPosition function
         std::vector<double> firstStripPitch{};
 
         std::vector<StripLayer> stripLayers{};
         std::vector<StripLayer> wireGroupLayers{};
+        std::vector<StripLayer> padLayers{};
 
         StripDesignPtr stripDesign{nullptr};
         WireDesignPtr wireGroupDesign{nullptr};
+
+        PadDesignPtr padDesign{nullptr};
 
 #ifndef SIMULATIONBASE
         ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
@@ -114,15 +115,22 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Gas Gaps
     double firstStripPitch(const Identifier& measId) const;
     double firstStripPitch(const IdentifierHash& measHash) const;
-    /// Length of gas Gap on short side
+    /// Length of gas Gap on short side for strips
     double sGapLength(const Identifier& measId) const;
     double sGapLength(const IdentifierHash& measHash) const;
-    /// Length of gas Gap on long side
+    /// Length of gas Gap on long side for strips
     double lGapLength(const Identifier& measId) const;
     double lGapLength(const IdentifierHash& measHash) const;
+    /// Length of gas Gap on short side for wireGroup/Pads
+    double sPadLength(const Identifier& measId) const;
+    double sPadLength(const IdentifierHash& measHash) const;
+    /// Length of gas Gap on long side for wireGroup/Pads
+    double lPadLength(const Identifier& measId) const;
+    double lPadLength(const IdentifierHash& measHash) const;
     /// Height of gas Gap
     double gapHeight(const Identifier& measId) const;
     double gapHeight(const IdentifierHash& measHash) const;
+    
     ////Strips
     /// Number of strips in a chamber
     unsigned int numStrips(const Identifier& measId) const;
@@ -156,6 +164,58 @@ class sTgcReadoutElement : public MuonReadoutElement {
     unsigned int numWireGroups(unsigned int gasGap) const;
     /// Wire Cutout of a gas Gap
     double wireCutout(unsigned int gasGap) const;
+    //// Pads
+    /// Total number of pads in the given layer
+    unsigned int numPads(const Identifier& measId) const;
+    unsigned int numPads(const IdentifierHash& measHash) const;
+    /// Returns the number of pads in the eta direction in the given layer
+    unsigned int numPadEta(const Identifier& measId) const;
+    unsigned int numPadEta(const IdentifierHash& measHash) const;
+    /// Returns the number of pads in the Phi direction in the given gasGap layer
+    unsigned int numPadPhi(const Identifier& measId) const;
+    unsigned int numPadPhi(const IdentifierHash& measHash) const;
+    /// Returns the height of the pads that are adjacent to the bottom edge of the trapezoid active area
+    double firstPadHeight(const Identifier& measId) const;
+    double firstPadHeight(const IdentifierHash& measHash) const;
+    /// Returns the height of all the pads that are not adjacent to the bottom edge of the trapezoid active area
+    double padHeight(const Identifier& measId) const;
+    double padHeight(const IdentifierHash& measHash) const;   
+    /// Returns the staggering shift of inner pad edges in the phi direction
+    double padPhiShift(const Identifier& measId) const;
+    double padPhiShift(const IdentifierHash& measHash) const; 
+    /// Returns the angle of the first pad outer edge w.r.t. the gasGap center from the beamline for the given pad identifier
+    double firstPadPhiDiv(const Identifier& measId) const;
+    double firstPadPhiDiv(const IdentifierHash& measHash) const;   
+    /// Returns the angular pitch of the pads in the phi direction
+    double anglePadPhi(const Identifier& measId) const;
+    double anglePadPhi(const IdentifierHash& measHash) const; 
+    /// Returns the maximum number of pads that can be contained in a column of a pad. Used to match the pad numbering scheme
+    unsigned int maxPadEta(const Identifier& measId) const;
+    unsigned int maxPadEta(const IdentifierHash& measHash) const; 
+    /// Returns the pad number in the conventional pad numbering scheme from the sequential channel number 
+    unsigned int padNumber(const Identifier& measId) const;
+    unsigned int padNumber(const IdentifierHash& measHash) const;
+    /// Returns a pair of Eta and Phi index for the given pad identifier
+    std::pair<uint, uint> padEtaPhi(const Identifier& measId) const;
+    std::pair<uint, uint> padEtaPhi(const IdentifierHash& measHash) const;   
+    /// Returns the Eta index of the pad for the given pad identifier
+    unsigned int padEta(const Identifier& measId) const;
+    unsigned int padEta(const IdentifierHash& measHash) const;
+    /// Returns the Phi index of the pad for the given pad identifier
+    unsigned int padPhi(const Identifier& measId) const;
+    unsigned int padPhi(const IdentifierHash& measHash) const;
+    /// Returns the distance between the gasGap center and the beamline
+    double beamlineRadius(const Identifier& measId) const;
+    double beamlineRadius(const IdentifierHash& measHash) const;
+    /// Returns an array of four 2D vectors representing corner positions of the pads
+    using localCornerArray = std::array<Amg::Vector2D, 4>;
+    localCornerArray localPadCorners(const Identifier& measId) const;
+    localCornerArray localPadCorners(const IdentifierHash& measHash) const;
+    /// Returns an array of four 3D vectors representing corner positions of the pads
+    using globalCornerArray = std::array<Amg::Vector3D, 4>;
+    globalCornerArray globalPadCorners(const ActsGeometryContext& ctx, const Identifier& measId) const;
+    globalCornerArray globalPadCorners(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;  
+       
     /// Retrieves the readoutElement Layer given the Identifier/Hash
     const StripDesign& stripDesign(const Identifier& measId) const;
     const StripDesign& stripDesign(const IdentifierHash& measHash) const;
@@ -168,10 +228,16 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Retrieves the readoutElement Layer given the gasGap
     const WireGroupDesign& wireDesign(unsigned int gasGap) const;
 
-    /// Returns the global strip/wire position
+    /// Retrieves the readoutElement Layer given the Identifier/Hash
+    const PadDesign& padDesign(const Identifier& measId) const;
+    const PadDesign& padDesign(const IdentifierHash& measHash) const;
+    /// Retrieves the readoutElement Layer given the gasGap
+    const PadDesign& padDesign(unsigned int gasGap) const;
+
+    /// Returns the global pad/strip/wireGroup position
     Amg::Vector3D globalChannelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
     Amg::Vector3D globalChannelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
-    /// Returns the local strip/wire position
+    /// Returns the local pad/strip/wireGroup position
     Amg::Vector2D localChannelPosition(const Identifier& measId) const;
     Amg::Vector2D localChannelPosition(const IdentifierHash& measHash) const;
 
@@ -201,10 +267,9 @@ class sTgcReadoutElement : public MuonReadoutElement {
                                      const unsigned int channel,
                                      const unsigned int wireInGrp = 0);
 
-
    private:
         /// Returns channel position for a given identifierHash
-        static unsigned int stripNumber(const IdentifierHash& measHash);
+        static unsigned int channelNumber(const IdentifierHash& measHash);
         /// Returns the channel type for a given identifierHash
         static unsigned int chType(const IdentifierHash& measHash);
         /// Returns the gasGap (0 to 3) for a given identifierHash

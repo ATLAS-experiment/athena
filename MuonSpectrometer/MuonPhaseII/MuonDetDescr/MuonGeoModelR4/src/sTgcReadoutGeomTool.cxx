@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonGeoModelR4/sTgcReadoutGeomTool.h>
@@ -67,7 +67,6 @@ sTgcReadoutGeomTool::sTgcShape sTgcReadoutGeomTool::extractParameters(const GeoS
     return result;
 }
     
-
 StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& define, FactoryCache& factoryCache) {
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
                      <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
@@ -115,6 +114,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
     for (physVolWithTrans& gapVol : allGasGaps) {
         StripDesignPtr stripDesign = std::make_unique<StripDesign>();
         WireDesignPtr wireGroupDesign = std::make_unique<WireGroupDesign>();
+        PadDesignPtr padDesign = std::make_unique<PadDesign>();
 
         sTgcShape gapPars = extractParameters(m_geoUtilTool->extractShape(gapVol.volume));
 
@@ -129,7 +129,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
             ATH_MSG_VERBOSE("Created new strip design "<<(*stripDesign));
 
             //WireGroupDesign
-            wireGroupDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight);
+            wireGroupDesign->defineTrapezoid(0.5*paramBook.sPadLength, 0.5*paramBook.lPadLength, gapPars.halfHeight);
             wireGroupDesign->flipTrapezoid();
             unsigned int numWireGroups = paramBook.numWireGroups[gasGap];
             /// Placing wires in the designated wireGroups for easy retrieval later, first and last are placed separately.
@@ -146,23 +146,45 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
                                                 paramBook.wirePitch, 
                                                 paramBook.wireWidth, 
                                                 numWireGroups);
-
             wireGroupDesign->defineWireCutout(paramBook.wireCutout[gasGap]);
+
+            //PadDesign
+            padDesign->defineTrapezoid(0.5*paramBook.sPadLength, 0.5*paramBook.lPadLength, gapPars.halfHeight);
+            padDesign->flipTrapezoid();
+            padDesign->definePadRow(paramBook.firstPadPhiDivision[gasGap],
+                                    paramBook.numPadPhi[gasGap],
+                                    paramBook.anglePadPhi,
+                                    paramBook.PadPhiShift[gasGap]);
+
+            padDesign->definePadColumn(paramBook.firstPadHeight[gasGap],
+                                        paramBook.numPadEta[gasGap],
+                                        paramBook.padHeight[gasGap]);
+
         }
-        /// Stacking strip and wireGroup layers
-        ++gasGap;        
+        /// Stacking strip, wireGroup and pad layers
+        ++gasGap;
+        ///wireGroups       
         wireGroupDesign = (*factoryCache.wireGroupDesigns.emplace(wireGroupDesign).first);
         StripLayer wireGroupLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), wireGroupDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Wire, 0));
         ATH_MSG_VERBOSE("Added new wireGroup layer at "<<wireGroupLayer);
         define.wireGroupLayers.push_back(std::move(wireGroupLayer));
         if(!define.wireGroupDesign) define.wireGroupDesign = wireGroupDesign;
+        ///Strips
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
         StripLayer stripLayer(gapVol.transform * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) * 
                                                  Amg::getRotateY3D(180* Gaudi::Units::deg), stripDesign, 
                                                  sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
         ATH_MSG_VERBOSE("Added new strip layer at "<< stripLayer);
         define.stripLayers.push_back(std::move(stripLayer));
-        if (!define.stripDesign) define.stripDesign = stripDesign;  
+        if (!define.stripDesign) define.stripDesign = stripDesign; 
+        ///Pads
+        double beamlineRadius = define.physVol->getAbsoluteTransform().translation().perp();
+        padDesign->defineBeamlineRadius(beamlineRadius);
+        ATH_MSG_DEBUG("The beamline radius is: " << beamlineRadius);
+        StripLayer padLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), padDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Pad, 0));
+        ATH_MSG_VERBOSE("Added new pad layer at "<<padLayer);
+        define.padLayers.push_back(std::move(padLayer));
+        if(!define.padDesign) define.padDesign = padDesign;
     }
     return StatusCode::SUCCESS;
 }
@@ -259,19 +281,15 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.numPadPhi = tokenizeInt(record->getString("nPadPhi"), ";");
         parBook.firstPadHeight = tokenizeDouble(record->getString("firstPadH"), ";");
         parBook.padHeight = tokenizeDouble(record->getString("padH"), ";");
-        ///Extra Pad Variables
         parBook.PadPhiShift = tokenizeInt(record->getString("PadPhiShift"), ";");
         parBook.anglePadPhi = record->getDouble("anglePadPhi");
         parBook.firstPadPhiDivision = tokenizeDouble(record->getString("firstPadPhiDivision"), ";");
-        parBook.firstPadRow = tokenizeInt(record->getString("firstPadRow"), ";");
-        parBook.lPadWidth = record->getDouble("lPadWidth");
-        parBook.rankPadEta = tokenizeInt(record->getString("rankPadH"), ";");
-        parBook.rankPadPhi = tokenizeInt(record->getString("rankPadPhi"), ";");
-        parBook.sPadWidth = record->getDouble("sPadWidth");
+        parBook.lPadLength = record->getDouble("lPadWidth");
+        parBook.sPadLength = record->getDouble("sPadWidth");
 
         parBook.gasTck = record->getDouble("gasTck");
 
-        ATH_MSG_DEBUG("Parameters of the chamber " << key << " are: "
+        ATH_MSG_ALWAYS("Parameters of the chamber " << key << " are: "
                         << " numStrips: " << parBook.numStrips
                         << " stripPitch: " << parBook.stripPitch
                         << " stripWidth: " << parBook.stripWidth
@@ -288,16 +306,11 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
                         << " Pads in Phi: " << parBook.numPadPhi
                         << " firstPadHeight: " << parBook.firstPadHeight
                         << " padHeight: " << parBook.padHeight
-                        ///ExtraPadVariables
                         << " PadPhiShift: " << parBook.PadPhiShift
                         << " anglePadPhi: " << parBook.anglePadPhi
                         << " firstPadPhiDivision: " << parBook.firstPadPhiDivision
-                        << " firstPadRow: " << parBook.firstPadRow
-                        << " lPadWidth: " << parBook.lPadWidth
-                        << " rankPadEta: " << parBook.rankPadEta
-                        << " rankPadPhi: " << parBook.rankPadPhi
-                        << " sPadWidth: " << parBook.sPadWidth
-
+                        << " lPadLength: " << parBook.lPadLength
+                        << " sPadLength: " << parBook.sPadLength
                         << " gasGapTck: " << parBook.gasTck);
     }
     return StatusCode::SUCCESS;

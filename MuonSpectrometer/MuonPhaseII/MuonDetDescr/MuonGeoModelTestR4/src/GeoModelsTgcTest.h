@@ -64,8 +64,8 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
     MuonVal::ScalarBranch<float>& m_lChamberLength{m_tree.newScalar<float>("lChamberLength")}; 
     MuonVal::ScalarBranch<float>& m_chamberHeight{m_tree.newScalar<float>("chamberHeight")}; 
     /// GasGap Lengths for debug
-    MuonVal::ScalarBranch<float>& m_sGapLength{m_tree.newScalar<float>("sGapLength")}; 
-    MuonVal::ScalarBranch<float>& m_lGapLength{m_tree.newScalar<float>("lGapLength")}; 
+    MuonVal::ScalarBranch<float>& m_sGapLength{m_tree.newScalar<float>("sGapLength")}; //sStripWidth
+    MuonVal::ScalarBranch<float>& m_lGapLength{m_tree.newScalar<float>("lGapLength")}; //lStripWidth
     MuonVal::ScalarBranch<float>& m_gapHeight{m_tree.newScalar<float>("gapHeight")}; 
 
 
@@ -82,6 +82,10 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
     /// Rotation matrix of the respective wireGroup layers
     MuonVal::CoordSystemsBranch m_wireGroupRot{m_tree, "wireGroupRot"};    
     MuonVal::VectorBranch<uint8_t>& m_wireGroupRotGasGap{m_tree.newVector<uint8_t>("wireGroupRotGasGap")};
+
+    /// Rotation matrix of the respective pad layers
+    MuonVal::CoordSystemsBranch m_padRot{m_tree, "padRot"};    
+    MuonVal::VectorBranch<uint8_t>& m_padRotGasGap{m_tree.newVector<uint8_t>("padRotGasGap")};
 
     /// Strip dimensions 
     MuonVal::ScalarBranch<uint>& m_numStrips{m_tree.newScalar<uint>("numStrips")}; // nStrips
@@ -105,21 +109,36 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
     MuonVal::ThreeVectorBranch m_globalWireGroupPos{m_tree, "globalWireGroupPos"}; //Position in ATLAS coordinates
     MuonVal::VectorBranch<uint8_t>& m_wireGroupNum{m_tree.newVector<uint8_t>("wireGroupNum")}; // wire Group number
     MuonVal::VectorBranch<uint8_t>& m_wireGroupGasGap{m_tree.newVector<uint8_t>("wireGroupGasGap")}; // gas gap number
-/*
-   /// Pad dimensions 
-    MuonVal::VectorBranch<uint>& m_numPads{m_tree.newVector<uint>("numPads")};
+
+   /// Pad dimensions
+    MuonVal::VectorBranch<uint>& m_numPads{m_tree.newVector<uint>("numPads")}; //total number of pads in a layer
+    MuonVal::ScalarBranch<float>& m_sPadLength{m_tree.newScalar<float>("sPadLength")}; // sPadWidth 
+    MuonVal::ScalarBranch<float>& m_lPadLength{m_tree.newScalar<float>("lPadLength")}; // lPadWidth 
     MuonVal::VectorBranch<uint>& m_numPadEta{m_tree.newVector<uint>("numPadEta")}; //nPadH
     MuonVal::VectorBranch<uint>& m_numPadPhi{m_tree.newVector<uint>("numPadPhi")}; //nPadPhi
+    MuonVal::VectorBranch<float>& m_firstPadHeight{m_tree.newVector<float>("firstPadHeight")}; //firstPadH
+    MuonVal::VectorBranch<float>& m_padHeight{m_tree.newVector<float>("padHeight")}; //PadH
+    MuonVal::VectorBranch<float>& m_padPhiShift{m_tree.newVector<float>("padPhiShift")}; //PadPhiShift_A (defined float in R3)
+    MuonVal::VectorBranch<float>& m_firstPadPhiDiv{m_tree.newVector<float>("firstPadPhiDiv")}; //firstPadPhiDivision
+    MuonVal::ScalarBranch<float>& m_anglePadPhi{m_tree.newScalar<float>("anglePadPhi")}; // anglePadPhi
+    MuonVal::ScalarBranch<float>& m_beamlineRadius{m_tree.newScalar<float>("beamlineRadius")}; 
+
+    MuonVal::TwoVectorBranch m_localPadCornerBR{m_tree, "localPadCornerBR"};
+    MuonVal::TwoVectorBranch m_localPadCornerBL{m_tree, "localPadCornerBL"};
+    MuonVal::TwoVectorBranch m_localPadCornerTR{m_tree, "localPadCornerTR"};
+    MuonVal::TwoVectorBranch m_localPadCornerTL{m_tree, "localPadCornerTL"};
+    MuonVal::TwoVectorBranch m_localPadPos{m_tree, "localPadPos"};
 
     MuonVal::ThreeVectorBranch m_globalPadCornerBR{m_tree, "globalPadCornerBR"};
     MuonVal::ThreeVectorBranch m_globalPadCornerBL{m_tree, "globalPadCornerBL"};
     MuonVal::ThreeVectorBranch m_globalPadCornerTR{m_tree, "globalPadCornerTR"};
     MuonVal::ThreeVectorBranch m_globalPadCornerTL{m_tree, "globalPadCornerTL"};
     MuonVal::ThreeVectorBranch m_globalPadPos{m_tree, "globalPadPos"};
+
     MuonVal::VectorBranch<uint8_t>& m_padGasGap{m_tree.newVector<uint8_t>("padGasGap")}; // gas gap number
     MuonVal::VectorBranch<uint>& m_padEta{m_tree.newVector<uint>("padEtaNumber")}; // pad number in eta direction
-    MuonVal::VectorBranch<uint>& m_padPhi{m_tree.newVector<uint>("padPhiNumber")}; // pad number in phi direction
-*/    
+    MuonVal::VectorBranch<uint>& m_padPhi{m_tree.newVector<uint>("padPhiNumber")}; // pad number in phi direction    
+
 };
 }
 #endif
