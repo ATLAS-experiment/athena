@@ -9,7 +9,7 @@
 // Variables to edit:
 //
 // -List of taggers:
-//  const vector<TString> taggers = {"IP3D","SV1","DL1dv00","DL1dv01","DL1r","GN1", "GN2v00"};
+//  const vector<TString> taggers = {"IP3D","SV1","DL1dv01","DL1r","GN2v01","GN2Xv01"};
 //
 // -Output directories for plots
 //  const TString HistoDir = "ROC/";
@@ -78,7 +78,7 @@ const float EffMax=1.;
 
 
 //Some global variables for plotting:
-vector<TString> taggers = {"IP3D","DIPS","SV1","DL1dv00","DL1dv01","GN1", "GN2v00","GN2Xv01"};
+vector<TString> taggers = {"IP3D","DIPS","SV1","DL1dv01","GN2v01","GN2Xv01"};
 
 const float CWidth=800;
 const float CHeight=600;
@@ -127,11 +127,9 @@ void fill_WP_values(){
     WP_values.insert(make_pair<TString, vector<TString>>("RNNIP", {"50", "70", "80"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DIPS", {"50", "70", "80"}));
     WP_values.insert(make_pair<TString, vector<TString>>("SV1", {"40", "50", "60"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DL1dv00", {"60", "70", "77", "85"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1dv01", {"60", "70", "77", "85"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"60", "70", "77", "85"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("GN1", {"60", "70", "77", "85"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("GN2v00", {"60", "70", "77", "85"}));
+    WP_values.insert(make_pair<TString, vector<TString>>("GN2v01", {"60", "70", "77", "85"}));
     WP_values.insert(make_pair<TString, vector<TString>>("GN2Xv01", {"50","55","60","65","75","80","85"}));
   }
   else{
@@ -139,11 +137,9 @@ void fill_WP_values(){
     WP_values.insert(make_pair<TString, vector<TString>>("RNNIP", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DIPS", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("SV1", {"60"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DL1dv00", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1dv01", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"70"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("GN1", {"70"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("GN2v00", {"70"}));
+    WP_values.insert(make_pair<TString, vector<TString>>("GN2v01", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("GN2Xv01", {"60"}));
   }
 }
@@ -1280,7 +1276,7 @@ void Draw_PhysVal_btagROC(TString inputMC="ttbar",
 			  TString reffile="files_merged/merged_NTUP_PHYSVAL_ref.root",
 			  TString testfile="files_merged/merged_NTUP_PHYSVAL_test.root",
 			  TString outputName="MyHistos.root",
-			  const vector<TString>& def_taggers=vector<TString>{"IP3D","DIPS","SV1","DL1dv00","DL1dv01","GN1", "GN2v00","GN2Xv01"},
+			  const vector<TString>& def_taggers=vector<TString>{"IP3D","DIPS","SV1","DL1dv01","GN2v01","GN2Xv01"},
 			  bool writeHistos=true){
 
     jetType=jet_type;
