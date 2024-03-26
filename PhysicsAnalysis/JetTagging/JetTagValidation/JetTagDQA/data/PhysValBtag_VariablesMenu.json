@@ -388,16 +388,16 @@
         },
 
         "GN2v01": {
-            "_comment": "pb, pc, and pu",
-            "title": "GN2v00",
-            "xtitle": "GN2v00 px",
+            "_comment": "pb, pc, pu and ptau",
+            "title": "GN2v01",
+            "xtitle": "GN2v01 px",
             "ytitle": "Jets",
             "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
             "xbins": 100,
             "xmin": 0,
             "xmax": 1,
-            "forEach": ["pb", "pc", "pu"],
-            "forEachTruthType": ["U", "B", "C", "DATA"],
+            "forEach": ["pb", "pc", "pu", "ptau"],
+            "forEachTruthType": ["U", "B", "C", "TAU", "DATA"],
             "type": "TH1D",
             "forData": "true"
         },
