@@ -549,8 +549,8 @@ namespace JetTagDQA{
       double m_DIPS_fc = 0.0;
       double m_DL1dv01_fc = 0.0;
       double m_DL1r_fc = 0.0;
-      double m_GN2v01_fc = 0.1;
-      double m_GN2v01_fu = 0.1;
+      double m_GN2v01_fc = 0.2;
+      double m_GN2v01_ftau = 0.01;
       double m_GN2Xv01_hcc_fc = 0.0;
       double m_GN2Xv01_top_fc = 0.0;
       std::map<std::string, TH1*> m_weight_histos; 
