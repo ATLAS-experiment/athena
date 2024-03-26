@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,8 @@
 // Header of the class ClassifyAndCalculateHFAugmentation.
 
 #include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFAugmentation.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 namespace DerivationFramework {
 
@@ -52,15 +54,20 @@ namespace DerivationFramework {
 
     ATH_MSG_INFO("Initialize HF computation");
 
-    // Print the string variables.
-
-    ATH_MSG_INFO("Jets Container Name "            << m_jetCollectionName);
-    ATH_MSG_INFO("Truth Particles Container Name " << m_TruthParticleContainerName);
+    ATH_MSG_INFO("Jets Container Name "            << m_jetCollectionKey.key());
+    ATH_MSG_INFO("Truth Particles Container Name " << m_truthParticlesKey.key());
     ATH_MSG_INFO("HF Classifier Name "             << m_hfDecorationName);
     ATH_MSG_INFO("Simple HF Classifier Name "      << m_SimplehfDecorationName);
 
-    // Check if the necessary tools can be retrieved.
+    ATH_CHECK( m_truthParticlesKey.initialize() );
+    ATH_CHECK( m_jetCollectionKey.initialize() );
+    ATH_CHECK( m_eventInfoKey.initialize() );
+    ATH_CHECK( m_hfDecorKey.assign(m_eventInfoKey.key()+"."+m_hfDecorationName) );
+    ATH_CHECK( m_hfDecorKey.initialize() );
+    ATH_CHECK( m_SimplehfDecorKey.assign(m_eventInfoKey.key()+"."+m_SimplehfDecorationName) );
+    ATH_CHECK( m_SimplehfDecorKey.initialize() );
 
+    // Retrieve the necessary tools
     if(m_HFClassification_tool.retrieve().isFailure()){
       ATH_MSG_ERROR("Unable to retrieve the tool " << m_HFClassification_tool);
       return StatusCode::FAILURE;
@@ -92,62 +99,51 @@ namespace DerivationFramework {
   StatusCode ClassifyAndCalculateHFAugmentation::addBranches() const
   {
 
-    // Create two pointers where the HF classifer and the simple HF classifier will be saved.
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
-    std::unique_ptr< int > hfclassif(new int());
-    std::unique_ptr< int > simpleclassif(new int());
-
-    // Retrieve the truth particle container from the event.
-
-    const xAOD::TruthParticleContainer* xTruthParticleContainer = nullptr;
-
-    if (evtStore()->retrieve(xTruthParticleContainer, m_TruthParticleContainerName).isFailure()) {
-      ATH_MSG_ERROR("could not retrieve TruthParticleContainer '" << m_TruthParticleContainerName << "'");
+    // Retrieve the truth particle container
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticlesHandle(m_truthParticlesKey, ctx);
+    if (!truthParticlesHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve TruthParticleContainer " << truthParticlesHandle.key());
       return StatusCode::FAILURE;
     }
+    const xAOD::TruthParticleContainer* xTruthParticleContainer = truthParticlesHandle.cptr();
 
-    // Retrieve the jets container from the event.
-
-    const xAOD::JetContainer* JetCollection = nullptr;
-    
-    if(evtStore()->retrieve(JetCollection,m_jetCollectionName).isFailure()) {
-      ATH_MSG_ERROR("could not retrieve JetContainer '" << m_jetCollectionName << "'");
+    // Retrieve the jets container
+    SG::ReadHandle<xAOD::JetContainer> jetInputHandle(m_jetCollectionKey, ctx);
+    if (!jetInputHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve JetContainer " << jetInputHandle.key());
       return StatusCode::FAILURE;
     }
+    const xAOD::JetContainer* JetCollection = jetInputHandle.cptr();
 
     // Compute a map that associates the HF hadrons with their origin using the tool m_HadronOriginClassifier_Tool.
-
     std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> hadronMap = m_HadronOriginClassifier_Tool->GetOriginMap(); 
 
     // Create a map with a list of matched hadrons for each jet.
-
     std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>> particleMatch = m_JetMatchingTool_Tool->matchHadronsToJets(xTruthParticleContainer, JetCollection);
 
     // Calculate the necessary information from the jets to compute the HF classifier.
-
     m_HFClassification_tool->flagJets(JetCollection, particleMatch, hadronMap, m_hfDecorationName);
 
     // Compute the HF classifier and the simple HF classifier.
+    int hfclassif     = m_HFClassification_tool->computeHFClassification(JetCollection, m_hfDecorationName);
+    int simpleclassif = m_HFClassification_tool->getSimpleClassification(hfclassif);
 
-    *hfclassif     = m_HFClassification_tool->computeHFClassification(JetCollection, m_hfDecorationName);
-    *simpleclassif = m_HFClassification_tool->getSimpleClassification(*hfclassif);
-
-    // Retrieve the EventInfo container from the event.
-
-    const xAOD::EventInfo* EventInfo = nullptr;
-    
-    if(evtStore()->retrieve(EventInfo,"EventInfo").isFailure()) {
-      ATH_MSG_ERROR("could not retrieve 'EventInfo'");
+    // Retrieve EventInfo
+    SG::ReadHandle<xAOD::EventInfo> eventInfoHandle(m_eventInfoKey, ctx);
+    if (!eventInfoHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve EventInfo " << eventInfoHandle.key());
       return StatusCode::FAILURE;
     }
+    const xAOD::EventInfo* EventInfo = eventInfoHandle.cptr();
 
-    // Dectorate the EventInfo with the HF Classification and the simple version
+    // Decorate EventInfo with the HF Classification and the simple version
+    SG::WriteDecorHandle<xAOD::EventInfo, int> decorator_HFClassification(m_hfDecorKey, ctx);
+    decorator_HFClassification(*EventInfo) = hfclassif;
 
-    SG::AuxElement::Decorator< int > decorator_HFClassification(m_hfDecorationName); 
-    decorator_HFClassification(*EventInfo) = *hfclassif;
-
-    SG::AuxElement::Decorator< int > decorator_SimpleHFClassification(m_SimplehfDecorationName); 
-    decorator_SimpleHFClassification(*EventInfo) = *simpleclassif;
+    SG::WriteDecorHandle<xAOD::EventInfo, int> decorator_SimpleHFClassification(m_SimplehfDecorKey, ctx);
+    decorator_SimpleHFClassification(*EventInfo) = simpleclassif;
 
     return StatusCode::SUCCESS;
   }
