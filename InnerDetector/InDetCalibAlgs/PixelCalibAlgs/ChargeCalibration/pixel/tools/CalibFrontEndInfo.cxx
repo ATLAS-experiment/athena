@@ -18,9 +18,9 @@ std::stringstream CalibFrontEndInfo::printDBformat()    const {
     if(m_FEid == 0) mytext << m_MODid_str << " " << m_MODid << "\n";
     
     mytext  << "I" << m_FEid
-            << " " << m_NormalTheshold << " " << m_NormalRms << " " << m_NormalNoise << " " << m_NormalIntime 
-            << " " << m_LongTheshold   << " " << m_LongRms   << " " << m_LongNoise   << " " << m_LongIntime 
-            << " " << m_GangedTheshold << " " << m_GangedRms << " " << m_GangedNoise << " " << m_GangedIntime
+            << " " << m_NormalThreshold << " " << m_NormalRms << " " << m_NormalNoise << " " << m_NormalIntime 
+            << " " << m_LongThreshold   << " " << m_LongRms   << " " << m_LongNoise   << " " << m_LongIntime 
+            << " " << m_GangedThreshold << " " << m_GangedRms << " " << m_GangedNoise << " " << m_GangedIntime
             
             << " " << m_NormalFitParams.at(0) << " " << m_NormalFitParams.at(1) << " " << m_NormalFitParams.at(2)
             << " " << m_LongFitParams.at(0)   << " " << m_LongFitParams.at(1)   << " " << m_LongFitParams.at(2)  
@@ -37,9 +37,9 @@ void CalibFrontEndInfo::printBeautyformat()    const {
 
            m_FEid,
 
-           m_NormalTheshold, m_NormalRms, m_NormalNoise, m_NormalIntime,
-           m_LongTheshold  , m_LongRms  , m_LongNoise  , m_LongIntime  ,
-           m_GangedTheshold, m_GangedRms, m_GangedNoise, m_GangedIntime,
+           m_NormalThreshold, m_NormalRms, m_NormalNoise, m_NormalIntime,
+           m_LongThreshold  , m_LongRms  , m_LongNoise  , m_LongIntime  ,
+           m_GangedThreshold, m_GangedRms, m_GangedNoise, m_GangedIntime,
 
            m_NormalFitParams.at(0), m_NormalFitParams.at(1), m_NormalFitParams.at(2) , m_NormalFitParamsQuality.at(0) , m_NormalFitParamsQuality.at(1),
            m_LongFitParams.at(0)  , m_LongFitParams.at(1)  , m_LongFitParams.at(2)   , m_LongFitParamsQuality.at(0)   , m_LongFitParamsQuality.at(1)  ,
@@ -59,9 +59,9 @@ void CalibFrontEndInfo::printVals()    const {
     printf("-----------------------------------------------------------------------\n");
     printf("|  %-9s  |  %9s  |  %9s  |  %9s  |  %9s  |\n","", "Threshold", "   RMS", " Noise", " Intime"      );
     printf("-----------------------------------------------------------------------\n");
-    printf("|  %-9s  |  %9d  |  %9d  |  %9d  |  %9d  |\n","Normal", m_NormalTheshold, m_NormalRms, m_NormalNoise, m_NormalIntime);
-    printf("|  %-9s  |  %9d  |  %9d  |  %9d  |  %9d  |\n","Long"  , m_LongTheshold  , m_LongRms  , m_LongNoise  , m_LongIntime  );
-    printf("|  %-9s  |  %9d  |  %9d  |  %9d  |  %9d  |\n","Ganged", m_GangedTheshold, m_GangedRms, m_GangedNoise, m_GangedIntime);
+    printf("|  %-9s  |  %9d  |  %9d  |  %9d  |  %9d  |\n","Normal", m_NormalThreshold, m_NormalRms, m_NormalNoise, m_NormalIntime);
+    printf("|  %-9s  |  %9d  |  %9d  |  %9d  |  %9d  |\n","Long"  , m_LongThreshold  , m_LongRms  , m_LongNoise  , m_LongIntime  );
+    printf("|  %-9s  |  %9d  |  %9d  |  %9d  |  %9d  |\n","Ganged", m_GangedThreshold, m_GangedRms, m_GangedNoise, m_GangedIntime);
     printf("-----------------------------------------------------------------------\n\n");
 
     if(m_NormalFitParams.size() == 3 ) {
@@ -90,9 +90,9 @@ void CalibFrontEndInfo::printMODerr()    const {
 
     bool error = false;
 
-    int vals[12] = {m_NormalTheshold, m_NormalRms, m_NormalNoise, m_NormalIntime,
-                    m_LongTheshold  , m_LongRms  , m_LongNoise  , m_LongIntime  ,
-                    m_GangedTheshold, m_GangedRms, m_GangedNoise, m_GangedIntime,
+    int vals[12] = {m_NormalThreshold, m_NormalRms, m_NormalNoise, m_NormalIntime,
+                    m_LongThreshold  , m_LongRms  , m_LongNoise  , m_LongIntime  ,
+                    m_GangedThreshold, m_GangedRms, m_GangedNoise, m_GangedIntime,
                    };
 
     for(const auto &val : vals) {

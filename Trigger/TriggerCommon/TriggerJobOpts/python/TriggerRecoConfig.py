@@ -471,7 +471,8 @@ if __name__ == '__main__':
 
     acc = MainServicesCfg(flags)
     acc.merge( TriggerRecoCfg(flags) )
-    acc.printConfig(withDetails=True)
+    if log.getEffectiveLevel() <= logging.DEBUG:
+        acc.printConfig(withDetails=True)
 
     import sys
     sys.exit(acc.run().isFailure())

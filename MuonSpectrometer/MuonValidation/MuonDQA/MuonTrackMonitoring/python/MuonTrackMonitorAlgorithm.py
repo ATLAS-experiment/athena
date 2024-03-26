@@ -1,20 +1,14 @@
 """
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 2020 Matthias Schott - Uni Mainz
 """
 
 from AthenaConfiguration.Enums import BeamType
 
 
-def MuonTrackConfig(flags, isOld=False, **kwargs):
-    if isOld:
-        # Run-2 style configuration
-        from AthenaMonitoring import AthMonitorCfgHelperOld as AthMonitorCfgHelper
-        from MuonTrackMonitoring.MuonTrackMonitoringConf import MuonTrackMonitorAlgorithm
-    else:
-        from AthenaMonitoring import AthMonitorCfgHelper
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        MuonTrackMonitorAlgorithm = CompFactory.MuonTrackMonitorAlgorithm
+def MuonTrackConfig(flags, **kwargs):
+    from AthenaMonitoring import AthMonitorCfgHelper
+    from AthenaConfiguration.ComponentFactory import CompFactory
 
     helper = AthMonitorCfgHelper(flags, "MuonTrackMonitoringConfig")
     if flags.Beam.Type != BeamType.Collisions:
@@ -22,7 +16,7 @@ def MuonTrackConfig(flags, isOld=False, **kwargs):
     if flags.Common.isOnline or flags.Beam.Type != BeamType.Collisions:
         kwargs.setdefault("RequireBeamSpot", False)
 
-    muonTrackAlg = helper.addAlgorithm(MuonTrackMonitorAlgorithm, "MuonTrackMonitorAlg", **kwargs)
+    muonTrackAlg = helper.addAlgorithm(CompFactory.MuonTrackMonitorAlgorithm, "MuonTrackMonitorAlg", **kwargs)
 
     myGroup = helper.addGroup(muonTrackAlg, "MuonTrackMonitorAlgorithm", "MuonPhysics/")
 

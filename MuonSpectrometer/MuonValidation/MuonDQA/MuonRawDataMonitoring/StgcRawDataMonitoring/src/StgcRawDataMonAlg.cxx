@@ -122,7 +122,7 @@ void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataCont
 
 	auto sectorSidedMon       = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
 	auto stationEtaSidedMon   = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEta);
-	fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
+	fill("sTgcQuadOccupancyPad", sectorSidedMon, stationEtaSidedMon);
       }
 
       else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
@@ -154,7 +154,7 @@ void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataCont
 
 	auto sectorSidedMon         = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
 	auto stationEtaSidedMon     = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEta);
-	fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
+	fill("sTgcQuadOccupancyStrip", sectorSidedMon, stationEtaSidedMon);
       }
 
       else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
@@ -169,7 +169,7 @@ void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataCont
 
 	auto sectorSidedMon             = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
 	auto stationEtaSidedMon         = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEta);
-	fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
+	fill("sTgcQuadOccupancyWire", sectorSidedMon, stationEtaSidedMon);
       }
     }
   }

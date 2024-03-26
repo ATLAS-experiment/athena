@@ -39,17 +39,27 @@ public:
   virtual StatusCode execute(const EventContext & ctx ) const;
   
 private:
+
+  /** Function that flags whether the FE cluster has any cell that is also in
+  the muon list of cells. If so the function sets isCellMatched to true
+  and returns non-zero values of the sum of matched energy in the FE and muon
+  clusters.
+  **/
+  std::pair<double,double> doMuonCellMatching(bool& isCellMatched, const xAOD::CaloCluster& FECluster, const xAOD::CaloCluster& muonCluster) const;
   
   // ReadHandleKeys
-  SG::ReadHandleKey<xAOD::MuonContainer>m_muonReadHandleKey{this,"MuonContainer","Muons","ReadHandleKey for Muons"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_muonReadHandleKey{this,"MuonContainer","Muons","ReadHandleKey for Muons"};
   
-  SG::ReadHandleKey<xAOD::FlowElementContainer>m_neutralFEReadHandleKey{this,"JetEtMissNeutralFlowElementContainer","JetETMissNeutralParticleFlowObjects","ReadHandleKey for neutral FlowElements"};
+  SG::ReadHandleKey<xAOD::FlowElementContainer> m_neutralFEReadHandleKey{this,"JetEtMissNeutralFlowElementContainer","JetETMissNeutralParticleFlowObjects","ReadHandleKey for neutral FlowElements"};
 
-  SG::ReadHandleKey<xAOD::FlowElementContainer>m_chargedFEReadHandleKey{this,"JetEtMissChargedFlowElementContainer","JetETMissChargedParticleFlowObjects","ReadHandleKey for charged FlowElements"};
-
+  SG::ReadHandleKey<xAOD::FlowElementContainer> m_chargedFEReadHandleKey{this,"JetEtMissChargedFlowElementContainer","JetETMissChargedParticleFlowObjects","ReadHandleKey for charged FlowElements"};
 
   /** Write key for adding charged Flow Element link decorations to muons **/
   SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonChargedFEWriteHandleKey{this,"MuonContainer_chargedFELinks","Muons.chargedFELinks","WriteHandleKey for muon link to charged FlowElements"};
+
+  /** Write key for adding fraction of nFlowElement cluster energy used in cell matching decoration of FlowElementContainer - EXPERIMENTAL **/
+  SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_ChargedFE_energy_match_muonWriteHandleKey{this,"FlowElementContainer_ChargedFE_ennergy_matched_muon","JetETMissChargedParticleFlowObjects.FE_efrac_matched_muon","WriteHandleKey for the fraction of neutral FlowElements cluster energy used to match to Muons"};
+
 
   /** Write key for adding Muon link decorations to charged Flow Elements **/
   SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_ChargedFEmuonWriteHandleKey{this,"JetETMissChargedFlowElements_FE_MuonLinks","JetETMissChargedParticleFlowObjects.FE_MuonLinks","WriteHandleKey for Charged Flow Elements coupled to muons"};

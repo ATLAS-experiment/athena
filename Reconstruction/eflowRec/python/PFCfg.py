@@ -324,6 +324,7 @@ def getMuonFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
         PFMuonFlowElementLinkerAlgorithm.MuonContainer_neutralFELinks=service_key+"Muons.neutralTCCLinks"
         PFMuonFlowElementLinkerAlgorithm.JetETMissNeutralFlowElementContainer_FE_MuonLinks=service_key+"TrackCaloClustersNeutral.TCC_MuonLinks"
         PFMuonFlowElementLinkerAlgorithm.JetETMissChargedFlowElements_FE_MuonLinks=service_key+"TrackCaloClustersCharged.TCC_MuonLinks"
+        PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_ChargedFE_ennergy_matched_muon="TrackCaloClustersCharged.TCC_efrac_matched_muon"
         # several variables relating to Neutral Flow Elements/TCCs to Muons for debug. perhaps at some point these should be removed by default 
         PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_nMatchedMuons="TrackCaloClustersNeutral.TCC_nMatchedMuons"
         PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_FE_efrac_matched_muon="TrackCaloClustersNeutral.TCC_efrac_matched_muon"
@@ -341,7 +342,8 @@ def getMuonFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
 
         PFMuonFlowElementLinkerAlgorithm.JetETMissNeutralFlowElementContainer_FE_MuonLinks="GlobalNeutralParticleFlowObjects.GlobalFE_MuonLinks"
         PFMuonFlowElementLinkerAlgorithm.JetETMissChargedFlowElements_FE_MuonLinks="GlobalChargedParticleFlowObjects.GlobalFE_MuonLinks"
-
+        PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_ChargedFE_ennergy_matched_muon="GlobalChargedParticleFlowObjects.GlobalFE_efrac_matched_muon"
+        
         PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_nMatchedMuons="GlobalNeutralParticleFlowObjects.GlobalFE_nMatchedMuons"
         PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_FE_efrac_matched_muon="GlobalNeutralParticleFlowObjects.GlobalFE_efrac_matched_muon"
 
