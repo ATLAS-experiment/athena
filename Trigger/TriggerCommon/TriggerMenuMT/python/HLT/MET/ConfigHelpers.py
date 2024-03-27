@@ -23,7 +23,7 @@ from abc import ABC, abstractmethod
 from string import ascii_uppercase
 from TrigMissingETHypo.TrigMissingETHypoConfig import TrigMETHypoToolFromDict
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-
+import functools
 
 def streamer_hypo_tool(chainDict):
     return CompFactory.TrigStreamerHypoTool(chainDict["chainName"])
@@ -236,15 +236,14 @@ class AlgConfig(ABC):
                     Sequences=[]
                     if sel_acc is None
                     else [
-                        MenuSequenceCA(
-                            flags, selectionCA=sel_acc, HypoToolGen=hypo_tool
-                        )
+                        functools.partial(make_MET_menu_sequence, flags, sel_acc, hypo_tool)                                                
                     ],
                     comboHypoCfg=ComboHypoCfg
                 )
             )
 
         return output_steps
+    
 
     def make_hypo_alg(self):
         """The hypo alg used for this configuration"""
@@ -296,6 +295,8 @@ class AlgConfig(ABC):
 
         raise ValueError("Unknown EFrecoAlg '{}' requested".format(EFrecoAlg))
 
+def make_MET_menu_sequence(flags, sel_acc, hypo_tool):
+    return MenuSequenceCA(flags, selectionCA=sel_acc, HypoToolGen=hypo_tool)
 
 # Load all the defined configurations
 from . import AlgConfigs

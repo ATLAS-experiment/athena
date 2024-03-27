@@ -359,7 +359,7 @@ def isFullScan(chain):
 
 def isNoAlg(chain):
     '''Helper function to determine if chain has HLT reco'''
-    return (len(chain.steps) == 0)
+    return (len(chain.steps) == 1 and "Step_PEBInfoWriter" in chain.steps[0].name)
 
 
 # Unit test
