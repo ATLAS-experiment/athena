@@ -202,8 +202,10 @@ namespace InDet {
 
     if( flav == 15 && abs(truth->pdgId()) == 15 ) return true;
 
+
     for(unsigned int p=0; p<truth->nParents(); p++) {
       const xAOD::TruthParticle* parent = truth->parent(p);
+      if(parent == truth ) continue ; // avoid infinite recursion
       if( isFrom(parent, flav) ) return true;
     }
 

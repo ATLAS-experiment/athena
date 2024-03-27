@@ -65,6 +65,7 @@ namespace FlavorTagDiscriminants {
             }
             for (unsigned int p = 0; p < truth_particle->nParents(); p++) {
                 const auto parent = truth_particle->parent(p);
+		if(parent == truth_particle) continue;// avoid infinite recursion
                 const auto parent_hadron = get_parent_hadron(parent, false);
                 if ( parent_hadron != nullptr ) {
                     return parent_hadron;
