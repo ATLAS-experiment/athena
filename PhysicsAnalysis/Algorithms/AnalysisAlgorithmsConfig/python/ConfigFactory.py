@@ -314,11 +314,6 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,
             defaults={'configName': 'Thinning'})
 
-        # selection decorations
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import SelectionDecorationBlock
-        self.addAlgConfigBlock(algName='SelectionDecoration',
-                               alg=SelectionDecorationBlock)
-
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
