@@ -987,6 +987,9 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq.setOptionValue ('.nReplicas', 2000 )
         configSeq.setOptionValue ('.runOnMC', True )
 
+    configSeq += config.makeConfig ('SelectionDecoration', containers = [
+        'OutMuons', 'OutElectrons', 'OutPhotons', 'OutTauJets', 'OutJets'])
+
     configSeq += config.makeConfig ('Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', vars)
