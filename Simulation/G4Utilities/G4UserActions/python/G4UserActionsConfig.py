@@ -135,3 +135,26 @@ def MonopoleLooperKillerToolCfg(flags, name="G4UA::MonopoleLooperKillerTool", **
     kwargs.setdefault("PrintSteps",2)
     kwargs.setdefault("VerboseLevel",0)
     return LooperKillerToolCfg(flags, name, **kwargs)
+
+
+def FastIDKillerToolCfg(flags, name="G4UA::FastIDKillerTool", **kwargs):
+    """
+    isDalek = True : kill all particles with kinetic energy below
+    'energyCut' leaving the ID envelope (R,Z).
+
+    isDalek = False : kill all particles leaving the ID envelope
+    (R,Z), except e+-/gamma with total energy >= 'energyCut'
+    """
+    result = ComponentAccumulator()
+    # FIXME UserActionConfig not yet migrated
+    # example custom configuration
+    # if name in flags.Sim.UserActionConfig.keys():
+    #     for prop,value in flags.Sim.UserActionConfig[name].iteritems():
+    #         kwargs.setdefault(prop,value)
+    from AthenaCommon.SystemOfUnits import MeV, mm
+    kwargs.setdefault("energyCut", 100.*MeV); # Energy cut in MeV
+    kwargs.setdefault("isDalek", False);
+    kwargs.setdefault("R", 1150.*mm); # ID outer radius
+    kwargs.setdefault("Z", 3490.*mm); # ID maximum Z coordiate
+    result.setPrivateTools(CompFactory.G4UA.FastIDKillerTool(name, **kwargs))
+    return result
