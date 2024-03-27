@@ -32,7 +32,8 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                       'xAOD::StripClusterAuxContainer#ITkConversionStripClustersAux.' + strip_cluster_variables]
         
     if flags.Acts.EDM.PersistifySpacePoints:
-        pixel_spacepoint_shortlist = ['-measurements']
+        pixel_spacepoint_shortlist = ['-measurements',
+                                      '-pixelSpacePointLink']
         strip_spacepoint_shortlist = ['topHalfStripLength', 
                                       'bottomHalfStripLength', 
                                       'topStripDirection',
