@@ -102,14 +102,6 @@ Thinning:
     outputName: 'OutTauJets'
     selectionName: 'tight'
 
-SelectionDecoration:
-    containers:
-      - 'OutMuons'
-      - 'OutElectrons'
-      - 'OutPhotons'
-      - 'OutTauJets'
-      - 'OutJets'
-
 # After configuring each container, many variables will be saved automatically.
 Output:
     treeName: 'analysis'

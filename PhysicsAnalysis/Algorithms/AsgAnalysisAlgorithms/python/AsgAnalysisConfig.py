@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -413,35 +413,6 @@ class PerEventSFBlock (ConfigBlock):
 
         config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
                             alg.scaleFactorOutputDecoration.split("_%SYS%")[0])
-
-
-class SelectionDecorationBlock (ConfigBlock):
-    """the ConfigBlock to add selection decoration to a container"""
-
-    def __init__ (self, containers) :
-        super (SelectionDecorationBlock, self).__init__ ()
-        self.containers = containers
-        self.addOption ('selectionFlagPrefix', 'select', type=str)
-
-    def makeAlgs(self, config):
-        for container in self.containers:
-            originContainerName = config.getOutputContainerOrigin(container)
-            selectionNames = config.getSelectionNames(originContainerName)
-            for selectionName in selectionNames:
-                # skip default selection
-                if selectionName == '':
-                    continue
-                alg = config.createAlgorithm(
-                    'CP::AsgSelectionAlg',
-                    f'SelectionDecoration_{originContainerName}_{selectionName}')
-                selectionDecoration = f'baselineSelection_{selectionName}_%SYS%'
-                alg.selectionDecoration =  f'{selectionDecoration},as_char'
-                alg.particles = config.readName (originContainerName)
-                alg.preselection = config.getFullSelection (originContainerName,
-                                                            selectionName)
-                config.addOutputVar(
-                    originContainerName, selectionDecoration,
-                    self.selectionFlagPrefix + '_' + selectionName)
 
 
 def makeCommonServicesConfig( seq ):
