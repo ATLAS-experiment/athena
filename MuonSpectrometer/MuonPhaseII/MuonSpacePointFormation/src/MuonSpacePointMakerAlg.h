@@ -52,13 +52,13 @@ namespace MuonR4{
                                           SpacePointBucketVec& splittedContainer) const;
 
 
-            SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xMdtHits",
+            SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xAODMdtCircles",
                                                                       "Key to the uncalibrated Drift circle measurements"};
             
-            SG::ReadHandleKey<xAOD::RpcStripContainer> m_rpcKey{this, "RpcKey", "xRpcHits",
+            SG::ReadHandleKey<xAOD::RpcStripContainer> m_rpcKey{this, "RpcKey", "xRpcStrips",
                                                                 "Key to the uncalibrated 1D rpc hits"};
             
-            SG::ReadHandleKey<xAOD::TgcStripContainer> m_tgcKey{this, "TgcKey", "xTgcHits",
+            SG::ReadHandleKey<xAOD::TgcStripContainer> m_tgcKey{this, "TgcKey", "xTgcStrips",
                                                                 "Key to the uncalibrated 1D tgc hits"};
 
             SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
