@@ -2,6 +2,7 @@
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import CompFactory
+import functools
 
 log = logging.getLogger('EmuStepProcessingConfig')
 
@@ -144,17 +145,17 @@ def generateChainsManually(flags, maskbit=0x7):
     if doMuon:
         from TriggerMenuMT.CFtest.HLTSignatureConfig import  muMenuSequence
         #step1
-        mu11 = muMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
-        mu12 = muMenuSequence(flags,step="1",reconame="v2", hyponame="v2")
+        mu11 = functools.partial(muMenuSequence, flags,step="1",reconame="v1", hyponame="v1")
+        mu12 = functools.partial(muMenuSequence,flags,step="1",reconame="v2", hyponame="v2")
                     
         #step2
-        mu21 = muMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
-        mu22 = muMenuSequence(flags,step="2",reconame="v2", hyponame="v2")
+        mu21 = functools.partial(muMenuSequence,flags,step="2",reconame="v1", hyponame="v1")
+        mu22 = functools.partial(muMenuSequence,flags,step="2",reconame="v2", hyponame="v2")
         #step3
-        mu31 = muMenuSequence(flags,step="3",reconame="v1", hyponame="v1")
-        mu32 = muMenuSequence(flags,step="3",reconame="v2", hyponame="v2")
+        mu31 = functools.partial(muMenuSequence,flags,step="3",reconame="v1", hyponame="v1")
+        mu32 = functools.partial(muMenuSequence,flags,step="3",reconame="v2", hyponame="v2")
         #step4
-        mu41 = muMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
+        mu41 = functools.partial(muMenuSequence,flags,step="4",reconame="v1", hyponame="v1")
 
         step_mu11  = makeChainStep("Step1_mu11", [mu11] )
         step_mu21  = makeChainStep("Step2_mu21", [mu21] )
@@ -180,15 +181,15 @@ def generateChainsManually(flags, maskbit=0x7):
     ## #electron chains
     if doElectron:
         from TriggerMenuMT.CFtest.HLTSignatureConfig import  elMenuSequence, gamMenuSequence
-        el11 = elMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
-        el21 = elMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
-        el22 = elMenuSequence(flags,step="2",reconame="v2", hyponame="v2")
-        el23 = elMenuSequence(flags,step="2",reconame="v2", hyponame="v3")
-        el31 = elMenuSequence(flags,step="3",reconame="v1", hyponame="v1")
-        el41 = elMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
+        el11 = functools.partial(elMenuSequence,flags,step="1",reconame="v1", hyponame="v1")
+        el21 = functools.partial(elMenuSequence,flags,step="2",reconame="v1", hyponame="v1")
+        el22 = functools.partial(elMenuSequence,flags,step="2",reconame="v2", hyponame="v2")
+        el23 = functools.partial(elMenuSequence,flags,step="2",reconame="v2", hyponame="v3")
+        el31 = functools.partial(elMenuSequence,flags,step="3",reconame="v1", hyponame="v1")
+        el41 = functools.partial(elMenuSequence,flags,step="4",reconame="v1", hyponame="v1")
 
         # gamma
-        gamm11 = gamMenuSequence(flags,"1", reconame="v1", hyponame="v1")
+        gamm11 = functools.partial(gamMenuSequence,flags,"1", reconame="v1", hyponame="v1")
     
         ElChains  = [
             makeChain(flags, name='HLT_TestChain5_ev1_L1EM3', L1Thresholds=["EM3"], ChainSteps=[ makeChainStep("Step1_em11", [el11]), makeChainStep("Step2_em21",  [el21]), makeChainStep("Step3_em31",  [el31])] ),
@@ -203,28 +204,29 @@ def generateChainsManually(flags, maskbit=0x7):
 
     # combined chain
     if doCombo:
-        emptySeq1 = EmptyMenuSequence("step1EmptySeqence")
-        emptySeq2 = EmptyMenuSequence("step2EmptySeqence")
+
+        emptySeq1 = functools.partial(EmptyMenuSequence,"step1EmptySeqence")
+        emptySeq2 = functools.partial(EmptyMenuSequence,"step2EmptySeqence")
         
         if not doElectron:
             from TriggerMenuMT.CFtest.HLTSignatureConfig import elMenuSequence        
-            el11 = elMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
-            el21 = elMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
-            el41 = elMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
+            el11 = functools.partial(elMenuSequence,flags,step="1",reconame="v1", hyponame="v1")
+            el21 = functools.partial(elMenuSequence,flags,step="2",reconame="v1", hyponame="v1")
+            el41 = functools.partial(elMenuSequence,flags,step="4",reconame="v1", hyponame="v1")
             
         if not doMuon:
             from TriggerMenuMT.CFtest.HLTSignatureConfig import muMenuSequence
             #step1
-            mu11 = muMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
-            mu12 = muMenuSequence(flags,step="1",reconame="v2", hyponame="v2")
+            mu11 = functools.partial(muMenuSequence,flags,step="1",reconame="v1", hyponame="v1")
+            mu12 = functools.partial(muMenuSequence,flags,step="1",reconame="v2", hyponame="v2")
             #step2
-            mu21 = muMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
-            mu22 = muMenuSequence(flags,step="2",reconame="v2", hyponame="v2")
+            mu21 = functools.partial(muMenuSequence,flags,step="2",reconame="v1", hyponame="v1")
+            mu22 = functools.partial(muMenuSequence,flags,step="2",reconame="v2", hyponame="v2")
             #step3
-            mu31 = muMenuSequence(flags,step="3",reconame="v1", hyponame="v1")
-            mu32 = muMenuSequence(flags,step="3",reconame="v2", hyponame="v2")
+            mu31 = functools.partial(muMenuSequence,flags,step="3",reconame="v1", hyponame="v1")
+            mu32 = functools.partial(muMenuSequence,flags,step="3",reconame="v2", hyponame="v2")
             #step4
-            mu41 = muMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
+            mu41 = functools.partial(muMenuSequence,flags,step="4",reconame="v1", hyponame="v1")
            
            
         from TriggerMenuMT.CFtest.HLTSignatureHypoTools import dimuDrComboHypoTool
@@ -281,7 +283,7 @@ def generateChainsManually(flags, maskbit=0x7):
 
             # FSNOSEED not implemented in emulation
             #  L1Thresholds=["MU5VF", "MU5VF"],
-            makeChain(flags, name='HLT_TestChain10_mEmpty1_TestChain6_mEmpty1_L12MU5VF', L1Thresholds=["MU5VF", "MU5VF"],  ChainSteps=[
+            makeChain(flags, name='HLT_TestChain10_mEmpty1_TestChain6_mEmpty1_L12MU5VF', L1Thresholds=["MU5VF", "MU5VF"],  ChainSteps=[                 
                  makeChainStep("Step1_2muAs_empty", multiplicity=[]),
                  makeChainStep("Step2_2muAs",   [mu21, mu21], multiplicity=[1,1]) ])
             ]

@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, EmptyMenuSequenceCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, EmptyMenuSequenceCfg, isEmptySequenceCfg
 
 from AthenaCommon.Logging import logging
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
@@ -279,9 +279,9 @@ def noPrecedingStepsPostMerge(newsteps, ileg):
 def getCurrentAG(chainStep):
     
     filled_seq_ag = []
-    for iseq,seq in enumerate(chainStep.sequences):
+    for iseq,seq in enumerate(chainStep.sequenceFunctions):
         # In the case of dummy configs, they are all empty
-        if isinstance(seq, EmptyMenuSequence):
+        if isEmptySequenceCfg(seq):
             continue
         else:
             # get the alignment group of the leg that is running a non-empty sequence
@@ -293,7 +293,7 @@ def getCurrentAG(chainStep):
             filled_seq_ag += [chainStep.stepDicts[iseq]['chainParts'][0]['alignmentGroup']]
 
     if len(filled_seq_ag) == 0:
-        log.error("[getCurrentAG] No non-empty sequences were found in %s", chainStep.sequences)
+        log.error("[getCurrentAG] No non-empty sequences were found in %s", chainStep.sequenceFunctions)
         log.error("[getCurrentAG] The chainstep is %s", chainStep)
         raise Exception("[getCurrentAG] Cannot find the current alignment group for this chain")        
     elif len(set(filled_seq_ag)) > 1:
@@ -450,8 +450,8 @@ def checkStepContent(parallel_steps):
     for step in parallel_steps:
         if step is None or step.isEmpty:
             continue
-        for seq in step.sequences:
-            if not isinstance(seq, EmptyMenuSequence):
+        for seq in step.sequenceFunctions:
+            if not isEmptySequenceCfg(seq):
                 return True    
     return False   
 
@@ -481,7 +481,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
 
         for chain_index, step in enumerate(parallel_steps):
             # every step is empty but some might have empty sequences and some might not
-            if step is None or len(step.sequences) == 0:
+            if step is None or len(step.sequenceFunctions) == 0:
 
                 new_stepDicts = deepcopy(chainDefList[chain_index].steps[-1].stepDicts)
                 currentStepName = 'Empty' + chainDefList[chain_index].alignmentGroups[0]+'Align'+str(stepNumber)+'_'+new_stepDicts[0]['chainParts'][0]['multiplicity']+new_stepDicts[0]['signature']
@@ -531,7 +531,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
 
     for chain_index, step in enumerate(parallel_steps): #this is a horizontal merge!
 
-        if step is None or (hasNonEmptyStep and len(step.sequences) == 0):
+        if step is None or (hasNonEmptyStep and len(step.sequenceFunctions) == 0):
             # this happens for merging chains with different numbers of steps, we need to "pad" out with empty sequences to propogate the decisions
             # all other chain parts' steps should contain an empty sequence
 
@@ -571,11 +571,11 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
         else:
             # Standard step, append it to the combined step
             log.debug("[makeCombinedStep]  step %s, multiplicity  = %s", step.name, str(step.multiplicity))
-            if len(step.sequences):
-                log.debug("[makeCombinedStep]    with sequences = %s", ' '.join(map(str, [seq.name for seq in step.sequences])))
+            if len(step.sequenceFunctions):
+                log.debug("[makeCombinedStep]    with sequences = %s", ' '.join(map(str, [seq.func.__name__ for seq in step.sequenceFunctions])))
 
             # this function only works if the input chains are single-object chains (one menu seuqnce)
-            if len(step.sequences) > 1:
+            if len(step.sequenceFunctions) > 1:
                 log.debug("[makeCombinedStep] combining in an already combined chain")
 
             if ( comboHypo is None or
@@ -589,7 +589,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
                 currentStepName = currentStepName[7:]    
             if re.search('^merged_',currentStepName):
                 currentStepName = currentStepName[7:]
-            stepSeq.extend(step.sequences)
+            stepSeq.extend(step.sequenceFunctions)
             # set the multiplicity of all the legs 
             if len(step.multiplicity) == 0:
                 stepMult.append(0)
