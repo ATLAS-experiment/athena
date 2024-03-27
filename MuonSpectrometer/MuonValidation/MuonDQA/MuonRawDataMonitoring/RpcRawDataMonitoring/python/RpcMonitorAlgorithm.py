@@ -225,6 +225,12 @@ def RpcMonitoringConfig(inputFlags):
                             path=trackPath,
                             xbins=200, xmin=-100., xmax=100.)
     
+    myGroup_track.defineHistogram('residual_panel,panelInd_res_inTime;Residual_Panels', 
+                            title='Distance between extrapolated muon track position and RPC hit;Panel Index;Distance [mm];Number of hit',
+                            type='TH2D', 
+                            path=trackPath,
+                            xbins=100, xmin=-50., xmax=50., ybins=8592, ymin=-0.5, ymax=8591.5)
+
     ## All muon
     myGroup_track.defineHistogram('muPt_allMu;Pt_AllMuons',
                             title='Pt of muons in all events;Pt[MeV];NMuon',

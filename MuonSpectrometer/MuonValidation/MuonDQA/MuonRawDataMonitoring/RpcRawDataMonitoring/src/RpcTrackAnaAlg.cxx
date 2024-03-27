@@ -638,7 +638,7 @@ StatusCode RpcTrackAnaAlg::fillHistPRD(const EventContext& ctx) const {
     auto prd_layer_all_phi = Scalar<int>("prd_layer_phi", 0);
 
     auto i_prd_LB = Scalar<int>("LB", i_lb);
-    auto i_panelIndex = Scalar<int>("panelInd", 0);
+    auto i_panelIndex = Scalar<int>("panelInd", -1);
 
     auto tool = getGroup(m_packageName);
 
@@ -1097,19 +1097,20 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
     ATH_MSG_DEBUG(" RpcPrepDataContainer size = " << rpcContainer->size());
     ATH_MSG_DEBUG(" results size = " << results.size());
 
-    ATH_MSG_INFO(" RpcPrepDataContainer Test 1 ");
-    
     auto i_hitTime_sec = Scalar<int>("hitTime_sec", 0);
 
     auto isOutTime_prd = Scalar<bool>("isOutTime_prd", false);
     auto isOutTime_onTrack = Scalar<bool>("isOutTime_prd_onTrack", false);
-    auto i_panelIndex = Scalar<int>("panelInd_prd", 0);
-    auto i_panelIndex_onTrack = Scalar<int>("panelInd_prd_onTrack", 0);
+    auto i_panelIndex = Scalar<int>("panelInd_prd", -1);
+    auto i_panelIndex_onTrack = Scalar<int>("panelInd_prd_onTrack", -1);
 
     auto res_eta = Scalar<int>("residual_eta", 0);
     auto res_phi = Scalar<int>("residual_phi", 0);
     auto closest_res_eta = Scalar<int>("closest_residual_eta", 0);
     auto closest_res_phi = Scalar<int>("closest_residual_phi", 0);
+
+    auto res_panel = Scalar<int>("residual_panel", 0);
+    auto i_panelInd_res = Scalar<int>("panelInd_res_inTime", -1);
 
     for (GasGapResult& exr : results) {
         const std::shared_ptr<GasGapData> gap = exr.second;
@@ -1175,7 +1176,9 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                     // If hit is out-of-time
                     // bool isOutTime = (std::abs(i_hitTime_sec+50.) > m_outtime); // for run 3
                     bool isOutTime = (std::abs(i_hitTime_sec) > m_outtime); // for run 2 test
-
+                    int i_panel = measuresPhi ? gap->RpcPanel_eta_phi.second->panel_index :
+                        gap->RpcPanel_eta_phi.first->panel_index;
+                    
                     // Fill histograms of out-of-time hit fraction
                     if (muon_source == ZCand) {
                         
@@ -1183,19 +1186,17 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                         isOutTime_onTrack = isOutTime;
                         
                         if (measuresPhi) {
-                            int i_panel_phi = gap->RpcPanel_eta_phi.second->panel_index;
-                            i_panelIndex = i_panel_phi;
+                            i_panelIndex = i_panel;
                             fill(tool, i_panelIndex, isOutTime_prd);
                             if (std::abs(residual_phi) < m_diffHitTrackPostion) {
-                                i_panelIndex_onTrack = i_panel_phi;
+                                i_panelIndex_onTrack = i_panel;
                                 fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
                             }
                         } else {
-                            int i_panel_eta = gap->RpcPanel_eta_phi.first->panel_index;
-                            i_panelIndex = i_panel_eta;
+                            i_panelIndex = i_panel;
                             fill(tool, i_panelIndex, isOutTime_prd);
                             if (std::abs(residual_eta) < m_diffHitTrackPostion) {
-                                i_panelIndex_onTrack = i_panel_eta;
+                                i_panelIndex_onTrack = i_panel;
                                 fill(tool, i_panelIndex_onTrack, isOutTime_onTrack);
                             }
                         }
@@ -1205,12 +1206,14 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                     if (isOutTime){
                         continue;
                     }
+                    i_panelInd_res = i_panel;
 
                     if (measuresPhi) {
                         res_phi = residual_phi;
+                        res_panel = residual_phi;
                         clo_res_phi = std::min(clo_res_phi, residual_phi);
 
-                        fill(tool, res_phi);
+                        fill(tool, res_phi, res_panel, i_panelInd_res);
 
                         if (std::abs(residual_phi) < m_diffHitTrackPostion) {
                             NHit_perEvt_phi++;
@@ -1218,9 +1221,10 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                         }
                     } else {
                         res_eta = residual_eta;
+                        res_panel = residual_eta;
                         clo_res_eta = std::min(clo_res_eta, residual_eta);
 
-                        fill(tool, res_eta);
+                        fill(tool, res_eta, res_panel, i_panelInd_res);
 
                         if (std::abs(residual_eta) < m_diffHitTrackPostion){
                             NHit_perEvt_eta++;
@@ -1242,7 +1246,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
             auto hitMulti_eta = Scalar<int>("hitMulti_eta", NHit_perEvt_eta);
             auto hitMulti_phi = Scalar<int>("hitMulti_phi", NHit_perEvt_phi);
             auto hitMulti = Scalar<int>("hitMulti", 0);
-            auto i_panelIndex = Scalar<int>("panelInd_hM", 0);
+            auto i_panelIndex = Scalar<int>("panelInd_hM", -1);
             auto i_passExtrap = Scalar<bool>("muon_passExtrap", false);
             auto i_LB = Scalar<int>("LB_detEff", lumiBlock);
 
@@ -1280,7 +1284,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                 fill(tool, closest_res_phi);
             }
         } else {
-            auto i_panelIndex = Scalar<int>("panelInd_hM_allMu", 0);
+            auto i_panelIndex = Scalar<int>("panelInd_hM_allMu", -1);
             auto i_passExtrap = Scalar<bool>("muon_passExtrap_allMu", false);
 
             //
