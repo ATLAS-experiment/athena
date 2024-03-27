@@ -187,8 +187,8 @@ def getArgumentParser():
     g.add_argument('--drop-and-reload', action='store_true', dest='drop_reload',
                    help='offload configuration and start new process')
 
-    g.add_argument('--config-only', metavar='FILE',
-                   help='run configuration and store in %(metavar)s')
+    g.add_argument('--config-only', metavar='FILE', nargs='?', default=False, const=True,
+                   help='run only configuration and optionally store in %(metavar)s')
 
     g.add_argument('--dump-configuration', metavar='FILE', dest='config_dump_file',
                    help='dump an ASCII version of the configuration to %(metavar)s')
