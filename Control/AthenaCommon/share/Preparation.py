@@ -45,41 +45,8 @@ if not "POOL_OUTMSG_LEVEL" in os.environ:
 include( "AthenaCommon/Atlas.UnixStandardJob.py" )
 include.block( "AthenaCommon/Atlas.UnixStandardJob.py" )
 
-## since the cppyy import leads to irreproducible growths in vmem,
-## we optionally make sure this growth is bumped upwards to some common
-## number (to not wash out other vmem changes):
-def vmem_mb():
-   for l in open( "/proc/self/status" ):
-      if l.startswith( "VmSize:" ):
-         return float(l.split()[1])/1024.
-
-def grow_vmem(targetvmem_mb):
-   v = vmem_mb()
-   global l_extra_vmem_holder
-   l_extra_vmem_holder = []
-   while vmem_mb() < targetvmem_mb:
-      l_extra_vmem_holder += [ " "*1024 ]
-   v = vmem_mb() - v
-   log.info( "Acquired %f mb of extra vmem",  v )
-
-if not opts.cppyy_minvmem is None:
-   min_cppyy_vmem_growth = opts.cppyy_minvmem
-   log.debug( "Using cppyy minimum growth from CLI with value %.2f", min_cppyy_vmem_growth )
-   vmem_before_cppyy = vmem_mb()
-elif os.getenv( "ATHENA_PYCINTEX_MINVMEM" ):
-   min_cppyy_vmem_growth = float(os.getenv( "ATHENA_PYCINTEX_MINVMEM" ))
-   log.debug( "Using ATHENA_PYCINTEX_MINVMEM with value %.2f", min_cppyy_vmem_growth )
-   vmem_before_cppyy = vmem_mb()
-else:
-   min_cppyy_vmem_growth = None
-
 from PyUtils.Helpers import ROOT6Setup
 ROOT6Setup(batch=not opts.interactive)
-
-if min_cppyy_vmem_growth:
-   grow_vmem( vmem_before_cppyy + min_cppyy_vmem_growth )
-   del vmem_before_cppyy
-del min_cppyy_vmem_growth, grow_vmem, vmem_mb
 
 
 ## now import the top-level module which eases interactive work and/or
