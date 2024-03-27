@@ -18,14 +18,14 @@ references_map = {
     "s4008": "v1",
     "a913": "v1",
     # Overlay
-    "d1726": "v1",
-    "d1759": "v1",
-    "d1912": "v1",
+    "d1726": "v2",
+    "d1759": "v2",
+    "d1912": "v2",
     # Reco
     "q442": "v2",
     "q449": "v2",
-    "q452": "v2",
-    "q454": "v3",
+    "q452": "v3",
+    "q454": "v4",
     # Derivations
     "data_PHYS_Run2": "v1",
     "data_PHYS_Run3": "v1",
