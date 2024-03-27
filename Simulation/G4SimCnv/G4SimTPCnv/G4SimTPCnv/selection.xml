@@ -2,5 +2,9 @@
    <class name="TrackRecordCollection_p2" id="22D044AD-A13A-42BF-B2A4-BDAF5BE2D819" />
    <class name="std::vector<TrackRecord_p1>" />
    <class name="TrackRecord_p1" />
+
+   <class name="TrackRecordCollection_p3" id="C17DB0DC-C53D-4993-A222-B1F4E01C9004" />
+   <class name="std::vector<TrackRecord_p2>" />
+   <class name="TrackRecord_p2" />
 </lcgdict>
 

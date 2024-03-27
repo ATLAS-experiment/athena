@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -76,9 +76,11 @@ G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
   // Barcode
   TrackHelper trHelp(track);
   const int barcode = trHelp.GetBarcode();
+  const int id = trHelp.GetUniqueID();
+  const int status = trHelp.GetStatus();
 
   //create the TimedTrackRecord
-  m_trackRecordCollection->Emplace(pdgcode,ener,mom,pos,time,barcode,preVol->GetName());
+  m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,barcode,id,preVol->GetName());
 
   return true;
 }
@@ -89,21 +91,23 @@ void TrackFastSimSD::WriteTrack(const G4Track* track, const bool originPos, cons
 
   G4VPhysicalVolume *preVol=track->GetVolume();
 
-  int pdgcode = (track->GetDefinition())?track->GetDefinition()->GetPDGEncoding():0;
+  const int pdgcode = (track->GetDefinition())?track->GetDefinition()->GetPDGEncoding():0;
 
-  G4ThreeVector pos = originPos?track->GetVertexPosition():track->GetPosition();
-  double ener=originMom?(track->GetVertexKineticEnergy()+track->GetDynamicParticle()->GetMass()):track->GetTotalEnergy();
+  const G4ThreeVector pos = originPos?track->GetVertexPosition():track->GetPosition();
+  const double ener=originMom?(track->GetVertexKineticEnergy()+track->GetDynamicParticle()->GetMass()):track->GetTotalEnergy();
   G4ThreeVector mom = track->GetMomentum();
   if (originMom){
     double mommag = std::sqrt(std::pow(ener,2)-std::pow(track->GetDynamicParticle()->GetMass(),2));
     mom = track->GetVertexMomentumDirection()*mommag;
   }
 
-  double time=track->GetGlobalTime();
+  const double time=track->GetGlobalTime();
   TrackHelper trHelp(track);
-  int barcode = trHelp.GetBarcode();
+  const int barcode = trHelp.GetBarcode();
+  const int id = trHelp.GetUniqueID();
+  const int status = trHelp.GetStatus();
 
   //create the TimedTrackRecord
-  m_trackRecordCollection->Emplace(pdgcode,ener,mom,pos,time,barcode,preVol?preVol->GetName():"Unknown");
+  m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,barcode,id,preVol?preVol->GetName():"Unknown");
 }
 

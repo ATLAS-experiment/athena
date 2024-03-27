@@ -18,39 +18,47 @@ public:
   /** @brief Constructor */
   TrackRecord(
               int pdg,
+              int status,
               double energy,
               const CLHEP::Hep3Vector& momentum,
               const CLHEP::Hep3Vector& postition,
               double time,
               int barcode,
+              int id,
               const std::string& volumeName)
     : m_pdgCode(pdg)
+    , m_status(status)
     , m_energy(energy)
     , m_momentum(momentum)
     , m_position(postition)
     , m_time(time)
     , m_barcode(barcode)
+    , m_id(id)
     , m_volName(volumeName) {}
 
   /** @brief Constructor */
   TrackRecord(const TrackRecord& trc)
     : m_pdgCode(trc.m_pdgCode)
+    , m_status(trc.m_status)
     , m_energy(trc.m_energy)
     , m_momentum(trc.m_momentum)
     , m_position(trc.m_position)
     , m_time(trc.m_time)
     , m_barcode(trc.m_barcode)
+    , m_id(trc.m_id)
     , m_volName(trc.m_volName){}
 
   /** @brief Assignement Operator */
   TrackRecord &operator=(const TrackRecord& trc) {
     if (this != &trc) {
       m_pdgCode = trc.m_pdgCode;
+      m_status = trc.m_status;
       m_energy = trc.m_energy;
       m_momentum = trc.m_momentum;
       m_position = trc.m_position;
       m_time = trc.m_time;
       m_barcode = trc.m_barcode;
+      m_id = trc.m_id;
       m_volName = trc.m_volName;
     }
     return *this;
@@ -92,6 +100,18 @@ public:
   /** @brief Set Volume name */
   void SetVolName(const std::string& theName){m_volName = theName;}
 
+  /** @brief status. */
+  int status() const {return m_status;}
+
+  /** @brief Set status */
+  void SetStatus(int status) {m_status = status;}
+
+  /** @brief unique ID */
+  int id() const {return m_id;}
+
+  /** @brief Set uniqueID */
+  void SetID(int uniqueID){m_id = uniqueID;}
+
   /** @brief bar code. Alias function. */
   int barcode() const {return m_barcode;}
 
@@ -100,11 +120,13 @@ public:
 
 private:
   int m_pdgCode{0};
+  int m_status{0};
   double m_energy{0};
   CLHEP::Hep3Vector m_momentum{0,0,0};
   CLHEP::Hep3Vector m_position{0,0,0};
   double m_time{0.};
   int m_barcode{0};
+  int m_id{0};
   std::string m_volName{""};
 };
 

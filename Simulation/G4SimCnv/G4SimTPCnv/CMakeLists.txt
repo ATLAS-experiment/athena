@@ -16,7 +16,7 @@ atlas_add_tpcnv_library( G4SimTPCnv
                          INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                          DEFINITIONS ${CLHEP_DEFINITIONS}
-                         LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaPoolCnvSvcLib AthenaPoolServicesLib AthenaKernel TrackRecordLib )
+                         LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaPoolCnvSvcLib AthenaPoolServicesLib AthenaKernel TrackRecordLib TruthUtils)
 
 atlas_add_dictionary( G4SimTPCnvDict
                       G4SimTPCnv/G4SimTPCnvDict.h
@@ -33,4 +33,9 @@ atlas_add_dictionary( OLD_G4SimTPCnvDict
 atlas_add_test( TrackRecordCnv_p1_test
                 SOURCES
                 test/TrackRecordCnv_p1_test.cxx
+                LINK_LIBRARIES G4SimTPCnv TestTools CxxUtils )
+
+atlas_add_test( TrackRecordCnv_p2_test
+                SOURCES
+                test/TrackRecordCnv_p2_test.cxx
                 LINK_LIBRARIES G4SimTPCnv TestTools CxxUtils )

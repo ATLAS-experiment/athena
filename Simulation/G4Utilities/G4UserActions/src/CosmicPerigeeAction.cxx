@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //class header
@@ -114,7 +114,9 @@ namespace G4UA
     // Create the TimedTrackRecord
     TrackHelper trHelp(aStep->GetTrack());
     int barcode = trHelp.GetBarcode();
-    m_trackRecordCollection->Emplace(pdgcode, ener, mom, pos, time, barcode,
+    int id = trHelp.GetUniqueID();
+    const int status = trHelp.GetStatus();
+    m_trackRecordCollection->Emplace(pdgcode, status, ener, mom, pos, time, barcode, id,
                                      preVol->GetName());
   }
 

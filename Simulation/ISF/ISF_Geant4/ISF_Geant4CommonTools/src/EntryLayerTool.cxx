@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
 #include "EntryLayerTool.h"
+
+#include "TruthUtils/MagicNumbers.h"
 
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
@@ -185,15 +187,18 @@ ISF::EntryLayer ISF::EntryLayerTool::registerParticle(const ISF::ISFParticle& pa
     // Use barcode assigend to ISFParticle only if no generation zero particle is present.
     auto                truthBinding = particle.getTruthBinding();
     auto generationZeroTruthParticle = truthBinding ? truthBinding->getGenerationZeroTruthParticle() : nullptr;
-    Barcode::ParticleBarcode barcode = generationZeroTruthParticle ? HepMC::barcode(generationZeroTruthParticle)
-                                                                   : particle.barcode();
+    const int barcode = generationZeroTruthParticle ? HepMC::barcode(generationZeroTruthParticle) : particle.barcode(); // FIXME barcode-based
+    const int id = generationZeroTruthParticle ? HepMC::uniqueID(generationZeroTruthParticle) : HepMC::UNDEFINED_ID; //particle.id(); // FIXME uncomment when ISFParticle has an id() method.
+    const int status = generationZeroTruthParticle ? generationZeroTruthParticle->status() : particle.status();
 
     m_collection[layerHit]->Emplace(particle.pdgCode(),
+                                    status,
                                     energy,
                                     hepMom,
                                     hepPos,
                                     particle.timeStamp(),
                                     barcode,
+                                    id,
                                     m_volumeName[layerHit] );
   }
 
