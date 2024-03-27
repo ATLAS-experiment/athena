@@ -55,10 +55,10 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                    tgcStationIndex("T2E"), tgcStationIndex("T2F"),
                                    tgcStationIndex("T3E"), tgcStationIndex("T3F")};
    
-   const std::set<Identifier> BOE_ids{m_idHelperSvc->mdtIdHelper().elementID("BOL", 7,7),
-                                                               m_idHelperSvc->mdtIdHelper().elementID("BOL", -7,7),
-                                                               m_idHelperSvc->rpcIdHelper().elementID( "BOL", -8, 7, 1),
-                                                               m_idHelperSvc->rpcIdHelper().elementID( "BOL", 8, 7, 1)};
+   const std::set<Identifier> BOE_ids{m_idHelperSvc->hasMDT() ? m_idHelperSvc->mdtIdHelper().elementID("BOL", 7,7): Identifier{},
+                                      m_idHelperSvc->hasMDT() ? m_idHelperSvc->mdtIdHelper().elementID("BOL", -7,7): Identifier{},
+                                      m_idHelperSvc->hasRPC() ? m_idHelperSvc->rpcIdHelper().elementID("BOL", -8, 7, 1) : Identifier{},
+                                      m_idHelperSvc->hasRPC() ? m_idHelperSvc->rpcIdHelper().elementID("BOL", 8, 7, 1) : Identifier{}};
 
    std::vector<MuonReadoutElement*> allReadOutEles = mgr.getAllReadoutElements();
 
