@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonPRDTest/PrdTesterModule.h>
 #include <StoreGate/ReadCondHandle.h>
 namespace MuonPRDTest {
     PrdTesterModule::PrdTesterModule(MuonTesterTree& tree, const std::string& grp_name, bool useCondGeo, MSG::Level msglvl) :
-        MuonTesterBranch(tree, " prd module " + grp_name), AthMessaging(grp_name), m_useCondDetMgr{useCondGeo} {
+        MuonTesterBranch(tree, " prd module " + grp_name),
+        m_useCondDetMgr{useCondGeo} {
         setLevel(msglvl);
         m_idHelperSvc.retrieve().ignore();
     }
