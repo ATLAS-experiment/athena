@@ -1,14 +1,9 @@
 #
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from .CscMonUtils import getCSCLabelx
 
-
-def CscMonitoringRAW_AlgOldConfig(inputFlags):
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    helper = AthMonitorCfgHelperOld(inputFlags,'CscAthMonitorCfg')
-    return helper.result()
 
 def CscMonitoringRAW_AlgConfig(inputFlags):
     '''Function to configures some algorithms in the monitoring system.'''

@@ -53,6 +53,10 @@ namespace Monitored {
       else              return HistogramFiller::fill<TProfile2D>(detail::noWeight, cutMaskAccessor, *vars.var[0], *vars.var[1], *vars.var[2]);
     }
   };
+
+    /// TProfile2D filler with rebinable x-axis
+    typedef HistogramFillerRebinableAxis<HistogramFiller2DProfile, Axis::X> HistogramFiller2DProfileRebinable;
+
 }
 
 #endif /* AthenaMonitoringKernel_HistogramFiller_HistogramFiller2DProfile_h */

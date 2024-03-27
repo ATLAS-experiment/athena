@@ -27,12 +27,6 @@ class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
         virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
     private:
-
-        StringProperty m_Grouphist   {this,"Grouphist"       ,"JfexSimMonitor","group name for histograming"};
-        
-        ToolHandle<GenericMonitoringTool> m_monTool{this,"jFEXMonTool","","Monitoring tool"};
-        void  genError(const std::string& location, const std::string& title) const;
-        
         
         // container keys for jfex input data
         SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexTowerKey{this, "jFexTowerContainer","L1_jFexDataTowers","SG key of the input jFex Tower container"};
@@ -54,11 +48,47 @@ class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
         SG::ReadHandleKey< xAOD::jFexSumETRoIContainer > m_simu_key_jTE  {this,"jFexSumETRoISimContainer","L1_jFexSumETRoISim","SG key of the Sim jFex SumEt Roi container" };
 
     SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArMaskedChannelKey", "LArMaskedSC", "Key of the OTF-Masked SC" };
-        
-        template <typename T> std::vector<std::array<float,5> > tobMatching(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<float,5> > & unmatched, const std::string& evtType, const std::string& signa="" ) const;
-        void fillHist(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<float,5> > & elem ) const;
-        
-        template <typename T> std::vector<std::array<int,3> >  tobMatchingGlobals(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<int,3> > & unmatched, const std::string& evtType, const std::string& signa="" ) const;
-        void fillHistGlobals(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<int,3> > & elem ) const;
-};       
+
+      template <typename T> bool compareRoI(const std::string& label, const std::string& evenType,
+                                                                   const SG::ReadHandleKey<T>& tobs1Key,
+                                                                   const SG::ReadHandleKey<T>& tobs2Key,
+                                                                   const EventContext& ctx, bool simReadyFlag=false) const;
+
+        // map hold the binlabels (in form of LBN:FirstEventNum) to use for each lb
+        mutable std::map<int,std::string> m_firstEvents ATLAS_THREAD_SAFE;
+        mutable std::mutex m_firstEventsMutex;
+
+
+        struct SortableTob {
+            SortableTob(unsigned int w, float e, float p) : word0(w),eta(e),phi(p) { }
+            unsigned int word0;
+            float eta,phi;
+        };
+        template <typename T> void fillVectors(const SG::ReadHandleKey<T>& key, const EventContext& ctx, std::vector<float>& etas, std::vector<float>& phis, std::vector<unsigned int>& word0s) const {
+            etas.clear();phis.clear();word0s.clear();
+            SG::ReadHandle<T> tobs{key, ctx};
+            if(tobs.isValid()) {
+                etas.reserve(tobs->size());
+                phis.reserve(tobs->size());
+                word0s.reserve(tobs->size());
+                std::vector<SortableTob> sortedTobs;
+                sortedTobs.reserve(tobs->size());
+                for(const auto tob : *tobs) {
+                    sortedTobs.emplace_back(SortableTob{tob->tobWord(),tob->eta(),tob->phi()});
+                }
+                std::sort(sortedTobs.begin(),sortedTobs.end(),[](const SortableTob& lhs, const SortableTob& rhs) { return lhs.word0<rhs.word0; });
+                for(const auto& tob : sortedTobs) {
+                    etas.push_back(tob.eta);
+                    phis.push_back(tob.phi);
+                    word0s.push_back(tob.word0);
+                }
+            }
+        }
+
+};
+
+// specializations for global tob types (no eta and phi values)
+template <> void JfexSimMonitorAlgorithm::fillVectors(const SG::ReadHandleKey<xAOD::jFexMETRoIContainer>& key, const EventContext& ctx, std::vector<float>& etas, std::vector<float>& phis, std::vector<unsigned int>& word0s) const;
+template <> void JfexSimMonitorAlgorithm::fillVectors(const SG::ReadHandleKey<xAOD::jFexSumETRoIContainer>& key, const EventContext& ctx, std::vector<float>& etas, std::vector<float>& phis, std::vector<unsigned int>& word0s) const;
+
 #endif

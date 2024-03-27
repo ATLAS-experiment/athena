@@ -44,8 +44,6 @@ def set_flags(flags):
 
    # Increase scheduler checks and verbosity
    flags.Scheduler.CheckDependencies = True
-   flags.Scheduler.ShowControlFlow = True
-   flags.Scheduler.ShowDataDeps = True
    flags.Scheduler.EnableVerboseViews = True
    flags.Input.FailOnUnknownCollections = True
    flags.Scheduler.AutoLoadUnmetDependencies = False
@@ -153,6 +151,12 @@ def athenaCfg(flags):
       flags.Output.doWriteRDO = True
       if not flags.Output.RDOFileName:
          flags.Output.RDOFileName = 'RDO_TRIG.pool.root'
+
+   # Enable verbose control/data flow printouts if in a
+   # restricted menu, typical for debugging
+   if flags.Trigger.selectChains or len(flags.Trigger.enabledSignatures)==1:
+      flags.Scheduler.ShowControlFlow = True
+      flags.Scheduler.ShowDataDeps = True
 
    # Configure main services
    _allflags = flags.clone()   # copy including Concurrency flags

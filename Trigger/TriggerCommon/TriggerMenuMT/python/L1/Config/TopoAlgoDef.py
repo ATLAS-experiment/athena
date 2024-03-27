@@ -1185,7 +1185,7 @@ class TopoAlgoDef:
                 alg.addvariable(key, value)
             alg.addvariable('MinET', 0)
             for bitid,minxe in enumerate(d.Threlist):
-                alg.addvariable('KFXE', str(minxe), bitid)            
+                alg.addvariable('KFXE', str(minxe*_et_conversion), bitid) 
             tm.registerTopoAlgo(alg)
 
                 

@@ -285,7 +285,6 @@ def getDevSignatures():
         ChainProp(name='HLT_j20_pf_ftf_presel4j85_PhysicsTLA_L13J50', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=MultiJetGroup+DevGroup),
         ChainProp(name='HLT_j20_pf_ftf_presel5j50_PhysicsTLA_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=MultiJetGroup+DevGroup),
         ChainProp(name='HLT_j20_pf_ftf_presel6j40_PhysicsTLA_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=MultiJetGroup+DevGroup),
-        ChainProp(name='HLT_6j20_pf_ftf_presel6c25_PhysicsTLA_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=MultiJetGroup+DevGroup),
         ## with calo fast-tag presel - so actually btag TLA ATR-23002
         ChainProp(name='HLT_2j20_2j20_pf_ftf_presel2j25XX2j25b85_PhysicsTLA_L14jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, stream=['TLA'], groups=MultiJetGroup+DevGroup),
         ChainProp(name='HLT_5j20_j20_pf_ftf_presel5c25XXc25b85_PhysicsTLA_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, stream=['TLA'], groups=MultiJetGroup+DevGroup),
@@ -455,7 +454,19 @@ def getDevSignatures():
         ChainProp(name='HLT_j220_j150_3timeSig_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
         ChainProp(name='HLT_3j45_j45_2timing_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
         ChainProp(name='HLT_j220_j150_2timing_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
-        # ATR-28836 Copies of delayed jets chains withot timing hypo for reference
+        ChainProp(name='HLT_2j45_2j45_2timeSig_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_2j45_2j45_3timeSig_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_2j100_2timeSig_L1jJ90', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+
+        #ATR-28836 Test chains for delayed jets with upper limit
+        ChainProp(name='HLT_3j45_j45_3timeSig15_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j220_j150_3timeSig15_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j220_j150_2timing15_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_2j45_2j45_2timeSig15_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_2j45_2j45_3timeSig15_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_2j100_2timeSig15_L1jJ90', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+
+        # ATR-28836 Copies of delayed jets chains without timing hypo for reference
         ChainProp(name='HLT_3j45_j45_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
         ChainProp(name='HLT_j220_j150_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
 

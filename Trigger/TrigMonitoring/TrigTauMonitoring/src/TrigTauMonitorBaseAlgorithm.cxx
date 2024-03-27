@@ -20,13 +20,14 @@ StatusCode TrigTauMonitorBaseAlgorithm::initialize() {
 
     ATH_CHECK( m_offlineTauJetKey.initialize() );
 
+    if(m_L1_select_by_et_only) ATH_MSG_INFO("L1 RoI selection by Et cut only! No isolated L1 tau items are allowed!");
     ATH_CHECK( m_legacyl1TauRoIKey.initialize() );
     ATH_CHECK( m_phase1l1eTauRoIKey.initialize() );
-    ATH_CHECK( m_phase1l1eTauRoIThresholdPatternsKey.initialize() );
+    ATH_CHECK( m_phase1l1eTauRoIThresholdPatternsKey.initialize(!m_L1_select_by_et_only) );
     ATH_CHECK( m_phase1l1jTauRoIKey.initialize() );
-    ATH_CHECK( m_phase1l1jTauRoIThresholdPatternsKey.initialize() );
+    ATH_CHECK( m_phase1l1jTauRoIThresholdPatternsKey.initialize(!m_L1_select_by_et_only) );
     ATH_CHECK( m_phase1l1cTauRoIKey.initialize() );
-    ATH_CHECK( m_phase1l1cTauRoIThresholdPatternsKey.initialize() );
+    ATH_CHECK( m_phase1l1cTauRoIThresholdPatternsKey.initialize(!m_L1_select_by_et_only) );
     ATH_CHECK( m_phase1l1cTauRoIDecorKey.initialize() );
 
     ATH_CHECK( m_hltTauJetKey.initialize() );
@@ -36,7 +37,16 @@ StatusCode TrigTauMonitorBaseAlgorithm::initialize() {
 
     // Parse TauTrigInfo objects
     for(const std::string& trigger : m_triggers) {
-        m_trigInfo[trigger] = TrigTauInfo(trigger, m_L1_Phase1_thresholds, m_L1_Phase1_threshold_patterns);
+	if(m_L1_select_by_et_only) {
+            m_trigInfo[trigger] = TrigTauInfo(trigger, m_L1_Phase1_thresholds);
+
+            if(m_trigInfo[trigger].areAnyL1TauIsolated()) {
+                ATH_MSG_FATAL("Cannot use isolated L1 tau items if running with SelectL1ByETOnly = True: " << trigger);
+	        return StatusCode::FAILURE;
+            }
+        } else {
+            m_trigInfo[trigger] = TrigTauInfo(trigger, m_L1_Phase1_thresholds, m_L1_Phase1_threshold_patterns);
+        }
     }
 
     return StatusCode::SUCCESS;
@@ -120,16 +130,22 @@ std::vector<const xAOD::eFexTauRoI*> TrigTauMonitorBaseAlgorithm::getL1eTAUs(con
         ATH_MSG_WARNING("Failed to retrieve the L1_eTauRoi container");
         return roi_vec;
     }
-    SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, uint64_t> thresholdPatterns(m_phase1l1eTauRoIThresholdPatternsKey, ctx);
-    if(!thresholdPatterns.isValid()) {
-        ATH_MSG_WARNING("Failed to create thresholdPatterns property accessor for the L1_eTauRoi container");
-        return roi_vec;
-    }
-    
-    for(const xAOD::eFexTauRoI* roi : *rois) {
-        // Check that the RoI passed the threshold selection
-        if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) {
-            roi_vec.push_back(roi);
+
+    if(m_L1_select_by_et_only) {
+        for(const xAOD::eFexTauRoI* roi : *rois) {
+            // Select by RoI ET value only
+            if(roi->et() > m_L1_Phase1_thresholds.value().at(l1_item)) roi_vec.push_back(roi);
+        }
+    } else {
+        SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, uint64_t> thresholdPatterns(m_phase1l1eTauRoIThresholdPatternsKey, ctx);
+        if(!thresholdPatterns.isValid()) {
+            ATH_MSG_WARNING("Failed to create thresholdPatterns property accessor for the L1_eTauRoi container");
+            return roi_vec;
+        }
+        
+        for(const xAOD::eFexTauRoI* roi : *rois) {
+            // Check that the RoI passed the threshold selection
+            if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) roi_vec.push_back(roi);
         }
     }
 
@@ -146,16 +162,22 @@ std::vector<const xAOD::jFexTauRoI*> TrigTauMonitorBaseAlgorithm::getL1jTAUs(con
         ATH_MSG_WARNING("Failed to retrieve the L1_jTauRoi container");
         return roi_vec;
     }
-    SG::ReadDecorHandle<xAOD::jFexTauRoIContainer, uint64_t> thresholdPatterns(m_phase1l1jTauRoIThresholdPatternsKey, ctx);
-    if(!thresholdPatterns.isValid()) {
-        ATH_MSG_WARNING("Failed to create thresholdPatterns property accessor for the L1_jTauRoi container");
-        return roi_vec;
-    }
-    
-    for(const xAOD::jFexTauRoI* roi : *rois) {
-        // Check that the RoI passed the threshold selection
-        if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) {
-            roi_vec.push_back(roi);
+
+    if(m_L1_select_by_et_only) {
+        for(const xAOD::jFexTauRoI* roi : *rois) {
+            // Select by RoI ET value only
+            if(roi->et() > m_L1_Phase1_thresholds.value().at(l1_item)) roi_vec.push_back(roi);
+        }
+    } else {
+        SG::ReadDecorHandle<xAOD::jFexTauRoIContainer, uint64_t> thresholdPatterns(m_phase1l1jTauRoIThresholdPatternsKey, ctx);
+        if(!thresholdPatterns.isValid()) {
+            ATH_MSG_WARNING("Failed to create thresholdPatterns property accessor for the L1_jTauRoi container");
+            return roi_vec;
+        }
+        
+        for(const xAOD::jFexTauRoI* roi : *rois) {
+            // Check that the RoI passed the threshold selection
+            if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) roi_vec.push_back(roi);
         }
     }
 
@@ -177,21 +199,31 @@ std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> TrigTau
         ATH_MSG_WARNING("Failed to create jTauLink accessor for the L1_cTauRoi container");
         return roi_vec;
     }
-    SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, uint64_t> thresholdPatterns(m_phase1l1eTauRoIThresholdPatternsKey, ctx);
-    if(!thresholdPatterns.isValid()) {
-        ATH_MSG_WARNING("Failed to create thresholdPatterns property accessor for the L1_cTauRoi container");
-        return roi_vec;
+
+    if(m_L1_select_by_et_only) {
+        for(size_t i = 0; i < rois->size(); i++) {
+            const xAOD::eFexTauRoI* roi = (*rois)[i];
+            const xAOD::jFexTauRoI* jTau_roi = jTau_roi_link(i).isValid() ? *jTau_roi_link(i) : nullptr;
+
+            // Select by RoI ET value only
+            if(roi->et() > m_L1_Phase1_thresholds.value().at(l1_item)) roi_vec.push_back(std::make_pair(roi, jTau_roi));
+        }
+    } else {
+        SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, uint64_t> thresholdPatterns(m_phase1l1cTauRoIThresholdPatternsKey, ctx);
+        if(!thresholdPatterns.isValid()) {
+            ATH_MSG_WARNING("Failed to create thresholdPatterns property accessor for the L1_cTauRoi container");
+            return roi_vec;
+        }
+
+        for(size_t i = 0; i < rois->size(); i++) {
+            const xAOD::eFexTauRoI* roi = (*rois)[i];
+            const xAOD::jFexTauRoI* jTau_roi = jTau_roi_link(i).isValid() ? *jTau_roi_link(i) : nullptr;
+
+            // Check that the RoI passed the threshold selection
+            if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) roi_vec.push_back(std::make_pair(roi, jTau_roi));
+        }   
     }
 
-    for(size_t i = 0; i < rois->size(); i++) {
-        const xAOD::eFexTauRoI* roi = (*rois)[i];
-        const xAOD::jFexTauRoI* jTau_roi = jTau_roi_link(i).isValid() ? *jTau_roi_link(i) : nullptr;
-
-        // Check that the RoI passed the threshold selection
-        if(thresholdPatterns(*roi) & m_L1_Phase1_threshold_patterns.value().at(l1_item)) {
-            roi_vec.push_back(std::make_pair(roi, jTau_roi));
-        }
-    }   
 
     return roi_vec;
 }

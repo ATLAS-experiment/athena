@@ -35,6 +35,7 @@ StatusCode PFMuonFlowElementAssoc::initialize() {
 
     // Initialise the decoration keys
     ATH_CHECK(m_muonChargedFEWriteHandleKey.initialize());
+    ATH_CHECK(m_ChargedFE_energy_match_muonWriteHandleKey.initialize());
     ATH_CHECK(m_muonNeutralFEWriteHandleKey.initialize());
     ATH_CHECK(m_ClustCollectionLinkKey.initialize());
     ATH_CHECK(m_ChargedFEmuonWriteHandleKey.initialize());
@@ -97,6 +98,8 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
     // for neutral flow element studies
     std::vector<std::vector<double>> muonNeutralFE_frac_cluster_energy_matched_Vec(muonReadHandle->size());
 
+    SG::WriteDecorHandle<xAOD::FlowElementContainer, std::vector<double> > chargedFE_energy_match_muonWriteHandle(m_ChargedFE_energy_match_muonWriteHandleKey,ctx);
+
     // Loop over the Flow Elements
 
     //////////////////////////////
@@ -107,6 +110,10 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
         size_t FETrackIndex = FE->chargedObjects().at(0)->index();
         // Init a vector of element links to muons
         std::vector<MuonLink_t> FEMuonLinks;
+
+        //vector of fractions of FE cluster energy matched to muons
+        std::vector<double> FEMatchedClusterCellEnergies;
+        for (unsigned int counter = 0; counter < FE->otherObjects().size(); ++counter) FEMatchedClusterCellEnergies.push_back(0.0);
 
         // loop over muons in container
         for (const xAOD::Muon* muon : *muonChargedFEWriteDecorHandle) {
@@ -136,7 +143,24 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                 // index() is the unique index of the cFlowElement in the cFlowElementcontaine
                 muonChargedFEVec.at(muon->index()).emplace_back(*ChargedFEReadHandle, FE->index());
             }  // matching block
-        }      // end of muon loop
+
+            //if in mode where we can access calorimeter cells, then we will check if any of the clusters
+            //that this chargedFE has modified have calorimeter cells that match the muons calorimeter cells
+            //if so then we will decorate the charged FE with the fraction of cluster energy that was matched
+            if (!m_useMuonTopoClusters){
+                const xAOD::CaloCluster* muonCluster = muon->cluster();
+                unsigned int counter = 0;
+                for (auto thisCluster : FE->otherObjects()){
+                    const xAOD::CaloCluster* thisCaloCluster = dynamic_cast<const xAOD::CaloCluster*>(thisCluster);
+                    bool isCellMatched = false;
+                    std::pair <double,double> FEAndMuonMatchedCellEnergy = this->doMuonCellMatching(isCellMatched, *thisCaloCluster,*muonCluster);
+                    FEMatchedClusterCellEnergies[counter] += FEAndMuonMatchedCellEnergy.first;
+                    counter++;
+                }//loop over associated calorimeter clusters
+            }
+        }// end of muon loop
+
+        chargedFE_energy_match_muonWriteHandle(*FE) = FEMatchedClusterCellEnergies;
 
         // Add vector of muon element links as decoration to FlowElement container
         ChargedFEmuonWriteDecorHandle(*FE) = FEMuonLinks;
@@ -160,6 +184,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
             int nMatchedFE = 0;
             // get the index of the cluster corresponding to the Neutral FlowElements
             ATH_MSG_DEBUG("P1");
+            ATH_MSG_DEBUG("FE with e, eta and phi" << FE->e() << ", " << FE->eta() << " and " << FE->phi());
             const xAOD::IParticle* otherObject = FE->otherObjects().at(0);
             //This is expected to happen for low energy FE - sometimes the linked cluster has E < 0 and 
             //is thinned away in the AOD
@@ -222,47 +247,12 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     // Retrieve cells in both the FE cluster and muon cluster
                     // Define the link as where at least one calo cell is shared between the FE cluster and the Muon Cluster
 
-                    // retrieve the link to cells
-                    const CaloClusterCellLink* CellLink = FE_cluster->getCellLinks();
-                    // build the iterator(s) for the looping over the elements inside the CellLink
-                    if (!CellLink && !m_useMuonTopoClusters) {  // safety check if no celll link and we're doing the cell based matching only
-                       ATH_MSG_WARNING("Flow Element CaloCluster CaloClusterCellLink is nullptr");
-                        continue;
-                    }
-
-                    CaloClusterCellLink::const_iterator FE_FirstCell = CellLink->begin();
-                    CaloClusterCellLink::const_iterator FE_LastCell = CellLink->end();
-
-                    // retrieve cells associated to Muon cluster
-                    const CaloClusterCellLink* Muon_Clus_CellLink = cluster->getCellLinks();
-                    if (!Muon_Clus_CellLink) {
-                        ATH_MSG_WARNING("This Muon calo cluster does not have any cells associated to it");
-                        continue;
-                    }  // if nullptr, skip this muon cluster.
-                    // get the iterator on the links
-
-                    CaloClusterCellLink::const_iterator Muon_Clus_FirstCell = Muon_Clus_CellLink->begin();
-                    CaloClusterCellLink::const_iterator Muon_Clus_LastCell = Muon_Clus_CellLink->end();
-
-                    // Now we check if any match and sum the energy of the cells that are matched. Current algo allows for at least one
-                    // match.
                     bool isCellMatched = false;
-                    double FE_sum_matched_cellEnergy = 0;
-                    double Muon_sum_matched_cellEnergy = 0;
+                    std::pair<double,double> FEAndMuonMatchedCellEnergy = this->doMuonCellMatching(isCellMatched, *FE_cluster,*cluster);
 
-                    for (; FE_FirstCell != FE_LastCell; ++FE_FirstCell) {
-                        Identifier index_FECell = FE_FirstCell->ID();
-                        for (; Muon_Clus_FirstCell != Muon_Clus_LastCell; ++Muon_Clus_FirstCell) {
-                            Identifier index_muoncell = Muon_Clus_FirstCell->ID();
-                            if (index_FECell == index_muoncell) {
-                                isCellMatched = true;
-                                double FE_cell_energy = FE_FirstCell->e();
-                                FE_sum_matched_cellEnergy = FE_sum_matched_cellEnergy + FE_cell_energy;
-                                double Muon_cell_energy = Muon_Clus_FirstCell->e();
-                                Muon_sum_matched_cellEnergy = Muon_sum_matched_cellEnergy + Muon_cell_energy;
-                            }
-                        }
-                    }  // end of cell matching double loop
+                    double FE_sum_matched_cellEnergy = FEAndMuonMatchedCellEnergy.first;
+                    double Muon_sum_matched_cellEnergy = FEAndMuonMatchedCellEnergy.second;
+
                     double frac_FE_cluster_energy_matched = 0;
                     // retrieve total cluster energy from the FE cluster
                     double tot_FE_cluster_energy = FE_cluster->e();
@@ -277,6 +267,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     if (frac_FE_cluster_energy_matched > 0) {
                         ATH_MSG_VERBOSE("Fraction of FE cluster energy used in match: " << frac_FE_cluster_energy_matched << ", ismatched? "
                                                                                         << isCellMatched << "");
+                        ATH_MSG_VERBOSE("Numerator and denominator are " << FE_sum_matched_cellEnergy << " and " << tot_FE_cluster_energy);
                         ATH_MSG_VERBOSE("Fraction of Muon cluster energy used in match: " << frac_muon_cluster_energy_matched << "");
                     }
 
@@ -328,3 +319,44 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
 
     return StatusCode::SUCCESS;
 }
+
+std::pair<double,double> PFMuonFlowElementAssoc::doMuonCellMatching(bool& isCellMatched,const xAOD::CaloCluster& FECluster, const xAOD::CaloCluster& muonCluster) 
+const {
+
+    const CaloClusterCellLink* FECellLinks = FECluster.getCellLinks();                         
+    if (!FECellLinks && !m_useMuonTopoClusters) { 
+        ATH_MSG_WARNING("Flow Element CaloCluster CaloClusterCellLink is nullptr");
+        return std::make_pair(0.0,0.0);
+    }
+
+    const CaloClusterCellLink* muonCellLinks = muonCluster.getCellLinks();    
+    if (!muonCellLinks) {
+        ATH_MSG_WARNING("This Muon calo cluster does not have any cells associated to it");
+        return std::make_pair(0.0,0.0);
+    }
+    
+    //sum of energy of FE cells that are matched 
+    double FE_matchedCellEnergy = 0;
+    //sum of energy of muon cells that are matched
+    double muon_matchedCellEnergy = 0;
+
+    for (auto thisFECell : *FECellLinks){
+        Identifier FECellID = thisFECell->ID();
+        ATH_MSG_VERBOSE("FE Cell with ID: " << FECellID.get_identifier32().get_compact() << " and energy: " << thisFECell->e());
+        for (auto thisMuonCell : *muonCellLinks){
+            Identifier muonCellID = thisMuonCell->ID();
+            ATH_MSG_VERBOSE("Muon Cell with ID: " << muonCellID.get_identifier32().get_compact() << " and energy: " << thisMuonCell->e());
+            if (muonCellID == FECellID){
+                isCellMatched = true;
+                ATH_MSG_VERBOSE("MAtched cell found");
+                ATH_MSG_VERBOSE("FE cell energy: " << thisFECell->e() << " and muon cell energy: " << thisMuonCell->e());
+                FE_matchedCellEnergy += thisFECell->e();
+                ATH_MSG_VERBOSE("FE matched cell energy: " << FE_matchedCellEnergy);
+                muon_matchedCellEnergy += thisMuonCell->e();
+            }//if FE cell is also a muon cell
+        }//loop on muon cells
+    }//loop on FE cluster cells
+
+    return std::make_pair(FE_matchedCellEnergy,muon_matchedCellEnergy);
+
+}   

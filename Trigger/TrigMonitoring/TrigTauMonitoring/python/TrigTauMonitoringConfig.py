@@ -10,14 +10,31 @@ class TrigTauMonAlgBuilder:
   # Configuration flags
   # Can be accessed in the --preExec with e.g.:
   # --preExec 'from TrigTauMonitoring.TrigTauMonitoringConfig import TrigTauMonAlgBuilder; TrigTauMonAlgBuilder.do_total_efficiency=True'
+  # But be careful! Changing settings in this way will affect all instances of the TrigTauMonitoring (although you should normally have only 1)
 
+  #=============================================
+  # Monitoring modules
+  #=============================================
+  do_single_tau = True
+  do_L1 = True
+  do_ditau = True
+  do_tag_and_probe = True
+  do_truth = True # Truth monitoring will only be used when running on MC data
+
+  #=============================================
+  # Configuration
+  #=============================================
   do_total_efficiency = False # Enable total efficiency plots (HLT vs Offline, without the L1 matching as in the normal HLT Efficiency plots)
 
   require_offline_taus = True # Require at least 1 offline good-quality tau (regardless of p_T) on ALL events (except in the Truth monitoring).
   # This will bias the background events variable distributions of online objects, but will better represent the signal events (the events included in the efficiency numerators)
 
-  duplicate_var_plots_without_offline_taus = True # Duplicate variable distribution plots without the requirement of at least 1 offline good-quality tau (regardless of p_T) on ALL events (except in the Truth monitoring).
+  do_duplicate_var_plots_without_offline_taus = True # Duplicate variable distribution plots without the requirement of at least 1 offline good-quality tau (regardless of p_T) on ALL events (except in the Truth monitoring).
 
+  #=============================================
+  # Setup for L1Calo monitoring
+  #=============================================
+  do_alternative_eTAU_monitoring = False # Run the L1 monitoring again, for the Alt (heuristic) eTAU simulation
 
   def __init__(self, helper):
     from AthenaCommon.Logging import logging
@@ -31,18 +48,23 @@ class TrigTauMonAlgBuilder:
     self.L1_Phase1_threshold_mappings = {} # thresholdMappings bit masks
 
     # Monitoring algorithms, and lists of items to monitor (will be filled on configure())
+    self.activate_single_tau = self.do_single_tau
     self.mon_alg_single = None
     self.HLT_single_items = []
 
+    self.activate_ditau = self.do_ditau
     self.mon_alg_ditau = None
     self.HLT_ditau_items = []
 
+    self.activate_tag_and_probe = self.do_tag_and_probe
     self.mon_alg_tag_and_probe = None
     self.HLT_tag_and_probe_items = []
 
+    self.activate_truth = self.do_truth
     self.mon_alg_truth = None
     self.HLT_truth_items = []
 
+    self.activate_L1 = self.do_L1
     self.mon_alg_L1 = None
     self.L1_items = []
 
@@ -50,13 +72,6 @@ class TrigTauMonAlgBuilder:
 
 
   def configureMode(self):
-    # Activate the four main modules by default
-    self.activate_single_tau = True
-    self.activate_L1 = True
-    self.activate_ditau = True
-    self.activate_tag_and_probe = True
-    self.activate_truth = False
-
     self.is_mc = False
 
     self.data_type = self.helper.flags.DQ.DataType
@@ -64,9 +79,9 @@ class TrigTauMonAlgBuilder:
 
     if self.data_type is DQDataType.MC:
       self.is_mc = True
-      self.activate_truth = True
       self.logger.debug('Enabling Truth monitoring')
     else:
+      self.activate_truth = False
       self.logger.debug('Using default monitoring configuration for collisions')
 
     # We don't have any configuration specific for Cosmics or HI (the HLT Tau Monitoring is disabled for this one)
@@ -217,12 +232,12 @@ class TrigTauMonAlgBuilder:
       self.bookRNNInputTrack(self.mon_alg_single, self.base_path, trigger, online=False)
       self.bookRNNInputCluster(self.mon_alg_single, self.base_path, trigger, online=False)
 
-    if self.duplicate_var_plots_without_offline_taus:
+    if self.do_duplicate_var_plots_without_offline_taus:
       self.mon_alg_single_no_offline = self._configureAlgorithm(CompFactory.TrigTauMonitorSingleAlgorithm, 'TrigTauMonAlgSingleNoOffline')
       self.mon_alg_single_no_offline.TriggerList = self.HLT_single_items
       self.mon_alg_single_no_offline.RequireOfflineTaus = False
-      self.mon_alg_single_no_offline.DoEfficiencyPlots = False
       self.mon_alg_single_no_offline.DoOfflineTausDistributions = False
+      self.mon_alg_single_no_offline.DoEfficiencyPlots = False
 
       self.logger.info('  |- Booking all histograms')
       path = f'{self.base_path}/OnlineOnlyVars'
@@ -279,7 +294,7 @@ class TrigTauMonAlgBuilder:
         self.bookL1EffHistograms(self.mon_alg_L1, self.base_path, trigger, n_prong=p)
       self.bookL1Vars(self.mon_alg_L1, self.base_path, trigger)
 
-    if self.duplicate_var_plots_without_offline_taus:
+    if self.do_duplicate_var_plots_without_offline_taus:
       self.mon_alg_L1_no_offline = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1NoOffline')
       self.mon_alg_L1_no_offline.TriggerList = self.L1_items
       self.mon_alg_L1_no_offline.RequireOfflineTaus = False
@@ -289,6 +304,22 @@ class TrigTauMonAlgBuilder:
       path = f'{self.base_path}/OnlineOnlyVars'
       for trigger in self.L1_items:
         self.bookL1Vars(self.mon_alg_L1_no_offline, path, trigger)
+
+    if self.do_alternative_eTAU_monitoring:
+      self.mon_alg_L1_alt = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1eTAUAlt')
+      self.mon_alg_L1_alt.Phase1L1eTauRoIKey = 'L1_eTauRoIAltSim' # Use alternative RoIs (with heuristic eTAU algorithm simulation)
+      self.mon_alg_L1_alt.SelectL1ByETOnly = True # We don't have threshold patterns for the Alt RoIs, so we match by ET only
+      self.mon_alg_L1_alt.RequireOfflineTaus = False
+
+      l1_items = [item for item in self.L1_items if 'eTAU' in item and not self.getTriggerInfo(item).isL1TauIsolated()] # Only non-isolated eTAU items
+      self.mon_alg_L1_alt.TriggerList = l1_items
+
+      self.logger.info('  |- Booking all histograms')
+      path = f'{self.base_path}/L1eTAUAlt'
+      for trigger in l1_items:
+        for p in ('1P', '3P'):
+          self.bookL1EffHistograms(self.mon_alg_L1_alt, path, trigger, n_prong=p)
+        self.bookL1Vars(self.mon_alg_L1_alt, path, trigger)
 
 
   def bookHLTEffHistograms(self, mon_alg, base_path, trigger, n_prong):

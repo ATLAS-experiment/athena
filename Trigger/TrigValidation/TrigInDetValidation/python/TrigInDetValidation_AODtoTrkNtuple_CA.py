@@ -52,16 +52,15 @@ tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
 if args.doTIDATier0 or args.doNewTIDATier0:   
 
+  histsvc=CompFactory.THistSvc()
+  histsvc.Output = ["CombinedMonitoring DATAFILE='data-hists-tier0.root' OPT='RECREATE'"]
+  acc.addService(histsvc)
+
   # this is the new location ...
-  from TrigInDetMonitoring.TIDAMonitoring import TIDAMonitoring
-  for git in TIDAMonitoring( flags, "idtrigger" ):
-    acc.addEventAlgo(git)
+  from TrigInDetMonitoring.TIDAMonitoring import TrigInDetMonConfig
+  acc.merge( TrigInDetMonConfig( flags ) )
 
-  THistSvc=CompFactory.THistSvc()
-  THistSvc.Output = ["EXPERT DATAFILE='data-hists-tier0.root' OPT='RECREATE'"]
-  acc.addService(THistSvc)
-
-
+  
 ############ TrigInDetAnalysis part ################################
 
 if ( True ) :
