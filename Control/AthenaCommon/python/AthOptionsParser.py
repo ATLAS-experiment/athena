@@ -49,21 +49,6 @@ class PerfMonAction(argparse.Action):
         setattr(args, self.dest, opts)
 
 
-class AthHelp(argparse.Action):
-   """Custom help to hide/show expert groups"""
-   def __call__(self, parser, namespace, values, option_string=None):
-
-      for g in parser.expert_groups:
-         for a in g._group_actions:
-            if values!='all':
-               a.help = argparse.SUPPRESS
-
-      parser.print_help()
-      if values!='all':
-         print('\nUse --help=all to show all (expert) options')
-      sys.exit(0)
-
-
 def get_version():
     """Version string"""
     from PyUtils.Helpers import release_metadata
@@ -172,8 +157,8 @@ def getArgumentParser():
     g.add_argument('-v', '--version', action='version', version=get_version(),
                    help='print version number')
 
-    g.add_argument('-h', '--help', nargs='?', choices=['all'], action=AthHelp,
-                   help='show help message ("all" for expert options)')
+    g.add_argument('-h', '--help', action='help',
+                   help='show help message')
 
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Run mode')
@@ -248,13 +233,6 @@ def getArgumentParser():
 
     g.add_argument('--enable-ers-hdlr', metavar='y/n', default='n', choices=['y','n'],
                    help='enable or not the ERS handler [%(default)s]')
-
-    # Hidden (expert) options
-    g = parser.add_argument_group('Expert options')
-    parser.expert_groups.append(g)
-
-    g.add_argument('--cppyy_minvmem', type=float, dest='cppyy_minvmem',
-                   help="artificial vmem bump around cppys's import")
 
     return parser
 
