@@ -1,16 +1,27 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSMATRIXBRANCH_IXX
 #define MUONTESTER_MUONSMATRIXBRANCH_IXX
+
 namespace MuonVal {
-template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& name) : m_Vec(tree, name) {}
-template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& b_name, const T& def) : MatrixBranch<T>(tree, b_name) {
+
+
+template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& name) : 
+    MuonTesterBranch{tree, name},
+    m_Vec(tree, name) {}
+template <class T> MatrixBranch<T>::MatrixBranch(TTree* tree, const std::string& b_name, const T& def) : 
+    MatrixBranch<T>(tree, b_name) {
     setDefault(def);
 }
-template <class T> MatrixBranch<T>::MatrixBranch(MuonTesterTree& tree, const std::string& name) : m_Vec(tree, name) {}
+template <class T> MatrixBranch<T>::MatrixBranch(MuonTesterTree& parent, const std::string& name) : 
+    MuonTesterBranch{parent, name},
+    m_Vec(tree(), name),
+    m_parent{&parent} {
+}
 template <class T>
-MatrixBranch<T>::MatrixBranch(MuonTesterTree& tree, const std::string& b_name, const T& def) : MatrixBranch<T>(tree, b_name) {
+MatrixBranch<T>::MatrixBranch(MuonTesterTree& tree, const std::string& b_name, const T& def) : 
+    MatrixBranch<T>(tree, b_name) {
     setDefault(def);
 }
 template <class T> void MatrixBranch<T>::push_back(size_t i, const T& value) { m_Vec[i].push_back(value); }
@@ -22,9 +33,10 @@ template <class T> T& MatrixBranch<T>::get(size_t i, size_t j) {
 }
 template <class T> std::vector<T>& MatrixBranch<T>::operator[](size_t i) { return m_Vec[i]; }
 template <class T> std::vector<T>& MatrixBranch<T>::get(size_t i) { return m_Vec.get(i); }
-template <class T> bool MatrixBranch<T>::fill(const EventContext& ctx) { return m_Vec.fill(ctx); }
+template <class T> bool MatrixBranch<T>::fill(const EventContext& ctx) { 
+    return m_Vec.fill(ctx); 
+}
 template <class T> bool MatrixBranch<T>::init() { return m_Vec.init(); }
-template <class T> std::string MatrixBranch<T>::name() const { return m_Vec.name(); }
 template <class T> size_t MatrixBranch<T>::nrows() const { return m_Vec.size(); }
 template <class T> size_t MatrixBranch<T>::ncols(size_t row) const {
     if (row >= nrows()) { return 0; }
@@ -32,9 +44,7 @@ template <class T> size_t MatrixBranch<T>::ncols(size_t row) const {
 }
 template <class T> const T& MatrixBranch<T>::getDefault() const { return m_default; }
 template <class T> void MatrixBranch<T>::setDefault(const T& def) { m_default = def; }
-template <class T> const TTree* MatrixBranch<T>::tree() const { return m_Vec.tree(); }
-template <class T> TTree* MatrixBranch<T>::tree() { return m_Vec.tree(); }
 template <class T> bool MatrixBranch<T>::initialized() const { return m_Vec.initialized(); }
-template <class T> std::vector<IMuonTesterBranch::DataDependency> MatrixBranch<T>::data_dependencies() { return {};}
+
 }
 #endif

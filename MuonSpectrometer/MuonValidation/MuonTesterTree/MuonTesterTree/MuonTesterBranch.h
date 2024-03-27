@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONTESTERBRANCH_H
 #define MUONTESTER_MUONTESTERBRANCH_H
 
 #include <MuonTesterTree/IMuonTesterBranch.h>
+#include <AthenaBaseComps/AthMessaging.h>
 //
 #include <string>
 #include <vector>
@@ -17,7 +18,7 @@ class TTree;
 ///      to the TTree in the initialization stage
 namespace MuonVal {
 class MuonTesterTree;
-class MuonTesterBranch : virtual public IMuonTesterBranch {
+class MuonTesterBranch : public AthMessaging, virtual public IMuonTesterBranch {
 public:
     MuonTesterBranch(MuonTesterTree& tree, const std::string& br_name);
     /// Standard constructor taking the TTree object and the name of the branch to be added to the TTree

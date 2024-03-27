@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include <AthenaKernel/getMessageSvc.h>
-#include <GaudiKernel/MsgStream.h>
 #include <MuonTesterTree/EventInfoBranch.h>
 #include <StoreGate/ReadHandle.h>
+#include <MuonTesterTree/throwExcept.h>
 #include <stdexcept>
 namespace {
      static const SG::AuxElement::ConstAccessor<unsigned int> acc_Random("RandomRunNumber");
@@ -23,15 +22,15 @@ EventInfoBranch::EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask):
             for (unsigned int lhe = 1; lhe < s_num_lhe ; ++lhe ) {
                 std::shared_ptr<ScalarBranch<double>>& new_br = m_lhe_weights[lhe];                
                 new_br = std::make_shared<ScalarBranch<double>>(tree.tree(),  "mcEventWeight_LHE_" + std::to_string(lhe),0.);
-                if (not tree.addBranch(new_br)) {
-                  throw std::runtime_error("EventInfoBranch: Failed to create Scalar branch in c'tor");
-                };
+                if (!tree.addBranch(new_br)) {
+                  THROW_EXCEPTION("EventInfoBranch: Failed to create Scalar branch in c'tor");
+                }
             }            
         }
     } else {
          tree.disableBranch(m_mcChannel.name());
          tree.disableBranch(m_weight.name()); 
-        m_writemask&= ~(WriteOpts::writePRW | WriteOpts::writeBeamSpot);   
+         m_writemask&= ~(WriteOpts::writePRW | WriteOpts::writeBeamSpot);   
     }
     
     if (m_writemask & WriteOpts::writePRW) {
@@ -56,8 +55,7 @@ EventInfoBranch::EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask):
 bool EventInfoBranch::fill(const EventContext& ctx) {
     SG::ReadHandle<xAOD::EventInfo> evt_info{m_key, ctx};
     if (!evt_info.isValid()) {
-        MsgStream log(Athena::getMessageSvc(), "EventInfoBranch");
-        log << MSG::ERROR << "Could not retrieve the EventInfo " << m_key.fullKey() << endmsg;
+        ATH_MSG_ERROR("Could not retrieve the EventInfo " << m_key.fullKey());
         return false;
     }
 
