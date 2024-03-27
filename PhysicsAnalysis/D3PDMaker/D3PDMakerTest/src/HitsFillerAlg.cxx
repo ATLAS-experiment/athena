@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -99,11 +99,13 @@ StatusCode HitsFillerAlg::fillTrackRecordCollection()
     CLHEP::Hep3Vector p(j+11,j+12,j+13);
     CLHEP::Hep3Vector x(j+14,j+15,j+16);
     c->Emplace(j, // PDG
+               j+20, // status
                (j+10)*1000, // energy
                p, //position
                x, //momentum
                j+17, // time
                j+18, // barcode
+               j+19, // id
                "volname" // volume name
                );
   }

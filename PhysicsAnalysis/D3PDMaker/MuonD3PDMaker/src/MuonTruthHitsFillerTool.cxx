@@ -35,7 +35,7 @@ MuonTruthHitsFillerTool::MuonTruthHitsFillerTool (const std::string& type,
   m_PRD_TruthNames.emplace_back("MM_TruthMap");
   m_PRD_TruthNames.emplace_back("STGC_TruthMap");
 
- 
+
 }
 
 
@@ -44,7 +44,7 @@ MuonTruthHitsFillerTool::MuonTruthHitsFillerTool (const std::string& type,
  */
 StatusCode MuonTruthHitsFillerTool::initialize()
 {
-  CHECK(book());  
+  CHECK(book());
   CHECK( m_idHelperSvc.retrieve() );
   return StatusCode::SUCCESS;
 }
@@ -90,9 +90,9 @@ StatusCode MuonTruthHitsFillerTool::book()
 /**
  * @brief Fill one block --- type-safe version.
  */
-StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& p)
+StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& trackRecord)
 {
-  CHECK( fillHitCounts (p.barcode()) ); // FIXME barcode-based
+  CHECK( fillHitCounts (trackRecord.barcode()) );  // FIXME barcode-based
   return StatusCode::SUCCESS;
 }
 
@@ -122,7 +122,11 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
 
     for (const PRD_MultiTruthCollection::value_type& mc : *collection) {
       // check if gen particle same as input
-      if( HepMC::barcode(mc.second) != barcode ) continue;
+      // TODO Here barcode is being used purely as a unique
+      // identifier, so we can use HepMC::uniqueID once TrackRecord
+      // and xAOD::TruthParticle and PRD_MultiTruthCollection support
+      // it.
+      if ( HepMC::barcode(mc.second) != barcode ) continue; // FIXME barcode-based
       found = true;
       const Identifier& id = mc.first;
       ATH_MSG_VERBOSE("found matching hit " << m_idHelperSvc->toString(id) );
@@ -149,7 +153,7 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
         }else{
           Muon::MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(id);
           ++*(m_nprecHitsPerChamberLayer[chIndex]);
-        }	    
+        }
       }
     }
   }
@@ -192,9 +196,9 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
     if( *ntrig[MSI::T3]  > 0 )  ++*m_ntrigEtaLayers;
     if( *ntrig[MSI::T4]  > 0 )  ++*m_ntrigEtaLayers;
     if( *ntrig[MSI::CSC] > 2 )  ++*m_ntrigEtaLayers;
-    if( *ntrig[MSI::STGC1] + 
+    if( *ntrig[MSI::STGC1] +
         *ntrig[MSI::STGC2] > 3 )  ++*m_ntrigEtaLayers;
-    
+
     ATH_MSG_DEBUG("Muon hits: prec " << *m_nprecLayers <<
                   " phi " << *m_nphiLayers
                   << " trig eta " << *m_ntrigEtaLayers );

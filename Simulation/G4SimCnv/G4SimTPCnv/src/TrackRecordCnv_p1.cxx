@@ -7,6 +7,7 @@
 
 #include "G4SimTPCnv/TrackRecord_p1.h"
 #include "G4SimTPCnv/TrackRecordCnv_p1.h"
+#include "TruthUtils/MagicNumbers.h"
 
 
 void
@@ -18,6 +19,8 @@ TrackRecordCnv_p1::persToTrans(const TrackRecord_p1* persObj, TrackRecord* trans
    transObj->SetEnergy((double) persObj->energy());
    transObj->SetMomentum(CLHEP::Hep3Vector(persObj->momentumX(), persObj->momentumY(), persObj->momentumZ() ));
    transObj->SetPosition(CLHEP::Hep3Vector(persObj->positionX(), persObj->positionY(), persObj->positionZ() ));
+   const int oldStatus = 1; // Given how TrackRecords are used currently; this will be correct for all but some very exotic samples.
+   transObj->SetStatus(HepMC::new_particle_status_from_old(oldStatus, persObj->barCode()));
    transObj->SetTime((double) persObj->time());
    transObj->SetBarcode(persObj->barCode()); // FIXME barcode-based
    transObj->SetVolName(persObj->volName());

@@ -34,11 +34,13 @@ int TrackHelper::GetBarcode() const  // TODO Drop this once UniqueID and Status 
   if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetHepMCParticle()==0) return 0;
   return m_trackInfo->GetParticleBarcode();
 }
+
 int TrackHelper::GetUniqueID() const
 {
   if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetHepMCParticle()==0) return 0;
   return m_trackInfo->GetParticleUniqueID();
 }
+
 int TrackHelper::GetStatus() const
 {
   if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetHepMCParticle()==0) return 0;

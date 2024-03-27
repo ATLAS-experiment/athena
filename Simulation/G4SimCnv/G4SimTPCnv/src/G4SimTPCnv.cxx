@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -7,9 +7,11 @@
 
 #include "G4SimTPCnv/TrackRecordCollectionCnv_p1.h"
 #include "G4SimTPCnv/TrackRecordCollectionCnv_p2.h"
+#include "G4SimTPCnv/TrackRecordCollectionCnv_p3.h"
 #include "G4SimTPCnv/TrackRecord_p1.h"
 #include "G4SimTPCnv/TrackRecordCollection_p1.h"
 #include "G4SimTPCnv/TrackRecordCollection_p2.h"
+#include "G4SimTPCnv/TrackRecordCollection_p3.h"
 
 // For Root streamer:
 // for ROOT streamer
@@ -28,3 +30,8 @@ DECLARE_NAMED_TPCNV_FACTORY(TrackRecordCollectionCnv_p2,
                             TrackRecordCollection_p2,
                             Athena::TPCnvVers::Current)
                       
+DECLARE_NAMED_TPCNV_FACTORY(TrackRecordCollectionCnv_p3,
+                            TrackRecordCollectionCnv_p3,
+                            AtlasHitsVector<TrackRecord>,
+                            TrackRecordCollection_p3,
+                            Athena::TPCnvVers::Old)
