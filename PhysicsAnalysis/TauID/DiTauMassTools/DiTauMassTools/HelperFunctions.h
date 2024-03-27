@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Asg wrapper around the MissingMassCalculator
@@ -33,8 +33,8 @@ namespace HistInfoV2
 
 namespace MMCCalibrationSetV2
 {
-  enum e { MMC2015HIGHMASS=0, UPGRADE, LFVMMC2012, MMC2019, MAXMMCCALIBRATIONSET };
-  const std::string name[MAXMMCCALIBRATIONSET]={ "MMC2015HIGHMASS", "UPGRADE", "LFVMMC2012", "MMC2019"};
+  enum e { MMC2015HIGHMASS=0, UPGRADE, LFVMMC2012, MMC2016MC15C, MMC2019, MAXMMCCALIBRATIONSET };
+  const std::string name[MAXMMCCALIBRATIONSET]={ "MMC2015HIGHMASS", "UPGRADE", "LFVMMC2012", "MMC2016MC15C", "MMC2019"};
 }
 
 namespace MMCFitMethodV2
