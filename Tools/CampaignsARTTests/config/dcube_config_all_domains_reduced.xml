@@ -1369,20 +1369,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="tagger_DL1dv00">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv00_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv00_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv00_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_GN1">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN1_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN1_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN1_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
     </TDirectory>
    </TDirectory>
   </TDirectory>
