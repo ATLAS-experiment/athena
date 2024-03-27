@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the probability calculation of the MissingMassCalculator
@@ -1052,6 +1052,7 @@ double MissingMassProb::dTheta3d_probabilityFast(MissingMassInput& preparedInput
     {
       if(m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
          || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012
+	 || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
          || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
         myDelThetaParam[i]=dTheta3Dparam(i,tau_code,P_tau,s_fit_param[1][tau_code][i]);
     }
@@ -1089,8 +1090,9 @@ double MissingMassProb::myDelThetaHadFunc(double *x, double *par)
   const double sigmaL=par[4];
 
   if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
+      || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
+      || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
+      || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
     const double norm=sqrt(2.0*TMath::Pi());
     const double g1=TMath::Gaus(arg,mean,sigmaG)/norm;
     const double g2=TMath::Landau(arg_L,mpv,sigmaL)/norm;
@@ -1133,15 +1135,17 @@ double MissingMassProb::dTheta3Dparam(const int & parInd, const int & tau_type, 
 
   if(parInd==0) {
     if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
+	|| m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
+	|| m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
+	|| m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
       return (par[0]+par[1]*P_tau+par[2]*pow(P_tau,2)+par[3]*pow(P_tau,3)+par[4]*pow(P_tau,4))*0.00125;
     }
   }
   else { // parInd==0
     if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
+	|| m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C
+	|| m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
+	|| m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
       if(tau_type==0) return par[0]*(exp(-par[1]*P_tau)+par[2]/P_tau)+par[3]+par[4]*P_tau;
       else return par[0]*(exp(-par[1]*sqrt(P_tau))+par[2]/P_tau)+par[3]+par[4]*P_tau;
     }
@@ -1358,7 +1362,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                   if(preparedInput.m_Njet25==0)//0-jet
                     {
                       // placeholder for 2019 tune
-                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019){
+                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
+			  m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019){
                         if(preparedInput.m_MetVec.Mod()<20.0) // 0-jet low MET case
                           {
                             if(std::abs(preparedInput.m_DelPhiTT)>2.95 && m_allowUseHT) // use mHt only if dPhi(lep-tau)>2.95
@@ -1403,7 +1408,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                                 preparedInput.m_METsigmaL = sigma;
                               }
                           } // high MET
-                      } // MMC2019
+                      } // MMC2016MC15C or MMC2019
                       // 2015 high-mass tune; avergare MET resolution for Mh=600,1000 mass points
                       else if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
                         {
@@ -1429,8 +1434,9 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                           // MET resolution can't be perfect in presence of other objects (i.e., electrons, jets, taus), so assume minSumEt=5.0 for now
                           sigma= preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : METoffset;
                         }
-                      //2019
-		      else if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019)
+                      //2016 mc15c or 2019
+		      else if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
+			       m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019)
                         {
 			  double x = preparedInput.m_DelPhiTT;
 			  double dphi_scale = x > 0.3 ? 0.9429 - 0.059*x + 0.054*x*x : 0.728;
@@ -1467,7 +1473,9 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       preparedInput.m_METsigmaL=sigma;
 
                     }
-                  else if(preparedInput.m_Njet25==0 && m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019)
+                  else if(preparedInput.m_Njet25==0 &&
+			  (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
+			   m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019))
                     {
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)
                       double x = preparedInput.m_DelPhiTT;
@@ -1507,7 +1515,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       // MET resolution can't be perfect in presence of other objects (i.e., electrons, jets, taus), so assume minSumEt=5.0 for now
                       double sigma =  preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : std::abs(METoffset);
 
-                      if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019) {
+                      if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
+			 m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019) {
                         double x = preparedInput.m_DelPhiTT;
                         double dphi_scale = x > 0.6 ? 1.42047 - 0.666644*x + 0.199986*x*x : 1.02;
                         METoffset = 1.19769*(1.0+preparedInput.m_METresSyst*sigmaSyst);
@@ -1559,7 +1568,9 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       preparedInput.m_METsigmaL = sigma;
                     } // end of MMC2015HIGHMASS
 
-                  if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019) // 2019 leplep
+                  if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
+		     m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019)
+		    // 2016 MC15c + 2019 leplep
                     {
 		      m_UseHT=false;
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)

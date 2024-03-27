@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=8 sw=2
@@ -2089,6 +2089,7 @@ int MissingMassCalculatorV2::TailCleanUp(const TLorentzVector &vis1,
   {
 
     if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
+	m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2016MC15C ||
         m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 ||
         m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE)
       return pass_code; // don't use TailCleanup for 8 & 13 TeV data
@@ -3168,7 +3169,8 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
    
       // T. Davidek: hack for lep-lep -- subtract lepton pT both for muon and
       //  electron
-      if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 &&
+    if ((m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2016MC15C ||
+	 m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019) &&
         preparedInput.m_vistau1.M() < 0.12 && preparedInput.m_vistau2.M() < 0.12) { // lep-lep channel
       if (preparedInput.m_SumEt > preparedInput.m_vistau1.Pt())
         preparedInput.m_SumEt -= preparedInput.m_vistau1.Pt();
