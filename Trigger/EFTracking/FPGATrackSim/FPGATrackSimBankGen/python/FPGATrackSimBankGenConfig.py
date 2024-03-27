@@ -85,10 +85,10 @@ if __name__ == "__main__":
     log = logging.getLogger(__name__)
 
     flags.fillFromArgs()
+    flags.Trigger.FPGATrackSim.Hough.IdealGeoRoads = False 
     flags = prepareFlagsForFPGATrackSimBankGen(flags)
 
     ### we don't want to load sectors when running bank gen, set this to false
-    flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads = False 
 
     flags.lock()
 
