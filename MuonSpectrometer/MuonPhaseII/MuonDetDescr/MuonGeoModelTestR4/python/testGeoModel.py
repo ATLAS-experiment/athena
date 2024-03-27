@@ -144,6 +144,7 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     flags.Scheduler.ShowControlFlow = True
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
+    flags.PerfMon.doFullMonMT = True
    
 
     flags.lock()
