@@ -13,7 +13,6 @@ class PrimaryPassConfig(FlagEnum):
     UPC = 'UPC'
     HIP = 'HIP'
     MinBias = 'MinBias'
-    RobustReco = 'RobustReco'
     Default = 'Main'
 
 
@@ -335,8 +334,7 @@ def createTrackingConfigFlags():
         createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
         createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags,
         createDisappearingTrackingPassFlags, createSCTTrackingPassFlags,
-        createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags,
-        createRobustRecoTrackingPassFlags)
+        createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags)
 
     def primaryPass(flags):
         if flags.Beam.Type is BeamType.Cosmics:
@@ -401,8 +399,6 @@ def createTrackingConfigFlags():
                          createTRTTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.TRTStandalonePass",
                          createTRTStandaloneTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory("Tracking.RobustRecoPass",
-                         createRobustRecoTrackingPassFlags, prefix=True)
 
     # ITk
 

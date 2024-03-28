@@ -352,25 +352,6 @@ def createTrackingPassFlags():
 
     return icf
 
-### RobustReco mode ####################
-def createRobustRecoTrackingPassFlags():
-    icf = createTrackingPassFlags()
-    icf.extension               = ""
-
-    icf.minClusters             = 7
-    icf.maxHoles                = 5
-    icf.maxPixelHoles           = 2
-    icf.maxSctHoles             = 5
-    icf.maxDoubleHoles          = 4
-
-    icf.maxZImpact              = 500*Units.mm
-
-    icf.maxSecondaryHoles       = 5
-    icf.maxSecondaryPixelHoles  = 5
-    icf.maxSecondarySCTHoles    = 5
-    icf.maxSecondaryDoubleHoles = 2
-
-    return icf
 
 ### ITk mode ####################
 def createITkTrackingPassFlags():
