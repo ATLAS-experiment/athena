@@ -1,5 +1,10 @@
-/*  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+/*  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#if defined(FLATTEN) && defined(__GNUC__)
+// Avoid warning in dbg build
+#pragma GCC optimize "-fno-var-tracking-assignments"
+#endif
 
 #include "src/SeedingTool.h"
 
@@ -11,6 +16,7 @@
 #include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Seeding/SeedConfirmationRangeConfig.hpp"
+#include "CxxUtils/inline_hints.h"
 
 using namespace Acts::HashedStringLiteral;
 
@@ -202,6 +208,7 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
+ATH_FLATTEN
   StatusCode
   SeedingTool::createSeeds(const EventContext& /*ctx*/,
 			   const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
