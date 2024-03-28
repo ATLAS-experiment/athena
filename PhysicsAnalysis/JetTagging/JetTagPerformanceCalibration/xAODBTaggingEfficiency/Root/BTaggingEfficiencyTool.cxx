@@ -255,7 +255,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 
   // Now that we know the CDI file location, let's check if the configuration provided is correct
   Analysis::CDIReader Reader(m_SFFileFull);
-  if(!Reader.checkConfig(m_taggerName, m_jetAuthor, m_OP, msgLvl(MSG::INFO))){
+  if(!Reader.checkConfig(m_taggerName, m_jetAuthor, m_OP, msgLvl(MSG::DEBUG))){
     ATH_MSG_ERROR( "BTaggingEfficiencyTool configuration is invalid - follow the above suggestions to correct your config!");
     return StatusCode::FAILURE;
   };
@@ -489,7 +489,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 						     true,                                      // use MC/MC scale factors
 						     false,                                     // do not use topology rescaling (only relevant for pseudo-continuous tagging)
 						     m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
-                 msgLvl(MSG::INFO),                         // if false, suppress any non-error/warning messages
+                 msgLvl(MSG::DEBUG),                         // if false, suppress any non-error/warning messages
                  flavours                                   // vector of flavour labels, conventional or not
                 ));                         
 
