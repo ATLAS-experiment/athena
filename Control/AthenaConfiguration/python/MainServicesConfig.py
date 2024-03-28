@@ -310,8 +310,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
 
 
     if len(flags.PerfMon.Valgrind.ProfiledAlgs)>0:
-        from Valkyrie.PerfMonValkyrieConfig import ValkyrieProfilerServiceCfg
-        cfg.merge(ValkyrieProfilerServiceCfg(flags))
+        from Valkyrie.ValkyrieConfig import ValgrindServiceCfg
+        cfg.merge(ValgrindServiceCfg(flags))
 
     return cfg
 
