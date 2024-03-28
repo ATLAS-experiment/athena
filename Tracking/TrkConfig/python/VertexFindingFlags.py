@@ -49,8 +49,7 @@ def createPriVertexingFlags():
               pcf.Tracking.PrimaryPassConfig in [
                   PrimaryPassConfig.VtxLumi,
                   PrimaryPassConfig.VtxBeamSpot,
-                  PrimaryPassConfig.HighPileup,
-                  PrimaryPassConfig.RobustReco]):
+                  PrimaryPassConfig.HighPileup]):
             return VertexSetup.IVF
         else: # Default
             return VertexSetup.ActsGaussAMVF
@@ -62,8 +61,7 @@ def createPriVertexingFlags():
     flags.addFlag("useBeamConstraint", lambda pcf:
                   not(pcf.Tracking.PrimaryPassConfig in [
                       PrimaryPassConfig.VtxLumi,
-                      PrimaryPassConfig.VtxBeamSpot,
-                      PrimaryPassConfig.RobustReco]))
+                      PrimaryPassConfig.VtxBeamSpot]))
 
     def maxD0(pcf):
         if pcf.Detector.GeometryITk:
@@ -75,17 +73,6 @@ def createPriVertexingFlags():
                 return 4.0 * Units.mm
 
     flags.addFlag("maxD0", maxD0)
-
-    def minNPixelHits(pcf):
-        if pcf.Detector.GeometryITk:
-            return 3
-        else:
-            if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.RobustReco:
-                return 0
-            else: # Default ID
-                return 1
-
-    flags.addFlag("minNPixelHits", minNPixelHits)
 
     def minPt(pcf):
         if pcf.Detector.GeometryITk:
@@ -112,11 +99,13 @@ def createPriVertexingFlags():
     flags.addFlag("maxSigmaD0", maxSigmaD0)
 
     idflags = { "maxSigmaZ0SinTheta" : 10.0 * Units.mm,
+                "minNPixelHits"      : 1,
                 "minNSctHits"        : 4,
                 "minNSiHits"         : 6,
                 "maxZinterval"       : 3}
 
     itkflags = {"maxSigmaZ0SinTheta" : 2.5 * Units.mm,
+                "minNPixelHits"      : 3,
                 "minNSctHits"        : 0,
                 "minNSiHits"         : 7,
                 "maxZinterval"       : 0.5}
