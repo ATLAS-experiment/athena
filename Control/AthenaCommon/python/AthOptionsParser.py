@@ -154,13 +154,13 @@ def getArgumentParser():
                    choices=['ALL', 'VERBOSE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'FATAL'],
                    help='logging level: %(choices)s')
 
-    g.add_argument('--nprocs', metavar='N', type=int, default=0,
+    g.add_argument('--nprocs', metavar='N', type=int,
                    help='enable AthenaMP if %(metavar)s>=1 or %(metavar)s==-1')
 
-    g.add_argument('--threads', metavar='N', type=int, default=0,
+    g.add_argument('--threads', metavar='N', type=int,
                    help='number of threads for AthenaMT, threads per worker for athenaMP')
 
-    g.add_argument('--concurrent-events', metavar='N', type=int, default=0,
+    g.add_argument('--concurrent-events', metavar='N', type=int,
                    help='number of concurrent events for AthenaMT')
 
     g.add_argument('--mtes', action='store_true',
