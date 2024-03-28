@@ -415,6 +415,33 @@ class PerEventSFBlock (ConfigBlock):
                             alg.scaleFactorOutputDecoration.split("_%SYS%")[0])
 
 
+class SelectionDecorationBlock (ConfigBlock):
+    """the ConfigBlock to add selection decoration to a container"""
+
+    def __init__ (self, containers) :
+        super (SelectionDecorationBlock, self).__init__ ()
+        self.containers = containers
+
+    def makeAlgs(self, config):
+        for container in self.containers:
+            originContainerName = config.getOutputContainerOrigin(container)
+            selectionNames = config.getSelectionNames(originContainerName)
+            for selectionName in selectionNames:
+                # skip default selection
+                if selectionName == '':
+                    continue
+                alg = config.createAlgorithm(
+                    'CP::AsgSelectionAlg',
+                    f'SelectionDecoration_{originContainerName}_{selectionName}')
+                selectionDecoration = f'baselineSelection_{selectionName}_%SYS%'
+                alg.selectionDecoration =  f'{selectionDecoration},as_char'
+                alg.particles = config.readName (originContainerName)
+                alg.preselection = config.getFullSelection (originContainerName,
+                                                            selectionName)
+                config.addOutputVar(
+                    originContainerName, selectionDecoration, selectionName)
+
+
 def makeCommonServicesConfig( seq ):
     """Create the common services config"""
 
