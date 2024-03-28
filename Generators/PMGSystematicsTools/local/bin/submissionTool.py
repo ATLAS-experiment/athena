@@ -251,10 +251,9 @@ def main(argv):
         # make JOs for this DSID
         if isAthAnalysis:
           print("[INFO] attempting to retrieve weight names from metadata... this will crash if you are trying to submit EVNT files from R21 or DAOD files from R20...")
-          from PyUtils import AthFile
-          af = AthFile.fopen(testSamplePath)  # opens the first file from the InputCollections list
+          from PyUtils.MetaReader import read_metadata
           systWeights = None
-          metadata = af.fileinfos['metadata']
+          metadata = read_metadata(testSamplePath, None, 'full')[testSamplePath]
           if '/Generation/Parameters' in metadata:
               genpars = metadata['/Generation/Parameters']
               if 'HepMCWeightNames' in genpars:
