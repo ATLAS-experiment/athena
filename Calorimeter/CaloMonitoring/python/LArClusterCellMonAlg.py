@@ -1,21 +1,6 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-
-def LArClusterCellMonConfigOld(flags):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from CaloMonitoring.CaloMonitoringConf import  LArClusterCellMonAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArClusterCellMonAlgOldCfg')
-
-    algo = LArClusterCellMonConfigCore(helper, LArClusterCellMonAlg,flags)
-
-    from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
-    algo.ReadyFilterTool = GetAtlasReadyFilterTool()
-    from AthenaMonitoring.BadLBFilterTool import GetLArBadLBFilterTool
-    algo.BadLBTool = GetLArBadLBFilterTool()
-
-    return helper.result()
 
 def LArClusterCellMonConfig(flags):
 
