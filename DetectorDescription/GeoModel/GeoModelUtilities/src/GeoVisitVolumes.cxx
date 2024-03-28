@@ -22,7 +22,7 @@
 
 GeoVisitVolumes::GeoVisitVolumes (IGeoVisitVolumesAction& action,
                                   int depthLimit /*= 1*/)
-  : m_action (action)
+  : m_action(&action)
   , m_nameTag(nullptr)
   , m_serialDenominator(nullptr)
   , m_idTag(nullptr)
@@ -33,9 +33,22 @@ GeoVisitVolumes::GeoVisitVolumes (IGeoVisitVolumesAction& action,
 }
 
 
+GeoVisitVolumes::GeoVisitVolumes (IGeoVisitVolumesNoXformAction& action,
+                                  int depthLimit /*= 1*/)
+  : m_action(&action)
+  , m_nameTag(nullptr)
+  , m_serialDenominator(nullptr)
+  , m_idTag(nullptr)
+  , m_serialIdentifier(nullptr)
+{
+  setDepthLimit (depthLimit);
+}
+
+
 void GeoVisitVolumes::handleTransform (const GeoTransform *xform)
 {
-  m_pendingTransformList.push_back (xform);
+  if (m_action.index() == 0)
+    m_pendingTransformList.push_back (xform);
 }
 
 
@@ -47,32 +60,38 @@ void GeoVisitVolumes::handleVol (const GeoVPhysVol *vol)
   if(getPath()->getLength()-1 == 0)
     return;
 
-  GeoTrf::Transform3D transform;
-  GeoTrf::Transform3D defTransform;
-
-  if (m_pendingTransformList.size() == 1) {
-    transform = m_pendingTransformList[0]->getTransform(nullptr);
-    defTransform = m_pendingTransformList[0]->getDefTransform(nullptr);
-  }
-  else {
-    transform = GeoTrf::Transform3D::Identity();
-    defTransform = GeoTrf::Transform3D::Identity();
-    for (const GeoTransform* t : m_pendingTransformList) {
-      transform    = transform    * t->getTransform(nullptr);
-      defTransform = defTransform * t->getDefTransform(nullptr);
-    }
-  }
-
   const static std::string anon = "ANON";
   const std::string& name = m_nameTag ? m_nameTag->getName() : anon;
 
   int id = m_idTag ? m_idTag->getIdentifier() : -1;
 
-  m_action (id, name, vol, transform, defTransform);
+  if (m_action.index() == 0) {
+    GeoTrf::Transform3D transform;
+    GeoTrf::Transform3D defTransform;
+
+    if (m_pendingTransformList.size() == 0) {
+      transform = GeoTrf::Transform3D::Identity();
+      defTransform = GeoTrf::Transform3D::Identity();
+    }
+    else {
+      transform = m_pendingTransformList[0]->getTransform(nullptr);
+      defTransform = m_pendingTransformList[0]->getDefTransform(nullptr);
+      for (size_t i = 1; i < m_pendingTransformList.size(); ++i) {
+        const GeoTransform* t = m_pendingTransformList[i];
+        transform    = transform    * t->getTransform(nullptr);
+        defTransform = defTransform * t->getDefTransform(nullptr);
+      }
+    }
+
+    (*std::get<0>(m_action)) (id, name, vol, transform, defTransform);
+    m_pendingTransformList.clear();
+  }
+  else {
+    (*std::get<1>(m_action)) (id, name, vol);
+  }
 
   m_idTag   = nullptr;
   m_nameTag = nullptr;
-  m_pendingTransformList.clear();
 }
 
 
@@ -117,11 +136,22 @@ void GeoVisitVolumes::handleSerialTransformer (const GeoSerialTransformer  *sT)
     idbase = m_serialIdentifier->getBaseId();
   }
 
-  GeoTrf::Transform3D transform (GeoTrf::Transform3D::Identity());
-  GeoTrf::Transform3D defTransform (GeoTrf::Transform3D::Identity());
-  for (const GeoTransform* t : m_pendingTransformList) {
-    transform    = transform    * t->getTransform(nullptr);
-    defTransform = defTransform * t->getDefTransform(nullptr);
+  GeoTrf::Transform3D transform; 
+  GeoTrf::Transform3D defTransform;
+  if (m_action.index() == 0) {
+    if (m_pendingTransformList.size() == 0) {
+      transform = GeoTrf::Transform3D::Identity();
+      defTransform = GeoTrf::Transform3D::Identity();
+    }
+    else {
+      transform = m_pendingTransformList[0]->getTransform(nullptr);
+      defTransform = m_pendingTransformList[0]->getDefTransform(nullptr);
+      for (size_t i = 1; i < m_pendingTransformList.size(); ++i) {
+        const GeoTransform* t = m_pendingTransformList[i];
+        transform    = transform    * t->getTransform(nullptr);
+        defTransform = defTransform * t->getDefTransform(nullptr);
+      }
+    }
   }
 
   for (unsigned int i = 0; i < ncopies; i++) {
@@ -138,9 +168,14 @@ void GeoVisitVolumes::handleSerialTransformer (const GeoSerialTransformer  *sT)
       name = "ANON";
     }
 
-    m_action (id, name, vol,
-              transform * sT->getTransform (i),
-              defTransform * sT->getTransform (i));
+    if (m_action.index() == 0) {
+      (*std::get<0>(m_action)) (id, name, vol,
+                                transform * sT->getTransform (i),
+                                defTransform * sT->getTransform (i));
+    }
+    else {
+      (*std::get<1>(m_action)) (id, name, vol);
+    }
   }
 
   m_idTag   = nullptr;
@@ -185,6 +220,33 @@ GeoVolumeVec_t geoGetVolumes (const GeoGraphNode* node,
                         const GeoTrf::Transform3D& transform,
                         const GeoTrf::Transform3D& /*defTransform*/)
                    { ret.emplace_back (volume, transform); },
+                   node,
+                   depthLimit);
+  return ret;
+}
+
+
+/**
+ * @brief Return the child volumes.
+ * @param node Root of the graph to traverse.
+ * @param depthLimit Depth limit for the traversal.
+ * @param sizeHint Hint about the number of volumes to be returned,
+ *                 to allow avoiding resizes of the output vector.
+ *
+ * Returns a vector of volumes in the graph.  The same volume may be
+ * returned multiple times in the case of a GeoSerialTransform.
+ */
+std::vector<const GeoVPhysVol*>
+geoGetVolumesNoXform (const GeoGraphNode* node,
+                      int depthLimit /*= 1*/,
+                      int sizeHint /* 20*/)
+{
+  std::vector<const GeoVPhysVol*> ret;
+  ret.reserve (sizeHint);
+  geoVisitVolumesNoXform ([&] (int /*id*/,
+                               const std::string& /*name*/,
+                               const GeoVPhysVol* volume)
+                   { ret.push_back (volume); },
                    node,
                    depthLimit);
   return ret;

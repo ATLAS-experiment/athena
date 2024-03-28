@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeoModelUtilities/test/GeoVisitVolumes_test.cxx
@@ -89,6 +89,30 @@ void TestVisitor::operator() (int id,
 }
 
 
+class TestVisitorNoXform
+{
+public:
+  TestVisitorNoXform (PVConstLink v0) : m_v0 (v0) {}
+  void operator() (int id,
+                   const std::string& name,
+                   PVConstLink volume);
+
+  PVConstLink m_v0;
+  int m_icount = 0;
+};
+
+
+void TestVisitorNoXform::operator() (int id,
+                                     const std::string& name,
+                                     PVConstLink volume)
+{
+  assert (m_v0->getIdOfChildVol (m_icount) == id);
+  assert (m_v0->getNameOfChildVol (m_icount) == name);
+  assert (m_v0->getChildVol (m_icount) == volume);
+  ++m_icount;
+}
+
+
 void test1()
 {
   std::cout << "test1\n";
@@ -106,6 +130,14 @@ void test1()
                    { visitor (id, name, volume, transform, defTransform); },
                    &*v0);
   assert (visitor.m_icount == 6);
+
+  TestVisitorNoXform visitorNoXform (v0);
+  geoVisitVolumesNoXform ([&] (int id,
+                               const std::string& name,
+                               PVConstLink volume)
+                          { visitorNoXform (id, name, volume); },
+                          &*v0);
+  assert (visitorNoXform.m_icount == 6);
 }
 
 
@@ -138,6 +170,15 @@ void test2()
 
   assert (vols[5].first->getLogVol()->getName() == "l4");
   compareTransform (vols[5].second, GeoTrf::Transform3D::Identity());
+
+  std::vector<const GeoVPhysVol*> vols2 = geoGetVolumesNoXform (&*v0);
+  assert (vols2.size() == 6);
+  assert (vols2[0]->getLogVol()->getName() == "l1");
+  assert (vols2[1]->getLogVol()->getName() == "l2");
+  assert (vols2[2]->getLogVol()->getName() == "l3");
+  assert (vols2[3]->getLogVol()->getName() == "l3");
+  assert (vols2[4]->getLogVol()->getName() == "l3");
+  assert (vols2[5]->getLogVol()->getName() == "l4");
 }
 
 
