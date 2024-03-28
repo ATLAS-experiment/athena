@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/EventHashBranch.h>
@@ -9,11 +9,9 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 namespace {
     // Erase all objects from the branch vector
     void Remove(std::vector<MuonVal::IMuonTesterBranch*>& vec, std::function<bool(const MuonVal::IMuonTesterBranch*)> remove_func) {
-        std::vector<MuonVal::IMuonTesterBranch*>::iterator itr = std::find_if(vec.begin(), vec.end(), remove_func);
-        while (itr != vec.end()) {
-            vec.erase(itr);
-            itr = std::find_if(vec.begin(), vec.end(), remove_func);
-        }
+        // Could use std::erase_if with C++20...
+        std::vector<MuonVal::IMuonTesterBranch*>::iterator itr = std::remove_if(vec.begin(), vec.end(), remove_func);
+        vec.erase (itr, vec.end());
     }
 
 }  // namespace
