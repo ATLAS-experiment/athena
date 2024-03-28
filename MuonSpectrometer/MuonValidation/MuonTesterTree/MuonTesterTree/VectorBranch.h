@@ -43,7 +43,7 @@ public:
     inline T& get(size_t idx);
 
     inline const T& getDefault() const;
-    virtual void setDefault(const T& def);
+    void setDefault(const T& def);
 
     inline bool isUpdated() const;
 
