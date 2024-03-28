@@ -270,5 +270,7 @@ MuonTesterTree::MuonTesterTree(const std::string& tree_name, const std::string& 
     AthMessaging{"MuonTesterTree"},
     m_tree{std::make_unique<TTree>(tree_name.c_str(), "MuonTesterTree")}, m_stream(stream) {}
 
-MuonTesterTree::~MuonTesterTree() = default;
+MuonTesterTree::~MuonTesterTree(){
+    m_branches_to_init.clear();
+}
 }

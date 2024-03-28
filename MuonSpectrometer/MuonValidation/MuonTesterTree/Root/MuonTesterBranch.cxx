@@ -42,7 +42,9 @@ MuonTesterTree& MuonTesterBranch::parent() {
     return *m_parent;
 }
 MuonTesterBranch::~MuonTesterBranch() {
-    if (m_parent) m_parent->removeBranch(this);
+    if (m_parent) {
+        m_parent->removeBranch(this);
+    }
 }
 MuonTesterBranch::MuonTesterBranch(TTree* tree, const std::string& br_name) :
     AthMessaging{"MuonTesterBranch"}, m_tree(tree), m_name(br_name) {}

@@ -11,12 +11,16 @@ template <class T>
 ArrayBranch<T>::ArrayBranch(TTree* t, const std::string& b_name, size_t size) :
     MuonTesterBranch{t,b_name},
     m_size{size} {
+    m_data.resize(size);
+    m_updated.resize(size);
     reset();
 }
 template <class T>
 ArrayBranch<T>::ArrayBranch(MuonTesterTree& t, const std::string& b_name, size_t size) : 
     MuonTesterBranch{t, b_name},
     m_size{size} {
+    m_data.resize(size);
+    m_updated.resize(size);
     reset();
 }
 
@@ -68,7 +72,7 @@ template <class T> bool ArrayBranch<T>::init() {
     } else if (tree()->FindBranch(name().c_str())) {
         ATH_MSG_ERROR("init() -- The branch " << name() << " already exists in TTree  " << tree()->GetName() << ".");
         return false;
-    } else if (!tree()->Branch(name().c_str(), m_data.get(), br_name.str().c_str())) {
+    } else if (!tree()->Branch(name().c_str(), m_data.data(), br_name.str().c_str())) {
         ATH_MSG_ERROR("init() -- Could not create branch " << name() << " in TTree " << tree()->GetName());
         return false;
     }

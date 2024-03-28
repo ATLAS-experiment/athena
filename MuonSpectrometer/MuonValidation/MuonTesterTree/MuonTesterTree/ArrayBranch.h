@@ -55,8 +55,8 @@ private:
     /// Resets the check mask
     void reset();
     size_t m_size{0};
-    std::unique_ptr<T[]> m_data{new T[m_size]};
-    std::unique_ptr<bool[]> m_updated{new bool[m_size]};
+    std::vector<T> m_data{};
+    std::vector<bool> m_updated{};
 
     bool m_init{false};
 
