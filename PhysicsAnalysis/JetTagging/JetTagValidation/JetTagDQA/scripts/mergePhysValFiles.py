@@ -22,11 +22,9 @@ categories = ['jet',
               'tagger_RNNIP',
               'tagger_DIPS',
               'tagger_SV1',
-              'tagger_DL1dv00',
               'tagger_DL1dv01',
               'tagger_DL1r',
-              'tagger_GN1',
-              'tagger_GN2v00',
+              'tagger_GN2v01',
               'tagger_GN2Xv01',
               'old_taggers',
               #'tagger_IP2D',
@@ -45,7 +43,7 @@ sub_categories_type_1 = [ '_incl',
                    '_muon',
                  ]
 
-categories_with_subcategories_type_2 = ['tagger_IP3D', 'tagger_RNNIP', 'tagger_DIPS', 'tagger_SV1', 'tagger_DL1dv00', 'tagger_DL1dv01', 'tagger_DL1r', 'tagger_GN1','tagger_GN2v00','tagger_GN2Xv01']
+categories_with_subcategories_type_2 = ['tagger_IP3D', 'tagger_RNNIP', 'tagger_DIPS', 'tagger_SV1', 'tagger_DL1dv01', 'tagger_DL1r', 'tagger_GN2v01','tagger_GN2Xv01']
 
 sub_categories_type_2 = [ '_pt_ttbar',
                    '_pt_Zprime',
@@ -64,8 +62,8 @@ sub_categories_type_4 = [ 'jet']
 # define the jet containers
 jetcontainers = ['AntiKt4EMTopoJets',
                  'AntiKt4EMPFlowJets',
-                 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-                 'AntiKtVR30Rmax4Rmin02PV0TrackJets'
+                 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets',
+                 'AntiKtVR30Rmax4Rmin02PV0TrackJets',
                  ]
 
 # parser arguments

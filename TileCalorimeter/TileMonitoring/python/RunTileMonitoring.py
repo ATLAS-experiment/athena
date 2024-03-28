@@ -97,6 +97,7 @@ if __name__=='__main__':
     _addBoolArgument(parser, 'online', help='Online environment running')
 
     parser.add_argument('--no-mon', action='store_false', dest='mon', help='Do not run Tile monitoring algorithms')
+    parser.add_argument('--cosmics', action='store_true', help='Use cosmics streams for online Tile monitoring')
     parser.add_argument('--jivexml', action='store_true', help='Create Jive XML output')
     parser.add_argument('--stateless', action="store_true", help='Run Online Tile monitoring in partition')
     parser.add_argument('--use-mbts-trigger', action="store_true", dest='useMbtsTrigger', help='Use L1 MBTS triggers')
@@ -114,7 +115,7 @@ if __name__=='__main__':
     parser.add_argument('--lvl1Logic', default='Ignore', choices=['And','Or','Ignore'], help='EMON, default: Ignore')
     parser.add_argument('--lvl1Origin', default='TAV', choices=['TBP','TAP','TAV'], help='EMON, default: TAV')
     parser.add_argument('--streamType', default='physics', help='EMON, HLT stream type (e.g. physics or calibration)')
-    parser.add_argument('--streamNames', default=['express','Main','Standby','CosmicCalo','L1Calo','ZeroBias','Background','MinBias','CosmicMuons','IDCosmic'], help='EMON, List of HLT stream names')
+    parser.add_argument('--streamNames', default=['express','Main','Standby','L1Calo','ZeroBias','Background','MinBias'], help='EMON, List of HLT stream names')
     parser.add_argument('--streamLogic', default='Or', choices=['And','Or','Ignore'], help='EMON, default: Or')
     parser.add_argument('--triggerType', type=int, default=256, help='EMON, LVL1 8 bit trigger type, default: 256')
     parser.add_argument('--groupName', default="TilePhysMon", help='EMON, Name of the monitoring group')
@@ -168,6 +169,8 @@ if __name__=='__main__':
             _l1Names += ['L1_MBTSC' + str(counter) for counter in range(0, 16)]
             parser.set_defaults(lvl1Logic='Or', lvl1Origin='TBP', lvl1Items=_l1Items, lvl1Names=_l1Names,
                                 keyCount=1000, groupName='TileMBTSMon', useMbtsTrigger = True)
+        elif args.cosmics:
+            parser.set_defaults(postProcessingInterval=100, groupName='TileCosmicsMon', streamNames=['CosmicCalo','CosmicMuons','IDCosmic'])
         else:
             parser.set_defaults(postProcessingInterval=100)
 
@@ -314,6 +317,7 @@ if __name__=='__main__':
         bsEmonInputSvc.StreamLogic = args.streamLogic
         bsEmonInputSvc.GroupName = args.groupName
         bsEmonInputSvc.ProcessCorruptedEvents = True
+        bsEmonInputSvc.BufferSize = 2000
 
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 

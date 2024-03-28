@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileMBTSMonitorAlgorithm.py
@@ -44,53 +44,13 @@ def TileMBTSMonitoringConfig(flags, **kwargs):
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, 'TileMBTSMonAlgCfg')
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    _TileMBTSMonitoringConfigCore(helper, CompFactory.TileMBTSMonitorAlgorithm,
-                                  flags.Input.RunNumbers[0],
-                                  flags.Beam.Type is BeamType.Cosmics,
-                                  **kwargs)
-
-    accumalator = helper.result()
-    result.merge(accumalator)
-    return result
-
-
-def TileMBTSMonitoringConfigOld(flags, **kwargs):
-
-    ''' Function to configure TileMBTSMonitorAlgorithm algorithm in the old monitoring system.'''
-
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from AthenaCommon.GlobalFlags import globalflags
-
-    kwargs.setdefault('useTrigger', False)
-
-    if globalflags.InputFormat().lower() == 'pool':
-        kwargs.setdefault('TileDigitsContainer', 'TileDigitsFlt')
-
-    helper = AthMonitorCfgHelperOld(flags, 'TileMBTSMonAlgCfg')
-
-    from RecExConfig.AutoConfiguration import GetRunNumber
-    runNumber = GetRunNumber()
-
-    from AthenaCommon.BeamFlags import jobproperties
-    isCosmics = jobproperties.Beam.beamType() == 'cosmics'
-
-    from TileMonitoring.TileMonitoringConf import TileMBTSMonitorAlgorithm
-    _TileMBTSMonitoringConfigCore(helper, TileMBTSMonitorAlgorithm, runNumber, isCosmics, **kwargs)
-
-    return helper.result()
-
-
-def _TileMBTSMonitoringConfigCore(helper, algConfObj, runNumber, isCosmics, **kwargs):
-
-    ''' Function to configure TileMBTSMonitorAlgorithm algorithm in the monitoring system.'''
-
-    run = str(runNumber)
-
     # Adding an TileMBTSMonitorAlgorithm algorithm to the helper
-    tileMBTSMonAlg = helper.addAlgorithm(algConfObj, 'TileMBTSMonAlg')
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    tileMBTSMonAlg = helper.addAlgorithm(CompFactory.TileMBTSMonitorAlgorithm, 'TileMBTSMonAlg')
 
     tileMBTSMonAlg.TriggerChain = ''
+
+    runNumber = flags.Input.RunNumbers[0]
 
     numberOfMBTS = 32
     if runNumber < 400000:
@@ -110,6 +70,8 @@ def _TileMBTSMonitoringConfigCore(helper, algConfObj, runNumber, isCosmics, **kw
         fillHistogramPerMBTS = tileMBTSMonAlg.getDefaultProperty('FillHistogramsPerMBTS')
 
     useTrigger = kwargs['useTrigger']
+
+    run = str(runNumber)
 
     # 1) Configure histogram with TileMBTSMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileMBTSMonAlg, 'TileMBTSMonExecuteTime', 'Tile/')
@@ -186,6 +148,8 @@ def _TileMBTSMonitoringConfigCore(helper, algConfObj, runNumber, isCosmics, **kw
                                 xbins = numberOfMBTS, xmin = 0, xmax = numberOfMBTS,
                                 ybins = numberOfErrors, ymin = 0, ymax = numberOfErrors)
 
+
+    isCosmics = flags.Beam.Type is BeamType.Cosmics
     nEnergyBins = 550 if isCosmics else 400
     maxEnergy = 5 if isCosmics else 80
 
@@ -421,6 +385,11 @@ def _TileMBTSMonitoringConfigCore(helper, algConfObj, runNumber, isCosmics, **kw
             name = f'SampleNumbers,Samples;AveragePulse_TBP_{mbtsName}'
             tool.defineHistogram(name, title = title, type = 'TProfile', path = 'Digit',
                                  xbins = 7, xmin = -0.5, xmax = 6.5)
+
+    accumalator = helper.result()
+    result.merge(accumalator)
+    return result
+
 
 if __name__=='__main__':
 

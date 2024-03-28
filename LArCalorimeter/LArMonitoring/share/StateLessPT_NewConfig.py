@@ -154,11 +154,11 @@ if __name__=='__main__':
    autoConfigOnlineRecoFlags(flags,partition)
 
    flags.IOVDb.DatabaseInstance="CONDBR2"
-   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2023-01"
+   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2023-03"
 
    flags.GeoModel.Layout="atlas"
    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
+   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
    #overwrite the run number 
    flags.Input.RunNumbers=[runnumber]

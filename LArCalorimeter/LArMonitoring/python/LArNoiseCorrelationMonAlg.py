@@ -57,7 +57,7 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
  
     larNoiseCorrelMonAlg.ProblemsToMask=["deadReadout","deadPhys","short","almostDead","highNoiseHG","highNoiseMG","highNoiseLG","sporadicBurstNoise"]
     larNoiseCorrelMonAlg.IgnoreBadChannels=True
-    larNoiseCorrelMonAlg.TriggerChain = "HLT_noalg_zb_L1ZB, HLT_noalg_cosmiccalo_L1RD1_EMPTY" #turn off for calibration run 
+    larNoiseCorrelMonAlg.TriggerChain = "HLT_noalg_zb_L1ZB, HLT_noalg_zb_L1RD1_EMPTY, HLT_noalg_cosmiccalo_L1RD1_EMPTY" #turn off for calibration run 
     try:
        larNoiseCorrelMonAlg.IsCalibrationRun = flags.LArMon.calibRun
     except AttributeError:
@@ -71,7 +71,11 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
     if len(customFEBStoMonitor)==0: 
         #we do not want to plot everything if online
         if isOnline:
+            from AthenaCommon.Logging import logging
             larNoiseCorrelMonAlg.PlotsOFF=True
+            msg=logging.getLogger("LArNoiseCorrelationMonAlg")
+            msg.warning("customFEBStoMonitors empty, and we are online,  no plot will be produced")
+            msg.warning(customFEBStoMonitor)
             pass
         febsToMonitorBarrelA=lArDQGlobals.febsBarrelA
         febsToMonitorEndcapA=lArDQGlobals.febsEndcapA
@@ -99,6 +103,16 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
             larNoiseCorrelMonAlg.FEBlist=febsToMonitorBarrelA+febsToMonitorBarrelC+febsToMonitorEndcapA+febsToMonitorEndcapC
             pass
         pass
+
+    if larNoiseCorrelMonAlg.PlotsOFF: # do not have plots, returning
+       from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+       if isComponentAccumulatorCfg():
+          cfg=ComponentAccumulator()
+          cfg.merge(helper.result())
+          return cfg
+       else:    
+          return helper.result()
+    
 
     #prepare the monitoring group
     grpName="NoiseCorr"

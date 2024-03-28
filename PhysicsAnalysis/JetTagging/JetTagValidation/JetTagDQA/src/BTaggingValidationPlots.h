@@ -43,7 +43,7 @@ namespace JetTagDQA{
 
       void bookNJetsThatPassedWPCutsHistos();
       void initializeNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts);
-      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& discr_DL1dv00, const double& DL1dv01, const double& discr_DL1r, const double& GN1, const double& GN2v00, const double& GN2Xv01);
+      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& DL1dv01, const double& discr_DL1r, const double& GN2v01, const double& GN2Xv01);
       void fillNJetsThatPassedWPCutsHistos(std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
 
       void setTaggerInfos();    
@@ -495,9 +495,6 @@ namespace JetTagDQA{
       TH1* m_SV1_pc = nullptr;
       TH1* m_SV1_pu = nullptr;
       
-      TH1* m_DL1dv00_pb = nullptr;
-      TH1* m_DL1dv00_pc = nullptr;
-      TH1* m_DL1dv00_pu = nullptr;
       TH1* m_DL1dv01_pb = nullptr;
       TH1* m_DL1dv01_pc = nullptr;
       TH1* m_DL1dv01_pu = nullptr;
@@ -505,13 +502,10 @@ namespace JetTagDQA{
       TH1* m_DL1r_pc = nullptr;
       TH1* m_DL1r_pu = nullptr;
 
-      TH1* m_GN1_pb = nullptr;
-      TH1* m_GN1_pc = nullptr;
-      TH1* m_GN1_pu = nullptr;
-
-      TH1* m_GN2v00_pb = nullptr;
-      TH1* m_GN2v00_pc = nullptr;
-      TH1* m_GN2v00_pu = nullptr;
+      TH1* m_GN2v01_pb = nullptr;
+      TH1* m_GN2v01_pc = nullptr;
+      TH1* m_GN2v01_pu = nullptr;
+      TH1* m_GN2v01_ptau = nullptr;
 
       TH1* m_GN2Xv01_phbb = nullptr;
       TH1* m_GN2Xv01_phcc = nullptr;
@@ -574,20 +568,17 @@ namespace JetTagDQA{
       std::map<std::string, double> m_DIPS_workingPoints;
       std::map<std::string, double> m_SV1_workingPoints;
       std::map<std::string, double> m_JetFitter_workingPoints;
-      std::map<std::string, double> m_DL1dv00_workingPoints;
       std::map<std::string, double> m_DL1dv01_workingPoints;
       std::map<std::string, double> m_DL1r_workingPoints;
-      std::map<std::string, double> m_GN1_workingPoints;
-      std::map<std::string, double> m_GN2v00_workingPoints;
+      std::map<std::string, double> m_GN2v01_workingPoints;
       std::map<std::string, double> m_GN2Xv01_workingPoints;
 
       double m_RNNIP_fc = 0.0;
       double m_DIPS_fc = 0.0;
-      double m_DL1dv00_fc = 0.0;
       double m_DL1dv01_fc = 0.0;
       double m_DL1r_fc = 0.0;
-      double m_GN1_fc = 0.0;
-      double m_GN2v00_fc = 0.0;
+      double m_GN2v01_fc = 0.2;
+      double m_GN2v01_ftau = 0.01;
       double m_GN2Xv01_hcc_fc = 0.0;
       double m_GN2Xv01_top_fc = 0.0;
       std::map<std::string, TH1*> m_weight_histos; 
@@ -600,7 +591,7 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the jvt and TMP cuts
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
-      void setTaggerNames(const std::string& dipsName, const std::string& DL1dv00Name, const std::string& DL1dv01Name, const std::string& GN1Name, const std::string& GN2v00Name, const std::string& GN2Xv01Name);
+      void setTaggerNames(const std::string& dipsName, const std::string& DL1dv01Name, const std::string& GN2v01Name, const std::string& GN2Xv01Name);
 
       // jvt variables 
       bool m_JVT_defined;
@@ -632,10 +623,8 @@ namespace JetTagDQA{
 
       // tagger names
       std::string m_dipsName;
-      std::string m_DL1dv00Name;
       std::string m_DL1dv01Name;
-      std::string m_GN1Name;
-      std::string m_GN2v00Name;
+      std::string m_GN2v01Name;
       std::string m_GN2Xv01Name;
   
   };

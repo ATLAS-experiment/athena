@@ -6,6 +6,7 @@ log = logging.getLogger("TriggerMenuMT.HLT.Jet.JetChainSequences")
 from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+import functools
 
 def jetEJsMenuSequence(flags, jetsIn):
     
@@ -35,7 +36,9 @@ def jetEJsMenuSequence(flags, jetsIn):
         )
     )
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetEJsHypoToolFromDict)
+    def makejetEJsMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetEJsHypoToolFromDict)
+    return functools.partial(makejetEJsMenuSequence)
 
 def jetCRVARMenuSequence(flags, jetsIn):
 
@@ -61,8 +64,10 @@ def jetCRVARMenuSequence(flags, jetsIn):
             Cells  = cellsin
         )
     )
+    def makejetCRVARMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRVARHypoToolFromDict)
+    return functools.partial(makejetCRVARMenuSequence)
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRVARHypoToolFromDict)
 
 def jetCRMenuSequence(flags, jetsIn):
 
@@ -89,5 +94,9 @@ def jetCRMenuSequence(flags, jetsIn):
             Cells  = cellsin
         )
     )
+    
+    def makejetCRMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRHypoToolFromDict)
+    
+    return functools.partial(makejetCRMenuSequence)
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRHypoToolFromDict)
