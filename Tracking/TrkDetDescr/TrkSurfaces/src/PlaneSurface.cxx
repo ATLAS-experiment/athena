@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -209,6 +209,8 @@ Trk::PlaneSurface::localToGlobal(const Amg::Vector2D& locpos,
   glopos = transform() * loc3Dframe;
 }
 
+// Avoid out-of-line Eigen calls
+ATH_FLATTEN
 bool
 Trk::PlaneSurface::globalToLocal(const Amg::Vector3D& glopos,
                                       const Amg::Vector3D&,
@@ -264,6 +266,7 @@ Trk::PlaneSurface::globalToLocalDirection(const Amg::Vector3D& glodir, Trk::Loca
   ldir = Trk::LocalDirection(std::atan2(d.z(), d.x()), std::atan2(d.z(), d.y()));
 }
 
+ATH_FLATTEN
 bool
 Trk::PlaneSurface::isOnSurface(const Amg::Vector3D& glopo,
                                const Trk::BoundaryCheck& bchk,
