@@ -21,11 +21,10 @@ l1seeds = { 'low'  : \
                 'L1_JPSI-1M5-eEM9',\
                 'L1_MU8F',\
                 'L1_ZeroBias',\
-              #  'L1_ZB_eEM18'
                 ],\
              'medium' : \
                [
-                'L1_2eEM18L',\
+                'L1_2eEM18',\
                 'L1_2MU3V',\
                 'L1_BPH-0DR3-eEM9jJ40_2MU3V',\
                 'L1_BPH-0DR3-eEM9jJ40_MU5VF',\
