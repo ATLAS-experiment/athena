@@ -28,7 +28,7 @@ StatusCode TrigL2LayerNumberTool::initialize() {
 
   StatusCode sc = AthAlgTool::initialize();
 
-  ATH_MSG_INFO("In initialize...");
+  ATH_MSG_DEBUG("In initialize...");
 
   sc = detStore()->retrieve(m_pixelId, "PixelID");
   if (sc.isFailure()) {
@@ -70,14 +70,14 @@ StatusCode TrigL2LayerNumberTool::initialize() {
   else {
     createModuleHashMap(m_hashMap);
 
-    ATH_MSG_INFO("Total number of unique silicon layers = "<<m_hashMap.size());
+    ATH_MSG_DEBUG("Total number of unique silicon layers = "<<m_hashMap.size());
 
     m_MaxSiliconLayerNum = (int)m_hashMap.size();
     m_OffsetEndcapPixels = m_LastBarrelLayer;
   }
 
   
-  ATH_MSG_INFO("TrigL2LayerNumberTool initialized ");
+  ATH_MSG_DEBUG("TrigL2LayerNumberTool initialized ");
 
   report();
 
@@ -92,11 +92,11 @@ StatusCode TrigL2LayerNumberTool::finalize()
 
 void TrigL2LayerNumberTool::report() const {
 
-  ATH_MSG_INFO("TrigL2 Layer numbering scheme:");
-  ATH_MSG_INFO("Total number of layers = "<<maxSiliconLayerNum());
-  ATH_MSG_INFO("OffsetEndcapPixels     = "<<offsetEndcapPixels());
-  ATH_MSG_INFO("OffsetBarrelSCT        = "<<offsetBarrelSCT());
-  ATH_MSG_INFO("OffsetEndcapSCT        = "<<offsetEndcapSCT());
+  ATH_MSG_DEBUG("TrigL2 Layer numbering scheme:");
+  ATH_MSG_DEBUG("Total number of layers = "<<maxSiliconLayerNum());
+  ATH_MSG_DEBUG("OffsetEndcapPixels     = "<<offsetEndcapPixels());
+  ATH_MSG_DEBUG("OffsetBarrelSCT        = "<<offsetBarrelSCT());
+  ATH_MSG_DEBUG("OffsetEndcapSCT        = "<<offsetEndcapSCT());
 }
 
 void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >& hashMap) {
@@ -208,7 +208,7 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
 
   int M = (layerId-m_LastBarrelLayer)/2;
 
-  ATH_MSG_INFO("List of unique layers in Pixel and SCT :");
+  ATH_MSG_DEBUG("List of unique layers in Pixel and SCT :");
   for(int l=0;l<layerId;l++) {
 
     int oldL = l;
@@ -220,11 +220,11 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
     }
 
     if(m_layerGeometry[l].m_subdet==1) {
-      ATH_MSG_INFO("Layer "<<l<<" ("<<oldL<<") : PIX, reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<
+      ATH_MSG_DEBUG("Layer "<<l<<" ("<<oldL<<") : PIX, reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<
 		   " "<<m_layerGeometry[l].m_maxBound);
     }
     if(m_layerGeometry[l].m_subdet==2) {
-      ATH_MSG_INFO("Layer "<<l<<" ("<<oldL<<") : SCT, reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<
+      ATH_MSG_DEBUG("Layer "<<l<<" ("<<oldL<<") : SCT, reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<
 		   " "<<m_layerGeometry[l].m_maxBound);
     }
   }
