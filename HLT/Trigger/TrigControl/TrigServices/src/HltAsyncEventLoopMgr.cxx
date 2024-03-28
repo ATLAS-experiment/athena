@@ -1572,7 +1572,7 @@ StatusCode HltAsyncEventLoopMgr::processFinishedEvent()
   if (check("Failed to retrieve the HLTResult DataObject", HLT::OnlineErrorCode::NO_HLT_RESULT)) {return sc;}
 
   // Check for result truncation
-  if (!hltResult->getTruncatedModuleIds().empty()) {sc = StatusCode::FAILURE;}
+  if (!hltResult->getTruncatedModuleIds().empty() && hltResult->severeTruncation()) {sc = StatusCode::FAILURE;}
   if (check("HLT result truncation", HLT::OnlineErrorCode::RESULT_TRUNCATION)) {return sc;}
 
   // Convert the HLT result to the output data format
