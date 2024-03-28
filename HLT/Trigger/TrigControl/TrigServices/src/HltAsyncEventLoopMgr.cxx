@@ -33,14 +33,12 @@
 #include "eformat/StreamTag.h"
 #include "owl/time.h"
 
-// Boost includes
-#include <boost/filesystem.hpp>
-
 // ROOT includes
 #include "TROOT.h"
 #include "TSystem.h"
 
 // System includes
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -447,18 +445,18 @@ StatusCode HltAsyncEventLoopMgr::hltUpdateAfterFork(const ptree& /*pt*/)
   // Nothing happens if the online TrigMonTHistSvc is used as there are no output files.
   SmartIF<IIoComponent> histsvc = serviceLocator()->service("THistSvc", /*createIf=*/ false).as<IIoComponent>();
   if ( !m_ioCompMgr->io_retrieve(histsvc.get()).empty() ) {
-    boost::filesystem::path worker_dir = boost::filesystem::absolute("athenaHLT_workers");
+    std::filesystem::path worker_dir = std::filesystem::absolute("athenaHLT_workers");
     std::ostringstream oss;
     oss << "athenaHLT-" << std::setfill('0') << std::setw(2) << m_workerID;
     worker_dir /= oss.str();
     // Delete worker directory if it exists already
-    if ( boost::filesystem::exists(worker_dir) ) {
-      if ( boost::filesystem::remove_all(worker_dir) == 0 ) {
+    if ( std::filesystem::exists(worker_dir) ) {
+      if ( std::filesystem::remove_all(worker_dir) == 0 ) {
         ATH_MSG_FATAL("Cannot delete previous worker directory " << worker_dir);
         return StatusCode::FAILURE;
       }
     }
-    if ( !boost::filesystem::create_directories(worker_dir) ) {
+    if ( !std::filesystem::create_directories(worker_dir) ) {
       ATH_MSG_FATAL("Cannot create worker directory " << worker_dir);
       return StatusCode::FAILURE;
     }
