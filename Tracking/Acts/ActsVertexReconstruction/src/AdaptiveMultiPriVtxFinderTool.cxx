@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/AdaptiveMultiPriVtxFinderTool.h"
@@ -12,7 +12,6 @@
 
 // PACKAGE
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsInterop/Logger.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 
 // ACTS
@@ -62,18 +61,24 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
 
     ATH_CHECK( m_extrapolationTool.retrieve() );
 
-    Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry } );
+    // Logger
+    m_logger = makeActsAthenaLogger(this, "Acts");
+    
+    Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry },
+			       logger().cloneWithSuffix("Navigator"));
 
     auto bField = std::make_shared<ATLASMagneticFieldWrapper>();
     auto stepper = Acts::EigenStepper<>(bField);
     m_propagator = std::make_shared<Propagator>(std::move(stepper), 
-      std::move(navigator));
+						std::move(navigator),
+						logger().cloneWithSuffix("Prop"));
 
     // IP Estimator
     Acts::ImpactPointEstimator::Config ipEstCfg(bField, m_propagator);
     ipEstCfg.maxIterations = m_ipEstMaxIterations;
     ipEstCfg.precision = m_ipEstPrecision;
-    Acts::ImpactPointEstimator ipEst(ipEstCfg);
+    Acts::ImpactPointEstimator ipEst(ipEstCfg,
+				     logger().cloneWithSuffix("ImpactPointEstimator"));
 
     Acts::AnnealingUtility::Config annealingConfig;
     annealingConfig.setOfTemperatures = m_annealingTemps;
@@ -84,7 +89,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     TrackLinearizer::Config ltConfig;
     ltConfig.bField = bField;
     ltConfig.propagator = m_propagator;
-    m_linearizer.emplace(ltConfig);
+    m_linearizer.emplace(ltConfig, logger().cloneWithSuffix("Linearizer"));
 
     // Vertex fitter configuration
     VertexFitter::Config fitterCfg(ipEst);
@@ -96,7 +101,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     fitterCfg.doSmoothing = m_fitterDoSmoothing;
     fitterCfg.extractParameters.connect<&TrackWrapper::extractParameters>();
     fitterCfg.trackLinearizer.connect<&TrackLinearizer::linearizeTrack>(&*m_linearizer);
-    VertexFitter fitter(fitterCfg);
+    VertexFitter fitter(fitterCfg, logger().cloneWithSuffix("Fitter"));
 
     // Set up Gaussian track density
     Acts::GaussianTrackDensity::Config trackDensityConfig;
@@ -127,7 +132,8 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     finderConfig.useVertexCovForIPEstimation = m_useVertexCovForIPEstimation;
     finderConfig.useSeedConstraint = m_useSeedConstraint;
     finderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
-    m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig));
+    m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig),
+						    logger().cloneWithSuffix("Finder"));
     
     ATH_MSG_INFO("ACTS AMVF tool successfully initialized");
     return StatusCode::SUCCESS;

@@ -12,7 +12,6 @@
 
 // PACKAGE
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsInterop/Logger.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 
 // ACTS
@@ -54,6 +53,8 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   ATH_CHECK(m_beamSpotKey.initialize());
   ATH_CHECK(m_trkFilter.retrieve());
 
+  m_logger = makeActsAthenaLogger(this, "Acts");
+  
   ATH_MSG_INFO("Initializing ACTS Iterative Vertex Finder tool");
   ATH_CHECK( m_trackingGeometryTool.retrieve() );
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry
@@ -61,30 +62,33 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
 
   ATH_CHECK( m_extrapolationTool.retrieve() );
 
-  Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry } );
+  Acts::Navigator navigator( Acts::Navigator::Config{ trackingGeometry },
+			     logger().cloneWithSuffix("Navigator"));
 
   m_bField = std::make_shared<ATLASMagneticFieldWrapper>();
   auto stepper = Acts::EigenStepper<>(m_bField);
   m_propagator = std::make_shared<Propagator>(std::move(stepper),
-						 std::move(navigator));
+					      std::move(navigator),
+					      logger().cloneWithSuffix("Prop"));
   // IP Estimator
   Acts::ImpactPointEstimator::Config ipEstCfg(m_bField, m_propagator);
   ipEstCfg.maxIterations = m_ipEstMaxIterations;
   ipEstCfg.precision = m_ipEstPrecision;
-  Acts::ImpactPointEstimator ipEst(ipEstCfg);
+  Acts::ImpactPointEstimator ipEst(ipEstCfg,
+				   logger().cloneWithSuffix("ImpactPointEstimator"));
 
   // Linearizer for Acts::BoundParameters type test
   TrackLinearizer::Config ltConfig;
   ltConfig.bField = m_bField;
   ltConfig.propagator = m_propagator;
-  m_linearizer.emplace(ltConfig);
+  m_linearizer.emplace(ltConfig, logger().cloneWithSuffix("Linearizer"));
 
   // Full Billoir Vertex fitter setup
   VertexFitter::Config fitterCfg;
   fitterCfg.maxIterations = m_fitterMaxIterations;
   fitterCfg.extractParameters.connect<&TrackWrapper::extractParameters>();
   fitterCfg.trackLinearizer.connect<&TrackLinearizer::linearizeTrack>(&*m_linearizer);
-  VertexFitter fitter(fitterCfg);
+  VertexFitter fitter(fitterCfg, logger().cloneWithSuffix("Fitter"));
 
 
   // Seed finder setup
@@ -114,7 +118,7 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
   finderConfig.cutOffTrackWeight = m_cutOffTrackWeight;
   finderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
   finderConfig.trackLinearizer.connect<&TrackLinearizer::linearizeTrack>(&*m_linearizer);
-  m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig)); 
+  m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig), logger().cloneWithSuffix("Finder")); 
 
   ATH_MSG_INFO("ACTS Iterative Vertex Finder tool successfully initialized");
   return StatusCode::SUCCESS;
