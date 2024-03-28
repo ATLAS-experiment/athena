@@ -152,9 +152,9 @@ def FastIDKillerToolCfg(flags, name="G4UA::FastIDKillerTool", **kwargs):
     #     for prop,value in flags.Sim.UserActionConfig[name].iteritems():
     #         kwargs.setdefault(prop,value)
     from AthenaCommon.SystemOfUnits import MeV, mm
-    kwargs.setdefault("energyCut", 100.*MeV); # Energy cut in MeV
-    kwargs.setdefault("isDalek", False);
-    kwargs.setdefault("R", 1150.*mm); # ID outer radius
-    kwargs.setdefault("Z", 3490.*mm); # ID maximum Z coordiate
+    kwargs.setdefault("energyCut", 100.*MeV) # Energy cut in MeV
+    kwargs.setdefault("isDalek", False)
+    kwargs.setdefault("R", 1150.*mm) # ID outer radius
+    kwargs.setdefault("Z", 3490.*mm) # ID maximum Z coordiate
     result.setPrivateTools(CompFactory.G4UA.FastIDKillerTool(name, **kwargs))
     return result
