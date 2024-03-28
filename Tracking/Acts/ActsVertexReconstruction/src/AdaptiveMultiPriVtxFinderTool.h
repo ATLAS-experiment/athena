@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKPRIVTXFINDERTOOL_ADAPTIVEMULTIPRIVTXFINDERTOOL_H
@@ -21,6 +21,7 @@
 // ReferenceWrapperAnyCompat in clang builds due the is_constructable
 // specialization defined there getting implicitly instantiated earlier.
 #include "Acts/Propagator/Propagator.hpp"
+#include "ActsInterop/Logger.h"
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
@@ -41,7 +42,6 @@
 #include "Acts/Vertexing/TrackAtVertex.hpp"
 #include "Acts/Vertexing/Vertex.hpp"
 #include "Acts/Vertexing/ImpactPointEstimator.hpp"
-
 
 #include <cmath>
 
@@ -108,6 +108,10 @@ namespace ActsTrk {
       return m_trackingGeometryTool.get();
     }
 
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
+    const Acts::Logger &logger() const { return *m_logger; }
+    
     using Propagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
     using TrackLinearizer = Acts::HelicalTrackLinearizer;
     using VertexFitter = Acts::AdaptiveMultiVertexFitter;

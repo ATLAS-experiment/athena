@@ -21,6 +21,7 @@
 // ReferenceWrapperAnyCompat in clang builds due the is_constructable
 // specialization defined there getting implicitly instantiated earlier.
 #include "Acts/Propagator/Propagator.hpp"
+#include "ActsInterop/Logger.h"
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
@@ -98,6 +99,10 @@ namespace ActsTrk {
 
   private:
 
+     /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger {nullptr};
+    const Acts::Logger &logger() const { return *m_logger; }
+    
     std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
     findVertex(const EventContext& ctx, const std::vector<std::unique_ptr<Trk::ITrackLink>>& trackVector) const;
 
