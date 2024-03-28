@@ -582,12 +582,12 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_OS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
         if self.electrons:
-            if "Particle" or "Truth" in self.electrons:
+            if "Particle" in self.electrons or "Truth" in self.electrons:
                 alg.truthElectrons, alg.truthElectronSelection = config.readNameAndSelection(self.electrons)
             else:
                 alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         if self.muons:
-            if "Particle" or "Truth" in self.electrons:
+            if "Particle" in self.muons or "Truth" in self.muons:
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
@@ -605,12 +605,12 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_SS_{self.step}'
         alg = config.createAlgorithm('CP::ChargeSelectorAlg', thisalg)
         if self.electrons:
-            if "Particle" or "Truth" in self.electrons:
+            if "Particle" in self.electrons or "Truth" in self.electrons:
                 alg.truthElectrons, alg.truthElectronSelection = config.readNameAndSelection(self.electrons)
             else:
                 alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         if self.muons:
-            if "Particle" or "Truth" in self.electrons:
+            if "Particle" in self.muons or "Truth" in self.muons:
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
@@ -630,12 +630,12 @@ class EventSelectionConfig(ConfigBlock):
         thisalg = f'{self.name}_MLL_OSSF_{self.step}'
         alg = config.createAlgorithm('CP::DileptonOSSFInvariantMassWindowSelectorAlg', thisalg)
         if self.electrons:
-            if "Particle" or "Truth" in self.electrons:
+            if "Particle" in self.electrons or "Truth" in self.electrons:
                 alg.truthElectrons, alg.truthElectronSelection = config.readNameAndSelection(self.electrons)
             else:
                 alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
         if self.muons:
-            if "Particle" or "Truth" in self.electrons:
+            if "Particle" in self.muons or "Truth" in self.muons:
                 alg.truthMuons, alg.truthMuonSelection = config.readNameAndSelection(self.muons)
             else:
                 alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
