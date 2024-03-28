@@ -2,13 +2,14 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// GeoShapeConverter.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 // Trk
 #include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
 
+#include <algorithm>
+#include <cmath>
+
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "TrkVolumes/BoundarySurface.h"
 #include "TrkVolumes/CombinedVolumeBounds.h"
 #include "TrkVolumes/CuboidVolumeBounds.h"
@@ -39,190 +40,134 @@
 #include "GeoModelKernel/GeoTubs.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
 
-// #define DEBUG
-#ifdef DEBUG
-#define DEBUG_TRACE(a) \
-    do {               \
-        a              \
-    } while (0)
-#else
-#define DEBUG_TRACE(a) \
-    do {               \
-    } while (0)
-#endif
-
 namespace {
-// commonly used axes
-const Amg::Vector3D gXAxis(1.0, 0.0, 0.0), gYAxis(0.0, 1.0, 0.0),
-    gZAxis(0.0, 0.0, 1.0);
 // commonly used angles, ±90°, 180°
-const double p90deg(90.0 * Gaudi::Units::deg),
-    m90deg(-90.0 * Gaudi::Units::deg), p180deg(180.0 * Gaudi::Units::deg);
+constexpr double p90deg(90.0 * Gaudi::Units::deg),
+                 m90deg(-90.0 * Gaudi::Units::deg), 
+                 p180deg(180.0 * Gaudi::Units::deg);
+                 
+Amg::Transform3D* makeTransform(const Amg::Transform3D& trf) {
+    return std::make_unique<Amg::Transform3D>(trf).release();
+}
 }  // namespace
 
-Trk::CylinderVolumeBounds* Trk::GeoShapeConverter::convert(
-    const GeoTubs* gtubs) {
+namespace Trk {
+GeoShapeConverter::GeoShapeConverter() : AthMessaging{"GeoShapeConverter"} {}
+
+std::unique_ptr<CylinderVolumeBounds> GeoShapeConverter::convert(const GeoTubs* gtubs) {
     // get the dimensions
     double rMin = gtubs->getRMin();
     double rMax = gtubs->getRMax();
     double halflength = gtubs->getZHalfLength();
     // create the volumeBounds
-    return new Trk::CylinderVolumeBounds(rMin, rMax, halflength);
+    return std::make_unique<CylinderVolumeBounds>(rMin, rMax, halflength);
 }
 
-Trk::CylinderVolumeBounds* Trk::GeoShapeConverter::convert(
-    const GeoTube* gtube) {
+std::unique_ptr<CylinderVolumeBounds> GeoShapeConverter::convert(const GeoTube* gtube) {
     // get the dimensions
     double rMin = gtube->getRMin();
     double rMax = gtube->getRMax();
     double halflength = gtube->getZHalfLength();
     // create the volumeBounds
-    return new Trk::CylinderVolumeBounds(rMin, rMax, halflength);
+    return std::make_unique<CylinderVolumeBounds>(rMin, rMax, halflength);
 }
 
-Trk::CylinderVolumeBounds* Trk::GeoShapeConverter::convert(
-    const GeoPcon* gpcon, std::vector<double>& zbounds) {
+std::unique_ptr<CylinderVolumeBounds> GeoShapeConverter::convert(const GeoPcon* gpcon, 
+                                                                 std::vector<double>& zbounds) {
+
     // get the pcon igredients ...
     unsigned int numberOfPlanes = gpcon->getNPlanes();
-    //  std::cout << numberOfPlanes << " planes build this Pcon (pointer: " <<
-    //  gpcon <<") =================" << std::endl;
-    // get teh dimensions
-    double rMin = 10e10;
-    double rMax = 0.;
-    double zMin = 10e10;
-    double zMax = 0.;
+    double rMin{10.e10}, rMax{-10.e10}, zMin{10.e10}, zMax{-10.e10};
 
     for (unsigned int iplane = 0; iplane < numberOfPlanes; ++iplane) {
-
-        zMin =
-            gpcon->getZPlane(iplane) < zMin ? gpcon->getZPlane(iplane) : zMin;
-        zMax =
-            gpcon->getZPlane(iplane) > zMin ? gpcon->getZPlane(iplane) : zMax;
-
-        rMin = gpcon->getRMinPlane(iplane) < rMin ? gpcon->getRMinPlane(iplane)
-                                                  : rMin;
-        rMax = gpcon->getRMaxPlane(iplane) > rMin ? gpcon->getRMaxPlane(iplane)
-                                                  : rMax;
-
-        //    std::cout << " Pcon iplane "  << iplane << "
-        //    gpcon->getZPlane(iplane) " << gpcon->getZPlane(iplane) << " zmin "
-        //    << zMin << " zmax " << zMax << std::endl; std::cout << " Pcon
-        //    iplane "  << iplane << " gpcon->getRminPlane(iplane) " <<
-        //    gpcon->getRMinPlane(iplane) << " rmin " << rMin << "
-        //    gpcon->getRmaxPlane(iplane) " << gpcon->getRMaxPlane(iplane) << "
-        //    rmax " << rMax << std::endl;
+        zMin = std::min(gpcon->getZPlane(iplane), zMin);
+        zMax = std::max(gpcon->getZPlane(iplane), zMax);
+        rMin = std::min(gpcon->getRMinPlane(iplane), rMin);
+        rMax = std::max(gpcon->getRMaxPlane(iplane), rMax);
     }
     zbounds.push_back(zMin);
     zbounds.push_back(zMax);
 
-    return new Trk::CylinderVolumeBounds(rMin, rMax, 0.5 * (zMax - zMin));
+    return std::make_unique<CylinderVolumeBounds>(rMin, rMax,
+                                                  0.5 * (zMax - zMin));
 }
 
-Trk::CuboidVolumeBounds* Trk::GeoShapeConverter::convert(const GeoBox* gbox) {
-
+std::unique_ptr<CuboidVolumeBounds> GeoShapeConverter::convert(const GeoBox* gbox) {
     double halfX = gbox->getXHalfLength();
     double halfY = gbox->getYHalfLength();
     double halfZ = gbox->getZHalfLength();
-
-    return new Trk::CuboidVolumeBounds(halfX, halfY, halfZ);
+    return std::make_unique<CuboidVolumeBounds>(halfX, halfY, halfZ);
 }
 
-Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(
-    const GeoShape* sh, Amg::Transform3D* transf) const {
-    Trk::Volume* vol = nullptr;
+std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh, 
+                                                            const Amg::Transform3D& transf) const {
+    std::unique_ptr<Volume> vol{};
     double tol = 0.1;
 
-    DEBUG_TRACE(std::cout << " translateGeoShape " << sh->type() << std::endl;);
+    ATH_MSG_DEBUG(" translateGeoShape " << sh->type());
 
     if (sh->type() == "Trap") {
         const GeoTrap* trap = dynamic_cast<const GeoTrap*>(sh);
-        Trk::TrapezoidVolumeBounds* volBounds = nullptr;
-        if (trap->getDxdyndzp() < trap->getDxdyndzn())
-            volBounds = new Trk::TrapezoidVolumeBounds(
-                trap->getDxdyndzp(), trap->getDxdyndzn(), trap->getDydzn(),
-                trap->getZHalfLength());
-        else
-            volBounds = new Trk::TrapezoidVolumeBounds(
-                trap->getDxdyndzn(), trap->getDxdyndzp(), trap->getDydzn(),
-                trap->getZHalfLength());
-
-        vol = new Trk::Volume(new Amg::Transform3D(*transf), volBounds);
-
-        return vol;
-    }
-
-    if (sh->type() == "Pgon") {
+        std::unique_ptr<TrapezoidVolumeBounds> volBounds{};
+        if (trap->getDxdyndzp() < trap->getDxdyndzn()) {
+            volBounds = std::make_unique<TrapezoidVolumeBounds>(trap->getDxdyndzp(), 
+                                                                trap->getDxdyndzn(), 
+                                                                trap->getDydzn(),
+                                                                trap->getZHalfLength());
+        } else {
+            volBounds = std::make_unique<TrapezoidVolumeBounds>(trap->getDxdyndzn(), 
+                                                                trap->getDxdyndzp(), 
+                                                                trap->getDydzn(),
+                                                                trap->getZHalfLength());
+        }
+        return std::make_unique<Volume>(makeTransform(transf), volBounds.release());
+    } else if (sh->type() == "Pgon") {
         const GeoPgon* pgon = dynamic_cast<const GeoPgon*>(sh);
-        if (!pgon)
-            return nullptr;
-        double hlz = 0.5 * fabs(pgon->getZPlane(1) - pgon->getZPlane(0));
+        double hlz = 0.5 * std::abs(pgon->getZPlane(1) - pgon->getZPlane(0));
         double phiH = pgon->getDPhi() / (2. * pgon->getNSides());
-        double hly =
-            0.5 * cos(phiH) * (pgon->getRMaxPlane(0) - pgon->getRMinPlane(0));
-        double dly =
-            0.5 * cos(phiH) * (pgon->getRMaxPlane(0) + pgon->getRMinPlane(0));
-        double hlxmin = pgon->getRMinPlane(0) * sin(phiH);
-        double hlxmax = pgon->getRMaxPlane(0) * sin(phiH);
-
+        double hly = 0.5 * std::cos(phiH) * (pgon->getRMaxPlane(0) - pgon->getRMinPlane(0));
+        double dly = 0.5 * std::cos(phiH) * (pgon->getRMaxPlane(0) + pgon->getRMinPlane(0));
+        double hlxmin = pgon->getRMinPlane(0) * std::sin(phiH);
+        double hlxmax = pgon->getRMaxPlane(0) * std::sin(phiH);
         if (pgon->getDPhi() == 2 * M_PI) {
 
-            Trk::CylinderVolumeBounds* volBounds =
-                new Trk::CylinderVolumeBounds(pgon->getRMaxPlane(0), hlz);
-            Trk::CuboidVolumeBounds* subBounds = new Trk::CuboidVolumeBounds(
-                hlxmax + tol, hlxmax + tol, hlz + tol);
-            Trk::Volume* volume =
-                new Trk::Volume(new Amg::Transform3D(*transf), volBounds);
-            Trk::Volume* bVol = new Trk::Volume(nullptr, subBounds);
+           auto volBounds = std::make_unique<CylinderVolumeBounds>(pgon->getRMaxPlane(0), hlz);
+           auto subBounds = std::make_unique<CuboidVolumeBounds>(hlxmax + tol, hlxmax + tol,
+                                                                 hlz + tol);
+            auto volume = std::make_unique<Volume>(makeTransform(transf), volBounds.release());
+            auto bVol = std::make_unique<Volume>(nullptr, subBounds.release());
             const unsigned int nsides(pgon->getNSides());
             const double twicePhiH(2.0 * phiH);
-            const double xTranslationDistance =
-                hlxmax + cos(phiH) * (pgon->getRMaxPlane(0));
-            const Amg::Vector3D translationVector(xTranslationDistance, 0., 0.);
-            const Amg::Translation3D xTranslation(translationVector);
+            const double xTranslationDistance = hlxmax + std::cos(phiH) * (pgon->getRMaxPlane(0));
+
+            const Amg::Translation3D xTranslation{xTranslationDistance, 0., 0.};
             for (unsigned int i = 0; i < nsides; i++) {
                 const double angle = i * twicePhiH;
-                Amg::AngleAxis3D zRotation(angle, gZAxis);
-                const Amg::Transform3D totalTransform =
-                    (*transf) * zRotation * xTranslation;
-
-                // should be equivalent to:
-                // HepGeom::Transform3D
-                // trP(*transf*HepGeom::RotateZ3D(2*i*phiH)*HepGeom::TranslateX3D(hlxmax+cos(phiH)*pgon->getRMaxPlane(0)));
-                Trk::Volume* volS = new Trk::Volume(*bVol, totalTransform);
-                Trk::SubtractedVolumeBounds* combBounds =
-                    new Trk::SubtractedVolumeBounds(volume, volS);
-                volume = new Trk::Volume(nullptr, combBounds);
+                Amg::Transform3D totalTransform = transf * Amg::getRotateZ3D(angle) * xTranslation;
+                auto volS = std::make_unique<Volume>(*bVol, totalTransform);
+                auto combBounds =std::make_unique<SubtractedVolumeBounds>(volume.release(),
+                                                                          volS.release());
+                volume = std::make_unique<Volume>(nullptr, combBounds.release());
             }
-            delete bVol;
             return volume;
         }
 
         if (pgon->getNSides() == 1) {
-            Trk::TrapezoidVolumeBounds* volBounds =
-                new Trk::TrapezoidVolumeBounds(hlxmin, hlxmax, hly, hlz);
-            const Amg::Vector3D translationVector(0.0, dly, 0.0);
-            const Amg::Translation3D yTranslation(translationVector);
-            const Amg::AngleAxis3D zRotation(m90deg, gZAxis);
-            Amg::Transform3D totalTransform =
-                *transf * zRotation * yTranslation;
-            // totalTransform *= zRotation;
-            // totalTransform *= yTranslation;
-            vol = new Trk::Volume(new Amg::Transform3D(totalTransform),
-                                  volBounds);
-            return vol;
+            auto volBounds = std::make_unique<TrapezoidVolumeBounds>(hlxmin, hlxmax, hly, hlz);
+            Amg::Transform3D totalTransform = transf *
+                                              Amg::getRotateZ3D(m90deg) *
+                                              Amg::Translation3D(0., dly, 0.);
+            return std::make_unique<Volume>(makeTransform(std::move(totalTransform)), 
+                                            volBounds.release());
         }
 
         if (pgon->getNSides() == 2) {
-            Trk::CylinderVolumeBounds* cylBounds =
-                new Trk::CylinderVolumeBounds(0, dly + hly, hlz);
-            vol = new Trk::Volume(new Amg::Transform3D(*transf), cylBounds);
-            return vol;
+            auto cylBounds = std::make_unique<CylinderVolumeBounds>(0, dly + hly, hlz);
+            return std::make_unique<Volume>(makeTransform(transf),
+                                            cylBounds.release());
         }
-
         return vol;
-    }
-
-    if (sh->type() == "Trd") {
+    } else if (sh->type() == "Trd") {
         const GeoTrd* trd = dynamic_cast<const GeoTrd*>(sh);
         //
         double x1 = trd->getXHalfLength1();
@@ -231,238 +176,135 @@ Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(
         double y2 = trd->getYHalfLength2();
         double z = trd->getZHalfLength();
         //
-        DEBUG_TRACE(std::cout << " Trd x1 " << x1 << " x2 " << x2 << " y1 "
-                              << y1 << " y2 " << y2 << " z " << z
-                              << std::endl;);
-
+        ATH_MSG_DEBUG(" Trd x1 " << x1 << " x2 " << x2 << " y1 " << y1 << " y2 "
+                                 << y2 << " z " << z);
         // Note this flip comes from the y axis in Tracking -> z axis in
         // Geomodel
-
-        const Amg::AngleAxis3D yzFlip(p90deg, gXAxis);
         if (y1 == y2) {
             if (x1 <= x2) {
-                //
-                // my P.K. guess
-                //
-                Trk::TrapezoidVolumeBounds* volBounds =
-                    new Trk::TrapezoidVolumeBounds(x1, x2, z, y1);
-                Amg::Transform3D totalTransform = (*transf) * yzFlip;
-                vol = new Trk::Volume(new Amg::Transform3D(totalTransform),
-                                      volBounds);
-                DEBUG_TRACE(
-                    std::cout
-                        << " Trd new volume case 1 Trapezoid minHalflengthX "
-                        << volBounds->minHalflengthX() << " maxHalflengthX() "
-                        << volBounds->maxHalflengthX() << std::endl;);
+                auto volBounds = std::make_unique<TrapezoidVolumeBounds>(x1, x2, z, y1);
+                Amg::Transform3D totalTransform = transf * Amg::getRotateX3D(p90deg);
+                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                               volBounds.release());
+                
+                ATH_MSG_DEBUG(" Trd new volume case 1 Trapezoid minHalflengthX "
+                              << volBounds->minHalflengthX()
+                              << " maxHalflengthX() "
+                              << volBounds->maxHalflengthX());
             } else {
 
-                Trk::TrapezoidVolumeBounds* volBounds =
-                    new Trk::TrapezoidVolumeBounds(x2, x1, z, y1);
-                const Amg::AngleAxis3D yFlip(p180deg, gXAxis);
-                const Amg::AngleAxis3D xySign(p180deg, gZAxis);
+                auto volBounds = std::make_unique<TrapezoidVolumeBounds>(x2, x1, z, y1);
+                Amg::Transform3D totalTransform = transf *
+                                                  Amg::getRotateY3D(p180deg) *
+                                                  Amg::getRotateZ3D(p180deg);
+                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                               volBounds.release());
 
-                Amg::Transform3D totalTransform = (*transf) * yFlip * yzFlip;
-                vol = new Trk::Volume(new Amg::Transform3D(totalTransform),
-                                      volBounds);
-
-                DEBUG_TRACE({
-                    std::cout
-                        << " Trd new volume case 2 Trapezoid minHalflengthX "
+                if (msgLvl(MSG::DEBUG)) {
+                    const Amg::Vector3D top{-x1, y1, z}, bottom{-x2, y1, -z},
+                                        top2{x1, y1, z}, bottom2{x2, y1, -z};
+                    ATH_MSG_DEBUG(" Trd new volume case 2 Trapezoid minHalflengthX "
                         << volBounds->minHalflengthX() << " maxHalflengthX() "
-                        << volBounds->maxHalflengthX() << std::endl;
-                    // original local coordinates in Geomodel (check that
-                    // routine is NOT called with the  1,1,1 Matrix)
-                    Amg::Vector3D top(-x1, y1, z);
-                    Amg::Vector3D bottom(-x2, y1, -z);
-                    Amg::Vector3D top2(x1, y1, z);
-                    Amg::Vector3D bottom2(x2, y1, -z);
-
-                    std::cout << " Original topLocal x " << top.x() << " y "
-                              << top.y() << " z " << top.z() << " Radius "
-                              << bottom.perp() << std::endl;
-                    std::cout << " Original bottomLocal x " << bottom.x()
-                              << " y " << bottom.y() << " z " << bottom.z()
-                              << " Radius " << bottom.perp() << std::endl;
-                    Amg::Vector3D topG = (*transf) * top;
-                    Amg::Vector3D bottomG = (*transf) * bottom;
-                    std::cout << " top Global x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    std::cout << " bottom Global x " << bottomG.x() << " y "
-                              << bottomG.y() << " z " << bottomG.z()
-                              << " Radius " << bottomG.perp() << std::endl;
-                    topG = (*transf) * top2;
-                    bottomG = (*transf) * bottom2;
-                    std::cout << " top2 Global x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    std::cout << " bottom2 Global x " << bottomG.x() << " y "
-                              << bottomG.y() << " z " << bottomG.z()
-                              << " Radius " << bottomG.perp() << std::endl;
-
-                    // new local coordinates
-                    Amg::Vector3D topR(-x2, z, y1);
-                    Amg::Vector3D bottomR(-x1, -z, y1);
-                    Amg::Vector3D top2R(x2, z, y1);
-                    Amg::Vector3D bottom2R(x1, -z, y1);
+                        << volBounds->maxHalflengthX());
+                    ATH_MSG_DEBUG(" Original topLocal " << Amg::toString(top) << " Radius " << top.perp());
+                    ATH_MSG_DEBUG(" Original bottomLocal "<< Amg::toString(bottom) << " Radius " << bottom.perp());
+                    Amg::Vector3D topG{transf * top}, bottomG{transf * bottom};
+                    ATH_MSG_DEBUG(" top Global " << Amg::toString(topG)<< " Radius " << topG.perp());
+                    ATH_MSG_DEBUG(" bottom Global " << Amg::toString(bottomG)<< " Radius "<< bottomG.perp());
+                    topG = transf * top2;
+                    bottomG = transf * bottom2;
+                    ATH_MSG_DEBUG(" top2 Global x " << Amg::toString(topG)<< " Radius " << topG.perp());
+                    ATH_MSG_DEBUG(" bottom2 Global " << Amg::toString(bottomG) << " Radius: " << bottomG.perp());
+                    const Amg::Vector3D topR{-x2, z, y1}, bottomR{-x1, -z, y1},
+                                        top2R{x2, z, y1}, bottom2R{x1, -z, y1};
                     topG = totalTransform * topR;
                     bottomG = totalTransform * bottomR;
-                    std::cout << " topR Global x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    std::cout << " bottomR Global x " << bottomG.x() << " y "
-                              << bottomG.y() << " z " << bottomG.z()
-                              << " Radius " << bottomG.perp() << std::endl;
+                    ATH_MSG_DEBUG(" topR Global " << Amg::toString(topG)<< " Radius " << topG.perp());
+                    ATH_MSG_DEBUG(" bottomR Global " << Amg::toString(bottomG)<< " Radius "<< bottomG.perp());
                     topG = totalTransform * top2R;
                     bottomG = totalTransform * bottom2R;
-                    std::cout << " top2R Global x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    std::cout << " bottom2R Global x " << bottomG.x() << " y "
-                              << bottomG.y() << " z " << bottomG.z()
-                              << " Radius " << bottomG.perp() << std::endl;
+                    ATH_MSG_DEBUG(" top2R Global " << Amg::toString(topG) << " Radius "<< topG.perp());
+                    ATH_MSG_DEBUG(" bottom2R Global " << Amg::toString(bottomG)<< " Radius "<< bottomG.perp());
 
-                    std::cout << " Original bottomLocal x " << bottom.x()
-                              << " y " << bottom.y() << " z " << bottom.z()
-                              << " Radius " << bottom.perp() << std::endl;
-                    std::cout << " topLocal x " << topR.x() << " y " << topR.y()
-                              << " z " << topR.z() << " Radius " << topR.perp()
-                              << std::endl;
-                    topG = yFlip * topR;
-                    std::cout << " topLocal Y Flip  x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    const Amg::AngleAxis3D xFlip(p180deg, gYAxis);
-                    topG = xFlip * topR;
-                    std::cout << " topLocal X Flip  x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    const Amg::AngleAxis3D xyFlip(p90deg, gZAxis);
-                    topG = xyFlip * topR;
-                    std::cout << " topLocal XY Flip  x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    topG = yzFlip * topR;
-                    std::cout << " topLocal YZ Flip  x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    const Amg::AngleAxis3D xzFlip(p90deg, gYAxis);
-                    topG = xzFlip * topR;
-                    std::cout << " topLocal XZ Flip  x " << topG.x() << " y "
-                              << topG.y() << " z " << topG.z() << " Radius "
-                              << topG.perp() << std::endl;
-                    topG = xySign * topR;
-                    std::cout << " topLocal XY sign Flip  x " << topG.x()
-                              << " y " << topG.y() << " z " << topG.z()
-                              << " Radius " << topG.perp() << std::endl;
-                });
+                    ATH_MSG_DEBUG(" Original bottomLocal "<< Amg::toString(bottom) << " Radius "<< bottom.perp());
+                    ATH_MSG_DEBUG(" topLocal x " << Amg::toString(topR)<< " Radius " << topR.perp());
+                    topG = Amg::getRotateY3D(p180deg) * topR;
+                    ATH_MSG_DEBUG(" topLocal Y Flip " << Amg::toString(topG)<< " Radius " << topG.perp());
+                    topG = Amg::getRotateY3D(p180deg) * topR;
+                    ATH_MSG_DEBUG(" topLocal X Flip " << Amg::toString(topG) << " Radius "<< topG.perp());
+                    topG = Amg::getRotateZ3D(p90deg) * topR;
+                    ATH_MSG_DEBUG(" topLocal XY Flip " << Amg::toString(topG) << " Radius " << topG.perp());
+                    topG = Amg::getRotateY3D(p180deg) * topR;
+                    ATH_MSG_DEBUG(" topLocal YZ Flip " << Amg::toString(topG) << " Radius " << topG.perp());
+                    topG = Amg::getRotateY3D(p90deg) * topR;
+                    ATH_MSG_DEBUG(" topLocal XZ Flip " << Amg::toString(topG) << " Radius " << topG.perp());
+                    topG = Amg::getRotateY3D(p180deg) * topR;
+                    ATH_MSG_DEBUG(" topLocal XY sign Flip  x "<< Amg::toString(topG) << " Radius " << topG.perp());
+                }
             }
-
             return vol;
         } else if (x1 == x2) {
             if (y1 < y2) {
-                Trk::TrapezoidVolumeBounds* volBounds =
-                    new Trk::TrapezoidVolumeBounds(y1, y2, z, x1);
-                //	    const Amg::AngleAxis3D yRotation(p90deg, gYAxis);
-                //	    const Amg::AngleAxis3D zRotation(p90deg, gZAxis);
-                //	    Amg::Transform3D totalTransform = yRotation *
-                //(*transf) * zRotation;
-                //
-                // my P.K. guess
-                //
-                const Amg::AngleAxis3D xyFlip(p90deg, gZAxis);
-                Amg::Transform3D totalTransform = (*transf) * xyFlip * yzFlip;
-                vol = new Trk::Volume(new Amg::Transform3D(totalTransform),
-                                      volBounds);
-                // original line:
-                // vol = new Trk::Volume(new
-                // HepGeom::Transform3D(HepGeom::RotateY3D(90*CLHEP::deg)*(*transf)*HepGeom::RotateZ3D(90*CLHEP::deg)),
-                // volBounds );
-                DEBUG_TRACE(
-                    std::cout
-                        << " Trd new volume case 3 Trapezoid minHalflengthX "
-                        << volBounds->minHalflengthX() << " maxHalflengthX() "
-                        << volBounds->maxHalflengthX() << std::endl;);
+                std::unique_ptr<TrapezoidVolumeBounds> volBounds =
+                    std::make_unique<TrapezoidVolumeBounds>(y1, y2, z, x1);
+                ATH_MSG_DEBUG(" Trd new volume case 3 Trapezoid minHalflengthX "
+                              << volBounds->minHalflengthX()<< " maxHalflengthX() "
+                              << volBounds->maxHalflengthX());
+                Amg::Transform3D totalTransform = transf *
+                                                  Amg::getRotateZ3D(p90deg) *
+                                                  Amg::getRotateX3D(p90deg);
+                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                               volBounds.release());
+
             } else {
-                Trk::TrapezoidVolumeBounds* volBounds =
-                    new Trk::TrapezoidVolumeBounds(y2, y1, z, x1);
-                //	    const Amg::AngleAxis3D yRotation(p90deg, gYAxis);
-                //	    const Amg::Transform3D totalTransform = yRotation *
-                //(*transf);
-                // my P.K. guess
-                //
-                const Amg::AngleAxis3D xyFlip(p90deg, gZAxis);
-                const Amg::AngleAxis3D yFlip(p180deg, gXAxis);
-                Amg::Transform3D totalTransform =
-                    (*transf) * yFlip * xyFlip * yzFlip;
-                // totalTransform *= (*transf);
-                vol = new Trk::Volume(new Amg::Transform3D(totalTransform),
-                                      volBounds);
-                DEBUG_TRACE(
-                    std::cout
-                        << " Trd new volume case 4 Trapezoid minHalflengthX "
-                        << volBounds->minHalflengthX() << " maxHalflengthX() "
-                        << volBounds->maxHalflengthX() << std::endl;);
+                auto volBounds = std::make_unique<TrapezoidVolumeBounds>(y2, y1, z, x1);
+                ATH_MSG_DEBUG(" Trd new volume case 4 Trapezoid minHalflengthX "
+                              << volBounds->minHalflengthX()
+                              << " maxHalflengthX() "<< volBounds->maxHalflengthX());
+
+                Amg::Transform3D totalTransform =  transf * 
+                                                   Amg::getRotateX3D(p180deg) *
+                                                   Amg::getRotateZ3D(p90deg) * 
+                                                   Amg::getRotateX3D(p90deg);
+                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                               volBounds.release());
             }
             return vol;
         } else {
-            std::cout << "PROBLEM: translating trapezoid: not recognized:" << x1
-                      << "," << x2 << "," << y1 << "," << y2 << "," << z
-                      << std::endl;
+            ATH_MSG_WARNING("PROBLEM: translating trapezoid: not recognized:"
+                            << x1 << "," << x2 << "," << y1 << "," << y2 << ","<< z);
         }
-    }
-
-    if (sh->type() == "Box") {
+    } else if (sh->type() == "Box") {
         const GeoBox* box = dynamic_cast<const GeoBox*>(sh);
         //
         double x = box->getXHalfLength();
         double y = box->getYHalfLength();
         double z = box->getZHalfLength();
-        Trk::CuboidVolumeBounds* volBounds =
-            new Trk::CuboidVolumeBounds(x, y, z);
-        vol = new Trk::Volume(new Amg::Transform3D(*transf), volBounds);
-        return vol;
-        //
-    }
-    if (sh->type() == "Para") {
+        std::unique_ptr<CuboidVolumeBounds> volBounds = std::make_unique<CuboidVolumeBounds>(x, y, z);
+        return std::make_unique<Volume>(makeTransform(transf), volBounds.release());
+    } else if (sh->type() == "Para") {
         const GeoPara* para = dynamic_cast<const GeoPara*>(sh);
         //
         double x = para->getXHalfLength();
         double y = para->getYHalfLength();
         double z = para->getZHalfLength();
-        Trk::CuboidVolumeBounds* volBounds =
-            new Trk::CuboidVolumeBounds(x, y, z);
-        vol = new Trk::Volume(new Amg::Transform3D(*transf), volBounds);
-        return vol;
+        auto volBounds = std::make_unique<CuboidVolumeBounds>(x, y, z);
+        return std::make_unique<Volume>(makeTransform(transf), volBounds.release());
         //
-    }
-    if (sh->type() == "Tube") {
+    } else if (sh->type() == "Tube") {
         const GeoTube* tube = dynamic_cast<const GeoTube*>(sh);
-        double rMin = tube->getRMin();
-        double rMax = tube->getRMax();
-        double z = tube->getZHalfLength();
-        Trk::CylinderVolumeBounds* volBounds =
-            new Trk::CylinderVolumeBounds(rMin, rMax, z);
-        vol = new Trk::Volume(new Amg::Transform3D(*transf), volBounds);
-        return vol;
-    }
-
-    if (sh->type() == "Tubs") {  // non-trivial case - transform!
+        return std::make_unique<Volume>(makeTransform(transf), convert(tube).release());
+    } else if (sh->type() == "Tubs") {  // non-trivial case - transform!
         const GeoTubs* tubs = dynamic_cast<const GeoTubs*>(sh);
         double rMin = tubs->getRMin();
         double rMax = tubs->getRMax();
         double z = tubs->getZHalfLength();
         double aPhi = tubs->getSPhi();
         double dPhi = tubs->getDPhi();
-        Trk::CylinderVolumeBounds* volBounds =
-            new Trk::CylinderVolumeBounds(rMin, rMax, 0.5 * dPhi, z);
-        const Amg::AngleAxis3D zRotation(aPhi + 0.5 * dPhi, gZAxis);
-        Amg::Transform3D totalTransform((*transf) * zRotation);
-        vol = new Trk::Volume(new Amg::Transform3D(totalTransform), volBounds);
-        return vol;
-    }
-
-    if (sh->type() == "Cons") {
+        auto volBounds = std::make_unique<CylinderVolumeBounds>(rMin, rMax, 0.5 * dPhi, z);
+        Amg::Transform3D totalTransform(transf * Amg::getRotateZ3D(aPhi + 0.5 * dPhi));
+        return std::make_unique<Volume>(makeTransform(std::move(totalTransform)), volBounds.release());
+    } else if (sh->type() == "Cons") {
         const GeoCons* cons = dynamic_cast<const GeoCons*>(sh);
         double rMin1 = cons->getRMin1();
         double rMin2 = cons->getRMin2();
@@ -473,340 +315,254 @@ Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(
         double dPhi = cons->getDPhi();
         // translate into tube with average radius
         if (dPhi == 2 * M_PI) {
-            Trk::CylinderVolumeBounds* volBounds =
-                new Trk::CylinderVolumeBounds(0.5 * (rMin1 + rMin2),
-                                              0.5 * (rMax1 + rMax2), z);
-            vol = new Trk::Volume(new Amg::Transform3D(*transf), volBounds);
-            return vol;
+            auto volBounds =std::make_unique<CylinderVolumeBounds>(0.5 * (rMin1 + rMin2), 
+                                                                   0.5 * (rMax1 + rMax2), z);
+            return std::make_unique<Volume>(makeTransform(transf),
+                                            volBounds.release());
         } else {
-            Trk::CylinderVolumeBounds* volBounds =
-                new Trk::CylinderVolumeBounds(0.5 * (rMin1 + rMin2),
-                                              0.5 * (rMax1 + rMax2), 0.5 * dPhi,
-                                              z);
-            const Amg::AngleAxis3D zRotation(aPhi + 0.5 * dPhi, gZAxis);
-            Amg::Transform3D totalTransform((*transf) * zRotation);
-            vol = new Trk::Volume(new Amg::Transform3D(totalTransform),
-                                  volBounds);
-            return vol;
+            auto volBounds =std::make_unique<CylinderVolumeBounds>(0.5 * (rMin1 + rMin2),
+                                                                   0.5 * (rMax1 + rMax2),
+                                                                   0.5 * dPhi, z);
+            Amg::Transform3D totalTransform = transf * Amg::getRotateZ3D(aPhi + 0.5 * dPhi);
+            return std::make_unique<Volume>(makeTransform(std::move(totalTransform)), 
+                                            volBounds.release());
         }
-    }
-
-    if (sh->type() == "Pcon") {
+    } else if (sh->type() == "Pcon") {
         const GeoPcon* con = dynamic_cast<const GeoPcon*>(sh);
-        if (!con)
-            return nullptr;
-        Trk::CylinderVolumeBounds* volBounds = nullptr;
+        std::unique_ptr<CylinderVolumeBounds> volBounds{};
         double aPhi = con->getSPhi();
         double dPhi = con->getDPhi();
         double z1 = con->getZPlane(0);
         double r1 = con->getRMinPlane(0);
         double R1 = con->getRMaxPlane(0);
-        std::vector<Trk::Volume*> cyls;
+        std::vector<std::unique_ptr<Volume>> cyls;
         const unsigned int nPlanes = con->getNPlanes();
-        DEBUG_TRACE(std::cout << " convert pcon aPhi " << aPhi << " dPhi "
-                              << dPhi << " z1 " << z1 << " r1 " << r1 << " R1 "
-                              << R1 << " nPlanes " << nPlanes << std::endl;);
+        ATH_MSG_DEBUG(" convert pcon aPhi " << aPhi << " dPhi " << dPhi << " z1 " << z1 << " r1 "
+                      << r1 << " R1 " << R1 << " nPlanes " << nPlanes);
         for (unsigned int iv = 1; iv < nPlanes; iv++) {
             double z2 = con->getZPlane(iv);
             double r2 = con->getRMinPlane(iv);
             double R2 = con->getRMaxPlane(iv);
             double zshift = 0.5 * (z1 + z2);
-            double hz = 0.5 * fabs(z1 - z2);
-            double rmin = fmax(r1, r2);
-            double rmax = sqrt(
-                (R1 * R1 + R1 * R2 + R2 * R2 - r1 * r1 - r1 * r2 - r2 * r2) /
-                    3 +
-                rmin * rmin);
-            DEBUG_TRACE(std::cout << " iPlane " << iv << " z2 " << z2 << " r2 "
-                                  << r2 << " R2 " << R2 << " zshift " << zshift
-                                  << " hz " << hz << " rmin " << rmin
-                                  << " rmax " << rmax << std::endl;);
+            double hz = 0.5 * std::abs(z1 - z2);
+            double rmin = std::max(r1, r2);
+            double rmax = std::sqrt((R1 * R1 + R1 * R2 + R2 * R2 - r1 * r1 - r1 * r2 - r2 * r2) / 3 + rmin * rmin);
+            ATH_MSG_DEBUG(" iPlane " << iv << " z2 " << z2 << " r2 " << r2 << " R2 " << R2 << " zshift " << zshift
+                                     << " hz " << hz << " rmin " << rmin << " rmax " << rmax);
             double dz = con->getZPlane(iv) - con->getZPlane(iv - 1);
             double drMin = con->getRMinPlane(iv) - con->getRMinPlane(iv - 1);
             double drMax = con->getRMaxPlane(iv) - con->getRMaxPlane(iv - 1);
             int nSteps = 1;
-            if (fabs(dz) > 1 && (fabs(drMin) > 0.1 * fabs(dz) ||
-                                 fabs(drMax) > 0.1 * fabs(dz))) {
-                double dMax = fabs(dz);
-                if (fabs(drMin) > dMax)
-                    dMax = fabs(drMin);
-                if (fabs(drMax) > dMax)
-                    dMax = fabs(drMax);
-                nSteps = dMax / 50.;
-                //         nSteps = dMax/100.;
-                if (nSteps < 2)
-                    nSteps = 2;
-                if (nSteps > 20)
-                    nSteps = 20;
-                DEBUG_TRACE(std::cout << " Now " << nSteps
-                                      << " cylinders should be created " << dz
-                                      << " drMin " << drMin << " drMax "
-                                      << drMax << " splopeMin " << drMin / dz
-                                      << " slopeMax " << drMax / dz
-                                      << std::endl;);
+            if (std::abs(dz) > 1 && (std::abs(drMin) > 0.1 * std::abs(dz) ||
+                                     std::abs(drMax) > 0.1 * std::abs(dz))) {
+                double dMax = std::abs(dz);
+                dMax = std::max(std::abs(drMin), dMax);
+                dMax = std::max(std::abs(drMax), dMax);
+                nSteps = std::clamp(dMax / 50., 2., 20.);
+                ATH_MSG_DEBUG(" Now "
+                              << nSteps << " cylinders should be created " << dz
+                              << " drMin " << drMin << " drMax " << drMax
+                              << " splopeMin " << drMin / dz << " slopeMax "
+                              << drMax / dz);
             }
-            //      nSteps = 1;
-
             for (int j = 0; j < nSteps; j++) {
-
-                // divide volume into nStep cylinders
-
+                /// divide volume into nStep cylinders
                 double zStep = (0.5 + j) * dz / nSteps;
                 if (nSteps > 1) {
-                    hz = 0.5 * fabs(z1 - z2) / nSteps;
+                    hz = 0.5 * std::abs(z1 - z2) / nSteps;
                     zshift = z1 + zStep;
                     rmin = r1 + drMin * zStep / dz;
                     rmax = R1 + drMax * zStep / dz;
                 }
-                DEBUG_TRACE(std::cout << " cylinder " << j << " zshift "
-                                      << zshift << " rmin " << rmin << " rmax "
-                                      << rmax << " hz " << hz << std::endl;);
+                ATH_MSG_DEBUG(" cylinder " << j << " zshift " << zshift
+                                           << " rmin " << rmin << " rmax "
+                                           << rmax << " hz " << hz);
                 // translate into tube sector
                 if (dPhi == 2 * M_PI) {
-                    volBounds = new Trk::CylinderVolumeBounds(rmin, rmax, hz);
-                    Amg::Vector3D translationVector(0.0, 0.0, zshift);
-                    Amg::Translation3D zTranslation(translationVector);
-                    Amg::Transform3D totalTransform(*transf * zTranslation);
-                    cyls.push_back(new Trk::Volume(
-                        new Amg::Transform3D(totalTransform), volBounds));
+                    volBounds = std::make_unique<CylinderVolumeBounds>(rmin, rmax, hz);
+                    Amg::Transform3D totalTransform = transf * Amg::Translation3D{0., 0., zshift};
+                    cyls.emplace_back(std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                                               volBounds.release()));
                 } else {
-                    volBounds = new Trk::CylinderVolumeBounds(rmin, rmax,
-                                                              0.5 * dPhi, hz);
-                    Amg::Vector3D translationVector(0.0, 0.0, zshift);
-                    Amg::Translation3D zTranslation(translationVector);
-                    const Amg::AngleAxis3D zRotation(aPhi + 0.5 * dPhi, gZAxis);
-                    Amg::Transform3D totalTransform(*transf * zTranslation *
-                                                    zRotation);
-                    cyls.push_back(new Trk::Volume(
-                        new Amg::Transform3D(totalTransform), volBounds));
+                    volBounds = std::make_unique<CylinderVolumeBounds>(rmin, rmax, 0.5 * dPhi, hz);
+                    Amg::Transform3D totalTransform = transf * Amg::Translation3D{0., 0., zshift} *
+                                                      Amg::getRotateZ3D(aPhi + 0.5 * dPhi);
+                    cyls.emplace_back(std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                                               volBounds.release()));
                 }
             }  // end loop over steps
             z1 = z2;
             r1 = r2;
             R1 = R2;
         }
-        if (cyls.size() < 2)
-            return cyls[0];
-        else {
-            Trk::CombinedVolumeBounds* comb =
-                new Trk::CombinedVolumeBounds(cyls[0], cyls[1], false);
-            Trk::Volume* combVol = new Trk::Volume(nullptr, comb);
-            unsigned int ic = 2;
-            while (ic < cyls.size()) {
-                comb = new Trk::CombinedVolumeBounds(combVol, cyls[ic], false);
-                combVol = new Trk::Volume(nullptr, comb);
-                ic++;
+
+        if (cyls.size() < 2) {
+            return std::move(cyls[0]);
+        } else {
+            auto comb =std::make_unique<CombinedVolumeBounds>(cyls[0].release(), cyls[1].release(), false);
+            std::unique_ptr<Volume> combVol = std::make_unique<Volume>(nullptr, comb.release());
+            for (unsigned int ic = 2; ic < cyls.size(); ++ic) {
+                comb = std::make_unique<CombinedVolumeBounds>(combVol.release(), cyls[ic].release(), false);
+                combVol = std::make_unique<Volume>(nullptr, comb.release());
             }
             return combVol;
         }
-    }
-
-    if (sh->type() == "SimplePolygonBrep") {
-        const GeoSimplePolygonBrep* spb =
-            dynamic_cast<const GeoSimplePolygonBrep*>(sh);
-        if (!spb)
-            return nullptr;
+    } else if (sh->type() == "SimplePolygonBrep") {
+        const GeoSimplePolygonBrep* spb = dynamic_cast<const GeoSimplePolygonBrep*>(sh);
         unsigned int nv = spb->getNVertices();
         std::vector<std::pair<double, double>> ivtx(nv);
         for (unsigned int iv = 0; iv < nv; iv++) {
-            ivtx[iv] = std::pair<double, double>(spb->getXVertex(iv),
-                                                 spb->getYVertex(iv));
-            DEBUG_TRACE(std::cout << " SimplePolygonBrep  x "
-                                  << spb->getXVertex(iv) << " y "
-                                  << spb->getYVertex(iv) << " z "
-                                  << spb->getDZ() << std::endl;);
+            ivtx[iv] = std::make_pair(spb->getXVertex(iv), spb->getYVertex(iv));
+            ATH_MSG_DEBUG(" SimplePolygonBrep  x "<< spb->getXVertex(iv) << " y " << spb->getYVertex(iv)
+                          << " z " << spb->getDZ());
         }
         // translate into trapezoid or double trapezoid if possible
         if (nv == 4 || nv == 6) {
             std::vector<double> xstep;
             std::vector<std::pair<double, double>> ystep;
             bool trdlike = true;
-            for (unsigned int iv = 0; iv < nv; iv++) {
+            for (unsigned int iv = 0; iv < nv; ++iv) {
                 if (!ystep.size() || spb->getYVertex(iv) > ystep.back().first)
-                    ystep.push_back(std::pair<double, double>(
-                        spb->getYVertex(iv), std::abs(spb->getXVertex(iv))));
+                    ystep.emplace_back(spb->getYVertex(iv),
+                                       std::abs(spb->getXVertex(iv)));
                 else {
-                    std::vector<std::pair<double, double>>::iterator iy =
-                        ystep.begin();
+                    std::vector<std::pair<double, double>>::iterator iy = ystep.begin();
                     while (iy + 1 < ystep.end() &&
                            spb->getYVertex(iv) > (*iy).first + 1.e-3) {
                         ++iy;
                     }
-                    if (spb->getYVertex(iv) < (*iy).first - 1.e-3)
-                        ystep.insert(iy, std::pair<double, double>(
-                                             spb->getYVertex(iv),
-                                             std::abs(spb->getXVertex(iv))));
-                    else if (spb->getYVertex(iv) == (*iy).first &&
-                             std::abs(spb->getXVertex(iv)) != (*iy).second)
+                    if (spb->getYVertex(iv) < (*iy).first - 1.e-3) {
+                        ystep.insert(iy, std::make_pair(spb->getYVertex(iv), std::abs(spb->getXVertex(iv))));
+                    } else if (spb->getYVertex(iv) == (*iy).first &&
+                               std::abs(spb->getXVertex(iv)) != (*iy).second) {
                         trdlike = false;
+                    }
                 }
             }
 
             if (trdlike) {
+                std::unique_ptr<VolumeBounds> volBounds{};
                 if (nv == 4) {
-                    if (ystep[1].second >=
-                        ystep[0].second) {  // expected ordering
-                        Trk::TrapezoidVolumeBounds* volBounds =
-                            new Trk::TrapezoidVolumeBounds(
-                                ystep[0].second, ystep[1].second,
-                                0.5 * (ystep[1].first - ystep[0].first),
-                                spb->getDZ());
-                        return new Trk::Volume(new Amg::Transform3D(*transf),
-                                               volBounds);
+                    if (ystep[1].second >=  ystep[0].second) {  // expected ordering
+                        volBounds = std::make_unique<TrapezoidVolumeBounds>(ystep[0].second, 
+                                                                            ystep[1].second,
+                                                                            0.5 * (ystep[1].first - ystep[0].first),
+                                                                            spb->getDZ());
+                        return std::make_unique<Volume>(makeTransform(transf),
+                                                        volBounds.release());
                     }
                 }
 
                 if (nv == 6) {
                     if (ystep[1].second >= ystep[0].second &&
-                        ystep[2].second >=
-                            ystep[1].second) {  // expected ordering
-                        Trk::DoubleTrapezoidVolumeBounds* volBounds =
-                            new Trk::DoubleTrapezoidVolumeBounds(
-                                ystep[0].second, ystep[1].second,
-                                ystep[2].second,
-                                0.5 * (ystep[1].first - ystep[0].first),
-                                0.5 * (ystep[2].first - ystep[1].first),
-                                spb->getDZ());
-                        Amg::Vector3D ydiff(0., ystep[1].first, 0.);
-                        return new Trk::Volume(
-                            new Amg::Transform3D(*transf *
-                                                 Amg::Translation3D(ydiff)),
-                            volBounds);
+                        ystep[2].second >= ystep[1].second) {  // expected ordering
+                        volBounds = std::make_unique<DoubleTrapezoidVolumeBounds>(ystep[0].second, 
+                                                                                  ystep[1].second,
+                                                                                  ystep[2].second,
+                                                                                  0.5 * (ystep[1].first - ystep[0].first),
+                                                                                  0.5 * (ystep[2].first - ystep[1].first),
+                                                                                  spb->getDZ());
+                        return std::make_unique<Volume>(makeTransform(transf * Amg::Translation3D(0., ystep[1].first, 0.)),
+                                                        volBounds.release());
                     }
                 }
             }  //  not trd-like
         }
-
-        return new Trk::Volume(
-            new Amg::Transform3D(*transf),
-            new Trk::SimplePolygonBrepVolumeBounds(ivtx, spb->getDZ()));
+        auto newBounds =  std::make_unique<SimplePolygonBrepVolumeBounds>(ivtx, spb->getDZ());
+        return std::make_unique<Volume>(makeTransform(transf),
+                                        newBounds.release());
     }
 
-    if (sh->type() == "Subtraction") {
-        const GeoShapeSubtraction* sub =
-            dynamic_cast<const GeoShapeSubtraction*>(sh);
-        if (!sub)
-            return nullptr;
+    else if (sh->type() == "Subtraction") {
+        const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(sh);
+        
         const GeoShape* shA = sub->getOpA();
         const GeoShape* shB = sub->getOpB();
-        Trk::Volume* volA = translateGeoShape(shA, transf);
-        if (!volA)
-            return vol;
-        Trk::Volume* volB = translateGeoShape(shB, transf);
-        if (!volB) {
-            delete volA;
-            return vol;
-        }
-        Trk::SubtractedVolumeBounds* volBounds =
-            new Trk::SubtractedVolumeBounds(volA, volB);
-        vol = new Trk::Volume(nullptr, volBounds);
-        return vol;
-    }
-
-    if (sh->type() == "Union") {
+        std::unique_ptr<Volume> volA = translateGeoShape(shA, transf);
+        std::unique_ptr<Volume> volB = translateGeoShape(shB, transf);
+        auto volBounds = std::make_unique<SubtractedVolumeBounds>(volA.release(),
+                                                                  volB.release());
+        return std::make_unique<Volume>(nullptr, volBounds.release());
+    } else if (sh->type() == "Union") {
         const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(sh);
-        if (!uni)
-            return nullptr;
         const GeoShape* shA = uni->getOpA();
         const GeoShape* shB = uni->getOpB();
-        Trk::Volume* volA = translateGeoShape(shA, transf);
-        if (!volA)
-            return vol;
-        Trk::Volume* volB = translateGeoShape(shB, transf);
-        if (!volB) {
-            delete volA;
-            return vol;
-        }
-        Trk::CombinedVolumeBounds* volBounds =
-            new Trk::CombinedVolumeBounds(volA, volB, false);
-        vol = new Trk::Volume(nullptr, volBounds);
-        return vol;
-    }
+        std::unique_ptr<Volume> volA = translateGeoShape(shA, transf);
+        std::unique_ptr<Volume> volB = translateGeoShape(shB, transf);
+        auto volBounds = std::make_unique<CombinedVolumeBounds>(volA.release(),
+                                                                volB.release(), false);
+        return std::make_unique<Volume>(nullptr, volBounds.release());
+    } else if (sh->type() == "Intersection") {
+        const GeoShapeIntersection* intersect = dynamic_cast<const GeoShapeIntersection*>(sh);
 
-    if (sh->type() == "Intersection") {
-        const GeoShapeIntersection* intersect =
-            dynamic_cast<const GeoShapeIntersection*>(sh);
-        if (!intersect)
-            return nullptr;
         const GeoShape* shA = intersect->getOpA();
         const GeoShape* shB = intersect->getOpB();
-        Trk::Volume* volA = translateGeoShape(shA, transf);
-        if (!volA)
-            return vol;
-        Trk::Volume* volB = translateGeoShape(shB, transf);
-        if (!volB) {
-            delete volA;
-            return vol;
-        }
-        Trk::CombinedVolumeBounds* volBounds =
-            new Trk::CombinedVolumeBounds(volA, volB, true);
-        vol = new Trk::Volume(nullptr, volBounds);
-        return vol;
+        std::unique_ptr<Volume> volA{translateGeoShape(shA, transf)};
+        std::unique_ptr<Volume> volB{translateGeoShape(shB, transf)};
+        auto volBounds = std::make_unique<CombinedVolumeBounds>(volA.release(),
+                                                                volB.release(), true);
+        return std::make_unique<Volume>(nullptr, volBounds.release());
     }
 
     if (sh->type() == "Shift") {
         const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(sh);
-        if (!shift)
-            return nullptr;
-        const GeoShape* shA = shift->getOp();
-        // check this!
-        const Amg::Transform3D tr = shift->getX();
-        Amg::Transform3D newtransf = *transf * tr;
-        Trk::Volume* vol = translateGeoShape(shA, &newtransf);
-        return vol;
+        return translateGeoShape(shift->getOp(), transf * shift->getX());
     }
-    std::cout << "shape " << sh->type() << " not recognized, return 0"
-              << std::endl;
-    return vol;
+    ATH_MSG_WARNING("shape " << sh->type() << " not recognized, return 0");
+    return nullptr;
 }
 
-void Trk::GeoShapeConverter::decodeShape(const GeoShape* sh) const {
-    std::cout << "  ";
-    std::cout << "decoding shape:" << sh->type() << std::endl;
+void GeoShapeConverter::decodeShape(const GeoShape* sh) const {
+    ATH_MSG_DEBUG("  ");
+    ATH_MSG_DEBUG("decoding shape:" << sh->type());
 
     if (sh->type() == "Pgon") {
         const GeoPgon* pgon = dynamic_cast<const GeoPgon*>(sh);
         if (pgon)
-            std::cout << "polygon: " << pgon->getNPlanes() << " planes "
-                      << pgon->getSPhi() << " " << pgon->getDPhi() << " "
-                      << pgon->getNSides() << std::endl;
+            ATH_MSG_DEBUG("polygon: " << pgon->getNPlanes() << " planes "
+                                      << pgon->getSPhi() << " "
+                                      << pgon->getDPhi() << " "
+                                      << pgon->getNSides());
         else
-            std::cout << "polygon: WARNING: dynamic_cast failed!" << std::endl;
+            ATH_MSG_DEBUG("polygon: WARNING: dynamic_cast failed!");
     }
 
     if (sh->type() == "Trd") {
         const GeoTrd* trd = dynamic_cast<const GeoTrd*>(sh);
-        std::cout << "dimensions:" << trd->getXHalfLength1() << ","
-                  << trd->getXHalfLength2() << "," << trd->getYHalfLength1()
-                  << "," << trd->getYHalfLength2() << ","
-                  << trd->getZHalfLength() << std::endl;
+        ATH_MSG_DEBUG("dimensions:" << trd->getXHalfLength1() << ","
+                                    << trd->getXHalfLength2() << ","
+                                    << trd->getYHalfLength1() << ","
+                                    << trd->getYHalfLength2() << ","
+                                    << trd->getZHalfLength());
     }
     if (sh->type() == "Box") {
         const GeoBox* box = dynamic_cast<const GeoBox*>(sh);
-        std::cout << "dimensions:" << box->getXHalfLength() << ","
-                  << box->getYHalfLength() << "," << box->getZHalfLength()
-                  << std::endl;
+        ATH_MSG_DEBUG("dimensions:" << box->getXHalfLength() << ","
+                                    << box->getYHalfLength() << ","
+                                    << box->getZHalfLength());
     }
 
     if (sh->type() == "Tube") {
         const GeoTube* tube = dynamic_cast<const GeoTube*>(sh);
-        std::cout << "dimensions:" << tube->getRMin() << "," << tube->getRMax()
-                  << "," << tube->getZHalfLength() << std::endl;
+        ATH_MSG_DEBUG("dimensions:" << tube->getRMin() << "," << tube->getRMax()
+                                    << "," << tube->getZHalfLength());
     }
 
     if (sh->type() == "Tubs") {
         const GeoTubs* tubs = dynamic_cast<const GeoTubs*>(sh);
-        std::cout << "dimensions:" << tubs->getRMin() << "," << tubs->getRMax()
-                  << "," << tubs->getZHalfLength() << "," << tubs->getSPhi()
-                  << "," << tubs->getDPhi() << std::endl;
+        ATH_MSG_DEBUG("dimensions:" << tubs->getRMin() << "," << tubs->getRMax()
+                                    << "," << tubs->getZHalfLength() << ","
+                                    << tubs->getSPhi() << ","
+                                    << tubs->getDPhi());
     }
 
     if (sh->type() == "Cons") {
         const GeoCons* cons = dynamic_cast<const GeoCons*>(sh);
-        std::cout << "dimensions:" << cons->getRMin1() << ","
-                  << cons->getRMin2() << "," << cons->getRMax1() << ","
-                  << cons->getRMax2() << "," << cons->getDZ() << ","
-                  << cons->getSPhi() << "," << cons->getDPhi() << std::endl;
+        ATH_MSG_DEBUG("dimensions:"
+                      << cons->getRMin1() << "," << cons->getRMin2() << ","
+                      << cons->getRMax1() << "," << cons->getRMax2() << ","
+                      << cons->getDZ() << "," << cons->getSPhi() << ","
+                      << cons->getDPhi());
     }
 
     if (sh->type() == "Subtraction") {
@@ -814,7 +570,7 @@ void Trk::GeoShapeConverter::decodeShape(const GeoShape* sh) const {
             dynamic_cast<const GeoShapeSubtraction*>(sh);
         const GeoShape* sha = sub->getOpA();
         const GeoShape* shs = sub->getOpB();
-        std::cout << "decoding subtracted shape:" << std::endl;
+        ATH_MSG_DEBUG("decoding subtracted shape:");
         decodeShape(sha);
         decodeShape(shs);
     }
@@ -823,18 +579,19 @@ void Trk::GeoShapeConverter::decodeShape(const GeoShape* sh) const {
         const GeoShapeUnion* sub = dynamic_cast<const GeoShapeUnion*>(sh);
         const GeoShape* shA = sub->getOpA();
         const GeoShape* shB = sub->getOpB();
-        std::cout << "decoding shape A:" << std::endl;
+        ATH_MSG_DEBUG("decoding shape A:");
         decodeShape(shA);
-        std::cout << "decoding shape B:" << std::endl;
+        ATH_MSG_DEBUG("decoding shape B:");
         decodeShape(shB);
     }
     if (sh->type() == "Shift") {
         const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(sh);
         const GeoShape* shA = shift->getOp();
         const GeoTrf::Transform3D& transf = shift->getX();
-        std::cout << "shifted by:transl:" << transf.translation()
-                  << ", rot:" << transf(0, 0) << "," << transf(1, 1) << ","
-                  << transf(2, 2) << std::endl;
+        ATH_MSG_DEBUG("shifted by:transl:"
+                      << transf.translation() << ", rot:" << transf(0, 0) << ","
+                      << transf(1, 1) << "," << transf(2, 2));
         decodeShape(shA);
     }
 }
+}  // namespace Trk

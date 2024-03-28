@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-//////////////////////////////////////////////////////////////////
-// MuonStationTypeBuilder.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef MUONTRACKINGGEOMETRY_MUONSTATIONTYPEBUILDER_H
 #define MUONTRACKINGGEOMETRY_MUONSTATIONTYPEBUILDER_H
@@ -19,7 +15,7 @@
 
 // Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"  //base class
-#include "GaudiKernel/ToolHandle.h"      //member
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 // stl
 #include <memory>  //std::unique_ptr
@@ -27,9 +23,6 @@
 #include <utility>  //for std::pair
 #include <vector>
 
-class GeoVPhysVol;
-class GeoShape;
-class Identifier;
 
 namespace Trk {
 class Volume;
@@ -43,17 +36,10 @@ class GeoMaterialConverter;
 class MaterialProperties;
 }  // namespace Trk
 
-namespace MuonGM {
-class MuonDetectorManager;
-class MuonStation;
-class MMReadoutElement;
-class sTgcReadoutElement;
-}  // namespace MuonGM
-
+namespace MuonGM{
+   class MuonDetectorManager;
+}
 namespace Muon {
-
-typedef std::pair<Trk::SharedObject<const Trk::Layer>, const Amg::Transform3D*>
-    LayTr;
 
 /** @class MuonStationTypeBuilder
 
@@ -92,114 +78,98 @@ class MuonStationTypeBuilder : public AthAlgTool {
     /** Interface methode */
     static const InterfaceID& interfaceID();
     /** steering routine */
-    Trk::TrackingVolumeArray* processBoxStationComponents(
-        const GeoVPhysVol* cv, Trk::CuboidVolumeBounds* envBounds,
-        Cache&) const;
-    std::vector<Trk::Layer*>* processBoxComponentsArbitrary(
-        const GeoVPhysVol* mv, Trk::CuboidVolumeBounds* envBounds,
-        Cache& cache) const;
+    std::unique_ptr<Trk::TrackingVolumeArray> processBoxStationComponents(const GeoVPhysVol* cv, 
+                                                                          const Trk::CuboidVolumeBounds& envBounds,
+                                                                          Cache&) const;
+    std::vector<std::unique_ptr<Trk::Layer>> processBoxComponentsArbitrary(const GeoVPhysVol* mv, 
+                                                                           const Trk::CuboidVolumeBounds& envBounds,
+                                                                           Cache& cache) const;
 
-    Trk::TrackingVolumeArray* processTrdStationComponents(
-        const GeoVPhysVol* cv, Trk::TrapezoidVolumeBounds* envBounds,
-        Cache&) const;
+    std::unique_ptr<Trk::TrackingVolumeArray> processTrdStationComponents(const GeoVPhysVol* cv, 
+                                                                          const Trk::TrapezoidVolumeBounds& envBounds,
+                                                                          Cache&) const;
 
-    Trk::TrackingVolume* processCscStation(const GeoVPhysVol* cv,
-                                           const std::string& name,
-                                           Cache&) const;
+    std::unique_ptr<Trk::TrackingVolume> processCscStation(const GeoVPhysVol* cv,
+                                                           const std::string& name,
+                                                           Cache&) const;
 
-    Trk::TrackingVolume* processTgcStation(const GeoVPhysVol* cv, Cache&) const;
+    std::unique_ptr<Trk::TrackingVolume> processTgcStation(const GeoVPhysVol* cv, Cache&) const;
 
-    std::unique_ptr<Trk::DetachedTrackingVolume> process_sTGC(
-        const MuonGM::MuonDetectorManager* muonMgr,
-        const MuonGM::sTgcReadoutElement* stgc, Identifier id,
-        const GeoVPhysVol* gv, Amg::Transform3D transf) const;
+    std::unique_ptr<Trk::DetachedTrackingVolume> process_sTGC(const Identifier& id,
+                                                              const GeoVPhysVol* gv, 
+                                                              const Amg::Transform3D& transf) const;
 
-    std::unique_ptr<Trk::DetachedTrackingVolume> process_MM(
-        const MuonGM::MuonDetectorManager* muonMgr,
-        const MuonGM::MMReadoutElement* mm, Identifier id,
-        const GeoVPhysVol* gv, Amg::Transform3D transf) const;
+    std::unique_ptr<Trk::DetachedTrackingVolume> process_MM(const Identifier& id,
+                                                            const GeoVPhysVol* gv,
+                                                            const Amg::Transform3D& transf) const;
 
     /** components */
-    Trk::TrackingVolume* processMdtBox(Trk::Volume*, const GeoVPhysVol*&,
-                                       Amg::Transform3D*, double, Cache&) const;
+    std::unique_ptr<Trk::TrackingVolume> processMdtBox(const Trk::Volume& trkVol, 
+                                                       const GeoVPhysVol*,
+                                                       const Amg::Transform3D&, 
+                                                       double, Cache&) const;
 
-    Trk::TrackingVolume* processMdtTrd(Trk::Volume*, const GeoVPhysVol*&,
-                                       Amg::Transform3D*, Cache&) const;
+    std::unique_ptr<Trk::TrackingVolume> processMdtTrd(const Trk::Volume& trkVol, 
+                                                       const GeoVPhysVol*,
+                                                       const Amg::Transform3D&, Cache&) const;
 
-    Trk::TrackingVolume* processRpc(Trk::Volume*,
-                                    std::vector<const GeoVPhysVol*>,
-                                    std::vector<Amg::Transform3D>,
-                                    Cache&) const;
+    std::unique_ptr<Trk::TrackingVolume> processRpc(const Trk::Volume& inVol,
+                                                    const std::vector<const GeoVPhysVol*>& childVols,
+                                                    const std::vector<Amg::Transform3D>& childVolsTrf,
+                                                    Cache&) const;
 
-    Trk::TrackingVolume* processSpacer(Trk::Volume&,
-                                       std::vector<const GeoVPhysVol*>,
-                                       std::vector<Amg::Transform3D>) const;
+    std::unique_ptr<Trk::TrackingVolume> processSpacer(const Trk::Volume&,
+                                                       std::vector<const GeoVPhysVol*>,
+                                                       std::vector<Amg::Transform3D>) const;
 
-    Trk::TrackingVolume* processNSW(
-        const MuonGM::MuonDetectorManager* muonDetMgr,
-        const std::vector<Trk::Layer*>&) const;
+    std::unique_ptr<Trk::LayerArray> processCSCTrdComponent(const GeoVPhysVol*,
+                                                            const Trk::TrapezoidVolumeBounds&,
+                                                            const Amg::Transform3D& , 
+                                                            Cache&) const;
 
-    Trk::LayerArray* processCSCTrdComponent(const GeoVPhysVol*&,
-                                            Trk::TrapezoidVolumeBounds*&,
-                                            Amg::Transform3D*&, Cache&) const;
+    std::unique_ptr<Trk::LayerArray> processCSCDiamondComponent(const GeoVPhysVol*, 
+                                                               const Trk::DoubleTrapezoidVolumeBounds&,
+                                                               const Amg::Transform3D&, Cache&) const;
 
-    Trk::LayerArray* processCSCDiamondComponent(
-        const GeoVPhysVol*&, Trk::DoubleTrapezoidVolumeBounds*&,
-        Amg::Transform3D*&, Cache&) const;
+    std::unique_ptr<Trk::LayerArray> processTGCComponent(const GeoVPhysVol*,
+                                                         const Trk::TrapezoidVolumeBounds&,
+                                                         const Amg::Transform3D&, Cache&) const;
 
-    Trk::LayerArray* processTGCComponent(const GeoVPhysVol*&,
-                                         Trk::TrapezoidVolumeBounds*&,
-                                         Amg::Transform3D*&, Cache&) const;
+    std::pair<std::unique_ptr<Trk::Layer>, 
+              std::vector<std::unique_ptr<Trk::Layer>>> createLayerRepresentation(Trk::TrackingVolume& trVol) const;
 
-    std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*>
-    createLayerRepresentation(Trk::TrackingVolume* trVol) const;
 
-    Trk::Layer* createLayer(const MuonGM::MuonDetectorManager* detMgr,
-                            Trk::TrackingVolume* trVol,
-                            Trk::MaterialProperties*, Amg::Transform3D&) const;
+    Identifier identifyNSW(const std::string&, const Amg::Transform3D&) const;
 
-    static Identifier identifyNSW(const MuonGM::MuonDetectorManager* muonDetMgr,
-                                  const std::string&, const Amg::Transform3D&);
-
-    void printChildren(const GeoVPhysVol*, int level = 0) const;
     // used to be private ..
     double get_x_size(const GeoVPhysVol*) const;
     double decodeX(const GeoShape*) const;
     double envelopeThickness(const Trk::VolumeBounds& vb) const;
     Trk::MaterialProperties getAveragedLayerMaterial(const GeoVPhysVol*, double,
                                                      double) const;
-    Trk::MaterialProperties collectStationMaterial(
-        const Trk::TrackingVolume* trVol, double) const;
-    void printTransform(std::string comment, Amg::Transform3D transf) const;
+    Trk::MaterialProperties collectStationMaterial(const Trk::TrackingVolume& trVol, double) const;
+
+   private:
     void printVolumeBounds(std::string comment,
                            const Trk::VolumeBounds& vb) const;
 
-   private:
     // derive layer bounds from the station envelope
-    Trk::SurfaceBounds* getLayerBoundsFromEnvelope(
-        const Trk::Volume* envelope) const;
+    std::unique_ptr<Trk::SurfaceBounds> getLayerBoundsFromEnvelope(const Trk::Volume& envelope) const;
 
     // calculate area defined by (planar) surface bounds
-    double area(const Trk::SurfaceBounds* sb) const;
+    double area(const Trk::SurfaceBounds& sb) const;
 
-    /** Private method to fill default material */
-    // void fillDefaultServiceMaterial();
 
-    Gaudi::Property<bool> m_multilayerRepresentation{
-        this, "BuildMultilayerRepresentation", true};
+    Gaudi::Property<bool> m_multilayerRepresentation{this, "BuildMultilayerRepresentation", true};
     Gaudi::Property<bool> m_resolveSpacer{this, "ResolveSpacerBeams", false};
 
-    ToolHandle<Trk::ITrackingVolumeArrayCreator>
-        m_trackingVolumeArrayCreator{this, "TrackingVolumeArrayCreator",
-                                     "Trk::TrackingVolumeArrayCreator/"
-                                     "TrackingVolumeArrayCreator"};  //!< Helper
-                                                                     //!< Tool
-                                                                     //!< to
-                                                                     //!< create
-                                                                     //!< TrackingVolume
-                                                                     //!< Arrays
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    
+    // Helper tool to create TrackingVolume Arrays
+    ToolHandle<Trk::ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator{this, "TrackingVolumeArrayCreator",
+                                                            "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"};  
 
-    std::unique_ptr<Trk::Material> m_muonMaterial;  //!< the material
+    std::unique_ptr<const Trk::Material> m_muonMaterial;  //!< the material
     Trk::GeoMaterialConverter m_materialConverter;
     Trk::GeoShapeConverter m_geoShapeConverter;
     Trk::VolumeConverter m_volumeConverter;

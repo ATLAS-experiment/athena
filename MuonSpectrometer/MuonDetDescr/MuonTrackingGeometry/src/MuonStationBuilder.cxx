@@ -19,13 +19,7 @@ StatusCode Muon::MuonStationBuilder::initialize() {
     return Muon::MuonStationBuilderImpl::initialize();
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-Muon::MuonStationBuilder::buildDetachedTrackingVolumes(bool blend) const {
-    if (!m_muonMgr) {
-        ATH_MSG_FATAL("No muon manager is provided");
-        return nullptr;
+Muon::MuonStationBuilder::DetachedVolVec
+    Muon::MuonStationBuilder::buildDetachedTrackingVolumes(bool blend) const {
+        return Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(m_muonMgr, blend);
     }
-
-    return Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
-        m_muonMgr, blend);
-}

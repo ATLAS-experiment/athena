@@ -2,12 +2,9 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// VolumeConverter.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #include "TrkDetDescrGeoModelCnv/VolumeConverter.h"
 
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 // Trk
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkVolumes/BevelledCylinderVolumeBounds.h"
@@ -28,46 +25,39 @@
 #include "GeoModelKernel/GeoTrd.h"
 
 // STL
+#include <algorithm>
 #include <iostream>
+namespace {
+    const Trk::Material dummyMaterial{1.e10, 1.e10, 0., 0., 0.};
 
-// #define DEBUG
-#ifdef DEBUG
-#define DEBUG_TRACE(a) \
-    do {               \
-        a              \
-    } while (0)
-#else
-#define DEBUG_TRACE(a) \
-    do {               \
-    } while (0)
-#endif
+    Amg::Transform3D* makeTransform(const Amg::Transform3D& trf) {
+        return std::make_unique<Amg::Transform3D>(trf).release();
+    }
+}
 
-Trk::TrackingVolume* Trk::VolumeConverter::translate(
-    const GeoVPhysVol* gv, bool simplify, bool blend,
-    double blendMassLimit) const {
+namespace Trk {
+VolumeConverter::VolumeConverter() : AthMessaging("VolumeConverter") {}
+
+std::unique_ptr<TrackingVolume> VolumeConverter::translate(const GeoVPhysVol* gv, 
+                                                           bool simplify, bool blend,
+                                                           double blendMassLimit) const {
 
     const std::string name = gv->getLogVol()->getName();
 
     Amg::Transform3D ident{Amg::Transform3D::Identity()};
-    const Trk::Volume* volGeo = m_geoShapeConverter.translateGeoShape(
-        gv->getLogVol()->getShape(), &ident);
-
-    // temporary owner of auxiliary volumes
-    std::vector<const Trk::Volume*> vv;
+    std::unique_ptr<Volume> volGeo{m_geoShapeConverter.translateGeoShape(
+        gv->getLogVol()->getShape(), ident)};
 
     // resolve volume structure into a set of non-overlapping subtractions from
     // analytically calculable shapes
-    std::vector<std::pair<const Trk::Volume*, const Trk::Volume*>>
-        constituents = splitComposedVolume(volGeo, vv);
+    VolumePairVec constituents = splitComposedVolume(*volGeo);
 
     // material properties
-    Trk::Material mat =
-        m_materialConverter.convert(gv->getLogVol()->getMaterial());
+    Material mat = m_materialConverter.convert(gv->getLogVol()->getMaterial());
 
     // calculate precision of volume estimate  taking into account material
     // properties
-    double precision = Trk::VolumeConverter::s_precisionInX0 *
-                       mat.X0;  // required precision in mm
+    double precision = s_precisionInX0 * mat.X0;  // required precision in mm
 
     // volume estimate from GeoShape
     double volumeFromGeoShape =
@@ -77,39 +67,40 @@ Trk::TrackingVolume* Trk::VolumeConverter::translate(
     // double volumeBoolean = calculateVolume(volGeo,false,pow(precision,3)); //
     // TODO : test on inert material
 
-    // volume estimate from Trk::Volume
+    // volume estimate from Volume
     double volume = volumeFromGeoShape >= 0 ? volumeFromGeoShape : -1.;
     if ((simplify || blend) && volumeFromGeoShape < 0) {
         double fraction = 0.;
         volume = 0.;
-        for (auto cs : constituents) {
+        for (const VolumePair& cs : constituents) {
             fraction = estimateFraction(cs, precision);
             if (fraction < 0) {
                 volume = -1;
                 break;
             } else
-                volume += fraction * calculateVolume(cs.first);
+                volume += fraction * calculateVolume(*cs.first);
         }
     }
 
     // evaluate complexity of shape
     // simple case
-    if (constituents.size() == 1 && !constituents[0].second)
-        return new Trk::TrackingVolume(*volGeo, mat, nullptr, nullptr, name);
-
+    if (constituents.size() == 1 && !constituents[0].second) {
+        return std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr,
+                                                name);
+    }
     // build envelope
-    const Trk::Volume* envelope = nullptr;
+    std::unique_ptr<Volume> envelope{};
     std::string envName = name;
 
-    Trk::TrackingVolume* trEnv = nullptr;
+    std::unique_ptr<TrackingVolume> trEnv{};
 
     bool blended = false;
 
     if (constituents.size() == 1) {
 
-        envelope =
-            new Trk::Volume(*(constituents.front().first), volGeo->transform());
-        double volEnv = calculateVolume(constituents.front().first);
+        envelope = std::make_unique<Volume>(*(constituents.front().first),
+                                            volGeo->transform());
+        double volEnv = calculateVolume(*constituents.front().first);
 
         if (blend && volume > 0 && volEnv > 0 &&
             volume * mat.rho < blendMassLimit)
@@ -118,22 +109,17 @@ Trk::TrackingVolume* Trk::VolumeConverter::translate(
         if ((simplify || blended) && volume > 0 && volEnv > 0) {
             // simplified material rescales X0, l0 and density
             double fraction = volume / volEnv;
-            Trk::Material matScaled(mat.X0 / fraction, mat.L0 / fraction, mat.A,
-                                    mat.Z, fraction * mat.rho);
+            Material matScaled(mat.X0 / fraction, mat.L0 / fraction, mat.A,
+                               mat.Z, fraction * mat.rho);
             if (blend && !blended)
                 envName = envName + "_PERM";
-            trEnv = new Trk::TrackingVolume(*envelope, matScaled, nullptr,
-                                            nullptr, envName);
+            trEnv = std::make_unique<TrackingVolume>(*envelope, matScaled,
+                                                     nullptr, nullptr, envName);
         } else {
-            auto confinedVols =
-                std::make_unique<std::vector<Trk::TrackingVolume*>>();
-            confinedVols->push_back(
-                new Trk::TrackingVolume(*volGeo, mat, nullptr, nullptr, name));
+            auto confinedVols =std::make_unique<std::vector<TrackingVolume*>>();
+            confinedVols->push_back(std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
             envName = name + "_envelope";
-            Trk::Material dummyMaterial(1.e10, 1.e10, 0., 0.,
-                                        0.);  // default material properties
-            trEnv = new Trk::TrackingVolume(*envelope, dummyMaterial,
-                                            confinedVols.release(), envName);
+            trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
         }
 
         return trEnv;
@@ -141,13 +127,13 @@ Trk::TrackingVolume* Trk::VolumeConverter::translate(
 
     // composed shapes : derive envelope from span
     Amg::Transform3D transf = volGeo->transform();
-    std::unique_ptr<Trk::VolumeSpan> span = std::make_unique<Trk::VolumeSpan>(
-        *findVolumeSpan(&(volGeo->volumeBounds()), transf, 0., 0.));
+    std::unique_ptr<VolumeSpan> span =
+        findVolumeSpan(volGeo->volumeBounds(), transf, 0., 0.);
 
     bool isCyl = false;
     for (auto fv : constituents) {
-        const Trk::CylinderVolumeBounds* cyl =
-            dynamic_cast<const Trk::CylinderVolumeBounds*>(
+        const CylinderVolumeBounds* cyl =
+            dynamic_cast<const CylinderVolumeBounds*>(
                 &(fv.first->volumeBounds()));
         if (cyl) {
             isCyl = true;
@@ -155,135 +141,133 @@ Trk::TrackingVolume* Trk::VolumeConverter::translate(
         }
     }
 
-    DEBUG_TRACE({
-        std::cout << "envelope estimate: object contains cylinder:" << name
-                  << ":" << isCyl << std::endl;
-        std::cout << "complex volume span for envelope:" << name
-                  << ":x range:" << (*span).xMin << "," << (*span).xMax
-                  << std::endl;
-        std::cout << "complex volume span for envelope:" << name
-                  << ":y range:" << (*span).yMin << "," << (*span).yMax
-                  << std::endl;
-        std::cout << "complex volume span for envelope:" << name
-                  << ":z range:" << (*span).zMin << "," << (*span).zMax
-                  << std::endl;
-        std::cout << "complex volume span for envelope:" << name
-                  << ":R range:" << (*span).rMin << "," << (*span).rMax
-                  << std::endl;
-        std::cout << "complex volume span for envelope:" << name
-                  << ":phi range:" << (*span).phiMin << "," << (*span).phiMax
-                  << std::endl;
-    });
+    ATH_MSG_DEBUG(__FILE__ << ":" << __LINE__
+                           << "envelope estimate: object contains cylinder:"
+                           << name << ":" << isCyl);
+    ATH_MSG_DEBUG(__FILE__ << ":" << __LINE__
+                           << "complex volume span for envelope:" << name
+                           << ":x range:" << (*span).xMin << ","
+                           << (*span).xMax);
+    ATH_MSG_DEBUG(__FILE__ << ":" << __LINE__
+                           << "complex volume span for envelope:" << name
+                           << ":y range:" << (*span).yMin << ","
+                           << (*span).yMax);
+    ATH_MSG_DEBUG(__FILE__ << ":" << __LINE__
+                           << "complex volume span for envelope:" << name
+                           << ":z range:" << (*span).zMin << ","
+                           << (*span).zMax);
+    ATH_MSG_DEBUG(__FILE__ << ":" << __LINE__
+                           << "complex volume span for envelope:" << name
+                           << ":R range:" << (*span).rMin << ","
+                           << (*span).rMax);
+    ATH_MSG_DEBUG(__FILE__ << ":" << __LINE__
+                           << "complex volume span for envelope:" << name
+                           << ":phi range:" << (*span).phiMin << ","
+                           << (*span).phiMax);
 
     if (!isCyl) {  // cuboid envelope
-        envelope = new Trk::Volume(
-            new Amg::Transform3D(transf *
-                                 Amg::Translation3D(Amg::Vector3D(
-                                     0.5 * ((*span).xMin + (*span).xMax),
-                                     0.5 * ((*span).yMin + (*span).yMax),
-                                     0.5 * ((*span).zMin + (*span).zMax)))),
-            new Trk::CuboidVolumeBounds(0.5 * ((*span).xMax - (*span).xMin),
-                                        0.5 * ((*span).yMax - (*span).yMin),
-                                        0.5 * ((*span).zMax - (*span).zMin)));
-    } else {
+        Amg::Transform3D cylTrf{
+            transf * Amg::Translation3D{0.5 * ((*span).xMin + (*span).xMax),
+                                        0.5 * ((*span).yMin + (*span).yMax),
+                                        0.5 * ((*span).zMin + (*span).zMax)}};
 
+        std::unique_ptr<VolumeBounds> bounds =
+            std::make_unique<CuboidVolumeBounds>(
+                0.5 * ((*span).xMax - (*span).xMin),
+                0.5 * ((*span).yMax - (*span).yMin),
+                0.5 * ((*span).zMax - (*span).zMin));
+        envelope = std::make_unique<Volume>(
+            makeTransform(std::move(cylTrf)), bounds.release());
+    } else {
         double dPhi = (*span).phiMin > (*span).phiMax
                           ? (*span).phiMax - (*span).phiMin + 2 * M_PI
                           : (*span).phiMax - (*span).phiMin;
-        Trk::CylinderVolumeBounds* cylBounds = nullptr;
+        std::unique_ptr<VolumeBounds> cylBounds{};
+        Amg::Transform3D cylTrf{transf};
         if (dPhi < 2 * M_PI) {
             double aPhi = 0.5 * ((*span).phiMax + (*span).phiMin);
-            cylBounds = new Trk::CylinderVolumeBounds(
+            cylBounds = std::make_unique<CylinderVolumeBounds>(
                 (*span).rMin, (*span).rMax, 0.5 * dPhi,
                 0.5 * ((*span).zMax - (*span).zMin));
-            const Amg::AngleAxis3D zRotation(aPhi, Amg::Vector3D::UnitZ());
-            transf = transf * zRotation;
+            cylTrf = cylTrf * Amg::getRotateZ3D(aPhi);
         } else {
-            cylBounds = new Trk::CylinderVolumeBounds(
+            cylBounds = std::make_unique<CylinderVolumeBounds>(
                 (*span).rMin, (*span).rMax,
                 0.5 * ((*span).zMax - (*span).zMin));
         }
-        envelope = new Trk::Volume(&transf, cylBounds);
+        envelope = std::make_unique<Volume>(
+            makeTransform(std::move(cylTrf)), cylBounds.release());
     }
 
-    double volEnv = calculateVolume(envelope);
+    double volEnv = calculateVolume(*envelope);
 
     if (blend && volume > 0 && volEnv > 0 && volume * mat.rho < blendMassLimit)
         blended = true;
 
     if ((simplify || blended) && volume > 0 && volEnv > 0) {
         double fraction = volume / volEnv;
-        Trk::Material matScaled(mat.X0 / fraction, mat.L0 / fraction, mat.A,
-                                mat.Z, fraction * mat.rho);
+        Material matScaled(mat.X0 / fraction, mat.L0 / fraction, mat.A, mat.Z,
+                           fraction * mat.rho);
         if (blend && !blended)
             envName = envName + "_PERM";
-        trEnv =
-            new Trk::TrackingVolume(*envelope, mat, nullptr, nullptr, envName);
+        trEnv = std::make_unique<TrackingVolume>(*envelope, mat, nullptr,
+                                                 nullptr, envName);
     } else {
-        auto confinedVols =
-            std::make_unique<std::vector<Trk::TrackingVolume*>>();
-        confinedVols->push_back(
-            new Trk::TrackingVolume(*volGeo, mat, nullptr, nullptr, name));
+        auto confinedVols = std::make_unique<std::vector<TrackingVolume*>>();
+        confinedVols->push_back( std::make_unique<TrackingVolume>(*volGeo, mat, nullptr, nullptr, name).release());
         envName = envName + "_envelope";
-        Trk::Material dummyMaterial(1.e10, 1.e10, 0., 0.,
-                                    0.);  // default material properties
-        trEnv = new Trk::TrackingVolume(*envelope, dummyMaterial,
-                                        confinedVols.release(), envName);
+        trEnv = std::make_unique<TrackingVolume>(*envelope, dummyMaterial, confinedVols.release(), envName);
     }
 
     return trEnv;
 }
 
-double Trk::VolumeConverter::resolveBooleanVolume(const Trk::Volume* trVol,
-                                                  double tolerance) const {
+double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
+                                             double tolerance) const {
 
-    std::vector<Trk::VolumePart> constituents;
-    Trk::VolumePart inputVol;
-    inputVol.parts.push_back(trVol);
-    inputVol.sign = 1.;
-    // constituents.push_back(Trk::VolumePart( trVol, 1.));
-    constituents.push_back(inputVol);
-    std::vector<Trk::VolumePart>::iterator sIter = constituents.begin();
-    // temporary owner of auxiliary volumes
-    std::vector<const Trk::Volume*> vv;
+    VolumePartVec constituents{};
+    VolumePart inputVol{};
+    inputVol.parts.push_back(std::make_unique<Volume>(trVol));
+    constituents.push_back(std::move(inputVol));
+    VolumePartVec::iterator sIter = constituents.begin();
+
+    /// temporary owner of auxiliary volumes
     double volume = 0;
     while (sIter != constituents.end()) {
         bool update = false;
-        for (unsigned int ii = 0; ii < (*sIter).parts.size(); ii++) {
-            // std::vector<Trk::Volume* >::iterator vIter =
-            // (*sIter).parts.begin(); while (vIter != (*sIter).parts.end()) {
-            const Trk::CombinedVolumeBounds* comb =
-                dynamic_cast<const Trk::CombinedVolumeBounds*>(
-                    &((*sIter).parts[ii]->volumeBounds()));
-            const Trk::SubtractedVolumeBounds* sub =
-                dynamic_cast<const Trk::SubtractedVolumeBounds*>(
-                    &((*sIter).parts[ii]->volumeBounds()));
+        for (unsigned int ii = 0; ii < (*sIter).parts.size(); ++ii) {
+            const VolumeBounds& bounds{((*sIter).parts[ii]->volumeBounds())};
+            const CombinedVolumeBounds* comb =
+                dynamic_cast<const CombinedVolumeBounds*>(&bounds);
+            const SubtractedVolumeBounds* sub =
+                dynamic_cast<const SubtractedVolumeBounds*>(&bounds);
             if (comb) {
-                (*sIter).parts[ii] = comb->first();
-                Trk::VolumePart vp = (*sIter);
+                (*sIter).parts[ii].reset(comb->first()->clone());
+                VolumePart vp = (*sIter);
                 constituents.push_back(vp);
-                constituents.back().parts[ii] = comb->second();
+                constituents.back().parts[ii].reset(comb->second()->clone());
                 constituents.push_back(vp);
-                constituents.back().parts.push_back(comb->second());
+                constituents.back().parts.emplace_back(comb->second()->clone());
                 constituents.back().sign = -1. * constituents.back().sign;
                 update = true;
                 break;
             } else if (sub) {
-                (*sIter).parts[ii] = sub->outer();
-                // small components
-                double volSub = calculateVolume(sub->inner(), true, tolerance);
-                if (volSub < tolerance)
+                (*sIter).parts[ii].reset(sub->outer()->clone());
+                /// small components
+                double volSub = calculateVolume(*sub->inner(), true, tolerance);
+                if (volSub < tolerance) {
                     volume += -1. * (*sIter).sign * volSub;
-                else {
-                    constituents.push_back(Trk::VolumePart(*sIter));
-                    constituents.back().parts.push_back(sub->inner());
+                } else {
+                    constituents.emplace_back(*sIter);
+                    constituents.back().parts.emplace_back(
+                        sub->inner()->clone());
                     constituents.back().sign = -1. * constituents.back().sign;
                 }
                 update = true;
                 break;
             } else {
                 // component small, below tolerance
-                double volSmall = calculateVolume((*sIter).parts[ii]);
+                double volSmall = calculateVolume(*(*sIter).parts[ii]);
                 if (volSmall < tolerance) {
                     constituents.erase(sIter);
                     update = true;
@@ -294,16 +278,16 @@ double Trk::VolumeConverter::resolveBooleanVolume(const Trk::Volume* trVol,
         if (update)
             sIter = constituents.begin();
         else if ((*sIter).parts.size() == 1) {
-            double volSingle = calculateVolume((*sIter).parts[0]);
+            double volSingle = calculateVolume(*(*sIter).parts[0]);
             volume += (*sIter).sign * volSingle;
             constituents.erase(sIter);
         } else {
-            std::vector<const Trk::Volume*>::iterator tit =
+            std::vector<std::shared_ptr<Volume>>::iterator tit =
                 (*sIter).parts.begin();
             bool noovrlp = false;
             while (tit + 1 != (*sIter).parts.end()) {
-                std::pair<bool, const Trk::Volume*> overlap =
-                    m_intersectionHelper.intersect(*tit, *(tit + 1));
+                std::pair<bool, std::unique_ptr<Volume>> overlap =
+                    m_intersectionHelper.intersect(**tit, **(tit + 1));
                 if (overlap.first && !overlap.second) {
                     constituents.erase(sIter);
                     noovrlp = true;
@@ -311,31 +295,26 @@ double Trk::VolumeConverter::resolveBooleanVolume(const Trk::Volume* trVol,
                 }  // no intersection
                 else if (overlap.first && overlap.second) {
                     (*sIter).parts.erase(tit, tit + 2);
-                    (*sIter).parts.push_back(overlap.second);
-                    vv.push_back(
-                        (std::make_unique<Trk::Volume>(*overlap.second)).get());
+                    (*sIter).parts.push_back(std::move(overlap.second));
                     tit = (*sIter).parts.begin();
                 } else {
-                    if (calculateVolume(*tit) < tolerance) {
+                    if (calculateVolume(**tit) < tolerance) {
                         constituents.erase(sIter);
                         noovrlp = true;
                         break;
                     }
-                    if (calculateVolume(*(tit + 1)) < tolerance) {
+                    if (calculateVolume(**(tit + 1)) < tolerance) {
                         constituents.erase(sIter);
                         noovrlp = true;
                         break;
                     }
-                    std::pair<bool, const Trk::Volume*> overlap =
-                        m_intersectionHelper.intersectApproximative(*tit,
-                                                                    *(tit + 1));
+                    std::pair<bool, std::unique_ptr<Volume>> overlap =
+                        m_intersectionHelper.intersectApproximative(
+                            **tit, **(tit + 1));
                     if (overlap.first) {
                         if (overlap.second) {
                             (*sIter).parts.erase(tit, tit + 2);
-                            (*sIter).parts.push_back(overlap.second);
-                            vv.push_back(
-                                (std::make_unique<Trk::Volume>(*overlap.second))
-                                    .get());
+                            (*sIter).parts.push_back(std::move(overlap.second));
                             tit = (*sIter).parts.begin();
                         } else {
                             constituents.erase(sIter);
@@ -348,158 +327,139 @@ double Trk::VolumeConverter::resolveBooleanVolume(const Trk::Volume* trVol,
             }
             if (noovrlp) {
             } else if ((*sIter).parts.size() == 1) {
-                double volSingle = calculateVolume((*sIter).parts[0]);
+                double volSingle = calculateVolume(*(*sIter).parts[0]);
                 volume += (*sIter).sign * volSingle;
                 constituents.erase(sIter);
             } else {
                 ++sIter;
             }
         }
-        // std::cout << "constituents.size:" << constituents.size() << ":volume
-        // estimate so far:" << volume <<  std::endl;
     }
 
-    if (constituents.size())
-        std::cout << "boolean volume resolved to " << constituents.size()
-                  << " items "
-                  << ":volume estimate:" << volume << std::endl;
+    if (constituents.size()) {
+        ATH_MSG_VERBOSE("boolean volume resolved to "
+                        << constituents.size() << " items "
+                        << ":volume estimate:" << volume);
+    }
     return volume;
 }
 
-std::vector<std::pair<const Trk::Volume*, const Trk::Volume*>>
-Trk::VolumeConverter::splitComposedVolume(
-    const Trk::Volume* trVol, std::vector<const Trk::Volume*>& vv) const {
+VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
+    const Trk::Volume& trVol) const {
 
-    std::vector<std::pair<const Trk::Volume*, const Trk::Volume*>> constituents;
-    constituents.emplace_back(trVol, nullptr);
-    std::vector<std::pair<const Trk::Volume*, const Trk::Volume*>>::iterator
-        sIter = constituents.begin();
-    const Trk::Volume* subVol = nullptr;
+    VolumePairVec constituents;
+    constituents.emplace_back(std::make_unique<Volume>(trVol), nullptr);
+    VolumePairVec::iterator sIter = constituents.begin();
+    std::unique_ptr<VolumeBounds> newBounds{};
     while (sIter != constituents.end()) {
-        const Trk::CombinedVolumeBounds* comb =
+        /// Check whether the first operand in the iterator is a composite one
+        const CombinedVolumeBounds* comb =
             dynamic_cast<const Trk::CombinedVolumeBounds*>(
                 &((*sIter).first->volumeBounds()));
         const Trk::SubtractedVolumeBounds* sub =
             dynamic_cast<const Trk::SubtractedVolumeBounds*>(
                 &((*sIter).first->volumeBounds()));
+        /// Combined one --> Union or Intersecion
         if (comb) {
-            subVol = (*sIter).second;
+            std::shared_ptr<Volume> subVol = (*sIter).second;
             sIter = constituents.erase(sIter);
+            std::shared_ptr<Volume> combFirst{comb->first()->clone()};
+            std::shared_ptr<Volume> combSecond{comb->second()->clone()};
             if (comb->intersection()) {
-                Trk::Volume* newSubVol = new Trk::Volume(
-                    nullptr,
-                    new Trk::SubtractedVolumeBounds(comb->first()->clone(),
-                                                    comb->second()->clone()));
-                vv.push_back((std::make_unique<Trk::Volume>(*newSubVol)).get());
+                newBounds = std::make_unique<Trk::SubtractedVolumeBounds>(
+                    combFirst->clone(), combSecond->clone());
+                std::unique_ptr<Trk::Volume> newSubVol =
+                    std::make_unique<Volume>(nullptr, newBounds.release());
                 if (subVol) {
-                    Trk::Volume* newCSubVol = new Trk::Volume(
-                        nullptr, new Trk::CombinedVolumeBounds(
-                                     subVol->clone(), newSubVol, false));
-                    constituents.insert(
-                        sIter,
-                        std::pair<const Trk::Volume*, const Trk::Volume*>(
-                            comb->first(), newCSubVol));
-                    vv.push_back(
-                        (std::make_unique<Trk::Volume>(*newCSubVol)).get());
+                    newBounds = std::make_unique<CombinedVolumeBounds>(
+                        subVol->clone(), newSubVol.release(), false);
+                    std::shared_ptr<Volume> newCSubVol =
+                        std::make_unique<Volume>(nullptr, newBounds.release());
+                    constituents.insert(sIter,
+                                        std::make_pair(combFirst, newCSubVol));
                 } else {
                     constituents.insert(
-                        sIter,
-                        std::pair<const Trk::Volume*, const Trk::Volume*>(
-                            comb->first(), newSubVol));
+                        sIter, std::make_pair(combFirst, std::move(newSubVol)));
                 }
             } else {
-                constituents.insert(
-                    sIter, std::pair<const Trk::Volume*, const Trk::Volume*>(
-                               comb->first(), subVol));
+                constituents.insert(sIter, std::make_pair(combFirst, subVol));
                 if (subVol) {
-                    Trk::Volume* newSubVol = new Trk::Volume(
-                        nullptr,
-                        new Trk::CombinedVolumeBounds(
-                            subVol->clone(), comb->first()->clone(), false));
+                    newBounds = std::make_unique<CombinedVolumeBounds>(
+                        subVol->clone(), combFirst->clone(), false);
+                    std::unique_ptr<Trk::Volume> newSubVol =
+                        std::make_unique<Volume>(nullptr, newBounds.release());
                     constituents.insert(
                         sIter,
-                        std::pair<const Trk::Volume*, const Trk::Volume*>(
-                            comb->second(), newSubVol));
-                    vv.push_back(
-                        (std::make_unique<Trk::Volume>(*newSubVol)).get());
+                        std::make_pair(combSecond, std::move(newSubVol)));
                 } else {
-                    constituents.insert(
-                        sIter,
-                        std::pair<const Trk::Volume*, const Trk::Volume*>(
-                            comb->second(), comb->first()));
+                    constituents.insert(sIter,
+                                        std::make_pair(combSecond, combFirst));
                 }
             }
-            //}
             sIter = constituents.begin();
         } else if (sub) {
-            subVol = (*sIter).second;
+            std::shared_ptr<Volume> subVol = (*sIter).second;
             sIter = constituents.erase(sIter);
+            std::shared_ptr<Volume> innerVol{sub->inner()->clone()};
+            std::shared_ptr<Volume> outerVol{sub->outer()->clone()};
             if (subVol) {
-                Trk::Volume* newSubVol = new Trk::Volume(
-                    nullptr,
-                    new Trk::CombinedVolumeBounds(
-                        subVol->clone(), sub->inner()->clone(), false));
+                newBounds = std::make_unique<CombinedVolumeBounds>(
+                    subVol->clone(), innerVol->clone(), false);
+                std::unique_ptr<Volume> newSubVol =
+                    std::make_unique<Trk::Volume>(nullptr, newBounds.release());
                 constituents.insert(
-                    sIter, std::pair<const Trk::Volume*, const Trk::Volume*>(
-                               sub->outer(), newSubVol));
-                vv.push_back((std::make_unique<Trk::Volume>(*newSubVol)).get());
-                //}
+                    sIter, std::make_pair(outerVol, std::move(newSubVol)));
             } else {
-                constituents.insert(
-                    sIter, std::pair<const Trk::Volume*, const Trk::Volume*>(
-                               sub->outer(), sub->inner()));
+                constituents.insert(sIter, std::make_pair(outerVol, innerVol));
             }
             sIter = constituents.begin();
         } else {
             ++sIter;
         }
     }
-
     return constituents;
 }
 
-const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
-    const Trk::VolumeBounds* volBounds, const Amg::Transform3D& transform,
+std::unique_ptr<VolumeSpan> VolumeConverter::findVolumeSpan(
+    const VolumeBounds& volBounds, const Amg::Transform3D& transform,
     double zTol, double phiTol) const {
-    if (!volBounds)
-        return nullptr;
     // volume shape
-    const Trk::CuboidVolumeBounds* box =
-        dynamic_cast<const Trk::CuboidVolumeBounds*>(volBounds);
-    const Trk::TrapezoidVolumeBounds* trd =
-        dynamic_cast<const Trk::TrapezoidVolumeBounds*>(volBounds);
-    const Trk::DoubleTrapezoidVolumeBounds* dtrd =
-        dynamic_cast<const Trk::DoubleTrapezoidVolumeBounds*>(volBounds);
-    const Trk::BevelledCylinderVolumeBounds* bcyl =
-        dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(volBounds);
-    const Trk::CylinderVolumeBounds* cyl =
-        dynamic_cast<const Trk::CylinderVolumeBounds*>(volBounds);
-    const Trk::SubtractedVolumeBounds* sub =
-        dynamic_cast<const Trk::SubtractedVolumeBounds*>(volBounds);
-    const Trk::CombinedVolumeBounds* comb =
-        dynamic_cast<const Trk::CombinedVolumeBounds*>(volBounds);
-    const Trk::SimplePolygonBrepVolumeBounds* spb =
-        dynamic_cast<const Trk::SimplePolygonBrepVolumeBounds*>(volBounds);
-    const Trk::PrismVolumeBounds* prism =
-        dynamic_cast<const Trk::PrismVolumeBounds*>(volBounds);
+    const CuboidVolumeBounds* box =
+        dynamic_cast<const CuboidVolumeBounds*>(&volBounds);
+    const TrapezoidVolumeBounds* trd =
+        dynamic_cast<const TrapezoidVolumeBounds*>(&volBounds);
+    const DoubleTrapezoidVolumeBounds* dtrd =
+        dynamic_cast<const DoubleTrapezoidVolumeBounds*>(&volBounds);
+    const BevelledCylinderVolumeBounds* bcyl =
+        dynamic_cast<const BevelledCylinderVolumeBounds*>(&volBounds);
+    const CylinderVolumeBounds* cyl =
+        dynamic_cast<const CylinderVolumeBounds*>(&volBounds);
+    const SubtractedVolumeBounds* sub =
+        dynamic_cast<const SubtractedVolumeBounds*>(&volBounds);
+    const CombinedVolumeBounds* comb =
+        dynamic_cast<const CombinedVolumeBounds*>(&volBounds);
+    const SimplePolygonBrepVolumeBounds* spb =
+        dynamic_cast<const SimplePolygonBrepVolumeBounds*>(&volBounds);
+    const PrismVolumeBounds* prism =
+        dynamic_cast<const PrismVolumeBounds*>(&volBounds);
 
     double dPhi = 0.;
 
     if (sub) {
-        return findVolumeSpan(&(sub->outer()->volumeBounds()),
+        return findVolumeSpan(sub->outer()->volumeBounds(),
                               transform * sub->outer()->transform(), zTol,
                               phiTol);
     }
 
     if (comb) {
-        const Trk::VolumeSpan* s1 = findVolumeSpan(
-            &(comb->first()->volumeBounds()),
+        std::unique_ptr<VolumeSpan> s1 = findVolumeSpan(
+            comb->first()->volumeBounds(),
             transform * comb->first()->transform(), zTol, phiTol);
-        const Trk::VolumeSpan* s2 = findVolumeSpan(
-            &(comb->second()->volumeBounds()),
+        std::unique_ptr<VolumeSpan> s2 = findVolumeSpan(
+            comb->second()->volumeBounds(),
             transform * comb->second()->transform(), zTol, phiTol);
 
-        Trk::VolumeSpan scomb;
+        VolumeSpan scomb;
         scomb.rMin = std::min((*s1).rMin, (*s2).rMin);
         scomb.rMax = std::max((*s1).rMax, (*s2).rMax);
         scomb.xMin = std::min((*s1).xMin, (*s2).xMin);
@@ -537,27 +497,17 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
             scomb.phiMin = std::min((*s1).phiMin, (*s2).phiMin);
             scomb.phiMax = std::max((*s1).phiMax, (*s2).phiMax);
         }
-        delete s1;
-        delete s2;
-        return new Trk::VolumeSpan(scomb);
+        return std::make_unique<VolumeSpan>(scomb);
     }
 
     //
-    double minZ = 1.e6;
-    double maxZ = -1.e6;
-    double minPhi = 2 * M_PI;
-    double maxPhi = 0.;
-    double minR = 1.e6;
-    double maxR = 0.;
-    double minX = 1.e6;
-    double maxX = -1.e6;
-    double minY = 1.e6;
-    double maxY = -1.e6;
+    double minZ{1.e6}, maxZ{-1.e6}, minPhi{2 * M_PI}, maxPhi{0.}, minR{1.e6},
+        maxR{0.}, minX{1.e6}, maxX{-1.e6}, minY{1.e6}, maxY{-1.e6};
 
     // defined vertices and edges
     std::vector<Amg::Vector3D> vtx;
     std::vector<std::pair<int, int>> edges;
-    Trk::VolumeSpan span;
+    VolumeSpan span;
 
     if (box) {
         vtx.emplace_back(box->halflengthX(), box->halflengthY(),
@@ -665,29 +615,31 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
         vtx.emplace_back(0., 0., -bcyl->halflengthZ());
         edges.emplace_back(std::make_pair(0, 1));
         if (dPhi < M_PI) {
-            vtx.emplace_back(bcyl->outerRadius() * cos(dPhi),
-                             bcyl->outerRadius() * sin(dPhi),
+            const double cosDphi = std::cos(dPhi);
+            const double sinDphi = std::sin(dPhi);
+            vtx.emplace_back(bcyl->outerRadius() * cosDphi,
+                             bcyl->outerRadius() * sinDphi,
                              bcyl->halflengthZ());
-            vtx.emplace_back(bcyl->innerRadius() * cos(dPhi),
-                             bcyl->innerRadius() * sin(dPhi),
+            vtx.emplace_back(bcyl->innerRadius() * cosDphi,
+                             bcyl->innerRadius() * sinDphi,
                              bcyl->halflengthZ());
-            vtx.emplace_back(bcyl->outerRadius() * cos(-dPhi),
-                             bcyl->outerRadius() * sin(-dPhi),
+            vtx.emplace_back(bcyl->outerRadius() * cosDphi,
+                             -bcyl->outerRadius() * sinDphi,
                              bcyl->halflengthZ());
-            vtx.emplace_back(bcyl->innerRadius() * cos(-dPhi),
-                             bcyl->innerRadius() * sin(-dPhi),
+            vtx.emplace_back(bcyl->innerRadius() * cosDphi,
+                             -bcyl->innerRadius() * sinDphi,
                              bcyl->halflengthZ());
-            vtx.emplace_back(bcyl->outerRadius() * cos(dPhi),
-                             bcyl->outerRadius() * sin(dPhi),
+            vtx.emplace_back(bcyl->outerRadius() * cosDphi,
+                             bcyl->outerRadius() * sinDphi,
                              -bcyl->halflengthZ());
-            vtx.emplace_back(bcyl->innerRadius() * cos(dPhi),
-                             bcyl->innerRadius() * sin(dPhi),
+            vtx.emplace_back(bcyl->innerRadius() * cosDphi,
+                             bcyl->innerRadius() * sinDphi,
                              -bcyl->halflengthZ());
-            vtx.emplace_back(bcyl->outerRadius() * cos(-dPhi),
-                             bcyl->outerRadius() * sin(-dPhi),
+            vtx.emplace_back(bcyl->outerRadius() * cosDphi,
+                             -bcyl->outerRadius() * sinDphi,
                              -bcyl->halflengthZ());
-            vtx.emplace_back(bcyl->innerRadius() * cos(-dPhi),
-                             bcyl->innerRadius() * sin(-dPhi),
+            vtx.emplace_back(bcyl->innerRadius() * cosDphi,
+                             -bcyl->innerRadius() * sinDphi,
                              -bcyl->halflengthZ());
             vtx.emplace_back(bcyl->outerRadius(), 0.,
                              0.);  // to distinguish phi intervals for cylinders
@@ -712,29 +664,25 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
         vtx.emplace_back(0., 0., -cyl->halflengthZ());
         edges.emplace_back(std::make_pair(0, 1));
         if (dPhi < M_PI) {
-            vtx.emplace_back(cyl->outerRadius() * cos(dPhi),
-                             cyl->outerRadius() * sin(dPhi),
-                             cyl->halflengthZ());
-            vtx.emplace_back(cyl->innerRadius() * cos(dPhi),
-                             cyl->innerRadius() * sin(dPhi),
-                             cyl->halflengthZ());
-            vtx.emplace_back(cyl->outerRadius() * cos(-dPhi),
-                             cyl->outerRadius() * sin(-dPhi),
-                             cyl->halflengthZ());
-            vtx.emplace_back(cyl->outerRadius() * cos(-dPhi),
-                             cyl->outerRadius() * sin(-dPhi),
-                             cyl->halflengthZ());
-            vtx.emplace_back(cyl->outerRadius() * cos(dPhi),
-                             cyl->outerRadius() * sin(dPhi),
+            const double cosDphi = std::cos(dPhi);
+            const double sinDphi = std::sin(dPhi);
+            vtx.emplace_back(cyl->outerRadius() * cosDphi,
+                             cyl->outerRadius() * sinDphi, cyl->halflengthZ());
+            vtx.emplace_back(cyl->innerRadius() * cosDphi,
+                             cyl->innerRadius() * sinDphi, cyl->halflengthZ());
+            vtx.emplace_back(cyl->outerRadius() * cosDphi,
+                             -cyl->outerRadius() * sinDphi, cyl->halflengthZ());
+            vtx.emplace_back(cyl->outerRadius() * cosDphi,
+                             -cyl->outerRadius() * sinDphi, cyl->halflengthZ());
+            vtx.emplace_back(cyl->outerRadius() * cosDphi,
+                             cyl->outerRadius() * sinDphi, -cyl->halflengthZ());
+            vtx.emplace_back(cyl->innerRadius() * cosDphi,
+                             cyl->innerRadius() * sinDphi, -cyl->halflengthZ());
+            vtx.emplace_back(cyl->outerRadius() * cosDphi,
+                             -cyl->outerRadius() * sinDphi,
                              -cyl->halflengthZ());
-            vtx.emplace_back(cyl->innerRadius() * cos(dPhi),
-                             cyl->innerRadius() * sin(dPhi),
-                             -cyl->halflengthZ());
-            vtx.emplace_back(cyl->outerRadius() * cos(-dPhi),
-                             cyl->outerRadius() * sin(-dPhi),
-                             -cyl->halflengthZ());
-            vtx.emplace_back(cyl->outerRadius() * cos(-dPhi),
-                             cyl->outerRadius() * sin(-dPhi),
+            vtx.emplace_back(cyl->outerRadius() * cosDphi,
+                             -cyl->outerRadius() * sinDphi,
                              -cyl->halflengthZ());
             vtx.emplace_back(cyl->outerRadius(), 0.,
                              0.);  // to distinguish phi intervals for cylinders
@@ -818,9 +766,8 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
         // azimuthal & radial extent
         if (ro < minR) {  // excentric object, phi span driven by z-R extent
             // calculate point of closest approach
-            Trk::PerigeeSurface peri;
-            Trk::Intersection closest =
-                peri.straightLineIntersection(vtxt[1], dir);
+            PerigeeSurface peri;
+            Intersection closest = peri.straightLineIntersection(vtxt[1], dir);
             double le = (vtxt[0] - vtxt[1]).norm();
             if ((closest.position - vtxt[0]).norm() < le &&
                 (closest.position - vtxt[1]).norm() < le) {
@@ -836,8 +783,9 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
             } else
                 minR = std::max(0., minR - ro * std::abs(dir.z()));
 
-            minPhi += -atan(ro / minR);
-            maxPhi += atan(ro / minR);
+            const double aTan = std::atan2(ro, minR);
+            minPhi += -aTan;
+            maxPhi += aTan;
             if (minPhi < 0)
                 minPhi += 2 * M_PI;
             if (maxPhi > 2 * M_PI)
@@ -853,11 +801,11 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
                 minR = std::max(0., minR - ro * std::abs(cos(dir.theta())));
 
             // loop over edges to check inner radial extent
-            Trk::PerigeeSurface peri;
+            PerigeeSurface peri;
             for (unsigned int ie = 0; ie < edges.size(); ie++) {
                 Amg::Vector3D dir =
                     (vtxt[edges[ie].first] - vtxt[edges[ie].second]).unit();
-                Trk::Intersection closest =
+                Intersection closest =
                     peri.straightLineIntersection(vtxt[edges[ie].second], dir);
                 double le =
                     (vtxt[edges[ie].first] - vtxt[edges[ie].second]).norm();
@@ -919,11 +867,11 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
 
     if (!cyl && !bcyl) {
         // loop over edges to check inner radial extent
-        Trk::PerigeeSurface peri;
+        PerigeeSurface peri;
         for (unsigned int ie = 0; ie < edges.size(); ie++) {
             Amg::Vector3D dir =
                 (vtxt[edges[ie].first] - vtxt[edges[ie].second]).unit();
-            Trk::Intersection closest =
+            Intersection closest =
                 peri.straightLineIntersection(vtxt[edges[ie].second], dir);
             double le = (vtxt[edges[ie].first] - vtxt[edges[ie].second]).norm();
             if ((closest.position - vtxt[edges[ie].first]).norm() < le &&
@@ -970,189 +918,132 @@ const Trk::VolumeSpan* Trk::VolumeConverter::findVolumeSpan(
         span.yMin = minY - zTol;
         span.yMax = maxY - +zTol;
     } else {
-        DEBUG_TRACE(std::cout
-                    << " Trk::VolumeConverter::volume shape not recognized "
-                    << std::endl);
+        ATH_MSG_WARNING("VolumeConverter::volume shape not recognized ");
     }
-    const Trk::VolumeSpan* newSpan = new Trk::VolumeSpan(span);
-    return newSpan;
+    return std::make_unique<VolumeSpan>(span);
 }
 
-double Trk::VolumeConverter::calculateVolume(const Trk::Volume* vol,
-                                             bool nonBooleanOnly,
-                                             double precision) const {
+double VolumeConverter::calculateVolume(const Volume& vol, bool nonBooleanOnly,
+                                        double precision) const {
 
     double volume = -1.;
 
-    if (!vol)
-        return volume;
+    const CylinderVolumeBounds* cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol.volumeBounds()));
+    const CuboidVolumeBounds* box = dynamic_cast<const CuboidVolumeBounds*>(&(vol.volumeBounds()));
+    const TrapezoidVolumeBounds* trd = dynamic_cast<const TrapezoidVolumeBounds*>(&(vol.volumeBounds()));
+    const BevelledCylinderVolumeBounds* bcyl =dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol.volumeBounds()));
+    const PrismVolumeBounds* prism =dynamic_cast<const PrismVolumeBounds*>(&(vol.volumeBounds()));
+    const SimplePolygonBrepVolumeBounds* spb = dynamic_cast<const SimplePolygonBrepVolumeBounds*>(&(vol.volumeBounds()));
+    const CombinedVolumeBounds* comb =dynamic_cast<const CombinedVolumeBounds*>(&(vol.volumeBounds()));
+    const SubtractedVolumeBounds* sub = dynamic_cast<const SubtractedVolumeBounds*>(&(vol.volumeBounds()));
 
-    const Trk::CylinderVolumeBounds* cyl =
-        dynamic_cast<const Trk::CylinderVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::CuboidVolumeBounds* box =
-        dynamic_cast<const Trk::CuboidVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::TrapezoidVolumeBounds* trd =
-        dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::BevelledCylinderVolumeBounds* bcyl =
-        dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(
-            &(vol->volumeBounds()));
-    const Trk::PrismVolumeBounds* prism =
-        dynamic_cast<const Trk::PrismVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::SimplePolygonBrepVolumeBounds* spb =
-        dynamic_cast<const Trk::SimplePolygonBrepVolumeBounds*>(
-            &(vol->volumeBounds()));
-    const Trk::CombinedVolumeBounds* comb =
-        dynamic_cast<const Trk::CombinedVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::SubtractedVolumeBounds* sub =
-        dynamic_cast<const Trk::SubtractedVolumeBounds*>(
-            &(vol->volumeBounds()));
-
-    if (cyl)
-        return volume = 2 * cyl->halfPhiSector() *
-                        (cyl->outerRadius() * cyl->outerRadius() -
-                         cyl->innerRadius() * cyl->innerRadius()) *
-                        cyl->halflengthZ();
-    if (box)
-        return volume = (8 * box->halflengthX() * box->halflengthY() *
-                         box->halflengthZ());
-    if (trd)
-        return volume = (4 * (trd->minHalflengthX() + trd->maxHalflengthX()) *
-                         trd->halflengthY() * trd->halflengthZ());
+    if (cyl) {
+        return 2 * cyl->halfPhiSector() * cyl->halflengthZ() *
+               (std::pow(cyl->outerRadius(), 2) -
+                std::pow(cyl->innerRadius(), 2));
+    }
+    if (box) {
+        return 8 * box->halflengthX() * box->halflengthY() * box->halflengthZ();
+    }
+    if (trd) {
+        return 4 * (trd->minHalflengthX() + trd->maxHalflengthX()) *
+               trd->halflengthY() * trd->halflengthZ();
+    }
     if (bcyl) {
         int type = bcyl->type();
         if (type < 1)
-            return volume = 2 * bcyl->halfPhiSector() *
-                            (bcyl->outerRadius() * bcyl->outerRadius() -
-                             bcyl->innerRadius() * bcyl->innerRadius()) *
-                            bcyl->halflengthZ();
+            return 2 * bcyl->halfPhiSector() *
+                   (std::pow(bcyl->outerRadius(), 2) -
+                    std::pow(bcyl->innerRadius(), 2)) *
+                   bcyl->halflengthZ();
         if (type == 1)
-            return volume = 2 * bcyl->halflengthZ() *
-                            (bcyl->halfPhiSector() * bcyl->outerRadius() *
-                                 bcyl->outerRadius() -
-                             bcyl->innerRadius() * bcyl->innerRadius() *
-                                 tan(bcyl->halfPhiSector()));
+            return 2 * bcyl->halflengthZ() *
+                   (bcyl->halfPhiSector() * std::pow(bcyl->outerRadius(), 2) -
+                    std::pow(bcyl->innerRadius(), 2) *
+                        std::tan(bcyl->halfPhiSector()));
         if (type == 2)
-            return volume = 2 * bcyl->halflengthZ() *
-                            (-bcyl->halfPhiSector() * bcyl->innerRadius() *
-                                 bcyl->innerRadius() +
-                             bcyl->outerRadius() * bcyl->outerRadius() *
-                                 tan(bcyl->halfPhiSector()));
+            return 2 * bcyl->halflengthZ() *
+                   (-bcyl->halfPhiSector() * std::pow(bcyl->innerRadius(), 2) +
+                    std::pow(bcyl->outerRadius(), 2) *
+                        std::tan(bcyl->halfPhiSector()));
         if (type == 3)
-            return volume = 2 * bcyl->halflengthZ() *
-                            tan(bcyl->halfPhiSector()) *
-                            (bcyl->outerRadius() * bcyl->outerRadius() -
-                             bcyl->innerRadius() * bcyl->innerRadius());
+            return 2 * bcyl->halflengthZ() * std::tan(bcyl->halfPhiSector()) *
+                   (std::pow(bcyl->outerRadius(), 2) -
+                    std::pow(bcyl->innerRadius(), 2));
     }
     if (prism) {
 
         std::vector<std::pair<double, double>> v = prism->xyVertices();
-        // replaced by triangle formula
-        // double a2 = v[1].first * v[1].first + v[1].second * v[1].second +
-        // v[0].first * v[0].first +
-        //            v[0].second * v[0].second - 2 * (v[0].first * v[1].first +
-        //            v[0].second * v[1].second);
-        // double c2 = v[2].first * v[2].first + v[2].second * v[2].second +
-        // v[0].first * v[0].first +
-        //            v[0].second * v[0].second - 2 * (v[0].first * v[2].first +
-        //            v[0].second * v[2].second);
-        // double ca = v[1].first * v[2].first + v[1].second * v[2].second +
-        // v[0].first * v[0].first +
-        //            v[0].second * v[0].second - v[0].first * v[1].first -
-        //            v[0].second * v[1].second - v[0].first * v[2].first -
-        //            v[0].second * v[2].second;
-        // double vv2 = (a2 * c2 - ca * ca);
-        // double vv = 0.;
-        // fix nans
-        // if (vv2 > 0.)  vv = sqrt(vv2);
-        // return volume = vv * prism->halflengthZ();
-
         double vv = v[0].first * (v[1].second - v.back().second);
-        for (unsigned int i = 1; i < v.size() - 1; i++)
+        for (unsigned int i = 1; i < v.size() - 1; i++) {
             vv += v[i].first * (v[i + 1].second - v[i - 1].second);
+        }
         vv += v.back().first * (v[0].second - v[v.size() - 2].second);
-
-        return volume = vv * prism->halflengthZ();
+        return vv * prism->halflengthZ();
     }
     if (spb) {
         std::vector<std::pair<double, double>> v = spb->xyVertices();
-
-        // replaced by triangle formula
-        // this should give a set of non-overlapping prisms
-        // temporary owner of auxiliary volumes
-        // volume = 0.;
-        // auto garbage = std::make_unique<std::vector< const Trk::Volume*> >();
-        // std::vector<std::pair<const Trk::Volume*, const Trk::Volume* > >
-        //  subvols =splitComposedVolume(spb->combinedVolume(), garbage.get());
-        // for (auto prism : subvols) {
-        //  volume += calculateVolume( prism.first );
-        //}
-        // for (auto volTmp : *garbage.get()) delete volTmp;
-        // return volume;
-
         double vv = v[0].first * (v[1].second - v.back().second);
-        for (unsigned int i = 1; i < v.size() - 1; i++)
+        for (unsigned int i = 1; i < v.size() - 1; i++) {
             vv += v[i].first * (v[i + 1].second - v[i - 1].second);
+        }
         vv += v.back().first * (v[0].second - v[v.size() - 2].second);
-
-        return volume = vv * spb->halflengthZ();
+        return vv * spb->halflengthZ();
     }
 
     if (nonBooleanOnly)
         return volume;
 
-    if (comb || sub)
+    if (comb || sub) {
         return resolveBooleanVolume(vol, precision);
-
+    }
     return volume;
 }
 
-double Trk::VolumeConverter::estimateFraction(
-    std::pair<const Trk::Volume*, const Trk::Volume*> sub,
-    double precision) const {
-
-    double fraction = -1.;
+double VolumeConverter::estimateFraction(const VolumePair& sub,
+                                         double precision) const {
 
     if (!sub.first)
-        return fraction = 0.;
+        return 0.;
 
     if (sub.first && !sub.second)
-        return fraction = 1.;
+        return 1.;
+    double fraction = -1.;
 
-    std::pair<bool, const Trk::Volume*> overlap =
-        m_intersectionHelper.intersect(sub.first, sub.second);
+    std::pair<bool, std::unique_ptr<Volume>> overlap =
+        m_intersectionHelper.intersect(*sub.first, *sub.second);
 
     if (overlap.first && !overlap.second)
         return fraction = 1.;
     else if (overlap.first && overlap.second) {
-        fraction = 1. - calculateVolume(overlap.second, true, precision) /
-                            calculateVolume(sub.first, true, precision);
-        delete overlap.second;
+        fraction = 1. - calculateVolume(*overlap.second, true, precision) /
+                            calculateVolume(*sub.first, true, precision);
         return fraction;
     }
     //  resolve embedded volumes
 
     // trivial within required precision
-    double volA = calculateVolume(sub.first, true, precision);
-    double volB = calculateVolume(sub.second, true, precision);
+    double volA = calculateVolume(*sub.first, true, precision);
+    double volB = calculateVolume(*sub.second, true, precision);
     if ((volA > 0 && volA < precision) || (volB > 0 && volB < precision))
         return 1.;
 
     return fraction;
 }
 
-void Trk::VolumeConverter::collectMaterial(const GeoVPhysVol* pv,
-                                           Trk::MaterialProperties& layMat,
-                                           double sf) const {
+void VolumeConverter::collectMaterial(const GeoVPhysVol* pv,
+                                      MaterialProperties& layMat,
+                                      double sf) const {
     // sf is the area of the layer collecting the material
 
     // solution relying on GeoModel
     // currently involves hit&miss on-fly calculation of boolean volumes
     // GeoModelTools::MaterialComponent  mat =
-    // gm_materialHelper.collectMaterial(pv); Trk::Material newMP =
+    // gm_materialHelper.collectMaterial(pv); Material newMP =
     // convert(mat.first); double d = mat.second / sf; layMat.addMaterial(newMP,
     // d / newMP.x0()); return;
 
-    std::vector<Trk::MaterialComponent> materialContent;
+    std::vector<MaterialComponent> materialContent;
     collectMaterialContent(pv, materialContent);
 
     for (auto mat : materialContent) {
@@ -1165,19 +1056,19 @@ void Trk::VolumeConverter::collectMaterial(const GeoVPhysVol* pv,
     }
 }
 
-void Trk::VolumeConverter::collectMaterialContent(
+void VolumeConverter::collectMaterialContent(
     const GeoVPhysVol* gv,
-    std::vector<Trk::MaterialComponent>& materialContent) const {
+    std::vector<MaterialComponent>& materialContent) const {
 
     // solution relying on GeoModel
     // currently involves hit&miss on-fly calculation of boolean volumes
     // GeoModelTools::MaterialComponent  mat =
-    // gm_materialHelper.collectMaterial(pv); Trk::Material newMP =
-    // convert(mat.first); materialContent.push_back( Trk::MaterialComponent(
-    // newMP, mat.second) ); return;
+    // gm_materialHelper.collectMaterial(pv); Material newMP =
+    // convert(mat.first); materialContent.push_back( MaterialComponent( newMP,
+    // mat.second) ); return;
 
     const GeoLogVol* lv = gv->getLogVol();
-    Trk::Material mat = m_materialConverter.convert(lv->getMaterial());
+    Material mat = m_materialConverter.convert(lv->getMaterial());
 
     double motherVolume = 0.;
 
@@ -1195,11 +1086,10 @@ void Trk::VolumeConverter::collectMaterialContent(
 
         if (isBoolean) {
             Amg::Transform3D transf{Amg::Transform3D::Identity()};
-            std::unique_ptr<const Trk::Volume> vol =
-                std::make_unique<const Trk::Volume>(
-                    *m_geoShapeConverter.translateGeoShape(sh, &transf));
+            std::unique_ptr<Volume> vol{
+                m_geoShapeConverter.translateGeoShape(sh, transf)};
             motherVolume =
-                calculateVolume(vol.get(), false, pow(1.e-3 * mat.X0, 3));
+                calculateVolume(*vol, false, std::pow(1.e-3 * mat.X0, 3));
             if (motherVolume < 0) {
                 //  m_geoShapeConverter.decodeShape(sh);
             }
@@ -1211,7 +1101,7 @@ void Trk::VolumeConverter::collectMaterialContent(
     double childVol = 0;
     std::string cPrevious = " ";
     size_t nIdentical = 0;
-    std::vector<Trk::MaterialComponent> childMat;
+    std::vector<MaterialComponent> childMat;
     for (unsigned int ic = 0; ic < nc; ic++) {
         const GeoVPhysVol* cv = &(*(gv->getChildVol(ic)));
         std::string cname = cv->getLogVol()->getName();
@@ -1220,8 +1110,8 @@ void Trk::VolumeConverter::collectMaterialContent(
                            // history
         else {             // scale and collect material from previous item
             for (auto cmat : childMat) {
-                materialContent.push_back(Trk::MaterialComponent(
-                    cmat.first, nIdentical * cmat.second));
+                materialContent.push_back(
+                    MaterialComponent(cmat.first, nIdentical * cmat.second));
                 childVol += materialContent.back().second;
             }
             childMat.clear();  // reset
@@ -1231,21 +1121,20 @@ void Trk::VolumeConverter::collectMaterialContent(
     }
     for (auto cmat : childMat) {
         materialContent.push_back(
-            Trk::MaterialComponent(cmat.first, nIdentical * cmat.second));
+            MaterialComponent(cmat.first, nIdentical * cmat.second));
         childVol += materialContent.back().second;
     }
     if (motherVolume > 0 && childVol > 0)
         motherVolume += -1. * childVol;
 
-    DEBUG_TRACE(std::cout << "collected material:" << lv->getName()
-                          << ":made of:" << lv->getMaterial()->getName()
-                          << ":density(g/mm3)" << mat.rho
-                          << ":mass:" << mat.rho * motherVolume << std::endl;);
-    materialContent.push_back(
-        std::pair<Trk::Material, double>(mat, motherVolume));
+    ATH_MSG_DEBUG("collected material:" << lv->getName() << ":made of:"
+                                        << lv->getMaterial()->getName()
+                                        << ":density(g/mm3)" << mat.rho
+                                        << ":mass:" << mat.rho * motherVolume);
+    materialContent.push_back(std::pair<Material, double>(mat, motherVolume));
 }
 
-double Trk::VolumeConverter::leadingVolume(const GeoShape* sh) const {
+double VolumeConverter::leadingVolume(const GeoShape* sh) const {
 
     if (sh->type() == "Subtraction") {
         const GeoShapeSubtraction* sub =
@@ -1273,3 +1162,4 @@ double Trk::VolumeConverter::leadingVolume(const GeoShape* sh) const {
 
     return sh->volume();
 }
+}  // namespace Trk
