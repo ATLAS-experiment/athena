@@ -179,7 +179,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
         FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]
 
     # Add truth containers
-    if flags.Input.isMC:
+    if flags.Input.isMC and flags.Trigger.EDMVersion>=0:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAG1SlimmingHelper)
         from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
         acc.merge(HLTJetFTagDecorationCfg(flags))

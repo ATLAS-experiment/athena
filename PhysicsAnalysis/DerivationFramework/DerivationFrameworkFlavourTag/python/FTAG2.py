@@ -119,7 +119,7 @@ def FTAG2Cfg(flags):
     FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper)
 
     # Add truth containers
-    if flags.Input.isMC:
+    if flags.Input.isMC and flags.Trigger.EDMVersion>=0:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAG2SlimmingHelper)
         from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
         acc.merge(HLTJetFTagDecorationCfg(flags))
