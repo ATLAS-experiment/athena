@@ -44,3 +44,6 @@
 # Don't build PerfMonVTune which has external Intel tool dependency
 - Control/PerformanceMonitoring/PerfMonVTune
 
+# Temporarily removing due to ATLASRECTS-7946
+- MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelTestR4
+- MuonSpectrometer/MuonGeoModelTest
