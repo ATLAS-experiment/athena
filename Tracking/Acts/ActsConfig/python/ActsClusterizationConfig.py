@@ -126,36 +126,53 @@ def ActsClusterCacheCreatorAlgCfg(flags,
     acc.addEventAlgo(CompFactory.ActsTrk.Cache.CreatorAlg(name, **kwargs))
     return acc
 
-def ActsPixelClustersViewFillerAlgCfg(flags,
-                                      name: str = "ActsPixelClusterViewFillerAlg",
+def ActsPixelClusterPreparationAlgCfg(flags,
+                                      name: str = "ActsPixelClusterPreparationAlg",
+                                      useCache: bool = False,
                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("InputIDC", "ActsPixelClustersCache")
-    kwargs.setdefault("Output", "ITkPixelClusters_InView")
-    kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
+
+    kwargs.setdefault('InputCollection', 'ITkPixelClusters')
+    kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
         
-    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterCacheFillerAlg(name, **kwargs))
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsDataPreparationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsDataPreparationMonitoringToolCfg(flags,
+                                                                                               name = "ActsPixelClusterPreparationMonitoringTool")))
+
+    if not useCache:
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterDataPreparationAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterCacheDataPreparationAlg(name, **kwargs))
     return acc
 
-def ActsStripClustersViewFillerAlgCfg(flags,
-                                      name: str = "ActsStripClusterViewFillerAlg",
+def ActsStripClusterPreparationAlgCfg(flags,
+                                      name: str = "ActsStripClusterPreparationAlg",
+                                      useCache: bool = False,
                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("InputIDC", "ActsStripClustersCache")
-    kwargs.setdefault("Output", "ITkStripClusters_InView")
-    kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
+
+    kwargs.setdefault('InputCollection', 'ITkStripClusters')
+    kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
         
-    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterCacheFillerAlg(name, **kwargs))
-    return acc
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsDataPreparationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsDataPreparationMonitoringToolCfg(flags,
+                                                                                               name = "ActsStripClusterPreparationMonitoringTool")))
 
+    if not useCache:
+        acc.addEventAlgo(CompFactory.ActsTrk.StripClusterDataPreparationAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.StripClusterCacheDataPreparationAlg(name, **kwargs))
+    return acc
 
 def ActsMainClusterizationCfg(flags,
                               RoIs: str = "ActsRegionOfInterest") -> ComponentAccumulator:
@@ -170,14 +187,23 @@ def ActsMainClusterizationCfg(flags,
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                 RoIs=RoIs))
-
+        
     if flags.Acts.useCache:
         if flags.Detector.EnableITkPixel:
-            acc.merge(ActsPixelClustersViewFillerAlgCfg(flags,
-                                                        RoIs=RoIs))
+            acc.merge(ActsPixelClusterPreparationAlgCfg(flags,
+                                                        name="ActsPixelClusterPreparationAlg",
+                                                        RoIs=RoIs,
+                                                        useCache=True,
+                                                        OutputCollection="ITkPixelClusters_InView",
+                                                        InputIDC="ActsPixelClustersCache"))
+            
         if flags.Detector.EnableITkStrip:
-            acc.merge(ActsStripClustersViewFillerAlgCfg(flags,
-                                                        RoIs=RoIs))
+            acc.merge(ActsStripClusterPreparationAlgCfg(flags,
+                                                        name="ActsStripClusterCachePreparationAlg",
+                                                        RoIs=RoIs,
+                                                        useCache=True,
+                                                        OutputCollection="ITkStripClusters_InView",
+                                                        InputIDC="ActsStripClustersCache"))
             
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -193,20 +219,22 @@ def ActsMainClusterizationCfg(flags,
 def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if flags.Detector.EnableITkStrip:
+    if flags.Acts.useCache:
         acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                 name="ActsConversionStripClusterizationAlg",
                                                 ClustersKey="ITkConversionStripClusters",
                                                 EnableCache=False,
                                                 RoIs="ActsConversionRegionOfInterest"))
+        
+    if flags.Detector.EnableITkStrip:
+        acc.merge(ActsStripClusterPreparationAlgCfg(flags,
+                                                    name="ActsConversionStripClusterPreparationAlg" if not flags.Acts.useCache else "ActsConversionStripClusterCachePreparationAlg",
+                                                    RoIs="ActsConversionRegionOfInterest",
+                                                    useCache=flags.Acts.useCache,
+                                                    InputCollection="ITkStripClusters",
+                                                    OutputCollection="ITkConversionStripClusters" if not flags.Acts.useCache else "ITkConversionStripClusters_InView",
+                                                    InputIDC="ActsStripClustersCache"))
 
-    if flags.Acts.useCache:
-        if flags.Detector.EnableITkStrip:
-            acc.merge(ActsStripClustersViewFillerAlgCfg(flags,
-                                                        name="ActsConversionStripClustersViewFiller",
-                                                        Output="ITkConversionStripClusters_InView",
-                                                        RoIs="ActsConversionRegionOfInterest"))
-    
     # Analysis extensions
     if flags.Acts.doAnalysis:
         if flags.Detector.EnableITkStrip:

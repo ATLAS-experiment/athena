@@ -45,35 +45,35 @@ ActsTrackFindingAlg                                  INFO Ratios
 |------------------------------------------|------------|------------|------------|
 ActsConversionStripSeedingAlg                        INFO Seed statistics
 |---------------------|------------|
-| Spacepoints         |       6773 |
-| Seeds               |        371 |
+| Spacepoints         |       7019 |
+| Seeds               |        376 |
 | No track parameters |          0 |
 |---------------------|------------|
 ActsConversionTrackFindingAlg                        INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
-| Input seeds                       |        371 |        371 |
+| Input seeds                       |        376 |        376 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |        306 |        306 |
-| Cannot find track                 |         57 |         57 |
+| Used   seeds                      |        311 |        311 |
+| Cannot find track                 |         61 |         61 |
 | Duplicate seeds                   |         65 |         65 |
-| CKF tracks                        |        214 |        214 |
+| CKF tracks                        |        215 |        215 |
 | Rejected refined parameters       |         35 |         35 |
 | selected tracks                   |         48 |         48 |
-| Stopped tracks reaching max holes |         57 |         57 |
+| Stopped tracks reaching max holes |         61 |         61 |
 |-----------------------------------|------------|------------|
 ActsConversionTrackFindingAlg                        INFO Ratios
 |------------------------------------------|------------|------------|
 |                                          | SSS        | ALL        |
 |------------------------------------------|------------|------------|
-| failed / seeds                           |   0.153639 |   0.153639 |
-| duplication / seeds                      |   0.175202 |   0.175202 |
-| Rejected refined params / seeds          |  0.0943396 |  0.0943396 |
-| selected / CKF tracks                    |   0.224299 |   0.224299 |
-| selected tracks / used seeds             |   0.156863 |   0.156863 |
+| failed / seeds                           |   0.162234 |   0.162234 |
+| duplication / seeds                      |   0.172872 |   0.172872 |
+| Rejected refined params / seeds          |  0.0930851 |  0.0930851 |
+| selected / CKF tracks                    |   0.223256 |   0.223256 |
+| selected tracks / used seeds             |   0.154341 |   0.154341 |
 |------------------------------------------|------------|------------|
-| selected / CKF tracks           0.0- 0.5 |       0.08 |       0.08 |
+| selected / CKF tracks           0.0- 0.5 |  0.0784314 |  0.0784314 |
 |                                 0.5- 1.0 |  0.0816327 |  0.0816327 |
 |                                 1.0- 1.5 |  0.0588235 |  0.0588235 |
 |                                 1.5- 2.0 |   0.264706 |   0.264706 |

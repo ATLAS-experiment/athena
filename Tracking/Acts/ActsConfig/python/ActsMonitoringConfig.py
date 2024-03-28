@@ -38,6 +38,21 @@ def ActsITkStripClusterizationMonitoringToolCfg(flags,
     acc.merge(ActsMonitoringHistSvcCfg(flags))
     return acc
 
+def ActsDataPreparationMonitoringToolCfg(flags,
+                                         name: str = "ActsDataPreparationMonitoringTool",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, name)
+
+    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F', title='Time for execute',
+                            xbins=100, xmin=0, xmax=100)
+
+    acc.setPrivateTools(monTool)
+    acc.merge(ActsMonitoringHistSvcCfg(flags))
+    return acc
+
 def ActsHgtdClusterizationMonitoringToolCfg(flags,
                                             name: str = "ActsHgtdClusterizationMonitoringTool",
                                             **kwargs) -> ComponentAccumulator:
