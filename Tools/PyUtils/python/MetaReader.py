@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import absolute_import
 import os
 import re
 from fnmatch import fnmatchcase
@@ -665,23 +664,19 @@ def _read_guid(filename):
     import ROOT
     root_file = ROOT.TFile.Open( _get_pfn(filename) )
     params = root_file.Get('##Params')
+    if not isinstance(params, ROOT.TTree):
+        raise NotImplementedError(f"Cannot extract ##Params from object of type {type(params)!r}")
 
-    regex = re.compile(r'^\[NAME=([a-zA-Z0-9_]+)\]\[VALUE=(.*)\]')
+    regex = re.compile(r'\[NAME=(\w+)\]\[VALUE=(.*)\]', re.ASCII)
     fid = None
 
-    for i in range(params.GetEntries()):
-        params.GetEntry(i)
-        # Work around apparent pyroot issue:
-        # If we try to access params.db_string directly, we see trailing
-        # garbage, which can confuse python's bytes->utf8 conversion
-        # and result in an error.
-        param = params.GetLeaf('db_string').GetValueString()
+    for entry in params:
+        param = entry.GetLeaf('db_string').GetValueString()
 
         result = regex.match(param)
-        if result:
-            if result.group(1) == 'FID' :
-               # don't exit yet, it's the last FID entry that counts
-               fid = result.group(2)
+        if result and result.group(1) == 'FID' :
+            # don't exit yet, it's the last FID entry that counts
+            fid = result.group(2)
 
     return fid
 

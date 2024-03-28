@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Lightweight and simplified version of AthFile
 # As the transform knows which files are bytestream and which are
 # POOL files we just have two simple classes and definately avoid
 # doing anything fancy here
 
-from __future__ import print_function
 import os
 import os.path
 import re
@@ -407,27 +406,22 @@ class AthInpFile(object):
                         nentries = reader.GetNEntries()
                         break
 
-                # _get_guid() code from FilePeeker class by Sebastian Binet
                 pool = f.Get('##Params')
+                if not isinstance(pool, root.TTree):
+                    raise NotImplementedError(f"Cannot extract ##Params from object of type {type(pool)!r}")
                 if pool:
-                    pool_token = re.compile(r'\[NAME=(?P<name>.*?)\]'\
+                    pool_token = re.compile(r'\[NAME=(?P<name>.*?)\]'
                                             r'\[VALUE=(?P<value>.*?)\]').match
                     params = []
-                    for i in range(pool.GetEntries()):
-                        if pool.GetEntry(i)>0:
-                            # Work around apparent pyroot issue:
-                            # If we try to access pool.db_string directly,
-                            # we see trailing garbage, which can confuse
-                            # python's bytes->utf8 conversion
-                            # and result in an error.
-                            param = pool.GetLeaf('db_string').GetValueString()
-                            match = pool_token(param)
-                            if not match:
-                                continue
-                            d = match.groupdict()
-                            params.append((d['name'], d['value']))
-                            if d['name'].lower() == 'fid':
-                                pool_guid = d['value']
+                    for entry in pool:
+                        param = entry.GetLeaf('db_string').GetValueString()
+                        match = pool_token(param)
+                        if not match:
+                            continue
+                        d = match.groupdict()
+                        params.append((d['name'], d['value']))
+                        if d['name'].lower() == 'fid':
+                            pool_guid = d['value']
                 del pool
             f.Close()
             del f
