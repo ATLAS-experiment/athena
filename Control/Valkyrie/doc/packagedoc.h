@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,19 +15,17 @@ General information about using valgrind in Atlas can be found on the
 
 Since code profilers like %callgrind collect a huge amount of data and since you are most likely only
 interested in your particular algorithm it is not a good idea to simply run the profiler on an athena job.
-Using ValgrindSvc it is possible to profile specific algorithms only.
-Add the following to your job options
+Using ValgrindSvc it is possible to profile specific algorithms only. For a typical CA-job this can be
+configured via setting the following flags:
 
 <pre>
-  from Valkyrie.JobOptCfg import ValgrindSvc
-  svcMgr += ValgrindSvc( OutputLevel = DEBUG,
-                         ProfiledAlgs = ["HelloWorld"] )
+  python -m AthExHelloWorld.HelloWorldConfig PerfMon.Valgrind.ProfiledAlgs=["HelloWorld"]
 </pre>
 
-and run the athena job within valgrind:
+and then running the job within valgrind:
 
 <pre>
-  valgrind --tool=callgrind --trace-children=yes --instr-atstart=no `which athena.py` HelloWorldOptions.py
+  valgrind --tool=callgrind --trace-children=yes --instr-atstart=no [CMD]
 </pre>
 
 Add your other favorite valgrind options but make sure that the instrumentation at start is turned off,
