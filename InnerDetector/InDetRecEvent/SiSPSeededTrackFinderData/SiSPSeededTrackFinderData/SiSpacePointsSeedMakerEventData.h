@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -217,8 +217,8 @@ namespace InDet {
     // given PoolStl allocator
     template <typename T>
     static void clearPoolList(std::list<T, SG::ArenaPoolSTLAllocator<T>>& poolList){
-      using namespace std;
-      poolList.~list<T, SG::ArenaPoolSTLAllocator<T>>();
+      // Can't just use clear() because we want to erase the
+      // pool as well.
       poolList = std::list<T, SG::ArenaPoolSTLAllocator<T>>();
     }
 
