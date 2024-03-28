@@ -30,9 +30,9 @@ TrigDisappearingTrackHypoTool::~TrigDisappearingTrackHypoTool() {}
 
 StatusCode TrigDisappearingTrackHypoTool::initialize()
 {
-   ATH_MSG_INFO( "Initialization completed successfully:" );
-   ATH_MSG_INFO( "  cutTrackPtGeV = " << m_cutTrackPtGeV ); 
-   ATH_MSG_INFO( "Tool configured for chain/id: " << m_decisionId  );
+   ATH_MSG_DEBUG( "Initialization completed successfully:" );
+   ATH_MSG_DEBUG( "  cutTrackPtGeV = " << m_cutTrackPtGeV ); 
+   ATH_MSG_DEBUG( "Tool configured for chain/id: " << m_decisionId  );
 
    return StatusCode::SUCCESS;
 }

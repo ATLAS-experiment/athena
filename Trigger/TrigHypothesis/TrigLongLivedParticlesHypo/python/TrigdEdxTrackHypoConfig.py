@@ -53,7 +53,7 @@ def TrigdEdxTrackHypoToolFromDict( chainDict ):
     for THR in thresholds:
         strThr += str(THR)+", "
         
-    log.info("Threshold Values are: %s",strThr)
+    log.debug("Threshold Values are: %s",strThr)
 
     tool.cutTrackPtGeV = thresholds
 
@@ -65,21 +65,21 @@ def TrigdEdxTrackHypoToolFromDict( chainDict ):
 
     for cpart in cparts:
         if cpart['IDinfo'] =="loose":
-            log.info("UTT: Loose ID working point is set")
+            log.debug("UTT: Loose ID working point is set")
             trackEta.append(2.5)
             trackdEdx.append(1.5)
             tracka0beam.append(5.0)
             trackNhighdEdxHits.append(1)
             trackHighdEdxDef.append("1p50")
         elif cpart['IDinfo'] =="tight":
-            log.info("UTT: Tight ID working point is set")
+            log.debug("UTT: Tight ID working point is set")
             trackEta.append(2.5)
             trackdEdx.append(1.8)
             tracka0beam.append(1.5)
             trackNhighdEdxHits.append(2)
             trackHighdEdxDef.append("1p80")
         else:
-            log.info("UTT: Medium ID working point is set")
+            log.debug("UTT: Medium ID working point is set")
             trackEta.append(2.5)
             trackdEdx.append(1.7)
             tracka0beam.append(2.5)
