@@ -1,5 +1,5 @@
 """ 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """ 
 
 # Author: Will Buttinger
@@ -47,15 +47,15 @@ print("INFO: Processing:",jps.AthenaCommonFlags.FilesInput())
 print("INFO: Outputting:",jps.AthenaCommonFlags.HistOutputs())
 
 # read input file metadata: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/AthAnalysis#How_to_access_file_metadata_at_t
-from PyUtils import AthFile
-af = AthFile.fopen(jps.AthenaCommonFlags.FilesInput()[0])
-isMC = 'IS_SIMULATION' in af.fileinfos['evt_type']
-isFastSim = isMC and ('ATLFASTII' in af.fileinfos['metadata']['/Simulation/Parameters']['SimulationFlavour'].upper()) #full sim or atlfast
+from PyUtils.MetaReader import read_metadata
+inp_filename = jps.AthenaCommonFlags.FilesInput()[0]
+metadata = read_metadata(inp_filename, None, 'peeker')[inp_filename]
+isMC = 'IS_SIMULATION' in metadata['eventTypes']
+isFastSim = isMC and ('ATLFASTII' in metadata['SimulationFlavour'].upper()) #full sim or atlfast
 print("INFO: Format: "," isMC: ",isMC," isFastSim: ",isFastSim)
-
 if isMC:
     campaignMap = {284500:"mc20a",300000:"mc20d",310000:"mc20e",410000:"mc21a"}
-    MCCampaign = campaignMap[af.fileinfos["run_number"][0]]
+    MCCampaign = campaignMap[metadata["runNumbers"][0]]
 
 # configure SUSYTools algorithm and its tool
 susyAlg = CfgMgr.SUSYToolsAlg(DoSyst = isMC and not susyArgs.noSyst)
@@ -64,7 +64,7 @@ if susyArgs.configFile:
     susyAlg.SUSYTools.ConfigFile = susyArgs.configFile
 else:
     # select config file based on whether we are run3 or run2
-    if (isMC and ((MCCampaign in ["mc21a"]) or (MCCampaign in ["mc23a"]) or (MCCampaign in ["mc23c"]) )) or (not isMC and af.fileinfos["run_number"][0]>400000):
+    if (isMC and ((MCCampaign in ["mc21a"]) or (MCCampaign in ["mc23a"]) or (MCCampaign in ["mc23c"]) )) or (not isMC and metadata["runNumbers"][0]>400000):
         susyAlg.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"   # run3
     else:
         susyAlg.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default.conf"        # run2
