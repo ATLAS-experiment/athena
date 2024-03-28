@@ -365,7 +365,7 @@ double FlavourUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, con
 {
     // First, check if we even want to apply the uncertainty (large-R specific break-out)
     // Check if we are supposed to only use given truth labels
-    static const SG::AuxElement::ConstAccessor<int> accLargeRJetTruthLabel(m_largeRJetTruthLabelName);
+    const SG::AuxElement::ConstAccessor<int> accLargeRJetTruthLabel(m_largeRJetTruthLabelName);
     if (!m_largeRJetTruthLabels.empty())
     {
         // If we are asking to check truth labels, then retrieve the truth jet label from the jet
