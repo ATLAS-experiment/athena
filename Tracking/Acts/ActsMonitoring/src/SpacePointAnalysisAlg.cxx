@@ -52,21 +52,29 @@ namespace ActsTrk {
       ATH_MSG_FATAL("xAOD::SpacePointContainer with key " << m_spacePointContainerKey.key() << " is not available...");
       return StatusCode::FAILURE;
     }
-
+    const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
+    // Early exit if no input collection
+    if (inputSpacePointCollection->size() == 0) {
+      return StatusCode::SUCCESS;
+    }
+    
     ATH_MSG_DEBUG("Reading decoration to space point collection: bare pointers to clusters");
     ATH_MSG_DEBUG("Decoration name: " << m_clusterDecoration.key());
     using decoration_type = std::vector<const xAOD::UncalibratedMeasurement*>;
     SG::ReadDecorHandle< xAOD::SpacePointContainer,
 			 decoration_type > barePointersToClusters( m_clusterDecoration, ctx );
-    ATH_CHECK(barePointersToClusters.isAvailable());
+    if ( not barePointersToClusters.isAvailable() and
+	 not inputSpacePointCollection->front()->isAvailable<decoration_type>("measurements") ) {
+      ATH_MSG_ERROR("Space Point Collection does not have decoration 'measurements', which should contain a vector of bare pointes to clusters");
+      return StatusCode::FAILURE;
+    }
     
     auto monitor_nsp = Monitored::Scalar<int>("Nsp", inputSpacePointContainer->size());
     fill(m_monGroupName.value(), monitor_nsp);
 
-    const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     // Check we can have access to clusters
     for (const xAOD::SpacePoint* sp : *inputSpacePointCollection) {
-      const auto& els = barePointersToClusters(*sp);
+      const auto& els = sp->measurements();
       for (const auto* el : els) {
           [[maybe_unused]] const auto idHash = el->identifierHash();
       }

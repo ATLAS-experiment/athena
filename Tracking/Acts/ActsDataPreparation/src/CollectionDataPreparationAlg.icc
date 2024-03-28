@@ -1,0 +1,25 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+namespace ActsTrk {
+
+  // Pixel Clusters
+  inline
+  xAOD::DetectorIDHashType PixelClusterDataPreparationAlg::retrieveDetectorIDHash(const xAOD::PixelCluster& obj) const
+  { return obj.identifierHash(); }
+
+  // Strip Clusters
+  inline
+  xAOD::DetectorIDHashType StripClusterDataPreparationAlg::retrieveDetectorIDHash(const xAOD::StripCluster& obj) const
+  { return obj.identifierHash(); }
+
+  // SpacePoints
+  inline
+  xAOD::DetectorIDHashType SpacePointDataPreparationAlg::retrieveDetectorIDHash(const xAOD::SpacePoint& obj) const
+  { return obj.elementIdList()[0]; }
+
+} // namespace
+
+
+

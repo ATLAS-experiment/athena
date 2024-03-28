@@ -42,6 +42,44 @@ def ActsCoreStripSpacePointToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 
+def ActsPixelSpacePointPreparationAlgCfg(flags,
+                                         name: str = "ActsPixelSpacePointPreparationAlg",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+        
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsDataPreparationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsDataPreparationMonitoringToolCfg(flags,
+                                                                                               name = "ActsPixelSpacePointPreparationMonitoringTool")))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.SpacePointDataPreparationAlg(name, **kwargs))
+    return acc
+
+def ActsStripSpacePointPreparationAlgCfg(flags,
+                                         name: str = "ActsStripSpacePointPreparationAlg",
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+        
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsDataPreparationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsDataPreparationMonitoringToolCfg(flags,
+                                                                                               name = "ActsStripSpacePointPreparationMonitoringTool")))
+
+    acc.addEventAlgo(CompFactory.ActsTrk.SpacePointDataPreparationAlg(name, **kwargs))
+    return acc
+
 def ActsPixelSpacePointFormationAlgCfg(flags,
                                        name: str = "ActsPixelSpacePointFormationAlg",
                                        **kwargs) -> ComponentAccumulator:
@@ -128,25 +166,44 @@ def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if flags.Detector.EnableITkStrip:
-        # Need to schedule this here in case the Athena space point formation is not schedule
-        # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
-        # This may be because the current strip space point formation algorithm is not using Acts
-        # May be not necessary once the Acts-based strip space point maker is ready
-        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        acc.merge(ITkStripReadoutGeometryCfg(flags))
-        
-        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-        acc.merge(BeamSpotCondAlgCfg(flags))
-        
-        from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
-        acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
-        
-        acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
-                                                     name="ActsConversionStripSpacePointFormation",
-                                                     StripClusters="ITkConversionStripClusters_InView" if flags.Acts.useCache else "ITkConversionStripClusters",
-                                                     StripSpacePoints="ITkConversionStripSpacePoints",
-                                                     StripOverlapSpacePoints="ITkConversionStripOverlapSpacePoints"))
+        # For the time being, while we wait for the cache mechanism to be available also for space points,
+        # we do the following:
+        #   - offline: we schedule the Preparation Algorithms and rely of the space point collections created in the main pass
+        #   - online (i.e. with cache): we run space point formation and pass the output directly to seeding
 
+        if not flags.Acts.useCache:
+            acc.merge(ActsStripSpacePointPreparationAlgCfg(flags,
+                                                           name = "ActsConversionStripSpacePointPreparationAlg",
+                                                           RoIs = "ActsConversionRegionOfInterest",
+                                                           InputCollection = "ITkStripSpacePoints",
+                                                           OutputCollection = "ITkConversionStripSpacePoints"))
+            
+            acc.merge(ActsStripSpacePointPreparationAlgCfg(flags,
+                                                           name = "ActsConversionStripOverlapSpacePointPreparationAlg",
+                                                           RoIs = "ActsConversionRegionOfInterest",
+                                                           InputCollection = "ITkStripOverlapSpacePoints",
+                                                           OutputCollection = "ITkConversionStripOverlapSpacePoints"))
+
+        else:            
+            # Need to schedule this here in case the Athena space point formation is not schedule
+            # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
+            # This may be because the current strip space point formation algorithm is not using Acts
+            # May be not necessary once the Acts-based strip space point maker is ready            
+            from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+            acc.merge(ITkStripReadoutGeometryCfg(flags))
+            
+            from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+            acc.merge(BeamSpotCondAlgCfg(flags))
+            
+            from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
+            acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
+            
+            acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                                                         name="ActsConversionStripSpacePointFormation",
+                                                         StripClusters="ITkConversionStripClusters_InView",
+                                                         StripSpacePoints="ITkConversionStripSpacePoints",
+                                                         StripOverlapSpacePoints="ITkConversionStripOverlapSpacePoints"))
+            
     # Analysis extensions
     if flags.Acts.doAnalysis:
         if flags.Detector.EnableITkStrip:

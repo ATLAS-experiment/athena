@@ -1,0 +1,167 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+namespace ActsTrk {
+
+  template <typename external_collection_t, bool useCache>
+  DataPreparationAlg<external_collection_t, useCache>::DataPreparationAlg(const std::string& name,
+									  ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
+  {}
+
+  template <typename external_collection_t, bool useCache>
+  StatusCode DataPreparationAlg<external_collection_t, useCache>::initialize()
+  {
+    ATH_MSG_INFO("Initializing " << name() << " ...");
+
+    // Handles we always need
+    ATH_CHECK(m_outputCollectionKey.initialize());
+    ATH_CHECK(m_roiCollectionKey.initialize());
+    // Collections needed if we do not use the cache
+    ATH_CHECK(m_inputCollectionKey.initialize(not useCache));
+    ATH_CHECK(m_detEleCollKey.initialize(not useCache));
+    // Collections needed if we use the cache
+    ATH_CHECK(m_inputIdentifiableContainer.initialize(useCache));
+    
+    // Tools
+    ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
+    ATH_CHECK(m_regionSelector.retrieve());
+
+    return StatusCode::SUCCESS;
+  }
+
+  template <typename external_collection_t, bool useCache>
+  StatusCode
+  DataPreparationAlg<external_collection_t, useCache>::execute(const EventContext& ctx) const
+  {
+    ATH_MSG_DEBUG("Executing " << name() << " ...");
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto mon = Monitored::Group( m_monTool, timer );    
+
+
+    ATH_MSG_DEBUG("Writing output collection with key `" << m_outputCollectionKey.key() << "`");
+    SG::WriteHandle< output_collection_t > outputHandle = SG::makeHandle( m_outputCollectionKey, ctx );
+    ATH_CHECK( outputHandle.record( std::make_unique<output_collection_t>(SG::VIEW_ELEMENTS) ) );
+    output_collection_t *outputCollection = outputHandle.ptr();
+
+    if constexpr (not useCache) {
+      ATH_CHECK( fillFromContainer( ctx, *outputCollection ) );
+    } else {
+      ATH_CHECK( fillFromCache( ctx, *outputCollection ) );
+    }
+    
+    ATH_MSG_DEBUG("Concluded creation of output collection with " << outputCollection->size() << " entries");
+    return StatusCode::SUCCESS;
+  }
+
+  template <typename external_collection_t, bool useCache>
+  StatusCode
+  DataPreparationAlg<external_collection_t, useCache>::fillFromContainer(const EventContext& ctx,
+									 output_collection_t& outputCollection) const
+  {
+    ATH_MSG_DEBUG("Filling output collection from container");
+    
+    // Inputs
+    ATH_MSG_DEBUG("Retrieving Input Collection with key `" << m_inputCollectionKey.key() << "`");
+    SG::ReadHandle< input_collection_t > inputHandle = SG::makeHandle(  m_inputCollectionKey, ctx );
+    ATH_CHECK(inputHandle.isValid());
+    const input_collection_t* inputCollection = inputHandle.cptr();
+    ATH_MSG_DEBUG("Retrieved input collection with " << inputCollection->size() << " elements.");
+    
+    if (inputCollection->size() == 0) {
+      return StatusCode::SUCCESS;
+    }
+
+    ATH_MSG_DEBUG("Retrieving SiDetectorElementCollection with key `" << m_detEleCollKey.key() << "`");
+    SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle = SG::makeHandle( m_detEleCollKey, ctx );
+    ATH_CHECK(detEleHandle.isValid());    
+    const InDetDD::SiDetectorElementCollection* detElements = detEleHandle.cptr();
+
+    // Selection
+    // For the time being we simply insert data given the idHash
+    // Use the Container Accessor strategy
+    ContainerAccessor<object_t, IdentifierHash, 1>
+      accessor ( *inputCollection,
+		 [this] (const object_t& coll) -> IdentifierHash 
+		 { return retrieveDetectorIDHash(coll); },
+		 detElements->size());
+    
+    // Get the list of id hashes from the RoI
+    std::set<IdentifierHash> hashes;
+    ATH_CHECK( fetchIdHashes( ctx, hashes ) );
+    
+    // Run on all the id hashes that overlap with the RoI
+    for (const IdentifierHash id : hashes) {      
+      // If the requested idHash is not present move to the next one
+      // This should not happen for clusters, but may happen for strip space points
+      if (not accessor.isIdentifierPresent(id)) {
+	continue;
+      }
+      
+      // Get the objects and add them to the output collection
+      const auto& ranges = accessor.rangesForIdentifierDirect(id);
+      for (auto [firstElement, lastElement] : ranges) {
+	for (; firstElement != lastElement; ++firstElement) {
+	  outputCollection.push_back(*firstElement);
+	}
+      }
+    }
+
+    return StatusCode::SUCCESS;
+  }
+
+  template <typename external_collection_t, bool useCache>
+  StatusCode
+  DataPreparationAlg<external_collection_t, useCache>::fillFromCache(const EventContext& ctx,
+								     output_collection_t& outputCollection) const
+  {
+    ATH_MSG_DEBUG("Filling output collection from cache");
+
+    // Inputs
+    ATH_MSG_DEBUG("Retrieving Identifiable Container with key `" << m_inputIdentifiableContainer.key() << "`");
+    cache_read_handle_t cacheHandle = SG::makeHandle( m_inputIdentifiableContainer, ctx );
+    ATH_CHECK( cacheHandle.isValid() );
+    
+    std::set<IdentifierHash> hashes;
+    ATH_CHECK( fetchIdHashes( ctx, hashes ) );
+    
+    for(auto idHash: hashes) {
+      //this function will wait if an item is not available
+      auto ce = cacheHandle->indexFindPtr(idHash);
+      if(ce == nullptr) continue;
+      
+      for(unsigned int i = ce->range_start; i < ce->range_end; i++){
+	outputCollection.push_back(ce->container->at(i));
+      }
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+  
+  template <typename external_collection_t, bool useCache>
+  StatusCode
+  DataPreparationAlg<external_collection_t, useCache>::fetchIdHashes(const EventContext& ctx,
+							   std::set<IdentifierHash>& hashes) const
+  {    
+    ATH_MSG_DEBUG("Retrieving RoIs with key `" << m_roiCollectionKey.key() << "`");
+    SG::ReadHandle< TrigRoiDescriptorCollection > roiHandle = SG::makeHandle( m_roiCollectionKey, ctx );
+    ATH_CHECK(roiHandle.isValid());
+    const TrigRoiDescriptorCollection* roiCollection = roiHandle.cptr();
+    
+    std::vector<IdentifierHash> listOfIds;
+    for (const auto* roi : *roiCollection) {
+      listOfIds.clear();
+      m_regionSelector->HashIDList(*roi, listOfIds);
+      hashes.insert(listOfIds.begin(), listOfIds.end());
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+
+  template <typename external_collection_t, bool useCache>
+  xAOD::DetectorIDHashType
+  DataPreparationAlg<external_collection_t, useCache>::retrieveDetectorIDHash(const object_t&) const
+  { return 0; }
+  
+} // namespace
