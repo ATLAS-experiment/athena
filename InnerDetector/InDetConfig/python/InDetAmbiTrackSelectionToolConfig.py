@@ -117,14 +117,10 @@ def InDetTRTAmbiTrackSelectionToolCfg(
             InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     kwargs.setdefault("minScoreShareTracks", -1.)  # off !
-    kwargs.setdefault("minHits",
-                      flags.Tracking.ActiveConfig.minSecondaryClusters)
-    kwargs.setdefault("minNotShared",
-                      flags.Tracking.ActiveConfig.minSecondarySiNotShared)
-    kwargs.setdefault("maxShared",
-                      flags.Tracking.ActiveConfig.maxSecondaryShared)
-    kwargs.setdefault("minTRTHits",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("minHits", flags.Tracking.BackTracking.minClusters)
+    kwargs.setdefault("minNotShared", flags.Tracking.BackTracking.minSiNotShared)
+    kwargs.setdefault("maxShared", flags.Tracking.BackTracking.maxShared)
+    kwargs.setdefault("minTRTHits", flags.Tracking.BackTracking.minTRTonTrk)
     kwargs.setdefault("UseParameterization",
                       flags.Tracking.ActiveConfig.useParameterizedTRTCuts)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
@@ -239,4 +235,3 @@ def ITkAmbiTrackSelectionToolCfg(
     acc.setPrivateTools(CompFactory.InDet.InDetDenseEnvAmbiTrackSelectionTool(
         name=name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
-    

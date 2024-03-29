@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetSegmentDriftCircleAssValidation package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -12,8 +12,7 @@ def SegmentDriftCircleAssValidationCfg(
     kwargs.setdefault("RadiusMin", 0.)
     kwargs.setdefault("RadiusMax", 600.)
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
-    kwargs.setdefault("MinNumberDCs",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("MinNumberDCs", flags.Tracking.BackTracking.minTRTonTrk)
 
     acc.addEventAlgo(
         CompFactory.InDet.SegmentDriftCircleAssValidation(name, **kwargs))

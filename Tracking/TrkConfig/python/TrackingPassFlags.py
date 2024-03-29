@@ -123,36 +123,6 @@ def useNewParameterizationTRT_ranges( inflags ):
     {'-2':  False,
     '3-':  True } )
 
-def minSecondaryTRTonTrk_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  10,
-    '7-':  15 } )
-
-def minSecondaryTRTPrecFrac_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  0.0,
-    '7-':  0.3 } )
-
-def maxSecondaryHoles_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  2,
-    '7-':  1 } )
-
-def maxSecondaryPixelHoles_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  2,
-    '7-':  1 } )
-
-def maxSecondarySCTHoles_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  2,
-    '7-':  1 } )
-
-def maxSecondaryDoubleHoles_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  1,
-    '7-':  0 } )
-
 def rejectShortExtensions_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
     {'-6':  False,
@@ -293,19 +263,6 @@ def createTrackingPassFlags():
 
     # --- defaults for secondary tracking
     icf.addFlag("maxSecondaryImpact", 100.0 * Units.mm) # low lumi
-    
-    icf.addFlag("minSecondaryClusters"      , 4)
-    icf.addFlag("minSecondarySiNotShared"   , 4)
-    icf.addFlag("maxSecondaryShared"        , 1)  # cut is now on number of shared modules
-    icf.addFlag("minSecondaryTRTonTrk"      , minSecondaryTRTonTrk_ranges)
-    icf.addFlag("minSecondaryTRTPrecFrac"   , minSecondaryTRTPrecFrac_ranges)
-    
-    icf.addFlag("maxSecondaryHoles"         , maxSecondaryHoles_ranges)
-    icf.addFlag("maxSecondaryPixelHoles"    , maxSecondaryPixelHoles_ranges)
-    icf.addFlag("maxSecondarySCTHoles"      , maxSecondarySCTHoles_ranges)
-    icf.addFlag("maxSecondaryDoubleHoles"   , maxSecondaryDoubleHoles_ranges)
-    icf.addFlag("SecondarynHolesMax"        , 2 )
-    icf.addFlag("SecondarynHolesGapMax"     , 2 )
 
     icf.addFlag("rejectShortExtensions"     , lambda pcf:
                 False if pcf.Beam.Type is BeamType.Cosmics else
@@ -609,7 +566,6 @@ def createMinBiasTrackingPassFlags():
     icf.maxdImpactSSSSeeds        = 20.0    # apply cut on SSS seeds
     icf.excludeUsedTRToutliers    = False   # TRT outliers are added to the exclusion list
     icf.useTRTonlyOldLogic        = True    # turn off ole overlap logic to reduce number of hits
-    icf.maxSecondaryImpact        = 100.0 * Units.mm # low lumi
     icf.doBremRecoverySi          = False
 
     return icf
@@ -1165,7 +1121,6 @@ def createTRTStandaloneTrackingPassFlags():
     icf.useTIDE_Ambi           = False
     icf.usePrdAssociationTool  = True
 
-    icf.minSecondaryTRTPrecFrac = 0.15
     # Mu- and eta- dependent cuts on nTRT
     icf.TrkSel.TRTTrksEtaBins                  = [ 0.7,   0.8,   0.9,  1.2,  1.3,  1.6,  1.7,  1.8,  1.9,  999]  # eta bins (10) for eta-dep cuts on TRT conversion tracks
     icf.TrkSel.TRTTrksMinTRTHitsThresholds     = lambda pcf: [  25,    18,    18,   18,   26,   28,   26,   24,   22,    0] if pcf.GeoModel.Run is LHCPeriod.Run3 else \

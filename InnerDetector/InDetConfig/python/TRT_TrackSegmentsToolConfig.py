@@ -54,8 +54,7 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(
                       flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
     if InputCollections is not None:
         kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
-    kwargs.setdefault("MinNumberDriftCircles",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.BackTracking.minTRTonTrk)
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
     kwargs.setdefault("sharedFrac",
                       flags.Tracking.ActiveConfig.maxSecondaryTRTShared)

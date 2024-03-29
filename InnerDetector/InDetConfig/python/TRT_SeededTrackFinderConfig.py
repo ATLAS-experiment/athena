@@ -55,8 +55,7 @@ def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder',
 
     kwargs.setdefault("PRDtoTrackMap",
                       'InDetSegmentPRDtoTrackMap' if InputCollections is not None else "")
-    kwargs.setdefault("MinTRTonSegment",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("MinTRTonSegment", flags.Tracking.BackTracking.minTRTonTrk)
     kwargs.setdefault("MinTRTonly", flags.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("TrtExtension", True)
     kwargs.setdefault("SiExtensionCuts",
