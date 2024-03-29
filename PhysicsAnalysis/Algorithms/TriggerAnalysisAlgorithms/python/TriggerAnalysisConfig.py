@@ -85,7 +85,7 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         return
 
-    def makeTriggerGlobalEffCorrAlg(self, config, decisionTool, matchingTool, noSF):
+    def makeTriggerGlobalEffCorrAlg(self, config, matchingTool, noSF):
 
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' )
         if config.geometry() == LHCPeriod.Run3:
@@ -164,6 +164,6 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         # Calculate multi-lepton (electron/muon/photon) trigger efficiencies and SFs
         if self.triggerChainsPerYear and not self.noGlobalTriggerEff:
-            self.makeTriggerGlobalEffCorrAlg(config, decisionTool, matchingTool, self.noEffSF)
+            self.makeTriggerGlobalEffCorrAlg(config, matchingTool, self.noEffSF)
 
         return
