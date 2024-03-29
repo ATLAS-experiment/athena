@@ -77,6 +77,9 @@ def TriggerTowersInputCfg(flags):
 def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, outputSuffix="", simulateAltTau=False):
     from AthenaConfiguration.Enums import Format
 
+    if not simulateAltTau and flags.DQ.Environment == "tier0":
+        simulateAltTau = True # require alt RoI at tier0 while validating new BDT alg against heuristic
+
     acc = ComponentAccumulator()
 
     log = logging.getLogger('L1CaloFEXSimCfg')
