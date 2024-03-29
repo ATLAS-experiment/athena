@@ -81,23 +81,17 @@ def InDetTRT_SeededScoringToolCfg(
         flags, name='InDetTRT_SeededScoringTool', **kwargs):
     kwargs.setdefault("useAmbigFcn", False)
     kwargs.setdefault("useTRT_AmbigFcn", True)
-    kwargs.setdefault("minTRTonTrk",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("minTRTonTrk", flags.Tracking.BackTracking.minTRTonTrk)
     kwargs.setdefault("minTRTPrecisionFraction",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTPrecFrac)
+                      flags.Tracking.BackTracking.minTRTPrecFrac)
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minSecondaryPt)
     kwargs.setdefault("maxRPhiImp",
                       flags.Tracking.ActiveConfig.maxSecondaryImpact)
-    kwargs.setdefault("minSiClusters",
-                      flags.Tracking.ActiveConfig.minSecondaryClusters)
-    kwargs.setdefault("maxSiHoles",
-                      flags.Tracking.ActiveConfig.maxSecondaryHoles)
-    kwargs.setdefault("maxPixelHoles",
-                      flags.Tracking.ActiveConfig.maxSecondaryPixelHoles)
-    kwargs.setdefault("maxSCTHoles",
-                      flags.Tracking.ActiveConfig.maxSecondarySCTHoles)
-    kwargs.setdefault("maxDoubleHoles",
-                      flags.Tracking.ActiveConfig.maxSecondaryDoubleHoles)
+    kwargs.setdefault("minSiClusters", flags.Tracking.BackTracking.minClusters)
+    kwargs.setdefault("maxSiHoles", flags.Tracking.BackTracking.maxHoles)
+    kwargs.setdefault("maxPixelHoles", flags.Tracking.BackTracking.maxPixelHoles)
+    kwargs.setdefault("maxSCTHoles", flags.Tracking.BackTracking.maxSCTHoles)
+    kwargs.setdefault("maxDoubleHoles", flags.Tracking.BackTracking.maxDoubleHoles)
 
     return InDetAmbiScoringToolBaseCfg(flags, name, **kwargs)
 
@@ -173,8 +167,7 @@ def InDetCosmicExtenScoringToolCfg(
 
 def InDetCosmicScoringTool_TRTCfg(
         flags, name='InDetCosmicScoringTool_TRT', **kwargs):
-    kwargs.setdefault("minTRTHits",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("minTRTHits", flags.Tracking.BackTracking.minTRTonTrk)
     return InDetCosmicExtenScoringToolCfg(flags, name, **kwargs)
 
 
@@ -265,7 +258,7 @@ def InDetTRT_StandaloneScoringToolCfg(flags, name='InDetTRT_StandaloneScoringToo
     kwargs.setdefault("OldTransitionLogic",
                       flags.Tracking.ActiveConfig.useTRTonlyOldLogic)
     kwargs.setdefault("minTRTPrecisionFraction",
-                      flags.Tracking.ActiveConfig.minSecondaryTRTPrecFrac)
+                      flags.Tracking.TRTStandalone.minTRTPrecFrac)
     kwargs.setdefault("TRTTrksEtaBins",
                       flags.Tracking.ActiveConfig.TrkSel.TRTTrksEtaBins)
     kwargs.setdefault("TRTTrksMinTRTHitsThresholds",

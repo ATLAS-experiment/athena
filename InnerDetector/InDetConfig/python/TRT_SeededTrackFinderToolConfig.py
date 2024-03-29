@@ -41,10 +41,8 @@ def TRT_SeededTrackFinder_ATLCfg(flags, name='InDetTRT_SeededTrackMaker', InputC
     kwargs.setdefault("SeedTool", InDetTRT_SeededSpacePointFinder)
 
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
-    kwargs.setdefault("nHolesMax",
-                      flags.Tracking.ActiveConfig.SecondarynHolesMax)
-    kwargs.setdefault("nHolesGapMax",
-                      flags.Tracking.ActiveConfig.SecondarynHolesGapMax)
+    kwargs.setdefault("nHolesMax", flags.Tracking.BackTracking.nHolesMax)
+    kwargs.setdefault("nHolesGapMax", flags.Tracking.BackTracking.nHolesGapMax)
     kwargs.setdefault("Xi2max", flags.Tracking.ActiveConfig.SecondaryXi2max)
     kwargs.setdefault("Xi2maxNoAdd",
                       flags.Tracking.ActiveConfig.SecondaryXi2maxNoAdd)

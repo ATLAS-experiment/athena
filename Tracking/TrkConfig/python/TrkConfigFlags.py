@@ -194,6 +194,29 @@ def createTrackingConfigFlags():
     # Control cuts and settings for different lumi to limit CPU and disk space
     icf.addFlag("Tracking.cutLevel", cutLevel)
 
+    # --- defaults for backtracking
+    icf.addFlag("Tracking.BackTracking.minClusters", 4)
+    icf.addFlag("Tracking.BackTracking.minSiNotShared", 4)
+    # cut is now on number of shared modules
+    icf.addFlag("Tracking.BackTracking.maxShared", 1)
+    icf.addFlag("Tracking.BackTracking.minTRTonTrk", lambda prevFlags:
+                10 if prevFlags.Tracking.cutLevel<=6 else 15)
+    icf.addFlag("Tracking.BackTracking.minTRTPrecFrac", lambda prevFlags:
+                0. if prevFlags.Tracking.cutLevel<=6 else 0.3)
+
+    icf.addFlag("Tracking.BackTracking.maxHoles", lambda prevFlags:
+                2 if prevFlags.Tracking.cutLevel<=6 else 1)
+    icf.addFlag("Tracking.BackTracking.maxPixelHoles", lambda prevFlags:
+                2 if prevFlags.Tracking.cutLevel<=6 else 1)
+    icf.addFlag("Tracking.BackTracking.maxSCTHoles", lambda prevFlags:
+                2 if prevFlags.Tracking.cutLevel<=6 else 1)
+    icf.addFlag("Tracking.BackTracking.maxDoubleHoles", lambda prevFlags:
+                1 if prevFlags.Tracking.cutLevel<=6 else 0)
+    icf.addFlag("Tracking.BackTracking.nHolesMax", 2)
+    icf.addFlag("Tracking.BackTracking.nHolesGapMax", 2)
+
+    icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
+
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)
     # Switch for track observer tool
