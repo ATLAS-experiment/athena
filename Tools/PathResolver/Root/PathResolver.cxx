@@ -178,15 +178,16 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
          }
       }
       std::string fileToDownload = addr + "/" + file.string();
+      std::string targetPath = locationToDownloadTo+"/"+file.string();
       //disable error output from root while attempting to download
       // FIXME: Disabling errors now commented out because it is not
       //        thread-safe.  Needs changes in ROOT.
       //long errLevel = gErrorIgnoreLevel;
       //gErrorIgnoreLevel = kError+1;
-      if(!TFile::Cp(fileToDownload.c_str(),(locationToDownloadTo+"/"+file.string()).c_str())) {
-         msg(MSG::DEBUG) <<"Unable to download file : " << fileToDownload << endmsg;
+      if(!TFile::Cp(fileToDownload.c_str(),targetPath.c_str(), false)) {
+         msg(MSG::WARNING) <<"Unable to download file : " << fileToDownload << endmsg;
       } else {
-         msg(MSG::INFO) <<"Successfully downloaded " << fileToDownload << endmsg;
+         msg(MSG::DEBUG) <<"Successfully downloaded " << fileToDownload << endmsg;
          result = (locationToDownloadTo+"/"+file.string()).c_str();
          //gErrorIgnoreLevel=errLevel;
          return true;
