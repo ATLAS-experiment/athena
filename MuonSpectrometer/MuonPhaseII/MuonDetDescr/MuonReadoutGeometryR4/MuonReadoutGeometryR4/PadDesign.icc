@@ -42,6 +42,7 @@ namespace MuonGMR4 {
     inline double PadDesign::beamlineRadius() const {
         return m_radius;
     }
+    
     using localCornerArray = std::array<Amg::Vector2D, 4>;  
     inline localCornerArray PadDesign::padCorners(const int channel) const {
         return padCorners(padEtaPhi(channel));

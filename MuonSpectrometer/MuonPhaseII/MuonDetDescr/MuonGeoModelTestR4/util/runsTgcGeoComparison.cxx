@@ -460,7 +460,6 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newWireGroup.gasGap = (*wireGroupGasGap)[wg];
             newWireGroup.channelNumber = (*wireGroupNum)[wg];
             newWireGroup.channelType = 2;
-            if (newWireGroup.channelNumber > 0) continue;
             newchamber.channels.insert(std::move(newWireGroup));
         }
 
@@ -472,7 +471,6 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newStrip.gasGap = (*stripGasGap)[s];
             newStrip.channelNumber = (*stripNum)[s];
             newStrip.channelType = 1;
-            if (newStrip.channelNumber > 0 && newStrip.channelNumber < newchamber.numStrips) continue;
             newchamber.channels.insert(std::move(newStrip));
         }
 
@@ -496,7 +494,6 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newPad.gasGap = (*padGasGap)[p];
             newPad.padEta = (*padEta)[p];
             newPad.padPhi = (*padPhi)[p];
-            if (newPad.padEta > 1 || newPad.padPhi > 2) continue;
             newchamber.pads.insert(std::move(newPad));
         }
 
@@ -709,7 +706,7 @@ int main( int argc, char** argv ) {
             }
             const sTgcPad& testPad{*pad_itr};
             /// Local Pad position dump
-            const Amg::Vector2D diffLocalPadPos{testPad.localPosition - testPad.localPosition};
+            const Amg::Vector2D diffLocalPadPos{testPad.localPosition - refPad.localPosition};
             if (diffLocalPadPos.mag() > tolerance) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
                             <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " local position: "
@@ -753,9 +750,9 @@ int main( int argc, char** argv ) {
                             <<" displacement: "<<Amg::toString(diffLocalPadCornerTR,2)<<std::endl;
                 chamberOkay = false;
             }
-           
+    
             /// Global Pad position dump
-            const Amg::Vector3D diffGlobalPadPos{testPad.globalPosition - testPad.globalPosition};
+            const Amg::Vector3D diffGlobalPadPos{testPad.globalPosition - refPad.globalPosition};
             if (diffGlobalPadPos.mag() > tolerance) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"pad (gasGap/(padEta, padPhi)): "
                             <<testPad.gasGap<<"/("<<testPad.padEta<<", "<<testPad.padPhi<<"), "<< " global position: "
@@ -772,6 +769,7 @@ int main( int argc, char** argv ) {
                             <<" displacement: "<<Amg::toString(diffGlobalPadCornerBL,2)<<std::endl;
                 chamberOkay = false;
             }
+
             /// bottom-right pad corner
             const Amg::Vector3D diffGlobalPadCornerBR{testPad.globalPadCornerBR - refPad.globalPadCornerBR};
             if (diffGlobalPadCornerBR.mag() > tolerance) {
