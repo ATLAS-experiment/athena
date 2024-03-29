@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_SeededTrackFinder package
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -55,8 +55,8 @@ def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder',
 
     kwargs.setdefault("PRDtoTrackMap",
                       'InDetSegmentPRDtoTrackMap' if InputCollections is not None else "")
-    kwargs.setdefault("MinTRTonSegment", flags.Tracking.BackTracking.minTRTonTrk)
-    kwargs.setdefault("MinTRTonly", flags.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("MinTRTonSegment", flags.Tracking.BackTracking.minTRT)
+    kwargs.setdefault("MinTRTonly", flags.Tracking.BackTracking.minTRT)
     kwargs.setdefault("TrtExtension", True)
     kwargs.setdefault("SiExtensionCuts",
                       flags.Tracking.ActiveConfig.SiExtensionCuts)

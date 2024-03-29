@@ -1,9 +1,9 @@
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
+from AthenaConfiguration.Enums import BeamType, FlagEnum
 from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
 class RoIStrategy(FlagEnum):
@@ -284,19 +284,6 @@ def createTrackingPassFlags():
     icf.addFlag("usePixelSeeding"        	  , lambda pcf : pcf.Detector.EnablePixel )
     icf.addFlag("useSCTSeeding"        	  	  , lambda pcf : pcf.Detector.EnableSCT )
 
-    # --------------------------------------
-    # --- TRT Only TRACKING cuts
-    # --------------------------------------
-    
-    # --- TRT only
-    icf.addFlag("minTRTonly"                , 15)
-    icf.addFlag("maxTRTonlyShared"          , 0.7)
-    icf.addFlag("useTRTonlyParamCuts"       , True)
-    icf.addFlag("useTRTonlyOldLogic"        , False)
-    icf.addFlag("TrkSel.TRTTrksEtaBins"                 , [999, 999, 999, 999, 999, 999, 999, 999, 999, 999])  # eta bins (10) for eta-dep cuts on TRT conversion tracks
-    icf.addFlag("TrkSel.TRTTrksMinTRTHitsThresholds"    , [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0])  # eta-dep nTRT for TRT conversion tracks (> 15 is applied elsewhere)
-    icf.addFlag("TrkSel.TRTTrksMinTRTHitsMuDependencies", [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0])  # eta-dep nTRT, mu dependence for TRT conversion tracks
-
     # --- Pixel and TRT particle ID during particle creation
     icf.addFlag("RunPixelPID", True)
     icf.addFlag("RunTRTPID", True)
@@ -565,7 +552,6 @@ def createMinBiasTrackingPassFlags():
     icf.TRTSegFinderPtBins        = 50
     icf.maxdImpactSSSSeeds        = 20.0    # apply cut on SSS seeds
     icf.excludeUsedTRToutliers    = False   # TRT outliers are added to the exclusion list
-    icf.useTRTonlyOldLogic        = True    # turn off ole overlap logic to reduce number of hits
     icf.doBremRecoverySi          = False
 
     return icf
@@ -902,7 +888,6 @@ def createCosmicsTrackingPassFlags():
     icf.maxSctHoles      = 3
     icf.maxDoubleHoles   = 1
     icf.minTRTonTrk      = 15
-    icf.minTRTonly       = 15
     icf.roadWidth        = 60.
     icf.Xi2max           = 60.0
     icf.Xi2maxNoAdd      = 100.0
@@ -1105,8 +1090,6 @@ def createTRTTrackingPassFlags():
     icf.useTIDE_Ambi            = False
     icf.usePrdAssociationTool   = True
     icf.minPT                   = 0.4 * Units.GeV
-    icf.minTRTonly              = 15
-    icf.maxTRTonlyShared        = 0.7
     icf.doBremRecoverySi        = False
 
     icf.RunPixelPID             = False
@@ -1120,12 +1103,6 @@ def createTRTStandaloneTrackingPassFlags():
     icf.extension              = "TRTStandalone"
     icf.useTIDE_Ambi           = False
     icf.usePrdAssociationTool  = True
-
-    # Mu- and eta- dependent cuts on nTRT
-    icf.TrkSel.TRTTrksEtaBins                  = [ 0.7,   0.8,   0.9,  1.2,  1.3,  1.6,  1.7,  1.8,  1.9,  999]  # eta bins (10) for eta-dep cuts on TRT conversion tracks
-    icf.TrkSel.TRTTrksMinTRTHitsThresholds     = lambda pcf: [  25,    18,    18,   18,   26,   28,   26,   24,   22,    0] if pcf.GeoModel.Run is LHCPeriod.Run3 else \
-                                                 [  27,    18,    18,   18,   26,   28,   26,   24,   22,    0]  # eta-dep nTRT for TRT conversion tracks (> 15 is applied elsewhere)
-    icf.TrkSel.TRTTrksMinTRTHitsMuDependencies = [ 0.2,  0.05,  0.05, 0.05, 0.15, 0.15, 0.15, 0.15, 0.15,    0]  # eta-dep nTRT, mu dependence for TRT conversion tracks
     icf.doBremRecoverySi        = False
 
     return icf

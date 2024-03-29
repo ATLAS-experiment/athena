@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetAmbiTrackSelectionTool package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -120,7 +120,7 @@ def InDetTRTAmbiTrackSelectionToolCfg(
     kwargs.setdefault("minHits", flags.Tracking.BackTracking.minClusters)
     kwargs.setdefault("minNotShared", flags.Tracking.BackTracking.minSiNotShared)
     kwargs.setdefault("maxShared", flags.Tracking.BackTracking.maxShared)
-    kwargs.setdefault("minTRTHits", flags.Tracking.BackTracking.minTRTonTrk)
+    kwargs.setdefault("minTRTHits", flags.Tracking.BackTracking.minTRT)
     kwargs.setdefault("UseParameterization",
                       flags.Tracking.ActiveConfig.useParameterizedTRTCuts)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)

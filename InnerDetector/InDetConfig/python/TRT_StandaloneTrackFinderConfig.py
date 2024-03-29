@@ -1,17 +1,17 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_StandaloneTrackFinder package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
-def TRT_StandaloneTrackFinderCfg(flags, name ='InDetTRT_StandaloneTrackFinder', **kwargs):
+def TRT_StandaloneTrackFinderCfg(
+        flags, name ='InDetTRT_StandaloneTrackFinder', **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("MinNumDriftCircles",
-                      flags.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("MinNumDriftCircles", flags.Tracking.TRTStandalone.minTRT)
     kwargs.setdefault("MinPt", flags.Tracking.ActiveConfig.minTRTonlyPt)
-    kwargs.setdefault("OldTransitionLogic",
-                      flags.Tracking.ActiveConfig.useTRTonlyOldLogic)
-    kwargs.setdefault("OutputTracksLocation", "TRTStandaloneTracks")
+    kwargs.setdefault("OldTransitionLogic", (
+        flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.MinBias))
 
     if "TRT_SegToTrackTool" not in kwargs:
         from InDetConfig.TRT_SegmentsToTrackToolConfig import (
@@ -22,7 +22,8 @@ def TRT_StandaloneTrackFinderCfg(flags, name ='InDetTRT_StandaloneTrackFinder', 
     acc.addEventAlgo(CompFactory.InDet.TRT_StandaloneTrackFinder(name, **kwargs))
     return acc
 
-def TRT_TrackSegment_TrackFinderCfg(flags, name ='InDetTRT_TrackSegment_TrackFinder',
+def TRT_TrackSegment_TrackFinderCfg(
+        flags, name ='InDetTRT_TrackSegment_TrackFinder',
                                     **kwargs):
     acc = ComponentAccumulator()
 

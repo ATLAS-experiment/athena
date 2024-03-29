@@ -43,8 +43,7 @@ def TRT_Standalone_SegmentToTrackToolCfg(flags, name ='InDetTRT_Standalone_Segme
         kwargs.setdefault("ScoringTool", ScoringTool)
 
     kwargs.setdefault("FinalRefit", True)
-    kwargs.setdefault("MaxSharedHitsFraction",
-                      flags.Tracking.ActiveConfig.maxTRTonlyShared)
+    kwargs.setdefault("MaxSharedHitsFraction", 0.7)
     kwargs.setdefault("SuppressHoleSearch", True)
 
     acc.setPrivateTools(CompFactory.InDet.TRT_SegmentToTrackTool(name, **kwargs))
