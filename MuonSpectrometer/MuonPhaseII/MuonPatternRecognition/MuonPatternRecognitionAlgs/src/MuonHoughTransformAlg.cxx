@@ -78,9 +78,15 @@ StatusCode MuonHoughTransformAlg::execute(const EventContext& ctx) const {
     for (const MuonR4::MuonSpacePointBucket* sp : spacePoints){
             std::vector<HoughSpaceInBucket>& buckets = data.houghSpaces[sp->front()->muonChamber()];
             buckets.push_back(
-                HoughSpaceInBucket{sp,}
+                HoughSpaceInBucket{sp}
             ); 
-            /// TODO: Update search window to fine-tune tanTheta
+            HoughSpaceInBucket& hs = buckets.back();             
+            Amg::Vector3D leftSide = hs.bucket->muonChamber()->globalToLocalTrans(data.gctx).translation() - (hs.bucket->coveredMin() * Amg::Vector3D::UnitY()); 
+            Amg::Vector3D rightSide = hs.bucket->muonChamber()->globalToLocalTrans(data.gctx).translation() - (hs.bucket->coveredMax() * Amg::Vector3D::UnitY()); 
+            const double tanThetaLeft = leftSide.y() / leftSide.z() ;
+            const double tanThetaRight = rightSide.y() / rightSide.z();
+            hs.seachWindowTanTheta = {tanThetaLeft, tanThetaRight}; 
+            hs.searchWindowZ= {hs.bucket->coveredMin() , hs.bucket->coveredMax()}; 
         }
         return StatusCode::SUCCESS;
     }
@@ -88,8 +94,8 @@ StatusCode MuonHoughTransformAlg::execute(const EventContext& ctx) const {
 
   StatusCode MuonHoughTransformAlg::prepareHoughPlane(MuonHoughEventData & data) const{
     HoughPlaneConfig cfg;
-    cfg.nBinsX = 100;
-    cfg.nBinsY = 100;
+    cfg.nBinsX = m_nBinsTanTheta;
+    cfg.nBinsY = m_nBinsZ0;
     ActsPeakFinderForMuonCfg peakFinderCfg;
     peakFinderCfg.fractionCutoff = 0.7;
     peakFinderCfg.threshold = 3;
@@ -109,19 +115,24 @@ StatusCode MuonHoughTransformAlg::prepareStation(MuonHoughEventData & data, cons
                                                   HoughSpaceInBucket& bucket) const{
     /// tune the search space 
 
-    double chamberCenter = 0.5 * (bucket.bucket->coveredMin() + bucket.bucket->coveredMax()); 
-    // TODO: This will become a configurable property 
-    double targetReso = 10.;  // 1 cm target resolution in y0
+    double chamberCenter = 0.5 * (bucket.searchWindowZ.first +bucket.searchWindowZ.second); 
     // build a symmetric window around the (geometric) chamber center so that the bin width is equivalent 
     // to our target resolution
-    // TODO: Properly pass binning instead of hardcoding nBins...
-    double searchStart = chamberCenter - 0.5 * 100 * targetReso; 
-    double searchEnd = chamberCenter + 0.5 * 100 * targetReso; 
+    double searchStart = chamberCenter - 0.5 * data.houghPlane->nBinsY() * m_targetResoZ0; 
+    double searchEnd = chamberCenter + 0.5 * data.houghPlane->nBinsY()  * m_targetResoZ0; 
     // Protection for very wide buckets - if the search space does not cover all of the bucket, widen the bin size 
     // so that we cover everything  
-    searchStart = std::min(searchStart, bucket.bucket->coveredMin() - 5. * targetReso); 
-    searchEnd = std::max(searchEnd, bucket.bucket->coveredMax() + 5. * targetReso); 
-    data.currAxisRanges = Acts::HoughTransformUtils::HoughAxisRanges{-2, 2, 
+    searchStart = std::min(searchStart, bucket.searchWindowZ.first- 2. * m_targetResoZ0); 
+    searchEnd = std::max(searchEnd, bucket.searchWindowZ.second + 2. * m_targetResoZ0); 
+    // also treat tan(theta) 
+    double tanThetaMean = 0.5 * (bucket.seachWindowTanTheta.first + bucket.seachWindowTanTheta.second); 
+    double searchStartTanTheta = tanThetaMean - 0.5 *  data.houghPlane->nBinsX() * m_targetResoTanTheta; 
+    double searchEndTanTheta = tanThetaMean + 0.5* data.houghPlane->nBinsX() * m_targetResoTanTheta; 
+    searchStartTanTheta = std::min(searchStartTanTheta, bucket.seachWindowTanTheta.first- 2. * m_targetResoTanTheta); 
+    searchEndTanTheta = std::max(searchEndTanTheta, bucket.seachWindowTanTheta.second + 2. * m_targetResoTanTheta); 
+
+
+    data.currAxisRanges = Acts::HoughTransformUtils::HoughAxisRanges{searchStartTanTheta, searchEndTanTheta, 
             searchStart, searchEnd
     };
     data.houghPlane->reset();

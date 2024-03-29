@@ -18,6 +18,7 @@
 #include <MuonSpacePoint/MuonSpacePointContainer.h>
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonHoughEventData.h"
+#include "Gaudi/Property.h"
 
 // muon includes
 
@@ -53,6 +54,11 @@ namespace MuonR4{
 
             void fillFromSpacePoint(MuonHoughEventData & data, 
                                     const MuonR4::HoughHitType & SP) const; 
+
+            DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.02};
+            DoubleProperty m_targetResoZ0{this, "ResolutionTargetZ0", 10.};
+            IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 10};
+            IntegerProperty m_nBinsZ0{this, "nBinsZ0", 100};
 
             SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
             
