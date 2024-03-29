@@ -12,7 +12,7 @@ def SegmentDriftCircleAssValidationCfg(
     kwargs.setdefault("RadiusMin", 0.)
     kwargs.setdefault("RadiusMax", 600.)
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
-    kwargs.setdefault("MinNumberDCs", flags.Tracking.BackTracking.minTRTonTrk)
+    kwargs.setdefault("MinNumberDCs", flags.Tracking.BackTracking.minTRT)
 
     acc.addEventAlgo(
         CompFactory.InDet.SegmentDriftCircleAssValidation(name, **kwargs))
@@ -20,6 +20,6 @@ def SegmentDriftCircleAssValidationCfg(
 
 def SegmentDriftCircleAssValidation_TrackSegments_Cfg(
         flags, name="InDetSegmentDriftCircleAssValidation_TrackSegments", **kwargs):
-    kwargs.setdefault("MinNumberDCs", flags.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("MinNumberDCs", flags.Tracking.TRTStandalone.minTRT)
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
     return SegmentDriftCircleAssValidationCfg(flags, name, **kwargs)

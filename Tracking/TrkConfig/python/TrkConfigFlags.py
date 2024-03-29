@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
@@ -199,7 +199,7 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.BackTracking.minSiNotShared", 4)
     # cut is now on number of shared modules
     icf.addFlag("Tracking.BackTracking.maxShared", 1)
-    icf.addFlag("Tracking.BackTracking.minTRTonTrk", lambda prevFlags:
+    icf.addFlag("Tracking.BackTracking.minTRT", lambda prevFlags:
                 10 if prevFlags.Tracking.cutLevel<=6 else 15)
     icf.addFlag("Tracking.BackTracking.minTRTPrecFrac", lambda prevFlags:
                 0. if prevFlags.Tracking.cutLevel<=6 else 0.3)
@@ -215,7 +215,9 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.BackTracking.nHolesMax", 2)
     icf.addFlag("Tracking.BackTracking.nHolesGapMax", 2)
 
+    # TRT standalone configuration
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
+    icf.addFlag("Tracking.TRTStandalone.minTRT", 15)
 
     # Turn on InDetRecStatistics
     icf.addFlag("Tracking.doStats", False)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_SegmentsToTrack package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -21,13 +21,15 @@ def TRT_Cosmics_SegmentsToTrackCfg(flags, name ='InDetTRT_Cosmics_SegmentsToTrac
         kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(
             InDetTrackSummaryToolCfg(flags)))
 
-    if "AssociationTool" not in kwargs \
-       and "InputAssociationMapName" in kwargs \
-       and kwargs["InputAssociationMapName"] != '':
-        from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
-        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge( InDetPRDtoTrackMapToolGangedPixelsCfg(flags) ))
+    if ("AssociationTool" not in kwargs
+        and "InputAssociationMapName" in kwargs
+        and kwargs["InputAssociationMapName"] != ''):
+        from InDetConfig.InDetAssociationToolsConfig import (
+            InDetPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
-    kwargs.setdefault("MinNHit", flags.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("MinNHit", flags.Tracking.TRTStandalone.minTRT)
     kwargs.setdefault("OutlierRemoval", True)
     kwargs.setdefault("MaterialEffects", False)
 

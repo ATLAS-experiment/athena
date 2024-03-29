@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_TrackSegmentsTool_xk package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -54,7 +54,7 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(
                       flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
     if InputCollections is not None:
         kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
-    kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.BackTracking.minTRTonTrk)
+    kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.BackTracking.minTRT)
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
     kwargs.setdefault("sharedFrac",
                       flags.Tracking.ActiveConfig.maxSecondaryTRTShared)
@@ -72,6 +72,6 @@ def TRT_TrackSegmentsMaker_ATLxk_TrackSegmentsCfg(
         flags, name = 'InDetTRT_SeedsMaker_TrackSegments', **kwargs):
    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
    kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.ActiveConfig.minPT)
-   kwargs.setdefault("sharedFrac", flags.Tracking.ActiveConfig.maxTRTonlyShared)
+   kwargs.setdefault("sharedFrac", 0.7)
    kwargs.setdefault("PRDtoTrackMap", "")
    return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, **kwargs)

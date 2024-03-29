@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackScoringTools package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
+from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
 #########################
 # InDet configs
@@ -81,7 +83,7 @@ def InDetTRT_SeededScoringToolCfg(
         flags, name='InDetTRT_SeededScoringTool', **kwargs):
     kwargs.setdefault("useAmbigFcn", False)
     kwargs.setdefault("useTRT_AmbigFcn", True)
-    kwargs.setdefault("minTRTonTrk", flags.Tracking.BackTracking.minTRTonTrk)
+    kwargs.setdefault("minTRTonTrk", flags.Tracking.BackTracking.minTRT)
     kwargs.setdefault("minTRTPrecisionFraction",
                       flags.Tracking.BackTracking.minTRTPrecFrac)
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minSecondaryPt)
@@ -167,7 +169,7 @@ def InDetCosmicExtenScoringToolCfg(
 
 def InDetCosmicScoringTool_TRTCfg(
         flags, name='InDetCosmicScoringTool_TRT', **kwargs):
-    kwargs.setdefault("minTRTHits", flags.Tracking.BackTracking.minTRTonTrk)
+    kwargs.setdefault("minTRTHits", flags.Tracking.BackTracking.minTRT)
     return InDetCosmicExtenScoringToolCfg(flags, name, **kwargs)
 
 
@@ -251,20 +253,24 @@ def InDetTRT_StandaloneScoringToolCfg(flags, name='InDetTRT_StandaloneScoringToo
     kwargs.setdefault("useAmbigFcn", True)
     kwargs.setdefault("useSigmaChi2", False)
     kwargs.setdefault("PtMin", flags.Tracking.ActiveConfig.minTRTonlyPt)
-    kwargs.setdefault("minTRTonTrk", flags.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("minTRTonTrk", flags.Tracking.TRTStandalone.minTRT)
     kwargs.setdefault("maxEta", 2.1)
-    kwargs.setdefault("UseParameterization",
-                      flags.Tracking.ActiveConfig.useTRTonlyParamCuts)
-    kwargs.setdefault("OldTransitionLogic",
-                      flags.Tracking.ActiveConfig.useTRTonlyOldLogic)
+    kwargs.setdefault("OldTransitionLogic", (
+        flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.MinBias))
     kwargs.setdefault("minTRTPrecisionFraction",
                       flags.Tracking.TRTStandalone.minTRTPrecFrac)
+    # eta bins (10) for eta-dep cuts on TRT conversion tracks
     kwargs.setdefault("TRTTrksEtaBins",
-                      flags.Tracking.ActiveConfig.TrkSel.TRTTrksEtaBins)
+                      [0.7, 0.8, 0.9, 1.2, 1.3, 1.6, 1.7, 1.8, 1.9, 999])
+    # eta-dep nTRT for TRT conversion tracks (> 15 is applied elsewhere)
     kwargs.setdefault("TRTTrksMinTRTHitsThresholds",
-                      flags.Tracking.ActiveConfig.TrkSel.TRTTrksMinTRTHitsThresholds)
+                      [25, 18, 18, 18, 26, 28, 26, 24, 22, 0]
+                      if flags.GeoModel.Run is LHCPeriod.Run3 else
+                      [27, 18, 18, 18, 26, 28, 26, 24, 22, 0])
+    # mu dependence for TRT conversion tracks
     kwargs.setdefault("TRTTrksMinTRTHitsMuDependencies",
-                      flags.Tracking.ActiveConfig.TrkSel.TRTTrksMinTRTHitsMuDependencies)
+                      [0.2,  0.05, 0.05, 0.05,
+                       0.15, 0.15, 0.15, 0.15, 0.15, 0.])
 
     acc.setPrivateTools(
         CompFactory.InDet.InDetTrtTrackScoringTool(name, **kwargs))
