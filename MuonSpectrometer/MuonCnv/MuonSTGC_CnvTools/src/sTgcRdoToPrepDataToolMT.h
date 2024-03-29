@@ -18,6 +18,9 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "NSWCalibTools/INSWCalibTool.h"
 #include "MuonPrepRawData/MuonPrepDataCollection_Cache.h"
+#include "xAODMuonPrepData/sTgcStripContainer.h"
+#include "xAODMuonPrepData/sTgcWireContainer.h"
+#include "xAODMuonPrepData/sTgcPadContainer.h"
 
 namespace Muon 
 {
@@ -47,25 +50,40 @@ namespace Muon
       StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override;
       StatusCode provideEmptyContainer(const EventContext& ctx) const override;
 
-      
-      StatusCode processCollection(const EventContext& ctx, 
-                                   Muon::sTgcPrepDataContainer* stgcPrepDataContainer,
-                                   const STGC_RawDataCollection *rdoColl, 
-                                   std::vector<IdentifierHash>& idWithDataVect) const;
-
       virtual void printPrepData(const EventContext& ctx) const override;
       virtual void printInputRdo(const EventContext& ctx) const override;
       
     protected:
+      struct xAODContainers {
+        xAOD::sTgcStripContainer* strip {nullptr};
+        xAOD::sTgcWireContainer* wire {nullptr};
+        xAOD::sTgcPadContainer* pad {nullptr};
+        Muon::sTgcPrepDataContainer* prd{nullptr};
+      };
       
+      StatusCode processCollection(const EventContext& ctx, 
+                                   xAODContainers& xAODcontainers,
+                                   const STGC_RawDataCollection *rdoColl, 
+                                   std::vector<IdentifierHash>& idWithDataVect) const;
+            
       virtual Muon::sTgcPrepDataContainer* setupSTGC_PrepDataContainer(const EventContext& ctx) const;
+      
+
+
+      /// Creates the xAOD PRD containers to be written
+      xAODContainers setupxAODPrepDataContainers(
+          SG::WriteHandle<xAOD::sTgcStripContainer>& stripOutputContainer,
+          SG::WriteHandle<xAOD::sTgcWireContainer>& wireOutputContainer,
+          SG::WriteHandle<xAOD::sTgcPadContainer>& padOutputContainer) const;
 
       const STGC_RawDataContainer* getRdoContainer(const EventContext& ctx) const;
 
       void processRDOContainer(const EventContext& ctx,
-                               Muon::sTgcPrepDataContainer* stgcPrepDataContainer,
+                               xAODContainers& xAODcontainers,
                                const std::vector<IdentifierHash>& idsToDecode,
                                std::vector<IdentifierHash>& idWithDataVect) const;
+      template<class T>
+      void setxAODCommonValues(T& xprd, const MuonGMR4::sTgcReadoutElement* re, uint8_t gasGap, uint16_t channelNumber, short int time, int charge) const;
 
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
 
@@ -82,6 +100,11 @@ namespace Muon
       /// This is the key for the cache for the sTGC PRD containers, can be empty
       SG::UpdateHandleKey<sTgcPrepDataCollection_Cache> m_prdContainerCacheKey{this, "PrdCacheKey", "", "Optional external cache for the sTGC PRD container"};
 
+      // xAOD output containers keys
+      bool m_outputxAOD{false};
+      SG::WriteHandleKey<xAOD::sTgcStripContainer>   m_xAODStripKey  {this, "xAODStripKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+      SG::WriteHandleKey<xAOD::sTgcPadContainer>   m_xAODPadKey  {this, "xAODPadKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+      SG::WriteHandleKey<xAOD::sTgcWireContainer>   m_xAODWireKey  {this, "xAODWireKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
 
    }; 
 } // end of namespace

@@ -21,4 +21,4 @@ atlas_add_component( MuonSTGC_CnvTools
                                     GaudiKernel AthenaBaseComps Identifier EventPrimitives MuonReadoutGeometry
                                      MuonDigitContainer MuonIdHelpersLib MuonNSWCommonDecode MuonRDO 
                                      MuonPrepRawData MuonTrigCoinData TrkSurfaces STgcClusterizationLib 
-                                     NSWCalibToolsLib MuonCnvToolInterfacesLib MuonSTGC_CnvToolsLib MuonCablingData xAODMuonRDO)
+                                     NSWCalibToolsLib MuonCnvToolInterfacesLib MuonSTGC_CnvToolsLib MuonCablingData xAODMuonRDO xAODMuonPrepData)
