@@ -192,6 +192,12 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         acc.addEventAlgo(jFEXInputs)
         acc.addEventAlgo(jFEX)
 
+        # database reading in MC
+        jFEXCondAlg = acc.getCondAlgo("jFEXCondAlgo")
+        jFEXCondAlg.IsMC = flags.Input.isMC
+        jFEXFormTOBsTool = CompFactory.LVL1.jFEXFormTOBs('jFEXFormTOBs')
+        jFEXFormTOBsTool.IsMC = flags.Input.isMC
+
     if flags.Trigger.L1.dogFex:
 
         if flags.Input.Format is not Format.POOL:
