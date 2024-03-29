@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -16,7 +16,6 @@
 // Framework include files
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainerImp.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"  //needed in all files that include this header because of the unique_ptr 
 
 #include <map>
 #include <vector>
@@ -24,9 +23,7 @@
 #include <functional>
 
 // Forward declarations
-class TObject;
 class TBranch;
-class TBuffer;
 class TTree;
 class TLeaf;
 class TClass;
@@ -61,15 +58,16 @@ namespace pool  {
     */
   class RootTreeContainer : public DbContainerImp
   {
+  protected:
+
     /// Definiton of a branch descriptor
     struct BranchDesc {
-    public:
-      TClass*           clazz;
-      TBranch*          branch;
-      TLeaf*            leaf;
-      void*             object;
-      void*             buffer;
-      const DbColumn*   column;
+      TClass*           clazz   = nullptr;
+      TBranch*          branch  = nullptr;
+      TLeaf*            leaf    = nullptr;
+      void*             object  = nullptr;
+      void*             buffer  = nullptr;
+      const DbColumn*   column  = nullptr;
 
       // ----  extra variables used for AuxDyn attributes
       // number of rows written to this branch so far
@@ -82,44 +80,19 @@ namespace pool  {
       std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>  auxdyn_reader;
 
 
-      BranchDesc()
-            : clazz(nullptr),
-              branch(nullptr),
-              leaf(nullptr),
-              object(nullptr),
-              buffer(nullptr),
-              column(nullptr)
-      {}
+      BranchDesc() = default;
+      BranchDesc(TClass* cl, TBranch* b, TLeaf* l, void* o, const DbColumn* c);
+      BranchDesc(BranchDesc && other) = default;
+      BranchDesc(BranchDesc const& other) = delete;
 
-      BranchDesc( TClass* cl,
-                  TBranch* b,
-                  TLeaf* l,
-                  void* o,
-                  const DbColumn* c)
-            : clazz(cl),
-              branch(b),
-              leaf(l),
-              object(nullptr),
-              buffer(o),
-              column(c)
-      {}
-
-      ~BranchDesc();
-       BranchDesc(BranchDesc const& other) = delete;
-       BranchDesc(BranchDesc && other) = default;
-       BranchDesc& operator=(BranchDesc const& other) = delete;
-       BranchDesc& operator=(BranchDesc && other) = default;
-
-      SG::IAuxStoreIO* getIOStorePtr() {
-         return ( aux_iostore_IFoffset >= 0 ?
-                  reinterpret_cast<SG::IAuxStoreIO*>( (char*)object + aux_iostore_IFoffset) : nullptr );
-      }
+      BranchDesc& operator=(BranchDesc const& other) = delete;
+      BranchDesc& operator=(BranchDesc && other) = default;
+      SG::IAuxStoreIO* getIOStorePtr();
     };
 
     /// Definition of the branch container
     typedef std::vector<BranchDesc> Branches;
 
-  protected:
     /// Reference to the root tree object
     TTree*             m_tree;
     /// reference to exact type description

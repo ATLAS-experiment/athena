@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
 //    Root Database container implementation
 //--------------------------------------------------------------------
 //
-//    Package    : pool (The POOL project)
+//    Package    : Athena APR RootStorageSvc (Former POOL project)
 //
-//    Author     : M.Frank
+//    Author     : M.Frank, M.Nowak
 //====================================================================
 
 // Framework include files
@@ -118,8 +118,16 @@ void fixupPackedConversion (TBranch* br)
 static UCharDbArrayAthena  s_char_Blob ATLAS_THREAD_SAFE;
 static IntDbArray   s_int_Blob ATLAS_THREAD_SAFE;
 
-// required for unique_ptr compilation
-RootTreeContainer::BranchDesc::~BranchDesc() {
+
+// required out-of-line for unique_ptr compilation
+RootTreeContainer::BranchDesc::BranchDesc( TClass* cl, TBranch* b, TLeaf* l, void* o, const DbColumn* c)
+   : clazz(cl), branch(b), leaf(l), object(nullptr), buffer(o), column(c)
+{}
+
+SG::IAuxStoreIO*
+RootTreeContainer::BranchDesc::getIOStorePtr() {
+   return ( aux_iostore_IFoffset >= 0 ?
+            reinterpret_cast<SG::IAuxStoreIO*>( (char*)object + aux_iostore_IFoffset) : nullptr );
 }
 
 
@@ -164,7 +172,6 @@ TBranch* RootTreeContainer::branch(const std::string& nam)  const  {
   return nullptr;
 }
 
-
 DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
 {
    int icol;
@@ -172,10 +179,9 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
    bool aux_needs_fill = false;
    Branches::iterator k;
    for(k=m_branches.begin(), icol=0; k !=m_branches.end(); ++k, ++icol) {
-      BranchDesc& dsc = (*k);
+      BranchDesc& dsc( *k );
       RootDataPtr p( nullptr );
-      void* ptr ATLAS_THREAD_SAFE = const_cast<void*>( action.dataAtOffset( dsc.column->offset() ) );
-      p.ptr = ptr;
+      p.cptr = action.dataAtOffset( dsc.column->offset() );
       switch( dsc.column->typeID() ) {
        case DbColumn::ANY:
        case DbColumn::POINTER:
@@ -197,6 +203,7 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
           dsc.rows_written++;
           break;
        case DbColumn::BLOB:
+          // MN: not sure if we ever use this case
           s_char_Blob.m_size    = p.blobSize();
           s_char_Blob.m_buffer  = (unsigned char*)p.blobData();
           dsc.object            = &s_char_Blob;
@@ -204,18 +211,17 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
           break;
        case DbColumn::STRING:
        case DbColumn::LONG_STRING:
-          {
-            const char* s = p.string();
-            p.cptr        = s;
-          }
+          // handling "std::string*" - e.g. ##Links and ##Params
+          // pass the char* from c_str() to ROOT
+          p.cptr =  p.string()->c_str();
           break;
        case DbColumn::NTCHAR:
        case DbColumn::LONG_NTCHAR:
-          //case DbColumn::TOKEN: PvG not sure wether we should pass *char[]
-          {
-            void *d = p.deref();
-            p.ptr   = d;
-          }
+          // MN: not sure if we ever use this case
+          p.ptr   = p.deref();
+          break;
+       case DbColumn::TOKEN:
+          // p.ptr is "char*" already so just pass it on
           break;
        default:
           break;
@@ -444,11 +450,7 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
 
 DbStatus RootTreeContainer::close()   {
   m_dbH = DbDatabase(POOL_StorageType);
-  if ( m_tree )   {
-    //m_tree->Print();
-  }
-  for(Branches::iterator k=m_branches.begin(); k != m_branches.end(); ++k)  {
-    BranchDesc& dsc = (*k);
+  for( BranchDesc& dsc : m_branches ) {
     if ( dsc.buffer && dsc.clazz )  {
       // This somehow fails for templates.
       dsc.clazz->Destructor(dsc.buffer);
@@ -580,11 +582,8 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                 case DbColumn::NTCHAR:
                 case DbColumn::LONG_NTCHAR:
                 case DbColumn::TOKEN:
-                   dsc.clazz = nullptr;
                    dsc.leaf = leaf;
                    dsc.branch = pBranch;
-                   dsc.buffer = nullptr;
-                   dsc.object = nullptr;
                    dsc.column = *i;
                    break;
                 default:
@@ -822,16 +821,13 @@ DbStatus  RootTreeContainer::addObject(DbDatabase& dbH,
 
 DbStatus
 RootTreeContainer::addBranch(const DbColumn* col,BranchDesc& dsc,const std::string& desc) {
+  dsc.column = col;
   const char* nam  = (m_branchName.empty() ? col->name().c_str() : m_branchName.c_str());
   std::string  coldesc = col->name() + desc;
   char buff[32];
   dsc.branch = m_tree->Branch(nam, buff, coldesc.c_str(), 4096);
-  if ( dsc.branch )  {
+  if( dsc.branch )  {
     dsc.leaf = dsc.branch->GetLeaf(nam);
-    dsc.clazz = nullptr;
-    dsc.column = col;
-    dsc.buffer = nullptr;
-    dsc.object = nullptr;
     return Success;
   }
   return Error;
