@@ -146,7 +146,9 @@ def TgcPrepDataAllBCto3BCCfg(flags, name="TgcPrepDataAllTo3Replicator", **kwargs
 def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.sTgcCache if flags.Muon.MuonTrigger else "")
-
+    kwargs.setdefault("xAODStripKey", "sTGCStrips" if flags.Muon.writexAODPRD else "")
+    kwargs.setdefault("xAODWireKey", "sTGCWires" if flags.Muon.writexAODPRD else "")
+    kwargs.setdefault("xAODPadKey", "sTGCPads" if flags.Muon.writexAODPRD else "")
     from MuonConfig.MuonRecToolsConfig import SimpleSTgcClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleSTgcClusterBuilderToolCfg(flags)))
     from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
@@ -154,7 +156,6 @@ def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     the_tool = CompFactory.Muon.sTgcRdoToPrepDataToolMT(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
-
 
 
 def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
@@ -165,11 +166,10 @@ def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
     from RegionSelector.RegSelToolConfig import regSelTool_STGC_Cfg
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_STGC_Cfg(flags)))
     kwargs.setdefault("useROBs", False)
+
     ## Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
-
-
 
 
 def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):

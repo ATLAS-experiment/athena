@@ -6,6 +6,9 @@
 
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
+#include "xAODMuonPrepData/sTgcStripAuxContainer.h"
+#include "xAODMuonPrepData/sTgcWireAuxContainer.h"
+#include "xAODMuonPrepData/sTgcPadAuxContainer.h"
 
 using namespace MuonGM;
 using namespace Trk;
@@ -30,14 +33,25 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::initialize()
     ATH_CHECK(m_muDetMgrKey.initialize());
     ATH_CHECK(m_calibTool.retrieve());
     ATH_CHECK(m_prdContainerCacheKey.initialize(!m_prdContainerCacheKey.key().empty()) );
-    ATH_MSG_INFO("initialize() successful in " << name());
+
+    // We won't support a mode where some xAOD containers are set and others are
+    // not.
+    if ((m_xAODStripKey.empty() != m_xAODWireKey.empty())
+      || (m_xAODWireKey.empty() != m_xAODPadKey.empty())) {
+        ATH_MSG_ERROR("You must set all or none of the xAOD container keys!");
+        return StatusCode::FAILURE;
+      }
+
+    ATH_CHECK(m_xAODStripKey.initialize(!m_xAODStripKey.empty()));
+    ATH_CHECK(m_xAODWireKey.initialize(!m_xAODWireKey.empty()));
+    ATH_CHECK(m_xAODPadKey.initialize(!m_xAODPadKey.empty()));
     return StatusCode::SUCCESS;
 }
 
 
 //============================================================================
 StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
-                                                            Muon::sTgcPrepDataContainer* stgcPrepDataContainer, 
+                                                            xAODContainers& xAODcontainers,
                                                             const STGC_RawDataCollection *rdoColl, 
                                                             std::vector<IdentifierHash>& idWithDataVect) const {
 
@@ -46,6 +60,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
 
     ATH_MSG_DEBUG(" ***************** Start of process STGC Collection with hash Id: " << hash);
   
+    auto stgcPrepDataContainer = xAODcontainers.prd;
     // check if the collection already exists, otherwise add it
     if ( stgcPrepDataContainer->indexFindPtr(hash) != nullptr ) {
         ATH_MSG_DEBUG("In processCollection: collection already contained in the sTGC PrepData container");
@@ -180,10 +195,64 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
                 *it = sTgcPrepData(rdoId, hash, std::move(localPos), std::move(rdoList), std::move(cov), detEl, calibratedCharge, calibStrip.time);
                 it->setAuthor(sTgcPrepData::Author::RdoToPrdConverter);
             }
+            
+            // TODO - add merging for xAOD
+
         } else {
-            // if not merging just add the PRD to the collection
-            prdColl->push_back(new sTgcPrepData(rdoId,hash, std::move(localPos), std::move(rdoList), std::move(cov), 
-                                                detEl, calibratedCharge, calibStrip.time));
+          // if not merging just add the PRD to the collection
+          prdColl->push_back(new sTgcPrepData(
+              rdoId, hash, std::move(localPos), std::move(rdoList),
+              std::move(cov), detEl, calibratedCharge, calibStrip.time));
+
+          // add to xAOD, depending on type.
+          if (m_outputxAOD) {
+            switch (channelType) {
+              case sTgcIdHelper::sTgcChannelTypes::Pad:
+                {
+                    auto xprd = new xAOD::sTgcPadHit();
+                    xAODcontainers.pad->push_back(xprd);
+
+                    // TODO - add readoutelement and then gasgap, channelID etc
+                    setxAODCommonValues(*xprd, 0, 0, 0, calibStrip.time, calibratedCharge);
+                    xprd->setIdentifier(rdoId.get_identifier32().get_compact());
+                    xprd->setMeasurement(hash, xAOD::MeasVector<1>(localPos[0]),
+                                        xAOD::MeasMatrix<1>(cov(0, 0)));
+                    break;
+                }
+              case sTgcIdHelper::sTgcChannelTypes::Strip:  // Strips
+                { 
+                    auto xprd =  new xAOD::sTgcStripCluster();
+                    xAODcontainers.strip->push_back(xprd);
+                    
+                    std::vector<uint16_t> stripNumbers;
+                    for (auto id : rdoList) {
+                    stripNumbers.push_back(id_helper.channel(id));
+                    }
+
+                    // TODO - add readoutelement and then gasgap, channelID etc
+                    setxAODCommonValues(*xprd, 0, 0, 0, calibStrip.time, calibratedCharge);
+                    xprd->setIdentifier(rdoId.get_identifier32().get_compact());
+                    xprd->setMeasurement(hash, xAOD::MeasVector<1>(localPos[0]),
+                                        xAOD::MeasMatrix<1>(cov(0, 0)));
+                    xprd->setStripNumbers(stripNumbers);
+                    break;
+                }
+              case sTgcIdHelper::sTgcChannelTypes::Wire:  // Wires
+                {
+                    auto xprd = new xAOD::sTgcWireHit();
+                    xAODcontainers.wire->push_back(xprd);
+                    // TODO - add readoutelement and then gasgap, channelID etc
+                    setxAODCommonValues(*xprd, 0, 0, 0, calibStrip.time, calibratedCharge);
+                    xprd->setIdentifier(rdoId.get_identifier32().get_compact());
+                    xprd->setMeasurement(hash, xAOD::MeasVector<1>(localPos[0]),
+                                        xAOD::MeasMatrix<1>(cov(0, 0)));
+                    break;
+                }
+              default:
+                ATH_MSG_ERROR("Unknown sTGC channel type");
+                return StatusCode::FAILURE;
+            }
+          }
         } 
     }
 
@@ -230,7 +299,7 @@ const STGC_RawDataContainer* Muon::sTgcRdoToPrepDataToolMT::getRdoContainer(cons
 
 //============================================================================
 void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx, 
-                                                          Muon::sTgcPrepDataContainer* stgcPrepDataContainer, 
+                                                          xAODContainers& xAODcontainers,
                                                           const std::vector<IdentifierHash>& idsToDecode,
                                                           std::vector<IdentifierHash>& idWithDataVect ) const
 {
@@ -252,12 +321,24 @@ void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx,
             continue;
         } else ATH_MSG_DEBUG("Going to decode " << hash);
 
-        if(processCollection(ctx, stgcPrepDataContainer, rdoColl, idWithDataVect).isFailure()) {
+        if(processCollection(ctx, xAODcontainers, rdoColl, idWithDataVect).isFailure()) {
             ATH_MSG_DEBUG("processCsm returns a bad StatusCode - keep going for new data collections in this event");
         }
     } 
 }
 
+template <class T>
+void Muon::sTgcRdoToPrepDataToolMT::setxAODCommonValues(
+    T& xprd, const MuonGMR4::sTgcReadoutElement* re, uint8_t gasGap,
+    uint16_t channelNumber, short int time, int charge) const {
+
+  xprd.setAuthor(sTgcPrepData::Author::RdoToPrdConverter);
+  xprd.setGasGap(gasGap);
+  xprd.setChannelNumber(channelNumber);
+  xprd.setTime(time);
+  xprd.setCharge(charge);
+  xprd.setReadoutElement(re);
+}
 
 // methods for ROB-based decoding
 //============================================================================
@@ -271,10 +352,21 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
     idWithDataVect.clear();
 
     Muon::sTgcPrepDataContainer* stgcPrepDataContainer = setupSTGC_PrepDataContainer(ctx);
-
     if (!stgcPrepDataContainer) return StatusCode::FAILURE;
 
-    processRDOContainer(ctx, stgcPrepDataContainer, idVect, idWithDataVect);
+    // We need to declare these in this scope, since once a WH goes out of scope, its container is locked.
+    SG::WriteHandle<xAOD::sTgcStripContainer> stripOutputContainer;
+    SG::WriteHandle<xAOD::sTgcWireContainer> wireOutputContainer;
+    SG::WriteHandle<xAOD::sTgcPadContainer> padOutputContainer;
+    if (m_outputxAOD) {
+        stripOutputContainer = SG::WriteHandle<xAOD::sTgcStripContainer>(m_xAODStripKey, ctx);
+        wireOutputContainer = SG::WriteHandle<xAOD::sTgcWireContainer>(m_xAODWireKey, ctx);
+        padOutputContainer = SG::WriteHandle<xAOD::sTgcPadContainer>(m_xAODPadKey, ctx);
+    }
+    auto xAODPrepDataContainers = setupxAODPrepDataContainers(stripOutputContainer, wireOutputContainer, padOutputContainer);
+    xAODPrepDataContainers.prd = stgcPrepDataContainer;
+
+    processRDOContainer(ctx, xAODPrepDataContainers, idVect, idWithDataVect);
     return StatusCode::SUCCESS;
 } 
 
@@ -319,4 +411,40 @@ Muon::sTgcPrepDataContainer* Muon::sTgcRdoToPrepDataToolMT::setupSTGC_PrepDataCo
   }
   
   return handle.ptr();
+}
+
+sTgcRdoToPrepDataToolMT::xAODContainers
+sTgcRdoToPrepDataToolMT::setupxAODPrepDataContainers(SG::WriteHandle<xAOD::sTgcStripContainer>& stripOutputContainer,
+          SG::WriteHandle<xAOD::sTgcWireContainer>& wireOutputContainer,
+          SG::WriteHandle<xAOD::sTgcPadContainer>& padOutputContainer) const {
+    xAODContainers containers;
+    if (m_outputxAOD) {
+      if (stripOutputContainer
+              .record(std::make_unique<xAOD::sTgcStripContainer>(),
+                      std::make_unique<xAOD::sTgcStripAuxContainer>())
+              .isFailure()) {
+        ATH_MSG_WARNING("Failed to record xAOD container with key: "
+                        << stripOutputContainer.key());
+      }
+      if (wireOutputContainer
+              .record(std::make_unique<xAOD::sTgcWireContainer>(),
+                      std::make_unique<xAOD::sTgcWireAuxContainer>())
+              .isFailure()) {
+        ATH_MSG_WARNING("Failed to record xAOD container with key: "
+                        << wireOutputContainer.key());
+      }
+
+      if (padOutputContainer
+              .record(std::make_unique<xAOD::sTgcPadContainer>(),
+                      std::make_unique<xAOD::sTgcPadAuxContainer>())
+              .isFailure()) {
+        ATH_MSG_DEBUG("Failed to record xAOD container with key: "
+                      << padOutputContainer.key());
+      }
+      containers.strip = stripOutputContainer.ptr();
+      containers.wire = wireOutputContainer.ptr();
+      containers.pad = padOutputContainer.ptr();
+    }
+
+    return containers;
 }
