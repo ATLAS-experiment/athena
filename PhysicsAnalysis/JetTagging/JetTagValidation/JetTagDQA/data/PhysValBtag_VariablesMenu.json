@@ -357,21 +357,6 @@
             "forData": "true"
         },
 
-        "DL1dv00": {
-            "_comment": "pb, pc, and pu",
-            "title": "DL1dv00",
-            "xtitle": "DL1dv00 px",
-            "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1,
-            "forEach": ["pb", "pc", "pu"],
-            "forEachTruthType": ["U", "B", "C", "DATA"],
-            "type": "TH1D",
-            "forData": "true"
-        },
-
         "DL1dv01": {
             "_comment": "pb, pc, and pu",
             "title": "DL1dv01",
@@ -402,32 +387,17 @@
             "forData": "true"
         },
 
-        "GN1": {
-            "_comment": "pb, pc, and pu",
-            "title": "GN1",
-            "xtitle": "GN1 px",
+        "GN2v01": {
+            "_comment": "pb, pc, pu and ptau",
+            "title": "GN2v01",
+            "xtitle": "GN2v01 px",
             "ytitle": "Jets",
             "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
             "xbins": 100,
             "xmin": 0,
             "xmax": 1,
-            "forEach": ["pb", "pc", "pu"],
-            "forEachTruthType": ["U", "B", "C", "DATA"],
-            "type": "TH1D",
-            "forData": "true"
-        },
-
-        "GN2v00": {
-            "_comment": "pb, pc, and pu",
-            "title": "GN2v00",
-            "xtitle": "GN2v00 px",
-            "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1,
-            "forEach": ["pb", "pc", "pu"],
-            "forEachTruthType": ["U", "B", "C", "DATA"],
+            "forEach": ["pb", "pc", "pu", "ptau"],
+            "forEachTruthType": ["U", "B", "C", "TAU", "DATA"],
             "type": "TH1D",
             "forData": "true"
         },

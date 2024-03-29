@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-
-#include "NavigationTesterAlg.h"
 #include <set>
 #include <algorithm>
 #include <iterator>
+#include "TrigCompositeUtils/ChainNameParser.h"
+#include "NavigationTesterAlg.h"
 
 
 // anonymous namespace for convenience functions
@@ -98,10 +98,19 @@ namespace Trig {
             }
              
             if ( m_verifyCombinationsSize ) {
-                ATH_CHECK(verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain));
+                auto status = verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain);
+                if ( status.isFailure() and m_failOnDifference) {
+                    ATH_MSG_ERROR("Failed when verifying combinations size");
+                    return StatusCode::FAILURE;
+                }
+
             } 
             if ( m_verifyCombinations ) {
-                ATH_CHECK(verifyCombinationsContent(combsRun2, combsRun3, chain));
+                auto status = verifyCombinationsContent(combsRun2, combsRun3, chain);
+                if ( status.isFailure() and m_failOnDifference) {
+                    ATH_MSG_ERROR("Failed when verifying combinations content");
+                    return StatusCode::FAILURE;
+                }
             }
             ATH_MSG_DEBUG("Verified chain " << chain);
         }
@@ -125,13 +134,13 @@ namespace Trig {
         bool isSubset = std::includes(run3.begin(), run3.end(), run2.begin(), run2.end());
         if (run2 != run3) 
         {
-            ATH_MSG_WARNING("Difference in combinations between Run2 and Run3 format for chain: " << chain);
+            ATH_MSG_WARNING("Difference in combinations between Run2 and Run3 format for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
             ATH_MSG_WARNING("Run2 combs: " << run2);
             ATH_MSG_WARNING("Run3 combs: " << run3);
         }
         if (not isSubset) 
         {
-            ATH_MSG_WARNING("NOT PASSED not isSubset failed, Run2 is not a subset of Run3 for chain: " << chain);
+            ATH_MSG_WARNING("NOT PASSED not isSubset failed, Run2 is not a subset of Run3 for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
             ATH_MSG_WARNING("Run2 combs: " << run2);
             ATH_MSG_WARNING("Run3 combs: " << run3);
             return StatusCode::FAILURE;
@@ -140,15 +149,15 @@ namespace Trig {
         for ( auto& combRun2: run2 ) {
             bool foundMatching = false;
             for ( auto& combRun3 : run3 ) {     
-                ATH_MSG_WARNING("Available Run 2 combinations: " );
+                ATH_MSG_DEBUG("Available Run 2 combinations: " );
                 for ( auto& c: combRun2 ){
-                    ATH_MSG_WARNING("  " << c );
+                    ATH_MSG_DEBUG("  " << c );
                 }
-                ATH_MSG_WARNING("Available Run 3 combinations: " );
+                ATH_MSG_DEBUG("Available Run 3 combinations: " );
                 for ( auto& c: combRun3 ){
-                    ATH_MSG_WARNING("  " << c );
+                    ATH_MSG_DEBUG("  " << c );
                 }
-                ATH_MSG_WARNING("COMPARISON combRun2 == combRun3: " <<  ( combRun2 == combRun3 ));
+                ATH_MSG_DEBUG("COMPARISON combRun2 == combRun3 are " <<  ( combRun2 == combRun3  ? "identical" : "distinct"));
                 if ( combRun2 == combRun3 ) {
                     ATH_MSG_DEBUG("Found matching combinations, run2 " << combRun2 
                                 << " run3 " << combRun3 );

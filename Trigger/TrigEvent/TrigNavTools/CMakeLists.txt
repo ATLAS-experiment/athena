@@ -25,5 +25,5 @@ atlas_add_test( NavConversionConfigTest
 
 
 atlas_add_test( ExecuteConversion
-                SCRIPT testTrigR2ToR3NavGraphConversionV2.py
+                SCRIPT testTrigR2ToR3NavGraphConversionV2.py --evtMax=200
                 POST_EXEC_SCRIPT nopost.sh )                

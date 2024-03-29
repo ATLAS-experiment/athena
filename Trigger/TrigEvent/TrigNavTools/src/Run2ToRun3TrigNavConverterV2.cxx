@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <boost/functional/hash.hpp>
@@ -630,11 +630,19 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturesProxies(ConvProxySet_t 
     auto first = *proxies.begin();
     for (auto p : proxies)
     {
-      if (not feaEqual(p->te->getFeatureAccessHelpers(), first->te->getFeatureAccessHelpers()))
+      if (filterFEAs(first->te->getFeatureAccessHelpers(), run2Nav) !=
+                        filterFEAs(p->te->getFeatureAccessHelpers(), run2Nav))
       {
         ATH_MSG_ERROR("Proxies grouped by FEA hash have actually distinct features (specific FEAs are different)");
         for (auto id: p->passChains ) ATH_MSG_ERROR("... chain id for this proxy " << id);
         ATH_MSG_ERROR(".... TE id of this proxy: " << TrigConf::HLTUtils::hash2string(p->te->getId()));
+        for ( auto fea: first->te->getFeatureAccessHelpers() ) {
+          ATH_MSG_ERROR("FEA1 " << fea);
+        }
+        for ( auto fea: p->te->getFeatureAccessHelpers() ) {
+          ATH_MSG_ERROR("FEA2 " << fea);
+        }
+
         return StatusCode::FAILURE;
       }
     }
@@ -778,7 +786,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantRois(ConvProxySet_t &convPr
   {
     // TODO need check & handling of case when there is more RoIs, now overwriting
     if (HLT::TrigNavStructure::getRoINodes(proxy->te).size() > 1)
-      ATH_MSG_WARNING("Several RoIs pointing to a proxy, taking latest one for now");
+      ATH_MSG_DEBUG("Several RoIs pointing to a proxy, taking latest one for now");
 
     mp.clear();
 
@@ -1138,11 +1146,8 @@ bool feaToSkip(const HLT::TriggerElement::FeatureAccessHelper &fea)
   return fea.getCLID() == thePassBitsCLID or fea.getCLID() == thePassBitsContCLID;
 }
 
-uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TriggerElement *te_ptr, const HLT::TrigNavStructure &navigationDecoder) const
-{
-  // FEA vectors hashing
-  ATH_MSG_VERBOSE("Calculating FEA hash");
-  uint64_t hash = 0;
+std::vector<HLT::TriggerElement::FeatureAccessHelper> Run2ToRun3TrigNavConverterV2::filterFEAs(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TrigNavStructure &navigationDecoder) const {
+  std::vector<HLT::TriggerElement::FeatureAccessHelper> out;
   for (auto fea : feaVector)
   {
     if (feaToSkip(fea))
@@ -1158,7 +1163,18 @@ uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerE
       ATH_MSG_VERBOSE("Skipping unrecorded (missing in SG) FEA hash calculation - name in SG: " << sgName << " FEA " << fea);
       continue;
     }
+    out.push_back(fea);
+  }
+  return out;
+}
 
+uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TriggerElement *te_ptr, const HLT::TrigNavStructure &navigationDecoder) const
+{
+  // FEA vectors hashing
+  ATH_MSG_VERBOSE("Calculating FEA hash");
+  uint64_t hash = 0;
+  for (auto fea : filterFEAs(feaVector, navigationDecoder))
+  {
     ATH_MSG_VERBOSE("Including FEA in hash CLID: " << fea.getCLID() << " te Id: " << te_ptr->getId());
     boost::hash_combine(hash, fea.getCLID());
     boost::hash_combine(hash, fea.getIndex().subTypeIndex());
@@ -1167,27 +1183,6 @@ uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerE
   }
   ATH_MSG_VERBOSE("Obtained FEA hash " << hash);
   return hash;
-}
-
-bool Run2ToRun3TrigNavConverterV2::feaEqual(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &a,
-                                            const std::vector<HLT::TriggerElement::FeatureAccessHelper> &b) const
-{
-  ATH_MSG_VERBOSE("Comparison of FEAs");
-  if (a.size() != b.size())
-    return false;
-
-  for (size_t i = 0; i < a.size(); ++i)
-  {
-    ATH_MSG_VERBOSE("Comparison FEA a:" << a[i] << " FEA b:"  << b[i]);
-    if (feaToSkip(a[i]) and feaToSkip(b[i]))
-    {
-      ATH_MSG_VERBOSE("Skipping FEA in comparison helper");
-      continue;
-    }
-    if (not(a[i] == b[i]))
-      return false;
-  }
-  return true;
 }
 
 bool Run2ToRun3TrigNavConverterV2::feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea) const

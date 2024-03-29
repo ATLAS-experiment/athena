@@ -129,8 +129,9 @@ private:
 
   // helpers
   //!< both method skip TrigPassBits
+  std::vector<HLT::TriggerElement::FeatureAccessHelper> filterFEAs(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TrigNavStructure &navigationDecoder) const;
+  // produces summary of attached objects (FEAs) in a form of a hash
   uint64_t feaToHash(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TriggerElement *te_ptr, const HLT::TrigNavStructure &navigationDecoder) const;
-  bool feaEqual(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &a, const std::vector<HLT::TriggerElement::FeatureAccessHelper> &b) const;
 
   //!< returns true if this particular feature is to be saved (linked)
   bool feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea) const;

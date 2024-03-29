@@ -18,6 +18,7 @@ from .JetPresel import caloPreselJetHypoToolFromDict, roiPreselJetHypoToolFromDi
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, jetmetTopoClusteringCfg_LC, HICaloTowerCfg
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
+import functools
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -172,7 +173,9 @@ def jetCaloPreselSelCfg(flags, **jetRecoDict):
 
 def jetCaloPreselMenuSequence(flags, **jetRecoDict):
     selAcc, jetDef, clustersKey = jetCaloPreselSelCfg(flags, **jetRecoDict)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.CALOPRESEL)), jetDef, clustersKey
+    def makejetCaloPreselMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.CALOPRESEL))
+    return functools.partial(makejetCaloPreselMenuSequence), jetDef, clustersKey
 
 # A null preselection, which will only run the cluster making (step 1)
 # We set RoIs='' for same reason as described for jetCaloPreselMenuSequence
@@ -195,7 +198,10 @@ def jetCaloSelCfg(flags, clusterCalib):
 
 def jetCaloRecoMenuSequence(flags, clusterCalib):
     selAcc, clusterKey = jetCaloSelCfg(flags, clusterCalib)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.PASSTHROUGH)), clusterKey
+    def makejetCaloRecoMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.PASSTHROUGH))
+    return functools.partial(makejetCaloRecoMenuSequence), clusterKey
+
 
 # A full hypo selecting only on calo jets (step 1)
 # Passing isPerf = True disables the hypo
@@ -229,7 +235,9 @@ def jetCaloHypoSelCfg(flags, isPerf, **jetRecoDict):
 
 def jetCaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
     selAcc, jetDef, hypoType = jetCaloHypoSelCfg(flags, isPerf, **jetRecoDict)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType)), jetDef
+    def makejetCaloHypoMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return functools.partial(makejetCaloHypoMenuSequence), jetDef
     
 
 # A full hypo selecting only on heavy ion calo jets (step 1)
@@ -253,7 +261,10 @@ def jetHICaloSelCfg(flags, isPerf, **jetRecoDict):
 
 def jetHICaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
     selAcc, jetDef, hypoType = jetHICaloSelCfg(flags, isPerf, **jetRecoDict)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType)), jetDef
+    def makejetHICaloHypoMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return functools.partial(makejetHICaloHypoMenuSequence), jetDef
+
 
 # A full hypo selecting on jets with FS track reco (step 2)
 # To combine either with a presel or a passthrough sequence
@@ -299,7 +310,10 @@ def jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict):
 
 def jetFSTrackingHypoMenuSequence(flags, clustersKey, isPerf, **jetRecoDict):
     selAcc, jetDef, hypoType = jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType)), jetDef
+    def makejetFSTrackingHypoMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return functools.partial(makejetFSTrackingHypoMenuSequence), jetDef
+
 
 # A full hypo selecting on jets with RoI track reco (step 2)
 # Needs to be preceded by a presel sequence, and be provided
@@ -350,4 +364,7 @@ def jetRoITrackJetTagSelCfg(flags, jetsIn, isPresel=True, **jetRecoDict):
 
 def jetRoITrackJetTagHypoMenuSequence(flags, jetsIn, isPresel=True, **jetRecoDict):
     selAcc, hypoType = jetRoITrackJetTagSelCfg(flags, jetsIn, isPresel, **jetRecoDict)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    def makejetRoITrackJetTagHypoMenuSequence():
+        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return functools.partial(makejetRoITrackJetTagHypoMenuSequence)
+

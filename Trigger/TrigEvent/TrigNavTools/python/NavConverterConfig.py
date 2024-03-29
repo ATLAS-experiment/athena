@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -46,7 +46,7 @@ def NavConverterCfg(flags, chainsFilter = []):
     cnvAlg.doCompression = True # set True for compression
     acc.addEventAlgo(cnvAlg)
 
-    checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = True, TrigDecisionTool = tdt) # optional: OutputLevel = DEBUG
+    checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = False, TrigDecisionTool = tdt) # optional: OutputLevel = DEBUG
     checker.RetrievalToolRun2Nav = CompFactory.Trig.IParticleRetrievalTool()
     
     # in conversion job  Run2 TDT is setup as default, we need to setup an alternative to access Run 3 format

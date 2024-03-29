@@ -109,6 +109,8 @@ LArDigitalTriggMonAlg::initialize()
 struct Digi_MonValues {
   float digi_eta;
   float digi_phi;
+  int digi_ieta;
+  int digi_iphi;
   int digi_sampos;
   int digi_adc;
   int digi_latomesourceidbin;
@@ -128,6 +130,8 @@ struct Digi_MonValues {
 struct SC_MonValues {
   float sc_eta;
   float sc_phi;
+  int sc_ieta;
+  int sc_iphi;
   int sc_latomesourceidbin;
   float sc_et_ofl;
   int sc_et_diff;
@@ -142,6 +146,8 @@ struct SC_MonValues {
   bool sc_passSCNom10tauGt3;
   bool sc_saturNotMasked;
   bool sc_OFCbOFNotMasked;
+  bool sc_notMaskedEoflNe0;
+  bool sc_notMaskedEoflGt1;
 };
 
 
@@ -163,6 +169,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto Digi_latomeSourceIdBIN = Monitored::Scalar<int>("Digi_latomeSourceIdBIN",1); // MlatomeSourceIdBIN
   auto Digi_phi = Monitored::Scalar<float>("Digi_phi",0.0); // MSCphi
   auto Digi_eta = Monitored::Scalar<float>("Digi_eta",0.0); // MSCeta
+  auto Digi_iphi = Monitored::Scalar<int>("Digi_iphi",0.0); 
+  auto Digi_ieta = Monitored::Scalar<int>("Digi_ieta",0.0); 
   auto Digi_maxpos = Monitored::Scalar<int>("Digi_maxpos",-1); // Mmaxpos
   auto Digi_partition = Monitored::Scalar<int>("Digi_partition",-1); // Mpartition
   auto Digi_sampos = Monitored::Scalar<int>("Digi_sampos",-1); // Msampos
@@ -184,6 +192,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto SC_partition = Monitored::Scalar<int>("SC_partition",-1); // Mpartition
   auto SC_phi = Monitored::Scalar<float>("SC_phi",0.0); // MSCphi
   auto SC_eta = Monitored::Scalar<float>("SC_eta",0.0); // MSCeta
+  auto SC_iphi = Monitored::Scalar<int>("SC_iphi",0.0);
+  auto SC_ieta = Monitored::Scalar<int>("SC_ieta",0.0);
   auto SC_energy_onl = Monitored::Scalar<int>("SC_energy_onl",0.0); // Menergy_onl
   auto SC_ET_onl = Monitored::Scalar<float>("SC_ET_onl",0.0); // Menergy_onl
   auto SC_ET_onl_muscaled = Monitored::Scalar<float>("SC_ET_onl_muscaled",0.0); // Menergy_onl
@@ -196,6 +206,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   // cuts
   auto passTauSel = Monitored::Scalar<bool>("passTauSel",false);
   auto nonZeroET = Monitored::Scalar<bool>("nonZeroET",false); // eTgt0GeV
+  auto nonZeroETofl = Monitored::Scalar<bool>("nonZeroETofl",false); // eTgt0GeV
   auto onlofflEmismatch = Monitored::Scalar<bool>("onlofflEmismatch",false);
   auto notSatur = Monitored::Scalar<bool>("notSatur",false);
   auto notOFCbOF = Monitored::Scalar<bool>("notOFCbOF",false);
@@ -203,6 +214,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto nonZeroEtau = Monitored::Scalar<bool>("nonZeroEtau",false);
   auto eTgt1GeV = Monitored::Scalar<bool>("eTgt1GeV",false);
   auto eTgt10GeV = Monitored::Scalar<bool>("eTgt10GeV",false);
+  auto eToflGt1GeV = Monitored::Scalar<bool>("eToflGt1GeV",false);
 
 
   auto passSCNom = Monitored::Scalar<bool>("passSCNom",false);  // pass tau, not satur, not OFCb OF, not masked  nonZeroET
@@ -211,7 +223,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto passSCNom10tauGt3 = Monitored::Scalar<bool>("passSCNom10tauGt3",false);  // pass tau, not satur, not OFCb OF, not masked eTgt10GeV  tauGt3
   auto saturNotMasked = Monitored::Scalar<bool>("saturNotMasked",false);  // notSatur is false, notMasked is false
   auto OFCbOFNotMasked = Monitored::Scalar<bool>("OFCbOFNotMasked",false);  // notOFCbOF is false, notMasked is false
-  
+  auto notMaskedEoflNe0 = Monitored::Scalar<bool>("notMaskedEoflNe0",false);  // not masked OSUM, not satur, not OFCb OF, ET ofl != 0
+  auto notMaskedEoflGt1 = Monitored::Scalar<bool>("notMaskedEoflGt1",false);  // not masked OSUM, not satur, not OFCb OF, ET ofl > 1
 
   // From LATOME header loop
   auto thisEvent=this->GetEventInfo(ctx);
@@ -301,6 +314,10 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       } 
       Digi_eta = caloDetElement->eta_raw();
       Digi_phi = caloDetElement->phi_raw();
+
+      Digi_ieta = m_SCID_helper->eta(offlineID);
+      Digi_iphi = m_SCID_helper->phi(offlineID);
+
       const int calosample=caloDetElement->getSampling();
 
       const unsigned iLyrNS=m_caloSamplingToLyrNS[calosample];
@@ -377,8 +394,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 	}
 
   //Should be able to use emplace_back here with C++20, see https://en.cppreference.com/w/cpp/language/aggregate_initialization
-	lvaluemap_digi.push_back({Digi_eta, Digi_phi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
-	lvaluemap_digi_ALL.push_back({Digi_eta, Digi_phi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
+	lvaluemap_digi.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
+	lvaluemap_digi_ALL.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
 
       } // End loop over samples
 
@@ -390,6 +407,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       const auto& tool = digiMonValueVec[ilayer];
       auto digi_part_eta = Monitored::Collection("Digi_part_eta",tool,[](const auto& v){return v.digi_eta;});
       auto digi_part_phi = Monitored::Collection("Digi_part_phi",tool,[](const auto& v){return v.digi_phi;});
+      auto digi_part_ieta = Monitored::Collection("Digi_part_ieta",tool,[](const auto& v){return v.digi_ieta;});
+      auto digi_part_iphi = Monitored::Collection("Digi_part_iphi",tool,[](const auto& v){return v.digi_iphi;});
       auto digi_part_sampos = Monitored::Collection("Digi_part_sampos",tool,[](const auto& v){return v.digi_sampos;});
       auto digi_part_adc = Monitored::Collection("Digi_part_adc",tool,[](const auto& v){return v.digi_adc;});
       auto digi_part_latomesourceidbin = Monitored::Collection("Digi_part_latomesourceidbin",tool,[](const auto& v){return v.digi_latomesourceidbin;});
@@ -404,7 +423,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       auto digi_part_badNotMasked = Monitored::Collection("Digi_part_badNotMasked",tool,[](const auto& v){return v.digi_badNotMasked;});
 
       fill(m_tools[m_toolmapLayerNames_digi.at(m_layerNames[ilayer])], 
-	   digi_part_eta, digi_part_phi, digi_part_sampos, digi_part_adc, digi_part_latomesourceidbin, digi_part_pedestal, digi_part_maxpos, digi_part_diff_adc_ped_norm, digi_part_diff_adc_ped, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
+	   digi_part_eta, digi_part_phi, digi_part_ieta, digi_part_iphi, digi_part_sampos, digi_part_adc, digi_part_latomesourceidbin, digi_part_pedestal, digi_part_maxpos, digi_part_diff_adc_ped_norm, digi_part_diff_adc_ped, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
     }
   
 
@@ -434,7 +453,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 	ATH_MSG_WARNING("Looping SC ET container, but we have reached the end of the SC ET Reco iterator. Check the sizes of these containers. Is SC ET Reco size zero? Is there a problem with the digit container name sent by the run logger?");
 	rawSCReco = 0;
       }
-      Digi_SCChannel = rawSC->chan();
+      SC_SCChannel = rawSC->chan();
       HWIdentifier id = rawSC->hardwareID(); // gives online ID
       //skip disconnected channels:
       if(!cabling->isOnlineConnected(id)) continue;
@@ -451,6 +470,9 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       }
       SC_eta = caloDetElement->eta_raw();
       SC_phi = caloDetElement->phi_raw();
+
+      SC_ieta = m_SCID_helper->eta(offlineID);
+      SC_iphi = m_SCID_helper->phi(offlineID);
       int calosample=caloDetElement->getSampling();
 
       const unsigned iLyrNS=m_caloSamplingToLyrNS[calosample];
@@ -479,9 +501,10 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       passSCNom10tauGt3 = false;
       saturNotMasked = false;
       OFCbOFNotMasked = false;
-      OFCbOFNotMasked = false;
-      
-      
+      notMaskedEoflNe0 = false;
+      notMaskedEoflGt1 = false;
+      nonZeroETofl = false;
+      eToflGt1GeV = false;
       // Check if this is a maskedOSUM SC 
       if ( ! m_bcMask.cellShouldBeMasked(bcCont,id)) {
 	notMasked = true;
@@ -521,6 +544,12 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       if (SC_ET_onl > 10){
 	eTgt10GeV = true;
       }
+      if (SC_ET_ofl != 0 ) {
+        nonZeroETofl = true;
+      }
+      if (SC_ET_ofl > 1){
+        eToflGt1GeV = true;
+      }
       if ( rawSC->satur().size()>0 ){
 	if ( rawSC->satur().at(bcid_ind) ){
 	  if ( notMasked ){
@@ -543,28 +572,37 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       if ( std::abs(SC_time) > 3 ){
 	tauGt3 = true;
       }
-      if ( notMasked && passTauSel && notSatur && notOFCbOF ){
-	if ( nonZeroET ){
-	  passSCNom = true;
-	}
-	if ( eTgt1GeV ){
-	  passSCNom1 = true;
-	}
-	if (eTgt10GeV ){
-	  passSCNom10 = true;
-	  if ( tauGt3 ){
-	    passSCNom10tauGt3 = true;
-	  }
-	}
-	if (SC_energy_onl != SC_energy_ofl){
-	  onlofflEmismatch=true;
-	}
-	
+
+      if ( notMasked && notSatur && notOFCbOF ){
+          if(nonZeroETofl){
+            notMaskedEoflNe0 = true;
+          }
+          if(eToflGt1GeV) {
+            notMaskedEoflGt1 = true;
+          }
+          
+          if ( passTauSel ){
+            if ( nonZeroET ){
+              passSCNom = true;
+            }
+            if ( eTgt1GeV ){
+              passSCNom1 = true;
+            }
+            if (eTgt10GeV ){
+              passSCNom10 = true;
+              if ( tauGt3 ){
+                passSCNom10tauGt3 = true;
+              }
+            }
+            if (SC_energy_onl != SC_energy_ofl){
+              onlofflEmismatch = true;
+            }
+          }
       } // end nominal selections
       
       //Should be able to use emplace_back here with C++20, see https://en.cppreference.com/w/cpp/language/aggregate_initialization
-      lvaluemap_sc.push_back({SC_eta, SC_phi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked});
-      lvaluemap_sc_ALL.push_back({SC_eta, SC_phi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked});
+      lvaluemap_sc.push_back({SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0, notMaskedEoflGt1});
+      lvaluemap_sc_ALL.push_back({SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0, notMaskedEoflGt1});
 
 
     } //end loop over SCs
@@ -574,6 +612,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       const auto& tool = scMonValueVec[ilayer];
       auto sc_part_eta = Monitored::Collection("SC_part_eta",tool,[](const auto& v){return v.sc_eta;});
       auto sc_part_phi = Monitored::Collection("SC_part_phi",tool,[](const auto& v){return v.sc_phi;});
+      auto sc_part_ieta = Monitored::Collection("SC_part_ieta",tool,[](const auto& v){return v.sc_ieta;});
+      auto sc_part_iphi = Monitored::Collection("SC_part_iphi",tool,[](const auto& v){return v.sc_iphi;});
       auto sc_part_latomesourceidbin = Monitored::Collection("SC_part_latomesourceidbin",tool,[](const auto& v){return v.sc_latomesourceidbin;});
       auto sc_part_et_ofl = Monitored::Collection("SC_part_et_ofl",tool,[](const auto& v){return v.sc_et_ofl;});
       auto sc_part_et_diff = Monitored::Collection("SC_part_et_diff",tool,[](const auto& v){return v.sc_et_diff;});
@@ -588,10 +628,12 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       auto sc_part_passSCNom10tauGt3 = Monitored::Collection("SC_part_passSCNom10tauGt3",tool,[](const auto& v){return v.sc_passSCNom10tauGt3;});
       auto sc_part_saturNotMasked = Monitored::Collection("SC_part_saturNotMasked",tool,[](const auto& v){return v.sc_saturNotMasked;});
       auto sc_part_OFCbOFNotMasked = Monitored::Collection("SC_part_OFCbOFNotMasked",tool,[](const auto& v){return v.sc_OFCbOFNotMasked;});
+      auto sc_part_notMaskedEoflNe0 = Monitored::Collection("SC_part_notMaskedEoflNe0",tool,[](const auto& v){return v.sc_notMaskedEoflNe0;});
+      auto sc_part_notMaskedEoflGt1 = Monitored::Collection("SC_part_notMaskedEoflGt1",tool,[](const auto& v){return v.sc_notMaskedEoflGt1;});
 
 
       fill(m_tools[m_toolmapLayerNames_sc.at(m_layerNames[ilayer])], 
-	   sc_part_eta, sc_part_phi, sc_part_latomesourceidbin, sc_part_et_ofl, sc_part_et_diff, sc_part_et_onl, sc_part_et_onl_muscaled, sc_part_time, sc_part_bcid, sc_part_lb, sc_part_passSCNom, sc_part_passSCNom1, sc_part_passSCNom10, sc_part_passSCNom10tauGt3, sc_part_saturNotMasked, sc_part_OFCbOFNotMasked);
+	   sc_part_eta, sc_part_phi, sc_part_ieta, sc_part_iphi, sc_part_latomesourceidbin, sc_part_et_ofl, sc_part_et_diff, sc_part_et_onl, sc_part_et_onl_muscaled, sc_part_time, sc_part_bcid, sc_part_lb, sc_part_passSCNom, sc_part_passSCNom1, sc_part_passSCNom10, sc_part_passSCNom10tauGt3, sc_part_saturNotMasked, sc_part_OFCbOFNotMasked, sc_part_notMaskedEoflNe0, sc_part_notMaskedEoflGt1);
     }
 
      
