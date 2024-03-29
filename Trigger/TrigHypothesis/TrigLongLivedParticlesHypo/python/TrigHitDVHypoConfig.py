@@ -92,7 +92,7 @@ def TrigHitDVHypoToolFromDict( chainDict ):
     for THR in thresholds:
         strThr += str(THR)+", "
 
-    log.info("Threshold Values are: %s",strThr)
+    log.debug("Threshold Values are: %s",strThr)
 
     tool.cutJetPtGeV = thresholds
 
@@ -102,18 +102,18 @@ def TrigHitDVHypoToolFromDict( chainDict ):
 
     for cpart in cparts:
         if cpart['IDinfo'] =="loose":
-            log.info("Loose ID working point is set")
+            log.debug("Loose ID working point is set")
             jetEta.append(2.0)
             doSPseed.append(True)
             effBDT.append(0.9)
         elif cpart['IDinfo'] =="tight":
-            log.info("Tight ID working point is set")
+            log.debug("Tight ID working point is set")
             jetEta.append(1.0)
             doSPseed.append(False)
             effBDT.append(0.75)
         else:
             if cpart['IDinfo'] =="medium":
-                log.info("Medium ID working point is set")
+                log.debug("Medium ID working point is set")
             else:
                 log.info("no working point specificed. setting medium working point")
             jetEta.append(2.0)

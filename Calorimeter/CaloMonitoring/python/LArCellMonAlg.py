@@ -1,51 +1,6 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-
-def LArCellMonConfigOld(flags):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from CaloMonitoring.CaloMonitoringConf import  LArCellMonAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArCellMonAlgOldCfg')
-    from AthenaCommon.BeamFlags import jobproperties
-    if jobproperties.Beam.beamType() == 'cosmics':
-       isCosmics=True
-    else:
-       isCosmics=False
-
-    from AthenaCommon.GlobalFlags  import globalflags
-    if globalflags.DataSource() == 'data':
-       isMC=False
-    else:
-       isMC=True
-
-    from RecExConfig.RecFlags import rec   
-    from RecExConfig.AutoConfiguration import ConfigureTriggerStream
-    ConfigureTriggerStream()
-    TriggerStream=rec.triggerStream()
-
-    from AthenaMonitoring.DQMonFlags import DQMonFlags
-    if not isMC and DQMonFlags.enableLumiAccess():
-        from LumiBlockComps.LBDurationCondAlgDefault import LBDurationCondAlgDefault
-        LBDurationCondAlgDefault()
-        from LumiBlockComps.TrigLiveFractionCondAlgDefault import TrigLiveFractionCondAlgDefault
-        TrigLiveFractionCondAlgDefault()
-        from LumiBlockComps.LuminosityCondAlgDefault import LuminosityCondAlgDefault
-        LuminosityCondAlgDefault()
-
-    from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-    CaloNoiseCondAlg()
-
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    algo = LArCellMonConfigCore(helper, LArCellMonAlg,flags,isCosmics, 
-                                TriggerStream, isMC, athenaCommonFlags.isOnline)
-
-    from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
-    algo.ReadyFilterTool = GetAtlasReadyFilterTool()
-    from AthenaMonitoring.BadLBFilterTool import GetLArBadLBFilterTool
-    algo.BadLBTool = GetLArBadLBFilterTool()
-
-    return helper.result()
 
 def LArCellMonConfig(flags):
 

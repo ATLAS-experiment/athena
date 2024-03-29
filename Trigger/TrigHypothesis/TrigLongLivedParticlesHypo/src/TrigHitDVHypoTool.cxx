@@ -29,13 +29,13 @@ TrigHitDVHypoTool::~TrigHitDVHypoTool() {}
 
 StatusCode TrigHitDVHypoTool::initialize()
 {
-   ATH_MSG_INFO( "Initialization completed successfully:" );
-   ATH_MSG_INFO( "   cutJetPtGeV = " << m_cutJetPtGeV );
-   ATH_MSG_INFO( "   cutJetEta   = " << m_cutJetEta );
-   ATH_MSG_INFO( "   effBDT      = " << m_effBDT );
-   ATH_MSG_INFO( "   doSPseed    = " << m_doSPseed );
+   ATH_MSG_DEBUG( "Initialization completed successfully:" );
+   ATH_MSG_DEBUG( "   cutJetPtGeV = " << m_cutJetPtGeV );
+   ATH_MSG_DEBUG( "   cutJetEta   = " << m_cutJetEta );
+   ATH_MSG_DEBUG( "   effBDT      = " << m_effBDT );
+   ATH_MSG_DEBUG( "   doSPseed    = " << m_doSPseed );
 
-   ATH_MSG_INFO( "Tool configured for chain/id: " << m_decisionId );
+   ATH_MSG_DEBUG( "Tool configured for chain/id: " << m_decisionId );
 
    return StatusCode::SUCCESS;
 }

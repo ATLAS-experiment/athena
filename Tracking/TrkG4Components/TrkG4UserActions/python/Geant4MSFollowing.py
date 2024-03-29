@@ -17,19 +17,19 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def setupArgParser():
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument("--inputevntfile",
+    parser.add_argument("--inputEVNTFile",
                         default="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root",
                         type=str,
                         help="The input EVNT file to use")
-    parser.add_argument("--outputhitsfile",
+    parser.add_argument("--outputHITSFile",
                         default="myHITS.pool.root", 
                         type=str,
                         help="The output HITS filename")
-    parser.add_argument("--geometrytag",
-                        default="ATLAS-R3S-2021-03-00-00", 
+    parser.add_argument("--geometryTag",
+                        default="ATLAS-R3S-2021-03-02-00", 
                         type=str,
                         help="The geometry tag to use")
-    parser.add_argument("--globaltag",
+    parser.add_argument("--globalTag",
                         default="OFLCOND-MC21-SDR-RUN3-09", 
                         type=str,
                         help="The global tag to use")
@@ -41,6 +41,8 @@ def setupArgParser():
                         default=10000,
                         type = int,
                         help="Maximum number of events to run on.")
+    parser.add_argument("--skipEvents", help="Number of events to skip", type = int , default =0)
+    
     return parser
   
 
@@ -218,14 +220,15 @@ if __name__ =="__main__":
     args = setupArgParser().parse_args()
     # Configure
     flags = initConfigFlags()
-    flags.Input.Files = [args.inputevntfile] # default: ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root']
-    flags.Output.HITSFileName = args.outputhitsfile # default: "myHITS.pool.root"
-    flags.GeoModel.AtlasVersion = args.geometrytag # default: "ATLAS-R3S-2021-03-00-00"
-    flags.IOVDb.GlobalTag = args.globaltag # default: "OFLCOND-MC21-SDR-RUN3-09"
+    flags.Input.Files = [args.inputEVNTFile] 
+    flags.Output.HITSFileName = args.outputHITSFile 
+    flags.GeoModel.AtlasVersion = args.geometryTag 
+    flags.IOVDb.GlobalTag = args.globalTag
     flags.Input.isMC = True
     flags.GeoModel.Align.Dynamic = False
     flags.Concurrency.NumThreads =1
     flags.Concurrency.NumConcurrentEvents = 1
+    flags.Exec.SkipEvents = args.skipEvents
     from AthenaConfiguration.Enums import  ProductionStep
     flags.Common.ProductionStep = ProductionStep.FastChain 
     flags.LAr.doAlign = True
@@ -251,12 +254,8 @@ if __name__ =="__main__":
 
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     acc.merge(G4AtlasAlgCfg(flags,UserActionTools=[GeantFollowerMSTool],
-                                        ExtraInputs={( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry'),
-                                                     ( 'AtlasFieldCacheCondObj' , 'ConditionStore+fieldCondObj' )}))
-
-    #from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    #from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
-    #acc.merge(OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['MSG4AtlasAlg']))
+                                    ExtraInputs={( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry'),
+                                                 ( 'AtlasFieldCacheCondObj' , 'ConditionStore+fieldCondObj' )}))
 
     # Execute
     acc.printConfig(withDetails=True)

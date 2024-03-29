@@ -9,9 +9,11 @@
 #ifndef TRKDETDESCRGEOMODELCNV_GEOSHAPRECONVERTER_H
 #define TRKDETDESCRGEOMODELCNV_GEOSHAPRECONVERTER_H
 // Trk
+#include "AthenaBaseComps/AthMessaging.h"
 #include "TrkGeometry/MaterialProperties.h"
 // Eigen
 #include "GeoPrimitives/GeoPrimitives.h"
+
 // STL
 
 class GeoTubs;
@@ -37,24 +39,26 @@ class Volume;
   generalization by Sarka.Todorova@cern.ch
   */
 
-class GeoShapeConverter {
+class GeoShapeConverter : public AthMessaging {
 
    public:
+    GeoShapeConverter();
     /** Convert a tubs */
-    static CylinderVolumeBounds* convert(const GeoTubs* gtub);
+    static std::unique_ptr<CylinderVolumeBounds> convert(const GeoTubs* gtub);
 
     /** Convert a tube */
-    static CylinderVolumeBounds* convert(const GeoTube* gtub);
+    static std::unique_ptr<CylinderVolumeBounds> convert(const GeoTube* gtub);
 
     /** Convert a Polygon into a CylinderVolume -> smooth it*/
-    static CylinderVolumeBounds* convert(const GeoPcon* gtub,
-                                         std::vector<double>& zbounds);
+    static std::unique_ptr<CylinderVolumeBounds> convert(
+        const GeoPcon* gtub, std::vector<double>& zbounds);
 
     /** Convert a Box */
-    static CuboidVolumeBounds* convert(const GeoBox* gbox);
+    static std::unique_ptr<CuboidVolumeBounds> convert(const GeoBox* gbox);
 
     /** Convert an arbitrary GeoShape into Trk::Volume */
-    Volume* translateGeoShape(const GeoShape*, Amg::Transform3D*) const;
+    std::unique_ptr<Volume> translateGeoShape(
+        const GeoShape* shape, const Amg::Transform3D& trf) const;
 
     /** Decode and dump arbitrary GeoShape for visual inspection */
     void decodeShape(const GeoShape*) const;

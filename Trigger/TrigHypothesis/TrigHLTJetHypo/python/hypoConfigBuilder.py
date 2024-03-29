@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 
@@ -15,6 +15,10 @@ from TrigHLTJetHypo.prefilter_mask import prefilter_mask
 from TrigHLTJetHypo.prefilter_ptrange import prefilter_ptrange
 from TrigHLTJetHypo.prefilter_maxmult import prefilter_maxmult
 from TrigHLTJetHypo.prefilter_clean import prefilter_clean
+
+from TrigHLTJetHypo.hypoToolDisplay import hypoToolDisplay
+
+
 
 from TrigHLTJetHypo.makeConditionFilterConfigurer import (
     makeConditionFilterConfigurer,
@@ -360,6 +364,8 @@ def getLabelIndices(chain_dict):
 
 def  hypotool_from_chaindict(chain_dict, visit_debug=False):
 
+    toolfactory.reset()
+
     if visit_debug:
         fn = chain_dict['chainName'] + '_chaindict.log'
         from pprint import pprint
@@ -395,6 +401,9 @@ def  hypotool_from_chaindict(chain_dict, visit_debug=False):
     hypo_tool = toolclass(**args)
     hypo_tool.visit_debug = visit_debug
 
+    if (visit_debug):
+        hypoToolDisplay(hypo_tool,
+                        do_dot=True)
         
     return hypo_tool
 
