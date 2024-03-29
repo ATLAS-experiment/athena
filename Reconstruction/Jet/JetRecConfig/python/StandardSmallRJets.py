@@ -88,8 +88,23 @@ AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                lock = True
 )
 
+AntiKt4EMPFlow_noElectrons = JetDefinition("AntiKt",0.4,cst.GPFlow_noElectrons,
+                                    ghostdefs = standardghosts+flavourghosts,
+                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr"),
+                                    lock = True
+)
 
+AntiKt4EMPFlow_noMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_noMuons,
+                                    ghostdefs = standardghosts+flavourghosts,
+                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr"),
+                                    lock = True
+)
 
+AntiKt4EMPFlow_noLeptons = JetDefinition("AntiKt",0.4,cst.GPFlow_noLeptons,
+                                    ghostdefs = standardghosts+flavourghosts,
+                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr"),
+                                    lock = True
+)
 
 AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
                               ghostdefs = standardghosts+flavourghosts, 

@@ -8,6 +8,7 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 
 #include "xAODEgamma/Electron.h"
+#include "xAODEgamma/EgammaxAODHelpers.h" 
 #include "xAODMuon/Muon.h"
 #include "xAODPFlow/FlowElement.h"
 #include "xAODPFlow/FlowElementAuxContainer.h"
@@ -18,10 +19,18 @@ StatusCode JetPFlowSelectionAlg::initialize() {
 
   ATH_CHECK(m_ChargedPFlowContainerKey.initialize());
   ATH_CHECK(m_NeutralPFlowContainerKey.initialize());
+  if (!m_electronContainerKey.empty()) {
+    ATH_CHECK(m_electronContainerKey.initialize());
+  }
   ATH_CHECK(m_outputChargedPFlowHandleKey.initialize());
   ATH_CHECK(m_outputNeutralPFlowHandleKey.initialize());
   ATH_CHECK(m_chargedFEElectronsReadDecorKey.initialize());
-  ATH_CHECK(m_chargedFEMuonsReadDecorKey.initialize());  
+  ATH_CHECK(m_chargedFEMuonsReadDecorKey.initialize());
+  ATH_CHECK(m_neutralFEMuons_efrac_match_DecorKey.initialize());
+  ATH_CHECK(m_neutralFEElectronsReadDecorKey.initialize());
+  ATH_CHECK(m_neutralFEMuonsReadDecorKey.initialize());
+  ATH_CHECK(m_chargedFE_energy_match_muonReadHandleKey.initialize());
+
 
   return StatusCode::SUCCESS;
 }
@@ -53,6 +62,18 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
+  SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector< ElementLink<xAOD::ElectronContainer> > > neutralFE_ElectronLinks(m_neutralFEElectronsReadDecorKey,ctx);
+  if (!neutralFE_ElectronLinks.isValid()){
+    ATH_MSG_ERROR("Can't retrieve input decoration "<< neutralFE_ElectronLinks.key());                  
+    return StatusCode::FAILURE;
+  }
+
+  SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector< ElementLink<xAOD::MuonContainer> > > neutralFE_MuonLinks(m_neutralFEMuonsReadDecorKey,ctx);
+  if (!neutralFE_MuonLinks.isValid()){
+    ATH_MSG_ERROR("Can't retrieve input decoration "<< neutralFE_MuonLinks.key());                  
+    return StatusCode::FAILURE;
+  }
+
   auto selectedChargedPFlowObjects = std::make_unique<xAOD::FlowElementContainer>(); // SG::VIEW_ELEMENTS
   auto selectedChargedPFlowObjectsAux = std::make_unique<xAOD::FlowElementAuxContainer>();
   selectedChargedPFlowObjects->setStore(selectedChargedPFlowObjectsAux.get());
@@ -68,7 +89,7 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   for ( const xAOD::FlowElement* fe : *ChargedPFlowObjects ) {
 
     // Select FE object if not matched to an electron or muon via links
-    if ( !checkLeptonLinks(chargedFE_ElectronLinks(*fe), chargedFE_MuonLinks(*fe)) ){
+    if ( !checkElectronLinks(chargedFE_ElectronLinks(*fe)) && !checkMuonLinks(chargedFE_MuonLinks(*fe)) ){
       xAOD::FlowElement* selectedFE = new xAOD::FlowElement();
       selectedChargedPFlowObjects->push_back(selectedFE);
       *selectedFE = *fe; // copies auxdata
@@ -83,12 +104,28 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   // Loop over Neutral FE objects
   for ( const xAOD::FlowElement* fe : *NeutralPFlowObjects ) {
 
+    //if links to an electron, then we veto entire neutral FE    
+    if (m_removeNeutralElectronFE){
+      if (checkElectronLinks(neutralFE_ElectronLinks(*fe))) continue;
+    }
+
     xAOD::FlowElement* selectedFE = new xAOD::FlowElement();
     selectedNeutralPFlowObjects->push_back(selectedFE);
     *selectedFE = *fe;
 
-  } // End loop over Neutral FE Objects
+    //if links to a muon, then we need to subtract off the muon energy in 
+    //this calorimeter cluster
+    if (m_removeNeutralMuonFE && checkMuonLinks(neutralFE_MuonLinks(*fe))){
+        SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector<double> > clusterMuonEnergyFracs(m_neutralFEMuons_efrac_match_DecorKey,ctx); 
+        double totalMuonCaloEnergy = 0.0;         
+        for (auto energy : clusterMuonEnergyFracs(*fe) ) totalMuonCaloEnergy += energy;
+        TLorentzVector newP4;
+        newP4.SetPxPyPzE(fe->p4().Px(),fe->p4().Py(),fe->p4().Pz(),fe->e() - totalMuonCaloEnergy);
+        selectedFE->setP4(newP4);
+    }
 
+
+  } // End loop over Neutral FE Objects
 
   // Add the energy from removed charged FE clusters to neutral FE object 
   // if shared clusters exist, create the new neutral FE object otherwise
@@ -139,10 +176,46 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
       // Ignore topoclusters with nullptr
       if ( !thisCluster_matched && theCluster_charged ){
 
+        //check if charged cluster belongs to an electron, before we put it back as neutral        
+        bool belongsToElectron = false;
+        if (m_removeNeutralElectronFE){
+
+          //get container index of charged cluster and compare to indices of electron topoclusters
+          unsigned int chargedClusterIndex = theCluster_charged->index();
+
+          SG::ReadHandle<xAOD::ElectronContainer> electronReadHandle(m_electronContainerKey,ctx);
+          if (!electronReadHandle.isValid()){
+            ATH_MSG_ERROR("Can't retrieve electron container "<< m_electronContainerKey.key());                  
+            return StatusCode::FAILURE;
+          }
+
+          for (auto thisElectron : *electronReadHandle){
+            const std::vector<const xAOD::CaloCluster*> electronTopoClusters = xAOD::EgammaHelpers::getAssociatedTopoClusters(thisElectron->caloCluster());
+            for (auto thisElectronTopoCluster : electronTopoClusters){
+              if (thisElectronTopoCluster->index() == chargedClusterIndex){
+                belongsToElectron = true;                
+                break;
+              }
+            }
+          }
+        }
+
+        if (belongsToElectron) continue;
+
+        bool belongsToMuon = false;
+        double muonCaloEnergy = 0.0;
+        if (m_removeNeutralMuonFE){          
+          SG::ReadDecorHandle<xAOD::FlowElementContainer, std::vector<double> > chargedFE_energy_match_muonReadHandle(m_chargedFE_energy_match_muonReadHandleKey,ctx);
+          std::vector<double> muonCaloEnergies = chargedFE_energy_match_muonReadHandle(*chargedFE);
+          muonCaloEnergy = muonCaloEnergies[iCluster];
+        }
+
+        if (belongsToMuon) continue;
+
         xAOD::FlowElement* newFE = new xAOD::FlowElement();
         selectedNeutralPFlowObjects->push_back(newFE);
 
-        newFE->setP4(theClusterWeight_charged / cosh(theCluster_charged->eta()),  // using energy from charged FE weight, not cluster->e()
+        newFE->setP4((theClusterWeight_charged - muonCaloEnergy) / cosh(theCluster_charged->eta()),  // using energy from charged FE weight, not cluster->e()
                     theCluster_charged->eta(),
                     theCluster_charged->phi(),
                     theCluster_charged->m());
@@ -194,11 +267,10 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
-bool JetPFlowSelectionAlg::checkLeptonLinks(const std::vector < ElementLink< xAOD::ElectronContainer > >& chargedFE_ElectronLinks,
-					    const std::vector < ElementLink< xAOD::MuonContainer > >& chargedFE_MuonLinks) const {
+bool JetPFlowSelectionAlg::checkElectronLinks(const std::vector < ElementLink< xAOD::ElectronContainer > >& FE_ElectronLinks) const{
 
   // Links to electrons
-  for (const ElementLink<xAOD::ElectronContainer>& ElectronLink: chargedFE_ElectronLinks){
+  for (const ElementLink<xAOD::ElectronContainer>& ElectronLink: FE_ElectronLinks){
     if (!ElectronLink.isValid()){
       ATH_MSG_WARNING("JetPFlowSelectionAlg encountered an invalid electron element link. Skipping. ");
       continue; 
@@ -216,9 +288,14 @@ bool JetPFlowSelectionAlg::checkLeptonLinks(const std::vector < ElementLink< xAO
       return true;
     }
   }
-  
+
+  return false;
+}
+
+bool JetPFlowSelectionAlg::checkMuonLinks(const std::vector < ElementLink< xAOD::MuonContainer > >& FE_MuonLinks) const{
+
   // Links to muons
-  for (const ElementLink<xAOD::MuonContainer>& MuonLink: chargedFE_MuonLinks){
+  for (const ElementLink<xAOD::MuonContainer>& MuonLink: FE_MuonLinks){
     if (!MuonLink.isValid()){
       ATH_MSG_WARNING("JetPFlowSelectionAlg encountered an invalid muon element link. Skipping. ");
       continue; 
@@ -227,7 +304,13 @@ bool JetPFlowSelectionAlg::checkLeptonLinks(const std::vector < ElementLink< xAO
     //Details of medium muons are here:
     //https://twiki.cern.ch/twiki/bin/view/Atlas/MuonSelectionTool
     const xAOD::Muon* muon = *MuonLink;
-    if ( muon->quality() <= xAOD::Muon::Medium && muon->muonType() == xAOD::Muon::Combined ){
+    xAOD::Muon::Quality quality = xAOD::Muon::VeryLoose;
+
+    if (m_muonID == "Loose")  quality = xAOD::Muon::Loose;
+    else if (m_muonID == "Medium") quality = xAOD::Muon::Medium;
+    else if (m_muonID == "Tight")  quality = xAOD::Muon::Tight;
+
+    if ( muon->quality() <= quality && muon->muonType() == xAOD::Muon::Combined ){
       return true;
     }    
   }

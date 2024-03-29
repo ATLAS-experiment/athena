@@ -342,16 +342,11 @@ const {
 
     for (auto thisFECell : *FECellLinks){
         Identifier FECellID = thisFECell->ID();
-        ATH_MSG_VERBOSE("FE Cell with ID: " << FECellID.get_identifier32().get_compact() << " and energy: " << thisFECell->e());
         for (auto thisMuonCell : *muonCellLinks){
             Identifier muonCellID = thisMuonCell->ID();
-            ATH_MSG_VERBOSE("Muon Cell with ID: " << muonCellID.get_identifier32().get_compact() << " and energy: " << thisMuonCell->e());
             if (muonCellID == FECellID){
                 isCellMatched = true;
-                ATH_MSG_VERBOSE("MAtched cell found");
-                ATH_MSG_VERBOSE("FE cell energy: " << thisFECell->e() << " and muon cell energy: " << thisMuonCell->e());
                 FE_matchedCellEnergy += thisFECell->e();
-                ATH_MSG_VERBOSE("FE matched cell energy: " << FE_matchedCellEnergy);
                 muon_matchedCellEnergy += thisMuonCell->e();
             }//if FE cell is also a muon cell
         }//loop on muon cells

@@ -581,10 +581,9 @@ def getConstitModAlg(parentjetdef, constitSeq, monTool=None):
         modlist.append(tool)
 
     sequenceshort = "".join(sequence)
-    seqname = "ConstitMod{0}_{1}".format(sequenceshort,constitSeq.name)
+    seqname = "ConstitMod{0}_{1}".format(sequenceshort,constitSeq.name)    
     inputcontainer = str(constitSeq.inputname)
     outputcontainer = str(constitSeq.containername)
-
 
     if (inputtype == xAODType.FlowElement or inputtype == xAODType.ParticleFlow):
         # Tweak PF names because ConstModSequence needs to work with
@@ -596,7 +595,6 @@ def getConstitModAlg(parentjetdef, constitSeq, monTool=None):
             return thestring
         inputcontainer = chopPFO(inputcontainer)
         outputcontainer = chopPFO(outputcontainer)
-
 
     doByVertex = constitSeq.byVertex
 
