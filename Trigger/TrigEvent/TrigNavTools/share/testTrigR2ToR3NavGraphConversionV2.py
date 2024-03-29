@@ -47,7 +47,8 @@ TriggerAPI.setConfigFlags(flags)
 chains = list(TriggerAPI.getAllHLT(TriggerPeriod.y2018).keys())
 
 # these are cases to debug further
-# chains= ["HLT_g45_tight_L1EM22VHI_xe45noL1"] 
+#chains= ["HLT_g45_tight_L1EM22VHI_xe45noL1"] 
+
 from TrigNavTools.NavConverterConfig import NavConverterCfg
 cfg.merge(NavConverterCfg(flags, chainsList=chains))
 
@@ -56,6 +57,14 @@ from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 from TileGeoModel.TileGMConfig import TileGMCfg
 cfg.merge(LArGMCfg(flags))
 cfg.merge(TileGMCfg(flags))
+
+# enable to get the navigation graphs *.dot files
+# from TrigValAlgs.TrigValAlgsConfig import TrigEDMCheckerCfg
+# cfg.merge(TrigEDMCheckerCfg(flags, doDumpAll=False))
+# cfg.getEventAlgo("TrigEDMChecker").doDumpTrigCompsiteNavigation=True
+
+
+
 msg = cfg.getService('MessageSvc'); 
 msg.debugLimit=0
 msg.infoLimit=0 

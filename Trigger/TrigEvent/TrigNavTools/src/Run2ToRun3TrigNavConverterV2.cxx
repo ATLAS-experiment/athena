@@ -266,11 +266,14 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   }
 
   ATH_CHECK(mirrorTEsStructure(convProxies, *run2NavigationPtr));
+  // printProxies(convProxies, [](auto ){ return true;},
+  //             {m_chainIdsPrinter});
 
   if (m_doSelfValidation)
     ATH_CHECK(allProxiesConnected(convProxies));
 
   ATH_CHECK(associateChainsToProxies(convProxies, m_allTEIdsToChains));
+
   ATH_CHECK(cureUnassociatedProxies(convProxies));
   ATH_MSG_DEBUG("Proxies to chains mapping done");
 
@@ -314,6 +317,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   ATH_CHECK(linkTrkNode(convProxies, *run2NavigationPtr));
   ATH_CHECK(createSFNodes(convProxies, *decisionOutput, m_finalTEIdsToChains, context));
   ATH_MSG_DEBUG("Conversion done, from " << convProxies.size() << " elements to " << decisionOutput->size() << " elements");
+
+  // printProxies(convProxies, [](auto ){ return true;},
+  //             {m_chainIdsPrinter, m_teIDPrinter});
 
   // dispose temporaries
   for (auto proxy : convProxies)
