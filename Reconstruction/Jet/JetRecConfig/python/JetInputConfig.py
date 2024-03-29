@@ -95,6 +95,41 @@ def buildPFlowSel(parentjetdef, spec):
                                               NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects"
                                              )
 
+def buildPFlowSel_noElectrons(parentjetdef,spec):
+    return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_noElectrons",
+                                              electronID = "LHMedium",
+                                              ElectronInputContainer="Electrons",
+                                              removeNeutralElectronFE=True,
+                                              ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
+                                              NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
+                                              ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_noElectrons",
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects_noElectrons"
+                                             )
+
+def buildPFlowSel_noMuons(parentjetdef,spec):
+    return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_noMuons",
+                                              electronID = "LHMedium",                                              
+                                              muonID = "Medium",
+                                              removeNeutralMuonFE=True,
+                                              ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
+                                              NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
+                                              ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_noMuons",
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects_noMuons"
+                                             )
+
+def buildPFlowSel_noLeptons(parentjetdef,spec):
+    return  CompFactory.JetPFlowSelectionAlg( "pflowselalg_noLeptons",
+                                              electronID = "LHMedium",   
+                                              ElectronInputContainer="Electrons",
+                                              removeNeutralElectronFE=True,                                           
+                                              muonID = "Medium",
+                                              removeNeutralMuonFE=True,
+                                              ChargedPFlowInputContainer  = "JetETMissChargedParticleFlowObjects",
+                                              NeutralPFlowInputContainer  = "JetETMissNeutralParticleFlowObjects",
+                                              ChargedPFlowOutputContainer = "GlobalChargedParticleFlowObjects_noLeptons",
+                                              NeutralPFlowOutputContainer = "GlobalNeutralParticleFlowObjects_noLeptons"
+                                             )
+
 ########################################################################
 
 def buildEventShapeAlg(jetOrConstitdef, inputspec, voronoiRf = 0.9, radius = 0.4, suffix = None ):

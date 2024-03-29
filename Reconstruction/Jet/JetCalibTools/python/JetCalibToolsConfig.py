@@ -77,6 +77,9 @@ af2configs = {
 calibcontexts = {
     # Standard AntiKt4
     "AntiKt4EMPFlow":pflowcontexts,
+    "AntiKt4EMPFlow_noElectrons":pflowcontexts,
+    "AntiKt4EMPFlow_noMuons":pflowcontexts,
+    "AntiKt4EMPFlow_noLeptons":pflowcontexts,
     "AntiKt4EMPFlowByVertex":pflowcontexts,
     "AntiKt4GPFlow":pflowcontexts,
     "AntiKt4UFOCSSK":ufocontexts,
@@ -96,7 +99,7 @@ calibcontexts = {
 
 }
 
-hasInSitu = ["AntiKt4LCTopo", "AntiKt4EMTopo", "AntiKt4EMPFlow", "TrigAntiKt4EMTopo"]
+hasInSitu = ["AntiKt4LCTopo", "AntiKt4EMTopo", "AntiKt4EMPFlow", "AntiKt4EMPFlow_noElectrons", "AntiKt4EMPFlow_noMuons", "AntiKt4EMPFlow_noLeptons", "TrigAntiKt4EMTopo"]
 
 # This method extracts the relevant configuration, does some consistency checks,
 # then forwards the configuration to defineJetCalibTool, returning the output.
@@ -155,6 +158,12 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
         _jetcollection = jetcollection
         if "PFlow" in jetcollection and (context=="TrigSoftDrop" or context=="TrigHLTSoftDrop"):
             _jetcollection = jetcollection.replace("EMPFlow","UFO")
+        if "_noElectrons" in jetcollection :
+            _jetcollection = _jetcollection.replace("_noElectrons","")
+        if "_noMuons" in jetcollection :
+            _jetcollection = _jetcollection.replace("_noMuons","")
+        if "_noLeptons" in jetcollection :
+            _jetcollection = _jetcollection.replace("_noLeptons","")
 
         if "ByVertex" in jetcollection:
             _jetcollection = jetcollection.replace("ByVertex","")

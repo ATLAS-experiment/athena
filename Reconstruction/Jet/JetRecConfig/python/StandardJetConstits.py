@@ -111,6 +111,21 @@ _stdInputList = [
                      algoBuilder = inputcfg.buildPFlowSel,
                      prereqs = ["input:JetETMissParticleFlowObjects", ],
                      ),
+
+    JetInputExternal("GlobalParticleFlowObjects_noElectrons", xAODType.FlowElement,
+                        algoBuilder = inputcfg.buildPFlowSel_noElectrons,
+                        prereqs = ["input:JetETMissParticleFlowObjects", ],
+                        ),
+
+    JetInputExternal("GlobalParticleFlowObjects_noMuons", xAODType.FlowElement,
+                        algoBuilder = inputcfg.buildPFlowSel_noMuons,
+                        prereqs = ["input:JetETMissParticleFlowObjects", ],
+                        ),            
+
+    JetInputExternal("GlobalParticleFlowObjects_noLeptons", xAODType.FlowElement,
+                        algoBuilder = inputcfg.buildPFlowSel_noLeptons,
+                        prereqs = ["input:JetETMissParticleFlowObjects", ],
+                        ),
     
     # *****************************
     JetInputExternal("InDetTrackParticles",   xAODType.TrackParticle,
@@ -319,6 +334,15 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
                        label='EMPFlow'),
     
+    JetInputConstitSeq("GPFlow_noElectrons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noElectrons', 'CHSGParticleFlowObjects_noElectrons',
+                       label='EMPFlow_noElectrons'),
+
+    JetInputConstitSeq("GPFlow_noMuons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noMuons', 'CHSGParticleFlowObjects_noMuons',
+                       label='EMPFlow_noMuons'),
+
+    JetInputConstitSeq("GPFlow_noLeptons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noLeptons', 'CHSGParticleFlowObjects_noLeptons',
+                       label='EMPFlow_noLeptons'),
+
     # Particle Flow Objects with several neutral PFO copies for by-vertex reconstruction
     JetInputConstitSeq("GPFlowByVtx", xAODType.FlowElement, ["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSByVtxGParticleFlowObjects',
                        label='EMPFlowByVertex', byVertex=True),
