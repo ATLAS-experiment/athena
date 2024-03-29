@@ -45,6 +45,8 @@ class jFEXCondAlgo : public AthReentrantAlgorithm {
 
         UnsignedIntegerProperty m_dbBeginTimestamp {this,"BeginTimestamp", 1698527690,"Earliest timestamp that db parameters will be loaded. Default is start of 2023-10-27"};
 
+	Gaudi::Property<bool> m_isMC {this, "IsMC", false, "For MC, always access the DB"};
+
 };
 
 
