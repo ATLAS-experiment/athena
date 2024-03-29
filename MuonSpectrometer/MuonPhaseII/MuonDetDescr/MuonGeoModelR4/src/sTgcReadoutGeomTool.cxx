@@ -178,7 +178,9 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         define.stripLayers.push_back(std::move(stripLayer));
         if (!define.stripDesign) define.stripDesign = stripDesign; 
         ///Pads
-        double beamlineRadius = define.physVol->getAbsoluteTransform().translation().perp();
+        /// defining frameOffset to correct the beamlineRadius
+        double frameOffset = -0.5 * (paramBook.lFrameWidth - paramBook.sFrameWidth);
+        double beamlineRadius = frameOffset + define.physVol->getAbsoluteTransform().translation().perp();
         padDesign->defineBeamlineRadius(beamlineRadius);
         ATH_MSG_DEBUG("The beamline radius is: " << beamlineRadius);
         StripLayer padLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), padDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Pad, 0));
@@ -288,6 +290,8 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.sPadLength = record->getDouble("sPadWidth");
 
         parBook.gasTck = record->getDouble("gasTck");
+        parBook.lFrameWidth = record->getDouble("ylFrame");
+        parBook.sFrameWidth = record->getDouble("ysFrame");
 
         ATH_MSG_ALWAYS("Parameters of the chamber " << key << " are: "
                         << " numStrips: " << parBook.numStrips
@@ -311,7 +315,9 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
                         << " firstPadPhiDivision: " << parBook.firstPadPhiDivision
                         << " lPadLength: " << parBook.lPadLength
                         << " sPadLength: " << parBook.sPadLength
-                        << " gasGapTck: " << parBook.gasTck);
+                        << " gasGapTck: " << parBook.gasTck
+                        << " lFrameWidth: " << parBook.lFrameWidth
+                        << " sFrameWidth: " << parBook.sFrameWidth);
     }
     return StatusCode::SUCCESS;
 }

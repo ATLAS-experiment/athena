@@ -149,29 +149,22 @@ Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& mea
       return Amg::Vector2D::Zero();
    }
 }
+
 Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    unsigned int gasGap = gasGapNumber(measHash);
-   if (chType(measHash) == ReadoutChannelType::Strip && gasGap < m_pars.stripLayers.size()) {
-      return localToGlobalTrans(ctx, lHash) * m_pars.stripLayers[gasGap].localStripPos(channelNumber(measHash));
+   if((chType(measHash) < ReadoutChannelType::Pad || chType(measHash) > ReadoutChannelType::Wire) && gasGap < m_pars.padLayers.size()) {
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The channel type "<<chType(measHash)
+                  <<"with the layer hash "<<layIdx<<" is invalid. Maximum range "<<m_pars.stripLayers.size());
+         return Amg::Vector3D::Zero();
    }
-   else if (chType(measHash) == ReadoutChannelType::Wire && gasGap < m_pars.wireGroupLayers.size()) {
-      Amg::Vector3D wireGrPos{Amg::Vector3D::Zero()};
-      Amg::Vector2D localWireGroup = localChannelPosition(measHash);
-      wireGrPos.block<2,1>(0,0) = std::move(localWireGroup);
-      return localToGlobalTrans(ctx, lHash) * wireGrPos;
-   }
-   else if (chType(measHash) == ReadoutChannelType::Pad && gasGap < m_pars.padLayers.size()) {
-      Amg::Vector3D padPos{Amg::Vector3D::Zero()};
-      Amg::Vector2D localPad = localChannelPosition(measHash);
-      padPos.block<2,1>(0,0) = std::move(localPad);
-      return localToGlobalTrans(ctx, lHash) * padPos;
-   }
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
-   return Amg::Vector3D::Zero();
+   Amg::Vector3D channelPos{Amg::Vector3D::Zero()};
+   Amg::Vector2D localChannel = localChannelPosition(measHash);
+   channelPos.block<2,1>(0,0) = std::move(localChannel);
+   return localToGlobalTrans(ctx, lHash) * channelPos;
 }
+
 using localCornerArray = std::array<Amg::Vector2D, 4>;
 using globalCornerArray = std::array<Amg::Vector3D, 4>;
 globalCornerArray sTgcReadoutElement::globalPadCorners(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {

@@ -95,12 +95,19 @@ namespace MuonGMR4{
         double cosRight = botBase / std::hypot(botRightPoint, botBase);
         double cosLeft = botBase / std::hypot(botLeftPoint, botBase);
         /// Adjusting the four corners of the pads for staggering in x direction w.r.t. the chamber origin
-        /// Outer edges of the trapezoid do not undergo staggering. Hence the if condition.
-        if (padPhi > 1 && padPhi < numPadPhi()) {
-            botLeftPoint += padPhiShift() * cosLeft;
-            botRightPoint += padPhiShift() * cosRight;
-            topLeftPoint += padPhiShift() * cosLeft;
-            topRightPoint += padPhiShift() * cosRight;
+        botLeftPoint += padPhiShift() * cosLeft;
+        botRightPoint += padPhiShift() * cosRight;
+        topLeftPoint += padPhiShift() * cosLeft;
+        topRightPoint += padPhiShift() * cosRight;
+        /// Outer edges of the trapezoid do not undergo staggering. Hence the if conditions.
+        double adjHeight = /*yCutout()? 2 * halfWidth() - yCutout() :*/ 2 * halfWidth();
+        if(padPhi == 1) {
+            botRightPoint = shortHalfHeight() + ((longHalfHeight() - shortHalfHeight()) * (botEdge - maxBottom) / adjHeight);
+            topRightPoint = shortHalfHeight() + ((longHalfHeight() - shortHalfHeight()) * (topEdge - maxBottom) / adjHeight);
+        }
+        if(padPhi == numPadPhi()) {
+            botLeftPoint = -shortHalfHeight() - ((longHalfHeight() - shortHalfHeight()) * (botEdge - maxBottom) / adjHeight);
+            topLeftPoint = -shortHalfHeight() - ((longHalfHeight() - shortHalfHeight()) * (topEdge - maxBottom) / adjHeight);
         }
         /// Adjusting the outer edges of the pads in diamond chambers (QL3)
         /// There are pads in the outer columns that may contain five vertices when the topEdge of the pad is above the

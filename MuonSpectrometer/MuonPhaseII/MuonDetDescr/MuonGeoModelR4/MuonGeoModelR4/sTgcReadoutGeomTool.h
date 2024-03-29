@@ -66,6 +66,8 @@ class sTgcReadoutGeomTool : public AthAlgTool,
       double sPadLength{0.};
 
       double gasTck{0.}; //gasTck
+      double lFrameWidth{0.}; //ylFrame
+      double sFrameWidth{0.}; //ysFrame
     };
 
     struct FactoryCache {
