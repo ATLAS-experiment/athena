@@ -24,6 +24,7 @@
 #include "TrigConfHLTUtils/HLTUtils.h"
 
 // STL includes
+#include <regex>
 #include <string>
 #include <set>
 #include <map>
@@ -177,6 +178,11 @@ private:
   CLID m_CaloClusterContainerCLID{0};
   CLID m_TrackParticleContainerCLID{0};
   CLID m_TauTrackContainerCLID{0};
+
+  // config hacks patterns
+  std::regex m_gammaXeChain{"HLT_g.*_xe.*"};
+  std::regex m_gammaXeChainGammaTE{"EF_g.*"};
+
 };
 
 #endif // TRIGNAVTOOLS_RUN2TORUN3TRIGNAVCONVERTERV2_H

@@ -19,6 +19,7 @@ namespace {
             ret.emplace(combination.begin(), combination.end());
         return ret;
     }
+
 }
 
 namespace xAOD {
@@ -93,6 +94,12 @@ namespace Trig {
             auto combsRun3 = vectorToSet(vecCombinationsRun3);
             ATH_MSG_DEBUG("Run 3 size " << combsRun3.size());
 
+            if (combinationsEmpty(vecCombinationsRun2) and combinationsEmpty(vecCombinationsRun3)) {
+                ATH_MSG_DEBUG("Both, Run2 and Run3 combinations are effectively empty");
+                continue;
+            }
+
+
             for (auto& c : combsRun3 ) {
                 ATH_MSG_DEBUG(c);
             }
@@ -116,6 +123,7 @@ namespace Trig {
         }
         return StatusCode::SUCCESS;
     }
+
     StatusCode NavigationTesterAlg::verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const {
         if (run2.size() > run3.size()) { // in Run3 we do not use decision per RoI but per object. For single RoI there is more than one object we will have more combinations in Run3
             ATH_MSG_WARNING("Issue in combination sizes for chain " << chain  
@@ -179,6 +187,13 @@ namespace Trig {
             }
         }
         return StatusCode::SUCCESS;
+    }
+
+    bool NavigationTesterAlg::combinationsEmpty(const CombinationsVector& combs) const {
+        size_t counter = 0;
+        for ( auto outerc: combs ) 
+            counter += outerc.size();
+        return counter == 0;
     }
 
 } //> end namespace Trig

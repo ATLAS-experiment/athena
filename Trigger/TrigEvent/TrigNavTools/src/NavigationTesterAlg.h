@@ -42,6 +42,7 @@ namespace Trig {
         using CombinationsSet=std::set<std::set<const xAOD::IParticle *>>;
         StatusCode verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const;
         StatusCode verifyCombinationsContent(const CombinationsSet& run2, const CombinationsSet& run3, const std::string& chain) const;
+        bool combinationsEmpty(const CombinationsVector& combs) const;
 
     }; //> end class AthAlgorithm
 }

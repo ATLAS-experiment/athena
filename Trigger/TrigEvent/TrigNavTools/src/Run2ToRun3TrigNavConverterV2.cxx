@@ -5,6 +5,7 @@
 #include <boost/functional/hash.hpp>
 #include <GaudiKernel/StatusCode.h>
 #include "AthLinks/ElementLinkVector.h"
+#include "TrigConfHLTUtils/HLTUtils.h"
 #include "xAODTrigger/TrigPassBitsContainer.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
@@ -190,7 +191,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
     m_setRoiName.push_back(name);
   }
 
-  // sanity check, i.e. if there is at least one entry w/o the coll name no other enties are needed for a given clid
+  // sanity check, i.e. if there is at least one entry w/o the coll name no other entries are needed for a given clid
   for (auto [clid, keysSet] : m_collectionsToSaveDecoded)
   {
     if (keysSet.size() > 1 and keysSet.count("") != 0)
@@ -198,6 +199,22 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
       ATH_MSG_ERROR("Bad configuration for CLID " << clid << " reuested saving of all (empty coll name configures) collections, yet there are also specific keys");
       return StatusCode::FAILURE;
     }
+
+  }
+  
+  bool anyChainBad=false;
+  for ( auto chain: m_chainsToSave ) {
+    if ( chain.find('*') != std::string::npos or chain.find('|') != std::string::npos ) {
+      ATH_MSG_ERROR("Supplied chain name: " << chain << " contains wildcard characters, this is not supported by the conversion tool");
+      anyChainBad=true;
+    }
+  }
+  if ( anyChainBad ) {
+    ATH_MSG_ERROR("Supplied chain names contain wildcard characters, this is not supported by the conversion tool");
+    return StatusCode::FAILURE;
+  }
+  if ( m_chainsToSave.empty() ) {
+    ATH_MSG_INFO("No chains list supplied, the conversion will occur for all chains");
   }
 
   ATH_CHECK(m_clidSvc->getIDOfTypeName("TrigRoiDescriptor", m_roIDescriptorCLID));
@@ -330,10 +347,22 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
       for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
       {
         unsigned int teId = ptrHLTTE->id();
-        allTEs[teId].insert(chainId);
+        allTEs[teId].insert(chainId);  
+
         if (ptrHLTSignature == ptrChain->signatures().back())
         {
-          finalTEs[teId].insert(chainId);
+          // this is dirty code code to fix issues originating from Run2 config
+          // case 1: gamma + L1 un-seed xe chains need only a single final TE for accessing photons
+          if (std::regex_match(chainName, m_gammaXeChain) and false ) {
+            if ( std::regex_match(ptrHLTTE->name(), m_gammaXeChainGammaTE) ) { // only gamma TE matters
+              finalTEs[teId].insert(chainId);
+              ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " gamma xe chain " << chainName );
+            }
+          } else {
+            finalTEs[teId].insert(chainId);
+            ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
+
+          }
         }
       }
     }
