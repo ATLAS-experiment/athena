@@ -66,7 +66,7 @@ StatusCode TrigDisappearingTrackHypoAlg::initialize()
       const std::string tuningVer  = "v21a";
       const std::string weightfile = PathResolver::find_calib_file(
          "TrigDisappearingTrackTriggerHypo/pix4l_sct0.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_INFO( "opening weightfile for Pix4l_SCT0 = " << weightfile );
+      ATH_MSG_DEBUG( "opening weightfile for Pix4l_SCT0 = " << weightfile );
       reader.tmva->BookMVA(methodName, weightfile);
    }
 
@@ -89,7 +89,7 @@ StatusCode TrigDisappearingTrackHypoAlg::initialize()
       const std::string tuningVer  = "v21b"; // "b" only for this category
       const std::string weightfile = PathResolver::find_calib_file(
          "TrigDisappearingTrackTriggerHypo/pix4l_sct1p.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_INFO( "opening weightfile for Pix4l_SCT1p = " << weightfile );
+      ATH_MSG_DEBUG( "opening weightfile for Pix4l_SCT1p = " << weightfile );
       reader.tmva->BookMVA(methodName, weightfile);
    }
 
@@ -112,7 +112,7 @@ StatusCode TrigDisappearingTrackHypoAlg::initialize()
       const std::string tuningVer  = "v21a";
       const std::string weightfile = PathResolver::find_calib_file(
          "TrigDisappearingTrackTriggerHypo/pix3l_sct0.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_INFO( "opening weightfile for Pix3l_SCT0 = " << weightfile );
+      ATH_MSG_DEBUG( "opening weightfile for Pix3l_SCT0 = " << weightfile );
       reader.tmva->BookMVA(methodName, weightfile);
    }
 
@@ -138,7 +138,7 @@ StatusCode TrigDisappearingTrackHypoAlg::initialize()
       const std::string tuningVer  = "v21a";
       const std::string weightfile = PathResolver::find_calib_file(
          "TrigDisappearingTrackTriggerHypo/pix3l_sct1p.BDT.weights." + tuningVer + ".xml");
-      ATH_MSG_INFO( "opening weightfile for Pix3l_SCT1p = " << weightfile );
+      ATH_MSG_DEBUG( "opening weightfile for Pix3l_SCT1p = " << weightfile );
       reader.tmva->BookMVA(methodName, weightfile);
    }
 

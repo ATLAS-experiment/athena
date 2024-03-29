@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,16 +34,13 @@ class MuonInertMaterialBuilderCond final : public MuonInertMaterialBuilderImpl {
     virtual StatusCode initialize() override;
 
     /** Method returning cloned and positioned material objects */
-    std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
-    buildDetachedTrackingVolumes(
-        const EventContext& ctx,
-        SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
-        bool blend = false) const;
+    DetachedVolVec buildDetachedTrackingVolumes(const EventContext& ctx, 
+                                                SG::WriteCondHandle<Trk::TrackingGeometry>& whandle, 
+                                                bool blend = false) const;
 
    private:
-    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrReadKey{
-        this, "MuonMgrReadKey", "MuonDetectorManager",
-        "Key of input MuonDetectorMgr"};
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrReadKey{this, "MuonMgrReadKey", "MuonDetectorManager",
+                                                                        "Key of input MuonDetectorMgr"};
 };
 
 }  // namespace Muon

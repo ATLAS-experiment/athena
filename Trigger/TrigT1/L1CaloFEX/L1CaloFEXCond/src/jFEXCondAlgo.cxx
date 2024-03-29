@@ -52,9 +52,11 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
 
-    // Date from which jFEX database parameters should be used
+    // Date from which jFEX database parameters should be used (MC should always use DB)
     // PU fix: 2023-10-27
     bool validTimeStamp = (ctx.eventID().time_stamp() < m_dbBeginTimestamp) ? false : true;
+    if (m_isMC)
+      validTimeStamp = true;
 
     // Set DB to false if any of keys not provided
     bool anyKeyEmpty = ( m_JfexModuleSettingsKey.empty() ||  m_JfexNoiseCutsKey.empty() || m_JfexSystemSettingsKey.empty() );
@@ -182,7 +184,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
                     }
                 }
                 catch(uint16_t errTower) {
-                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID:"<<errTower <<". Some towers are not used anymore. Skipping");
+                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID A:"<<errTower <<". Some towers are not used anymore. Skipping");
                 }
             }
         }
@@ -268,7 +270,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
                     }
                 }
                 catch(uint16_t errTower) {
-                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID:"<<errTower <<". Some towers are not used anymore. Skipping");
+                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID B:"<<errTower <<". Some towers are not used anymore. Skipping");
                     NoiseCuts[ (uint16_t) itr->first ] = {0, 0, 0, 0};
                 }
 
@@ -289,7 +291,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
                     }
                 }
                 catch(uint16_t errTower) {
-                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID:"<<errTower <<". Some towers are not used anymore. Skipping");
+                    ATH_MSG_DEBUG("Loading Pileup values for jFEX ID C:"<<errTower <<". Some towers are not used anymore. Skipping");
                     PileUpWeight[ (uint16_t) itr->first ] = {0, 0, 0, 0};
                 }
             }
@@ -327,7 +329,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
 
         for(int mod=0; mod<6; mod++) {
             myprint << "jFEX"<<mod<<" - ";
-            for(int range=0; range<9; range++) {
+            for(int range=0; range<25; range++) {
                 myprint << writeDBTool->get_jJCalibParam(mod,range)<< " ";
             }
             myprint << std::endl;

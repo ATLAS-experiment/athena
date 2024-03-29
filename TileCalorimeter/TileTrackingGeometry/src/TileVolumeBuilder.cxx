@@ -249,7 +249,7 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) con
       ATH_MSG_VERBOSE( "  Child: " << childLogVol->getName() << " has shape  " << childShape->type() );
       
       const GeoTubs* currentTubs  = dynamic_cast<const GeoTubs*>(childShape);
-      Trk::CylinderVolumeBounds* childCylVolBounds = currentTubs ? Trk::GeoShapeConverter::convert(currentTubs) : nullptr;
+      Trk::CylinderVolumeBounds* childCylVolBounds = currentTubs ? Trk::GeoShapeConverter::convert(currentTubs).release() : nullptr;
       // get the transform
       GeoTrf::Transform3D childTransform = currentVPhysVolLink->getXToChildVol(ichild);
       double childZposition = childTransform.translation().z();

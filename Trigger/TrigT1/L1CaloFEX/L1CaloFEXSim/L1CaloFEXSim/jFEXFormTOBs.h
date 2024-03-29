@@ -43,6 +43,8 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
         /** Internal data */
     private:
 
+	Gaudi::Property<bool> m_isMC {this, "IsMC", false, "For MC, always access the DB"};
+
         int Get_calibrated_SRj_ET(int, int, const std::vector<int>& );
         int Get_eta_calibrated_SRj_ET(int, int, unsigned int, int,  const std::vector<int>& );
         

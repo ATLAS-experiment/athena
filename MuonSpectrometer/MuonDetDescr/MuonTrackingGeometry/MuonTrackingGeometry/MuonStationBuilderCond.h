@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKINGGEOMETRY_MUONSTATIONBUILDERCOND_H
@@ -27,12 +27,10 @@ class MuonStationBuilderCond final
     virtual ~MuonStationBuilderCond() = default;
     virtual StatusCode initialize() override;
 
-    virtual std::unique_ptr<
-        std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-    buildDetachedTrackingVolumes(
-        const EventContext& ctx,
-        SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
-        bool blend = false) const override;
+    virtual DetachedVolumeVec 
+          buildDetachedTrackingVolumes(const EventContext& ctx,
+                                       SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
+                                       bool blend = false) const override;
 
    private:
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrReadKey{

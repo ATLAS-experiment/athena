@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Instantiator for AlgTools needed by the FastReduction."""
 
@@ -82,6 +82,12 @@ class FastReductionAlgToolFactory:
         self.tool_factories[key][1] += 1
         return klass, name
 
+    def reset(self):
+        """Reset all creation counts to 0"""
+
+        for v in self.tool_factories.values():
+            v[1] = 0
+             
     
     def __str__(self):
         wid = max(len(k) for k in self.tool_factories.keys())

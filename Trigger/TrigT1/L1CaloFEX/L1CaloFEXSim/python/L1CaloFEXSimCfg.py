@@ -77,6 +77,9 @@ def TriggerTowersInputCfg(flags):
 def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, outputSuffix="", simulateAltTau=False):
     from AthenaConfiguration.Enums import Format
 
+    if not simulateAltTau and flags.DQ.Environment == "tier0":
+        simulateAltTau = True # require alt RoI at tier0 while validating new BDT alg against heuristic
+
     acc = ComponentAccumulator()
 
     log = logging.getLogger('L1CaloFEXSimCfg')
@@ -191,6 +194,12 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
         acc.addEventAlgo(jFEXInputs)
         acc.addEventAlgo(jFEX)
+
+        # database reading in MC
+        jFEXCondAlg = acc.getCondAlgo("jFEXCondAlgo")
+        jFEXCondAlg.IsMC = flags.Input.isMC
+        jFEXFormTOBsTool = CompFactory.LVL1.jFEXFormTOBs('jFEXFormTOBs')
+        jFEXFormTOBsTool.IsMC = flags.Input.isMC
 
     if flags.Trigger.L1.dogFex:
 
