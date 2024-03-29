@@ -5,6 +5,7 @@
 #include "MdtEtaTransformTester.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "GeoModelHelpers/throwExcept.h"
 #include "TCanvas.h"
 #include "TLine.h"
 #include "TArrow.h"
@@ -57,7 +58,6 @@ namespace MuonValR4 {
         SG::ReadCondHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, context};
         ATH_CHECK(gctxHandle.isValid());
         const ActsGeometryContext& gctx{**gctxHandle};
-
         // retrieve the two input collections
 
         auto simHitCollections = m_inSimHitKeys.makeHandles(context);
@@ -329,7 +329,7 @@ namespace MuonValR4 {
             mrk->SetMarkerColor(kOrange-3); 
             mrk->Draw();
             primitives.emplace_back(std::move(mrk));
-            auto trajectory = std::make_unique<TArrow>( foundMax->getY(), 0., foundMax->getY() +  0.3 * frameWidth * m_out_max_tantheta.getVariable(), 0.3 * frameWidth);
+            auto trajectory = std::make_unique<TArrow>( foundMax->getY(), 0., foundMax->getY() +  0.3 * frameWidth * foundMax->getX(), 0.3 * frameWidth);
             trajectory->SetLineColor(kOrange-3); 
             trajectory->Draw();
             primitives.push_back(std::move(trajectory));
