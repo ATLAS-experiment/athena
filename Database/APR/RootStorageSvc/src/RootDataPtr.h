@@ -43,14 +43,14 @@ namespace pool  {
     DbBlob*                  blob;
     DbPointer*               pointer;
     RootDataPtr(const void* p)  { cptr = p;                   }
-    void* deref()               { return *pptr;               }
-    const char* string()        { return str->c_str();        }
-    int* ibuffer()              { return tlinks->m_buffer;    }
-    int  isize()                { return tlinks->m_size;      }
-    int  blobSize()             { return blob->buffPointer(); }
-    char* blobData()            { return blob->data();        }
-    int  linkSize()             { return int(links->size());  }
-    long long* linkData()             { return links->size()>0 ? &(links->begin()->first) : 0; }
+    void*        deref()        { return *pptr;               }
+    std::string* string()       { return str;                 }
+    int*         ibuffer()      { return tlinks->m_buffer;    }
+    int          isize()        { return tlinks->m_size;      }
+    int          blobSize()     { return blob->buffPointer(); }
+    char*        blobData()     { return blob->data();        }
+    int          linkSize()     { return int(links->size());  }
+    long long*   linkData()     { return links->size()>0 ? &(links->begin()->first) : 0; }
   };
 }       // end namespace pool
 #endif  /* POOL_ROOTSTORAGESVC_ROOTDB_PTR_H */

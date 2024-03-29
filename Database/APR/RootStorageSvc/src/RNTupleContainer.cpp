@@ -73,6 +73,7 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
   switch (tid) {
     case DbColumn::STRING:
     case DbColumn::LONG_STRING:
+    case DbColumn::NTCHAR:
     case DbColumn::TOKEN:
       return "std::string";
       break;
@@ -157,8 +158,7 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          m_fieldDescs.emplace_back(*col);
          FieldDesc& dsc = m_fieldDescs.back();
          dsc.fieldname = fieldName.empty() ? col->name() : fieldName;
-         dsc.sgkey = dsc.fieldname;  // remember the original name (usually coming
-         // from SG Key)
+         dsc.sgkey = dsc.fieldname;  // remember the original name (usually coming from SG Key)
          for (auto& c : dsc.fieldname)
             if (!std::isalnum(c)) c = '_';
          if (dsc.typeID() == DbColumn::BLOB or dsc.typeID() == DbColumn::ANY or
@@ -320,9 +320,13 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
           p.ptr                 = dsc.object;
           break;
        case DbColumn::STRING:
+       case DbColumn::LONG_STRING:
+          dsc.str.clear();  // just to be on the safe side
+          // p.ptr is pointing to std::string already
+          break;
        case DbColumn::NTCHAR:
        case DbColumn::TOKEN:
-          // copy char* to a string buffer
+          // copy char* to the string buffer dsc.str and make p.ptr point to it
           dsc.str = p.c_str;
           p.ptr = &dsc.str;
           break;
