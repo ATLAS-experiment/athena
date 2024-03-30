@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrkEventTPCnv/test/TrackCnv_p4_test.cxx
@@ -11,7 +11,7 @@
 #undef NDEBUG
 #include "TrkEventTPCnv/TrkTrack/TrackCnv_p4.h"
 #include "TrkTrackSummary/TrackSummary.h"
-#include "TrkEventTPCnv/TrackCollectionCnv_tlp5.h"
+#include "TrkEventTopLevelCnv/TrackCollectionCnv_tlp7.h"
 #include "TestTools/FLOATassert.h"
 #include "GaudiKernel/MsgStream.h"
 #include "TestTools/leakcheck.h"
@@ -211,7 +211,7 @@ void testit (const Trk::Track& trans1)
 {
   MsgStream log (nullptr, "test");
   TrackCnv_p4 cnv;
-  TrackCollectionCnv_tlp5 tlcnv;
+  TrackCollectionCnv_tlp7 tlcnv;
   cnv.setTopConverter (&tlcnv, TPObjRef::typeID_t());
   Trk::Track_p4 pers;
   cnv.transToPers (&trans1, &pers, log);
@@ -221,9 +221,10 @@ void testit (const Trk::Track& trans1)
 }
 
 
-void test1 ATLAS_NOT_THREAD_SAFE ()
+//Test a Global Chi2 fitter like track
+void testGX2 ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test1\n";
+  std::cout << "testGX2\n";
   Athena_test::Leakcheck check;
 
   AmgSymMatrix(5) cov;
@@ -264,9 +265,56 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   testit (trans1);
 }
 
+//Test a Gaussian Sum Filter fitter like track
+void testGSF ATLAS_NOT_THREAD_SAFE ()
+{
+  std::cout << "testGSF\n";
+  Athena_test::Leakcheck check;
+
+  AmgSymMatrix(5) cov;
+  for (int i=0; i < 5; i++)
+    for (int j=0; j < 5; j++)
+      cov(i,j) = 100*(i+1)*(j+1);
+
+  Trk::PerigeeSurface psurf (Amg::Vector3D (50, 100, 150));
+  Trk::LocalParameters parms1 (1.5, 2.5, 3.5, 4.5, 5.5);
+  Trk::PseudoMeasurementOnTrack pmeas (Trk::LocalParameters(parms1), Amg::MatrixX(cov), psurf);
+  Trk::Perigee perigee (100, 200, 1.5, 0.5, 1e-3, psurf, std::nullopt);
+  Trk::FitQuality fq (10, 20);
+  Trk::MaterialEffectsOnTrack me (12.5, psurf);
+
+  auto tsvec = std::make_unique<MultiComponentStateOnSurfaceDV>(SG::OWN_ELEMENTS);
+  auto mtsos1 = std::make_unique<Trk::MultiComponentStateOnSurface>(
+      fq,
+      std::make_unique<Trk::PseudoMeasurementOnTrack>(pmeas),
+      std::make_unique<Trk::Perigee>(perigee),
+      Trk::MultiComponentState{},
+      std::make_unique<Trk::MaterialEffectsOnTrack>(me));
+  tsvec->push_back(std::move(mtsos1));
+
+  std::bitset<Trk::TrackInfo::NumberOfTrackProperties> properties;
+  std::bitset<Trk::TrackInfo::NumberOfTrackRecoInfo> patrec;
+  properties[0] = true;
+  properties[2] = true;
+  properties[3] = true;
+  patrec[1] = true;
+  patrec[3] = true;
+  Trk::TrackInfo info (Trk::TrackInfo::GaussianSumFilter,
+                       Trk::electron,
+                       properties,
+                       patrec);
+
+  Trk::Track trans1 (info,
+                     std::move(tsvec),
+                     std::make_unique<Trk::FitQuality>(fq));
+  testit (trans1);
+}
+
+
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
-  test1();
+  testGX2();
+  testGSF();
   return 0;
 }
