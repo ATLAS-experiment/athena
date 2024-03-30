@@ -102,7 +102,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                     if(std::regex_match(leg[j], topo_rgx)) continue; // Remove HLT topo sections, not part of the L1 item
 
                     // L1Topo items (they all include a "-" in the name, or have a separate "##DETA/PHI##_" prefix):
-                    if(leg[j].find("-") != std::string::npos || std::regex_match(leg[j], l1_toposeparate_rgx)) {
+                    if(leg[j].find('-') != std::string::npos || std::regex_match(leg[j], l1_toposeparate_rgx)) {
                         // We only keep information from the legacy L1Topo item, from which we will not always use all thresholds
                         // Since we won't be adding any more Legacy thresholds, let's hard-code it...
                         if(leg[0] == "L1TAU60" && leg[j] == "DR-TAU12ITAU12I") leg[j] = "TAU12IM"; // L1_TAU60_DR-TAU20ITAU12I, uses "TAU12IM" threshold from the L1Topo item
