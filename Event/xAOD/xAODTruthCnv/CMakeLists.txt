@@ -25,6 +25,5 @@ atlas_add_dictionary( xAODTruthCnvDict
    LINK_LIBRARIES xAODTruthCnvLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/*jobOptions.py )
 atlas_install_scripts( scripts/dumpTruth.py  )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
