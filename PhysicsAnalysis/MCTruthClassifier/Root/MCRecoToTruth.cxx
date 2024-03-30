@@ -20,8 +20,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TrackParticle* trkPtr, MC
   return particleTruthClassifier(genPart, info);
 }
 
-// Not const due to ITruthParticlesInConeTool::particlesInCone
-// called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
@@ -30,11 +28,15 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPa
   ParticleOrigin partorig = NonDefined;
   const xAOD::TruthParticle* genPart = nullptr;
   const xAOD::TrackParticle* trkPtr = elec->trackParticle();
-  if (elec->author() != xAOD::EgammaParameters::AuthorFwdElectron || trkPtr) { // Central electron or forward electron with track (when reco implemented in the future)
-    if (!trkPtr) return std::make_pair(parttype, partorig);
+  if (elec->author() != xAOD::EgammaParameters::AuthorFwdElectron ||trkPtr) {
+    // Central electron or forward electron with track (when reco
+    // implemented in the future)
+    if (!trkPtr){
+      return std::make_pair(parttype, partorig);
+    }
     genPart = getGenPart(trkPtr);
   } else {
-#ifndef XAOD_ANALYSIS // Fwd electron available only in Athena
+#ifndef XAOD_ANALYSIS // cluster matching available only in Athena
     const xAOD::CaloCluster* clus = elec->caloCluster();
     genPart = egammaClusMatch(clus, true, info);
 #else
@@ -48,8 +50,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Electron* elec, MCTruthPa
   return particleTruthClassifier(genPart, info);
 }
 
-// Not const due to ITruthParticlesInConeTool::particlesInCone
-// called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
@@ -110,8 +110,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClas
   return particleTruthClassifier(genPart, info);
 }
 
-// Not const due to ITruthParticlesInConeTool::particlesInCone
-// called via egammaClusMatch.
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, MCTruthPartClassifier::Info* info /*= nullptr*/) const
 {
@@ -146,7 +144,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
   constituents.clear();
   findJetConstituents(jet, constituents, DR);
   // AV: Jet type is the type of hadron with "heaviest" flavour among the jet constituents.
-  // AV: No hadrons in the jet -- the flavour is unknown. 
+  // AV: No hadrons in the jet -- the flavour is unknown.
   // AV: The algorithm will fail on 4/5 quark hadrons and probably on nonBSM hadrons. To be fixed.
   for (const auto& thePart: constituents) {
     MC::findAllJetMothers(thePart, allJetMothers);
@@ -154,7 +152,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
     if (thePart->status() == 3) continue;
     // determine if hadron and its type
     tempparttype = particleTruthClassifier(thePart, info).first;
-    if (tempparttype != Hadron) continue; 
+    if (tempparttype != Hadron) continue;
     tempparttype = defTypeOfHadron(thePart->pdgId());
     // classify the jet
     if (tempparttype == BBbarMesonPart || tempparttype == BottomMesonPart || tempparttype == BottomBaryonPart) {
@@ -164,11 +162,11 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, MCTrut
     if (tempparttype == CCbarMesonPart || tempparttype == CharmedMesonPart || tempparttype == CharmedBaryonPart) {
       if (parttype != BJet) parttype = CJet;
       continue;
-    } 
+    }
     if (tempparttype == StrangeBaryonPart || tempparttype == LightBaryonPart || tempparttype == StrangeMesonPart || tempparttype == LightMesonPart) {
       if (parttype != BJet && parttype != CJet) parttype = LJet;
       continue;
-    } 
+    }
   }
 
   // clasify the jet origin
