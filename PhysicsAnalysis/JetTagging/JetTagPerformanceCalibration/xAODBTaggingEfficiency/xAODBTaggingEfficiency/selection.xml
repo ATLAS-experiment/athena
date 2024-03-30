@@ -1,7 +1,7 @@
-<!-- $Id: selection.xml 742367 2016-04-23 09:53:26Z krasznaa $ -->
 <lcgdict>
   <class name="BTaggingEfficiencyTool" />
   <class name="BTaggingSelectionTool" />
   <class name="BTaggingTruthTaggingTool" />
   <class name="BTaggingEigenVectorRecompositionTool" />
+  <class name="BTaggingSelectionJsonTool" />
 </lcgdict>

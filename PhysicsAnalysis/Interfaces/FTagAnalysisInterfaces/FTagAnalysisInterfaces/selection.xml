@@ -2,6 +2,7 @@
   <!-- Requested dictionary generation -->
   <class name="IBTaggingEfficiencyTool" />
   <class name="IBTaggingSelectionTool" />
-   <class name="IBTaggingTruthTaggingTool" />
-   <class name="IBTaggingEigenVectorRecompositionTool" />
+  <class name="IBTaggingTruthTaggingTool" />
+  <class name="IBTaggingEigenVectorRecompositionTool" />
+  <class name="IBTaggingSelectionJsonTool" />
 </lcgdict>

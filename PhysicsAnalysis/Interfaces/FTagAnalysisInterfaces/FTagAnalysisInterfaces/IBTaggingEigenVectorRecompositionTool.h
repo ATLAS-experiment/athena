@@ -1,12 +1,7 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// IBTaggingEfficiencyTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 /**
 @class BTaggingEigenVectorRecompositionTool
 Tool to help retrieving(from CDI) and providing coefficents values which

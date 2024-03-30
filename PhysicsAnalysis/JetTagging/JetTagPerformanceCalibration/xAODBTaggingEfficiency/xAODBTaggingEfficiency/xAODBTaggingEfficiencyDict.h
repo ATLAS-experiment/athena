@@ -2,7 +2,6 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: xAODBTaggingEfficiencyDict.h 742367 2016-04-23 09:53:26Z krasznaa $
 #ifndef XAODBTAGGINGEFFICIENCY_XAODBTAGGINGEFFICIENCYDICT_H
 #define XAODBTAGGINGEFFICIENCY_XAODBTAGGINGEFFICIENCYDICT_H
 
@@ -13,6 +12,7 @@
 
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyTool.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
+#include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
 #include "xAODBTaggingEfficiency/BTaggingTruthTaggingTool.h"
 #include "xAODBTaggingEfficiency/BTaggingEigenVectorRecompositionTool.h"
 #endif // XAODBTAGGINGEFFICIENCY_XAODBTAGGINGEFFICIENCYDICT_H
