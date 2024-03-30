@@ -81,7 +81,6 @@ InDetPerfPlot_HitResidual::initializePlots() {
   //
   ////SCT and TRT do not have y-residuals/pulls
   // introduce cluster width histograms
-
   book(m_etaWidth.at(PIXEL).at(BARREL), "clusterEtaWidth_pixel_barrel");
   book(m_etaWidth.at(PIXEL).at(ENDCAP), "clusterEtaWidth_pixel_endcap");
   book(m_phiWidth.at(PIXEL).at(BARREL), "clusterPhiWidth_pixel_barrel");
@@ -94,6 +93,35 @@ InDetPerfPlot_HitResidual::initializePlots() {
   book(m_etaWidthEta.at(PIXEL), "clusterEtaWidth_eta_pixel");
   //
   book(m_phiWidthEta.at(SCT), "clusterPhiWidth_eta_sct");
+
+  // additional histograms booked if high detail level is specified
+  // all additional histograms for residuals, pull and cluster size vs eta
+  if(m_iDetailLevel > 200) {
+    book(m_residualx_eta.at(L0PIXBARR).at(BARREL), "residualx_l0pix_barrel_eta");
+    book(m_residualx_eta.at(PIXEL).at(BARREL), "residualx_pixel_barrel_eta");
+    book(m_residualx_eta.at(SCT).at(BARREL), "residualx_sct_barrel_eta");
+    book(m_residualx_eta.at(PIXEL).at(ENDCAP), "residualx_pixel_endcap_eta");
+    book(m_residualx_eta.at(SCT).at(ENDCAP), "residualx_sct_endcap_eta");
+    book(m_residualy_eta.at(L0PIXBARR).at(BARREL), "residualy_l0pix_barrel_eta");
+    book(m_residualy_eta.at(PIXEL).at(BARREL), "residualy_pixel_barrel_eta");
+    book(m_residualy_eta.at(PIXEL).at(ENDCAP), "residualy_pixel_endcap_eta");
+    book(m_pullx_eta.at(L0PIXBARR).at(BARREL), "pullx_l0pix_barrel_eta");
+    book(m_pullx_eta.at(PIXEL).at(BARREL), "pullx_pixel_barrel_eta");
+    book(m_pullx_eta.at(SCT).at(BARREL), "pullx_sct_barrel_eta");
+    book(m_pullx_eta.at(PIXEL).at(ENDCAP), "pullx_pixel_endcap_eta");
+    book(m_pullx_eta.at(SCT).at(ENDCAP), "pullx_sct_endcap_eta");
+    book(m_pully_eta.at(L0PIXBARR).at(BARREL), "pully_l0pix_barrel_eta");
+    book(m_pully_eta.at(PIXEL).at(BARREL), "pully_pixel_barrel_eta");
+    book(m_pully_eta.at(PIXEL).at(ENDCAP), "pully_pixel_endcap_eta");
+    book(m_phiWidth_eta.at(L0PIXBARR).at(BARREL), "clusterPhiWidth_l0pix_barrel_eta");
+    book(m_phiWidth_eta.at(PIXEL).at(BARREL), "clusterPhiWidth_pixel_barrel_eta");
+    book(m_phiWidth_eta.at(SCT).at(BARREL), "clusterPhiWidth_sct_barrel_eta");
+    book(m_phiWidth_eta.at(PIXEL).at(ENDCAP), "clusterPhiWidth_pixel_endcap_eta");
+    book(m_phiWidth_eta.at(SCT).at(ENDCAP), "clusterPhiWidth_sct_endcap_eta");
+    book(m_etaWidth_eta.at(L0PIXBARR).at(BARREL), "clusterEtaWidth_l0pix_barrel_eta");
+    book(m_etaWidth_eta.at(PIXEL).at(BARREL), "clusterEtaWidth_pixel_barrel_eta");
+    book(m_etaWidth_eta.at(PIXEL).at(ENDCAP), "clusterEtaWidth_pixel_endcap_eta");
+  }
 }
 
 
@@ -153,13 +181,26 @@ InDetPerfPlot_HitResidual::fill(const xAOD::TrackParticle& trkprt, float weight)
           fillHisto(m_etaWidthEta.at(det), eta, etaWidth, weight);
 
           fillHisto(m_residualx.at(det).at(region), residualLocX, weight);
+
+          if(m_iDetailLevel > 200) {
+            fillHisto(m_phiWidth_eta.at(det).at(region), eta, width, weight);
+            fillHisto(m_etaWidth_eta.at(det).at(region), eta, etaWidth, weight);
+            fillHisto(m_residualx_eta.at(det).at(region), eta, residualLocX, weight);
+          }
+
           const bool hasYCoordinate = (det != SCT)and(det != TRT); // SCT & TRT do not have LocY
+          fillHisto(m_pullx.at(det).at(region), pullLocX, weight);
+          if(m_iDetailLevel > 200)
+            fillHisto(m_pullx_eta.at(det).at(region), eta, pullLocX, weight);
+
+          // SCT & TRT do not have LocY
           if (hasYCoordinate) {
             fillHisto(m_residualy.at(det).at(region), residualLocY, weight);
-          }
-          fillHisto(m_pullx.at(det).at(region), pullLocX, weight);
-          if (hasYCoordinate) { // SCT & TRT do not have LocY
             fillHisto(m_pully.at(det).at(region), pullLocY, weight);
+            if(m_iDetailLevel > 200) {
+              fillHisto(m_residualy_eta.at(det).at(region), eta, residualLocY, weight);
+              fillHisto(m_pully_eta.at(det).at(region), eta, pullLocY, weight);
+            }
           }
           if ((det == TRT) or (width < 0)) {
             continue;

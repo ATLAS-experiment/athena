@@ -497,6 +497,24 @@
   <x title="x residual(#mum)" n="1200" lo="-600" hi="600"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="residualx_l0pix_barrel_eta" type="TH2F" title="Residual: &L0PixBarr; X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x residual(#mum)" n="100" lo="-100.0" hi="100.0"/>
+  <z title="Entries"/>
+</h>
+<h id="residualx_pixel_barrel_eta" type="TH2F" title="Residual: Pixel Barrel X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x residual(#mum)" n="100" lo="-100.0" hi="100.0"/>
+  <z title="Entries"/>
+</h>
+<h id="residualx_sct_barrel_eta" type="TH2F" title="Residual: SCT Barrel X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x residual(#mum)" n="1200" lo="-600" hi="600"/>
+  <z title="Entries"/>
+</h>
+
 <!-- endcaps -->
 <h id="residualx_pixel_endcap" type="TH1F" title="Residual: Pixel Endcap X">
   <x title="x residual(#mum)" n="100" lo="-100.0" hi="100.0"/>
@@ -522,6 +540,20 @@
   <x title="x residual(#mum)" n="1200" lo="-600" hi="600"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="residualx_pixel_endcap_eta" type="TH2F" title="Residual: Pixel Endcap X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x residual(#mum)" n="100" lo="-100.0" hi="100.0"/>
+  <z title="Entries"/>
+</h>
+<h id="residualx_sct_endcap_eta" type="TH2F" title="Residual: SCT Endcap X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x residual(#mum)" n="1200" lo="-600" hi="600"/>
+  <z title="Entries"/>
+</h>
+
+
 <!-- y residuals -->
 <!-- barrel -->
 <h id="residualy_l0pix_barrel" type="TH1F" title="Residual: &L0PixBarr; Y">
@@ -560,6 +592,20 @@
   <x title="y residual(#mum)" n="1200" lo="-600" hi="600"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="residualy_l0pix_barrel_eta" type="TH2F" title="Residual: &L0PixBarr; Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="y residual(#mum)" n="100" lo="-1000.0" hi="1000.0"/>
+  <z title="Entries"/>
+</h>
+
+<h id="residualy_pixel_barrel_eta" type="TH2F" title="Residual: Pixel Barrel Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="y residual(#mum)" n="100" lo="-1000.0" hi="1000.0"/>
+  <z title="Entries"/>
+</h>
+
 <!-- endcaps -->
 <h id="residualy_pixel_endcap" type="TH1F" title="Residual: Pixel Endcap Y">
   <x title="y residual(#mum)" n="100" lo="-1000.0" hi="1000.0"/>
@@ -573,6 +619,14 @@
   <x title="y residual(#mum)" n="100" lo="-1000.0" hi="1000.0"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="residualy_pixel_endcap_eta" type="TH2F" title="Residual: Pixel Endcap Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="y residual(#mum)" n="100" lo="-1000.0" hi="1000.0"/>
+  <z title="Entries"/>
+</h>
+
 <!-- pulls -->
 <!-- barrel, x -->
 <h id="pullx_l0pix_barrel" type="TH1F" title="Pull: B-Layer Barrel X">
@@ -587,6 +641,24 @@
   <x title="x pull" n="100" lo="-5" hi="5"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="pullx_l0pix_barrel_eta" type="TH2F" title="Pull: B-Layer Barrel X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+<h id="pullx_pixel_barrel_eta" type="TH2F" title="Pull: Pixel Barrel X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+<h id="pullx_sct_barrel_eta" type="TH2F" title="Pull: SCT Barrel X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+
 <!-- endcap, x -->
 <h id="pullx_pixel_endcap" type="TH1F" title="Pull: Pixel Endcap X">
   <x title="x pull" n="100" lo="-5" hi="5"/>
@@ -596,6 +668,19 @@
   <x title="x pull" n="100" lo="-5" hi="5"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="pullx_pixel_endcap_eta" type="TH2F" title="Pull: Pixel Endcap X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+<h id="pullx_sct_endcap_eta" type="TH2F" title="Pull: SCT Endcap X - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+
 <!-- barrel, y -->
 <h id="pully_l0pix_barrel" type="TH1F" title="Pull: B-Layer Barrel Y">
   <x title="y pull" n="100" lo="-5" hi="5"/>
@@ -609,6 +694,19 @@
   <x title="y pull" n="10" lo="-5" hi="5"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="pully_l0pix_barrel_eta" type="TH2F" title="Pull: B-Layer Barrel Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+<h id="pully_pixel_barrel_eta" type="TH2F" title="Pull: Pixel Barrel Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+
 <!-- endcap,y -->
 <h id="pully_pixel_endcap" type="TH1F" title="Pull: Pixel Endcap Y">
   <x title="y pull" n="100" lo="-5" hi="5"/>
@@ -618,6 +716,14 @@
   <x title="y pull" n="10" lo="-5" hi="5"/>
   <y title="Entries"/>
 </h>
+
+<!-- as a function of eta -->
+<h id="pully_pixel_endcap_eta" type="TH2F" title="Pull: Pixel Endcap Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="x pull" n="100" lo="-5" hi="5"/>
+  <z title="Entries"/>
+</h>
+
 <!-- cluster width plots -->
 <h id="clusterPhiWidth_pixel_barrel" type="TH1F" title="Cluster width in phi: Pixel Barrel">
   <x title="Pixels" n="10" lo="0" hi="10"/>
@@ -655,6 +761,52 @@
   <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
   <y title="Cluster width in eta"/>
 </h>
+
+<!-- as a function of eta -->
+
+<h id="clusterPhiWidth_l0pix_barrel_eta" type="TH2F" title="Cluster width in phi: B-Layer - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Pixels" n="10" lo="0" hi="10"/>
+  <z title="Entries"/>
+</h>
+<h id="clusterEtaWidth_l0pix_barrel_eta" type="TH2F" title="Cluster width in eta: B-Layer - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Pixels" n="20" lo="0" hi="20"/>
+  <z title="Entries"/>
+</h>
+<h id="clusterPhiWidth_pixel_barrel_eta" type="TH2F" title="Cluster width in phi: Pixel Barrel - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Pixels" n="10" lo="0" hi="10"/>
+  <z title="Entries"/>
+</h>
+<h id="clusterPhiWidth_pixel_endcap_eta" type="TH2F" title="Cluster width in phi: Pixel Endcap - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Pixels" n="10" lo="0" hi="10"/>
+  <z title="Entries"/>
+</h>
+<h id="clusterEtaWidth_pixel_barrel_eta" type="TH2F" title="Cluster width in eta: Pixel Barrel - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Pixels" n="20" lo="0" hi="20"/>
+  <z title="Entries"/>
+</h>
+<h id="clusterEtaWidth_pixel_endcap_eta" type="TH2F" title="Cluster width in eta: Pixel Endcap - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Pixels" n="10" lo="0" hi="10"/>
+  <z title="Entries"/>
+</h>
+<h id="clusterPhiWidth_sct_barrel_eta" type="TH2F" title="Cluster width in phi: SCT Barrel - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="num. strips" n="10" lo="0" hi="10"/>
+  <z title="Entries"/>
+</h>
+<h id="clusterPhiWidth_sct_endcap_eta" type="TH2F" title="Cluster width in phi: SCT Endcap - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="num. strips" n="10" lo="0" hi="10"/>
+  <z title="Entries"/>
+</h>
+
+
+
 <!--
    =======================================================
    end of hit residuals & cluster width plots

@@ -52,15 +52,23 @@ private:
   std::vector<std::vector<TH1*>> m_residualx_1hit = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
   std::vector<std::vector<TH1*>> m_residualx_2ormorehits = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
   std::vector<std::vector<TH1*>> m_residualx = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH2*>> m_residualx_eta = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+
   //
   std::vector<std::vector<TH1*>> m_residualy_1hit = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
   std::vector<std::vector<TH1*>> m_residualy_2ormorehits = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
   std::vector<std::vector<TH1*>> m_residualy = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH2*>> m_residualy_eta = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
   //
   std::vector<std::vector<TH1*>> m_pullx = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
   std::vector<std::vector<TH1*>> m_pully = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH2*>> m_pullx_eta = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH2*>> m_pully_eta = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+
   std::vector<std::vector<TH1*>> m_phiWidth = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
   std::vector<std::vector<TH1*>> m_etaWidth = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH2*>> m_phiWidth_eta = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH2*>> m_etaWidth_eta = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
 
   std::vector<TProfile*> m_phiWidthEta = {N_SUBDETECTORS, nullptr};
   std::vector<TProfile*> m_etaWidthEta = {N_SUBDETECTORS, nullptr};
