@@ -1,12 +1,6 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// IBTaggingEfficiencyTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef CPIBTAGGINGEFFICIENCYTOOL_H
 #define CPIBTAGGINGEFFICIENCYTOOL_H
@@ -60,23 +54,9 @@ class IBTaggingEfficiencyTool : virtual public CP::ISystematicsTool {
               float & eff) = 0;
 
 
-/* uses onnx tool to get the efficiencies (fixed cut wp)
-  node_feat: input to the network that'll calculate the efficiencies, where each vector corresponds to set of variables associated with a jet
-  effAllJet: vector to be filled with efficiencies of all the jets
-  node_feat = {
-   {flav_jet1, pt_jet1, eta_jet1, phi_jet1, ...},
-   {flav_jet2, pt_jet2, eta_jet2, phi_jet2, ...},
-   ...
-  }
-  effAllJet = {eff_jet1, eff_jet2, ...}
-  */
+
   virtual CP::CorrectionCode getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& effAllJet) = 0;
 
-   /* uses onnx tool to get the efficiencies (continuous wp)
-  effAllJetAllWp = {
-   {eff_jet1_wp1, eff_jet1_wp2, ...},
-   {eff_jet2_wp1, eff_jet2_wp2, ...},
-  */ 
   virtual CP::CorrectionCode getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<std::vector<float>>& effAllJetAllWp) = 0;
 
 

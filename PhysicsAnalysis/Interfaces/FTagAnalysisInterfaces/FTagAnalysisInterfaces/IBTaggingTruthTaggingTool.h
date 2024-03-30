@@ -1,4 +1,3 @@
-// Dear emacs, this is -*- c++ -*-
 ///////////////////////////////////////////////////////////////////
 // IBTaggingTruthTaggingTool.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +16,6 @@
 
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 
-// xAOD jet
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/Jet.h"
 
@@ -42,14 +40,6 @@ class IBTaggingTruthTaggingTool : virtual public CP::ISystematicsTool {
     
   virtual StatusCode CalculateResults( const xAOD::JetContainer& jets, Analysis::TruthTagResults& results,int rand_seed=-1)=0;
 
-  /* will use onnx tool
-  node_feat: input to the network that'll calculate the efficiencies, where each vector corresponds to a set of variables associated with a jet
-  node_feat = {
-   {flav_jet1, pt_jet1, eta_jet1, phi_jet1, ...},
-   {flav_jet2, pt_jet2, eta_jet2, phi_jet2, ...},
-   ...
-  }
-  */
   virtual StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw,  Analysis::TruthTagResults& results, int rand_seed=-1)=0 ;
     
   virtual StatusCode CalculateResultsONNX( const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat, Analysis::TruthTagResults& results, int rand_seed=-1)=0;
