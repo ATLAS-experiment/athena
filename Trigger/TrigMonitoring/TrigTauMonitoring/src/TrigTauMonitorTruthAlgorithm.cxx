@@ -64,7 +64,7 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
 }
 
 
-StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<xAOD::TruthParticle> xTruthTau) const
+StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<xAOD::TruthParticle>& xTruthTau) const
 {
     if(!xTruthTau->hasDecayVtx()) return StatusCode::FAILURE;
 

@@ -20,7 +20,7 @@ private:
     std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::shared_ptr<xAOD::TruthParticle>>> getTruthTaus(const EventContext& ctx, const float threshold = 20.0) const;
 
     // Process truth tau object
-    StatusCode examineTruthTau(const std::shared_ptr<xAOD::TruthParticle> xTruthParticle) const;
+    StatusCode examineTruthTau(const std::shared_ptr<xAOD::TruthParticle>& xTruthParticle) const;
 
     virtual StatusCode processEvent(const EventContext& ctx) const override;
 

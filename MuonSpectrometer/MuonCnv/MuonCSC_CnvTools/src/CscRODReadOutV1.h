@@ -20,7 +20,7 @@ class CscRODReadOutV1 {
 public:
     CscRODReadOutV1();
     CscRODReadOutV1(double startTime, uint16_t samplingTime, double signalWidth, uint16_t numIntegration);
-    ~CscRODReadOutV1();
+    ~CscRODReadOutV1() = default;
 
     // more static header/footer information
     uint32_t getHeaderSize() { return ROD_HEADER_SIZE; }
@@ -72,7 +72,7 @@ public:
     void setAddress(const uint32_t address);
     Identifier decodeAddress(const Identifier& moduleId);
     Identifier decodeAddress(const Identifier& moduleId, int j);
-    int findCharge(std::vector<uint16_t> amplitude, double& time);
+    int findCharge(const std::vector<uint16_t>& amplitude, double& time);
     double signal_amplitude(double samplingTime) const;
     uint32_t address(const Identifier& channelId, int& eta, int& phi) const;
 

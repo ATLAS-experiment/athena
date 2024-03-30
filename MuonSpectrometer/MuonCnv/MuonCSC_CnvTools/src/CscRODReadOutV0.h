@@ -19,7 +19,7 @@
 class CscRODReadOutV0 {
 public:
     CscRODReadOutV0();
-    ~CscRODReadOutV0();
+    ~CscRODReadOutV0() = default;
 
     // get static head/footer information
     uint32_t getHeaderMarker() { return ROD_HEADER; }

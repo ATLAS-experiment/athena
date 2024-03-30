@@ -48,7 +48,7 @@ CscRODReadOutV0::CscRODReadOutV0() :
 }
 
 // destructor
-CscRODReadOutV0::~CscRODReadOutV0() = default;
+
 
 void CscRODReadOutV0::encodeFragments(const uint16_t* amplitude, const uint32_t& address, std::vector<uint32_t>& v) const {
     uint16_t amp[2] = {0, 0};

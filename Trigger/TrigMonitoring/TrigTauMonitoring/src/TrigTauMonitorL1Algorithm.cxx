@@ -54,7 +54,8 @@ StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) cons
             std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> rois = getL1cTAUs(ctx, info.getL1TauItem());
 
             std::vector<const xAOD::eFexTauRoI*> eTau_rois;
-            for(const auto& [eTau_roi, jTau_roi] : rois) eTau_rois.push_back(eTau_roi);
+            eTau_rois.reserve(rois.size());
+for(const auto& [eTau_roi, jTau_roi] : rois) eTau_rois.push_back(eTau_roi);
 
             if(m_do_variable_plots) fillL1cTauVars(trigger, rois);
 	    if(m_do_efficiency_plots) {
