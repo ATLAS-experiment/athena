@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <iostream>
@@ -47,8 +47,8 @@ int main ATLAS_NOT_THREAD_SAFE() {
           track2.trackStateOnSurfaces());
   std::cout << (multiStates->at(0) != nullptr) << '\n';
 
-  // Add to the TSOS vector
-  std::cout << "--> Add extra TSOS" << '\n';
+  // Manipulate TSOS
+  std::cout << "--> Adding extra TSOS" << '\n';
   auto* states = track1.trackStateOnSurfaces();
   std::cout << "Own Elements : " << (states->ownPolicy() == SG::OWN_ELEMENTS)
             << '\n';
@@ -63,7 +63,7 @@ int main ATLAS_NOT_THREAD_SAFE() {
             << '\n';
   std::cout << track1.trackStateOnSurfaces()->at(1)->fitQualityOnSurface()
             << '\n';
-  std::cout << "--> Modidy existing TSOS" << '\n';
+  std::cout << "--> Modify existing TSOS" << '\n';
   Trk::FitQuality fq2(25, 20);
   auto* TSOSMod = new Trk::TrackStateOnSurface(fq2, nullptr, nullptr, nullptr);
   track1.trackStateOnSurfaces()->at(0) = TSOSMod;
