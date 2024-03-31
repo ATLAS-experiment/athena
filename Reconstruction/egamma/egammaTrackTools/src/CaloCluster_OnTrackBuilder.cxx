@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCluster_OnTrackBuilder.h"
@@ -178,7 +178,7 @@ CaloCluster_OnTrackBuilder::getClusterLocalParameters(
       Trk::DefinedParameter qOverP(clusterQoverE, Trk::qOverP);
       defPar.push_back(qOverP);
     }
-    return Trk::LocalParameters(defPar);
+    return {defPar};
   }
   // Local paramters of a disk are
   // Trk::locR   = 0
@@ -201,7 +201,7 @@ CaloCluster_OnTrackBuilder::getClusterLocalParameters(
     defPar.push_back(qOverP);
   }
 
-  return Trk::LocalParameters(defPar);
+  return {defPar};
 }
 
 Amg::MatrixX
