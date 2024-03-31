@@ -59,9 +59,17 @@ public:
   // constructor
   MCTruthClassifier(const std::string& type)  : asg::AsgTool(type) {
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
-    declareProperty("FwdElectronUseG4Sel" , m_FwdElectronUseG4Sel = true, "Use Geant4 selection for forward electrons calo clusters");
-    declareProperty("FwdElectronTruthExtrEtaCut", m_FwdElectronTruthExtrEtaCut = 2.4, "Cut on the eta of the truth Particles to be extrapolated for Fwd electrons");
-    declareProperty("FwdElectronTruthExtrEtaWindowCut", m_FwdElectronTruthExtrEtaWindowCut = 0.15, "Cut on the delta eta of the truth Particles to be extrapolated for Fwd electrons and the current FwdElectron");
+    declareProperty("FwdElectronUseG4Sel", m_FwdElectronUseG4Sel = true,
+                    "Use Geant4 selection for forward electrons calo clusters");
+    declareProperty("FwdElectronTruthExtrEtaCut",
+                    m_FwdElectronTruthExtrEtaCut = 2.4,
+                    "Cut on the eta of the truth Particles to be extrapolated "
+                    "for Fwd electrons");
+    declareProperty(
+        "FwdElectronTruthExtrEtaWindowCut",
+        m_FwdElectronTruthExtrEtaWindowCut = 0.15,
+        "Cut on the delta eta of the truth Particles to be extrapolated for "
+        "Fwd electrons and the current FwdElectron");
     declareProperty("partExtrConePhi", m_partExtrConePhi = 0.4);
     declareProperty("partExtrConeEta", m_partExtrConeEta = 0.2);
     declareProperty("phtClasConePhi", m_phtClasConePhi = 0.05);
@@ -70,7 +78,7 @@ public:
     declareProperty("phtdRtoTrCut", m_phtdRtoTrCut = 0.1);
     declareProperty("fwrdEledRtoTrCut", m_fwrdEledRtoTrCut = 0.15);
     declareProperty("ROICone", m_ROICone = false);
-//AV: those below are needed in egammaClusMatch
+    //AV: those below are needed in egammaClusMatch
     declareProperty("pTChargePartCut", m_pTChargePartCut = 1.0);
     declareProperty("pTNeutralPartCut", m_pTNeutralPartCut = 0.);
     declareProperty("inclG4part", m_inclG4part = false);
@@ -81,7 +89,7 @@ public:
     declareProperty("NumOfSiHitsCut", m_NumOfSiHitsCut = 3);
     declareProperty("jetPartDRMatch", m_jetPartDRMatch = 0.4);
 #endif
-  } 
+  }
   virtual ~MCTruthClassifier()  = default ;
 
     // Gaudi algorithm hooks
@@ -111,7 +119,7 @@ public:
     }
 #endif
     return StatusCode::SUCCESS;
-  }  
+  }
   virtual StatusCode finalize()
 #ifndef XAOD_STANDALONE
     override
@@ -119,36 +127,36 @@ public:
   { return StatusCode::SUCCESS;}
 
   /* All get to see these*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::TruthParticle*,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   checkOrigOfBkgElec(const xAOD::TruthParticle* thePart,MCTruthPartClassifier::Info* info = nullptr) const override;
 
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const HepMcParticleLink& theLink,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(HepMC::ConstGenParticlePtr,MCTruthPartClassifier::Info* info = nullptr) const override;
 
 #endif
 
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::TrackParticle*,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::Electron*,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::Photon*,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::Muon*,MCTruthPartClassifier::Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::CaloCluster*,MCTruthPartClassifier::Info* info = nullptr) const override;
 
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
@@ -211,13 +219,13 @@ private:
 #endif
 
   /* Data members*/
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> 
+  SG::ReadHandleKey<xAOD::TruthParticleContainer>
   m_truthParticleContainerKey{this,"xAODTruthParticleContainerName","TruthParticles","ReadHandleKey for xAOD::TruthParticleContainer"};
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{this,"ParticleCaloExtensionTool",""};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager",""};
-  ToolHandle<xAOD::ITruthParticlesInConeTool> 
+  ToolHandle<xAOD::ITruthParticlesInConeTool>
   m_truthInConeTool{this,"TruthInConeTool","xAOD::TruthParticlesInConeTool/TruthParticlesInConeTool"};
 
   bool  m_FwdElectronUseG4Sel;
@@ -234,11 +242,11 @@ private:
 
   float m_pTChargePartCut;
   float m_pTNeutralPartCut;
-  bool m_inclG4part;  
+  bool m_inclG4part;
 #endif
 
 #ifndef XAOD_ANALYSIS
-  SG::ReadHandleKey<xAODTruthParticleLinkVector> 
+  SG::ReadHandleKey<xAODTruthParticleLinkVector>
   m_truthLinkVecReadHandleKey{this,"xAODTruthLinkVector","xAODTruthLinks", "ReadHandleKey for xAODTruthParticleLinkVector"};
 #endif
 #ifndef GENERATIONBASE
