@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -1109,5 +1109,5 @@ egammaLayerRecalibTool::create(const std::string& type, const std::string& args)
     if(amount_getter) delete  amount_getter;
   }
 
-  return std::pair<std::string, egammaLayerRecalibTool*>(name, tool);
+  return {name, tool};
 }

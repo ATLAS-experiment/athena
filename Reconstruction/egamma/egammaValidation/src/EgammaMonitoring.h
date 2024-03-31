@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef egammaValidation_EgammaMonitoring_H
@@ -214,8 +214,8 @@ private:
 
   int m_CenFwdOverlap[2] = { 0, 0 };
 
-  TH1D *m_dR1; //!
-  TH1D *m_dR2; //!
+  TH1D *m_dR1{}; //!
+  TH1D *m_dR2{}; //!
 };
 
 #endif

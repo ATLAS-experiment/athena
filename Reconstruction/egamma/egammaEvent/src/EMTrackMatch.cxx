@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -49,11 +49,6 @@ Updated:  Jan, 2004 (FD+AK)
 //  Constructor
 // ----------------------------
 
-// give default values
-EMTrackMatch::EMTrackMatch()
-  :	egDetail() 
-{    
-}
 
 // =================================================================
 // constructor with data
@@ -101,14 +96,6 @@ EMTrackMatch::EMTrackMatch(const std::vector<double>& deltaEta,
   for (unsigned int i = 0; i < deltaEta.size(); ++i) setDeltaEta (i, deltaEta[i], true);
   for (unsigned int i = 0; i < deltaPhi.size(); ++i) setDeltaPhi (i, deltaPhi[i], true);
 
-}
-
-// =================================================================
-EMTrackMatch::~EMTrackMatch()
-{ 
-  //
-  // destructor
-  //
 }
 
 /// interface methods

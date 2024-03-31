@@ -33,7 +33,7 @@ public:
   };
 
   /** @brief Default constructor*/
-  EMTrackMatch();
+  EMTrackMatch() = default;
 
   /** @brief constructor with data*/
   EMTrackMatch(const std::vector<double>& deltaEta,
@@ -54,7 +54,7 @@ public:
 	       int                        linkIndex = 0);
   
   /** @brief Destructor*/
-  virtual ~EMTrackMatch();
+  virtual ~EMTrackMatch() = default;
 
   virtual const std::string& className() const override;
   
