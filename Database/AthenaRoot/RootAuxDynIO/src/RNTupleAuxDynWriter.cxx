@@ -139,23 +139,14 @@ namespace RootAuxDynIO
       int attrN = 0;
       for( auto& attr: m_attrDataMap ) {
          ATH_MSG_VERBOSE("Setting data ptr for field# " << ++attrN << ": " << attr.first << "  data=" << std::hex << attr.second << std::dec );
-         if( !attr.second ) {
-            if( m_generatedValues.find(attr.first) == m_generatedValues.end() ) {
-               ATH_MSG_DEBUG("Generating default object for field: " << attr.first );
-               for( auto val_i = m_entry->begin(); val_i != m_entry->end(); ++val_i ) {
-                  if( val_i->GetField().GetFieldName() == attr.first ) {
-                     // One could call RValue::EmplaceNew() (i.e., val_i->EmplaceNew()) but that violates const-ness
-                     // So for now we clone the field and create the default value from the clone
-                     auto valPtr = std::make_shared<RFieldBase::RValue>(val_i->GetField().Clone(attr.first)->CreateValue());
-                     m_generatedValues.insert( std::make_pair(attr.first, std::move(valPtr)) );
-                     break;
-                  }
-               }
-            }
-            attr.second = m_generatedValues.find(attr.first)->second->GetPtr<void>().get();
+         // If an object already exists bind it to the field
+         // Otherwise, create a new value and use its address
+         if( attr.second ) {
+            m_entry->BindRawPtr( attr.first, attr.second );
+         } else {
+            m_entry->EmplaceNewValue( attr.first );
+            attr.second = m_entry->GetPtr<void>( attr.first ).get();
          }
-         // attach the attribute values rememberd internally
-         m_entry->BindRawPtr( attr.first, attr.second );
       }
       num_bytes += m_ntupleWriter->Fill( *m_entry );
       ATH_MSG_DEBUG("Filled RNTuple Row, bytes written: " << num_bytes);
@@ -183,9 +174,6 @@ namespace RootAuxDynIO
         log << endmsg;
       }
       // delete the generated default fields (RField should delete the default data objest)
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
-      m_generatedValues.clear();
-#endif
       m_ntupleWriter.reset(); m_entry.reset(); m_model.reset(); m_rowN=0;
    }
 
