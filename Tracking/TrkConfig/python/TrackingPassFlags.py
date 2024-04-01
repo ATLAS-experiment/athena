@@ -123,21 +123,6 @@ def useNewParameterizationTRT_ranges( inflags ):
     {'-2':  False,
     '3-':  True } )
 
-def rejectShortExtensions_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  False,
-    '7-':  True } )
-
-def SiExtensionCuts_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-6':  False,
-    '7-':  True } )
-
-def RoISeededBackTracking_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-12':  False,
-    '13-':  True } )
-
 def roadWidth_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
     {'-16':  20.0,
@@ -147,11 +132,6 @@ def keepAllConfirmedPixelSeeds_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
     {'-17':  False,
     '18-':  True } )
-
-def minRoIClusterEt_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-18':  0.0,
-    '19-':  6000. * Units.MeV } )
 
 def maxSeedsPerSP_Pixels_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
@@ -263,20 +243,6 @@ def createTrackingPassFlags():
 
     # --- defaults for secondary tracking
     icf.addFlag("maxSecondaryImpact", 100.0 * Units.mm) # low lumi
-
-    icf.addFlag("rejectShortExtensions"     , lambda pcf:
-                False if pcf.Beam.Type is BeamType.Cosmics else
-                rejectShortExtensions_ranges( pcf ) ) # extension finder in back tracking
-                    
-    icf.addFlag("SiExtensionCuts"           , SiExtensionCuts_ranges) # cut in Si Extensions before fit
-
-    # --- pattern cuts for back tracking
-    icf.addFlag("SecondaryXi2max"           , 15.0)
-    icf.addFlag("SecondaryXi2maxNoAdd"      , 50.0)
-
-    # --- run back tracking and TRT only in RoI seed regions
-    icf.addFlag("RoISeededBackTracking"     , RoISeededBackTracking_ranges and ( lambda pcf : pcf.Detector.EnableCalo ) )
-    icf.addFlag("minRoIClusterEt"           , minRoIClusterEt_ranges)
 
     icf.addFlag("usePixel"       		  , lambda pcf : pcf.Detector.EnablePixel )
     icf.addFlag("useTRT"        		  , lambda pcf : pcf.Detector.EnableTRT )
@@ -1139,13 +1105,13 @@ if __name__ == "__main__":
   flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
 
   assert flags.Tracking.cutLevel == 19 , "default cut level is wrong"
-  assert flags.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minRoIClusterEt)
+  assert flags.Tracking.ActiveConfig.minSecondaryPt == 3.0 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minSecondaryPt)
   flags.Tracking.cutLevel = 2
-  assert flags.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minRoIClusterEt)
-  assert flags.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(flags.Tracking.BeamGasPass.minRoIClusterEt)
+  assert flags.Tracking.ActiveConfig.minSecondaryPt == 1.0 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minSecondaryPt)
+  assert flags.Tracking.BeamGasPass.minSecondaryPt == 1.0 * Units.GeV, "wrong cut value {}, not following cutLevel setting ".format(flags.Tracking.BeamGasPass.minSecondaryPt)
 
   assert flags.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
-  assert flags.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
+  assert flags.Tracking.HeavyIonPass.minSecondaryPt == 1.0 * Units.GeV, "wrong cut value, overwrite"
 
   l.info("flags.Tracking.ActiveConfig.minSecondaryPt %f", flags.Tracking.ActiveConfig.minSecondaryPt * 1.0)
   l.info("type(flags.Tracking.ActiveConfig.minSecondaryPt) " + str(type(flags.Tracking.ActiveConfig.minSecondaryPt)))

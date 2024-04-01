@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_TrackSegmentsFinder package
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -26,14 +26,14 @@ def TRT_TrackSegmentsFinderCfg(
         kwargs.setdefault("RoadTool", acc.popToolsAndMerge(
             TRT_DetElementsRoadMaker_xkCfg(flags)))
 
-    if flags.Tracking.ActiveConfig.RoISeededBackTracking:
+    if flags.Tracking.BackTracking.doRoISeeded:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             CaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(CaloClusterROIPhiRZContainerMakerCfg(flags))
         kwargs.setdefault("useCaloSeeds", True)
         kwargs.setdefault("EMROIPhiRZContainer", (
-            "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" %
-            (flags.Tracking.ActiveConfig.minRoIClusterEt/Units.GeV)))
+            "InDetCaloClusterROIPhiRZ%.0fGeVBackTracking" %
+            (flags.Tracking.BackTracking.minRoIClusterEt/Units.GeV)))
 
     kwargs.setdefault("SegmentsLocation", "TRTSegments")
 
