@@ -145,7 +145,7 @@ bool TFCSPredictExtrapWeights::getNormInputs(
     }
     inputTXT.close();
   } else {
-    ATH_MSG_ERROR(" Unable to open file ");
+    ATH_MSG_ERROR(" Unable to open file " << inputFileName);
     return false;
   }
 
