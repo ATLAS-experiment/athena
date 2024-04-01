@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package's name.
 atlas_subdir( xAODCoreCnv )
@@ -20,5 +20,3 @@ atlas_add_component( xAODCoreCnv
    AthLinks AthenaBaseComps AthenaKernel CxxUtils SGTools StoreGateLib xAODCore
    GaudiKernel xAODCoreCnvLib )
 
-# Install files from the package.
-atlas_install_joboptions( share/*.py )
