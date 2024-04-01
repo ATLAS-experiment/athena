@@ -124,7 +124,7 @@ StatusCode MuonReadoutElement::strawSurfaceFactory(const IdentifierHash& hash,
         return StatusCode::FAILURE;
     }
 
-    auto insert_itr = m_surfaces.insert(std::make_unique<ActsTrk::SurfaceCache>((*transformCache).get(), detectorType()));
+    auto insert_itr = m_surfaces.insert(std::make_unique<ActsTrk::SurfaceCache>((*transformCache).get()));
     if(!insert_itr.second){
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);
@@ -145,7 +145,7 @@ StatusCode MuonReadoutElement::planeSurfaceFactory(const IdentifierHash& hash, s
                    <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
     }    
-    auto insert_itr = m_surfaces.insert(std::make_unique<ActsTrk::SurfaceCache>((*transformCache).get(), detectorType()));
+    auto insert_itr = m_surfaces.insert(std::make_unique<ActsTrk::SurfaceCache>((*transformCache).get()));
     if(!insert_itr.second){
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);

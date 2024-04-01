@@ -19,7 +19,8 @@ namespace ActsTrk {
             /// Factory method to create new SurfaceBounds.
             template<class... argList> std::shared_ptr<BoundType> make_bounds(argList... args) {
                 return (*m_store.insert(std::make_shared<BoundType>(args...)).first);
-            }        
+            }
+            size_t size() const { return m_store.size() ;}       
         private: 
             /** @brief: Comparison struct to construct sets of Acts::Surface bounds with unique elements. 
              *          Two elements are considered to be identical if all of their parameters match within epsilon. 
