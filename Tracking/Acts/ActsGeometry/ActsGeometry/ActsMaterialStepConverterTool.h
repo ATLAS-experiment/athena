@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSMATERIALSTEPCONVERTERTOOL_H
@@ -12,9 +12,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-// PACKAGE
-#include "ActsGeometryInterfaces/AlignmentStore.h" // ReadCondHandleKey wants complete type
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsMaterialStepConverterTool.h"
 
 class ActsMaterialStepConverterTool : public extends<AthAlgTool, IActsMaterialStepConverterTool>

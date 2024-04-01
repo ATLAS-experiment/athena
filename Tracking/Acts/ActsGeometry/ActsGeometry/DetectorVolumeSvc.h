@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSDETECTORVOLUMESVC_H
@@ -24,17 +24,15 @@ namespace ActsTrk{
     class DetectorVolumeSvc : public extends<AthService, IDetectorVolumeSvc> {
     public:
 
-    StatusCode initialize() override;
+      DetectorVolumeSvc( const std::string& name, ISvcLocator* pSvcLocator );
 
-    DetectorVolumeSvc( const std::string& name, ISvcLocator* pSvcLocator );
+      StatusCode initialize() override;
 
-    DetectorPtr detector() const override;
+      DetectorPtr detector() const override;
 
-    unsigned int populateAlignmentStore(ActsTrk::RawGeomAlignStore& store) const override;
+      unsigned int populateAlignmentStore(AlignmentStore& store) const override;
 
-    const ActsGeometryContext& getNominalContext() const override;
-
-    StatusCode checkAlignComplete(const ActsGeometryContext& ctx) const override;
+      const ActsGeometryContext& getNominalContext() const override;
 
     private:
         std::shared_ptr<const Acts::Experimental::Detector> buildDetector() const;

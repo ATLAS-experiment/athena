@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSGEOMETRYINTERFACES_GEOMETRYDEFS_H
 #define ACTSGEOMETRYINTERFACES_GEOMETRYDEFS_H
@@ -14,8 +14,7 @@
 namespace ActsTrk {
     /// Simple enum to Identify the Type of the
     /// ACTS sub detector
-    enum class DetectorType {
-        UnDefined = 0,
+    enum class DetectorType: unsigned short {
         /// Inner detector legacy
         Pixel,
         Sct,
@@ -28,7 +27,8 @@ namespace ActsTrk {
         Tgc,  /// Thin gap champers
         Csc,  /// Maybe not needed in the migration
         Mm,   /// Micromegas (NSW)
-        sTgc  /// Small Thing Gap chambers (NSW)
+        sTgc,  /// Small Thing Gap chambers (NSW)
+        UnDefined
     };
 
     inline std::string to_string(const DetectorType& type) {

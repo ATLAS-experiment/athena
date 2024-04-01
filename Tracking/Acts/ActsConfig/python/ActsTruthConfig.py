@@ -68,6 +68,8 @@ def TruthParticleHitCountAlgCfg(flags,
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
     kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')

@@ -26,6 +26,7 @@ atlas_add_library( ActsGeometryLib
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES}
                    ActsCore
                    ActsGeometryInterfacesLib
+                   ActsGeoUtils
                    ActsInteropLib
                    ActsPluginJson
                    AthenaBaseComps
@@ -60,7 +61,6 @@ atlas_add_component( ActsGeometry
                      src/ActsSurfaceMappingTool.cxx
                      src/ActsVolumeMappingTool.cxx
                      src/ActsObjWriterTool.cxx
-                     #src/ActsExCellWriterSvc.cxx
                      src/ActsMaterialStepConverterTool.cxx
                      src/ActsMaterialJsonWriterTool.cxx
                      src/ActsMaterialTrackWriterSvc.cxx

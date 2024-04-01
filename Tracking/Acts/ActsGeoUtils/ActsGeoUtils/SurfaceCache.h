@@ -23,7 +23,7 @@ namespace ActsTrk {
     public:
         /** @brief: Standard constructor taking the tranasform cache of the element and the detector type. 
         **/
-      SurfaceCache(const TransformCache* transformCache, ActsTrk::DetectorType type);
+      SurfaceCache(const TransformCache* transformCache);
 
       /// Returns the transformation stored in the TransformCache.
       const Acts::Transform3& transform(const Acts::GeometryContext& gctx) const override final;
@@ -47,7 +47,6 @@ namespace ActsTrk {
       const TransformCache* transformCache() const;
     private:
         const TransformCache* m_transformCache{nullptr};
-        ActsTrk::DetectorType m_type{ActsTrk::DetectorType::UnDefined};
         std::shared_ptr<Acts::Surface> m_surface{nullptr};
   };
   /// Comparison operators

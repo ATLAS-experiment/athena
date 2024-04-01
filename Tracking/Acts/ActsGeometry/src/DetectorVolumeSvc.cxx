@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/DetectorVolumeSvc.h"
 
-
+#include "ActsGeoUtils/NoDeletePtr.h"
 // ATHENA
 #include "GaudiKernel/EventContext.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -31,14 +31,14 @@ StatusCode DetectorVolumeSvc::initialize() {
 }
 
 std::shared_ptr<const Acts::Experimental::Detector> DetectorVolumeSvc::detector() const {
-  ATH_MSG_INFO("Retrieving tracking geometry");
   if (!m_detector.isValid()) {
+      ATH_MSG_INFO("Build the Acts tracking detector");
       m_detector.set(buildDetector());
    }
   return *m_detector.ptr();
 }
 
-unsigned int DetectorVolumeSvc::populateAlignmentStore(ActsTrk::RawGeomAlignStore& /*store*/) const {
+unsigned int DetectorVolumeSvc::populateAlignmentStore(AlignmentStore& /*store*/) const {
     return 0;
 }
 
@@ -46,15 +46,11 @@ const ActsGeometryContext& DetectorVolumeSvc::getNominalContext() const {
     return m_nomContext;
 }
 
-StatusCode DetectorVolumeSvc::checkAlignComplete(const ActsGeometryContext& /*ctx*/) const {
-    return StatusCode::SUCCESS;
-}
-
 std::shared_ptr<const Acts::Experimental::Detector> DetectorVolumeSvc::buildDetector() const {
     ActsGeometryContext gctx{};
     std::vector<std::shared_ptr<const Acts::Experimental::IDetectorComponentBuilder> > builders;
     for (const auto &builder : m_builderTools) {
-        builders.push_back(std::shared_ptr<const Acts::Experimental::IDetectorComponentBuilder>(builder.get(), [](auto*){}));
+        builders.push_back(NoDeletePtr<const Acts::Experimental::IDetectorComponentBuilder>(builder.get()));
     }
 
     //Define config for cylindrical container builder
