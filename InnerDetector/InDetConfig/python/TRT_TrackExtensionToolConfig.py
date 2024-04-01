@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_TrackExtensionTool_xk packages
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -107,7 +107,7 @@ def TRT_TrackExtensionTool_xkCfg(
                       500 if flags.Tracking.doBeamGas
                       else 50)
 
-    if flags.Tracking.ActiveConfig.RoISeededBackTracking:
+    if flags.Tracking.BackTracking.doRoISeeded:
         kwargs.setdefault("minTRTSegmentpT",
                           flags.Tracking.ActiveConfig.minSecondaryPt)
 

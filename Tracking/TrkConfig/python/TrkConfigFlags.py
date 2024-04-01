@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
-
+import AthenaCommon.SystemOfUnits as Units
 
 class PrimaryPassConfig(FlagEnum):
     VtxLumi = 'VtxLumi'
@@ -194,6 +194,11 @@ def createTrackingConfigFlags():
     # Control cuts and settings for different lumi to limit CPU and disk space
     icf.addFlag("Tracking.cutLevel", cutLevel)
 
+    # --- run back tracking and TRT only in RoI seed regions
+    icf.addFlag("Tracking.BackTracking.doRoISeeded", lambda prevFlags:
+                prevFlags.Tracking.cutLevel>=13 and
+                prevFlags.Detector.EnableCalo)
+    
     # --- defaults for backtracking
     icf.addFlag("Tracking.BackTracking.minClusters", 4)
     icf.addFlag("Tracking.BackTracking.minSiNotShared", 4)
@@ -214,6 +219,16 @@ def createTrackingConfigFlags():
                 1 if prevFlags.Tracking.cutLevel<=6 else 0)
     icf.addFlag("Tracking.BackTracking.nHolesMax", 2)
     icf.addFlag("Tracking.BackTracking.nHolesGapMax", 2)
+
+    # extension finder in back tracking
+    icf.addFlag("Tracking.BackTracking.rejectShortExtensions", lambda prevFlags:
+                not(prevFlags.Beam.Type is BeamType.Cosmics) and
+                prevFlags.Tracking.cutLevel>=7)
+    # cut in Si Extensions before fit
+    icf.addFlag("Tracking.BackTracking.SiExtensionCuts", lambda prevFlags:
+                prevFlags.Tracking.cutLevel>=7)
+    icf.addFlag("Tracking.BackTracking.minRoIClusterEt", lambda prevFlags:
+                6.*Units.GeV if prevFlags.Tracking.cutLevel>=19 else 0.)
 
     # TRT standalone configuration
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetCaloClusterROISelector package
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
@@ -24,12 +24,12 @@ def CaloClusterROIPhiRZContainerMakerCfg(
     minPt = []
     phiWidth = []
 
-    if flags.Tracking.ActiveConfig.RoISeededBackTracking:
+    if flags.Tracking.BackTracking.doRoISeeded:
         # TRT_TrackSegmentsFinder
         # TRT_SeededTrackFinder
-        pt_cut = flags.Tracking.ActiveConfig.minRoIClusterEt
+        pt_cut = flags.Tracking.BackTracking.minRoIClusterEt
         OutputROIContainerName.append(
-            'InDetCaloClusterROIPhiRZ%.0fGeVUnordered' % (pt_cut/Units.GeV))
+            'InDetCaloClusterROIPhiRZ%.0fGeVBackTracking' % (pt_cut/Units.GeV))
         minPt.append(pt_cut)
         # no phi ordering, no Roi duplication close to +- pi
         phiWidth.append(0.)
@@ -40,17 +40,16 @@ def CaloClusterROIPhiRZContainerMakerCfg(
         # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidt)
         phiWidth.append(flags.Tracking.phiWidthBrem)
 
+        OutputROIContainerName.append('InDetCaloClusterROIPhiRZ5GeV')
+        minPt.append(5000)
+        # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
+        phiWidth.append(0.075)
+
     if flags.Tracking.doCaloSeededAmbi:
         OutputROIContainerName.append('InDetCaloClusterROIPhiRZ10GeV')
         minPt.append(10000)
         # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
         phiWidth.append(0.05)
-
-    if flags.Tracking.doCaloSeededBrem:
-        OutputROIContainerName.append('InDetCaloClusterROIPhiRZ5GeV')
-        minPt.append(5000)
-        # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
-        phiWidth.append(0.075)
 
     kwargs.setdefault("OutputROIContainerName", OutputROIContainerName)
     kwargs.setdefault("minPt", minPt)
@@ -97,17 +96,16 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(
         phiWidth.append(flags.Tracking.phiWidthBrem)
         # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
 
+        OutputROIContainerName.append('ITkCaloClusterROIPhiRZ5GeV')
+        minPt.append(5000)
+        # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
+        phiWidth.append(0.075)
+
     if flags.Tracking.doCaloSeededAmbi:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ10GeV')
         minPt.append(10000)
         # must be equal or larger than phiWidth of its clients: InDetAmbiTrackSelectionTool
         phiWidth.append(0.05)
-
-    if flags.Tracking.doCaloSeededBrem:
-        OutputROIContainerName.append('ITkCaloClusterROIPhiRZ5GeV')
-        minPt.append(5000)
-        # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
-        phiWidth.append(0.075)
 
     if flags.Tracking.doITkConversion or flags.Acts.doITkConversion:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ15GeVUnordered')
