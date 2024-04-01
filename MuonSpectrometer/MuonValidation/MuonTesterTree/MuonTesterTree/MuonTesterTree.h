@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTERTREE_MUONTESTERTREE_H
 #define MUONTESTERTREE_MUONTESTERTREE_H
@@ -132,11 +132,17 @@ private:
     /// Flag to indicate whether the TTree is written to the file or not
     bool m_written{false};
 
-    // List of branches which are owned by the tree. They will be deleted if the object is destructed
-    std::vector<std::shared_ptr<IMuonTesterBranch>> m_branches{};
+    // Careful: m_branches_to_init must come before m_branches.
+    // When m_branches is destroyed, the branches being deleted will
+    // try to remove themselves from m_branches_to_init.  If these are
+    // in the opposite order, then m_branches_to_init will already
+    // have been destroyed, and we'll be accessing freed memory.
+
     // List of branches which shall be initialized. The list will be sorted before initialization and then cleared
     // None of the branches is explicitly owned by the object
     std::vector<IMuonTesterBranch*> m_branches_to_init{};
+    // List of branches which are owned by the tree. They will be deleted if the object is destroyed
+    std::vector<std::shared_ptr<IMuonTesterBranch>> m_branches{};
     /// Set of branches that were already initialized
     std::set<IMuonTesterBranch*> m_initialized_br{};
 
