@@ -68,9 +68,9 @@ else:
       opts.fromdb = None
 
  ## let command line decide if one wants to enable PerfMon
-   if opts.pmon:
+   if opts.perfmon:
       import PerfMonComps.PerfMonFlags as _pmf
-      _pmf._decode_pmon_opts(opts.pmon.split(','))
+      _pmf._decode_pmon_opts(opts.perfmon.split(','))
 
  ## all symbols have been loaded, but nothing has been run, good time for debug
    if DbgStage.value == "init":
