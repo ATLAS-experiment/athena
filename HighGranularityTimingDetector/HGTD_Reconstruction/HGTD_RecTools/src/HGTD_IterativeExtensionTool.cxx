@@ -127,9 +127,13 @@ HGTD::ExtensionObject HGTD_IterativeExtensionTool::extendTrackToHGTD(
     // TODO: BoundaryCheck set to false as in 20.20 -> what does this do?
     std::unique_ptr<const Trk::TrackParameters> extrap_result = nullptr;
 
+    Trk::ParticleHypothesis part = track->info().particleHypothesis();
+    if (part == Trk::undefined) {
+      part = static_cast<Trk::ParticleHypothesis>(m_particle_hypot.value());
+    }
     extrap_result = m_extrapolator->extrapolate(
         ctx, *last_param, surf_obj, Trk::PropDirection::alongMomentum, false,
-        track->info().particleHypothesis());
+        part);
 
     //
     if (not extrap_result) {
