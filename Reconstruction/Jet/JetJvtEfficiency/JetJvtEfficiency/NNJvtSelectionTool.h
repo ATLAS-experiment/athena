@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETJVTEFFICIENCY_NNJVTSELECTIONTOOL_H
@@ -9,7 +9,6 @@
 #include "JetJvtEfficiency/JvtSelectionToolBase.h"
 #include "JetMomentTools/NNJvtBinning.h"
 
-#include <optional>
 
 namespace CP {
     class NNJvtSelectionTool : public JvtSelectionToolBase {
@@ -41,7 +40,7 @@ namespace CP {
         // TODO: TEMPORARY
         // Backup accessors to allow using these tools in the JetJvtEfficiency object which does not
         // know its parent jet container name
-        std::optional<SG::AuxElement::ConstAccessor<float>> m_jvtAcc;
+        SG::ConstAccessor<float> m_jvtAcc { m_jvtMoment.key() };
     };
 } // namespace CP
 

@@ -1,0 +1,166 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/TypelessConstAccessor.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Sep, 2023
+ * @brief Helper class to provide const generic access to aux data.
+ */
+
+
+#include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/exceptions.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+inline
+TypelessConstAccessor::TypelessConstAccessor (const std::string& name)
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  m_auxid = r.findAuxID(name);
+  if (m_auxid == null_auxid)
+    SG::throwExcUnknownAuxItem (name);
+  m_eltSize = r.getEltSize (m_auxid);
+}
+
+
+/**
+ * @brief Constructor.
+ * @param ti The type for this aux data item.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+inline
+TypelessConstAccessor::TypelessConstAccessor (const std::type_info& ti,
+                                              const std::string& name)
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  m_auxid = r.getAuxID (ti, name);
+  if (m_auxid == null_auxid)
+    SG::throwExcUnknownAuxItem (name, "", &ti);
+  m_eltSize = r.getEltSize (m_auxid);
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+inline
+TypelessConstAccessor::TypelessConstAccessor (const std::string& name,
+                                              const std::string& clsname)
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  m_auxid = r.findAuxID(name, clsname);
+  if (m_auxid == null_auxid)
+    SG::throwExcUnknownAuxItem (name, clsname);
+  m_eltSize = r.getEltSize (m_auxid);
+}
+
+
+/**
+ * @brief Constructor.
+ * @param ti The type for this aux data item.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+inline
+TypelessConstAccessor::TypelessConstAccessor (const std::type_info& ti,
+                                              const std::string& name,
+                                              const std::string& clsname)
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  m_auxid = r.getAuxID (ti, name, clsname);
+  if (m_auxid == null_auxid)
+    SG::throwExcUnknownAuxItem (name, clsname, &ti);
+  m_eltSize = r.getEltSize (m_auxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a const pointer.
+ * @param e The element for which to fetch the variable.
+ */
+template <class ELT>
+ATH_REQUIRES( IsConstAuxElement<ELT> )
+inline
+const void*
+TypelessConstAccessor::operator() (const ELT& e) const
+{
+  assert (e.container() != 0);
+  return (*this) (*e.container(), e.index());
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a const pointer.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ * Looping over the index via this method will be faster then
+ * looping over the elements of the container.
+ */
+inline
+const void*
+TypelessConstAccessor::operator() (const AuxVectorData& container,
+                                   size_t index) const
+{
+  const char* ptr = reinterpret_cast<const char*> (getDataArray (container));
+  return ptr + index * m_eltSize;
+}
+
+    
+/**
+ * @brief Get a pointer to the start of the auxiliary data array.
+ * @param container The container from which to fetch the variable.
+ */
+inline
+const void*
+TypelessConstAccessor::getDataArray (const AuxVectorData& container) const
+{
+  return container.getDataArray (m_auxid);
+}
+    
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param e An element of the container which to test the variable.
+ */
+template <class ELT>
+ATH_REQUIRES( IsConstAuxElement<ELT> )
+inline
+bool
+TypelessConstAccessor::isAvailable (const ELT& e) const
+{
+  return e.container() && e.container()->isAvailable (m_auxid);
+}
+
+
+/**
+ * @brief Return the aux id for this variable.
+ */
+inline
+SG::auxid_t
+TypelessConstAccessor::auxid() const
+{
+  return m_auxid;
+}
+
+
+} // namespace SG

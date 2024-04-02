@@ -16,8 +16,8 @@ namespace CP {
         ATH_CHECK(JvtSelectionToolBase::initialize());
 
         
-        m_jvtAcc.emplace(m_jvtMoment.key());
-        m_timingAcc.emplace(m_timingMoment.key());
+        m_jvtAcc = SG::ConstAccessor<float>(m_jvtMoment.key());
+        m_timingAcc = SG::ConstAccessor<float>(m_timingMoment.key());
         if (m_jetContainer.empty()) {
             ATH_MSG_WARNING("No JetContainer set. This behaviour is deprecated");
             ATH_CHECK(m_jvtMoment.initialize(false));
@@ -43,7 +43,7 @@ namespace CP {
     }
 
     bool FJvtSelectionTool::select(const xAOD::IParticle *jet) const {
-        return (*m_jvtAcc)(*jet) <= m_jvtCut && (*m_timingAcc)(*jet) <= m_timingCut;
+        return m_jvtAcc(*jet) <= m_jvtCut && m_timingAcc(*jet) <= m_timingCut;
     }
 
 } // namespace CP

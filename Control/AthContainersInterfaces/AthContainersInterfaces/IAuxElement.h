@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/IAuxElement.h
@@ -17,6 +17,10 @@
 #include <cstdlib>
 #include <cstdint>
 #include <cassert>
+
+
+// If set, we need to write data that's forward-compatible with r21.
+#define ATHCONTAINERS_R21_COMPAT
 
 
 namespace SG {

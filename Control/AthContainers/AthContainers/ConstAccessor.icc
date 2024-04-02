@@ -1,0 +1,162 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/ConstAccessor.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Oct, 2023
+ * @brief Helper class to provide constant type-safe access to aux data.
+ */
+
+
+#include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/exceptions.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class T, class ALLOC>
+inline
+ConstAccessor<T, ALLOC>::ConstAccessor (const std::string& name)
+  : ConstAccessor (name, "", SG::AuxTypeRegistry::Flags::None)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class T, class ALLOC>
+inline
+ConstAccessor<T, ALLOC>::ConstAccessor
+  (const std::string& name, const std::string& clsname)
+  : ConstAccessor (name, clsname, SG::AuxTypeRegistry::Flags::None)
+{
+  // cppcheck-suppress missingReturn; false positive
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class T, class ALLOC>
+inline
+ConstAccessor<T, ALLOC>::ConstAccessor
+  (const std::string& name,
+   const std::string& clsname,
+   const SG::AuxTypeRegistry::Flags flags)
+    : m_auxid (SG::AuxTypeRegistry::instance().getAuxID<T, ALLOC> (name, clsname, flags))
+{
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a const reference.
+ * @param e The element for which to fetch the variable.
+ */
+template <class T, class ALLOC>
+template <class ELT>
+ATH_REQUIRES( IsConstAuxElement<ELT> )
+inline
+typename ConstAccessor<T, ALLOC>::const_reference_type
+ConstAccessor<T, ALLOC>::operator() (const ELT& e) const
+{
+  assert (e.container() != 0);
+  return e.container()->template getData<T> (m_auxid, e.index());
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a const reference.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ * Looping over the index via this method will be faster then
+ * looping over the elements of the container.
+ */
+template <class T, class ALLOC>
+inline
+typename ConstAccessor<T, ALLOC>::const_reference_type
+ConstAccessor<T, ALLOC>::operator()
+  (const AuxVectorData& container,
+   size_t index) const
+{
+  return container.template getData<T> (m_auxid, index);
+}
+
+
+
+/**
+ * @brief Get a pointer to the start of the auxiliary data array.
+ * @param container The container from which to fetch the variable.
+ */
+template <class T, class ALLOC>
+inline
+typename ConstAccessor<T, ALLOC>::const_container_pointer_type
+ConstAccessor<T, ALLOC>::getDataArray (const AuxVectorData& container) const
+{
+  return reinterpret_cast<const_container_pointer_type>
+    (container.getDataArray (m_auxid));
+}
+    
+
+/**
+ * @brief Get a span over the auxilary data array.
+ * @param container The container from which to fetch the variable.
+ */
+template <class T, class ALLOC>
+inline
+typename ConstAccessor<T, ALLOC>::const_span
+ConstAccessor<T, ALLOC>::getDataSpan (const AuxVectorData& container) const
+{
+  auto beg = reinterpret_cast<const_container_pointer_type>
+    (container.getDataArray (m_auxid));
+  return const_span (beg, container.size_v());
+}
+    
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param e An element of the container which to test the variable.
+ */
+template <class T, class ALLOC>
+template <class ELT>
+ATH_REQUIRES( IsConstAuxElement<ELT> )
+inline
+bool
+ConstAccessor<T, ALLOC>::isAvailable (const ELT& e) const
+{
+  return e.container() && e.container()->isAvailable (m_auxid);
+}
+
+
+/**
+ * @brief Return the aux id for this variable.
+ */
+template <class T, class ALLOC>
+inline
+SG::auxid_t
+ConstAccessor<T, ALLOC>::auxid() const
+{
+  return m_auxid;
+}
+
+
+} // namespace SG

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetJvtEfficiency/JvtSelectionToolBase.h"
@@ -7,7 +7,7 @@
 
 namespace CP {
     StatusCode JvtSelectionToolBase::initialize() {
-        m_etaAcc.emplace(m_jetEtaName);
+        m_etaAcc = SG::ConstAccessor<float>(m_jetEtaName);
         m_cutPos = m_info.addCut("Jvt", "Whether the jet passes the Jvt selection");
 
         return StatusCode::SUCCESS;
@@ -28,7 +28,7 @@ namespace CP {
     bool JvtSelectionToolBase::isInRange(const xAOD::IParticle *jet) const {
         if (jet->pt() < m_minPtForJvt || jet->pt() > m_maxPtForJvt)
             return false;
-        float eta = (*m_etaAcc)(*jet);
+        float eta = m_etaAcc(*jet);
         return std::abs(eta) >= m_minEta && std::abs(eta) <= m_maxEta;
     }
 } // namespace CP

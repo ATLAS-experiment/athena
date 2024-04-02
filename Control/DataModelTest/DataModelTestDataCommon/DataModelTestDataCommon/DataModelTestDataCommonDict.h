@@ -45,6 +45,6 @@ DMTest::CView::Pers_t xb;
 
 }
 
-template class SG::AuxElement::ConstAccessor<ElementLink<DMTest::CVec> >;
+template class SG::ConstAccessor<ElementLink<DMTest::CVec> >;
 
 #endif // not DATAMODELTESTDATACOMMONDICT_H

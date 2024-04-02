@@ -1,5 +1,5 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-/* Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
 /**
  * @file xAODEventFormatCnv/test/xAODEventFormatCnvTestDict.h
  * @author frank berghaus <fberghaus@anl.gov>
@@ -18,6 +18,6 @@
 #include "AthLinks/ElementLink.h"
 
 
-template class SG::AuxElement::ConstAccessor<ElementLink<xAODMakerTest::AVec> >;
+template class SG::ConstAccessor<ElementLink<xAODMakerTest::AVec> >;
 
 #endif  // XAODEVENTFORMATCNVTESTDICT_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETJVTEFFICIENCY_JVTEFFICIENCYTOOLBASE_H
@@ -13,7 +13,6 @@
 
 #include <TH2.h>
 #include <memory>
-#include <optional>
 
 namespace CP {
     class JvtEfficiencyToolBase : public asg::AsgTool,
@@ -57,7 +56,7 @@ namespace CP {
         std::unique_ptr<TH2> m_effHist;
         bool m_useDummySFs{false};
         // The accessor for the jet eta
-        std::optional<SG::AuxElement::ConstAccessor<float>> m_etaAcc;
+        SG::ConstAccessor<float> m_etaAcc { m_jetEtaName };
         // -1, 0 or +1 depending on the systematic
         int m_appliedSysSigma = 0;
         // TEMPORARY: Allow for using an accessor rather than the full decorhandle

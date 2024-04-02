@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetJvtEfficiency/JvtEfficiencyToolBase.h"
@@ -29,7 +29,7 @@ namespace {
 
 namespace CP {
     StatusCode JvtEfficiencyToolBase::initialize() {
-        m_etaAcc.emplace(m_jetEtaName);
+        m_etaAcc = SG::ConstAccessor<float>(m_jetEtaName);
         if (!m_doTruthRequirement)
             ATH_MSG_WARNING("No truth requirement will be performed, which is not recommended.");
         m_accIsHS.emplace(m_truthHSLabel.key());
@@ -60,7 +60,7 @@ namespace CP {
                 return CorrectionCode::Ok;
             }
         }
-        return getEffImpl(jet.pt(), (*m_etaAcc)(jet), sf);
+        return getEffImpl(jet.pt(), m_etaAcc(jet), sf);
     }
 
     CorrectionCode
@@ -79,7 +79,7 @@ namespace CP {
                 return CorrectionCode::Ok;
             }
         }
-        return getIneffImpl(jet.pt(), (*m_etaAcc)(jet), sf);
+        return getIneffImpl(jet.pt(), m_etaAcc(jet), sf);
     }
 
     StatusCode JvtEfficiencyToolBase::initHists(const std::string &file, const std::string &wp) {
@@ -154,7 +154,7 @@ namespace CP {
     bool JvtEfficiencyToolBase::isInRange(const xAOD::Jet &jet) const {
         if (jet.pt() < m_minPtForJvt || jet.pt() > m_maxPtForJvt)
             return false;
-        float eta = (*m_etaAcc)(jet);
+        float eta = m_etaAcc(jet);
         return std::abs(eta) >= m_minEta && std::abs(eta) <= m_maxEta;
     }
 } // namespace CP
