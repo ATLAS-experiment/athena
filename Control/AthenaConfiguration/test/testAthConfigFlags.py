@@ -505,7 +505,7 @@ flags and positional arguments:
         # in the help text. This is useful to see the 'effect' of other arguments on the flags
         # this test also shows the use of the list terminator e.g. for fileInput list
         self.flags.addFlag("Input.Files",[],help="List of input files")
-        self.do_test(args="--filesInput file1 file2 -- --help Input",expected="""flags:
+        self.do_test(args="--filesInput file1,file2 -- --help Input",expected="""flags:
   Input.Files  : List of input files (default: ['file1', 'file2'])
 """)
 
