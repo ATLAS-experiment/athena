@@ -343,7 +343,7 @@ void HepMcParticleLink::ExtendedBarCode::makeIndex (index_type index,
   assert ((index & POSITION_MASK) == 0);
   index_type old = position | POSITION_MASK;
   m_evtIndex.compare_exchange_strong (old, index);
-  assert (old == (position|POSITION_MASK) || old == index);
+  assert (old == (position|POSITION_MASK) || old == index || (position==UNDEFINED && old==0));
 }
 
 
