@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -85,39 +85,13 @@ unsigned FPGATrackSimHit::getSection() const
 }
 
 
-// TODO TODO TODO this is a temporary fix for release 21.9. Here, each strip chip
-// (the entire physical 10cm x 10cm chip) is considered a single module, and has a
-// single hashID. In rel22 a unique hashID will be assigned to each row of strips
-// (4 or 2 per chip). This change fixes the 21.9 version to match the 22 version,
-// by adding the row index (eta coord) to the hashID.
 unsigned FPGATrackSimHit::getFPGATrackSimIdentifierHash() const
 {
-    if (m_detType == SiliconTech::strip)
-        return (m_identifierHash << 2) + m_etaIndex;
     return m_identifierHash;
 }
 
-// TODO TODO TODO as above
 int FPGATrackSimHit::getFPGATrackSimEtaModule() const
 {
-    if (m_detType == SiliconTech::strip)
-    {
-        if (m_detectorZone == DetectorZone::barrel)
-        {
-            // First two SCT ITK layers have 4 rows per module
-            if (m_layer_disk < 2) return (4 * m_etaModule) + m_etaIndex;
-
-            // Last two SCT ITK layers have 2 rows per module
-            return (2 * m_etaModule) + m_etaIndex;
-        }
-        // endcap row: number of rows indexed by etaModule is [4,4,2,4,2,2]
-        else
-        {
-            static const unsigned cumulative_rows[6] = { 0,4,8,10,14,16 };
-            return cumulative_rows[m_etaModule] + m_etaIndex;
-        }
-    }
-
     return m_etaModule;
 }
 
