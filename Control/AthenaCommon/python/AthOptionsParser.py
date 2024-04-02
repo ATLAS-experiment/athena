@@ -156,7 +156,7 @@ def getArgumentParser():
     g.add_argument('--mtes-channel', metavar='NAME', default='EventService_EventRanges',
                    help='yampl channel name between pilot and AthenaMT in event service mode')
 
-    g.add_argument('-v', '--version', action='version', version=get_version(),
+    g.add_argument('--version', action='version', version=get_version(),
                    help='print version number')
 
     g.add_argument('-h', '--help', action='help',
