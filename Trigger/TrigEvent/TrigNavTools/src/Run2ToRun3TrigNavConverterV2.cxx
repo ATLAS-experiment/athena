@@ -11,6 +11,7 @@
 #include "TrigNavStructure/TriggerElement.h"
 #include "Run2ToRun3TrigNavConverterV2.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
+#include "SpecialCases.h"
 
 namespace TCU = TrigCompositeUtils;
 
@@ -357,23 +358,18 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
 
         if (ptrHLTSignature == ptrChain->signatures().back())
         {
-          // this is dirty code code to fix issues originating from Run2 config
-          // case 1: gamma + L1 un-seed xe chains need only a single final TE for accessing photons
-          if (std::regex_match(chainName, m_gammaXeChain) and false ) {
-            if ( std::regex_match(ptrHLTTE->name(), m_gammaXeChainGammaTE) ) { // only gamma TE matters
-              finalTEs[teId].insert(chainId);
-              ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " gamma xe chain " << chainName );
-            }
-          } else {
-            finalTEs[teId].insert(chainId);
-            ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
-
-          }
+          finalTEs[teId].insert(chainId);
+          ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
         }
       }
     }
     // chains with a multiple legs
     std::vector<int> multiplicities = ChainNameParser::multiplicities(chainName);
+    // dirty hacks for failing chains parsing    
+    if(std::regex_match(chainName, SpecialCases::gammaXeChain))
+      multiplicities={1,1};
+
+    
     if ( multiplicities.size() > 1 ) {
       // the chain structure (in terms of multiplicities) may change along the way
       // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern

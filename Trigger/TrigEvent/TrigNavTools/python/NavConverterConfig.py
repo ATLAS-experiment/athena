@@ -57,10 +57,14 @@ def NavConverterCfg(flags, chainsList = []):
                                                 HLTSummary = r2ToR3OutputName,
                                                 NavigationFormat = 'TrigComposite',
                                                 AcceptMultipleInstance=True,
-                                                TrigConfigSvc = tdt.TrigConfigSvc)
+                                                TrigConfigSvc = tdt.TrigConfigSvc, OutputLevel=1)
     acc.addPublicTool(run3tdt)
     checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
     checker.Chains = chainsList
+    checker.OutputLevel=2
+    checker.TrigDecisionToolRun3 = run3tdt
+    checker.TrigDecisionToolRun2 = tdt
+
     acc.addEventAlgo(checker)
     return acc
 

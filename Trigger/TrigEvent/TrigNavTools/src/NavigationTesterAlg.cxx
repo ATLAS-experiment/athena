@@ -7,6 +7,7 @@
 #include <iterator>
 #include "TrigCompositeUtils/ChainNameParser.h"
 #include "NavigationTesterAlg.h"
+#include "SpecialCases.h"
 
 
 // anonymous namespace for convenience functions
@@ -61,8 +62,11 @@ namespace Trig {
     StatusCode NavigationTesterAlg::initialize()
     {
         ATH_CHECK(m_tdt.retrieve());
+        ATH_CHECK(m_tdtRun2.retrieve());
+        ATH_CHECK(m_tdtRun3.retrieve());
         ATH_CHECK(m_toolRun2.retrieve());
         ATH_CHECK(m_toolRun3.retrieve());
+
         if (m_chains.size() == 0)
             ATH_MSG_WARNING("No chains provided, algorithm will be no-op");
         return StatusCode::SUCCESS;
@@ -74,6 +78,9 @@ namespace Trig {
         {
             ATH_MSG_DEBUG("Begin testing chain " << chain);
             if (!m_tdt->isPassed(chain)) continue;
+
+            const auto &featuresRun3 = m_tdtRun3->features<xAOD::IParticleContainer>(chain);
+            const auto &featuresRun2 = m_tdtRun2->features<xAOD::IParticleContainer>(chain);    
 
             // We assume that the navigation is ultimately a set of element links
             // We're comparing two types of navigation but they should both point to the same
@@ -103,22 +110,30 @@ namespace Trig {
             for (auto& c : combsRun3 ) {
                 ATH_MSG_DEBUG(c);
             }
-             
-            if ( m_verifyCombinationsSize ) {
-                auto status = verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain);
-                if ( status.isFailure() and m_failOnDifference) {
-                    ATH_MSG_ERROR("Failed when verifying combinations size");
-                    return StatusCode::FAILURE;
+            if ( std::regex_match(chain, SpecialCases::gammaXeChain)) {
+                for ( auto f2: featuresRun2 ) {
+                    bool found=false;
+                    for ( auto f3: featuresRun3 ) {
+                        ATH_MSG_DEBUG("Serial set of features " << *(f3.link) );
+                        if ( *(f2.link) == *(f3.link))
+                            found = true;
+                    }
+                    if ( not found ) {
+                        ATH_MSG_ERROR("Missing feature in Run 3 that is present in Run 2 " <<  *(f2.link) );
+                        if ( m_failOnDifference ) {
+                            return StatusCode::FAILURE;
+                        } 
+                    }
                 }
-
-            } 
-            if ( m_verifyCombinations ) {
-                auto status = verifyCombinationsContent(combsRun2, combsRun3, chain);
-                if ( status.isFailure() and m_failOnDifference) {
-                    ATH_MSG_ERROR("Failed when verifying combinations content");
-                    return StatusCode::FAILURE;
+            } else {
+                if ( m_verifyCombinationsSize ) {
+                    ATH_CHECK(verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain));
+                } 
+                if ( m_verifyCombinations ) {
+                    ATH_CHECK(verifyCombinationsContent(combsRun2, combsRun3, chain));
                 }
             }
+
             ATH_MSG_DEBUG("Verified chain " << chain);
         }
         return StatusCode::SUCCESS;
@@ -130,7 +145,7 @@ namespace Trig {
                         << " using Run 2 navigation " << run2.size() 
                         << " Run 3 navigation " << run3.size());
             if ( m_failOnDifference ) {
-                ATH_MSG_ERROR("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details)");    
+                ATH_MSG_ERROR("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details), this may be a false positive if chain is incorrectly decoded");    
                 return StatusCode::FAILURE;
             }
         }
