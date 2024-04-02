@@ -1,14 +1,11 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #--
 #-- Configures standard cell weight calibration tools (extracted from JetGetter)
 #--
 #-- Note the input for this calibration is jet driven. The fitted default
 
-#Remark: This code is supposed to work with both old-style config and ComponentAccumulator based config.
-#CA-based config is assumed if the additional parameter 'flags' is set to a AthConfigFlags container (and not None)
-
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
@@ -99,22 +96,15 @@ class H1Calibration(object):
     # folder overriding -----------------------
     forceOverrideFolder = False
     @staticmethod
-    def overrideFolder(flags=None):
-        if flags is None:
-            #Assume non-CA case, old-style config flags
-            from AthenaCommon.GlobalFlags import globalflags
-            isMC=(globalflags.DataSource()!="data")
-        else:
-            isMC=flags.Input.isMC
-
-        return H1Calibration.forceOverrideFolder or isMC
+    def overrideFolder(flags):
+        return H1Calibration.forceOverrideFolder or flags.Input.isMC
 
     #--
     #-- Helper functions to access DB parameters. Note that providing a dbtag (like from JetCalibrationDBTag)
     #-- overwrites the default tag extracted from the detector description version
     #--
     @staticmethod
-    def calibration_dict(dbtag="",flags=None):
+    def calibration_dict(flags, dbtag=""):
         #-- DB tag provided
         if dbtag != "":
             calibdic = {
@@ -130,15 +120,7 @@ class H1Calibration(object):
             return calibdic
         #-- default extraction
         else:
-            if flags is None:
-                #Assume non-CA case, old-style config flags
-                from AthenaCommon.GlobalFlags import globalflags
-                ddv = globalflags.DetDescrVersion()
-            else:
-                #Assume ComponentAccumulator case
-                ddv=flags.GeoModel.AtlasVersion 
-
-
+            ddv = flags.GeoModel.AtlasVersion
             #-- establish relation between detector description and calibration
             if ddv.startswith("ATLAS-CSC"):
                 if ddv >= "ATLAS-CSC-01-00-01":
@@ -151,7 +133,7 @@ class H1Calibration(object):
                 return H1Calibration.calibdicV14
     #-- get calibration parameters 
     @staticmethod
-    def getCalibDBParams(finder,mainparam,input, onlyCellWeight=False, isMC=False, flags=None):
+    def getCalibDBParams(flags, finder, mainparam, input, onlyCellWeight=False, isMC=False):
         """ Retrieves calibration DB parameters from jet finder specs, returns a triplet (key,folder,tag)
         """
         #-- adapt to DB convention
@@ -160,7 +142,7 @@ class H1Calibration(object):
         if param == '7':
             param = ''
         #-- get dictionary
-        caldict = H1Calibration.calibration_dict("", flags)
+        caldict = H1Calibration.calibration_dict(flags)
 
         calibtype = finder+param+input
         #-- specific calibration
@@ -180,8 +162,8 @@ class H1Calibration(object):
             if onlyCellWeight: 
                 # then we don't really care : just give back Cone4Tower or Cone4Topo
                 # and avoid the warning below.
-                if 'Topo' in input: return  H1Calibration.getCalibDBParams('Cone',0.4,'H1Topo',onlyCellWeight,isMC, flags)
-                else:               return  H1Calibration.getCalibDBParams('Cone',0.4,'H1Tower',onlyCellWeight,isMC, flags)
+                if 'Topo' in input: return  H1Calibration.getCalibDBParams(flags,'Cone',0.4,'H1Topo',onlyCellWeight,isMC)
+                else:               return  H1Calibration.getCalibDBParams(flags,'Cone',0.4,'H1Tower',onlyCellWeight,isMC)
             # else try to find a good fall back
             _logger.warning("getCalibDBParams: no dedicated calibration for %s %s %s", finder,mainparam,input)
             if finder not in [ 'Kt', 'Cone' ]    : finder = 'Cone'     # fall back to ATLAS Cone
@@ -190,31 +172,10 @@ class H1Calibration(object):
             else:               l = [ 0.4, 0.7 ]
             (m,mainparam) = min( [ (abs(p-mainparam),p) for p in l ] ) # main parameter optimization (??)
             _logger.warning("getCalibDBParams: defaulted calibration to %s %s %s", finder,mainparam,input)
-            return H1Calibration.getCalibDBParams(finder,mainparam,input,onlyCellWeight,isMC, flags)
-    #-- load DB folder
-    @staticmethod
-    def loadCaloFolder(folder,tag,isMC=False):
-        from IOVDbSvc.CondDB       import conddb
-        from AthenaCommon.AppMgr   import ServiceMgr
+            return H1Calibration.getCalibDBParams(flags,finder,mainparam,input,onlyCellWeight,isMC)
 
-        IOVDbSvc = CompFactory.IOVDbSvc  # IOVDbSvc
-        ServiceMgr += IOVDbSvc()
-        IOVDbSvc = ServiceMgr.IOVDbSvc
-        if isMC:
-           dbString="CALO_OFL"
-        else:
-           dbString="CALO"
-        if (folder,tag) not in H1Calibration.loaded_folder:
-            if H1Calibration.overrideFolder():
-                conddb.addFolder(dbString,folder+'<tag>'+tag+'</tag>',
-                                 className = 'CaloRec::ToolConstants')
-            else:
-                conddb.addFolder(dbString,folder,
-                                 className = 'CaloRec::ToolConstants')
-
-            H1Calibration.loaded_folder.append( (folder,tag) )
     
-def getCellWeightTool(finder="Cone",mainparam=0.4,input="Topo", onlyCellWeight=False,flags=None):
+def getCellWeightTool(flags, finder="Cone", mainparam=0.4, input="Topo", onlyCellWeight=False):
     """
     Returns a fully configured H1-style cell weighting calibration tool. This tool only uses cell weights!
     Parameters/type:
@@ -222,33 +183,15 @@ def getCellWeightTool(finder="Cone",mainparam=0.4,input="Topo", onlyCellWeight=F
     input/str      : input objects triggers calibration weights
     mainparam/float: size parameter for jet
     """
-    H1WeightToolCSC12Generic = CompFactory.H1WeightToolCSC12Generic  # CaloClusterCorrection
-    if flags is None:
-        #old-style case
-        from AthenaCommon.GlobalFlags import globalflags
-        isMC=globalflags.DataSource()!='data'
-        #-- DB access  
-        (key,folder,tag) = H1Calibration.getCalibDBParams(finder,mainparam,input, onlyCellWeight, isMC)
-        H1Calibration.loadCaloFolder(folder,tag, isMC)
-        #-- configure tool
-        toolName = finder + editParm(mainparam) + input
-        cellcalibtool = H1WeightToolCSC12Generic("H1Weight"+toolName)
-        cellcalibtool.DBHandleKey = key
-        # --
-        return cellcalibtool
-    else:
-        #ComponentAccumulator case
-        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-        result=ComponentAccumulator()
-        (key,folder,tag) = H1Calibration.getCalibDBParams(finder,mainparam,input, onlyCellWeight, flags.Input.isMC, flags)
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders(flags,folder,'CALO_OFL' if flags.Input.isMC else 'CALO',className = 'CaloRec::ToolConstants',
-                                tag=tag if H1Calibration.overrideFolder(flags) else None))
-        
-         #-- configure tool
-        toolName = finder + editParm(mainparam) + input
-        cellcalibtool = H1WeightToolCSC12Generic("H1Weight"+toolName)
-        cellcalibtool.DBHandleKey = key
-        result.setPrivateTools(cellcalibtool)
-        return result
+    result = ComponentAccumulator()
+    (key,folder,tag) = H1Calibration.getCalibDBParams(flags,finder,mainparam,input, onlyCellWeight, flags.Input.isMC)
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    result.merge(addFolders(flags,folder,'CALO_OFL' if flags.Input.isMC else 'CALO',className = 'CaloRec::ToolConstants',
+                            tag=tag if H1Calibration.overrideFolder(flags) else None))
 
+    #-- configure tool
+    toolName = finder + editParm(mainparam) + input
+    cellcalibtool = CompFactory.H1WeightToolCSC12Generic("H1Weight"+toolName,
+                                                         DBHandleKey = key)
+    result.setPrivateTools(cellcalibtool)
+    return result
