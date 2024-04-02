@@ -7,6 +7,7 @@ from .Inputs import input_EVNT, input_HITS, \
     input_RDO_BKG, \
     input_HITS_data_overlay, input_BS_SKIM, \
     input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino, \
+    input_HITS_minbias_low_fulltruth, input_HITS_minbias_high_fulltruth, \
     input_AOD
 from .Test import TestSetup, WorkflowRun, WorkflowTest, WorkflowType
 
@@ -155,9 +156,16 @@ class PileUpTest(WorkflowTest):
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 5"
 
+        if "StandardInTimeOnlyTruth" in extra_args:
+            input_high = input_HITS_minbias_high_fulltruth[run]
+            input_low = input_HITS_minbias_low_fulltruth[run]
+        else:
+            input_high = input_HITS_minbias_high[run]
+            input_low = input_HITS_minbias_low[run]
+
         self.command = \
             (f"Digi_tf.py --AMIConfig {ID} --jobNumber 1 --digiSeedOffset1 1 --digiSeedOffset2 1"
-             f" --inputHITSFile {input_HITS_neutrino[run]} --inputHighPtMinbiasHitsFile {input_HITS_minbias_high[run]} --inputLowPtMinbiasHitsFile {input_HITS_minbias_low[run]} --outputRDOFile myRDO.pool.root"
+             f" --inputHITSFile {input_HITS_neutrino[run]} --inputHighPtMinbiasHitsFile {input_high} --inputLowPtMinbiasHitsFile {input_low} --outputRDOFile myRDO.pool.root"
              f" --imf False {extra_args}")
 
         self.output_checks = [

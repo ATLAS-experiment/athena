@@ -34,7 +34,7 @@ def main():
             log.error("Parallel execution not supported for pile-up workflow")
             exit(1)
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
-            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
+            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, f"{options.extra_args} --digiSteeringConf StandardInTimeOnlyTruth --geometryVersion ATLAS-P2-RUN4-03-00-00 --conditionsTag default:OFLCOND-MC15c-SDR-14-05"))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:

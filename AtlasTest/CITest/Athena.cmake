@@ -38,9 +38,8 @@ atlas_add_citest( PileUpPresamplingRun2
 atlas_add_citest( PileUpPresamplingRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
 
-# TODO: pending inputs on CVMFS
-# atlas_add_citest( PileUpPresamplingRun4
-#    SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
+atlas_add_citest( PileUpPresamplingRun4FullTruth
+   SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' )
 
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA True --conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
