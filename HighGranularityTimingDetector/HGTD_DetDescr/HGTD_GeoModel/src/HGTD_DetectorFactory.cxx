@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /*  Three-ring detector layout, created by Christian and David
@@ -763,7 +763,7 @@ std::array< PositionsInQuadrant, 4 > HGTD_DetectorFactory::prepareLayersFromQuad
 // backward compatibility to pre-TDR two-ring layouts
 // 3-ring layout differ from 2-ring here.
 std::string HGTD_DetectorFactory::formModuleName( int layer, int quadrant, unsigned int maxrows, int row, int mod,
-                                                  ModulePosition module,
+                                                  const ModulePosition& module,
                                                   double& myx, double& myy, double& myrot, int& phi, int& eta ) {
 
     std::string module_string = "";

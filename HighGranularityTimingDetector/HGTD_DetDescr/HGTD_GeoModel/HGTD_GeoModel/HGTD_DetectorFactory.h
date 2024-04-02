@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_GEOMODEL_HGTD_DETECTORFACTORY_H
@@ -95,7 +95,7 @@ private:
   std::array< PositionsInQuadrant, 4 > prepareLayersFromQuadrants( unsigned int ) ;
   PositionsInQuadrant prepareQuadrantsFromRows( int layer, unsigned int maxRow );
   std::string formModuleName( int layer, int quadrant, unsigned int maxrows, int row, int mod,
-              ModulePosition module, double & myx, double & myy, double & myrot,
+              const ModulePosition& module, double & myx, double & myy, double & myrot,
               int & phi, int & eta ) ;
 
   // 3-ring layout
