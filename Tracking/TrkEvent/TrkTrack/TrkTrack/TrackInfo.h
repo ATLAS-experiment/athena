@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRKTRACK_TRACKINFO_H
@@ -279,7 +279,7 @@ public:
 
   /**
    * Rule of 6 : default ctor, copy/move ctor
-   * copy/move assignement
+   * copy/move assignment
    */
   TrackInfo() = default;
   TrackInfo(const TrackInfo&) = default;
