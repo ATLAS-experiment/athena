@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::HEC::HECGeometry
@@ -155,7 +155,7 @@ namespace LArG4 {
           const G4LogicalVolume * logicalWorld = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume()->GetLogicalVolume();
           const G4VPhysicalVolume *thePhysicalVolume = G4PhysicalVolumeStore::GetInstance()->GetVolume("LArMgr::LAr::HEC::Mother",false);
           int level=0;
-          if(this->checkDaughters(logicalWorld, thePhysicalVolume,level))
+          if(thePhysicalVolume && this->checkDaughters(logicalWorld, thePhysicalVolume,level))
             {
               m_g4historyDepth=level+1;
               m_depthHist=true;
@@ -167,7 +167,7 @@ namespace LArG4 {
             {
               const G4VPhysicalVolume *thePhysicalVolume2 = G4PhysicalVolumeStore::GetInstance()->GetVolume("LArMgr::LAr::HEC::LiquidArgon",false);
               int level2=0;
-              if(this->checkDaughters(logicalWorld, thePhysicalVolume2,level2))
+              if(thePhysicalVolume2 && this->checkDaughters(logicalWorld, thePhysicalVolume2,level2))
                 {
                   m_g4historyDepth=level2;
                   m_depthHist=true;
