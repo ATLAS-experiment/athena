@@ -68,20 +68,10 @@ else:
       opts.fromdb = None
 
  ## let command line decide if one wants to enable PerfMon
-   if opts.do_pmon:
+   if opts.pmon:
       import PerfMonComps.PerfMonFlags as _pmf
-      _pmf._decode_pmon_opts(opts.do_pmon)
+      _pmf._decode_pmon_opts(opts.pmon.split(','))
 
- ## now is a good time to tweak the event selector according to command line opt
-   if opts.nbr_repeat_evts:
-      try:
-         from PerfMonComps.PerfMonEventSelector import repeatEvents
-         repeatEvents(nbrReplays=opts.nbr_repeat_evts)
-      except ImportError as err:
-         # not enough karma (probably b/c of runtime/compiletime deps. mix-up)
-         from AthenaCommon.Logging import logging
-         _msg.info( "Could not install the stammer eventloop selector" )
-      
  ## all symbols have been loaded, but nothing has been run, good time for debug
    if DbgStage.value == "init":
       hookDebugger()
