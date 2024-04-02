@@ -10,17 +10,18 @@ def BTagTrackAugmenterAlgCfg(
         flags,
         TrackCollection='InDetTrackParticles',
         PrimaryVertexCollectionName='PrimaryVertices',
-        prefix="btagIp_"):
+        prefix=None):
 
     acc = ComponentAccumulator()
-    name = ('BTagTrackAugmenter').lower() + prefix + PrimaryVertexCollectionName + TrackCollection
+    pfx_str = prefix or "btagIp_"
+    name = ('BTagTrackAugmenter').lower() + pfx_str + PrimaryVertexCollectionName + TrackCollection
 
     # -- create the track augmenter algorithm
     acc.addEventAlgo(CompFactory.Analysis.BTagTrackAugmenterAlg(
         name=name,
         TrackContainer=TrackCollection,
         PrimaryVertexContainer=PrimaryVertexCollectionName,
-        prefix=prefix,
+        prefix=pfx_str,
         TrackToVertexIPEstimator=acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags, 'TrkToVxIPEstimator') ),
         Extrapolator=acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
     ))
