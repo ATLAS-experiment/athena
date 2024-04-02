@@ -13,10 +13,10 @@ def ReadMyxAOD(evt):
 
 
         
-        acc_chargedFE_muon=ROOT.SG.AuxElement.ConstAccessor(
+        acc_chargedFE_muon=ROOT.SG.ConstAccessor(
             "vector<ElementLink<xAOD::MuonContainer>>"
         )("FE_MuonLinks") # accessor matches type in the aux branch
-        acc_neutralFE_muon=ROOT.SG.AuxElement.ConstAccessor(
+        acc_neutralFE_muon=ROOT.SG.ConstAccessor(
             "vector<ElementLink<xAOD::MuonContainer>>"
         )("FE_MuonLinks") # accessor matches type in the aux branch
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: share/xAODRootTest.py
 # Author: snyder@bnl.gov
@@ -59,13 +59,13 @@ def format_int_vec(v):
     l = [format_int(x) for x in v]
     return '[' + ','.join(l) + ']'
 accessors = {
-    'int'   :  (ROOT.SG.AuxElement.ConstAccessor(int), format_int),
-    'unsigned int'   :  (getattr (ROOT, 'SG::AuxElement::ConstAccessor<unsigned int>'), format_int),
-    'float' :  (ROOT.SG.AuxElement.ConstAccessor(float), format_float),
-    'std::vector<float>' : (getattr (ROOT, 'SG::AuxElement::ConstAccessor<std::vector<float> >'), format_float_vec),
-    'std::vector<int>' : (getattr (ROOT, 'SG::AuxElement::ConstAccessor<std::vector<int> >'), format_int_vec),
+    'int'   :  (ROOT.SG.ConstAccessor(int), format_int),
+    'unsigned int'   :  (getattr (ROOT, 'SG::ConstAccessor<unsigned int>'), format_int),
+    'float' :  (ROOT.SG.ConstAccessor(float), format_float),
+    'std::vector<float>' : (getattr (ROOT, 'SG::ConstAccessor<std::vector<float> >'), format_float_vec),
+    'std::vector<int>' : (getattr (ROOT, 'SG::ConstAccessor<std::vector<int> >'), format_int_vec),
     'ElementLink<DataVector<DMTest::C_v1> >' :
-               (ROOT.SG.AuxElement.ConstAccessor(cel_cls), format_el),
+               (ROOT.SG.ConstAccessor(cel_cls), format_el),
     }
 
 def dump_auxitem (x, auxid, f = sys.stdout):
@@ -235,7 +235,7 @@ class xAODTestDecor:
     def __init__ (self, decorName, offset=0, readPrefix = ''):
         self.readPrefix = readPrefix
         self.offset = offset
-        self.decor = ROOT.SG.AuxElement.Decorator(int)(decorName)
+        self.decor = ROOT.SG.Decorator(int)(decorName)
         return
 
     
@@ -257,7 +257,7 @@ class xAODTestPDecor:
     def __init__ (self, decorName, offset=0, readPrefix = ''):
         self.readPrefix = readPrefix
         self.offset = offset
-        self.decor = ROOT.SG.AuxElement.Decorator(int)(decorName)
+        self.decor = ROOT.SG.Decorator(int)(decorName)
         return
 
     

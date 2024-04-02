@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -73,9 +73,9 @@ template class std::vector<std::pair<unsigned int, unsigned int> >;
 #define ARGS1 (const std::string&)
 #define ARGS2 (const std::string&, const std::string&)
 #define INSTAN_TYPE(TYP) \
-  template class SG::ConstAuxElement::ConstAccessor<TYP>; \
-  template class SG::AuxElement::Accessor<TYP>; \
-  template class SG::ConstAuxElement::Decorator<TYP>; \
+  template class SG::ConstAccessor<TYP>; \
+  template class SG::Accessor<TYP>; \
+  template class SG::Decorator<TYP>; \
   template TYP& SG::AuxElement::auxdata<TYP> ARGS1; \
   template TYP& SG::AuxElement::auxdata<TYP> ARGS2; \
   template const TYP& SG::ConstAuxElement::auxdata<TYP> ARGS1 const; \

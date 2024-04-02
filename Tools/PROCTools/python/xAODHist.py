@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 import sys
@@ -104,7 +104,7 @@ def xAODHist(evt, phys=False, analysis=False, histfile=None):
 
             nTrueElectrons = 0
             nTruePhotons = 0
-            acc = ROOT.SG.AuxElement.ConstAccessor(
+            acc = ROOT.SG.ConstAccessor(
               'ElementLink< xAOD::TruthParticleContainer>')('truthParticleLink')
 
             if nElec > 0 and acc.isAvailable(electrons.at(0)):

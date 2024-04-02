@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxElement_test.cxx
@@ -108,7 +108,6 @@ void test1()
 {
   std::cout << "test1\n";
 
-  SG::AuxElement::ConstAccessor<int> ityp1_c ("anInt");
   SG::AuxElement::Accessor<int> ityp1 ("anInt");
   SG::AuxElement::Accessor<float> ftyp1 ("aFloat");
 
@@ -119,7 +118,6 @@ void test1()
   assert (b.trackIndices());
 
   assert (!ityp1.isAvailable(b));
-  assert (!ityp1_c.isAvailable(b));
   assert (!ityp1.isAvailableWritable(b));
 
   SG::AuxVectorBase v;
@@ -143,7 +141,6 @@ void test1()
   ityp1(b) = 3;
   ftyp1(b) = 1.5;
   assert (ityp1(b) == 3);
-  assert (ityp1_c(b) == 3);
   assert (ftyp1(b) == 1.5);
   assert (b.auxdata<int>("anInt") == 3);
   assert (b.auxdataConst<int>("anInt") == 3);
@@ -158,7 +155,6 @@ void test1()
   auxids.insert (ftyp1_id);
   assert (b.getAuxIDs() == auxids);
 
-  assert (ityp1_c.auxid() == ityp1_id);
   assert (ityp1.auxid() == ityp1_id);
   assert (ftyp1.auxid() == ftyp1_id);
 
@@ -230,21 +226,6 @@ void test1()
 
   v.setStore ((SG::IConstAuxStore*)&store);
   assert (ftyp1(cb) == 1.5);
-
-  SG::AuxElement::TypelessConstAccessor ftyp1a ("aFloat");
-  assert (ftyp1a.isAvailable (b3));
-  assert (*reinterpret_cast<const float*>(ftyp1a (b3)) == 1.5);
-  assert (*reinterpret_cast<const float*>(ftyp1a (v3, 6)) == 1.5);
-  assert ((reinterpret_cast<const float*>(ftyp1a.getDataArray (v3)))[6] == 1.5);
-
-  assert (ftyp1a.auxid() == ftyp1_id);
-
-  EXPECT_EXCEPTION (SG::ExcUnknownAuxItem,
-                    SG::AuxElement::TypelessConstAccessor ("adsasd"));
-  SG::AuxElement::TypelessConstAccessor x1 (typeid(int), "adsasd");
-  EXPECT_EXCEPTION (SG::ExcUnknownAuxItem,
-                    SG::AuxElement::TypelessConstAccessor (typeid(SG::AuxVectorBase),
-                                                           "x2"));
 }
 
 
@@ -678,7 +659,7 @@ void test_const1()
 {
   std::cout << "test_const1\n";
 
-  SG::ConstAuxElement::ConstAccessor<int> ityp1_c ("anInt");
+  SG::ConstAccessor<int> ityp1_c ("anInt");
 
   SG::ConstAuxElement b;
   assert (b.index() == 0);
@@ -724,18 +705,6 @@ void test_const1()
   SG::ConstAuxElement b3 = b2;
   assert (b3.index() == 0);
   assert (b3.container() == 0);
-
-  SG::ConstAuxElement::TypelessConstAccessor ityp1a ("anInt");
-  assert (ityp1a.isAvailable (b2));
-  assert (*reinterpret_cast<const int*>(ityp1a (b2)) == 123);
-  assert (ityp1a.auxid() == ityp1_id);
-
-  EXPECT_EXCEPTION (SG::ExcUnknownAuxItem,
-                    SG::ConstAuxElement::TypelessConstAccessor ("adsasdxyz"));
-  SG::ConstAuxElement::TypelessConstAccessor x1 (typeid(int), "adsasd");
-  EXPECT_EXCEPTION (SG::ExcUnknownAuxItem,
-                    SG::ConstAuxElement::TypelessConstAccessor (typeid(SG::AuxVectorBase),
-                                                                "x2"));
 }
 
 

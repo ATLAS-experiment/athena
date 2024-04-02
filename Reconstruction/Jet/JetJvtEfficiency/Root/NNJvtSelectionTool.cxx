@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetJvtEfficiency/NNJvtSelectionTool.h"
@@ -18,7 +18,7 @@ namespace CP {
     StatusCode NNJvtSelectionTool::initialize() {
         ATH_CHECK(JvtSelectionToolBase::initialize());
 
-        m_jvtAcc.emplace(m_jvtMoment.key());
+        m_jvtAcc = SG::ConstAccessor<float> (m_jvtMoment.key());
         if (m_jetContainer.empty()) {
             ATH_MSG_WARNING("No JetContainer set. This behaviour is deprecated");
             ATH_CHECK(m_jvtMoment.initialize(false));
@@ -55,6 +55,6 @@ namespace CP {
     }
 
     bool NNJvtSelectionTool::select(const xAOD::IParticle *jet) const {
-        return (*m_jvtAcc)(*jet) > m_cutMap(*jet);
+        return m_jvtAcc(*jet) > m_cutMap(*jet);
     }
 } // namespace CP

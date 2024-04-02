@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETJVTEFFICIENCY_JVTSELECTIONTOOLBASE_H
@@ -10,7 +10,6 @@
 #include "AsgTools/PropertyWrapper.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "xAODJet/JetContainer.h"
-#include <optional>
 
 namespace CP {
     class JvtSelectionToolBase : public asg::AsgTool, virtual public IAsgSelectionTool {
@@ -42,7 +41,7 @@ namespace CP {
         // The index to set in the info. I suspect that this is always 0 but better to be safe
         int m_cutPos = 0;
         // The accessor for the jet eta
-        std::optional<SG::AuxElement::ConstAccessor<float>> m_etaAcc;
+        SG::ConstAccessor<float> m_etaAcc { m_jetEtaName };
         // Check the range
         virtual bool isInRange(const xAOD::IParticle *jet) const;
         // Check the score

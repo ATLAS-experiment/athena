@@ -5487,7 +5487,7 @@ def format_el(x):
     if not key:
         key = '(%d)' % x.key()
     return '%s[%d]' % (key, x.index())
-char_accessor_ = getattr (ROOT, 'SG::ConstAuxElement::ConstAccessor<char>')
+char_accessor_ = getattr (ROOT, 'SG::ConstAccessor<char>')
 class char_accessor:
     def __init__ (self, name):
         self.ac = char_accessor_ (name)
