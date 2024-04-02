@@ -1591,11 +1591,11 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processTgcSta
         // xy -> yz  rotation
         Amg::Transform3D tTr = Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2);
         std::unique_ptr<Trk::LayerArray> tgcLayerArray{processTGCComponent(cv, *tgcBounds, tTr, cache)};
+        printVolumeBounds("TGC envelope bounds:", *tgcBounds);
         auto envelope = std::make_unique<Trk::Volume>(makeTransform(tTr), tgcBounds.release());
         
         // ready to build the station prototype
         auto tgc_station = std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, tgcLayerArray.release(), nullptr, tgc_name);
-        printVolumeBounds("TGC envelope bounds:", *tgcBounds);
         return tgc_station;
     } else {
         ATH_MSG_WARNING( tgc_name << ": TGC component not a trapezoid ?  no prototype built ");
