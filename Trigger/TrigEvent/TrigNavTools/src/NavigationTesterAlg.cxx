@@ -2,6 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <GaudiKernel/StatusCode.h>
 #include <set>
 #include <algorithm>
 #include <iterator>
@@ -110,21 +111,8 @@ namespace Trig {
             for (auto& c : combsRun3 ) {
                 ATH_MSG_DEBUG(c);
             }
-            if ( std::regex_match(chain, SpecialCases::gammaXeChain)) {
-                for ( auto f2: featuresRun2 ) {
-                    bool found=false;
-                    for ( auto f3: featuresRun3 ) {
-                        ATH_MSG_DEBUG("Serial set of features " << *(f3.link) );
-                        if ( *(f2.link) == *(f3.link))
-                            found = true;
-                    }
-                    if ( not found ) {
-                        ATH_MSG_ERROR("Missing feature in Run 3 that is present in Run 2 " <<  *(f2.link) );
-                        if ( m_failOnDifference ) {
-                            return StatusCode::FAILURE;
-                        } 
-                    }
-                }
+            if ( std::regex_match(chain, SpecialCases::gammaXeChain) ) {
+                ATH_CHECK(verifyFlatContent(featuresRun2, featuresRun3, chain));
             } else {
                 if ( m_verifyCombinationsSize ) {
                     ATH_CHECK(verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain));
@@ -138,6 +126,25 @@ namespace Trig {
         }
         return StatusCode::SUCCESS;
     }
+
+    StatusCode NavigationTesterAlg::verifyFlatContent(std::vector<TrigCompositeUtils::LinkInfo<DataVector<xAOD::IParticle> > > run2, std::vector<TrigCompositeUtils::LinkInfo<DataVector<xAOD::IParticle> > > run3, const std::string& chain) const {
+        for ( auto f2: run2 ) {
+            bool found=false;
+            for ( auto f3: run3 ) {
+                ATH_MSG_DEBUG("Serial set of features " << *(f3.link) );
+                if ( *(f2.link) == *(f3.link))
+                    found = true;
+            }
+            if ( not found ) {
+                ATH_MSG_ERROR("Missing feature in Run 3 that is present in Run 2 " <<  *(f2.link) << " chain " << chain << " enable DEBUG to see more details" );
+                if ( m_failOnDifference ) {
+                    return StatusCode::FAILURE;
+                } 
+            }
+        }
+        return StatusCode::SUCCESS;
+    }
+
 
     StatusCode NavigationTesterAlg::verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const {
         if (run2.size() > run3.size()) { // in Run3 we do not use decision per RoI but per object. For single RoI there is more than one object we will have more combinations in Run3

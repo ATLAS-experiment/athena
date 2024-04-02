@@ -6,5 +6,4 @@
 namespace SpecialCases {
   // config hacks patterns
   const std::regex gammaXeChain{"HLT_g.*_xe.*"};
-  const std::regex gammaXeChainGammaTE{"EF_g.*"};
 }
