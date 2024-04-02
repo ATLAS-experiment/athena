@@ -202,7 +202,7 @@ class ExecStep(Step):
                 if self.type == 'athenaHLT':
                     athenaopts += ' --perfmon'
                 elif self.type == 'athena':
-                    athenaopts += ' --pmon=fastmonmt'
+                    athenaopts += ' --perfmon=fastmonmt'
             if self.malloc:
                 athenaopts += " --stdcmalloc "
 
