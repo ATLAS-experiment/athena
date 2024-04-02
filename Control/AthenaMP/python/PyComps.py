@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #-----Python imports---#
 import os, sys, shutil
@@ -8,7 +8,7 @@ from AthenaCommon.Logging import log as msg
 
 from AthenaMP.AthenaMPConf import AthMpEvtLoopMgr
 class MpEvtLoopMgr(AthMpEvtLoopMgr):
-    def __init__(self, name='AthMpEvtLoopMgr', **kw):
+    def __init__(self, name='AthMpEvtLoopMgr', isPileup=False, **kw):
 
         from AthenaCommon.AppMgr import theApp
         self.nThreads = theApp._opts.threads
@@ -27,13 +27,8 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
         self.Strategy = jp.AthenaMPFlags.Strategy()
         self.PollingInterval = jp.AthenaMPFlags.PollingInterval()
         self.MemSamplingInterval = jp.AthenaMPFlags.MemSamplingInterval()
-
-        from AthenaCommon.DetFlags import DetFlags
-        if DetFlags.pileup.any_on() or DetFlags.overlay.any_on():
-            self.IsPileup = True
-        else:
-            self.IsPileup = False
         self.EventsBeforeFork = jp.AthenaMPFlags.EventsBeforeFork()
+        self.IsPileup = isPileup
 
         if self.Strategy=='EventService':
             self.EventsBeforeFork = 0
