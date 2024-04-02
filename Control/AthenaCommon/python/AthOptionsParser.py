@@ -134,9 +134,6 @@ def getArgumentParser():
     g.add_argument('--skipEvents', metavar='N', type=int,
                    help='number of events to skip')
 
-    g.add_argument('-r', '--repeat-evts', metavar='N', type=int, dest='nbr_repeat_evts',
-                   help='number of times to repeat each event from a given input file')
-
     g.add_argument('-c', '--command', metavar='CMD',
                    help='one-liner, runs before any scripts')
 
