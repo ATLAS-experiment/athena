@@ -23,8 +23,6 @@ public:
 
     virtual ~AuxElementBranch() = default;
 
-    void setDefault(const T& val) override;
-
 private:
     SG::AuxElement::ConstAccessor<T> m_acc;
     bool m_hasDefault;
