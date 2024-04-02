@@ -147,7 +147,7 @@ def JETM12AugmentationToolsCfg(flags):
                                                                                               name = "TrackSelectionTool500_JETM12",
                                                                                               minPt = 500.))
     #Nonprompt_All_MaxWeight TTVA
-    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
+    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     toolkwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(flags))
 
     toolkwargs["name"] = "TrackIsolationToolPt500"
