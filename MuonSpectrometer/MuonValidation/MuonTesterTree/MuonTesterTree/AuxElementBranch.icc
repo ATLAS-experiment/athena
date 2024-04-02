@@ -17,10 +17,6 @@ template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement* p) 
 }
 template <class T> void AuxElementBranch<T>::operator+=(const SG::AuxElement& p) { push_back(p); }
 template <class T> void AuxElementBranch<T>::operator+=(const SG::AuxElement* p) { push_back(p); }
-template <class T> void AuxElementBranch<T>::setDefault(const T& val) {
-    VectorBranch<T>::setDefault(val);
-    m_hasDefault = true;
-}
 template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement& p) {
     if (m_acc.isAvailable(p))
         VectorBranch<T>::push_back(m_acc(p));
