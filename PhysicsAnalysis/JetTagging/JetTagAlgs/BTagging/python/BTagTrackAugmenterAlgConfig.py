@@ -6,23 +6,23 @@ from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCf
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 
 
-def BTagTrackAugmenterAlgCfg(flags, TrackCollection = 'InDetTrackParticles', PrimaryVertexCollectionName = 'PrimaryVertices', prefix=None, **options):
+def BTagTrackAugmenterAlgCfg(
+        flags,
+        TrackCollection='InDetTrackParticles',
+        PrimaryVertexCollectionName='PrimaryVertices',
+        prefix="btagIp_"):
 
     acc = ComponentAccumulator()
-    # Minimal configuration
-    # @TODO why is options re-initialised to an empty dict ?
-    options = {}
-    options['name'] = ('BTagTrackAugmenter').lower() + PrimaryVertexCollectionName + TrackCollection
-    options['TrackContainer'] = TrackCollection
-    options['PrimaryVertexContainer'] = PrimaryVertexCollectionName
-    if 'TrackToVertexIPEstimator' not in  options :
-        options.setdefault('TrackToVertexIPEstimator',acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags, 'TrkToVxIPEstimator') ))
-    if 'Extrapolator' not in options :
-        options.setdefault('Extrapolator', acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    if prefix is not None:
-        options['prefix'] = prefix
+    name = ('BTagTrackAugmenter').lower() + prefix + PrimaryVertexCollectionName + TrackCollection
 
     # -- create the track augmenter algorithm
-    acc.addEventAlgo(CompFactory.Analysis.BTagTrackAugmenterAlg(**options))
+    acc.addEventAlgo(CompFactory.Analysis.BTagTrackAugmenterAlg(
+        name=name,
+        TrackContainer=TrackCollection,
+        PrimaryVertexContainer=PrimaryVertexCollectionName,
+        prefix=prefix,
+        TrackToVertexIPEstimator=acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags, 'TrkToVxIPEstimator') ),
+        Extrapolator=acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
+    ))
 
     return acc
