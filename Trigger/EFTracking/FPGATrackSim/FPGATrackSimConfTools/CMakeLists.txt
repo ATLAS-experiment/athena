@@ -37,7 +37,7 @@ atlas_add_test( FPGATrackSimConfigFlags_test
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimConfigFlags
                 POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( FPGATrackSimWorflows_test
+atlas_add_test( FPGATrackSimWorkflows_test
                 SCRIPT FPGATrackWorkflow.sh
                 POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 300)
