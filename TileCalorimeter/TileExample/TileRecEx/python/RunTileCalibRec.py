@@ -50,8 +50,6 @@ def getArgumentParser(flags):
     parser.add_argument('--dumpArguments', action='store_true', help='Print arguments and exit')
     parser.add_argument('--outputDirectory', default='.', help='Output directory for produced files')
 
-    parser.add_argument('--perfmon', action='store_true', help='Run perfmon')
-
     parser.add_argument('-v', '--version', type=str, default='0', help='Version to be used in output files for ntuple and monitoring')
 
     parser.add_argument('--calib', default=False, help='Calculate calibration constants and store them in ROOT file', action=argparse.BooleanOptionalAction)
@@ -256,10 +254,6 @@ if __name__=='__main__':
 
     flags.needFlagsCategory('Tile')
 
-    # Set up perfmon
-    if args.perfmon:
-        flags.PerfMon.doFullMonMT=True
-
     if args.preExec:
         log.info('Executing preExec: %s', args.preExec)
         exec(args.preExec)
@@ -288,11 +282,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
-
-    # Add perfmon
-    if args.perfmon:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
 
     # =======>>> Set up the File (BS | POOL) reading
     if flags.Input.Format is Format.BS:
