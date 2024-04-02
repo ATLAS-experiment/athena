@@ -21,6 +21,7 @@
 #include "GeoModelKernel/GeoNodeAction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include <vector>
+#include <variant>
 
 
 class GeoVPhysVol;
@@ -46,12 +47,38 @@ public:
 
 
 /**
+ * @brief Define a simple callback for each volume found,
+ *        without keeping track of geometrical transforms.
+ *        It may be more convenient to use the
+ *        templated versions below.
+ */
+class IGeoVisitVolumesNoXformAction
+{
+public:
+  virtual ~IGeoVisitVolumesNoXformAction() = default;
+  virtual void operator() (int id,
+                           const std::string& name,
+                           const GeoVPhysVol* volume) = 0;
+};
+
+
+/**
  * @brief Visitor to process all volumes under a GeoModel node.
+ *
+ * Can take either an @c IGeoVisitVolumesAction or 
+ * an @c IGeoVisitVolumesNoXformAction.  In the latter case, we don't
+ * keep track of the geometrical transforms.  It can be used as a faster
+ * option if you only care about the list of volumes but not where they're
+ * located.
  */
 class GeoVisitVolumes : public GeoNodeAction
 {
 public:
+  /// Initialize to visit volumes keeping track of transformations.
   GeoVisitVolumes (IGeoVisitVolumesAction& action, int depthLimit = 1);
+
+  /// Initialize to visit volumes withoutkeeping track of transformations.
+  GeoVisitVolumes (IGeoVisitVolumesNoXformAction& action, int depthLimit = 1);
 
   /// Handles a Transform.
   virtual void handleTransform (const GeoTransform *xform) override;
@@ -79,12 +106,14 @@ public:
 
 
 private:
-   GeoVisitVolumes (const GeoVisitVolumes &right) = delete;
-   GeoVisitVolumes & operator=(const GeoVisitVolumes &right) = delete;
+  GeoVisitVolumes (const GeoVisitVolumes &right) = delete;
+  GeoVisitVolumes & operator=(const GeoVisitVolumes &right) = delete;
 
-   void handleVol (const GeoVPhysVol *vol);
+  void handleVol (const GeoVPhysVol *vol);
 
-   IGeoVisitVolumesAction& m_action;
+  /// Callback.
+  std::variant<IGeoVisitVolumesAction*,
+               IGeoVisitVolumesNoXformAction*> m_action;
 
   /// A pointer to a name tag.  If the volume is named.
   const GeoNameTag *m_nameTag;
@@ -123,6 +152,27 @@ public:
 };
 
 
+/**
+ * @brief Callback object calling a templated functional.
+ *
+ * This version doesn't supply transformation information.
+ */
+template <class FUNCTION>
+class GeoVisitVolumesNoXformAction
+  : public IGeoVisitVolumesNoXformAction
+{
+public:
+  GeoVisitVolumesNoXformAction (FUNCTION f) : m_f (f) {}
+  virtual void operator() (int id,
+                           const std::string& name,
+                           const GeoVPhysVol* volume) override
+  {
+    m_f (id, name, volume);
+  }
+  FUNCTION m_f;
+};
+
+
 
 /**
  * @brief Template helper for running the visitor.
@@ -131,6 +181,20 @@ template <class FUNCTION>
 void geoVisitVolumes (FUNCTION f, const GeoGraphNode* node, int depthLimit = 1)
 {
   GeoVisitVolumesAction<FUNCTION> act (f);
+  GeoVisitVolumes visitor (act, depthLimit);
+  node->exec (&visitor);
+}
+
+
+/**
+ * @brief Template helper for running the visitor.
+ *
+ * This version doesn't supply transformation information.
+ */
+template <class FUNCTION>
+void geoVisitVolumesNoXform (FUNCTION f, const GeoGraphNode* node, int depthLimit = 1)
+{
+  GeoVisitVolumesNoXformAction<FUNCTION> act (f);
   GeoVisitVolumes visitor (act, depthLimit);
   node->exec (&visitor);
 }
@@ -152,6 +216,22 @@ typedef std::vector<std::pair<const GeoVPhysVol*, GeoTrf::Transform3D> >
 GeoVolumeVec_t geoGetVolumes (const GeoGraphNode* node,
                               int depthLimit = 1,
                               int sizeHint = 20);
+
+
+/**
+ * @brief Return the child volumes.
+ * @param node Root of the graph to traverse.
+ * @param depthLimit Depth limit for the traversal.
+ * @param sizeHint Hint about the number of volumes to be returned,
+ *                 to allow avoiding resizes of the output vector.
+ *
+ * Returns a vector of volumes in the graph.  The same volume may be
+ * returned multiple times in the case of a GeoSerialTransform.
+ */
+std::vector<const GeoVPhysVol*>
+geoGetVolumesNoXform (const GeoGraphNode* node,
+                      int depthLimit = 1,
+                      int sizeHint = 20);
 
 
 #endif // not GEOMODELUTILITIES_GEOVISITVOLUMES_H
