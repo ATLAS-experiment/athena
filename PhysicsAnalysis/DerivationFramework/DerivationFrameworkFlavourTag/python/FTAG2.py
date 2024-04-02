@@ -119,10 +119,12 @@ def FTAG2Cfg(flags):
     FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper)
 
     # Add truth containers
-    if flags.Input.isMC and flags.Trigger.EDMVersion>=0:
+    if flags.Input.isMC:
         FtagBaseContent.add_truth_to_SlimmingHelper(FTAG2SlimmingHelper)
-        from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
-        acc.merge(HLTJetFTagDecorationCfg(flags))
+        if flags.Trigger.EDMVersion == 3:
+            # Add truth labels to Run 3 trigger jets
+            from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
+            acc.merge(HLTJetFTagDecorationCfg(flags))
 
     # Add ExtraVariables
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG2SlimmingHelper)

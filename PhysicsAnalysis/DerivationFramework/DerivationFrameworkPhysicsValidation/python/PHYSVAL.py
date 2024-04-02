@@ -226,8 +226,8 @@ def PHYSVALCfg(flags):
         PHYSVALSlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupEvents','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         PHYSVALSlimmingHelper.SmartCollections += ['AntiKt4TruthJets']
 
-        if flags.Trigger.EDMVersion>=0:
-            # Decorate HLT jets with truth labels
+        if flags.Trigger.EDMVersion == 3:
+            # Decorate Run 3 HLT jets with truth labels
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
             acc.merge(HLTJetFTagDecorationCfg(flags))
 

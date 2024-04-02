@@ -75,7 +75,7 @@ def TLACommonAugmentationsCfg(ConfigFlags,**kwargs):
     from DerivationFrameworkTLA.TLACommonConfigFunctions import TLAJetCommonCfg
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg, HLTJetFTagDecorationCfg
     acc.merge(TLAJetCommonCfg(ConfigFlags))
-    if ConfigFlags.Input.isMC:
+    if ConfigFlags.Input.isMC and ConfigFlags.Trigger.EDMVersion == 3:
         acc.merge(HLTJetFTagDecorationCfg(ConfigFlags))
 
     FTagJetColl = ['AntiKt4EMPFlowJets']
