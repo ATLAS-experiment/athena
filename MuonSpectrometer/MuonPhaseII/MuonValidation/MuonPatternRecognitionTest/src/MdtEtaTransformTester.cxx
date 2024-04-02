@@ -112,7 +112,7 @@ namespace MuonValR4 {
             /// Global coordinates
             m_out_gen_Eta   = genParticlePtr->momentum().eta();
             m_out_gen_Phi= genParticlePtr->momentum().phi();
-            m_out_gen_Pt= genParticlePtr->momentum().pt();
+            m_out_gen_Pt= genParticlePtr->momentum().perp();
             m_out_gen_nHits = hits.size(); 
             unsigned int nMdt{0}, nRpc{0}, nTgc{0}; 
             for (const xAOD::MuonSimHit* hit : hits){
