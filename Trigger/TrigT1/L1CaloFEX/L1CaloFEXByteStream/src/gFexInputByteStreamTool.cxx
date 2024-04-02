@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -578,7 +578,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     ilbit   = ilow%32;
                     if(ilword == ihword){
                         mask = 0x00000FFF;
-                        mask = mask << (ilow);
+                        mask = mask << (ilbit);
                         etowerData[ntower] = etowerData[ntower] | ( (Xfiber[iFiber][ihword] & mask) >> ilbit );
                         // undo multilinear decoding
                         if( do_lconv){
@@ -621,7 +621,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
   
                     if(ilword == ihword){
                         mask = 0x00000FFF;
-                        mask = mask << ilow;
+                        mask = mask << ilbit;
                         htowerData[ntower] = htowerData[ntower] | ( (hTREXval & mask) >> (ilbit) );
                     } 
                     else if ( ihbit == 7 ) {
@@ -863,7 +863,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     lHECval = Xfiber[iFiber][ilword];
                     if(ilword == ihword){
                         mask = 0x00000FFF;
-                        mask = mask << ilow;
+                        mask = mask << ilbit;
                         htowerData[ntower] = htowerData[ntower] | ( (hHECval & mask) >> (ilbit) );
                     } 
                     else if ( ihbit == 7 ) {
