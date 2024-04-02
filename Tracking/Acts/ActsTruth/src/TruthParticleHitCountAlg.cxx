@@ -150,8 +150,7 @@ namespace ActsTrk
                            return n_measurements<n_hits_min;
                         });
 
-    assert( truth_particles_without_enough_measurements <truth_particle_hit_counts->size());
-    m_nTruthParticlesWithHits += (truth_particle_hit_counts->size() - truth_particles_without_enough_measurements);
+    m_nTruthParticlesWithHits += truth_particle_hit_counts->size();
 
     ATH_MSG_INFO("Truth particles with hits:" << truth_particle_hit_counts->size()
                  << ", without enough hits: " << truth_particles_without_enough_measurements);
