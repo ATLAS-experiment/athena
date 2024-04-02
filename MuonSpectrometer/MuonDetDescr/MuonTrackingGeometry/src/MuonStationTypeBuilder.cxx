@@ -259,9 +259,9 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         const Trk::CuboidVolumeBounds* compBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(compVol[i]->volumeBounds()));
         // check return to comply with coverity
         if (!compBounds) {
-            ATH_MSG_ERROR(__FILE__<<":"<<__LINE__<<" box station component does not return cuboid shape "
-                        <<typeid(compVol[i]->volumeBounds()).name());
-            throw std::runtime_error("Tief in den wellen. Ich habe so viele mandarineeen");
+	    const Trk::VolumeBounds& vBounds = compVol[i]->volumeBounds();
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" box station component does not return cuboid shape "
+                            <<typeid(vBounds).name());
             continue;
         }
         //
@@ -583,7 +583,8 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         // low edge of current volume
         Xcurr = lowX;
         if (!compCubBounds && !compTrdBounds) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Unknown volume shape "<<typeid(compVol[i]->volumeBounds()).name());
+	    const Trk::VolumeBounds& vBounds = compVol[i]->volumeBounds();
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Unknown volume shape "<<typeid(vBounds).name());
             return nullptr;
         }
         // close spacer if no further components
