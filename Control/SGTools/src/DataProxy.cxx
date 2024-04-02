@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm> 
@@ -280,15 +280,6 @@ void DataProxy::resetBoundHandles (bool hard) {
     // Early exit if the list is empty.
     if (!m_boundHandles) return;
 
-    // Remove empty entries.
-    handleList_t::iterator it =
-      std::remove (m_handles.begin(), m_handles.end(), nullptr);
-    m_handles.erase (it, m_handles.end());
-    if (m_handles.empty()) {
-      m_boundHandles = false;
-      return;
-    }
-
     // Make a copy and drop the lock, so we're not holding the lock
     // during the callback.
     handles = m_handles;
@@ -302,12 +293,9 @@ void DataProxy::resetBoundHandles (bool hard) {
 void DataProxy::unbindHandle(IResetable *ir) {
   assert(ir);
   lock_t lock (m_mutex);
-  //  std::cout << "unbindHandle " << ir << std::endl;
   auto ifr = find(m_handles.begin(), m_handles.end(), ir );
-  //reset the entry for ir instead of deleting it, so this can be called
-  //within a m_handles loop
   if (ifr != m_handles.end()) {
-    *ifr=0; 
+    m_handles.erase(ifr);
     if (IProxyDict* store = m_store)
       store->unboundHandle(ir);
   }
