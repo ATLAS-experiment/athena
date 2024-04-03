@@ -35,10 +35,16 @@ LArSamples::TimingClass::~TimingClass()
 void LArSamples::TimingClass::timePerFebAllFebs(const std::string& nrun, const std::string& name)
 // ***************************************************************************** //
 {
-
   ofstream file; 
   string fname = "TimingFile" + nrun + "_" + name + ".txt"; 
-  file.open(fname.c_str(), ios::out);
+
+  if(FileEmptyCheck(fname))
+  {
+    std::cout<<" +++++ The file:" << fname <<" is empty, time-fit will not be performed +++"<<std::endl;
+    return;
+  }
+  else 
+    file.open(fname.c_str(), ios::out);
 
   for( uint i = 0; i < m_interface->nChannels(); i++ ){ 
     if( i%10000 == 0 ) cout << "Processing entry " << i << endl;
@@ -89,10 +95,18 @@ void LArSamples::TimingClass::timePerFebAllFebs(const std::string& nrun, const s
 }
 
 // ********************************************************************************** //
+bool LArSamples::TimingClass::FileEmptyCheck(const std::string& fname)
+// ********************************************************************************** //
+{
+  std::ifstream file(fname);
+  return file.peek() == std::ifstream::traits_type::eof();
+}
+
+// ********************************************************************************** //
 void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, const std::string& name)
 // ********************************************************************************** //
 {
-  
+
   for( int d = 0; d < 2; d++ ){ //side 
     for( int ft = 0; ft < 32; ft++ ){ //feedthrough
       for( int sl = 0; sl < 15; sl++ ) //slot
@@ -108,6 +122,13 @@ void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, cons
   std::vector< std::vector<double> > myvec;
   string tfilename; 
   tfilename = "TimingFile" + nrun + "_" + name + ".txt"; 
+
+  if(FileEmptyCheck(tfilename))
+  {
+    std::cout<<" +++++ The file:" << tfilename <<" is empty, time-fit will not be performed +++"<<std::endl;
+    return ;
+  }
+
   myvec = readTimingFiles(tfilename);
 
   string Filename = "OFCTime_PerFEB_" + name + ".root"; 
@@ -259,7 +280,7 @@ void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, cons
 void LArSamples::TimingClass::Time(int dete, const std::string& nrun)
 /************************************************************/
 {
-  
+
   TH1F *h = new TH1F( Form("h_%d", dete) , Form("h_%d", dete) , 160, -20, 20 );
   h->Sumw2();
 
@@ -425,7 +446,6 @@ void LArSamples::TimingClass::PlotFebAverageTime(const std::string& nrun, const 
 void LArSamples::TimingClass::MergeFebTime( const std::string& nrun )
 // ******************************************************* //
 {
-  
   ofstream mergedfile;
   string name = "FEB_time_fitMean_" + nrun + ".txt";
   mergedfile.open( name.c_str(), ios::out );
@@ -435,6 +455,12 @@ void LArSamples::TimingClass::MergeFebTime( const std::string& nrun )
   for( int i = 0; i < 4; i++ ){
     string tmpname = detparts[i]; 
     string file = "FEB_time_fitMean_" + nrun + "_" + tmpname + ".txt";    
+
+  if(FileEmptyCheck(file))
+  {
+    std::cout<<" +++++ The file:" << tmpname <<" is empty, no merging FEB time will be performed +++"<<std::endl;
+    return ;
+  }
     
     ifstream f( file.c_str(), ios::in ); 
     while( !f.eof() ){	 
@@ -683,7 +709,6 @@ void LArSamples::TimingClass::PlotFebtime()
 bool LArSamples::TimingClass::EnergyThreshold( int calo, int layer, int quality, int ft, int slot, double energy, double time )
 // **************************************************************************************************************************** //
 { 
-
   bool pass = true;
   if( quality > 4000 ) pass = false; 
 
@@ -730,7 +755,6 @@ bool LArSamples::TimingClass::EnergyThreshold( int calo, int layer, int quality,
 vector< vector<double> > LArSamples::TimingClass::readTimingFiles(const std::string& file)
 // ******************************************************************************* //
 {  
-
   std::vector< std::vector <double> > Data; 
   
   ifstream f( file.c_str() );
@@ -804,7 +828,6 @@ vector< vector<double> > LArSamples::TimingClass::readTimingFiles(const std::str
 double LArSamples::TimingClass::getTimeWeightedMedian(std::vector<double> time, const std::vector<double>& time2, const std::vector<double>& weight, double totalW)
 // ********************************************************************************************************************************************* //
 { 
-  
   TGraph *g = new TGraph();
   double wmedian = -99., weights, w0 = -1., cumulWeights = 0.0; 
   int Size = time.size();
