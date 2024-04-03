@@ -148,22 +148,9 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             import ROOT
             # open the file using ROOT.TFile
             current_file = ROOT.TFile.Open( _get_pfn(filename) )
-            # open the DataHeader Container to read the number of entries
-            from PyUtils.PoolFile import PoolOpts
-            dataHeaderTree = current_file.Get(PoolOpts.TTreeNames.DataHeader)
-            if isinstance(dataHeaderTree, ROOT.TTree):
-                meta_dict[filename]['nentries'] = dataHeaderTree.GetEntriesFast()
-            else:
-                # check early to avoid scary ROOT read errors
-                if current_file.GetListOfKeys().Contains(PoolOpts.RNTupleNames.DataHeader) and ROOT.gROOT.GetVersionInt() < 63100:
-                    raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files") 
-                dataHeaderRNT = current_file.Get(PoolOpts.RNTupleNames.DataHeader)
-                if isinstance(dataHeaderRNT, ROOT.Experimental.RNTuple):
-                    meta_dict[filename]['nentries'] = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
-                else:
-                    meta_dict[filename]['nentries'] = None
 
             # get auto flush setting from the main EventData TTree
+            from PyUtils.PoolFile import PoolOpts
             collectionTree = current_file.Get(PoolOpts.TTreeNames.EventData)
             if isinstance(collectionTree, ROOT.TTree):
                 meta_dict[filename]['auto_flush'] = collectionTree.GetAutoFlush()
@@ -445,6 +432,24 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     else:
                         meta_dict[filename][key] = return_obj
 
+            try:
+                # get the number of events from EventStreamInfo
+                esi_dict = next(key for key in meta_dict[filename].keys() if "EventStreamInfo" in key)
+                meta_dict[filename]["nentries"] = meta_dict[filename][esi_dict]["numberOfEvents"]
+            except (KeyError, StopIteration):
+                # fallback to opening the DataHeader Container to read the number of entries
+                dataHeaderTree = current_file.Get(PoolOpts.TTreeNames.DataHeader)
+                if isinstance(dataHeaderTree, ROOT.TTree):
+                    meta_dict[filename]['nentries'] = dataHeaderTree.GetEntriesFast()
+                else:
+                    # check early to avoid scary ROOT read errors
+                    if current_file.GetListOfKeys().Contains(PoolOpts.RNTupleNames.DataHeader) and ROOT.gROOT.GetVersionInt() < 63100:
+                        raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
+                    dataHeaderRNT = current_file.Get(PoolOpts.RNTupleNames.DataHeader)
+                    if isinstance(dataHeaderRNT, ROOT.Experimental.RNTuple):
+                        meta_dict[filename]['nentries'] = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
+                    else:
+                        meta_dict[filename]['nentries'] = None
 
             if unique_tag_info_values and mode=='iov':
                 unique_tag_info_values = False
