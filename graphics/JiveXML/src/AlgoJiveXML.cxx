@@ -86,7 +86,7 @@ namespace JiveXML{
     /// Get the streaming tools
     if (m_onlineMode == true){
       ATH_MSG_INFO("Retrieving default server streaming tool");
-      ATH_CHECK(m_StreamToFileTool.retrieve());
+      ATH_CHECK(m_StreamToServerTool.retrieve());
    }
 
     /**
