@@ -69,7 +69,7 @@ namespace pool  {
     long long int m_counters[3];
     /// Default compression level
     int           m_defCompression;
-    /// Default compressionalgorithm 
+    /// Default compression algorithm
     int           m_defCompressionAlg;
     /// Default split level
     int           m_defSplitLevel;
@@ -131,7 +131,7 @@ namespace pool  {
     std::map<void*, indexLookup_t>                                         m_ntupleIndexMap;
 
   public:
-    /// Standard Constuctor
+    /// Standard Constructor
     RootDatabase();
 
     /// Standard destructor
@@ -238,14 +238,15 @@ namespace pool  {
     /// Execute Database Transaction action
     virtual DbStatus    transAct(Transaction::Action action);
 
-    RNTupleReader*        getNTupleReader(std::string ntuple_name);
+    /// return RNTupleReader for a given ntuple_name
+    RNTupleReader*        getNTupleReader(const std::string& ntuple_name);
 
     // translate index value to row# for a given RNTuple  
     uint64_t            indexLookup(RNTupleReader *ps, uint64_t idx_val);
 
     /// return NTupleWriter for a given ntuple_name
     /// create a new one if needed when create==true
-    RootAuxDynIO::IRNTupleWriter*  getNTupleWriter(std::string ntuple_name, bool create=false);
+    RootAuxDynIO::IRNTupleWriter*  getNTupleWriter(const std::string& ntuple_name, bool create=false);
 
   protected:
     // Execute any pending Fills before commit or flush

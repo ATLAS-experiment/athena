@@ -46,7 +46,7 @@ class RootDatabase;
 
 class RNTupleContainer : public DbContainerImp
 {
-  /// Definiton of a field info structure
+  /// Definition of a field info structure
   struct FieldDesc : public DbColumn
   {
     std::string fieldname;
@@ -147,9 +147,6 @@ class RNTupleContainer : public DbContainerImp
 
   /// Return the name of the container
   const std::string& getName() const { return m_name; }
-
-  /// Is this a container in a TBranch? (regular ones take the whole TTree)
-  // bool        isBranchContainer() const { return !m_branchName.empty(); }
 
   /// Return true if this branch container was updated and it's TTree needs to
   /// be Filled

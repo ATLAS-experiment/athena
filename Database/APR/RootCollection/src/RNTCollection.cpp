@@ -25,13 +25,10 @@
 #include "TMessage.h"
 #include "TDirectory.h"
 
+#include "ROOT/RNTuple.hxx"
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#else
-#include "ROOT/RNTuple.hxx"
 #endif
-#include "ROOT/RNTupleModel.hxx"
-using ROOT::Experimental::RNTupleModel;
 
 #include "CxxUtils/starts_with.h"
 
@@ -92,7 +89,7 @@ void  RNTCollection::delayedFileOpen( const std::string& method )
 std::unique_ptr< RNTupleReader > RNTCollection::getCollectionRNTuple()
 {
    if( m_file ) {
-      auto reader = RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName /* ,opts */ );
+      auto reader = RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
       if( reader )
          m_poolOut << coral::Debug << "Retrieved Collection RNTuple  \""
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )

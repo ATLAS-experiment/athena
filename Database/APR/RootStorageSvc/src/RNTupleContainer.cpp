@@ -187,13 +187,23 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          }
       }
       else if( mode & (pool::READ | pool::UPDATE) ) {
-         // create (and keep in the descriptin object) the rntuple field for reading
+         // create (and keep in the description object) the rntuple field for reading
          m_ntupleReader = m_rootDb->getNTupleReader(ntupleName);
+         if( m_ntupleReader ) {
+            log << DbPrintLvl::Debug << "Created container " << m_name
+                << " for RNTuple reading"
+                << DbPrint::endmsg;
+         } else {
+            log << DbPrintLvl::Error << "Could not create container " << m_name
+                << " for RNTuple reading"
+                << DbPrint::endmsg;
+            return Error;
+         }
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          for( auto& dsc : m_fieldDescs ) {
             dsc.view_p = std::make_unique<RNTupleView<void,true>>( m_ntupleReader->GetView<void>(dsc.fieldname, nullptr) );
             if( dsc.hasAuxStore() ) {
-               // atach RNTuple Reader (owned by the DB)
+               // Attach RNTuple Reader (owned by the DB)
                const std::string type_name = dsc.view_p->GetField().GetTypeName();
                dsc.auxdyn_reader = RootAuxDynIO::getNTupleAuxDynReader( dsc.fieldname, type_name, m_ntupleReader );
                // If we set up a reader, then disable aging
@@ -239,7 +249,7 @@ DbStatus RNTupleContainer::initObjectFieldDesc( FieldDesc& dsc )
             TClass *storeTClass = dsc.clazz->GetBaseClass("SG::IAuxStoreIO");
             if( storeTClass ) {
                // This is a class implementing SG::IAuxStoreIO
-               // Provide writers for its dynamic attibutes
+               // Provide writers for its dynamic attributes
                dsc.aux_iostore_IFoffset = dsc.clazz->GetBaseClassOffset( storeTClass );
                // get rid of the AUX_POSTFIX dot at the end (converter to _ earlier)
                auto last = dsc.fieldname.end() - 1;
