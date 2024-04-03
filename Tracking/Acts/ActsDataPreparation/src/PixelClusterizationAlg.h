@@ -3,12 +3,16 @@
 */
 
 #include <ActsToolInterfaces/IPixelClusteringTool.h>
-#include "ClusterizationAlg.h"
+#include "details/ClusterizationAlg.h"
 
 namespace ActsTrk {
 
-class PixelClusterizationAlg : public ClusterizationAlg<IPixelClusteringTool> {
-    using ClusterizationAlg<IPixelClusteringTool>::ClusterizationAlg;
+class PixelClusterizationAlg : public ClusterizationAlg<IPixelClusteringTool, false> {
+  using ClusterizationAlg<IPixelClusteringTool, false>::ClusterizationAlg;
+};
+
+class PixelCacheClusterizationAlg : public ClusterizationAlg<IPixelClusteringTool, true> {
+  using ClusterizationAlg<IPixelClusteringTool, true>::ClusterizationAlg;
 };
 
 }

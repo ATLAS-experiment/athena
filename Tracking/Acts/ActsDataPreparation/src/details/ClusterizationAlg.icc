@@ -7,13 +7,14 @@
 
 namespace ActsTrk {
 
-template <typename IClusteringTool>
-ClusterizationAlg<IClusteringTool>::ClusterizationAlg(const std::string& name,
-				     ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {}
+template <typename IClusteringTool, bool useCache>
+ClusterizationAlg<IClusteringTool, useCache>::ClusterizationAlg(const std::string& name,
+								ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
+{}
 
-template <typename IClusteringTool>
-StatusCode ClusterizationAlg<IClusteringTool>::initialize()
+template <typename IClusteringTool, bool useCache>
+StatusCode ClusterizationAlg<IClusteringTool, useCache>::initialize()
 {
     ATH_MSG_DEBUG("Initializing " << name() << " ...");
 
@@ -30,20 +31,20 @@ StatusCode ClusterizationAlg<IClusteringTool>::initialize()
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
 
     //caching
-    ATH_CHECK(m_ClusterCache.initialize(m_cache_enabled));
-    ATH_CHECK(m_ClusterCacheBackend.initialize(m_cache_enabled));
+    ATH_CHECK(m_ClusterCache.initialize(useCache));
+    ATH_CHECK(m_ClusterCacheBackend.initialize(useCache));
 
     return StatusCode::SUCCESS;
 }
 
-template <typename IClusteringTool>
-StatusCode ClusterizationAlg<IClusteringTool>::execute(const EventContext& ctx) const
+template <typename IClusteringTool, bool useCache>
+StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventContext& ctx) const
 {
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto mon = Monitored::Group( m_monTool, timer );
 
     Cache_WriteHandle cacheHandle;
-    if(m_cache_enabled){
+    if constexpr (useCache) {
       cacheHandle = Cache_WriteHandle(m_ClusterCache, ctx);
       auto updateHandle = Cache_BackendUpdateHandle(m_ClusterCacheBackend, ctx);
       ATH_CHECK(updateHandle.isValid());
@@ -79,7 +80,7 @@ StatusCode ClusterizationAlg<IClusteringTool>::execute(const EventContext& ctx) 
         //obtain the write handle directly when we decide to process a given idhash
         //this will ensure that proper waiting 
         Cache_IDCLock cache_wh;
-        if(m_cache_enabled){
+        if constexpr (useCache) {
           //obtain a write handle
           auto tmp = cacheHandle->getWriteHandle(id);
           Cache_IDCLock::Swap(cache_wh, tmp);
@@ -93,7 +94,7 @@ StatusCode ClusterizationAlg<IClusteringTool>::execute(const EventContext& ctx) 
           auto prev_len = clusterContainer->size();
           ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx,*clusterContainer));
 
-          if(m_cache_enabled){
+          if constexpr (useCache) {
             //add to the cache
             ATH_CHECK(Cache::Helper<BaseClusterType>::insert(cache_wh, clusterContainer, prev_len, clusterContainer->size()));
           }
