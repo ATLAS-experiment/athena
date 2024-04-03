@@ -96,3 +96,8 @@ def enableParticleID(flags):
 def enableVerboseSelector(flags):
     """ """
     flags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfig.VerboseSelectorToolCfg']
+
+
+def enableFastIDKiller(flags):
+    """ """
+    flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FastIDKillerToolCfg']
