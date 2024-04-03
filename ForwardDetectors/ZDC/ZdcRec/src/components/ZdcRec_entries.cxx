@@ -9,6 +9,7 @@
 #include "ZdcRec/ZdcRecChannelToolLucrod.h"
 #include "ZdcRec/ZdcRecNoiseTool.h"
 #include "ZdcRec/ZdcSignalSinc.h"
+#include "ZdcRec/ZdcMCTruthAlg.h"
 
 DECLARE_COMPONENT( ZdcRec )
 DECLARE_COMPONENT( ZdcRecV2 )
@@ -20,4 +21,5 @@ DECLARE_COMPONENT( ZdcRecChannelTool )
 DECLARE_COMPONENT( ZdcRecChannelToolV2 )
 DECLARE_COMPONENT( ZdcRecChannelToolLucrod )
 DECLARE_COMPONENT( ZdcRecNoiseTool )
+DECLARE_COMPONENT( ZdcMCTruthAlg )
 
