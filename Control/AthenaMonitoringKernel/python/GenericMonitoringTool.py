@@ -258,8 +258,15 @@ def _options(opt):
         settings.update(opt) # update the default dictionary
     elif isinstance(opt, str) and len(opt)>0:
         # If the user provides a comma- or space-separated string of options.
+        settings = _options (opt.replace(',',' ').split())
+
+    elif isinstance(opt,str):
+        # empty string case 
+        pass
+    elif isinstance(opt, list):
+        # process each item in list
         unknown = []
-        for o in opt.replace(',',' ').split():
+        for o in opt:
             kv = o.split('=', maxsplit=1)
             key = kv[0]
             if len(kv)==2:
@@ -273,12 +280,6 @@ def _options(opt):
                 unknown.append(key)
 
         assert len(unknown)==0, f'Unknown option(s) provided: {", ".join(unknown)}.'
-
-    elif isinstance(opt,str):
-        # empty string case 
-        pass
-    elif isinstance(opt, list):
-        for o in opt: settings.update( _options(o) ) # process each item in list
     else:
         raise ValueError("Unknown opt type")
     return settings
