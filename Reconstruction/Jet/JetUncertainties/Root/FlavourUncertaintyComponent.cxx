@@ -35,6 +35,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(const std::string& name
     , m_secondRespType(FlavourResp_UNKNOWN)
     , m_BjetAccessor("IsBjet")
     , m_NjetAccessor("Njet")
+    , m_largeRJetTruthLabelAccessor(m_largeRJetTruthLabelName)
     , m_gluonFractionHists()
     , m_gluonFractionErrorHists()
 {
@@ -68,6 +69,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(   const ComponentHelpe
     , m_secondRespType(FlavourResp_UNKNOWN)
     , m_BjetAccessor("IsBjet")
     , m_NjetAccessor("Njet")
+    , m_largeRJetTruthLabelAccessor(m_largeRJetTruthLabelName)
     , m_gluonFractionHists()
     , m_gluonFractionErrorHists()
 {
@@ -97,6 +99,7 @@ FlavourUncertaintyComponent::FlavourUncertaintyComponent(const FlavourUncertaint
     , m_secondRespType(toCopy.m_secondRespType)
     , m_BjetAccessor(toCopy.m_BjetAccessor)
     , m_NjetAccessor(toCopy.m_NjetAccessor)
+    , m_largeRJetTruthLabelAccessor(toCopy.m_largeRJetTruthLabelAccessor)
     , m_gluonFractionHists()
     , m_gluonFractionErrorHists()
 {
@@ -365,18 +368,17 @@ double FlavourUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, con
 {
     // First, check if we even want to apply the uncertainty (large-R specific break-out)
     // Check if we are supposed to only use given truth labels
-    const SG::AuxElement::ConstAccessor<int> accLargeRJetTruthLabel(m_largeRJetTruthLabelName);
     if (!m_largeRJetTruthLabels.empty())
     {
         // If we are asking to check truth labels, then retrieve the truth jet label from the jet
-        if (!accLargeRJetTruthLabel.isAvailable(jet))
+        if (!m_largeRJetTruthLabelAccessor.isAvailable(jet))
         {
             // Unable to retrieve truth label, but we were told to look for it, error
             ATH_MSG_ERROR("Unable to retrieve LargeRJetTruthLabel: " + m_largeRJetTruthLabelName + " from the jet.  Please use JetTruthLabeling before calling this function.");
             return JESUNC_ERROR_CODE;
         }
         // Ok, the label exists, now check what it is
-        const LargeRJetTruthLabel::TypeEnum largeRJetTruthLabel = LargeRJetTruthLabel::intToEnum(accLargeRJetTruthLabel(jet));
+        const LargeRJetTruthLabel::TypeEnum largeRJetTruthLabel = LargeRJetTruthLabel::intToEnum(m_largeRJetTruthLabelAccessor(jet));
         if (largeRJetTruthLabel == LargeRJetTruthLabel::UNKNOWN)
         {
             // This is an error - the label exists but it is unrecognized
