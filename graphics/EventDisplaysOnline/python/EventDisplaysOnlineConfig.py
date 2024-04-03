@@ -7,10 +7,10 @@ from AthenaConfiguration.Enums import BeamType
 
 isCosmicData = False
 isHIMode = False #TODO
-isBeamSplashMode = True
+isBeamSplashMode = False
 isOfflineTest = False
 testWithoutPartition = False
-HorizontalMuons_quickReco = True
+HorizontalMuons_quickReco = False
 
 # An explicit list for nominal data taking to exclude some high rate streams
 # Empty list to read all
@@ -19,8 +19,8 @@ if isBeamSplashMode:
     streamsWanted = ['MinBias'] #if trigger fails it will go to debug_HltError
 
 # If testing at p1, write out to /tmp/ to see output
-#outputDirectory="/atlas/EventDisplayEvents/"
-outputDirectory="/tmp/myexley"
+outputDirectory="/atlas/EventDisplayEvents/"
+#outputDirectory="/tmp/myexley"
 if isOfflineTest:
     outputDirectory="."
 
@@ -37,7 +37,7 @@ sendToPublicStream = False # Gets set later, overwrite here to True to test it
 ## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-11-02-01/         ##
 ## without_gatherer/GMTestPartition.data.xml                            ##
 ##----------------------------------------------------------------------##
-partitionName = 'GMTestPartition' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
+partitionName = 'ATLAS' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
 
 if isHIMode:
     maxEvents=200 # Number of events to keep per stream in /atlas/EventDisplays/stream
