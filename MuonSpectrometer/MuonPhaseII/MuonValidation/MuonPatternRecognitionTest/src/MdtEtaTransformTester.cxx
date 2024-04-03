@@ -3,6 +3,7 @@
 */
 
 #include "MdtEtaTransformTester.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "GeoModelHelpers/throwExcept.h"
@@ -33,11 +34,16 @@ namespace MuonValR4 {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_r4DetMgr));
         ATH_MSG_DEBUG("Succesfully initialised");
+        if (m_drawEvtDisplayFailure || m_drawEvtDisplaySuccess) {
+            m_allCan = std::make_unique<TCanvas>("AllDisplays", "AllDisplays", 800, 600);
+            m_allCan->SaveAs(Form("%s[", m_allCanName.value().c_str()));
+        }
         return StatusCode::SUCCESS;
     }
 
     StatusCode MdtEtaTransformTester::finalize() {
         ATH_CHECK(m_tree.write());
+        if (m_allCan) m_allCan->SaveAs(Form("%s]", m_allCanName.value().c_str()));
         return StatusCode::SUCCESS;
     }
 
@@ -54,15 +60,15 @@ namespace MuonValR4 {
 
     StatusCode MdtEtaTransformTester::execute()  {
         
-        const EventContext & context = Gaudi::Hive::currentContext();
-        SG::ReadCondHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, context};
+        const EventContext & ctx = Gaudi::Hive::currentContext();
+        SG::ReadCondHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
         ATH_CHECK(gctxHandle.isValid());
         const ActsGeometryContext& gctx{**gctxHandle};
         // retrieve the two input collections
 
-        auto simHitCollections = m_inSimHitKeys.makeHandles(context);
+        auto simHitCollections = m_inSimHitKeys.makeHandles(ctx);
         
-        SG::ReadHandle<MuonR4::StationHoughMaxContainer> readHoughPeaks(m_inHoughMaximaKey, context);
+        SG::ReadHandle<MuonR4::StationHoughMaxContainer> readHoughPeaks(m_inHoughMaximaKey, ctx);
         ATH_CHECK(readHoughPeaks.isPresent());        
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
@@ -105,7 +111,7 @@ namespace MuonValR4 {
             const std::optional<double> lambda = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.);
             Amg::Vector3D chamberPos = localPos + (*lambda)*chamberDir;
 
-            m_evtNumber = context.eventID().event_number();
+            m_evtNumber = ctx.eventID().event_number();
             m_out_stationName = reElement->stationName();
             m_out_stationEta = reElement->stationEta();
             m_out_stationPhi = reElement->stationPhi();
@@ -129,7 +135,12 @@ namespace MuonValR4 {
 
             const std::vector<MuonR4::HoughMaximum>& houghMaxima = houghPeakMap[reElement->getChamber()];
             if (houghMaxima.empty()){
-                if (!m_tree.fill(context)) return StatusCode::FAILURE; 
+                if (!m_tree.fill(ctx)) {
+                    return StatusCode::FAILURE;
+                }
+                if (m_drawEvtDisplayFailure) {
+                    ATH_CHECK(drawEventDisplay(ctx, hits, nullptr));
+                }
                 continue;
             }
             const MuonR4::HoughMaximum* foundMax = nullptr; 
@@ -202,9 +213,13 @@ namespace MuonValR4 {
                 m_out_max_nMdt = nMdt;
                 m_out_max_nRpc = nRpc;
                 m_out_max_nTgc = nTgc;
-            }           
- 
-            if (!m_tree.fill(context)) return StatusCode::FAILURE;
+                if (m_drawEvtDisplaySuccess) {
+                    ATH_CHECK(drawEventDisplay(ctx, hits, foundMax));
+                }
+            } else if (m_drawEvtDisplayFailure) {
+                ATH_CHECK(drawEventDisplay(ctx, hits, nullptr));          
+            }
+            if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
         }
         return StatusCode::SUCCESS;
     }
@@ -277,7 +292,9 @@ namespace MuonValR4 {
                 ATH_MSG_DEBUG( "         HIT @ "<<Amg::toString(hit->positionInChamber())<<"  "<<m_idHelperSvc->toString(hit->identify())<<" with r = "<<hit->driftRadius()); 
                 /// Space point is a mdt space point
                 if (hit->driftRadius() > 1e-6) {
-                    auto  ell = std::make_unique<TEllipse>(hit->positionInChamber().y(), hit->positionInChamber().z(),hit->driftRadius());
+                    auto  ell = std::make_unique<TEllipse>(hit->positionInChamber().y(), 
+                                                          hit->positionInChamber().z(),
+                                                          hit->driftRadius());
                     ell->SetLineColor(kRed);
                     ell->SetFillColor(kRed);
                     if (hitsOnMax.count(hit)) {
@@ -289,7 +306,9 @@ namespace MuonValR4 {
                     ell->Draw(); 
                     primitives.emplace_back(std::move(ell));
                 } else {
-                    auto  m = std::make_unique<TEllipse>(hit->positionInChamber().y(), hit->positionInChamber().z(), hit->uncertainty().x(), hit->uncertainty().x());
+                    auto  m = std::make_unique<TEllipse>(hit->positionInChamber().y(), 
+                                                         hit->positionInChamber().z(), 
+                                                         hit->uncertainty().y());
                     m->SetLineColor(kBlue); 
                     m->SetFillColor(kBlue); 
                     m->SetFillStyle(0);
@@ -300,7 +319,7 @@ namespace MuonValR4 {
                     } else if (hit->measuresPhi())  {
                         m->SetLineColor(kGreen); 
                         m->SetFillColor(kGreen);
-                    } 
+                    }
                     /// Fill the ellipse if the hit is on the hough maximum
                     if (hitsOnMax.count(hit)) {
                         m->SetFillStyle(1001);
@@ -341,6 +360,7 @@ namespace MuonValR4 {
                 <<refChamber->stationEta()<<"_"<<refChamber->stationPhi()<<".pdf"; 
         
         myCanvas.SaveAs(pdfName.str().c_str());
+        myCanvas.SaveAs(m_allCanName.value().c_str());
         primitives.clear();
         return StatusCode::SUCCESS;
     }

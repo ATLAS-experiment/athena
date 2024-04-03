@@ -47,4 +47,3 @@ ConstVectorMap<3> RpcStrip_v1::stripPosInStation() const {
 
 }  // namespace xAOD
 #undef IMPLEMENT_SETTER_GETTER
-#undef THROW_EXCEPT

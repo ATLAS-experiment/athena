@@ -3,6 +3,7 @@
 */
 #ifndef XAODMUONPREPDATA_ACCESSOR_MACROS_H
 #define XAODMUONPREPDATA_ACCESSOR_MACROS_H
+#include "GeoModelHelpers/throwExcept.h"
 /**
  *  Macros to implement the scalar variables of the xAOD::MuonPrepData objects
 */
@@ -44,17 +45,6 @@
          acc(*this) = value;                                                                 \
       }
 /**
- *  Macro to throw an exception message indicating the
- *  location in the source code where the exception has been thrown
-*/
-#define THROW_EXCEPT(MSG)                       \
-    {                                           \
-       std::stringstream sstr{};                \
-       sstr<<__FILE__<<":"<<__LINE__<<" "<<MSG; \
-       throw std::runtime_error(sstr.str());    \
-    } 
-
-/**
  *  Macro to handle the readoutElement. If the object is created within the RDO -> Prd conversion
  *  the method simply returns the pointer to the given readoutElement. In contrast, if the object is 
  *  created from disk, the readoutElement link is not automatically restored. At the first time, when
@@ -73,14 +63,14 @@
             const MuonGMR4::MuonDetectorManager* detMgr{};                                      \
             if (!service.retrieve().isSuccess() ||                                              \
                 !service->retrieve(detMgr).isSuccess()){                                        \
-                THROW_EXCEPT("Failed to retrieve the Run4 muon detector manager. "<<            \
+                THROW_EXCEPTION("Failed to retrieve the Run4 muon detector manager. "<<         \
                          "Please schedule the MuonGeometry in your job");                       \
             }                                                                                   \
             const IdentifierHash hash{identifierHash()};                                        \
             const MuonGMR4::READOUT_ELEMENT_TYPE* re = detMgr->get##READOUT_ELEMENT_TYPE(hash); \
             if (!re) {                                                                          \
                 const Identifier id{static_cast<Identifier::value_type>(identifier())};         \
-                THROW_EXCEPT(detMgr->idHelperSvc()->toString(id)                                \
+                THROW_EXCEPTION(detMgr->idHelperSvc()->toString(id)                             \
                             <<" does not have a readout element.");                             \
             }                                                                                   \
             CACHED_VALUE.set(re);                                                               \

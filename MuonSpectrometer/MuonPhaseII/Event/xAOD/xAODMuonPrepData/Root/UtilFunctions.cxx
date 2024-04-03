@@ -2,7 +2,7 @@
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODMuonPrepData/UtilFunctions.h"
-
+#include "GeoModelHelpers/throwExcept.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/TgcStrip.h"
@@ -40,7 +40,7 @@ namespace xAOD{
         } else if (meas->type() == xAOD::UncalibMeasType::sTgcStripType) {
             return static_cast<const xAOD::sTgcMeasurement*>(meas)->readoutElement();
         }
-        THROW_EXCEPT("Unsupported measurement given "<<typeid(*meas).name());
+        THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
         return nullptr;
     }
     
@@ -59,12 +59,12 @@ namespace xAOD{
             const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(meas);
             return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
         } else {
-            THROW_EXCEPT("Measurement "<<typeid(*meas).name()<<" is not supported");
+            THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         }
         return Amg::Vector3D::Zero();
     }
     Amg::Vector3D channelDirInChamber(const ActsGeometryContext& gctx,
-                                    const xAOD::UncalibratedMeasurement* meas) {        
+                                      const xAOD::UncalibratedMeasurement* meas) {        
         if (!meas) return Amg::Vector3D::Zero();
         if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(meas);
@@ -81,7 +81,7 @@ namespace xAOD{
             } 
             return trf.linear() *dir;
         }
-        THROW_EXCEPT("Measurement "<<typeid(*meas).name()<<" is not supported");
+        THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         return Amg::Vector3D::Zero();        
     }
     Amg::Vector3D channelNormalInChamber(const ActsGeometryContext& gctx,
@@ -102,7 +102,7 @@ namespace xAOD{
             } 
             return trf.linear() *dir;
         }
-        THROW_EXCEPT("Measurement "<<typeid(*meas).name()<<" is not supported");
+        THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         return Amg::Vector3D::Zero();  
     }
 }

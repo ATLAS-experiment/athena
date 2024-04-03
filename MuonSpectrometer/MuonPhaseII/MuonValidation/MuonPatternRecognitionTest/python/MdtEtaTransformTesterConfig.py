@@ -14,7 +14,14 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
+    parser.set_defaults(noMM=True)
+    parser.set_defaults(noSTGC=True)
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    parser.add_argument("--displayFailedSeeds", 
+                        help="Saves the hits of failed seeds in a pdf", action='store_true', default = False)
+    parser.add_argument("--displayGoodSeeds", 
+                        help="Saves the hits of failed seeds in a pdf", action='store_true', default = False)
+
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
@@ -28,7 +35,9 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointMakerAlgCfg 
     cfg.merge(MuonSpacePointMakerAlgCfg(flags))
     cfg.merge(MuonHoughTransformAlgCfg(flags))
-    cfg.merge(MdtEtaTransformTesterCfg(flags))
+    cfg.merge(MdtEtaTransformTesterCfg(flags,
+                                       drawDisplayFailed =args.displayFailedSeeds,
+                                       drawDisplaySuccss = args.displayGoodSeeds))
     cfg.merge(PerfMonMTSvcCfg(flags))
     # cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
