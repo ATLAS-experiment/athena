@@ -25,7 +25,7 @@
 #include "MuonTesterTree/ThreeVectorBranch.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 
-
+#include "TCanvas.h"
 ///  @brief Lightweight algorithm to read xAOD MDT sim hits and 
 ///  (fast-digitised) drift circles from SG and fill a 
 ///  validation NTuple with identifier and drift circle info.
@@ -103,6 +103,14 @@ namespace MuonValR4{
     MuonVal::VectorBranch<bool> &   m_max_tgcHitHasPhiMeas{m_tree.newVector<bool>("maxTgcHasPhiMeas")};
     MuonVal::VectorBranch<float>&   m_max_tgcHitErrorX{m_tree.newVector<float>("maxTgcEtaMeasError")};
     MuonVal::VectorBranch<float>&   m_max_tgcHitErrorY{m_tree.newVector<float>("maxTgcPhiMeasError")};
+
+    /// Draw the event display for the cases where the hough transform did not find any hough maximum
+    Gaudi::Property<bool> m_drawEvtDisplayFailure{this, "drawDisplayFailed", false};
+    /// Draw the event dispalty for the successful cases
+    Gaudi::Property<bool> m_drawEvtDisplaySuccess{this, "drawDisplaySuccss", false};
+    
+    std::unique_ptr<TCanvas> m_allCan{};
+    Gaudi::Property<std::string> m_allCanName{this, "AllCanvasName", "AllHoughiDiPuffDisplays.pdf"};
 
   };
 }
