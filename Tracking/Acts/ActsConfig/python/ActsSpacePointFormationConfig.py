@@ -178,12 +178,6 @@ def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
                                                            InputCollection = "ITkStripSpacePoints",
                                                            OutputCollection = "ITkConversionStripSpacePoints"))
             
-            acc.merge(ActsStripSpacePointPreparationAlgCfg(flags,
-                                                           name = "ActsConversionStripOverlapSpacePointPreparationAlg",
-                                                           RoIs = "ActsConversionRegionOfInterest",
-                                                           InputCollection = "ITkStripOverlapSpacePoints",
-                                                           OutputCollection = "ITkConversionStripOverlapSpacePoints"))
-
         else:            
             # Need to schedule this here in case the Athena space point formation is not schedule
             # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
@@ -202,20 +196,16 @@ def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
                                                          name="ActsConversionStripSpacePointFormation",
                                                          StripClusters="ITkConversionStripClusters_InView",
                                                          StripSpacePoints="ITkConversionStripSpacePoints",
-                                                         StripOverlapSpacePoints="ITkConversionStripOverlapSpacePoints"))
+                                                         ProcessOverlapForStrip=False))
             
     # Analysis extensions
     if flags.Acts.doAnalysis:
         if flags.Detector.EnableITkStrip:
-            from ActsConfig.ActsAnalysisConfig import ActsStripSpacePointAnalysisAlgCfg, ActsStripOverlapSpacePointAnalysisAlgCfg
+            from ActsConfig.ActsAnalysisConfig import ActsStripSpacePointAnalysisAlgCfg
             acc.merge(ActsStripSpacePointAnalysisAlgCfg(flags,
                                                         name="ActsConversionStripSpacePointAnalysisAlg",
                                                         extension="ActsConversion",
                                                         SpacePointContainerKey="ITkConversionStripSpacePoints"))
-            acc.merge(ActsStripOverlapSpacePointAnalysisAlgCfg(flags,
-                                                               name="ActsConversionStripOverlapSpacePointAnalysisAlg",
-                                                               extension="ActsConversion",
-                                                               SpacePointContainerKey="ITkConversionStripOverlapSpacePoints"))
         
     return acc
 

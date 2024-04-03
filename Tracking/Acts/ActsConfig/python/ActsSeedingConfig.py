@@ -329,7 +329,7 @@ def ActsConversionSeedingCkf(flags) -> ComponentAccumulator:
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripSeedingAlgCfg(flags,
                                          name="ActsConversionStripSeedingAlg",
-                                         InputSpacePoints=["ITkConversionStripSpacePoints", "ITkConversionStripOverlapSpacePoints"],
+                                         InputSpacePoints=["ITkConversionStripSpacePoints"],
                                          OutputSeeds="ActsConversionStripSeeds",
                                          OutputEstimatedTrackParameters="ActsConversionStripEstimatedTrackParams"))
 
