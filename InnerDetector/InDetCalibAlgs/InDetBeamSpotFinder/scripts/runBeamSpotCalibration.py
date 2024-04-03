@@ -86,6 +86,7 @@ for path in configMy.jobConfig['inputfiles']:
 flags.Trigger.triggerConfig = "DB"
 flags.DQ.enableLumiAccess = False
 flags.Output.HISTFileName = configMy.jobConfig['monfile']
+flags.fillFromArgs()
 flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -117,7 +118,3 @@ sc = acc.run()
 # Success should be 0
 import sys
 sys.exit(not sc.isSuccess())
-
-
-
-
