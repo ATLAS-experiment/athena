@@ -151,8 +151,8 @@ namespace Trig {
             ATH_MSG_WARNING("Issue in combination sizes for chain " << chain  
                         << " using Run 2 navigation " << run2.size() 
                         << " Run 3 navigation " << run3.size());
+            ATH_MSG_ERROR("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details), this may be a false positive if chain is incorrectly decoded");    
             if ( m_failOnDifference ) {
-                ATH_MSG_ERROR("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details), this may be a false positive if chain is incorrectly decoded");    
                 return StatusCode::FAILURE;
             }
         }
@@ -173,7 +173,9 @@ namespace Trig {
             ATH_MSG_WARNING("NOT PASSED not isSubset failed, Run2 is not a subset of Run3 for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
             ATH_MSG_WARNING("Run2 combs: " << run2);
             ATH_MSG_WARNING("Run3 combs: " << run3);
-            return StatusCode::FAILURE;
+            if ( m_failOnDifference ) {
+                return StatusCode::FAILURE;
+            }
         }
 
         for ( auto& combRun2: run2 ) {
@@ -202,8 +204,8 @@ namespace Trig {
                 for ( auto& c: run3 ){
                     ATH_MSG_WARNING("  " << c );
                 }
+                ATH_MSG_ERROR("When checking combinations in details found differences, (enable WARNING message for more details)");
                 if ( m_failOnDifference ) {
-                    ATH_MSG_ERROR("When checking combinations in details found differences, (enable WARNING message for more details)");
                     return StatusCode::FAILURE;
                 }
             }
