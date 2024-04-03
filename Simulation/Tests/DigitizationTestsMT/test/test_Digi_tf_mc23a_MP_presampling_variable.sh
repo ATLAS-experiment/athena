@@ -82,7 +82,7 @@ rc4=-9999
 if [[ $rc1 -eq 0 ]]
 then
     # Do reference comparisons
-    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileName" "${ATLAS_REFERENCE_DATA}/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileName"
+    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileName" "${ATLAS_REFERENCE_DATA}/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileName" --diff-root
     rc4=$?
     status=$rc4
 fi
@@ -91,7 +91,7 @@ echo "art-result: $rc4 OLDvsFixedRef"
 rc6=-9999
 if [[ $rc1 -eq 0 ]]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileName"
+    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileName" --diff-root
     rc6=$?
     status=$rc6
 fi
