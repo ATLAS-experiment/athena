@@ -255,7 +255,7 @@ class MetadataCheck(WorkflowCheck):
 
         self.logger.info(f"Reading the reference file from location {reference_file}")
 
-        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease", "StreamDAOD_PHYS/eventTypes"])
+        exclusion_list = " ".join(["file_guid", "file_size", "/TagInfo/AtlasRelease", "FileMetaData/productionRelease", "StreamDAOD_PHYS/eventTypes", "StreamDAOD_PHYSLITE/eventTypes"])
 
         validation_file = test.validation_path / file_name
         log_file = test.validation_path / f"meta-diff-{test.ID}.{self.format}.log"
