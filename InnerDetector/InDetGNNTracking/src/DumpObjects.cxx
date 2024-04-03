@@ -28,6 +28,25 @@
 
 #include <fstream>
 
+int InDet::compute_overlap_SP_flag(const int& eta_module_cl1,const int& phi_module_cl1,
+                                   const int& eta_module_cl2,const int& phi_module_cl2){
+  int flag=-999;
+
+  if( (eta_module_cl1==eta_module_cl2) && (phi_module_cl1==phi_module_cl2) ){
+    flag=0; // not an overlap Space Point
+  }
+  else if((eta_module_cl1!=eta_module_cl2) && (phi_module_cl1==phi_module_cl2) ){
+    flag=1; // overlap Space Point in eta only
+  }
+  else if((eta_module_cl1==eta_module_cl2) && (phi_module_cl1!=phi_module_cl2) ){
+    flag=2; // overlap Space Point in phi only
+  }
+  else{
+    flag=3; // "overlap" Space Point in eta and phi (not sure we can call it overlap)
+  }
+  return flag;
+}
+
 //-------------------------------------------------------------------------
 InDet::DumpObjects::DumpObjects(const std::string &name, ISvcLocator *pSvcLocator)
     //-------------------------------------------------------------------------
@@ -143,6 +162,7 @@ StatusCode InDet::DumpObjects::initialize() {
     m_CLparticleLink_eventIndex = new std::vector<std::vector<int>>;
     m_CLparticleLink_barcode = new std::vector<std::vector<int>>;
     m_CLbarcodesLinked = new std::vector<std::vector<bool>>;
+    m_CLparticle_charge = new std::vector<std::vector<float>>;
     m_CLphis = new std::vector<std::vector<int>>;
     m_CLetas = new std::vector<std::vector<int>>;
     m_CLtots = new std::vector<std::vector<int>>;
@@ -243,6 +263,7 @@ StatusCode InDet::DumpObjects::initialize() {
     m_nt->Branch("CLparticleLink_eventIndex", &m_CLparticleLink_eventIndex);
     m_nt->Branch("CLparticleLink_barcode", &m_CLparticleLink_barcode);
     m_nt->Branch("CLbarcodesLinked", &m_CLbarcodesLinked);
+    m_nt->Branch("CLparticle_charge", &m_CLparticle_charge);
     m_nt->Branch("CLphis", &m_CLphis);
     m_nt->Branch("CLetas", &m_CLetas);
     m_nt->Branch("CLtots", &m_CLtots);
@@ -336,7 +357,6 @@ StatusCode InDet::DumpObjects::execute() {
   //
   const EventContext &ctx = Gaudi::Hive::currentContext();
 
-  m_selected = 0;
   m_event++;
 
   // map cluster ID to an index
@@ -409,6 +429,11 @@ StatusCode InDet::DumpObjects::execute() {
 
     // for ( HepMC::GenEvent::particle_const_iterator p = genEvt->particles_begin(); p != genEvt->particles_end(); ++p )
     // {
+
+    ///////////////////////////////////////////////////////////////////////
+    ////////////////////////////// PARTICLES //////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+
     for (auto p : *genEvt) {
       //*p is a GenParticle
       float px, py, pz, pt, eta, vx, vy, vz, radius, status, charge = 0.;
@@ -490,6 +515,7 @@ StatusCode InDet::DumpObjects::execute() {
     (*m_CLparticleLink_eventIndex).clear();
     (*m_CLparticleLink_barcode).clear();
     (*m_CLbarcodesLinked).clear();
+    (*m_CLparticle_charge).clear();
     (*m_CLphis).clear();
     (*m_CLetas).clear();
     (*m_CLtots).clear();
@@ -543,6 +569,7 @@ StatusCode InDet::DumpObjects::execute() {
         std::vector<int> particleLink_eventIndex = {};
         std::vector<int> particleLink_barcode = {};
         std::vector<bool> barcodesLinked = {};
+        std::vector<float> charge = {};
         std::vector<int> phis = {};
         std::vector<int> etas = {};
         std::vector<int> tots = {};
@@ -584,6 +611,7 @@ StatusCode InDet::DumpObjects::execute() {
                 barcodes.push_back(barcode);
                 particleLink_eventIndex.push_back(particleLink.eventIndex());
                 particleLink_barcode.push_back(particleLink.barcode());
+                charge.push_back(deposit.second);
                 barcodesLinked.push_back(particleLink.isValid());
               }
             }
@@ -622,7 +650,7 @@ StatusCode InDet::DumpObjects::execute() {
         double phi_angle = atan2(trknormcomp, trkphicomp);
         double eta_angle = atan2(trknormcomp, trketacomp);
         // now dumping all the values now
-        clusterIDMapIdx[cluster->identify()] = m_selected++;
+        clusterIDMapIdx[cluster->identify()] = m_selected;
         std::vector<double> v_local_cov;
         if (local_cov.size() > 0) {
           for (size_t i = 0, nRows = local_cov.rows(), nCols = local_cov.cols(); i < nRows; i++) {
@@ -647,6 +675,7 @@ StatusCode InDet::DumpObjects::execute() {
           (*m_CLparticleLink_eventIndex).push_back(particleLink_eventIndex);
           (*m_CLparticleLink_barcode).push_back(particleLink_barcode);
           (*m_CLbarcodesLinked).push_back(barcodesLinked);
+          (*m_CLparticle_charge).push_back(charge);
           (*m_CLetas).push_back(etas);
           (*m_CLphis).push_back(phis);
           (*m_CLtots).push_back(tots);
@@ -670,6 +699,7 @@ StatusCode InDet::DumpObjects::execute() {
           (*m_CLlocal_cov).push_back(v_local_cov);
         }
         m_nCL++;
+        m_selected++;
         if (m_nCL == m_maxCL) {
           ATH_MSG_WARNING("DUMP : hit max number of clusters");
           break;
@@ -722,6 +752,7 @@ StatusCode InDet::DumpObjects::execute() {
         std::vector<int> particleLink_eventIndex = {};
         std::vector<int> particleLink_barcode = {};
         std::vector<bool> barcodesLinked = {};
+        std::vector<float> charge = {};
 
         std::vector<int> tots = {};
         std::vector<int> strip_ids = {};
@@ -756,6 +787,7 @@ StatusCode InDet::DumpObjects::execute() {
                 barcodes.push_back(barcode);
                 particleLink_eventIndex.push_back(particleLink.eventIndex());
                 particleLink_barcode.push_back(particleLink.barcode());
+                charge.push_back(deposit.second);
                 barcodesLinked.push_back(particleLink.isValid());
               }
             }
@@ -806,7 +838,7 @@ StatusCode InDet::DumpObjects::execute() {
         double eta_angle = atan2(trknormcomp, trketacomp);
 
         // now dumping all the values now
-        clusterIDMapIdx[cluster->identify()] = m_selected++;
+        clusterIDMapIdx[cluster->identify()] = m_selected;
         // cluster shape
         std::vector<int> cst;
         for (unsigned strip = 0; strip < strip_ids.size(); strip++) {
@@ -835,6 +867,7 @@ StatusCode InDet::DumpObjects::execute() {
           (*m_CLparticleLink_eventIndex).push_back(particleLink_eventIndex);
           (*m_CLparticleLink_barcode).push_back(particleLink_barcode);
           (*m_CLbarcodesLinked).push_back(barcodesLinked);
+          (*m_CLparticle_charge).push_back(charge);
           (*m_CLetas).push_back(strip_ids);
           (*m_CLphis).push_back(cst);
           (*m_CLtots).push_back(tots);
@@ -859,6 +892,7 @@ StatusCode InDet::DumpObjects::execute() {
         }
 
         m_nCL++;
+        m_selected++;
         if (m_nCL == m_maxCL) {
           ATH_MSG_WARNING("DUMP : hit max number of clusters");
           break;
@@ -973,7 +1007,12 @@ StatusCode InDet::DumpObjects::execute() {
       m_SPz[m_nSP] = sp->globalPosition().z();
       m_SPCL1_index[m_nSP] = clusterIDMapIdx[cl_1->identify()];
       m_SPCL2_index[m_nSP] = clusterIDMapIdx[cl_2->identify()];
-      m_SPisOverlap[m_nSP] = 1;
+      int flag = compute_overlap_SP_flag(m_CLeta_module[m_SPCL1_index[m_nSP]], m_CLphi_module[m_SPCL1_index[m_nSP]],
+                                         m_CLeta_module[m_SPCL2_index[m_nSP]], m_CLphi_module[m_SPCL2_index[m_nSP]]);
+      if(flag<1 || flag > 2){
+        ATH_MSG_WARNING("Unexpected overlap SP flag: "<<flag);
+      }
+      m_SPisOverlap[m_nSP] = flag;
     }
     sp_index++;
 
@@ -1235,6 +1274,7 @@ StatusCode InDet::DumpObjects::finalize() {
     delete m_CLparticleLink_eventIndex;
     delete m_CLparticleLink_barcode;
     delete m_CLbarcodesLinked;
+    delete m_CLparticle_charge;
     delete m_CLphis;
     delete m_CLetas;
     delete m_CLtots;

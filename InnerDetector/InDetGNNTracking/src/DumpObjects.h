@@ -43,6 +43,9 @@ class ParticleDataTable;
 
 namespace InDet {
 
+int compute_overlap_SP_flag(const int& eta_module_cl1,const int& phi_module_cl1,
+                            const int& eta_module_cl2,const int& phi_module_cl2);
+
 class DumpObjects : public AthAlgorithm {
 public:
   DumpObjects(const std::string &name, ISvcLocator *pSvcLocator);
@@ -132,6 +135,7 @@ private:
   std::vector<std::vector<int>> *m_CLparticleLink_eventIndex;
   std::vector<std::vector<int>> *m_CLparticleLink_barcode;
   std::vector<std::vector<bool>> *m_CLbarcodesLinked;
+  std::vector<std::vector<float>> *m_CLparticle_charge;
   std::vector<std::vector<int>> *m_CLphis, *m_CLetas, *m_CLtots;
   double *m_CLloc_direction1, *m_CLloc_direction2, *m_CLloc_direction3;
   double *m_CLJan_loc_direction1, *m_CLJan_loc_direction2, *m_CLJan_loc_direction3;
@@ -162,7 +166,7 @@ private:
   int *m_SPindex;
   double *m_SPx, *m_SPy, *m_SPz;
   int *m_SPCL1_index, *m_SPCL2_index;
-  int *m_SPisOverlap; // -1: pixel not applicable, 0: strip not overlap, 1: strip overlap
+  int *m_SPisOverlap; // -1: pixel, 0: strip not overlap, 1: strip overlap eta, 2: strip overlap phi, 3: overlap eta & phi
 
   int m_nTRK;
   int *m_TRKindex;
