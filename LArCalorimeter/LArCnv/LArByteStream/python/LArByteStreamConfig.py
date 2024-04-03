@@ -1,38 +1,14 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-
-def LArRawDataContByteStreamToolConfig (name="LArRawDataContByteStreamTool",
-                                        InitializeForWriting = False,
-                                        stream=None,
-                                        **kwargs):
-      tool = CompFactory.LArRawDataContByteStreamTool (name, **kwargs)
-      if InitializeForWriting:
-         from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-         from LArCabling.LArCablingAccess import LArOnOffIdMapping, LArFebRodMapping
-         noisealg = CaloNoiseCondAlg ('totalNoise')
-         LArOnOffIdMapping()
-         LArFebRodMapping()
-         if stream:
-            key = str(noisealg.OutputKey)
-            if key.find ('+') < 0:
-               key = 'ConditionStore+' + key
-            stream.ExtraInputs |= {('CaloNoise', key),
-                                   ('LArOnOffIdMapping', 'ConditionStore+LArOnOffIdMap'),
-                                   ('LArFebRodMapping', 'ConditionStore+LArFebRodMap')}
-      tool.InitializeForWriting = InitializeForWriting
-      return tool
-
-# ComponentAccumulator version
 def LArRawDataContByteStreamToolCfg (flags,
                                      name="LArRawDataContByteStreamTool",
                                      InitializeForWriting = False,
                                      DSPRunMode = 4,
                                      RodBlockVersion = 0,
                                      **kwargs):
-      from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
       acc = ComponentAccumulator()
       tool = CompFactory.LArRawDataContByteStreamTool(name, **kwargs)
       tool.InitializeForWriting = InitializeForWriting
