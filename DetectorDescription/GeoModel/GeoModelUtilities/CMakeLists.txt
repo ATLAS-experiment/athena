@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( GeoModelUtilities )
 
 # External dependencies.
 find_package( Eigen ) # Needed by GeoModelKernel
-find_package( GeoModel COMPONENTS GeoGenericFunctions GeoModelKernel )
-
+find_package( GeoModel COMPONENTS GeoGenericFunctions GeoModelKernel GeoModelHelpers )
+find_package( ROOT COMPONENTS Core )
 # The list of sources, and list of linked libraries depends on what project is
 # being built.
 if( BUILDVP1LIGHT )
@@ -30,15 +30,21 @@ atlas_add_library( GeoModelUtilities
    LINK_LIBRARIES GeoPrimitives ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} ${libraries} )
 
 atlas_add_test( GeoGetIds_test
-   SOURCES test/GeoGetIds_test.cxx
-   INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoModelUtilities )
+                 SOURCES test/GeoGetIds_test.cxx
+                 INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+                 LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoModelUtilities )
 
 atlas_add_test( GeoVisitVolumes_test
-   SOURCES test/GeoVisitVolumes_test.cxx
-   INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoModelUtilities )
+                SOURCES test/GeoVisitVolumes_test.cxx
+                INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+                LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} GeoModelUtilities )
 
+atlas_add_test( GeoAlignStore_test
+                SOURCES test/testAlignStore.cxx
+                INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES ${EIGEN_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} GeoModelUtilities
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
 # Code in this file makes heavy use of eigen and runs orders of magnitude
 # more slowly without optimization.  So force this to be optimized even
 # in debug builds.  If you need to debug it you might want to change this.

@@ -1,0 +1,108 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef GEOMODELUTILITIES_TRANSFORMMAP_ICC
+#define GEOMODELUTILITIES_TRANSFORMMAP_ICC
+
+#include "GeoModelHelpers/throwExcept.h"
+#include "CxxUtils/inline_hints.h"
+
+
+template <typename T, typename X> bool TransformMap<T, X>::setTransform(const T* obj, std::shared_ptr<const X> xf) const {
+    if (m_locked) {
+        THROW_EXCEPTION("The transform map is already locked ");
+    }
+    std::unique_lock guard{m_mutex};
+    typename ConCurrentMap_t::iterator itr = m_mutableCont->find(obj);
+    if (itr !=m_mutableCont->end()) {
+        itr->second = std::move(xf);
+        return false;
+    }
+    return m_mutableCont->emplace(obj, xf).second;
+}
+template <typename T, typename X>
+bool TransformMap<T, X>::setTransform(const T* obj, std::shared_ptr<const X> xf) {
+    std::unique_lock guardThis{m_mutex};
+    if (m_locked) {
+        std::shared_ptr<const X>& newObj = m_container[obj];
+        bool good = !newObj;
+        newObj = std::move(xf);
+        return good;
+    }
+    typename ConCurrentMap_t::iterator itr = m_mutableCont->find(obj);
+    if (itr !=m_mutableCont->end()) {
+        itr->second = std::move(xf);
+        return false;
+    }
+    return m_mutableCont->emplace(obj, xf).second;
+}
+
+template <typename T, typename X> bool TransformMap<T, X>::setTransform(const T *obj, const X &xf) const {
+    return setTransform(obj, std::make_shared<const X>(xf));
+}
+template <typename T, typename X> bool TransformMap<T, X>::setTransform(const T *obj, const X &xf) {
+    return setTransform(obj, std::make_shared<const X>(xf));
+}
+
+
+template <typename T, typename X> 
+ATH_FLATTEN
+const X *TransformMap<T, X>::getTransform(const T *obj) const {
+    if (m_locked) {
+        auto itr = m_container.find(obj);
+        return itr != m_container.end() ? itr->second.get() : nullptr;
+    }
+    auto itr = m_mutableCont->find(obj);
+    return itr != m_mutableCont->end() ? itr->second.get() : nullptr;   
+}
+
+template <typename T, typename X> bool TransformMap<T, X>::append(const TransformMap &other) {
+    bool allGood{true};
+    std::shared_lock guardOther{other.m_mutex};
+    std::unique_lock guardThis{m_mutex};
+    if (other.m_mutableCont) {
+        for (const auto&[key, value]: *other.m_mutableCont){
+            allGood &= setTransform(key, value);   
+        }
+    } else {
+        for (const auto &[key, value] : other.m_container) {
+            allGood &= setTransform(key, value);
+        }
+    }
+    return allGood;
+}
+
+template <typename T, typename X> void TransformMap<T, X>::clear() {
+    std::unique_lock guardThis{m_mutex};
+    m_container.clear();
+    m_mutableCont = std::make_unique<ConCurrentMap_t>(typename ConCurrentMap_t::Updater_t());
+    m_locked = false;
+}
+
+template <typename T, typename X> void TransformMap<T, X>::lock() {
+    std::unique_lock guardThis{m_mutex};
+    if (m_locked) return;
+    for (auto& [key, value] : *m_mutableCont) {
+        m_container.insert(std::make_pair(key, value));
+    }
+    m_locked = true;
+    m_mutableCont.reset();
+}
+template <typename T, typename X>
+std::vector<const T*> TransformMap<T, X>::getStoredKeys() const {
+    std::vector<const T*> keys{};
+    if (m_mutableCont) {
+        keys.reserve(m_mutableCont->size());
+        for (const auto& key_value: *m_mutableCont) {
+            keys.push_back(key_value.first);
+        }
+    } else {
+        keys.reserve(m_container.size());
+        for (const auto& key_value: m_container) {
+            keys.push_back(key_value.first);
+        }
+    }
+    return keys;
+}
+#endif
