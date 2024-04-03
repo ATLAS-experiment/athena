@@ -17,6 +17,7 @@ public:
     using VectorBranch<T>::push_back;
     using VectorBranch<T>::initialized;
     using VectorBranch<T>::getDefault;
+    using VectorBranch<T>::hasDefault;
 
     AuxElementBranch(TTree* t, const std::string& var_name, const std::string& acc = "");
     AuxElementBranch(MuonTesterTree& t, const std::string& var_name, const std::string& acc = "");
@@ -25,7 +26,6 @@ public:
 
 private:
     SG::AuxElement::ConstAccessor<T> m_acc;
-    bool m_hasDefault;
 };
 template <class T> class ParticleVariableBranch : public AuxElementBranch<T>, virtual public IParticleDecorationBranch {
 public:

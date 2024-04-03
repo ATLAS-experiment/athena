@@ -46,10 +46,12 @@ public:
     void setDefault(const T& def);
 
     inline bool isUpdated() const;
+    inline bool hasDefault() const;
 
 private:
     std::vector<T> m_variable{};
     T m_default{};
+    bool m_hasDefault{false};
     bool m_updated{false};
 };
 

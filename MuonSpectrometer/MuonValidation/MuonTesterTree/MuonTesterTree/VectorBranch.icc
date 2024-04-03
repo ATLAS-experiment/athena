@@ -52,6 +52,8 @@ template <class T> void VectorBranch<T>::push_back(const T& value) {
 template <class T> void VectorBranch<T>::operator+=(const T& value) { push_back(value); }
 template <class T> bool VectorBranch<T>::isUpdated() const { return m_updated; }
 template <class T> const T& VectorBranch<T>::getDefault() const { return m_default; }
-template <class T> void VectorBranch<T>::setDefault(const T& def) { m_default = def; }
+template <class T> void VectorBranch<T>::setDefault(const T& def) { m_default = def; m_hasDefault=true; }
+template <class T> bool VectorBranch<T>::hasDefault() const { return m_hasDefault; }
+
 }
 #endif
