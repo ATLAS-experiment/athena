@@ -57,12 +57,8 @@ def LArCoverageConfigCore(helper, algoinstance,flags):
        larCoverageAlg.LArRawChannelKey="LArRawChannels_FromDigits"
 
     #Configure the CaloNoise
-    if not hasattr(helper, 'resobj'):
-        from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-        CaloNoiseCondAlg(noisetype="electronicNoise")
-    else:
-        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-        helper.resobj.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
+    from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    helper.resobj.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
 
     #-- caloNoise groups --
     caloNoiseToolArrayEM = helper.addArray([nLayers],larCoverageAlg,caloNoiseToolGroupName+"EM",topPath='/')
