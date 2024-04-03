@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -332,7 +332,7 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collecti
     while (m_thpcMDT->nextDetectorElement(i, e)) {
         // Loop over the hits:
         while (i != e) {
-            handleMDTSimhit(ctx, *i, twinRndmEngine, toolRndmEngine);
+            handleMDTSimHit(ctx, *i, twinRndmEngine, toolRndmEngine);
             ++i;
         }
     }
@@ -349,7 +349,7 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collecti
     return StatusCode::SUCCESS;
 }
 
-bool MdtDigitizationTool::handleMDTSimhit(const EventContext& ctx, 
+bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
                                           const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
                                           CLHEP::HepRandomEngine* toolRndmEngine) {
     const MDTSimHit& hit(*phit);
@@ -425,13 +425,13 @@ bool MdtDigitizationTool::handleMDTSimhit(const EventContext& ctx,
     double qgamma = -9999.;
 
     if (m_DoQballCharge) {
-        // chargeCalculator returns the value of electric charge for Qball particle.
-        // particleGamma returns the value of gamma for Qball particle.
-        qgamma = particleGamma(hit, phit.eventId());
-        qcharge = chargeCalculator(hit, phit.eventId());
+      // chargeCalculator returns the value of electric charge for Qball particle.
+      // particleGamma returns the value of gamma for Qball particle.
+      qgamma = particleGamma(ctx, hit, phit.eventId());
+      qcharge = chargeCalculator(ctx, hit, phit.eventId());
 
-        digiInput = MdtDigiToolInput{std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma, DigitId};
-    } 
+      digiInput = MdtDigiToolInput{std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma, DigitId};
+    }
 
     // digitize input
     MdtDigiToolOutput digiOutput(m_digiTool->digitize(ctx, digiInput, toolRndmEngine));
@@ -765,9 +765,7 @@ bool MdtDigitizationTool::createDigits(const EventContext& ctx, Collections_t& c
             if (!m_includePileUpTruth && HepMC::ignoreTruthLink(phit->particleLink(), m_vetoPileUpTruthLinks)) { continue; }
 
             // Create the Deposit for MuonSimData
-            const HepMcParticleLink::PositionFlag idxFlag =
-                (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            MuonSimData::Deposit deposit(HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE), // FIXME
+            MuonSimData::Deposit deposit(HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx), // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
                                          MuonMCData(driftRadius, hit.localPosition().z()));
 
             // Record the SDO collection in StoreGate
@@ -857,14 +855,13 @@ bool MdtDigitizationTool::insideMaskWindow(double time) const {
 //+emulate deformations here
 MDTSimHit MdtDigitizationTool::applyDeformations(const MDTSimHit& hit, const MuonGM::MdtReadoutElement* element,
                                                  const Identifier& DigitId) {
-    const int id = hit.MDTid();
-
     // make the deformation
     Amg::Vector3D hitAtGlobalFrame = element->nodeform_localToGlobalTransf(DigitId) * hit.localPosition();
     Amg::Vector3D hitDeformed = element->globalToLocalTransf(DigitId) * hitAtGlobalFrame;
-
-    MDTSimHit simhit2{id, hit.globalTime(), hitDeformed.perp(), hitDeformed, hit.truthBarcode()};
-
+    MDTSimHit simhit2(hit);
+    // apply the deformation
+    simhit2.setDriftRadius(hitDeformed.perp());
+    simhit2.setLocalPosition(hitDeformed);
     return simhit2;
 }
 

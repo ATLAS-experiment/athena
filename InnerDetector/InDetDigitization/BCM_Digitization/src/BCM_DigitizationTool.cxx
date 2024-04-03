@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -18,7 +18,7 @@
 #include "InDetBCM_RawData/BCM_RDO_Collection.h"
 #include "xAODEventInfo/EventInfo.h"             // NEW EDM
 #include "xAODEventInfo/EventAuxInfo.h"          // NEW EDM
-#include "TruthUtils/HepMCHelpers.h"          // NEW EDM
+#include "TruthUtils/HepMCHelpers.h"
 
 //----------------------------------------------------------------------
 // Constructor with parameters:
@@ -115,10 +115,12 @@ void BCM_DigitizationTool::processSiHit(const SiHit &currentHit, double eventTim
   m_enerVect[moduleNo].push_back(enerDep);
   m_timeVect[moduleNo].push_back(hitTime);
   // Create new deposit and add to vector
-  const HepMcParticleLink::PositionFlag idxFlag = (evtIndex==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink particleLink{HepMcParticleLink(currentHit.truthBarcode(), evtIndex, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME
-  const int barcode = particleLink.barcode();
-  if (barcode == 0 || barcode == HepMC::SINGLE_PARTICLE){
+  const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(currentHit.particleLink(), evtIndex, ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+  const int barcode = HepMC::barcode(particleLink); // FIXME barcode-based
+  if (
+      (barcode == 0 && particleLink.id() == 0) // delta-ray
+      || barcode == HepMC::SINGLE_PARTICLE // FIXME barcode-based - need an id-based equivalent of this check
+      ) {
     return;
   }
   m_depositVect[moduleNo].emplace_back(particleLink,currentHit.energyLoss());

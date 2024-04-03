@@ -417,6 +417,26 @@ int HepMcParticleLink::getEventNumberAtPosition (index_type position, const IPro
 }
 
 
+  /**
+   * @brief Return a HepMcParticleLink pointing at the same particle,
+   * but in a different GenEvent
+   * @param particleLink the current HepMcParticleLink
+   * @param eventIndex the event number (unless zero) of the GenEvent
+   * which the redirected HepMcParticleLink should point at
+   **/
+HepMcParticleLink HepMcParticleLink::getRedirectedLink(const HepMcParticleLink& particleLink, uint32_t eventIndex, const EventContext& ctx)
+{
+  const HepMcParticleLink::PositionFlag idxFlag =
+    (eventIndex==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
+  // Support reading in legacy barcode-based persistent EDM for now
+  const int uniqueID =
+    (particleLink.barcode() != 0) ? particleLink.barcode() : particleLink.id();
+  const HepMcParticleLink::UniqueIDFlag uidFlag =
+    (particleLink.barcode() != 0) ? HepMcParticleLink::IS_BARCODE : HepMcParticleLink::IS_ID;
+  return HepMcParticleLink(uniqueID, eventIndex, idxFlag, uidFlag, ctx);
+}
+
+
 /**
  * @brief Alter the persistent part of the link.
  */

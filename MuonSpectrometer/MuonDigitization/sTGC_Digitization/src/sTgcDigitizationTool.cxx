@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -413,9 +413,7 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
 
       ATH_MSG_DEBUG("sTgcDigitizationTool::doDigitization hits mapped");
 
-      const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-      const int barcode = hit.particleLink().barcode();
-      const HepMcParticleLink particleLink(barcode, eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+      const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(hit.particleLink(), eventId, ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
       const sTGCSimHit temp_hit(hit.sTGCId(), hit.globalTime(),
                                 HPOS,
                                 hit.particleEncoding(),

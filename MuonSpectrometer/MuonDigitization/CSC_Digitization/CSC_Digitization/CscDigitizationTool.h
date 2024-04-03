@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONDIGITIZATION_CSCDIGITIZATIONTOOL_H
@@ -81,7 +81,7 @@ private:
                                            Collections_t& collections,
                                            CscSimDataCollection* cscSimData);
 
-  StatusCode CoreDigitization(Collections_t& collections,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine);
+  StatusCode CoreDigitization(Collections_t& collections,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine, const EventContext& ctx);
 
   // Get next event and extract collection of hit collections:
   StatusCode getNextEvent(const EventContext& ctx);

@@ -544,6 +544,7 @@ public:
    */
   static std::vector<index_type> getEventPositionInCollection (index_type index, const IProxyDict* sg);
 
+
   /**
    * @brief Return the position in the McEventCollection of the
    *        GenEvent pointed to by this HepMcParticleLink
@@ -551,6 +552,16 @@ public:
    * FIXME - need to be able to flag when no event with the appropriate event_number was found.
    */
   index_type getEventPositionInCollection (const IProxyDict* sg) const;
+
+
+  /**
+   * @brief Return a HepMcParticleLink pointing at the same particle,
+   * but in a different GenEvent
+   * @param particleLink the current HepMcParticleLink
+   * @param eventIndex the event number (unless zero) of the GenEvent
+   * which the redirected HepMcParticleLink should point at
+   **/
+  static HepMcParticleLink getRedirectedLink(const HepMcParticleLink& particleLink, uint32_t eventIndex, const EventContext& ctx);
 
 
   /**

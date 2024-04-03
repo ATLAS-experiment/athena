@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////
@@ -424,21 +424,22 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
   SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibData(m_offlineCalibDataKey, ctx);
-  std::vector<int> trkNo;
+  std::vector<int> truthIdList;
   std::vector<Identifier> detEl;
 
   while (thpcsi.nextDetectorElement(i, e)) {
 
     Pixel_detElement_RIO_map PixelDetElClusterMap;
 
-    trkNo.clear();
+    truthIdList.clear();
     detEl.clear();
 
     while (i != e) {
 
       const TimedHitPtr<SiHit>& hit(*i++);
-
-
+      // check the status of truth information for this SiHit
+      // some Truth information is cut for pile up events
+      const HepMcParticleLink currentLink = HepMcParticleLink::getRedirectedLink(hit->particleLink(), hit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
       const int barrelEC = hit->getBarrelEndcap();
       const int layerDisk = hit->getLayerDisk();
       const int phiModule = hit->getPhiModule();
@@ -455,7 +456,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
       std::vector<HepMcParticleLink> hit_vector; //Store the hits in merged cluster
 
-      const int trkn = hit->truthBarcode();
+      const int truthID = (currentLink.barcode() !=0 && currentLink.id() == 0) ? 3 : currentLink.id(); // FIXME barcode-based Patch for reading in legacy barcode-based EDM - if the barcode is non-zero, but the id is zero then we must be looking at a particle linked to suppressed pile-up truth - such SiHits would be linked to the third GenParticle in their GenEvents (if they were present)
 
       const Identifier hitId = hitSiDetElement->identify(); // Isn't this is identical to moduleID?
       //const IdentifierHash hitIdHash = hitSiDetElement->identifyHash();
@@ -463,16 +464,16 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
 
       bool isRep = false;
 
-      for (int j : trkNo) {
+      for (int j : truthIdList) {
         for (auto & k : detEl) {
-          if ((trkn > 0) && (trkn == j) && (hitId == k)) {isRep = true; break;}
+          if ((truthID > 0) && (truthID == j) && (hitId == k)) {isRep = true; break;}
         }
         if (isRep) break;
       }
 
       if (isRep) continue;
 
-      trkNo.push_back(trkn);
+      truthIdList.push_back(truthID);
       detEl.push_back(hitId);
 
       HepGeom::Point3D<double> localStartPosition = hit->localStartPosition();
@@ -784,18 +785,18 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
               waferHash, pixelCluster.release()));
       const PixelCluster* insertedCluster = it->second;
 
-      if (hit->particleLink().isValid()) {
-        if (!HepMC::ignoreTruthLink(hit->particleLink(), m_vetoPileUpTruthLinks)) {
+      if (currentLink.isValid()) {
+        if (!HepMC::ignoreTruthLink(currentLink, m_vetoPileUpTruthLinks)) {
           m_pixPrdTruth->insert(
-              std::make_pair(insertedCluster->identify(), hit->particleLink()));
+              std::make_pair(insertedCluster->identify(), currentLink));
           ATH_MSG_DEBUG("Truth map filled with cluster"
                         << insertedCluster
-                        << " and link = " << hit->particleLink());
+                        << " and link = " << currentLink);
         }
       } else {
         ATH_MSG_DEBUG(
             "Particle link NOT valid!! Truth map NOT filled with cluster"
-            << insertedCluster << " and link = " << hit->particleLink());
+            << insertedCluster << " and link = " << currentLink);
       }
 
       // Add all hit that was connected to the cluster

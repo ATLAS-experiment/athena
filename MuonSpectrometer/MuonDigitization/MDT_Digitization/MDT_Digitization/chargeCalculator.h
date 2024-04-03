@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_CHARGECALCULATOR_H
@@ -36,27 +36,22 @@ to the third digit of decimal number of the  pdgid.
 // SB
 #include "AtlasHepMC/GenParticle.h"
 //
-double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
-    const HepMcParticleLink::PositionFlag idxFlag = (eventId == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-    const HepMcParticleLink trkParticle(hit.truthBarcode(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
-    HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
-    double qcharge = 1.;
-    if (genParticle) {
-        int particleEncoding = genParticle->pdg_id();
-        //      std::cout << "SB: pdgId=" << particleEncoding <<std::endl;
-        if (((int)(std::abs(particleEncoding) / 10000000) == 1) && ((int)(std::abs(particleEncoding) / 100000) == 100)) {
-            qcharge = ((std::abs(particleEncoding) / 100000.0) - 100.0) * 1000.0;
-            if (particleEncoding < 0.0) qcharge = -qcharge;
-            //			std::cout << "SB: BINGO! Qball: qcharge=" << qcharge <<std::endl;
-        } else if (((int)(std::abs(particleEncoding) / 10000000) == 2) && ((int)(std::abs(particleEncoding) / 100000) == 200)) {
-            qcharge = (double)((std::abs(particleEncoding) / 1000) % 100) / (double)((std::abs(particleEncoding) / 10) % 100);
-            if (particleEncoding < 0.0) qcharge = -qcharge;
-        }
-    } else {
-        //      std::cout << "SB: genParticle=0 " <<std::endl;
+double chargeCalculator(const EventContext& ctx, const MDTSimHit& hit, unsigned short eventId = 0) {
+  const HepMcParticleLink trkParticle = HepMcParticleLink::getRedirectedLink(hit.particleLink(), eventId, ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+  HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
+  double qcharge = 1.;
+  if (genParticle) {
+    const int particleEncoding = genParticle->pdg_id();
+    if (((int)(std::abs(particleEncoding) / 10000000) == 1) && ((int)(std::abs(particleEncoding) / 100000) == 100)) { // TODO use a function from TruthUtils/AtlasPID.h
+      qcharge = ((std::abs(particleEncoding) / 100000.0) - 100.0) * 1000.0;
+      if (particleEncoding < 0.0) qcharge = -qcharge;
     }
-
-    return qcharge;
+    else if (((int)(std::abs(particleEncoding) / 10000000) == 2) && ((int)(std::abs(particleEncoding) / 100000) == 200)) { // TODO use a function from TruthUtils/AtlasPID.h
+      qcharge = (double)((std::abs(particleEncoding) / 1000) % 100) / (double)((std::abs(particleEncoding) / 10) % 100);
+      if (particleEncoding < 0.0) qcharge = -qcharge;
+    }
+  }
+  return qcharge;
 }
 
 #endif

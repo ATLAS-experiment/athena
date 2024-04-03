@@ -495,9 +495,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
                     continue;
                 }
             }
-            const HepMcParticleLink::PositionFlag idxFlag =
-                (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            const HepMcParticleLink particleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+            const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
             // Read the information about the Micro Megas hit
             ATH_MSG_DEBUG("> hitID  " << hitID << " Hit bunch time  " << bunchTime << " tot " << globalHitTime << " tof/G4 time "
                                       << hit.globalTime() << " globalHitPosition " << globalHitPosition << "hit: r "

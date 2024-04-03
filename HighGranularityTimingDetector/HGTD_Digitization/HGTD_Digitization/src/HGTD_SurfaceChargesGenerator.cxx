@@ -66,12 +66,14 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
 
   // check the status of truth information for this SiHit
   // some Truth information is cut for pile up events
-  unsigned short eventId = timed_hit_ptr.eventId();
-  const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink trklink{HepMcParticleLink(hit.truthBarcode(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME barcode-based
+  const HepMcParticleLink trklink = HepMcParticleLink::getRedirectedLink(hit.particleLink(), timed_hit_ptr.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
   SiCharge::Process hitproc{SiCharge::track};
-  if (hit.truthBarcode() != 0) {
+  if (hit.truthID() != 0 || hit.truthBarcode() != 0) { // if the hit was not caused by a delta-ray then one of these must be true
     if (not trklink.isValid()) {
+      // TODO consider extending this check to reject links to
+      // GenEvents other than the first one in the McEventCollection,
+      // so that the digitization output doesn't change if pile-up
+      // truth is saved.
       hitproc = SiCharge::cut_track;
     }
   }

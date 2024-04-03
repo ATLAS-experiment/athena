@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "EnergyDepositionTool.h"
@@ -140,12 +140,8 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
   ATH_MSG_DEBUG("Deposit energy in sensor volume.");
 
   //Check if simulated particle or delta ray
-  const HepMcParticleLink::PositionFlag idxFlag =
-    (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink McLink {
-    HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx) // FIXME
-  };
-  HepMC::ConstGenParticlePtr genPart = McLink.cptr();
+  const HepMcParticleLink McLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+ HepMC::ConstGenParticlePtr genPart = McLink.cptr();
   bool delta_hit = true;
   if (genPart) delta_hit = false;
   double sensorThickness = Module.design().thickness();

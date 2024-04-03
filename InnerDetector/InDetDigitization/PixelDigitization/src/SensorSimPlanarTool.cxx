@@ -325,15 +325,12 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     coLorentz = std::sqrt(1.0 + (tanLorentz*tanLorentz));
   }
 
-  const HepMcParticleLink::PositionFlag idxFlag =
-    (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-
   //**************************************//
   //*** Now diffuse charges to surface *** //
   //**************************************//
   // pre-make HepMcParticleLink
-  const auto particleLink = HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx); // FIXME barcode-based syntax
-  const double pHitTime = hitTime(phit);
+  const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+ const double pHitTime = hitTime(phit);
 
   const double halfEtaPitch = 0.5*Module.etaPitch();
   const double halfPhiPitch = 0.5*Module.phiPitch();
