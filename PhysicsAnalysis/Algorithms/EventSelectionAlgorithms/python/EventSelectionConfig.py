@@ -171,12 +171,17 @@ class EventSelectionConfig(ConfigBlock):
         return self.cutflow
 
     def setDecorationName(self, algorithm, config, decoration):
-        self.currentDecoration = decoration
         self.cutflow.append( decoration )
         if algorithm is not None:
             algorithm.decorationName = f'{decoration}'
+            self.currentDecoration = decoration
             if self.debugMode:
                 config.addOutputVar('EventInfo', decoration, decoration.split("_%SYS%")[0])
+        else:
+            if self.currentDecoration:
+                self.currentDecoration += '&&' + decoration
+            else:
+                self.currentDecoration = decoration
         config.addSelection('EventInfo', '', decoration)
         return
 
@@ -662,7 +667,7 @@ class EventSelectionConfig(ConfigBlock):
             self.raise_misconfig(text, "GLOBALTRIGMATCH")
         if len(items) != 1:
             self.raise_misconfig(text, "number of arguments")
-        self.setDecorationName(None, config, "globalTriggerMatch_dontsave_%SYS%")
+        self.setDecorationName(None, config, "globalTriggerMatch_dontsave_%SYS%,as_char")
         return
 
     def add_SAVE(self, text, config):
