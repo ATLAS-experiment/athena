@@ -35,26 +35,6 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
 
 
     # adding BadChan masker private tool
-    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-
-
-    if isComponentAccumulatorCfg():
-       if flags.DQ.Environment == 'online':
-          isOnline=True
-    else:
-       from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-       if athenaCommonFlags.isOnline:
-          isOnline=True
-
-    isOnline=False #needed later
-    if isComponentAccumulatorCfg() :
-        if flags.DQ.Environment == 'online':
-            isOnline=True
-    else :
-        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-        if athenaCommonFlags.isOnline:
-            isOnline=True
- 
     larNoiseCorrelMonAlg.ProblemsToMask=["deadReadout","deadPhys","short","almostDead","highNoiseHG","highNoiseMG","highNoiseLG","sporadicBurstNoise"]
     larNoiseCorrelMonAlg.IgnoreBadChannels=True
     larNoiseCorrelMonAlg.TriggerChain = "HLT_noalg_zb_L1ZB, HLT_noalg_zb_L1RD1_EMPTY, HLT_noalg_cosmiccalo_L1RD1_EMPTY" #turn off for calibration run 
@@ -70,7 +50,7 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
     #deal with custom febs to monitor (if any)
     if len(customFEBStoMonitor)==0: 
         #we do not want to plot everything if online
-        if isOnline:
+        if flags.DQ.Environment == 'online':
             from AthenaCommon.Logging import logging
             larNoiseCorrelMonAlg.PlotsOFF=True
             msg=logging.getLogger("LArNoiseCorrelationMonAlg")
@@ -106,13 +86,9 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
 
     if larNoiseCorrelMonAlg.PlotsOFF: # do not have plots, returning
        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-       if isComponentAccumulatorCfg():
-          cfg=ComponentAccumulator()
-          cfg.merge(helper.result())
-          return cfg
-       else:    
-          return helper.result()
-    
+       cfg=ComponentAccumulator()
+       cfg.merge(helper.result())
+       return cfg
 
     #prepare the monitoring group
     grpName="NoiseCorr"
@@ -196,13 +172,10 @@ def LArNoiseCorrelationMonConfigCore(helper, algoinstance,flags):
 
    
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    if isComponentAccumulatorCfg():
-        cfg=ComponentAccumulator()
-        cfg.merge(helper.result())
-        return cfg
-    else:    
-        return helper.result()
-    
+    cfg=ComponentAccumulator()
+    cfg.merge(helper.result())
+    return cfg
+
 
 if __name__=='__main__':
 

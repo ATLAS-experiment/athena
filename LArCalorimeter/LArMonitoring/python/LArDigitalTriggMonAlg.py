@@ -371,7 +371,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
             thisTopPath=f"/{thisSel}/{topPath}"
             # Histos that we only want for all partitions/layers combined lalala
             if part == "ALL":
-                partGroup_sc.defineHistogram('SC_part_latomeSourceidbin,SC_part_et_onl;SC_ET_Onl_vs_LATOME_'+thisSel,
+                partGroup_sc.defineHistogram('SC_part_latomesourceidbin,SC_part_et_onl;SC_ET_Onl_vs_LATOME_'+thisSel,
                                              title='SC ET [GeV] vs LATOME name '+selStrPart[thisSel]+'; ; ET SC [GeV]',
                                              type='TH2F',
                                              cutmask='SC_part_'+thisSel,
