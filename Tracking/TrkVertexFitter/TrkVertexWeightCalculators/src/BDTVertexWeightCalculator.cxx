@@ -126,7 +126,7 @@ const xAOD::Vertex* BDTVertexWeightCalculator::getVertex(
     const xAOD::VertexContainer& vertices) const {
   float best_score = std::numeric_limits<float>::lowest();
   const xAOD::Vertex* vertex = nullptr;
-  for (const auto& v : vertices) {
+  for (const xAOD::Vertex* v : vertices) {
     if (v == nullptr) {
       ATH_MSG_WARNING("Null vertex in container");
       continue;
