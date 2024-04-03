@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -126,7 +126,7 @@ StatusCode CscDigitizationTool::processAllSubEvents(const EventContext& ctx) {
   rngWrapper->setSeed( name(), ctx );
 
   Collections_t collections;
-  ATH_CHECK( CoreDigitization(collections,cscSimData.ptr(), rngWrapper->getEngine(ctx)) );
+  ATH_CHECK( CoreDigitization(collections,cscSimData.ptr(), rngWrapper->getEngine(ctx), ctx) );
   for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
     if (collections[coll_hash]) {
       ATH_CHECK( cscDigits->addCollection (collections[coll_hash].release(), coll_hash) );
@@ -136,7 +136,7 @@ StatusCode CscDigitizationTool::processAllSubEvents(const EventContext& ctx) {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine) {
+StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine, const EventContext& ctx) {
 
   std::map <IdentifierHash,deposits> myDeposits;
   csc_map    data_map;
@@ -208,8 +208,7 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
         hashVec.clear();
         continue;
       }
-      const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-      const HepMcParticleLink trackLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+      const HepMcParticleLink trackLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
       const auto cscd = CscMcData(energy, ypos, zpos);
       for (; vecBeg != vecEnd; ++vecBeg) {
         myDeposits[(*vecBeg)].emplace_back(trackLink,cscd);
@@ -560,7 +559,7 @@ StatusCode CscDigitizationTool::mergeEvent(const EventContext& ctx) {
   rngWrapper->setSeed( name(), ctx );
 
   Collections_t collections;
-  ATH_CHECK(CoreDigitization(collections,cscSimData.ptr(), rngWrapper->getEngine(ctx)));
+  ATH_CHECK(CoreDigitization(collections,cscSimData.ptr(), rngWrapper->getEngine(ctx), ctx));
   for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
     if (collections[coll_hash]) {
       ATH_CHECK( cscDigits->addCollection (collections[coll_hash].release(), coll_hash) );

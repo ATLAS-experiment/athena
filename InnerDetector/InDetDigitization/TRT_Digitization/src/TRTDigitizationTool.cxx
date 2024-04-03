@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -425,9 +425,9 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
     depositVector.clear();
     depositVector.reserve(std::distance(i,e));
     for (TimedHitCollection<TRTUncompressedHit>::const_iterator hit_iter(i); hit_iter != e; ++hit_iter ) {
-      const HepMcParticleLink::PositionFlag idxFlag = (hit_iter->eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM; // suspect that we could use evtIndex here rather than hit_iter->eventId()
       // create a new deposit
-      InDetSimData::Deposit deposit( HepMcParticleLink((*hit_iter)->truthBarcode(), hit_iter->eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx), (*hit_iter)->GetEnergyDeposit() ); // FIXME
+      InDetSimData::Deposit deposit( HepMcParticleLink::getRedirectedLink((*hit_iter)->particleLink(), hit_iter->eventId(), ctx), // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+                                     (*hit_iter)->GetEnergyDeposit() );
       if (HepMC::ignoreTruthLink(deposit.first, m_vetoPileUpTruthLinks)) {
         continue;
       }

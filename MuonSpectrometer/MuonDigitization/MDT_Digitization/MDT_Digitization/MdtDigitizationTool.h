@@ -17,9 +17,9 @@
     container for simulation data to be preserved after the digitization
     procedue, and persistified together with the RDOs) containers are created
     and recorded on StoreGate; the MDTSimHit collection are merged using the
-    TimedHitCollection sorted container (done in handleMDTSimhit(TimedHitPtr
+    TimedHitCollection sorted container (done in handleMDTSimHit(TimedHitPtr
     \<MDTSimHit\>& hit)) method); into a loop over the TimedHitCollection for
-    the given DetectorElement, the handleMDTSimhit() method converts the SimID
+    the given DetectorElement, the handleMDTSimHit() method converts the SimID
     into the Offline ID to be associated to the Digit and pass to the
     digitization tool the drift radius and the distance to the chamber RO side
     (for the propagation delay computation). The digitization tool returns a
@@ -131,7 +131,7 @@ private:
     bool insideMaskWindow(double time) const;
     bool checkMDTSimHit(const EventContext& ctx, const MDTSimHit& hit) const;
 
-    bool handleMDTSimhit(const EventContext& ctx, const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
+    bool handleMDTSimHit(const EventContext& ctx, const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
                          CLHEP::HepRandomEngine* toolRndmEngine);
     bool createDigits(const EventContext& ctx, Collections_t& collections, MuonSimDataCollection* sdoContainer, CLHEP::HepRandomEngine* rndmEngine);
 

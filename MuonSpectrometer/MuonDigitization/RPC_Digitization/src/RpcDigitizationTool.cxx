@@ -535,7 +535,9 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 
             if (m_validationSetup) {
                 ATH_MSG_VERBOSE("Validation:  globalHitTime, G4Time, BCtime = " << globalHitTime << " " << G4Time << " " << bunchTime);
-                inputSimHitColl->Emplace(idHit, globalHitTime, hit.localPosition(), hit.truthBarcode(), hit.postLocalPosition(),
+                inputSimHitColl->Emplace(idHit, globalHitTime, hit.localPosition(),
+                                         HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx), // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+                                         hit.postLocalPosition(),
                                          hit.energyDeposit(), hit.stepLength(), hit.particleEncoding(), hit.kineticEnergy());
             }
 
@@ -607,9 +609,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 continue;
             }
             const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(atlasRpcIdeta);  // first add time jitter to the time:
-            const HepMcParticleLink::PositionFlag idxFlag =
-                (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            const HepMcParticleLink particleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
+            const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
 
             ATH_CHECK(DetectionEfficiency(ctx, atlasRpcIdeta, atlasRpcIdphi, undefPhiStripStat, rndmEngine, particleLink));
 
@@ -652,7 +652,6 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 
                 //////////////////////////////////////////////////////////////////////////////////
                 // create here deposit for MuonSimData
-                // ME unused: const HepMcParticleLink & particleLink = hit.particleLink();
                 // MuonMCData first  word is the packing of    : proptime, bunchTime, posy, posz
                 // MuonMCData second word is the total hit time: bunchcTime+tof+proptime+correlatedJitter / ns
                 MuonSimData::Deposit deposit(particleLink, MuonMCData((*b), time));  // store tof+strip_propagation+corr.jitter

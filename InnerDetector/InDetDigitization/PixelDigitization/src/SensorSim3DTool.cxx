@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SensorSim3DTool.h"
@@ -115,11 +115,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double module_size_x = Module.width();
   double module_size_y = Module.length();
 
-  const HepMcParticleLink::PositionFlag idxFlag =
-    (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-
-  // pre-make HepMcParticleLink
-  auto particleLink = HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
+  const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
   const double pHitTime = hitTime(phit);
 
   if (m_radiationDamageSimulationType != RadiationDamageSimulationType::NO_RADIATION_DAMAGE) {
@@ -264,7 +260,6 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
       float ramoInit_mizj  = ramoPotentialMap.getContent(ramo_init_bin_x_zj, ramo_init_bin_y_mi);
       float ramoInit_mimj  = ramoPotentialMap.getContent(ramo_init_bin_x_mj, ramo_init_bin_y_mi);
 
-      auto mc_particle_link = HepMcParticleLink(phit->truthBarcode(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
       const auto hit_time = hitTime(phit);
 
       //Loop over charge-carrier pairs, we're looping over electrons and holes at the same time
@@ -456,25 +451,25 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
           const SiLocalPosition& chargePos_mimj_holes = Module.hitLocalToLocal(y_mod_mj_holes, x_mod_mi_holes);
 
           //This was: const SiSurfaceCharge scharge(chargePos, SiCharge(eHitRamo*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
-          const SiSurfaceCharge scharge_pipj_electrons(chargePos_pipj_electrons, SiCharge(eHitRamo_pipj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_pizj_electrons(chargePos_pizj_electrons, SiCharge(eHitRamo_pizj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_pimj_electrons(chargePos_pimj_electrons, SiCharge(eHitRamo_pimj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_zipj_electrons(chargePos_zipj_electrons, SiCharge(eHitRamo_zipj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_zizj_electrons(chargePos_zizj_electrons, SiCharge(eHitRamo_zizj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_zimj_electrons(chargePos_zimj_electrons, SiCharge(eHitRamo_zimj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_mipj_electrons(chargePos_mipj_electrons, SiCharge(eHitRamo_mipj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_mizj_electrons(chargePos_mizj_electrons, SiCharge(eHitRamo_mizj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_mimj_electrons(chargePos_mimj_electrons, SiCharge(eHitRamo_mimj_electrons*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
+          const SiSurfaceCharge scharge_pipj_electrons(chargePos_pipj_electrons, SiCharge(eHitRamo_pipj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_pizj_electrons(chargePos_pizj_electrons, SiCharge(eHitRamo_pizj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_pimj_electrons(chargePos_pimj_electrons, SiCharge(eHitRamo_pimj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_zipj_electrons(chargePos_zipj_electrons, SiCharge(eHitRamo_zipj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_zizj_electrons(chargePos_zizj_electrons, SiCharge(eHitRamo_zizj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_zimj_electrons(chargePos_zimj_electrons, SiCharge(eHitRamo_zimj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_mipj_electrons(chargePos_mipj_electrons, SiCharge(eHitRamo_mipj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_mizj_electrons(chargePos_mizj_electrons, SiCharge(eHitRamo_mizj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_mimj_electrons(chargePos_mimj_electrons, SiCharge(eHitRamo_mimj_electrons*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
 
-          const SiSurfaceCharge scharge_pipj_holes(chargePos_pipj_holes, SiCharge(eHitRamo_pipj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_pizj_holes(chargePos_pizj_holes, SiCharge(eHitRamo_pizj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_pimj_holes(chargePos_pimj_holes, SiCharge(eHitRamo_pimj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_zipj_holes(chargePos_zipj_holes, SiCharge(eHitRamo_zipj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_zizj_holes(chargePos_zizj_holes, SiCharge(eHitRamo_zizj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_zimj_holes(chargePos_zimj_holes, SiCharge(eHitRamo_zimj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_mipj_holes(chargePos_mipj_holes, SiCharge(eHitRamo_mipj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_mizj_holes(chargePos_mizj_holes, SiCharge(eHitRamo_mizj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
-          const SiSurfaceCharge scharge_mimj_holes(chargePos_mimj_holes, SiCharge(eHitRamo_mimj_holes*eleholePairEnergy, hit_time, SiCharge::track, mc_particle_link));
+          const SiSurfaceCharge scharge_pipj_holes(chargePos_pipj_holes, SiCharge(eHitRamo_pipj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_pizj_holes(chargePos_pizj_holes, SiCharge(eHitRamo_pizj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_pimj_holes(chargePos_pimj_holes, SiCharge(eHitRamo_pimj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_zipj_holes(chargePos_zipj_holes, SiCharge(eHitRamo_zipj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_zizj_holes(chargePos_zizj_holes, SiCharge(eHitRamo_zizj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_zimj_holes(chargePos_zimj_holes, SiCharge(eHitRamo_zimj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_mipj_holes(chargePos_mipj_holes, SiCharge(eHitRamo_mipj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_mizj_holes(chargePos_mizj_holes, SiCharge(eHitRamo_mizj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
+          const SiSurfaceCharge scharge_mimj_holes(chargePos_mimj_holes, SiCharge(eHitRamo_mimj_holes*eleholePairEnergy, hit_time, SiCharge::track, particleLink));
 
           auto addCharge = [&Module, &chargedDiodes](SiSurfaceCharge const & scharge) {
             const SiCellId& diode = Module.cellIdOfPosition(scharge.position());

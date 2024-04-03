@@ -255,11 +255,14 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
   while (thpcsi.nextDetectorElement(i, e))
     {
       SCT_detElement_RIO_map SCT_DetElClusterMap;
-      std::vector<int> trkNo;
+      std::vector<int> truthIdList;
       std::vector<Identifier> detEl;
       while (i != e)
         {
           const TimedHitPtr<SiHit>& currentSiHit(*i++);
+          // check the status of truth information for this SiHit
+          // some Truth information is cut for pile up events
+          const HepMcParticleLink currentLink = HepMcParticleLink::getRedirectedLink(currentSiHit->particleLink(), currentSiHit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
 
           const Identifier waferId = m_sct_ID->wafer_id(currentSiHit->getBarrelEndcap(), currentSiHit->getLayerDisk(), currentSiHit->getPhiModule(), currentSiHit->getEtaModule(), currentSiHit->getSide());
           const IdentifierHash waferHash = m_sct_ID->wafer_hash(waferId);
@@ -270,8 +273,6 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
               continue;
             }
 
-          std::vector<HepMcParticleLink> hit_vector; //Store the hits in merged cluster
-
           // the module design
           const InDetDD::SCT_ModuleSideDesign* design = dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&hitSiDetElement->design());
           if (!design)
@@ -280,20 +281,22 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
               continue;
             }
 
+          std::vector<HepMcParticleLink> hit_vector; //Store the hits in merged cluster
+
           // Process only one hit by the same particle in the same detector element
           bool isRep = false;
-          const int trkn = currentSiHit->truthBarcode();
+          const int truthID = (currentLink.barcode() !=0 && currentLink.id() == 0) ? 3 : currentLink.id(); // FIXME barcode-based Patch for reading in legacy barcode-based EDM - if the barcode is non-zero, but the id is zero then we must be looking at a particle linked to suppressed pile-up truth - such SiHits would be linked to the third GenParticle in their GenEvents (if they were present)
           const Identifier detElId = hitSiDetElement->identify();
-          for (int j : trkNo)
+          for (int j : truthIdList)
             {
               for (auto & k : detEl)
                 {
-                  if ((trkn > 0) && (trkn == j) && (detElId == k)) {isRep = true; break;}
+                  if ((truthID > 0) && (truthID == j) && (detElId == k)) {isRep = true; break;}
                 }
               if (isRep) { break; }
             }
           if (isRep) { continue; }
-          trkNo.push_back(trkn);
+          truthIdList.push_back(truthID);
           detEl.push_back(detElId);
 
           const double hitDepth  = hitSiDetElement->hitDepthDirection();
@@ -858,15 +861,15 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
             const InDet::SCT_Cluster*  potentialCluster = it->second;
 
             // Build Truth info for current cluster
-            if (currentSiHit->particleLink().isValid()) {
-              if (!HepMC::ignoreTruthLink(currentSiHit->particleLink(), m_vetoPileUpTruthLinks)) {
-                sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), currentSiHit->particleLink()));
-                ATH_MSG_DEBUG("Truth map filled with cluster" << potentialCluster << " and link = " << currentSiHit->particleLink());
+            if (currentLink.isValid()) {
+              if (!HepMC::ignoreTruthLink(currentLink, m_vetoPileUpTruthLinks)) {
+                sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), currentLink));
+                ATH_MSG_DEBUG("Truth map filled with cluster" << potentialCluster << " and link = " << currentLink);
               }
             }
           else
             {
-              ATH_MSG_DEBUG("Particle link NOT valid!! Truth map NOT filled with cluster" << potentialCluster << " and link = " << currentSiHit->particleLink());
+              ATH_MSG_DEBUG("Particle link NOT valid!! Truth map NOT filled with cluster" << potentialCluster << " and link = " << currentLink);
             }
 
 

@@ -403,15 +403,15 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
         continue;
 
       m_driftCircleMap.insert( std::multimap< Identifier, InDet::TRT_DriftCircle * >::value_type( straw_id, trtDriftCircle ) );
-
-      if ( hit->particleLink().isValid() ) {
-        if (!HepMC::ignoreTruthLink(hit->particleLink(), m_vetoPileUpTruthLinks)) {
-          trtPrdTruth->insert( std::make_pair( trtDriftCircle->identify(), hit->particleLink() ) );
-          ATH_MSG_DEBUG( "Truth map filled with cluster " << trtDriftCircle << " and link = " << hit->particleLink() );
+      const HepMcParticleLink particleLink = HepMcParticleLink::getRedirectedLink(hit->particleLink(), hit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+      if ( particleLink.isValid() ) {
+        if (!HepMC::ignoreTruthLink(particleLink, m_vetoPileUpTruthLinks)) {
+          trtPrdTruth->insert( std::make_pair( trtDriftCircle->identify(), particleLink ) );
+          ATH_MSG_DEBUG( "Truth map filled with cluster " << trtDriftCircle << " and link = " << particleLink );
         }
       }
       else {
-        ATH_MSG_DEBUG( "Particle link NOT valid!! Truth map NOT filled with cluster " << trtDriftCircle << " and link = " << hit->particleLink() );
+        ATH_MSG_DEBUG( "Particle link NOT valid!! Truth map NOT filled with cluster " << trtDriftCircle << " and link = " << particleLink );
       }
 
     }

@@ -14,7 +14,6 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetSimEvent/SiHit.h"
 #include "InDetIdentifier/PixelID.h"
-#include "GeneratorObjects/HepMcParticleLink.h"
 #include "SiPropertiesTool/SiliconProperties.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"

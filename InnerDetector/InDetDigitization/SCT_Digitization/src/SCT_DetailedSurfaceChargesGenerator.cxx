@@ -310,11 +310,15 @@ void SCT_DetailedSurfaceChargesGenerator::processSiHit(const SiDetectorElement* 
 
   //check the status of truth information for this SiHit
   //some Truth information is cut for pile up events
-  const HepMcParticleLink::PositionFlag idxFlag = (p_eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink trklink{HepMcParticleLink(phit.truthBarcode(), p_eventId, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME
+  const HepMcParticleLink trklink = HepMcParticleLink::getRedirectedLink(phit.particleLink(), p_eventId, ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+
   SiCharge::Process hitproc{SiCharge::track};
-  if (phit.truthBarcode()!=0) {
+  if (phit.truthID() != 0 || phit.truthBarcode() != 0) { // if the hit was not caused by a delta-ray then one of these must be true
     if (not trklink.isValid()) {
+      // TODO consider extending this check to reject links to
+      // GenEvents other than the first one in the McEventCollection,
+      // so that the digitization output doesn't change if pile-up
+      // truth is saved.
       hitproc = SiCharge::cut_track;
     }
   }

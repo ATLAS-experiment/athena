@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDigitizationTool.h"
@@ -449,17 +449,11 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
                     }
 
                     // link to MC info
-                    // const HepMcParticleLink & particleLink =
-                    // hit.particleLink();
                     // create here deposit for MuonSimData, link and tof
-                    const HepMcParticleLink::PositionFlag idxFlag =
-                        (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION
-                                              : HepMcParticleLink::IS_EVENTNUM;
                     std::vector<MuonSimData::Deposit> deposits;
                     deposits.emplace_back(
-                        HepMcParticleLink(phit->truthBarcode(), phit.eventId(),
-                                          idxFlag, HepMcParticleLink::IS_BARCODE), // FIXME
-                        MuonMCData(tof, 0));
+                                          HepMcParticleLink::getRedirectedLink(phit->particleLink(), phit.eventId(), ctx), // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+                                          MuonMCData(tof, 0));
                     MuonSimData simData(deposits, 0);
                     simData.setPosition(gpos);
                     simData.setTime(hitTime(phit));
