@@ -1,16 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_ARRAYBRANCH_H
 #define MUONTESTER_ARRAYBRANCH_H
 
 #include <MuonTesterTree/IMuonTesterBranch.h>
+#include <MuonTesterTree/MuonTesterBranch.h>
 #include <TTree.h>
 /// Class to store array like branches into the n-tuples
 
 namespace MuonVal {
 class MuonTesterTree;
-template <class T> class ArrayBranch : public IMuonTesterBranch {
+template <class T> class ArrayBranch : public MuonTesterBranch, virtual public IMuonTesterBranch {
 public:
     /// Constructor
     ArrayBranch(TTree* tree, const std::string& name, size_t size);
@@ -20,23 +21,12 @@ public:
     ArrayBranch(TTree* tree, const std::string& name, size_t size, const T& def_val);
     ArrayBranch(MuonTesterTree& tree, const std::string& name, size_t size, const T& def_val);
 
-    ArrayBranch(const ArrayBranch&) = delete;
-    void operator=(const ArrayBranch&) = delete;
-    virtual ~ArrayBranch();
+    virtual ~ArrayBranch() = default;
 
     /// Returns false if one of the array values is not updated
     bool fill(const EventContext&) override final;
     /// Connects the branch with the tree
     bool init() override final;
-    /// Returns the name of the branch
-    std::string name() const override final;
-    /// Returns the data dependencies of the branch (empty)
-    std::vector<DataDependency> data_dependencies() override final;
-
-    /// Underlying tree object
-    const TTree* tree() const override final;
-    TTree* tree() override final;
-    
 
     /// Is the branch initialized
     bool initialized() const;
@@ -64,21 +54,15 @@ private:
     std::string tree_data_type() const;
     /// Resets the check mask
     void reset();
-
-    TTree* m_tree{nullptr};
-    std::string m_name{};
-
     size_t m_size{0};
-    std::unique_ptr<T[]> m_data{nullptr};
-    std::unique_ptr<bool[]> m_updated{nullptr};
+    std::vector<T> m_data{};
+    std::vector<bool> m_updated{};
 
     bool m_init{false};
 
     /// Default value in cases where the part are not updated
     T m_default{};
     bool m_failIfNotUpdated{true};
-
-    MuonTesterTree* m_parent{nullptr};
 };
 /// Specification of the branch data_type for the TTree initialize routine
 template <> std::string ArrayBranch<char*>::tree_data_type() const;

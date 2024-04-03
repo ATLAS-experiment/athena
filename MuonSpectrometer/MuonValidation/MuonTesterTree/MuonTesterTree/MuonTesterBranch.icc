@@ -1,32 +1,26 @@
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONTESTERBRANCH_IXX
 #define MUONTESTER_MUONTESTERBRANCH_IXX
-#include <AthenaKernel/getMessageSvc.h>
-#include <GaudiKernel/MsgStream.h>
 #include <TTree.h>
 #include <algorithm> //for std::find
 namespace MuonVal {
 template <class T> bool MuonTesterBranch::addToTree(T& variable) {
     if (initialized()) {
-        MsgStream log(Athena::getMessageSvc(), "MuonTesterBranch()");
-        log << MSG::INFO << "init()  -- " << name() << " is already initialized." << endmsg;
+        ATH_MSG_INFO("init()  -- " << name() << " is already initialized.");
         return true;
     }
     std::string bName = eraseWhiteSpaces(name());
     if (bName.empty() || !m_tree) {
-        MsgStream log(Athena::getMessageSvc(), "MuonTesterBranch()");
-        log << MSG::ERROR << "init()  -- Empty names are forbidden." << endmsg;
+        ATH_MSG_ERROR("init()  -- Empty names are forbidden.");
         return false;
     } else if (m_tree->FindBranch(bName.c_str())) {
-        MsgStream log(Athena::getMessageSvc(), "MuonTesterBranch()");
-        log << MSG::ERROR << "The branch " << name() << " already exists in TTree " << m_tree->GetName() << "." << endmsg;
+        ATH_MSG_ERROR("The branch " << name() << " already exists in TTree " << m_tree->GetName() << ".");
         return false;
     } else if (!m_tree->Branch(bName.c_str(), &variable)) {
-        MsgStream log(Athena::getMessageSvc(), "MuonTesterBranch()");
-        log << MSG::ERROR << "Could not create the branch " << name() << " in TTree " << m_tree->GetName() << "." << endmsg;
+        ATH_MSG_ERROR("Could not create the branch " << name() << " in TTree " << m_tree->GetName() << ".");
         return false;
     }
     m_init = true;
@@ -37,6 +31,7 @@ bool MuonTesterBranch::declare_dependency(Key& key) {
     if (std::find(m_dependencies.begin(), m_dependencies.end(),&key) != m_dependencies.end()) return true;
     if (!key.initialize(!key.empty())) return false;
     m_dependencies.emplace_back(&key);
+    ATH_MSG_DEBUG("Declared new dependency "<<key.fullKey()<<" to "<<name());
     return true;
 }
 }
