@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: CaloClusterCorrection/python/CaloSwCorrections.py
@@ -113,26 +113,20 @@
 # with a string of the form `MODULE.NAME'.
 #
 
-# Need to be sure that we always get run3 configurables in the imported
-# steering modules.
-from AthenaCommon.Configurable import ConfigurableCABehavior
-with ConfigurableCABehavior():
-    from CaloClusterCorrection.CaloTopoEMmoments  import make_CaloTopoEMmoments
-    from CaloClusterCorrection.CaloTopoEMlayers   import make_CaloTopoEMlayers
-    from CaloClusterCorrection.CaloTopoEMetaoff   import make_CaloTopoEMetaoff
-    from CaloClusterCorrection.CaloTopoEMetaoffSW import make_CaloTopoEMetaoffSW
-    from CaloClusterCorrection.CaloTopoEMphioff   import make_CaloTopoEMphioff
-    from CaloClusterCorrection.CaloTopoEMphimod   import make_CaloTopoEMphimod
-    from CaloClusterCorrection.CaloTopoEMClusterUpdate \
-         import make_CaloTopoEMClusterUpdate
-    from CaloClusterCorrection.CaloTopoEMgap      import make_CaloTopoEMgap
-    from CaloClusterCorrection.CaloClusterListBadChannel   import make_CaloClusterListBadChannel
-    from CaloClusterCorrection.CaloTopoEMlongWeights \
-         import make_CaloTopoEMlongWeights
-    from CaloClusterCorrection.constants         import CALOCORR_EMTOPO, EMB1, EME1
-    from CaloClusterCorrection.common            import CaloClusterCorrSetup
-    from CaloClusterCorrection.compat            import makeFlags, unpackCA
-
+from CaloClusterCorrection.CaloTopoEMmoments  import make_CaloTopoEMmoments
+from CaloClusterCorrection.CaloTopoEMlayers   import make_CaloTopoEMlayers
+from CaloClusterCorrection.CaloTopoEMetaoff   import make_CaloTopoEMetaoff
+from CaloClusterCorrection.CaloTopoEMetaoffSW import make_CaloTopoEMetaoffSW
+from CaloClusterCorrection.CaloTopoEMphioff   import make_CaloTopoEMphioff
+from CaloClusterCorrection.CaloTopoEMphimod   import make_CaloTopoEMphimod
+from CaloClusterCorrection.CaloTopoEMClusterUpdate \
+     import make_CaloTopoEMClusterUpdate
+from CaloClusterCorrection.CaloTopoEMgap      import make_CaloTopoEMgap
+from CaloClusterCorrection.CaloClusterListBadChannel   import make_CaloClusterListBadChannel
+from CaloClusterCorrection.CaloTopoEMlongWeights \
+     import make_CaloTopoEMlongWeights
+from CaloClusterCorrection.constants         import CALOCORR_EMTOPO, EMB1, EME1
+from CaloClusterCorrection.common            import CaloClusterCorrSetup
 
 
 ##############################################################################
@@ -338,42 +332,3 @@ def make_CaloTopoEMCorrectionsCfg (flags,
                                                    cells_name = cells_name,
                                                    source = source,
                                                    **kw)
-
-
-##############################################################################
-# Backwards compatibility:
-# Main entry point to create a list of correction tools (old configuration)
-#
-
-#
-# Create and return a list of correction tools.
-# KEY is a string that specifies the correction type.
-# SUFFIX is a string to add to the end of each tool name.
-# VERSION specifies which version of corrections to use.
-# CORRLIST can be used to explicitly specify which corrections to run.
-# CELLS_NAME is the SG key to use to find the calorimeter cells,
-# for those corrections that require it.
-# SOURCE specifies the source(s) from which tools are configured.
-# See above for details.
-# None means to use the default.
-#
-# For more detailed information, see the comments at the start of this file.
-#
-def make_CaloTopoEMCorrections (key = None,
-                                suffix = '',
-                                version = None,
-                                corrlist = None,
-                                cells_name = None,
-                                source = None,
-                                **kw):
-    with ConfigurableCABehavior():
-        ca = CaloTopoEMCorrections.make_corrections (makeFlags(),
-                                                     corrclass = CALOCORR_EMTOPO,
-                                                     key = key,
-                                                     suffix = suffix,
-                                                     version = version,
-                                                     corrlist = corrlist,
-                                                     cells_name = cells_name,
-                                                     source = source,
-                                                     **kw)
-    return unpackCA (ca)

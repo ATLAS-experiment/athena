@@ -9,10 +9,7 @@
 #
 
 
-from AthenaConfiguration.ComponentAccumulator import \
-     conf2toConfigurable, appendCAtoAthena
 import string
-
 
 #
 # Return a new-style configuration flags object containing information
@@ -45,13 +42,3 @@ def makeFlags():
     flags.IOVDb.GlobalTag = globalflags.ConditionsTag()
 
     return flags
-
-
-#
-# Apply the results of a ComponentAccumulator to Athena.
-# Returns the list of configured correction tools.
-#
-def unpackCA (ca):
-    tools = [conf2toConfigurable(c) for c in  ca.popPrivateTools()]
-    appendCAtoAthena (ca)
-    return tools
