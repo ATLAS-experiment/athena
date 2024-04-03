@@ -151,7 +151,7 @@ StatusCode BuildVertexPointingAlg::execute() {
 void BuildVertexPointingAlg::selectPhotons(
     const xAOD::EgammaContainer& original_photons,
     ConstDataVector<DataVector<xAOD::Egamma>>& photons_selected) const {
-  for (const auto& photon : original_photons) {
+  for (const xAOD::Egamma* photon : original_photons) {
     if (m_selectionTool->accept(photon)) {
       photons_selected.push_back(photon);
       ATH_MSG_DEBUG("photon selected for pointing: pT = " << photon->pt()
