@@ -11,6 +11,7 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "ZdcIdentifier/ZdcID.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
 
 class StoreGateSvc;
 
@@ -39,7 +40,7 @@ private:
   std::vector< std::vector< bool > > m_zdcOn;
   std::vector< std::vector< float > > m_zdcPos; //Positions of the ZDC modules
   std::vector< std::vector< std::pair<int,int> > > m_zdcPixelStart_Stop; //Start and stop layers of the pixels for a given ZDC module
-  std::vector< float > m_rpdPos; //Positions of the RPD modules
+  std::vector< GeoAlignableTransform* > m_rpdPos; //Positions of the RPD modules
   std::vector< float > m_branPos; //Positions of the BRAN modules
 };
 

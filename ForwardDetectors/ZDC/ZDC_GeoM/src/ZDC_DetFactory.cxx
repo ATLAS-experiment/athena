@@ -15,8 +15,6 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
-#include "GeoModelKernel/GeoAlignableTransform.h"
-#include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/Units.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -69,12 +67,13 @@ void ZDC_DetFactory::initializePbPb2023(){
     m_BRANs_On = true; //Flag for both BRAN modules
     m_zdcOn = {{true, true, true, true}, //If the given ZDC is on
                {true, true, true, true}};
-    m_zdcPos = {{-394.0,  -15.0, 170.0, 325.0}, //Positions of the ZDC modules
-                {-272.75,   6.0, 191.0, 346.0}};
+    m_zdcPos = {{-394.5, 38.5, 220.8, 375.8},
+                {-325.5, 6.5, 188.8, 343.8}};
     m_zdcPixelStart_Stop = {{{1,8}, {0,9}, {0,0}, {0,0}}, //Pixel start and stop layers for each ZDC
                             {{0,0}, {0,9}, {0,0}, {0,0}}};
-    m_rpdPos = {-204.625,-183.375}; //Positions of the RPD modules
-    m_branPos = {-142.5,-121.5};
+    m_rpdPos = {new GeoAlignableTransform(GeoTrf::Translate3D(-2.012 * Gaudi::Units::mm, 21.388 * Gaudi::Units::mm, -178.0 * Gaudi::Units::mm)),
+                new GeoAlignableTransform(GeoTrf::Translate3D(1.774 * Gaudi::Units::mm, 21.344 * Gaudi::Units::mm, -210.0 * Gaudi::Units::mm))};
+    m_branPos = {-89.5, -121.5};
 }
 
 void ZDC_DetFactory::create(GeoPhysVol *world)
@@ -108,39 +107,24 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
          **************************************************/
         for(int module = 0; module < 4; ++module){
             if(!m_zdcOn[side][module]) continue;
-            id = m_zdcID->channel_id(sideSign,module,ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
             ZDC_ZDCModule *zdcMod = new ZDC_ZDCModule(m_detectorStore, sideSign ,module, m_zdcID, m_zdcPixelStart_Stop[side][module].first, m_zdcPixelStart_Stop[side][module].second);
-            sprintf(volName, "Zdc::Steel_Mod %s", id.getString().c_str());
-            Envelope_Physical->add(new GeoNameTag(volName));
-            Envelope_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
-            Envelope_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_zdcPos[side][module] * Gaudi::Units::mm)));
-            Envelope_Physical->add(zdcMod->create());
+            zdcMod->create(Envelope_Physical, new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_zdcPos[side][module] * Gaudi::Units::mm)));
         }
 
         /*************************************************
          * Place RPD
          **************************************************/
         if(m_RPDs_On){
-            id = m_zdcID->channel_id(sideSign, 4, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
             ZDC_RPDModule *rpdMod = new ZDC_RPDModule(m_detectorStore, sideSign, 4, m_zdcID);
-            sprintf(volName, "Zdc::RPD_Mod %s", id.getString().c_str());
-            Envelope_Physical->add(new GeoNameTag(volName));
-            Envelope_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
-            Envelope_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_rpdPos[side] * Gaudi::Units::mm)));
-            Envelope_Physical->add(rpdMod->create());
+            rpdMod->create(Envelope_Physical, m_rpdPos[side]);
         }
 
         /*************************************************
          * Place BRAN
          **************************************************/
         if(m_BRANs_On){
-            id = m_zdcID->channel_id(sideSign, 5, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
             ZDC_BRANModule *branMod = new ZDC_BRANModule(m_detectorStore, sideSign, 5, m_zdcID);
-            sprintf(volName, "Zdc::BRAN_Mod %s", id.getString().c_str());
-            Envelope_Physical->add(new GeoNameTag(volName));
-            Envelope_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
-            Envelope_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_branPos[side] * Gaudi::Units::mm)));
-            Envelope_Physical->add(branMod->create());
+            branMod->create(Envelope_Physical, new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_branPos[side] * Gaudi::Units::mm)));
         }
 
         /*************************************************
