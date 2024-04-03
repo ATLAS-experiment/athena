@@ -35,40 +35,25 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
     larFEBMonAlg.SubDetNames=lArDQGlobals.SubDet
     larFEBMonAlg.Streams=lArDQGlobals.defaultStreamNames
 
-    isCOMP200=False
-    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-    if isComponentAccumulatorCfg():
-      if "COMP200" in flags.IOVDb.DatabaseInstance:
-         isCOMP200=True
-    else:      
-      from IOVDbSvc.CondDB import conddb
-      if conddb.GetInstance() == 'COMP200':
-         isCOMP200=True
+    isCOMP200="COMP200" in flags.IOVDb.DatabaseInstance
 
     if not isCOMP200:
        dbString="<db>COOLONL_LAR/CONDBR2</db>"
        persClass="AthenaAttributeList"
        fld="/LAR/Configuration/DSPThresholdFlat/Thresholds"
-       if isComponentAccumulatorCfg():
-          havethem=False
-          for c in helper.resobj.getServices(): 
-              if c.getName()=="IOVDbSvc":
-                 iovDbSvc=c
-                 condLoader=helper.resobj.getCondAlgo("CondInputLoader")
-                 havethem=True
-                 break
-              pass
-          if not havethem:
-             from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-             helper.resobj.merge(IOVDbSvcCfg(flags))
-             condLoader=helper.resobj.getCondAlgo("CondInputLoader")
-             iovDbSvc=helper.resobj.getService("IOVDbSvc")
-       else:   
-          from AthenaCommon import CfgGetter
-          iovDbSvc=CfgGetter.getService("IOVDbSvc")
-          from AthenaCommon.AlgSequence import AthSequencer
-          condSeq = AthSequencer("AthCondSeq")
-          condLoader=condSeq.CondInputLoader
+       havethem=False
+       for c in helper.resobj.getServices():
+           if c.getName()=="IOVDbSvc":
+               iovDbSvc=c
+               condLoader=helper.resobj.getCondAlgo("CondInputLoader")
+               havethem=True
+               break
+
+       if not havethem:
+           from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+           helper.resobj.merge(IOVDbSvcCfg(flags))
+           condLoader=helper.resobj.getCondAlgo("CondInputLoader")
+           iovDbSvc=helper.resobj.getService("IOVDbSvc")
 
        iovDbSvc.Folders.append(fld+dbString)
        condLoader.Load.add((persClass,fld))
@@ -77,11 +62,8 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
        fld='/LAR/Configuration/DSPThreshold/Thresholds'
        db='LAR_ONL'
        obj='LArDSPThresholdsComplete'
-       if isComponentAccumulatorCfg():
-           from IOVDbSvc.IOVDbSvcConfig import addFolders
-           helper.resobj.merge(addFolders(flags,fld,db,obj))
-       else:
-           conddb.addFolder (db, fld, className=obj)
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       helper.resobj.merge(addFolders(flags,fld,db,obj))
        larFEBMonAlg.Run1DSPThresholdsKey = 'LArDSPThresholds'
 
 
@@ -199,14 +181,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
                                   path=summary_hist_path,
                                   xbins=lArDQGlobals.Samples_Bins, xmin=lArDQGlobals.Samples_Min, xmax=lArDQGlobals.Samples_Max)
 
-    isOnline=False
-    if isComponentAccumulatorCfg() :
-      if flags.DQ.Environment == 'online':
-         isOnline=True
-    else:
-      from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-      if athenaCommonFlags.isOnline:
-         isOnline=True
+    isOnline = flags.DQ.Environment=='online'
 
     if isOnline:     
        Group.defineHistogram('LBf,EvtRejYield;RAW_EventsRejectedLB',

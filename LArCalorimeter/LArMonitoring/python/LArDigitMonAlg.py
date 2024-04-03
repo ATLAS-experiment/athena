@@ -172,15 +172,11 @@ def LArDigitMonConfigCore(helper, algoinstance,flags):
                                   xbins=lArDQGlobals.Samples_Bins,xmin=lArDQGlobals.Samples_Min,xmax=lArDQGlobals.Samples_Max)
     
 
-    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    if isComponentAccumulatorCfg():
-        cfg=ComponentAccumulator()
-        cfg.merge(helper.result())
-        return cfg
-    else:    
-        return helper.result()
-    
+    cfg=ComponentAccumulator()
+    cfg.merge(helper.result())
+    return cfg
+
 
 if __name__=='__main__':
 
