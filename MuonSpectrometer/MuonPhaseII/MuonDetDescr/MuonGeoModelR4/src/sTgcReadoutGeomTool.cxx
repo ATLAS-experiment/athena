@@ -178,9 +178,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         define.stripLayers.push_back(std::move(stripLayer));
         if (!define.stripDesign) define.stripDesign = stripDesign; 
         ///Pads
-        /// defining frameOffset to correct the beamlineRadius
-        double frameOffset = -0.5 * (paramBook.lFrameWidth - paramBook.sFrameWidth);
-        double beamlineRadius = frameOffset + define.physVol->getAbsoluteTransform().translation().perp();
+        double beamlineRadius = (define.physVol->getAbsoluteTransform() * gapVol.transform).translation().perp();
         padDesign->defineBeamlineRadius(beamlineRadius);
         ATH_MSG_DEBUG("The beamline radius is: " << beamlineRadius);
         StripLayer padLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), padDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Pad, 0));

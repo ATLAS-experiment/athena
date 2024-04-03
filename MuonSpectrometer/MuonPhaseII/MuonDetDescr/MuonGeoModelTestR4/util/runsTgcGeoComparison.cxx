@@ -460,6 +460,8 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newWireGroup.gasGap = (*wireGroupGasGap)[wg];
             newWireGroup.channelNumber = (*wireGroupNum)[wg];
             newWireGroup.channelType = 2;
+            ///Uncomment to avoid wireGroupPositions dump
+            //if (newWireGroup.channelNumber > 1) continue;
             newchamber.channels.insert(std::move(newWireGroup));
         }
 
@@ -471,6 +473,8 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newStrip.gasGap = (*stripGasGap)[s];
             newStrip.channelNumber = (*stripNum)[s];
             newStrip.channelType = 1;
+            ///Uncomment to avoid stripPositions dump
+            //if (newStrip.channelNumber > 1) continue;
             newchamber.channels.insert(std::move(newStrip));
         }
 
@@ -494,6 +498,8 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             newPad.gasGap = (*padGasGap)[p];
             newPad.padEta = (*padEta)[p];
             newPad.padPhi = (*padPhi)[p];
+            ///Uncomment to avoid padPositions dump
+            //if (newPad.padEta > 0 || newPad.padPhi > 0) continue;
             newchamber.pads.insert(std::move(newPad));
         }
 
@@ -651,7 +657,7 @@ int main( int argc, char** argv ) {
             TEST_BASICPROP(padPhiShift[c], "shift of inner pad edges in phi direction in the layer "<< c + 1 << " are ");
             TEST_BASICPROP(firstPadPhiDiv[c], "angular position of the outer edge of the first pad in the layer "<< c + 1 << " are ");
             ++c;
-            ///Dumping local to global layer transformation
+            ///Uncomment to dump the local to global layer transformation
 /*
             std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                       << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 

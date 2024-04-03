@@ -122,15 +122,29 @@ Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& mea
       wireGroupCenter = std::move(*wireGroupCenterOpt);
       unsigned int gasGap = gasGapNumber(measHash) + 1;
       if (channelNumber(measHash) == 1) {
-         ATH_MSG_DEBUG("The first wire pos is: " << wireGroupCenter.x() + (0.5 * firstWireGroupWidth(gasGap))* wirePitch(measHash) );
-         wireGroupCenter.x() = 0.5*(wireGroupCenter.x() + (0.5 * firstWireGroupWidth(gasGap) - 1)* wirePitch(measHash) - 0.5 * lGapLength(measHash));
+         ATH_MSG_DEBUG("The first wiregroup width is " <<firstWireGroupWidth(gasGap));
+         ATH_MSG_DEBUG("The last wire pos is: " << wireGroupCenter.x() + ((firstWireGroupWidth(gasGap) + 1) / 2 - 1) * wirePitch(measHash) );
+         /// Shifting the first wireGroup center to the last wire of the first wireGroup
+         wireGroupCenter.x() = wireGroupCenter.x() + ((firstWireGroupWidth(gasGap) + 1) / 2 - 1) * wirePitch(measHash);
+         /// Defining the wireGroup center as the mean of the position of the last wire in the first group
+         /// and the left edge of the active area defined for pads to match the R3 description
+         wireGroupCenter.x() = 0.5 * (wireGroupCenter.x() - 0.5 * lPadLength(measHash));
       }
-
       else if (channelNumber(measHash) == numWireGroups(gasGap)) {
          ATH_MSG_DEBUG("The last wire center before modification is: " << wireGroupCenter.x());
-         wireGroupCenter.x() = 0.5 * (wireGroupCenter.x() + 0.5*lGapLength(measHash) - 
-                              (wireGroupWidth(gasGap) * wirePitch(measHash)));
-         ATH_MSG_DEBUG("The last wire center after modification is: " << wireGroupCenter.x());
+         unsigned int lastWireGroupWidth = numWires(gasGap) - firstWireGroupWidth(gasGap) - (numWireGroups(gasGap) - 2) * wireGroupWidth(gasGap);
+         ATH_MSG_DEBUG("The last wire group width is: " << lastWireGroupWidth << " and half of that is: "<< lastWireGroupWidth / 2);                     
+         /// Shifting the last wireGroup center to the last wire of the second-last wireGroup
+         wireGroupCenter.x() = wireGroupCenter.x() - (lastWireGroupWidth / 2 + 1) * wirePitch(measHash);
+         ATH_MSG_DEBUG("The last wire of the last second group is at: " << wireGroupCenter.x());
+         /// Defining the wireGroup center as the mean of the position of the last wire in the second last group
+         /// and the right edge of the active area defined for pads to match the R3 description
+         wireGroupCenter.x() = 0.5 * (wireGroupCenter.x() + 0.5 * lPadLength(measHash));
+      }
+      else {
+         /// In R3, the center of the normal wireGroup is defined on the 10th wire, whereas, in R4
+         /// the center is defined on the 11th wire. So shifting by a wirePitch to match R3
+         wireGroupCenter.x() = wireGroupCenter.x() - wirePitch(measHash);
       }
       return wireGroupCenter;
    }
