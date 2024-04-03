@@ -18,6 +18,8 @@
 // Algs
 DECLARE_COMPONENT(ActsTrk::PixelClusterizationAlg)
 DECLARE_COMPONENT(ActsTrk::StripClusterizationAlg)
+DECLARE_COMPONENT(ActsTrk::PixelCacheClusterizationAlg)
+DECLARE_COMPONENT(ActsTrk::StripCacheClusterizationAlg)
 DECLARE_COMPONENT(ActsTrk::PixelSpacePointFormationAlg)
 DECLARE_COMPONENT(ActsTrk::StripSpacePointFormationAlg)
 // Tools

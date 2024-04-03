@@ -58,7 +58,8 @@ def ActsStripClusteringToolCfg(flags,
     return acc
 
 def ActsPixelClusterizationAlgCfg(flags,
-                                  name: str = 'ActsPixelClusterizationAlg', 
+                                  name: str = 'ActsPixelClusterizationAlg',
+                                  useCache: bool = False,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -69,7 +70,6 @@ def ActsPixelClusterizationAlgCfg(flags,
     # Regional selection
     kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
-    kwargs.setdefault('EnableCache', flags.Acts.useCache)
     kwargs.setdefault('ClusterCacheBackend', 'ActsPixelClusterCache_Back')
     kwargs.setdefault('ClusterCache', 'ActsPixelClustersCache')
 
@@ -84,11 +84,15 @@ def ActsPixelClusterizationAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelClusterizationMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+    if not useCache:
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
     return acc
 
 def ActsStripClusterizationAlgCfg(flags, 
-                                  name: str = 'ActsStripClusterizationAlg', 
+                                  name: str = 'ActsStripClusterizationAlg',
+                                  useCache: bool = False,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -99,7 +103,6 @@ def ActsStripClusterizationAlgCfg(flags,
     # Regional selection
     kwargs.setdefault('RoIs', 'ActsRegionOfInterest')
 
-    kwargs.setdefault('EnableCache', flags.Acts.useCache)
     kwargs.setdefault('ClusterCacheBackend', 'ActsStripClusterCache_Back')
     kwargs.setdefault('ClusterCache', 'ActsStripClustersCache')
 
@@ -114,7 +117,10 @@ def ActsStripClusterizationAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkStripClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripClusterizationMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(name, **kwargs))
+    if not useCache:
+        acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.StripCacheClusterizationAlg(name, **kwargs))
     return acc
 
 def ActsClusterCacheCreatorAlgCfg(flags,
@@ -183,10 +189,12 @@ def ActsMainClusterizationCfg(flags,
 
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsPixelClusterizationAlgCfg(flags,
-                                                RoIs=RoIs))
+                                                RoIs=RoIs,
+                                                useCache=flags.Acts.useCache))
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripClusterizationAlgCfg(flags,
-                                                RoIs=RoIs))
+                                                RoIs=RoIs,
+                                                useCache=flags.Acts.useCache))
         
     if flags.Acts.useCache:
         if flags.Detector.EnableITkPixel:
@@ -223,7 +231,7 @@ def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                 name="ActsConversionStripClusterizationAlg",
                                                 ClustersKey="ITkConversionStripClusters",
-                                                EnableCache=False,
+                                                useCache=False,
                                                 RoIs="ActsConversionRegionOfInterest"))
         
     if flags.Detector.EnableITkStrip:

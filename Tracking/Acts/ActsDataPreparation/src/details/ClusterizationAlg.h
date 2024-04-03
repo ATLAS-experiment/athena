@@ -12,11 +12,11 @@
 #include <StoreGate/WriteHandleKey.h>
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
 #include <IRegionSelector/IRegSelTool.h>
-#include "Cache.h"
+#include "src/Cache.h"
 
 namespace ActsTrk {
 
-template <typename IClusteringTool>
+template <typename IClusteringTool, bool useCache>
 class ClusterizationAlg : public AthReentrantAlgorithm {
 public:
     using RDOContainer = typename IClusteringTool::RDOContainer;
@@ -40,62 +40,37 @@ public:
     virtual StatusCode execute(const EventContext& ctx) const override;
     
 private:
-    ClusterizationAlg() = delete;
-    ClusterizationAlg(const ClusterizationAlg&) = delete;
-    ClusterizationAlg &operator=(const ClusterizationAlg&) = delete;
-    
-    ToolHandle<IClusteringTool> m_clusteringTool {
-	this, "ClusteringTool", "", "Clustering Tool"
-    };
+    ToolHandle<IClusteringTool> m_clusteringTool {this, "ClusteringTool", "",
+      "Clustering Tool"};
 
-    ToolHandle<GenericMonitoringTool> m_monTool {
-	this, "MonTool", "", "Monitoring tool"
-    };
+    ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "",
+      "Monitoring tool"};
 
-    ToolHandle<IRegSelTool> m_regionSelector {
-	this, "RegSelTool", "", "Region selector tool"
-    };
+    ToolHandle<IRegSelTool> m_regionSelector {this, "RegSelTool", "",
+      "Region selector tool"};
 
-    SG::ReadHandleKey<RDOContainer> m_rdoContainerKey {
-	this,
-	"RDOContainerKey",
-	"",
-	"Input RDO container key"
-    };
+    SG::ReadHandleKey<RDOContainer> m_rdoContainerKey {this, "RDOContainerKey", "",
+      "Input RDO container key"};
 
-    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey {
-	this, "RoIs", "", "RoIs to read in"
-    };
+    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey {this, "RoIs", "",
+      "RoIs to read in"};
 
-    SG::WriteHandleKey<ClusterContainer> m_clusterContainerKey {
-	this,
-	"ClustersKey",
-	"",
-	"Key of output xAOD pixel cluster container"
-    };
+    SG::WriteHandleKey<ClusterContainer> m_clusterContainerKey {this, "ClustersKey", "",
+      "Key of output xAOD pixel cluster container"};
 
     Cache_WriteHandleKey m_ClusterCache{this,"ClusterCache",""};
     Cache_BackendUpdateHandleKey m_ClusterCacheBackend{this,"ClusterCacheBackend",""};
-    Gaudi::Property< bool > m_cache_enabled {this, "EnableCache", false};
 
     // expected number of clusters for RDO
     // This values is used for reserving enough memory of the cluster container
     // reserve = m_expectedClustersPerRDO * nRDOs
     // The default values has been computed on a tt-bar PU200 sample
     // comparing the memory usage and the container capacity
-    Gaudi::Property<int> m_expectedClustersPerRDO {
-      this,
-      "expectedClustersPerRDO",
-      32,
-      "Expected number of clusters for RDO"
-    };
+    Gaudi::Property<int> m_expectedClustersPerRDO {this, "expectedClustersPerRDO", 32,
+      "Expected number of clusters for RDO"};
 
-    Gaudi::Property<std::string> m_idHelperName {
-	this,
-	"IDHelper",
-	"",
-	"Name of ID helper to fetch from detstore"
-    };
+    Gaudi::Property<std::string> m_idHelperName {this, "IDHelper", "",
+      "Name of ID helper to fetch from detstore" };
 
     const IDHelper* m_idHelper = nullptr;
 };
