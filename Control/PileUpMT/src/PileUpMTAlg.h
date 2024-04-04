@@ -15,6 +15,7 @@
 #include "src/ISkipEventIdxSvc.h"
 #include "xAODCnvInterfaces/IEventInfoCnvTool.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODEventInfo/EventAuxInfo.h"
 #include "xAODEventInfo/EventInfoContainer.h"
 
 // Example ROOT Includes
@@ -142,6 +143,7 @@ class PileUpMTAlg : public AthAlgorithm {
   // Utilities
   StatusCode get_ei(StoreGateSvc& sg,
                     std::unique_ptr<const xAOD::EventInfo>& ei,
+                    std::unique_ptr<xAOD::EventAuxInfo>& eiAux,
                     bool pileup = false) const;
   inline unsigned int get_BCID(int bc, unsigned int central_BCID) const {
     constexpr int maxBCPerOrbit = 3564;  // FIXME may need update
