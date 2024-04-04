@@ -121,7 +121,6 @@ if __name__=='__main__':
     parser.add_argument('--groupName', default="TilePhysMon", help='EMON, Name of the monitoring group')
     parser.add_argument('--postProcessingInterval', type=int, default=10000000,
                         help='Number of events between postprocessing steps (<0: disabled, >evtMax: during finalization)')
-    parser.add_argument('--perfmon', action='store_true', help='Run perfmon')
 
     update_group = parser.add_mutually_exclusive_group()
     update_group.add_argument('--frequency', type=int, default=0, help='EMON, Frequency (in number of events) of publishing histograms')
@@ -269,10 +268,6 @@ if __name__=='__main__':
     # Override default configuration flags from command line arguments
     flags.fillFromArgs(parser=parser)
 
-    # perfmon
-    if args.perfmon:
-        flags.PerfMon.doFullMonMT=True
-
     if args.preExec:
         log.info('Executing preExec: %s', args.preExec)
         exec(args.preExec)
@@ -285,11 +280,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
-
-    # Add perfmon
-    if args.perfmon:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
 
     typeNames = ['CTP_RDO/CTP_RDO'] if args.mbts and args.useMbtsTrigger else []
 

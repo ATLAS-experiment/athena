@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def setPerfmonFlagsFromRunArgs(flags, runArgs):
     """ A helper function to set perfmon flags from runArgs."""
@@ -10,4 +10,8 @@ def setPerfmonFlagsFromRunArgs(flags, runArgs):
             flags.PerfMon.doFullMonMT = True
         else:
             raise RuntimeError(f"Unknown perfmon type: {runArgs.perfmon}")
-        flags.PerfMon.OutputJSON = f"perfmonmt_{runArgs.trfSubstepName}.json"
+
+        try:
+            flags.PerfMon.OutputJSON = f"perfmonmt_{runArgs.trfSubstepName}.json"
+        except AttributeError:
+            pass  # not a transform

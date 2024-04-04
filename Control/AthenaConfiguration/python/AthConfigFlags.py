@@ -596,7 +596,7 @@ class AthConfigFlags(object):
         parser.add_argument("--mtes", type=bool, default=None, help="Run multi-threaded event service")
         parser.add_argument("--mtes-channel", type=str, default=None, help="For multi-threaded event service: the name of communication channel between athena and pilot")
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
-        parser.add_argument("--pmon", type=str.lower, default=None, choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
+        parser.add_argument("--perfmon", type=str.lower, nargs='?', const='fastmonmt', choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
         parser.add_argument("--profile-python", type=str, default=None, metavar='FILE', help='profile python code, dump in %(metavar)s. End filename with .txt for quick summary only')
         parser.add_argument("--tracelevel", type=int, default=None, help='Trace python configuration code as it is executed. Verbosity is reduced according to the paramter.'\
                             ' 0: print everying, 1: exclude System and ROOT libraries, 2: exclude also GaudConfig2, 3: exclude ComponentAccumulator internals.'\
@@ -738,11 +738,9 @@ class AthConfigFlags(object):
         if args.nprocs is not None:
             self.Concurrency.NumProcs = args.nprocs
 
-        if args.pmon is not None:
-            self._loadDynaFlags("PerfMon")
-            dispatch = {'fastmonmt' : 'PerfMon.doFastMonMT',
-                        'fullmonmt' : 'PerfMon.doFullMonMT'}
-            self._set(dispatch[args.pmon.lower()], True)
+        if args.perfmon is not None:
+            from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+            setPerfmonFlagsFromRunArgs(self, args)
 
         if args.mtes is not None:
             self.Exec.MTEventService = args.mtes

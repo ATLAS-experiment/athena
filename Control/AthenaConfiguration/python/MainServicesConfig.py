@@ -308,6 +308,10 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     elif LoopMgr == 'AthenaEventLoopMgr':
         cfg.merge(AthenaEventLoopMgrCfg(flags))
 
+    # Performance monitoring and profiling:
+    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
+        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+        cfg.merge(PerfMonMTSvcCfg(flags))
 
     if len(flags.PerfMon.Valgrind.ProfiledAlgs)>0:
         from Valkyrie.ValkyrieConfig import ValgrindServiceCfg

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file DQTestingDriver.py
@@ -29,8 +29,7 @@ if __name__=='__main__':
                         help='Maximum number of events to process (alias for --evtMax)')
     parser.add_argument('--printDetailedConfig', action='store_true',
                         help='Print detailed Athena configuration')
-    parser.add_argument('--perfmon', action='store_true',
-                        help='Run perfmon')
+
     # change default
     parser.set_defaults(threads=1)
     args, _ = parser.parse_known_args()
@@ -69,10 +68,6 @@ if __name__=='__main__':
                         flags.DQ.Environment)
             log.warning('Will proceed but best guess is this is an error')
 
-    # perfmon
-    if args.perfmon:
-        flags.PerfMon.doFullMonMT=True
-
     if args.preExec:
         # bring things into scope
         from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
@@ -99,11 +94,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
-
-    # add perfmon
-    if args.perfmon:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
 
     if flags.Input.Format is Format.BS:
         # attempt to start setting up reco ...
