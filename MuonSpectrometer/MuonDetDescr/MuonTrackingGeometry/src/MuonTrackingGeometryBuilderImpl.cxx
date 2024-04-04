@@ -1308,7 +1308,7 @@ TrackingVolumePtr MuonTrackingGeometryBuilderImpl::processVolume(const Trk::Volu
                     auto detVolsPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>(detVols);
                     auto sVol = std::make_unique<Trk::TrackingVolume>(*subVol, 
                                                                       aLVC.m_muonMaterial, 
-                                                                      detVolsPtr.release(), 
+                                                                      detVolsPtr.get(),
                                                                       volName);
 
                     // statistics
