@@ -11,16 +11,28 @@ class MetAnalysisConfig (ConfigBlock):
     def __init__ (self, containerName) :
         super (MetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('useFJVT', False, type=bool)
-        self.addOption ('treatPUJets', False, type=bool)
-        self.addOption ('setMuonJetEMScale', True, type=bool)
-        self.addOption ('jets', "", type=str)
-        self.addOption ('electrons', "", type=str)
-        self.addOption ('muons', "", type=str)
-        self.addOption ('photons', "", type=str)
-        self.addOption ('taus', "", type=str)
-        self.addOption ('invisible', "", type=str)
+        self.addOption ('postfix', '', type=str,
+                        info='a postfix to apply to decorations and algorithm names (not needed if running a single instance of MET)')
+        self.addOption ('useFJVT', False, type=bool,
+                        info='whether to use the forward JVT decision in the calculation')
+        self.addOption ('treatPUJets', False, type=bool,
+                        info='whether to treat pile-up jets in the MET significance calculation')
+        self.addOption ('setMuonJetEMScale', True, type=bool,
+                        info='enables the handling of muons in jets for the MET calculation. Should be turned off for analyses where muons are not reconstructed at all.')
+        self.addOption ('jets', "", type=str,
+                        info='the input jet container')
+        self.addOption ('electrons', "", type=str,
+                        info='the input electron container, with a possible selection, in the format `container` or `container.selection`')
+        self.addOption ('muons', "", type=str,
+                        info='the input muon container, with a possible selection, in the format `container` or `container.selection`')
+        self.addOption ('photons', "", type=str,
+                        info='the input photon container, with a possible selection, in the format `container` or `container.selection`')
+        self.addOption ('taus', "", type=str,
+                        info='the input tau-jet container, with a possible selection, in the format `container` or `container.selection`')
+        self.addOption ('invisible', "", type=str,
+                        info='any input container to be treated as invisible particles, in the format `container` (no selection)')
+        self.addOption ('metWP', "Tight", type=str,
+                        info='the MET working point to use: Loose, Tight, Tighter, Tenacious')
 
     def makeAlgs (self, config) :
 
@@ -45,14 +57,15 @@ class MetAnalysisConfig (ConfigBlock):
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
         config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
         alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
-
+        alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale
-
         if self.useFJVT:
             alg.makerTool.JetRejectionDec = 'passFJVT'
+
         if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
+
         alg.metCore = 'MET_Core_' + metSuffix
         alg.metAssociation = 'METAssoc_' + metSuffix
         alg.jets = config.readName (self.jets)
