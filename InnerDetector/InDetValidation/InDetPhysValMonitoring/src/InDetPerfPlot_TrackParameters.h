@@ -64,7 +64,8 @@ private:
   TH2* m_truth_pt_vs_eta{};
   TH2* m_truth_phi_vs_eta{};
 
-
+  TH2* m_truth_hits_vs_eta{};
+  TH1* m_truth_hits{};
 
   // plot base has nop default implementation of this; we use it to book the histos
   void initializePlots();

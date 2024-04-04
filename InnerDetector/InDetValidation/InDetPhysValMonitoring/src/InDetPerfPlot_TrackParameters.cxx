@@ -60,6 +60,9 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_truth_pt_vs_eta, "truth_pt_vs_eta");
   book(m_truth_phi_vs_eta, "truth_phi_vs_eta");
 
+  book(m_truth_hits, "truth_hits");
+  book(m_truth_hits_vs_eta, "truth_hits_vs_eta");
+
 }
 
 void
@@ -94,6 +97,12 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TruthParticle& particle, float w
   fillHisto(m_truth_pt_vs_eta, pt, eta, weight);
   fillHisto(m_truth_phi_vs_eta, phi, eta, weight);
 
+  static const SG::AuxElement::ConstAccessor< float > nSilHitsAcc("nSilHits");
+  if (nSilHitsAcc.isAvailable(particle)) {
+    float hits = nSilHitsAcc(particle);
+    fillHisto(m_truth_hits, hits, weight);
+    fillHisto(m_truth_hits_vs_eta, eta, hits, weight);
+  }
 }
 
 void

@@ -2875,6 +2875,17 @@
   <y title="truth_{#eta}" n="100" lo="-&ETA;" hi="&ETA;"/>
 </h>
 
+<h id="truth_hits_vs_eta" type="TH2F" title="# Silicon Hits vs #eta for Truth Particle">
+  <x title="truth_{#eta}" n="100" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Silicon Hits" n="40" lo="-0.5" hi="39.5"/>
+  <z title="Number of Entries"/>
+</h>
+
+<h id="truth_hits" type="TH1F" title="# Silicon Hits for Truth Particle">
+  <x title="Silicon Hits" n="40" lo="-0.5" hi="39.5"/>
+  <y title="Number of Entries"/>
+</h>
+
 
 <!--
    =======================================================
