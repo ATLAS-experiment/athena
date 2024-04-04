@@ -239,9 +239,7 @@ class AthConfigFlags(object):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
 
     def _calculateHash(self):
-        fmap = self._renamed_map()
-        flags = ((fmap[x], y) for x, y in self._flagdict.items() if fmap[x])
-        return hash(frozenset((x, repr(y)) for x, y in flags))
+        return hash( (frozenset(self._renames), id(self._flagdict)) )
 
     def __getattr__(self, name):
         # Avoid infinite recursion looking up our own attributes
@@ -502,9 +500,15 @@ class AthConfigFlags(object):
 
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
-        newFlags._renames[subsetToReplace] = replacementSubset
-        if not keepOriginal:
-            newFlags._renames[replacementSubset] = "" # block access to original flags
+
+        # handle the case where one replaces A -> B and then B -> A in two cloneAndReplace
+        if replacementSubset in newFlags._renames and newFlags._renames[replacementSubset] == subsetToReplace:
+            del newFlags._renames[replacementSubset]
+            del newFlags._renames[subsetToReplace]
+        else: # brand new replacement
+            newFlags._renames[subsetToReplace] = replacementSubset
+            if not keepOriginal:
+                newFlags._renames[replacementSubset] = "" # block access to original flags
         newFlags._hash = None
         return newFlags
 
