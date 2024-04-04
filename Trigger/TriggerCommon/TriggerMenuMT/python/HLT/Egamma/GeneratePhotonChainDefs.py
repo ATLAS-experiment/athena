@@ -7,7 +7,7 @@ from ..Photon.PhotonChainConfiguration import PhotonChainConfiguration
 import pprint
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
-log.info("Importing %s",__name__)
+log.debug("Importing %s",__name__)
 
 
 
