@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFXAOD_XAODCONFIGSVC_H
@@ -230,11 +230,11 @@ namespace TrigConf {
       /// @name Names for reading the R3 payload directly (RAWtoALL)
       /// @{
 
-      Gaudi::Property< std::string > m_hltMenuName{this, "HLTTriggerMenu", "DetectorStore+HLTTriggerMenu",
-        "HLT Menu Key, for when UseInFileMetadata=False. Not a ReadHandleKey, as from the DetectorStore."};
+      SG::ReadHandleKey<HLTMenu> m_hltMenuKey{this, "HLTTriggerMenu", "DetectorStore+HLTTriggerMenu",
+        "HLT Menu Key, for when UseInFileMetadata=False. From the DetectorStore."};
 
-      Gaudi::Property< std::string > m_l1MenuName{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu",
-        "L1 Menu Key, for when UseInFileMetadata=False. Not a ReadHandleKey, as from the DetectorStore"};
+      SG::ReadHandleKey<L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu",
+        "L1 Menu Key, for when UseInFileMetadata=False. From the DetectorStore"};
 
       SG::ReadCondHandleKey<TrigConf::HLTPrescalesSet> m_HLTPrescaleSetKey{this, "HLTPrescales", "HLTPrescales", 
          "HLT prescales set condition handle, for when UseInFileMetadata=False"};
