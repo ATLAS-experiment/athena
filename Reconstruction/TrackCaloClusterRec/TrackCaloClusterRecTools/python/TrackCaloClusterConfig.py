@@ -1,4 +1,4 @@
-#   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon import Logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -141,18 +141,7 @@ def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorE
     return components
 
 
-
 def runUFOReconstruction(flags, constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
-    """wrapper function using CAtoGlobalWrapper in order to maintain compatibility with RunII-style config in derivations"""
-    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-    if isComponentAccumulatorCfg():
-        return runUFOReconstruction_r22(flags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
-    else:
-        from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-        return CAtoGlobalWrapper(runUFOReconstruction_r22, flags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
-
-
-def runUFOReconstruction_r22( flags,constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
     
     """Create a UFO collection from PFlow and tracks (PFO retrieved from PFOPrefix and tracks directly from trackParticleName). 
     This functions schedules 2 UFO specific algs : 
