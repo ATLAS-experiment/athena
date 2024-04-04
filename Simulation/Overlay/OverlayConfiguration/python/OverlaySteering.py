@@ -89,7 +89,7 @@ def OverlayMainContentCfg(configFlags):
             else:
                 from TrigT1CaloSim.TTL1OverlayConfig import LArTTL1OverlayCfg
                 acc.merge(LArTTL1OverlayCfg(configFlags))
-                if configFlags.GeoModel.Run in [LHCPeriod.Run3]:
+                if configFlags.GeoModel.Run >= LHCPeriod.Run3:
                     acc.merge(LArSuperCellOverlayCfg(configFlags))
 
     if configFlags.Detector.EnableTile:
