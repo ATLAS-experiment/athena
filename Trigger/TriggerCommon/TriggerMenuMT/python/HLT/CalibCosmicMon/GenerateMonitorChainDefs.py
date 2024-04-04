@@ -7,7 +7,7 @@ from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
-log.info("Importing %s",__name__)
+log.debug("Importing %s",__name__)
 
 
 

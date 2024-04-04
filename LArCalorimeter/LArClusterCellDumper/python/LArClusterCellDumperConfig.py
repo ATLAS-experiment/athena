@@ -9,7 +9,6 @@ from AthenaConfiguration.Enums import LHCPeriod
 
 def EventReaderAlgCfg(flags, name="EventReaderAlgCfg", **kwargs):
     from IOVDbSvc.IOVDbSvcConfig import addFolders
-    from IOVDbSvc.CondDB import conddb
 
     acc = ComponentAccumulator()
 
@@ -71,7 +70,6 @@ def EventReaderAlgCfg(flags, name="EventReaderAlgCfg", **kwargs):
     acc.popToolsAndMerge(CaloCellPedestalCorrCfg(flags))
 
     obj = "AthenaAttributeList"
-    dbOnline    = 'LAR_ONL'
 
     ## Data
     if not isMC:
@@ -83,7 +81,7 @@ def EventReaderAlgCfg(flags, name="EventReaderAlgCfg", **kwargs):
             obj='LArDSPThresholdsComplete'
 
             kwargs.setdefault("Run2DSPThresholdsKey", fldThr)
-            conddb.addFolder (dbOnline, fldThr, className=obj)
+            acc.merge(addFolders(flags,fldThr, "LAR_ONL", className=obj, db=dbString))
 
         else: # Run2
             fldThr="/LAR/Configuration/DSPThresholdFlat/Thresholds"
@@ -197,41 +195,26 @@ def LArClusterCellDumperCfg(flags, name='LArClusterCellDumperCfg'):
 if __name__ == "__main__":
     mlog = logging.getLogger('LArClusterCellDumperCfg')
     
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags ## > V24+
-    from AthenaCommon.GlobalFlags import globalflags
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    
-    histSvc = CompFactory.THistSvc(Output = ["rec DATAFILE='dumper_output.root', OPT='RECREATE'"])
-
-    dumperFlags                             = initConfigFlags()
-    dumperFlags.loadAllDynamicFlags()
-    
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    dumperFlags.Input.Files                 = defaultTestFiles.ESD
-    dumperFlags.Exec.MaxEvents              = 50
-    
-    if not dumperFlags.Input.isMC:
-        globalflags.DataSource  = 'data'
-    else:
-        globalflags.DataSource  = 'geant4'
+    flags.Input.Files                 = defaultTestFiles.ESD
+    flags.Exec.MaxEvents              = 50
+    flags.Common.MsgSuppression       = False
 
-    dumperFlags.fillFromArgs()
-    dumperFlags.lock()
+    flags.fillFromArgs()
+    flags.lock()
 
-    athenaCommonFlags.FilesInput = dumperFlags.Input.Files
-    
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(dumperFlags)
+    acc = MainServicesCfg(flags)
 
-    acc.merge(PoolReadCfg(dumperFlags)) # athena service required for POOL file reading
-    acc.addService(histSvc)
-    acc.merge(LArClusterCellDumperCfg(dumperFlags))
-    acc.getService("MessageSvc").defaultLimit=999999
+    acc.merge(PoolReadCfg(flags)) # athena service required for POOL file reading
+    acc.addService(CompFactory.THistSvc(
+        Output = ["rec DATAFILE='dumper_outputMC.root', OPT='RECREATE'"]))
+    acc.merge(LArClusterCellDumperCfg(flags))
 
     mlog.info("Executing LArClusterCellDumperCfg...")
 
-    with open("configData.pkl", "wb") as f:
-        acc.store(f)
-
-    acc.run()
+    import sys
+    sys.exit(acc.run().isFailure())
