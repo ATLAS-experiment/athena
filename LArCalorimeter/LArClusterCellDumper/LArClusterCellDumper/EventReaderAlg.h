@@ -8,9 +8,8 @@
 #include "AthContainers/ConstDataVector.h"
 
 // Calibration constants
-#include "AthenaPoolUtilities/AthenaAttributeList.h" // 
+#include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CaloCondBlobObjs/CaloCondBlobFlt.h"
-#include "CoralBase/Blob.h"
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
 #include "LArRawConditions/LArADC2MeV.h"
 #include "LArElecCalib/ILArPedestal.h"
