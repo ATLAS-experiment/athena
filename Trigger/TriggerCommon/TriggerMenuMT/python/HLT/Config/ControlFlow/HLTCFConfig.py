@@ -251,7 +251,7 @@ def createDataFlow(flags, chains, allDicts):
         lastCFseq = None
         lastDecisions = []
         for nstep, chainStep in enumerate( chain.steps ):
-            chainStep.createSequences()
+            chainStep.createSequences(flags.Trigger.fastMenuGeneration)
             log.debug("\n************* Start connecting step %d %s for chain %s", nstep+1, chainStep.name, chain.name)           
             if nstep == 0:             
                 filterInput = chain.L1decisions
