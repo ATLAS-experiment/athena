@@ -384,12 +384,25 @@ def extract_streams_from_tag (fname,
     return streams
 
 class PoolOpts(object):
+    # default names of APR file storage elements
+    # copied here from APRDefaults.h for performance (as the first dictionary access takes 7 sec)
+    class TTreeNames:
+        EventData   = "CollectionTree"
+        EventTag    = "POOLCollectionTree"
+        DataHeader  = "POOLContainer"
+        MetaData    = "MetaData"
+    class RNTupleNames:
+        EventData   = "EventData"
+        EventTag    = "EventTag"
+        DataHeader  = "DataHeader"
+        MetaData    = "MetaData"
+
     FAST_MODE   = False
     SUPER_DETAILED_BRANCH_SZ = False
     READ_MODE   = "READ"
-    POOL_HEADER = "POOLContainer"
-    EVENT_DATA  = "CollectionTree"
-    META_DATA   = "MetaData"
+    POOL_HEADER = TTreeNames.DataHeader
+    EVENT_DATA  = TTreeNames.EventData
+    META_DATA   = TTreeNames.MetaData
     HDR_FORMAT  = "  %11s     %11s     %11s      %11s  %5s  %s"
     ROW_FORMAT  = "%12.3f kb %12.3f kb %12.3f kb %12.3f %8i  %s"
 

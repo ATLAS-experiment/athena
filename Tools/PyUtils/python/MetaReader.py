@@ -149,21 +149,22 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             # open the file using ROOT.TFile
             current_file = ROOT.TFile.Open( _get_pfn(filename) )
             # open the DataHeader Container to read the number of entries
-            dataHeaderTree = current_file.Get(ROOT.APRDefaults.TTreeNames.DataHeader)
+            from PyUtils.PoolFile import PoolOpts
+            dataHeaderTree = current_file.Get(PoolOpts.TTreeNames.DataHeader)
             if isinstance(dataHeaderTree, ROOT.TTree):
                 meta_dict[filename]['nentries'] = dataHeaderTree.GetEntriesFast()
             else:
                 # check early to avoid scary ROOT read errors
-                if current_file.GetListOfKeys().Contains(ROOT.APRDefaults.RNTupleNames.DataHeader) and ROOT.gROOT.GetVersionInt() < 63100:
+                if current_file.GetListOfKeys().Contains(PoolOpts.RNTupleNames.DataHeader) and ROOT.gROOT.GetVersionInt() < 63100:
                     raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files") 
-                dataHeaderRNT = current_file.Get(ROOT.APRDefaults.RNTupleNames.DataHeader)
+                dataHeaderRNT = current_file.Get(PoolOpts.RNTupleNames.DataHeader)
                 if isinstance(dataHeaderRNT, ROOT.Experimental.RNTuple):
                     meta_dict[filename]['nentries'] = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
                 else:
                     meta_dict[filename]['nentries'] = None
 
             # get auto flush setting from the main EventData TTree
-            collectionTree = current_file.Get(ROOT.APRDefaults.TTreeNames.EventData)
+            collectionTree = current_file.Get(PoolOpts.TTreeNames.EventData)
             if isinstance(collectionTree, ROOT.TTree):
                 meta_dict[filename]['auto_flush'] = collectionTree.GetAutoFlush()
 
