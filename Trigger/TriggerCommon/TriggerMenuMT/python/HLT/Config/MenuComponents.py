@@ -674,14 +674,7 @@ class ChainStep(object):
  
         self.name = name
         self.sequences = []
-        self.sequenceFunctions = Sequences
-        for iseq, seq in enumerate(Sequences):              
-            if not isinstance(seq, functools.partial):
-                log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", name, iseq)
-                log.error("[ChainStep] It rather seems to be of type %s trying to print it", type(seq))
-                raise RuntimeError("Sequence is not packaged in a tuple, see error message above" )
-                    
-                
+        self.sequenceFunctions = Sequences                                       
         self.onlyJets  = False
         sig_set = None
         if len(chainDicts) > 0  and 'signature' in chainDicts[0]: 
@@ -706,11 +699,19 @@ class ChainStep(object):
         self.legIds = self.getLegIds() if len(multiplicity) > 1 else [0]
         self.makeCombo()
 
-    def createSequences(self):
+    def createSequences(self, fastMenuGeneration):
         """ defered creation"""
-        log.debug("creating sequences for step %s", self.name)
-        for seq in self.sequenceFunctions:
-            self.sequences.append(seq()) # create the sequences
+        if fastMenuGeneration:
+            log.debug("creating sequences for step %s", self.name)
+            for iseq, seq in enumerate(self.sequenceFunctions):              
+                if not isinstance(seq, functools.partial):
+                    log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", name, iseq)
+                    log.error("[ChainStep] It rather seems to be of type %s trying to print it", type(seq))
+                    raise RuntimeError("Sequence is not packaged in a tuple, see error message above" )                        
+                self.sequences.append(seq()) # create the sequences
+        else:
+            for seq in self.sequenceFunctions:
+                self.sequences.append(seq)
 
     def relabelLegIdsForJets(self):
 

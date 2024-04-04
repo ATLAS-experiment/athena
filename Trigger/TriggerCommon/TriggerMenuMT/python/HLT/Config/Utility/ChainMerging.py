@@ -572,7 +572,8 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
             # Standard step, append it to the combined step
             log.debug("[makeCombinedStep]  step %s, multiplicity  = %s", step.name, str(step.multiplicity))
             if len(step.sequenceFunctions):
-                log.debug("[makeCombinedStep]    with sequences = %s", ' '.join(map(str, [seq.func.__name__ for seq in step.sequenceFunctions])))
+                # simplify this after remiving fastMenuGeneration
+                log.debug("[makeCombinedStep]    with sequences = %s", ' '.join(map(str, [seq.func.__name__ if isinstance(seq, functools.partial) else seq.name for seq in step.sequenceFunctions])))
 
             # this function only works if the input chains are single-object chains (one menu seuqnce)
             if len(step.sequenceFunctions) > 1:
