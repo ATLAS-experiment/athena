@@ -25,9 +25,10 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  MultiBjetGroup,
                                                                  SingleTauGroup,
                                                                  MultiTauGroup,
+                                                                 SinglePhotonGroup,
                                                                  MultiPhotonGroup,
                                                                  TauBJetGroup,
-                                                                 TauMETGroup,                        
+                                                                 TauMETGroup,
                                                                  BphysicsGroup,
                                                                  EgammaMETGroup,
                                                                  EgammaJetGroup,
@@ -167,6 +168,17 @@ def getDevSignatures():
         ChainProp(name='HLT_g45_medium_g20_medium_L12eEM18L', l1SeedThresholds=['eEM18L','eEM18L'], groups=SupportPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_g50_medium_g20_medium_L12eEM18L', l1SeedThresholds=['eEM18L','eEM18L'], groups=SupportPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g20_medium_L12eEM18L', l1SeedThresholds=['eEM18L'], groups=SupportPhIGroup+MultiPhotonGroup),
+
+        # ATR-29062      
+        ChainProp(name='HLT_g140_loose_ringer_L1eEM26M', groups=SinglePhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_2g20_tight_icaloloose_ringer_L12eEM18M', groups=MultiPhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_2g22_tight_ringer_L12eEM18M', groups=MultiPhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g35_medium_g25_medium_ringer_L12eEM24L', groups=SinglePhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_2g50_loose_ringer_L12eEM24L', groups=MultiPhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g25_medium_ringer_L1eEM24L', groups=SinglePhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g35_medium_ringer_L1eEM24L', groups=SinglePhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g20_tight_icaloloose_ringer_L1eEM18M', groups=SinglePhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g15_tight_ringer_L1eEM12L', groups=SinglePhotonGroup+DevGroup, monGroups=['egammaMon:shifter']),
 
     ]
 
