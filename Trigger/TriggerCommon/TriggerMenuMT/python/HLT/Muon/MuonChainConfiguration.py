@@ -114,7 +114,7 @@ class MuonChainConfiguration(ChainConfigurationBase):
         elif 'l2io' in self.chainPart['l2AlgInfo']:
             return self.getStep(flags,2, 'muCombIO', [mul2IOOvlpRmSequence], is_probe_leg=is_probe_leg )
         elif doOvlpRm:
-           return self.getStep(flags,2, 'muComb', [muCombOvlpRmSequence], is_probe_leg=is_probe_leg )
+           return self.getStep(flags,2, 'muCombOVR', [muCombOvlpRmSequence], is_probe_leg=is_probe_leg )
         elif "LRT" in self.chainPart['addInfo']:
            return self.getStep(flags,2, 'muCombLRT', [muCombLRTSequence], is_probe_leg=is_probe_leg )
         else:
