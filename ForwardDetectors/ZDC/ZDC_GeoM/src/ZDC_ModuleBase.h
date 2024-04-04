@@ -7,6 +7,7 @@
 
 #include "ZdcIdentifier/ZdcID.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "ZdcIdentifier/ZdcID.h"
 
@@ -31,7 +32,7 @@ class ZDC_ModuleBase{
 
     virtual ~ZDC_ModuleBase() = default;
 
-    virtual GeoFullPhysVol* create() = 0;
+    virtual void create(GeoFullPhysVol* mother, GeoAlignableTransform* trf) = 0;
 
   protected:
 

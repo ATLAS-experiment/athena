@@ -15,7 +15,7 @@ class ZDC_ZDCModule : public ZDC_ModuleBase{
 
     virtual ~ZDC_ZDCModule() = default;
 
-    virtual GeoFullPhysVol* create() override;
+    virtual void create(GeoFullPhysVol* mother, GeoAlignableTransform* trf) override;
 
   protected:
     int m_pixelStart;
