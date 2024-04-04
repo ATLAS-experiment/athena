@@ -3,6 +3,7 @@
 # art-description: Run MC20e pile-up presamling with 2018 geometry and conditions, 25ns pile-up, MT output containers
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 4096
 # art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: mc20e_presampling.RDO.pool.root
