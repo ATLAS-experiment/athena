@@ -76,6 +76,11 @@ StatusCode AthenaOutputStreamTool::initialize() {
          if (m_dataHeaderKey.value().find("Tool") == m_dataHeaderKey.size() - 4) {
             m_dataHeaderKey.setValue(m_dataHeaderKey.value().substr(0, m_dataHeaderKey.size() - 4));
          }
+      } else if (CxxUtils::starts_with (m_dataHeaderKey.value(), "Output")) {
+         // Remove Output prefix
+         m_dataHeaderKey.setValue(m_dataHeaderKey.value().substr(6));
+         // Remove .* suffix
+         m_dataHeaderKey.setValue(m_dataHeaderKey.value().substr(0, m_dataHeaderKey.value().find(".")));
       } else {
          const INamedInterface* parentAlg = dynamic_cast<const INamedInterface*>(parent());
          if (parentAlg != 0) {
