@@ -5,7 +5,7 @@ atlas_add_library (ZdcNtupleLib
                    ZdcNtuple/*.h Root/*.cxx
 		   PUBLIC_HEADERS ZdcNtuple
 		   LINK_LIBRARIES AnaAlgorithmLib AsgAnalysisInterfaces
-                   AsgTools PMGAnalysisInterfacesLib PMGToolsLib
+                   AsgTools PMGAnalysisInterfacesLib PMGToolsLib GeneratorObjects
                    TrigConfInterfaces TrigDecisionToolLib
                    ZdcAnalysisLib xAODCaloEvent xAODEventInfo
                    xAODForward xAODHIEvent xAODTracking InDetTrackSelectionToolLib
