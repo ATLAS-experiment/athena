@@ -22,6 +22,9 @@ namespace Trig {
 
     private:
         PublicToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "", "When enabled read navigation from TDT/off by default"};
+        PublicToolHandle<Trig::TrigDecisionTool> m_tdtRun3{this, "TrigDecisionToolRun3", "", "Use for directly accessing objects"};
+        PublicToolHandle<Trig::TrigDecisionTool> m_tdtRun2{this, "TrigDecisionToolRun2", "", "Use for directly accessing objects"};
+
         ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun2{
             this, "RetrievalToolRun2Nav", "", "The tool configured to use Run 2 format"};
         ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun3{
@@ -40,8 +43,10 @@ namespace Trig {
 
         using CombinationsVector=std::vector<std::vector<const xAOD::IParticle *>>;
         using CombinationsSet=std::set<std::set<const xAOD::IParticle *>>;
+        StatusCode verifyFlatContent(std::vector<TrigCompositeUtils::LinkInfo<DataVector<xAOD::IParticle> > > run2, std::vector<TrigCompositeUtils::LinkInfo<DataVector<xAOD::IParticle> > > run3, const std::string& chain) const;
         StatusCode verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const;
         StatusCode verifyCombinationsContent(const CombinationsSet& run2, const CombinationsSet& run3, const std::string& chain) const;
+        bool combinationsEmpty(const CombinationsVector& combs) const;
 
     }; //> end class AthAlgorithm
 }
