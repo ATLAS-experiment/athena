@@ -21,6 +21,9 @@ def createActsTrackingPassFlags():
     # enabled. Ambi. can be activated/deactivated with 
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+
+    # Storing track collection as a separate track collection wrt other passes
+    icf.storeSeparateContainer = True
     return icf
 
 def createActsConversionTrackingPassFlags():
@@ -36,8 +39,8 @@ def createActsConversionTrackingPassFlags():
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
     
-    # Deactivate PRD association tool
-    icf.usePrdAssociationTool = False
+    # Storing track collection as a separate track collection wrt other passes
+    icf.storeSeparateContainer = True
     return icf
     
 def createValidateActsClustersTrackingPassFlags():

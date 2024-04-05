@@ -89,15 +89,16 @@ def ITkClusterSplitProbabilityContainerName(flags):
     return ClusterSplitProbContainer
 
 
-def ITkStoreTrackSeparateContainerCfg(flags, TrackContainer="",
-                                      ClusterSplitProbContainer=""):
+def ITkStoreTrackSeparateContainerCfg(flags,
+                                      TrackContainer: str ="",
+                                      ClusterSplitProbContainer: str = "") -> ComponentAccumulator:
     result = ComponentAccumulator()
     extension = flags.Tracking.ActiveConfig.extension
     if hasattr(flags.TrackOverlay, "ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
-    
+
     if doTrackOverlay:
         # schedule merger to combine signal and background tracks
         InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
@@ -114,56 +115,84 @@ def ITkStoreTrackSeparateContainerCfg(flags, TrackContainer="",
             OutputCombinedTracks=MergerOutputTracks,
             AssociationMapName=AssociationMapName))
 
-    if flags.Tracking.doTruth:
+    # Run truth, but only do this for non ACTS workflows
+    if flags.Tracking.doTruth and extension not in ['Acts', 'ActsConversion']:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
         result.merge(ITkTrackTruthCfg(
             flags,
             Tracks=TrackContainer,
             DetailedTruth=TrackContainer+"DetailedTruth",
             TracksTruth=TrackContainer+"TruthCollection"))
-
-    from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
-    result.merge(ITkTrackParticleCnvAlgCfg(
-        flags,
-        name=extension + "TrackParticleCnvAlg",
-        TrackContainerName=TrackContainer,
-        xAODTrackParticlesFromTracksContainerName=(
-            "InDet" + extension + "TrackParticles"),
-        ClusterSplitProbabilityName=(
-            "" if flags.Tracking.doITkFastTracking else
-            ClusterSplitProbContainer),
-        AssociationMapName=""))
-
+        
+    # Create track particles from all the different track collections
+    # We have different algorithms depending on the EDM being used
+    if extension not in ['Acts', 'ActsConversion']:
+        # Workflows that use Trk Tracks
+        from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
+        result.merge(ITkTrackParticleCnvAlgCfg(
+            flags,
+            name=extension + "TrackParticleCnvAlg",
+            TrackContainerName=TrackContainer,
+            xAODTrackParticlesFromTracksContainerName=(
+                "InDet" + extension + "TrackParticles"),
+            ClusterSplitProbabilityName=(
+                "" if flags.Tracking.doITkFastTracking else
+                ClusterSplitProbContainer),
+            AssociationMapName=""))
+    else:
+        # Workflows that use Acts Tracks
+        from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+        # The following few lines will disappear once we have imposed a proper nomenclature for our algorithms and collection
+        prefix = flags.Tracking.ActiveConfig.extension
+        result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
+                                                       ACTSTracksLocation=TrackContainer,
+                                                       TrackParticlesOutKey=f'{TrackContainer}ParticlesAlt'))
+            
+            
     return result
 
 
 # Returns CA + ClusterSplitProbContainer
-def ITkTrackRecoPassCfg(flags, extension="",
-                        InputCombinedITkTracks=None,
-                        InputExtendedITkTracks=None,
-                        StatTrackCollections=None,
-                        StatTrackTruthCollections=None,
-                        ClusterSplitProbContainer=""):
-    if InputCombinedITkTracks is None:
-        InputCombinedITkTracks = []
-    if InputExtendedITkTracks is None:
-        InputExtendedITkTracks = []
-    if StatTrackCollections is None:
-        StatTrackCollections = []
-    if StatTrackTruthCollections is None:
-        StatTrackTruthCollections = []
+def ITkTrackRecoPassCfg(flags,
+                        InputCombinedITkTracks: list[str] = None,
+                        InputCombinedActsTracks: list[str] = None,
+                        InputExtendedITkTracks: list[str] = None,
+                        StatTrackCollections: list[str] = None,
+                        StatTrackTruthCollections: list[str] = None,
+                        ClusterSplitProbContainer: str = ""):
+    # We use these lists to store the collections from all the tracking passes, thus keeping the history
+    # of previous passes. None of these lists is allowed to be a None
+    assert InputCombinedITkTracks is not None and isinstance(InputCombinedITkTracks, list)
+    assert InputCombinedActsTracks is not None and isinstance(InputCombinedActsTracks, list)
+    assert InputExtendedITkTracks is not None and isinstance(InputExtendedITkTracks, list)
+    assert StatTrackCollections is not None and isinstance(StatTrackCollections, list)
+    assert StatTrackTruthCollections is not None and isinstance(StatTrackTruthCollections ,list)
 
+    # Get the tracking pass extension name
+    extension = flags.Tracking.ActiveConfig.extension
+    
     result = ComponentAccumulator()
     if hasattr(flags.TrackOverlay, "ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
 
+    # Define collection name(s)
+    # This is the track collection AFTER the ambiguity resolution
     TrackContainer = "Resolved" + extension + "Tracks"
-    SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
+    # For Acts we have another convention, with the extention as the first element in the name
+    if extension in ['Acts', 'ActsConversion']:
+        TrackContainer = extension + "ResolvedTracks"
     if doTrackOverlay and extension == "Conversion":
         TrackContainer = flags.Overlay.SigPrefix + TrackContainer
 
+    # This is the track collection BEFORE the ambiguity resolution
+    SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
+    # For ACTS the name is totally different
+    if  extension in ['Acts', 'ActsConversion']:
+        SiSPSeededTracks = extension + "Tracks"
+        
+    # This performs track finding
     from InDetConfig.ITkTrackingSiPatternConfig import ITkTrackingSiPatternCfg
     result.merge(ITkTrackingSiPatternCfg(
         flags,
@@ -174,6 +203,7 @@ def ITkTrackRecoPassCfg(flags, extension="",
     StatTrackCollections += [SiSPSeededTracks, TrackContainer]
     StatTrackTruthCollections += [SiSPSeededTracks+"TruthCollection",
                                   TrackContainer+"TruthCollection"]
+    
     if doTrackOverlay and extension == "Conversion":
         TrackContainer = "Resolved" + extension + "Tracks"
         result.merge(ITkStoreTrackSeparateContainerCfg(
@@ -182,16 +212,30 @@ def ITkTrackRecoPassCfg(flags, extension="",
             ClusterSplitProbContainer=ClusterSplitProbContainer))
 
     if flags.Tracking.ActiveConfig.storeSeparateContainer:
+        # If we do not want the track collection to be merged with another collection
+        # then we immediately create the track particles from it
+        # This happens inside ITkStoreTrackSeparateContainerCfg
+
+        # Track container, for ACTS workflow, depends on whether we activated the ambiguity resolution or not
+        inputTrack = TrackContainer
+        if extension in ['Acts', 'ActsConversion'] and not flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
+            inputTrack = SiSPSeededTracks
+
         result.merge(ITkStoreTrackSeparateContainerCfg(
             flags,
-            TrackContainer=TrackContainer,
+            TrackContainer=inputTrack,
             ClusterSplitProbContainer=ClusterSplitProbContainer))
     else:
-        if extension not in ['Acts', 'ActsConversion']:
-            ClusterSplitProbContainer = (
-                "ITkAmbiguityProcessorSplitProb" + extension)
-            InputCombinedITkTracks += [TrackContainer]
+        # ClusterSplitProbContainer is used for removing measurements used in previous passes
+        # For ACTS this is still not possible, TO BE IMPLEMENTED
+        ClusterSplitProbContainer = (
+            "ITkAmbiguityProcessorSplitProb" + extension)
+        # Collect all the Trk Track collections to be then merged in a single big collection
+        # Merging will be done later, and after that we create track particles from the merged collection
+        InputCombinedITkTracks += [TrackContainer]
 
+    # This is only used in this same function for the Track-PRD association
+    # Not yet supported for ACTS tracks
     if extension not in ['Acts', 'ActsConversion']:
         InputExtendedITkTracks += [TrackContainer]
         
@@ -199,15 +243,13 @@ def ITkTrackRecoPassCfg(flags, extension="",
 
 
 def ITkTrackFinalCfg(flags,
-                     InputCombinedITkTracks=None,
-                     StatTrackCollections=None,
-                     StatTrackTruthCollections=None):
-    if InputCombinedITkTracks is None:
-        InputCombinedITkTracks = []
-    if StatTrackCollections is None:
-        StatTrackCollections = []
-    if StatTrackTruthCollections is None:
-        StatTrackTruthCollections = []
+                     InputCombinedITkTracks: list[str] = None,
+                     StatTrackCollections: list[str] = None,
+                     StatTrackTruthCollections: list[str] = None):
+    # None of the input collection is supposed to be None
+    assert InputCombinedITkTracks is not None and isinstance(InputCombinedITkTracks, list)
+    assert StatTrackCollections is not None and isinstance(StatTrackCollections, list)
+    assert StatTrackTruthCollections is not None and isinstance(StatTrackTruthCollections, list)
 
     result = ComponentAccumulator()
     if hasattr(flags.TrackOverlay, "ActiveConfig"):
@@ -220,6 +262,7 @@ def ITkTrackFinalCfg(flags,
         #schedule merge to combine signal and background tracks
         InputCombinedITkTracks += [flags.Overlay.BkgPrefix + TrackContainer]
 
+    # This merges track collections
     from TrkConfig.TrkTrackCollectionMergerConfig import (
         ITkTrackCollectionMergerAlgCfg)
     result.merge(ITkTrackCollectionMergerAlgCfg(
@@ -249,6 +292,7 @@ def ITkTrackFinalCfg(flags,
 
     splitProbName = ITkClusterSplitProbabilityContainerName(flags)
 
+    # This creates track particles
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
     result.merge(ITkTrackParticleCnvAlgCfg(
         flags,
@@ -387,7 +431,7 @@ def ITkExtendedPRDInfoCfg(flags):
 ##############################################################################
 
 
-def ITkTrackRecoCfg(flags):
+def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
     """Configures complete ITk tracking """
     result = ComponentAccumulator()
 
@@ -395,13 +439,22 @@ def ITkTrackRecoCfg(flags):
         # TODO: ITk BS providers
         raise RuntimeError("ByteStream inputs not supported")
 
+    # Get all the requested tracking passes
     flags_set = CombinedTrackingPassFlagSets(flags)
+
+    # Store the names of several collections from all the different passes
+    # These collections will then be used for different purposes
+    
     # Tracks to be ultimately merged in InDetTrackParticle collection
     InputCombinedITkTracks = []
+    # Same but for ACTS collection
+    InputCombinedActsTracks = []
     # Includes also tracks which end in standalone TrackParticle collections
     InputExtendedITkTracks = []
+    # Cluster split prob container for measurement removal
     ClusterSplitProbContainer = ""
-    StatTrackCollections = []  # To be passed to the InDetRecStatistics alg
+    # To be passed to the InDetRecStatistics alg
+    StatTrackCollections = []
     StatTrackTruthCollections = []
 
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
@@ -420,28 +473,42 @@ def ITkTrackRecoCfg(flags):
         # (3) Hybrid configurations with EDM converters
         result.merge(ITkRecPreProcessingSiliconCfg(current_flags))
 
-        # Track Reco
+        # Track Reconstruction
+        # This includes track finding and ambiguity resolution
+        # The output is the component accumulator to be added to the sequence
+        # and the name of the cluster split prob container that is used for
+        # removing measurements used by previous passes
+        # This last object will also assure the proper sequence of the tracking passes
+        # since it will create a data dependency from the prevous pass
         acc, ClusterSplitProbContainer = ITkTrackRecoPassCfg(
-            current_flags, extension=extension,
+            current_flags,
             InputCombinedITkTracks=InputCombinedITkTracks,
+            InputCombinedActsTracks=InputCombinedActsTracks,
             InputExtendedITkTracks=InputExtendedITkTracks,
             StatTrackCollections=StatTrackCollections,
             StatTrackTruthCollections=StatTrackTruthCollections,
             ClusterSplitProbContainer=ClusterSplitProbContainer)
         result.merge(acc)
 
+    # This merges the track collection in InputCombinedITkTracks
+    # and creates a track particle collection from that
     result.merge(
         ITkTrackFinalCfg(flags,
                          InputCombinedITkTracks=InputCombinedITkTracks,
                          StatTrackCollections=StatTrackCollections,
                          StatTrackTruthCollections=StatTrackTruthCollections))
 
+    # This will handle ACTS tracks instead
+
+    # Store some collections for persistification
+    # Used for validation and studies
     if flags.Tracking.doStoreTrackSeeds:
         result.merge(ITkTrackSeedsFinalCfg(flags))
 
     if flags.Tracking.doStoreSiSPSeededTracks:
         result.merge(ITkSiSPSeededTracksFinalCfg(flags))
 
+    # Perform vertex finding
     if flags.Tracking.doVertexFinding:
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
