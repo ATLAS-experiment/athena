@@ -184,21 +184,20 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
             if (x1 <= x2) {
                 auto volBounds = std::make_unique<TrapezoidVolumeBounds>(x1, x2, z, y1);
                 Amg::Transform3D totalTransform = transf * Amg::getRotateX3D(p90deg);
-                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
-                                               volBounds.release());
-                
                 ATH_MSG_DEBUG(" Trd new volume case 1 Trapezoid minHalflengthX "
                               << volBounds->minHalflengthX()
                               << " maxHalflengthX() "
                               << volBounds->maxHalflengthX());
+                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                               volBounds.release());
+                
+
             } else {
 
                 auto volBounds = std::make_unique<TrapezoidVolumeBounds>(x2, x1, z, y1);
                 Amg::Transform3D totalTransform = transf *
                                                   Amg::getRotateY3D(p180deg) *
                                                   Amg::getRotateZ3D(p180deg);
-                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
-                                               volBounds.release());
 
                 if (msgLvl(MSG::DEBUG)) {
                     const Amg::Vector3D top{-x1, y1, z}, bottom{-x2, y1, -z},
@@ -241,6 +240,8 @@ std::unique_ptr<Volume> GeoShapeConverter::translateGeoShape(const GeoShape* sh,
                     topG = Amg::getRotateY3D(p180deg) * topR;
                     ATH_MSG_DEBUG(" topLocal XY sign Flip  x "<< Amg::toString(topG) << " Radius " << topG.perp());
                 }
+                vol = std::make_unique<Volume>(makeTransform(std::move(totalTransform)),
+                                               volBounds.release());
             }
             return vol;
         } else if (x1 == x2) {
