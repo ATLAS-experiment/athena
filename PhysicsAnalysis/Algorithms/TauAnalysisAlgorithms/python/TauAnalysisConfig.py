@@ -13,6 +13,7 @@ class TauCalibrationConfig (ConfigBlock):
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('rerunTruthMatching', True, type=bool)
+        self.addOption ('decorateTruth', False, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -36,6 +37,23 @@ class TauCalibrationConfig (ConfigBlock):
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+        # decorate truth tau information on the reconstructed object:
+        if self.decorateTruth and config.dataType() is not DataType.Data:
+            alg = config.createAlgorithm( 'CP::TauTruthDecorationsAlg',
+                                        'TauTruthDecorationsAlg' + postfix )
+            alg.taus = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            alg.doubleDecorations = ['pt_vis', 'eta_vis', 'phi_vis', 'm_vis']
+            alg.floatDecorations = []
+            alg.intDecorations = ['pdgId']
+            alg.charDecorations = ['IsHadronicTau']
+            alg.prefix = 'truth_'
+
+            # these are "_ListHelper" objects, and not "list", need to copy to lists to allow concatenate
+            for var in ['DecayMode'] + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.charDecorations[:]:
+                branchName = alg.prefix+var
+                config.addOutputVar (self.containerName, branchName, branchName, noSys=True)
+
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
@@ -48,6 +66,7 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+        config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
 
 
 
