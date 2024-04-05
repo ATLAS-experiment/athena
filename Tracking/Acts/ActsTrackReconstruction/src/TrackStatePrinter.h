@@ -59,10 +59,10 @@ namespace ActsTrk
               bool isKF) const override;
 
     void
-    printTracks(const Acts::GeometryContext &tgContext,
-                const ActsTrk::MutableTrackContainer &tracks,
-                const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
-                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const override;
+    printTrack(const Acts::GeometryContext &tgContext,
+               const ActsTrk::MutableTrackContainer &tracks,
+               const ActsTrk::MutableTrackContainer::TrackProxy &track,
+               const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const override;
 
     void
     printTrackState(const Acts::GeometryContext &tgContext,

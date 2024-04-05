@@ -475,62 +475,58 @@ namespace ActsTrk
   }
 
   void
-  TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
+  TrackStatePrinter::printTrack(const Acts::GeometryContext &tgContext,
                                  const ActsTrk::MutableTrackContainer &tracks,
-                                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
+                                 const ActsTrk::MutableTrackContainer::TrackProxy &track,
                                  const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset) const
   {
-    for (auto &track : fitResult)
-    {
-      const auto lastMeasurementIndex = track.tipIndex();
-      // to print track states from inside outward, we need to reverse the order of visitBackwards().
-      std::vector<ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy> states;
-      states.reserve(lastMeasurementIndex + 1); // could be an overestimate
-      size_t npixel = 0, nstrip = 0;
-      tracks.trackStateContainer().visitBackwards(
-          lastMeasurementIndex,
-          [&states, &npixel, &nstrip](const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state) -> void
+    const auto lastMeasurementIndex = track.tipIndex();
+    // to print track states from inside outward, we need to reverse the order of visitBackwards().
+    std::vector<ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy> states;
+    states.reserve(lastMeasurementIndex + 1); // could be an overestimate
+    size_t npixel = 0, nstrip = 0;
+    tracks.trackStateContainer().visitBackwards(
+        lastMeasurementIndex,
+        [&states, &npixel, &nstrip](const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state) -> void
+        {
+          if (state.hasCalibrated())
           {
-            if (state.hasCalibrated())
-            {
-              if (state.calibratedSize() == 1)
-                ++nstrip;
-              else if (state.calibratedSize() == 2)
-                ++npixel;
-            }
-            states.push_back(state);
-          });
+            if (state.calibratedSize() == 1)
+              ++nstrip;
+            else if (state.calibratedSize() == 2)
+              ++npixel;
+          }
+          states.push_back(state);
+        });
 
-      if (track.nMeasurements() + track.nOutliers() != npixel + nstrip)
-      {
-        ATH_MSG_WARNING("Track has " << track.nMeasurements() + track.nOutliers() << " measurements + outliers, but "
-                                     << npixel + nstrip << " pixel + strip hits");
-      }
-
-      const Acts::BoundTrackParameters per(track.referenceSurface().getSharedPtr(),
-                                           track.parameters(),
-                                           track.covariance(),
-                                           track.particleHypothesis());
-      std::cout << std::setw(5) << lastMeasurementIndex << ' '
-                << std::left
-                << std::setw(4) << "parm" << ' '
-                << std::setw(21) << actsSurfaceName(per.referenceSurface()) << ' '
-                << std::setw(22) << to_string("#hit=", npixel, '/', nstrip, ", #hole=", track.nHoles()) << ' '
-                << std::right;
-      printParameters(per.referenceSurface(), tgContext, per.parameters());
-      std::cout << std::fixed << std::setw(8) << ' '
-                << std::setw(7) << std::setprecision(1) << track.chi2() << ' '
-                << std::left
-                << "#out=" << track.nOutliers()
-                << ", #sh=" << track.nSharedHits()
-                << std::right << std::defaultfloat << std::setprecision(-1) << '\n';
-
-      for (auto i = states.size(); i > 0;)
-      {
-        printTrackState(tgContext, states[--i], container_offset);
-      }
+    if (track.nMeasurements() + track.nOutliers() != npixel + nstrip)
+    {
+      ATH_MSG_WARNING("Track has " << track.nMeasurements() + track.nOutliers() << " measurements + outliers, but "
+                                    << npixel + nstrip << " pixel + strip hits");
     }
-    std::cout << std::flush;
+
+    const Acts::BoundTrackParameters per(track.referenceSurface().getSharedPtr(),
+                                          track.parameters(),
+                                          track.covariance(),
+                                          track.particleHypothesis());
+    std::cout << std::setw(5) << lastMeasurementIndex << ' '
+              << std::left
+              << std::setw(4) << "parm" << ' '
+              << std::setw(21) << actsSurfaceName(per.referenceSurface()) << ' '
+              << std::setw(22) << to_string("#hit=", npixel, '/', nstrip, ", #hole=", track.nHoles()) << ' '
+              << std::right;
+    printParameters(per.referenceSurface(), tgContext, per.parameters());
+    std::cout << std::fixed << std::setw(8) << ' '
+              << std::setw(7) << std::setprecision(1) << track.chi2() << ' '
+              << std::left
+              << "#out=" << track.nOutliers()
+              << ", #sh=" << track.nSharedHits()
+              << std::right << std::defaultfloat << std::setprecision(-1) << '\n';
+
+    for (auto i = states.size(); i > 0;)
+    {
+      printTrackState(tgContext, states[--i], container_offset);
+    }
   }
 
   void

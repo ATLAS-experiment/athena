@@ -59,6 +59,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.trackFindingChi2CutOff', 15.0)
     actscf.addFlag('Acts.doTrackFindingTrackSelector', 1) # 0=no selection, 1=default track selection, 2=no eta-dependant cuts, 3=no holes/shared cuts, 4=no branch stopper
     actscf.addFlag('Acts.trackFindingMaxHoles', []) # add eta-dependent cut for branch stopper
+    actscf.addFlag('Acts.doTwoWayCKF', True) # run CKF twice, first with forward propagation with smoothing, then with backward propagation
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
 
