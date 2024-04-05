@@ -286,7 +286,7 @@ inline Amg::Transform3D getTranslateZ3D(const double Z) {
     return Amg::Transform3D{Amg::Translation3D{Z * Amg::Vector3D::UnitZ()}};
 }
 /** @brief: Returns a shift transformation along an arbitrary axis */
-inline Amg::Transform3D Amg::getTranslate3D(const double X, const double Y, const double Z) {
+inline Amg::Transform3D getTranslate3D(const double X, const double Y, const double Z) {
     return getTranslateX3D(X) * getTranslateY3D(Y) * getTranslateZ3D(Z);
 }
 /** @brief: Returns a shift transformation along an arbitrary axis */

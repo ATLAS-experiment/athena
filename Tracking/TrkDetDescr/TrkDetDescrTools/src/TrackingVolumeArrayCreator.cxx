@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,6 +8,7 @@
 
 // Trk include
 #include <cmath>
+#include <algorithm>
 
 #include "TrkDetDescrTools/TrackingVolumeArrayCreator.h"
 #include "TrkDetDescrUtils/BinUtility.h"
@@ -22,48 +23,64 @@
 #include "TrkVolumes/DoubleTrapezoidVolumeBounds.h"
 #include "TrkVolumes/TrapezoidVolumeBounds.h"
 // Amg
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 
+namespace {
+    using VolumePtr = Trk::TrackingVolumeArrayCreator::VolumePtr;
+    inline std::vector<VolumePtr> translateToShared(const std::vector<Trk::TrackingVolume*>& inVols,
+                                                    bool no_deletePtr) {
+        std::vector<VolumePtr> outVec{};
+        outVec.reserve(inVols.size());
+        for (Trk::TrackingVolume* vol : inVols) {
+            if(!no_deletePtr) {
+                outVec.emplace_back(vol);
+            } else {
+                outVec.emplace_back(vol, Trk::do_not_delete<Trk::TrackingVolume>);
+            }
+        }
+        return outVec;
+    }
+}
+
+
+namespace Trk{
 // constructor
-Trk::TrackingVolumeArrayCreator::TrackingVolumeArrayCreator(
-  const std::string& t,
-  const std::string& n,
-  const IInterface* p)
+TrackingVolumeArrayCreator::TrackingVolumeArrayCreator(const std::string& t,
+                                                       const std::string& n,
+                                                       const IInterface* p)
   : AthAlgTool(t, n, p)
 {
   declareInterface<ITrackingVolumeArrayCreator>(this);
 }
 
 // destructor
-Trk::TrackingVolumeArrayCreator::~TrackingVolumeArrayCreator() = default;
+TrackingVolumeArrayCreator::~TrackingVolumeArrayCreator() = default;
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInR(
-  const std::vector<Trk::TrackingVolume*>& vols,
-  bool navtype) const
-{
-  ATH_MSG_VERBOSE("Create VolumeArray of "
-                  << vols.size()
-                  << " Volumes (with CylinderVolumeBounds) with R-binning. ");
+TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const std::vector<TrackingVolume*>& vols,
+                                                                         bool navtype) const {
+    return cylinderVolumesArrayInR(translateToShared(vols, navtype), navtype).release();
+}
+std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumesArrayInR(const std::vector<VolumePtr>& vols,
+                                                                                         bool navtype) const {
+
+  
+  ATH_MSG_VERBOSE("Create VolumeArray of "<< vols.size() << " Volumes (with CylinderVolumeBounds) with R-binning. ");
 
   // check for compatibility - needs r-sorting first
-  double lastZmin = 0.;
-  double lastZmax = 0.;
-  double lastOuterRadius = 0.;
+  double lastZmin{0.}, lastZmax{0.}, lastOuterRadius{0.};
 
   // the vector of doubles for identification
   std::vector<float> boundaries;
   boundaries.reserve(vols.size() + 1);
 
   // the vector needed for the BinnedArray
-  std::vector<Trk::TrackingVolumeOrderPosition> volOrder;
+  std::vector<TrackingVolumeOrderPosition> volOrder;
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (unsigned int ivol = 0; volIter != vols.end(); ++volIter, ++ivol) {
-    const Trk::CylinderVolumeBounds* currentCylBounds = nullptr;
-    if (*volIter)
-      currentCylBounds = dynamic_cast<const Trk::CylinderVolumeBounds*>(
-        &((*volIter)->volumeBounds()));
+    const CylinderVolumeBounds* currentCylBounds = nullptr;
+    if (*volIter) currentCylBounds = dynamic_cast<const CylinderVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!currentCylBounds) {
       ATH_MSG_ERROR("Given TrackingVolume doesn't exist or is not of shape "
                     "'CylinderVolumeBounds': return 0");
@@ -77,93 +94,74 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInR(
     boundaries.push_back(currentRmax);
 
     // compatibility checks
-    double currentZmin =
-      (*volIter)->center().z() - currentCylBounds->halflengthZ();
-    double currentZmax =
-      (*volIter)->center().z() + currentCylBounds->halflengthZ();
+    double currentZmin = (*volIter)->center().z() - currentCylBounds->halflengthZ();
+    double currentZmax = (*volIter)->center().z() + currentCylBounds->halflengthZ();
 
     // check for compatibility of the new volume - not for navigation type
     if (ivol && !navtype) {
-      // longitudinal clinch
-      if (fabs(currentZmin - lastZmin) > 0.1 ||
-          fabs(currentZmax - lastZmax) > 0.1) {
-        ATH_MSG_ERROR("Given TrackingVolume(s) do not extend in z to the same "
-                      "point (required) : return 0");
-        ATH_MSG_VERBOSE("Information : lastZmin / lastZmin    = "
-                        << lastZmin << " / " << currentZmin);
-        ATH_MSG_VERBOSE("              lastZmax / currentZmax = "
-                        << lastZmax << " / " << currentZmax);
-        return nullptr;
-      }
-      // radial clinch
-      if (fabs(currentRmin - lastOuterRadius) > 0.1) {
-        ATH_MSG_ERROR("Given TrackingVolume(s) are not wrapping, neither "
-                      "inside-out, nor v.v. : return 0");
-        ATH_MSG_VERBOSE("Information : currentRmin / lastOuterRadius = "
-                        << currentRmin << " / " << lastOuterRadius);
-        return nullptr;
-      }
+        // longitudinal clinch
+        if (std::abs(currentZmin - lastZmin) > 0.1 || std::abs(currentZmax - lastZmax) > 0.1) {
+          ATH_MSG_ERROR("Given TrackingVolume(s) do not extend in z to the same point (required) : return 0");
+          ATH_MSG_VERBOSE("Information : lastZmin / lastZmin    = "<< lastZmin << " / " << currentZmin);
+          ATH_MSG_VERBOSE("              lastZmax / currentZmax = "<< lastZmax << " / " << currentZmax);
+          return nullptr;
+        }
+        // radial clinch
+        if (std::abs(currentRmin - lastOuterRadius) > 0.1) {
+          ATH_MSG_ERROR("Given TrackingVolume(s) are not wrapping, neither inside-out, nor v.v. : return 0");
+          ATH_MSG_VERBOSE("Information : currentRmin / lastOuterRadius = "<< currentRmin << " / " << lastOuterRadius);
+          return nullptr;
+        }
     }
     // register for next round
     lastZmin = currentZmin;
     lastZmax = currentZmax;
     lastOuterRadius = currentRmax;
     // output
-    ATH_MSG_VERBOSE("Adding Volume '" << (*volIter)->volumeName()
-                                      << "' to Array");
+    ATH_MSG_VERBOSE("Adding Volume '" << (*volIter)->volumeName() << "' to Array");
+    
+    volOrder.emplace_back((*volIter), currentCylBounds->mediumRadius() * Amg::Vector3D::UnitX());
     // push back the volume order position
-    if (!navtype) {
-      volOrder.emplace_back(
-        Trk::SharedObject<TrackingVolume>((*volIter)),
-        Amg::Vector3D(currentCylBounds->mediumRadius(), 0.0, 0.0));
-    } else {
-      volOrder.emplace_back(
-        Trk::SharedObject<TrackingVolume>(
-          (*volIter), do_not_delete<TrackingVolume>),
-        Amg::Vector3D(currentCylBounds->mediumRadius(), 0.0, 0.0));
-    }
+
   }
   if (!volOrder.empty()) {
-    Trk::BinUtility* volBinUtilR =
-      new Trk::BinUtility(boundaries, Trk::open, Trk::binR);
+    auto volBinUtilR = std::make_unique<BinUtility>(boundaries, open, binR);
     ATH_MSG_VERBOSE("Return created Array. ");
-    return new Trk::BinnedArray1D<Trk::TrackingVolume>(volOrder, volBinUtilR);
+    return std::make_unique<BinnedArray1D<TrackingVolume>>(volOrder, volBinUtilR.release());
   }
-  ATH_MSG_ERROR(
-    "No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
+  ATH_MSG_ERROR("No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(
-  const std::vector<Trk::TrackingVolume*>& vols,
-  bool navtype) const
-{
+
+TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(const std::vector<TrackingVolume*>& vols,
+                                                                         bool navtype) const {
+      return cylinderVolumesArrayInZ(translateToShared(vols, navtype), navtype).release();
+  }
+
+std::unique_ptr<TrackingVolumeArray> 
+  TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(const std::vector<VolumePtr>& vols,
+                                                      bool navtype) const {
   ATH_MSG_VERBOSE("Create VolumeArray of "
                   << vols.size()
                   << " Volumes (with CylinderVolumeBounds) with Z-binning. ");
 
   // for compatibility checks
-  double lastRmin = 0.;
-  double lastRmax = 0.;
-  double lastZmax = 0.;
+  double lastRmin{0.}, lastRmax{0.}, lastZmax{0.};
 
   // the vector of doubles for identification
   std::vector<float> boundaries;
   boundaries.reserve(vols.size() + 1);
 
   // the vector needed for the BinnedArray
-  std::vector<Trk::TrackingVolumeOrderPosition> volOrder;
+  std::vector<TrackingVolumeOrderPosition> volOrder;
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (unsigned int ivol = 0; volIter != vols.end(); ++volIter, ++ivol) {
-    const Trk::CylinderVolumeBounds* currentCylBounds = nullptr;
-    if (*volIter)
-      currentCylBounds = dynamic_cast<const Trk::CylinderVolumeBounds*>(
-        &((*volIter)->volumeBounds()));
+    const CylinderVolumeBounds* currentCylBounds = nullptr;
+    if (*volIter)currentCylBounds = dynamic_cast<const CylinderVolumeBounds*>( &((*volIter)->volumeBounds()));
     if (!currentCylBounds) {
-      ATH_MSG_ERROR("Given TrackingVolume doesn't exist or is not of shape "
-                    "'CylinderVolumeBounds': return 0");
+      ATH_MSG_ERROR("Given TrackingVolume doesn't exist or is not of shape 'CylinderVolumeBounds': return 0");
       return nullptr;
     }
     //
@@ -172,8 +170,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(
     // get the numbers
     double currentZmin = volCenter.z() - halflengthZ;
     double currentZmax = volCenter.z() + halflengthZ;
-    if (!ivol)
-      boundaries.push_back(currentZmin);
+    if (!ivol) boundaries.push_back(currentZmin);
     boundaries.push_back(currentZmax);
 
     // consistency checks
@@ -183,21 +180,16 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(
     // compatibility check - not for navtype
     if (ivol && !navtype) {
       // first the radial check
-      if (fabs(lastRmin - currentRmin) > 0.1 ||
-          fabs(lastRmax - currentRmax) > 0.1) {
-        ATH_MSG_ERROR("Given TrackingVolume(s) do not have same radial extends "
-                      "(required): return 0");
-        ATH_MSG_VERBOSE("Information : lastRmin / currentRmin = "
-                        << lastRmin << " / " << currentRmin);
-        ATH_MSG_VERBOSE("              lastRmax / currentRmax = "
-                        << lastRmax << " / " << currentRmax);
+      if (std::abs(lastRmin - currentRmin) > 0.1 || std::abs(lastRmax - currentRmax) > 0.1) {
+        ATH_MSG_ERROR("Given TrackingVolume(s) do not have same radial extends (required): return 0");
+        ATH_MSG_VERBOSE("Information : lastRmin / currentRmin = " << lastRmin << " / " << currentRmin);
+        ATH_MSG_VERBOSE("              lastRmax / currentRmax = " << lastRmax << " / " << currentRmax);
         return nullptr;
       }
       // then let's see whether they leave gaps in z
-      if (fabs(lastZmax - currentZmin) > 0.1) {
-        ATH_MSG_ERROR("Given TrackingVolume(s) are not attaching in z "
-                      "(required) : return 0");
-        return nullptr;
+      if (std::abs(lastZmax - currentZmin) > 0.1) {
+          ATH_MSG_ERROR("Given TrackingVolume(s) are not attaching in z (required) : return 0");
+          return nullptr;
       }
     }
     // for the next round
@@ -207,123 +199,94 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInZ(
     // output
     ATH_MSG_VERBOSE("Adding Volume '" << (*volIter)->volumeName()
                                       << "' to Array");
-    // push back the volume order position
-    if (!navtype) {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>((*volIter)),
-                            Amg::Vector3D((*volIter)->center()));
-    } else {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                              (*volIter), do_not_delete<TrackingVolume>),
-                            Amg::Vector3D((*volIter)->center()));
-    }
+    // push back the volume order position    
+    volOrder.emplace_back((*volIter), (*volIter)->center());
+    
   }
   if (!volOrder.empty()) {
-    Trk::BinUtility* volBinUtil =
-      new Trk::BinUtility(boundaries, Trk::open, Trk::binZ);
+    auto volBinUtil = std::make_unique<BinUtility>(boundaries, open, binZ);
     ATH_MSG_VERBOSE("Return created Array. ");
-    return new Trk::BinnedArray1D<Trk::TrackingVolume>(volOrder, volBinUtil);
+    return std::make_unique<BinnedArray1D<TrackingVolume>>(volOrder, volBinUtil.release());
   }
-  ATH_MSG_ERROR(
-    "No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
+  ATH_MSG_ERROR("No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhi(
-  const std::vector<Trk::TrackingVolume*>& vols,
-  bool navtype) const
-{
+TrackingVolumeArray* TrackingVolumeArrayCreator::cylinderVolumesArrayInPhi(const std::vector<TrackingVolume*>& vols,
+                                                                           bool navtype) const {
+    return cylinderVolumesArrayInPhi(translateToShared(vols,navtype), navtype).release();
+}
 
-  ATH_MSG_VERBOSE("Create VolumeArray of "
-                  << vols.size()
-                  << " Volumes (with CylinderVolumeBounds) with Phi-binning. ");
+std::unique_ptr<TrackingVolumeArray> 
+  TrackingVolumeArrayCreator::cylinderVolumesArrayInPhi(const std::vector<VolumePtr>& vols,
+                                                        bool /*navtype*/) const {
+
+  ATH_MSG_VERBOSE("Create VolumeArray of " << vols.size()
+               << " Volumes (with CylinderVolumeBounds) with Phi-binning. ");
 
   // phi binning; assume equidistant
   int nPhiBins = !vols.empty() ? vols.size() : 1;
   double phi = M_PI;
   // the vector needed for the BinnedArray
-  std::vector<Trk::TrackingVolumeOrderPosition> volOrder;
+  std::vector<TrackingVolumeOrderPosition> volOrder;
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (; volIter != vols.end(); ++volIter) {
-    const Trk::CylinderVolumeBounds* cyl = nullptr;
-    if (*volIter)
-      cyl = dynamic_cast<const Trk::CylinderVolumeBounds*>(
-        &((*volIter)->volumeBounds()));
+    const CylinderVolumeBounds* cyl = nullptr;
+    if (*volIter) cyl = dynamic_cast<const CylinderVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!cyl) {
-      ATH_MSG_ERROR("Given TrackingVolume doesn't exist or is not of shape "
-                    "'CylinderVolumeBounds': return 0");
-      return nullptr;
+       ATH_MSG_ERROR("Given TrackingVolume doesn't exist or is not of shape 'CylinderVolumeBounds': return 0");
+       return nullptr;
     }
     // output
-    ATH_MSG_VERBOSE("Adding Volume '" << (*volIter)->volumeName()
-                                      << "' to Array");
+    ATH_MSG_VERBOSE("Adding Volume '" << (*volIter)->volumeName()<< "' to Array");
     // push back the volume order position
-    Amg::Vector3D gp(cyl->mediumRadius(), 0., 0.);
-    if (!navtype) {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>((*volIter)),
-                            Amg::Vector3D(((*volIter)->transform()) * gp));
-    } else {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                              (*volIter), do_not_delete<TrackingVolume>),
-                            Amg::Vector3D(((*volIter)->transform()) * gp));
-    }
+    const Amg::Vector3D gp = cyl->mediumRadius() * Amg::Vector3D::UnitX();
+  
+    volOrder.emplace_back((*volIter), (*volIter)->transform() * gp);
+    
   }
   if (!volOrder.empty()) {
-    Trk::BinUtility* volBinUtil =
-      new Trk::BinUtility(nPhiBins, -phi, +phi, Trk::closed, Trk::binPhi);
-    return new Trk::BinnedArray1D<Trk::TrackingVolume>(volOrder, volBinUtil);
+    auto volBinUtil = std::make_unique<BinUtility>(nPhiBins, -phi, +phi, closed, binPhi);
+    return std::make_unique<BinnedArray1D<TrackingVolume>>(volOrder, volBinUtil.release());
   }
-  ATH_MSG_ERROR(
-    "No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
+  ATH_MSG_ERROR("No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
-  const std::vector<Trk::TrackingVolume*>& vols,
-  bool navtype) const
-{
+TrackingVolumeArray*
+  TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<TrackingVolume*>& vols,
+                                                         bool navtype) const {
+    return cylinderVolumesArrayInPhiR(translateToShared(vols, navtype), navtype).release();
+}
+std::unique_ptr<TrackingVolumeArray>
+TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumePtr>& vols,
+                                                       bool navtype) const {
   if (vols.empty())
     return nullptr;
 
-  bool bevelled = false;
-  for (auto *vol : vols) {
-    const Trk::BevelledCylinderVolumeBounds* bcyl =
-      dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(
-        &(vol->volumeBounds()));
-    if (bcyl) {
-      bevelled = true;
-      break;
-    }
-  }
-
+  bool bevelled = std::find_if(vols.begin(),vols.end(), 
+                              [](const VolumePtr ptr) -> bool {
+                                  return dynamic_cast<const BevelledCylinderVolumeBounds*>(&(ptr->volumeBounds()));
+                              }) != vols.end();
+ 
   double tol = 0.001;
 
   // the vector needed for the BinnedArray
-  std::vector<Trk::TrackingVolumeOrderPosition> volOrder;
+  std::vector<TrackingVolumeOrderPosition> volOrder;
 
   if (bevelled) {
-    ATH_MSG_VERBOSE(
-      "Create 2dim VolumeArray of "
-      << vols.size()
-      << " Volumes (with CylinderVolumeBounds) with PhiH-binning. ");
+    ATH_MSG_VERBOSE("Create 2dim VolumeArray of "<< vols.size()
+                    << " Volumes (with CylinderVolumeBounds) with PhiH-binning. ");
     std::vector<float> phiSteps;
     std::vector<std::pair<std::pair<double, int>, std::pair<double, double>>>
       volPos;
-    std::vector<Trk::TrackingVolume*> fullPhiVols;
+    std::vector<VolumePtr> fullPhiVols;
 
-    for (auto *vol : vols) {
-      const Trk::CylinderVolumeBounds* cyl =
-        dynamic_cast<const Trk::CylinderVolumeBounds*>(
-          &(vol->volumeBounds()));
-      const Trk::BevelledCylinderVolumeBounds* bcyl =
-        dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(
-          &(vol->volumeBounds()));
-      double rmin = 0.;
-      double rmax = 0.;
-      double dphi = 0.;
-      double mRad = 0.;
+    for (VolumePtr vol : vols) {
+      auto cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
+      auto bcyl =dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
+      double rmin{0.}, rmax{0.}, dphi{0.}, mRad{0.};
       int type = 0;
 
       if (cyl) {
@@ -338,42 +301,27 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
         mRad = bcyl->mediumRadius();
         type = bcyl->type();
       } else {
-        ATH_MSG_ERROR("volume not cylinder nor bevelled cylinder ");
-        return nullptr;
+         ATH_MSG_ERROR("volume not cylinder nor bevelled cylinder ");
+         return nullptr;
       }
 
       if (dphi < M_PI) {
         // push back the volume order position
-        Amg::Vector3D gp(mRad, 0., 0.);
-        Amg::Vector3D ngp((vol->transform()) * gp);
-        if (!navtype) {
-          volOrder.emplace_back(
-            Trk::SharedObject<TrackingVolume>(vol), ngp);
-        } else {
-          volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                                  vol, do_not_delete<TrackingVolume>),
-                                ngp);
-        }
+        Amg::Vector3D ngp((vol->transform()) * (mRad * Amg::Vector3D::UnitX()));      
+        volOrder.emplace_back(vol, ngp);
+        
         // push back volume position to avoid another loop
         volPos.emplace_back(std::pair<double, int>(ngp.phi(), type),
                             std::pair<double, double>(rmin, rmax));
         // phi binning
-        double phi1 = ngp.phi() - dphi;
-        double phi2 = ngp.phi() + dphi;
-        if (phi1 < -2 * M_PI)
-          phi1 += 2 * M_PI;
-        if (phi2 < -2 * M_PI)
-          phi2 += 2 * M_PI;
-        if (phi1 > 2 * M_PI)
-          phi1 -= 2 * M_PI;
-        if (phi2 > 2 * M_PI)
-          phi2 -= 2 * M_PI;
-
+        double phi1 = xAOD::P4Helpers::deltaPhi(ngp.phi(), dphi);
+        double phi2 = xAOD::P4Helpers::deltaPhi(ngp.phi(), -dphi);
+      
         if (!phiSteps.empty()) {
           std::vector<float>::iterator iter = phiSteps.begin();
           bool known = false;
           while (iter != phiSteps.end()) {
-            if (fabs(phi1 - (*iter)) < tol) {
+            if (std::abs(phi1 - (*iter)) < tol) {
               known = true;
               break;
             }
@@ -389,7 +337,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
           iter = phiSteps.begin();
           known = false;
           while (iter != phiSteps.end()) {
-            if (fabs(phi2 - (*iter)) < tol) {
+            if (std::abs(phi2 - (*iter)) < tol) {
               known = true;
               break;
             }
@@ -416,12 +364,9 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       phiSteps.push_back(+M_PI);
     }
     for (auto & fullPhiVol : fullPhiVols) {
-      const Trk::CylinderVolumeBounds* cyl =
-        dynamic_cast<const Trk::CylinderVolumeBounds*>(
-          &(fullPhiVol->volumeBounds()));
+      auto cyl =dynamic_cast<const CylinderVolumeBounds*>(&(fullPhiVol->volumeBounds()));
       if (!cyl) {
-        ATH_MSG_WARNING("dynamic_cast<const Trk::CylinderVolumeBounds*>   "
-                        "failed ... trying to continue loop");
+        ATH_MSG_WARNING("dynamic_cast<const CylinderVolumeBounds*>  failed ... trying to continue loop");
         continue;
       }
       double rmin = cyl->innerRadius();
@@ -435,19 +380,10 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
         else
           phiRef += 0.5 * phiSteps[0] + M_PI;
         // setting the position in the phi sector
-        Amg::Vector3D ngp(cyl->mediumRadius() * cos(phiRef),
-                          cyl->mediumRadius() * sin(phiRef),
-                          0.);
-
-        if (!navtype) {
-          volOrder.emplace_back(
-            Trk::SharedObject<TrackingVolume>(fullPhiVol), ngp);
-        } else {
-          volOrder.emplace_back(
-            Trk::SharedObject<TrackingVolume>(
-              fullPhiVol, do_not_delete<TrackingVolume>),
-            ngp);
-        }
+        Amg::Vector3D ngp = Amg::getRotateZ3D(phiRef) * (cyl->mediumRadius() * Amg::Vector3D::UnitX());
+       
+        volOrder.emplace_back(fullPhiVol, ngp);
+        
         // push back volume position to avoid another loop
         volPos.emplace_back(std::pair<double, int>(ngp.phi(), 0),
                             std::pair<double, double>(rmin, rmax));
@@ -471,8 +407,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
     phiRef.back() = 0.5 * (phiSteps.back() + phiSteps.front());
     phiRef.back() += (phiRef.back() > 0) ? -M_PI : M_PI;
 
-    Trk::BinUtility* phiBinUtil =
-      new Trk::BinUtility(phiSteps, Trk::closed, Trk::binPhi);
+    auto phiBinUtil = std::make_unique<BinUtility>(phiSteps, closed, binPhi);
 
     // H binning
 
@@ -492,7 +427,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
           hSteps[phibin].begin();
         bool known = false;
         while (iter != hSteps[phibin].end()) {
-          if (fabs(rmin - (*iter).second) < tol) {
+          if (std::abs(rmin - (*iter).second) < tol) {
             known = true;
             break;
           }
@@ -508,7 +443,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
         iter = hSteps[phibin].begin();
         known = false;
         while (iter != hSteps[phibin].end()) {
-          if (fabs(rmax - (*iter).second) < tol) {
+          if (std::abs(rmax - (*iter).second) < tol) {
             known = true;
             break;
           }
@@ -529,61 +464,47 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
     // verify size of the array
     // 2dim array
     // steering bin utility in phi
-    std::vector<Trk::BinUtility*>* hUtil =
-      new std::vector<Trk::BinUtility*>(phiSteps.size());
+    std::vector<BinUtility*>* hUtil =
+      new std::vector<BinUtility*>(phiSteps.size());
 
     for (unsigned int ih = 0; ih < phiSteps.size(); ++ih) {
-      (*hUtil)[ih] = new Trk::BinUtility(phiRef[ih], hSteps[ih]);
+      (*hUtil)[ih] = new BinUtility(phiRef[ih], hSteps[ih]);
     }
 
-    return new Trk::BinnedArray1D1D<Trk::TrackingVolume>(
-      volOrder, phiBinUtil, hUtil);
+    return std::make_unique<BinnedArray1D1D<TrackingVolume>>(volOrder, phiBinUtil.release(), hUtil);
   }
 
-  ATH_MSG_VERBOSE(
-    "Create 2dim VolumeArray of of "
-    << vols.size()
-    << " Volumes (with CylinderVolumeBounds) with PhiR-binning. ");
+  ATH_MSG_VERBOSE("Create 2dim VolumeArray of of "<< vols.size()
+                << " Volumes (with CylinderVolumeBounds) with PhiR-binning. ");
 
   std::vector<float> rSteps;
   double phiSector = M_PI;
   std::vector<std::pair<double, std::pair<double, double>>> volPos;
 
-  for (auto *vol : vols) {
-    const Trk::CylinderVolumeBounds* cyl =
-      dynamic_cast<const Trk::CylinderVolumeBounds*>(
-        &(vol->volumeBounds()));
+  for (auto vol : vols) {
+   auto cyl =dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
     if (!cyl) {
-      ATH_MSG_WARNING("dynamic_cast<const Trk::CylinderVolumeBounds*>   "
-                      "failed ... trying to continue loop");
-      continue;
+       ATH_MSG_WARNING("dynamic_cast<const CylinderVolumeBounds*> failed ... trying to continue loop");
+       continue;
     }
     double rmin = cyl->innerRadius();
     double rmax = cyl->outerRadius();
     double dphi = cyl->halfPhiSector();
-    if (phiSector > 0. && fabs(dphi - phiSector) > 0.001)
+    if (phiSector > 0. && std::abs(dphi - phiSector) > 0.001)
       phiSector = phiSector < M_PI ? -1. : dphi;
 
-    // push back the volume order position
-    Amg::Vector3D gp(cyl->mediumRadius(), 0., 0.);
-    Amg::Vector3D ngp((vol->transform()) * gp);
-    if (!navtype) {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(vol),
-                            ngp);
-    } else {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                              vol, do_not_delete<TrackingVolume>),
-                            ngp);
-    }
+    
+    const Amg::Vector3D ngp{vol->transform() * (cyl->mediumRadius()* Amg::Vector3D::UnitX())};
+    volOrder.emplace_back(vol, ngp);
+    
     // push back volume position to avoid another loop
-    volPos.emplace_back(cyl->mediumRadius(),
-                        std::pair<double, double>(ngp.phi(), dphi));
+    volPos.emplace_back(cyl->mediumRadius(), std::make_pair(ngp.phi(), dphi));
     // r binning
     if (!rSteps.empty()) {
       std::vector<float>::iterator iter = rSteps.begin();
       bool known = false;
       while (iter != rSteps.end()) {
-        if (fabs(rmin - (*iter)) < tol) {
+        if (std::abs(rmin - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -599,7 +520,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       iter = rSteps.begin();
       known = false;
       while (iter != rSteps.end()) {
-        if (fabs(rmax - (*iter)) < tol) {
+        if (std::abs(rmax - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -635,20 +556,16 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       return cylinderVolumesArrayInR(vols, navtype);
     }
     // 2dim array
-    Trk::BinUtility* rBinUtil =
-      new Trk::BinUtility(rSteps, Trk::open, Trk::binR);
-    std::vector<Trk::BinUtility*>* phiUtil =
-      new std::vector<Trk::BinUtility*>(rSteps.size() - 1);
+    auto rBinUtil = std::make_unique<BinUtility>(rSteps, open, binR);
+    std::vector<BinUtility*>* phiUtil = new std::vector<BinUtility*>(rSteps.size() - 1);
     for (unsigned int ip = 0; ip < phiUtil->size(); ++ip) {
-      (*phiUtil)[ip] =
-        new Trk::BinUtility(phiSect[ip], Trk::closed, Trk::binPhi);
+      (*phiUtil)[ip] = new BinUtility(phiSect[ip], closed, binPhi);
     }
-    return new Trk::BinnedArray1D1D<Trk::TrackingVolume>(
-      volOrder, rBinUtil, phiUtil);
+    return std::make_unique<BinnedArray1D1D<TrackingVolume>>(volOrder, rBinUtil.release(), phiUtil);
   }
 
   // R binning : steering binUtility
-  Trk::BinUtility* binGenR = new Trk::BinUtility(rSteps, Trk::open, Trk::binR);
+  auto binGenR = std::make_unique<BinUtility>(rSteps, open, binR);
 
   // phi binning
   std::vector<std::vector<float>> phiSteps(rSteps.size() - 1);
@@ -671,7 +588,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       std::vector<float>::iterator iter = phiSteps[binr].begin();
       bool known = false;
       while (iter != phiSteps[binr].end()) {
-        if (std::fabs(phi1 - (*iter)) < tol) {
+        if (std::abs(phi1 - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -687,7 +604,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       iter = phiSteps[binr].begin();
       known = false;
       while (iter != phiSteps[binr].end()) {
-        if (std::fabs(phi2 - (*iter)) < tol) {
+        if (std::abs(phi2 - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -707,56 +624,49 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
   }
 
   // 2dim array
-  std::vector<Trk::BinUtility*>* phiUtil =
-    new std::vector<Trk::BinUtility*>(phiSteps.size());
+  std::vector<BinUtility*>* phiUtil = new std::vector<BinUtility*>(phiSteps.size());
 
   for (unsigned int ip = 0; ip < phiSteps.size(); ++ip) {
     (*phiUtil)[ip] =
-      new Trk::BinUtility(phiSteps[ip], Trk::closed, Trk::binPhi);
+      new BinUtility(phiSteps[ip], closed, binPhi);
   }
 
-  return new Trk::BinnedArray1D1D<Trk::TrackingVolume>(
-    volOrder, binGenR, phiUtil);
+  return std::make_unique<BinnedArray1D1D<TrackingVolume>>(volOrder, binGenR.release(), phiUtil);
 }
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
-  const std::vector<Trk::TrackingVolume*>& vols,
-  bool navtype) const
-{
-  ATH_MSG_VERBOSE(
-    "Create 2dim VolumeArray of of "
-    << vols.size()
-    << " Volumes (with CylinderVolumeBounds) with PhiZ-binning. ");
+TrackingVolumeArray*
+TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<TrackingVolume*>& vols,
+                                                       bool navtype) const {
+    return cylinderVolumesArrayInPhiZ(translateToShared(vols, navtype), navtype).release();
+}
+std::unique_ptr<TrackingVolumeArray>
+TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumePtr>& vols,
+                                                       bool navtype) const {
+
+  ATH_MSG_VERBOSE("Create 2dim VolumeArray of of "<< vols.size()
+              << " Volumes (with CylinderVolumeBounds) with PhiZ-binning. ");
 
   double tol = 0.001;
   // the vector needed for the BinnedArray
-  std::vector<Trk::TrackingVolumeOrderPosition> volOrder;
+  std::vector<TrackingVolumeOrderPosition> volOrder;
 
   std::vector<float> zSteps;
 
   double phiSector = M_PI;
   std::vector<std::pair<float, std::pair<float, float>>> volPos;
 
-  for (auto *vol : vols) {
-    const Trk::CylinderVolumeBounds* cyl =
-      dynamic_cast<const Trk::CylinderVolumeBounds*>(
-        &(vol->volumeBounds()));
-    const Trk::BevelledCylinderVolumeBounds* bcyl =
-      dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(
-        &(vol->volumeBounds()));
-    double zmin = 0.;
-    double zmax = 0.;
-    double dphi = 0.;
-    double mRad = 0.;
+  for (const VolumePtr& vol : vols) {
+    auto cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
+    auto bcyl = dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
+    double zmin{0.}, zmax{0.}, dphi{0.}, mRad{0.};
     if (cyl) {
-      zmin = vol->center()[2] - cyl->halflengthZ();
-      zmax = vol->center()[2] + cyl->halflengthZ();
+      zmin = vol->center().z() - cyl->halflengthZ();
+      zmax = vol->center().z() + cyl->halflengthZ();
       dphi = cyl->halfPhiSector();
       mRad = cyl->mediumRadius();
     } else if (bcyl) {
-      zmin = vol->center()[2] - bcyl->halflengthZ();
-      zmax = vol->center()[2] + bcyl->halflengthZ();
+      zmin = vol->center().z() - bcyl->halflengthZ();
+      zmax = vol->center().z() + bcyl->halflengthZ();
       dphi = bcyl->halfPhiSector();
       mRad = bcyl->mediumRadius();
     } else {
@@ -764,29 +674,21 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
       return nullptr;
     }
 
-    if (phiSector > 0. && fabs(dphi - phiSector) > 0.001)
+    if (phiSector > 0. && std::abs(dphi - phiSector) > 0.001)
       phiSector = phiSector < M_PI ? -1. : dphi;
 
     // push back the volume order position
-    Amg::Vector3D gp(mRad, 0., 0.);
-    Amg::Vector3D ngp((vol->transform()) * gp);
-    if (!navtype) {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(vol),
-                            ngp);
-    } else {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                              vol, do_not_delete<TrackingVolume>),
-                            ngp);
-    }
+    Amg::Vector3D ngp{vol->transform() * (mRad * Amg::Vector3D::UnitX())};
+
+    volOrder.emplace_back(vol, ngp);
     // push back volume position to avoid another loop
-    volPos.emplace_back(vol->center()[2],
-                        std::pair<float, float>(ngp.phi(), dphi));
+    volPos.emplace_back(vol->center().z(), std::make_pair(ngp.phi(), dphi));
     // z binning
     if (!zSteps.empty()) {
       std::vector<float>::iterator iter = zSteps.begin();
       bool known = false;
       while (iter != zSteps.end()) {
-        if (fabs(zmin - (*iter)) < tol) {
+        if (std::abs(zmin - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -802,7 +704,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
       iter = zSteps.begin();
       known = false;
       while (iter != zSteps.end()) {
-        if (fabs(zmax - (*iter)) < tol) {
+        if (std::abs(zmax - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -838,15 +740,13 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
       return cylinderVolumesArrayInPhi(vols, navtype);
     }
     // 2dim array
-    Trk::BinUtility* binGenZPhi =
-      new Trk::BinUtility(zSteps, Trk::open, Trk::binZ);
-    (*binGenZPhi) +=
-      Trk::BinUtility(phiSector, -M_PI, M_PI, Trk::closed, Trk::binPhi);
-    return new Trk::BinnedArray2D<Trk::TrackingVolume>(volOrder, binGenZPhi);
+    auto binGenZPhi =std::make_unique<BinUtility>(zSteps, open, binZ);
+    (*binGenZPhi) += BinUtility(phiSector, -M_PI, M_PI, closed, binPhi);
+    return std::make_unique<BinnedArray2D<TrackingVolume>>(volOrder, binGenZPhi.release());
   }
 
   // steering binUtility in binZ
-  Trk::BinUtility* binGenZ = new Trk::BinUtility(zSteps, Trk::open, Trk::binZ);
+  auto binGenZ = std::make_unique<BinUtility>(zSteps, open, binZ);
 
   // phi binning  - steering binUtility in binZ
   std::vector<std::vector<float>> phiSteps(zSteps.size() - 1);
@@ -869,7 +769,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
       std::vector<float>::iterator iter = phiSteps[binZ].begin();
       bool known = false;
       while (iter != phiSteps[binZ].end()) {
-        if (std::fabs(phi1 - (*iter)) < tol) {
+        if (std::abs(phi1 - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -885,7 +785,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
       iter = phiSteps[binZ].begin();
       known = false;
       while (iter != phiSteps[binZ].end()) {
-        if (std::fabs(phi2 - (*iter)) < tol) {
+        if (std::abs(phi2 - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -906,138 +806,106 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
   }
 
   // 2dim array: construct from two 1D boundaries
-  std::vector<Trk::BinUtility*>* phiUtil =
-    new std::vector<Trk::BinUtility*>(phiSteps.size());
+  std::vector<BinUtility*>* phiUtil = new std::vector<BinUtility*>(phiSteps.size());
 
   for (unsigned int ip = 0; ip < phiSteps.size(); ++ip) {
-    (*phiUtil)[ip] =
-      new Trk::BinUtility(phiSteps[ip], Trk::closed, Trk::binPhi);
+    (*phiUtil)[ip] = new BinUtility(phiSteps[ip], closed, binPhi);
   }
 
-  return new Trk::BinnedArray1D1D<Trk::TrackingVolume>(
-    volOrder, binGenZ, phiUtil);
+  return std::make_unique<BinnedArray1D1D<TrackingVolume>>(volOrder, binGenZ.release(), phiUtil);
 }
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::cuboidVolumesArrayInZ(
-  const std::vector<TrackingVolume*>&,
-  bool) const
-{
-  ATH_MSG_ERROR(" cuboidVolumesArrayInZ not implemented ");
-  return nullptr;
-}
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::cuboidVolumesArrayNav(
-  const std::vector<TrackingVolume*>& vols,
-  Trk::BinUtility* binUtil,
-  bool navtype) const
-{
+TrackingVolumeArray*
+TrackingVolumeArrayCreator::cuboidVolumesArrayNav(const std::vector<TrackingVolume*>& vols,
+                                                  BinUtility* binUtil,
+                                                  bool navtype) const {
+    return cuboidVolumesArrayNav(translateToShared(vols, navtype), binUtil).release();
+} 
+std::unique_ptr<TrackingVolumeArray> 
+    TrackingVolumeArrayCreator::cuboidVolumesArrayNav(const std::vector<VolumePtr>& vols,
+                                                      BinUtility* binUtil) const {
   // the vector needed for the BinnedArray
-  std::vector<Trk::SharedObject<Trk::TrackingVolume>> volOrder;
+  std::vector<VolumePtr> volOrder;
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (; volIter != vols.end(); ++volIter) {
-    const Trk::CuboidVolumeBounds* currentCubBounds =
-      dynamic_cast<const Trk::CuboidVolumeBounds*>(
-        &((*volIter)->volumeBounds()));
+    auto currentCubBounds = dynamic_cast<const CuboidVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!currentCubBounds) {
       ATH_MSG_ERROR("Given TrackingVolume to TrackingVolumeArrayCreator didn't "
                     "match specified shape: return 0");
       return nullptr;
     }
-    // push back the volume order position
-    if (!navtype) {
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>((*volIter)));
-    } else {
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>(
-        (*volIter), do_not_delete<TrackingVolume>));
-    }
+     volOrder.push_back(*volIter);
   }
   if (!volOrder.empty()) {
-    Amg::Transform3D* navTransform = new Amg::Transform3D;
-    navTransform->setIdentity();
-    return new Trk::NavBinnedArray1D<Trk::TrackingVolume>(
-      volOrder, binUtil, navTransform);
+    auto navTransform = std::make_unique<Amg::Transform3D>(Amg::Transform3D::Identity());
+    return std::make_unique<NavBinnedArray1D<TrackingVolume>>(volOrder, binUtil, navTransform.release());
   }
-  ATH_MSG_ERROR(
-    "No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
+  ATH_MSG_ERROR("No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::trapezoidVolumesArrayNav(
-  const std::vector<TrackingVolume*>& vols,
-  Trk::BinUtility* binUtil,
-  bool navtype) const
-{
+
+TrackingVolumeArray*
+TrackingVolumeArrayCreator::trapezoidVolumesArrayNav(const std::vector<TrackingVolume*>& vols,
+                                                     BinUtility* binUtil, bool navtype) const {
+  return trapezoidVolumesArrayNav(translateToShared(vols, navtype), binUtil).release();
+}
+
+std::unique_ptr<TrackingVolumeArray>
+  TrackingVolumeArrayCreator::trapezoidVolumesArrayNav(const std::vector<VolumePtr>& vols, BinUtility* binUtil) const {
   // the vector needed for the BinnedArray
-  std::vector<Trk::SharedObject<Trk::TrackingVolume>> volOrder;
+  std::vector<VolumePtr> volOrder;
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (; volIter != vols.end(); ++volIter) {
-    const Trk::TrapezoidVolumeBounds* currentTrdBounds =
-      dynamic_cast<const Trk::TrapezoidVolumeBounds*>(
-        &((*volIter)->volumeBounds()));
+    auto currentTrdBounds = dynamic_cast<const TrapezoidVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!currentTrdBounds) {
       ATH_MSG_ERROR("Given TrackingVolume to TrackingVolumeArrayCreator didn't "
                     "match specified shape: return 0");
       return nullptr;
     }
     // push back the volume order position
-    if (!navtype) {
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>(*volIter));
-    } else {
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>(
-        *volIter, do_not_delete<TrackingVolume>));
-    }
+    volOrder.push_back(*volIter);
   }
   if (!volOrder.empty()) {
-    Amg::Transform3D* navTransform = new Amg::Transform3D;
-    navTransform->setIdentity();
-    return new Trk::NavBinnedArray1D<Trk::TrackingVolume>(
-      volOrder, binUtil, navTransform);
+    Amg::Transform3D* navTransform = new Amg::Transform3D(Amg::Transform3D::Identity());
+    return std::make_unique<NavBinnedArray1D<TrackingVolume>>(volOrder, binUtil, navTransform);
   }
-  ATH_MSG_ERROR(
-    "No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
+  ATH_MSG_ERROR("No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
-Trk::TrackingVolumeArray*
-Trk::TrackingVolumeArrayCreator::doubleTrapezoidVolumesArrayNav(
-  const std::vector<TrackingVolume*>& vols,
-  Trk::BinUtility* binUtil,
-  bool navtype) const
-{
+TrackingVolumeArray* TrackingVolumeArrayCreator::doubleTrapezoidVolumesArrayNav(const std::vector<TrackingVolume*>& vols,
+                                                                                BinUtility* binUtil,
+                                                                                bool navtype) const {
+    return doubleTrapezoidVolumesArrayNav(translateToShared(vols, navtype), binUtil).release();
+}
+
+std::unique_ptr<TrackingVolumeArray> 
+  TrackingVolumeArrayCreator::doubleTrapezoidVolumesArrayNav(const std::vector<VolumePtr>& vols, BinUtility* binUtil) const {
   // the vector needed for the BinnedArray
-  std::vector<Trk::SharedObject<Trk::TrackingVolume>> volOrder;
+  std::vector<VolumePtr> volOrder;
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (; volIter != vols.end(); ++volIter) {
-    const Trk::DoubleTrapezoidVolumeBounds* currentDTrdBounds =
-      dynamic_cast<const Trk::DoubleTrapezoidVolumeBounds*>(
-        &((*volIter)->volumeBounds()));
+    auto currentDTrdBounds =dynamic_cast<const DoubleTrapezoidVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!currentDTrdBounds) {
       ATH_MSG_ERROR("Given TrackingVolume to TrackingVolumeArrayCreator didn't "
                     "match specified shape: return 0");
       return nullptr;
     }
     // push back the volume order position
-    if (!navtype) {
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>((*volIter)));
-    } else {
-      volOrder.push_back(Trk::SharedObject<TrackingVolume>(
-        (*volIter), do_not_delete<TrackingVolume>));
-    }
+    volOrder.push_back(*volIter);
   }
   if (!volOrder.empty()) {
-    Amg::Transform3D* navTransform = new Amg::Transform3D;
-    navTransform->setIdentity();
-    return new Trk::NavBinnedArray1D<Trk::TrackingVolume>(
-      volOrder, binUtil, navTransform);
+    Amg::Transform3D* navTransform = new Amg::Transform3D(Amg::Transform3D::Identity());
+    return std::make_unique<NavBinnedArray1D<TrackingVolume>>(volOrder, binUtil, navTransform);
   }
   ATH_MSG_ERROR(
     "No TrackingVolumes provided to the TrackingVolumeArrayCreator: return 0");
   return nullptr;
 }
 
+}

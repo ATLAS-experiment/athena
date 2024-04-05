@@ -134,13 +134,18 @@ public:
       --- Necessary as friendship cannot be inherited: your father's friend
      isn't necessary yours ---
    */
-  Trk::TrackingVolume* glueTrackingVolumeArrays(
-    TrackingVolume& firstVol,
-    BoundarySurfaceFace firstFace,
-    TrackingVolume& secondVol,
-    BoundarySurfaceFace secondFace,
-    std::string name) const override;
+  Trk::TrackingVolume* glueTrackingVolumeArrays(TrackingVolume& firstVol, 
+                                                BoundarySurfaceFace firstFace, 
+                                                TrackingVolume& secondVol, 
+                                                BoundarySurfaceFace secondFace, 
+                                                std::string name) const override;
 
+  std::shared_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol, 
+                                                                BoundarySurfaceFace firstFace, 
+                                                                std::shared_ptr<TrackingVolume> secondVol, 
+                                                                BoundarySurfaceFace secondFace, 
+                                                                const std::string& name) const;
+  
   /** protected method to set inside Volume of a BoundarySurface:
       input:
       - the volume that holds the BoundarySurface
@@ -202,9 +207,9 @@ public:
     SharedObject<BinnedArray<TrackingVolume>> outsidevolarray) const override;
 
 private:
-  Trk::LayerMaterialProperties* layerMaterialProperties(const Trk::Surface& sf)
-    const; //!< helper method to construct barrel material
-
+   //!< helper method to construct barrel material
+   std::unique_ptr<Trk::LayerMaterialProperties> layerMaterialProperties(const Trk::Surface& sf) const;
+  
   /** Private method - it takes the full vector of given volumes to create the
      supervolume,
                      - it compares the volumes with the ones scheduled to build
@@ -213,27 +218,35 @@ private:
      GlueVolumeDescriptor exists) and adds either the volume itself or the
      associated subvolume
                      - volumes on glueVols level are all on navigation level*/
-  static void fillGlueVolumes(
-    const std::vector<TrackingVolume*>& topLevelVolumes,
-    const std::vector<TrackingVolume*>& envelopeFaceVolumes,
-    BoundarySurfaceFace glueFace,
-    std::vector<Trk::TrackingVolume*>& glueVols);
+  static void fillGlueVolumes(const std::vector<TrackingVolume*>& topLevelVolumes,
+                              const std::vector<TrackingVolume*>& envelopeFaceVolumes,
+                              BoundarySurfaceFace glueFace,
+                              std::vector<Trk::TrackingVolume*>& glueVols);
+
+  static void fillGlueVolumes(const std::vector<std::shared_ptr<TrackingVolume>>& topLevelVolumes,
+                              const std::vector<std::shared_ptr<TrackingVolume>>& envelopeFaceVolumes,
+                              BoundarySurfaceFace glueFace,
+                              std::vector<Trk::TrackingVolume*>& glueVols);
+
 
   /** Execute the glueing  - the input volumes are all on navigation level */
-  void glueTrackingVolumes(const std::vector<Trk::TrackingVolume*>& glueVols,
+  void glueTrackingVolumes(const std::vector<std::shared_ptr<TrackingVolume>>& glueVols,
                            BoundarySurfaceFace glueFace,
                            BoundarySurfaceFace secondFace) const;
 
-  ToolHandle<ILayerArrayCreator>
-    m_layerArrayCreator; //!< A Tool for coherent LayerArray creation
+  void glueTrackingVolumes(const std::vector<TrackingVolume*>& glueVols,
+                           BoundarySurfaceFace glueFace,
+                           BoundarySurfaceFace secondFace) const;
+  PublicToolHandle<ILayerArrayCreator>
+    m_layerArrayCreator{this, "LayerArrayCreator", "Trk::LayerArrayCreator/LayerArrayCreator"}; //!< A Tool for coherent LayerArray creation
   ToolHandle<ITrackingVolumeArrayCreator>
-    m_trackingVolumeArrayCreator; //!< Helper Tool to create TrackingVolume
+    m_trackingVolumeArrayCreator{this, "TrackingVolumeArrayCreator", "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"}; //!< Helper Tool to create TrackingVolume
                                   //!< Arrays
 
-  int m_barrelLayerBinsZ;   //!< material bins in Z
-  int m_barrelLayerBinsPhi; //!< material bins in Phi
-  int m_endcapLayerBinsR;   //!< material bins in R
-  int m_endcapLayerBinsPhi; //!< material bins in Phi
+  Gaudi::Property<int> m_barrelLayerBinsZ{this, "BarrelLayerBinsZ", 1};   //!< material bins in Z
+  Gaudi::Property<int> m_barrelLayerBinsPhi{this, "BarrelLayerBinsPhi", 1}; //!< material bins in Phi
+  Gaudi::Property<int> m_endcapLayerBinsR{this, "EndcapLayerBinsR", 1};   //!< material bins in R
+  Gaudi::Property<int> m_endcapLayerBinsPhi{this, "EndcapLayerBinsPhi", 1}; //!< material bins in Phi
 
   static constexpr double s_layerThickness =
     1. * Gaudi::Units::mm; //!< standard layer thickness
