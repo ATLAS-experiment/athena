@@ -49,10 +49,10 @@ StatusCode MuonHoughTransformAlg::execute(const EventContext& ctx) const {
       SG::WriteHandle<StationHoughMaxContainer> writeMaxima(m_maxima, ctx); 
       ATH_CHECK(writeMaxima.record(std::make_unique<StationHoughMaxContainer>()));
       
-      SG::ReadCondHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
+      SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
       ATH_CHECK(gctxHandle.isValid());
 
-      MuonHoughEventData data{**gctxHandle}; 
+      MuonHoughEventData data{*gctxHandle}; 
  
       /// pre-populate the event data - sort PRDs by station       
       ATH_CHECK(preProcess(data, *spacePoints)); 

@@ -31,10 +31,8 @@ const parameterBook& RpcReadoutElement::getParameters() const { return m_pars; }
 
 StatusCode RpcReadoutElement::initElement() {   
     /// Check that the alignable node has been assigned
-    if(!alignableTransform()) {
-      ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
-      return StatusCode::FAILURE;
-    } 
+    ATH_CHECK(createGeoTransform());
+ 
     ATH_MSG_DEBUG("Parameter book "<<parameterBook());
     if (m_pars.layers.empty()) {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
@@ -51,7 +49,7 @@ StatusCode RpcReadoutElement::initElement() {
          continue;
       }
       ATH_CHECK(insertTransform(layHash, 
-                                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
+                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
 #ifndef SIMULATIONBASE

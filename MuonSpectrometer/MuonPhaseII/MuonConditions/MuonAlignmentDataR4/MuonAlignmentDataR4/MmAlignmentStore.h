@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONALIGNMENTDATA_MMALIGNMENTSTORE_H
 #define MUONALIGNMENTDATA_MMALIGNMENTSTORE_H
@@ -7,12 +7,12 @@
 #include <MuonAlignmentData/BLinePar.h>
 #include <MuonAlignmentData/NswPassivationDbData.h>
 #include <MuonAlignmentData/NswAsBuiltDbData.h>
-#include <ActsGeometryInterfaces/AlignmentStore.h>
+#include <ActsGeometryInterfaces/DetectorAlignStore.h>
 /*  Alignment store class to additionally ship the Micromega passivation,
  *  the As built parameters and the BLines through the Acts Geometry context
  * 
  */
-class MmAlignmentStore: public ActsTrk::AlignmentStore {
+class MmAlignmentStore: public ActsTrk::DetectorAlignStore::InternalAlignStore  {
     public:
         MmAlignmentStore() = default;
         /// @brief  Passivation is subdivided into several PCBs

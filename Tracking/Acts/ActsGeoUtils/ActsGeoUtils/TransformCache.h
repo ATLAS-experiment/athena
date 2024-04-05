@@ -4,10 +4,11 @@
 #ifndef ActsGeoUtils_TransformCache_H
 #define ActsGeoUtils_TransformCache_H
 
+#include <shared_mutex>
 #include <ActsGeoUtils/Defs.h>
 #include <ActsGeometryInterfaces/IDetectorElement.h>
-#include <CxxUtils/CachedUniquePtr.h>
 #include <Identifier/IdentifierHash.h>
+#include <CxxUtils/CachedUniquePtr.h>
 
 namespace ActsTrk {
 
@@ -23,22 +24,30 @@ namespace ActsTrk {
        *          to find the transformation to go from the origin of  the GeoModel detector coordinate system 
        *          to the origin of the sensor coordinate system.
       */
-      using TransformMaker = std::function<Amg::Transform3D(ActsTrk::RawGeomAlignStore* store, const IdentifierHash& hash)>;
+      using TransformMaker = std::function<Amg::Transform3D(const ActsTrk::DetectorAlignStore* store, const IdentifierHash& hash)>;
 
       /** @brief: Standard constructor taking the hash of the sensor element and 
        *          and the TransformMaker expressed usually as a lambda function
       **/
-      TransformCache(const IdentifierHash& hash, TransformMaker maker,
-                     const IDetectorElement* parentEle = nullptr);
-
+      TransformCache(const IdentifierHash& hash, 
+                     TransformMaker maker,
+                     const IDetectorElement* parentEle);
+      
+      TransformCache(const IdentifierHash& hash, 
+                     std::shared_ptr<const TransformMaker> maker,
+                     const IDetectorElement* parentEle);
+      /** @brief: Delete copy constructor & assignment operator*/
+      TransformCache(const TransformCache& other) = delete;
+      TransformCache& operator=(const TransformCache& other) = delete;
+      /** @brief Destructor releasing the ticket for later reuse*/
+      ~TransformCache();
+      
       /** @brief Returns the matching transformation from the alignment store. 
        *         If a nullptr is given, then it's equivalent to the case that the transformation
        *         is pointing to a perfectly aligned surface. In this case, the internal nominal
        *         transformation cache is invoked.
        * */
-      const Amg::Transform3D& getTransform(const ActsTrk::AlignmentStore* store) const;
-      /** @brief Stores the aligned transformation into the store. */
-      void storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const;
+      const Amg::Transform3D& getTransform(const DetectorAlignStore* store) const;
       /** @brief Returns the sensor hash of this transformation cache */
       IdentifierHash hash() const;
       /** @brief Returns the transform maker function of this transformation cache*/
@@ -47,11 +56,16 @@ namespace ActsTrk {
       const IDetectorElement* parent() const;
       /** @brief resets the nominal cache associated with the detector element*/
       void releaseNominalCache() const;
+    
     private:
-      IdentifierHash m_hash{0};
-      TransformMaker m_transform{};
-      mutable CxxUtils::CachedUniquePtr<Amg::Transform3D> m_nomCache ATLAS_THREAD_SAFE{};
-      const IDetectorElement* m_parent{nullptr};
+       const IDetectorElement* m_parent{nullptr};
+       const DetectorType m_type{m_parent->detectorType()};
+       using TicketCounter = DetectorAlignStore::TrackingAlignStore;
+       const unsigned int m_clientNo{TicketCounter::drawTicket(m_type)};
+       IdentifierHash m_hash{0};
+       std::shared_ptr<const TransformMaker> m_transform{};
+       mutable std::shared_mutex m_mutex ATLAS_THREAD_SAFE{};
+       mutable CxxUtils::CachedUniquePtrT<Amg::Transform3D> m_nomCache ATLAS_THREAD_SAFE{};
   };
 
 inline bool operator<(const std::unique_ptr<TransformCache>& a,
@@ -68,4 +82,5 @@ inline bool operator<(const std::unique_ptr<TransformCache>& a,
 }
 using TransformCacheSet = std::set<std::unique_ptr<TransformCache>, std::less<>>;
 }
+#include <ActsGeoUtils/TransformCache.icc>
 #endif

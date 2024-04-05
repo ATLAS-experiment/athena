@@ -58,8 +58,6 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     
     /// Element initialization
     virtual StatusCode initElement() = 0;
-    /// Cache the alignment
-    virtual bool storeAlignment(ActsTrk::RawGeomAlignStore& store) const override;
     /// Returnsthe alignable transform of the readout element
     const GeoAlignableTransform* alignableTransform() const;
     /// Return the athena identifier.
@@ -164,6 +162,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 #endif
     /// Releases all cached transforms that are not connected with alignment
     void releaseUnAlignedTrfs() const;
+
+    unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const override final;
    protected:
      using TransformMaker = ActsTrk::TransformCache::TransformMaker;
       
@@ -171,8 +171,12 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      StatusCode insertTransform(const IdentifierHash& hash,
                                  TransformMaker make);
 
+     StatusCode insertTransform(const IdentifierHash& hash,
+                                std::shared_ptr<const TransformMaker> make);
+
+     StatusCode createGeoTransform();
      /// Returns the transformation into the center of the readout volume
-     Amg::Transform3D toStation(ActsTrk::RawGeomAlignStore* alignStore) const;
+     Amg::Transform3D toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
 #ifndef SIMULATIONBASE
      //Creates a MuonSurfaceCache for straw surfaces using the given Bounds and Identifier Hash
      StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::LineBounds> lBounds);
@@ -200,7 +204,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     int m_stPhi{-1};
 
     /// Cache all local to global transformations
-    ActsTrk::TransformCacheSet m_localToGlobalCaches{};
+    using TransformCacheMap = std::unordered_map<IdentifierHash, std::unique_ptr<ActsTrk::TransformCache>>;
+    TransformCacheMap m_localToGlobalCaches{};
 #ifndef SIMULATIONBASE
     ///Cache of all associated surfaces
     ActsTrk::SurfaceCacheSet m_surfaces{};

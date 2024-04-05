@@ -31,6 +31,8 @@ def MuonGeoModelCfg(flags):
     if flags.Muon.usePhaseIIGeoSetup:
         from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg as MuonGeoModelCfgR4
         result.merge(MuonGeoModelCfgR4(flags))
+        from MuonGeoModelR4.MuonGeoModelConfig import MuonAlignStoreCfg
+        result.merge(MuonAlignStoreCfg(flags))
         if flags.Common.ProductionStep != ProductionStep.Simulation:
             from MuonGeometryCnv.MuonReadoutGeomCnvCfg import MuonReadoutGeometryCnvAlgCfg
             result.merge(MuonReadoutGeometryCnvAlgCfg(flags))

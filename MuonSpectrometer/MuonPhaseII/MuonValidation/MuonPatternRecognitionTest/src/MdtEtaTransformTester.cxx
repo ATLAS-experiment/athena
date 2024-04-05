@@ -61,9 +61,10 @@ namespace MuonValR4 {
     StatusCode MdtEtaTransformTester::execute()  {
         
         const EventContext & ctx = Gaudi::Hive::currentContext();
-        SG::ReadCondHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
-        ATH_CHECK(gctxHandle.isValid());
-        const ActsGeometryContext& gctx{**gctxHandle};
+        SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
+        ATH_CHECK(gctxHandle.isPresent());
+        const ActsGeometryContext& gctx{*gctxHandle};
+
         // retrieve the two input collections
 
         auto simHitCollections = m_inSimHitKeys.makeHandles(ctx);
@@ -229,9 +230,9 @@ namespace MuonValR4 {
         
         if (simHits.size() < 4) return StatusCode::SUCCESS;
 
-        SG::ReadCondHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
-        ATH_CHECK(gctxHandle.isValid());
-        const ActsGeometryContext& gctx{**gctxHandle};
+        SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
+        ATH_CHECK(gctxHandle.isPresent());
+        const ActsGeometryContext& gctx{*gctxHandle};
 
         auto readSpacePoints = SG::makeHandle(m_spacePointKey, ctx);  
         ATH_CHECK(readSpacePoints.isPresent()); 

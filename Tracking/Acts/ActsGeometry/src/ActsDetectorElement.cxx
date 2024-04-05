@@ -1,8 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
+
+#include "GeoModelHelpers/throwExcept.h"
 
 // ATHENA
 #include "ActsInterop/IdentityHelper.h"
@@ -42,22 +44,49 @@ using Acts::Transform3;
 
 using namespace Acts::UnitLiterals;
 using namespace ActsTrk;
-using SubDetAlignments = ActsGeometryContext::SubDetAlignments;
-
 
 
 constexpr double length_unit = 1_mm;
 
-ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detElem) : m_detElement{&detElem} {
-  m_type = detElem.isPixel() ? DetectorType::Pixel : DetectorType::Sct;
+ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detElem) :
+  GeoVDetectorElement{detElem.getMaterialGeom()},
+  m_type{detElem.isPixel() ? DetectorType::Pixel : DetectorType::Sct},
+  m_trfCache{0,[this,&detElem](const DetectorAlignStore* store, const IdentifierHash&) {
+
+      const InDetDD::SiDetectorDesign &design = detElem.design();
+      const Trk::SurfaceBounds::BoundsType boundsType = detElem.bounds().type();
+
+      // extra shift for split row modules
+      Amg::Transform3D extraTransform{Amg::CLHEPTransformToEigen(detElem.recoToHitTransform())};    
+      if (boundsType == Trk::SurfaceBounds::Rectangle &&
+          typeid(design) == typeid(InDetDD::StripBoxDesign) ) {
+
+          extraTransform = design.moduleShift() * extraTransform;
+
+      } else if (boundsType == Trk::SurfaceBounds::Annulus) {
+        // need to rotate pi/2 to reproduce ABXY orientation, phiS so that phi=0
+        // is center and symmetric
+        const double phiShift = M_PI_2 - static_cast<const InDetDD::StripStereoAnnulusDesign&>(design).stereo();
+
+        const Amg::Vector2D origin2D = static_cast<const Acts::AnnulusBounds&>(m_surface->bounds()).moduleOrigin();
+        const Amg::Translation3D transl{origin2D.x(), origin2D.y(), 0};
+        const Amg::Transform3D originTrf{transl * Amg::getRotateZ3D(-phiShift)};
+        extraTransform = extraTransform * originTrf.inverse();
+      }
+      GeoAlignmentStore* alignStore = store ? store->geoModelAlignment.get() : nullptr;
+      Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(alignStore) * extraTransform;
+      // need to make sure translation has correct units
+      l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
+
+      return l2g;
+  },this},
+  m_detElement{&detElem} {
+
 
   auto boundsType = detElem.bounds().type();
 
   m_thickness = detElem.thickness();
 
-  Acts::Transform3 recoToHit = Amg::CLHEPTransformToEigen(detElem.recoToHitTransform());
-
-  m_extraTransform = recoToHit; // default to recoToHit
 
   if (boundsType == Trk::SurfaceBounds::Rectangle) {
 
@@ -65,21 +94,10 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
     double hlX = design.width() / 2. * length_unit;
     double hlY = design.length() / 2. * length_unit;
 
-    auto rectangleBounds =
-        std::make_shared<const Acts::RectangleBounds>(hlX, hlY);
+    auto rectangleBounds = std::make_shared<const Acts::RectangleBounds>(hlX, hlY);
 
     m_bounds = rectangleBounds;
-
-    if (const auto *bd = dynamic_cast<const InDetDD::StripBoxDesign *>(&design);
-        bd != nullptr) {
-      // extra shift for split row modules
-      m_extraTransform = bd->moduleShift() * recoToHit;
-    }
-
-    m_surface =
-        Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
-
-
+    m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
 
   } else if (boundsType == Trk::SurfaceBounds::Trapezoid) {
 
@@ -94,8 +112,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
 
     m_bounds = trapezoidBounds;
 
-    m_surface =
-        Acts::Surface::makeShared<Acts::PlaneSurface>(trapezoidBounds, *this);
+    m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(trapezoidBounds, *this);
 
 
   } else if (boundsType == Trk::SurfaceBounds::Annulus) {
@@ -113,16 +130,12 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
     double maxR = annulus->maxR();
     double minR = annulus->minR();
 
-    double phiAvg =
-        0; // phiAvg is the bounds-internal local rotation. We don't want one
-
+    // phiAvg is the bounds-internal local rotation. We don't want one
+    double phiAvg = 0; 
     // phi is the total opening angle, set up symmetric phi bounds
     double phiMax = phi / 2.;
     double phiMin = -phiMax;
 
-    // need to rotate pi/2 to reproduce ABXY orientation, phiS so that phi=0
-    // is center and symmetric
-    double phiShift = M_PI / 2. - phiS;
 
     Amg::Vector2D originStripXYRotated(R * (1 - std::cos(phiS)),
                                        R * std::sin(-phiS));
@@ -131,25 +144,22 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
         minR, maxR, phiMin, phiMax, originStripXYRotated, phiAvg);
     m_bounds = annulusBounds;
 
-    m_surface =
-        Acts::Surface::makeShared<Acts::DiscSurface>(annulusBounds, *this);
-
-    Amg::Vector2D origin2D = annulusBounds->moduleOrigin();
-    Amg::Translation3D transl(Amg::Vector3D(origin2D.x(), origin2D.y(), 0));
-    Amg::Rotation3D rot(Amg::AngleAxis3D(-phiShift, Amg::Vector3D::UnitZ()));
-    Amg::Transform3D originTrf;
-    originTrf = transl * rot;
-    m_extraTransform = recoToHit * originTrf.inverse();
+    m_surface = Acts::Surface::makeShared<Acts::DiscSurface>(annulusBounds, *this);
 
   } else {
     std::cout << boundsType << std::endl;
-    throw std::domain_error(
-        "ActsDetectorElement does not support this surface type");
+    throw std::domain_error("ActsDetectorElement does not support this surface type");
   }
 }
 
-ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf, const InDetDD::TRT_BaseElement &detElem, const Identifier &id) :
-    m_type{DetectorType::Trt}, m_detElement{&detElem}, m_defTransform{trf}, m_explicitIdentifier(id) {
+ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf, 
+                                         const InDetDD::TRT_BaseElement &detElem, 
+                                         const Identifier &id) :
+    GeoVDetectorElement{detElem.getMaterialGeom()},
+    m_type{DetectorType::Trt}, 
+    m_trfCache{0,[trf](const DetectorAlignStore* , const IdentifierHash&) { return trf; },this},
+    m_detElement{&detElem}, 
+    m_explicitIdentifier(id) {
 
   // we know this is a straw
   double length = detElem.strawLength() * 0.5 * length_unit;
@@ -165,8 +175,7 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf, const InDe
       innerTubeRadius =
           brlElem->getDescriptor()->innerTubeRadius() * length_unit;
     } else {
-      throw std::runtime_error(
-          "Cannot get tube radius for element in ActsDetectorElement c'tor");
+      THROW_EXCEPTION("Cannot get tube radius for element in ActsDetectorElement c'tor");
     }
   }
 
@@ -178,7 +187,19 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf, const InDe
 }
 
 ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) :
-    m_type{DetectorType::Hgtd}, m_detElement{&detElem}, m_thickness{detElem.thickness()}, m_explicitIdentifier{id} {
+    GeoVDetectorElement{detElem.getMaterialGeom()},
+    m_type{DetectorType::Hgtd}, 
+    m_trfCache{0, [&detElem,this](const DetectorAlignStore* store, const IdentifierHash&) {
+
+        GeoAlignmentStore* geoModelStore = store ? store->geoModelAlignment.get() : nullptr;
+        Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore);
+        // need to make sure translation has correct units
+        l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
+        return l2g;
+    }, this},
+    m_detElement{&detElem}, 
+    m_thickness{detElem.thickness()}, 
+    m_explicitIdentifier{id} {
 
   auto boundsType = detElem.bounds().type();
 
@@ -193,8 +214,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &de
 
     m_bounds = rectangleBounds;
 
-    m_surface =
-        Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
+    m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
         
   } else {
     throw std::domain_error(
@@ -213,72 +233,19 @@ IdentityHelper ActsDetectorElement::identityHelper() const {
 const Acts::Transform3 &ActsDetectorElement::transform(const Acts::GeometryContext &anygctx) const {
     // any cast to known context type
     const ActsGeometryContext *gctx = anygctx.get<const ActsGeometryContext *>();
-
-    // This is needed for initial geometry construction. At that point, we don't
-    // have a consistent view of the geometry yet, and thus we can't populate an
-    // alignment store at that time.
-
     // unpack the alignment store from the context
-    SubDetAlignments::const_iterator itr = gctx->alignmentStores.find(detectorType());
-
-    /// Does this mean that the alignment is not cached for this detector element?
-    if (itr == gctx->alignmentStores.end()) return getDefaultTransform();
-    const GeoModel::TransientConstSharedPtr<AlignmentStore> &alignmentStore = itr->second;
-
-    // get the correct cached transform
-    // units should be fine here since we converted at construction
-    const Acts::Transform3 *cachedTrf = alignmentStore->getTransform(this);
-
-    assert(cachedTrf != nullptr);
-    return *cachedTrf;
+    return m_trfCache.getTransform(gctx->getStore(detectorType()).get());
 
 }
 
-bool ActsDetectorElement::storeAlignment(RawGeomAlignStore &store) const {
-  if (store.detType != detectorType()) return false;
-
-    Amg::Transform3D trf{Amg::Transform3D::Identity()};
-    static constexpr std::array<DetectorType, 3> useGeoModel{DetectorType::Pixel, DetectorType::Sct, DetectorType::Hgtd};
-    if (std::find(useGeoModel.begin(), useGeoModel.end(), detectorType()) != useGeoModel.end()) {
-        Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(store.geoModelAlignment.get()) * m_extraTransform;
-        // need to make sure translation has correct units
-        l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
-
-        trf = l2g;
-    } else if (detectorType() == DetectorType::Trt && m_defTransform.isValid()) {
-        // So far: NO ALIGNMENT for the ACTS TRT version. Default transform set in
-        // constructor, should be safe to access without mutex.
-        trf = *m_defTransform.ptr();
-  } else {
-    throw std::runtime_error{"Unknown detector element type "+to_string(detectorType())};
-  }
-
-  store.trackingAlignment->setTransform(this, trf);
-#ifndef NDEBUG
-    if (!store.trackingAlignment->getTransform(this)) { throw std::runtime_error("Detector element was unable to store transform in GAS"); }
-#endif
-    return true;
-
+unsigned int ActsDetectorElement::storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const {
+    if (store.detType != detectorType()) return 0;
+    m_trfCache.getTransform(&store);
+    return 1;
 }
 
-const Acts::Transform3 &
-ActsDetectorElement::getDefaultTransform() const {
-  if (!m_defTransform.isValid()) {
-    // transform not yet set
-    static constexpr std::array<DetectorType, 3> useGeoModel{DetectorType::Pixel, DetectorType::Sct, DetectorType::Hgtd};
-    if (std::find(useGeoModel.begin(), useGeoModel.end(), detectorType()) != useGeoModel.end()) {
-        Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform() * m_extraTransform;
-            // need to make sure translation has correct units
-            l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
-
-            m_defTransform.set(std::move(l2g));
-        } else if (const auto *detElem = dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement); detElem != nullptr) {
-            throw std::logic_error{"TRT transform should have been set in the constructor"};
-        } else {
-            throw std::runtime_error{"Unknown detector element type"};
-        }
-    }
-    return *m_defTransform.ptr();
+const Acts::Transform3 & ActsDetectorElement::getDefaultTransform() const {
+    return m_trfCache.getTransform(nullptr);
 }
 
 const Acts::Surface &ActsDetectorElement::surface() const {
@@ -313,7 +280,7 @@ Identifier ActsDetectorElement::identify() const {
              nullptr) {
     return m_explicitIdentifier;
   } else {
-    throw std::runtime_error{"Unknown detector element type"};
+    THROW_EXCEPTION("Unknown detector element type");
   }
 }
 

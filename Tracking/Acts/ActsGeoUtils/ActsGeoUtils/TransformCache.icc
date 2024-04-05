@@ -1,0 +1,32 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef ActsGeoUtils_TransformCache_ICC
+#define ActsGeoUtils_TransformCache_ICC
+
+#include <CxxUtils/inline_hints.h>
+
+namespace ActsTrk {
+    ATH_FLATTEN
+    inline const Amg::Transform3D& TransformCache::getTransform(const ActsTrk::DetectorAlignStore* alignStore) const {    
+        /// Valid alignment store is given -> Take the transformation from the cache there
+        if (alignStore) {
+            const Amg::Transform3D* cache = alignStore->trackingAlignment->getTransform(m_clientNo);
+            if (cache) return *cache;
+            const Amg::Transform3D& trf{alignStore->trackingAlignment->setTransform(m_clientNo, (*m_transform)(alignStore, m_hash))};
+            /// If an external alignment store is presented release the nominal transformation
+            releaseNominalCache();
+            return trf;
+        }
+        /// Fall back solution to go onto the nominal cache    
+        if (!m_nomCache) {
+            std::unique_lock guard{m_mutex};
+            m_nomCache.set(std::make_unique<Amg::Transform3D>((*m_transform)(nullptr, m_hash)));
+            return (*m_nomCache);
+        }
+        std::shared_lock guard{m_mutex};
+        return (*m_nomCache);
+    }
+
+ }
+#endif

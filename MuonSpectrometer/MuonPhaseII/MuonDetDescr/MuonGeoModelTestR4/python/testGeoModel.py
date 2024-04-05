@@ -32,7 +32,8 @@ def setupServicesCfg(flags):
     if flags.Input.Format is Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         result.merge(PoolReadCfg(flags))
-
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
     result.merge(MuonIdHelperSvcCfg(flags))
     return result

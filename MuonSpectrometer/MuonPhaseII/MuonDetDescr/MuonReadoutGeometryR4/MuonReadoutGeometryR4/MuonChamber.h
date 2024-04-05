@@ -22,7 +22,7 @@
 #include <set>
 
 namespace MuonGMR4 {
-    class MuonChamber{
+    class MuonChamber {
         public:
             using ReadoutSet = std::vector<const MuonReadoutElement*>;                
             struct defineArgs{
@@ -62,10 +62,6 @@ namespace MuonGMR4 {
             /// Returns the transformation of the MuonChamber
             const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& gctx) const;
             Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
-            /// Applies the alignment transformations to the middle layers
-            /// Returns false if the alignment store does not cache the constants
-            /// for the correpsonding detector element
-            bool storeAlignment(ActsTrk::RawGeomAlignStore& store) const;
             /// Surrounding box dimensions
             double halfXLong() const;
             double halfXShort() const;
@@ -78,13 +74,13 @@ namespace MuonGMR4 {
             const defineArgs& parameters() const;
         private:
            defineArgs m_args{};
-           
-           Amg::Transform3D fromLayerToGlobal(ActsTrk::RawGeomAlignStore* store) const;
+           using AlignmentStore = ActsGeometryContext::AlignmentStore;
+           Amg::Transform3D fromLayerToGlobal(const AlignmentStore* store) const;
 
            ActsTrk::TransformCache m_localToGlobal{IdentifierHash{0},
-                    [this](ActsTrk::RawGeomAlignStore* store, const IdentifierHash&){
+                    [this](const AlignmentStore* store, const IdentifierHash&){
                         return fromLayerToGlobal(store);
-           }};
+                    },readOutElements()[0]};
     };
     
     std::ostream& operator<<(std::ostream& ostr,

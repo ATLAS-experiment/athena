@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 // ATHENA
 #include "GaudiKernel/EventContext.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -1006,18 +1007,17 @@ ActsTrackingGeometrySvc::makeSCTTRTAssembly(
   return container;
 }
 
-unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(RawGeomAlignStore &store) const {
+unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore &store) const {
     ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
     unsigned int nElements = 0;
     m_trackingGeometry->visitSurfaces([&store, &nElements](const Acts::Surface *srf) {
         const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
         const IDetectorElement *gmde = dynamic_cast<const IDetectorElement *>(detElem);
-        nElements += gmde->storeAlignment(store);
+        nElements += gmde->storeAlignedTransforms(store);
     });
     ATH_MSG_DEBUG("Populated with " << nElements << " elements");
     return nElements;
 }
-
 const ActsGeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
 
 Acts::CylinderVolumeBuilder::Config
@@ -1035,11 +1035,7 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
   Acts::Transform3 beamPipeTransform;
   beamPipeTransform.setIdentity();
 
-  beamPipeTransform = Acts::Translation3(
-      beamPipeTopVolume->getX().translation().x(),
-      beamPipeTopVolume->getX().translation().y(),
-      beamPipeTopVolume->getX().translation().z()
-  );
+  beamPipeTransform = Acts::Translation3(beamPipeTopVolume->getX().translation());
 
   double beamPipeRadius = 20;
 
@@ -1081,10 +1077,7 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
   ATH_MSG_VERBOSE("BeamPipe constructed from Database: translation (yes) - radius "
       << ( beamPipeTube ? "(yes)" : "(no)") << " - r = " << beamPipeRadius );
 
-  ATH_MSG_VERBOSE("BeamPipe shift estimated as    : " 
-      <<  beamPipeTransform.translation().x() << ", "
-      <<  beamPipeTransform.translation().y() << ","
-      <<  beamPipeTransform.translation().y());
+  ATH_MSG_VERBOSE("BeamPipe shift estimated as    : " << Amg::toString(beamPipeTransform.translation()));
 
   Acts::CylinderVolumeBuilder::Config cfg;
 
@@ -1104,26 +1097,4 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
   cfg.buildToRadiusZero = true;
 
   return cfg;
-}
-StatusCode ActsTrackingGeometrySvc::checkAlignComplete(const ActsGeometryContext &ctx) const {
-    /// Look up what subdetectors are part of the tracking geometry
-    std::set<DetectorType> activeDets{};
-    m_trackingGeometry->visitSurfaces([&activeDets](const Acts::Surface *srf) {
-        const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
-        const IDetectorElement *gmde = dynamic_cast<const IDetectorElement *>(detElem);
-        activeDets.insert(gmde->detectorType());
-    });
-
-    /// Loop over the detector types. Check whether for each of them a dedicated alignment store exists
-    for (const DetectorType &type : activeDets) {
-        if (m_subDetNoAlign.count(type)) {
-            ATH_MSG_DEBUG("Detector " << to_string(type) << " does not expect any alignment store. Do not check");
-            continue;
-        }
-        if (ctx.alignmentStores.find(type) == ctx.alignmentStores.end()) {
-            ATH_MSG_FATAL("No alignment constants have been defined for subdetector " << to_string(type) << ". Please check.");
-            return StatusCode::FAILURE;
-        }
-    }
-    return StatusCode::SUCCESS;
 }

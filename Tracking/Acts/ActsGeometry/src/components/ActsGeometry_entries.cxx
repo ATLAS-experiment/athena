@@ -4,8 +4,6 @@
 
 #include "EventPrimitives/EventPrimitives.h"
 // needed here to get the ATLAS eigen plugins in before the ACTS eigen plugins
-#include "../ActsAlignmentCondAlg.h"
-#include "../ActsDetAlignCondAlg.h"
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
 #include "ActsGeometry/DetectorVolumeSvc.h"
 #include "ActsGeometry/ActsExtrapolationAlg.h"
@@ -42,8 +40,6 @@ DECLARE_COMPONENT(ActsMaterialJsonWriterTool)
 DECLARE_COMPONENT(ActsTrackingGeometryTool)
 
 DECLARE_COMPONENT(ActsPropStepRootWriterSvc)
-DECLARE_COMPONENT(ActsAlignmentCondAlg)
-DECLARE_COMPONENT(ActsDetAlignCondAlg)
 DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsTrk::DetectorVolumeSvc)
 DECLARE_COMPONENT(ActsTrk::SimpleCylinderDetBuilderTool)

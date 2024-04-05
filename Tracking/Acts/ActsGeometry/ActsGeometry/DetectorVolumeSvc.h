@@ -22,7 +22,7 @@
 namespace ActsTrk{
 
     class DetectorVolumeSvc : public extends<AthService, IDetectorVolumeSvc> {
-    public:
+      public:
 
       DetectorVolumeSvc( const std::string& name, ISvcLocator* pSvcLocator );
 

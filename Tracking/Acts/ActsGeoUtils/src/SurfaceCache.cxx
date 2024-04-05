@@ -15,12 +15,7 @@ namespace ActsTrk{
   const Acts::Transform3& SurfaceCache::transform(const Acts::GeometryContext& anygctx) const  {
     const ActsGeometryContext* gctx = anygctx.get<const ActsGeometryContext*>();    
     // unpack the alignment store from the context
-    const DetectorType type = m_transformCache->parent()->detectorType();
-    ActsGeometryContext::SubDetAlignments::const_iterator itr = gctx->alignmentStores.find(type);
-    const AlignmentStore* store{itr == gctx->alignmentStores.end() ? nullptr : itr->second.get()};   
-    return m_transformCache->getTransform(store);
-    /// Will be used in the next MR
-    /// return m_transformCache->getTransform(gctx->getStore(m_transformCache->parent()->detectorType()).get());
+    return m_transformCache->getTransform(gctx->getStore(m_transformCache->parent()->detectorType()).get());
   }
   const Acts::Surface& SurfaceCache::surface() const  { 
     if (!m_surface) THROW_EXCEPTION("Surface has not been set before");

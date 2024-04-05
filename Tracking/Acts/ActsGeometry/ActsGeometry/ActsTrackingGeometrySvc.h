@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSTRACKINGGEOMETRYSVC_H
@@ -58,11 +58,9 @@ public:
   std::shared_ptr<const Acts::TrackingGeometry>
   trackingGeometry() override;
 
-  unsigned int populateAlignmentStore(ActsTrk::RawGeomAlignStore& store) const override;
+  unsigned int populateAlignmentStore(ActsTrk::DetectorAlignStore& store) const override;
 
   const ActsGeometryContext& getNominalContext() const override;
-
-  StatusCode checkAlignComplete(const ActsGeometryContext& ctx) const override;
 
 private:
   ActsLayerBuilder::Config
