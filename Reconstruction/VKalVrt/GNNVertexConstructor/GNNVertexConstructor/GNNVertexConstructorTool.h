@@ -7,32 +7,31 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 
 #include "AnalysisUtils/AnalysisMisc.h"
-#include "GeoPrimitives/GeoPrimitivesHelpers.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "PathResolver/PathResolver.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "FlavorTagDiscriminants/GNNTool.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
+#include "PathResolver/PathResolver.h"
+#include "TMath.h"
+#include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
-#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
-#include "TMath.h"
 
-#include "vector"
+#include "algorithm"
 #include "iostream"
 #include "iterator"
 #include "map"
-#include "set"
-#include "algorithm"
 #include "ranges"
+#include "set"
 #include "vector"
 #include <numeric>
 #include <vector>
@@ -44,10 +43,10 @@ class TTree;
 class ITHistSvc;
 
 namespace Trk {
-  class TrkVKalVrtFitter;
-  class IVertexFitter;
-  class IVKalState;
-  class VxSecVKalVertexInfo;
+class TrkVKalVrtFitter;
+class IVertexFitter;
+class IVKalState;
+class VxSecVKalVertexInfo;
 } // namespace Trk
 
 #include "xAODTracking/TrackParticleContainer.h"
@@ -127,65 +126,55 @@ struct workVectorArrxAOD {
 class GNNVertexConstructorTool : public AthAlgTool, virtual public IGNNVertexConstructorInterface {
 
 public:
-  GNNVertexConstructorTool(const std::string &type, const std::string &name,
-                           const IInterface *parent);
+  GNNVertexConstructorTool(const std::string &type, const std::string &name, const IInterface *parent);
   virtual ~GNNVertexConstructorTool();
 
   StatusCode initialize();
   StatusCode finalize();
 
-  virtual StatusCode decorateJets(const xAOD::JetContainer*) const;
-  virtual StatusCode performVertexFit(const xAOD::JetContainer*, 
-                                      xAOD::VertexContainer*, 
-                                      const xAOD::Vertex & primaryVertex, 
-                                      const EventContext&) const;
-                                      
- 
+  virtual StatusCode decorateJets(const xAOD::JetContainer *) const;
+  virtual StatusCode performVertexFit(const xAOD::JetContainer *, xAOD::VertexContainer *,
+                                      const xAOD::Vertex &primaryVertex, const EventContext &) const;
 
   // Tools
-  ToolHandle<FlavorTagDiscriminants::GNNTool> m_gnn_Tool{this, "gnn_Tool", "",
-                                                         "GNN Decorator tool"};
+  ToolHandle<FlavorTagDiscriminants::GNNTool> m_gnn_Tool{this, "gnn_Tool", "", "GNN Decorator tool"};
   ToolHandle<Trk::TrkVKalVrtFitter> m_vertexFitterTool;
-    
+
   // Read handles
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackLinksKey{
-      this, "trackLinksKey", "", "Jet GNN Deco Read Key for track link"};
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackOriginsKey{
-      this, "trackLinksKey", "", "Jet GNN Deco Read Key for track origin"};
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_vertexLinksKey{
-      this, "vertexLinksKey", "", "Jet GNN Deco Read Key for vertex link"};
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "eventInfoKey", "EventInfo",
-                                                    "EventInfo container to use"};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackLinksKey{this, "trackLinksKey", "",
+                                                             "Jet GNN Deco Read Key for track link"};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackOriginsKey{this, "trackLinksKey", "",
+                                                               "Jet GNN Deco Read Key for track origin"};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_vertexLinksKey{this, "vertexLinksKey", "",
+                                                              "Jet GNN Deco Read Key for vertex link"};
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "eventInfoKey", "EventInfo", "EventInfo container to use"};
 
   // Write handles
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetWriteDecorKeyVertexLink{this,"jetDecorKeyJetLink",
-    "","WriteDecorHandleKey for adding VertexLink to Jets"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetWriteDecorKeyVertexNumber{this,"jetDecorKeyVertexNumber",
-    "","WriteDecorHandleKey for adding number of vertices within a Jet"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetWriteDecorKeyVertexLink{
+      this, "jetDecorKeyJetLink", "", "WriteDecorHandleKey for adding VertexLink to Jets"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetWriteDecorKeyVertexNumber{
+      this, "jetDecorKeyVertexNumber", "", "WriteDecorHandleKey for adding number of vertices within a Jet"};
 
   // Conditions
-  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData",
-                                                           "SG key for beam spot"};
-  
-  //Access the Primary Vertex Info
-  const xAOD::Vertex* m_thePV;
-  
-  //Histograms
-  bool m_fitHists;
-  ITHistSvc* m_thistSvc{nullptr};
-  TH1F* m_vertexN  =nullptr;  
-  TH1F* m_eFrac    =nullptr;
+  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 
-  
+  // Access the Primary Vertex Info
+  const xAOD::Vertex *m_thePV;
+
+  // Histograms
+  bool m_fitHists;
+  ITHistSvc *m_thistSvc{nullptr};
+  TH1F *m_vertexN = nullptr;
+  TH1F *m_eFrac = nullptr;
+
 private:
- 
   std::string m_jetCollection;
 
-  TLorentzVector TotalMom(const std::vector<const xAOD::TrackParticle*>& selTrk) const; 
-  
-  double vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
-                                  const std::vector<double>& vrtErr,double& signif ) const;
- 
+  TLorentzVector TotalMom(const std::vector<const xAOD::TrackParticle *> &selTrk) const;
+
+  double vrtVrtDist(const xAOD::Vertex &primVrt, const Amg::Vector3D &secVrt, const std::vector<double> &vrtErr,
+                    double &signif) const;
+
   struct WrkVrt {
     bool Good = true;
     std::deque<long int> selTrk;
@@ -196,34 +185,33 @@ private:
     std::vector<double> chi2PerTrk;
     std::vector<std::vector<double>> trkAtVrt;
     double chi2{};
-    double projectedVrt=0.;
-    int detachedTrack=-1;
-    double BDT=1.1;
-    };//end WrkVrt
-    
-    double m_Xbeampipe;
-    double m_Ybeampipe;
-    double m_XlayerB;
-    double m_YlayerB;
-    double m_Xlayer1;
-    double m_Ylayer1;
-    double m_Xlayer2;
-    double m_Ylayer2;
-    double m_Rbeampipe;
-    double m_RlayerB;
-    double m_Rlayer1;
-    double m_Rlayer2;
-    double m_Rlayer3;
-    bool   m_MultiWithPrimary;
-    double m_minD0;
-    double m_massPi;
-    double m_minSig3D;
-    double m_maxChi2;
-    double m_minPerp;
-    bool   m_SingleHFTrack;
-    bool   m_HFTrackRatio;
-    float  m_HFRatioThres;
-    
+    double projectedVrt = 0.;
+    int detachedTrack = -1;
+    double BDT = 1.1;
+  }; // end WrkVrt
+
+  double m_Xbeampipe;
+  double m_Ybeampipe;
+  double m_XlayerB;
+  double m_YlayerB;
+  double m_Xlayer1;
+  double m_Ylayer1;
+  double m_Xlayer2;
+  double m_Ylayer2;
+  double m_Rbeampipe;
+  double m_RlayerB;
+  double m_Rlayer1;
+  double m_Rlayer2;
+  double m_Rlayer3;
+  bool m_MultiWithPrimary;
+  double m_minD0;
+  double m_massPi;
+  double m_minSig3D;
+  double m_maxChi2;
+  double m_minPerp;
+  bool m_SingleHFTrack;
+  bool m_HFTrackRatio;
+  float m_HFRatioThres;
 };
 } // namespace Rec
 
