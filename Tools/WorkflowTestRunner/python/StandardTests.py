@@ -214,9 +214,8 @@ class DerivationTest(WorkflowTest):
 
         self.output_checks = []
         for format in formats:
-            if format == "PHYS":
-                self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
-                self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
+            self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
+            self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
 
         super().__init__(ID, run, type, steps, setup)
 
