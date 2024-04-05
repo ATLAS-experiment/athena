@@ -63,6 +63,7 @@ void testgFexJetRoI() {
    SIMPLE_ASSERT( obj->phiMin_gFex() == static_cast<float>(3*(2*M_PI/32)) );
    SIMPLE_ASSERT( obj->phiMax_gFex() == static_cast<float>(3*(2*M_PI/32)+(2*M_PI/32)) );
 
+
    std::cout << "Test jet TOB completed!" << std::endl;
 
 
@@ -93,7 +94,7 @@ void testgFexGlobalRoI() {
    SIMPLE_ASSERT( obj->globalType() == 2 );
    
    SIMPLE_ASSERT( obj->METquantityOne() == 365400 );
-   SIMPLE_ASSERT( obj->METquantityTwo() == -1447200 );
+   SIMPLE_ASSERT( obj->METquantityTwo() == -361800 );
    SIMPLE_ASSERT( obj->SumEt() == -999 );
 
    std::cout << "Test global TOB completed!" << std::endl;
