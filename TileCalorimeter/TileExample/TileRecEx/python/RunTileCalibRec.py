@@ -50,7 +50,7 @@ def getArgumentParser(flags):
     parser.add_argument('--dumpArguments', action='store_true', help='Print arguments and exit')
     parser.add_argument('--outputDirectory', default='.', help='Output directory for produced files')
 
-    parser.add_argument('-v', '--version', type=str, default='0', help='Version to be used in output files for ntuple and monitoring')
+    parser.add_argument('--outputVersion', type=str, default='0', help='Version to be used in output files for ntuple and monitoring')
 
     parser.add_argument('--calib', default=False, help='Calculate calibration constants and store them in ROOT file', action=argparse.BooleanOptionalAction)
     parser.add_argument('--tmdb', default=None, help='Enable TMDB', action=argparse.BooleanOptionalAction)
@@ -228,7 +228,7 @@ if __name__=='__main__':
         flags.DQ.useTrigger = False
         flags.DQ.enableLumiAccess = False
         if not flags.Output.HISTFileName:
-            flags.Output.HISTFileName = f'{args.outputDirectory}/tilemon_{runNumber}_{args.version}.root'
+            flags.Output.HISTFileName = f'{args.outputDirectory}/tilemon_{runNumber}_{args.outputVersion}.root'
 
     if args.tmdb is None:
         args.tmdb = not flags.Input.isMC
@@ -237,7 +237,7 @@ if __name__=='__main__':
         args.channel_time_mon = flags.Tile.RunType in [TileRunType.GAPLAS, TileRunType.GAPCIS] and (args.run2 or args.run3) and flags.Tile.doFit
 
     if args.pool:
-        flags.Output.ESDFileName = f'tile_{runNumber}_{args.version}.pool.root'
+        flags.Output.ESDFileName = f'tile_{runNumber}_{args.outputVersion}.pool.root'
 
     if args.jivexml:
         flags.Output.doJiveXML = True
@@ -337,7 +337,7 @@ if __name__=='__main__':
 
     # =======>>> Set up the Tile Ntuple
     if args.ntuple:
-        ntupleFile = f'{args.outputDirectory}/tile_{runNumber}_{args.version}.aan.root'
+        ntupleFile = f'{args.outputDirectory}/tile_{runNumber}_{args.outputVersion}.aan.root'
         from TileRec.TileAANtupleConfig import TileAANtupleCfg
         cfg.merge( TileAANtupleCfg(flags, outputFile=ntupleFile) )
         tileNtuple = cfg.getEventAlgo('TileNtuple')
@@ -451,12 +451,12 @@ if __name__=='__main__':
     # =======>>> Set up the Tile calibration
     if args.calib:
         if flags.Tile.RunType is TileRunType.LAS:
-            laserCalibFile = f'tileCalibLAS_{runNumber}_{args.version}.root'
+            laserCalibFile = f'tileCalibLAS_{runNumber}_{args.outputVersion}.root'
             from TileCalibAlgs.TileLaserCalibAlgConfig import TileLaserCalibAlgCfg
             cfg.merge( TileLaserCalibAlgCfg(flags, FileName=laserCalibFile) )
 
         elif flags.Tile.RunType is TileRunType.CIS:
-            cisCalibFile = f'tileCalibCIS_{runNumber}_{args.version}.root'
+            cisCalibFile = f'tileCalibCIS_{runNumber}_{args.outputVersion}.root'
             from TileCalibAlgs.TileCisCalibAlgConfig import TileCisCalibAlgCfg
             cfg.merge( TileCisCalibAlgCfg(flags, FileName=cisCalibFile) )
 
@@ -464,8 +464,8 @@ if __name__=='__main__':
             defaultVersions = ['0', 'Ped.0', 'Ped']
 
             fileVersion = f'_{flags.Tile.NoiseFilter}' if flags.Tile.NoiseFilter > 0 else ""
-            if args.version not in defaultVersions:
-                fileVersion = f'_{args.version}_tnf{flags.Tile.NoiseFilter}'
+            if args.outputVersion not in defaultVersions:
+                fileVersion = f'_{args.outputVersion}_tnf{flags.Tile.NoiseFilter}'
 
             from TileCalibAlgs.TileRawChNoiseCalibAlgConfig import TileRawChNoiseCalibAlgCfg
             cfg.merge( TileRawChNoiseCalibAlgCfg(flags) )
@@ -482,7 +482,7 @@ if __name__=='__main__':
                 rawChanNoiseCalibAlg.UseforCells = 1 # 1= Fixed , 2= Opt2
 
             # Produce digi noise ntuple only for default version
-            if args.version in defaultVersions:
+            if args.outputVersion in defaultVersions:
                 from TileCalibAlgs.TileDigiNoiseCalibAlgConfig import TileDigiNoiseCalibAlgCfg
                 cfg.merge( TileDigiNoiseCalibAlgCfg(flags) )
                 digiNoiseCalibAlg = cfg.getEventAlgo('TileDigiNoiseCalibAlg')
@@ -498,7 +498,7 @@ if __name__=='__main__':
 
     # =======>>> Set up the Tile output D3PD file
     if args.d3pd:
-        d3pdFile = f'{args.outputDirectory}/tile_{runNumber}_{args.version}.aan.root'
+        d3pdFile = f'{args.outputDirectory}/tile_{runNumber}_{args.outputVersion}.aan.root'
         from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
         D3PDMakerFlags.DoTruth = flags.Input.isMC
         from TileRecEx.TileD3PDConfig import TileD3PDCfg
