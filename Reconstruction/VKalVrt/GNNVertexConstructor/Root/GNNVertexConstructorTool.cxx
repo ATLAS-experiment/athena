@@ -15,31 +15,34 @@ namespace Rec {
 GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, const std::string &name,
                                                    const IInterface *parent)
     : AthAlgTool(type, name, parent), m_vertexFitterTool("Trk::TrkVKalVrtFitter/VertexFitterTool", this),
-      m_jetCollection("AntiKt4EMPFlowJets"), m_Xbeampipe(0.), m_Ybeampipe(0.), m_XlayerB(0.), m_YlayerB(0.),
-      m_Xlayer1(0.), m_Ylayer1(0.), m_Xlayer2(0.), m_Ylayer2(0.), m_Rbeampipe(0.), // Correct values are filled
-      m_RlayerB(0.),                                                               // in jobO or initialize()
-      m_Rlayer1(0.), m_Rlayer2(0.), m_MultiWithPrimary(true), m_fitHists(false), m_minD0(1), m_minSig3D(20),
-      m_maxChi2(20), m_minPerp(0.5), m_SingleHFTrack(false), m_HFTrackRatio(true), m_HFRatioThres(0.3) {
+      m_jetCollection("AntiKt4EMPFlowJets"), 
+      m_Xlayer2(0.), 
+      m_Ylayer2(0.), 
+      m_Rbeampipe(0.),
+      m_RlayerB(0.),
+      m_Rlayer1(0.), 
+      m_Rlayer2(0.), 
+      m_Rlayer3(0.), 
+      m_MultiWithPrimary(true), 
+      m_minD0(1), 
+      m_minSig3D(20),
+      m_maxChi2(20), 
+      m_minPerp(0.5), 
+      m_SingleHFTrack(false), 
+      m_HFTrackRatio(true), 
+      m_HFRatioThres(0.3) {
   declareInterface<IGNNVertexConstructorInterface>(this);
-  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
-  declareProperty("JetTrackLinks", m_trackOriginsKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackOrigin");
+  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackLinks");
+  declareProperty("JetTrackOrigins", m_trackOriginsKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackOrigin");
   declareProperty("JetVertexLinks", m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_VertexIndex");
   declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
-  declareProperty("Xbeampipe", m_Xbeampipe);
-  declareProperty("Ybeampipe", m_Ybeampipe);
-  declareProperty("XlayerB", m_XlayerB);
-  declareProperty("YlayerB", m_YlayerB);
-  declareProperty("Xlayer1", m_Xlayer1);
-  declareProperty("Ylayer1", m_Ylayer1);
   declareProperty("Xlayer2", m_Xlayer2);
   declareProperty("Ylayer2", m_Ylayer2);
   declareProperty("Rbeampipe", m_Rbeampipe);
   declareProperty("RlayerB", m_RlayerB);
   declareProperty("Rlayer1", m_Rlayer1);
   declareProperty("Rlayer2", m_Rlayer2);
-  declareProperty("fitHists", m_fitHists,
-                  "Fit extra histograms on numer of vertices within jet and combined energy fraction");
   declareProperty("mind0", m_minD0, "D0 cut on vertices");
   declareProperty("minSig3D", m_minSig3D, "Sig 3D cut on vertices");
   declareProperty("maxChi2", m_maxChi2, "Maximum Chi2 for fitted vertices");
@@ -75,22 +78,13 @@ StatusCode GNNVertexConstructorTool::initialize() {
   ATH_CHECK(m_trackOriginsKey.initialize());
   ATH_CHECK(m_vertexLinksKey.initialize());
 
+
   m_jetWriteDecorKeyVertexLink = m_jetCollection + ".GNNVerticesLink";
   ATH_CHECK(m_jetWriteDecorKeyVertexLink.initialize());
 
   m_jetWriteDecorKeyVertexNumber = m_jetCollection + ".GNNVerticesNumber";
   ATH_CHECK(m_jetWriteDecorKeyVertexNumber.initialize());
 
-  // ADD a config for histogramming
-  // Hists
-  if (m_fitHists == true) {
-    ATH_CHECK(service("THistSvc", m_thistSvc));
-    StatusCode sc;
-    m_eFrac = new TH1F("eFrac", "Energy Fraction of vertices within a jet and jet energy", 25, 0, 1);
-    ATH_CHECK(m_thistSvc->regHist("/GNNPlots/EFrac/", m_eFrac));
-    m_vertexN = new TH1F("vertexN", "No. of Vertices within a Jet", 8, -0.5, 7.5);
-    ATH_CHECK(m_thistSvc->regHist("/GNNPlots/VertexN/", m_vertexN));
-  }
   // Retrieve tools
   ATH_CHECK(m_gnn_Tool.retrieve());
   ATH_CHECK(m_vertexFitterTool.retrieve());
@@ -159,11 +153,15 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
   using TL = ElementLink<DataVector<xAOD::TrackParticle_v1>>;
 
   // Read Decor Handle for Track links and Vertex links
-  SG::ReadDecorHandle<xAOD::JetContainer, TLC> trackLinksHandle(m_trackLinksKey, ctx);
-  SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>> trackOriginsHandle(m_trackOriginsKey, ctx);
-  SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>> vertexLinksHandle(m_vertexLinksKey, ctx);
+  SG::ReadDecorHandle<xAOD::BTaggingContainer, TLC> trackLinksHandle(m_trackLinksKey, ctx);
+  SG::ReadDecorHandle<xAOD::BTaggingContainer, std::vector<char>> trackOriginsHandle(m_trackOriginsKey, ctx);
+  SG::ReadDecorHandle<xAOD::BTaggingContainer, std::vector<char>> vertexLinksHandle(m_vertexLinksKey, ctx);
   SG::WriteDecorHandle<xAOD::JetContainer, std::vector<ElementLink<xAOD::VertexContainer>>>
       jetWriteDecorHandleVertexLink(m_jetWriteDecorKeyVertexLink, ctx);
+
+
+  static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::BTaggingContainer> > btagLinkAcc 
+    = SG::AuxElement::ConstAccessor<ElementLink<xAOD::BTaggingContainer> >("btaggingLink");
 
   // Vertex decorators
   SG::AuxElement::Decorator<float> decor_mass("mass");
@@ -183,11 +181,12 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 
   // Loop over the jets
   for (const auto &jet : *inJetContainer) {
+    const xAOD::BTagging* btag = *btagLinkAcc(*jet);
 
     // Retrieve the Vertex and Track Collections
-    auto vertexCollection = vertexLinksHandle(*jet);
-    auto trackCollection = trackLinksHandle(*jet);
-    auto trackOriginCollection = trackOriginsHandle(*jet);
+    auto vertexCollection = vertexLinksHandle(*btag);
+    auto trackCollection = trackLinksHandle(*btag);
+    auto trackOriginCollection = trackOriginsHandle(*btag);
 
     using indexList = std::vector<int>;
     using vertexHFMap = std::map<char, bool>;
@@ -354,9 +353,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 
         double xvt = newvrt.vertex[0];
         double yvt = newvrt.vertex[1];
-        // double Dist2DBP=sqrt( (xvt-m_Xbeampipe)*(xvt-m_Xbeampipe) + (yvt-m_Ybeampipe)*(yvt-m_Ybeampipe) );
-        // double Dist2DBL=sqrt( (xvt-m_XlayerB)*(xvt-m_XlayerB) + (yvt-m_YlayerB)*(yvt-m_YlayerB) );
-        // double Dist2DL1=sqrt( (xvt-m_Xlayer1)*(xvt-m_Xlayer1) + (yvt-m_Ylayer1)*(yvt-m_Ylayer1) );
         double Dist2DL2 = sqrt((xvt - m_Xlayer2) * (xvt - m_Xlayer2) + (yvt - m_Ylayer2) * (yvt - m_Ylayer2));
         double minDstMat = 39.9;
         minDstMat = TMath::Min(minDstMat, fabs(Dist2DL2 - m_Rlayer3)); // 4-layer pixel detector
@@ -415,15 +411,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         jetWriteDecorHandleVertexLink(*jet).push_back(linkVertex);
 
       } // end of 2 Track requirement
-    }
-    if (m_fitHists == true) {
-      m_vertexN->Fill(vertexN, 1.);
-      if (TrackE == 0)
-        continue;
-      else {
-        float eFracNew = TrackE / jet->p4().E();
-        m_eFrac->Fill(eFracNew, 1.);
-      }
     }
     delete xAODwrk;
   } // end loop over jets

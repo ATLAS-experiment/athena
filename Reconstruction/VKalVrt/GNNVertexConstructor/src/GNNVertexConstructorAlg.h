@@ -31,6 +31,10 @@ private:
   // Input Primary Vertices
   SG::ReadHandleKey<xAOD::VertexContainer> m_pvContainerKey{this, "PrimaryVertexContainer", "PrimaryVertices",
                                                             "Read PrimaryVertices container"};
+
+  //To get the data-dependency right ...
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_gnnVertexLinkKey{this, "GNNVertexLinkKey", "AntiKt4EMTopoJets.GN2v01_VertexIndex", "Key for GNN vertex index"};
+
 };
 
 } // namespace Rec

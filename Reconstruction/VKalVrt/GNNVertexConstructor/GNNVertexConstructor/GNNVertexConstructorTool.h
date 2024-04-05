@@ -29,6 +29,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
+#include <xAODBTagging/BTaggingContainer.h>
 
 #include "algorithm"
 #include "iostream"
@@ -145,11 +146,11 @@ public:
   ToolHandle<Trk::TrkVKalVrtFitter> m_vertexFitterTool;
 
   // Read handles
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackLinksKey{this, "trackLinksKey", "",
+  SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_trackLinksKey{this, "trackLinksKey", "",
                                                              "Jet GNN Deco Read Key for track link"};
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackOriginsKey{this, "trackLinksKey", "",
+  SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_trackOriginsKey{this, "trackLinksKey", "",
                                                                "Jet GNN Deco Read Key for track origin"};
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_vertexLinksKey{this, "vertexLinksKey", "",
+  SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_vertexLinksKey{this, "vertexLinksKey", "",
                                                               "Jet GNN Deco Read Key for vertex link"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "eventInfoKey", "EventInfo", "EventInfo container to use"};
 
@@ -165,13 +166,8 @@ public:
   // Access the Primary Vertex Info
   const xAOD::Vertex *m_thePV;
 
-  // Histograms
-  bool m_fitHists;
-  ITHistSvc *m_thistSvc{nullptr};
-  TH1F *m_vertexN = nullptr;
-  TH1F *m_eFrac = nullptr;
-
 private:
+
   std::string m_jetCollection;
 
   TLorentzVector TotalMom(const std::vector<const xAOD::TrackParticle *> &selTrk) const;
@@ -189,17 +185,8 @@ private:
     std::vector<double> chi2PerTrk;
     std::vector<std::vector<double>> trkAtVrt;
     double chi2{};
-    double projectedVrt = 0.;
-    int detachedTrack = -1;
-    double BDT = 1.1;
   }; // end WrkVrt
 
-  double m_Xbeampipe;
-  double m_Ybeampipe;
-  double m_XlayerB;
-  double m_YlayerB;
-  double m_Xlayer1;
-  double m_Ylayer1;
   double m_Xlayer2;
   double m_Ylayer2;
   double m_Rbeampipe;
