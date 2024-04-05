@@ -220,7 +220,7 @@ class ThresholdDef:
         # jJET central
         jJ_cuts = [(30,25), (40,25), (55,23), (70,23), (80,25), (85,21)]
         for thrV, etamax in jJ_cuts:
-            ThresholdDef.addJetVaryingThrValues( jJetThreshold( 'jJ%ip0ETA%i'  % (thrV, etamax), 'jJ'), pt=get_threshold_cut('jJ', thrV), shift_set=0, rangemin=0, rangemax=etamax )
+            ThresholdDef.addJetVaryingThrValues( jJetThreshold( 'jJ%ip0ETA%i'  % (thrV, etamax), 'jJ'), pt=get_threshold_cut('CjJ', thrV), shift_set=0, rangemin=0, rangemax=etamax )
 
         # jJET central, variable eta (EXAMPLE)
         # ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ12p0ETA25V', 'jJ'), pt=12, shift_set=1, rangemin=0, rangemax=25 )
@@ -228,7 +228,7 @@ class ThresholdDef:
         # jJET forward jet
         jJ_cuts = [15, 20, 40, 50, 60, 90, 125]
         for thrV in jJ_cuts:
-            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip30ETA49' % thrV, 'jJ'), pt=get_threshold_cut('jJ', thrV), shift_set=0, rangemin=30, rangemax=49 )
+            ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%ip30ETA49' % thrV, 'jJ'), pt=get_threshold_cut('FjJ', thrV), shift_set=0, rangemin=30, rangemax=49 )
 
         # jJET SPARES
         for thrV in range(1,5):
