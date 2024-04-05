@@ -290,7 +290,7 @@ inline Amg::Transform3D Amg::getTranslate3D(const double X, const double Y, cons
     return getTranslateX3D(X) * getTranslateY3D(Y) * getTranslateZ3D(Z);
 }
 /** @brief: Returns a shift transformation along an arbitrary axis */
-inline Amg::Transform3D Amg::getTranslate3D(const Amg::Vector3D& v) {
+inline Amg::Transform3D getTranslate3D(const Amg::Vector3D& v) {
     return Amg::Transform3D{Amg::Translation3D{v}};
 }
 /// Calculates the closest approach of two lines. 
