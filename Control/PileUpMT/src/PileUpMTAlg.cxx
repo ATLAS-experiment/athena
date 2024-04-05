@@ -46,6 +46,7 @@ PileUpMTAlg::~PileUpMTAlg() {}
 
 StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg,
                                std::unique_ptr<const xAOD::EventInfo>& ei_,
+                               std::unique_ptr<xAOD::EventAuxInfo>& ei_aux_,
                                bool pileup) const {
   std::string key = pileup ? "EventInfo" : "HSEventInfo";
   xAOD::EventInfo* newEi = new xAOD::EventInfo();
@@ -89,6 +90,7 @@ StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg,
   }
   newEi->setEvtStore(&sg);
   ei_.reset(newEi);
+  ei_aux_.reset(eiAux);
   return StatusCode::SUCCESS;
 }
 
@@ -103,7 +105,8 @@ StatusCode PileUpMTAlg::add_subevt(
   const unsigned int bc_idx = bc - m_earliestDeltaBC;
   StoreGateSvc* sg = mbSvc->getMinbias(ctx, subevt_id);
   std::unique_ptr<const xAOD::EventInfo> ei;
-  ATH_CHECK(get_ei(*sg, ei, true));
+  std::unique_ptr<xAOD::EventAuxInfo> eiAux;
+  ATH_CHECK(get_ei(*sg, ei, eiAux, true));
   xAOD::EventInfo mb_to_modify(*ei);
   if (m_writeTrace) {
     trace.push_back(mb_to_modify.eventNumber());
@@ -198,7 +201,8 @@ StatusCode PileUpMTAlg::execute() {
   // Code based on PileUpEventLoopMgr and PileUpToolsAlg (trying to extract the
   // core merging code) Read hard scatter
   std::unique_ptr<const xAOD::EventInfo> hsEvt = nullptr;
-  ATH_CHECK(get_ei(*evtStore(), hsEvt));
+  std::unique_ptr<xAOD::EventAuxInfo> hsEvtAux = nullptr;
+  ATH_CHECK(get_ei(*evtStore(), hsEvt, hsEvtAux));
 
   // Setup overlaid event
   SG::WriteHandle<xAOD::EventInfo> overlaidEvt(m_evtInfoKey, ctx);

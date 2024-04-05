@@ -4,6 +4,7 @@
 
 #include "ZDC_RPDModule.h"
 
+#include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -22,7 +23,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "CLHEP/Geometry/Transform3D.h"
 
-GeoFullPhysVol* ZDC_RPDModule::create(){
+void ZDC_RPDModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
 
     MsgStream LogStream(Athena::getMessageSvc(), "ZDC_RPDModule::create");
     
@@ -30,7 +31,7 @@ GeoFullPhysVol* ZDC_RPDModule::create(){
     if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, "MATERIALS")) {
         MsgStream LogStream(Athena::getMessageSvc(), "ZDC_RPDModule::create");
         LogStream << MSG::ERROR << "execute: Could not retrieve StoredMaterialManager object from the detector store" << endmsg;
-        return nullptr;
+        return;
     }
     
     const GeoMaterial *Aluminum = materialManager->getMaterial("std::Aluminium");
@@ -40,20 +41,31 @@ GeoFullPhysVol* ZDC_RPDModule::create(){
     const GeoMaterial *OpKapton = materialManager->getMaterial("ZDC::opticalKapton");
 
     // All parameters are either in mm or are unitless
-    int nRows = 4;
-    int nCols = 4;
-    float coreDia = 0.60;                                                        // Fiber core diameter
-    float cladDia = 0.66;                                                        // Fiber cladding diameter
-    float buffDia = 0.71;                                                        // Fiber buffer diameter
-    float fiberPitchX = 1.425;                                                   // Spacing between fibers in X
-    float fiberPitchZ = 1.63;                                                    // Spacing between fibers in Z
-    float tileSize = 11.4;                                                       // Size of a square "tile"
-    float housingThickness = 5;                                                  // Thickness of aluminum housing
-    float readoutFiberLength = 70;                                               // Length of the "readout" section of the fibers, not including the active area extension
-    float detectorHeight = readoutFiberLength + 4 * tileSize + housingThickness; // Only gets one factor of housing thickness because the top of the fibers should be exposed
-    float detectorInnerWidth = 4 * tileSize;                                     // Width (x) of the detector cavity which contains the fibers
-    float detectorInnerDepth = 8 * fiberPitchZ + buffDia;                        // Depth (z) of the detector cavity which contains the fibers
+    const int nRows = 4;
+    const int nCols = 4;
+    const float coreDia = 0.60;                                 // Fiber core diameter
+    const float cladDia = 0.66;                                 // Fiber cladding diameter
+    const float buffDia = 0.71;                                 // Fiber buffer diameter
+    const float fiberPitchX = 1.425;                            // Spacing between fibers in X
+    const float fiberPitchZ = 1.63;                             // Spacing between fibers in Z
+    const float tileSize = 11.4;                                // Size of a square "tile"
+    const float housingThickness = 5;                           // Thickness of aluminum housing
+    const float detectorInnerWidth = 4 * tileSize;              // Width (x) of the detector cavity which contains the fibers
+    const float detectorInnerDepth = 8 * fiberPitchZ + buffDia; // Depth (z) of the detector cavity which contains the fibers
+    const float footWidth = 91;                                 // Width of the foot of the module
+    const float footDepth = 75;                                 // Depth of the foot of the module
+    const float footHeight = 10;                                // Height of the foot of the module
+    const float posX = trf->getTransform().translation().x();   // X position of center of the tiles
+    const float posY = trf->getTransform().translation().y();   // Y position of center of the tiles
+    const float posZ = trf->getTransform().translation().z();   // Z position of center of the tiles
 
+    const GeoBox* motherBox = dynamic_cast<const GeoBox*>(mother->getLogVol()->getShape());
+    const float halfY = motherBox->getYHalfLength();
+
+    // Height of the extension between the main RPD body and the foot
+    const float detectorHeight = 2*halfY - footHeight;          // Height of the detector minus the foot
+    const float readoutFiberLength = halfY - posY - 2*tileSize; // Length of the "readout" section of the fibers, not including the active area extension
+    
     char volName[64];
 
     // Aluminum housing (case)
@@ -71,6 +83,14 @@ GeoFullPhysVol* ZDC_RPDModule::create(){
 
     GeoLogVol *Module_Logical = new GeoLogVol("RPD_Module_Logical", Module_Box, OpAir);
     GeoPhysVol *Module_Physical = new GeoPhysVol(Module_Logical);
+
+    // Foot
+    GeoBox *Foot_Box = new GeoBox(footWidth * Gaudi::Units::mm * 0.5,
+                                  footHeight * Gaudi::Units::mm * 0.5,
+                                  footDepth * Gaudi::Units::mm * 0.5);
+
+    GeoLogVol *Foot_Logical = new GeoLogVol("RPD_Foot_Logical", Foot_Box, Aluminum);
+    GeoPhysVol *Foot_Physical = new GeoPhysVol(Foot_Logical);
 
     // Readout fiber volumes are made here because they're all the same length
     // Core
@@ -123,7 +143,8 @@ GeoFullPhysVol* ZDC_RPDModule::create(){
     for (int row = 0; row < nRows; ++row)
     {
         float fiberLength = (1 + row) * tileSize;
-        float y = (-detectorHeight * 0.5 + housingThickness + tileSize * nRows - fiberLength * 0.5) * Gaudi::Units::mm;
+        // float y = (-detectorHeight * 0.5 + housingThickness + tileSize * nRows - fiberLength * 0.5) * Gaudi::Units::mm;
+        float y = (posY - 0.5 * footHeight + 0.5 * tileSize * nRows - fiberLength * 0.5) * Gaudi::Units::mm;
 
         // Core
         sprintf(volName, "RPD_Core_Active_Logical %d", row);
@@ -229,11 +250,30 @@ GeoFullPhysVol* ZDC_RPDModule::create(){
         } // end loop over fibers
     }// end loop over rows
 
-    sprintf(volName, "ZDC::RPD_Air_Cavity %s", m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR).getString().c_str());
-    Housing_Physical->add(new GeoNameTag(volName));
-    Housing_Physical->add(new GeoIdentifierTag( m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR).get_identifier32().get_compact()));
-    Housing_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateY3D(2 * tileSize * Gaudi::Units::mm)));
-    Housing_Physical->add(Module_Physical);
+    Identifier id;
 
-    return Housing_Physical;
+    // Place the fiber routing volume
+    id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
+    sprintf(volName, "ZDC::RPD_Air_Cavity %s", id.getString().c_str());
+    Housing_Physical->add(new GeoNameTag(volName));
+    Housing_Physical->add(new GeoIdentifierTag( id.get_identifier32().get_compact()));
+    Housing_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateY3D(  0.5 * (detectorHeight - readoutFiberLength) * Gaudi::Units::mm)));
+    Housing_Physical->add(Module_Physical);
+    
+    // Place the foot in the mother volume
+    id = m_zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    sprintf(volName, "ZDC::RPD_Foot %s",id.getString().c_str());
+    mother->add(new GeoNameTag(volName));
+    mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
+    mother->add(new GeoAlignableTransform(GeoTrf::Translate3D(posX * Gaudi::Units::mm, (-halfY + footHeight * 0.5) * Gaudi::Units::mm, posZ * Gaudi::Units::mm)));
+    mother->add(Foot_Physical);
+
+    // Place the module in the mother volume
+    id = m_zdcID->channel_id(m_side, 4, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    sprintf(volName, "Zdc::RPD_Mod %s", id.getString().c_str());
+    mother->add(new GeoNameTag(volName));
+    mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
+    mother->add(new GeoAlignableTransform(GeoTrf::Translate3D(posX * Gaudi::Units::mm, 0.5 * footHeight * Gaudi::Units::mm, posZ * Gaudi::Units::mm)));
+    mother->add(Housing_Physical);
+
 }

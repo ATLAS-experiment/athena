@@ -34,6 +34,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "PATInterfaces/SystematicVariation.h"
 #include "PATInterfaces/SystematicRegistry.h"
+#include "GeneratorObjects/McEventCollection.h"
 
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 
@@ -98,6 +99,8 @@ public:
     { this, "ZdcModuleContainerName", "ZdcModules", "" };
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
     { this, "ZdcSumContainerName", "ZdcSums", "" };
+  SG::ReadHandleKey<McEventCollection> m_mcEventCollectionName
+    {this, "MCEventCollectionName", "TruthEvent", ""};
   
   const xAOD::EventInfo* m_eventInfo;
 
@@ -178,6 +181,19 @@ public:
   unsigned int t_ZdcModuleMask;
   float t_ZdcTrigEff[2];
   unsigned short t_ZdcLucrodTriggerSideAmp[2];
+  float t_ZdcTruthTotal[2];
+  float t_ZdcTruthInvis[2];
+  float t_ZdcTruthEM[2];
+  float t_ZdcTruthNonEM[2];
+  float t_ZdcTruthEscaped[2];
+  std::vector< float > t_ZdcTruthParticlePosx;
+  std::vector< float > t_ZdcTruthParticlePosy;
+  std::vector< float > t_ZdcTruthParticlePosz;
+  std::vector< float > t_ZdcTruthParticleTime;
+  std::vector< float > t_ZdcTruthParticlePx;
+  std::vector< float > t_ZdcTruthParticlePy;
+  std::vector< float > t_ZdcTruthParticlePz;
+  std::vector< float > t_ZdcTruthParticleEnergy;
 
   float t_ZdcModuleAmp[2][4];
   float t_ZdcModuleTime[2][4];
@@ -194,6 +210,11 @@ public:
   float t_ZdcModulePreSampleAmp[2][4];
   unsigned short t_ZdcLucrodTriggerAmp[2][4];
   float t_ZdcModuleMaxADC[2][4];
+  float t_ZdcModuleTruthTotal[2][7];
+  float t_ZdcModuleTruthInvis[2][7];
+  float t_ZdcModuleTruthEM[2][7];
+  float t_ZdcModuleTruthNonEM[2][7];
+  float t_ZdcModuleTruthEscaped[2][7];
 
   float t_RpdChannelBaseline[2][16];
   float t_RpdChannelPileupExpFitParams[2][16][2];
@@ -376,6 +397,7 @@ public:
   bool processTriggerDecision();
   uint32_t acceptEvent();
   void processZdcNtupleFromModules(); // new version directly from output of ZdcAnalysisTool - which is much cleaner
+  void processMCEventCollection();
   void processFCal();
   void processMBTS();
   void processInDet();

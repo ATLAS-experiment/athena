@@ -46,7 +46,7 @@ ZDC_ZDCModule::ZDC_ZDCModule(ZDC_ZDCModule *right, int side, int module)
 }
 
 
-GeoFullPhysVol* ZDC_ZDCModule::create(){
+void ZDC_ZDCModule::create(GeoFullPhysVol* mother, GeoAlignableTransform* trf){
 
     MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
 
@@ -54,7 +54,7 @@ GeoFullPhysVol* ZDC_ZDCModule::create(){
     if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, "MATERIALS")) {
         MsgStream LogStream(Athena::getMessageSvc(), "ZDC_ZDCModule::create");
         LogStream << MSG::ERROR << "execute: Could not retrieve StoredMaterialManager object from the detector store" << endmsg;
-        return nullptr;
+        return;
     }
 
     const GeoMaterial *OpAir = materialManager->getMaterial("ZDC::opticalAir");
@@ -240,6 +240,12 @@ GeoFullPhysVol* ZDC_ZDCModule::create(){
     Housing_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D((wallThicknessBack - wallThicknessFront) * Gaudi::Units::mm)));
     Housing_Physical->add(Module_Physical);
 
-    return Housing_Physical;
+    // Place the steel case in the mother volume
+    id = m_zdcID->channel_id(m_side, m_module, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+    sprintf(volName, "Zdc::ZDC_Mod %s", id.getString().c_str());
+    mother->add(new GeoNameTag(volName));
+    mother->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
+    mother->add(trf);
+    mother->add(Housing_Physical);
 
 }

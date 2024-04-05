@@ -339,7 +339,7 @@ StatusCode BatchedMinbiasSvc::beginHardScatter(const EventContext& ctx) {
         continue;
       }
       if (!first_wait) {
-        auto wait_time = std::chrono::steady_clock::now() - order_wait_start;
+        auto wait_time = std::chrono::steady_clock::now() - cache_wait_start;
         ATH_MSG_INFO(
             fmt::format("Waited {:%M:%S} for a free cache", wait_time));
       }

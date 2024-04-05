@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi/Athena include(s):
@@ -42,6 +42,9 @@ namespace TrigConf {
       // Attempting to use this service when no eventBGKey is available will return empty bunch group data.
       CHECK( m_eventKey.initialize() );
       CHECK( m_eventBGKey.initialize() );
+
+      CHECK( m_hltMenuKey.initialize() );
+      CHECK( m_l1MenuKey.initialize() );
 
       // Set up the callbacks for the service:
       ServiceHandle< IIncidentSvc > incSvc( "IncidentSvc", name() );
@@ -170,10 +173,10 @@ namespace TrigConf {
    uint32_t xAODConfigSvc::masterKey() const {
       if (!m_useInFileMetadata) {
 
-         SG::ReadHandle<HLTMenu> hltMenuHandle(m_hltMenuName);  // No context - Detector Store
+         SG::ReadHandle<HLTMenu> hltMenuHandle(m_hltMenuKey);  // No context - Detector Store
          if( !hltMenuHandle.isValid() ) {
             REPORT_MESSAGE( MSG::WARNING )
-                << "Unable to load " << m_hltMenuName << " from Detector Store." << endmsg;
+                << "Unable to load " << m_hltMenuKey.key() << " from Detector Store." << endmsg;
             return std::numeric_limits<uint32_t>::max();
          } else {
             return hltMenuHandle->smk();
@@ -306,7 +309,7 @@ namespace TrigConf {
 
    const HLTMenu& xAODConfigSvc::hltMenu(const EventContext& ctx) const {
       if (!m_useInFileMetadata) {
-         SG::ReadHandle<HLTMenu> hltMenuHandle(m_hltMenuName);  // No context - Detector Store
+         SG::ReadHandle<HLTMenu> hltMenuHandle(m_hltMenuKey, ctx);
          if( hltMenuHandle.isValid() ) {
             return *hltMenuHandle;
          }
@@ -334,7 +337,7 @@ namespace TrigConf {
 
    const L1Menu& xAODConfigSvc::l1Menu(const EventContext& ctx) const {
       if (!m_useInFileMetadata) {
-         SG::ReadHandle<L1Menu> l1MenuHandle(m_l1MenuName);  // No context - Detector Store
+         SG::ReadHandle<L1Menu> l1MenuHandle(m_l1MenuKey, ctx);
          if( l1MenuHandle.isValid() ) {
             return *l1MenuHandle;
          }
@@ -738,10 +741,10 @@ namespace TrigConf {
       // read the menu (detector store).
       const bool firstEvent = (!currentHlt.isInitialized() and !currentHltps.isInitialized());
 
-      SG::ReadHandle<HLTMenu> hltMenuHandle(m_hltMenuName);  // No context - Detector Store
+      SG::ReadHandle<HLTMenu> hltMenuHandle(m_hltMenuKey, context);
       if( !hltMenuHandle.isValid() ) {
           REPORT_MESSAGE( MSG::WARNING )
-             << "Unable to load " << m_hltMenuName << " from Detector Store." << endmsg;
+             << "Unable to load " << m_hltMenuKey.key() << " from Detector Store." << endmsg;
       } else {
          if (!currentHlt.isInitialized() or currentHlt.smk() != hltMenuHandle->smk()) {
             validConfig = false;
@@ -751,10 +754,10 @@ namespace TrigConf {
          }
       }
 
-      SG::ReadHandle<L1Menu> l1MenuHandle(m_l1MenuName);  // No context - Detector Store
+      SG::ReadHandle<L1Menu> l1MenuHandle(m_l1MenuKey, context);
       if( !l1MenuHandle.isValid() ) {
           REPORT_MESSAGE( MSG::WARNING )
-             << "Unable to load " << m_l1MenuName << " from Detector Store." << endmsg;
+             << "Unable to load " << m_l1MenuKey.key() << " from Detector Store." << endmsg;
       } else {
          if (!currentL1.isInitialized() or currentL1.smk() != l1MenuHandle->smk()) {
             validConfig = false;

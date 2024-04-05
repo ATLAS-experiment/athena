@@ -183,10 +183,7 @@ def getArgumentParser():
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Monitoring and debugging')
 
-    g.add_argument('--perfmon', dest='pmon', action='store_const', const='perfmon',
-                   help='enable performance monitoring toolkit (same as --pmon=perfmon)')
-
-    g.add_argument('--pmon', metavar='MODE', action='store',
+    g.add_argument('--perfmon', metavar='MODE', nargs='?', const='fastmonmt',
                    help='enable performance monitoring toolkit in MODE')
 
     g.add_argument('--profile-python', metavar='FILE',
