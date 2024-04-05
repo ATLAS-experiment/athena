@@ -59,7 +59,7 @@ namespace MuonGMR4 {
   
 
     StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
-        SG::ReadCondHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
+        SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
         if (!gctx.isValid()) {
             ATH_MSG_FATAL("Failed to retrieve the Acts alignment "<<m_geoCtxKey.fullKey());
             return StatusCode::FAILURE;
@@ -72,17 +72,17 @@ namespace MuonGMR4 {
            
         for (const MuonChamber* chamber : chambers) {
             /// Create the bounting volume 
-            std::shared_ptr<Acts::Volume> boundVol = chamber->boundingVolume(**gctx);            
+            std::shared_ptr<Acts::Volume> boundVol = chamber->boundingVolume(*gctx);
             for(const MuonReadoutElement* readOut : chamber->readOutElements()) {                
                 if (readOut->detectorType() == ActsTrk::DetectorType::Tgc) {
                    const TgcReadoutElement* tgc = static_cast<const TgcReadoutElement*>(readOut);
-                   ATH_CHECK(testTgc(**gctx, *tgc, *chamber, *boundVol)); 
+                   ATH_CHECK(testTgc(*gctx, *tgc, *chamber, *boundVol)); 
                 }else if (readOut->detectorType() == ActsTrk::DetectorType::Mdt) {
                     const MdtReadoutElement* mdtMl = static_cast<const MdtReadoutElement*>(readOut);
-                    ATH_CHECK(testMdt(**gctx, *mdtMl, *chamber, *boundVol));
+                    ATH_CHECK(testMdt(*gctx, *mdtMl, *chamber, *boundVol));
                 } else if (readOut->detectorType() == ActsTrk::DetectorType::Rpc) {
                     const RpcReadoutElement* rpc = static_cast<const RpcReadoutElement*>(readOut);
-                    ATH_CHECK(testRpc(**gctx, *rpc, *chamber, *boundVol));
+                    ATH_CHECK(testRpc(*gctx, *rpc, *chamber, *boundVol));
                 } else {
                     ATH_MSG_FATAL("The readout element "<<m_idHelperSvc->toStringDetEl(readOut->identify())
                                 <<" is not an Mdt, Rpc, Tgc or Mm");

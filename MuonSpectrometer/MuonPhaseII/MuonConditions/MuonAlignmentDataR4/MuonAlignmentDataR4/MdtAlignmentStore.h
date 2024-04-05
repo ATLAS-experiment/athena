@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_MDTALIGNMENTSTORE_H
@@ -7,13 +7,13 @@
 
 #include <MuonAlignmentData/BLinePar.h>
 #include <MuonAlignmentData/MdtAsBuiltPar.h>
-#include <ActsGeometryInterfaces/AlignmentStore.h>
+#include <ActsGeometryInterfaces/DetectorAlignStore.h>
 /**
  *  Helper struct to cache simulatenously the As-built and the
  *  BLine corrections of the Mdts for fast access within the new
  *  MdtReadout geometry
 */
-class MdtAlignmentStore : public ActsTrk::AlignmentStore {
+class MdtAlignmentStore: public ActsTrk::DetectorAlignStore::InternalAlignStore {
     public:
         MdtAlignmentStore() = default;
         /// Helper struct to store the pointer to the 

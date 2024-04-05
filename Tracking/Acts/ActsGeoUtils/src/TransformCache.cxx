@@ -3,52 +3,32 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <ActsGeoUtils/TransformCache.h>
+#include <GeoModelKernel/GeoVDetectorElement.h>
 
-#define THROW_RUNTIME(message)                         \
-    {                                                  \
-      std::stringstream except{};                      \
-      except<<__FILE__<<":"<<__LINE__<<" ";            \
-      except<<message<<std::endl;                      \
-      throw std::runtime_error(except.str());          \
-    }
 namespace ActsTrk {
+    TransformCache::~TransformCache() {
+        TicketCounter::giveBackTicket(m_type, m_clientNo);
+    }
     TransformCache::TransformCache(const IdentifierHash& hash,
                                    TransformMaker maker,
                                    const IDetectorElement* parentEle): 
+        TransformCache(hash,std::make_unique<TransformMaker>(maker), parentEle) {}
+    TransformCache::TransformCache(const IdentifierHash& hash,
+                                   std::shared_ptr<const TransformMaker> maker,
+                                   const IDetectorElement* parentEle): 
+          m_parent{parentEle},
           m_hash{hash},
-          m_transform{maker},
-          m_parent{parentEle} {}
+          m_transform{maker}{}
 
-    const IDetectorElement* TransformCache::parent() const{
+    const IDetectorElement* TransformCache::parent() const {
         return m_parent;
     }
     void TransformCache::releaseNominalCache() const {
+        std::unique_lock guard{m_mutex};
         m_nomCache.release();
+        const GeoVDetectorElement* vParent =dynamic_cast<const GeoVDetectorElement*>(m_parent);
+        if (vParent) vParent->getMaterialGeom()->clearPositionInfo();
     } 
-    const Amg::Transform3D& TransformCache::getTransform(const ActsTrk::AlignmentStore* alignStore) const {    
-        /// Valid alignment store is given -> Take the transformation from the cache there
-        if (alignStore){
-            const Amg::Transform3D* cache = alignStore->getTransform(this);
-            if (cache) return *cache;
-            THROW_RUNTIME("The Alignment store does not contain an aligned transformation.");
-        }
-        /// Fall back solution to go onto the nominal cache    
-        if (!m_nomCache) {
-            return (*m_nomCache.set(std::make_unique<Amg::Transform3D>(m_transform(nullptr, m_hash))));
-        }
-        return (*m_nomCache);
-    }
-
-    void TransformCache::storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) const {
-        if (!alignStore.trackingAlignment) return;
-        if (alignStore.trackingAlignment->getTransform(this)) {
-            THROW_RUNTIME("Transformation has already been cached. Being called twice");
-        }
-        alignStore.trackingAlignment->setTransform(this, m_transform(&alignStore, m_hash));
-        /// If an external alignment is given, the nominal cache can be released
-        m_nomCache.release();
-    }
     IdentifierHash TransformCache::hash() const { return m_hash; }
-    const TransformCache::TransformMaker& TransformCache::transformMaker() const { return m_transform; }
+    const TransformCache::TransformMaker& TransformCache::transformMaker() const { return *m_transform; }
 }
-#undef THROW_RUNTIME

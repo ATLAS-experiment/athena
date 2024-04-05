@@ -9,7 +9,7 @@
 #include <StoreGate/WriteCondHandle.h>
 
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <ActsGeometryInterfaces/RawGeomAlignStore.h>
+#include <ActsGeometryInterfaces/DetectorAlignStore.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonAlignmentData/CorrContainer.h>
 
@@ -49,21 +49,20 @@ private:
     /// Loads the BLine container and the Mdt-as built parameters from the Conditions store
     /// and stores them into the tracking alignment object of the RawGeomAlignmentStore
     StatusCode loadMdtDeformPars(const EventContext& ctx,
-                                 ActsTrk::RawGeomAlignStore& store) const;
+                                 ActsTrk::DetectorAlignStore& store) const;
     
     StatusCode loadMmDeformPars(const EventContext& ctx,
-                                ActsTrk::RawGeomAlignStore& store) const;
+                                ActsTrk::DetectorAlignStore& store) const;
 
     StatusCode loadStgcDeformPars(const EventContext& ctx,
-                                  ActsTrk::RawGeomAlignStore& store) const;
+                                  ActsTrk::DetectorAlignStore& store) const;
                                 
     /// Loads the corresponding ReadCondHandles from the Conditions store
     /// and adds their IOVs to the dependency of the writeHandle
     StatusCode declareDependencies(const EventContext& ctx,
                                    ActsTrk::DetectorType detType,
-                                   SG::WriteCondHandle<ActsTrk::RawGeomAlignStore>& writeHandle) const;
+                                   SG::WriteCondHandle<ActsTrk::DetectorAlignStore>& writeHandle) const;
 
-    
     std::vector<ActsTrk::DetectorType> m_techs{};
     
     SG::ReadCondHandleKey<ALineContainer> m_readKeyALines{this, "ReadKeyALines", "ALineContainer",
@@ -79,7 +78,7 @@ private:
     SG::ReadCondHandleKey<NswPassivationDbData> m_readNswPassivKey {this, "dMmPassivationKey", "NswPassivationDbData", 
                                                     "Key of NswPassivationDbData object containing passivation data for MMs"};
 
-    SG::WriteCondHandleKeyArray<ActsTrk::RawGeomAlignStore> m_writeKeys{this, "WriteKeys", {},
+    SG::WriteCondHandleKeyArray<ActsTrk::DetectorAlignStore> m_writeKeys{this, "WriteKeys", {},
                                                                         "Keys of the alignment technologies"};
     Gaudi::Property<std::string> m_keyToken{this, "CondKeyToken","ActsAlignContainer",
                                             "Common name token of all written alignment objects (e.g.) MdtActsAlignContainer"};
@@ -98,7 +97,8 @@ private:
     Gaudi::Property<bool> m_applyALines{this, "applyALines", true};
     /// Apply the chamber deformation model (Mdts + Nsw)
     Gaudi::Property<bool> m_applyBLines{this, "applyBLines", false};
-
+    /// Flag toggling whether the alignment store shall be filled with the transforms or not
+    Gaudi::Property<bool> m_fillAlignStoreCache{this, "FillAlignCache", false};
 
 };
 

@@ -5,7 +5,6 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include "StoreGate/ReadCondHandle.h"
 
 
 namespace MuonR4 {
@@ -35,15 +34,15 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
     SG::ReadHandle<ContType> readHandle{key, ctx};
     ATH_CHECK(readHandle.isPresent());
 
-    SG::ReadCondHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
-    ATH_CHECK(gctx.isValid());
+    SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
+    ATH_CHECK(gctx.isPresent());
     
     using PrdType = typename ContType::const_value_type;
     using PrdVec = std::vector<PrdType>;
     /// Fill the Mdt hits directly into their respective pre sorted container
     if constexpr (std::is_same<ContType, xAOD::MdtDriftCircleContainer>::value) {
         for (const PrdType prd : *readHandle) {
-            fillContainer[prd->readoutElement()->getChamber()].etaHits.emplace_back(**gctx, prd, nullptr);
+            fillContainer[prd->readoutElement()->getChamber()].etaHits.emplace_back(*gctx, prd, nullptr);
         }
     } else {
         /// Helper pair to separate eta & phi hits
@@ -78,10 +77,10 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
                     fillInto.etaHits.reserve(fillInto.etaHits.size() + etaHits.size());
                     fillInto.phiHits.reserve(fillInto.phiHits.size() + phiHits.size());
                     for (const PrdType etaPrd : etaHits) {
-                        fillInto.etaHits.emplace_back(**gctx, etaPrd);
+                        fillInto.etaHits.emplace_back(*gctx, etaPrd);
                     }
                     for (const PrdType phiPrd : phiHits) {
-                        fillInto.phiHits.emplace_back(**gctx, phiPrd);
+                        fillInto.phiHits.emplace_back(*gctx, phiPrd);
                     }
                     continue;
                 }
@@ -89,7 +88,7 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
                 fillInto.etaHits.reserve(fillInto.etaHits.size() + etaHits.size() * phiHits.size());
                 for (const PrdType etaPrd : etaHits) {
                     for (const PrdType phiPrd: phiHits) {
-                        fillInto.etaHits.emplace_back(**gctx, etaPrd, phiPrd);
+                        fillInto.etaHits.emplace_back(*gctx, etaPrd, phiPrd);
                     }
                 }
             }
@@ -141,10 +140,10 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
     auto pointPos = [hasEtaMeas, defineBuckets] (const MuonSpacePoint& p) {
         return hasEtaMeas || !defineBuckets ?  p.positionInChamber().y() : p.positionInChamber().x();
     };
-    SG::ReadCondHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
+    SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
 
     auto channelDir = [hasEtaMeas, defineBuckets, &gctx](const MuonSpacePoint & p) {
-        const Amg::Vector3D d = xAOD::channelDirInChamber(**gctx, p.primaryMeasurement());
+        const Amg::Vector3D d = xAOD::channelDirInChamber(*gctx, p.primaryMeasurement());
         return std::abs(hasEtaMeas || !defineBuckets ? d.y() : d.z());
     };
 

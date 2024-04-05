@@ -54,7 +54,7 @@ namespace MuonValR4{
     SG::ReadHandleKey<MuonR4::StationHoughMaxContainer> m_inHoughMaximaKey{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
     SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
     
-    SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};

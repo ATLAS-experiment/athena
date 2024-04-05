@@ -32,13 +32,13 @@ const ActsGeometryContext&
 ActsTrackingGeometryTool::getGeometryContext(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("Creating alignment context for event");
-  SG::ReadCondHandle<ActsGeometryContext> rch(m_rchk, ctx);
+  SG::ReadHandle<ActsGeometryContext> rch(m_rchk, ctx);
 
   if(!rch.isValid()) {
     ATH_MSG_ERROR("Creating alignment context failed: read cond handle invalid!");
   }
 
-  return **rch;
+  return *rch;
 }
 
 const ActsGeometryContext&

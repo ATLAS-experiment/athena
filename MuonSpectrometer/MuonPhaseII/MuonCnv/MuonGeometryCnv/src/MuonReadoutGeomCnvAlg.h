@@ -38,7 +38,7 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
 
         SG::WriteCondHandleKey<MuonGM::MuonDetectorManager> m_writeKey{this, "WriteKey", "MuonDetectorManager"};
         
-        SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
+        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
                                                               "Alignment key"};
         
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};

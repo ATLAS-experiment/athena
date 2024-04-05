@@ -1,25 +1,20 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_MUONDETECTORDEFS_H
 #define MUONGEOMODELR4_MUONDETECTORDEFS_H
 
-#include <GeoPrimitives/GeoPrimitives.h>
+#include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 ///
-#include <CxxUtils/ArrayHelper.h>
+#include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <ActsGeoUtils/SurfaceBoundSet.h>
 
+#include <CxxUtils/ArrayHelper.h>
 #include <CxxUtils/StringUtils.h>
-#include<CxxUtils/bitscan.h>
-
-#include <GeoPrimitives/GeoPrimitivesHelpers.h>
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
-#include <ActsGeometryInterfaces/RawGeomAlignStore.h>
+#include <CxxUtils/bitscan.h>
 
 
-#include <GeoModelKernel/GeoVAlignmentStore.h>
 #include <Identifier/Identifier.h>
 #include <Identifier/IdentifierHash.h>
 

@@ -4,14 +4,13 @@
 #ifndef SIMULATIONBASE
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
+#include <ActsGeoUtils/NoDeletePtr.h>
 
 
 
 namespace MuonGMR4 {
 
 using ReadoutSet = MuonChamber::ReadoutSet;
-using SubDetAlignments = ActsGeometryContext::SubDetAlignments;
-using AlignStorePtr = GeoModel::TransientConstSharedPtr<ActsTrk::AlignmentStore>;
 
 MuonChamber::MuonChamber(defineArgs&& args):
     m_args{std::move(args)} {}
@@ -40,25 +39,23 @@ int MuonChamber::stationEta() const { return m_args.readoutEles[0]->stationEta()
 ActsTrk::DetectorType MuonChamber::detectorType() const { return m_args.readoutEles[0]->detectorType(); }
 const ReadoutSet& MuonChamber::readOutElements() const{ return m_args.readoutEles; }
 const Amg::Transform3D& MuonChamber::localToGlobalTrans(const ActsGeometryContext& gctx) const {
-    SubDetAlignments::const_iterator itr = gctx.alignmentStores.find(detectorType());
-    return m_localToGlobal.getTransform(itr != gctx.alignmentStores.end() ? itr->second.get() : nullptr);
+    return m_localToGlobal.getTransform(gctx.getStore(detectorType()).get());
 }            
 Amg::Transform3D MuonChamber::globalToLocalTrans(const ActsGeometryContext& gctx) const {
     return localToGlobalTrans(gctx).inverse(); 
 }
-Amg::Transform3D MuonChamber::fromLayerToGlobal(ActsTrk::RawGeomAlignStore* store) const {
+Amg::Transform3D MuonChamber::fromLayerToGlobal(const AlignmentStore* store) const {
     ActsGeometryContext gctx{};
     /// If the store is given, assume that the tracking alignment already caches the transformations
     /// of the needed detector surfaces --> We can build a geo context on the fly.
     if (store) {
-        gctx.alignmentStores[detectorType()] = store->trackingAlignment;
+        auto copyStore = std::make_unique<AlignmentStore>(detectorType());
+        copyStore->geoModelAlignment = store->geoModelAlignment;
+        copyStore->trackingAlignment = store->trackingAlignment;
+        copyStore->internalAlignment = store->internalAlignment;
+        gctx.setStore(std::move(copyStore)); 
     }        
     return m_args.readoutEles[0]->localToGlobalTrans(gctx) * m_args.centerTrans;
-}
-bool MuonChamber::storeAlignment(ActsTrk::RawGeomAlignStore& store) const {
-    if (store.detType != detectorType()) return false;
-    m_localToGlobal.storeAlignment(store);
-    return true;
 }
 double MuonChamber::halfXLong() const { return m_args.halfXLong; }
 double MuonChamber::halfXShort() const { return m_args.halfXShort; }

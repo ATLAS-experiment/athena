@@ -81,4 +81,63 @@ def MuonGeoModelCfg(flags):
     geoModelSvc.DetectorTools+=[result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
     return result
 
+def MuonAlignStoreCfg(flags):
+    result = ComponentAccumulator()
+    if not flags.Muon.usePhaseIIGeoSetup: return result
+    from MuonCondAlgR4.ConditionsConfig import ActsMuonAlignCondAlgCfg
+    result.merge(ActsMuonAlignCondAlgCfg(flags))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsAlignStoreProviderAlgCfg
+    
+    from ROOT.ActsTrk import DetectorType 
+
+    if flags.Detector.GeometryMDT:  
+        result.merge(ActsAlignStoreProviderAlgCfg(flags, 
+                                                  name="ActsDetAlignmentAlgMdt",
+                                                  CondAlignStore="MdtActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  EventAlignStore="MdtActsAlignContainer",
+                                                  SplitPhysVolCache = True,
+                                                  FillAlignCache = False,
+                                                  LoadTrackingGeoSvc = False,
+                                                  DetectorType=DetectorType.Mdt))
+    if flags.Detector.GeometryRPC:  
+        result.merge(ActsAlignStoreProviderAlgCfg(flags, 
+                                                  name="ActsDetAlignmentAlgRpc",
+                                                  CondAlignStore="RpcActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  EventAlignStore="RpcActsAlignContainer",
+                                                  SplitPhysVolCache = True,
+                                                  FillAlignCache = False,
+                                                  LoadTrackingGeoSvc = False,
+                                                  DetectorType=DetectorType.Rpc))
+    if flags.Detector.GeometryTGC:  
+        result.merge(ActsAlignStoreProviderAlgCfg(flags, 
+                                                  name="ActsDetAlignmentAlgTgc",
+                                                  CondAlignStore="TgcActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  EventAlignStore="TgcActsAlignContainer",
+                                                  SplitPhysVolCache = True,
+                                                  FillAlignCache = False,
+                                                  LoadTrackingGeoSvc = False,
+                                                  DetectorType=DetectorType.Tgc))
+    if flags.Detector.GeometrysTGC: 
+        result.merge(ActsAlignStoreProviderAlgCfg(flags, 
+                                                  name="ActsDetAlignmentAlgSTGC",
+                                                  CondAlignStore="sTgcActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  EventAlignStore="sTgcActsAlignContainer",
+                                                  SplitPhysVolCache = False,
+                                                  FillAlignCache = False,
+                                                  LoadTrackingGeoSvc = False,
+                                                  DetectorType=DetectorType.sTgc))
+
+    if flags.Detector.GeometryMM:
+        result.merge(ActsAlignStoreProviderAlgCfg(flags, 
+                                                  name="ActsDetAlignmentAlgMM",
+                                                  CondAlignStore="MmActsAlignContainer" if flags.Muon.enableAlignment or \
+                                                                                           flags.Muon.applyMMPassivation else "",
+                                                  EventAlignStore="MmActsAlignContainer",
+                                                  SplitPhysVolCache = False,
+                                                  FillAlignCache = False,
+                                                  LoadTrackingGeoSvc = False,
+                                                  DetectorType=DetectorType.Mm))
+
+
+    return result
 

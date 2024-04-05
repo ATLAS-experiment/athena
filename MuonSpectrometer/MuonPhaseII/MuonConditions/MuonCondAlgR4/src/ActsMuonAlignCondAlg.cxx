@@ -117,8 +117,12 @@ StatusCode ActsMuonAlignCondAlg::loadDeltas(const EventContext& ctx,
     return StatusCode::SUCCESS;
 }
 StatusCode ActsMuonAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
-                                                   ActsTrk::RawGeomAlignStore& store) const {
-    std::unique_ptr<MdtAlignmentStore> trkAlignment = std::make_unique<MdtAlignmentStore>();
+                                                   ActsTrk::DetectorAlignStore& store) const {
+    
+    if (!m_applyMdtAsBuilt  && !m_applyBLines) {
+        return StatusCode::SUCCESS;
+    }
+    std::unique_ptr<MdtAlignmentStore> internAlign = std::make_unique<MdtAlignmentStore>();
     const MdtAsBuiltContainer* asBuiltCont{nullptr};
     const BLineContainer* bLines{nullptr};
     if (m_applyMdtAsBuilt) {
@@ -129,39 +133,39 @@ StatusCode ActsMuonAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
         CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
         bLines = readHandle.cptr();        
     }
-    
-    if (bLines || asBuiltCont) {
-        std::vector<const MdtReadoutElement*> reEles = m_detMgr->getAllMdtReadoutElements();
-        for (const MdtReadoutElement* re : reEles) {
-            const Identifier stationId = alignmentId(re);
-            const BLinePar* bline{nullptr};
-            if (bLines) {
-                BLineContainer::const_iterator itr = bLines->find(stationId);
-                if (itr != bLines->end()) bline = &(*itr);
-            }
-            const MdtAsBuiltPar* asBuilt{nullptr};
-            if (asBuiltCont) {
-                MdtAsBuiltContainer::const_iterator itr = asBuiltCont->find(stationId);
-                if (itr != asBuiltCont->end()) asBuilt = &(*itr);
-            }
-            if (asBuilt || bline) trkAlignment->storeDistortion(re->identify(), bline, asBuilt);
+
+    std::vector<const MdtReadoutElement*> reEles = m_detMgr->getAllMdtReadoutElements();
+    for (const MdtReadoutElement* re : reEles) {
+        const Identifier stationId = alignmentId(re);
+        const BLinePar* bline{nullptr};
+        if (bLines) {
+            BLineContainer::const_iterator itr = bLines->find(stationId);
+            if (itr != bLines->end()) bline = &(*itr);
         }
+        const MdtAsBuiltPar* asBuilt{nullptr};
+        if (asBuiltCont) {
+            MdtAsBuiltContainer::const_iterator itr = asBuiltCont->find(stationId);
+            if (itr != asBuiltCont->end()) asBuilt = &(*itr);
+        }
+        if (asBuilt || bline) internAlign->storeDistortion(re->identify(), bline, asBuilt);
     }
     // Down cast the alignment pointer
-    std::unique_ptr<ActsTrk::AlignmentStore> actsStore = std::move(trkAlignment); 
-    store.trackingAlignment = std::move(actsStore);
+    store.internalAlignment = std::move(internAlign);
     return StatusCode::SUCCESS;
 }
 StatusCode ActsMuonAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
-                                                  ActsTrk::RawGeomAlignStore& store) const {
-    std::unique_ptr<MmAlignmentStore> trkAlignment = std::make_unique<MmAlignmentStore>();
+                                                  ActsTrk::DetectorAlignStore& store) const {
+    if (!m_applyMmPassivation && !m_applyNswAsBuilt && !m_applyBLines) {
+        return StatusCode::SUCCESS;
+    }
+    std::unique_ptr<MmAlignmentStore> internAlign = std::make_unique<MmAlignmentStore>();
     if (m_applyMmPassivation) {
         CREATE_READHANDLE(NswPassivationDbData, m_readNswPassivKey);
-        trkAlignment->passivation = readHandle.cptr();
+        internAlign->passivation = readHandle.cptr();
     }
     if (m_applyNswAsBuilt) {
         CREATE_READHANDLE(NswAsBuiltDbData, m_readNswAsBuiltKey);
-        trkAlignment->asBuiltPars = readHandle->microMegaData;
+        internAlign->asBuiltPars = readHandle->microMegaData;
     }
     if (m_applyBLines) {
         CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
@@ -171,20 +175,22 @@ StatusCode ActsMuonAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
             if (re->detectorType() != ActsTrk::DetectorType::Mm) continue;
             const Identifier stationId = alignmentId(re);
             BLineContainer::const_iterator itr = readHandle->find(stationId);
-            if (itr != readHandle->end()) trkAlignment->cacheBLine(re->identify(), *itr);
+            if (itr != readHandle->end()) internAlign->cacheBLine(re->identify(), *itr);
         }
     }
-    // Down cast the alignment pointer
-    std::unique_ptr<ActsTrk::AlignmentStore> actsStore = std::move(trkAlignment); 
-    store.trackingAlignment = std::move(actsStore);
+    store.internalAlignment = std::move(internAlign);
     return StatusCode::SUCCESS;
 }
 StatusCode ActsMuonAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
-                                                    ActsTrk::RawGeomAlignStore& store) const{
-    std::unique_ptr<sTgcAlignmentStore> trkAlignment = std::make_unique<sTgcAlignmentStore>();
+                                                    ActsTrk::DetectorAlignStore& store) const{
+    
+    if (!m_applyNswAsBuilt && !m_applyBLines) {
+        return StatusCode::SUCCESS;
+    }
+    std::unique_ptr<sTgcAlignmentStore> internalAlign = std::make_unique<sTgcAlignmentStore>();
     if (m_applyNswAsBuilt) {
         CREATE_READHANDLE(NswAsBuiltDbData, m_readNswAsBuiltKey);
-        trkAlignment->asBuiltPars = readHandle->sTgcData;
+        internalAlign->asBuiltPars = readHandle->sTgcData;
     }
     if (m_applyBLines) {
         CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
@@ -194,18 +200,16 @@ StatusCode ActsMuonAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
             if (re->detectorType() != ActsTrk::DetectorType::sTgc) continue;
             const Identifier stationId = alignmentId(re);
             BLineContainer::const_iterator itr = readHandle->find(stationId);
-            if (itr != readHandle->end()) trkAlignment->cacheBLine(re->identify(), *itr);
+            if (itr != readHandle->end()) internalAlign->cacheBLine(re->identify(), *itr);
         }
     }
-    // Down cast the alignment pointer
-    std::unique_ptr<ActsTrk::AlignmentStore> actsStore = std::move(trkAlignment); 
-    store.trackingAlignment = std::move(actsStore);
+    store.internalAlignment = std::move(internalAlign);
     return StatusCode::SUCCESS;
 }
 
 StatusCode ActsMuonAlignCondAlg::declareDependencies(const EventContext& ctx,
                                                      ActsTrk::DetectorType detType,
-                                                     SG::WriteCondHandle<ActsTrk::RawGeomAlignStore>& writeHandle) const {
+                                                     SG::WriteCondHandle<ActsTrk::DetectorAlignStore>& writeHandle) const {
     writeHandle.addDependency(IOVInfiniteRange::infiniteTime());
     if (m_applyALines) {
         CREATE_READHANDLE(ALineContainer, m_readKeyALines);
@@ -243,17 +247,16 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
     /// Create the condition handles
     unsigned int numAligned{0};
     for (size_t det =0 ; det < m_techs.size(); ++det) {
-        const SG::WriteCondHandleKey<ActsTrk::RawGeomAlignStore>& key = m_writeKeys[det];
+        const SG::WriteCondHandleKey<ActsTrk::DetectorAlignStore>& key = m_writeKeys[det];
         const ActsTrk::DetectorType subDet = m_techs[det];
 
-        SG::WriteCondHandle<ActsTrk::RawGeomAlignStore> writeHandle{key, ctx};
+        SG::WriteCondHandle<ActsTrk::DetectorAlignStore> writeHandle{key, ctx};
         if (writeHandle.isValid()) {
             ATH_MSG_FATAL("The alignment constants for "<<ActsTrk::to_string(subDet)
                           <<" is still valid. That should not happen at this stage");
             return StatusCode::FAILURE;
         }
-        std::unique_ptr<ActsTrk::RawGeomAlignStore> writeCdo = std::make_unique<ActsTrk::RawGeomAlignStore>();
-        writeCdo->detType = subDet;
+        std::unique_ptr<ActsTrk::DetectorAlignStore> writeCdo = std::make_unique<ActsTrk::DetectorAlignStore>(subDet);
 
         const std::set<const GeoAlignableTransform*>& toStore =  techTransforms[subDet];
         /// Append the alignable transformations to the conditions object
@@ -270,14 +273,18 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
             ATH_CHECK(loadStgcDeformPars(ctx, *writeCdo));
         }
         /// Propagate the cache throughout the geometry
-        for (const MuonReadoutElement* re : readoutEles){
-            numAligned+= re->storeAlignment(*writeCdo);
-        }
         ATH_CHECK(declareDependencies(ctx, subDet, writeHandle));
+        if (m_fillAlignStoreCache) {
+            for (const MuonReadoutElement* re : readoutEles){
+                numAligned+= re->storeAlignedTransforms(*writeCdo);
+            }
+            /// The geoModel constants are no longer needed.
+            writeCdo->geoModelAlignment.reset();
+        }
         ATH_CHECK(writeHandle.record(std::move(writeCdo)));
     }
     /// Check that all readout elements were properly aligned
-    if (numAligned != readoutEles.size()){
+    if (m_fillAlignStoreCache && numAligned != readoutEles.size()){
         ATH_MSG_FATAL("Only "<<numAligned<<" out of "<<readoutEles.size()<<" were picked up by the alignment cutalg");
         return StatusCode::FAILURE;
     }

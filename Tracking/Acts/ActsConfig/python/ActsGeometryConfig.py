@@ -100,84 +100,10 @@ def ActsTrackingGeometryToolCfg(flags,
                                 name: str = "ActsTrackingGeometryTool" ) -> ComponentAccumulator:
   acc = ComponentAccumulator()
   acc.merge(ActsTrackingGeometrySvcCfg(flags))
-  acc.merge(ActsAlignmentCondAlgCfg(flags))
+  from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+  acc.merge(ActsGeometryContextAlgCfg(flags))
   acc.setPrivateTools(CompFactory.ActsTrackingGeometryTool(name))
   return acc
-
-def ActsDetAlignCondAlgCfg(flags,
-                           name: str = "ActsDetAlignmentCondAlg",
-                           **kwargs) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  kwargs.setdefault("TrackingGeometrySvc", acc.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)))
-  the_alg = CompFactory.ActsDetAlignCondAlg(name, **kwargs)
-  acc.addCondAlgo(the_alg, primary = True)
-  return acc
-
-def ActsAlignmentCondAlgCfg(flags,
-                            name: str = "ActsAlignmentCondAlg",
-                            **kwargs) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  from ROOT.ActsTrk import DetectorType 
-  AlignmentStores = []
-  scheduleTrkGeoSvc = False
-  if flags.Detector.GeometryITk:
-    scheduleTrkGeoSvc = True
-    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelAlignCondAlgCfg
-    acc.merge(ITkPixelAlignCondAlgCfg(flags))
-    acc.merge(ActsDetAlignCondAlgCfg(flags,
-                                     name="ActsDetAlignmentCondAlgITkPixel",
-                                     InputTransforms="ITkPixelAlignmentStore",
-                                     ActsTransforms="ActsITkPixelAlignmentStore",
-                                     DetectorType=DetectorType.Pixel))
-    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripAlignCondAlgCfg
-    acc.merge(ITkStripAlignCondAlgCfg(flags))
-    acc.merge(ActsDetAlignCondAlgCfg(flags,
-                                     name="ActsDetAlignmentCondAlgITkSct",
-                                     InputTransforms="ITkStripAlignmentStore",
-                                     ActsTransforms="ActsITkStripAlignmentStore",
-                                     DetectorType=DetectorType.Sct))
-    
-    AlignmentStores = ["ActsITkPixelAlignmentStore", "ActsITkStripAlignmentStore"]
-  else:
-    if flags.Detector.GeometryPixel:
-      scheduleTrkGeoSvc = True
-      from PixelConditionsAlgorithms.PixelConditionsConfig import PixelAlignCondAlgCfg
-      acc.merge(PixelAlignCondAlgCfg(flags))
-      acc.merge(ActsDetAlignCondAlgCfg(flags,
-                                       name="ActsDetAlignmentCondAlgPixel",
-                                       InputTransforms="PixelAlignmentStore",
-                                       ActsTransforms="ActsPixelAlignmentStore",
-                                       DetectorType=DetectorType.Pixel))
-      AlignmentStores+=["ActsPixelAlignmentStore"]
-    
-    if flags.Detector.GeometrySCT:
-      scheduleTrkGeoSvc = True
-      from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_AlignCondAlgCfg
-      acc.merge(SCT_AlignCondAlgCfg(flags))
-      acc.merge(ActsDetAlignCondAlgCfg(flags,
-                                       name="ActsDetAlignmentCondAlgSct",
-                                       InputTransforms="SCTAlignmentStore",
-                                       ActsTransforms="ActsSCTAlignmentStore",
-                                       DetectorType=DetectorType.Sct))
-      AlignmentStores += ["ActsSCTAlignmentStore"]
-  ### Parse the alignment from the new muon geomodel
-  if flags.Muon.usePhaseIIGeoSetup:
-      from MuonCondAlgR4.ConditionsConfig import ActsMuonAlignCondAlgCfg
-      acc.merge(ActsMuonAlignCondAlgCfg(flags))
-      
-      if (flags.Muon.enableAlignment or flags.Muon.applyMMPassivation):
-          if flags.Detector.GeometryMDT:  AlignmentStores += ["MdtActsAlignContainer"]
-          if flags.Detector.GeometryRPC:  AlignmentStores += ["RpcActsAlignContainer"]
-          if flags.Detector.GeometryTGC:  AlignmentStores += ["TgcActsAlignContainer"]
-          if flags.Detector.GeometrysTGC: AlignmentStores += ["sTgcActsAlignContainer"]
-          if flags.Detector.GeometryMM:   AlignmentStores += ["MmActsAlignContainer"]
-
-  kwargs.setdefault("AlignmentStores", AlignmentStores)
-  kwargs.setdefault("LoadTrackingGeoSvc", scheduleTrkGeoSvc)
-  kwargs.setdefault("TrackingGeometrySvc", acc.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags))if scheduleTrkGeoSvc else "")
-  acc.addCondAlgo(CompFactory.ActsAlignmentCondAlg(name, **kwargs))
-  return acc
-
 
 def ActsExtrapolationToolCfg(flags,
                              name: str = "ActsExtrapolationTool",

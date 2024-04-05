@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_STGCALIGNMENTSTORE_H
@@ -7,11 +7,11 @@
 
 #include <MuonAlignmentData/BLinePar.h>
 #include <MuonAlignmentData/NswAsBuiltDbData.h>
-#include <ActsGeometryInterfaces/AlignmentStore.h>
+#include <ActsGeometryInterfaces/DetectorAlignStore.h>
 /*  Alignment store to additionally ship the sTgc as-built parameters and
  *  B-Line deformation parameters through the Acts geometry context.
  */
-class sTgcAlignmentStore: public ActsTrk::AlignmentStore {
+class sTgcAlignmentStore : public ActsTrk::DetectorAlignStore::InternalAlignStore {
     public:
         sTgcAlignmentStore() = default;
         /// @brief   Pointer to the collection of passivation parameters

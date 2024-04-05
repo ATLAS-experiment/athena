@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSDETECTORELEMENT_H
 #define ACTSGEOMETRY_ACTSDETECTORELEMENT_H
 
 // Amg Eigen plugin includes
-#include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
+#include "GeoModelKernel/GeoVDetectorElement.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeoUtils/TransformCache.h"
 // ATHENA INCLUDES
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
 #include "HGTD_Identifier/HGTD_ID.h"
@@ -37,10 +39,10 @@ class IdentityHelper;
 
 /// @class ActsDetectorElement
 ///
-class ActsDetectorElement : public ActsTrk::IDetectorElement {
+class ActsDetectorElement : public ActsTrk::IDetectorElement, public GeoVDetectorElement {
 public:
   using DetectorType = ActsTrk::DetectorType;
-  using RawGeomAlignStore = ActsTrk::RawGeomAlignStore;
+  using AlignmentStore = ActsGeometryContext::AlignmentStore;
 
 
   ActsDetectorElement(const InDetDD::SiDetectorElement &detElem);
@@ -67,10 +69,8 @@ public:
   DetectorType detectorType() const override final;
 
 
-  /// Return local to global transform associated with this identifier
-  bool storeAlignment(RawGeomAlignStore& store) const override final;
-
-
+  virtual unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& alignStore) const override;
+  
   virtual const Acts::Transform3 &
   transform(const Acts::GeometryContext &gctx) const final override;
 
@@ -100,6 +100,8 @@ public:
 
 private:
   DetectorType m_type{DetectorType::UnDefined};
+
+  ActsTrk::TransformCache m_trfCache;
   /// Detector element as variant
   const GeoVDetectorElement *m_detElement{nullptr};
   /// Boundaries of the detector element
@@ -110,11 +112,9 @@ private:
   std::shared_ptr<Acts::Surface> m_surface{};
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces{};
 
-  CxxUtils::CachedValue<Acts::Transform3> m_defTransform{};
 
-  Acts::Transform3 m_extraTransform{Acts::Transform3::Identity()};
 
-  Identifier m_explicitIdentifier{0};
+  Identifier m_explicitIdentifier{};
 };
 
 #endif

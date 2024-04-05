@@ -43,17 +43,17 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
         ATH_MSG_DEBUG("The current readout geometry is still valid.");
         return StatusCode::SUCCESS;
     }
-    SG::ReadCondHandle<ActsGeometryContext> geoContext{m_geoCtxKey, ctx};
+    SG::ReadHandle<ActsGeometryContext> geoContext{m_geoCtxKey, ctx};
     if (!geoContext.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve "<<m_geoCtxKey.fullKey());
         return StatusCode::FAILURE;
     }
     writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
-    writeHandle.addDependency(geoContext);
+    // writeHandle.addDependency(geoContext);
     std::unique_ptr<MuonGM::MuonDetectorManager> detMgr = std::make_unique<MuonGM::MuonDetectorManager>();
     PVLink world{new GeoFullPhysVol(nullptr)};
     detMgr->addTreeTop(world);
-    ATH_CHECK(buildMdt(**geoContext, detMgr.get(), world));
+    ATH_CHECK(buildMdt(*geoContext, detMgr.get(), world));
     ATH_CHECK(writeHandle.record(std::move(detMgr)));
     return StatusCode::SUCCESS;
 }
@@ -61,10 +61,10 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
                                            MuonGM::MuonDetectorManager* mgr,
                                            PVLink world) const {    
     /// Access the B-Line and As-built parameters
-    using SubDetAlignments = ActsGeometryContext::SubDetAlignments;
-    SubDetAlignments::const_iterator alignItr = gctx.alignmentStores.find(ActsTrk::DetectorType::Mdt);
-    const MdtAlignmentStore* alignStore = alignItr != gctx.alignmentStores.end() ? 
-                             static_cast<const MdtAlignmentStore*>(alignItr->second.get()) : nullptr;
+    using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
+    SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mdt);
+    const MdtAlignmentStore* alignStore = alignItr ?
+                                 static_cast<const MdtAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
     const std::vector<const MuonGMR4::MdtReadoutElement*> mdtReadOuts{m_detMgr->getAllMdtReadoutElements()};
     ATH_MSG_INFO("Copy "<<mdtReadOuts.size()<<" Mdt readout elements to the legacy system");

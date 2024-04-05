@@ -38,11 +38,7 @@ Identifier MdtReadoutElement::measurementId(const IdentifierHash& measHash) cons
                                 tubeNumber(measHash) + 1);
 }
 StatusCode MdtReadoutElement::initElement() {
-  /// Check that the alignable node has been assigned
-  if(!alignableTransform()) {
-     ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
-     return StatusCode::FAILURE;
-  }
+  ATH_CHECK(createGeoTransform());
   /// First check whether we're having tubes
   if (!numLayers() || !numTubesInLay()) {
      ATH_MSG_FATAL("The readout element "<< idHelperSvc()->toStringDetEl(identify())<<" has no tubes. Please check "<<std::endl<<m_pars);
@@ -62,14 +58,21 @@ StatusCode MdtReadoutElement::initElement() {
   /// w.r.t. to the chamber edge. Move first tube into the proper position
 
   std::optional<Amg::Vector3D> prevLayPos{std::nullopt};
+  std::shared_ptr<TransformMaker> tubeMaker = std::make_shared<TransformMaker>(
+                     [this](const DetectorAlignStore* store, const IdentifierHash& hash){
+                           return toStation(store) * toTubeFrame(hash); 
+                     });
+
+  std::shared_ptr<TransformMaker> layerMaker = std::make_shared<TransformMaker>(
+                    [this](const DetectorAlignStore* store, const IdentifierHash& hash){
+                    const Amg::Translation3D toCenter{m_pars.halfY * Amg::Vector3D::UnitY()};
+                    return toStation(store) * toChamberLayer(hash)*toCenter*Amg::getRotateY3D(90*Gaudi::Units::deg); 
+                  });
+
   for (unsigned int lay =1 ; lay <= numLayers() ; ++lay) {
      /// Cache the transformations to the chamber layers
      const IdentifierHash layHash = measurementHash(lay,0);
-     ATH_CHECK(insertTransform(layHash, 
-                [this](RawGeomAlignStore* store, const IdentifierHash& hash){
-                    const Amg::Translation3D toCenter{m_pars.halfY * Amg::Vector3D::UnitY()};
-                    return toStation(store) * toChamberLayer(hash)*toCenter*Amg::getRotateY3D(90*Gaudi::Units::deg); 
-                }));
+     ATH_CHECK(insertTransform(layHash, layerMaker));
 #ifndef SIMULATIONBASE
      ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(m_pars.shortHalfX, 
                                                                             m_pars.longHalfX, 
@@ -83,11 +86,7 @@ StatusCode MdtReadoutElement::initElement() {
          prevTubePos = std::nullopt;
          continue;
       }
-
-      ATH_CHECK(insertTransform(idHash,
-                [this](RawGeomAlignStore* store, const IdentifierHash& hash){
-                    return toStation(store) * toTubeFrame(hash); 
-                }));
+      ATH_CHECK(insertTransform(idHash, tubeMaker));
 #ifndef SIMULATIONBASE
       ATH_CHECK(strawSurfaceFactory(idHash, m_pars.tubeBounds->make_bounds(innerTubeRadius(), 0.5*tubeLength(idHash))));
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSTRACKINGGEOMETRYTOOL_H
@@ -13,7 +13,6 @@
 #include "StoreGate/ReadCondHandleKey.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/AlignmentStore.h" // ReadCondHandleKey wants complete type
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
@@ -51,7 +50,7 @@ public:
 private:
   ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-  SG::ReadCondHandleKey<ActsGeometryContext> m_rchk{
+  SG::ReadHandleKey<ActsGeometryContext> m_rchk{
       this, "ActsAlignmentKey", "ActsAlignment", "cond read key for the alignment"};
 };
 

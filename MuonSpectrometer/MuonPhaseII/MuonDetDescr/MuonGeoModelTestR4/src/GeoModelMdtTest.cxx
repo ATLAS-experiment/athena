@@ -63,12 +63,10 @@ StatusCode GeoModelMdtTest::finalize() {
 }
 StatusCode GeoModelMdtTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    SG::ReadCondHandle<ActsGeometryContext> geoContextHandle{m_geoCtxKey, ctx};
-    if (!geoContextHandle.isValid()){
-      ATH_MSG_FATAL("Failed to retrieve "<<m_geoCtxKey.fullKey());
-      return StatusCode::FAILURE;
-    }
-    const ActsGeometryContext& gctx{**geoContextHandle};
+    SG::ReadHandle<ActsGeometryContext> geoContextHandle{m_geoCtxKey, ctx};
+    ATH_CHECK(geoContextHandle.isPresent());
+
+    const ActsGeometryContext& gctx{*geoContextHandle};
 
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     for (const Identifier& test_me : m_testStations) {

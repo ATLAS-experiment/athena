@@ -27,11 +27,7 @@ TgcReadoutElement::TgcReadoutElement(defineArgs&& args)
 const parameterBook& TgcReadoutElement::getParameters() const { return m_pars; }
 StatusCode TgcReadoutElement::initElement() {
     
-   if(!alignableTransform()) {
-      ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
-      return StatusCode::FAILURE;
-   } 
-
+    ATH_CHECK(createGeoTransform());
     /// Check that the readoutelement has sensor layouts
     bool hasSensor{false};
     for (size_t s = 0; s < m_pars.sensorLayouts.size(); ++s) {
@@ -62,7 +58,7 @@ StatusCode TgcReadoutElement::initElement() {
          if (numWireGangs(gap)) {
             const IdentifierHash layHash{constructHash(0, gap, false)}; 
             ATH_CHECK(insertTransform(layHash, 
-                                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
+                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
 #ifndef SIMULATIONBASE
@@ -75,7 +71,7 @@ StatusCode TgcReadoutElement::initElement() {
          if (numStrips(gap)) {
             const IdentifierHash layHash{constructHash(0, gap, true)}; 
             ATH_CHECK(insertTransform(layHash, 
-                                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
+                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
 #ifndef SIMULATIONBASE

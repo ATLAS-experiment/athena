@@ -66,7 +66,7 @@ namespace MuonR4{
 
             SG::WriteHandleKey<StationHoughMaxContainer> m_maxima{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
 
-            SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     };
 }
