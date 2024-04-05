@@ -806,9 +806,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantRois(ConvProxySet_t &convPr
 {
 
   // ordered_sorter
-  auto ordered_sorter = [&](const auto &left, const auto &right) -> bool
+  auto ordered_sorter = [&setRoiName = std::as_const(m_setRoiName)](const std::string &left, const std::string &right) -> bool
   {
-    return std::find(cbegin(m_setRoiName), cend(m_setRoiName), left) < std::find(cbegin(m_setRoiName), cend(m_setRoiName), right);
+    return std::find(cbegin(setRoiName), cend(setRoiName), left) < std::find(cbegin(setRoiName), cend(setRoiName), right);
   };
 
   std::map<std::string, HLT::TriggerElement::FeatureAccessHelper, decltype(ordered_sorter)> mp(ordered_sorter);
