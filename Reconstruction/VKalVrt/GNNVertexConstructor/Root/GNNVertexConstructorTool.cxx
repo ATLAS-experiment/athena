@@ -92,6 +92,20 @@ StatusCode GNNVertexConstructorTool::initialize() {
   ATH_CHECK(m_beamSpotKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());
 
+  // Vertex decorators
+  m_deco_mass      = std::make_unique< SG::AuxElement::Decorator<float> >("mass");
+  m_deco_pt        = std::make_unique< SG::AuxElement::Decorator<float> >("pt");
+  m_deco_charge    = std::make_unique< SG::AuxElement::Decorator<float> >("charge");
+  m_deco_vPos      = std::make_unique< SG::AuxElement::Decorator<float> >("vPos");
+  m_deco_lxy       = std::make_unique< SG::AuxElement::Decorator<float> >("Lxy");
+  m_deco_sig3D     = std::make_unique< SG::AuxElement::Decorator<float> >("significance3d");
+  m_deco_deltaR    = std::make_unique< SG::AuxElement::Decorator<float> >("deltaR");
+  m_deco_NGT       = std::make_unique< SG::AuxElement::Decorator<float> >("NGTinSvx");
+  m_deco_l3d       = std::make_unique< SG::AuxElement::Decorator<float> >("L3d");
+  m_deco_N2Tpair   = std::make_unique< SG::AuxElement::Decorator<float> >("N2Tpair");
+  m_deco_minDst    = std::make_unique< SG::AuxElement::Decorator<float> >("minDstMat");
+  m_deco_eFrac     = std::make_unique< SG::AuxElement::Decorator<float> >("efracsv");
+
   return StatusCode::SUCCESS;
 }
 
@@ -386,24 +400,24 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
           GNNvertex->addTrackAtVertex(link_trk, 1.);
         }
 
-        // Add Vertex Info into Container
+        //Add Vertex Info into Container 
         GNNvertex->setVertexType(xAOD::VxType::SecVtx);
         GNNvertex->setPosition(newvrt.vertex);
         GNNvertex->setFitQuality(newvrt.chi2, NDOF);
-        decor_mass(*GNNvertex) = newvrt.vertexMom.M();
-        decor_pT(*GNNvertex) = newvrt.vertexMom.Perp();
-        decor_charge(*GNNvertex) = newvrt.vertexCharge;
-        decor_vPos(*GNNvertex) = vPos;
-        decor_Lxy(*GNNvertex) = Lxy;
-        decor_L3D(*GNNvertex) = L3D;
-        decor_significance3d(*GNNvertex) = Signif3D;
-        decor_NGTinSvx(*GNNvertex) = NGTatVtx;
-        decor_deltaR(*GNNvertex) = drJPVSV;
-        decor_minDstMat(*GNNvertex) = minDstMat;
-        decor_efracsv(*GNNvertex) = eRatio;
-
-        if (newvrt.trkAtVrt.size() == 2) {
-          decor_N2Tpair(*GNNvertex) = newvrt.trkAtVrt.size();
+        (*m_deco_mass)(*GNNvertex)            = newvrt.vertexMom.M();
+        (*m_deco_pt)(*GNNvertex)              = newvrt.vertexMom.Perp();
+        (*m_deco_charge)(*GNNvertex)          = newvrt.vertexCharge;
+        (*m_deco_vPos)(*GNNvertex)            = vPos;
+        (*m_deco_lxy)(*GNNvertex)             = Lxy;
+        (*m_deco_l3d)(*GNNvertex)             = L3D;
+        (*m_deco_sig3D)(*GNNvertex)  = Signif3D; 
+        (*m_deco_NGT)(*GNNvertex)        = NGTatVtx;
+        (*m_deco_deltaR)(*GNNvertex)          = drJPVSV;
+        (*m_deco_minDst)(*GNNvertex)       = minDstMat;
+        (*m_deco_eFrac)(*GNNvertex)         = eRatio;
+        
+        if (newvrt.trkAtVrt.size()==2){
+          (*m_deco_N2Tpair)(*GNNvertex)=newvrt.trkAtVrt.size();
         }
         ElementLink<xAOD::VertexContainer> linkVertex;
         linkVertex.setElement(GNNvertex);
