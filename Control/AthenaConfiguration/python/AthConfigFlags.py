@@ -495,7 +495,13 @@ class AthConfigFlags(object):
 
         #Sanity check: Don't replace a by a
         if (subsetToReplace == replacementSubset):
-            raise RuntimeError("Can not replace flags {} with themselves".format(subsetToReplace))
+            raise RuntimeError(f'Can not replace flags {subsetToReplace} with themselves')
+
+        # protect against subsequent remaps within remaps: clone = flags.cloneAndReplace('Y', 'X').cloneAndReplace('X.b', 'X.a')
+        for alias,src in self._renames.items():
+            if src == "": continue
+            if src+"." in subsetToReplace:
+                raise RuntimeError(f'Can not replace flags {subsetToReplace} by {replacementSubset} because of already present replacement of {alias} by {src}')
 
 
         newFlags = copy(self) # shallow copy

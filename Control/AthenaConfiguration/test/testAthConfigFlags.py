@@ -257,7 +257,6 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.flags.X.a = 30
         copyf = self.flags.cloneAndReplace( "X", "Z.Xclone1")
         self.assertEqual( copyf.X.a, 20, "dynamically loaded flags have wrong value")
-#        self.assertEqual( copyf.T.Abool, False, "The flags clone does not have dynamic flags")
         copyf.dump()
 
         self.flags.lock()
@@ -280,6 +279,12 @@ class TestFlagsSetupDynamic(FlagsSetup):
         print("\nFlag after double remap ..")
         print("-"*80)
 
+    def test_overwriteFlagsProtectAgainstSubClones(self):
+        self.flags.lock()
+        newf = self.flags.cloneAndReplace("R", "X")
+        with self.assertRaises(RuntimeError):
+            newf = newf.cloneAndReplace("X.R", "A")
+    
     def test_copyAsDict(self):
         """test for asdict with cloned flags"""
         zdict = self.flags.asdict()['Z']
@@ -326,6 +331,27 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.assertTrue('X' in clonec2x.Z)
         self.assertFalse('C' in clonec2x.Z)
 
+    def test_delete(self):
+        # test item delete
+        no_A = copy.deepcopy(self.flags)
+        self.assertTrue( no_A.hasCategory("A") )
+        del no_A['A']
+        with self.assertRaises(AttributeError):
+            no_A.A
+        self.assertNotEqual(self.flags, no_A)
+        self.assertFalse( no_A.hasCategory("A") )
+        # test attribute delete
+        cval = self.flags.A.B.C
+        no_C = copy.deepcopy(self.flags)
+        del no_C.A.B.C
+        with self.assertRaises(AttributeError):
+            no_C.A.B.C
+        # test adding back a flag
+        no_C.addFlag("A.B.C", cval)
+        no_C.lock()
+        self.flags.lock()
+        self.assertEqual(no_C.A.B.C, self.flags.A.B.C)
+
     def test_hash_after_loadAllDynamic(self):
         copyflags = copy.deepcopy(self.flags)
         copyflags.lock()
@@ -334,7 +360,7 @@ class TestFlagsSetupDynamic(FlagsSetup):
         postHash = copyflags.athHash()
         self.assertEqual(initialHash, postHash, "After loading all dynamic flags the hash has changed")
 
-    def test_clonedFlagsHaveDifferenHash(self):
+    def test_hash_clonedFlagsHaveDifferenHash(self):
         cloneFlags = self.flags.clone()
         cloneFlags.lock()
         cloneHash = cloneFlags.athHash()
@@ -344,8 +370,7 @@ class TestFlagsSetupDynamic(FlagsSetup):
         cloneHash2 = cloneFlags2.athHash()
         self.assertNotEqual(cloneHash, cloneHash2, "flags after another clone should have different hash")
 
-
-    def test_cloneAndReplace(self):
+    def test_hash_cloneAndReplace(self):
         origFlags = self.flags.clone()
         origFlags.lock()
         origHash = origFlags.athHash()
