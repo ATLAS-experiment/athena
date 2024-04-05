@@ -217,9 +217,11 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
           break;
        case DbColumn::NTCHAR:
        case DbColumn::LONG_NTCHAR:
-          // MN: not sure if we ever use this case
-          p.ptr   = p.deref();
+         {// MN: not sure if we ever use this case
+          void * readVal= p.deref();
+          p.ptr   = readVal;
           break;
+         }
        case DbColumn::TOKEN:
           // p.ptr is "char*" already so just pass it on
           break;
