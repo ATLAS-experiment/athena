@@ -1,0 +1,28 @@
+# A note on the format of this file
+# Lines beginning with a '#' character are comments and will be ignored, as will empty lines
+# Triggers are broken up into sections to make it easier to read, and when adding new triggers
+# please try and keep them in alphabetical order
+
+#####################
+# Muon triggers     #
+#####################
+
+#####################
+# Electron triggers #
+#####################
+
+#####################
+# Photon triggers   #
+#####################
+
+#####################
+# Tau triggers      #
+#####################
+
+#####################
+# Jet triggers      #
+#####################
+
+#####################
+# BJet triggers     #
+#####################
