@@ -269,7 +269,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
                 // component small, below tolerance
                 double volSmall = calculateVolume(*(*sIter).parts[ii]);
                 if (volSmall < tolerance) {
-                    constituents.erase(sIter);
+                    sIter=constituents.erase(sIter);
                     update = true;
                     break;
                 }
@@ -280,7 +280,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
         else if ((*sIter).parts.size() == 1) {
             double volSingle = calculateVolume(*(*sIter).parts[0]);
             volume += (*sIter).sign * volSingle;
-            constituents.erase(sIter);
+            sIter=constituents.erase(sIter);
         } else {
             std::vector<std::shared_ptr<Volume>>::iterator tit =
                 (*sIter).parts.begin();
@@ -289,7 +289,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
                 std::pair<bool, std::unique_ptr<Volume>> overlap =
                     m_intersectionHelper.intersect(**tit, **(tit + 1));
                 if (overlap.first && !overlap.second) {
-                    constituents.erase(sIter);
+                    sIter=constituents.erase(sIter);
                     noovrlp = true;
                     break;
                 }  // no intersection
@@ -299,12 +299,12 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
                     tit = (*sIter).parts.begin();
                 } else {
                     if (calculateVolume(**tit) < tolerance) {
-                        constituents.erase(sIter);
+                        sIter=constituents.erase(sIter);
                         noovrlp = true;
                         break;
                     }
                     if (calculateVolume(**(tit + 1)) < tolerance) {
-                        constituents.erase(sIter);
+                        sIter=constituents.erase(sIter);
                         noovrlp = true;
                         break;
                     }
@@ -317,7 +317,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
                             (*sIter).parts.push_back(std::move(overlap.second));
                             tit = (*sIter).parts.begin();
                         } else {
-                            constituents.erase(sIter);
+                            sIter=constituents.erase(sIter);
                             noovrlp = true;
                             break;  // no intersection
                         }
@@ -329,7 +329,7 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
             } else if ((*sIter).parts.size() == 1) {
                 double volSingle = calculateVolume(*(*sIter).parts[0]);
                 volume += (*sIter).sign * volSingle;
-                constituents.erase(sIter);
+                sIter=constituents.erase(sIter);
             } else {
                 ++sIter;
             }
