@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetRunType, GetBFields, WaitForPartition
+from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetBFields, WaitForPartition
 from AthenaConfiguration.Enums import BeamType
 
 isCosmicData = False
