@@ -199,6 +199,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doNavigationSlimming', True,
                   help='enable Navigation slimming for RAWtoXYZ or AODtoDAOD transforms')
 
+    flags.addFlag('Trigger.derivationsExtraChains', [],
+                  help='list of chains which should be considered for trigger-matching in addition to those from the TriggerAPI when running derivations')
+
     # CostMonitoring category
     flags.addFlag('Trigger.CostMonitoring.doCostMonitoring', True,
                   help='enable cost monitoring')
