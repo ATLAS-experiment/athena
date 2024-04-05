@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef VKalVrt_GNNVertexConstructorTool_H
 #define VKalVrt_GNNVertexConstructorTool_H
 
