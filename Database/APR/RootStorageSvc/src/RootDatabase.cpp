@@ -46,7 +46,7 @@ using namespace pool;
 using namespace std;
 
 
-/// Standard Constuctor
+/// Standard Constructor
 RootDatabase::RootDatabase() :
         m_file(nullptr), 
         m_version ("2.0"),
@@ -802,7 +802,7 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
   return Error;  
 }
 
-/// Set TTree autoFlush value.  For Branch Containers enable TTree Fill mode
+/// Set TTree AutoFlush value.  For Branch Containers enable TTree Fill mode
 DbStatus RootDatabase::setAutoFlush(const DbOption& opt)
 {
    DbPrint log("RootDatabase.setOption");
@@ -902,7 +902,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
    if( m_file == nullptr or !m_file->IsWritable() )
       return Success;
 
-   // Flush the RNTuples from the DB level, so every ntuple is flused only once
+   // Flush the RNTuples from the DB level, so every ntuple is flushed only once
    for( auto& writer : m_ntupleWriterMap ) {
       auto wr = writer.second.get();
       if( wr->isGrouped() and wr->needsCommit() ) wr->commit();
@@ -1096,25 +1096,30 @@ DbStatus RootDatabase::fillBranchContainerTrees()
 
 
 RNTupleReader*
-RootDatabase::getNTupleReader(std::string ntuple_name)
+RootDatabase::getNTupleReader(const std::string& ntuple_name)
 {
+   // If we already know the reader simply return it
    auto reader_entry = m_ntupleReaderMap.find(ntuple_name);
    if( reader_entry != m_ntupleReaderMap.end() ) {
       return reader_entry->second.get();
    }
-   const std::string file_name = m_file->GetName();
-   auto native_reader = RNTupleReader::Open(ntuple_name, file_name);
-   RNTupleReader *ps = native_reader.get();
-   if( m_rntReaderMetricsEnabled ) {
-      native_reader->EnableMetrics();
+
+   // If this is the first time, set up the reader
+   // If something goes wrong we return a null pointer
+   auto native_reader = m_file ? RNTupleReader::Open(ntuple_name, m_file->GetName()) : nullptr;
+   if ( native_reader ) {
+      if( m_rntReaderMetricsEnabled ) {
+         native_reader->EnableMetrics();
+      }
+      m_ntupleReaderMap.emplace(ntuple_name, std::move(native_reader));
+      return m_ntupleReaderMap.at(ntuple_name).get();
    }
-   m_ntupleReaderMap.emplace(ntuple_name, std::move(native_reader));
-   return ps;
+   return nullptr;
 }
 
 
 RootAuxDynIO::IRNTupleWriter*
-RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
+RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
 {
    auto& writer = m_ntupleWriterMap[ntuple_name];
    if( !writer and create ) {
