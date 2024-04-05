@@ -456,11 +456,11 @@ void LArSamples::TimingClass::MergeFebTime( const std::string& nrun )
     string tmpname = detparts[i]; 
     string file = "FEB_time_fitMean_" + nrun + "_" + tmpname + ".txt";    
 
-  if(FileEmptyCheck(file))
-  {
-    std::cout<<" +++++ The file:" << tmpname <<" is empty, no merging FEB time will be performed +++"<<std::endl;
-    return ;
-  }
+    if(FileEmptyCheck(file))
+    {
+      std::cout<<" +++++ no information for " << tmpname <<", therefore it's timing information is not merged +++"<<std::endl;
+      continue;
+    }
     
     ifstream f( file.c_str(), ios::in ); 
     while( !f.eof() ){	 
