@@ -6,5 +6,6 @@
    <class name="CP::TauEfficiencyCorrectionsAlg" />
    <class name="CP::TauSmearingAlg" />
    <class name="CP::TauTruthMatchingAlg" />
+   <class name="CP::TauTruthDecorationsAlg" />
    
 </lcgdict>
