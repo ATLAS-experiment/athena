@@ -126,13 +126,13 @@ else:
     flags.LAr.doHVCorr = False # ATLASRECTS-6823
 
 if isBeamSplashMode or HorizontalMuons_quickReco:
-    flags.Reco.EnableJet=False;
-    flags.Reco.EnableMet=False;
-    flags.Reco.EnableTau=False;
-    flags.Reco.EnablePFlow=False;
-    flags.Reco.EnableBTagging=False;
-    flags.Reco.EnableEgamma=False;
-    flags.Reco.EnableCombinedMuon=False;
+    flags.Reco.EnableJet=False
+    flags.Reco.EnableMet=False
+    flags.Reco.EnableTau=False
+    flags.Reco.EnablePFlow=False
+    flags.Reco.EnableBTagging=False
+    flags.Reco.EnableEgamma=False
+    flags.Reco.EnableCombinedMuon=False
 
 from AthenaCommon.Constants import INFO
 flags.Exec.OutputLevel = INFO
@@ -228,11 +228,11 @@ if not testWithoutPartition:
 
 if isBeamSplashMode or HorizontalMuons_quickReco:
     # switch of the NSW segment making as it takes too much CPU in beamsplashes
-    acc.getEventAlgo("MuonSegmentMaker").doStgcSegments=False;
-    acc.getEventAlgo("MuonSegmentMaker").doMMSegments=False;
-    acc.getEventAlgo("MuonSegmentMaker_NCB").doStgcSegments=False;
-    acc.getEventAlgo("MuonSegmentMaker_NCB").doMMSegments=False;
-    acc.dropEventAlgo("QuadNSW_MuonSegmentCnvAlg");
+    acc.getEventAlgo("MuonSegmentMaker").doStgcSegments=False
+    acc.getEventAlgo("MuonSegmentMaker").doMMSegments=False
+    acc.getEventAlgo("MuonSegmentMaker_NCB").doStgcSegments=False
+    acc.getEventAlgo("MuonSegmentMaker_NCB").doMMSegments=False
+    acc.dropEventAlgo("QuadNSW_MuonSegmentCnvAlg")
         
 onlineEventDisplaysSvc = CompFactory.OnlineEventDisplaysSvc(
     name = "OnlineEventDisplaysSvc",
@@ -272,8 +272,8 @@ from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
 acc.merge(AlgoJiveXMLCfg(flags,StreamToFileTool=streamToFileTool,StreamToServerTool=streamToServerTool,OnlineMode= not isOfflineTest))
 
 if isBeamSplashMode:
-    acc.getPublicTool("CaloLArRetriever").LArlCellThreshold=500.;
-    acc.getPublicTool("CaloHECRetriever").HEClCellThreshold=500.;
+    acc.getPublicTool("CaloLArRetriever").LArlCellThreshold=500.
+    acc.getPublicTool("CaloHECRetriever").HEClCellThreshold=500.
 
 # This creates an ESD file per event which is renamed and moved to the desired output
 # dir in the VP1 Event Prod alg
