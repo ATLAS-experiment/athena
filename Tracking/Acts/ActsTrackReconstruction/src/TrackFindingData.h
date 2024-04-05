@@ -231,6 +231,7 @@ namespace
     // CKF configuration
     Acts::MeasurementSelector measurementSelector;
     Acts::PropagatorPlainOptions pOptions;
+    Acts::PropagatorPlainOptions pSecondOptions;
     Acts::CombinatorialKalmanFilterExtensions<ActsTrk::MutableTrackStateBackend> ckfExtensions;
     // Track selection
     Acts::TrackSelector trackSelector;

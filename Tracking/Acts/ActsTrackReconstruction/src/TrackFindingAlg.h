@@ -102,6 +102,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
     Gaudi::Property<bool> m_doBranchHoleCut{this, "doBranchHoleCut", true, "select on maxHoles in branch stopper"};
+    Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
@@ -135,6 +136,8 @@ namespace ActsTrk
       kNRejectedRefinedSeeds,
       kNSelectedTracks,
       kNStoppedTracksMaxHoles,
+      kMultipleBranches,
+      kNoSecond,
       kNStat
     };
     using EventStats = std::vector<std::array<unsigned int, kNStat>>;
@@ -163,9 +166,9 @@ namespace ActsTrk
                EventStats &event_stat) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
-    StatusCode storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
-                             const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
-                             DuplicateSeedDetector &duplicateSeedDetector) const;
+    void storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
+                       const ActsTrk::MutableTrackContainer::TrackProxy &track,
+                       DuplicateSeedDetector &duplicateSeedDetector) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.

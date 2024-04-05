@@ -60,6 +60,7 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
+    kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)

@@ -76,6 +76,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
     ATH_MSG_DEBUG("   " << m_doBranchHoleCut);
+    ATH_MSG_DEBUG("   " << m_doTwoWay);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
     ATH_MSG_DEBUG("   " << m_etaMin);
@@ -201,9 +202,12 @@ namespace ActsTrk
 
     ATH_MSG_INFO(trackSelectorCfg);
 
-    m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}, trackSelectorCfg}});
+    m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}, {}, trackSelectorCfg}});
 
     trackFinder().pOptions.maxSteps = m_maxPropagationStep;
+    trackFinder().pSecondOptions.maxSteps = m_maxPropagationStep;
+    trackFinder().pOptions.direction = Acts::Direction::Forward;
+    trackFinder().pSecondOptions.direction = trackFinder().pOptions.direction.invert();
 
     trackFinder().ckfExtensions.updater.connect<&gainMatrixUpdate>();
     trackFinder().ckfExtensions.smoother.connect<&gainMatrixSmoother>();
@@ -460,6 +464,22 @@ namespace ActsTrk
                                trackFinder().ckfExtensions,
                                trackFinder().pOptions,
                                &(*pSurface));
+    options.smoothing = true;
+    std::optional<TrackFinderOptions> secondOptions;
+    if (m_doTwoWay) {
+      options.smoothingTargetSurfaceStrategy = Acts::CombinatorialKalmanFilterTargetSurfaceStrategy::first;
+
+      secondOptions.emplace(tgContext,
+                            mfContext,
+                            calContext,
+                            slAccessorDelegate,
+                            trackFinder().ckfExtensions,
+                            trackFinder().pSecondOptions,
+                            &(*pSurface));
+      secondOptions->filterTargetSurface = pSurface.get();
+      secondOptions->smoothing = true;
+      secondOptions->smoothingTargetSurfaceStrategy = Acts::CombinatorialKalmanFilterTargetSurfaceStrategy::last;
+    }
 
     ActsTrk::MutableTrackContainer tracksContainerTemp;
 
@@ -473,11 +493,15 @@ namespace ActsTrk
 	m_stripCalibTool);
 
     options.extensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
+    if (m_doTwoWay)
+      secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
 
     std::size_t category_i = 0;
     const auto measurementContainerOffsets = measurements.measurementContainerOffsets();
     CkfBranchStopper ckfBranchStopper{*this, tgContext, measurementContainerOffsets, category_i, event_stat};
     options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
+    if (m_doTwoWay)
+      secondOptions->extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
 
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
@@ -568,49 +592,105 @@ namespace ActsTrk
       auto result = trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
 
       // The result for this seed
-      if (not result.ok())
-      {
+      if (not result.ok()) {
         ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
         continue;
       }
-      const auto &tracksForSeed = result.value();
+      auto &tracksForSeed = result.value();
 
-      if (!m_trackStatePrinter.empty())
-      {
-        m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, tracksForSeed, measurementContainerOffsets);
+      size_t ntracks = 0;
+
+      // lambda to collect together all the things we do with a viable track.
+      auto addTrack = [&](const ActsTrk::MutableTrackContainer::TrackProxy &track) {
+        if (!m_trackStatePrinter.empty()) {
+          m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
+        }
+
+        // Fill the track infos into the duplicate seed detector
+        if (m_skipDuplicateSeeds) {
+          storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector);
+        }
+
+        ++ntracks;
+        ++event_stat[category_i][kNOutputTracks];
+
+        // copy selected tracks into output tracksContainer
+        if (trackFinder().trackSelector.isValidTrack(track)) {
+          auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
+          destProxy.copyFrom(track, true);  // make sure we copy track states!
+          ++event_stat[category_i][kNSelectedTracks];
+        } else {
+          ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
+        }
+      };
+
+      std::size_t nfirst = 0;
+      for (auto &firstTrack : tracksForSeed) {
+        std::size_t nsecond = 0;
+
+        if (m_doTwoWay) {
+          std::optional<ActsTrk::MutableMultiTrajectory::TrackStateProxy> firstState;
+          for (auto st : firstTrack.trackStatesReversed()) {
+            bool isMeasurement = st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag);
+            bool isOutlier = st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag);
+            // We are excluding non measurement states and outlier here. Those can
+            // decrease resolution because only the smoothing corrected the very
+            // first prediction as filtering is not possible.
+            if (isMeasurement && !isOutlier)
+              firstState = st;
+          }
+
+          if (firstState.has_value()) {
+            Acts::BoundTrackParameters secondInitialParameters(
+                firstState->referenceSurface().getSharedPtr(),
+                firstState->parameters(), firstState->covariance(),
+                initialParameters->particleHypothesis());
+
+            auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, *secondOptions, tracksContainerTemp);
+
+            if (not secondResult.ok()) {
+              ATH_MSG_WARNING("Second track finding failed for " << seedType << " seed " << iseed << " track " << nfirst << " with error" << secondResult.error());
+            } else {
+              auto firstFirstState = std::next(firstTrack.trackStatesReversed().begin(),
+                                               firstTrack.nTrackStates() - 1);
+
+              auto &secondTracksForSeed = secondResult.value();
+              for (auto &secondTrack : secondTracksForSeed) {
+                if (secondTrack.nTrackStates() < 2) {
+                  ATH_MSG_DEBUG("Second track from " << seedType << " seed " << iseed << " track " << nfirst << " has only " << secondTrack.nTrackStates() << " track states");
+                  continue;
+                }
+
+                secondTrack.reverseTrackStates(true);
+
+                (*firstFirstState).previous() = (*std::next(secondTrack.trackStatesReversed().begin())).index();
+                secondTrack.tipIndex() = firstTrack.tipIndex();
+
+                Acts::calculateTrackQuantities(secondTrack);
+
+                addTrack(secondTrack);
+                ++nsecond;
+              }
+            }
+          }
+        }
+        if (nsecond == 0) {
+          if (m_doTwoWay) {
+            ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
+            ++event_stat[category_i][kNoSecond];
+          }
+          addTrack(firstTrack);
+        }
+        nfirst++;
       }
-
-      // Fill the track infos into the duplicate seed detector
-      if (m_skipDuplicateSeeds)
-      {
-        ATH_CHECK(storeSeedInfo(tracksContainerTemp, tracksForSeed, duplicateSeedDetector));
-      }
-
-      size_t ntracks = tracksForSeed.size();
-      event_stat[category_i][kNOutputTracks] += ntracks;
-
-      if (ntracks == 0)
-      {
+      if (ntracks == 0) {
         ATH_MSG_DEBUG("Track finding found no track candidates for " << seedType << " seed " << iseed);
         ++event_stat[category_i][kNoTrack];
+      } else if (ntracks >= 2) {
+        ++event_stat[category_i][kMultipleBranches];
       }
-
-      // copy selected tracks into output tracksContainer
-      size_t itrack = 0;
-      for (auto &track : tracksForSeed)
-      {
-        if (trackFinder().trackSelector.isValidTrack(track))
-        {
-          auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
-          destProxy.copyFrom(track, true); // make sure we copy track states!
-          ++event_stat[category_i][kNSelectedTracks];
-        }
-        else
-        {
-          ATH_MSG_DEBUG("Track " << itrack << " from " << seedType << " seed " << iseed << " failed track selection");
-        }
-        itrack++;
-      }
+      if (!m_trackStatePrinter.empty())
+        std::cout << std::flush;
     }
 
     ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << computeStatSum(typeIndex, kNOutputTracks, event_stat) << " track candidates.");
@@ -618,13 +698,11 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
-  StatusCode
+  void
   TrackFindingAlg::storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
-                                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
+                                 const ActsTrk::MutableTrackContainer::TrackProxy &track,
                                  DuplicateSeedDetector &duplicateSeedDetector) const
   {
-    for (auto &track : fitResult)
-    {
       const auto lastMeasurementIndex = track.tipIndex();
       duplicateSeedDetector.newTrajectory();
 
@@ -640,9 +718,6 @@ namespace ActsTrk
             auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
             duplicateSeedDetector.addMeasurement(sl);
           }); // end visitBackwards
-    }         // end loop on tracks from fitResult
-
-    return StatusCode::SUCCESS;
   }
 
   // === Statistics printout =================================================
@@ -698,6 +773,8 @@ namespace ActsTrk
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
                                           std::make_pair(kNStoppedTracksMaxHoles, "Stopped tracks reaching max holes"),
+                                          std::make_pair(kMultipleBranches, "Seeds with more than one branch"),
+                                          std::make_pair(kNoSecond, "Tracks failing second CKF"),
                                       });
       assert(stat_labels.size() == kNStat);
       std::vector<std::string> categories;
@@ -788,7 +865,9 @@ namespace ActsTrk
                                                       TableUtils::defineSimpleRatio("duplication / seeds", kNDuplicateSeeds, kNTotalSeeds),
                                                       TableUtils::defineSimpleRatio("Rejected refined params / seeds", kNRejectedRefinedSeeds, kNTotalSeeds),
                                                       TableUtils::defineSimpleRatio("selected / CKF tracks", kNSelectedTracks, kNOutputTracks),
-                                                      TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds)});
+                                                      TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds),
+                                                      TableUtils::defineSimpleRatio("branched tracks / used seeds", kMultipleBranches, kNUsedSeeds),
+                                                      TableUtils::defineSimpleRatio("no 2nd CKF / CKF tracks", kNoSecond, kNOutputTracks)});
 
       std::vector<float> ratio = TableUtils::computeRatios(ratio_def,
                                                            nSeedCollections() + 1,
