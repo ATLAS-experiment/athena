@@ -50,22 +50,38 @@ threshold_mapping = {
     },
     'jJ': {
         15:15,
-        20:15,
-        30:15,
-        40:25,
-        50:38,
-        55:44,
-        60:49,
-        70:61,
-        80:72,
-        85:79,
-        90:85,
-        100:98,
-        125:129,
-        140:146,
-        160:174,
-        180:199,
+        20:21,
+        30:27,
+        40:28,
+        50:33,
+        55:41,
+        60:64,
+        80:65,
+        90:84,
+        125:121,
+        140:138,
+        160:158,
+        180:197,
         500:400,
+    },
+    'CjJ': { # 0ETA2[1,3,5]
+        30:24,
+        40:28,
+        55:39,
+        70:59,
+        80:64,
+        85:70,
+        90:84,
+        100:98,
+    },
+    'FjJ': { # 30ETA49
+        15:15,
+        20:26,
+        40:53,
+        50:41,
+        60:61,
+        90:101,
+        125:152,
     },
     'gJ':
     {
@@ -98,11 +114,11 @@ threshold_mapping = {
     'jXE':
     {
         60:30,
-        70:35,
-        80:40,
+        70:34,
+        80:38,
         90:45,
-        100:50, 
-        110:55,
+        100:48, 
+        110:52,
         120:60,
         500:300,
     },
@@ -134,10 +150,12 @@ def get_threshold_cut(threshold_type,threshold_val):
     # To support more generality in topo alg configs
     if threshold_val == 0:
         return 0
-    # Handle prefix for different jet eta regions in L1Topo inputs
-    # e.g. jJ, CjJ, FjJ, AjJ
-    # May need to extend for other list types
+    # For jJ thresholds, there are different maps for:
+    # - jJ: 0-3.2 in eta
+    # - CjJ: 0-2.X (X=1,3,5) in eta
+    # - FjJ: 3.0-4.9 in eta
+    # - AjJ: 0-4.9 in eta uses the default range (L1Topo triggers)
     _threshold_type = threshold_type
-    if 'jJ' in threshold_type and threshold_type[0] in ['A','C','F']:
-        _threshold_type = threshold_type [1:]
+    if threshold_type == 'AjJ':
+        _threshold_type = 'jJ'
     return threshold_mapping[_threshold_type][threshold_val]

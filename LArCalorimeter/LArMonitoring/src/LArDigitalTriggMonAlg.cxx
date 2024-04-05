@@ -514,17 +514,30 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       }
       int bcid_ind = 0;
       if (rawSC->energies().size()>0){
-	for ( auto & SCe : rawSC->bcids() ) 
-	  {
-	    if ( SCe == BCID ) break;
-	    bcid_ind++;
-	  }
+	for ( auto & SCe : rawSC->bcids() ){
+	  if ( SCe == BCID ) break;
+	  bcid_ind++;
+	}
+	if ( rawSC->bcids().at(bcid_ind) != BCID ) ATH_MSG_WARNING("BCID not found in SC bcids list!! "<<BCID<<" "<<rawSC->bcids().at(bcid_ind));
+
+	if (rawSC->energies().size() > (unsigned)bcid_ind){
+	  SC_energy_onl = rawSC->energies().at(bcid_ind);
+	}else{
+	  ATH_MSG_WARNING("rawSC energies vector is too small for the requested BCID index "<<bcid_ind<<" (size is "<<rawSC->energies().size()<<", bcid vec size is "<<rawSC->bcids().size()<<")");
+	  SC_energy_onl = 0;
+	}
+      }else{
+	ATH_MSG_WARNING("rawSC energies vector is empty!");
+	SC_energy_onl = 0;
       }
-      if ( rawSC->bcids().at(bcid_ind) != BCID ) ATH_MSG_WARNING("BCID not found in SC bcids list!! "<<BCID<<" "<<rawSC->bcids().at(bcid_ind));
-      
-      SC_energy_onl = rawSC->energies().at(bcid_ind); 
-      if ( rawSCReco != 0 ){ 
-	SC_energy_ofl = rawSCReco->energies().at(0); // algorithm already selects the correct energy 
+
+      if ( rawSCReco != 0 ){
+	if ( rawSCReco->energies().size()>0 ){
+	  SC_energy_ofl = rawSCReco->energies().at(0); // algorithm already selects the correct energy
+	}else{
+	  ATH_MSG_WARNING("rawSCReco energies vector is empty!");
+	SC_energy_ofl = 0;
+	}
       } 
       SC_ET_diff = SC_energy_onl - SC_energy_ofl;	
       SC_ET_onl = ( SC_energy_onl* 12.5 ) / 1000;  // Converted to GeV

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ###############################################################
 #
 # Job options file to run Digitization
@@ -58,7 +58,6 @@ from AtlasGeoModel import GeoModelInit
 include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 include( "TileIdCnv/TileIdCnv_jobOptions.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )
-include("TileConditions/TileConditions_jobOptions.py" )
 include("LArConditionsCommon/LArConditionsCommon_MC_jobOptions.py")
 
 from LArRecUtils.LArMCSymCondAlg import LArMCSymCondAlgDefault

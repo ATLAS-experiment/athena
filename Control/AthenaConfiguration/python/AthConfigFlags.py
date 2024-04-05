@@ -686,69 +686,63 @@ class AthConfigFlags(object):
         # remove the leftovers from the argList ... for later use in the do_help
         argList = [a for a in argList if a not in leftover]
 
-        #First, handle athena.py-like arguments:
+        # First, handle athena.py-like arguments (if available in parser):
+        def arg_set(dest):
+            """Check if dest is available in parser and has been set"""
+            return vars(args).get(dest, None) is not None
 
-        if args.debug is not None:
-            from AthenaCommon.Debugging import DbgStage
-            if args.debug not in DbgStage.allowed_values:
-                raise ValueError("Unknown debug stage, allowed values {}".format(DbgStage.allowed_values))
+        if arg_set('debug'):
             self.Exec.DebugStage=args.debug
 
-        if args.evtMax is not None:
+        if arg_set('evtMax'):
             self.Exec.MaxEvents=args.evtMax
 
-        if args.interactive is not None:
-            if args.interactive not in ("init","run"):
-                raise ValueError("Unknown value for interactive, allowed values are 'init' and 'run'")
+        if arg_set('interactive'):
             self.Exec.Interactive=args.interactive
 
-        if args.skipEvents is not None:
+        if arg_set('skipEvents'):
             self.Exec.SkipEvents=args.skipEvents
 
-        if args.filesInput is not None:
+        if arg_set('filesInput'):
             self.Input.Files = [] # remove generic
             for f in args.filesInput.split(","):
                 found = glob.glob(f)
                 # if not found, add string directly
                 self.Input.Files += found if found else [f]
 
-        if args.loglevel is not None:
+        if arg_set('loglevel'):
             from AthenaCommon import Constants
-            if hasattr(Constants,args.loglevel):
-                self.Exec.OutputLevel=getattr(Constants,args.loglevel)
-            else:
-                raise ValueError("Unknown log-level, allowed values are ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, FATAL")
+            self.Exec.OutputLevel = getattr(Constants, args.loglevel)
 
-        if args.config_only is not None:
+        if arg_set('config_only'):
             from os import environ
             environ["PICKLECAFILE"] = "" if args.config_only is True else args.config_only
 
-        if args.threads is not None:
+        if arg_set('threads'):
             self.Concurrency.NumThreads = args.threads
             #Work-around a possible inconsistency of NumThreads and NumConcurrentEvents that may
-            #occur when these values are set by the transforms and overwritten by --athenaopts .. 
+            #occur when these values are set by the transforms and overwritten by --athenaopts ..
             #See also ATEAM-907
             if args.concurrent_events is None and self.Concurrency.NumConcurrentEvents==0:
                 self.Concurrency.NumConcurrentEvents = args.threads
 
-
-        if args.concurrent_events is not None:
+        if arg_set('concurrent_events'):
             self.Concurrency.NumConcurrentEvents = args.concurrent_events
 
-        if args.nprocs is not None:
+        if arg_set('nprocs'):
             self.Concurrency.NumProcs = args.nprocs
 
-        if args.perfmon is not None:
+        if arg_set('perfmon'):
             from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
             setPerfmonFlagsFromRunArgs(self, args)
 
-        if args.mtes is not None:
+        if arg_set('mtes'):
             self.Exec.MTEventService = args.mtes
 
-        if args.mtes_channel is not None:
+        if arg_set('mtes_channel'):
             self.Exec.MTEventServiceChannel = args.mtes_channel
 
-        if args.profile_python is not None:
+        if arg_set('profile_python'):
             from AthenaCommon.Debugging import dumpPythonProfile
             import atexit, cProfile, functools
             cProfile._athena_python_profiler = cProfile.Profile()
@@ -758,7 +752,7 @@ class AthConfigFlags(object):
             atexit.register(functools.partial(dumpPythonProfile, args.profile_python))
 
 
-        #All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
+        # All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
         for arg in leftover:
             if arg=='--':
                 argList += ["---"]

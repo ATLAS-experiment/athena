@@ -2,8 +2,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import Format
 
+import argparse
 import copy
 import unittest
 
@@ -404,12 +406,7 @@ class TestDynamicDependentFlags(unittest.TestCase):
 
 class FlagsFromArgsTest(unittest.TestCase):
     def setUp(self):
-        self.flags = AthConfigFlags()
-        self.flags.addFlag('Exec.OutputLevel',3) #Global Output Level
-        self.flags.addFlag('Exec.MaxEvents',-1)
-        self.flags.addFlag("Exec.SkipEvents",0)
-        self.flags.addFlag("Exec.DebugStage","")
-        self.flags.addFlag('Input.Files',[])
+        self.flags = initConfigFlags()
         self.flags.addFlag('detA.flagB',0)
         self.flags.addFlag("detA.flagC","")
         self.flags.addFlag("detA.flagD", [], type=list)
@@ -453,6 +450,7 @@ class FlagsFromArgsTest(unittest.TestCase):
 class FlagsHelpTest(unittest.TestCase):
     def setUp(self):
         self.flags = AthConfigFlags()
+        self.parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
         self.flags.addFlag("Flag0","",help="This is Flag0")
         self.flags.addFlag("CatA.Flag1","",help="This is Flag1")
         self.flags.addFlag("CatA.SubCatA.Flag2","",help="This is Flag2")
@@ -464,9 +462,13 @@ class FlagsHelpTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             f = io.StringIO()
             with contextlib.redirect_stdout(f):
-                self.flags.fillFromArgs(args.split(" "))
-        if expected not in f.getvalue(): print(f.getvalue())
-        self.assertTrue(expected in f.getvalue())
+                self.flags.fillFromArgs(args.split(" "), parser=self.parser)
+        # Ignore whitespace changes
+        expected = ' '.join(expected.split())
+        value = ' '.join(f.getvalue().split())
+        if expected not in value:
+            print(f.getvalue())
+        self.assertTrue(expected in value)
 
     def test_basicHelp(self):
         # tests printing top-level help message
@@ -505,8 +507,8 @@ flags and positional arguments:
         # in the help text. This is useful to see the 'effect' of other arguments on the flags
         # this test also shows the use of the list terminator e.g. for fileInput list
         self.flags.addFlag("Input.Files",[],help="List of input files")
-        self.do_test(args="--filesInput file1,file2 -- --help Input",expected="""flags:
-  Input.Files  : List of input files (default: ['file1', 'file2'])
+        self.do_test(args="CatA.SubCatA.Flag2=42 -- --help CatA.SubCatA",expected="""flags:
+  CatA.SubCatA.Flag2  : This is Flag2 (default: 42)
 """)
 
 
