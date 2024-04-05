@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSCALARBRANCH_IXX
 #define MUONTESTER_MUONSCALARBRANCH_IXX
-#include <AthenaKernel/getMessageSvc.h>
-#include <GaudiKernel/MsgStream.h>
+
+
 namespace MuonVal {
 template <class T> ScalarBranch<T>::ScalarBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 template <class T> ScalarBranch<T>::ScalarBranch(MuonTesterTree& tree, const std::string& name) : MuonTesterBranch(tree, name) {}
@@ -17,14 +17,12 @@ ScalarBranch<T>::ScalarBranch(MuonTesterTree& tree, const std::string& name, con
 }
 template <class T> bool ScalarBranch<T>::fill(const EventContext&) {
     if (!initialized()) {
-        MsgStream log(Athena::getMessageSvc(), "ScalarBranch()");
-        log << MSG::ERROR << "init()  -- The branch " << name() << " is not initialized yet." << endmsg;
+        ATH_MSG_ERROR("init()  -- The branch " << name() << " is not initialized yet.");
         return false;
     }
     if (!m_updated) {
         if (mustBeUpdated()) {
-            MsgStream log(Athena::getMessageSvc(), "ScalarBranch()");
-            log << MSG::ERROR << "The variable " << name() << " must always be filled between a fill call " << endmsg;
+            ATH_MSG_ERROR("The scalar variable " << name() << " must always be filled between a fill call ");
             return false;
         } else
             m_variable = getDefault();
