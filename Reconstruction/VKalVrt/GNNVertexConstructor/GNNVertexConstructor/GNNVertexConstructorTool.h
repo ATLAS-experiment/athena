@@ -122,9 +122,8 @@ private:
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_lxy;
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_sig3D;
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_deltaR;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_NGT;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_l3d;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_N2Tpair;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_ntrk;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_lxyz;
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_minDst;
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_eFrac;
   
@@ -134,8 +133,9 @@ private:
   double m_massPi;
   double m_minSig3D;
   double m_maxChi2;
-  bool  m_HFTrackRatio;
-  float m_HFRatioThres;
+  int    m_minNTrack;
+  bool   m_HFTrackRatio;
+  float  m_HFRatioThres;
 };
 } // namespace Rec
 

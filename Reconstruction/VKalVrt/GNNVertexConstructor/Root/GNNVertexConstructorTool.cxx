@@ -19,6 +19,7 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_maxLxy(300), 
       m_minSig3D(20),
       m_maxChi2(20), 
+      m_minNTrack(2),
       m_HFTrackRatio(true), 
       m_HFRatioThres(0.3) {
   declareInterface<IGNNVertexConstructorInterface>(this);
@@ -68,10 +69,9 @@ StatusCode GNNVertexConstructorTool::initialize() {
   m_deco_vPos      = std::make_unique< SG::AuxElement::Decorator<float> >("vPos");
   m_deco_lxy       = std::make_unique< SG::AuxElement::Decorator<float> >("Lxy");
   m_deco_sig3D     = std::make_unique< SG::AuxElement::Decorator<float> >("significance3d");
-  m_deco_deltaR    = std::make_unique< SG::AuxElement::Decorator<float> >("deltaR");
-  m_deco_NGT       = std::make_unique< SG::AuxElement::Decorator<float> >("NGTinSvx");
-  m_deco_l3d       = std::make_unique< SG::AuxElement::Decorator<float> >("L3d");
-  m_deco_N2Tpair   = std::make_unique< SG::AuxElement::Decorator<float> >("N2Tpair");
+  m_deco_deltaR    = std::make_unique< SG::AuxElement::Decorator<float> >("deltaRJet");
+  m_deco_ntrk      = std::make_unique< SG::AuxElement::Decorator<float> >("ntrk");
+  m_deco_lxyz      = std::make_unique< SG::AuxElement::Decorator<float> >("Lxyz");
   m_deco_eFrac     = std::make_unique< SG::AuxElement::Decorator<float> >("efracsv");
 
   return StatusCode::SUCCESS;
@@ -280,12 +280,12 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
             newvrt.vertexMom.Rho();
 
         double Lxy = sqrt(vDir[0] * vDir[0] + vDir[1] * vDir[1]);
-        double L3D = sqrt(vDir[0] * vDir[0] + vDir[1] * vDir[1] + vDir[2] * vDir[2]);
-        ATH_MSG_DEBUG("L3D  " << L3D);
+        double Lxyz = sqrt(vDir[0] * vDir[0] + vDir[1] * vDir[1] + vDir[2] * vDir[2]);
+        ATH_MSG_DEBUG("Lxyz  " << Lxyz);
 
         double drJPVSV = Amg::deltaR(jetVrtDir, vDir); // DeltaR
 
-        int NGTatVtx = newvrt.trkAtVrt.size(); // # Tracks in Vertex
+        int ntrk = newvrt.trkAtVrt.size(); // # Tracks in Vertex
 
         TLorentzVector MomentumVtx = TotalMom(xAODwrk->listSelTracks);
         TrackE += newvrt.vertexMom.E();
@@ -296,6 +296,8 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         [[maybe_unused]] double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
 
         // apply quality cuts
+        if (ntrk < m_minNTrack)
+          continue;
         if (Lxy < m_minLxy or Lxy > m_maxLxy)
           continue;
         if (signif3D < m_minSig3D)
@@ -324,15 +326,12 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         (*m_deco_charge)(*GNNvertex)          = newvrt.vertexCharge;
         (*m_deco_vPos)(*GNNvertex)            = vPos;
         (*m_deco_lxy)(*GNNvertex)             = Lxy;
-        (*m_deco_l3d)(*GNNvertex)             = L3D;
+        (*m_deco_lxyz)(*GNNvertex)            = Lxyz;
         (*m_deco_sig3D)(*GNNvertex)           = signif3D; 
-        (*m_deco_NGT)(*GNNvertex)             = NGTatVtx;
+        (*m_deco_ntrk)(*GNNvertex)            = ntrk;
         (*m_deco_deltaR)(*GNNvertex)          = drJPVSV;
         (*m_deco_eFrac)(*GNNvertex)           = eRatio;
         
-        if (newvrt.trkAtVrt.size()==2){
-          (*m_deco_N2Tpair)(*GNNvertex)=newvrt.trkAtVrt.size();
-        }
         ElementLink<xAOD::VertexContainer> linkVertex;
         linkVertex.setElement(GNNvertex);
         linkVertex.setStorableObject(*outVertexContainer);
