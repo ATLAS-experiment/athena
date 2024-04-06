@@ -131,25 +131,8 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
   SG::WriteDecorHandle<xAOD::JetContainer, std::vector<ElementLink<xAOD::VertexContainer>>>
       jetWriteDecorHandleVertexLink(m_jetWriteDecorKeyVertexLink, ctx);
 
-
   static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::BTaggingContainer> > btagLinkAcc 
     = SG::AuxElement::ConstAccessor<ElementLink<xAOD::BTaggingContainer> >("btaggingLink");
-
-  // Vertex decorators
-  SG::AuxElement::Decorator<float> decor_mass("mass");
-  SG::AuxElement::Decorator<float> decor_pT("pt");
-  SG::AuxElement::Decorator<float> decor_charge("charge");
-  SG::AuxElement::Decorator<float> decor_vPos("vPos");
-  SG::AuxElement::Decorator<float> decor_Lxy("Lxy");
-  SG::AuxElement::Decorator<float> decor_significance3d("significance3d");
-  SG::AuxElement::Decorator<float> decor_deltaR("deltaR");
-  SG::AuxElement::Decorator<float> decor_NGTinSvx("NGTinSvx");
-  SG::AuxElement::Decorator<float> decor_L3D("L3d");
-  SG::AuxElement::Decorator<float> decor_N2Tpair("N2Tpair");
-  SG::AuxElement::Decorator<float> decor_minDstMat("minDstMat");
-  SG::AuxElement::Decorator<float> decor_efracsv("efracsv");
-  SG::AuxElement::Decorator<float> decor_badChi2("badChi");
-  SG::AuxElement::Decorator<float> decor_JetN("JetN");
 
   // Loop over the jets
   for (const auto &jet : *inJetContainer) {
@@ -246,32 +229,29 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 
         xAODwrk->listSelTracks.clear();
 
-        xAODwrk->listSelTracks.clear();
-//        //newvrt.selTrk.clear();
-              
-        //Retrieve the tracks and push to working xAOD
-//        for (auto i = elements.first; i != elements.second; ++i) {
-//          xAODwrk->listSelTracks.push_back(*(i->second));
-//          //ATH_MSG_DEBUG((*(i->second))->d0());
-//          }
-       
-       ATH_MSG_DEBUG("#Tracks test " << xAODwrk->listSelTracks.size());
-        
-       Amg::Vector3D FitVertex, vDist;
-       TLorentzVector jetDir(jet->p4()); //Jet Direction
-        
-       //Get Estimate
-       StatusCode sc=m_vertexFitterTool->VKalVrtFitFast(xAODwrk->listSelTracks, FitVertex, *state);
-        
-        if(sc.isFailure() || FitVertex.perp()>m_Rlayer2*2){  /* No initial estimation */
-          IniVrt=primVrt.position();
-          if( m_MultiWithPrimary ) IniVrt.setZero();
-        }else{
-            vDist=FitVertex-primVrt.position();
-            double JetVrtDir = jetDir.Px()*vDist.x() + jetDir.Py()*vDist.y() + jetDir.Pz()*vDist.z();
-            if( m_MultiWithPrimary ) JetVrtDir=fabs(JetVrtDir); /* Always positive when primary vertex is seeked for*/ 
-            if( JetVrtDir>0. ) IniVrt=FitVertex;                /* Good initial estimation */ 
-            else               IniVrt=primVrt.position();
+        for (auto TrackLink : pair.second) {
+          xAODwrk->listSelTracks.push_back(*TrackLink);
+        }
+
+        Amg::Vector3D FitVertex, vDist;
+        TLorentzVector jetDir(jet->p4()); // Jet Direction
+
+        // Get Estimate
+        StatusCode sc = m_vertexFitterTool->VKalVrtFitFast(xAODwrk->listSelTracks, FitVertex, *state);
+
+        if (sc.isFailure() || FitVertex.perp() > m_maxLxy) { /* No initial estimation */
+          IniVrt = primVrt.position();
+          if (m_multiWithPrimary)
+            IniVrt.setZero();
+        } else {
+          vDist = FitVertex - primVrt.position();
+          double JetVrtDir = jetDir.Px() * vDist.x() + jetDir.Py() * vDist.y() + jetDir.Pz() * vDist.z();
+          if (m_multiWithPrimary)
+            JetVrtDir = fabs(JetVrtDir); /* Always positive when primary vertex is seeked for*/
+          if (JetVrtDir > 0.)
+            IniVrt = FitVertex; /* Good initial estimation */
+          else
+            IniVrt = primVrt.position();
         }
 
         m_vertexFitterTool->setApproximateVertex(IniVrt.x(), IniVrt.y(), IniVrt.z(), *state);
@@ -368,3 +348,4 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 StatusCode GNNVertexConstructorTool::finalize() { return StatusCode::SUCCESS; }
 
 } // namespace Rec
+

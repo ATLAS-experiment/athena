@@ -47,69 +47,6 @@ class IVKalState;
 class VxSecVKalVertexInfo;
 } // namespace Trk
 
-#include "xAODTracking/TrackParticleContainer.h"
-
-//Headers to use the GNN Tool
-#include "FlavorTagDiscriminants/GNN.h"
-#include "FlavorTagDiscriminants/GNNTool.h"
-#include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
-#include "FlavorTagDiscriminants/OnnxUtil.h"
-#include "GaudiKernel/ToolHandle.h"
-//Header for Data Containers
-#include "xAODBTagging/BTagging.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODJet/JetAuxContainer.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODCore/AuxContainerBase.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/Vertex.h"
-
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkExInterfaces/IExtrapolator.h"
-#include "lwtnn/parse_json.hh"
-#include <vector>
-#include "GaudiKernel/ServiceHandle.h"
-//Remove in boost > 1.76 when the boost iterator issue
-//is solved see ATLASRECTS-6358
-#define BOOST_ALLOW_DEPRECATED_HEADERS
-#include "boost/graph/adjacency_list.hpp"
-
-#include "BeamSpotConditionsData/BeamSpotData.h"
-#include "FlavorTagDiscriminants/GNNTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkVKalVrtCore/TrkVKalVrtCore.h"
-#include "VxSecVertex/VxSecVertexInfo.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexContainer.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
-#include "TMath.h"
-
-#include "vector"
-#include "iostream"
-#include "iterator"
-#include "map"
-
-class TH2D;
-class TH1F;
-class TProfile;
-class TTree;
-class ITHistSvc;
-
-namespace Trk {
-  class TrkVKalVrtFitter;
-  class IVertexFitter;
-  class IVKalState;
-  class VxSecVKalVertexInfo;
-} // namespace Trk
-
 namespace Rec {
 
 struct workVectorArrxAOD {
@@ -178,15 +115,22 @@ private:
     double chi2{};
   }; // end WrkVrt
 
-  double m_Xlayer2;
-  double m_Ylayer2;
-  double m_Rbeampipe;
-  double m_RlayerB;
-  double m_Rlayer1;
-  double m_Rlayer2;
-  double m_Rlayer3;
-  bool m_MultiWithPrimary;
-  double m_minD0;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_mass;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_pt;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_charge;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_vPos;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_lxy;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_sig3D;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_deltaR;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_NGT;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_l3d;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_N2Tpair;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_minDst;
+  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_eFrac;
+  
+  bool   m_multiWithPrimary;
+  double m_minLxy;
+  double m_maxLxy;
   double m_massPi;
   double m_minSig3D;
   double m_maxChi2;
@@ -196,3 +140,4 @@ private:
 } // namespace Rec
 
 #endif
+
