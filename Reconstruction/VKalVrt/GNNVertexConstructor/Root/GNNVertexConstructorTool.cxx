@@ -3,10 +3,8 @@
 */
 
 #include "GNNVertexConstructor/GNNVertexConstructorTool.h"
-#include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "TH1F.h"
 #include "ranges"
 #include <boost/iterator/zip_iterator.hpp>
 
@@ -16,19 +14,11 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
                                                    const IInterface *parent)
     : AthAlgTool(type, name, parent), m_vertexFitterTool("Trk::TrkVKalVrtFitter/VertexFitterTool", this),
       m_jetCollection("AntiKt4EMPFlowJets"), 
-      m_Xlayer2(0.), 
-      m_Ylayer2(0.), 
-      m_Rbeampipe(0.),
-      m_RlayerB(0.),
-      m_Rlayer1(0.), 
-      m_Rlayer2(0.), 
-      m_Rlayer3(0.), 
-      m_MultiWithPrimary(true), 
-      m_minD0(1), 
+      m_multiWithPrimary(true), 
+      m_minLxy(0), 
+      m_maxLxy(300), 
       m_minSig3D(20),
       m_maxChi2(20), 
-      m_minPerp(0.5), 
-      m_SingleHFTrack(false), 
       m_HFTrackRatio(true), 
       m_HFRatioThres(0.3) {
   declareInterface<IGNNVertexConstructorInterface>(this);
@@ -36,20 +26,12 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
   declareProperty("JetTrackOrigins", m_trackOriginsKey = "BTagging_AntiKt4EMPFlow.GN2v01_TrackOrigin");
   declareProperty("JetVertexLinks", m_vertexLinksKey = "BTagging_AntiKt4EMPFlow.GN2v01_VertexIndex");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
-  declareProperty("Xlayer2", m_Xlayer2);
-  declareProperty("Ylayer2", m_Ylayer2);
-  declareProperty("Rbeampipe", m_Rbeampipe);
-  declareProperty("RlayerB", m_RlayerB);
-  declareProperty("Rlayer1", m_Rlayer1);
-  declareProperty("Rlayer2", m_Rlayer2);
-  declareProperty("mind0", m_minD0, "D0 cut on vertices");
-  declareProperty("minSig3D", m_minSig3D, "Sig 3D cut on vertices");
+  declareProperty("minLxy", m_minLxy, "Minimum radial distance from the PV");
+  declareProperty("maxLxy", m_maxLxy, "Maximum radial distance from the PV");
+  declareProperty("minSig3D", m_minSig3D, "Maximum 3D significance from the PV");
   declareProperty("maxChi2", m_maxChi2, "Maximum Chi2 for fitted vertices");
-  declareProperty("minPerp", m_minPerp, "Perpendicular distance from primary cut on fitted vertices");
-  declareProperty("SingleHFTracks", m_SingleHFTrack,
-                  "Select any vertice with at least one HF track identified by the GNN");
   declareProperty("HFTrackRatio", m_HFTrackRatio,
-                  "Select any vertice that passes the threshold for number of HF tracks to all tracks in vertice");
+                  "Select any vertices that passes the threshold for number of HF tracks to all tracks in vertice");
   declareProperty("HFRatio", m_HFRatioThres,
                   "The threshold for the ratio between HF tracks and all tracks for a vertex");
   m_massPi = 139.5702;
@@ -61,16 +43,6 @@ GNNVertexConstructorTool::~GNNVertexConstructorTool() { ATH_MSG_DEBUG("GNNVertex
 StatusCode GNNVertexConstructorTool::initialize() {
 
   ATH_MSG_DEBUG("GNNVertexConstructor Tool in initialize()");
-
-  if (m_Rbeampipe == 0.)
-    m_Rbeampipe = 24.0;
-  if (m_RlayerB == 0.)
-    m_RlayerB = 34.0;
-  if (m_Rlayer1 == 0.)
-    m_Rlayer1 = 51.6;
-  if (m_Rlayer2 == 0.)
-    m_Rlayer2 = 90.0;
-  m_Rlayer3 = 122.5;
 
   // Initialize keys
   ATH_CHECK(m_trackLinksKey.initialize());
@@ -100,7 +72,6 @@ StatusCode GNNVertexConstructorTool::initialize() {
   m_deco_NGT       = std::make_unique< SG::AuxElement::Decorator<float> >("NGTinSvx");
   m_deco_l3d       = std::make_unique< SG::AuxElement::Decorator<float> >("L3d");
   m_deco_N2Tpair   = std::make_unique< SG::AuxElement::Decorator<float> >("N2Tpair");
-  m_deco_minDst    = std::make_unique< SG::AuxElement::Decorator<float> >("minDstMat");
   m_deco_eFrac     = std::make_unique< SG::AuxElement::Decorator<float> >("efracsv");
 
   return StatusCode::SUCCESS;
@@ -237,25 +208,14 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       };
     };
 
-    auto vertex2trackOrigin = [&HeavyFlavourTracksMap, &FittingMap](const auto &e) {
-      const auto &[vertex, tcm] = e;
-      if (HeavyFlavourTracksMap.find(vertex) != HeavyFlavourTracksMap.end() &&
-          HeavyFlavourTracksMap[vertex] == true) // if exists and is true
-      {
-        FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm)); // check if copies set or just takes a reference
-      };
-    };
-
-    if (m_SingleHFTrack == true) {
-      ATH_MSG_INFO("At least ONE HF Track vertex");
-      std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), vertex2trackOrigin);
-    } else if (m_HFTrackRatio == true) {
-      ATH_MSG_INFO("Vertex with HF Ratio ");
+    if (m_HFTrackRatio == true) {
+      ATH_MSG_DEBUG("Vertex with HF Ratio ");
       std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), HFRatioFunc);
-    } else if (m_SingleHFTrack == false && m_HFTrackRatio == false) {
-      ATH_MSG_INFO("No Requirement on Track Origins");
+    } else {
+      ATH_MSG_DEBUG("No Requirement on Track Origins");
       std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), InclusiveFunc);
     }
+
     // Working xAOD
     workVectorArrxAOD *xAODwrk = new workVectorArrxAOD();
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle{m_beamSpotKey, ctx};
@@ -347,25 +307,18 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 
         int NGTatVtx = newvrt.trkAtVrt.size(); // # Tracks in Vertex
 
-        double xvt = newvrt.vertex[0];
-        double yvt = newvrt.vertex[1];
-        double Dist2DL2 = sqrt((xvt - m_Xlayer2) * (xvt - m_Xlayer2) + (yvt - m_Ylayer2) * (yvt - m_Ylayer2));
-        double minDstMat = 39.9;
-        minDstMat = TMath::Min(minDstMat, fabs(Dist2DL2 - m_Rlayer3)); // 4-layer pixel detector
-
         TLorentzVector MomentumVtx = TotalMom(xAODwrk->listSelTracks);
         TrackE += newvrt.vertexMom.E();
         vertexN += 1;
 
         double eRatio = MomentumVtx.E() / jet->p4().E();
         double signif3D;
-        double Signif3D = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
+        [[maybe_unused]] double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
 
-        if (newvrt.vertex.perp() > m_Rbeampipe && Signif3D < m_minSig3D)
+        // apply quality cuts
+        if (Lxy < m_minLxy or Lxy > m_maxLxy)
           continue;
-        if (Lxy <= m_minD0)
-          continue;
-        if (newvrt.vertex.perp() < m_minPerp)
+        if (signif3D < m_minSig3D)
           continue;
 
         // Make New Container
@@ -392,10 +345,9 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         (*m_deco_vPos)(*GNNvertex)            = vPos;
         (*m_deco_lxy)(*GNNvertex)             = Lxy;
         (*m_deco_l3d)(*GNNvertex)             = L3D;
-        (*m_deco_sig3D)(*GNNvertex)           = Signif3D; 
+        (*m_deco_sig3D)(*GNNvertex)           = signif3D; 
         (*m_deco_NGT)(*GNNvertex)             = NGTatVtx;
         (*m_deco_deltaR)(*GNNvertex)          = drJPVSV;
-        (*m_deco_minDst)(*GNNvertex)          = minDstMat;
         (*m_deco_eFrac)(*GNNvertex)           = eRatio;
         
         if (newvrt.trkAtVrt.size()==2){

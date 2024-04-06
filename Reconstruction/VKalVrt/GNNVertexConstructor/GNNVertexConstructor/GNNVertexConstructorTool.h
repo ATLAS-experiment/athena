@@ -18,7 +18,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
-#include "PathResolver/PathResolver.h"
 #include "TMath.h"
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
@@ -29,7 +28,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
-#include <xAODBTagging/BTaggingContainer.h>
+#include "xAODBTagging/BTaggingContainer.h"
 
 #include "algorithm"
 #include "iostream"
@@ -40,12 +39,6 @@
 #include "vector"
 #include <numeric>
 #include <vector>
-
-class TH2D;
-class TH1F;
-class TProfile;
-class TTree;
-class ITHistSvc;
 
 namespace Trk {
 class TrkVKalVrtFitter;
@@ -197,9 +190,7 @@ private:
   double m_massPi;
   double m_minSig3D;
   double m_maxChi2;
-  double m_minPerp;
-  bool m_SingleHFTrack;
-  bool m_HFTrackRatio;
+  bool  m_HFTrackRatio;
   float m_HFRatioThres;
 };
 } // namespace Rec
