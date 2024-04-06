@@ -316,7 +316,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                     ? nullptr
                     : std::make_unique<Amg::Transform3D>();
 
-                if (boundaryTransform) (*boundaryTransform) = Amg::Translation3D(0.,0.,0.5*(zmin+zmax));
+                if (boundaryTransform) (*boundaryTransform) = Amg::getTranslateZ3D(0.5*(zmin+zmax));
                 // create the cylinder surface for the shared boundary
                 CylinderSurface cSurface = boundaryTransform ? CylinderSurface(*boundaryTransform,boundaryr,0.5*(zmax-zmin)) :
                                                                CylinderSurface(boundaryr,0.5*(zmax-zmin));
@@ -418,8 +418,8 @@ TrackingVolume* TrackingVolumeHelper::glueTrackingVolumeArrays(
 { 
     TrackingVolume* enclosingVolume = nullptr;
 
-    const CylinderVolumeBounds* cyl1 = dynamic_cast<const CylinderVolumeBounds*> (&(firstVol.volumeBounds()));
-    const CylinderVolumeBounds* cyl2 = dynamic_cast<const CylinderVolumeBounds*> (&(secondVol.volumeBounds()));
+    auto cyl1 = dynamic_cast<const CylinderVolumeBounds*> (&(firstVol.volumeBounds()));
+    auto cyl2 = dynamic_cast<const CylinderVolumeBounds*> (&(secondVol.volumeBounds()));
 
     if (!cyl1 || !cyl2) {
         ATH_MSG_ERROR( "TrackingVolumeHelper::glueTrackingVolumeArrays: input volumes not cylinders, return 0" );
@@ -564,8 +564,8 @@ std::shared_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(s
 { 
     std::shared_ptr<TrackingVolume> enclosingVolume{};
 
-    const CylinderVolumeBounds* cyl1 = dynamic_cast<const CylinderVolumeBounds*>(&(firstVol->volumeBounds()));
-    const CylinderVolumeBounds* cyl2 = dynamic_cast<const CylinderVolumeBounds*>(&(secondVol->volumeBounds()));
+    auto cyl1 = dynamic_cast<const CylinderVolumeBounds*>(&(firstVol->volumeBounds()));
+    auto cyl2 = dynamic_cast<const CylinderVolumeBounds*>(&(secondVol->volumeBounds()));
 
     if (!cyl1 || !cyl2) {
         ATH_MSG_ERROR( "TrackingVolumeHelper::glueTrackingVolumeArrays: input volumes not cylinders, return 0" );
@@ -740,11 +740,7 @@ void TrackingVolumeHelper::fillGlueVolumes(const std::vector<TrackingVolume*>& t
 void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<std::shared_ptr<TrackingVolume>>& glueVols,
                                                BoundarySurfaceFace firstFace,
                                                BoundarySurfaceFace secondFace) const {
-    std::vector<TrackingVolume*> glueVolRaw{};
-    for (const auto& vol : glueVols) {
-        glueVolRaw.push_back(vol.get());
-    }
-    glueTrackingVolumes(glueVolRaw, firstFace, secondFace);
+    glueTrackingVolumes(::toRawVec(glueVols), firstFace, secondFace);
 
 }
 void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*>& glueVols,

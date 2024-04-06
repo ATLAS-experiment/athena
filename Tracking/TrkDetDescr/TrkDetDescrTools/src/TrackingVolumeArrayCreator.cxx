@@ -24,7 +24,6 @@
 #include "TrkVolumes/TrapezoidVolumeBounds.h"
 // Amg
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
-#include "FourMomUtils/xAODP4Helpers.h"
 
 namespace {
     using VolumePtr = Trk::TrackingVolumeArrayCreator::VolumePtr;
@@ -100,14 +99,14 @@ std::unique_ptr<TrackingVolumeArray> TrackingVolumeArrayCreator::cylinderVolumes
     // check for compatibility of the new volume - not for navigation type
     if (ivol && !navtype) {
         // longitudinal clinch
-        if (std::abs(currentZmin - lastZmin) > 0.1 || std::abs(currentZmax - lastZmax) > 0.1) {
+        if (fabs(currentZmin - lastZmin) > 0.1 || fabs(currentZmax - lastZmax) > 0.1) {
           ATH_MSG_ERROR("Given TrackingVolume(s) do not extend in z to the same point (required) : return 0");
           ATH_MSG_VERBOSE("Information : lastZmin / lastZmin    = "<< lastZmin << " / " << currentZmin);
           ATH_MSG_VERBOSE("              lastZmax / currentZmax = "<< lastZmax << " / " << currentZmax);
           return nullptr;
         }
         // radial clinch
-        if (std::abs(currentRmin - lastOuterRadius) > 0.1) {
+        if (fabs(currentRmin - lastOuterRadius) > 0.1) {
           ATH_MSG_ERROR("Given TrackingVolume(s) are not wrapping, neither inside-out, nor v.v. : return 0");
           ATH_MSG_VERBOSE("Information : currentRmin / lastOuterRadius = "<< currentRmin << " / " << lastOuterRadius);
           return nullptr;
@@ -180,14 +179,14 @@ std::unique_ptr<TrackingVolumeArray>
     // compatibility check - not for navtype
     if (ivol && !navtype) {
       // first the radial check
-      if (std::abs(lastRmin - currentRmin) > 0.1 || std::abs(lastRmax - currentRmax) > 0.1) {
+      if (fabs(lastRmin - currentRmin) > 0.1 || fabs(lastRmax - currentRmax) > 0.1) {
         ATH_MSG_ERROR("Given TrackingVolume(s) do not have same radial extends (required): return 0");
         ATH_MSG_VERBOSE("Information : lastRmin / currentRmin = " << lastRmin << " / " << currentRmin);
         ATH_MSG_VERBOSE("              lastRmax / currentRmax = " << lastRmax << " / " << currentRmax);
         return nullptr;
       }
       // then let's see whether they leave gaps in z
-      if (std::abs(lastZmax - currentZmin) > 0.1) {
+      if (fabs(lastZmax - currentZmin) > 0.1) {
           ATH_MSG_ERROR("Given TrackingVolume(s) are not attaching in z (required) : return 0");
           return nullptr;
       }
@@ -241,9 +240,7 @@ std::unique_ptr<TrackingVolumeArray>
     // output
     ATH_MSG_VERBOSE("Adding Volume '" << (*volIter)->volumeName()<< "' to Array");
     // push back the volume order position
-    const Amg::Vector3D gp = cyl->mediumRadius() * Amg::Vector3D::UnitX();
-  
-    volOrder.emplace_back((*volIter), (*volIter)->transform() * gp);
+     volOrder.emplace_back((*volIter), (*volIter)->transform() * (cyl->mediumRadius() * Amg::Vector3D::UnitX()));
     
   }
   if (!volOrder.empty()) {
@@ -265,7 +262,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
   if (vols.empty())
     return nullptr;
 
-  bool bevelled = std::find_if(vols.begin(),vols.end(), 
+  const bool bevelled = std::find_if(vols.begin(),vols.end(), 
                               [](const VolumePtr ptr) -> bool {
                                   return dynamic_cast<const BevelledCylinderVolumeBounds*>(&(ptr->volumeBounds()));
                               }) != vols.end();
@@ -314,14 +311,23 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
         volPos.emplace_back(std::pair<double, int>(ngp.phi(), type),
                             std::pair<double, double>(rmin, rmax));
         // phi binning
-        double phi1 = xAOD::P4Helpers::deltaPhi(ngp.phi(), dphi);
-        double phi2 = xAOD::P4Helpers::deltaPhi(ngp.phi(), -dphi);
+        double phi1 = ngp.phi() - dphi;
+        double phi2 = ngp.phi() + dphi;
+        if (phi1 < -2 * M_PI) {
+          phi1 += 2 * M_PI;
+        } if (phi2 < -2 * M_PI) {
+          phi2 += 2 * M_PI;
+        } if (phi1 > 2 * M_PI) {
+          phi1 -= 2 * M_PI;
+        } if (phi2 > 2 * M_PI) {
+          phi2 -= 2 * M_PI;
+        }
       
         if (!phiSteps.empty()) {
           std::vector<float>::iterator iter = phiSteps.begin();
           bool known = false;
           while (iter != phiSteps.end()) {
-            if (std::abs(phi1 - (*iter)) < tol) {
+            if (fabs(phi1 - (*iter)) < tol) {
               known = true;
               break;
             }
@@ -337,7 +343,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
           iter = phiSteps.begin();
           known = false;
           while (iter != phiSteps.end()) {
-            if (std::abs(phi2 - (*iter)) < tol) {
+            if (fabs(phi2 - (*iter)) < tol) {
               known = true;
               break;
             }
@@ -380,7 +386,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
         else
           phiRef += 0.5 * phiSteps[0] + M_PI;
         // setting the position in the phi sector
-        Amg::Vector3D ngp = Amg::getRotateZ3D(phiRef) * (cyl->mediumRadius() * Amg::Vector3D::UnitX());
+        const Amg::Vector3D ngp{cyl->mediumRadius() * std::cos(phiRef),cyl->mediumRadius() * std::sin(phiRef),0.};
        
         volOrder.emplace_back(fullPhiVol, ngp);
         
@@ -427,7 +433,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
           hSteps[phibin].begin();
         bool known = false;
         while (iter != hSteps[phibin].end()) {
-          if (std::abs(rmin - (*iter).second) < tol) {
+          if (fabs(rmin - (*iter).second) < tol) {
             known = true;
             break;
           }
@@ -443,7 +449,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
         iter = hSteps[phibin].begin();
         known = false;
         while (iter != hSteps[phibin].end()) {
-          if (std::abs(rmax - (*iter).second) < tol) {
+          if (fabs(rmax - (*iter).second) < tol) {
             known = true;
             break;
           }
@@ -490,7 +496,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
     double rmin = cyl->innerRadius();
     double rmax = cyl->outerRadius();
     double dphi = cyl->halfPhiSector();
-    if (phiSector > 0. && std::abs(dphi - phiSector) > 0.001)
+    if (phiSector > 0. && fabs(dphi - phiSector) > 0.001)
       phiSector = phiSector < M_PI ? -1. : dphi;
 
     
@@ -504,7 +510,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
       std::vector<float>::iterator iter = rSteps.begin();
       bool known = false;
       while (iter != rSteps.end()) {
-        if (std::abs(rmin - (*iter)) < tol) {
+        if (fabs(rmin - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -520,7 +526,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
       iter = rSteps.begin();
       known = false;
       while (iter != rSteps.end()) {
-        if (std::abs(rmax - (*iter)) < tol) {
+        if (fabs(rmax - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -588,7 +594,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
       std::vector<float>::iterator iter = phiSteps[binr].begin();
       bool known = false;
       while (iter != phiSteps[binr].end()) {
-        if (std::abs(phi1 - (*iter)) < tol) {
+        if (fabs(phi1 - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -604,7 +610,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
       iter = phiSteps[binr].begin();
       known = false;
       while (iter != phiSteps[binr].end()) {
-        if (std::abs(phi2 - (*iter)) < tol) {
+        if (fabs(phi2 - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -674,11 +680,11 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
       return nullptr;
     }
 
-    if (phiSector > 0. && std::abs(dphi - phiSector) > 0.001)
+    if (phiSector > 0. && fabs(dphi - phiSector) > 0.001)
       phiSector = phiSector < M_PI ? -1. : dphi;
 
     // push back the volume order position
-    Amg::Vector3D ngp{vol->transform() * (mRad * Amg::Vector3D::UnitX())};
+    const Amg::Vector3D ngp{vol->transform() * (mRad * Amg::Vector3D::UnitX())};
 
     volOrder.emplace_back(vol, ngp);
     // push back volume position to avoid another loop
@@ -688,7 +694,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
       std::vector<float>::iterator iter = zSteps.begin();
       bool known = false;
       while (iter != zSteps.end()) {
-        if (std::abs(zmin - (*iter)) < tol) {
+        if (fabs(zmin - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -704,7 +710,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
       iter = zSteps.begin();
       known = false;
       while (iter != zSteps.end()) {
-        if (std::abs(zmax - (*iter)) < tol) {
+        if (fabs(zmax - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -769,7 +775,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
       std::vector<float>::iterator iter = phiSteps[binZ].begin();
       bool known = false;
       while (iter != phiSteps[binZ].end()) {
-        if (std::abs(phi1 - (*iter)) < tol) {
+        if (fabs(phi1 - (*iter)) < tol) {
           known = true;
           break;
         }
@@ -785,7 +791,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
       iter = phiSteps[binZ].begin();
       known = false;
       while (iter != phiSteps[binZ].end()) {
-        if (std::abs(phi2 - (*iter)) < tol) {
+        if (std::fabs(phi2 - (*iter)) < tol) {
           known = true;
           break;
         }
