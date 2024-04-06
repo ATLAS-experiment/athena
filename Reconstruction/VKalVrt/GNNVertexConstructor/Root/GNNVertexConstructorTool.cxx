@@ -392,11 +392,11 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         (*m_deco_vPos)(*GNNvertex)            = vPos;
         (*m_deco_lxy)(*GNNvertex)             = Lxy;
         (*m_deco_l3d)(*GNNvertex)             = L3D;
-        (*m_deco_sig3D)(*GNNvertex)  = Signif3D; 
-        (*m_deco_NGT)(*GNNvertex)        = NGTatVtx;
+        (*m_deco_sig3D)(*GNNvertex)           = Signif3D; 
+        (*m_deco_NGT)(*GNNvertex)             = NGTatVtx;
         (*m_deco_deltaR)(*GNNvertex)          = drJPVSV;
-        (*m_deco_minDst)(*GNNvertex)       = minDstMat;
-        (*m_deco_eFrac)(*GNNvertex)         = eRatio;
+        (*m_deco_minDst)(*GNNvertex)          = minDstMat;
+        (*m_deco_eFrac)(*GNNvertex)           = eRatio;
         
         if (newvrt.trkAtVrt.size()==2){
           (*m_deco_N2Tpair)(*GNNvertex)=newvrt.trkAtVrt.size();
