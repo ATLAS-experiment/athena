@@ -177,13 +177,13 @@ class FlagAddress(object):
         used = set()
         for flag in self._flags._flagdict.keys():
             if flag.startswith(self._name.rstrip('.') + '.'):
-                newflag = rmap[flag]
-                ntrim = len(self._name) + 1
-                n_dots_in = flag[:ntrim].count('.')
-                remaining = newflag.split('.')[n_dots_in]
-                if remaining not in used:
-                    yield remaining
-                    used.add(remaining)
+                for newflag in rmap[flag]:
+                    ntrim = len(self._name) + 1
+                    n_dots_in = flag[:ntrim].count('.')
+                    remaining = newflag.split('.')[n_dots_in]
+                    if remaining not in used:
+                        yield remaining
+                        used.add(remaining)
 
     def _subflag_itr(self):
         """Subflag iterator specialized for this address
@@ -196,7 +196,8 @@ class FlagAddress(object):
             if key.startswith(address.rstrip('.') + '.'):
                 ntrim = len(address) + 1
                 remaining = key[ntrim:]
-                yield rename[key], getattr(self, remaining)
+                for r in rename[key]:
+                    yield r, getattr(self, remaining)
 
     def asdict(self):
         """Convert to a python dictionary
@@ -240,7 +241,7 @@ class AthConfigFlags(object):
 
     def _calculateHash(self):
         fmap = self._renamed_map()
-        flags = ((fmap[x], y) for x, y in self._flagdict.items() if fmap[x])
+        flags = ((z, y) for x, y in self._flagdict.items() for z in fmap[x] if fmap[x] and z)
         return hash(frozenset((x, repr(y)) for x, y in flags))
 
     def __getattr__(self, name):
@@ -297,10 +298,11 @@ class AthConfigFlags(object):
         rmap = self._renamed_map()
         used = set()
         for flag in self._flagdict:
-            first = rmap[flag].split('.',1)[0]
-            if first not in used:
-                yield first
-                used.add(first)
+            for r in rmap[flag]:
+                first = r.split('.',1)[0]
+                if first not in used:
+                    yield first
+                    used.add(first)
 
     def asdict(self):
         """Convert to a python dictionary
@@ -317,16 +319,26 @@ class AthConfigFlags(object):
 
         This is the inverse of _renamed, which maps new names to old
         names
-        """
+        
+        Returns a list of the new names corresponding to the old names
+        (since cloneAndReplace may or may not disable access to the old name,
+        it is possible that an old name renames to multiple new names)
+        """        
+        revmap = {}
+        
+        for new, old in self._renames.items():
+            if old not in revmap:
+                revmap[old] = [ new ]
+            else:
+                revmap[old] += [ new ]
+        
         def rename(key):
-            for new, old in self._renames.items():
+            for old, newlist in revmap.items():
                 if key.startswith(old + '.'):
                     stem = key.removeprefix(old)
-                    if not new:
-                        return ''
-                    else:
-                        return f'{new}{stem}'
-            return key
+                    return [ f'{new}{stem}' if new else '' for new in newlist ]
+            return [ key ]
+        
         return {x:rename(x) for x in self._flagdict.keys()}
 
     def _subflag_itr(self):
@@ -336,18 +348,19 @@ class AthConfigFlags(object):
         """
         self.loadAllDynamicFlags()
 
-        for old, new in self._renamed_map().items():
-            # Lots of modules are missing in analysis releases. I
-            # tried to prevent imports using the _addFlagsCategory
-            # function which checks if some module exists, but this
-            # turned in to quite a rabbit hole. Catching and ignoring
-            # the missing module exception seems to work, even if it's
-            # not pretty.
-            try:
-                yield new, getattr(self, old)
-            except ModuleNotFoundError as err:
-                _msg.debug(f'missing module: {err}')
-                pass
+        for old, newlist in self._renamed_map().items():
+            for new in newlist:
+                # Lots of modules are missing in analysis releases. I
+                # tried to prevent imports using the _addFlagsCategory
+                # function which checks if some module exists, but this
+                # turned in to quite a rabbit hole. Catching and ignoring
+                # the missing module exception seems to work, even if it's
+                # not pretty.
+                try:
+                    yield new, getattr(self, old)
+                except ModuleNotFoundError as err:
+                    _msg.debug(f'missing module: {err}')
+                    pass
 
     def addFlag(self, name, setDef, type=None, help=None):
         self._tryModify()
@@ -414,7 +427,9 @@ class AthConfigFlags(object):
             return True
 
         if name in self._renames:
-            return self.hasCategory(self._renames[name])
+            re_name = self._renames[name]
+            if re_name != name:
+                return self.hasCategory(re_name)
         
         # If not found do search through all keys.
         # TODO: could be improved by using a trie for _flagdict
@@ -430,7 +445,7 @@ class AthConfigFlags(object):
         return False
 
     def hasFlag(self, name):
-        return name in self._renamed_map().values()
+        return name in [y for x in self._renamed_map().values() for y in x]
 
     def _set(self,name,value):
         self._tryModify()
@@ -505,6 +520,10 @@ class AthConfigFlags(object):
         newFlags._renames[subsetToReplace] = replacementSubset
         if not keepOriginal:
             newFlags._renames[replacementSubset] = "" # block access to original flags
+        else:
+            if replacementSubset not in newFlags._renames:
+                newFlags._renames[replacementSubset] = replacementSubset
+                #For _renamed_map to know that these flags still work.
         newFlags._hash = None
         return newFlags
 
