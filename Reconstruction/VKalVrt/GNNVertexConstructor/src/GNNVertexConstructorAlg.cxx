@@ -24,8 +24,6 @@ StatusCode GNNVertexConstructorAlg::initialize() {
   ATH_CHECK(m_outVertexKey.initialize());
   ATH_CHECK(m_pvContainerKey.initialize());
 
-  ATH_CHECK(m_gnnVertexLinkKey.initialize());
-
   return StatusCode::SUCCESS;
 }
 

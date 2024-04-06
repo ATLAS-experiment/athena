@@ -151,7 +151,7 @@ namespace FlavorTagDiscriminants {
       auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(jet, btag);
       gnn_input.insert({sequence_name, sequence_data});
       // collect tracks for decoration
-      if ((loader->getType() == ConstituentsType::TRACK)){
+      if (loader->getType() == ConstituentsType::TRACK){
         for (auto constituent : sequence_constituents){
           input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
         }

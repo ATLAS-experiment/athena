@@ -29,7 +29,6 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix="FTAG1", container_name_prefix="FTAG"))
 
     from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorAlgCfg
-    import AthenaCommon.Constants as Lvl
     acc.merge(GNNVertexConstructorAlgCfg(flags, name="GNNVertexFitterAlg"))
 
     # thinning tools
