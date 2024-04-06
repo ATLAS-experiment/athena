@@ -2,27 +2,16 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def GNNVertexConstructorToolCfg(flags, name="GNNVertexFitterTool", outfile="HIST.pool.root", **kwargs):
+def GNNVertexConstructorToolCfg(flags, name="GNNVertexFitterTool", **kwargs):
     acc = ComponentAccumulator()
+
     acc.merge(BeamSpotCondAlgCfg(flags))
-    gnnTool = acc.getPrimaryAndMerge(
-            GNNToolCfg(
-                flags,
-                NNFile           ="BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx",
-                trackLinkType    ="IPARTICLE",  #Either IPARTICLE or  TRACK_PARTICLE
-                variableRemapping={"BTagTrackToJetAssociator" : "GhostTrack"},
-                )
- 
-    ) 
-    acc.addService(CompFactory.THistSvc(Output=[f"GNNPlots DATAFILE='{outfile}', OPT='RECREATE'"])
-    )
-  
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(GNNTool=gnnTool, **kwargs))
+    acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(**kwargs))
+
     return acc
     
 

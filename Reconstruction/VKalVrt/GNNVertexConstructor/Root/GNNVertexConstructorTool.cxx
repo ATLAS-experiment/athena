@@ -32,10 +32,9 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_HFTrackRatio(true), 
       m_HFRatioThres(0.3) {
   declareInterface<IGNNVertexConstructorInterface>(this);
-  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackLinks");
-  declareProperty("JetTrackOrigins", m_trackOriginsKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackOrigin");
-  declareProperty("JetVertexLinks", m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_VertexIndex");
-  declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
+  declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlow.GN2v01_TrackLinks");
+  declareProperty("JetTrackOrigins", m_trackOriginsKey = "BTagging_AntiKt4EMPFlow.GN2v01_TrackOrigin");
+  declareProperty("JetVertexLinks", m_vertexLinksKey = "BTagging_AntiKt4EMPFlow.GN2v01_VertexIndex");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
   declareProperty("Xlayer2", m_Xlayer2);
   declareProperty("Ylayer2", m_Ylayer2);
@@ -78,7 +77,6 @@ StatusCode GNNVertexConstructorTool::initialize() {
   ATH_CHECK(m_trackOriginsKey.initialize());
   ATH_CHECK(m_vertexLinksKey.initialize());
 
-
   m_jetWriteDecorKeyVertexLink = m_jetCollection + ".GNNVerticesLink";
   ATH_CHECK(m_jetWriteDecorKeyVertexLink.initialize());
 
@@ -86,7 +84,6 @@ StatusCode GNNVertexConstructorTool::initialize() {
   ATH_CHECK(m_jetWriteDecorKeyVertexNumber.initialize());
 
   // Retrieve tools
-  ATH_CHECK(m_gnn_Tool.retrieve());
   ATH_CHECK(m_vertexFitterTool.retrieve());
   // Additional Info for Vertex Fit
   ATH_CHECK(m_beamSpotKey.initialize());
@@ -105,16 +102,6 @@ StatusCode GNNVertexConstructorTool::initialize() {
   m_deco_N2Tpair   = std::make_unique< SG::AuxElement::Decorator<float> >("N2Tpair");
   m_deco_minDst    = std::make_unique< SG::AuxElement::Decorator<float> >("minDstMat");
   m_deco_eFrac     = std::make_unique< SG::AuxElement::Decorator<float> >("efracsv");
-
-  return StatusCode::SUCCESS;
-}
-
-// Use GNN to decorate the tracks || May be removed in future
-StatusCode GNNVertexConstructorTool::decorateJets(const xAOD::JetContainer *jetCont) const {
-
-  for (auto jet : *jetCont) {
-    m_gnn_Tool->decorate(*jet);
-  }
 
   return StatusCode::SUCCESS;
 }
@@ -246,8 +233,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       const auto &[vertex, tcm] = d;
       if (HeavyFlavourVertexMap.find(vertex) != HeavyFlavourVertexMap.end() &&
           (static_cast<float>(HeavyFlavourVertexMap[vertex].size()) / tcm.size()) >= HFRatio) {
-        std::cout << (static_cast<float>(HeavyFlavourVertexMap[vertex].size()) / tcm.size()) << "RATIO "
-                  << "\n";
         FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm));
       };
     };
@@ -258,7 +243,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
           HeavyFlavourTracksMap[vertex] == true) // if exists and is true
       {
         FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm)); // check if copies set or just takes a reference
-                                                                       // -
       };
     };
 
@@ -294,9 +278,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     float TrackE = 0;  // Energy Fraction of all vertices within a Jet
 
     for (const auto &pair : FittingMap) {
-
       if (pair.second.size() >= 2) {
-
         // Need at least 2 tracks to perform a fit
         int NTRKS = pair.second.size();
         std::vector<double> InpMass(NTRKS, m_massPi);

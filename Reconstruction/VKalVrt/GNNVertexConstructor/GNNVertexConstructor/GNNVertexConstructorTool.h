@@ -137,12 +137,10 @@ public:
   StatusCode initialize();
   StatusCode finalize();
 
-  virtual StatusCode decorateJets(const xAOD::JetContainer *) const;
   virtual StatusCode performVertexFit(const xAOD::JetContainer *, xAOD::VertexContainer *,
                                       const xAOD::Vertex &primaryVertex, const EventContext &) const;
 
   // Tools
-  ToolHandle<FlavorTagDiscriminants::GNNTool> m_gnn_Tool{this, "gnn_Tool", "", "GNN Decorator tool"};
   ToolHandle<Trk::TrkVKalVrtFitter> m_vertexFitterTool;
 
   // Read handles

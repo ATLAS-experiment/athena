@@ -63,10 +63,6 @@ StatusCode GNNVertexConstructorAlg::execute(const EventContext &ctx) const {
     }
   }
 
-  // Decorates the Jets using the GNN model
-  // May b removed in future with development of GNN model
-  // ATH_CHECK(m_VtxTool->decorateJets(inJetContainer.ptr()));
-
   // Perform a Vertex fit
   ATH_CHECK(m_VtxTool->performVertexFit(inJetContainer.ptr(), outVertexContainer.ptr(), *pv, ctx));
 
