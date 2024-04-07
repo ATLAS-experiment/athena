@@ -17,7 +17,7 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_multiWithPrimary(true), 
       m_minLxy(0), 
       m_maxLxy(300), 
-      m_minSig3D(20),
+      m_minSig3D(0),
       m_maxChi2(20), 
       m_minNTrack(2),
       m_HFTrackRatio(true), 
