@@ -90,7 +90,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
 
         // set the layer to the two surfaces
         if (lmps){
-            Layer* mLayer = new MaterialLayer(firstFaceSurface, *lmps);
+            std::shared_ptr<Layer> mLayer = std::make_shared<MaterialLayer>(firstFaceSurface, *lmps);
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume." );
             firstFaceSurface.setMaterialLayer(mLayer);
             ATH_MSG_VERBOSE("Set MaterialLayer to the BoundarySurface of second volume.");

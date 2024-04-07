@@ -207,13 +207,13 @@ Surface::associatedLayer() const
 inline const Layer*
 Surface::materialLayer() const
 {
-  return m_materialLayer;
+  return m_materialLayer.get();
 }
 
 inline Layer*
 Surface::materialLayer()
 {
-  return m_materialLayer;
+  return m_materialLayer.get();
 }
 
 inline const Surface*
@@ -253,7 +253,7 @@ Surface::owner() const
 }
 
 inline void
-Surface::setMaterialLayer(Layer* mlay)
+Surface::setMaterialLayer(std::shared_ptr<Layer> mlay)
 {
   m_materialLayer = mlay;
 }
