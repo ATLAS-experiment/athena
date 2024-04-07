@@ -59,7 +59,7 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
       auto tobType = Monitored::Scalar<std::string>("tobType","em");
       for(const xAOD::eFexEMRoI* roi : *emDataContPtr){
-          locIdx = std::to_string(roi->iPhi()/16) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
+          locIdx = std::to_string(roi->iPhi()/8) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
           seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
           fill(m_packageName+"_"+key.key(),tobEt,lbn,locIdx);
       }
@@ -84,7 +84,7 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
       auto tobType = Monitored::Scalar<std::string>("tobType","tau");
       for(const xAOD::eFexTauRoI* roi : *tauDataContPtr){
-        locIdx = std::to_string(roi->iPhi()/16) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
+        locIdx = std::to_string(roi->iPhi()/8) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
         seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
         fill(m_packageName+"_"+key.key(),tobEt,lbn,locIdx);
       }
