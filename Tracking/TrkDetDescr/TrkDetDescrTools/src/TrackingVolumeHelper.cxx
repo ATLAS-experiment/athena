@@ -114,7 +114,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
             ATH_MSG_VERBOSE( "              -> " << (volIter)->volumeName() );
     }
     // prepare the material layer if needed
-    Layer* mLayer = nullptr;
+    std::shared_ptr<Layer> mLayer{};
     // ----------------------------------------------------------------------------------------
     // create a MaterialLayer as a boundary
     if (buildBoundaryLayer){
@@ -124,7 +124,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(TrackingVolume& firstVol,
         // LayerMaterialProperties are cloned by MaterialLayer
 
         // the material layer is ready - it can be assigned
-        mLayer = new MaterialLayer(firstFaceSurface, *lmps);
+        mLayer = std::make_unique<MaterialLayer>(firstFaceSurface, *lmps);
         ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume (may be shared with second volume)." );
         firstFaceSurface.setMaterialLayer(mLayer);
     }  
@@ -199,7 +199,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
     BinnedArray<TrackingVolume>* navArrayTwo = nullptr;
 
     std::unique_ptr<Surface>     mLayerSurface;
-    std::unique_ptr<Layer>       mLayer;
+    std::shared_ptr<Layer>       mLayer;
 
     ATH_MSG_VERBOSE("Glue configuration firstFace | secondFace = " << firstFace << " | " << secondFace );
 
@@ -255,7 +255,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 // attach the material layer to the shared boundary if existing
                 if (mLayer) {
                     ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from second array." );
-                    boundarySurface->surfaceRepresentation().setMaterialLayer(mLayer.release());
+                    boundarySurface->surfaceRepresentation().setMaterialLayer(mLayer);
                 }
                 // set the boundary surface to the volumes of both sides
                 for (const auto & volIter : firstVolumes){
@@ -340,7 +340,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 if (mLayer) {
                   ATH_MSG_VERBOSE("Set MaterialLayer to the BoundarySurface of volume from second array.");
                   // assume that now the mlayer onwership goes over to the TrackingVolume
-                  boundarySurface->surfaceRepresentation().setMaterialLayer(mLayer.release());
+                  boundarySurface->surfaceRepresentation().setMaterialLayer(mLayer);
                 }
                 // set the boundary surface to the volumes of both sides
                 for (const auto & volIter : firstVolumes){
@@ -366,7 +366,6 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
     SharedObject< BinnedArray< TrackingVolume> > navArrayOneShared(navArrayOne);
     SharedObject< BinnedArray< TrackingVolume> > navArrayTwoShared(navArrayTwo);
 
-    Layer                       *mLayer_ptr=mLayer.get();
     // (a) to the first set of volumes
     for (const auto & tVolIter: firstVolumes) {
         // take care of the orientation of the normal vector
@@ -378,13 +377,12 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
             ATH_MSG_VERBOSE( "Set insideTrackingVolumeArray at face " << firstFace << " to " << (*tVolIter).volumeName() );
         }
         // set the boundary layer if it exists
-        if (mLayer_ptr) {
+        if (mLayer) {
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from first array." );
             Surface& firstFaceSurface = tVolIter->boundarySurfaces()[firstFace]->surfaceRepresentation();
             // assume that now the mlayer onwership goes over to the TrackingVolume
             //cppcheck-suppress ignoredReturnValue
-            mLayer.release();
-            firstFaceSurface.setMaterialLayer(mLayer_ptr);
+            firstFaceSurface.setMaterialLayer(mLayer);
         }
                     
     }
@@ -398,13 +396,12 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
             ATH_MSG_VERBOSE( "Set insideTrackingVolumeArray at face " << secondFace << " to " << (*tVolIter).volumeName() );
             setInsideTrackingVolumeArray(*tVolIter,secondFace,navArrayOneShared);
         }
-        if (mLayer_ptr) {
+        if (mLayer) {
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from second array." );
             Surface& secondFaceSurface = tVolIter->boundarySurfaces()[secondFace]->surfaceRepresentation();
             // assume that now the mlayer onwership goes over to the TrackingVolume
             //cppcheck-suppress ignoredReturnValue
-            mLayer.release();
-            secondFaceSurface.setMaterialLayer(mLayer_ptr);
+            secondFaceSurface.setMaterialLayer(mLayer);
         }
     }    
     // coverity will report a bug here for mLayer running out of scope, but the memory management is done later in the TrackingVolume
