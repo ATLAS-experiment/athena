@@ -140,11 +140,11 @@ public:
                                                 BoundarySurfaceFace secondFace, 
                                                 std::string name) const override;
 
-  std::shared_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol, 
+  std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol, 
                                                                 BoundarySurfaceFace firstFace, 
                                                                 std::shared_ptr<TrackingVolume> secondVol, 
                                                                 BoundarySurfaceFace secondFace, 
-                                                                const std::string& name) const;
+                                                                const std::string& name) const override;
   
   /** protected method to set inside Volume of a BoundarySurface:
       input:

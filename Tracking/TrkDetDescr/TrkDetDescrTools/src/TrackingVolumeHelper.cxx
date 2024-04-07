@@ -556,13 +556,12 @@ TrackingVolume* TrackingVolumeHelper::glueTrackingVolumeArrays(
     return enclosingVolume;
 }
 
-std::shared_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol,
-                                                                                         BoundarySurfaceFace firstFace,
-                                                                                         std::shared_ptr<TrackingVolume> secondVol,
-                                                                                         BoundarySurfaceFace secondFace, 
-                                                                                         const std::string& name) const
-{ 
-    std::shared_ptr<TrackingVolume> enclosingVolume{};
+std::unique_ptr<TrackingVolume> TrackingVolumeHelper::glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol,
+                                                                               BoundarySurfaceFace firstFace,
+                                                                               std::shared_ptr<TrackingVolume> secondVol,
+                                                                               BoundarySurfaceFace secondFace, 
+                                                                               const std::string& name) const { 
+    std::unique_ptr<TrackingVolume> enclosingVolume{};
 
     auto cyl1 = dynamic_cast<const CylinderVolumeBounds*>(&(firstVol->volumeBounds()));
     auto cyl2 = dynamic_cast<const CylinderVolumeBounds*>(&(secondVol->volumeBounds()));
