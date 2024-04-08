@@ -37,6 +37,9 @@ namespace FlavorTagDiscriminants {
     RDHK m_acc_type_label {
       this, "acc_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
         "Accessor for the truth type label of the truth particle"};
+    RDHK m_acc_source_label {
+      this, "acc_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+        "Accessor for the truth label for the source of secondary particles"};    
     RDHK m_acc_vertex_index {
       this, "acc_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Accessor for the vertex index of the truth particle"};

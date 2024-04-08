@@ -34,9 +34,11 @@ namespace FlavorTagDiscriminants {
 
     // Initialize accessors
     m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
+    m_acc_source_label = "TruthParticles." + m_acc_source_label.key();
     m_acc_vertex_index = "TruthParticles." + m_acc_vertex_index.key();
     m_acc_parent_barcode = "TruthParticles." + m_acc_parent_barcode.key();
     ATH_CHECK( m_acc_type_label.initialize() );
+    ATH_CHECK( m_acc_source_label.initialize() );
     ATH_CHECK( m_acc_vertex_index.initialize() );
     ATH_CHECK( m_acc_parent_barcode.initialize() );
 
@@ -72,6 +74,7 @@ namespace FlavorTagDiscriminants {
     // instantiate accessors
     using RDH = SG::ReadDecorHandle<xAOD::TruthParticleContainer, int>;
     RDH acc_type_label(m_acc_type_label, ctx);
+    RDH acc_source_label(m_acc_source_label, ctx);
     RDH acc_vertex_index(m_acc_vertex_index, ctx);
     RDH acc_parent_barcode(m_acc_parent_barcode, ctx);
 
@@ -88,16 +91,16 @@ namespace FlavorTagDiscriminants {
     std::vector<const xAOD::TrackParticle*> tracks_vector(tracks->begin(), tracks->end());
     for ( const auto& track : tracks_vector ) {
       
-      // for the origin labels we need to start from the track object (to label fake tracks)
+      // for the origin label we need to start from the track object (to label fake tracks)
       int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
       dec_origin_label(*track) = InDet::ExclusiveOrigin::getExclusiveOrigin(trackTruthOrigin);
-      dec_source_label(*track) = TruthDecoratorHelpers::get_source_type(trackTruthOrigin);
 
       // everything else is already decorated to the associated truth particle
       const auto truth = m_trackTruthOriginTool->getTruth(track);
       dec_barcode(*track) = truth ? truth->barcode() : -2;
       dec_parent_barcode(*track) = truth ? acc_parent_barcode(*truth) : -2;
       dec_type_label(*track) = truth ? acc_type_label(*truth) : -2;
+      dec_source_label(*track) = truth ? acc_source_label(*truth) : -2;
       dec_vertex_index(*track) = truth ? acc_vertex_index(*truth) : -2;
 
     }
