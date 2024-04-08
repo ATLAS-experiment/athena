@@ -83,9 +83,7 @@ namespace Muon {
         if (RIO.localCovariance().cols() != RIO.localCovariance().rows()) {
             ATH_MSG_WARNING("Rows and colums not equal!");
             if (m_idHelperSvc->isRpc(RIO.identify())) {
-                std::stringstream ss;
-                ss << "RPC hit with (r,c)=" << RIO.localCovariance().rows() << "," << RIO.localCovariance().cols();
-                ATH_MSG_WARNING(ss.str().c_str());
+               ATH_MSG_WARNING("RPC hit with (r,c)=" << RIO.localCovariance().rows() << "," << RIO.localCovariance().cols());
             }
         }
 
@@ -260,13 +258,18 @@ namespace Muon {
             Amg::Vector2D localPos(lp[Trk::locX], lp[Trk::locY]);
 
             // Dont make RIO On tracks for sTGC wires in inner Q1
-            if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && MClus->detectorElement()->isEtaZero(MClus->identify(), lp))
+            if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && 
+                MClus->detectorElement()->isEtaZero(MClus->identify(), lp)) {
+              ATH_MSG_WARNING("sTgcReadoutElement with isEtaZero() ?! "<<m_idHelperSvc->toString(MClus->identify()));
               return nullptr;
-
+            }
             // Wires are already considered in the above check. Dont remove them here
-            if (!rio_surface.insideBounds(localPos) && m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) != sTgcIdHelper::Wire)
+            if (!rio_surface.insideBounds(localPos) && 
+                 m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) != sTgcIdHelper::Wire) {
+              ATH_MSG_WARNING("sTgc measurement "<<m_idHelperSvc->toString(MClus->identify())<<" out of bounds. "
+                             <<Amg::toString(localPos));
               return nullptr;
-
+        }
             MClT = new sTgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
 
         } else if (m_idHelperSvc->isMM(RIO.identify())) {
