@@ -210,10 +210,11 @@ void lossyFloatCompress (void* dst,
 
   // This is where we apply in-place lossy float compression
   if(typeName == "float") {
+    // cppcheck-suppress invalidPointerCast
+    float* f = reinterpret_cast<float*> (eltPtr);
     for (size_t i = 0; i < n; i++) {
-      //cppcheck-suppress invalidPointerCast
-      *(float*) eltPtr = compressors[nmantissa].reduceFloatPrecision(*(float*) eltPtr);
-      eltPtr += eltSize;
+      *f = compressors[nmantissa].reduceFloatPrecision(*f);
+      ++f;
     }
   } else if (typeName == "std::vector<float>"){
     for (size_t i = 0; i < n; i++) {

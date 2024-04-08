@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.cxx
@@ -608,6 +608,7 @@ AuxTypeRegistry::addFactory (lock_t& /*lock*/,
   else
     m_factories.insert_or_assign (key, factory.release());
 
+  // cppcheck-suppress returnDanglingLifetime; false positive
   return fac;
 }
 
