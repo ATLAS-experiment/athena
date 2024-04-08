@@ -7,7 +7,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg, MessageSvcCf
 from AthenaConfiguration.Enums import LHCPeriod
 
 flags = initConfigFlags()
-flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-01-00/RUN4_presampling.mu200.25events.RDO.pool.root']
+flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-01-00/RUN4_presampling.mu200.withSuperCell.50events.RDO.pool.root']
 flags.Input.isMC = True
 
 import sys
