@@ -22,47 +22,55 @@ atlas_install_python_modules( python/*.py )
 
 atlas_add_test( MdtCabling_Run2Data
                   SCRIPT python -m MuonCondTest.MdtCablingTester
+                  PRIVATE_WORKING_DIRECTORY
                   PROPERTIES TIMEOUT 600
                   POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MdtCabling_Run2MC
-                  SCRIPT python -m MuonCondTest.MdtCablingTester -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run2MC.ESD.pool.root
-                  PROPERTIES TIMEOUT 600
-                  POST_EXEC_SCRIPT nopost.sh)
+                SCRIPT python -m MuonCondTest.MdtCablingTester -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run2MC.ESD.pool.root
+                PRIVATE_WORKING_DIRECTORY
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( MdtCabling_Run3MC
                 SCRIPT python -m MuonCondTest.MdtCablingTester -i /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root
+                PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( RpcCabling_Run3MC
                 SCRIPT python -m MuonNRPC_Cabling.createCablingJSON && python -m MuonCondTest.RpcCablingTester
+                PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWCondTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWCondAlg.sh 
+                PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWPassivTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWPassivAlg.sh 
+                PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWDcsTest
+                PRIVATE_WORKING_DIRECTORY
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWDcsAlg.sh 
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
-
-
 atlas_add_test( TgcCondTest
                 SCRIPT python -m MuonCondDump.dumpTgcDigiDeadChambers  &&  python -m MuonCondTest.TgcCondTester
+                PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( TgcDigiThresholdTest
                 SCRIPT python -m MuonCondDump.dumpTgcDigiThreshold  &&  python -m MuonCondTest.TgcDigiThresholdTester
+                PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TgcDigiJitterTest
                 SCRIPT python -m MuonCondDump.dumpTgcDigiJitter  &&  python -m MuonCondTest.TgcDigiJitterTester
+                PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
