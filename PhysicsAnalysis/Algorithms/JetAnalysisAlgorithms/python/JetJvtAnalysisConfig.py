@@ -11,6 +11,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
 
     def __init__ (self, containerName) :
         super (JetJvtAnalysisConfig, self).__init__ ()
+        self.addDependency('OverlapRemoval', required=False)
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('enableFJvt', False, type=bool)
