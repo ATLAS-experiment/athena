@@ -26,6 +26,7 @@ namespace FlavorTagDiscriminants {
         }
         namespace TruthSource {
             enum Label {
+                NoTruth             = -2,
                 NotSecondary        =  0,
                 HadronicInteraction =  1,
                 KshortDecay         =  2,

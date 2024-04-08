@@ -96,7 +96,7 @@ namespace FlavorTagDiscriminants {
       if ( (!MC::isStable(truth_particle) or truth_particle->pt() < 500) and !truth_particle->isCharmHadron()) {
         dec_origin_label(*truth_particle) = InDet::ExclusiveOrigin::Pileup;
         dec_type_label(*truth_particle) = TruthDecoratorHelpers::TruthType::Label::NoTruth;
-        dec_source_label(*truth_particle) = -2;
+        dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
         dec_parent_barcode(*truth_particle) = -1;

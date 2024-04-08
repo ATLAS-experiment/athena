@@ -98,7 +98,7 @@ namespace FlavorTagDiscriminants {
         // if the truth link is broken, assume PU
         dec_origin_label(*electron) = InDet::ExclusiveOrigin::Pileup;
         dec_type_label(*electron) = TruthDecoratorHelpers::TruthType::Label::NoTruth;
-        dec_source_label(*electron) = -1;
+        dec_source_label(*electron) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         dec_vertex_index(*electron) = -2;
         dec_barcode(*electron) = -2;
         dec_parent_barcode(*electron) = -2;
