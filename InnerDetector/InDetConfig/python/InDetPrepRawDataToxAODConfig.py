@@ -1,7 +1,13 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataToxAOD package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+
+def TruthParticleIndexDecoratorAlgCfg(flags, name='TruthParticleIndexDecoratorAlg', **kwargs) :
+    acc = ComponentAccumulator()
+    kwargs.setdefault('TruthParticleIndexDecoration', 'origTruthIndex')
+    acc.addEventAlgo(CompFactory.TruthParticleIndexDecoratorAlg(name, **kwargs))
+    return acc
 
 def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs):
     from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
@@ -26,6 +32,10 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
 
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    if flags.Input.isMC:
+        # need to decorate truth particles and clusters with same unique identified
+        # which is the origin truth particle index
+        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
     kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     kwargs.setdefault("WriteExtendedPRDinformation", True)
 
@@ -60,6 +70,10 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
 
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    if flags.Input.isMC:
+        # need to decorate truth particles and clusters with same unique identified
+        # which is the origin truth particle index
+        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
     kwargs.setdefault("WriteExtendedPRDinformation", True)
     kwargs.setdefault("PixelReadoutManager", "ITkPixelReadoutManager")
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
@@ -86,6 +100,10 @@ def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    if flags.Input.isMC:
+        # need to decorate truth particles and clusters with same unique identified
+        # which is the origin truth particle index
+        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
     kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
@@ -110,6 +128,10 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    if flags.Input.isMC:
+        # need to decorate truth particles and clusters with same unique identified
+        # which is the origin truth particle index
+        acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
 
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc

@@ -12,6 +12,8 @@
 #include <limits>
 
 #include "xAODTruth/TruthVertex.h"
+#include "StoreGate/ReadDecorHandle.h"
+
 // #include "GeneratorUtils/PIDUtils.h"
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
@@ -46,6 +48,10 @@ InDetPhysValTruthDecoratorAlg::initialize() {
   }
 
   ATH_CHECK( m_truthParticleName.initialize());
+  if (!m_truthParticleIndexDecor.key().empty()) {
+     m_truthParticleIndexDecor = m_truthParticleName.key()+"."+m_truthParticleIndexDecor.key();
+  }
+  ATH_CHECK( m_truthParticleIndexDecor.initialize( !m_truthParticleIndexDecor.key().empty()));
 
   std::vector<std::string> decor_names(kNDecorators);
   decor_names[kDecorD0]="d0";
@@ -69,6 +75,9 @@ InDetPhysValTruthDecoratorAlg::finalize() {
     std::lock_guard<std::mutex> lock(m_mutex);
     ATH_MSG_DEBUG( "Truth selection cut flow : " << m_cutFlow.report(m_truthSelectionTool->names()) );
   }
+  if (m_nMissingTruthParticles>0) {
+    ATH_MSG_INFO( "Clusters which reference missing / thinned truth particles : " << m_nMissingTruthParticles );
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -78,14 +87,42 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
   if ((not ptruth.isValid())) {
     return StatusCode::FAILURE;
   }
+  std::size_t ptruth_size=ptruth->size();
+
+  std::vector<unsigned int> truthIndexMap;
+  if (!m_truthParticleIndexDecor.empty()) {
+     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int> decor_index(m_truthParticleIndexDecor, ctx);
+     unsigned int max_size=0;
+     assert( ptruth_size < std::numeric_limits<unsigned int>::max());
+     for (const xAOD::TruthParticle *truth_particle : *ptruth) {
+        max_size = std::max( max_size, decor_index(*truth_particle) );
+     }
+     if (max_size>=std::numeric_limits<unsigned int>::max()) {
+        ATH_MSG_ERROR("Truth index exceed max allowed range.");
+        return StatusCode::FAILURE;
+     }
+     ++max_size;
+     truthIndexMap.resize( max_size, std::numeric_limits<unsigned int>::max());
+     unsigned int new_index=0;
+     for (const xAOD::TruthParticle *truth_particle : *ptruth) {
+        truthIndexMap.at( decor_index(*truth_particle) ) = new_index;
+        ++new_index;
+     }
+  }
+  else {
+     truthIndexMap.reserve(ptruth_size);
+     for (unsigned int i=0; i<ptruth_size; ++i) {
+        truthIndexMap.push_back(i);
+     }
+  }
 
   std::vector< IDPVM::OptionalDecoration<xAOD::TruthParticleContainer,float> >
      float_decor( IDPVM::createDecoratorsIfNeeded(*ptruth, m_decor, ctx, msgLvl(MSG::DEBUG)) );
 
   ///truthbarcode-cluster maps to be pre-stored at event level
   std::vector< std::array<uint16_t, kNClusterTypes> > tp_clustercount;
-  tp_clustercount.resize(ptruth->size(),std::array<uint16_t,kNClusterTypes>{});
-  
+  tp_clustercount.resize(ptruth_size,std::array<uint16_t,kNClusterTypes>{});
+  unsigned int missing_truth_particle=0u;
   //Loop over the pixel and sct clusters to fill the truth barcode - cluster count maps
   SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> sctClusters(m_truthSCTClusterName, ctx); 
   SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> pixelClusters(m_truthPixelClusterName, ctx); 
@@ -98,7 +135,12 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
         const std::vector<unsigned int> &truth_indices = truthIndexAcc(*sctCluster);
         for (auto index : truth_indices) {
            if (index != std::numeric_limits<unsigned int>::max()) {
-              ++tp_clustercount.at(index)[kSCT];
+              if (index < truthIndexMap.size() && truthIndexMap[index] != std::numeric_limits<unsigned int>::max()) {
+                 ++tp_clustercount.at(truthIndexMap[index])[kSCT];
+              }
+              else {
+                 ++missing_truth_particle;
+              }
            }
         }
       }
@@ -111,12 +153,19 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
         const std::vector<unsigned int> &truth_indices = truthIndexAcc(*pixCluster);
         for (auto index : truth_indices) {
            if (index != std::numeric_limits<unsigned int>::max()) {
-              ++tp_clustercount.at(index)[kPixel];
+              if (index < truthIndexMap.size() && truthIndexMap[index] != std::numeric_limits<unsigned int>::max()) {
+                 ++tp_clustercount.at(truthIndexMap[index])[kPixel];
+              }
+              else {
+                 ++missing_truth_particle;
+              }
            }
         }
       }
     } // Loop over PIX clusters
   }
+  m_nMissingTruthParticles += missing_truth_particle;
+
   if (not float_decor.empty()) {
      SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosX(m_beamSpotDecoKey[0], ctx);
      SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosY(m_beamSpotDecoKey[1], ctx);

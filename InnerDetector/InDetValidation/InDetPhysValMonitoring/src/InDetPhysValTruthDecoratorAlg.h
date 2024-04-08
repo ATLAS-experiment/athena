@@ -62,6 +62,7 @@ private:
   mutable std::mutex m_mutex;
   mutable CutFlow m_cutFlow ATLAS_THREAD_SAFE; // Guarded by m_mutex
 
+  mutable std::atomic<std::size_t> m_nMissingTruthParticles = 0u;
   mutable std::atomic<bool> m_errorEmitted{false};
 
   ///TruthParticle container's name needed to create decorators
@@ -77,6 +78,9 @@ private:
   
   SG::ReadHandleKey<xAOD::TrackMeasurementValidationContainer> m_truthSCTClusterName
     {this, "SCTClusterContainerName",  "SCT_Clusters", ""};
+
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthParticleIndexDecor
+    {this, "TruthParticleIndexDecoration", "origTruthIndex", "decoration name for the original truth particle index."};
    
   // decoration helper
   enum EDecorations {
