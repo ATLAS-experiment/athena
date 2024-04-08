@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s).
@@ -383,8 +383,8 @@ void RingSetConf_v1::getRawConfCol(
 {
   // Protect against bad pointers:
   if ( container == nullptr ) {
-    std::runtime_error(std::string("Retrieved nullptr when trying to create"
-        " RawConfCollection."));
+    throw std::runtime_error(std::string("Retrieved nullptr when trying to create"
+                                         " RawConfCollection."));
   }
 
   // Clear previous collection
