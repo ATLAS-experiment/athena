@@ -14,6 +14,7 @@ if __name__=="__main__":
     parser.add_argument('--tot'       , required=True, help="Time over threshold file, format must be \"SCAN_SXXXXXXXXX\" ")
     parser.add_argument('--layers'    , required=True, nargs='+', choices={"Blayer","L1","L2","disk"}, help="What layers we should run to update the calibration.")
     parser.add_argument('--saveInfo'  , type=bool, default=False, help="Creates a root file with the fitting plots - Slower running time")
+    parser.add_argument('--runCal'    , type=bool, default=False, help="Runs only the Pixel Calibration layers")
     parser.add_argument('--tag'       , type=str, default="PixelChargeCalibration-DATA-RUN2-UPD4-26", help="Tag in order to read the DB")
     
     args = parser.parse_args()
@@ -33,9 +34,16 @@ if __name__=="__main__":
         proc[l].communicate()
     print("Done\n")
     
+    # This is meant to run just one layer from a different calibration path and other layer from other path.
+    # We need to merge after the output of PixelCalibration. Use --runCal = True if you plan to test or run other layer afterwards
+    if args.runCal:
+        print("Jobs finished")
+        exit(0)
+    
     print("Merging calibration output...")
     from PixelCalibAlgs.FileMerger import MergeCalibFiles
-    MergeCalibFiles(args.layers)
+    # Sending an array of all the layer - the ones not present will be skipped and reported
+    MergeCalibFiles(["Blayer", "L1", "L2", "disk"])
     print("Done\n")
     
     print("Creating Reference file..")
@@ -51,9 +59,13 @@ if __name__=="__main__":
     UpdateCalib(args.tag)
     print("Done\n")
     
+    print("Validation new vs. previous calibration.")
+    # Plots the old vs. new charge for all FE (includes IBL)
+    # Meant to be used for pixel, but can be used for IBL in standalone (reading central DB using MakeReferenceFile.cxx step)
+    from PixelCalibAlgs.EvoMonitoring import setupRunEvo
+    setupRunEvo("FINAL_calibration_candidate.txt", args.tag+".log" )
+    print("Done\n")
     
-    # Work in progress... 
-    # Check the calibrated modules (replace the bad ones with the previous calibration) and upload
     
     print("Jobs finished")
     exit(0)

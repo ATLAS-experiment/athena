@@ -6,6 +6,7 @@ import json
 # It converts the DB payload into a python dictionary using json
 def ReadDbFile(name):
     mydict = dict()
+    iov = "non"
     with open(name) as fp:
         lines = fp.readlines()
         for line in lines:
@@ -16,9 +17,10 @@ def ReadDbFile(name):
                 arrayline = line.split(' : ')
                 mydict = json.loads(arrayline[1])
             else:
+                iov = line[:line.find(" - ")]
                 print("Data base IOV: %s" % line)
-                
-    return mydict
+    
+    return mydict, iov
 
 
 def ReadNewCalib(name):
@@ -198,7 +200,7 @@ def Fprint(dict, name):
             ))
 
 def UpdateCalib(tag):
-    ref_calib = ReadDbFile(tag+".log")
+    ref_calib, iov = ReadDbFile(tag+".log")
     new_calib, read_report = ReadNewCalib("calibration_merged.txt")
     
     # modifying the new_calib dictionary in order to recover the empty FE 
@@ -220,7 +222,7 @@ def UpdateCalib(tag):
     
     print(str)
     print("More information in: log_recovery.txt")
-    print("NEW CALIBRATION file to update the DB: final_calibration_candidate.txt")
+    print("NEW CALIBRATION file to update the DB: FINAL_calibration_candidate.txt")
     
     str += """Positions of single 0's:
     0: normal_threshold,  1: normal_RMS,  2: normal_noise,  3: normal_intime

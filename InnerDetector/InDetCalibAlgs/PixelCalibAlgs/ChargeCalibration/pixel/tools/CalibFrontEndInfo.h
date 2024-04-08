@@ -112,13 +112,13 @@ class CalibFrontEndInfo {
         
         int m_times_fitted       = -1;
         
-        std::vector<float> m_NormalFitParams;
-        std::vector<float> m_LongFitParams;
-        std::vector<float> m_SigFitParams;
+        std::vector<float> m_NormalFitParams = {0,0,0};
+        std::vector<float> m_LongFitParams   = {0,0,0};
+        std::vector<float> m_SigFitParams    = {0,0};
         
-        std::vector<float> m_NormalFitParamsQuality;
-        std::vector<float> m_LongFitParamsQuality;
-        std::vector<float> m_SigFitParamsQuality;
+        std::vector<float> m_NormalFitParamsQuality = {0,0};
+        std::vector<float> m_LongFitParamsQuality   = {0,0};
+        std::vector<float> m_SigFitParamsQuality    = {0,0};
         
         
 };
