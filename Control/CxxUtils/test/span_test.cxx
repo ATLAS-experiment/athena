@@ -80,6 +80,8 @@ void test1()
   test1a<float> (s2);
   const CxxUtils::span<float>& cs2 = s2;
   test1a<const float> (cs2);
+  CxxUtils::span<const float> cs2a = s2;
+  test1a<const float> (cs2a);
 
   CxxUtils::span<float> s3 = s2;
   test1a<float> (s3);
