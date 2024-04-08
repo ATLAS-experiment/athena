@@ -15,16 +15,16 @@ def FullScanLRTMenuSequence(flags):
     from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
     reco = InEventRecoCA("UncFSLRTreco",inputMaker=getTrackingInputMaker(flags,"ftf"))
 
-    from TrigInDetConfig.utils import getFlagsForActiveConfig
-    flagsLRT = getFlagsForActiveConfig(flags, "fullScanLRT", log)
+    from TrigInDetConfig.utils import cloneFlagsToActiveConfig
+    flagsLRT = cloneFlagsToActiveConfig(flags, "fullScanLRT")
 
     reco.mergeReco( getCommonInDetFullScanLRTCfg(flags, flagsLRT) )
 
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
-    reco.mergeReco(trigInDetPrecisionTrackingCfg(flags, 
+    reco.mergeReco(trigInDetPrecisionTrackingCfg(flagsLRT, 
                                                  trkFSRoI, 
-                                                 flags.Trigger.InDetTracking.fullScanLRT.input_name,
+                                                 flagsLRT.Tracking.ActiveConfig.input_name,
                                                  in_view=False))
 
     # Construct the SelectionCA to hold reco + hypo

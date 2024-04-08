@@ -50,7 +50,7 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   from TrigInDetConfig.utils import getFlagsForActiveConfig
   flags = getFlagsForActiveConfig(inflags, signatureName, log)
  
-  """ Generates precision fast tracking config, it is a primary config function """
+  """ Generates fast tracking config, it is a primary config function """
 
   from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
 

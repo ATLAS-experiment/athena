@@ -5,11 +5,13 @@
 #include <boost/functional/hash.hpp>
 #include <GaudiKernel/StatusCode.h>
 #include "AthLinks/ElementLinkVector.h"
+#include "TrigConfHLTUtils/HLTUtils.h"
 #include "xAODTrigger/TrigPassBitsContainer.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
 #include "Run2ToRun3TrigNavConverterV2.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
+#include "SpecialCases.h"
 
 namespace TCU = TrigCompositeUtils;
 
@@ -190,7 +192,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
     m_setRoiName.push_back(name);
   }
 
-  // sanity check, i.e. if there is at least one entry w/o the coll name no other enties are needed for a given clid
+  // sanity check, i.e. if there is at least one entry w/o the coll name no other entries are needed for a given clid
   for (auto [clid, keysSet] : m_collectionsToSaveDecoded)
   {
     if (keysSet.size() > 1 and keysSet.count("") != 0)
@@ -198,6 +200,22 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
       ATH_MSG_ERROR("Bad configuration for CLID " << clid << " reuested saving of all (empty coll name configures) collections, yet there are also specific keys");
       return StatusCode::FAILURE;
     }
+
+  }
+  
+  bool anyChainBad=false;
+  for ( auto chain: m_chainsToSave ) {
+    if ( chain.find('*') != std::string::npos or chain.find('|') != std::string::npos ) {
+      ATH_MSG_ERROR("Supplied chain name: " << chain << " contains wildcard characters, this is not supported by the conversion tool");
+      anyChainBad=true;
+    }
+  }
+  if ( anyChainBad ) {
+    ATH_MSG_ERROR("Supplied chain names contain wildcard characters, this is not supported by the conversion tool");
+    return StatusCode::FAILURE;
+  }
+  if ( m_chainsToSave.empty() ) {
+    ATH_MSG_INFO("No chains list supplied, the conversion will occur for all chains");
   }
 
   ATH_CHECK(m_clidSvc->getIDOfTypeName("TrigRoiDescriptor", m_roIDescriptorCLID));
@@ -249,11 +267,14 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   }
 
   ATH_CHECK(mirrorTEsStructure(convProxies, *run2NavigationPtr));
+  // printProxies(convProxies, [](auto ){ return true;},
+  //             {m_chainIdsPrinter});
 
   if (m_doSelfValidation)
     ATH_CHECK(allProxiesConnected(convProxies));
 
   ATH_CHECK(associateChainsToProxies(convProxies, m_allTEIdsToChains));
+
   ATH_CHECK(cureUnassociatedProxies(convProxies));
   ATH_MSG_DEBUG("Proxies to chains mapping done");
 
@@ -298,6 +319,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   ATH_CHECK(createSFNodes(convProxies, *decisionOutput, m_finalTEIdsToChains, context));
   ATH_MSG_DEBUG("Conversion done, from " << convProxies.size() << " elements to " << decisionOutput->size() << " elements");
 
+  // printProxies(convProxies, [](auto ){ return true;},
+  //             {m_chainIdsPrinter, m_teIDPrinter});
+
   // dispose temporaries
   for (auto proxy : convProxies)
   {
@@ -330,15 +354,22 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
       for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
       {
         unsigned int teId = ptrHLTTE->id();
-        allTEs[teId].insert(chainId);
+        allTEs[teId].insert(chainId);  
+
         if (ptrHLTSignature == ptrChain->signatures().back())
         {
           finalTEs[teId].insert(chainId);
+          ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
         }
       }
     }
     // chains with a multiple legs
     std::vector<int> multiplicities = ChainNameParser::multiplicities(chainName);
+    // dirty hacks for failing chains parsing    
+    if(std::regex_match(chainName, SpecialCases::gammaXeChain))
+      multiplicities={1,1};
+
+    
     if ( multiplicities.size() > 1 ) {
       // the chain structure (in terms of multiplicities) may change along the way
       // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
@@ -775,9 +806,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantRois(ConvProxySet_t &convPr
 {
 
   // ordered_sorter
-  auto ordered_sorter = [&](const auto &left, const auto &right) -> bool
+  auto ordered_sorter = [&setRoiName = std::as_const(m_setRoiName)](const std::string &left, const std::string &right) -> bool
   {
-    return std::find(cbegin(m_setRoiName), cend(m_setRoiName), left) < std::find(cbegin(m_setRoiName), cend(m_setRoiName), right);
+    return std::find(cbegin(setRoiName), cend(setRoiName), left) < std::find(cbegin(setRoiName), cend(setRoiName), right);
   };
 
   std::map<std::string, HLT::TriggerElement::FeatureAccessHelper, decltype(ordered_sorter)> mp(ordered_sorter);
