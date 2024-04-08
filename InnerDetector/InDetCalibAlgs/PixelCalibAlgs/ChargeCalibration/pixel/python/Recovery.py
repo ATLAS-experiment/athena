@@ -94,10 +94,13 @@ def recover_thr(thr1, thr2, listarray, ref_val):
 # This function recovers other than the thresholds
 def recover(listarray, ref_val):
     
-    if not listarray:
-        return ref_val
-    else:
-        return sum(listarray)/len(listarray)    
+    if ref_val == 0:
+        if not listarray:
+            return ref_val
+        else:
+            return sum(listarray)/len(listarray)
+    
+    return ref_val 
 
 def recover_empties(new_calib, ref_calib):
     
@@ -246,6 +249,7 @@ def UpdateCalib(tag):
 if __name__ == "__main__":
     
     UpdateCalib("PixelChargeCalibration-DATA-RUN2-UPD4-26")
+    
     exit(0)    
 
 

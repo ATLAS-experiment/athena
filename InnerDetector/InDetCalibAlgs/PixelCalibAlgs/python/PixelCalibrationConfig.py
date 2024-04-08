@@ -6,16 +6,18 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(prog='python -m PixelCalibAlgs.PixelCalibrationConfig.',
                             description="""Calibration tool for pixel.\n\n
                             Example: python -m PixelCalibAlgs.PixelCalibrationConfig --folder "global/path/to/folder/" --thr "threshold_file" --thr_intime "intime_file" 
-                                                                                     --tot "tot_file --layers [Blayer, L1, L2, disk] [--saveInfo]""")
+                                                                                     --tot "tot_file --layers [Blayer, L1, L2, disk] [--saveInfo --runCal --skipPlots]""")
     
     parser.add_argument('--folder'    , required=True, help="Directory path to the files")
     parser.add_argument('--thr'       , required=True, help="Threshold file, format must be \"SCAN_SXXXXXXXXX\" ")
     parser.add_argument('--thr_intime', required=True, help="Threshold intime file, format must be \"SCAN_SXXXXXXXXX\" ")
     parser.add_argument('--tot'       , required=True, help="Time over threshold file, format must be \"SCAN_SXXXXXXXXX\" ")
     parser.add_argument('--layers'    , required=True, nargs='+', choices={"Blayer","L1","L2","disk"}, help="What layers we should run to update the calibration.")
-    parser.add_argument('--saveInfo'  , type=bool, default=False, help="Creates a root file with the fitting plots - Slower running time")
-    parser.add_argument('--runCal'    , type=bool, default=False, help="Runs only the Pixel Calibration layers")
+    parser.add_argument('--saveInfo'  , action='store_true', help="Creates a root file with the fitting plots - Slower running time")
+    parser.add_argument('--runCal'    , action='store_true', help="Runs only the Pixel Calibration layers")
+    parser.add_argument('--skipPlots' , action='store_true', help="Skips the plotting step. Takes less time")
     parser.add_argument('--tag'       , type=str, default="PixelChargeCalibration-DATA-RUN2-UPD4-26", help="Tag in order to read the DB")
+    
     
     args = parser.parse_args()
     
@@ -58,6 +60,10 @@ if __name__=="__main__":
     from PixelCalibAlgs.Recovery import UpdateCalib
     UpdateCalib(args.tag)
     print("Done\n")
+
+    if args.skipPlots:
+        print("Jobs finished")
+        exit(0)
     
     print("Validation new vs. previous calibration.")
     # Plots the old vs. new charge for all FE (includes IBL)
