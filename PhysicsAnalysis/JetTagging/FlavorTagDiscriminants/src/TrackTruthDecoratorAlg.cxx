@@ -30,7 +30,9 @@ namespace FlavorTagDiscriminants {
     // Initialize Container keys
     ATH_MSG_DEBUG( "Inizializing containers:"            );
     ATH_MSG_DEBUG( "    ** " << m_TrackContainerKey      );
+    ATH_MSG_DEBUG( "    ** " << m_MuonContainerKey       );
     ATH_CHECK( m_TrackContainerKey.initialize() );
+    ATH_CHECK( m_MuonContainerKey.initialize() );
 
     // Initialize accessors
     m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
@@ -49,15 +51,18 @@ namespace FlavorTagDiscriminants {
     m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
     m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key();
     m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key();
+    m_dec_muon_origin_label = m_TrackContainerKey.key() + "." + m_dec_muon_origin_label.key();
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
     CHECK( m_dec_barcode.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
+    CHECK( m_dec_muon_origin_label.initialize() );
     
     // Retrieve tools
     ATH_CHECK( m_trackTruthOriginTool.retrieve() );
+    ATH_CHECK( m_truthLeptonTool.retrieve() );
 
     return StatusCode::SUCCESS;
   }
@@ -70,6 +75,9 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandle<TPC> tracks(m_TrackContainerKey, ctx);
     CHECK( tracks.isValid() );
     ATH_MSG_DEBUG( "Retrieved " << tracks->size() << " tracks..." );
+    SG::ReadHandle<xAOD::MuonContainer> muons(m_MuonContainerKey,ctx);
+    CHECK( tracks.isValid() );
+    ATH_MSG_DEBUG( "Retrieved " << muons->size() << " muons..." );
 
     // instantiate accessors
     using RDH = SG::ReadDecorHandle<xAOD::TruthParticleContainer, int>;
@@ -86,6 +94,7 @@ namespace FlavorTagDiscriminants {
     WDH dec_vertex_index(m_dec_vertex_index, ctx);
     WDH dec_barcode(m_dec_barcode, ctx);
     WDH dec_parent_barcode(m_dec_parent_barcode, ctx);
+    WDH dec_muon_origin_label(m_dec_muon_origin_label, ctx);
 
     // decorate loop
     std::vector<const xAOD::TrackParticle*> tracks_vector(tracks->begin(), tracks->end());
@@ -102,7 +111,50 @@ namespace FlavorTagDiscriminants {
       dec_type_label(*track) = truth ? acc_type_label(*truth) : TruthDecoratorHelpers::TruthType::Label::NoTruth;
       dec_source_label(*track) = truth ? acc_source_label(*truth) : TruthDecoratorHelpers::TruthSource::Label::NoTruth;
       dec_vertex_index(*track) = truth ? acc_vertex_index(*truth) : -2;
+      dec_muon_origin_label(*track) = -2;
 
+    }
+
+    // decorate muon tracks with truth origin
+    // defining a map for proper muon origin labels 
+    std::map<unsigned int,unsigned int> muTruthMap = {
+      {0, 0}, //Fake(Uknown) muon
+      {1, 1}, //KnownUknown muon
+      {4, 2}, //Prompt muon
+      {8, 3}, //From B muon
+      {13, 4}, //From B/C (decay chain) muon (not included in the muon TruthClassificationTool)
+      {9, 5}, //From C muon 
+      {10, 6}, //From light muon
+    };
+
+    for ( const auto muon : *muons ) {
+      
+      // Classify muon truth origin
+      unsigned int muTruthOrigin = 0;
+      ATH_CHECK(m_truthLeptonTool->classify(*muon, muTruthOrigin));
+      
+      // Get the track associated to the muon
+      auto track_link = muon->inDetTrackParticleLink();
+      if ( !track_link.isValid() ) { continue; }
+      auto track = *track_link;
+
+      // Get the track truth origin
+      int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
+      if ( muTruthOrigin == 9 && InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
+        // Check if a muon isFromC and the associated track isFromBC
+        muTruthOrigin = 11;
+      }
+      else if ( muTruthOrigin == 9 && !InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
+        muTruthOrigin = 9;
+      }
+
+      if ( muTruthMap.find(muTruthOrigin) != muTruthMap.end() ) {
+        muTruthOrigin = muTruthMap[muTruthOrigin];
+        ATH_MSG_DEBUG("Muon truth Origin after mapping: " << muTruthOrigin);
+        
+        // decorate track
+        dec_muon_origin_label(*track) = muTruthOrigin;
+      }
     }
     return StatusCode::SUCCESS;
   }
