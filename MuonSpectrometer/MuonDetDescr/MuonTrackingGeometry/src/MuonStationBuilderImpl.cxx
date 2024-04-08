@@ -772,7 +772,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
                 if (vname == (*it).first->getLogVol()->getName() &&
                     m_gmBrowser.compareGeoVolumes(cv, (*it).first, 1.e-3) == 0)
                     break;
-                it++;
+                ++it;
             }
 
             if (it == sensitive.end()) {
@@ -811,7 +811,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
                 if (vname == (*it).first->getLogVol()->getName() &&
                     m_gmBrowser.compareGeoVolumes(cv, (*it).first, 1.e-3) == 0)
                     break;
-                it++;
+                ++it;
             }
 
             if (it == sensitive.end()) {
@@ -858,7 +858,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
                         m_gmBrowser.compareGeoVolumes(tv, (*it).first, 1.e-3) ==
                             0)
                         break;
-                    it++;
+                    ++it;
                 }
 
                 if (it == sensitive.end()) {
@@ -887,7 +887,7 @@ MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* m
                 if (vname == (*it).first->getLogVol()->getName() &&
                     m_gmBrowser.compareGeoVolumes(cv, (*it).first, 1.e-3) == 0)
                     break;
-                it++;
+                ++it;
             }
 
             if (it == sensitive.end()) {
