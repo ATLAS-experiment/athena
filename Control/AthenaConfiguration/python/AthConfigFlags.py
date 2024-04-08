@@ -517,7 +517,12 @@ class AthConfigFlags(object):
 
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
-        newFlags._renames[subsetToReplace] = replacementSubset
+        
+        if replacementSubset in newFlags._renames and newFlags._renames[replacementSubset]:
+            newFlags._renames[subsetToReplace] = newFlags._renames[replacementSubset]
+        else:
+            newFlags._renames[subsetToReplace] = replacementSubset
+        
         if not keepOriginal:
             newFlags._renames[replacementSubset] = "" # block access to original flags
         else:

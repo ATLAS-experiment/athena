@@ -332,6 +332,36 @@ class TestFlagsSetupDynamic(FlagsSetup):
         clonef.loadAllDynamicFlags()
         self.assertTrue(clonef.hasFlag('W.A'))
         self.assertFalse(clonef.hasFlag('Z.A'))
+        
+    def test_nonReplacingCloneExists(self):
+        clonef = self.flags.cloneAndReplace('W', 'Z', True)
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W.A'))
+        self.assertTrue(clonef.hasFlag('Z.A'))
+    
+    def test_nonReplacingMultiCloneExists(self):
+        clonef = self.flags.cloneAndReplace('W1', 'Z', True)
+        clonef = clonef.cloneAndReplace('W2', 'Z', True)
+        clonef = clonef.cloneAndReplace('W3', 'W1', True)
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W1.A'))
+        self.assertTrue(clonef.hasFlag('W2.A'))
+        self.assertTrue(clonef.hasFlag('W3.A'))
+        self.assertTrue(clonef.hasFlag('Z.A'))
+    
+    def test_complexClone(self):
+        clonef = self.flags.cloneAndReplace('W1', 'Z', True)
+        clonef = clonef.cloneAndReplace('W2', 'Z', True)
+        clonef = clonef.cloneAndReplace('W3', 'W1', True)
+        clonef = clonef.cloneAndReplace('W4', 'W1', False)
+        clonef = clonef.cloneAndReplace('W5', 'Z', False)
+        self.assertTrue(clonef.hasFlag('W2.A'))
+        self.assertTrue(clonef.hasFlag('W3.A'))
+        self.assertTrue(clonef.hasFlag('W4.A'))
+        self.assertTrue(clonef.hasFlag('W5.A'))
+        self.assertFalse(clonef.hasFlag('W1.A'))
+        self.assertFalse(clonef.hasFlag('Z.A'))
+        
 
     def test_cloneIter(self):
         # top level check
