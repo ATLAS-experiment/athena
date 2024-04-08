@@ -7,11 +7,16 @@
 
 #include "GaudiKernel/IService.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
-
-#include "Acts/Detector/Detector.hpp"
-
+#ifndef SIMULATIONBASE
+#   include "Acts/Detector/Detector.hpp"
+#endif
 #include <memory>
 
+namespace Acts{
+    namespace Experimental {
+        class Detector;
+    }
+}
 
 namespace ActsTrk{
     /** @brief Interface of the service providing the Acts::Detector which implements

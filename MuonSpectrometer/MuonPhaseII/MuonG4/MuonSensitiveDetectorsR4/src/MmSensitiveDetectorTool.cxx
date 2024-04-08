@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MmSensitiveDetectorTool.h"
 #include "MmSensitiveDetector.h"
@@ -15,6 +15,6 @@ StatusCode MmSensitiveDetectorTool::initialize() {
     return StatusCode::SUCCESS;
 }
 G4VSensitiveDetector* MmSensitiveDetectorTool::makeSD() const {
-  return new MmSensitiveDetector(name(), m_outputCollectionNames[0], m_detMgr);
+  return new MmSensitiveDetector(name(), m_outputCollectionNames[0], m_alignStoreKey, m_detMgr);
 }
 }

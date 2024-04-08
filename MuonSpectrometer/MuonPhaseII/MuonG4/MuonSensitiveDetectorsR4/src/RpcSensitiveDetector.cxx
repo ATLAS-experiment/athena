@@ -15,6 +15,7 @@
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GeoModelHelpers/throwExcept.h"
 
 using namespace MuonGMR4;
 using namespace CxxUtils;
@@ -28,11 +29,15 @@ namespace MuonG4R4 {
 
 RpcSensitiveDetector::RpcSensitiveDetector(const std::string& name, 
                                            const std::string& output_key,
+                                           const std::string& trf_storeKey,
                                            const MuonGMR4::MuonDetectorManager* detMgr):
     G4VSensitiveDetector{name},
     AthMessaging{name},
     m_writeHandle{output_key},
-    m_detMgr{detMgr} {}
+    m_trfCacheKey{trf_storeKey},
+    m_detMgr{detMgr} {
+    m_trfCacheKey.initialize().ignore();
+}
 
 void RpcSensitiveDetector::Initialize(G4HCofThisEvent*) {
   if (m_writeHandle.isValid()) {
@@ -41,8 +46,7 @@ void RpcSensitiveDetector::Initialize(G4HCofThisEvent*) {
   }
   if (!m_writeHandle.recordNonConst(std::make_unique<xAOD::MuonSimHitContainer>(),
                                     std::make_unique<xAOD::MuonSimHitAuxContainer>()).isSuccess()) {
-      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to record "<<m_writeHandle.fullKey());
-      throw std::runtime_error("Container saving is impossible");
+      THROW_EXCEPTION(" Failed to record "<<m_writeHandle.fullKey());
   }
   ATH_MSG_DEBUG("Output container "<<m_writeHandle.fullKey()<<" has been successfully created");
 }
@@ -67,6 +71,16 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   if (!readOutEle) {
       return false;
   }
+
+  ActsGeometryContext gctx{};
+
+  SG::ReadHandle<DetectorAlignStore> trfStoreHandle{m_trfCacheKey};
+  if (!trfStoreHandle.isValid()) {
+    ATH_MSG_FATAL("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
+    return false;
+  }
+  gctx.setStore(std::make_unique<DetectorAlignStore>(*trfStoreHandle));
+
   const Amg::Transform3D globalToLocal = getTransform(touchHist, 0).inverse();
   ATH_MSG_VERBOSE(" Track is inside volume "
                  <<touchHist->GetHistory()->GetTopVolume()->GetName()
@@ -86,14 +100,13 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   ATH_MSG_VERBOSE("Propagation to the gas gap center: "<<Amg::toString(locGapCross, 2));
   const Amg::Vector3D gapCenterCross = globalToLocal.inverse() * locGapCross;
 
-  const Identifier etaHitID = getIdentifier(readOutEle, 
-                                            gapCenterCross, false);
+  const Identifier etaHitID = getIdentifier(gctx, readOutEle, gapCenterCross, false);
   if (!etaHitID.is_valid()) {
       ATH_MSG_VERBOSE("No valid hit found");
       return true;
   }
   const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
-  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
+  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, etaHitID)};
   const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
   const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
   
@@ -102,9 +115,6 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       ATH_MSG_FATAL("The hit "<<Amg::toString(locHitPos)<<" doest not match "<<m_detMgr->idHelperSvc()->toString(etaHitID));
       throw std::runtime_error("Picked wrong gas gap");
   }
-
-  /// At the very last clear the cache of the readout element
-  readOutEle->releaseUnAlignedTrfs();
 
   xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
   m_writeHandle->push_back(hit);  
@@ -122,7 +132,8 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   return true;
 }
 
-Identifier RpcSensitiveDetector::getIdentifier(const MuonGMR4::RpcReadoutElement* readOutEle, 
+Identifier RpcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+                                               const MuonGMR4::RpcReadoutElement* readOutEle, 
                                                const Amg::Vector3D& hitAtGapPlane, bool phiGap) const {
   const RpcIdHelper& idHelper{m_detMgr->idHelperSvc()->rpcIdHelper()};
 
@@ -130,7 +141,7 @@ Identifier RpcSensitiveDetector::getIdentifier(const MuonGMR4::RpcReadoutElement
                                                   readOutEle->doubletZ(),
                                                   readOutEle->doubletPhi(), 1, phiGap, 1);
   
-  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(m_gctx, firstChan) * 
+  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(gctx, firstChan) * 
                                 hitAtGapPlane};
   const double gapHalfWidth = readOutEle->stripEtaLength() / 2;
   const double gapHalfLength = readOutEle->stripPhiLength()/ 2;
@@ -154,8 +165,7 @@ const MuonGMR4::RpcReadoutElement* RpcSensitiveDetector::getReadoutElement(const
    const std::vector<std::string> volumeTokens = tokenize(stationVolume, "_");
    ATH_MSG_VERBOSE("Name of the station volume is "<<stationVolume);
    if (volumeTokens.size() != 7) {
-      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Cannot deduce the station name from "<<stationVolume);
-      throw std::runtime_error("Invalid station Identifier");
+      THROW_EXCEPTION(" Cannot deduce the station name from "<<stationVolume);
    }
    /// Find the Detector element from the Identifier
     ///       <STATIONETA>_(<STATIONPHI>-1)_<DOUBLETR>_<DOUBLETPHI>_<DOUBLETZ>
@@ -171,10 +181,8 @@ const MuonGMR4::RpcReadoutElement* RpcSensitiveDetector::getReadoutElement(const
                                              stationEta, stationPhi, doubletR, doubletZ, doubletPhi);
    const RpcReadoutElement* readOutElem = m_detMgr->getRpcReadoutElement(detElId);
    if (!readOutElem) {
-      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to retrieve a valid detector element from "
+      THROW_EXCEPTION(" Failed to retrieve a valid detector element from "
                     <<m_detMgr->idHelperSvc()->toStringDetEl(detElId)<<" "<<stationVolume);
-      /// Keep the failure for the moment commented because there're few ID issues
-      /// throw std::runtime_error("Invalid detector Element");
    }
    return readOutElem;
 }

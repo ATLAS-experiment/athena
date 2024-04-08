@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcSensitiveDetectorTool.h"
 #include "TgcSensitiveDetector.h"
@@ -15,6 +15,6 @@ StatusCode TgcSensitiveDetectorTool::initialize() {
     return StatusCode::SUCCESS;
 }
 G4VSensitiveDetector* TgcSensitiveDetectorTool::makeSD() const {
-  return new TgcSensitiveDetector(name(), m_outputCollectionNames[0], m_detMgr);
+  return new TgcSensitiveDetector(name(), m_outputCollectionNames[0], m_alignStoreKey, m_detMgr);
 }
 }

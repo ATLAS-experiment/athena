@@ -16,6 +16,7 @@
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GeoModelHelpers/throwExcept.h"
 
 using namespace ActsTrk;
 
@@ -27,11 +28,15 @@ namespace MuonG4R4 {
 
 TgcSensitiveDetector::TgcSensitiveDetector(const std::string& name, 
                                            const std::string& output_key,
+                                           const std::string& trf_storeKey,
                                            const MuonGMR4::MuonDetectorManager* detMgr):
     G4VSensitiveDetector{name},
     AthMessaging{name},
     m_writeHandle{output_key},
-    m_detMgr{detMgr} {}
+    m_trfCacheKey{trf_storeKey},
+    m_detMgr{detMgr} {
+    m_trfCacheKey.initialize().ignore();
+}
 
 void TgcSensitiveDetector::Initialize(G4HCofThisEvent*) {
   if (m_writeHandle.isValid()) {
@@ -40,8 +45,7 @@ void TgcSensitiveDetector::Initialize(G4HCofThisEvent*) {
   }
   if (!m_writeHandle.recordNonConst(std::make_unique<xAOD::MuonSimHitContainer>(),
                                     std::make_unique<xAOD::MuonSimHitAuxContainer>()).isSuccess()) {
-      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to record "<<m_writeHandle.fullKey());
-      throw std::runtime_error("Container saving is impossible");
+      THROW_EXCEPTION("Failed to record "<<m_writeHandle.fullKey());
   }
   ATH_MSG_DEBUG("Output container "<<m_writeHandle.fullKey()<<" has been successfully created");
 }
@@ -66,6 +70,14 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     if (!readOutEle) {
        return false;
     }
+    ActsGeometryContext gctx{};
+
+    SG::ReadHandle<DetectorAlignStore> trfStoreHandle{m_trfCacheKey};
+    if (!trfStoreHandle.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
+      return false;
+    }
+    gctx.setStore(std::make_unique<DetectorAlignStore>(*trfStoreHandle));
     
     const Amg::Transform3D globalToLocal = getTransform(currentTrack->GetTouchable(), 0).inverse();
     ATH_MSG_VERBOSE(" Track is inside volume "
@@ -86,14 +98,14 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     ATH_MSG_VERBOSE("Extrpolated by "<<(*travelDist)<<" mm to the gasGap center "<<Amg::toString(lPosAtGap, 2));
     
     const Amg::Vector3D gapCenterCross = globalToLocal.inverse() * lPosAtGap;
-    const Identifier etaHitID = getIdentifier(readOutEle, gapCenterCross, false);
+    const Identifier etaHitID = getIdentifier(gctx, readOutEle, gapCenterCross, false);
     if (!etaHitID.is_valid()) {
         ATH_MSG_VERBOSE("No valid hit found");
         return true;
     }
     
     const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
-    const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
+    const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, etaHitID)};
     const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
     const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
     
@@ -137,17 +149,18 @@ const MuonGMR4::TgcReadoutElement* TgcSensitiveDetector::getReadoutElement(const
     bool isValid{false};
     const Identifier stationId = idHelper.elementID(stationName, stationEta, stationPhi,  isValid);
     if (!isValid) {
-       throw std::runtime_error("Failed to deduce station name from "+stationVolume);
+       THROW_EXCEPTION("Failed to deduce station name from "+stationVolume);
     }
     return m_detMgr->getTgcReadoutElement(stationId);
 }
 
-Identifier TgcSensitiveDetector::getIdentifier(const MuonGMR4::TgcReadoutElement* readOutEle, 
+Identifier TgcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+                                               const MuonGMR4::TgcReadoutElement* readOutEle, 
                                                const Amg::Vector3D& hitAtGapPlane, bool phiGap) const {
     const TgcIdHelper& idHelper{m_detMgr->idHelperSvc()->tgcIdHelper()};
     const Identifier firstChan = idHelper.channelID(readOutEle->identify(), 1, phiGap, 1);
  
-    const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(m_gctx, firstChan) * hitAtGapPlane};   
+    const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(gctx, firstChan) * hitAtGapPlane};   
   
     const int gasGap = std::round(std::abs(locHitPos.z()) /  readOutEle->gasGapPitch()) + 1;
     ATH_MSG_VERBOSE("Detector element: "<<m_detMgr->idHelperSvc()->toStringDetEl(firstChan)

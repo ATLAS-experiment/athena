@@ -2,7 +2,7 @@
 from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg, PhysicsListSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
-from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg, SimHitContainerListCfg
+from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg, SimHitContainerListCfg, InputContainerListCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
 from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata, readSimulationParameters
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -31,12 +31,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     ## Don"t drop the GeoModel
     kwargs.setdefault("ReleaseGeoModel", flags.Sim.ReleaseGeoModel)
-    from SimulationConfig.SimEnums import LArParameterization
-    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
-        kwargs.setdefault("ExtraInputs",
-                          {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'),
-                           ('LArfSamplSym', 'ConditionStore+LArfSamplSym'),
-                           ('TileSamplingFraction', 'ConditionStore+TileSamplingFraction')})
+    kwargs.setdefault("ExtraInputs", InputContainerListCfg(flags))
     kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags))
     ## Record the particle flux during the simulation
     kwargs.setdefault("RecordFlux", flags.Sim.RecordFlux)

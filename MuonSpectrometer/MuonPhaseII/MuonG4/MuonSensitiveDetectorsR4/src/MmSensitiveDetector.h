@@ -33,9 +33,17 @@ class MmSensitiveDetector : public G4VSensitiveDetector, public AthMessaging {
 
 
 public:
-     /** construction/destruction */
-    MmSensitiveDetector(const std::string& name, const std::string& output_key,
-                         const MuonGMR4::MuonDetectorManager* detMgr);
+    /** @brief Constructor
+     *  @param name: Name of the Sensitive detctor / AthMessaging module
+     *  @param output_key: Key under which the sim hits are written into store gate
+     *  @param trf_storeKey: Location of the DetctorAlignmentStore holding the transformations per event
+     *  @param detMgr: Pointer to the run-4 detector manager
+    */
+    MmSensitiveDetector(const std::string& name, 
+                        const std::string& output_key,
+                        const std::string& trf_storKey,
+                        const MuonGMR4::MuonDetectorManager* detMgr);
+ 
     ~MmSensitiveDetector()=default;
     
     /** member functions */
@@ -45,14 +53,23 @@ public:
     
 private:
     /// Retrieves the matching readout element to a G4 hit
-    const MuonGMR4::MmReadoutElement* getReadoutElement(const G4TouchableHistory* touchHist) const;
-    Identifier getIdentifier(const MuonGMR4::MmReadoutElement* readOutEle, const Amg::Vector3D& hitAtGapPlane) const;
-    /* For the moment use write handles because the sensitive detectors are 
+    const MuonGMR4::MmReadoutElement* getReadoutElement(const ActsGeometryContext& gctx,
+                                                        const G4TouchableHistory* touchHist) const;
+    /// Identify the gasGap layer of the hit
+    Identifier getIdentifier(const ActsGeometryContext& gctx,
+                             const MuonGMR4::MmReadoutElement* readOutEle, 
+                             const Amg::Vector3D& hitAtGapPlane) const;
+    /* 
+     *  For the moment use write handles because the sensitive detectors are 
      *  managed by a service which must not have a data dependency
     */
     SG::WriteHandle<xAOD::MuonSimHitContainer> m_writeHandle;
-    /// Pointer to the acts Geometry context
-    const ActsGeometryContext m_gctx{};
+    /**
+     *  ReadHandleKey to the DetectorAlignmentStore caching
+     *  the relevant transformations needed in this event
+    */
+    SG::ReadHandleKey<ActsTrk::DetectorAlignStore> m_trfCacheKey;
+
     /// Pointer to the underlying detector manager
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
    

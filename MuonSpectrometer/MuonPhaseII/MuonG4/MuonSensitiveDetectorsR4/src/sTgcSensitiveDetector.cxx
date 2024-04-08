@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcSensitiveDetector.h"
@@ -15,6 +15,7 @@
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GeoModelHelpers/throwExcept.h"
 
 
 using namespace MuonGMR4;
@@ -30,11 +31,15 @@ namespace MuonG4R4 {
 
 sTgcSensitiveDetector::sTgcSensitiveDetector(const std::string& name, 
                                              const std::string& output_key,
+                                             const std::string& trf_storeKey,
                                              const MuonGMR4::MuonDetectorManager* detMgr):
     G4VSensitiveDetector{name},
     AthMessaging{name},
     m_writeHandle{output_key},
-    m_detMgr{detMgr} {}
+    m_trfCacheKey{trf_storeKey},
+    m_detMgr{detMgr} {
+      m_trfCacheKey.initialize().ignore();
+}
 
 void sTgcSensitiveDetector::Initialize(G4HCofThisEvent*) {
   if (m_writeHandle.isValid()) {
@@ -43,8 +48,7 @@ void sTgcSensitiveDetector::Initialize(G4HCofThisEvent*) {
   }
   if (!m_writeHandle.recordNonConst(std::make_unique<xAOD::MuonSimHitContainer>(),
                                     std::make_unique<xAOD::MuonSimHitAuxContainer>()).isSuccess()) {
-      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to record "<<m_writeHandle.fullKey());
-      throw std::runtime_error("Container saving is impossible");
+      THROW_EXCEPTION(" Failed to record "<<m_writeHandle.fullKey());
   }
   ATH_MSG_DEBUG("Output container "<<m_writeHandle.fullKey()<<" has been successfully created");
 }
@@ -65,8 +69,21 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   if (currentTrack->GetVelocity() < velCutOff) return true;
 
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(currentTrack->GetTouchable());
-  const MuonGMR4::sTgcReadoutElement* readOutEle = getReadoutElement(touchHist);
- 
+  
+  ActsGeometryContext gctx{};
+
+  SG::ReadHandle<DetectorAlignStore> trfStoreHandle{m_trfCacheKey};
+  if (!trfStoreHandle.isValid()) {
+    ATH_MSG_FATAL("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");
+    return false;
+  }
+  gctx.setStore(std::make_unique<DetectorAlignStore>(*trfStoreHandle));
+
+
+  const MuonGMR4::sTgcReadoutElement* readOutEle = getReadoutElement(gctx, touchHist);
+  
+
+
   const Amg::Transform3D globalToLocal = getTransform(touchHist, 0).inverse();
   ATH_MSG_VERBOSE(" Track is inside volume "
                  << touchHist->GetHistory()->GetTopVolume()->GetName()
@@ -86,25 +103,21 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   ATH_MSG_VERBOSE("Propagation to the gas gap center: "<<Amg::toString(locGapCross, 2));
   const Amg::Vector3D gapCenterCross = globalToLocal.inverse() * locGapCross;
 
-  const Identifier etaHitID = getIdentifier(readOutEle, 
+  const Identifier etaHitID = getIdentifier(gctx, readOutEle, 
                                             gapCenterCross, sTgcIdHelper::Strip);
   if (!etaHitID.is_valid()) {
       ATH_MSG_VERBOSE("No valid hit found");
       return true;
   }
   const double globalTime = currentTrack->GetGlobalTime() + (*travelDist) / currentTrack->GetVelocity();
-  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
+  const Amg::Transform3D gapTrans{readOutEle->globalToLocalTrans(gctx, etaHitID)};
   const Amg::Vector3D locHitDir = gapTrans.linear() * Amg::Hep3VectorToEigen(currentTrack->GetMomentumDirection());
   const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
   /// Final check that the hit is located at zero
   if (std::abs(locHitPos.z()) > tolerance) {
-      ATH_MSG_FATAL("The hit "<<Amg::toString(locHitPos)<<" doest not match "<<m_detMgr->idHelperSvc()->toString(etaHitID));
-      throw std::runtime_error("Picked wrong gas gap");
+      THROW_EXCEPTION("The hit "<<Amg::toString(locHitPos)<<" doest not match "<<m_detMgr->idHelperSvc()->toString(etaHitID)
+                      <<"Wrong gas gap picked");
   }
-
-  /// At the very last clear the cache of the readout element
-  readOutEle->releaseUnAlignedTrfs();
-
 
   xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
   m_writeHandle->push_back(hit);  
@@ -122,7 +135,8 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   return true;
 }
 
-Identifier sTgcSensitiveDetector::getIdentifier(const MuonGMR4::sTgcReadoutElement* readOutEle, 
+Identifier sTgcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+                                                const MuonGMR4::sTgcReadoutElement* readOutEle, 
                                                 const Amg::Vector3D& hitAtGapPlane, 
                                                 sTgcIdHelper::sTgcChannelTypes chType) const {
 
@@ -130,18 +144,17 @@ Identifier sTgcSensitiveDetector::getIdentifier(const MuonGMR4::sTgcReadoutEleme
   const Identifier firstChan = idHelper.channelID(readOutEle->identify(),
                                                   readOutEle->multilayer(), 1, chType, 1);
   
-  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(m_gctx, firstChan) * hitAtGapPlane};
+  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(gctx, firstChan) * hitAtGapPlane};
   ATH_MSG_VERBOSE("Detector element: "<<m_detMgr->idHelperSvc()->toStringDetEl(firstChan)
                 <<" locPos: "<<Amg::toString(locHitPos, 2)
                 <<" gap thickness "<<readOutEle->gasGapPitch()
                 <<" gasGap: "<< (std::abs(locHitPos.z()) /  readOutEle->gasGapPitch()) + 1);
   
   const int gasGap = std::round(std::abs(locHitPos.z()) /  readOutEle->gasGapPitch()) + 1;
-  return idHelper.channelID(readOutEle->identify(),
-                            readOutEle->multilayer(),
-                            gasGap, chType, 1);
+  return idHelper.channelID(readOutEle->identify(),readOutEle->multilayer(), gasGap, chType, 1);
 }
-const MuonGMR4::sTgcReadoutElement* sTgcSensitiveDetector::getReadoutElement(const G4TouchableHistory* touchHist) const {
+const MuonGMR4::sTgcReadoutElement* sTgcSensitiveDetector::getReadoutElement(const ActsGeometryContext& gctx,
+                                                                             const G4TouchableHistory* touchHist) const {
    
    
    /// The fourth volume is the envelope volume of the NSW station. It will tell us the sector and station eta
@@ -150,8 +163,7 @@ const MuonGMR4::sTgcReadoutElement* sTgcSensitiveDetector::getReadoutElement(con
    const std::vector<std::string> volumeTokens = tokenize(stationVolume.substr(stationVolume.rfind("Q")), "_");
    ATH_MSG_VERBOSE("Name of the station volume is "<<volumeTokens);
    if (volumeTokens.size() != 4) {
-      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Cannot deduce the station name from "<<stationVolume);
-      throw std::runtime_error("Invalid station Identifier");
+      THROW_EXCEPTION("Cannot deduce the station name from "<<stationVolume);
    }
    /// Find the Detector element from the Identifier  
    const std::string stName = volumeTokens[0][1] == 'S' ? "STS" : "STL";
@@ -165,15 +177,14 @@ const MuonGMR4::sTgcReadoutElement* sTgcSensitiveDetector::getReadoutElement(con
    const sTgcReadoutElement* readOutElemMl1 = m_detMgr->getsTgcReadoutElement(detElIdMl1);
    const sTgcReadoutElement* readOutElemMl2 = m_detMgr->getsTgcReadoutElement(detElIdMl2);
    if (!readOutElemMl1 || !readOutElemMl2) {
-      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to retrieve a valid detector element from "
+      THROW_EXCEPTION("Failed to retrieve a valid detector element from "
                     <<m_detMgr->idHelperSvc()->toStringDetEl(detElIdMl1)<<" "<<stationVolume);
-      throw std::runtime_error("Invalid detector Element");
    }
    /// retrieve the translation of the transformation going into the current current gasVolume
    const Amg::Vector3D transformCenter = getTransform(touchHist, 0).translation();
    /// Let's use the position of the first gasGap in the second quad as a reference. If the
    /// absolute z value is smaller than its z value the hit must be located in quad number one
-   const Amg::Vector3D centerMl2 = readOutElemMl2->center(m_gctx, detElIdMl2);
+   const Amg::Vector3D centerMl2 = readOutElemMl2->center(gctx, detElIdMl2);
    return std::abs(centerMl2.z())  - tolerance <= std::abs(transformCenter.z()) ? readOutElemMl2 : readOutElemMl1;
 }
 }

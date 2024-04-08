@@ -271,6 +271,17 @@ def SimHitContainerListCfg(flags):
 
     return writtenContainers
 
+def InputContainerListCfg(flags):
+    dependencies = []
+    from SimulationConfig.SimEnums import LArParameterization
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        dependencies+=[('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'),
+                       ('LArfSamplSym', 'ConditionStore+LArfSamplSym'),
+                       ('TileSamplingFraction', 'ConditionStore+TileSamplingFraction')]
+    from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import MuonDependenciesCfg
+    dependencies += MuonDependenciesCfg(flags)
+    return dependencies
+
 def SensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
     tools = []

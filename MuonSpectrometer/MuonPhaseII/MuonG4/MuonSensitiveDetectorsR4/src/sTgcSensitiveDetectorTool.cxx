@@ -15,6 +15,6 @@ StatusCode sTgcSensitiveDetectorTool::initialize() {
     return StatusCode::SUCCESS;
 }
 G4VSensitiveDetector* sTgcSensitiveDetectorTool::makeSD() const {
-  return new sTgcSensitiveDetector(name(), m_outputCollectionNames[0], m_detMgr);
+  return new sTgcSensitiveDetector(name(), m_outputCollectionNames[0], m_alignStoreKey, m_detMgr);
 }
 }
