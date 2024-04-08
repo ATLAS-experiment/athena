@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 Main configuration of flavour tagging algorithms.
 The low and high level tagging algorithms are scheduled here.
@@ -116,9 +116,11 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
 
 
 def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow']):
+    """
+    Run flavour tagging algorithms during reconstruction (AOD or ESD production).
+    """
 
-
-    result=ComponentAccumulator()
+    result = ComponentAccumulator()
  
     if inputFlags.Reco.EnableHI:   
         JetCollection=['AntiKt4HI']     
@@ -149,10 +151,8 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
 
     # By default, in Run3 we don't write out BTagging containers in AOD or ESD
     # following allows to write them out when using Reco_tf.py --CA run 3 style configuration
-
     if inputFlags.Output.doWriteAOD and inputFlags.Jet.WriteToAOD:
      result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=True, toESD=False))
-
     if inputFlags.Output.doWriteESD:
      result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=False, toESD=True))
 
@@ -163,7 +163,6 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
         BTaggingAODList = _track_measurement_list('JetAssociatedPixelClusters')
         BTaggingAODList += _track_measurement_list('JetAssociatedSCTClusters')
         result.merge(addToAOD(inputFlags, BTaggingAODList))
-
     if inputFlags.BTagging.savePixelHits:
         result.merge(JetHitAssociationCfg(inputFlags))
         result.merge(TrackHitAssignementAlg(inputFlags))

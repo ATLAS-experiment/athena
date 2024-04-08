@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -17,7 +17,7 @@ PFLOW_JETS = 'AntiKt4EMPFlowJets'
 def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
                           trackAugmenterPrefix=None):
     """
-    Return a component accumulator which runs tagging in derivations.
+    Run flavour tagging in derivations.
     Configures several jet collections at once.
     """
 
@@ -40,22 +40,26 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
             RenameInputContainerEmPflowHacksCfg('tracklessAODVersion')
         )
 
-    #Treating decoration of large-R jets as a special case
+    # decorate tracks with detailed truth info and reco lepton info
+    acc.merge(trackTruthDecorator(cfgFlags))
+    acc.merge(trackLeptonDecorator(cfgFlags))
+
+    # Treat large-R jets as a special case
     largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-
     if largeRJetCollection in jet_cols:
-        jet_col_name_without_Jets = largeRJetCollection.replace('Jets','')
-        nnFiles = GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets)
-
-        acc.merge(BTagLargeRDecoration(cfgFlags, nnFiles, largeRJetCollection))
+        acc.merge(BTagLargeRDecoration(cfgFlags, largeRJetCollection))
         jet_cols.remove(largeRJetCollection)
 
+    # Run flavour tagging on each jet collection
     for jet_col, pv_col in zip(jet_cols, pv_cols):
+
+        # pflow jets need the jet fold hash to run GN2v01
         if jet_col == PFLOW_JETS:
             acc.merge(FoldDecoratorCfg(cfgFlags, jetCollection=jet_col))
-
+        
+        # Run flavour tagging on this jet collection
         acc.merge(
-            getFtagComponent(
+            tagSingleJetCollection(
                 cfgFlags, jet_col, pv_col,
                 trackAugmenterPrefix=trackAugmenterPrefix
             )
@@ -63,7 +67,11 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
 
     return acc
 
-def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'):
+
+def BTagLargeRDecoration(cfgFlags, jet_col):
+
+    jet_col_name_without_Jets = jet_col.replace('Jets', '')
+    nnFiles = GetTaggerTrainingMap(cfgFlags, jet_col_name_without_Jets)
 
     # Doesn't need to be configurable at the moment
     trackContainer = 'GhostTrack'
@@ -71,7 +79,6 @@ def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBet
     variableRemapping = {'BTagTrackToJetAssociator': trackContainer}
 
     acc = ComponentAccumulator()
-
     acc.merge(BTagTrackAugmenterAlgCfg(
         cfgFlags,
         TrackCollection='InDetTrackParticles',
@@ -84,8 +91,8 @@ def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBet
 
         acc.addEventAlgo(
             CompFactory.FlavorTagDiscriminants.JetTagDecoratorAlg(
-                f'{jet_name}{tagger_name}JetTagAlg',
-                container=jet_name,
+                f'{jet_col}{tagger_name}JetTagAlg',
+                container=jet_col,
                 constituentContainer=trackContainer,
                 decorator=CompFactory.FlavorTagDiscriminants.GNNTool(
                     tagger_name,
@@ -99,18 +106,16 @@ def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBet
     return acc
 
 
-
-def getFtagComponent(cfgFlags, jet_col, pv_col,
-                     trackAugmenterPrefix=None):
+def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
+                           trackAugmenterPrefix=None):
     """
     Return a component accumulator which runs tagging on a single jet collection.
     """ 
 
     jet_col_name_without_Jets = jet_col.replace('Jets','')
-    track_collection = 'InDetTrackParticles'
+    track_collection = _getTrackCollection(cfgFlags)
     input_muons = 'Muons'
     if cfgFlags.BTagging.Pseudotrack:
-        track_collection = 'InDetPseudoTrackParticles'
         input_muons = None
 
     acc = ComponentAccumulator()
@@ -121,41 +126,7 @@ def getFtagComponent(cfgFlags, jet_col, pv_col,
         prefix=trackAugmenterPrefix
     ))
 
-    # decorate tracks with lepton info                                                                                            
-    electronID_tool = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(cfgFlags,
-                                                                        name = "electronID_tool",
-                                                                        quality = LikeEnum.VeryLoose))
-
-    muonID_tool = acc.popToolsAndMerge(MuonSelectionToolCfg(cfgFlags,
-                                                            name = "muonID_tool",
-                                                            MuQuality = 2,          #Loose muon selection
-                                                            MaxEta = 2.5))
-    
-    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackLeptonDecoratorAlg(
-        'TrackLeptonDecoratorAlg',
-        trackContainer=track_collection,
-        electronSelectionTool = electronID_tool,
-        muonSelectionTool = muonID_tool,
-    ))
-
-    # decorate detailed truth info
-    if cfgFlags.Input.isMC:
-        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
-            InDetTrackTruthOriginToolCfg,
-        )
-        trackTruthOriginTool = acc.popToolsAndMerge(InDetTrackTruthOriginToolCfg(cfgFlags))
-
-        acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TruthParticleDecoratorAlg(
-            'TruthParticleDecoratorAlg',
-            trackTruthOriginTool=trackTruthOriginTool
-        ))
-        acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
-            'TrackTruthDecoratorAlg',
-            trackContainer=track_collection,
-            trackTruthOriginTool=trackTruthOriginTool
-        ))
-
-    # schedule tagging algorithms
+    # schedule tagging algorithms for this jet collection
     acc.merge(BTagAlgsCfg(
         inputFlags=cfgFlags,
         JetCollection=jet_col_name_without_Jets,
@@ -168,6 +139,55 @@ def getFtagComponent(cfgFlags, jet_col, pv_col,
     ))
 
     return acc
+
+
+def trackLeptonDecorator(cfgFlags) -> ComponentAccumulator:
+    """Decorate tracks with information about reconstructed leptons"""
+    acc = ComponentAccumulator()
+
+    electronID_tool = acc.popToolsAndMerge(
+        AsgElectronLikelihoodToolCfg(cfgFlags, name="ftagElectronID", quality=LikeEnum.VeryLoose)
+    )
+    muonID_tool = acc.popToolsAndMerge( # loose quality selection
+        MuonSelectionToolCfg(cfgFlags, name="ftagMuonID", MuQuality=2, MaxEta=2.5) 
+    )
+    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackLeptonDecoratorAlg(
+        'TrackLeptonDecoratorAlg',
+        trackContainer=_getTrackCollection(cfgFlags),
+        electronSelectionTool=electronID_tool,
+        muonSelectionTool=muonID_tool,
+    ))
+
+    return acc
+
+
+def trackTruthDecorator(cfgFlags) -> ComponentAccumulator:
+    """Decorate tracks with detailed truth information."""
+    acc = ComponentAccumulator()
+    if not cfgFlags.Input.isMC:
+        return acc
+
+    from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
+        InDetTrackTruthOriginToolCfg,
+    )
+    trackTruthOriginTool = acc.popToolsAndMerge(InDetTrackTruthOriginToolCfg(cfgFlags))
+    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TruthParticleDecoratorAlg(
+        'TruthParticleDecoratorAlg',
+        trackTruthOriginTool=trackTruthOriginTool
+    ))
+    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
+        'TrackTruthDecoratorAlg',
+        trackContainer=_getTrackCollection(cfgFlags),
+        trackTruthOriginTool=trackTruthOriginTool
+    ))
+
+    return acc
+
+
+def _getTrackCollection(cfgFlags):
+    if cfgFlags.BTagging.Pseudotrack:
+        return 'InDetPseudoTrackParticles'
+    return 'InDetTrackParticles'
 
 
 # Valerio's magic hacks for emtopo
