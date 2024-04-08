@@ -105,17 +105,11 @@ StatusCode DiTauTrackFinder::execute(DiTauCandidateData * data,
     }
   }
     
-  // check if ditau candidate has still at least 2 subjets or 1 subjet plus an electron or muon
-  if (vSubjets.empty()) {
-    ATH_MSG_DEBUG("Found no subjet with track. Reject ditau candidate");
+  // check if ditau candidate has still at least 2 subjets
+  if (vSubjets.size()<=1) {
+    ATH_MSG_DEBUG("Found less than 2 subjets. Reject ditau candidate");
     return StatusCode::FAILURE;
-  }
-  if (vSubjets.size()==1) {
-    if (data->electrons.empty() && data->muons.empty()) {
-      ATH_MSG_DEBUG("Found 1 subjet with track, but no additional electron or muon. Reject ditau candidate");
-      return StatusCode::FAILURE;
-    }
-  }
+  }	  
 
   data->subjets = vSubjets;
   ATH_MSG_DEBUG("number of subjets  after track association: " << data->subjets.size());

@@ -20,21 +20,6 @@ def SubjetBuilderCfg(ConfigFlags, name="DiTauRec_SubjetBuilder", **kwargs):
     acc.setPrivateTools(CompFactory.SubjetBuilder(name, **kwargs))
     return acc
 
-
-def ElMuFinderCfg(ConfigFlags, name = "DiTauRec_ElMuFinder", **kwargs):
-    """Configure the ElMuFinder"""
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("ElectronContainer", "Electrons")
-    kwargs.setdefault("MuonContainer", "Muons")
-    kwargs.setdefault("ElectronMinPt", 7000)
-    kwargs.setdefault("ElectronMaxEta", 2.47)
-    kwargs.setdefault("MuonMinPt", 7000)
-    kwargs.setdefault("MuonMaxEta", 2.7)
-
-    acc.setPrivateTools(CompFactory.ElMuFinder(name, **kwargs))
-    return acc
-
 def TVAToolCfg(ConfigFlags, name="TVATool_forDiTaus", **kwargs):
     """Configure the TVA tool"""
     acc = ComponentAccumulator()

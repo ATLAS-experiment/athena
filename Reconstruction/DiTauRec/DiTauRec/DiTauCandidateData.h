@@ -10,8 +10,6 @@
 #include "xAODTau/DiTauJetAuxContainer.h"
 #include "fastjet/PseudoJet.hh"
 
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODMuon/MuonContainer.h"
 #include "CaloEvent/CaloCell.h"
 
 class DiTauCandidateData {
@@ -24,9 +22,6 @@ class DiTauCandidateData {
   const xAOD::JetContainer* seedContainer;
   std::vector<fastjet::PseudoJet> subjets;
   std::vector<const CaloCell*> subjetCells;
-
-  std::vector<const xAOD::Electron*> electrons;
-  std::vector<const xAOD::Muon*> muons;
 
   float Rjet;
   float Rsubjet;

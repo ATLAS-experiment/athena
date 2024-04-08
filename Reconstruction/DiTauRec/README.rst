@@ -30,8 +30,6 @@ Additionally, a multi-variate di-tau identification algorithm is under developme
 These are filtered for subjets. 
 A candidate for a full-hadronic tau pair decay should include at least two subjets, while 
 each subjet has to include at least one track. 
-For semi-leptonic tau pair decays also one subjet plus an electron or muon candidate within
-the seed jet area is allowed.
 
 A general introduction into di-tau tagging in ATLAS can be found in my `master thesis <https://cds.cern.ch/record/2105592>`_. 
 Some slides about the general implementation can be found `here <https://indico.cern.ch/event/441941/session/1/contribution/7/attachments/1157918/1666256/15-09-22-TauWorkshop.pdf>`_.
@@ -67,7 +65,6 @@ These tools are applied in the following order:
 
 * `SeedJetBuilder <src/SeedJetBuilder.cxx>`_ (stores seed jet information in 
   DiTauCandidateData)
-* `ElMuFinder <src/ElMuFinder.cxx>`_ (searches for electrons and muons inside the seed jet)
 * `SubjetBuilder <src/SubjetBuilder.cxx>`_ (reconstructs subjets within the seed jet)
 * `VertexFinder <src/VertexFinder.cxx>`_ (finds the most likely primary vertex)
 * `DiTauTrackFinder <src/DiTauTrackFinder.cxx>`_ (associates tracks to the seed jet and checks quality criteria)
@@ -91,8 +88,6 @@ By applying a high cut on the seed jet pT only di-tau candidates in the interest
 *  Jet pT > 300 GeV
 *  Subjet pT > 15 GeV, nTracks > 1, n < 5
 *  Track pT > 1 GeV, IPd0Max = 1, IPz0Max = 1.5
-*  Electron pT > 7 GeV, \|eta\| < 2.47, author: Electron or Ambiguous
-*  Muon pT > 7 GeV, \|eta\| < 2.47, muon quality = 2 (MuonSelectionTool)
 
 |
 
