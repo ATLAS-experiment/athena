@@ -85,9 +85,6 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
         IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
         skimmingTools.append(IDTRKVALID_ANDTool)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        "IDTRKVALIDKernelPresel", SkimmingTools=skimmingTools))
-
     # ====================================================================
     # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS
     # ====================================================================
@@ -112,18 +109,6 @@ def IDTRKVALID_PixelModuleStatus_KernelCfg(
     DFEI = acc.getPrimaryAndMerge(EventInfoPixelModuleStatusMonitoringCfg(flags))
     augmentationTools.append(DFEI)
 
-    skimmingTools = []
-    if flags.InDet.DRAWZSelection:
-        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
-        skimmingTools.append(IDTRKVALID_ANDTool)
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools = augmentationTools,
-        SkimmingTools     = skimmingTools,
-        ThinningTools     = [],
-        RunSkimmingFirst  = True))
-
     return acc
 
 def IDTRKVALID_ITkPixelModuleStatus_KernelCfg(
@@ -137,18 +122,6 @@ def IDTRKVALID_ITkPixelModuleStatus_KernelCfg(
     DFEI = acc.getPrimaryAndMerge(
         ITkEventInfoPixelModuleStatusMonitoringCfg(flags))
     augmentationTools.append(DFEI)
-
-    skimmingTools = []
-    if flags.InDet.DRAWZSelection:
-        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
-        skimmingTools.append(IDTRKVALID_ANDTool)
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools = augmentationTools,
-        SkimmingTools     = skimmingTools,
-        ThinningTools     = [],
-        RunSkimmingFirst  = True))
 
     return acc
 

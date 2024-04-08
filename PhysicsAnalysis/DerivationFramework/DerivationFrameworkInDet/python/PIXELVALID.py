@@ -49,10 +49,13 @@ def PIXELVALID_ANDToolCfg(flags, name='PIXELVALID_ANDTool'):
 def PIXELVALID_ZTAUTAUCfg(flags, name='PIXELVALID_ZTAUTAU'):
     acc = ComponentAccumulator()
 
-    sel_mu = '(Muons.pt > 29*GeV) && Muons.passesIDCuts'
+#    sel_mu = '(Muons.pt > 29*GeV) && Muons.passesIDCuts'
+    sel_mu = '(Muons.pt > 10*GeV) && Muons.passesIDCuts'
     muRequirement = '( count( '+sel_mu+'  ) == 1 )'
-    sel_tau       = '(TauJets.pt > 30.0*GeV) && (TauJets.RNNJetScoreSigTrans>0.55) && ( TauJets.nTracks == 3)'
-    tauRequirement = '( count( '+sel_tau+'  ) == 1 )'
+#    sel_tau       = '(TauJets.pt > 30.0*GeV) && (TauJets.RNNJetScoreSigTrans>0.55) && ( TauJets.nTracks == 3)'
+    sel_tau       = '(TauJets.pt > 10.0*GeV)'
+#    tauRequirement = '( count( '+sel_tau+'  ) == 1 )'
+    tauRequirement = '( count( '+sel_tau+'  ) > 0 )'
     draw_taumuh =  muRequirement+' && '+tauRequirement
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (xAODStringSkimmingToolCfg)
     PIXELVALID_ZTAUTAU = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(flags, 
@@ -90,6 +93,10 @@ def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernel'):
         Z0SGEntryName="PIXELVALIDInDetTrackZ0AtPV"))
     augmentationTools.append(DFCommonZ0AtPV)
 
+    from DerivationFrameworkInDet.PixelNtupleMakerConfig import (EventInfoPixelModuleStatusMonitoringCfg)
+    DFEI = acc.getPrimaryAndMerge(EventInfoPixelModuleStatusMonitoringCfg(flags))
+    augmentationTools.append(DFEI)
+
     # ====================================================================
     # SKIMMING TOOLS
     # ====================================================================
@@ -102,37 +109,9 @@ def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernel'):
         PIXELVALID_ZTAUTAU = acc.getPrimaryAndMerge(PIXELVALID_ZTAUTAUCfg(flags))
         skimmingTools.append(PIXELVALID_ZTAUTAU)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("PIXELVALIDKernelPresel", SkimmingTools=skimmingTools))
-
     # ====================================================================
     # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS
     # ====================================================================
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools = augmentationTools,
-        SkimmingTools     = skimmingTools,
-        ThinningTools     = [],
-        RunSkimmingFirst  = True))
-
-    return acc
-
-def PIXELVALID_PixelModuleStatus_KernelCfg(flags, name='PIXELVALID_PixelModuleStatus_Kernel'):
-    acc = ComponentAccumulator()
-
-    augmentationTools = []
-    from DerivationFrameworkInDet.PixelNtupleMakerConfig import (EventInfoPixelModuleStatusMonitoringCfg)
-    DFEI = acc.getPrimaryAndMerge(EventInfoPixelModuleStatusMonitoringCfg(flags))
-    augmentationTools.append(DFEI)
-
-    skimmingTools = []
-#    if flags.InDet.DRAWZSelection:
-#        PIXELVALID_ANDTool = acc.getPrimaryAndMerge(PIXELVALID_ANDToolCfg(flags))
-#        skimmingTools.append(PIXELVALID_ANDTool)
-#
-#    if flags.InDet.PixelDumpMode==3:
-#        PIXELVALID_ZTAUTAU = acc.getPrimaryAndMerge(PIXELVALID_ZTAUTAUCfg(flags))
-#        skimmingTools.append(PIXELVALID_ZTAUTAU)
-
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
         AugmentationTools = augmentationTools,
@@ -171,8 +150,6 @@ def PIXELVALIDKernelCfg(flags, StreamName=""):
     acc.addSequence(seqAND(PIXELVALIDSequenceName))
 
     acc.merge(PIXELVALIDKernelCommonCfg(flags),sequenceName=PIXELVALIDSequenceName)
-
-    acc.merge(PIXELVALID_PixelModuleStatus_KernelCfg(flags),sequenceName=PIXELVALIDSequenceName)
 
     from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPrepDataToxAODCfg
     acc.merge(InDetPrepDataToxAODCfg(flags),sequenceName=PIXELVALIDSequenceName)
