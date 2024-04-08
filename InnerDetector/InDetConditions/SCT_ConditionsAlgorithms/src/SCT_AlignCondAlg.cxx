@@ -124,6 +124,10 @@ StatusCode SCT_AlignCondAlg::execute()
     oldEl->getMaterialGeom()->getDefAbsoluteTransform(writeCdo.get());
   }
 
+  writeCdo->lockDelta();
+  writeCdo->lockPosCache();
+
+
   if (writeHandle.record(std::move(writeCdo)).isFailure()) {
     ATH_MSG_FATAL("Could not record GeoAlignmentStore " << writeHandle.key() 
                   << " with EventRange " << writeHandle.getRange()

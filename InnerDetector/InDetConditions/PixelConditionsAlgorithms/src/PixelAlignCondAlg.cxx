@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelAlignCondAlg.h"
@@ -158,6 +158,8 @@ StatusCode PixelAlignCondAlg::execute()
     oldEl->getMaterialGeom()->getAbsoluteTransform(writeCdo.get());
     oldEl->getMaterialGeom()->getDefAbsoluteTransform(writeCdo.get());
   }
+  writeCdo->lockDelta();
+  writeCdo->lockPosCache();
 
   if (writeHandle.record(std::move(writeCdo)).isFailure()) {
     ATH_MSG_FATAL("Could not record GeoAlignmentStore " << writeHandle.key()
