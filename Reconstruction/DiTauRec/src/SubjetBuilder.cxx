@@ -91,16 +91,9 @@ StatusCode SubjetBuilder::execute(DiTauCandidateData * data,
 
   // store (pt-sorted) subjets
   std::vector<PseudoJet> vSubjets = sorted_by_pt( cs.inclusive_jets(m_ptmin) );
-
-  if (vSubjets.empty()) {
-    ATH_MSG_DEBUG("Found no subjet. Reject ditau candidate");
+  if (vSubjets.size()<=1) {
+    ATH_MSG_DEBUG("Found less than 2 subjets. Reject ditau candidate");
     return StatusCode::FAILURE;
-  }
-  if (vSubjets.size()==1) {
-    if (data->electrons.empty() && data->muons.empty()) {
-      ATH_MSG_DEBUG("Found 1 subjet, but no additional electron or muon. Reject ditau candidate");
-      return StatusCode::FAILURE;
-    }
   }
 
   ATH_MSG_DEBUG("found "<< vSubjets.size() << " subjets");

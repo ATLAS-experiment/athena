@@ -1,14 +1,13 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, ElMuFinderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, IDVarCalculatorCfg
+from DiTauRec.DiTauToolsConfig import SeedJetBuilderCfg, SubjetBuilderCfg, JetAlgCfg, VertexFinderCfg, DiTauTrackFinderCfg, CellFinderCfg, IDVarCalculatorCfg
 
 def DiTauBuilderCfg(flags, name="DiTauBuilder", **kwargs):
     acc = ComponentAccumulator()
 
     tools = [
         acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[0])),
-        acc.popToolsAndMerge(ElMuFinderCfg(flags)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
 
@@ -39,7 +38,6 @@ def DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder", **kwargs):
 
     tools = [
         acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[1])),
-        acc.popToolsAndMerge(ElMuFinderCfg(flags)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
 
