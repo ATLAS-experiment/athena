@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODMissingET/MissingETAssociationHelper.h"
@@ -52,7 +52,7 @@ bool MissingETAssociationHelper::objSelected(const MissingETAssociation_v1* asso
   size_t index = assoc->index();
   if(index >= m_useObjectFlags.size()) return false; // No flag for this association has been set to 1 yet
   if (objIdx >= sizeof(MissingETBase::Types::bitmask_t)*CHAR_BIT) return false;
-  return bool(m_useObjectFlags.at(index) & (1<<objIdx));
+  return bool(m_useObjectFlags.at(index) & (static_cast<MissingETBase::Types::bitmask_t>(1)<<objIdx));
 }
 
 bool MissingETAssociationHelper::objSelected(const MissingETAssociation_v1* assoc, const IParticle* pPart) const
