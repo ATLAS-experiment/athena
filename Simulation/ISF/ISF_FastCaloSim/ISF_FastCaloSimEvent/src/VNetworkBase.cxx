@@ -22,8 +22,10 @@ VNetworkBase::VNetworkBase(const std::string &inputFile)
 };
 
 // No setupPersistedVariables or setupNet here!
-VNetworkBase::VNetworkBase(const VNetworkBase &copy_from) : MLogging() {
-  m_inputFile = std::string(copy_from.m_inputFile);
+VNetworkBase::VNetworkBase(const VNetworkBase &copy_from)
+  : MLogging(),
+    m_inputFile (copy_from.m_inputFile)
+{
 };
 
 // Nothing is needed from the destructor right now.

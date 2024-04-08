@@ -16,7 +16,7 @@ TFCSSimpleLWTNNHandler::TFCSSimpleLWTNNHandler(const std::string &inputFile)
     : VNetworkLWTNN(inputFile) {
   ATH_MSG_DEBUG("Setting up from inputFile.");
   setupPersistedVariables();
-  setupNet();
+  TFCSSimpleLWTNNHandler::setupNet();
 };
 
 TFCSSimpleLWTNNHandler::TFCSSimpleLWTNNHandler(

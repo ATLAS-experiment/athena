@@ -125,7 +125,7 @@ public:
   virtual void setLevel(int level);
 
   /// Make a message to decorate the start of logging
-  static std::string startMsg(MSG::Level lvl, std::string file, int line);
+  static std::string startMsg(MSG::Level lvl, const std::string& file, int line);
 
   /// Return a stream for sending messages directly (no decoration)
   MsgStream &msg() const { return *m_msg; }
@@ -204,7 +204,7 @@ public:
 
   /// Make a message to decorate the start of logging
   // This isn't in AthMessaging, but it's useful outside classes
-  static std::string startMsg(MSG::Level lvl, std::string file, int line);
+  static std::string startMsg(MSG::Level lvl, const std::string& file, int line);
 
 private:
   /// Message source name

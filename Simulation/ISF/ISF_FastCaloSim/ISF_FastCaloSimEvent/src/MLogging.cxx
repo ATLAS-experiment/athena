@@ -113,7 +113,7 @@ void MLogging::setLevel(MSG::Level lvl) {
 
 // This is the same either way.
 /// Print a message for the start of logging
-std::string MLogging::startMsg(MSG::Level lvl, std::string file, int line) {
+std::string MLogging::startMsg(MSG::Level lvl, const std::string& file, int line) {
   int col1_len = 20;
   int col2_len = 5;
   int col3_len = 10;

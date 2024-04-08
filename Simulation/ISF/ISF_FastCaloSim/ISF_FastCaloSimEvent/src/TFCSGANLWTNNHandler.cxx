@@ -16,7 +16,7 @@ TFCSGANLWTNNHandler::TFCSGANLWTNNHandler(const std::string &inputFile)
     : VNetworkLWTNN(inputFile) {
   ATH_MSG_DEBUG("Setting up from inputFile.");
   setupPersistedVariables();
-  setupNet();
+  TFCSGANLWTNNHandler::setupNet();
 };
 
 TFCSGANLWTNNHandler::TFCSGANLWTNNHandler(const TFCSGANLWTNNHandler &copy_from)
