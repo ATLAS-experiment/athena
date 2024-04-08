@@ -265,6 +265,7 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
            if (!cached) continue;
            writeCdo->geoModelAlignment->setDelta(alignable, alignDeltas[alignable]);
         }
+        writeCdo->geoModelAlignment->lockDelta();
         if (subDet == ActsTrk::DetectorType::Mdt) {
             ATH_CHECK(loadMdtDeformPars(ctx,*writeCdo));
         } else if (subDet == ActsTrk::DetectorType::Mm) {

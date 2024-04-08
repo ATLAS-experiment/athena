@@ -41,7 +41,9 @@ StatusCode LArAlignCondAlg::execute()
     ATH_MSG_ERROR("Failed to apply LAr alignments");
     return StatusCode::FAILURE;
   }
-
+  writeCdo->lockDelta();
+  writeCdo->lockPosCache();
+  
   ATH_CHECK(writeGeoAlignHandle.record(std::move(writeCdo)));
   ATH_MSG_INFO("recorded new GeoAlignmentStore object for LAr with key " << writeGeoAlignHandle.key() 
 	       << " and range " << writeGeoAlignHandle.getRange());
