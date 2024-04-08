@@ -189,7 +189,7 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
 ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) :
     GeoVDetectorElement{detElem.getMaterialGeom()},
     m_type{DetectorType::Hgtd}, 
-    m_trfCache{0, [&detElem,this](const DetectorAlignStore* store, const IdentifierHash&) {
+    m_trfCache{0, [this](const DetectorAlignStore* store, const IdentifierHash&) {
 
         GeoAlignmentStore* geoModelStore = store ? store->geoModelAlignment.get() : nullptr;
         Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore);

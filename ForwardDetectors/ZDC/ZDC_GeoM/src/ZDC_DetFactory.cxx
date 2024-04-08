@@ -98,8 +98,6 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
     GeoBox *Envelope_Box = new GeoBox(91 * Gaudi::Units::mm * 0.5, 181 * Gaudi::Units::mm * 0.5, 94.3 * Gaudi::Units::cm * 0.5);
     GeoLogVol *Envelope_Logical = new GeoLogVol("Envelope_Logical", Envelope_Box, Air);
 
-    Identifier id;
-
     char volName[256];
     for(int side : {0, 1}){
         int sideSign = (side == 0) ? -1 : 1;
