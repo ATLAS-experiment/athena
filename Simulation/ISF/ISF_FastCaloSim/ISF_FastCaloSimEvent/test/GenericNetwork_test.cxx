@@ -24,7 +24,7 @@ using ISF_FCS::MLogging;
 // Very crude way to make a file for input
 // writes a fake lwtnn GAN to the disk at the
 // specified file name
-void setup_fastCaloGAN(std::string outputFile) {
+void setup_fastCaloGAN(const std::string& outputFile) {
   std::ofstream output;
   output.open(outputFile);
 
@@ -69,7 +69,7 @@ void setup_fastCaloGAN(std::string outputFile) {
 }
 
 // ditto for Sim
-void setup_fastCaloSim(std::string outputFile) {
+void setup_fastCaloSim(const std::string& outputFile) {
   std::ofstream output;
   output.open(outputFile);
 
@@ -170,7 +170,7 @@ void setup_fastCaloSim(std::string outputFile) {
   output.close();
 }
 
-void test_fastCaloGAN(std::string inputFile, ISF_FCS::MLogging logger) {
+void test_fastCaloGAN(const std::string& inputFile, const ISF_FCS::MLogging& logger) {
   ATH_MSG_NOCLASS(logger, "Testing fastCaloGAN format.");
   TFCSSimpleLWTNNHandler my_net(inputFile);
 
@@ -224,7 +224,7 @@ void test_fastCaloGAN(std::string inputFile, ISF_FCS::MLogging logger) {
                   "Outputs should before and after writing shoud be identical");
 }
 
-void test_fastCaloSim(std::string inputFile, ISF_FCS::MLogging logger) {
+void test_fastCaloSim(const std::string& inputFile, const ISF_FCS::MLogging& logger) {
   ATH_MSG_NOCLASS(logger, "Testing fastCaloSim format.");
   TFCSGANLWTNNHandler my_net(inputFile);
   ATH_MSG_NOCLASS(logger, "Made the net.");
@@ -279,7 +279,7 @@ void test_fastCaloSim(std::string inputFile, ISF_FCS::MLogging logger) {
                   "Outputs should before and after writing shoud be identical");
 }
 
-void test_ONNX(ISF_FCS::MLogging logger) {
+void test_ONNX(const ISF_FCS::MLogging& logger) {
   // Curiously, there is no easy way to generate an ONNX
   // model from c++. It is expected you will convert an
   // existing model, so creating one here would require

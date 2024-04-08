@@ -179,7 +179,7 @@ private:
    *
    **/
   std::vector<char>
-  getSerializedSession(std::string tree_name = m_defaultTreeName);
+  getSerializedSession(const std::string& tree_name = m_defaultTreeName);
   /**
    * @brief Retrieve the content of the proto file from a TTree
    *

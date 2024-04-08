@@ -587,11 +587,11 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
   ATH_MSG_NOCLASS(logger, "Finish all tests" << std::endl);
 }
 
-void TFCSEnergyAndHitGANV2::test_path(std::string path,
+void TFCSEnergyAndHitGANV2::test_path(const std::string& path,
                                       TFCSSimulationState *simulstate,
                                       const TFCSTruthState *truth,
                                       const TFCSExtrapolationState *extrapol,
-                                      std::string outputname, int pid) {
+                                      const std::string& outputname, int pid) {
   ISF_FCS::MLogging logger;
   ATH_MSG_NOCLASS(logger, "Running test on " << path << std::endl);
   if (!simulstate) {

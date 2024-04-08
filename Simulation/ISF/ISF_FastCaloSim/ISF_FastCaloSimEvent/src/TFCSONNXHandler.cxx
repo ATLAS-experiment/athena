@@ -24,8 +24,8 @@
 TFCSONNXHandler::TFCSONNXHandler(const std::string &inputFile)
     : VNetworkBase(inputFile) {
   ATH_MSG_INFO("Setting up from inputFile.");
-  setupPersistedVariables();
-  setupNet();
+  TFCSONNXHandler::setupPersistedVariables();
+  TFCSONNXHandler::setupNet();
   ATH_MSG_DEBUG("Setup from file complete");
 };
 
@@ -34,7 +34,7 @@ TFCSONNXHandler::TFCSONNXHandler(const std::vector<char> &bytes)
   ATH_MSG_INFO("Given onnx session bytes as input.");
   // The super constructor got no inputFile,
   // so it won't call setupNet itself
-  setupNet();
+  TFCSONNXHandler::setupNet();
   ATH_MSG_DEBUG("Setup from session complete");
 };
 
@@ -270,7 +270,7 @@ void TFCSONNXHandler::setupNet() {
 };
 
 // Needs to also work if the input file is a root file
-std::vector<char> TFCSONNXHandler::getSerializedSession(std::string tree_name) {
+std::vector<char> TFCSONNXHandler::getSerializedSession(const std::string& tree_name) {
   ATH_MSG_DEBUG("Getting serialized session for ONNX network.");
 
   if (this->isRootFile()) {
