@@ -13,7 +13,9 @@
 
 #include "xAODTruth/TruthParticleContainerFwd.h"
 #include "xAODTruth/TruthEventContainer.h"
+#include "xAODMuon/MuonContainer.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
+#include "TruthClassification/TruthClassificationTool.h"
 
 
 namespace FlavorTagDiscriminants {
@@ -31,6 +33,9 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_TrackContainerKey {
       this, "trackContainer", "InDetTrackParticles",
         "Key for the input track collection"};
+    SG::ReadHandleKey< xAOD::MuonContainer > m_MuonContainerKey {
+      this, "muonContainer", "Muons",
+        "Key for the input muon collection"};
 
     // Accessors for truth particles
     using RDHK = SG::ReadDecorHandleKey< xAOD::TruthParticleContainer >;
@@ -67,11 +72,16 @@ namespace FlavorTagDiscriminants {
     WDHK m_dec_parent_barcode {
       this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
         "Barcode of parent of linked truth particle"};
+    WDHK m_dec_muon_origin_label {
+      this, "dec_ftagTruthMuonOriginLabel", "ftagTruthMuonOriginLabel", 
+        "Exclusive origin label of the muon"};
 
     // Truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {
       this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", 
         "track truth origin tool"};
+    // Truth Lepton Origin tool
+    ToolHandle<CP::IClassificationTool> m_truthLeptonTool{"TruthClassificationTool/truthLeptonTool"};
   };
 }
 
