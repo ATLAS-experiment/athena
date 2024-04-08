@@ -105,7 +105,7 @@ namespace FlavorTagDiscriminants {
             particles (material interactions, gamme conversions, etc.)*/
 
             if (!(InDet::TrkOrigin::isSecondary(origin))){
-	        return TruthSource::Label::NoSecondary;
+	        return TruthSource::Label::NotSecondary;
 	        }
             else if ( InDet::TrkOrigin::isHadronicInteraction(origin) ) {
                 return TruthSource::Label::HadronicInteraction;
