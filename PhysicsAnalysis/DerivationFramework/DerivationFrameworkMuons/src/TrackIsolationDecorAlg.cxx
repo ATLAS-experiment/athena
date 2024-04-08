@@ -71,10 +71,21 @@ StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Failed to retrive vertex collection " << m_vtx_key.fullKey());
         return StatusCode::FAILURE;
     }
-    if (vertices->empty()) return StatusCode::SUCCESS;
+    using IsoDecorator = SG::WriteDecorHandle<xAOD::TrackParticleContainer, float>;
+    IsoDecorator decor_ptcone20{makeHandle<float>(ctx, m_ptcone20_key, -Gaudi::Units::GeV)};
+    IsoDecorator decor_ptcone30{makeHandle<float>(ctx, m_ptcone30_key, -Gaudi::Units::GeV)};
+    IsoDecorator decor_ptcone40{makeHandle<float>(ctx, m_ptcone40_key, -Gaudi::Units::GeV)};
+
+    IsoDecorator decor_ptvarcone20{makeHandle<float>(ctx, m_ptvarcone20_key, -Gaudi::Units::GeV)};
+    IsoDecorator decor_ptvarcone30{makeHandle<float>(ctx, m_ptvarcone30_key, -Gaudi::Units::GeV)};
+    IsoDecorator decor_ptvarcone40{makeHandle<float>(ctx, m_ptvarcone40_key, -Gaudi::Units::GeV)};
+
+    if (vertices->empty() || 
+        std::find_if(vertices->begin(), vertices->end(), [](const xAOD::Vertex* vtx){
+             return vtx->vertexType() == xAOD::VxType::PriVtx;
+        }) == vertices->end()) return StatusCode::SUCCESS;
     Muon::MuonSectorMapping sector_mapping{};
     
-    using IsoDecorator = SG::WriteDecorHandle<xAOD::TrackParticleContainer, float>;
     using SelDecorator = SG::ReadDecorHandle<xAOD::TrackParticleContainer, bool>;
     using TrkViewContainer = ConstDataVector<xAOD::TrackParticleContainer>;
     using view_map = std::map<int, std::vector<const xAOD::TrackParticle*> >;
@@ -88,13 +99,6 @@ StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
         container.push_back(trk);
     }
 
-    IsoDecorator decor_ptcone20{makeHandle<float>(ctx,m_ptcone20_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptcone30{makeHandle<float>(ctx,m_ptcone30_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptcone40{makeHandle<float>(ctx,m_ptcone40_key, -Gaudi::Units::GeV)};
-
-    IsoDecorator decor_ptvarcone20{makeHandle<float>(ctx,m_ptvarcone20_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptvarcone30{makeHandle<float>(ctx,m_ptvarcone30_key, -Gaudi::Units::GeV)};
-    IsoDecorator decor_ptvarcone40{makeHandle<float>(ctx,m_ptvarcone40_key, -Gaudi::Units::GeV)};
 
     std::vector<SelDecorator> selDecors;
     for (const SG::ReadDecorHandleKey<xAOD::TrackParticleContainer>& key : m_trkSel_keys) {
