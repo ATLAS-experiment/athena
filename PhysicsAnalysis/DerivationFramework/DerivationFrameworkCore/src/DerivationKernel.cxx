@@ -24,6 +24,7 @@
 #include "GaudiKernel/AlgTool.h"
 #include "GaudiKernel/Chrono.h"
 #include "GaudiKernel/ToolVisitor.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 
 #include "StoreGate/StoreGateSvc.h"             // Storegate stuff
 #include "StoreGate/DataHandle.h"
@@ -166,15 +167,23 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
     for (ToolHandle<IThinningTool> &a_tool_handle : m_thinningTools ) {
        visitTools(*a_tool_handle, renouncer);
     }
+
+   
     return StatusCode::SUCCESS;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode DerivationFramework::DerivationKernel::execute() {
-    
-    // On your marks.... get set....
-    Chrono chrono( &(*m_chronoSvc), name() ); 
+
+  IChronoSvc* cSvc=m_chronoSvc.get();
+  if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
+    //ChronoStat doesn't really work in MT
+    ATH_MSG_DEBUG("Number of threads=" << Gaudi::Concurrency::ConcurrencyFlags::numThreads() << " disabling ChronoStat");
+    cSvc=nullptr;
+  }
+  // On your marks.... get set.... (but only if not in MT)
+  Chrono chrono( cSvc , name() ); 
     // GO!!!
 
     ATH_MSG_DEBUG(name() << " is processing next event...");
