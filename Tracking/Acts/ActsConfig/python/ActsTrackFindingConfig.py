@@ -224,8 +224,6 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
         from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
         kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
 
-    kwargs.setdefault('ACTSTracksLocation', f'{flags.Tracking.ActiveConfig.extension}ResolvedTracks')
-    kwargs.setdefault('TrackParticlesOutKey', f'{flags.Tracking.ActiveConfig.extension}ResolvedTrackParticles')
     kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
     kwargs.setdefault('FirstAndLastParameterOnly',True)
 
@@ -243,3 +241,12 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
     acc.addEventAlgo(
         CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
     return acc
+
+def ActsTrackMergerAlgCfg(flags,
+                          name: str = "ActsTrackMergerAlg",
+                          **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('OutputTrackCollection', 'ActsCombinedTracks')
+    acc.addEventAlgo(CompFactory.ActsTrk.TrackMergerAlg(name, **kwargs))
+    return acc
+

@@ -123,7 +123,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
             Tracks=TrackContainer,
             DetailedTruth=TrackContainer+"DetailedTruth",
             TracksTruth=TrackContainer+"TruthCollection"))
-        
+
     # Create track particles from all the different track collections
     # We have different algorithms depending on the EDM being used
     if extension not in ['Acts', 'ActsConversion']:
@@ -232,7 +232,10 @@ def ITkTrackRecoPassCfg(flags,
             "ITkAmbiguityProcessorSplitProb" + extension)
         # Collect all the Trk Track collections to be then merged in a single big collection
         # Merging will be done later, and after that we create track particles from the merged collection
-        InputCombinedITkTracks += [TrackContainer]
+        if extension not in ['Acts', 'ActsConversion']:
+            InputCombinedITkTracks += [TrackContainer]
+        else:
+            InputCombinedActsTracks += [TrackContainer]
 
     # This is only used in this same function for the Track-PRD association
     # Not yet supported for ACTS tracks
@@ -241,6 +244,31 @@ def ITkTrackRecoPassCfg(flags,
         
     return result, ClusterSplitProbContainer
 
+
+def ITkActsTrackFinalCfg(flags,
+                         InputCombinedITkTracks: list[str] = None) -> ComponentAccumulator:
+    # Inputs must not be None
+    assert InputCombinedITkTracks is not None and isinstance(InputCombinedITkTracks, list)
+
+    acc = ComponentAccumulator()
+    if len(InputCombinedITkTracks) == 0:
+        return acc
+    
+    # Schedule track merger
+    mergeTrackContainer = "ActsCombinedTracks"
+    from ActsConfig.ActsTrackFindingConfig import ActsTrackMergerAlgCfg
+    acc.merge(ActsTrackMergerAlgCfg(flags,
+                                    InputTrackCollections = InputCombinedITkTracks,
+                                    OutputTrackCollection = mergeTrackContainer))
+
+    # Schedule Track particle creation
+    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToAltTrackParticleCnvAlg",
+                                                ACTSTracksLocation=mergeTrackContainer,
+                                                TrackParticlesOutKey=f'{mergeTrackContainer}ParticlesAlt'))
+    
+    
+    return acc
 
 def ITkTrackFinalCfg(flags,
                      InputCombinedITkTracks: list[str] = None,
@@ -499,6 +527,8 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
                          StatTrackTruthCollections=StatTrackTruthCollections))
 
     # This will handle ACTS tracks instead
+    result.merge(ITkActsTrackFinalCfg(flags,
+                                      InputCombinedITkTracks=InputCombinedActsTracks))
 
     # Store some collections for persistification
     # Used for validation and studies
