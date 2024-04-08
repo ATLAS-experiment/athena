@@ -19,7 +19,7 @@ def MC23a(flags):
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
     # of 64%, which leads to a relative high-pt / low-pt sampling of
-    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 67.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
     flags.Digitization.PU.NumberOfLowPtMinBias = 67.369
@@ -47,7 +47,7 @@ def MC23c(flags):
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
     # of 64%, which leads to a relative high-pt / low-pt sampling of
-    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 90.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
     flags.Digitization.PU.NumberOfLowPtMinBias = 90.323
@@ -76,7 +76,7 @@ def MC23d(flags):
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
     # of 64%, which leads to a relative high-pt / low-pt sampling of
-    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 95.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
     flags.Digitization.PU.NumberOfLowPtMinBias = 95.313
@@ -105,7 +105,7 @@ def MC23e(flags):
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
     # of 64%, which leads to a relative high-pt / low-pt sampling of
-    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 84.5
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 98.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
     flags.Digitization.PU.NumberOfLowPtMinBias = 98.308
