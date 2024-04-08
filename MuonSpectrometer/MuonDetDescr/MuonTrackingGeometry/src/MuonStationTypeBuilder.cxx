@@ -166,7 +166,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         else {
             std::vector<std::pair<double, double>>::iterator it = xVol.begin();
             while (it != xVol.end() && xpos > (*it).first) {
-                it++;
+                ++it;
             }
             xVol.insert(it, std::make_pair(xpos, xh));
         }
