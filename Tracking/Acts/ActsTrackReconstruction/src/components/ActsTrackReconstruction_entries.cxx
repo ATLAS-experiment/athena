@@ -6,6 +6,7 @@
 #include "src/AmbiguityResolutionAlg.h"
 #include "src/ReFitterAlg.h"
 #include "src/TrackToTrackParticleCnvAlg.h"
+#include "src/TrackMergerAlg.h"
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
 #include "src/TrackStatePrinter.h"
@@ -22,6 +23,7 @@ DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
+DECLARE_COMPONENT( ActsTrk::TrackMergerAlg )
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
