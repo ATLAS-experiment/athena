@@ -70,8 +70,9 @@ StatusCode TrackParticleClusterAssociationAlg::execute()
     }
     else
         cl_eta = cl->eta();
-    
-    double sigmaWidth = atan(sqrt(rad)/cent)*cosh(cl_eta);
+
+    double sigmaWidth = 0.0;
+    if(cent > 0) sigmaWidth = atan(sqrt(rad)/cent)*cosh(cl_eta);
     sig_dec(*cl) = sigmaWidth;
   }
 
@@ -112,7 +113,6 @@ StatusCode TrackParticleClusterAssociationAlg::execute()
       continue;
     }
 
-
     // build the associated clusters
     std::vector<const xAOD::CaloCluster*> assoClusters = associatedClusters( *caloExtension, *clusterContainer); 
 
@@ -120,7 +120,7 @@ StatusCode TrackParticleClusterAssociationAlg::execute()
 
     caloClusterLinks.reserve( assoClusters.size() );
     for(const xAOD::CaloCluster* cluster : assoClusters) caloClusterLinks.emplace_back( *clusterContainer,cluster->index() );
-    ntracks++;     
+    ntracks++;
   }// end loop over tracks
 
   // 2nd loop over track, only to decorate with Track parameter if requested.
@@ -133,7 +133,6 @@ StatusCode TrackParticleClusterAssociationAlg::execute()
       if (caloExtension == nullptr ) trkParamDecor( *tp ) =  nullptr ;
       else trkParamDecor( *tp ) = caloExtension->caloEntryLayerIntersection();      
     }
-
   }
   
   ATH_MSG_DEBUG(" Total number of selected tracks: " << ntracks );

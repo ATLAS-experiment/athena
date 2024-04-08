@@ -8,7 +8,7 @@ import GaudiKernel.GaudiHandles as GaudiHandles
 from AthenaCommon.Logging import logging
 from AthenaCommon.Debugging import DbgStage
 from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, iterSequences,
-                                     checkSequenceConsistency, findAllAlgorithmsByName, compName)
+                                     checkSequenceConsistency, findAllAlgorithmsByName)
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCachable
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
@@ -157,7 +157,7 @@ class ComponentAccumulator(AccumulatorCachable):
         if self._primaryComp:
             summary += "  Primary Component: " + self._primaryComp.getFullJobOptName() + "\n"      
 
-        summary += "  Sequence(s): " + ", ".join([compName(s)+(" (main)" if s == self._sequence else "") for s in self._allSequences]) + "\n"
+        summary += "  Sequence(s): " + ", ".join([s.name+(" (main)" if s == self._sequence else "") for s in self._allSequences]) + "\n"
         summary += "  Last component added: " + self._lastAddedComponent+"\n"
         summary += "  Created by: " + self._creationCallStack
         return summary

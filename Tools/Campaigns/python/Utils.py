@@ -12,6 +12,7 @@ class Campaign(FlagEnum):
     MC23a = 'mc23a'
     MC23c = 'mc23c'
     MC23d = 'mc23d'
+    MC23e = 'mc23e'
     PhaseII = 'phaseII'
 
 # Campaign run numbers (only latest campaigns that do not have metadata present)
@@ -38,7 +39,9 @@ def getMCCampaign(files):
         mc_campaign = campaign_runs.get(run_numbers[0], Campaign.Unknown)
 
     # MC-equivalent projects for data
-    if 'data23' in project_name:
+    if 'data24' in project_name:
+        return Campaign.MC23e
+    elif 'data23' in project_name:
         return Campaign.MC23c
     elif 'data22' in project_name:
         return Campaign.MC21a
