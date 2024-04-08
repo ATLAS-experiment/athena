@@ -158,6 +158,7 @@
 + Event/xAOD/xAODJetAthenaPool
 + Event/xAOD/xAODMetaData
 + Event/xAOD/xAODMetaDataAthenaPool
++ Event/xAOD/xAODMeasurementBase
 + Event/xAOD/xAODMetaDataCnv
 + Event/xAOD/xAODPrimitives
 + Event/xAOD/xAODTruth
@@ -283,6 +284,8 @@
 + MuonSpectrometer/MuonStationIndex
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonReadoutGeometryR4
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4
++ MuonSpectrometer/MuonPhaseII/MuonG4/MuonSensitiveDetectorsR4
++ MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHit
 + Reconstruction/RecAlgs
 + Reconstruction/RecEvent
 + Reconstruction/RecEventAthenaPool
@@ -385,6 +388,7 @@
 
 + Tracking/Acts/ActsGeometryInterfaces
 + Tracking/Acts/ActsGeoUtils
++ Tracking/Acts/ActsAlignmentAlgs
 
 # Ignore everything else
 - .*

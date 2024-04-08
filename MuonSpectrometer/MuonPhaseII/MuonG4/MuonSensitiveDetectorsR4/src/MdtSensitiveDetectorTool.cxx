@@ -15,6 +15,6 @@ StatusCode MdtSensitiveDetectorTool::initialize() {
     return StatusCode::SUCCESS;
 }
 G4VSensitiveDetector* MdtSensitiveDetectorTool::makeSD() const {
-  return new MdtSensitiveDetector(name(), m_outputCollectionNames[0], m_detMgr);
+  return new MdtSensitiveDetector(name(), m_outputCollectionNames[0], m_alignStoreKey, m_detMgr);
 }
 }

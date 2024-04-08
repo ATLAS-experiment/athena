@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONG4R4_MmSENSITIVEDETECTORTOOL_H
 #define MUONG4R4_MmSENSITIVEDETECTORTOOL_H
@@ -23,6 +23,9 @@ protected:
     G4VSensitiveDetector* makeSD() const override final;
 private:
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+    /** @brief: Key to the alignment / transform store per event. */
+    Gaudi::Property<std::string> m_alignStoreKey{this, "AlignStoreKey", ""};
+
    
 };
 }

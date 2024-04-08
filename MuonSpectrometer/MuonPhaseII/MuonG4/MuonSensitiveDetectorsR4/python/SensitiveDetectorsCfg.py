@@ -6,6 +6,7 @@ def MdtSensitiveDetectorToolCfg(flags, name = "MdtSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionNames", [ "xRawMdtSimHits"])
     kwargs.setdefault("LogicalVolumeNames", ["MuonR4::MDTDriftGas"])
+    kwargs.setdefault("AlignStoreKey", "MdtActsAlignContainer")
     the_tool = CompFactory.MuonG4R4.MdtSensitiveDetectorTool(name, **kwargs)
     from MuonSimHitSorting.MuonSimHitSortingCfg import MuonSimHitSortingAlgCfg
     result.merge(MuonSimHitSortingAlgCfg(flags,name="MdtSimHitSorterAlg",
@@ -19,6 +20,7 @@ def MmSensitiveDetectorToolCfg(flags, name = "MmSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionNames", [ "xRawMmSimHits"])
     kwargs.setdefault("LogicalVolumeNames", ["MuonR4::actMicroMegaGas"])
+    kwargs.setdefault("AlignStoreKey", "MmActsAlignContainer")
     the_tool = CompFactory.MuonG4R4.MmSensitiveDetectorTool(name, **kwargs)
     from MuonSimHitSorting.MuonSimHitSortingCfg import MuonSimHitSortingAlgCfg
     result.merge(MuonSimHitSortingAlgCfg(flags,name="MmSimHitSorterAlg",
@@ -32,6 +34,7 @@ def RpcSensitiveDetectorToolCfg(flags, name = "RpcSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionNames", [ "xRawRpcSimHits"])
     kwargs.setdefault("LogicalVolumeNames", ["MuonR4::RpcGasGap"])
+    kwargs.setdefault("AlignStoreKey", "RpcActsAlignContainer")
     from MuonSimHitSorting.MuonSimHitSortingCfg import MuonSimHitSortingAlgCfg
     result.merge(MuonSimHitSortingAlgCfg(flags,name="RpcSimHitSorterAlg",
                                                InContainers=["xRawRpcSimHits"],
@@ -45,6 +48,7 @@ def TgcSensitiveDetectorToolCfg(flags, name = "TgcSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionNames", [ "xRawTgcSimHits"])
     kwargs.setdefault("LogicalVolumeNames", ["MuonR4::TgcGas"])
+    kwargs.setdefault("AlignStoreKey", "TgcActsAlignContainer")
     from MuonSimHitSorting.MuonSimHitSortingCfg import MuonSimHitSortingAlgCfg
     result.merge(MuonSimHitSortingAlgCfg(flags,name="TgcSimHitSorterAlg",
                                                InContainers=["xRawTgcSimHits"],
@@ -58,6 +62,7 @@ def sTgcSensitiveDetectorToolCfg(flags, name = "sTgcSensitiveDetector", **kwargs
     result = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionNames", [ "xRawStgcSimHits"])
     kwargs.setdefault("LogicalVolumeNames", ["MuonR4::sTgcGas"])
+    kwargs.setdefault("AlignStoreKey", "sTgcActsAlignContainer")
     from MuonSimHitSorting.MuonSimHitSortingCfg import MuonSimHitSortingAlgCfg
     result.merge(MuonSimHitSortingAlgCfg(flags,name="sTgcSimHitSorterAlg",
                                                InContainers=["xRawStgcSimHits"],
@@ -105,6 +110,20 @@ def SimHitContainerListCfg(flags):
         simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits")]    
     return simHitContainers
 
+def MuonDependenciesCfg(flags):
+    dependcies = []
+    if not flags.Muon.usePhaseIIGeoSetup: return dependcies
+    if flags.Detector.EnableMDT:
+        dependcies+=[("ActsTrk::DetectorAlignStore", "MdtActsAlignContainer")]
+    if flags.Detector.EnableMM:
+        dependcies+=[("ActsTrk::DetectorAlignStore", "MmActsAlignContainer")]
+    if flags.Detector.EnableRPC:
+        dependcies+=[("ActsTrk::DetectorAlignStore", "RpcActsAlignContainer")]
+    if flags.Detector.EnableTGC:
+        dependcies+=[("ActsTrk::DetectorAlignStore", "TgcActsAlignContainer")]
+    if flags.Detector.EnablesTGC:
+        dependcies+=[("ActsTrk::DetectorAlignStore", "sTgcActsAlignContainer")]    
+    return dependcies
 ### Returns the list of Container names written to the HITS file
 def OutputSimContainersCfg(flags):
     outContainers = []
@@ -124,3 +143,4 @@ def OutputSimContainersCfg(flags):
     outContainers +=[ f"xAOD::MuonSimHitAuxContainer#{cont}Aux." for cont in containerNames]
 
     return outContainers
+

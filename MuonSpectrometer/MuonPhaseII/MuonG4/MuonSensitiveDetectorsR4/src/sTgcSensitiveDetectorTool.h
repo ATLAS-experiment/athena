@@ -23,6 +23,9 @@ protected:
     G4VSensitiveDetector* makeSD() const override final;
 private:
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+    /** @brief: Key to the alignment / transform store per event. */
+    Gaudi::Property<std::string> m_alignStoreKey{this, "AlignStoreKey", ""};
+
    
 };
 }

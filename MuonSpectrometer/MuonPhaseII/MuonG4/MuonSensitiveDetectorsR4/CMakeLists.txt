@@ -18,7 +18,7 @@ atlas_add_library( MuonSensitiveDetectorsR4Lib
                    PUBLIC_HEADERS MuonSensitiveDetectorsR4
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES GeoPrimitives ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} StoreGateLib  
-                                  GaudiKernel xAODMuonSimHit G4AtlasToolsLib MCTruth MuonIdHelpersLib)
+                                  GaudiKernel xAODMuonSimHit G4AtlasToolsLib MCTruth MuonIdHelpersLib MuonReadoutGeometryR4)
 
 # Component(s) in the package:
 atlas_add_component( MuonSensitiveDetectorsR4

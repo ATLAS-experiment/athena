@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "RpcSensitiveDetectorTool.h"
 #include "RpcSensitiveDetector.h"
@@ -15,6 +15,6 @@ StatusCode RpcSensitiveDetectorTool::initialize() {
     return StatusCode::SUCCESS;
 }
 G4VSensitiveDetector* RpcSensitiveDetectorTool::makeSD() const {
-  return new RpcSensitiveDetector(name(), m_outputCollectionNames[0], m_detMgr);
+  return new RpcSensitiveDetector(name(), m_outputCollectionNames[0], m_alignStoreKey, m_detMgr);
 }
 }
