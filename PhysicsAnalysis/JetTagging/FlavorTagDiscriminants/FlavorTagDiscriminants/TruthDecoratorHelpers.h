@@ -26,13 +26,13 @@ namespace FlavorTagDiscriminants {
         }
         namespace TruthSource {
             enum Label {
-                NoTruth             = -2,
-                NotSecondary        =  0,
-                HadronicInteraction =  1,
-                KshortDecay         =  2,
-                LambdaDecay         =  3,
-                GammaConversion     =  4,
-                Other               =  5
+                NoTruth             = 0,
+                NotSecondary        = 1,
+                HadronicInteraction = 2,
+                KshortDecay         = 3,
+                LambdaDecay         = 4,
+                GammaConversion     = 5,
+                Other               = 6
             };
         }
         bool sort_particles(const xAOD::IParticle* particle_A, const xAOD::IParticle* particle_B);
