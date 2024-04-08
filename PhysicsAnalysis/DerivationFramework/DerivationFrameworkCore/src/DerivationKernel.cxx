@@ -113,13 +113,12 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
         ATH_MSG_INFO("The following augmentation tools will be applied....");
         ATH_MSG_INFO(m_augmentationTools);
     }
- 
-    // get the chrono auditor
-    if ( m_chronoSvc.retrieve().isFailure() ) {
-	    ATH_MSG_FATAL("Failed to retrieve service " << m_chronoSvc);
-	    return StatusCode::FAILURE;
-    } 
 
+    if (m_doChronoStat) {
+      //get the chrono auditor
+      ATH_CHECK(m_chronoSvc.retrieve());
+    }
+   
     if (m_runSkimmingFirst) {
 	ATH_MSG_INFO("Skimming will be run before augmentation. Make sure your skimming does not depend on variables calculated in the augmentation step!");
     }
@@ -176,12 +175,7 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
 
 StatusCode DerivationFramework::DerivationKernel::execute() {
 
-  IChronoSvc* cSvc=m_chronoSvc.get();
-  if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
-    //ChronoStat doesn't really work in MT
-    ATH_MSG_DEBUG("Number of threads=" << Gaudi::Concurrency::ConcurrencyFlags::numThreads() << " disabling ChronoStat");
-    cSvc=nullptr;
-  }
+  IChronoSvc* cSvc=m_chronoSvc.get(); //Might be null ... 
   // On your marks.... get set.... (but only if not in MT)
   Chrono chrono( cSvc , name() ); 
     // GO!!!
