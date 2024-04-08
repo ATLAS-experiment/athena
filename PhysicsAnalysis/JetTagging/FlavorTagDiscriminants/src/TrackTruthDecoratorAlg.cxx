@@ -116,20 +116,9 @@ namespace FlavorTagDiscriminants {
     }
 
     // decorate muon tracks with truth origin
-    // defining a map for proper muon origin labels 
-    std::map<unsigned int,unsigned int> muTruthMap = {
-      {0, 0}, //Fake(Uknown) muon
-      {1, 1}, //KnownUknown muon
-      {4, 2}, //Prompt muon
-      {8, 3}, //From B muon
-      {13, 4}, //From B/C (decay chain) muon (not included in the muon TruthClassificationTool)
-      {9, 5}, //From C muon 
-      {10, 6}, //From light muon
-    };
-
     for ( const auto muon : *muons ) {
       
-      // Classify muon truth origin
+      // Classify muon truth origin (https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/AnalysisCommon/TruthClassification)
       unsigned int muTruthOrigin = 0;
       ATH_CHECK(m_truthLeptonTool->classify(*muon, muTruthOrigin));
       
@@ -147,9 +136,12 @@ namespace FlavorTagDiscriminants {
       else if ( muTruthOrigin == 9 && !InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
         muTruthOrigin = 9;
       }
-
-      if ( muTruthMap.find(muTruthOrigin) != muTruthMap.end() ) {
-        muTruthOrigin = muTruthMap[muTruthOrigin];
+      
+      // Map the muon truth origin label and decorate the track
+      auto it = m_muTruthMap.find(muTruthOrigin);
+      if ( it != m_muTruthMap.end() ){
+        // map the muon truth origin label
+        muTruthOrigin = it->second;
         ATH_MSG_DEBUG("Muon truth Origin after mapping: " << muTruthOrigin);
         
         // decorate track
