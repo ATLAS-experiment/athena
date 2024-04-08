@@ -188,35 +188,18 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, fo
 
     jetSequence.configure( inputName = input, outputName = 'AnaJets_%SYS%' )
 
-    # Include, and then set up the jet analysis algorithm sequence:
-    from JetAnalysisAlgorithms.JetJvtAnalysisSequence import makeJetJvtAnalysisSequence
-    jvtSequence = makeJetJvtAnalysisSequence( dataType, jetContainer, enableCutflow=True, shallowViewOutput = False )
-    jvtSequence.configure( inputName = { 'jets'      : 'AnaJets_%SYS%' },
-                           outputName = {  } )
-
     # Add the sequences to the job:
     if ca:
         for element in jetSequence.getGaudiConfig2Algorithms():
             ca.addEventAlgo(element, caSeq)
-        for element in jvtSequence.getGaudiConfig2Algorithms():
-            ca.addEventAlgo(element, caSeq)
     else:
         algSeq += jetSequence
-        algSeq += jvtSequence
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta'
             ]
     if not forCompare:
         vars += ['OutJets_%SYS%.jvt_selection -> jet_select_jvt_%SYS%']
-    if dataType != 'data' :
-        vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
-        vars += [
-            'EventInfo.jvt_effSF_%SYS% -> weight_jvt_effSF_%SYS%',
-            # 'EventInfo.fjvt_effSF_%SYS% -> weight_fjvt_effSF_%SYS%',
-            # 'OutJets_%SYS%.fjvt_effSF_NOSYS -> jet_fjvtEfficiency_%SYS%',
-        ]
-
 
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisSequence import makeMuonAnalysisSequence
@@ -349,7 +332,9 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, fo
     vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
               'OutTauJets_NOSYS.phi -> tau_phi',
               'OutTauJets_NOSYS.eta -> tau_eta',
-              'OutTauJets_NOSYS.charge -> tau_charge', ]
+              'OutTauJets_NOSYS.charge -> tau_charge',
+              'OutTauJets_NOSYS.NNDecayMode -> tau_NNDecayMode',
+            ]
     if not forCompare:
         vars += [ 'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
     if dataType != 'data':
@@ -589,16 +574,37 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, fo
     # make filtered output containers
 
     addOutputCopyAlgorithms (algSeq, ca, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
-                             'selectPtEta&&baselineSelection_loose,as_char&&passesOR,as_char')
+                             'selectPtEta&&baselineSelection_loose,as_char&&passesOR_%SYS%,as_char')
     addOutputCopyAlgorithms (algSeq, ca, 'Photons', 'AnaPhotons_%SYS%', 'OutPhotons_%SYS%',
-                             'selectPtEta&&baselineSelection_tight,as_char&&passesOR,as_char')
+                             'selectPtEta&&baselineSelection_tight,as_char&&passesOR_%SYS%,as_char')
     addOutputCopyAlgorithms (algSeq, ca, 'Muons', 'AnaMuons_%SYS%', 'OutMuons_%SYS%',
-                             'selectPtEta&&baselineSelection_medium,as_char&&passesOR,as_char')
+                             'selectPtEta&&baselineSelection_medium,as_char&&passesOR_%SYS%,as_char')
     addOutputCopyAlgorithms (algSeq, ca, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
-                             'selectPtEta&&baselineSelection_tight,as_char&&passesOR,as_char')
+                             'selectPtEta&&baselineSelection_tight,as_char&&passesOR_%SYS%,as_char')
     addOutputCopyAlgorithms (algSeq, ca, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
-                             'selectPtEta&&passesOR,as_char')
+                             'selectPtEta&&passesOR_%SYS%,as_char')
 
+    # Include, and then set up the jet analysis algorithm sequence:
+    from JetAnalysisAlgorithms.JetJvtAnalysisSequence import makeJetJvtAnalysisSequence
+    jvtSequence = makeJetJvtAnalysisSequence( dataType, jetContainer, enableCutflow=True, shallowViewOutput = False,
+                                              preselection='selectPtEta&&passesOR_%SYS%,as_char' )
+    jvtSequence.configure( inputName = { 'jets'      : 'OutJets_%SYS%' },
+                           outputName = {  } )
+
+    # Add the sequences to the job:
+    if ca:
+        for element in jvtSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += jvtSequence
+
+    if dataType != 'data' :
+        vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
+        vars += [
+            'EventInfo.jvt_effSF_%SYS% -> weight_jvt_effSF_%SYS%',
+            # 'EventInfo.fjvt_effSF_%SYS% -> weight_fjvt_effSF_%SYS%',
+            # 'OutJets_%SYS%.fjvt_effSF_NOSYS -> jet_fjvtEfficiency_%SYS%',
+        ]
 
     # Add an ntuple dumper algorithm:
     treeMaker = createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
