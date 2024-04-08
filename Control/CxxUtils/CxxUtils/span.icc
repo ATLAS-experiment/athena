@@ -31,11 +31,18 @@ span<T>::span()
   * @param sz Length of the span.
   */
 template <class T>
+#if HAVE_CONCEPTS
+template <class U>
+requires (valid_span_type_v<T, U>)
+#else
+template <class U, typename>
+#endif
 inline
-span<T>::span (T* ptr, size_type sz)
-  : m_ptr(ptr),
-    m_size(sz)
+span<T>::span (U* ptr, size_type sz)
+  : m_ptr (ptr),
+    m_size (sz)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -45,12 +52,37 @@ span<T>::span (T* ptr, size_type sz)
   * @param end One past the end of the span.
   */
 template <class T>
+#if HAVE_CONCEPTS
+template <class U>
+requires (valid_span_type_v<T, U>)
+#else
+template <class U, typename>
+#endif
 inline
-span<T>::span (T* beg, T* end)
-  : m_ptr(beg),
+span<T>::span (U* beg, U* end)
+  : m_ptr (beg),
     m_size (end-beg)
 {
   // cppcheck-suppress missingReturn; false positive
+}
+
+
+/**
+ * @brief Constructor from another span.
+ * @param other Span to copy from.
+  */
+template <class T>
+#if HAVE_CONCEPTS
+template <class U>
+requires (valid_span_type_v<T, U>)
+#else
+template <class U, typename>
+#endif
+inline
+span<T>::span (const span<U>& other)
+  : m_ptr (other.begin()),
+    m_size (other.size())
+{
 }
 
 
@@ -342,7 +374,8 @@ constexpr span<const T>
 span<T>::first (size_type n) const noexcept
 {
   assert (n <= size());
-  return span<const T> (m_ptr, n);
+  const T* ptr = m_ptr;
+  return span<const T> (ptr, n);
 }
 
 
@@ -370,7 +403,8 @@ constexpr span<const T>
 span<T>::last (size_type n) const noexcept
 {
   assert (n <= size());
-  return span<const T> (m_ptr + (size() - n), n);
+  const T* ptr = m_ptr;
+  return span<const T> (ptr + (size() - n), n);
 }
 
 
@@ -414,7 +448,8 @@ span<T>::subspan (size_type offs, size_type n /*= dynamic_extent*/) const noexce
     assert (n <= size());
     assert (offs + n <= size());
   }
-  return span<const T> (m_ptr + offs, n);
+  const T* ptr = m_ptr;
+  return span<const T> (ptr + offs, n);
 }
 
 

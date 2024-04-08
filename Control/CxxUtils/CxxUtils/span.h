@@ -33,6 +33,13 @@ namespace CxxUtils {
 inline constexpr size_t dynamic_extent = static_cast<size_t>(-1);
 
 
+/// Is U* a valid type to use to initialize a span<T>?
+/// No more than const-conversion.
+/// Same logic as used in libstdc++.
+template <class T, class U>
+inline constexpr bool valid_span_type_v = std::is_convertible_v<U(*)[], T(*)[]>;
+
+
 /**
  * @brief Simplified version of the C++20 std::span.
  *
@@ -42,12 +49,11 @@ inline constexpr size_t dynamic_extent = static_cast<size_t>(-1);
  *    is no second template argument.
  *  - Constructors from arrays / std::array are not implemented.
  *  - The external member functions as_bytes / as_writable_bytes and
- *    deduction guides are not implemented.
+ *    not all deduction guides are implemented.
  *
  * Contact the core sw group if any of these are a problem.
  *
  * In addition:
- *  - The concept requirements on the constructors are not checked.
  *  - Accessor methods are split into const / non-const versions.
  *    This is required to avoid warnings from the thread-safety checker,
  *    but be careful of potential incompatibilies with std::span.
@@ -63,8 +69,8 @@ public:
   /// Required typedefs.
   using element_type           = T;
   using value_type             = std::remove_cv_t<T>;
-  using size_type              = size_t;
-  using difference_type        = ptrdiff_t;
+  using size_type              = std::size_t;
+  using difference_type        = std::ptrdiff_t;
   using pointer                = T*;
   using const_pointer          = const T*;
   using reference              = element_type&;
@@ -87,7 +93,13 @@ public:
    * @param ptr Start of the span.
    * @param sz Length of the span.
    */
-  span (T* ptr, size_type sz);
+#if HAVE_CONCEPTS
+  template <class U>
+  requires (valid_span_type_v<T, U>)
+#else
+  template <class U, typename = std::enable_if_t<valid_span_type_v<T, U> > >
+#endif
+  span (U* ptr, size_type sz);
 
 
   /**
@@ -95,14 +107,33 @@ public:
    * @param beg Start of the span.
    * @param end One past the end of the span.
    */
-  span (T* beg, T* end);
+#if HAVE_CONCEPTS
+  template <class U>
+  requires (valid_span_type_v<T, U>)
+#else
+  template <class U, typename = std::enable_if_t<valid_span_type_v<T, U> > >
+#endif
+  span (U* beg, U* end);
 
 
   // Default copy / assignment.
   span (const span&) = default;
   span& operator= (const span&) = default;
 
-  
+
+  /**
+   * @brief Constructor from another span.
+   * @param other Span to copy from.
+   */
+#if HAVE_CONCEPTS
+  template <class U>
+  requires (valid_span_type_v<T, U>)
+#else
+  template <class U, typename = std::enable_if_t<valid_span_type_v<T, U> > >
+#endif
+  span (const span<U>& other);
+
+
   /**
    * @brief Return the size of the span.
    */
@@ -288,6 +319,13 @@ private:
   /// Number of elements in the span.
   size_t m_size;
 };
+
+
+/// A couple needed deduction guides.
+template <class T>
+span (T* ptr, std::size_t sz) -> span<T>;
+template <class T>
+span (T* beg, T* end) -> span<T>;
 
 
 /**
