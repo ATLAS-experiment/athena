@@ -707,7 +707,7 @@ class ChainStep(object):
 
     def createSequences(self):
         """ defered creation"""
-        log.info("creating sequences for step %s", self.name)
+        log.debug("creating sequences for step %s", self.name)
         for seq in self.sequenceFunctions:                        
             self.sequences.append(seq()) # create the sequences        
 
