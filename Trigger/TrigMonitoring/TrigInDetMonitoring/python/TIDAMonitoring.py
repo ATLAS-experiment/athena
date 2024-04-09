@@ -334,8 +334,8 @@ def TIDAbjet( flags, key, toolkey, tools, monlevel, mcTruth ) :
                             [ "HLT_j.*presel.*b.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
                               "HLT_j.*roiftf.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
                               "HLT_j.*presel.*b.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
-                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_FTF",
-                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig", 
+                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_FTF:roi=HLT_Roi_Bjet",
+                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig:roi=HLT_Bjet", 
                               "HLT_j45_pf_ftf_preselj20_L1J15:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                               "HLT_j.*_ftf.*boffperf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                               "HLT_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -273,7 +273,26 @@ inline Amg::Transform3D getRotateZ3D(double angle) {
     transf = angleaxis;
     return transf;
 }
-
+/** @brief: Returns a shift transformation along the x-axis*/
+inline Amg::Transform3D getTranslateX3D(const double X) {
+    return Amg::Transform3D{Amg::Translation3D{X * Amg::Vector3D::UnitX()}};
+}
+/** @brief: Returns a shift transformation along the y-axis*/
+inline Amg::Transform3D getTranslateY3D(const double Y) {
+    return Amg::Transform3D{Amg::Translation3D{Y * Amg::Vector3D::UnitY()}};
+}
+/** @brief: Returns a shift transformation along the z-axis*/
+inline Amg::Transform3D getTranslateZ3D(const double Z) {
+    return Amg::Transform3D{Amg::Translation3D{Z * Amg::Vector3D::UnitZ()}};
+}
+/** @brief: Returns a shift transformation along an arbitrary axis */
+inline Amg::Transform3D getTranslate3D(const double X, const double Y, const double Z) {
+    return getTranslateX3D(X) * getTranslateY3D(Y) * getTranslateZ3D(Z);
+}
+/** @brief: Returns a shift transformation along an arbitrary axis */
+inline Amg::Transform3D getTranslate3D(const Amg::Vector3D& v) {
+    return Amg::Transform3D{Amg::Translation3D{v}};
+}
 /// Calculates the closest approach of two lines. 
 ///    posA: offset point of line A
 ///    dirA: orientation of line A (unit length)

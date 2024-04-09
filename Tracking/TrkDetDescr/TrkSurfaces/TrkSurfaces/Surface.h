@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -398,7 +398,7 @@ public:
   SurfaceOwner owner() const;
 
   /** set material layer */
-  void setMaterialLayer(Layer* mlay);
+  void setMaterialLayer(std::shared_ptr<Layer> mlay);
 
   /** Output Method for MsgStream, to be overloaded by child classes */
   virtual MsgStream& dump(MsgStream& sl) const;
@@ -433,26 +433,26 @@ protected:
  friend class ::SurfaceCnv_p1;
 
  //!< Unique Pointer to the Transforms struct*/
- std::unique_ptr<Transforms> m_transforms = nullptr;
+ std::unique_ptr<Transforms> m_transforms{};
 
  /** Not owning Pointer to the TrkDetElementBase*/
- const TrkDetElementBase* m_associatedDetElement = nullptr;
+ const TrkDetElementBase* m_associatedDetElement{};
 
  /** Identifier for the TrkDetElementBase*/
- Identifier m_associatedDetElementId;
+ Identifier m_associatedDetElementId{};
 
  /**The associated layer Trk::Layer
   - layer in which the Surface is embedded
   (not owning pointed)
   */
- const Layer* m_associatedLayer = nullptr;
+ const Layer* m_associatedLayer{};
  /** Possibility to attach a material descrption
  - potentially given as the associated material layer
    (not owning pointer)
  */
- Layer* m_materialLayer = nullptr;
+ std::shared_ptr<Layer> m_materialLayer{};
  /** enum for surface owner : 0  free surface */
- SurfaceOwner m_owner;
+ SurfaceOwner m_owner{SurfaceOwner::noOwn};
 
  /**Tolerance for being on Surface */
  static constexpr double s_onSurfaceTolerance = 10e-5;  // 0.1 * micron

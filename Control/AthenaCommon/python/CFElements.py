@@ -1,75 +1,51 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 import collections
 
+AthSequencer = CompFactory.AthSequencer  # cache lookup
 
-def _sequencer( name ):
-    if isComponentAccumulatorCfg():
-        return CompFactory.AthSequencer( name )
-    else:
-        from AthenaCommon.AlgSequence import AthSequencer as LegacyAthSequencer
-        return LegacyAthSequencer( name )
-
-def _append( seq, sub ):
-    if isComponentAccumulatorCfg():
-        seq.Members.append( sub )
-    else:
-        seq += sub
+def parAND(name, subs=[]):
+    """parallel AND sequencer"""
+    return AthSequencer( name,
+                         ModeOR = False,
+                         Sequential = False,
+                         StopOverride = True,
+                         Members = subs.copy() )
 
 def parOR(name, subs=[]):
-    """ parallel OR sequencer """
-    seq = _sequencer( name )
-    seq.ModeOR = True
-    seq.Sequential = False
-    seq.StopOverride = True
-    for s in subs:
-        _append(seq, s)
-    return seq
+    """parallel OR sequencer
+    This is the default sequencer and lets the DataFlow govern the execution entirely.
+    """
+    return AthSequencer( name,
+                         ModeOR = True,
+                         Sequential = False,
+                         StopOverride = True,
+                         Members = subs.copy() )
 
 def seqAND(name, subs=[]):
-    """ sequential AND sequencer """
-    seq = _sequencer( name )
-    seq.ModeOR = False
-    seq.Sequential = True
-#    seq.StopOverride = True
-    seq.StopOverride = False
-    for s in subs:
-        _append( seq, s )
-    return seq
+    """sequential AND sequencer"""
+    return AthSequencer( name,
+                         ModeOR = False,
+                         Sequential = True,
+                         StopOverride = False,
+                         Members = subs.copy() )
 
 def seqOR(name, subs=[]):
-    """ sequential OR sequencer, used when a barrier needs to be set by all subs reached irrespective of the decision """
-    seq = _sequencer( name )
-    seq.ModeOR = True
-    seq.Sequential = True
-    seq.StopOverride = True
-    for s in subs:
-        _append( seq, s )
-    return seq
+    """sequential OR sequencer
+    Used when a barrier needs to be set by all subs reached irrespective of the decision
+    """
+    return AthSequencer( name,
+                         ModeOR = True,
+                         Sequential = True,
+                         StopOverride = True,
+                         Members = subs.copy() )
 
-def hasProp(comp, propname):
-    if hasattr(comp, "properties"): # old/legacy component
-        return propname in comp.properties()
-    else:
-        return hasattr(comp, propname)
-    
-def getProp(comp, propname):
-    if hasattr(comp, "getProperties"): # old/legacy component
-        return comp.getValuedProperties().get(propname, comp.getDefaultProperty(propname))
-    else:
-        return getattr(comp, propname)
-
-
-
-def compName(comp):
-    return  comp.name() if callable(comp.name) else comp.name
 
 def getSequenceChildren(comp):
-    if hasattr(comp, "getChildren") and callable(comp.getChildren):
-        return comp.getChildren()
-    elif hasattr(comp, "Members"):
+    """Return sequence children (empty if comp is not a sequence)"""
+    try:
         return comp.Members
-    else:
+    except AttributeError:
         return []
 
 
@@ -82,12 +58,13 @@ def getAllSequenceNames(seq, depth=0):
            \\__ seq2 (seq: SEQ AND)
     """
 
-    seqNameList = [(compName(seq), depth)]
+    seqNameList = [(seq.name, depth)]
     for c in getSequenceChildren(seq):
       if isSequence(c):
         seqNameList +=  getAllSequenceNames(c, depth+1)
 
     return seqNameList
+
 
 def checkSequenceConsistency( seq ):
     """ Enforce rules for sequence graph - identical items can not be added to itself (even indirectly) """
@@ -97,17 +74,16 @@ def checkSequenceConsistency( seq ):
         seen.add (s)
         for c in getSequenceChildren( s ):
             if c in seen:
-                raise RuntimeError("Sequence {} contains itself".format(compName(c)) )
+                raise RuntimeError(f"Sequence {c.name} contains itself")
             if isSequence( c ):
-                if compName(c) == n:
-                    raise RuntimeError("Sequence {} contains sub-sequence of the same name".format(n) )
-                __noSubSequenceOfName( c, compName(c), seen ) # check each sequence for repetition as well
+                if c.name == n:
+                    raise RuntimeError(f"Sequence {n} contains sub-sequence of the same name")
+                __noSubSequenceOfName( c, c.name, seen ) # check each sequence for repetition as well
                 __noSubSequenceOfName( c, n, seen )
 
-    __noSubSequenceOfName( seq, compName(seq) )
+    __noSubSequenceOfName( seq, seq.name )
     for c in getSequenceChildren( seq ):
         checkSequenceConsistency(c)
-
 
 
 def stepSeq(name, filterAlg, rest):
@@ -116,34 +92,37 @@ def stepSeq(name, filterAlg, rest):
     stepAnd = seqAND(name, [ filterAlg, stepReco ])
     return stepAnd
 
+
 def isSequence( obj ):
-    if hasattr(obj, "__cpp_type__"):
-        return obj.__cpp_type__ == 'AthSequencer'
-    return 'AthSequence' in type( obj ).__name__
+    return isinstance(obj, AthSequencer)
+
 
 def findSubSequence( start, nameToLookFor ):
     """ Traverse sequences tree to find a sequence of a given name. The first one is returned. """
-    if compName(start) == nameToLookFor:
+    if start.name == nameToLookFor:
         return start
     for c in getSequenceChildren(start):
         if isSequence( c ):
-            if  compName(c) == nameToLookFor:
+            if  c.name == nameToLookFor:
                 return c
             found = findSubSequence( c, nameToLookFor )
             if found:
                 return found
     return None
 
+
 def findOwningSequence( start, nameToLookFor ):
     """ find sequence that owns the sequence nameTooLookFor"""
     for c in getSequenceChildren(start):
-        if  compName(c) == nameToLookFor:
+        if c.name == nameToLookFor:
             return start
         if isSequence( c ):
             found = findOwningSequence( c, nameToLookFor )
             if found:
                 return found
     return None
+
+
 def findAlgorithmByPredicate( startSequence, predicate, depth = 1000000 ):
     """ Traverse sequences tree to find the first algorithm satisfying given predicate. The first encountered is returned.
 
@@ -162,13 +141,13 @@ def findAlgorithmByPredicate( startSequence, predicate, depth = 1000000 ):
 
     return None
 
+
 def findAlgorithm( startSequence, nameToLookFor, depth = 1000000 ):
     """ Traverse sequences tree to find the algorithm of given name. The first encountered is returned.
 
     The name() method is used to obtain the algorithm name, that one has to match to the request.
     """
-    return findAlgorithmByPredicate( startSequence, lambda alg: compName(alg) == nameToLookFor, depth ) 
-
+    return findAlgorithmByPredicate( startSequence, lambda alg: alg.name == nameToLookFor, depth )
 
 
 def findAllAlgorithms(sequence, nameToLookFor=None):
@@ -180,7 +159,7 @@ def findAllAlgorithms(sequence, nameToLookFor=None):
         if isSequence(child):
             algorithms += findAllAlgorithms(child, nameToLookFor)
         else:
-            if nameToLookFor is None or compName(child) == nameToLookFor:
+            if nameToLookFor is None or child.name == nameToLookFor:
                 algorithms.append(child)
     return algorithms
 
@@ -196,15 +175,15 @@ def findAllAlgorithmsByName(sequence, namesToLookFor=None):
     """
     algorithms = collections.defaultdict(list)
     for idx, child in enumerate(getSequenceChildren(sequence)):
-        if (compName(child) == compName(sequence)):
-            raise RuntimeError("Recursively-nested sequence: {} contains itself".format(compName(child)))
+        if child.name == sequence.name:
+            raise RuntimeError(f"Recursively-nested sequence: {child.name} contains itself")
         if isSequence(child):
             childAlgs = findAllAlgorithmsByName(child, namesToLookFor)
             for algName in childAlgs:
                 algorithms[algName] += childAlgs[algName]
         else:
-            if namesToLookFor is None or compName(child) in namesToLookFor:
-                algorithms[compName(child)].append( (child, sequence, idx) )
+            if namesToLookFor is None or child.name in namesToLookFor:
+                algorithms[child.name].append( (child, sequence, idx) )
     return algorithms
 
 
@@ -214,7 +193,7 @@ def flatAlgorithmSequences( start ):
 
     def __inner( seq, collector ):
         for c in getSequenceChildren(seq):
-            collector[compName(seq)].append( c )
+            collector[seq.name].append( c )
             if isSequence( c ):
                 __inner( c, collector )
 
@@ -232,28 +211,44 @@ def iterSequences( start ):
             yield c
             if isSequence(c):
                 yield from __inner(c)
-
     yield start
     yield from __inner(start)
 
 
+
 # self test
 import unittest
-class TestCF(object):
+class TestCF( unittest.TestCase ):
+    def setUp( self ):
+        import AthenaPython.PyAthena as PyAthena
+
+        top = parOR("top")
+        top.Members += [parOR("nest1")]
+        nest2 = seqAND("nest2")
+        top.Members += [nest2]
+        top.Members += [PyAthena.Alg("SomeAlg0")]
+        nest2.Members += [parOR("deep_nest1")]
+        nest2.Members += [parOR("deep_nest2")]
+
+        nest2.Members += [PyAthena.Alg("SomeAlg1")]
+        nest2.Members += [PyAthena.Alg("SomeAlg2")]
+        nest2.Members += [PyAthena.Alg("SomeAlg3")]
+        self.top = top
+
     def test_findTop( self ):
         f = findSubSequence( self.top, "top")
         self.assertIsNotNone( f, "Can not find sequence at start" )
-        self.assertEqual( compName(f), "top", "Wrong sequence" )
+        self.assertEqual( f.name, "top", "Wrong sequence" )
         # a one level deep search
         nest2 = findSubSequence( self.top, "nest2" )
         self.assertIsNotNone( nest2, "Can not find sub sequence" )
-        self.assertEqual( compName(nest2), "nest2", "Sub sequence incorrect" )
+        self.assertEqual( nest2.name, "nest2", "Sub sequence incorrect" )
 
     def test_findDeep( self ):
         # deeper search
         d = findSubSequence( self.top, "deep_nest2")
         self.assertIsNotNone( d, "Deep searching for sub seqeunce fails" )
-        self.assertEqual( compName(d), "deep_nest2", "Wrong sub sequence in deep search" )
+        self.assertEqual( d.name, "deep_nest2", "Wrong sub sequence in deep search" )
 
     def test_findMissing( self ):
         # algorithm is not a sequence
@@ -270,16 +265,16 @@ class TestCF(object):
 
     def test_findRespectingScope( self ):
         owner = findOwningSequence( self.top, "deep_nest1")
-        self.assertEqual( compName(owner), "nest2", "Wrong owner %s" % compName(owner) )
+        self.assertEqual( owner.name, "nest2", "Wrong owner %s" % owner.name )
 
         owner = findOwningSequence( self.top, "deep_nest2")
-        self.assertEqual( compName(owner), "nest2", "Wrong owner %s" % compName(owner) )
+        self.assertEqual( owner.name, "nest2", "Wrong owner %s" % owner.name )
 
         owner = findOwningSequence( self.top, "SomeAlg1")
-        self.assertEqual( compName(owner), "nest2", "Wrong owner %s" % compName(owner) )
+        self.assertEqual( owner.name, "nest2", "Wrong owner %s" % owner.name )
 
         owner = findOwningSequence( self.top, "SomeAlg0")
-        self.assertEqual( compName(owner) , "top", "Wrong owner %s" % compName(owner) )
+        self.assertEqual( owner.name , "top", "Wrong owner %s" % owner.name )
 
     def test_iterSequences( self ):
         # Traverse from top
@@ -330,55 +325,6 @@ class TestCF(object):
         a1 = findAlgorithm( self.top, "SomeAlg3", 2)
         self.assertIsNotNone( a1 is None, "Could find algorithm even if it is deep in sequences structure" )
 
-
-class TestLegacyCF( unittest.TestCase, TestCF ):
-    def setUp( self ):
-        global isComponentAccumulatorCfg
-        isComponentAccumulatorCfg = lambda : False  # noqa: E731 (lambda for mockup)
-
-        from AthenaCommon.Configurable import ConfigurablePyAlgorithm
-        top = parOR("top")
-
-        # Skip initialization if it's already been done... otherwise, we'll
-        # get errors about duplicates.
-        if not top.getChildren():
-            top += parOR("nest1")
-            nest2 = seqAND("nest2")
-            top += nest2
-            top += ConfigurablePyAlgorithm("SomeAlg0")
-            nest2 += parOR("deep_nest1")
-            nest2 += parOR("deep_nest2")
-
-            nest2 += ConfigurablePyAlgorithm("SomeAlg1")
-            nest2 += ConfigurablePyAlgorithm("SomeAlg2")
-            nest2 += ConfigurablePyAlgorithm("SomeAlg3")
-        self.top = top
-
-
-
-class TestConf2CF( unittest.TestCase,  TestCF ):
-    def setUp( self ):
-        global isComponentAccumulatorCfg
-        isComponentAccumulatorCfg = lambda : True  # noqa: E731 (lambda for mockup)
-
-        def __mkAlg(name):
-            alg = ConfigurablePyAlgorithm(name)
-            setattr(alg, "__component_type__", "Algorithm")
-            return alg
-
-        from AthenaCommon.Configurable import ConfigurablePyAlgorithm
-        top = parOR("top")
-        top.Members += [parOR("nest1")]
-        nest2 = seqAND("nest2")
-        top.Members += [nest2]
-        top.Members += [__mkAlg("SomeAlg0")]
-        nest2.Members += [parOR("deep_nest1")]
-        nest2.Members += [parOR("deep_nest2")]
-
-        nest2.Members += [__mkAlg("SomeAlg1")]
-        nest2.Members += [__mkAlg("SomeAlg2")]
-        nest2.Members += [__mkAlg("SomeAlg3")]
-        self.top = top
 
 class TestNest( unittest.TestCase ):
     def test( self ):

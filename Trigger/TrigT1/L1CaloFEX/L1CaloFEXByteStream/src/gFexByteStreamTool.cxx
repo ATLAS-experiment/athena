@@ -463,25 +463,34 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
         sum_y += y;
     }
 
-    if (sum_x < -0x0007FF) sum_x = -0x0007FF;
-    if (sum_y < -0x0007FF) sum_y = -0x0007FF;
-
-    if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
-    if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
-
     if (type == 1) {//we are considering the scalar case (sum_x = MET and sum_y = SumEt) 
         ATH_MSG_DEBUG("  scalar tob, saving " << scalar << " in X component");
-        sum_x = scalar; //Total MET 
+        sum_x = scalar; //Total MET
         if( sum_y > 0x000FFF) sum_y = 0x000FFF; //Overflow control for SumEt
         if( sum_y < 0) sum_y = 0;
 
+    } else {
+        if (sum_x < -0x0007FF) sum_x = -0x0007FF;
+        if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
+
+        if (sum_y < -0x0007FF) sum_y = -0x0007FF;
+        if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
     }
 
     ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);
 
+    uint32_t METword = 0;
+
+    METword = (sum_y &  0x00000FFF) << 0; //set the Quantity2 to the corresponding slot (LSB)
+    METword = METword | (sum_x  &  0x00000FFF) << 12;//Quantity 1 (in bit number 12)
+    if (sum_y != 0) METword = METword | 0x00000001 << 24;//Status bit for Quantity 2 (0 if quantity is null)
+    if (sum_x != 0) METword = METword | 0x00000001 << 25;//Status bit for Quantity 1 (0 if quantity is null)
+    METword = METword | (type  &  0x0000001F) << 26;//TOB ID (5 bits starting at 26)
+
     // Save to the EDM
     std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
     container->push_back(std::move(myEDM));
+    container->back()->setWord(METword);
     container->back()->setQuantityOne(sum_x);
     container->back()->setQuantityTwo(sum_y);
     container->back()->setScaleOne(m_gXE_scale);
@@ -490,12 +499,10 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     container->back()->setStatusTwo(1);
     container->back()->setSaturated(0);
     container->back()->setGlobalType(type);
+    
 
     int MET2 = sum_x * sum_x + sum_y * sum_y;
-    int16_t MET = 0x0;
-    MET2 = MET2 >> 12;
-    MET = std::sqrt(MET2);
-
+    int16_t MET = std::sqrt(MET2);
     if (MET > 0x000FFF) MET = 0x000FFF;
 
     return MET;

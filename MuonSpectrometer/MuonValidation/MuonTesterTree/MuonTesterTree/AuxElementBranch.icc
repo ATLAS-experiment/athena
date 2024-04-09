@@ -17,14 +17,10 @@ template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement* p) 
 }
 template <class T> void AuxElementBranch<T>::operator+=(const SG::AuxElement& p) { push_back(p); }
 template <class T> void AuxElementBranch<T>::operator+=(const SG::AuxElement* p) { push_back(p); }
-template <class T> void AuxElementBranch<T>::setDefault(const T& val) {
-    VectorBranch<T>::setDefault(val);
-    m_hasDefault = true;
-}
 template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement& p) {
     if (m_acc.isAvailable(p))
         VectorBranch<T>::push_back(m_acc(p));
-    else if (m_hasDefault) {
+    else if (hasDefault()) {
         VectorBranch<T>::push_back(getDefault());
     } else {
         throw std::runtime_error("Decoration is not available to fill " + name());
@@ -32,10 +28,10 @@ template <class T> void AuxElementBranch<T>::push_back(const SG::AuxElement& p) 
 }
 template <class T>
 AuxElementBranch<T>::AuxElementBranch(TTree* t, const std::string& var_name, const std::string& acc) :
-    VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc), m_hasDefault(false) {}
+    VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc) {}
 template <class T>
 AuxElementBranch<T>::AuxElementBranch(MuonTesterTree& t, const std::string& var_name, const std::string& acc) :
-    VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc), m_hasDefault(false) {}
+    VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc) {}
 
 //########################################################################################
 //                      ParticleVariableBranch

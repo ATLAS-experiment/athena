@@ -119,7 +119,7 @@ def TriggerRecoCfgMC(flags):
 
     # This may kick into action for Run 2, based on flags.Trigger.doEDMVersionConversion
     from TrigNavTools.NavConverterConfig import NavConverterCfg
-    acc.merge(NavConverterCfg(flags, chainsFilter = ["HLT_.*"])) # Derivations use the TriggerAPI here, but at RDO_TRIG->AOD/ESD we should probably convert everything.
+    acc.merge(NavConverterCfg(flags))
 
     # This will kick into action for Run 3, and may for Run 2 if based on the navigation conversion above
     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg

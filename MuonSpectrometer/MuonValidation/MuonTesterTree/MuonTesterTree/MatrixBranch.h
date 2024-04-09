@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MATRIXBRANCH_H
 #define MUONTESTER_MATRIXBRANCH_H
@@ -9,7 +9,7 @@ class TTree;
 
 namespace MuonVal {
 class MuonTesterTree;
-template <class T> class MatrixBranch : public IMuonTesterBranch {
+template <class T> class MatrixBranch : public VectorBranch<std::vector<T>> {
 public:
     /// Standard constructor
     MatrixBranch(TTree* tree, const std::string& name);
@@ -19,24 +19,14 @@ public:
     MatrixBranch(TTree* tree, const std::string& b_name, const T& def);
     MatrixBranch(MuonTesterTree& tree, const std::string& b_name, const T& def);
 
-    MatrixBranch(const MatrixBranch&) = delete;
-    void operator=(const MatrixBranch&) = delete;
+
     virtual ~MatrixBranch() = default;
 
-    bool fill(const EventContext& ctx) override final;
-    bool init() override final;
-    std::string name() const override final;
 
-    std::vector<DataDependency> data_dependencies() override final;
-
-    const TTree* tree() const override final;
-    TTree* tree() override final;
-
-    bool initialized() const;
 
     /// Returns the i-th element of the outer vector
-    inline std::vector<T>& get(size_t i);
-    inline std::vector<T>& operator[](size_t i);
+    using VectorBranch<std::vector<T>>::get;
+    using VectorBranch<std::vector<T>>::operator[];
 
     /// Returns the j-th element of the i-th inner vector
     inline T& get(size_t i, size_t j);
@@ -54,8 +44,7 @@ public:
     void setDefault(const T& def);
 
 private:
-    VectorBranch<std::vector<T>> m_Vec;
-    T m_default;
+    T m_default{};
 };
 }
 #include <MuonTesterTree/MatrixBranch.icc>

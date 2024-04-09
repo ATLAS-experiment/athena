@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PRDTESTER_PrdTesterModule_H
 #define PRDTESTER_PrdTesterModule_H
 
-#include "AthenaBaseComps/AthMessaging.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonTesterTree/MuonTesterTreeDict.h"
@@ -13,7 +12,7 @@
 namespace MuonPRDTest {
     using namespace MuonVal;
     
-    class PrdTesterModule : public MuonTesterBranch, public AthMessaging {
+    class PrdTesterModule : public MuonTesterBranch {
     public:
         PrdTesterModule(MuonTesterTree& tree, const std::string& grp_name, bool useCondGeo, MSG::Level msglvl);
 

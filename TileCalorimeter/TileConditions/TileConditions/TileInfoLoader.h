@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILEINFOLOADER_H
@@ -72,7 +72,8 @@ private:
                                , std::vector<double> &FullShape, std::vector<double> &Shape);
     void buildCovMatrix (TileInfo& info);
 
-
+    Gaudi::Property<std::string> m_tileInfoName{this,
+        "TileInfo", "TileInfo", "Name of TileInfo object in Detector Store"};
 
     //=== services
     ServiceHandle<StoreGateSvc> m_detStore;

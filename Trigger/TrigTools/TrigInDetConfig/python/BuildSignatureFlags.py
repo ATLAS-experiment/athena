@@ -231,7 +231,7 @@ def signatureActions(func):
   def invokeSteps(*args, **kwargs):
     flagsSig = func(*args, **kwargs)     #invoke signature specific code
     recoMode = args[2]
-    derivedFromFlags(flagsSig,recoMode)  #invoke code dependant on signature flags
+    derivedFromSignatureFlags(flagsSig,recoMode)  #invoke code dependant on signature flags
     return flagsSig
   return invokeSteps
 
@@ -722,7 +722,7 @@ def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 
-def derivedFromFlags(flags: AthConfigFlags, recoMode : str):
+def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
 
   flags.trkTracks_FTF     = f'HLT_IDTrkTrack_{flags.suffix}_FTF'
   flags.trkTracks_IDTrig  = f'HLT_IDTrkTrack_{flags.suffix}_IDTrig'

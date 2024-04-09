@@ -6,16 +6,8 @@
 #include "../TileFatherMonTool.h"
 #include "../TileDigitsMonTool.h"
 #include "../TileRawChannelMonTool.h"
-#include "../TileDigiNoiseMonTool.h"
-#include "../TileTMDBDigitsMonTool.h"
-#include "../TileTMDBRawChannelMonTool.h"
 #include "../TileCellNoiseMonTool.h"
-#include "../TileRawChannelTimeMonTool.h"
-#include "../TileRawChannelNoiseMonTool.h"
-#include "../TileTBBeamMonTool.h"
-#include "../TileTBMonTool.h"
 #include "../TileTBCellMonTool.h"
-#include "../TileTBPulseMonTool.h"
 #include "../TileJetMonitorAlgorithm.h"
 #include "../TileDigitsFlxMonitorAlgorithm.h"
 #include "../TileDQFragMonitorAlgorithm.h"
@@ -43,16 +35,8 @@ DECLARE_COMPONENT( TileFatherMonTool )
 DECLARE_COMPONENT( TilePaterMonTool )
 DECLARE_COMPONENT( TileDigitsMonTool )
 DECLARE_COMPONENT( TileRawChannelMonTool )
-DECLARE_COMPONENT( TileDigiNoiseMonTool )
-DECLARE_COMPONENT( TileTMDBDigitsMonTool )
-DECLARE_COMPONENT( TileTMDBRawChannelMonTool )
 DECLARE_COMPONENT( TileCellNoiseMonTool )
-DECLARE_COMPONENT( TileRawChannelTimeMonTool )
-DECLARE_COMPONENT( TileRawChannelNoiseMonTool )
-DECLARE_COMPONENT( TileTBBeamMonTool )
-DECLARE_COMPONENT( TileTBMonTool )
 DECLARE_COMPONENT( TileTBCellMonTool )
-DECLARE_COMPONENT( TileTBPulseMonTool )
 DECLARE_COMPONENT( TileJetMonitorAlgorithm )
 DECLARE_COMPONENT( TileDigitsFlxMonitorAlgorithm )
 DECLARE_COMPONENT( TileDQFragMonitorAlgorithm )

@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
-log.info("Importing %s",__name__)
+log.debug("Importing %s",__name__)
 
 from copy import deepcopy
 

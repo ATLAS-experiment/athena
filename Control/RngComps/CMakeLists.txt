@@ -61,7 +61,8 @@ if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
  endif()
 
 atlas_add_test( RandomServices_test
-                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RandomServices_test.py )
+                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RandomServices_test.py
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

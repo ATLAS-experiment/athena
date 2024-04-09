@@ -1,9 +1,0 @@
-DecisionSvc          INFO Inserting stream: StreamAllP with no Algs
-StreamAllP.Stre...   INFO Initializing StreamAllP.StreamAllPTool
-StreamAllP           INFO Data output: AthenaPoolMultiTest_Propagate.root
-StreamAllP           INFO ../O reinitialization...
-StorageSvc           INFO EventStreamInfo_p3 [11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]
-StreamAllP           INFO Metadata records written: 21
-ItemListSvc         DEBUG STREAM StreamAllP has (11) items
-ItemListSvc         DEBUG    - EventStreamInfo_StreamAllP
-ItemListSvc         DEBUG    - xAOD::EventFormat_EventFormatStreamAllP

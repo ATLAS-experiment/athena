@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <AthenaKernel/getMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
@@ -8,6 +8,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/ScalarBranch.h>
 #include <MuonTesterTree/VectorBranch.h>
+#include <MuonTesterTree/throwExcept.h>
 
 #include <functional>
 
@@ -29,21 +30,24 @@ SET_BRANCHSTRING(Float_t, "/F")
 SET_BRANCHSTRING(Double_t, "/D")
 SET_BRANCHSTRING(Bool_t, "/o")
 
-MuonTesterBranch::MuonTesterBranch(MuonTesterTree& tree, const std::string& br_name) : MuonTesterBranch(tree.tree(), br_name) {
+MuonTesterBranch::MuonTesterBranch(MuonTesterTree& tree, const std::string& br_name) : 
+    MuonTesterBranch(tree.tree(), br_name) {
     m_parent = &tree;
     m_parent->addBranch(this);
 }
 MuonTesterTree& MuonTesterBranch::parent() {
     if (!m_parent) {
-        MsgStream log(Athena::getMessageSvc(), "MuonTesterBranch()");
-        log << MSG::WARNING << "The parent of  " << name() << " is null." << endmsg;
+        ATH_MSG_WARNING("The parent of  " << name() << " is null.");
     }
     return *m_parent;
 }
 MuonTesterBranch::~MuonTesterBranch() {
-    if (m_parent) m_parent->removeBranch(this);
+    if (m_parent) {
+        m_parent->removeBranch(this);
+    }
 }
-MuonTesterBranch::MuonTesterBranch(TTree* tree, const std::string& br_name) : m_tree(tree), m_name(br_name) {}
+MuonTesterBranch::MuonTesterBranch(TTree* tree, const std::string& br_name) :
+    AthMessaging{"MuonTesterBranch"}, m_tree(tree), m_name(br_name) {}
 std::string MuonTesterBranch::name() const { return m_name; }
 bool MuonTesterBranch::initialized() const { return m_init; }
 TTree* MuonTesterBranch::tree() { return m_tree; }
@@ -57,7 +61,7 @@ std::string MuonTesterBranch::eraseWhiteSpaces(const std::string& In) {
 std::vector<MuonTesterBranch::DataDependency> MuonTesterBranch::data_dependencies() { return m_dependencies;}
 
 template <> bool& VectorBranch<bool>::get(size_t) {
-    throw std::runtime_error("For boolean branches the get() operator is cumbersome");
+    THROW_EXCEPTION("For boolean branches the get() operator is cumbersome");
     return m_default;
 }
 }

@@ -128,7 +128,7 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
 
     if _isOldConfigurable(comp):
         _log.debug( "%sComponent is already OLD Configurable object %s, no conversion",
-                    indent, CFElements.compName(comp) )
+                    indent, comp.getName() )
         return comp
 
     if isinstance(comp, str):
@@ -139,13 +139,13 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
 
     if comp.getType() == 'AthSequencer':
         _log.debug( "%sComponent is a sequence %s, attempt to merge",
-                    indent, CFElements.compName(comp))
-        oldsequence = _fetchOldSeq(CFElements.compName(comp))
+                    indent, comp.getName())
+        oldsequence = _fetchOldSeq(comp.getName())
         _mergeSequences(oldsequence, comp, _log, indent)
         return oldsequence
 
     _log.debug( "%sConverting from GaudiConfig2 object %s type %s, parent %s",
-                indent, CFElements.compName(comp), comp.__class__.__name__ , parent)
+                indent, comp.getName(), comp.__class__.__name__ , parent)
 
     def _alreadyConfigured( comp, parent ):
         instanceName = comp.getName()
@@ -231,7 +231,7 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
                 _log.warning( "%sNew configuration object %s property %s has legacy configuration "
                               "components assigned to it %s. Skipping comparison, no guarantees "
                               "about configuration consistency.",
-                              indent, CFElements.compName(conf2), pname, CFElements.compName(pvalue) )
+                              indent, conf2.getName(), pname, pvalue.getName() )
                 continue
 
             propType = conf2._descriptors[pname].cpp_type

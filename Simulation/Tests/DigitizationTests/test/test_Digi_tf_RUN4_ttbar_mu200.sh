@@ -3,6 +3,7 @@
 # art-description: Run 4 digitization of a ttbar sample with pile-up
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 4096
 # art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: RUN4_ttbar.mu200.RDO.pool.root

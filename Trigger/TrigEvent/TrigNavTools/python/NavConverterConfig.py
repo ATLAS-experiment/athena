@@ -9,8 +9,11 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger("NavConverterConfig")
 
 
-def NavConverterCfg(flags, chainsFilter = []):
+def NavConverterCfg(flags, chainsList = []):
     """Configures Run 1/2 to Run 3 navigation conversion algorithm for all triggers"""
+    if len(chainsList) == 0:
+        log.info("Chains list is empty, the conversion will happen for all chains, but no validation will be performed")
+        log.info("The later is enabled when an explicit chain list is provided")
 
     acc = ComponentAccumulator()
 
@@ -25,7 +28,7 @@ def NavConverterCfg(flags, chainsFilter = []):
 
     r2ToR3OutputName = getRun3NavigationContainerFromInput(flags)
 
-    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter") # optional: OutputLevel = DEBUG
+    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter", OutputLevel=2)
     cnvAlg.TrigDecisionTool = tdt
     cnvAlg.TrigNavReadKey = ""
     cnvAlg.TrigConfigSvc = tdt.TrigConfigSvc
@@ -42,7 +45,7 @@ def NavConverterCfg(flags, chainsFilter = []):
     types = [ t for t in edm ]
     log.info("Assuming these collections are relevant for trigger: %s", " ".join(types))
     cnvAlg.Collections = types
-    cnvAlg.Chains = chainsFilter
+    cnvAlg.Chains = chainsList
     cnvAlg.doCompression = True # set True for compression
     acc.addEventAlgo(cnvAlg)
 
@@ -57,7 +60,10 @@ def NavConverterCfg(flags, chainsFilter = []):
                                                 TrigConfigSvc = tdt.TrigConfigSvc)
     acc.addPublicTool(run3tdt)
     checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
-    checker.Chains = chainsFilter
+    checker.Chains = chainsList
+    checker.TrigDecisionToolRun3 = run3tdt
+    checker.TrigDecisionToolRun2 = tdt
+
     acc.addEventAlgo(checker)
     return acc
 

@@ -235,7 +235,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 chainDict['groups'] = [g for g in chainDict['groups'] if not g.startswith('RATE:CPS_')]
 
         #import the necessary signatures
-        log.info("Importing the necessary signatures")
+        log.debug("Importing the necessary signatures")
         self.importSignaturesToGenerate()
 
         log.info("Will now generate the chain configuration for each chain")

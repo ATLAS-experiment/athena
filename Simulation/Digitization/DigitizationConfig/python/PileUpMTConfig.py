@@ -93,7 +93,7 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
     MinbiasSvcSeed(flags, name, kwargs)
     if kind == PUBkgKind.LOWPT:
         acc.merge(LowPtMinBiasEventSelectorCfg(flags))
-        kwargs.setdefault("OnDemandMB", False)
+        kwargs.setdefault("OnDemandMB", True)
         kwargs.setdefault("SkippedHSEvents", skip)
         kwargs.setdefault("MBBatchSize", 10000)
         kwargs.setdefault("NSimultaneousBatches", 1)
