@@ -4,7 +4,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
+def InDetPriVxFinderCfg(flags,
+                        name: str = "InDetPriVxFinder",
+                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if "VertexCollectionSortingTool" not in kwargs:
@@ -38,8 +40,11 @@ def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
     acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
     return acc
 
-def InDetTrigPriVxFinderCfg(flags, inputTracks, outputVtx, name="InDetTrigPriVxFinder",
-                            **kwargs):
+def InDetTrigPriVxFinderCfg(flags,
+                            inputTracks: str,
+                            outputVtx: str,
+                            name: str = "InDetTrigPriVxFinder",
+                            **kwargs) -> ComponentAccumulator:
 
     acc = ComponentAccumulator()
 
@@ -70,9 +75,15 @@ def InDetTrigPriVxFinderCfg(flags, inputTracks, outputVtx, name="InDetTrigPriVxF
     return acc
 
 
-def primaryVertexFindingCfg(flags, vxCandidatesOutputName="PrimaryVertices"):
+def primaryVertexFindingCfg(flags,
+                            name: str = "InDetPriVxFinder",
+                            vxCandidatesOutputName: str = "PrimaryVertices",
+                            **kwargs) -> ComponentAccumulator:
 
-    acc = InDetPriVxFinderCfg(flags, VxCandidatesOutputName=vxCandidatesOutputName)
+    acc = InDetPriVxFinderCfg(flags,
+                              name,
+                              VxCandidatesOutputName=vxCandidatesOutputName,
+                              **kwargs)
 
     if flags.Tracking.perigeeExpression == "Vertex":
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
