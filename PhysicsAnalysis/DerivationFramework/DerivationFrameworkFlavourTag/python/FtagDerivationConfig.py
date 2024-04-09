@@ -60,7 +60,9 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
                 trackAugmenterPrefix=trackAugmenterPrefix
             )
         )
-
+    from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
+    acc.merge(GNNVertexFitterAlgCfg(cfgFlags, name="GNNVertexFitterAlg"))
+    
     return acc
 
 def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'):
