@@ -240,7 +240,7 @@ class AthConfigFlags(object):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
 
     def _calculateHash(self):
-        return hash( (frozenset(self._renames), id(self._flagdict)) )
+        return hash( (frozenset({k: v for k, v in self._renames.items() if k != v}), id(self._flagdict)) )
 
     def __getattr__(self, name):
         # Avoid infinite recursion looking up our own attributes
@@ -522,13 +522,19 @@ class AthConfigFlags(object):
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
         
-        if replacementSubset in newFlags._renames and newFlags._renames[replacementSubset]:
+        if replacementSubset in newFlags._renames: #and newFlags._renames[replacementSubset]:
             newFlags._renames[subsetToReplace] = newFlags._renames[replacementSubset]
         else:
             newFlags._renames[subsetToReplace] = replacementSubset
         
         if not keepOriginal:
-            newFlags._renames[replacementSubset] = "" # block access to original flags
+            if replacementSubset not in newFlags._renames or newFlags._renames[replacementSubset] == replacementSubset:
+                newFlags._renames[replacementSubset] = "" # block access to original flags
+            else:
+                del newFlags._renames[replacementSubset]
+                #If replacementSubset was a "pure renaming" of another set of flags,
+                #the original set of flags gets propagated down to its potential further renamings:
+                #no need to worry about maintaining the intermediate steps in the renaming.
         else:
             if replacementSubset not in newFlags._renames:
                 newFlags._renames[replacementSubset] = replacementSubset
