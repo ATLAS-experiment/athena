@@ -28,8 +28,8 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     if flags.BTagging.AddV0Finder:
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix="FTAG1", container_name_prefix="FTAG"))
 
-    from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorAlgCfg
-    acc.merge(GNNVertexConstructorAlgCfg(flags, name="GNNVertexFitterAlg"))
+    from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
+    acc.merge(GNNVertexFitterAlgCfg(flags, name="GNNVertexFitterAlg"))
 
     # thinning tools
     thinningTools = []
@@ -139,8 +139,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                                        'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
 
     # Append to dictionary
-    FTAG1SlimmingHelper.AppendToDictionary.update({'GNNVertices':'xAOD::VertexContainer', 'GNNVerticesAux':'xAOD::VertexAuxContainer'})
-
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
     # Static content
