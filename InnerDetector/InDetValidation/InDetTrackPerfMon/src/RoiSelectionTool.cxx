@@ -36,7 +36,7 @@ StatusCode IDTPM::RoiSelectionTool::initialize() {
 ///------------------------
 ///----- retrieveRois -----
 ///------------------------
-std::vector< roiCollection_t > IDTPM::RoiSelectionTool::retrieveRois(
+std::vector< IDTPM::roiCollection_t > IDTPM::RoiSelectionTool::retrieveRois(
     const std::string& chainName,
     const std::string& roiKey,
     const int& chainLeg ) const { 
@@ -95,7 +95,7 @@ std::vector< roiCollection_t > IDTPM::RoiSelectionTool::retrieveRois(
 ///---------------------------
 ///----- getRoisStandard -----
 ///---------------------------
-std::vector< roiCollection_t > IDTPM::RoiSelectionTool::getRoisStandard( 
+std::vector< IDTPM::roiCollection_t > IDTPM::RoiSelectionTool::getRoisStandard( 
     const std::string& chainName ) const {
 
   return retrieveRois( chainName,
@@ -107,7 +107,7 @@ std::vector< roiCollection_t > IDTPM::RoiSelectionTool::getRoisStandard(
 ///----------------------
 ///----- getRoisTnP -----
 ///----------------------
-std::vector< roiCollection_t > IDTPM::RoiSelectionTool::getRoisTnP( 
+std::vector< IDTPM::roiCollection_t > IDTPM::RoiSelectionTool::getRoisTnP( 
     const std::string& chainName ) const {
 
   /// retrieving tag rois
@@ -134,7 +134,7 @@ std::vector< roiCollection_t > IDTPM::RoiSelectionTool::getRoisTnP(
 ///-------------------
 ///----- getRois -----
 ///-------------------
-std::vector< roiCollection_t > IDTPM::RoiSelectionTool::getRois(
+std::vector< IDTPM::roiCollection_t > IDTPM::RoiSelectionTool::getRois(
     const std::string& chainName ) const { 
 
   return ( m_doTnP.value() ) ?

@@ -11,6 +11,10 @@
 #include "TrackQualitySelectionTool.h"
 #include "TrackAnalysisCollections.h"
 
+/// Gaudi includes
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/Service.h"
+
 
 ///----------------------------------------
 ///------- Parametrized constructor -------
@@ -39,7 +43,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::initialize() {
 ///----- selectTracks ------
 ///-------------------------
 StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
-    IDTPM::TrackAnalysisCollections& trkAnaColls ) {
+    TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_DEBUG( "Initially copying collections to FullScan vectors" );
 
@@ -50,19 +54,19 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
   /// First copy the full collections vectors to the selected vectors (Full-Scan)
   if( trkAnaDefSvc->useOffline() ) {
     ATH_CHECK( trkAnaColls.fillOfflTrackVec(
-        trkAnaColls.offlTrackVec( IDTPM::TrackAnalysisCollections::FULL ),
-        IDTPM::TrackAnalysisCollections::FS ) );
+        trkAnaColls.offlTrackVec( TrackAnalysisCollections::FULL ),
+        TrackAnalysisCollections::FS ) );
   }
 
   if( trkAnaDefSvc->useTruth() ) {
     ATH_CHECK( trkAnaColls.fillTruthTrackVec(
-        trkAnaColls.truthTrackVec( IDTPM::TrackAnalysisCollections::FULL ),
-        IDTPM::TrackAnalysisCollections::FS ) );
+        trkAnaColls.truthTrackVec( TrackAnalysisCollections::FULL ),
+        TrackAnalysisCollections::FS ) );
   }
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after initial FullScan copy: " << 
-      trkAnaColls.printInfo( IDTPM::TrackAnalysisCollections::FS ) );
+      trkAnaColls.printInfo( TrackAnalysisCollections::FS ) );
 
   /// Select offline tracks matched to offline objects
   if( trkAnaDefSvc->useOffline() and m_doObjSelection.value() ) {

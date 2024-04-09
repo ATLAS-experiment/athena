@@ -28,8 +28,8 @@
 #include "../src/TrackAnalysisCollections.h"
 #include "../src/RoiSelectionTool.h"
 #include "InDetTrackPerfMon/ITrackSelectionTool.h"
+#include "../src/ITrackMatchingTool.h"
 /// TODO - To be included in later MRs
-//#include "InDetTrackPerfMon/ITrackMatchingTool.h"
 //#include "InDetTrackPerfMon/TrackAnalysisPlotsMgr.h"
 
 /// STL includes
@@ -61,56 +61,58 @@ private :
     StatusCode loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls );
 
     /// Offline TrackParticleContainer's name
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_offlineTrkParticleName{
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_offlineTrkParticleName {
         this, "OfflineTrkParticleContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
 
     /// Trigger TrackParticleContainer's name
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_triggerTrkParticleName{
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_triggerTrkParticleName {
         this, "TriggerTrkParticleContainerName", "HLT_IDTrack_Electron_IDTrig", "Name of container of trigger tracks" };
 
     /// TruthParticle container's name
-    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleName{
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleName {
         this, "TruthParticleContainerName",  "TruthParticles", "Name of container of TruthParticles" };
 
     /// Offline Primary vertex container's name
-    //SG::ReadHandleKey<xAOD::VertexContainer> m_offlineVertexContainerName{
+    //SG::ReadHandleKey<xAOD::VertexContainer> m_offlineVertexContainerName {
     //    this, "VertexContainerName", "PrimaryVertices", "offline vertices" };
 
     /// Truth vertex container's name
-    //SG::ReadHandleKey<xAOD::TruthVertexContainer> m_truthVertexContainerName{
+    //SG::ReadHandleKey<xAOD::TruthVertexContainer> m_truthVertexContainerName {
     //    this, "TruthVertexContainerName",  "TruthVertices", "truth vertices" };
 
     /// EventInfo container name
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoContainerName{
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoContainerName {
         this, "EventInfoContainerName", "EventInfo", "event info" };
 
     /// TODO - To be included in later MRs
-    //SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventName{
+    //SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventName {
     //    this, "TruthEvents", "TruthEvents", "Name of the truth events container probably either TruthEvent or TruthEvents" };
 
-    //SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileUpEventName{
+    //SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileUpEventName {
     //    this, "TruthPileupEvents", "TruthPileupEvents", "Name of the truth pileup events container probably TruthPileupEvent(s)" };
 
-    PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool{
+    PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool {
         this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "" };
 
-    ToolHandle< IDTPM::ITrackSelectionTool > m_trackQualitySelectionTool{
+    ToolHandle< IDTPM::ITrackSelectionTool > m_trackQualitySelectionTool {
         this, "TrackQualitySelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", "Wrapper-tool to perform general quality-based track(truth) selection" };
 
-    ToolHandle< IDTPM::RoiSelectionTool > m_roiSelectionTool{
+    ToolHandle< IDTPM::RoiSelectionTool > m_roiSelectionTool {
         this, "RoiSelectionTool", "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve and select RoIs" };
 
-    ToolHandle< IDTPM::ITrackSelectionTool > m_trackRoiSelectionTool{
+    ToolHandle< IDTPM::ITrackSelectionTool > m_trackRoiSelectionTool {
         this, "TrackRoiSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", "Tool to select track within a RoI" };
 
-    /// TODO - To be included in later MRs
-    //ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool{ this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks and viceversa" };
+    ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool {
+        this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks and viceversa" };
 
     /// Properties to fine-tune the tool behaviour
     StringProperty m_dirName{
         this, "DirName", "InDetTrackPerfMonPlots/", "Top level directory to write histograms into" };
 
     StringProperty m_anaTag{ this, "AnaTag", "", "Track analysis tag" }; 
+
+    BooleanProperty m_doMatch{ this, "doMatch", false, "Enable TrackMatchingTool" };
 
     /// TrackAnalysisDefinitionSvc
     ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;

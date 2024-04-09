@@ -107,10 +107,12 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
                 TrackRoiSelectionToolCfg( flags,
                     name="TrackRoiSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-    ## TODO - to be uncommented in future MRs
-    #if "TrackMatchingTool" not in kwargs:
-    #    kwargs.setdefault("TrackMatchingTool", acc.popToolsAndMerge(
-    #        TrackMatchingToolCfg(flags)))
+    if "TrackMatchingTool" not in kwargs:
+        from InDetTrackPerfMon.InDetMatchingConfig import TrackMatchingToolCfg
+        matchToolCfg = TrackMatchingToolCfg( flags )
+        if matchToolCfg is not None :
+            kwargs.setdefault( "doMatch", True ) # = False by default
+            kwargs.setdefault( "TrackMatchingTool", acc.popToolsAndMerge( matchToolCfg ) )
 
     acc.setPrivateTools( CompFactory.InDetTrackPerfMonTool( name, **kwargs ) )
     return acc

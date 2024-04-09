@@ -7,7 +7,11 @@
  * @author  Marco Aparo <marco.aparo@cern.ch>
  **/
 
-/// Local include(s)
+/// Gaudi includes
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/Service.h"
+
+/// Local includes
 #include "TrackObjectSelectionTool.h"
 #include "TrackAnalysisCollections.h"
 #include "OfflineObjectDecorHelper.h"
@@ -39,7 +43,7 @@ StatusCode IDTPM::TrackObjectSelectionTool::initialize() {
 ///----- selectTracks ------
 ///-------------------------
 StatusCode IDTPM::TrackObjectSelectionTool::selectTracks(
-    IDTPM::TrackAnalysisCollections& trkAnaColls ) {
+    TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_DEBUG( "Selecting offline tracks matched to an offline " << m_objectType.value() );
 
@@ -55,17 +59,17 @@ StatusCode IDTPM::TrackObjectSelectionTool::selectTracks(
   /// started loop over offline tracks
   std::vector< const xAOD::TrackParticle* > newVec;
   for( const xAOD::TrackParticle* thisTrack :
-       trkAnaColls.offlTrackVec( IDTPM::TrackAnalysisCollections::FS ) ) {
+       trkAnaColls.offlTrackVec( TrackAnalysisCollections::FS ) ) {
     if( accept( *thisTrack ) ) newVec.push_back( thisTrack );
   }
 
   /// update selected Full-Scan offline track vector
   ATH_CHECK( trkAnaColls.fillOfflTrackVec( newVec,
-                IDTPM::TrackAnalysisCollections::FS ) );
+                TrackAnalysisCollections::FS ) );
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after offline object-matching: " << 
-      trkAnaColls.printInfo( IDTPM::TrackAnalysisCollections::FS ) );
+      trkAnaColls.printInfo( TrackAnalysisCollections::FS ) );
 
   return StatusCode::SUCCESS;
 }
@@ -80,7 +84,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
   /// Electron
   if( m_objectType.value().find("Electron") != std::string::npos ) {
 
-    const xAOD::Electron* ele = IDTPM::getLinkedElectron(
+    const xAOD::Electron* ele = getLinkedElectron(
         offTrack, m_objectQuality.value() );
 
     if( not ele ) return false;
@@ -88,11 +92,13 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with " << m_objectQuality.value() << 
                    " Electron with transverse energy = " << ET( *ele ) );
+
+    return true;
   }
 
   /// Muon
   if( m_objectType.value().find("Muon") != std::string::npos ) {
-    const xAOD::Muon* mu = IDTPM::getLinkedMuon(
+    const xAOD::Muon* mu = getLinkedMuon(
         offTrack, m_objectQuality.value() );
 
     if( not mu ) return false;
@@ -100,12 +106,14 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with " << m_objectQuality.value() <<
                    " Muon with transverse energy = " << ET( *mu ) );
+
+    return true;
   }
 
   /// Tau
   if( m_objectType.value().find("Tau") != std::string::npos ) {
 
-    const xAOD::TauJet* tau = IDTPM::getLinkedTau(
+    const xAOD::TauJet* tau = getLinkedTau(
         offTrack, m_tauNprongs.value(),
         m_tauType.value(), m_objectQuality.value() );
 
@@ -116,19 +124,25 @@ bool IDTPM::TrackObjectSelectionTool::accept(
                    " hadronic " << m_tauNprongs.value() << "prong " <<
                    m_tauType.value() << " Tau with transverse energy = " <<
                    ET( *tau ) );
+
+    return true;
   }
 
   /// Truth
   if( m_objectType.value().find("Truth") != std::string::npos ) {
 
-    const xAOD::TruthParticle* truth = IDTPM::getLinkedTruth(
+    const xAOD::TruthParticle* truth = getLinkedTruth(
         offTrack, m_truthProbCut.value() );
 
     if( not truth ) return false;
 
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with truth particle with pt = " << pT( *truth ) );
+
+    return true;
   }
 
-  return true;
+  ATH_MSG_WARNING( "Type " << m_objectType.value() <<
+                   " is not supported for track-object selection" );
+  return false;
 }

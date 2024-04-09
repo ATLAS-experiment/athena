@@ -10,6 +10,10 @@
 /// Athena include(s)
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
+/// Gaudi includes
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/Service.h"
+
 /// Local include(s)
 #include "TrackRoiSelectionTool.h"
 #include "TrackAnalysisCollections.h"
@@ -108,6 +112,14 @@ bool IDTPM::TrackRoiSelectionTool::accept(
   return false;
 }
 
+/// accept method for offline tracks
+template bool IDTPM::TrackRoiSelectionTool::accept(
+    const xAOD::TrackParticle& t, const TrigRoiDescriptor* r ) const;
+
+/// accept method for truth particles
+template bool IDTPM::TrackRoiSelectionTool::accept(
+    const xAOD::TruthParticle& t, const TrigRoiDescriptor* r ) const;
+
 
 ///---------------------------
 ///------- getOuterPhi -------
@@ -184,7 +196,7 @@ exitPoint_t IDTPM::TrackRoiSelectionTool::getExitPoint(
 ///-------------------------
 template< class T >
 std::vector< const T* > IDTPM::TrackRoiSelectionTool::getTracks(
-    std::vector< const T* > tvec, 
+    const std::vector< const T* >& tvec,
     const TrigRoiDescriptor* r ) const {
 
   std::vector< const T* > selectedTracks;
@@ -202,13 +214,13 @@ std::vector< const T* > IDTPM::TrackRoiSelectionTool::getTracks(
 /// getTracks method for offline tracks
 template std::vector< const xAOD::TrackParticle* >
 IDTPM::TrackRoiSelectionTool::getTracks< xAOD::TrackParticle >(
-    std::vector< const xAOD::TrackParticle* > tvec,
+    const std::vector< const xAOD::TrackParticle* >& tvec,
     const TrigRoiDescriptor* r ) const;
 
 /// getTracks method for truth particles
 template std::vector< const xAOD::TruthParticle* >
 IDTPM::TrackRoiSelectionTool::getTracks< xAOD::TruthParticle >(
-    std::vector< const xAOD::TruthParticle* > tvec,
+    const std::vector< const xAOD::TruthParticle* >& tvec,
     const TrigRoiDescriptor* r ) const;
 
 
@@ -217,7 +229,7 @@ IDTPM::TrackRoiSelectionTool::getTracks< xAOD::TruthParticle >(
 ///-----------------------------
 std::vector< const xAOD::TrackParticle* >
 IDTPM::TrackRoiSelectionTool::getTrigTracks( 
-    SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey, 
+    const SG::ReadHandleKey< xAOD::TrackParticleContainer >& handleKey,
     const ElementLink< TrigRoiDescriptorCollection >& roiLink ) const {
 
   SG::ReadHandle<xAOD::TrackParticleContainer> handle( handleKey );
@@ -243,7 +255,7 @@ IDTPM::TrackRoiSelectionTool::getTrigTracks(
 ///--- selectTracksInRoI ---
 ///-------------------------
 StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
-    IDTPM::TrackAnalysisCollections& trkAnaColls,
+    TrackAnalysisCollections& trkAnaColls,
     const ElementLink< TrigRoiDescriptorCollection >& roiLink ) {
 
   ATH_MSG_DEBUG( "Selecting tracks in RoI" );
@@ -258,29 +270,29 @@ StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
   /// Trigger tracks RoI selection
   ATH_CHECK( trkAnaColls.fillTestTrackVec(
       getTrigTracks( m_triggerTrkParticleName, roiLink ),
-      IDTPM::TrackAnalysisCollections::InRoI ) );
+      TrackAnalysisCollections::InRoI ) );
 
   /// Offline tracks RoI selection
   if( trkAnaDefSvc->useOffline() ) {
     ATH_CHECK( trkAnaColls.fillOfflTrackVec(
         getTracks(
-            trkAnaColls.offlTrackVec( IDTPM::TrackAnalysisCollections::FS ),
+            trkAnaColls.offlTrackVec( TrackAnalysisCollections::FS ),
             *roi ),
-        IDTPM::TrackAnalysisCollections::InRoI ) );
+        TrackAnalysisCollections::InRoI ) );
   }
 
   /// Truth particles RoI selection 
   if( trkAnaDefSvc->useTruth() ) {
     ATH_CHECK( trkAnaColls.fillTruthTrackVec(
         getTracks(
-            trkAnaColls.truthTrackVec( IDTPM::TrackAnalysisCollections::FS ),
+            trkAnaColls.truthTrackVec( TrackAnalysisCollections::FS ),
             *roi ),
-        IDTPM::TrackAnalysisCollections::InRoI ) );
+        TrackAnalysisCollections::InRoI ) );
   }
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after RoI selection: " << 
-      trkAnaColls.printInfo( IDTPM::TrackAnalysisCollections::InRoI ) );
+      trkAnaColls.printInfo( TrackAnalysisCollections::InRoI ) );
  
   return StatusCode::SUCCESS;
 }

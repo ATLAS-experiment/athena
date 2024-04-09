@@ -46,11 +46,11 @@ namespace IDTPM {
 
     /// Main Track selection method
     virtual StatusCode selectTracks(
-        IDTPM::TrackAnalysisCollections& trkAnaColls ) override;
+        TrackAnalysisCollections& trkAnaColls ) override;
 
     /// Dummy method - unused
     virtual StatusCode selectTracksInRoI(
-        IDTPM::TrackAnalysisCollections&,
+        TrackAnalysisCollections&,
         const ElementLink< TrigRoiDescriptorCollection >& ) override {
       ATH_MSG_WARNING( "selectTracksInRoI method is disabled" );
       return StatusCode::SUCCESS;

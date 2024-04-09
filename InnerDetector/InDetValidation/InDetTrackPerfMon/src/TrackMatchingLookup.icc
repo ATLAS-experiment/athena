@@ -1,0 +1,165 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// local include(s)
+#include "TrackMatchingLookup.h"
+#include "TrackParmetersHelper.h"
+#include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
+
+/// gaudi includes
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/Service.h"
+
+/// STD includes
+#include <sstream>
+
+
+/// Constructor
+template< typename T, typename R >
+IDTPM::TrackMatchingLookupBase<T, R>::TrackMatchingLookupBase(
+  const std::string& anaTag_s ) :
+    AthMessaging( "TrackMatchingLookup" + anaTag_s ),
+    m_anaTag( anaTag_s ), m_mapTestToRef(), m_mapRefToTest() { }
+
+
+/// getMatchedRef
+template< typename T, typename R >
+const R* IDTPM::TrackMatchingLookupBase<T, R>::getMatchedRef( const T& t ) const
+{
+  typename mapTtoR_t::const_iterator titr = m_mapTestToRef.find( &t );
+  if( titr != m_mapTestToRef.end() ) return titr->second;
+  return nullptr;
+} 
+
+
+/// getMatchedTest
+template< typename T, typename R >
+const std::vector<const T*>&
+IDTPM::TrackMatchingLookupBase<T, R>::getMatchedTest( const R& r ) const
+{
+  typename mapRtoT_t::const_iterator titr = m_mapRefToTest.find( &r );
+  if( titr != m_mapRefToTest.end() ) return titr->second;
+  return m_nullTest;
+} 
+
+
+/// isTestInMaps
+template< typename T, typename R >
+bool IDTPM::TrackMatchingLookupBase<T, R>::isTestInMaps( const T& t ) const
+{
+  return ( getMatchedRef(t) != nullptr );
+}
+
+
+/// isRefInMaps 
+template< typename T, typename R >
+bool IDTPM::TrackMatchingLookupBase<T, R>::isRefInMaps( const R& r ) const
+{
+  return ( not getMatchedTest(r).empty() );
+} 
+
+
+/// updateMaps
+template< typename T, typename R >
+StatusCode IDTPM::TrackMatchingLookupBase<T, R>::updateMaps( const T& t, const R& r )
+{
+  ATH_MSG_DEBUG( "Adding new match = test : pT = " << pT(t) <<
+                 " -> reference : pT = " << pT(r) );  
+
+  /// Test->Reference caching (1 to 1)
+  std::pair< typename mapTtoR_t::iterator, bool > retTtoR =
+    m_mapTestToRef.insert( typename mapTtoR_t::value_type( &t, &r ) );
+
+  if( not retTtoR.second ) {
+    ATH_MSG_DEBUG( "Test is already matched to reference with pT = " <<
+                   pT( *(retTtoR.first->second) ) <<
+                   " .\n\t-> New matched reference is not cached!" );
+  }
+
+  /// (Reverse) Reference -> Test(s) caching (1 to 1+)
+  if( isRefInMaps(r) ) {
+    typename mapRtoT_t::iterator mitr = m_mapRefToTest.find( &r );
+    ATH_MSG_DEBUG( "Reference already matched to other " <<
+                   mitr->second.size() << " test(s). Adding a new one..." );
+    mitr->second.push_back( &t ); // updating matched test vector in map
+  }
+  else {
+    std::vector< const T* > tvec; // creating new vector of matched tests
+    tvec.push_back( &t );
+    m_mapRefToTest.insert( typename mapRtoT_t::value_type( &r, tvec ) );
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+
+/// clear lookup tables
+template< typename T, typename R >
+void IDTPM::TrackMatchingLookupBase<T, R>::clearMaps()
+{
+  m_mapTestToRef.clear();
+  m_mapRefToTest.clear();
+}
+
+
+/// print info about matching and reverse matchings
+template< typename T, typename R >
+std::string IDTPM::TrackMatchingLookupBase<T, R>::printMaps(
+    const std::vector< const T* >& testVec,
+    const std::vector< const R* >& refVec,
+    std::string_view chainRoiName_s ) const
+{
+  std::string testT(""), refT("");
+  ITrackAnalysisDefinitionSvc* trkAnaDefSvc;
+  ISvcLocator* svcLoc = Gaudi::svcLocator();
+  StatusCode sc = svcLoc->service( "TrkAnaDefSvc"+m_anaTag, trkAnaDefSvc );
+  if( sc.isSuccess() ) {
+    testT = "( " + trkAnaDefSvc->testType() + " ) ";
+    refT  = "( " + trkAnaDefSvc->referenceType()  + " ) ";
+  } else {
+    ATH_MSG_DEBUG( "Could not retrieve TrkAnaDefSvc" << m_anaTag );
+  }
+
+  std::stringstream ss;
+  ss << "TrackMatchingLookup" << m_anaTag << " : " << chainRoiName_s
+     <<" --> Found " << getMapsSize() << " matches\n";
+  if( getMapsSize() == 0 ) return ss.str();
+
+  ss << "\t\tTest " << testT
+     << "-> Reference " << refT << "matches:\n";
+  size_t it(0);
+  for( const T* t : testVec ) {
+    ss << "\t\t\t\tTest with pT = " << pT(*t)
+       << " matches with --> ";
+    if( isTestInMaps(*t) ) {
+      ss << "Reference with pT = "
+         << pT( *(getMatchedRef(*t)) ) << "\n";
+    } else {
+      ss << "N/A\n";
+    }
+    if( it > 20 ) { ss << "et al...\n"; break; }
+    it++;
+  }
+
+  ss << "\t\tReference -> Test matches:\n";
+  it = 0;
+  for( const R* r : refVec ) {
+    std::vector<const T*> testVecMatch = getMatchedTest(*r);
+    ss << "\t\t\t\tReference with pT = "
+       << pT(*r) << " matches with --> ";
+    if( testVecMatch.empty() ) ss << "N/A\n";
+    else {
+      ss << "tests with pTs = [";
+      for( size_t it=0 ; it<testVecMatch.size() ; it++ ) {
+        ss << " " << pT( *(testVecMatch.at(it)) );
+        if( it+1 != testVecMatch.size() ) ss << " ,";
+      }
+      ss << " ]\n";
+    }
+    if( it > 20 ) { ss << "et al...\n"; break; }
+    it++;
+  }
+
+  return ss.str();
+}

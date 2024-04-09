@@ -78,9 +78,7 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
   ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
   ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->useTrigger() } ) );
-  /// TODO - To be included in later MRs
-  //ATH_CHECK( m_generalSelectionTool.retrieve() );
-  //ATH_CHECK( m_trackMatchingTool.retrieve() );
+  ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
 
   ATH_CHECK( m_eventInfoContainerName.initialize() );
 
@@ -178,6 +176,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// Defining TrackAnalysisCollections object
   /// to contain all collections for this event
   IDTPM::TrackAnalysisCollections thisTrkAnaCollections( m_anaTag.value() );
+  ATH_CHECK( thisTrkAnaCollections.initialize() );
 
   SG::ReadHandle<xAOD::EventInfo> pie = SG::ReadHandle<xAOD::EventInfo>( m_eventInfoContainerName );
 
@@ -194,12 +193,6 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     ATH_MSG_DEBUG( "Some FULL collections are empty. Skipping event." );
     return StatusCode::SUCCESS;
   }
-
-  /// TODO - To be included in later MRs
-  //const EventContext& ctx = Gaudi::Hive::currentContext();
-  //IDTPM::ITrackMatchingTool::DecorHandles dh(*m_trackMatchingTool, ctx);
-
-  //ATH_CHECK( m_trackMatchingTool->fillDummyDecorations(dh, thisTrkAnaCollections) );
 
   /// ------------------------------
   /// --- Track quality selector ---
@@ -263,7 +256,6 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       const TrigRoiDescriptor* const* thisRoi = m_trkAnaDefSvc->useTrigger() ? 
                                                 thisRoiLink.cptr() : nullptr;
 
-
       /// ----------------------------------
       /// --- Track selection within RoI ---
       /// ----------------------------------
@@ -279,7 +271,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       }
 
       /// checking if track collections are empty
-      if ( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::InRoI ) ) {
+      if( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::InRoI ) ) {
         ATH_MSG_DEBUG( "Some collections are empty after RoI selection. Skipping event." );
         continue;
       }
@@ -289,13 +281,11 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// -------------------------------
       std::string chainRoIName = thisChain;
       if( m_trkAnaDefSvc->useTrigger() ) chainRoIName += "_RoI_"+std::to_string(ir);
-      thisTrkAnaCollections.setChainRoiName( chainRoIName );
 
-      /// TODO - To be included in later MRs
-      //ATH_CHECK( m_trackMatchingTool->match( dh, thisTrkAnaCollections, chainRoIName, thisRoi ) );
-
-      /// TODO - To be included in later MRs
-      //ATH_MSG_INFO( thisTrkAnaCollections.printMatchInfo() ); // FIXME - change to ATH_MSG_DEBUG
+      if( m_doMatch.value() ) {
+        ATH_MSG_DEBUG( "Doing Test-Reference matching..." );
+        ATH_CHECK( m_trackMatchingTool->match( thisTrkAnaCollections, chainRoIName ) );
+      }
 
       /// --------------------------
       /// --- Filling histograms ---
