@@ -61,11 +61,6 @@ def TileCellMakerCfg(flags, mergeChannels=True, **kwargs):
     from AthenaCommon.Logging import logging
     msg = logging.getLogger( 'TileCellMakerCfg' )
 
-    if flags.Tile.readDigits:
-        msg.info('Reconstruct Tile raw channels')
-        from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-        acc.merge( TileRawChannelMakerCfg(flags) )
-
     CaloCellMaker, CaloCellContainerFinalizerTool=CompFactory.getComps("CaloCellMaker","CaloCellContainerFinalizerTool",)
     from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
     tileCellBuilder = acc.popToolsAndMerge( TileCellBuilderCfg(flags, SkipGain=skipGain, mergeChannels=mergeChannels) )
