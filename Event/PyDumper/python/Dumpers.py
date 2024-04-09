@@ -173,10 +173,8 @@ Can be used for formatting expressions that using longs in py2.
     if isinstance (x, forceInt):
         return str(x.x)
     if isinstance(x, ROOT.std.string):
-        r = repr(x)
-        if len(r) and r[0] == 'b':
-            return r[1:] # remove leading 'b' in cppyy 3.1.2
-        return r
+        # remove leading 'b' added to repr(std.string) by cppyy 3.1.2 in ROOT 6.32
+        return repr(str(x))
     return repr(x)
 
 
@@ -4432,7 +4430,7 @@ def dump_TrigPassBits (b, f):
 
 def dump_TrigOperationalInfo (b, f):
     p = b.infos()
-    fprint (f, list(p.first), list(p.second))
+    fprint (f, [str(s) for s in p.first], list(p.second))
     return
 
 
