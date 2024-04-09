@@ -124,10 +124,7 @@ Trk::CylinderVolumeCreator::createTrackingVolume(
     discLayers.reserve(layers.size());
 
     // the raw data
-    double rMinRaw = 0.;
-    double rMaxRaw = 0.;
-    double zMinRaw = 0.;
-    double zMaxRaw = 0.;
+    double rMinRaw{0.}, rMaxRaw{0.}, zMinRaw{0.}, zMaxRaw{0.};
        
     // check the dimension and fill raw data
     if (estimateAndCheckDimension(layers,
@@ -554,11 +551,16 @@ Trk::CylinderVolumeCreator::estimateAndCheckDimension(
             }
         }
         // the raw data
-        takeSmaller(rMinClean,currentRmin); takeBigger(rMaxClean,currentRmax);
-        takeSmaller(zMinClean,currentZmin); takeBigger(zMaxClean,currentZmax);
+        rMinClean = std::min(rMinClean, currentRmin); 
+        rMaxClean = std::max(rMaxClean, currentRmax);
+        zMinClean = std::min(zMinClean, currentZmin); 
+        zMaxClean = std::max(zMaxClean, currentZmax);
         // assign if they overrule the minima/maxima (with layers thicknesses)
-        takeSmaller(layerRmin,currentRmin); takeBigger(layerRmax,currentRmax);
-        takeSmaller(layerZmin,currentZmin); takeBigger(layerZmax,currentZmax);
+
+        layerRmin = std::min(layerRmin,currentRmin); 
+        layerRmax = std::max(layerRmax, currentRmax);
+        layerZmin = std::min(layerZmin,currentZmin); 
+        layerZmax = std::max(layerZmax, currentZmax);
     }
 
     // special for biequidistant binning - navigation layers are added before / after
