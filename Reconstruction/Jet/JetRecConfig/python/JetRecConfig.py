@@ -17,7 +17,7 @@ from ROOT import xAODType
 xAODType.ObjectType
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 from JetRecConfig.JetDefinition import JetDefinition, JetInputConstitSeq, JetInputConstit, JetInputExternal
@@ -333,11 +333,7 @@ def getInputAlgs(jetOrConstitdef, flags=None, context="default", monTool=None):
             alg = inputInstance.algoBuilder( jetdef, inputInstance.specs ) 
             
         if alg is not None:
-            if isinstance( alg, list):
-                # this can happen when running in runII style atlas config...
-                algs+=alg
-            else:
-                algs.append(alg)
+            algs.append(alg)
 
     return algs
 
@@ -860,16 +856,7 @@ def registerAsInputConstit( jetdef ):
 
     # define a function to generate the CA for this jetdef
     def jetBuilder(largejetdef,spec):
-        if isComponentAccumulatorCfg():
-            return JetRecCfg(largejetdef._cflags, jetdef)
-        else:
-            # Compatibility with runII style : we can't use ComponentAccumulator and must return the list of algs.
-            #  When this is not needed anymore we can remove here and simplify inside getInputAlgs()
-            algs, jetdef_i = getJetAlgs(largejetdef._cflags, jetdef, True)
-            algs, ca = reOrderAlgs( [a for a in algs if a is not None])
-            # ignore dangling CA instance in legacy config
-            ca.wasMerged()
-            return algs
+        return JetRecCfg(largejetdef._cflags, jetdef)
 
     stdInputExtDic[jetname]  = JetInputExternal( jetname, jetname, algoBuilder=jetBuilder)
     stdConstitDic[jetname] = JetInputConstit(jetname, xAODType.Jet, jetname )
