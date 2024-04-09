@@ -540,8 +540,20 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
 
     # Perform vertex finding
     if flags.Tracking.doVertexFinding:
+        # Schedule the usual vertex finding for Athena workflow(s)
         from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
+
+        # Schedule the same vertex finding for Acts workflow(s)
+        # For now this is separate from the Athena counterpart, but in the
+        # end the difference will not be needed anymore
+        # ONLY schedule this if there are ACTS Track collections
+        if InputCombinedActsTracks:
+            result.merge(primaryVertexFindingCfg(flags,
+                                                 name="ActsPriVxFinderAlg",
+                                                 TracksName="ActsCombinedTracksParticlesAlt",
+                                                 vxCandidatesOutputName="ActsPrimaryVertices"))
+
 
     if flags.Tracking.doStats:
         result.merge(ITkStatsCfg(

@@ -21,6 +21,7 @@ def createActsTrackingPassFlags():
     # enabled. Ambi. can be activated/deactivated with 
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+
     return icf
 
 def createActsConversionTrackingPassFlags():
