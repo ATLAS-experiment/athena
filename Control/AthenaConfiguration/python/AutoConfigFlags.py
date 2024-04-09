@@ -140,7 +140,7 @@ def getDefaultDetectors(geoTag, sqliteDB, sqliteDBFullPath, includeForward=False
         detectors.add('ITkPixel')
         detectors.add('ITkStrip')
         if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Luminosity']['BCMPrime']:
-            pass  # keep disabled for now
+            detectors.add('BCMPrime')  # since https://gitlab.cern.ch/Atlas-Inner-Tracking/ITKLayouts/-/merge_requests/347 introduced BCMPrime geometry
         if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Luminosity']['PLR']:
             detectors.add('PLR')
     else:
