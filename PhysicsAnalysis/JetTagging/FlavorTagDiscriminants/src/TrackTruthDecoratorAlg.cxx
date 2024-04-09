@@ -131,7 +131,7 @@ namespace FlavorTagDiscriminants {
       int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
       if ( muTruthOrigin == 9 && InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
         // Check if a muon isFromC and the associated track isFromBC
-        muTruthOrigin = 11;
+        muTruthOrigin = 13;
       }
       else if ( muTruthOrigin == 9 && !InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
         muTruthOrigin = 9;
