@@ -674,7 +674,13 @@ class ChainStep(object):
  
         self.name = name
         self.sequences = []
-        self.sequenceFunctions = Sequences                                       
+        self.sequenceFunctions = Sequences    
+        for iseq, seq in enumerate(self.sequenceFunctions):              
+            if not isinstance(seq, functools.partial):
+                log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", self.name, iseq)
+                log.error("[ChainStep] It rather seems to be of type %s trying to print it", type(seq))
+                raise RuntimeError("Sequence is not packaged in a tuple, see error message above" ) 
+                                                 
         self.onlyJets  = False
         sig_set = None
         if len(chainDicts) > 0  and 'signature' in chainDicts[0]: 
@@ -699,23 +705,11 @@ class ChainStep(object):
         self.legIds = self.getLegIds() if len(multiplicity) > 1 else [0]
         self.makeCombo()
 
-    def createSequences(self, fastMenuGeneration):
+    def createSequences(self):
         """ defered creation"""
-        log.info("creating sequences for step %s with fastMenuGeneration = %d", self.name, fastMenuGeneration )
-        if fastMenuGeneration:
-            for iseq, seq in enumerate(self.sequenceFunctions):              
-                if not isinstance(seq, functools.partial):
-                    log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", self.name, iseq)
-                    log.error("[ChainStep] It rather seems to be of type %s trying to print it", type(seq))
-                    raise RuntimeError("Sequence is not packaged in a tuple, see error message above" )                        
-                self.sequences.append(seq()) # create the sequences
-        else:
-            # handle multiple behaviours of signature: those using ChainConfiguraitonBase pass the sequences, others pass funtools (jet/met)
-            for seq in self.sequenceFunctions:
-                if isinstance(seq, functools.partial):
-                    self.sequences.append(seq()) # create the sequences
-                else:
-                    self.sequences.append(seq)
+        log.info("creating sequences for step %s", self.name)
+        for seq in self.sequenceFunctions:                        
+            self.sequences.append(seq()) # create the sequences        
 
     def relabelLegIdsForJets(self):
 
