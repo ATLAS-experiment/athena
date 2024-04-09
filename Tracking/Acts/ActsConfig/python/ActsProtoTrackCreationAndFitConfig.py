@@ -106,7 +106,12 @@ if __name__ == "__main__":
     flags.PhysVal.IDPVM.doHitLevelPlots = True
     flags.PhysVal.IDPVM.runDecoration = True
     flags.PhysVal.IDPVM.validateExtraTrackCollections = [f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"]
-    flags.PhysVal.IDPVM.doTechnicalEfficiency = True
+    # @TODO the technical efficiency can only be computed if the xAOD clusters provide
+    #    information about the contributing truth particles (truth_index).
+    #    Currently, this information is only provided by the PixelPrepDataToxAOD and
+    #    SCT_PrepDataToxAOD but not the ClusterConversionUtilities used in this test.
+    #    Therefore doTechnicalEfficiency = False
+    flags.PhysVal.IDPVM.doTechnicalEfficiency = False
     flags.PhysVal.OutputFileName = "IDPVM.root"
     flags.fillFromArgs()
     flags.lock()
