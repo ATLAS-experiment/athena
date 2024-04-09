@@ -54,4 +54,24 @@ else()
        atlas_add_test( JobOptionsUnitTests SCRIPT test/JobOptionsUnitTests.py
           POST_EXEC_SCRIPT noerror.sh )
     endif()
+
+    # Command line testing:
+    atlas_add_test( athenaCA_config
+       SCRIPT athena.py --config-only=ca.pkl AthExHelloWorld/HelloWorldConfig.py Exec.MaxEvents=1
+       POST_EXEC_SCRIPT noerror.sh )
+
+    atlas_add_test( athenaCA_run
+       SCRIPT athena.py --stdcmalloc ca.pkl
+       LOG_SELECT_PATTERN "Preloading|processing event #"
+       DEPENDS athenaCA_config )
+
+    atlas_add_test( athenaLegacy_config
+       SCRIPT athena.py --config-only=legacy.pkl --evtMax=1 AthExHelloWorld/HelloWorldOptions.py
+       POST_EXEC_SCRIPT noerror.sh )
+
+    atlas_add_test( athenaLegacy_run
+       SCRIPT athena.py --stdcmalloc legacy.pkl
+       LOG_SELECT_PATTERN "Preloading|processing event #"
+       DEPENDS athenaLegacy_config )
+
 endif()
