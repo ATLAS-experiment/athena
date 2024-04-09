@@ -56,6 +56,18 @@ namespace InDet {
       return false;
     }
 
+    /** from Kshort decay */
+    inline bool isKshortDecay(int origin) {
+      if (origin & (0x1 << KshortDecay)) return true;
+      return false;
+    }
+
+    /** from Lambda decay */
+    inline bool isLambdaDecay(int origin) {
+      if (origin & (0x1 << LambdaDecay)) return true;
+      return false;
+    }
+
     /** from conversions */
     inline bool isGammaConversion(int origin) {
       if (origin & (0x1 << GammaConversion)) return true;
