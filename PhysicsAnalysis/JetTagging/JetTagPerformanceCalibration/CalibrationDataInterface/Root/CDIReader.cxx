@@ -54,7 +54,7 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
     // and construct the metadata map
     for(const auto label : *labelkeys){
       std::string labelname = label->GetName();
-      if(labelname == "cutvalue" || labelname == "fraction") continue;
+      if(labelname == "cutvalue" || labelname == "fraction" || labelname == "fraction_tau" ) continue;
       m_labels.insert(labelname);
       theseLabels.push_back(labelname);
       
