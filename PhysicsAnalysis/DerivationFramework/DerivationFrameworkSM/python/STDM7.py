@@ -15,7 +15,7 @@ def STDM7SkimmingToolCfg(flags):
     muonsRequirements = '(Muons.pt >= 4*GeV) && (abs(Muons.eta) < 2.6)' \
                         '&& (Muons.DFCommonMuonPassPreselection) && (Muons.DFCommonMuonPassIDCuts)'
     electronsRequirements = '(Electrons.pt > 11*GeV) && (abs(Electrons.eta) < 2.6)' \
-                            '&& ((Electrons.DFCommonElectronsLHLoose) || (Electrons.DFCommonElectronsDNNLoose))'
+                            '&& ((Electrons.DFCommonElectronsLHLoose) || ((Electrons.DFCommonElectronsDNNLoose) && (Electrons.pt > 15*GeV)))'
     
     chargedParticleRequirements = '(TruthParticles.pt > 500) && (TruthParticles.barcode < 200000)' \
                                   '&& (TruthParticles.status == 1) && (TruthParticles.charge != 0)' \
