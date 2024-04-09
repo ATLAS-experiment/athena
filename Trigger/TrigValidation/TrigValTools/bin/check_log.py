@@ -15,7 +15,7 @@ import os
 
 # Error keywords
 errorRegex = [
-    r'^ERROR ', ' ERROR ', ' FATAL ', 'CRITICAL ', 'ABORT_CHAIN',
+    r'^ERROR ', '^ERROR:', ' ERROR ', ' FATAL ', 'CRITICAL ', 'ABORT_CHAIN',
     r'^Exception\:',
     r'^Caught signal',
     r'^Core dump',
