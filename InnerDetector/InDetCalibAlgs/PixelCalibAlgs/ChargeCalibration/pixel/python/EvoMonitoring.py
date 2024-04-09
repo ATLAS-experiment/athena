@@ -197,7 +197,7 @@ def setupRunEvo(path_newCalib, path_oldCalib):
     new_iov = "Latest IOV"
     old_iov = "Older IOV"
     
-    print("Files chosen for the coparison:")
+    print("Files chosen for the comparison:")
     
     print("New calibration: '%s'" % path_newCalib)
     new_calib, new_iov = ReadCalibOutput(path_newCalib)

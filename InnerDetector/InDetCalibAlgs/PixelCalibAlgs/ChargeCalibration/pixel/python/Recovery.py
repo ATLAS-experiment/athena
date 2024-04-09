@@ -249,7 +249,6 @@ def UpdateCalib(tag):
 if __name__ == "__main__":
     
     UpdateCalib("PixelChargeCalibration-DATA-RUN2-UPD4-26")
-    
     exit(0)    
 
 
