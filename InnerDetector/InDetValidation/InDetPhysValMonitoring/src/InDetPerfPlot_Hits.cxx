@@ -68,7 +68,7 @@ InDetPerfPlot_Hits::initializePlots() {
   book(m_nPixelSharedHits_vs_eta, "nPixelSharedHits_vs_eta");
   book(m_nSCTSharedHits_vs_eta, "nSCTSharedHits_vs_eta");
   book(m_nInnerMostPixelSharedHits_vs_phi, "nInnerMostPixelSharedHits_vs_phi");
-  book(m_nInnerMostPixelSharedEndcapHits_vs_phi, "nInnerMostPixelSharedHits_vs_phi");
+  book(m_nInnerMostPixelSharedEndcapHits_vs_phi, "nInnerMostPixelSharedEndcapHits_vs_phi");
   book(m_nPixelSharedHits_vs_phi, "nPixelSharedHits_vs_phi");
   book(m_nSCTSharedHits_vs_phi, "nSCTSharedHits_vs_phi");
 

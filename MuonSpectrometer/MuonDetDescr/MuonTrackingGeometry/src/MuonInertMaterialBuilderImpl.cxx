@@ -98,8 +98,6 @@ Muon::MuonInertMaterialBuilderImpl::DetachedVolumeVecWithTrfs
             } else if (vname.substr(0, 1) != "J") {
                 accepted = m_buildSupports > 0;
             }
-            if (!accepted)
-
             if (!accepted) {
                 ATH_MSG_VERBOSE(" INERT muon object found and rejected :" << vname);
                 vol.next();
