@@ -478,9 +478,13 @@ namespace TrigCompositeUtils {
         // We want to keep going up one more level in this case to get the Feature node too (we save the 4-vec of the BPhys and both of the muons/electrons)
         const bool specialBphysCase = (me->name() == comboHypoAlgNodeName());
 
-        // We change the default behaviour to be modeKeep = false (unless we want to explore up one more level for BLS's special case)
-        // such that by default we start to NOT flag all the parent nodes to be kept
-        if (!specialBphysCase) {
+        // Special R2->R3 case: We can get steps with dummy features, these feature links point back to the same node.
+        // First check again the feature, with an addition requirement on the feature CLID. Then check if the feature points back to the node.
+        const bool specialR2toR3Case = (me->hasObjectLink(featureString(), ClassID_traits<DecisionContainer>::ID()) && me->object<Decision>(featureString()) == me);
+
+        // We change the default behaviour to be modeKeep = false (unless we want to explore up one more level for BLS's special case
+        // or to the next feature for the R2->R3 special case) such that by default we start to NOT flag all the parent nodes to be kept
+        if (!specialBphysCase && !specialR2toR3Case) {
           modeKeep = false;
         }
       }
@@ -513,6 +517,26 @@ namespace TrigCompositeUtils {
     }
     // ... and also for the InputMaker, with flipped logic.
     if (removeEmptySteps && me->name() == inputMakerNodeName() && myFirstChild && myFirstChild->name() == comboHypoAlgNodeName()) {
+      keep = false;
+    }
+
+    // Check against RemoveEmptySteps
+    // Check for the R2->R3 empty step case
+    if (removeEmptySteps 
+      && me->name() == hypoAlgNodeName()
+      && me->hasObjectLink(featureString(), ClassID_traits<DecisionContainer>::ID())
+      && me->object<Decision>(featureString()) == me)
+    {
+      keep = false;
+    }
+    // ... and also for the InputMaker
+    if (removeEmptySteps 
+      && me->name() == inputMakerNodeName()
+      && myFirstChild
+      && myFirstChild->name() == hypoAlgNodeName()
+      && myFirstChild->hasObjectLink(featureString(), ClassID_traits<DecisionContainer>::ID())
+      && myFirstChild->object<Decision>(featureString()) == myFirstChild)
+    {
       keep = false;
     }
 
