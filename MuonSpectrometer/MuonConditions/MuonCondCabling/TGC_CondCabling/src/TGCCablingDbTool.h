@@ -43,11 +43,6 @@ class TGCCablingDbTool: public AthAlgTool, public ITGCCablingDbTool
 
  private: 
 
-  /** IIOVSvc member */
-  IIOVSvc* m_IOVSvc = nullptr;
-  /** IChronoStatSvc member */
-  IChronoStatSvc* m_chronoSvc = nullptr;
-
   /** Data location */
   std::string m_DataLocation;
   /** Folder name */

@@ -53,6 +53,7 @@ def DRAW_JETKernelCfg(configFlags, name='DRAW_JETKernel', **kwargs):
     # The main kernel algo
     DRAW_JETKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_JETKernel',
+        doChronoStat=(configFlags.Concurrency.NumThreads <= 1),
         AugmentationTools=augmentationTools,
         SkimmingTools=[combTool])
 

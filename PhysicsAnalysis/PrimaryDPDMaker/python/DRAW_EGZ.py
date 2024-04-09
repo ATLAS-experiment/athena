@@ -83,6 +83,7 @@ def DRAW_EGZKernelCfg(configFlags, name='DRAW_EGZKernel', **kwargs):
     # The main kernel algo
     DRAW_EGZKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_EGZKernel',
+        doChronoStat=(configFlags.Concurrency.NumThreads <= 1),
         AugmentationTools=augmentationTools,
         SkimmingTools=[skimmingTool])
 

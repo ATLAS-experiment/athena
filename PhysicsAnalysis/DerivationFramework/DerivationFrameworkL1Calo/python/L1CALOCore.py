@@ -79,6 +79,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         ThinningTools = thinningTools,
         SkimmingTools = skimmingTools,
         RunSkimmingFirst = not isNotPool,
+        doChronoStat=(flags.Concurrency.NumThreads <= 1),
         OutputLevel = INFO))
 
     # Phase 1 setup
