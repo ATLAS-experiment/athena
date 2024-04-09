@@ -114,7 +114,7 @@ private:
     double chi2{};
   }; // end WrkVrt
 
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_mass;
+  std::unique_ptr< SG::AuxElement::Decorator<float>  > m_deco_mass;
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_pt;
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_charge;
   std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_vPos;
@@ -135,6 +135,7 @@ private:
   int    m_minNTrack;
   bool   m_HFTrackRatio;
   float  m_HFRatioThres;
+  std::string    m_gnnModel;
 };
 } // namespace Rec
 

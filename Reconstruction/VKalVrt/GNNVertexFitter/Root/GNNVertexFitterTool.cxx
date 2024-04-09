@@ -20,12 +20,13 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
       m_minSig3D(20),
       m_maxChi2(20), 
       m_minNTrack(2),
-      m_HFTrackRatio(true), 
+      m_HFTrackRatio(true),
+      m_gnnModel("GN2v01"), 
       m_HFRatioThres(0.3) {
   declareInterface<IGNNVertexFitterInterface>(this);
-  declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlow.GN2v01_TrackLinks");
-  declareProperty("JetTrackOrigins", m_trackOriginsKey = "BTagging_AntiKt4EMPFlow.GN2v01_TrackOrigin");
-  declareProperty("JetVertexLinks", m_vertexLinksKey = "BTagging_AntiKt4EMPFlow.GN2v01_VertexIndex");
+  declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackLinks");
+  declareProperty("JetTrackOrigins", m_trackOriginsKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackOrigin");
+  declareProperty("JetVertexLinks", m_vertexLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_VertexIndex");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
   declareProperty("minLxy", m_minLxy, "Minimum radial distance from the PV");
   declareProperty("maxLxy", m_maxLxy, "Maximum radial distance from the PV");
@@ -50,10 +51,10 @@ StatusCode GNNVertexFitterTool::initialize() {
   ATH_CHECK(m_trackOriginsKey.initialize());
   ATH_CHECK(m_vertexLinksKey.initialize());
 
-  m_jetWriteDecorKeyVertexLink = m_jetCollection + ".GNNVerticesLink";
+  m_jetWriteDecorKeyVertexLink = m_jetCollection + "."+m_gnnModel+"VerticesLink";
   ATH_CHECK(m_jetWriteDecorKeyVertexLink.initialize());
 
-  m_jetWriteDecorKeyVertexNumber = m_jetCollection + ".GNNVerticesNumber";
+  m_jetWriteDecorKeyVertexNumber = m_jetCollection + "."+m_gnnModel+"VerticesNumber";
   ATH_CHECK(m_jetWriteDecorKeyVertexNumber.initialize());
 
   // Retrieve tools
@@ -63,7 +64,7 @@ StatusCode GNNVertexFitterTool::initialize() {
   ATH_CHECK(m_eventInfoKey.initialize());
 
   // Vertex decorators
-  m_deco_mass      =  SG::AuxElement::Decorator<float> ("mass");
+  m_deco_mass      = std::make_unique< SG::AuxElement::Decorator<float> >("mass");
   m_deco_pt        = std::make_unique< SG::AuxElement::Decorator<float> >("pt");
   m_deco_charge    = std::make_unique< SG::AuxElement::Decorator<float> >("charge");
   m_deco_vPos      = std::make_unique< SG::AuxElement::Decorator<float> >("vPos");
@@ -289,11 +290,11 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         double eRatio = MomentumVtx.E() / jet->p4().E();
         double signif3D;
         
-        //[[maybe_unused]] double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
+         double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
 
-       // ATH_MSG_INFO("PERP  " << newvrt.vertex.perp() << "   L3d  " << Lxyz );
+        ATH_MSG_INFO("PERP  " << distToPV << "   L3d  " << Lxyz );
           
-       ATH_MSG_INFO("SIG  " signif3D);
+        ATH_MSG_INFO("SIG  " << signif3D);
         // apply quality cuts
         if (ntrk < m_minNTrack)
           continue;
