@@ -45,8 +45,8 @@ def InDetAlignmentMonitoringRun3Config(flags):
         ########### here starts InDetAlignMonResidualsAlgs ###########
      
         kwargsIDAlignMonResidualsAlg = { 
-            'TrackName'  : 'CombinedInDetTracks',  #Until new config ready
-            'TrackName2' : 'CombinedInDetTracks',  #Until new config ready
+            'TrackName'  : 'ExtendedTracks',  #Until new config ready
+            'TrackName2' : 'ExtendedTracks',  #Until new config ready
         }
 
         from InDetAlignmentMonitoringRun3.IDAlignMonResidualsAlgCfg import IDAlignMonResidualsAlgCfg
