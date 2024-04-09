@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetPhysValMonitoring/InDetPhysValMonitoringTool.h"
 #include "../InDetPhysValTruthDecoratorAlg.h"
+#include "../TruthParticleIndexDecoratorAlg.h"
 #include "../InDetPhysHitDecoratorAlg.h"
 #include "../ParameterErrDecoratorAlg.h"
 #include "../TruthClassDecoratorAlg.h"
@@ -16,6 +17,7 @@
 DECLARE_COMPONENT( HistogramDefinitionSvc )
 DECLARE_COMPONENT( InDetPhysValMonitoringTool )
 DECLARE_COMPONENT( InDetPhysValTruthDecoratorAlg )
+DECLARE_COMPONENT( TruthParticleIndexDecoratorAlg )
 DECLARE_COMPONENT( InDetPhysHitDecoratorAlg )
 DECLARE_COMPONENT( ParameterErrDecoratorAlg )
 DECLARE_COMPONENT( TruthClassDecoratorAlg )

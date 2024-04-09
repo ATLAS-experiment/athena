@@ -119,6 +119,9 @@ def InDetPhysValTruthDecoratorAlgCfg(
         kwargs.setdefault("PixelClusterContainerName", "ITkPixelClusters")
         kwargs.setdefault("SCTClusterContainerName", "ITkStripClusters")
 
+    kwargs.setdefault('TruthParticleIndexDecoration',
+                      'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')
+
     acc.addEventAlgo(CompFactory.InDetPhysValTruthDecoratorAlg(name, **kwargs))
     return acc
 
