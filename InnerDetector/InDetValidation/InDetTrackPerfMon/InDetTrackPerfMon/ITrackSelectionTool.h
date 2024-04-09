@@ -15,11 +15,6 @@
 
 /// Athena includes
 #include "AsgTools/IAsgTool.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Service.h"
-
-/// Local includes
-#include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
 
 class TrigRoiDescriptorCollection;
 
@@ -36,10 +31,10 @@ namespace IDTPM {
     ASG_TOOL_INTERFACE( IDTPM::ITrackSelectionTool )
 
     virtual StatusCode selectTracks(
-        IDTPM::TrackAnalysisCollections& trkAnaColls ) = 0;
+        TrackAnalysisCollections& trkAnaColls ) = 0;
 
     virtual StatusCode selectTracksInRoI(
-        IDTPM::TrackAnalysisCollections& trkAnaColls,
+        TrackAnalysisCollections& trkAnaColls,
         const ElementLink< TrigRoiDescriptorCollection >& roiLink ) = 0;
 
   };

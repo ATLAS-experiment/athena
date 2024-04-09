@@ -36,6 +36,7 @@ def createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "MatchingType"    , "DeltaRMatch" )
     icf.addFlag( "dRmax"           , 0.05 )
     icf.addFlag( "pTResMax"        , -9.9 )
+    icf.addFlag( "truthProbCut"    , 0.5 )
     # Trigger-specific properties
     icf.addFlag( "ChainNames"    , [] )
     icf.addFlag( "RoiKey"        , "" )
@@ -50,6 +51,7 @@ def createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "ObjectQuality"      , "Medium" )
     icf.addFlag( "TauType"            , "RNN" )
     icf.addFlag( "TauNprongs"         , 1 )
+    icf.addFlag( "TruthProbMin"       , 0.5 )
     # ...
     # Truth particles selection properties
     # ...

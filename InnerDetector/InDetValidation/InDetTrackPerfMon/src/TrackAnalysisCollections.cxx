@@ -7,32 +7,51 @@
  * @author Marco Aparo <marco.aparo@cern.ch>
  */
 
+/// local includes
 #include "TrackAnalysisCollections.h"
 #include "TrackParmetersHelper.h"
+#include "TrackMatchingLookup.h"
+
 
 /// -------------------
 /// --- Constructor ---
 /// -------------------
 IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( 
-  std::string anaTag ) :
+  const std::string& anaTag ) :
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
-    m_anaTag( anaTag ),
-    m_chainRoiName( "" ), 
-    m_trkAnaDefSvc( nullptr )
+    m_anaTag( anaTag ), m_trkAnaDefSvc( nullptr )
 {
   m_truthTrackVec.resize( NStages );
   m_offlTrackVec.resize( NStages );
   m_trigTrackVec.resize( NStages );
 }
 
-/// -------------------------
-/// --- load TrkAnaDefSvc ---
-/// -------------------------
-StatusCode IDTPM::TrackAnalysisCollections::loadTrkAnaDefSvc()
+/// ------------------
+/// --- initialize ---
+/// ------------------
+StatusCode IDTPM::TrackAnalysisCollections::initialize()
 {
-  if( m_trkAnaDefSvc ) return StatusCode::SUCCESS;
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  ATH_CHECK( svcLoc->service( "TrkAnaDefSvc"+m_anaTag, m_trkAnaDefSvc ) );
+  /// load trkAnaDefSvc
+  if( not m_trkAnaDefSvc ) {
+    ISvcLocator* svcLoc = Gaudi::svcLocator();
+    ATH_CHECK( svcLoc->service( "TrkAnaDefSvc"+m_anaTag, m_trkAnaDefSvc ) );
+  }
+
+  /// construct track matching lookup table
+  /// based on the types of test and reference
+  /// Truth->Track
+  if( m_trkAnaDefSvc->isTestTruth() ) {
+    m_matches = std::make_unique< TrackMatchingLookup_truthTrk >( m_anaTag );
+  }
+  /// Track->Truth
+  else if( m_trkAnaDefSvc->isReferenceTruth() ) {
+    m_matches = std::make_unique< TrackMatchingLookup_trkTruth >( m_anaTag );
+  }
+  /// Track->Track
+  else {
+    m_matches = std::make_unique< TrackMatchingLookup_trk >( m_anaTag );
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -41,10 +60,8 @@ StatusCode IDTPM::TrackAnalysisCollections::loadTrkAnaDefSvc()
 /// ----------------------------
 /// Truth particles
 StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackContainer(
-  SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey )
+  const SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->useTruth() ) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
@@ -73,10 +90,8 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackContainer(
 
 /// Offline track particles
 StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
-  SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
+  const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->useOffline() ) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
@@ -105,10 +120,8 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
 
 /// Trigger track particles
 StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
-  SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
+  const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->useTrigger() ) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
@@ -143,8 +156,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTestTruthVec(
   const std::vector< const xAOD::TruthParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->isTestTruth() ) {
     m_truthTrackVec[ stage ].clear(); 
     m_truthTrackVec[ stage ].insert( 
@@ -162,8 +173,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTestTrackVec(
   const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->isTestOffline() ) {
     m_offlTrackVec[ stage ].clear(); 
     m_offlTrackVec[ stage ].insert( 
@@ -189,8 +198,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillRefTruthVec(
   const std::vector< const xAOD::TruthParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
     m_truthTrackVec[ stage ].clear(); 
     m_truthTrackVec[ stage ].insert( 
@@ -208,8 +215,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillRefTrackVec(
   const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->isReferenceOffline() ) {
     m_offlTrackVec[ stage ].clear(); 
     m_offlTrackVec[ stage ].insert( 
@@ -235,8 +240,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackVec(
   const std::vector< const xAOD::TruthParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->useTruth() ) {
     m_truthTrackVec[ stage ].clear();
     m_truthTrackVec[ stage ].insert(
@@ -254,8 +257,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackVec(
   const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->useOffline() ) {
     m_offlTrackVec[ stage ].clear();
     m_offlTrackVec[ stage ].insert(
@@ -273,8 +274,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackVec(
   const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  ATH_CHECK( loadTrkAnaDefSvc() );
-
   if( m_trkAnaDefSvc->useTrigger() ) {
     m_trigTrackVec[ stage ].clear();
     m_trigTrackVec[ stage ].insert(
@@ -294,8 +293,6 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackVec(
 bool IDTPM::TrackAnalysisCollections::empty(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  if( loadTrkAnaDefSvc().isFailure() ) return true;
-
   /// check if empty disabled for FS trigger
   /// track vector (always empty by construction)
   bool isTrigEmpty  = m_trkAnaDefSvc->useTrigger() and 
@@ -335,6 +332,8 @@ void IDTPM::TrackAnalysisCollections::clear(
 /// copy inRoI collections from FullScan collections
 void IDTPM::TrackAnalysisCollections::copyFS()
 {
+  ATH_MSG_DEBUG( "Copying tracks in RoI" );
+
   /// offline copy
   m_offlTrackVec[ InRoI ].clear(); 
   m_offlTrackVec[ InRoI ].insert( 
@@ -348,6 +347,9 @@ void IDTPM::TrackAnalysisCollections::copyFS()
     m_truthTrackVec[ InRoI ].begin(),
     m_truthTrackVec[ FS ].begin(),
     m_truthTrackVec[ FS ].end() );
+
+  /// Debug printout
+  ATH_MSG_DEBUG( "Tracks after in RoI copy: " << printInfo( InRoI ) );
 }
 
 /// ---------------------------
@@ -357,8 +359,6 @@ void IDTPM::TrackAnalysisCollections::copyFS()
 const xAOD::TruthParticleContainer*
 IDTPM::TrackAnalysisCollections::testTruthContainer()
 {
-  if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
-    
   if( m_trkAnaDefSvc->isTestTruth() ) {
     return m_truthTrackContainer;
   }
@@ -370,8 +370,6 @@ IDTPM::TrackAnalysisCollections::testTruthContainer()
 const xAOD::TrackParticleContainer*
 IDTPM::TrackAnalysisCollections::testTrackContainer()
 {
-  if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
-    
   if( m_trkAnaDefSvc->isTestOffline() ) {
     return m_offlTrackContainer;
   }
@@ -387,8 +385,6 @@ IDTPM::TrackAnalysisCollections::testTrackContainer()
 const xAOD::TruthParticleContainer*
 IDTPM::TrackAnalysisCollections::refTruthContainer()
 {
-  if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
-    
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
     return m_truthTrackContainer;
   }
@@ -400,8 +396,6 @@ IDTPM::TrackAnalysisCollections::refTruthContainer()
 const xAOD::TrackParticleContainer*
 IDTPM::TrackAnalysisCollections::refTrackContainer()
 {
-  if( loadTrkAnaDefSvc().isFailure() ) return nullptr;
-    
   if( m_trkAnaDefSvc->isReferenceOffline() ) {
     return m_offlTrackContainer;
   }
@@ -417,29 +411,23 @@ IDTPM::TrackAnalysisCollections::refTrackContainer()
 /// --- Get track vectors ---
 /// -------------------------
 /// TEST = Truth
-std::vector< const xAOD::TruthParticle* >
+const std::vector< const xAOD::TruthParticle* >&
 IDTPM::TrackAnalysisCollections::testTruthVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  std::vector< const xAOD::TruthParticle* > nullVec{};
-  if( loadTrkAnaDefSvc().isFailure() ) return nullVec;
-
   if( m_trkAnaDefSvc->isTestTruth() ) {
     return m_truthTrackVec[ stage ];
   }
 
   ATH_MSG_DEBUG( "No Test truth vector found" );
-  return nullVec;
+  return m_nullTruthVec;
 }
 
 /// TEST = Track
-std::vector< const xAOD::TrackParticle* >
+const std::vector< const xAOD::TrackParticle* >&
 IDTPM::TrackAnalysisCollections::testTrackVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  std::vector< const xAOD::TrackParticle* > nullVec{};
-  if( loadTrkAnaDefSvc().isFailure() ) return nullVec;
-
   if( m_trkAnaDefSvc->isTestOffline() ) {
     return m_offlTrackVec[ stage ];
   }
@@ -449,33 +437,27 @@ IDTPM::TrackAnalysisCollections::testTrackVec(
   }
 
   ATH_MSG_DEBUG( "No Test track vector found" );
-  return nullVec;
+  return m_nullTrackVec;
 }
 
 /// REFERENCE = Truth
-std::vector< const xAOD::TruthParticle* >
+const std::vector< const xAOD::TruthParticle* >&
 IDTPM::TrackAnalysisCollections::refTruthVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  std::vector< const xAOD::TruthParticle* > nullVec{};
-  if( loadTrkAnaDefSvc().isFailure() ) return nullVec;
-
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
     return m_truthTrackVec[ stage ];
   }
 
   ATH_MSG_DEBUG( "No Reference truth vector found" );
-  return nullVec;
+  return m_nullTruthVec;
 }
 
 /// TEST = Track
-std::vector< const xAOD::TrackParticle* >
+const std::vector< const xAOD::TrackParticle* >&
 IDTPM::TrackAnalysisCollections::refTrackVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  std::vector< const xAOD::TrackParticle* > nullVec{};
-  if( loadTrkAnaDefSvc().isFailure() ) return nullVec;
-
   if( m_trkAnaDefSvc->isReferenceOffline() ) {
     return m_offlTrackVec[ stage ];
   }
@@ -485,7 +467,7 @@ IDTPM::TrackAnalysisCollections::refTrackVec(
   }
 
   ATH_MSG_DEBUG( "No Test track vector found" );
-  return nullVec;
+  return m_nullTrackVec;
 }
 
 /// -----------------------------------------
@@ -543,21 +525,45 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
   return ss.str();
 }
 
-/* TODO - to be included in later MRs
-/// return matching information
-IDTPM::TrackMatchAccessHelper TrackAnalysisCollections::matches() {
-  loadTrkAnaDefSvc();
-  IDTPM::TrackMatchAccessHelper matchInfo( m_chainRoiName, m_anaTag ); 
-  return matchInfo;
+
+/// ----------------------------------------------
+/// --- Print matching information (for debug) ---
+/// ----------------------------------------------
+std::string IDTPM::TrackAnalysisCollections::printMatchInfo()
+{
+  /// Truth->Track
+  if( m_trkAnaDefSvc->isTestTruth() ) {
+    return m_matches->printInfo( testTruthVec( InRoI ), refTrackVec( InRoI ) );
+  }
+  /// Track->Truth
+  if( m_trkAnaDefSvc->isReferenceTruth() ) {
+    return m_matches->printInfo( testTrackVec( InRoI ), refTruthVec( InRoI ) );
+  }
+  /// Track->Track
+  return m_matches->printInfo( testTrackVec( InRoI ), refTrackVec( InRoI ) );
 }
 
 
-/// print matching information
-std::string TrackAnalysisCollections::printMatchInfo() {
-  loadTrkAnaDefSvc();
-  std::string info = ( (m_trkAnaDefSvc->referenceType()).find("Truth") != std::string::npos ) ?
-      matches().printInfo( selectedTestTrackVec_inRoI(), selectedTruthParticleVec_inRoI ) :
-      matches().printInfo( selectedTestTrackVec_inRoI(), selectedOfflineTrackVec_inRoI ); 
-  return info; 
+/// --------------------------------
+/// --- update chainRoiNames set ---
+/// --------------------------------
+bool IDTPM::TrackAnalysisCollections::updateChainRois(
+    const std::string& chainRoi )
+{
+  ATH_MSG_DEBUG( "Updating TrackAnalysisCollection with ChainRoiName: " << chainRoi );
+
+  std::pair< std::set<std::string>::iterator, bool > result =
+      m_chainRois.insert( chainRoi );
+
+  if( not result.second ) {
+    ATH_MSG_WARNING( "ChainRoiName has already been cached. No update." );
+    return false;
+  }
+
+  /// Creating new matching lookup table for newChainRoiName
+  m_matches->clear();
+  m_matches->chainRoiName( chainRoi );
+  /// m_matches is now ready to be updated with new entries for the maps...
+
+  return result.second;
 }
-*/

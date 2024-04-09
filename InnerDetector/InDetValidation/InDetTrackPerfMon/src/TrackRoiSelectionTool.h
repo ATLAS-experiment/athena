@@ -35,7 +35,7 @@ typedef struct {
 namespace IDTPM {
 
   class TrackRoiSelectionTool :
-      public virtual IDTPM::ITrackSelectionTool,
+      public virtual ITrackSelectionTool,
       public asg::AsgTool {
 
   public:
@@ -53,12 +53,12 @@ namespace IDTPM {
 
     /// Main Track selection method
     virtual StatusCode selectTracksInRoI(
-        IDTPM::TrackAnalysisCollections& trkAnaColls,
+        TrackAnalysisCollections& trkAnaColls,
         const ElementLink< TrigRoiDescriptorCollection >& roiLink ) override;
 
     /// Dummy method - Disabled
     virtual StatusCode selectTracks(
-        IDTPM::TrackAnalysisCollections& ) override {
+        TrackAnalysisCollections& ) override {
       ATH_MSG_WARNING( "selectTracks method is disabled" );
       return StatusCode::SUCCESS;
     }
@@ -70,11 +70,12 @@ namespace IDTPM {
     /// track getter function (for offline tracks or truth particles)
     template< class T >
     std::vector< const T* > getTracks(
-        std::vector< const T* > tvec, const TrigRoiDescriptor* r ) const;
+        const std::vector< const T* >& tvec,
+        const TrigRoiDescriptor* r ) const;
 
     /// TrigDecTool- and EventView-based getter function for trigger tracks
     std::vector< const xAOD::TrackParticle* > getTrigTracks( 
-        SG::ReadHandleKey< xAOD::TrackParticleContainer >& handleKey, 
+        const SG::ReadHandleKey< xAOD::TrackParticleContainer >& handleKey,
         const ElementLink< TrigRoiDescriptorCollection >& roiLink ) const;
 
   private:
@@ -85,11 +86,11 @@ namespace IDTPM {
     float getOuterPhi( float pt, float phi, float r=1000. ) const;
 
     /// Trigger TrackParticleContainer's name
-    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_triggerTrkParticleName{
+    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_triggerTrkParticleName {
         this, "TriggerTrkParticleContainerName", "HLT_IDTrack_Electron_IDTrig", "Name of container of trigger tracks" };
 
     /// TrigDecTool
-    PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool{
+    PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool {
         this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "" };
 
   }; // class TrackRoiSelectionTool

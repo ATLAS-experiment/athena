@@ -25,9 +25,9 @@
 **/
 
 
-typedef TrigCompositeUtils::LinkInfo< TrigRoiDescriptorCollection > roiCollection_t;
-
 namespace IDTPM {
+
+  typedef TrigCompositeUtils::LinkInfo< TrigRoiDescriptorCollection > roiCollection_t;
 
   class RoiSelectionTool :
       public virtual asg::IAsgTool, 
@@ -67,24 +67,24 @@ namespace IDTPM {
         const std::string& chainName ) const;
 
     /// Properties to fine-tune the tool behaviour
-    StringProperty m_roiKey{ this, "RoiKey", "", "RoI name to process" };
+    StringProperty m_roiKey { this, "RoiKey", "", "RoI name to process" };
 
-    IntegerProperty m_chainLeg{
+    IntegerProperty m_chainLeg {
         this, "ChainLeg", -1, "Restrict to a specific \"leg\" of a multi-object trigger chain (default = all)" };
 
-    BooleanProperty m_doTnP{ this, "doTagNProbe", false, "Do Tag&Probe RoI selection" };
+    BooleanProperty m_doTnP { this, "doTagNProbe", false, "Do Tag&Probe RoI selection" };
 
-    StringProperty m_roiKeyTag{ this, "RoiKeyTag", "", "RoI name for the tag" };
+    StringProperty m_roiKeyTag { this, "RoiKeyTag", "", "RoI name for the tag" };
 
-    IntegerProperty m_chainLegTag{
+    IntegerProperty m_chainLegTag {
         this, "ChainLegTag", 0, "Tag \"leg\" of a multi-object trigger chain (default = 0)" };
 
-    StringProperty m_roiKeyProbe{ this, "RoiKeyProbe", "", "RoI name for the probe" };
+    StringProperty m_roiKeyProbe { this, "RoiKeyProbe", "", "RoI name for the probe" };
 
-    IntegerProperty m_chainLegProbe{
+    IntegerProperty m_chainLegProbe {
         this, "ChainLegProbe", 1, "Probe \"leg\" of a multi-object trigger chain (default = 1)" };
 
-    PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool{
+    PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool {
       this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "" };
 
   }; // class RoiSelectionTool

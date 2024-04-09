@@ -12,6 +12,7 @@
  * @brief  Class to hold for each event collections needed in the TrkAnalsis 
  */
 
+/// Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaBaseComps/AthMessaging.h"
@@ -26,13 +27,13 @@
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
-/// TODO - To be included in next MRs
-//#include "InDetTrackPerfMon/TrackMatchAccessHelper.h"
+#include "ITrackMatchingLookup.h"
 
 /// STD includes
 #include <string>
 #include <vector>
-#include <sstream>
+#include <memory>
+#include <set>
 
 
 namespace IDTPM {
@@ -48,7 +49,7 @@ namespace IDTPM {
     enum Stage : size_t { FULL, FS, InRoI, NStages };
 
     /// Constructor 
-    TrackAnalysisCollections( std::string anaTag );
+    TrackAnalysisCollections( const std::string& anaTag );
 
     /// Destructor
     ~TrackAnalysisCollections() = default;
@@ -56,20 +57,20 @@ namespace IDTPM {
     /// = operator
     TrackAnalysisCollections& operator=( const TrackAnalysisCollections& ) = delete;
 
-    /// load the TrkAnalysisDefinition service
-    StatusCode loadTrkAnaDefSvc();
+    /// initialize
+    StatusCode initialize();
 
     /// --- Setter methods ---
 
     /// fill FULL collections and vectors
     StatusCode fillTruthTrackContainer(
-      SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey );
+        const SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey );
 
     StatusCode fillOfflTrackContainer(
-      SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
+        const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
 
     StatusCode fillTrigTrackContainer(
-      SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
+        const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
 
     /// fill TEST vectors
     StatusCode fillTestTruthVec(
@@ -102,11 +103,6 @@ namespace IDTPM {
         const std::vector< const xAOD::TrackParticle* >& vec,
         Stage stage = FULL );
 
-    /// set the chainRoiName
-    void setChainRoiName( std::string chainRoiName ) { 
-      m_chainRoiName = chainRoiName; 
-    }
-
     /// --- Utility  methods ---
 
     /// check if collection are empty
@@ -121,17 +117,10 @@ namespace IDTPM {
     /// print Information about tracks in the collection(s)
     std::string printInfo( Stage stage = FULL ) const;
 
-    /// TODO - to be included in later MRs
-    /// return matching information 
-    //IDTPM::TrackMatchAccessHelper matches();
-
-    /// print matching information
-    //std::string printMatchInfo();
-
     /// --- Getter methods ---
 
     /// get TrackAnalysis tag
-    std::string anaTag() { return m_anaTag; }
+    const std::string& anaTag() { return m_anaTag; }
 
     /// get full TEST containers
     const xAOD::TruthParticleContainer* testTruthContainer();
@@ -150,22 +139,35 @@ namespace IDTPM {
       return m_trigTrackContainer; }
 
     /// get TEST track vectors
-    std::vector< const xAOD::TruthParticle* > testTruthVec( Stage stage = FULL );
-    std::vector< const xAOD::TrackParticle* > testTrackVec( Stage stage = FULL );
+    const std::vector< const xAOD::TruthParticle* >& testTruthVec( Stage stage = FULL );
+    const std::vector< const xAOD::TrackParticle* >& testTrackVec( Stage stage = FULL );
 
     /// get REFERENCE track vectors
-    std::vector< const xAOD::TruthParticle* > refTruthVec( Stage stage = FULL );
-    std::vector< const xAOD::TrackParticle* > refTrackVec( Stage stage = FULL );
+    const std::vector< const xAOD::TruthParticle* >& refTruthVec( Stage stage = FULL );
+    const std::vector< const xAOD::TrackParticle* >& refTrackVec( Stage stage = FULL );
 
     /// get truth/offline/trigger track vector (TEST or REFERENCE)
-    std::vector< const xAOD::TruthParticle* > truthTrackVec( Stage stage = FULL ) {
+    const std::vector< const xAOD::TruthParticle* >& truthTrackVec( Stage stage = FULL ) {
       return m_truthTrackVec[ stage ]; }
-    std::vector< const xAOD::TrackParticle* > offlTrackVec( Stage stage = FULL ) {
+    const std::vector< const xAOD::TrackParticle* >& offlTrackVec( Stage stage = FULL ) {
       return m_offlTrackVec[ stage ]; }
-    std::vector< const xAOD::TrackParticle* > trigTrackVec( Stage stage = FULL ) {
+    const std::vector< const xAOD::TrackParticle* >& trigTrackVec( Stage stage = FULL ) {
       return m_trigTrackVec[ stage ]; }
 
+    /// return matching information 
+    ITrackMatchingLookup& matches() { return *m_matches; }
+
+    /// print matching information
+    std::string printMatchInfo();
+
+    /// update chainRoiNames set
+    bool updateChainRois( const std::string& chainRoi );
+
   private:
+
+    /// TrackAnalysis properties
+    std::string m_anaTag;
+    ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
 
     /// --- Collections class variables ---
     /// Full collections
@@ -178,10 +180,15 @@ namespace IDTPM {
     std::vector<std::vector< const xAOD::TrackParticle* >> m_offlTrackVec{};
     std::vector<std::vector< const xAOD::TrackParticle* >> m_trigTrackVec{};
 
-    /// --- Other class variables ---
-    std::string m_anaTag;
-    std::string m_chainRoiName;
-    ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
+    /// null vectors
+    std::vector< const xAOD::TrackParticle* > m_nullTrackVec{};
+    std::vector< const xAOD::TruthParticle* > m_nullTruthVec{};
+
+    /// Lookup table for test-reference matching
+    std::unique_ptr< ITrackMatchingLookup > m_matches;
+
+    /// Set of chainRoiNames for caching
+    std::set< std::string > m_chainRois{};
  
   }; // class TrackAnalysisCollections
 

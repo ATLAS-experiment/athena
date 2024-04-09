@@ -51,6 +51,9 @@ def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwarg
         kwargs.setdefault( "TauType",    flags.PhysVal.IDTPM.currentTrkAna.TauType )
         kwargs.setdefault( "TauNprongs", flags.PhysVal.IDTPM.currentTrkAna.TauNprongs )
 
+    if "Truth" in objStr:
+        kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.TruthProbMin )
+
     acc.setPrivateTools( CompFactory.IDTPM.TrackObjectSelectionTool( name, **kwargs ) )
     return acc
 

@@ -69,7 +69,7 @@ namespace IDTPM {
   /// For truth particles
   bool isUnlinkedTruth( const xAOD::TrackParticle& track );
 
-  float getLinkedTruthMatchProb( const xAOD::TrackParticle& track );
+  float getTruthMatchProb( const xAOD::TrackParticle& track );
 
   const xAOD::TruthParticle* getLinkedTruth( const xAOD::TrackParticle& track,
                                              const float truthProbCut=0. );

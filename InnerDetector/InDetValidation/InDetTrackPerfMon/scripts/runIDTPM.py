@@ -34,10 +34,9 @@ for path in MyArgs.inputFileNames.split( ',' ):
 
 ## Outputs
 flags.PhysVal.OutputFileName = MyArgs.outputFileName + '.HIST.root'
-if MyArgs.writeAOD_IDTPM:
-    flags.addFlag( 'Output.doWriteAOD_IDTPM', True )
-    flags.addFlag( 'Output.AOD_IDTPMFileName',
-                   MyArgs.outputFileName + '.AOD_IDTPM.pool.root' )
+flags.addFlag( 'Output.doWriteAOD_IDTPM', MyArgs.writeAOD_IDTPM )
+flags.addFlag( 'Output.AOD_IDTPMFileName',
+               MyArgs.outputFileName + '.AOD_IDTPM.pool.root' )
 
 ## Set output log level
 if MyArgs.debug:
