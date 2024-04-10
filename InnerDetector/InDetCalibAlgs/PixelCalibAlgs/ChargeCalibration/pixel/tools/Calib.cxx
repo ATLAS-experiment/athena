@@ -198,7 +198,6 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     pixNormalParamsQuality = getParams_quality(functnormal.get()   );
                     pixSigParamsQuality    = getParams_quality(functnormalsig.get());
                     
-                    
                     if(m_savefile){
                         
                         m_wFile->cd();
@@ -246,7 +245,6 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     graflong  ->Fit(functlong.get() ,"MRQ");
                     
                     pixLongParams = getParams(functlong.get() ,3 );
-                    
                     pixLongParamsQuality = getParams_quality(functlong.get() );
                     
                     //delete the TF1                
@@ -280,9 +278,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                 }
                 
             } // End of FE loop
-            
         } // End of MOD
-        
     } // End of ROD
     
     // remove from memory
@@ -385,6 +381,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
     TIter rodItr = getRodIterator(timFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
+        const TString rodName(rodKey->GetName());
         TDirectoryFile* rodDir = static_cast<TDirectoryFile*>(rodKey->ReadObj());
         TKey* modKey;
         TIter modItr=getModuleIterator(rodDir);
@@ -465,20 +462,36 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                             printf("Error - Bad pixel in Calib::fillTiming\n");
                             return false;
                         }
-                        
-                        //map_info[modID].at(FE)->printVals();
-                        
                     }
                 }                 
-                
                 
             }
             else{
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
+                    TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                     for(unsigned int pixel=0; pixel<3; pixel++){
                         
                         // Saving information for the calibration
                         int tim_mean = histogramsTIM.at(FE).at(pixel)->GetMean();
+
+                        if(m_savefile){
+                            
+                            m_wFile->cd();
+                            if( !m_wFile->Get(rodName+"/"+modName+"/Thresholds/"+subdir) ){
+                                m_wFile->mkdir(rodName+"/"+modName+"/Thresholds/"+subdir,rodName);
+                            }
+
+                            m_wFile->cd(rodName+"/"+modName+"/Thresholds/"+subdir);
+
+                            histogramsTIM.at(FE).at(pixel)->SetTitle("Intime;Pixel intime;Counts");
+
+                            std::string type = "";
+                            if(pixel == 0) type = "normal";
+                            else if(pixel == 1) type = "long";
+                            else if(pixel == 2) type = "ganged";
+                            
+                            histogramsTIM.at(FE).at(pixel)->Write(TString("intime_"+type).Data(), TObject::kWriteDelete);
+                        }
                         
                         // Reset histograms for next front end
                         histogramsTIM.at(FE).at(pixel)->Reset("ICESM");
@@ -554,6 +567,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
     TIter rodItr = getRodIterator(riThrFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
+        const TString rodName(rodKey->GetName());
         TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
         TKey* modKey;
         TIter modItr=getModuleIterator(rodDir);
@@ -618,7 +632,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                 map_info[modID] = std::vector<std::unique_ptr<CalibFrontEndInfo>> ();
                 
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
-                    
+                    TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                     map_info[modID].push_back( std::unique_ptr<CalibFrontEndInfo>() );
                     std::unique_ptr<CalibFrontEndInfo> p = std::make_unique<CalibFrontEndInfo>(modID,FE,std::string(modName),std::string(rodKey->GetName()));
                     map_info[modID].at(FE) = std::move(p);
@@ -629,6 +643,27 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                         int thr_mean = histogramsTHR.at(FE).at(pixel)->GetMean();
                         int thr_rms  = histogramsTHR.at(FE).at(pixel)->GetRMS();
                         int sig_mean = histogramsSIG.at(FE).at(pixel)->GetMean();
+
+                        if(m_savefile){
+                            
+                            m_wFile->cd();
+                            if( !m_wFile->Get(rodName+"/"+modName+"/Thresholds/"+subdir) ){
+                                m_wFile->mkdir(rodName+"/"+modName+"/Thresholds/"+subdir,rodName);
+                            }
+
+                            m_wFile->cd(rodName+"/"+modName+"/Thresholds/"+subdir);
+
+                            histogramsTHR.at(FE).at(pixel)->SetTitle("Threshold;Pixel threshold;Counts");
+                            histogramsSIG.at(FE).at(pixel)->SetTitle("Sigma;Pixel sigma;Counts");
+
+                            std::string type = "";
+                            if(pixel == 0) type = "normal";
+                            else if(pixel == 1) type = "long";
+                            else if(pixel == 2) type = "ganged";
+                            
+                            histogramsTHR.at(FE).at(pixel)->Write(TString("thres_"+type).Data(), TObject::kWriteDelete);
+                            histogramsSIG.at(FE).at(pixel)->Write(TString("sigma_"+type).Data(), TObject::kWriteDelete);  
+                        }                        
                         
                         // Reset histograms for next front end
                         histogramsTHR.at(FE).at(pixel)->Reset("ICESM");
