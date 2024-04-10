@@ -50,6 +50,9 @@ private:
     DeadFEB,
     Noisy,
     Sporadic,
+    Distorted,
+    PeakReco,
+    Fibre,
     GrandTotalDead,
     nProblemTypes 
   };

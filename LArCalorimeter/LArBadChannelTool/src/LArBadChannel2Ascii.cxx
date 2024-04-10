@@ -58,7 +58,7 @@ StatusCode LArBadChannel2Ascii::execute() {
   }
 
   const LArBadFebCont* badFebCont=nullptr;
-  if (doExecSummary) {
+  if (doExecSummary && !m_isSC) {
     SG::ReadCondHandle<LArBadFebCont> badFebHdl{m_BFKey};
     badFebCont=(*badFebHdl);
   }
@@ -101,83 +101,91 @@ StatusCode LArBadChannel2Ascii::execute() {
   const LArBadChanBitPacking packing;
   const LArBadChanSCBitPacking SCpacking;
 
-  //std::vector<std::vector<unsigned> > problemMatrix(nParts,std::vector<unsigned>(nProblemTypes) );
-  std::vector<std::vector<unsigned> > problemMatrix(nProblemTypes,std::vector<unsigned>(nParts) );
-  
-  
-  const LArBadChannel::BitWord missingFEBMask= ~(0x1<<LArBadChannel::LArBadChannelEnum::missingFEBBit);
-  //std::cout << std::hex << "Mask=" << missingFEBMask << std::dec << std::endl;
-    
+  // std::vector<std::vector<unsigned> > problemMatrix(nParts,std::vector<unsigned>(nProblemTypes) );
+  std::vector<std::vector<unsigned> > problemMatrix(nProblemTypes, std::vector<unsigned>(nParts));
 
-  std::vector<HWIdentifier>::const_iterator it  = larOnlineID->channel_begin();
-  std::vector<HWIdentifier>::const_iterator it_e= larOnlineID->channel_end();
-  unsigned count=0,nConnected=0;
-  for(;it!=it_e;++it) {  
-    const HWIdentifier chid=*it;
-    //if (m_skipDisconnected && !m_larCablingSvc->isOnlineConnected(chid)) continue;
-    if (cabling && !cabling->isOnlineConnected(chid)) continue;
+    std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
+  std::vector<HWIdentifier>::const_iterator it_e = larOnlineID->channel_end();
+  unsigned count = 0, nConnected = 0;
+  for (; it != it_e; ++it) {
+    const HWIdentifier chid = *it;
+    // if (m_skipDisconnected && !m_larCablingSvc->isOnlineConnected(chid)) continue;
+    if (cabling && !cabling->isOnlineConnected(chid))
+      continue;
     ++nConnected;
 
-    LArBadChannel bc1 = badChannelCont->status(chid);
-    LArBadChannel::BitWord bcw=bc1.packedData();
-    if (!m_wMissing) bcw&=missingFEBMask; //Supress missingFEB bit
-    LArBadChannel bc(bcw);
-    
+    LArBadChannel bc = badChannelCont->status(chid);
+  
     if (!bc.good()) {
       ++count;
-      (*out) << larOnlineID->barrel_ec(chid) << " " 
-	     << larOnlineID->pos_neg(chid) << " "
-	     << larOnlineID->feedthrough(chid) << " "
-	     << larOnlineID->slot(chid) << " "
-	     << larOnlineID->channel(chid) << " "
-	     << "0 "; //Dummy 0 for calib-line
-      if(m_isSC) {
-         (*out) << SCpacking.stringStatus(bc);
+      (*out) << larOnlineID->barrel_ec(chid) << " " << larOnlineID->pos_neg(chid) << " " << larOnlineID->feedthrough(chid) << " " << larOnlineID->slot(chid)
+             << " " << larOnlineID->channel(chid) << " "
+             << "0 ";  // Dummy 0 for calib-line
+      if (m_isSC) {
+        (*out) << SCpacking.stringStatus(bc);
       } else {
-         (*out) << packing.stringStatus(bc);
+        (*out) << packing.stringStatus(bc);
       }
 
       (*out) << "  # 0x" << std::hex << chid.get_identifier32().get_compact();
       if (cabling) {
-	Identifier offid=cabling->cnvToIdentifier(chid);
-	(*out) << " -> 0x" << offid.get_identifier32().get_compact();
+        Identifier offid = cabling->cnvToIdentifier(chid);
+        (*out) << " -> 0x" << offid.get_identifier32().get_compact();
       }
       (*out) << std::dec << std::endl;
-    } //End if channel is not good (regular printout)
-    
+    }  // End if channel is not good (regular printout)
+
     if (doExecSummary) {
-      HWIdentifier fid=larOnlineID->feb_Id(chid);
-      LArBadFeb bf=badFebCont->status(fid);
+      HWIdentifier fid = larOnlineID->feb_Id(chid);
+      LArBadFeb bf;
+      if (!m_isSC) bf= badFebCont->status(fid);
 
-      DetPart dp=EMB;
-      if (larOnlineID->isEMECchannel(chid)) 
-	dp=EMEC;
+      DetPart dp = EMB;
+      if (larOnlineID->isEMECchannel(chid))
+        dp = EMEC;
       else if (larOnlineID->isHECchannel(chid))
-	dp=HEC;
+        dp = HEC;
       else if (larOnlineID->isFCALchannel(chid))
-	dp=FCAL;
+        dp = FCAL;
+
       
-      if (bc.deadReadout()) 
-	++problemMatrix[DeadReadout][dp];
+      if (bc.deadReadout() || bc.maskedOSUM())
+        ++problemMatrix[DeadReadout][dp];
       if (bc.deadPhys())
-	++problemMatrix[DeadPhys][dp];
-      if (bc.deadCalib()) 
-	++problemMatrix[DeadCalib][dp];
-      if (bc.reallyNoisy()) 
-	++problemMatrix[Noisy][dp];
+         ++problemMatrix[DeadPhys][dp];
+      if (bc.deadCalib())
+        ++problemMatrix[DeadCalib][dp];
+      if (bc.reallyNoisy())
+        ++problemMatrix[Noisy][dp];
       if (bc.sporadicBurstNoise())
-	++problemMatrix[Sporadic][dp];
-	
+        ++problemMatrix[Sporadic][dp];
 
-      if (bf.deadAll() || bf.deadReadout() || bf.deactivatedInOKS())
-	++problemMatrix[DeadFEB][dp];
-	
-      if (bf.deadAll() || bf.deadReadout() || bf.deactivatedInOKS() || bc.deadReadout() || bc.deadPhys() || bc.reallyNoisy())
-	++problemMatrix[GrandTotalDead][dp];
-	
-    }//end if executive Summary
+      if (bc.distorted() || bc.deformedTail() || bc.deformedPulse())
+	++problemMatrix[Distorted][dp];
 
-  }//end loop over channels;
+      if (bc.ADCJump() || bc.nonLinearRamp() || bc.SCAProblem() || bc.offOFCs() || bc.offAmplitude() || bc.offScale()) {
+	++problemMatrix[PeakReco][dp];
+      }
+      
+      if (bc.lowLightFibre() || bc.transmissionErrorFibre()) {
+	++problemMatrix[Fibre][dp];
+      }
+      
+      if (!m_isSC) { //problematic febs apply only to regular cells
+        if (bf.deadAll() || bf.deadReadout() || bf.deactivatedInOKS())
+          ++problemMatrix[DeadFEB][dp];
+        if (bf.deadAll() || bf.deadReadout() || bf.deactivatedInOKS() || bc.deadReadout() || bc.deadPhys() || bc.reallyNoisy())
+          ++problemMatrix[GrandTotalDead][dp];
+      }
+      else {
+         if(bc.maskedOSUM() || bc.deadReadout() || bc.deadPhys() || bc.reallyNoisy())
+          ++problemMatrix[GrandTotalDead][dp];
+      }
+
+
+    }  // end if executive Summary
+
+  }  // end loop over channels;
   if (m_skipDisconnected)
     ATH_MSG_INFO ( "Found " << count << " entries in the bad-channel database. (Number of connected cells: " << nConnected << ")"  );
   else
@@ -200,23 +208,45 @@ StatusCode LArBadChannel2Ascii::execute() {
 
     ATH_MSG_INFO ( "Writing Executive Summary to file " << m_executiveSummaryFile );
 
-    exeSum << "LAr dead readout channels:" << std::endl;
-    writeSum(exeSum,problemMatrix[DeadReadout]);
+    if (m_isSC) {
+      exeSum << "LAr SuperCells  dead readout (incl masked OSUM)" << std::endl;
+      writeSum(exeSum,problemMatrix[DeadReadout]);
 
-    exeSum << "LAr permanently dead channels inside detector:" << std::endl;
-    writeSum(exeSum,problemMatrix[DeadPhys]);
-
-    exeSum << "LAr noisy readout channels (more than 10 sigma above phi average or unstable):" << std::endl;
-    writeSum(exeSum,problemMatrix[Noisy]);
+      exeSum << "LAr SuperCells suffering from high noise:" << std::endl;
+      writeSum(exeSum,problemMatrix[Noisy]);
     
-    exeSum << "LAr readout channels showing sporadic noise bursts:" << std::endl;
-    writeSum(exeSum,problemMatrix[Sporadic]);
+      exeSum << "LAr SuperCells w/o calibration (constants from phi average of eta neighbours):" << std::endl;
+      writeSum(exeSum,problemMatrix[DeadCalib]);
 
-    exeSum << "LAr readout channels w/o calibration (constants from phi average of eta neighbours):" << std::endl;
-    writeSum(exeSum,problemMatrix[DeadCalib]);
+      exeSum << "LAr SuperCells with distorted pulse shape:" << std::endl;
+      writeSum(exeSum,problemMatrix[Distorted]);
 
-    exeSum << "LAr readout channels connected to inactive Front End Boards:" << std::endl;
-    writeSum(exeSum,problemMatrix[DeadFEB]);
+      exeSum << "LAr SuperCells having problems with the peak reco:" << std::endl;
+      writeSum(exeSum,problemMatrix[PeakReco]);
+      
+      exeSum << "LAr SuperCells having problems with the optical transmission:" << std::endl;
+      writeSum(exeSum,problemMatrix[Fibre]);
+     
+    }
+    else {
+      exeSum << "LAr dead readout channels:" << std::endl;
+      writeSum(exeSum,problemMatrix[DeadReadout]);
+
+      exeSum << "LAr permanently dead channels inside detector:" << std::endl;
+      writeSum(exeSum,problemMatrix[DeadPhys]);
+
+      exeSum << "LAr noisy readout channels (more than 10 sigma above phi average or unstable):" << std::endl;
+      writeSum(exeSum,problemMatrix[Noisy]);
+    
+      exeSum << "LAr readout channels showing sporadic noise bursts:" << std::endl;
+      writeSum(exeSum,problemMatrix[Sporadic]);
+
+      exeSum << "LAr readout channels w/o calibration (constants from phi average of eta neighbours):" << std::endl;
+      writeSum(exeSum,problemMatrix[DeadCalib]);
+
+      exeSum << "LAr readout channels connected to inactive Front End Boards:" << std::endl;
+      writeSum(exeSum,problemMatrix[DeadFEB]);
+    }
 
     exeSum << "LAr readout channels not usable:" << std::endl;
     
