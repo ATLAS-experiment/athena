@@ -1351,7 +1351,7 @@ def promote_keys(meta_dict, mode):
 def convert_itemList(metadata, layout):
     """
     This function will rearrange the itemList values to match the format of 'eventdata_items', 'eventdata_itemsList'
-    or 'eventdata_itemsDic' generated with AthFile
+    or 'eventdata_itemsDic' generated with the legacy file peeker tool
     :param metadata: a dictionary obtained using read_metadata method.
                      The mode for read_metadata must be 'peeker of 'full'
     :param layout: the mode in which the data will be converted:
