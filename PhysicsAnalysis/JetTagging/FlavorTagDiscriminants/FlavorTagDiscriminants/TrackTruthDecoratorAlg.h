@@ -81,17 +81,23 @@ namespace FlavorTagDiscriminants {
       this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", 
         "track truth origin tool"};
     // Truth Lepton Origin tool (https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/AnalysisCommon/TruthClassification)
-    ToolHandle<CP::IClassificationTool> m_truthLeptonTool{"TruthClassificationTool/truthLeptonTool"};
+    ToolHandle<CP::IClassificationTool> m_truthLeptonTool{
+      this, "truthLeptonTool", "",
+        "Lepton truth classification tool"};
 
     // Defining a map for proper muon origin labels 
-    std::map<unsigned int,unsigned int> m_muTruthMap = {
-      {0, 0}, //Fake(Uknown) muon
-      {1, 1}, //KnownUknown muon
-      {4, 2}, //Prompt muon
-      {8, 3}, //From B muon
-      {13, 4}, //From B/C (decay chain) muon (not included in the muon TruthClassificationTool)
-      {9, 5}, //From C muon 
-      {10, 6}, //From light muon
+    std::map<Truth::Type,unsigned int> m_muTruthMap = {
+      {Truth::Type::Unknown, 0}, //Fake(Uknown) muon
+      {Truth::Type::KnownUnknown, 1}, //KnownUknown muon
+      {Truth::Type::PromptMuon, 2}, //Prompt muon
+      {Truth::Type::BHadronDecay, 3}, //From B muon
+      // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool
+      // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool 
+      {Truth::Type::LightFlavorDecay, 6}, //From light muon
+      {Truth::Type::PromptMuonLike, 7}, //4-like muons
+      {Truth::Type::TauDecayLike, 7}, //4-like muons
+      {Truth::Type::BHadronDecayLike, 7}, //4-like muons
+      {Truth::Type::CHadronDecayLike, 7}, //4-like muons
     };
   };
 }
