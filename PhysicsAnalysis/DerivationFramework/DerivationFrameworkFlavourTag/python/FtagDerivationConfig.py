@@ -157,8 +157,7 @@ def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
         acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
             'TrackTruthDecoratorAlg',
             trackContainer=track_collection,
-            trackTruthOriginTool=trackTruthOriginTool,
-            truthLeptonTool=CompFactory.TruthClassificationTool("TruthClassificationTool")
+            trackTruthOriginTool=trackTruthOriginTool
         ))
 
     # schedule tagging algorithms
