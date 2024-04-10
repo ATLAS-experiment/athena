@@ -31,7 +31,7 @@ void LVL1::jFEXForwardElecInfo::setup(int jfex, uint ttid, int neta, int nphi){
 }
 
 
-void LVL1::jFEXForwardElecInfo::setup(uint *cval, uint reso){
+void LVL1::jFEXForwardElecInfo::setup(int *cval, uint reso){
   m_reso = reso;
   for(int i=0;i<9;i++) m_cval[i] = cval[i];
 }
@@ -70,11 +70,11 @@ float  LVL1::jFEXForwardElecInfo::getCoreTTfPhi(){
   return m_coreTTfPhi;
 }
 
-void   LVL1::jFEXForwardElecInfo::setCoreTTEtEM(uint ET_EM ){
+void   LVL1::jFEXForwardElecInfo::setCoreTTEtEM(int ET_EM ){
    m_coreTTEtEM  = ET_EM;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getCoreTTEtEM(){
+int   LVL1::jFEXForwardElecInfo::getCoreTTEtEM(){
   return m_coreTTEtEM;
 }
 
@@ -86,15 +86,15 @@ uint   LVL1::jFEXForwardElecInfo::getNextTTID(){
   return m_nextTTID;
 }
 
-void   LVL1::jFEXForwardElecInfo::setNextTTEtEM(uint nextEt){
+void   LVL1::jFEXForwardElecInfo::setNextTTEtEM(int nextEt){
   m_nextTTEtEM = nextEt;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getNextTTEtEM(){
+int   LVL1::jFEXForwardElecInfo::getNextTTEtEM(){
   return m_nextTTEtEM;
 }
 
-void   LVL1::jFEXForwardElecInfo::setTTEtEMiso(uint iso_ET){
+void   LVL1::jFEXForwardElecInfo::setTTEtEMiso(int iso_ET){
   m_TTEtEMiso  = iso_ET;
 }
 
@@ -102,7 +102,7 @@ void   LVL1::jFEXForwardElecInfo::addTTEtEMiso(int iso_ET){
   m_TTEtEMiso  += iso_ET;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getTTEtEMiso(){
+int   LVL1::jFEXForwardElecInfo::getTTEtEMiso(){
   return m_TTEtEMiso;
 }
 
@@ -110,27 +110,27 @@ void   LVL1::jFEXForwardElecInfo::calcTTClusEtEM(){
   m_TTClusEtEM   = m_coreTTEtEM + m_nextTTEtEM;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getTTClusEtEM(){
+int   LVL1::jFEXForwardElecInfo::getTTClusEtEM(){
   return m_TTClusEtEM ;
 }
 
-void   LVL1::jFEXForwardElecInfo::setTTEtHad1(uint ET_HAD){
+void   LVL1::jFEXForwardElecInfo::setTTEtHad1(int ET_HAD){
   m_TTEtHad1 = ET_HAD;
 }
 
-void   LVL1::jFEXForwardElecInfo::addTTEtHad1(uint ET_HAD){
+void   LVL1::jFEXForwardElecInfo::addTTEtHad1(int ET_HAD){
   m_TTEtHad1 += ET_HAD;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getTTEtHad1(){
+int   LVL1::jFEXForwardElecInfo::getTTEtHad1(){
   return m_TTEtHad1;
 }
 
-void   LVL1::jFEXForwardElecInfo::setTTEtHad2(uint ET_HAD){
+void   LVL1::jFEXForwardElecInfo::setTTEtHad2(int ET_HAD){
   m_TTEtHad2 = ET_HAD;
 }
 
-uint   LVL1::jFEXForwardElecInfo::getTTEtHad2(){
+int   LVL1::jFEXForwardElecInfo::getTTEtHad2(){
   return m_TTEtHad2;
 }
 
@@ -231,28 +231,29 @@ void LVL1::jFEXForwardElecInfo::calcFwdElEDM() {
 
 
 
-  // values divided by m_reso
-  if (m_et > m_cval[2] * m_EtEMiso)  {
+  // jFEX internal values are at higher granularity (25MeV), not output granularity (200MeV).
+  // since we avoid divisions, MeV values are just as good (given that input granularity is already 25MeV)
+  if (m_TTClusEtEM > m_cval[2] * m_TTEtEMiso)  {
     m_emiso  = 3;
-  } else if (m_et > m_cval[1] * m_EtEMiso){
+  } else if (m_TTClusEtEM > m_cval[1] * m_TTEtEMiso){
     m_emiso  = 2;
-  } else if (m_et > m_cval[0] * m_EtEMiso){
+  } else if (m_TTClusEtEM > m_cval[0] * m_TTEtEMiso){
     m_emiso  = 1;
   }
-
-  // values not yet divided by m_reso
-  if (m_EtEM > m_cval[5] * m_EtHad1)  {
+  
+  // hadronic fraction: only compare to core (=seed) tower
+  if (m_coreTTEtEM > m_cval[5] * m_TTEtHad1)  {
     m_emfr1  = 3;
-  } else if (m_EtEM > m_cval[4] * m_EtHad1){
+  } else if (m_coreTTEtEM > m_cval[4] * m_TTEtHad1){
     m_emfr1  = 2;
-  } else if (m_EtEM > m_cval[3] * m_EtHad1){
+  } else if (m_coreTTEtEM > m_cval[3] * m_TTEtHad1){
     m_emfr1  = 1;
   }
-  if (m_EtEM > m_cval[8] * m_EtHad2)  {
+  if (m_coreTTEtEM > m_cval[8] * m_TTEtHad2)  {
     m_emfr2  = 3;
-  } else if (m_EtEM > m_cval[7] * m_EtHad2){
+  } else if (m_coreTTEtEM > m_cval[7] * m_TTEtHad2){
     m_emfr2  = 2;
-  } else if (m_EtEM > m_cval[6] * m_EtHad2){
+  } else if (m_coreTTEtEM > m_cval[6] * m_TTEtHad2){
     m_emfr2  = 1;
   }
 
