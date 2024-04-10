@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -46,8 +46,7 @@ public:
   DeclareInterfaceID(ITrackingVolumeHelper, 1, 0);
 
   /**Virtual destructor*/
-  virtual ~ITrackingVolumeHelper() {}
-
+  virtual ~ITrackingVolumeHelper() = default;
   /** Glue Volume method: One to one
        --- Neccessary as friendship cannot be inherited: your father's friend
      isn't necessary yours ---
@@ -87,12 +86,17 @@ public:
        --- Neccessary as friendship cannot be inherited: your father's friend
      isn't necessary yours ---
       */
-  virtual Trk::TrackingVolume* glueTrackingVolumeArrays(
-    TrackingVolume& firstVol,
-    BoundarySurfaceFace firstFace,
-    TrackingVolume& secondVol,
-    BoundarySurfaceFace secondFace,
-    std::string name) const = 0;
+  virtual Trk::TrackingVolume* glueTrackingVolumeArrays(TrackingVolume& firstVol,
+                                                        BoundarySurfaceFace firstFace,
+                                                        TrackingVolume& secondVol,
+                                                        BoundarySurfaceFace secondFace,
+                                                        std::string name) const = 0;
+
+  virtual std::unique_ptr<Trk::TrackingVolume> glueTrackingVolumeArrays(std::shared_ptr<TrackingVolume> firstVol,
+                                                                        BoundarySurfaceFace firstFace,
+                                                                        std::shared_ptr<TrackingVolume> secondVol,
+                                                                        BoundarySurfaceFace secondFace,
+                                                                        const std::string& name) const = 0;
 
   /**  Glue Volume method: set inside Volume
      --- Neccessary as friendship cannot be inherited: your father's friend

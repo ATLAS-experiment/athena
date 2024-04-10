@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -300,8 +300,8 @@ StatusCode TileInfoLoader::initialize() {
   //=== Initialize and register TileInfo object
   CHECK( info->initialize() );
 
-  CHECK( m_detStore->record(std::move(info), "TileInfo", false ) );
-  ATH_MSG_DEBUG(  "Placed TileInfo object in the detector store."  );
+  CHECK( m_detStore->record(std::move(info), m_tileInfoName, false ) );
+  ATH_MSG_DEBUG(  "Placed TileInfo object [" << m_tileInfoName << "] in the detector store."  );
 
   return StatusCode::SUCCESS;
 }
