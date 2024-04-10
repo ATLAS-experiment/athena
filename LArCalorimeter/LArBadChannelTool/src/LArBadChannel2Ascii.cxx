@@ -226,7 +226,9 @@ StatusCode LArBadChannel2Ascii::execute() {
       
       exeSum << "LAr SuperCells having problems with the optical transmission:" << std::endl;
       writeSum(exeSum,problemMatrix[Fibre]);
-     
+
+      exeSum << "LAr SuperCells not usable:" << std::endl;
+      writeSum(exeSum,problemMatrix[GrandTotalDead]);
     }
     else {
       exeSum << "LAr dead readout channels:" << std::endl;
@@ -246,12 +248,11 @@ StatusCode LArBadChannel2Ascii::execute() {
 
       exeSum << "LAr readout channels connected to inactive Front End Boards:" << std::endl;
       writeSum(exeSum,problemMatrix[DeadFEB]);
-    }
-
-    exeSum << "LAr readout channels not usable:" << std::endl;
     
-    writeSum(exeSum,problemMatrix[GrandTotalDead]);
-
+      exeSum << "LAr readout channels not usable:" << std::endl;
+      writeSum(exeSum,problemMatrix[GrandTotalDead]);
+    }
+    
     exeSum.close();
   }
 
