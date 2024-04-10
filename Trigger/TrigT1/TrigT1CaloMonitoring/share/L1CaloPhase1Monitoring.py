@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-## Job options for Running the L1Calo Athena Simulation and/or Monitoring for Phase1
+## Script for Running the L1Calo Athena Simulation and/or Monitoring for Phase1
 ## can be run offline on raw or POOL files (for rerunning simulation)
 ## run through athena
-##    offline: athena --CA RecExOnline/L1CaloPhase1Monitoring.py --filesInput path/to/raw.data --evtMax 10
-##    online:  athena --CA RecExOnline/L1CaloPhase1Monitoring.py
+##    offline: athena --CA TrigT1CaloPhase1Monitoring/L1CaloPhase1Monitoring.py --filesInput path/to/raw.data --evtMax 10
+##    online:  athena --CA TrigT1CaloPhase1Monitoring/L1CaloPhase1Monitoring.py
 ## Author: Will Buttinger
 
 from AthenaCommon.Configurable import ConfigurableCABehavior
@@ -23,24 +23,6 @@ flags.Input.Files = [] # so that when no files given we can detect that
 # Note: The order in which all these flag defaults get set is very fragile
 # so don't reorder the setup of this flags stuff
 
-# if not isComponentAccumulatorCfg():
-#   # running as a jobo - commented out as phasing out support
-#   # from AthenaCommon.DetFlags import DetFlags
-#   # DetFlags.detdescr.all_setOff()
-#   # DetFlags.detdescr.Calo_setOn()
-#   decodeInputs = True
-#   # next three lines so that conddb set up ok
-#   if len(jps.AthenaCommonFlags.FilesInput())>0:
-#     from RecExConfig import AutoConfiguration
-#     AutoConfiguration.ConfigureSimulationOrRealData() #sets globalflags.DataSource
-#     AutoConfiguration.ConfigureFromListOfKeys(['ProjectName']) #sets rec.projectName, necessary to infer DatabaseInstance if that is left to 'auto' (default value)
-#     from AthenaConfiguration.OldFlags2NewFlags import getNewConfigFlags
-#     flags = getNewConfigFlags() # replace flags with old flags
-#     flags.Exec.MaxEvents = jps.AthenaCommonFlags.EvtMax() # didn't get copied so do it manually now
-#   elif partition.isValid():
-#     # running online, need to set some flags for conddb to be setup correctly at this point
-#     jps.Global.DataSource = 'data'
-#     jps.AthenaCommonFlags.isOnline = True
 
 flags.Exec.OutputLevel = Constants.WARNING # by default make everything output at WARNING level
 flags.Exec.InfoMessageComponents = ["AthenaEventLoopMgr","THistSvc","PerfMonMTSvc","ApplicationMgr"] # Re-enable some info messaging though
@@ -53,7 +35,7 @@ flags.Common.useOnlineLumi = True # needed for lumi-scaled monitoring, only have
 flags.DQ.doMonitoring = True      # use this flag to turn on/off monitoring in this application
 flags.DQ.enableLumiAccess = False # in fact, we don't need lumi access for now ... this turns it all off
 flags.DQ.FileKey = "" if partition.isValid() else "EXPERT" # histsvc file "name" to record to - Rafal asked it to be blank @ P1 ... means monitoring.root will be empty
-flags.Output.HISTFileName = "monitoring.root" # control names of monitoring root file
+flags.Output.HISTFileName = os.getenv("L1CALO_ATHENA_JOB_NAME","") + "monitoring.root" # control names of monitoring root file - ensure each online monitoring job gets a different filename to avoid collision between processes
 flags.DQ.useTrigger = False # don't do TrigDecisionTool in MonitorCfg helper methods
 # flag for saying if inputs should be decoded or not
 flags.Trigger.L1.doCaloInputs = True
@@ -75,29 +57,29 @@ else:
 #flags.IOVDb.GlobalTag = lambda s: "OFLCOND-MC23-SDR-RUN3-02" if s.Input.isMC else "CONDBR2-ES1PA-2022-07" #"CONDBR2-HLTP-2022-02"
 
 # now parse
-if isComponentAccumulatorCfg():
-  parser = flags.getArgumentParser()
-  parser.add_argument('--runNumber',default=None,help="specify to select a run number")
-  parser.add_argument('--lumiBlock',default=None,help="specify to select a lumiBlock")
-  parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
-  parser.add_argument('--stream',default="physics_L1Calo",help="stream to lookup files in")
-  parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
-  parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath>, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
-  parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
-  args = flags.fillFromArgs(parser=parser)
-  if args.runNumber is not None:
-    from glob import glob
-    if args.lumiBlock is None: args.lumiBlock="*"
-    print("Looking up files in atlastier0 for run",args.runNumber,"lb =",args.lumiBlock)
-    flags.Input.Files = []
-    for lb in args.lumiBlock.split(","):
-      if lb=="*":
-        tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb*.*"
-      else:
-        tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb{int(lb):04}.*"
-      print("Trying",tryStr)
-      flags.Input.Files += glob(tryStr)
-    print("Found",len(flags.Input.Files),"files")
+
+parser = flags.getArgumentParser()
+parser.add_argument('--runNumber',default=None,help="specify to select a run number")
+parser.add_argument('--lumiBlock',default=None,help="specify to select a lumiBlock")
+parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
+parser.add_argument('--stream',default="physics_L1Calo",help="stream to lookup files in")
+parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
+parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath>, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
+parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
+args = flags.fillFromArgs(parser=parser)
+if args.runNumber is not None:
+  from glob import glob
+  if args.lumiBlock is None: args.lumiBlock="*"
+  print("Looking up files in atlastier0 for run",args.runNumber,"lb =",args.lumiBlock)
+  flags.Input.Files = []
+  for lb in args.lumiBlock.split(","):
+    if lb=="*":
+      tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb*.*"
+    else:
+      tryStr = f"/eos/atlas/atlastier0/rucio/data*/{args.stream}/*{args.runNumber}/*RAW/*lb{int(lb):04}.*"
+    print("Trying",tryStr)
+    flags.Input.Files += glob(tryStr)
+  print("Found",len(flags.Input.Files),"files")
 
 # require at least 1 input file if running offline
 if not partition.isValid() and len(flags.Input.Files)==0:
@@ -109,7 +91,8 @@ elif partition.isValid():
 # if running on an input file, change the DQ environment, which will allow debug tree creation from monitoring algs
 if len(flags.Input.Files)>0:
   flags.DQ.Environment = "user"
-  flags.Trigger.triggerConfig='FILE' if flags.Input.isMC else 'DB' #for L1menu if running offline
+  # triggerConfig should default to DB which is appropriate if running on data
+  if flags.Input.isMC: flags.Trigger.triggerConfig='FILE' # uses the generated L1Menu (see below)
 
 # due to https://gitlab.cern.ch/atlas/athena/-/merge_requests/65253 must now specify geomodel explicitly if cant take from input file, but can autoconfigure it based on LHCPeriod set above
 if flags.GeoModel.AtlasVersion is None:
@@ -121,18 +104,8 @@ if flags.GeoModel.AtlasVersion is None:
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
 setupDetectorsFromList(flags,['LAr','Tile','MBTS'],True)
 
-
-if isComponentAccumulatorCfg():
-  from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-  cfg = MainServicesCfg(flags)
-# else:
-#   # for an unknown reason it seems like its necessary to create
-#   # setup the IOVDbSvc now otherwise conditions aren't done properly - its like CA config isn't getting applied properly?
-#   # and the CALIBRATIONS folder isnt found
-#   from IOVDbSvc.CondDB import conddb
-#   with ConfigurableCABehavior():
-#     from AthenaConfiguration.MainServicesConfig import MessageSvcCfg
-#     cfg = MessageSvcCfg(flags) # start with just messageSvc ComponentAccumulator() # use empty accumulator
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+cfg = MainServicesCfg(flags)
 
 with ConfigurableCABehavior(): # need to temporarily activate run3 behaviour to use this configuration method
 
@@ -176,15 +149,19 @@ with ConfigurableCABehavior(): # need to temporarily activate run3 behaviour to 
   cfg.merge(getDQTHistSvc(flags))
 
   # Create run3 L1 menu (needed for L1Calo EDMs)
-  #try:
-  from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu, createL1PrescalesFileFromMenu
+  from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu, createL1PrescalesFileFromMenu,getL1MenuFileName
   if flags.Input.isMC:
     # for MC we set the TriggerConfig to "FILE" above, so must generate a menu for it to load (will be the release's menu)
     generateL1Menu(flags)
     createL1PrescalesFileFromMenu(flags)
+  if flags.Trigger.triggerConfig=="FILE":
+    menuFilename = getL1MenuFileName(flags)
+    if os.path.exists(menuFilename):
+      print("Using L1Menu:",menuFilename)
+    else:
+      print("L1Menu file does not exist:",menuFilename)
+      sys.exit(1)
   cfg.merge(L1ConfigSvcCfg(flags))
-  #except:
-    #print("Failed to load L1 Menu")
 
   # -------- CHANGES GO BELOW ------------
   # setup the L1Calo software we want to monitor
@@ -361,6 +338,8 @@ with ConfigurableCABehavior(): # need to temporarily activate run3 behaviour to 
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
+  # example of adding user algorithm
+  # cfg.addEventAlgo(CompFactory.AnotherPackageAlg(),sequenceName="AthAlgSeq")
 
   for conf in args.postConfig:
     compName,propNameAndVal=conf.split(".",1)
@@ -380,15 +359,17 @@ print("Configured Services:",*[svc.name for svc in cfg.getServices()])
 #print("Configured EventAlgos:",*[alg.name for alg in cfg.getEventAlgos()])
 #print("Configured CondAlgos:",*[alg.name for alg in cfg.getCondAlgos()])
 
+#cfg.getService("StoreGateSvc").Dump=True
+
+# ensure printout level is low enough if dumping
+if cfg.getService("StoreGateSvc").Dump:
+  cfg.getService("StoreGateSvc").OutputLevel=3
+
+
 from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
 L1CaloMonitorCfgHelper.printHanConfig()
 
 
-if not isComponentAccumulatorCfg():
-  appendCAtoAthena(cfg)
-  #svcMgr.StoreGateSvc.Dump=True;svcMgr.DetectorStore.Dump=True
-  #svcMgr.IOVDbSvc.OutputLevel=DEBUG; print(svcMgr.IOVDbSvc)
-else:
-  if cfg.run().isFailure():
-    import sys
-    sys.exit(1)
+if cfg.run().isFailure():
+  import sys
+  sys.exit(1)
