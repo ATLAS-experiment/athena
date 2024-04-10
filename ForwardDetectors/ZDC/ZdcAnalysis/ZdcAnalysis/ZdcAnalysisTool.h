@@ -86,7 +86,7 @@ public:
       MSG::Level theLevel = static_cast<MSG::Level>(level);
       bool test = theLevel >= this->msg().level();
       if (test) {
-        this->msg() << message << endmsg;
+        this->msg(theLevel) << message << endmsg;
       }
       return test;
     };
