@@ -7,9 +7,7 @@
 ##    online:  athena --CA TrigT1CaloPhase1Monitoring/L1CaloPhase1Monitoring.py
 ## Author: Will Buttinger
 
-from AthenaCommon.Configurable import ConfigurableCABehavior
-from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena
-from AthenaConfiguration.ComponentFactory import CompFactory,isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod,Format
 from AthenaCommon import Constants
