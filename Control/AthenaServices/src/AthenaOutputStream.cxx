@@ -565,13 +565,18 @@ StatusCode AthenaOutputStream::write() {
    if( m_outSeqSvc->inUse() and m_outSeqSvc->inConcurrentEventsMode() ) {
       outputFN = m_slotRangeMap[ slot ];
       ATH_MSG_DEBUG( "Writing event sequence to " << outputFN );
-      
+
       streamer = m_streamerMap[ outputFN ].get();
       if( !streamer ) {
          // new range, needs a new streamer tool
          IAlgTool* st = AlgTool::Factory::create( m_streamer->type(), m_streamer->type(), m_streamer->name(), this ).release();
          st->addRef();
          streamer = dynamic_cast<IAthenaOutputStreamTool*>( st );
+         IProperty *mstreamer_props = dynamic_cast<IProperty*> (&*m_streamer);
+         IProperty *streamer_props = dynamic_cast<IProperty*> (&*streamer);
+         for ( const auto& prop : mstreamer_props->getProperties() ) {
+            ATH_CHECK( streamer_props->setProperty( *prop ) );
+         }
          if( !streamer or streamer->initialize().isFailure()
              or streamer->connectServices(m_dataStore.typeAndName(), m_persName, m_extendProvenanceRecord).isFailure() ) {
             ATH_MSG_FATAL("Unable to initialize OutputStreamTool for " << outputFN );
