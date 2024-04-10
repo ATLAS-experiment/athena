@@ -14,13 +14,23 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
                                                    const IInterface *parent)
     : AthAlgTool(type, name, parent), m_vertexFitterTool("Trk::TrkVKalVrtFitter/VertexFitterTool", this),
       m_jetCollection("AntiKt4EMPFlowJets"), 
+      m_deco_mass("mass"),
+      m_deco_pt("pt"),
+      m_deco_charge("charge"),
+      m_deco_vPos("vPos"),
+      m_deco_lxy("Lxy"),
+      m_deco_sig3D("significance3D"),
+      m_deco_deltaR("deltaR"),
+      m_deco_ntrk("ntrk"),
+      m_deco_lxyz("Lxyz"),
+      m_deco_eFrac("efracsv"),
       m_multiWithPrimary(true), 
       m_minLxy(1), 
       m_maxLxy(300), 
       m_minSig3D(2),
       m_maxChi2(20), 
       m_minNTrack(2),
-      m_HFRatioThres(0.3),
+      m_HFRatioThres(0.3),   
       m_gnnModel("GN2v01"){
   declareInterface<IGNNVertexFitterInterface>(this);
   declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackLinks");
@@ -60,17 +70,18 @@ StatusCode GNNVertexFitterTool::initialize() {
   ATH_CHECK(m_beamSpotKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());
 
+
   // Vertex decorators
-  m_deco_mass      = std::make_unique< SG::AuxElement::Decorator<float> >("mass");
-  m_deco_pt        = std::make_unique< SG::AuxElement::Decorator<float> >("pt");
-  m_deco_charge    = std::make_unique< SG::AuxElement::Decorator<float> >("charge");
-  m_deco_vPos      = std::make_unique< SG::AuxElement::Decorator<float> >("vPos");
-  m_deco_lxy       = std::make_unique< SG::AuxElement::Decorator<float> >("Lxy");
-  m_deco_sig3D     = std::make_unique< SG::AuxElement::Decorator<float> >("significance3d");
-  m_deco_deltaR    = std::make_unique< SG::AuxElement::Decorator<float> >("deltaRJet");
-  m_deco_ntrk      = std::make_unique< SG::AuxElement::Decorator<float> >("ntrk");
-  m_deco_lxyz      = std::make_unique< SG::AuxElement::Decorator<float> >("Lxyz");
-  m_deco_eFrac     = std::make_unique< SG::AuxElement::Decorator<float> >("efracsv");
+  //m_deco_mass      = std::make_unique< SG::AuxElement::Decorator<float> >("mass");
+  //m_deco_pt        = std::make_unique< SG::AuxElement::Decorator<float> >("pt");
+//  m_deco_charge    = std::make_unique< SG::AuxElement::Decorator<float> >("charge");
+//  m_deco_vPos      = std::make_unique< SG::AuxElement::Decorator<float> >("vPos");
+//  m_deco_lxy       = std::make_unique< SG::AuxElement::Decorator<float> >("Lxy");
+//  m_deco_sig3D     = std::make_unique< SG::AuxElement::Decorator<float> >("significance3d");
+//  m_deco_deltaR    = std::make_unique< SG::AuxElement::Decorator<float> >("deltaRJet");
+//  m_deco_ntrk      = std::make_unique< SG::AuxElement::Decorator<float> >("ntrk");
+//  m_deco_lxyz      = std::make_unique< SG::AuxElement::Decorator<float> >("Lxyz");
+//  m_deco_eFrac     = std::make_unique< SG::AuxElement::Decorator<float> >("efracsv");
 
   return StatusCode::SUCCESS;
 }
@@ -280,6 +291,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
 
         double eRatio = MomentumVtx.E() / jet->p4().E();
         double signif3D;
+        double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
         
         // apply quality cuts
         if (ntrk < m_minNTrack)
@@ -288,7 +300,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
           continue;
         if ( newvrt.vertex.perp() < m_minLxy)
           continue;
-        if (Lxyz < m_minSig3D && newvrt.vertex.perp() > 24.0)
+        if (distToPV < m_minSig3D && newvrt.vertex.perp() > 24.0)
           continue;
 
 //       if (newvrt.vertex.perp() > m_Rbeampipe && Signif3D < m_minSig3D)
@@ -311,16 +323,16 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         GNNvertex->setVertexType(xAOD::VxType::SecVtx);
         GNNvertex->setPosition(newvrt.vertex);
         GNNvertex->setFitQuality(newvrt.chi2, NDOF);
-        (*m_deco_mass)(*GNNvertex)            = newvrt.vertexMom.M();
-        (*m_deco_pt)(*GNNvertex)              = newvrt.vertexMom.Perp();
-        (*m_deco_charge)(*GNNvertex)          = newvrt.vertexCharge;
-        (*m_deco_vPos)(*GNNvertex)            = vPos;
-        (*m_deco_lxy)(*GNNvertex)             = Lxy;
-        (*m_deco_lxyz)(*GNNvertex)            = Lxyz;
-        (*m_deco_sig3D)(*GNNvertex)           = signif3D; 
-        (*m_deco_ntrk)(*GNNvertex)            = ntrk;
-        (*m_deco_deltaR)(*GNNvertex)          = drJPVSV;
-        (*m_deco_eFrac)(*GNNvertex)           = eRatio;
+        m_deco_mass(*GNNvertex)            = newvrt.vertexMom.M();
+        m_deco_pt(*GNNvertex)              = newvrt.vertexMom.Perp();
+        m_deco_charge(*GNNvertex)          = newvrt.vertexCharge;
+        m_deco_vPos(*GNNvertex)            = vPos;
+        m_deco_lxy(*GNNvertex)             = Lxy;
+        m_deco_lxyz(*GNNvertex)            = Lxyz;
+        m_deco_sig3D(*GNNvertex)           = signif3D; 
+        m_deco_ntrk(*GNNvertex)            = ntrk;
+        m_deco_deltaR(*GNNvertex)          = drJPVSV;
+        m_deco_eFrac(*GNNvertex)           = eRatio;
         
         ElementLink<xAOD::VertexContainer> linkVertex;
         linkVertex.setElement(GNNvertex);

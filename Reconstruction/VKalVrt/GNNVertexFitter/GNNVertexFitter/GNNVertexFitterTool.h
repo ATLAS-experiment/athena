@@ -114,17 +114,16 @@ private:
     double chi2{};
   }; // end WrkVrt
 
-  std::unique_ptr< SG::AuxElement::Decorator<float>  > m_deco_mass;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_pt;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_charge;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_vPos;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_lxy;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_sig3D;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_deltaR;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_ntrk;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_lxyz;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_minDst;
-  std::unique_ptr< SG::AuxElement::Decorator<float> >  m_deco_eFrac;
+  SG::AuxElement::Decorator<float>  m_deco_mass;
+  SG::AuxElement::Decorator<float>  m_deco_pt;
+  SG::AuxElement::Decorator<float>  m_deco_charge;
+  SG::AuxElement::Decorator<float>  m_deco_vPos;
+  SG::AuxElement::Decorator<float>  m_deco_lxy;
+  SG::AuxElement::Decorator<float>  m_deco_sig3D;
+  SG::AuxElement::Decorator<float>  m_deco_deltaR;
+  SG::AuxElement::Decorator<float>  m_deco_ntrk;
+  SG::AuxElement::Decorator<float>  m_deco_lxyz;
+  SG::AuxElement::Decorator<float>  m_deco_eFrac;
   
   bool   m_multiWithPrimary;
   double m_minLxy;
