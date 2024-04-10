@@ -116,18 +116,25 @@ def  trigJetEJsHypoToolFromDict(chain_dict):
 
 def  trigJetCRVARHypoToolFromDict(chain_dict):
     chain_name = chain_dict['chainName']
- 
     doBIBrm = int(0)
     doExoCal = int(0)
     ExoCalCut = 220
     if len(chain_dict['chainParts'][0]['exotHypo']) > 0:
         exot_hypo = chain_dict['chainParts'][0]['exotHypo'][0]
-        calratioX_matched = re.match(r'.*calratiovar(?P<cut>\d{1,3}[\d\D]*)', chain_dict['chainParts'][0]['exotHypo'][0])
+        calratioX_matched = re.match(r'.*calratiovar(?P<cut>\d{1,3}[\d\D]*)', chain_dict['chainParts'][0]['exotHypo'][0]) 
         if calratioX_matched:
             doExoCal= int(1)
             ExoCalCut = calratioX_matched.groupdict()['cut']
     else:
-        raise Exception("Unable to extract exotHypo calratio jet configuration from chain dict")
+        if len(chain_dict['chainParts'][1]['exotHypo']) > 0:
+            exot_hypo = chain_dict['chainParts'][1]['exotHypo'][0]
+            logger.warning(chain_dict)
+            calratioX_matched = re.match(r'.*calratiovar(?P<cut>\d{1,3}[\d\D]*)', chain_dict['chainParts'][1]['exotHypo'][0])
+            if calratioX_matched:
+                doExoCal= int(1)
+                ExoCalCut = calratioX_matched.groupdict()['cut']
+        else:
+            raise Exception("Unable to extract exotHypo calratio jet configuration from chain dict")
     if 'calratiovar' in exot_hypo:
             if 'calratiovarrmbib' in exot_hypo:
                  doBIBrm = int(1)
@@ -137,12 +144,18 @@ def  trigJetCRVARHypoToolFromDict(chain_dict):
     presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][0]['trkpresel'])
     if presel_matched:
         emf_cut = presel_matched.groupdict()['cut']
-    else: 
-        presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][3]['trkpresel'])
-        if presel_matched:
-            emf_cut = presel_matched.groupdict()['cut']
-        else:
-            raise Exception("misconfiguration of Exotic jet chain")
+    elif len(chain_dict['chainParts'])>1:
+         presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][1]['trkpresel'])
+         if presel_matched:
+             emf_cut = presel_matched.groupdict()['cut']
+         elif len(chain_dict['chainParts'])>3:
+             presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][3]['trkpresel'])
+             if presel_matched:
+                     emf_cut = presel_matched.groupdict()['cut']
+             else:
+                 raise Exception("misconfiguration of Exotic jet chain")             
+    else:
+        raise Exception("misconfiguration of Exotic jet chain")
 
     import math
     hypo = CompFactory.TrigJetCRVARHypoTool(chain_name)
