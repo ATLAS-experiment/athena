@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_T1_TRT_H
@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <array>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
@@ -56,7 +57,12 @@ namespace LVL1 {
     const TRT_ID* m_pTRTHelper;
 
     /* Gaudi Properties */
-    Gaudi::Property<int> m_TTCMultiplicity{this, "TTCMultiplicity", 5, "TTC board multiplicity required to fire the trigger"};
+    Gaudi::Property<int> m_TTCMultiplicity{this, "TTCMultiplicity", 4, "TTC board multiplicity required to fire the trigger"};
+    Gaudi::Property<std::string> m_maskedChipsFile{this, "maskedChipsFile", "TrigT1TRT/fastORmaskedChips.json", "path to file with list of masked chips"};
+
+    /* Structure with vectors containing masked chips -- m_maskedChipsBarrel.at(1) is the, and A side m_maskedChipsBarrel.at(0) is C side; then 32 corresponds to 32 phi sectors */
+    std::array<std::array<std::vector<int>, 32>, 2> m_maskedChipsBarrel;
+    std::array<std::array<std::vector<int>, 32>, 2> m_maskedChipsEc;
 
     /* Variables and functions used in trigger logic */
     int BarrelChipToBoard(int chip) const;
