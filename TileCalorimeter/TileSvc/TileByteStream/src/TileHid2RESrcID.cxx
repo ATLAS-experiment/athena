@@ -348,7 +348,7 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
                         m_frag2ROD[fragid] = {ROBid,fragid}; // separate CIS par in every partition
                         cisparFound = true;
                     }
-                } else if (fragid < 0x500) { // normal drawers
+                } else if (fragid < 0x500 || fragtype == 6) { // normal drawers
                     ++nRODfrag;
                     int frag_id = this->getOfflineFragID(fragid);
                     if (frag_id < 0) {
@@ -467,8 +467,10 @@ uint32_t TileHid2RESrcID::getRodID(int frag_id) const
 
   FRAGFULLMAP::const_iterator it = m_frag2ROD.find(frag_id);
   if(it == m_frag2ROD.end()){
-    std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
-    assert(0);
+    if (frag_id < static_cast<int>(TileCalibUtils::FELIX_FRAGID_OFFSET)) {
+      std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
+      assert(0);
+    }
     return 0;
   }
 
@@ -481,7 +483,7 @@ uint32_t TileHid2RESrcID::getBSfragID(int frag_id) const
 
   FRAGFULLMAP::const_iterator it = m_frag2ROD.find(frag_id);
   if(it == m_frag2ROD.end()){
-    if (frag_id < 0x1000) {
+    if (frag_id < static_cast<int>(TileCalibUtils::FELIX_FRAGID_OFFSET)) {
       std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
       assert(0);
     }
