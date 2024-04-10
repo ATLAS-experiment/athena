@@ -126,41 +126,7 @@ def tagSingleJetCollection(cfgFlags, jet_col, pv_col,
         prefix=trackAugmenterPrefix
     ))
 
-    # decorate tracks with lepton info                                                                                            
-    electronID_tool = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(cfgFlags,
-                                                                        name = "electronID_tool",
-                                                                        quality = LikeEnum.VeryLoose))
-
-    muonID_tool = acc.popToolsAndMerge(MuonSelectionToolCfg(cfgFlags,
-                                                            name = "muonID_tool",
-                                                            MuQuality = 2,          #Loose muon selection
-                                                            MaxEta = 2.5))
-    
-    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackLeptonDecoratorAlg(
-        'TrackLeptonDecoratorAlg',
-        trackContainer=track_collection,
-        electronSelectionTool = electronID_tool,
-        muonSelectionTool = muonID_tool,
-    ))
-
-    # decorate detailed truth info
-    if cfgFlags.Input.isMC:
-        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
-            InDetTrackTruthOriginToolCfg,
-        )
-        trackTruthOriginTool = acc.popToolsAndMerge(InDetTrackTruthOriginToolCfg(cfgFlags))
-
-        acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TruthParticleDecoratorAlg(
-            'TruthParticleDecoratorAlg',
-            trackTruthOriginTool=trackTruthOriginTool
-        ))
-        acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
-            'TrackTruthDecoratorAlg',
-            trackContainer=track_collection,
-            trackTruthOriginTool=trackTruthOriginTool
-        ))
-
-    # schedule tagging algorithms
+    # schedule tagging algorithms for this jet collection
     acc.merge(BTagAlgsCfg(
         inputFlags=cfgFlags,
         JetCollection=jet_col_name_without_Jets,
@@ -212,7 +178,8 @@ def trackTruthDecorator(cfgFlags) -> ComponentAccumulator:
     acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
         'TrackTruthDecoratorAlg',
         trackContainer=_getTrackCollection(cfgFlags),
-        trackTruthOriginTool=trackTruthOriginTool
+        trackTruthOriginTool=trackTruthOriginTool,
+        truthLeptonTool=CompFactory.TruthClassificationTool("TruthClassificationTool")
     ))
 
     return acc
