@@ -83,10 +83,14 @@ class FTagConfig (ConfigBlock):
                             result = "Herwig713"
                         elif "7.2.1" in version:
                             result = "Herwig721"
+                        elif "7.2.3" in version:
+                            result = "Herwig721"
             elif "Sherpa" in generators:
                 version = generatorDict["Sherpa"]
                 if version is not None:
                     if "2.2.10" in version:
+                        result = "Sherpa2210"
+                    elif "2.2.11" in version:
                         result = "Sherpa2210"
                     elif "2.2.12" in version:
                         result = "Sherpa2212"
