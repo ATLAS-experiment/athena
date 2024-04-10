@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.filter_files
 # @purpose take a bunch of input (pool/bs) files and produce a filtered one
@@ -102,12 +102,11 @@ def main(args):
 
     # put back the massaged selection into our workspace
     args.selection = selection[:]
+
+    from PyUtils.MetaReader import read_metadata
+    metadata = read_metadata(args.files[0], None, 'lite')[args.files[0]]
     
-    import PyUtils.AthFile as af
-    fi = af.fopen(args.files[0]).infos
-    af.save_cache()
-    
-    if fi['file_type'] == 'bs':
+    if metadata['file_type'] == 'BS':
         # optimization: run directly 'AtlCopyBSEvent.exe
         import subprocess
         cmd = ' '.join([

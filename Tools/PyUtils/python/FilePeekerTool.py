@@ -350,7 +350,6 @@ class FilePeekerTool():
 
             peeked_data['stream_tags'] = stream_tags
 
-        # AtlasRelease - reproduce AthFile behavior
         from PyUtils.Helpers import release_metadata
         rel_metadata = release_metadata()
         project = rel_metadata['project name']
