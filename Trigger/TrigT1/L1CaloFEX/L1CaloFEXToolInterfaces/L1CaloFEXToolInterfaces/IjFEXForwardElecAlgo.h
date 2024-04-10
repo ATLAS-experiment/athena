@@ -30,7 +30,7 @@ class IjFEXForwardElecAlgo : virtual public IAlgTool {
 
 	//virtual std::array<float,4> getEtaPhiEt(uint) =0;                                                                                    
         virtual std::array<float,2> getEtaPhi(uint) =0;
-        virtual std::array<uint,2> getEtEmHad(uint) =0;
+        virtual std::array<int,2> getEtEmHad(uint) =0;
 	virtual std::unordered_map<uint, jFEXForwardElecInfo> calculateEDM() =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> >,std::unordered_map<int,std::vector<int> > )  =0;
 
