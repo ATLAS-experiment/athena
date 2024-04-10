@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrigComposite_v1.icc 784388 2016-11-15 17:08:58Z tamartin $
@@ -15,6 +15,7 @@
 // xAOD include(s):
 #include "AthContainers/DataVector.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "AthContainers/Accessor.h"
 #include "xAODCore/CLASS_DEF.h"
 
 // In "standalone mode" xAOD::IParticleContainer doesn't have a CLID
@@ -43,8 +44,9 @@ namespace xAOD {
   template< typename TYPE >
   bool TrigComposite_v1::setDetail( const std::string& name, const TYPE& value ) {
     // It should be pretty strange if this should fail:
+    SG::Accessor< TYPE > acc( name );
     try {
-       auxdata< TYPE >( name ) = value;
+       acc( *this ) = value;
     } catch(const std::exception& exc) {
        std::cerr << "xAOD::TrigComposite_v1::setDetail ERROR Internal logic error found: [" << exc.what() << "]" << std::endl;
        return false;
