@@ -40,7 +40,7 @@ Reco_tf.py \
     --digiSeedOffset1="8" \
     --digiSeedOffset2="8" \
     --CA "default:True" \
-    --steering "doRDO_TRIG" "doTRIGtoALL" \
+    --steering "doRAWtoALL" \
     --outputDAOD_IDTIDEFile="DAOD_TIDE.pool.root"  \
     --outputRDOFile output.RDO.root \
     --multithreaded="True"
