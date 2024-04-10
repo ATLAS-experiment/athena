@@ -706,7 +706,7 @@ class ChainStep(object):
         self.makeCombo()
 
     def createSequences(self):
-        """ defered creation"""
+        """ creation of this step sequences with instantiation of the CAs"""
         log.debug("creating sequences for step %s", self.name)
         for seq in self.sequenceFunctions:                        
             self.sequences.append(seq()) # create the sequences        
