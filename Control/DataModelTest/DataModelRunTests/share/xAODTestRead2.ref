@@ -2,14 +2,14 @@ ApplicationMgr       INFO Application Manager Configured successfully
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
-DecisionSvc          INFO Inserting stream: OutputStreamStream1 with no Algs
+DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-Output...ream1Tool   INFO Initializing OutputStreamStream1.StreamStream1Tool
+Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 MetaDataSvc          INFO Initializing MetaDataSvc
 EventSelector        INFO EventSelection with query 
-Output...amStream1   INFO Data output: xaoddata2x.root
-Output...amStream1   INFO ../O reinitialization...
+StreamStream1        INFO Data output: xaoddata2x.root
+StreamStream1        INFO ../O reinitialization...
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully
@@ -4424,7 +4424,7 @@ xAODTestRead_scopy   INFO  anInt1 10508 aFloat: 12600.7 anInt2: 14708 dInt1: 100
 xAODTestRead_scopy   INFO scopy_cvecWD 1021: 4201(820100) 4202(820200) 4203(820300) 4204(820400) 4205(820500) 4206(820600) 4207(820700) 4208(820800) 4209(820900) 4210(821000)
 xAODTe...Vec_scopy   INFO scopy_hvec: 8401.5 8402.5 8403.5 8404.5 8405.5 8406.5 8407.5 8408.5 8409.5 8410.5 8411.5 8412.5 8413.5 8414.5 8415.5 8416.5 8417.5 8418.5 8419.5 8420.5
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-Output...amStream1   INFO Metadata records written: 21
+StreamStream1        INFO Metadata records written: 21
 ApplicationMgr       INFO Application Manager Stopped successfully
 AthDictLoaderSvc     INFO in finalize...
 ToolSvc              INFO Removing all tools created by ToolSvc

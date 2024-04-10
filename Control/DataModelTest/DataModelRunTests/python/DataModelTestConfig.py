@@ -113,7 +113,7 @@ def DataModelTestCfg (flags, testName,
 # Configure an output stream.
 #
 def TestOutputCfg (flags, stream, itemList, typeNames = [], metaItemList = []):
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     acc = ComponentAccumulator()
     itemList = ['xAOD::EventInfo#EventInfo',
                 'xAOD::EventAuxInfo#EventInfoAux.'] + itemList
@@ -131,7 +131,7 @@ def TestOutputCfg (flags, stream, itemList, typeNames = [], metaItemList = []):
                                 HelperTools = helperTools,
                                 MetadataItemList = metaItemList))
     if typeNames:
-        alg = acc.getEventAlgo (f'OutputStream{stream}')
+        alg = acc.getEventAlgo (outputStreamName(stream))
         alg.WritingTool.SubLevelBranchName = '<key>'
         acc.getService ('AthenaPoolCnvSvc').PoolAttributes += ["DEFAULT_SPLITLEVEL='1'"]
     return acc
