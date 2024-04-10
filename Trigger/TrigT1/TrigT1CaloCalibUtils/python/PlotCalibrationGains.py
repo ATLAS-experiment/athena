@@ -12,7 +12,6 @@ from PyCool import cool
 from optparse import OptionParser
 from math import fabs
 
-
 class L1CaloMap:
  
      def __init__(self,title,XaxisTitle="",YaxisTitle=""):
@@ -60,7 +59,7 @@ class L1CaloMap:
 class L1CaloGeometryConvertor:
 
      def __init__(self):
-          self.coolIdPath=f"/{os.environ['ATLAS_RELEASE_BASE']}/Athena/{os.environ['AtlasVersion']}/InstallArea/{os.environ['CMTCONFIG']}/jobOptions/TrigT1CaloCalibUtils/COOLIdDump.txt"
+          self.coolIdPath=ROOT.PathResolver.find_calib_file("TrigT1Calo/COOLIdDump_v1.txt")
           input = open(self.coolIdPath)
           self.list_of_channels_em={}
           self.list_of_channels_had={}
@@ -81,8 +80,7 @@ class L1CaloGeometryConvertor:
 
          # get database service and open database
          dbSvc = cool.DatabaseSvcFactory.databaseService()
-
-         dbString = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200'
+         dbString = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=CONDBR2'
          try:
            db = dbSvc.openDatabase(dbString, False)        
          except Exception as e:
@@ -435,7 +433,7 @@ class GainReader:
        # get database service and open database
        dbSvc = cool.DatabaseSvcFactory.databaseService()
 
-       dbString = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200'
+       dbString = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=CONDBR2'
        try:
          db = dbSvc.openDatabase(dbString, False)        
        except Exception as e:

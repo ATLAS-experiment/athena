@@ -1,7 +1,8 @@
-#
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
+import ROOT
 import sys
 import time
 
@@ -12,8 +13,8 @@ from optparse import OptionParser
 class L1CaloGeometryConvertor:
 
      def __init__(self):
-#          input = open('/afs/cern.ch/user/l/l1ccalib/jb/COOLIdDump.txt')
-          input = open('COOLIdDump.txt')
+          self.coolIdPath=ROOT.PathResolver.find_calib_file("TrigT1Calo/COOLIdDump_v1.txt")
+          input = open(self.coolIdPath)
           self.list_of_channels_em={}
           self.list_of_channels_had={}
 
