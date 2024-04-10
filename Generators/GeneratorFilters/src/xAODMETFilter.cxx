@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODMETFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 xAODMETFilter::xAODMETFilter(const std::string& name, ISvcLocator* pSvcLocator)
@@ -28,8 +29,9 @@ StatusCode xAODMETFilter::filterEvent() {
   unsigned int nParticles = xTruthParticleContainer->size();
   for (unsigned int iPart=0; iPart<nParticles; ++iPart) {
     const xAOD::TruthParticle* missingETparticle = (*xTruthParticleContainer)[iPart];
+    static const SG::ConstAccessor<bool> isPromptAcc ("isPrompt");
     if (!m_useHadronicNu && MC::isNeutrino(missingETparticle->pdgId()) &&
-      !(missingETparticle->auxdata<bool>("isPrompt"))) continue; // ignore neutrinos from hadron decays
+        !(isPromptAcc(*missingETparticle))) continue; // ignore neutrinos from hadron decays
       
       sumx += missingETparticle->px();
       sumy += missingETparticle->py();
