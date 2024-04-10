@@ -114,37 +114,45 @@ namespace FlavorTagDiscriminants {
       dec_muon_origin_label(*track) = -2;
 
     }
+    if ( !m_truthLeptonTool.empty() ) {
 
-    // decorate muon tracks with truth origin
-    for ( const auto muon : *muons ) {
-      
-      // Classify muon truth origin (https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/AnalysisCommon/TruthClassification)
-      unsigned int muTruthOrigin = 0;
-      ATH_CHECK(m_truthLeptonTool->classify(*muon, muTruthOrigin));
-      
-      // Get the track associated to the muon
-      auto track_link = muon->inDetTrackParticleLink();
-      if ( !track_link.isValid() ) { continue; }
-      auto track = *track_link;
+      // decorate muon tracks with truth origin
+      for ( const auto muon : *muons ) {
 
-      // Get the track truth origin
-      int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
-      if ( muTruthOrigin == 9 && InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
-        // Check if a muon isFromC and the associated track isFromBC
-        muTruthOrigin = 13;
-      }
-      else if ( muTruthOrigin == 9 && !InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
-        muTruthOrigin = 9;
-      }
-      
-      // Map the muon truth origin label and decorate the track
-      auto it = m_muTruthMap.find(muTruthOrigin);
-      if ( it != m_muTruthMap.end() ){
-        // map the muon truth origin label
-        muTruthOrigin = it->second;
-        ATH_MSG_DEBUG("Muon truth Origin after mapping: " << muTruthOrigin);
-        
-        // decorate track
+        // Classify muon truth origin (https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/AnalysisCommon/TruthClassification)
+        unsigned int muTruthOrigin = 0;
+        ATH_CHECK(m_truthLeptonTool->classify(*muon, muTruthOrigin));
+        Truth::Type muTruthOriginType = static_cast<Truth::Type>(muTruthOrigin);
+
+        // Get the track associated to the muon
+        auto track_link = muon->inDetTrackParticleLink();
+        if ( !track_link.isValid() ) { continue; }
+        auto track = *track_link;
+
+        // Get the track truth origin
+        int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
+
+        if ( muTruthOriginType == Truth::Type::CHadronDecay && InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
+          // Check if a muon is FromC and the associated track is FromBC
+          muTruthOrigin = 4;
+        }
+        else if ( muTruthOriginType == Truth::Type::CHadronDecay && !InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
+          // Check if a muon is FromC and the associated track is not FromBC
+          muTruthOrigin = 5;
+        }
+        else {
+          // any alternative truth origin label are taken from TruthClassificationTool and mapped
+          auto it = m_muTruthMap.find(muTruthOriginType);
+          if ( it != m_muTruthMap.end() ){
+            muTruthOrigin = it->second;
+          }
+          else {
+            // raise an error if the muon truth origin label is not found in the map
+            ATH_MSG_ERROR("Muon truth origin not found");
+          }
+        }
+
+        // decorate the muon track
         dec_muon_origin_label(*track) = muTruthOrigin;
       }
     }
