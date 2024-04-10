@@ -158,6 +158,11 @@ testChains = {
     "HLT_tau160_idperf_trackLRT_L1TAU100:HLT_IDTrack_TauLRT_FTF:HLT_Roi_TauLRT",
     "HLT_tau160_idperf_trackLRT_L1TAU100:HLT_IDTrack_TauLRT_IDTrig:HLT_Roi_TauLRT",
 
+    "HLT_j180_2dispjet50_3d2p_L1jJ160:HLT_IDTrack_DJLRT_FTF:HLT_Roi_DJ",
+    "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1jJ160:HLT_IDTrack_DJLRT_FTF:HLT_Roi_DJ",
+    "HLT_j180_dispjet90_x3d1p_L1jJ160:HLT_IDTrack_DJLRT_FTF:HLT_Roi_DJ",
+    "HLT_j180_dispjet100_x3d1p_L1jJ160:HLT_IDTrack_DJLRT_FTF:HLT_Roi_DJ",
+
 
     "HLT_fslrt0_L1J100:HLT_IDTrack_FSLRT_FTF;DTE",
     "HLT_fslrt0_L1J100:HLT_IDTrack_FS_FTF;DTE",
