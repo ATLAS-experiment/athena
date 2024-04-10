@@ -126,6 +126,9 @@ class  LArBadChannel {
 
   BitWord packedData() const {return m_word;}
 
+  bool isSC() const {return m_isSC;}
+  void setSC() {m_isSC=true;}
+
  private:
 
 	
