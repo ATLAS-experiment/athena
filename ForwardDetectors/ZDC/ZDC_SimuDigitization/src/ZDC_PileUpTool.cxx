@@ -106,9 +106,9 @@ void ZDC_PileUpTool::initializePbPb2023(){
   m_zdcRiseTime =  1.1;
   m_zdcFallTime =  4.5;
   m_rpdRiseTime =  0.8;
-  m_rpdFallTime =  8.4;
+  m_rpdFallTime =  15;
   m_zdcAdcPerPhoton = 0.000498;
-  m_rpdAdcPerPhoton = 3.5;
+  m_rpdAdcPerPhoton = {5.25 , 1.7};
 }
 
 StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
@@ -385,7 +385,8 @@ void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::H
                 " Module " << module << 
                                 " Channel " << channel << 
                 ", whith " << hit.getNPhotons() << " photons" );
-
+  
+  uint iSide = (side == -1) ? 0 : 1;
   float amplitude = 0, t0 = 0;
   bool doHighGain = true;
   std::shared_ptr<ZDCWaveformBase> waveformPtr;
@@ -403,12 +404,16 @@ void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::H
     t0 = m_zdct0;
 
   }else{ //It's an RPD channel
-    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons())*m_rpdAdcPerPhoton;
+    // ATH_MSG_INFO("Digitizing RPD " << side << ", channel " << channel << " with " << hit.getNPhotons() << " and " << m_rpdAdcPerPhoton[iSide] << " amplification");
+    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons())*m_rpdAdcPerPhoton[iSide];
     waveformPtr = std::make_shared<ZDCWaveformFermiExp>("rpd",m_rpdRiseTime,m_rpdFallTime);
     wfSampler = std::make_shared<ZDCWaveformSampler>(m_freqMHz, 0, m_numTimeBins, 12, m_Pedestal, waveformPtr);
     t0 = m_rpdt0;
     doHighGain = false;
   }
+
+  //Record the number of photons that lead to this waveform
+  zdc->auxdata<unsigned int>("nPhotons") = hit.getNPhotons();
 
   //Generate in time waveforms
   zdc->setWaveform("g0data", generateWaveform(wfSampler, amplitude, t0));
