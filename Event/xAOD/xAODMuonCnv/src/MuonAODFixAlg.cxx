@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: MuonAODFixAlg.cxx 298140 2013-11-19 11:32:49Z emoyse $
@@ -10,6 +10,7 @@
 // EDM include(s):
 #include "xAODMuon/MuonAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/Accessor.h"
 
 // Local include(s):
 #include "MuonAODFixAlg.h"
@@ -86,11 +87,13 @@ namespace xAOD {
        return;
     }
     muon.setP4(tp->pt(), tp->eta(), tp->phi());
-    if (tp->isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink" )) {
-      ElementLink<xAOD::TruthParticleContainer>& theLink =  muon.auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink" );
-      theLink =  tp->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink" );
-      muon.auxdata<int>("truthType") = tp->auxdata<int>("truthType");
-      muon.auxdata<int>("truthOrigin") = tp->auxdata<int>("truthOrigin");
+    static const SG::Accessor<ElementLink<xAOD::TruthParticleContainer> > truthParticleLinkAcc ("truthParticleLink");
+    static const SG::Accessor<int> truthTypeAcc ("truthType");
+    static const SG::Accessor<int> truthOriginAcc ("truthOrigin");
+    if (truthParticleLinkAcc.isAvailable (*tp)) {
+      truthParticleLinkAcc (muon) = truthParticleLinkAcc (*tp);
+      truthTypeAcc (muon) = truthTypeAcc (*tp);
+      truthOriginAcc (muon) = truthOriginAcc (*tp);
     }
   }
   
