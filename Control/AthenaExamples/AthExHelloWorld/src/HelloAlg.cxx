@@ -23,10 +23,8 @@ HelloAlg::HelloAlg(const std::string &name, ISvcLocator *pSvcLocator)
 }
 
 StatusCode HelloAlg::initialize() {
-  // Part 1: print where you are
-  ATH_MSG_INFO("initialize()");
 
-  // Part 2: Print out the property values
+  // Print out the property values
   ATH_MSG_INFO("  MyInt =    " << m_myInt.value() << endmsg
                                << "  MyBool =   " << m_myBool.value() << endmsg
                                << "  MyDouble = " << m_myDouble.value());
@@ -38,7 +36,7 @@ StatusCode HelloAlg::initialize() {
   for (const auto &[key, value] : m_myDict) {
     ATH_MSG_INFO("  MyDict['" << key << "'] = '" << value << "'");
   }
-  for (auto [key, value] : m_myTable) {
+  for (const auto &[key, value] : m_myTable) {
     ATH_MSG_INFO("  MyTable['" << key << "'] = '" << value << "'");
   }
   for (size_t row = 0; row < m_myMatrix.size(); row++) {
@@ -72,22 +70,22 @@ StatusCode HelloAlg::initialize() {
 }
 
 StatusCode HelloAlg::execute() {
-  // Part 1: print where you are (should never be INFO)
+  // Print where you are if needed (should never be INFO)
   ATH_MSG_DEBUG("execute()");
 
-  // Part 1: Print out the different levels of messages
+  // Print out the different levels of messages
   ATH_MSG_DEBUG("A DEBUG message");
   ATH_MSG_INFO("An INFO message");
   ATH_MSG_WARNING("A WARNING message");
   ATH_MSG_ERROR("An ERROR message");
   ATH_MSG_FATAL("A FATAL error message");
 
-  // Part 1a: Let publicly declared tool say something
+  // Let publicly declared tool say something
   ATH_MSG_INFO("Let the tool " << m_myPublicHelloTool.propertyName()
                                << " say something:");
   ATH_CHECK(m_myPublicHelloTool->saySomething());
 
-  // Part 1b: Let privately declared tool say something
+  // Let privately declared tool say something
   ATH_MSG_INFO("Let the tool " << m_myPrivateHelloTool.propertyName()
                                << " say something:");
   ATH_CHECK(m_myPrivateHelloTool->saySomething());
@@ -96,8 +94,8 @@ StatusCode HelloAlg::execute() {
 }
 
 StatusCode HelloAlg::finalize() {
-  // Part 1: print where you are (empty finalize is generally discouraged)
-  ATH_MSG_INFO("finalize()");
+  // Just an example: if there is nothing to be done do not re-implement finalize
+  ATH_MSG_DEBUG("finalize()");
 
   return StatusCode::SUCCESS;
 }
