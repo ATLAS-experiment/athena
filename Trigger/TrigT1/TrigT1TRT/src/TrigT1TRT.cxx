@@ -1,10 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <stdint.h>
+#include <fstream>
 
 #include "TrigT1TRT.h"
+
+#include "PathResolver/PathResolver.h"
+#include "nlohmann/json.hpp"
 
 namespace LVL1 {
   
@@ -40,7 +44,20 @@ namespace LVL1 {
 
     ATH_CHECK( m_TRTStrawNeighbourSvc.retrieve() );
 
-    ATH_MSG_INFO("Setting fast-OR trigger multiplicity" << m_TTCMultiplicity );
+    ATH_MSG_INFO("Setting Fast-OR trigger multiplicity" << m_TTCMultiplicity );
+
+    // Find the full path to filename:
+    std::string file = PathResolver::find_file(m_maskedChipsFile, "DATAPATH");
+    ATH_MSG_INFO("Reading file " << file);
+    std::ifstream fin(file.c_str());
+    if(!fin){
+      ATH_MSG_ERROR("Can not read file: " << file);
+      return StatusCode::FAILURE;
+    }
+    nlohmann::json data = nlohmann::json::parse(fin);
+
+    m_maskedChipsBarrel = data["Barrel"].template get<std::array<std::array<std::vector<int>, 32>, 2>>();
+    m_maskedChipsEc = data["Endcap"].template get<std::array<std::array<std::vector<int>, 32>, 2>>();
 
     // initialize numberOfStraws array for use in strawNumber function.
     for(int j=0; j<75; j++) {
@@ -197,10 +214,9 @@ namespace LVL1 {
             // Require good straw status
             if (m_ConditionsSummary->getStatus(TRT_Identifier,ctx) != TRTCond::StrawStatus::Good)
               continue;
-
+            
             if (barrel_ec == 1 || barrel_ec == -1) {
-
-              int side = barrel_ec>0?1:0;
+              int side = barrel_ec>0?1:0;             
               strawNumber = BarrelStrawNumber(straw, straw_layer, layer_or_wheel);
               chip = m_mat_chip_barrel[phi_module][strawNumber];
               board = BarrelChipToBoard(chip);
@@ -208,6 +224,11 @@ namespace LVL1 {
                 ATH_MSG_FATAL( "Failure in BarrelChipToBoard" );
                 return StatusCode::FAILURE;
               }
+
+              // check if chip is masked
+              std::vector<int> maskedChips = m_maskedChipsBarrel.at(side).at(phi_module);
+              if(std::find(maskedChips.begin(), maskedChips.end(), chip) != maskedChips.end())
+                continue;
 
               if ( (p_lolum)->highLevel() ) {
                 barrel_trigger_board[side][phi_module][board]++;
@@ -220,6 +241,11 @@ namespace LVL1 {
               strawNumber = EndcapStrawNumber(straw, straw_layer, layer_or_wheel, phi_module, barrel_ec);
               chip = m_mat_chip_endcap[phi_module][strawNumber];
               board = EndcapChipToBoard(chip);
+
+              // check if chip is masked
+              std::vector<int> maskedChips = m_maskedChipsEc.at(side).at(phi_module);
+              if(std::find(maskedChips.begin(), maskedChips.end(), chip) != maskedChips.end())
+                continue;
 
               if ( (p_lolum)->highLevel() ) {
                 endcap_trigger_board[side][phi_module][board]++;
