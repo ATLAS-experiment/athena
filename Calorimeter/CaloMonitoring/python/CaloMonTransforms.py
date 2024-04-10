@@ -11,6 +11,21 @@
 
 #from ROOT import TMath
 import cppyy
+import ROOT as R
+
+def cloneHistFloat(toClone):
+    """ If we want to clone the bins from an integer-type histogram, but then wish to fill it with floats (for efficiencies) """
+    histype = str(type(toClone))
+    newhist = None
+    if "TH1I" in histype:
+        newhist = R.TH1F()
+        toClone.Copy(newhist)
+    elif "TH2I" in histype:
+        newhist = R.TH2F()
+        toClone.Copy(newhist)
+    else:
+        newhist = toClone.Clone()
+    return newhist
 
 
 def divideHistCaloMon(inputs,doPercentage=False):
@@ -18,7 +33,7 @@ def divideHistCaloMon(inputs,doPercentage=False):
     assert len(inputs) == 1  
     assert len(inputs[0][1]) == 3
 
-    cl = inputs[0][1][0].Clone()
+    cl = cloneHistFloat(inputs[0][1][0])
     cl.Divide(inputs[0][1][1])
 
     label = inputs[0][0]['thr']
@@ -60,7 +75,7 @@ def divideByOccupancy(inputs,titleToReplace="",replaceTitWith=""):
     assert len(inputs) == 1  
     assert len(inputs[0][1]) == 2
 
-    cl = inputs[0][1][0].Clone()
+    cl = cloneHistFloat(inputs[0][1][0])
     cl.Reset()
 
     if titleToReplace!="":
@@ -115,8 +130,8 @@ def simpleDivideByAcceptedEvts(inputs,titleToReplace="",replaceTitWith=""):
     """ This function divides the input histogram by the number of accepted events"""
     assert len(inputs) == 1 #Expect only one match 
     assert len(inputs[0][1]) == 2 # pair of (regex-match,list-of-hists)
-    
-    cl=inputs[0][1][0].Clone() #First histogram of the list of histgrams in the pair 
+
+    cl = cloneHistFloat(inputs[0][1][0]) # First histogram of the list of histgrams in the pair 
     
     hnorm = inputs[0][1][1]    #Second histogram in the list of histograms is the number of events
     theNorm=hnorm.GetBinContent(1)
