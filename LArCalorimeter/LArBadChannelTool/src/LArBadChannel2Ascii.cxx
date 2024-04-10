@@ -9,6 +9,7 @@
 
 #include "LArIdentifier/LArOnlineID.h"
 #include <fstream>
+#include <algorithm>
 
 LArBadChannel2Ascii::LArBadChannel2Ascii(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm( name, pSvcLocator),
@@ -104,15 +105,27 @@ StatusCode LArBadChannel2Ascii::execute() {
   // std::vector<std::vector<unsigned> > problemMatrix(nParts,std::vector<unsigned>(nProblemTypes) );
   std::vector<std::vector<unsigned> > problemMatrix(nProblemTypes, std::vector<unsigned>(nParts));
 
-    std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
+  std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
   std::vector<HWIdentifier>::const_iterator it_e = larOnlineID->channel_end();
   unsigned count = 0, nConnected = 0;
+  std::vector<unsigned> nPerPart(nParts);
+
   for (; it != it_e; ++it) {
     const HWIdentifier chid = *it;
     // if (m_skipDisconnected && !m_larCablingSvc->isOnlineConnected(chid)) continue;
     if (cabling && !cabling->isOnlineConnected(chid))
       continue;
     ++nConnected;
+
+    DetPart dp = EMB;
+    if (larOnlineID->isEMECchannel(chid))
+      dp = EMEC;
+    else if (larOnlineID->isHECchannel(chid))
+      dp = HEC;
+    else if (larOnlineID->isFCALchannel(chid))
+      dp = FCAL;
+
+    ++nPerPart[dp];
 
     LArBadChannel bc = badChannelCont->status(chid);
   
@@ -140,15 +153,6 @@ StatusCode LArBadChannel2Ascii::execute() {
       LArBadFeb bf;
       if (!m_isSC) bf= badFebCont->status(fid);
 
-      DetPart dp = EMB;
-      if (larOnlineID->isEMECchannel(chid))
-        dp = EMEC;
-      else if (larOnlineID->isHECchannel(chid))
-        dp = HEC;
-      else if (larOnlineID->isFCALchannel(chid))
-        dp = FCAL;
-
-      
       if (bc.deadReadout() || bc.maskedOSUM())
         ++problemMatrix[DeadReadout][dp];
       if (bc.deadPhys())
@@ -161,16 +165,16 @@ StatusCode LArBadChannel2Ascii::execute() {
         ++problemMatrix[Sporadic][dp];
 
       if (bc.distorted() || bc.deformedTail() || bc.deformedPulse())
-	++problemMatrix[Distorted][dp];
+        ++problemMatrix[Distorted][dp];
 
       if (bc.ADCJump() || bc.nonLinearRamp() || bc.SCAProblem() || bc.offOFCs() || bc.offAmplitude() || bc.offScale()) {
-	++problemMatrix[PeakReco][dp];
+        ++problemMatrix[PeakReco][dp];
       }
-      
+
       if (bc.lowLightFibre() || bc.transmissionErrorFibre()) {
-	++problemMatrix[Fibre][dp];
+        ++problemMatrix[Fibre][dp];
       }
-      
+
       if (!m_isSC) { //problematic febs apply only to regular cells
         if (bf.deadAll() || bf.deadReadout() || bf.deactivatedInOKS())
           ++problemMatrix[DeadFEB][dp];
@@ -210,49 +214,49 @@ StatusCode LArBadChannel2Ascii::execute() {
 
     if (m_isSC) {
       exeSum << "LAr SuperCells  dead readout (incl masked OSUM)" << std::endl;
-      writeSum(exeSum,problemMatrix[DeadReadout]);
+      writeSum(exeSum,problemMatrix[DeadReadout],nPerPart);
 
       exeSum << "LAr SuperCells suffering from high noise:" << std::endl;
-      writeSum(exeSum,problemMatrix[Noisy]);
+      writeSum(exeSum,problemMatrix[Noisy],nPerPart);
     
       exeSum << "LAr SuperCells w/o calibration (constants from phi average of eta neighbours):" << std::endl;
-      writeSum(exeSum,problemMatrix[DeadCalib]);
+      writeSum(exeSum,problemMatrix[DeadCalib],nPerPart);
 
       exeSum << "LAr SuperCells with distorted pulse shape:" << std::endl;
-      writeSum(exeSum,problemMatrix[Distorted]);
+      writeSum(exeSum,problemMatrix[Distorted],nPerPart);
 
       exeSum << "LAr SuperCells having problems with the peak reco:" << std::endl;
-      writeSum(exeSum,problemMatrix[PeakReco]);
+      writeSum(exeSum,problemMatrix[PeakReco],nPerPart);
       
       exeSum << "LAr SuperCells having problems with the optical transmission:" << std::endl;
-      writeSum(exeSum,problemMatrix[Fibre]);
+      writeSum(exeSum,problemMatrix[Fibre],nPerPart);
 
       exeSum << "LAr SuperCells not usable:" << std::endl;
-      writeSum(exeSum,problemMatrix[GrandTotalDead]);
+      writeSum(exeSum,problemMatrix[GrandTotalDead],nPerPart);
     }
     else {
       exeSum << "LAr dead readout channels:" << std::endl;
-      writeSum(exeSum,problemMatrix[DeadReadout]);
+      writeSum(exeSum,problemMatrix[DeadReadout],nPerPart);
 
       exeSum << "LAr permanently dead channels inside detector:" << std::endl;
-      writeSum(exeSum,problemMatrix[DeadPhys]);
+      writeSum(exeSum,problemMatrix[DeadPhys],nPerPart);
 
       exeSum << "LAr noisy readout channels (more than 10 sigma above phi average or unstable):" << std::endl;
-      writeSum(exeSum,problemMatrix[Noisy]);
+      writeSum(exeSum,problemMatrix[Noisy],nPerPart);
     
       exeSum << "LAr readout channels showing sporadic noise bursts:" << std::endl;
-      writeSum(exeSum,problemMatrix[Sporadic]);
+      writeSum(exeSum,problemMatrix[Sporadic],nPerPart);
 
       exeSum << "LAr readout channels w/o calibration (constants from phi average of eta neighbours):" << std::endl;
-      writeSum(exeSum,problemMatrix[DeadCalib]);
+      writeSum(exeSum,problemMatrix[DeadCalib],nPerPart);
 
       exeSum << "LAr readout channels connected to inactive Front End Boards:" << std::endl;
-      writeSum(exeSum,problemMatrix[DeadFEB]);
+      writeSum(exeSum,problemMatrix[DeadFEB],nPerPart);
     
       exeSum << "LAr readout channels not usable:" << std::endl;
-      writeSum(exeSum,problemMatrix[GrandTotalDead]);
+      writeSum(exeSum,problemMatrix[GrandTotalDead],nPerPart);
     }
-    
+
     exeSum.close();
   }
 
@@ -260,20 +264,21 @@ StatusCode LArBadChannel2Ascii::execute() {
 }
 
 
-void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs) {
-  const unsigned nEMB=109568, nEMEC=63744, nHEC=5632, nFCAL=3524;
-  const unsigned nTot=nEMB+nEMEC+nHEC+nFCAL;
+void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs, const std::vector<unsigned> nChans)   {
+  
+  const unsigned nTot=std::accumulate(nChans.begin(),nChans.end(),0);
   unsigned nTotProb=0;
+
   for(size_t i=0;i<probs.size();++i) 
     nTotProb+=probs[i];
 
-  exeFile << "    EMB: " <<  std::setw(5) << probs[EMB] << " of "  << nEMB << " (" << std::setprecision(3) <<  probs[EMB]*(100./nEMB) << "%)" << std::endl;
-  exeFile << "   EMEC: " <<  std::setw(5) <<probs[EMEC] << " of "  << nEMEC << " (" << std::setprecision(3) << probs[EMEC]*(100./nEMEC) << "%)" << std::endl;
-  exeFile << " EM tot: " <<  std::setw(5) << probs[EMEC]+probs[EMB]  << " of "  << nEMB+nEMEC 
-          << " (" << std::setprecision(3) << (probs[EMEC]+probs[EMB])*(100./(nEMEC+nEMB)) << "%)" << std::endl;
+  exeFile << "    EMB: " <<  std::setw(5) << probs[EMB] << " of "  << nChans[EMB] << " (" << std::setprecision(3) <<  probs[EMB]*(100./nChans[EMB]) << "%)" << std::endl;
+  exeFile << "   EMEC: " <<  std::setw(5) <<probs[EMEC] << " of "  << nChans[EMEC] << " (" << std::setprecision(3) << probs[EMEC]*(100./nChans[EMEC]) << "%)" << std::endl;
+  exeFile << " EM tot: " <<  std::setw(5) << probs[EMEC]+probs[EMB]  << " of "  << nChans[EMB]+nChans[EMEC] 
+          << " (" << std::setprecision(3) << (probs[EMEC]+probs[EMB])*(100./(nChans[EMEC]+nChans[EMB])) << "%)" << std::endl;
 
-  exeFile << "    HEC: " <<  std::setw(5) <<probs[HEC] << " of "  << nHEC << " (" << std::setprecision(3) << probs[HEC]*(100./nHEC) << "%)" << std::endl;
-  exeFile << "   FCAL: " <<  std::setw(5) <<probs[FCAL] << " of "  << nFCAL << " (" << std::setprecision(3) << probs[FCAL]*(100./nFCAL) << "%)" << std::endl;    
+  exeFile << "    HEC: " <<  std::setw(5) <<probs[HEC] << " of "  << nChans[HEC] << " (" << std::setprecision(3) << probs[HEC]*(100./nChans[HEC]) << "%)" << std::endl;
+  exeFile << "   FCAL: " <<  std::setw(5) <<probs[FCAL] << " of "  << nChans[FCAL] << " (" << std::setprecision(3) << probs[FCAL]*(100./nChans[FCAL]) << "%)" << std::endl;    
   exeFile << "  Total: " <<  std::setw(5) << nTotProb << " of "  << nTot << " (" << std::setprecision(3) << nTotProb*(100./nTot) << "%)" << std::endl;
   exeFile << std::endl;
 
