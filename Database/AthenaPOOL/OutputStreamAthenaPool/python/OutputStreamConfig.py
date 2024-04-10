@@ -6,6 +6,9 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.Logging import logging
 
 
+def outputStreamName(streamName):
+   return f"Stream{streamName}"
+
 def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
                     AcceptAlgs=[], HelperTools=[]):
@@ -14,7 +17,6 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
 
    msg = logging.getLogger("OutputStreamCfg")
-   outputStreamName = f"Stream{streamName}"
    flagName = f"Output.{streamName}FileName"
    if flags.hasFlag(flagName):
       fileName = flags._get(flagName)
@@ -33,8 +35,8 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
 
    # define athena output stream
    writingTool = CompFactory.AthenaOutputStreamTool(
-      f"Stream{streamName}Tool",
-      DataHeaderKey=outputStreamName,
+      f"{outputStreamName(streamName)}Tool",
+      DataHeaderKey=outputStreamName(streamName),
       MetaDataPoolContainerPrefix=f"{flags.Output.StorageTechnology.MetaData}:MetaData",
       MetaDataOutputCollection=f"{flags.Output.StorageTechnology.MetaData}:MetaDataHdr",
    )
@@ -61,8 +63,8 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       finalItemList = [f"xAOD::EventInfo#{eventInfoKey}", f"xAOD::EventAuxInfo#{eventInfoKey}Aux."] + ItemList 
 
    outputStream = CompFactory.AthenaOutputStream(
-      f"OutputStream{streamName}",
-      StreamName=outputStreamName,
+      outputStreamName(streamName),
+      StreamName=outputStreamName(streamName),
       WritingTool=writingTool,
       ItemList=finalItemList,
       MetadataItemList=MetadataItemList,
@@ -75,7 +77,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       # conflicts.
       outputStream.TakeItemsFromInput = True
    outputStream.AcceptAlgs += AcceptAlgs
-   outputStream.ExtraOutputs.add(("DataHeader", f"StoreGateSvc+{outputStreamName}"))
+   outputStream.ExtraOutputs.add(("DataHeader", f"StoreGateSvc+{outputStreamName(streamName)}"))
    if flags.Scheduler.CheckOutputUsage and flags.Concurrency.NumThreads > 0:
       outputStream.ExtraInputs = {tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l}
       # Ignore dependencies
@@ -90,7 +92,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
 
    # Support for MT thinning.
    thinningCacheTool = CompFactory.Athena.ThinningCacheTool(f"ThinningCacheTool_Stream{streamName}",
-                                                            StreamName=outputStreamName)
+                                                            StreamName=outputStreamName(streamName))
    if trigNavThinningSvc is not None:
       thinningCacheTool.TrigNavigationThinningSvc = trigNavThinningSvc
    outputStream.HelperTools.append(thinningCacheTool)

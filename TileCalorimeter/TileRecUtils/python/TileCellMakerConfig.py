@@ -138,11 +138,11 @@ if __name__ == "__main__":
 
     acc.merge( TileCellMakerCfg(flags) )
 
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     acc.merge(OutputStreamCfg(flags, "ESD",
                               ItemList = [ 'CaloCellContainer#*', 'TileCellContainer#*']))
 
-    acc.getEventAlgo("OutputStreamESD").ExtraInputs = {('CaloCellContainer', 'StoreGateSvc+AllCalo')}
+    acc.getEventAlgo(outputStreamName("ESD")).ExtraInputs = {('CaloCellContainer', 'StoreGateSvc+AllCalo')}
 
     flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)

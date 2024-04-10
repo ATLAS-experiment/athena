@@ -484,14 +484,14 @@ def triggerPOOLOutputCfg(flags):
         itemsToRecord.append('xAOD::EventAuxInfo#EventInfoAux.')
 
 
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
         acc.merge(OutputStreamCfg(flags, outputType, ItemList=itemsToRecord,
                                   disableEventTag=True, takeItemsFromInput=(outputType == 'RDO')))
         from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
         acc.merge(SetupMetaDataForStreamCfg(flags, outputType,
                                             createMetadata=[MetadataCategory.TriggerMenuMetaData]))
 
-        alg = acc.getEventAlgo("OutputStream"+outputType)
+        alg = acc.getEventAlgo(outputStreamName(outputType))
         # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriterMT
         alg.ExtraInputs |= {
             ("xAOD::TrigDecision", str(decmaker.TrigDecisionKey)),
