@@ -68,7 +68,7 @@ StatusCode GNNVertexFitterAlg::execute(const EventContext &ctx) const {
 }
 
 StatusCode GNNVertexFitterAlg::finalize() {
-  ATH_MSG_DEBUG("devAlg: In devAlg::finalize()");
+  ATH_MSG_DEBUG("GNNVertexFitter::finalize()");
   return StatusCode::SUCCESS;
 }
 
