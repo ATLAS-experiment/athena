@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HelloAlg.h"
 
 #include <AthExHelloWorld/IHelloTool.h>
-
-#include <iterator>
 
 HelloAlg::HelloAlg(const std::string &name, ISvcLocator *pSvcLocator)
     : AthAlgorithm(name, pSvcLocator), m_myTable() {
@@ -43,10 +41,11 @@ StatusCode HelloAlg::initialize() {
   for (auto [key, value] : m_myTable) {
     ATH_MSG_INFO("  MyTable['" << key << "'] = '" << value << "'");
   }
-  for (size_t i = 0; i < m_myMatrix.size(); i++) {
-    msg(MSG::INFO) << "  MyMatrix[" << i << "] = [ ";
-    std::copy(m_myMatrix[i].begin(), m_myMatrix[i].end(),
-              std::ostream_iterator<double>(msg().stream(), " "));
+  for (size_t row = 0; row < m_myMatrix.size(); row++) {
+    msg(MSG::INFO) << "  MyMatrix[" << row << "] = [ ";
+    for (double value : m_myMatrix[row]) {
+      msg() << value << " ";
+    }
     msg() << "]" << endmsg;
   }
 
