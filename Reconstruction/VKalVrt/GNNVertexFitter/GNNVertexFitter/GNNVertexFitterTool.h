@@ -133,7 +133,6 @@ private:
   double m_minSig3D;
   double m_maxChi2;
   int    m_minNTrack;
-  bool   m_HFTrackRatio;
   float  m_HFRatioThres;
   std::string    m_gnnModel;
 };

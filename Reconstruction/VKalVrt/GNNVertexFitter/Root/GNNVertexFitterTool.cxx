@@ -20,9 +20,8 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
       m_minSig3D(2),
       m_maxChi2(20), 
       m_minNTrack(2),
-      m_HFTrackRatio(true),
-      m_gnnModel("GN2v01"), 
-      m_HFRatioThres(0.3) {
+      m_HFRatioThres(0.3),
+      m_gnnModel("GN2v01"){
   declareInterface<IGNNVertexFitterInterface>(this);
   declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackLinks");
   declareProperty("JetTrackOrigins", m_trackOriginsKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackOrigin");
@@ -32,8 +31,6 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
   declareProperty("maxLxy", m_maxLxy, "Maximum radial distance from the PV");
   declareProperty("minSig3D", m_minSig3D, "Maximum 3D significance from the PV");
   declareProperty("maxChi2", m_maxChi2, "Maximum Chi2 for fitted vertices");
-  declareProperty("HFTrackRatio", m_HFTrackRatio,
-                  "Select any vertices that passes the threshold for number of HF tracks to all tracks in vertice");
   declareProperty("HFRatio", m_HFRatioThres,
                   "The threshold for the ratio between HF tracks and all tracks for a vertex");
   m_massPi = 139.5702 * Gaudi::Units::MeV;
@@ -162,7 +159,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
     HeavyFlavourTracksMap.clear();
     AllTracksMap.clear();
 
-    for (int index=0; index<vertexCollection.size(); index++){
+    for (int index=0; index<int(vertexCollection.size()); index++){
     
       auto vertex = vertexCollection[index];
       auto trackOrigin = trackOriginCollection[index];
@@ -177,11 +174,6 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         HeavyFlavourVertexMap[vertex].insert(trackLink);
       }
       };
-
-    auto InclusiveFunc = [&FittingMap](const auto &c) {
-      const auto &[vertex, tcm] = c;
-      FittingMap.insert(std::pair<char, std::set<TL>>(vertex, tcm));
-    };
 
     auto HFRatioFunc = [&HeavyFlavourVertexMap, &HFRatio = m_HFRatioThres, &FittingMap](const auto &d) {
       const auto &[vertex, tcm] = d;
@@ -199,8 +191,8 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
       std::for_each(AllTracksMap.cbegin(), AllTracksMap.cend(), HFRatioFunc);
     }
 
-    // Working xAOD
-    workVectorArrxAOD *xAODwrk = new workVectorArrxAOD();
+    // Working xAOD   
+    std::unique_ptr<workVectorArrxAOD> xAODwrk (new workVectorArrxAOD());
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle{m_beamSpotKey, ctx};
 
     // Beam Conditions
@@ -289,12 +281,6 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         double eRatio = MomentumVtx.E() / jet->p4().E();
         double signif3D;
         
-         double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
-
-        ATH_MSG_INFO(newvrt.vertex.perp()<< "  PERP  " << distToPV << "   L3d  " << Lxyz );
-          
-        //ATH_MSG_INFO("SIG  " << signif3D);
-        
         // apply quality cuts
         if (ntrk < m_minNTrack)
           continue;
@@ -310,11 +296,6 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
 //        if (Lxy <= m_minD0)
 //          continue;
 //        if (newvrt.vertex.perp() < m_minPerp)
-
-
-        //xAOD::Vertex *GNNvertex = new xAOD::Vertex;
-
-//        outVertexContainer->emplace_back(GNNvertex);
 
         // Register Container
         auto* GNNvertex = outVertexContainer->emplace_back(new xAOD::Vertex);
@@ -348,7 +329,6 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
 
       } // end of 2 Track requirement
     }
-    delete xAODwrk;
   } // end loop over jets
   return StatusCode::SUCCESS;
 } // end performVertexFit
