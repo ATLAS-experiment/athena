@@ -17,7 +17,7 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
       m_multiWithPrimary(true), 
       m_minLxy(1), 
       m_maxLxy(300), 
-      m_minSig3D(20),
+      m_minSig3D(2),
       m_maxChi2(20), 
       m_minNTrack(2),
       m_HFTrackRatio(true),
@@ -54,8 +54,8 @@ StatusCode GNNVertexFitterTool::initialize() {
   m_jetWriteDecorKeyVertexLink = m_jetCollection + "."+m_gnnModel+"VerticesLink";
   ATH_CHECK(m_jetWriteDecorKeyVertexLink.initialize());
 
-  m_jetWriteDecorKeyVertexNumber = m_jetCollection + "."+m_gnnModel+"VerticesNumber";
-  ATH_CHECK(m_jetWriteDecorKeyVertexNumber.initialize());
+ // m_jetWriteDecorKeyVertexNumber = m_jetCollection + "."+m_gnnModel+"VerticesNumber";
+ // ATH_CHECK(m_jetWriteDecorKeyVertexNumber.initialize());
 
   // Retrieve tools
   ATH_CHECK(m_vertexFitterTool.retrieve());
@@ -152,7 +152,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
 
     vertexHFMap HeavyFlavourTracksMap;   // Map with does a vertex contain at least 1 heavy flavour track
     trackCountMap AllTracksMap;          // All the vertices and the corresponding track links
-    trackCountMap HeavyFlavourVertexMap; // All HEavy Flavour Tracks associated with a vertex
+    trackCountMap HeavyFlavourVertexMap; // All Heavy Flavour Tracks associated with a vertex
     trackCountMap FittingMap;            // Map filled with vertices to be fitted
 
     FittingMap.clear();
@@ -292,9 +292,10 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         
          double distToPV = vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);
 
-        ATH_MSG_INFO("PERP  " << distToPV << "   L3d  " << Lxyz );
+        ATH_MSG_INFO(newvrt.vertex.perp()<< "  PERP  " << distToPV << "   L3d  " << Lxyz );
           
-        ATH_MSG_INFO("SIG  " << signif3D);
+        //ATH_MSG_INFO("SIG  " << signif3D);
+        
         // apply quality cuts
         if (ntrk < m_minNTrack)
           continue;
@@ -302,7 +303,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
           continue;
         if ( newvrt.vertex.perp() < m_minLxy)
           continue;
-        if (signif3D < m_minSig3D && newvrt.vertex.perp() > 24.0)
+        if (Lxyz < m_minSig3D && newvrt.vertex.perp() > 24.0)
           continue;
 
 //       if (newvrt.vertex.perp() > m_Rbeampipe && Signif3D < m_minSig3D)
@@ -312,21 +313,17 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
 //        if (newvrt.vertex.perp() < m_minPerp)
 
 
-        // Make New Container
-        xAOD::Vertex *GNNvertex = new xAOD::Vertex;
+        //xAOD::Vertex *GNNvertex = new xAOD::Vertex;
 
-        outVertexContainer->emplace_back(GNNvertex);
+//        outVertexContainer->emplace_back(GNNvertex);
 
-        //auto* GNNvertex = outVertexContainer->emplace_back(new xAOD::Vertex);
+        // Register Container
+        auto* GNNvertex = outVertexContainer->emplace_back(new xAOD::Vertex);
 
-        // Registering tracks comprising the vertex to xAOD::Vertex
-        // loop over the tracks comprising the vertex
         for (const auto *trk : xAODwrk->listSelTracks) {
-          // Acquire link the track to the vertex
           ElementLink<xAOD::TrackParticleContainer> link_trk(
               *(dynamic_cast<const xAOD::TrackParticleContainer *>(trk->container())),
-              static_cast<long unsigned int>(trk->index()));
-          // Register the link to the vertex
+              trk->index());
           GNNvertex->addTrackAtVertex(link_trk, 1.);
         }
 
