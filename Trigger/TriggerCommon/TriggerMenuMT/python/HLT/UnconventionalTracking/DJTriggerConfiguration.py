@@ -52,9 +52,11 @@ def DJDispFragment(flags):
         UseZedPosition     = False)
 
     InViewRoIs = "InViewRoIs"
-    reco = InViewRecoCA("IMDJRoIFTF", RoITool = roiTool, mergeUsingFeature = True, 
-                        InViewRoIs = InViewRoIs,
-                        RequireParentView = False,ViewFallThrough = True)
+    
+    im_alg = CompFactory.EventViewCreatorAlgorithm("IM_DJRoIFTF", mergeUsingFeature = True, RoITool = roiTool, Views = "DJRoIViews", InViewRoIs = InViewRoIs, 
+                                                   RequireParentView = False, ViewFallThrough = True, ViewNodeName="DJRoIInViews")
+
+    reco = InViewRecoCA("DJRoIFTF", im_alg)
     
     acc = ComponentAccumulator()
     reco_seq = parOR('UncTrkrecoSeqDJTrigDispRecoSeq')
