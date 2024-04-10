@@ -122,7 +122,6 @@ BeamSpot::Event InDet::InDetBeamSpotFinder::readEvent(const xAOD::EventInfo & ev
     event.lumiBlock = BSeventInfo->event_ID()->lumi_block(); 
   }
 
-  int count = 0;
   for(const xAOD::Vertex* vtx:vertexContainer) {
     if (vtx->vertexType() == xAOD::VxType::NoVtx) continue; 
     vertex.x          = vtx->x();
@@ -138,16 +137,17 @@ BeamSpot::Event InDet::InDetBeamSpotFinder::readEvent(const xAOD::EventInfo & ev
     vertex.valid      = vertex.passed;    
     //Remove vertices with wrong x-y correlation
     if(vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy > 1.0 ||
-       vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy < 0. ||
+       vertex.vzz < 0. ||
+       vertex.vyy < 0. ||
        vertex.vxx < 0.) {
-      ++count;
-      ATH_MSG_INFO("Bad vertex: " << count << " " << event.eventNumber << " " 
+      ATH_MSG_DEBUG("Bad vertex: " << event.eventNumber << " " << vtx->vertexType() << " "
 		   << vertex.x << " " << vertex.y << " " << vertex.z << " "
 		   << vertex.vxx << " " << vertex.vyy << " " << vertex.vzz << " " 
 		   << vertex.nTracks << " " << vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy);
     }
     if(vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy > m_maxAbsCorrelXY*m_maxAbsCorrelXY ||
-       vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy < 0. ||
+       vertex.vzz < 0. ||
+       vertex.vyy < 0. ||
        vertex.vxx < 0.) continue;
     event.vertices.push_back( vertex );
   }
@@ -262,18 +262,11 @@ StatusCode InDet::InDetBeamSpotFinder::performFits(){
   IInDetBeamSpotTool::FitStatus bsFitStatus;
   std::vector<BeamSpot::VrtHolder> verticesToFit;
 
-  int count = 0;
   for( auto & eventList: m_sortedEventList){
     verticesToFit.clear();
     for( const auto & thisEvent: eventList){
       for( const auto & thisVertex: thisEvent.vertices){
         if( thisVertex.passed ) { 
-	  ++count;
-	  ATH_MSG_DEBUG("Vertex: " << count << " " << thisEvent.eventNumber << " " 
-			<< thisVertex.x << " " << thisVertex.y << " " << thisVertex.z << " "
-			<< thisVertex.vxx << " " << thisVertex.vyy << " " << thisVertex.vzz << " "
-			<< thisVertex.vxy << " " << thisVertex.vxy/sqrt(thisVertex.vxx*thisVertex.vyy) << " " 
-			<< thisVertex.nTracks);
 	  verticesToFit.push_back( thisVertex ); 
 	}
       }
