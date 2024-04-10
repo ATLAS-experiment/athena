@@ -20,10 +20,10 @@ def CaloRecoCalibCfg(configFlags):
             from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterCfg
             result.merge(TileDigitsFilterCfg(configFlags))
             
-            from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-            result.merge(LArRawChannelBuilderAlgCfg(configFlags))
-            from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-            result.merge(TileRawChannelMakerCfg(configFlags))
+        from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
+        result.merge(LArRawChannelBuilderAlgCfg(configFlags))
+        from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
+        result.merge(TileRawChannelMakerCfg(configFlags))
             
     if not configFlags.Input.isMC:
         from LArCellRec.LArTimeVetoAlgConfig import LArTimeVetoAlgCfg
