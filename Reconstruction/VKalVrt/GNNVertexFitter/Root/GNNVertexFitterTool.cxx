@@ -144,6 +144,8 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
     auto trackCollection = trackLinksHandle(*btag);
     auto trackOriginCollection = trackOriginsHandle(*btag);
 
+    ATH_MSG_INFO(vertexCollection.size() << "   " << trackCollection.size() << "   " << trackOriginCollection.size());
+
     using indexList = std::vector<int>;
     using vertexHFMap = std::map<char, bool>;
     using trackCountMap = std::map<char, std::set<TL>>;
@@ -156,28 +158,25 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
     trackCountMap FittingMap;            // Map filled with vertices to be fitted
 
     FittingMap.clear();
+    HeavyFlavourVertexMap.clear();
+    HeavyFlavourTracksMap.clear();
+    AllTracksMap.clear();
 
-    std::for_each(boost::make_zip_iterator(boost::make_tuple(vertexCollection.cbegin(), trackOriginCollection.cbegin(),
-                                                             trackCollection.cbegin())),
-                  boost::make_zip_iterator(
-                      boost::make_tuple(vertexCollection.cend(), trackOriginCollection.cend(), trackCollection.cend())),
-                  [&HeavyFlavourTracksMap, &HeavyFlavourVertexMap, &AllTracksMap, &FittingMap](
-                      const boost::tuple<const char &, const char &, const TL &> &e) {
-                    // 0,1,2 correspond to the first, second and third tuple/collection inserted into the boost iterator
-                    // function
-                    auto vertex = e.get<0>();
-                    auto trackOrigin = e.get<1>();
-                    auto trackLink = e.get<2>();
+    for (int index=0; index<vertexCollection.size(); index++){
+    
+      auto vertex = vertexCollection[index];
+      auto trackOrigin = trackOriginCollection[index];
+      auto trackLink   = trackCollection[index];
 
-                    AllTracksMap[vertex].insert(trackLink);
+      AllTracksMap[vertex].insert(trackLink);
 
-                    // Checking if vertex has a heavy flavour track
-                    if (InDet::ExclusiveOrigin::FromB == trackOrigin || InDet::ExclusiveOrigin::FromBC == trackOrigin ||
-                        InDet::ExclusiveOrigin::FromC == trackOrigin) {
-                      HeavyFlavourTracksMap[vertex] = (true);
-                      HeavyFlavourVertexMap[vertex].insert(trackLink);
-                    }
-                  });
+      // Checking if vertex has a heavy flavour track
+      if (InDet::ExclusiveOrigin::FromB == trackOrigin || InDet::ExclusiveOrigin::FromBC == trackOrigin ||
+          InDet::ExclusiveOrigin::FromC == trackOrigin) {
+        HeavyFlavourTracksMap[vertex] = (true);
+        HeavyFlavourVertexMap[vertex].insert(trackLink);
+      }
+      };
 
     auto InclusiveFunc = [&FittingMap](const auto &c) {
       const auto &[vertex, tcm] = c;
