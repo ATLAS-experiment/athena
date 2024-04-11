@@ -31,7 +31,7 @@ namespace ActsTrk {
     SG::WriteHandle< ActsTrk::TrackContainer > mergedTracksHandle = SG::makeHandle( m_outputTrackCollection, ctx );
     ActsTrk::MutableTrackContainer mergedTracks;
 
-    ATH_MSG_INFO("Retrieving input track collections");
+    ATH_MSG_DEBUG("Retrieving input track collections");
     std::size_t nInputs = 0ul;
     std::vector< const ActsTrk::TrackContainer* > inputCollections;
     inputCollections.reserve(m_inputTrackCollections.size());
