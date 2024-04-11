@@ -56,7 +56,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
     makeMuonCalibrationSequence (seq, dataType, postfix=postfix,
                                  ptSelectionOutput = ptSelectionOutput, 
                                  trackSelection = trackSelection,
-                                 maxEta = maxEta)
+                                 maxEta = maxEta, isRun3Geo = isRun3Geo)
     makeMuonWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
                                   qualitySelectionOutput = qualitySelectionOutput, isRun3Geo = isRun3Geo)
     makeSharedObjectSequence (seq, deepCopyOutput = deepCopyOutput,
@@ -74,7 +74,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
 
 
 def makeMuonCalibrationSequence( seq, dataType,
-                                 postfix = '', ptSelectionOutput = False, trackSelection = False, maxEta = 2.7):
+                                 postfix = '', ptSelectionOutput = False, trackSelection = False, maxEta = 2.7, isRun3Geo = False):
     """Create muon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -132,6 +132,8 @@ def makeMuonCalibrationSequence( seq, dataType,
                            'MuonCalibrationAndSmearingAlg' + postfix )
     addPrivateTool( alg, 'calibrationAndSmearingTool',
                     'CP::MuonCalibTool' )
+                    
+    alg.calibrationAndSmearingTool.IsRun3Geo = isRun3Geo
     alg.calibrationAndSmearingTool.calibMode = 2 # choose ID+MS with no sagitta bias
     seq.append( alg, inputPropName = 'muons', outputPropName = 'muonsOut',
                 stageName = 'calibration',
