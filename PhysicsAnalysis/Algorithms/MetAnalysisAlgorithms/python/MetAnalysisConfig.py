@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -90,6 +90,10 @@ class MetAnalysisConfig (ConfigBlock):
         # Set up the met significance algorithm:
         alg = config.createAlgorithm( 'CP::MetSignificanceAlg', 'MetSignificanceAlg' + postfix )
         config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
+        if self.muons != "" :
+            config.addPrivateTool( 'significanceTool.MuonCalibTool', 'CP::MuonCalibTool' )
+            alg.significanceTool.MuonCalibTool.calibMode = config._muonCalibMode
+
         alg.significanceTool.SoftTermParam = 0
         alg.significanceTool.TreatPUJets = self.treatPUJets
         alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim

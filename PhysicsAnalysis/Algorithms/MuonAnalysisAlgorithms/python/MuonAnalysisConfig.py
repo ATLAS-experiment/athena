@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -61,6 +61,8 @@ class MuonCalibrationConfig (ConfigBlock):
                         'CP::MuonCalibTool' )
         alg.calibrationAndSmearingTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
         alg.calibrationAndSmearingTool.calibMode = 2 # choose ID+MS with no sagitta bias
+        # To be used in MetAnalysisConfig
+        config._muonCalibMode = alg.calibrationAndSmearingTool.calibMode
         alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
         alg.muons = config.readName (self.containerName)
         alg.muonsOut = config.copyName (self.containerName)
