@@ -99,11 +99,47 @@ AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 standardRecoMode = True,                               
                                 )
 
+AntiKt10UFOCSSK_noElectrons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noElectrons,
+                                            ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
+                                            modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                            standardRecoMode = True,
+                                            )
+
+AntiKt10UFOCSSK_noMuons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noMuons,
+                                        ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
+                                        modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                        standardRecoMode = True,
+                                        )
+
+AntiKt10UFOCSSK_noLeptons = JetDefinition("AntiKt",1.0,cst.UFOCSSK_noLeptons,
+                                          ghostdefs = standardghosts+flavourghosts+["AntiKtVR30Rmax4Rmin02PV0TrackJets"],
+                                          modifiers = ("Sort", "Filter:50000","TrackMoments","JetGhostLabel","PartonTruthLabel"),
+                                          standardRecoMode = True,
+                                          )
+
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
                                       #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
                                       modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
                                       Beta = 1., ZCut= 0.1,
-                                     )
+                                      )
+
+AntiKt10UFOCSSKSoftDrop_noElectrons = JetSoftDrop(AntiKt10UFOCSSK_noElectrons,
+                                                  #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
+                                                  modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","Sort","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
+                                                  Beta = 1., ZCut= 0.1,
+                                                  )
+
+AntiKt10UFOCSSKSoftDrop_noMuons = JetSoftDrop(AntiKt10UFOCSSK_noMuons,
+                                              #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
+                                              modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","Sort","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
+                                              Beta = 1., ZCut= 0.1,
+                                              )
+
+AntiKt10UFOCSSKSoftDrop_noLeptons = JetSoftDrop(AntiKt10UFOCSSK_noLeptons,
+                                                #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
+                                                modifiers = ("Filter:1000","Calib:SoftDrop:mc","Filter:100000","Sort","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+ufo_dnn_moments,
+                                                Beta = 1., ZCut= 0.1,
+                                                )
 
 AntiKt10UFOCSSKSoftDrop_trigger = JetSoftDrop(AntiKt10UFOCSSK,
                                               #A filter of 1 GeV is applied before the calibration to remove jets with zero constituents after the soft drop alg is applied
@@ -120,7 +156,6 @@ AntiKt10Truth = JetDefinition("AntiKt",1.0,cst.Truth,
                                lock = True
 )
 
-
 AntiKt10TruthTrimmed = JetTrimming(AntiKt10Truth,
                                    modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
                                    PtFrac = 0.05, RClus = 0.2,                                    
@@ -130,6 +165,19 @@ AntiKt10TruthSoftDrop = JetSoftDrop(AntiKt10Truth,
                                     modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
                                     Beta = 1., ZCut= 0.1,
                                     )
+
+
+AntiKt10TruthWZ = JetDefinition("AntiKt",1.0, cst.TruthWZ,
+                                ghostdefs = flavourghosts,
+                                modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
+                                standardRecoMode = True,
+                                lock = True,
+)
+
+AntiKt10TruthWZSoftDrop = JetSoftDrop(AntiKt10TruthWZ,
+                                      modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
+                                      Beta = 1., ZCut= 0.1,
+)
 
 AntiKt10TruthDressedWZ = JetDefinition("AntiKt",1.0,cst.TruthDressedWZ,
                                        ghostdefs = flavourghosts ,

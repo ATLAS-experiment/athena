@@ -91,6 +91,10 @@ calibcontexts = {
     "AntiKt10LCTopoTrimmedPtFrac4SmallR20":fatjetcontexts,
     # Standard UFO CS+SK jets
     "AntiKt10UFOCSSKSoftDropBeta100Zcut10":fatjetcontexts,
+    # UFO CS+SK jets with leptons removed
+    "AntiKt10UFOCSSK_noElectronsSoftDropBeta100Zcut10":fatjetcontexts,
+    "AntiKt10UFOCSSK_noMuonsSoftDropBeta100Zcut10":fatjetcontexts,
+    "AntiKt10UFOCSSK_noLeptonsSoftDropBeta100Zcut10":fatjetcontexts,
     # Large-R PFlow Soft Drop CSSK
     "AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10":fatjetcontexts,
     # R-Scan
