@@ -351,13 +351,6 @@ def TauElecSubtractAlgCfg(flags):
     return result
 
 
-# This is an example config for scheduling TauJet_MuonRM in AOD
-def TauAODrunnerAlgCfg(flags):
-    from DerivationFrameworkTau.TauCommonConfig import AddMuonRemovalTauAODReRecoAlgCfg
-    result = AddMuonRemovalTauAODReRecoAlgCfg(flags)
-    return result
-
-
 if __name__=="__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
