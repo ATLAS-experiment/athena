@@ -27,7 +27,8 @@ if __name__=="__main__":
     print("Running PixelCalibration layers..")
     # Executing layers
     for layer in args.layers :
-        command = 'PixelCalibration directory_path=' + args.folder + ' THR=' + args.thr + ' THRintime=' + args.thr_intime + ' TOT=' + args.tot + ' ' + layer + ' > log_' + layer
+        extraArgs = "saveInfo" if args.saveInfo else ""
+        command = 'PixelCalibration directory_path=' + args.folder + ' THR=' + args.thr + ' THRintime=' + args.thr_intime + ' TOT=' + args.tot + ' ' + layer + ' ' + extraArgs +' > log_' + layer
         print("Command: %s\n" % command)
         proc.append(subprocess.Popen(command, shell=True))
     
