@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
  //////////////////////////////////////////////////////////////////////////////////////
@@ -23,12 +23,12 @@
 #include"TCollection.h"
 #include"CellClusterLinkTool.h"
 #include<math.h>
-#include<fstream>
+
 #include<algorithm>
 #include<stdio.h>
 #include<list>
 using namespace std;
-bool mySortfunc(clusterbin i,clusterbin j){
+bool mySortfunc(const clusterbin & i,const clusterbin & j){
    return (i.m_value > j.m_value);
 }
 string TranslatePartition(int partition){
@@ -42,6 +42,7 @@ string TranslatePartition(int partition){
     case HECC:  return "HECC"; break;
     case FCALC: return "FCALC";break;
    }
+   return "";
 }
 string TranslateLayer(int layer){
  switch(layer){
@@ -50,10 +51,11 @@ string TranslateLayer(int layer){
   case 2: return "Sampling2"; break;
   case 3: return "Sampling3"; break;
  }
+ return "";
 }
 
 
-void find_n(string name,int& partition,int& layer){
+void find_n(const string & name,int& partition,int& layer){
  size_t foundb;
  size_t founde;
  foundb=name.find_first_of("_");
@@ -366,7 +368,7 @@ void boundaryProcess(int MODE,TH2F*& h,TH2F* h2,int ix,int iy,int ix_total,int i
    }
   }
 }
-void LinkClusterAndCell(clusterbin clb,TH2F*& h,TH2F*& h2,int MODE,vector<cellbin>& problemCellbinSummary){
+void LinkClusterAndCell(const clusterbin & clb,TH2F*& h,TH2F*& h2,int MODE,vector<cellbin>& problemCellbinSummary){
  if(h==NULL) return;
  double eta = clb.m_eta;
  double phi = clb.m_phi; 
@@ -389,7 +391,7 @@ void AdjustLayer(string& layer,string& partition){
  }
 
 }
-void Maketag(string& info,cellbin bin,int index,string& webadd,list<string>& myweblist){
+void Maketag(string& info,const cellbin & bin,int index,string& webadd,list<string>& myweblist){
  char tmp[500];
  string partition = TranslatePartition(bin.m_partition);
  string layer = TranslateLayer(bin.m_layer);

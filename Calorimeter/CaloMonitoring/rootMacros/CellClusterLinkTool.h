@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
  //////////////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 
 #include <string>
 #include "TH2F.h"
-#include <iostream>
 #include<fstream>
 using namespace std;
 double RedThreshold_cluster=100;
