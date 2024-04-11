@@ -14,18 +14,8 @@ CompulsoryTriggerNavigation = [
 'xAOD::TrigNavigation#*',
 'xAOD::TrigNavigationAuxInfo#*',
 # Run 3 navigation:
-'xAOD::TrigCompositeContainer#HLTNav_Summary',
-'xAOD::TrigCompositeAuxContainer#HLTNav_SummaryAux.',
-'xAOD::TrigCompositeContainer#HLTNav_OnlineSlimmed',
-'xAOD::TrigCompositeAuxContainer#HLTNav_OnlineSlimmedAux.',
-'xAOD::TrigCompositeContainer#HLTNav_ESDSlimmed',
-'xAOD::TrigCompositeAuxContainer#HLTNav_ESDSlimmedAux.',
-'xAOD::TrigCompositeContainer#HLTNav_AODSlimmed',
-'xAOD::TrigCompositeAuxContainer#HLTNav_AODSlimmedAux.',
-'xAOD::TrigCompositeContainer#HLTNav_DAODSlimmed',
-'xAOD::TrigCompositeAuxContainer#HLTNav_DAODSlimmedAux.',
-'xAOD::TrigCompositeContainer#HLTNav_R2ToR3Summary',
-'xAOD::TrigCompositeAuxContainer#HLTNav_R2ToR3SummaryAux.',
+'xAOD::TrigCompositeContainer#HLTNav*',
+'xAOD::TrigCompositeAuxContainer#HLTNav*'
 ]
 
 # This accounts for AOD content that must be kept but which is partially expressed
