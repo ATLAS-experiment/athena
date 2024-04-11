@@ -25,6 +25,7 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "AsgServices/ServiceHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 #include "ElectronPhotonFourMomentumCorrection/egammaEnergyCorrectionTool.h"
@@ -36,13 +37,14 @@ namespace egGain { class GainTool; }
 namespace xAOD {
   inline float get_phi_calo(const xAOD::CaloCluster& cluster, int author, bool do_throw=false)
 	{
+          static const SG::ConstAccessor<float> phiCaloAcc ("phiCalo");
 	  double phi_calo;
 	  if(author== xAOD::EgammaParameters::AuthorFwdElectron){
 	    phi_calo = cluster.phi();
 	  }
 	  else if (cluster.retrieveMoment(xAOD::CaloCluster::PHICALOFRAME, phi_calo)) { }
-	  else if (cluster.isAvailable<float>("phiCalo")) {
-	    phi_calo = cluster.auxdata<float>("phiCalo");
+	  else if (phiCaloAcc.isAvailable(cluster)) {
+	    phi_calo = phiCaloAcc(cluster);
 	  }
 	  else {
 			asg::AsgMessaging msg("get_phi_calo");
@@ -57,13 +59,14 @@ namespace xAOD {
   inline float get_eta_calo(const xAOD::CaloCluster& cluster, int author, bool do_throw=false)
 	{
 	  double eta_calo;
+          static const SG::ConstAccessor<float> etaCaloAcc ("etaCalo");
 	  if(author== xAOD::EgammaParameters::AuthorFwdElectron){
             eta_calo = cluster.eta();
           }
 	  else if (cluster.retrieveMoment(xAOD::CaloCluster::ETACALOFRAME,
 				       eta_calo)) { }
-	  else if (cluster.isAvailable<float>("etaCalo")) {
-	    eta_calo = cluster.auxdata<float>("etaCalo");
+	  else if (etaCaloAcc.isAvailable(cluster)) {
+	    eta_calo = etaCaloAcc(cluster);
 	  }
 	  else {
 			asg::AsgMessaging msg("get_eta_calo");
