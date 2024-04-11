@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ***********************************************************************************\
@@ -21,6 +21,7 @@
 #include "JetCalibTools/JetCalibUtils.h"
 #include "lwtnn/parse_json.hh"
 #include "PathResolver/PathResolver.h"
+#include "AthContainers/ConstAccessor.h"
 #include <fstream>
 #include <memory>
 #include <utility>
@@ -307,8 +308,9 @@ int GlobalNNCalibration::getEtaBin(const xAOD::Jet& jet_reco, const std::vector<
 
 
 double GlobalNNCalibration::getJetChargedFraction(const xAOD::Jet& jet_reco) const{
-  if( jet_reco.isAvailable<std::vector<float> >("SumPtChargedPFOPt500") ){
-    float thisChargedFraction =  jet_reco.getAttribute<std::vector<float> >("SumPtChargedPFOPt500").at(0);
+  static const SG::ConstAccessor<std::vector<float> > SumPtChargedPFOPt500Acc ("SumPtChargedPFOPt500");
+  if( SumPtChargedPFOPt500Acc.isAvailable(jet_reco) ) {
+    float thisChargedFraction =  SumPtChargedPFOPt500Acc(jet_reco).at(0);
     thisChargedFraction /= jet_reco.jetP4(xAOD::JetConstitScaleMomentum).Pt();
     return double(thisChargedFraction);
   }
@@ -317,17 +319,21 @@ double GlobalNNCalibration::getJetChargedFraction(const xAOD::Jet& jet_reco) con
 }
 
 double GlobalNNCalibration::getJetDetEta(const xAOD::Jet& jet_reco) const {
-  if(jet_reco.isAvailable<float>("DetectorEta")) return double(jet_reco.getAttribute<float>("DetectorEta"));
-  return -999.;
+  static const SG::ConstAccessor<float> DetectorEtaAcc ("DetectorEta");
+  return DetectorEtaAcc.withDefault (jet_reco, -999);
 }
 
 int GlobalNNCalibration::getJetNtrk1000(const xAOD::Jet& jet_reco) const {
-  if(jet_reco.isAvailable<std::vector<int> >("NumTrkPt1000")) return jet_reco.getAttribute<std::vector<int> >("NumTrkPt1000").at(0);
+  static const SG::ConstAccessor<std::vector<int> > NumTrkPt1000Acc ("NumTrkPt1000");
+  if(NumTrkPt1000Acc.isAvailable(jet_reco))
+    return NumTrkPt1000Acc(jet_reco).at(0);
   return -999;
 }
 
 double GlobalNNCalibration::getJetWtrk1000(const xAOD::Jet& jet_reco) const {
-  if(jet_reco.isAvailable<std::vector<float> >("TrackWidthPt1000")) return double(jet_reco.getAttribute<std::vector<float> >("TrackWidthPt1000").at(0));
+  static const SG::ConstAccessor<std::vector<float> > TrackWidthPt1000Acc ("TrackWidthPt1000");
+  if(TrackWidthPt1000Acc.isAvailable(jet_reco))
+    return double(TrackWidthPt1000Acc(jet_reco).at(0));
   return -999.;
 }
 
