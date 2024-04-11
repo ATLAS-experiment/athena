@@ -255,15 +255,11 @@ def make_fastreduction_configurers(chain_dict):
     scenario chain parts, and n-1 for the non-simple scenario.
     """
     
-    #logger.warning(chain_dict)
     chain_parts = chain_dict['chainParts']
 
     simple_chainparts = [
         cp for cp in chain_parts if cp['hypoScenario'] == 'simple']
-    #logger.warning(chain_parts)
-    #logger.warning(simple_chainparts)
     simple_cpis = [cp['chainPartIndex'] for cp in simple_chainparts]
-    #logger.warning('simpleparts ndext are --',simple_cpis)
     # check that all the simple scenario parts occur before 
     # non-simple scenario chain parts
 

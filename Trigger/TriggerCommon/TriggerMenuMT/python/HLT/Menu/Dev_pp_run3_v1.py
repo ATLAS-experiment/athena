@@ -279,8 +279,6 @@ def getDevSignatures():
 
         ChainProp(name='HLT_j20_calratiovar_j70_j50a_j0_DJMASS900j50dphi260x200deta_roiftf_preselj20emf72_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*4,stream=['VBFDelayed'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j20_calratiovar59_j70_j50a_j0_DJMASS900j50dphi260x200deta_roiftf_preselj20emf72_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*4,stream=['VBFDelayed'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup),
-        #ChainProp(name='HLT_j20_calratiovar59_roiftf_preselj20emf72_j70_j50a_j0_DJMASS900j50dphi260x200deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*4,stream=['Main'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup),
-        #ChainProp(name='HLT_j70_j50a_j0_DJMASS900j50dphi260x200deta_j20_calratiovar59_roiftf_preselj20emf72_L1MJJ-500-NFF',l1SeedThresholds=['FSNOSEED']*4,stream=['Main'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j0_DJMASS900j50dphi260x200deta_calratiovar59_roiftf_preselj20emf72_L1MJJ-500-NFF',l1SeedThresholds=['FSNOSEED'],stream=['Main'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j0_DJMASS900j50dphi260x200deta_calratiovar82_roiftf_preselj20emf60_L1MJJ-500-NFF',l1SeedThresholds=['FSNOSEED'],stream=['Main'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j0_DJMASS900j50dphi260x200deta_calratiovar59_roiftf_preselj30emf72_L1MJJ-500-NFF',l1SeedThresholds=['FSNOSEED'],stream=['Main'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup),
