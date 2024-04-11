@@ -34,7 +34,7 @@
 # may be unreadable.
 ####################################################################
 
-from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, CompulsoryTriggerNavigation, CompulsoryDynamicContent
+from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, CompulsoryDynamicContent
 from DerivationFrameworkCore.ContentHandler import ContentHandler
 from DerivationFrameworkCore.ContainersForExpansion import ContainersForExpansion
 from DerivationFrameworkCore.ContainersOnTheFly import ContainersOnTheFly
@@ -300,8 +300,10 @@ class SlimmingHelper:
                                 self.FinalItemList.append(item)
 
                 if (triggerContent and self.IncludeTriggerNavigation):
-                        for item in CompulsoryTriggerNavigation:
-                                self.FinalItemList.append(item)
+                        from TrigDecisionTool.TrigDecisionToolConfig import possible_keys
+                        for item in possible_keys:
+                                self.FinalItemList.append('xAOD::TrigCompositeContainer#'+item)
+                                self.FinalItemList.append('xAOD::TrigCompositeAuxContainer#'+item+'Aux.')
 
                 # Add non-xAOD and on-the-fly content (not covered by smart slimming so no expansion)
                 badItemsWildcards = []
