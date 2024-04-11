@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -364,9 +364,9 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
 
   // get the ambiguity type from the decoration
   if (!m_skipAmbiguityCut){
-    if (eg->isAvailable<uint8_t>("ambiguityType")){
-      static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
-      ambiguityBit = acc(*eg);
+    static const SG::AuxElement::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
+    if (ambiguityTypeAcc.isAvailable(*eg)) {
+      ambiguityBit = ambiguityTypeAcc(*eg);
     }
     else {
       allFound = false;
