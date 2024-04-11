@@ -255,14 +255,11 @@ def make_fastreduction_configurers(chain_dict):
     scenario chain parts, and n-1 for the non-simple scenario.
     """
     
-
     chain_parts = chain_dict['chainParts']
 
     simple_chainparts = [
         cp for cp in chain_parts if cp['hypoScenario'] == 'simple']
-
     simple_cpis = [cp['chainPartIndex'] for cp in simple_chainparts]
-
     # check that all the simple scenario parts occur before 
     # non-simple scenario chain parts
 
@@ -291,7 +288,7 @@ def make_fastreduction_configurers(chain_dict):
 
     scenario_chainparts =[
         cp for cp in chain_parts if cp['hypoScenario'] != 'simple']
-
+           
     if scenario_chainparts:
         for scenario_chainpart in scenario_chainparts:
             # scenario_chainpart = scenario_chainparts[0]
