@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -12,6 +12,7 @@
 #include <AthContainers/AuxElement.h>
 #include <CxxUtils/AthUnlikelyMacros.h>
 #include <SelectionHelpers/ISelectionWriteAccessor.h>
+#include <SelectionHelpers/ISelectionReadAccessor.h>
 #include <xAODBase/IParticle.h>
 #include <memory>
 
@@ -87,6 +88,9 @@ namespace CP
                         const CP::CorrectionCode& code,
                         const char *context) const;
 
+    /// \brief retrieve the OutOfValidity decision, where true = particle passes validity check
+  public:
+    bool get (const xAOD::IParticle& particle) const;
 
     /// \brief the action to take
   private:
@@ -94,7 +98,8 @@ namespace CP
 
     /// \brief the accessor if we apply one
   private:
-    std::unique_ptr<ISelectionWriteAccessor> m_accessor;
+    std::unique_ptr<ISelectionWriteAccessor> m_write_accessor;
+    std::unique_ptr<ISelectionReadAccessor> m_read_accessor;
 
     /// \brief the decoration name we use (if we have one)
   private:

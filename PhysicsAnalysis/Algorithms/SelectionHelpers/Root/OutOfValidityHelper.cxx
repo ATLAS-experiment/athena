@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -26,7 +26,8 @@ namespace CP
   {
     if (!m_decorationName.empty())
     {
-      ANA_CHECK (makeSelectionWriteAccessor (m_decorationName, m_accessor));
+      ANA_CHECK (makeSelectionWriteAccessor (m_decorationName, m_write_accessor));
+      ANA_CHECK (makeSelectionReadAccessor (m_decorationName, m_read_accessor));
     }
       
     m_isInitialized = true;
@@ -44,12 +45,12 @@ namespace CP
     switch (code)
     {
     case CP::CorrectionCode::Ok:
-      if (m_accessor) m_accessor->setBool (particle, true);
+      if (m_write_accessor) m_write_accessor->setBool (particle, true);
       return StatusCode::SUCCESS;
     case CP::CorrectionCode::Error:
       return StatusCode::FAILURE;
     case CP::CorrectionCode::OutOfValidityRange:
-      if (m_accessor) m_accessor->setBool (particle, false);
+      if (m_write_accessor) m_write_accessor->setBool (particle, false);
       switch (OutOfValidityAction (m_action))
       {
       case OutOfValidityAction::ABORT:
@@ -65,5 +66,11 @@ namespace CP
     ANA_MSG_ERROR (__FILE__ << ":" << __LINE__ << ": invalid enum value encountered " << code << " " << int (m_action));
     return StatusCode::FAILURE;
   }
+
+  bool OutOfValidityHelper ::
+  get (const xAOD::IParticle& particle) const {
+    return m_read_accessor->getBool(particle);
+  }
+
 
 }

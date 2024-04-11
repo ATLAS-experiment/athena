@@ -16,7 +16,6 @@ Jets:
         noEffSF: False
         btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_60'
-        kinematicSelection: True
     FlavourTaggingEventSF:
       - containerName: 'AnaJets.baselineJvt'
         selectionName: 'ftag'

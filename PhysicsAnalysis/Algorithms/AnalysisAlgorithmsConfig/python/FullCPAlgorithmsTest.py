@@ -177,7 +177,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, fo
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
     makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False,
-                              enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True )
+                              enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = False )
     vars += [
         'OutJets_NOSYS.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select',
     ]
@@ -722,7 +722,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq.setOptionValue ('.noEffSF', forCompare)
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
-    configSeq.setOptionValue ('.kinematicSelection', True )
     
     configSeq += config.makeConfig( 'Jets.JVT',
         containerName='AnaJets' )
@@ -940,7 +939,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         # configSeq.setOptionValue ('.met',         'AnaMET')
         # configSeq.setOptionValue ('.selectionCutsDict', exampleSelectionCuts)
         from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
-        makeMultipleEventSelectionConfigs(configSeq, electrons = 'AnaElectrons.loose', muons = 'AnaMuons.medium', jets = 'AnaJets.ftag',
+        makeMultipleEventSelectionConfigs(configSeq, electrons = 'AnaElectrons.loose', muons = 'AnaMuons.medium', jets = 'AnaJets',
                                           met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
                                           selectionCutsDict = exampleSelectionCuts, noFilter = True)
 

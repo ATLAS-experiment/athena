@@ -101,7 +101,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     alg.selectionTool.OperatingPoint = btagWP
     alg.selectionTool.JetAuthor = jetCollection
     alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
-    alg.selectionTool.MinPt = minPt
+    alg.selectionTool.MinPt = 0.
     alg.preselection = '&&'.join (preselectionList)
     alg.selectionDecoration = 'ftag_select_' + btagger + '_' + btagWP + ',as_char'
     seq.append( alg, inputPropName = 'particles',
@@ -114,7 +114,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
         alg.selectionTool.OperatingPoint = btagWP
         alg.selectionTool.JetAuthor = jetCollection
         alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
-        alg.selectionTool.MinPt = minPt
+        alg.selectionTool.MinPt = 0.
         alg.preselection = '&&'.join (preselectionList)
         alg.quantileDecoration = 'ftag_quantile_' + btagger
         seq.append( alg, inputPropName = 'jets',
@@ -131,7 +131,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
         alg.efficiencyTool.JetAuthor = jetCollection
         alg.efficiencyTool.ScaleFactorFileName = bTagCalibFile
         alg.efficiencyTool.SystematicsStrategy = "Envelope"
-        alg.efficiencyTool.MinPt = minPt
+        alg.efficiencyTool.MinPt = 0.
         if DSID != "default":
             alg.efficiencyTool.EfficiencyBCalibrations = DSID
             alg.efficiencyTool.EfficiencyTCalibrations = DSID

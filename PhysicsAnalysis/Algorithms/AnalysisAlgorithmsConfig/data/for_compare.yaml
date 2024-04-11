@@ -16,7 +16,6 @@ Jets:
         noEffSF: True
         btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_60'
-        kinematicSelection: True
     JVT: {}
     PtEtaSelection: {}
 
