@@ -475,9 +475,13 @@ class ComponentAccumulator(AccumulatorCachable):
             algorithms=[algorithms,]
 
         if sequenceName is None:
-            seq=self._sequence
+            # If there is an AthAlgSeq add the event algorithm there by default
+            # See ATEAM-825 for a more detailed discussion for this choice
+            seq = findSubSequence(self._sequence, 'AthAlgSeq')
+            if seq is None:
+                seq = self._sequence
         else:
-            seq = findSubSequence(self._sequence, sequenceName )
+            seq = findSubSequence(self._sequence, sequenceName)
         if seq is None:
             self.printConfig()
             raise ConfigurationError("Can not find sequence {}".format(sequenceName))

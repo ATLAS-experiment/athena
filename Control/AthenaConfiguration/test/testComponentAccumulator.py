@@ -657,7 +657,37 @@ class TestDifferentSequencesMerging( unittest.TestCase ):
         self.assertRaises(RuntimeError, _merge) # expect to raise issue
         ca.wasMerged()
 
+class TestAddingAlgorithms( unittest.TestCase ):
+    def test_adding_algorithm_to_mainservices(self):
+        # Set up dummy flags
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        flags.lock()
 
+        # Set up main services
+        from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+        cfg = MainServicesCfg(flags)
+        cfg.addEventAlgo(TestAlgo("foo")) # This should end up in AthAlgSeq not AthMasterSeq
+
+        # Make sure the algorithm ended up in the right place
+        self.assertIsNone(findAlgorithm(cfg.getSequence("AthMasterSeq"), "foo", 1), "foo is found in AthMasterSeq")
+        self.assertIsNotNone(findAlgorithm(cfg.getSequence("AthAlgSeq"), "foo", 1), "foo is not found in AthAlgSeq")
+
+    def test_adding_algorithm_to_custom_sequence(self):
+        # Set up a custom ComponentAccumulator
+        acc = ComponentAccumulator(sequence = CompFactory.AthSequencer("MySeq"))
+        acc.addEventAlgo(TestAlgo("foo")) # This should end up in MySeq since that's the sole sequence
+
+        # Make sure the algorithm ended up in the right place
+        self.assertIsNotNone(findAlgorithm(acc.getSequence("MySeq"), "foo", 1), "foo is not found in MySeq")
+
+    def test_adding_algorithm_to_default_sequence(self):
+        # Set up a default ComponentAccumulator
+        acc = ComponentAccumulator()
+        acc.addEventAlgo(TestAlgo("foo")) # This should end up in AthAlgSeq
+
+        # Make sure the algorithm ended up in the right place
+        self.assertIsNotNone(findAlgorithm(acc.getSequence("AthAlgSeq"), "foo", 1), "foo is not found in AthAlgSeq")
 
 
 if __name__ == "__main__":
