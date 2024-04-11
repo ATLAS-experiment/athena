@@ -453,6 +453,7 @@ def createITkLargeD0TrackingPassFlags():
     icf.roadWidth          = 5
 
     # --- seeding
+    icf.useITkPixelSeeding       = False
     icf.maxdImpactSSSSeeds       = [300.0 * Units.mm]
 
     icf.doBremRecoverySi = False

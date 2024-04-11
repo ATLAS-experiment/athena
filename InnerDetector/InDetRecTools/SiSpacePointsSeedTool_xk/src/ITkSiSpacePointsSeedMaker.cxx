@@ -1769,7 +1769,8 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
         /// so rarely should happen more than once per event.
         if (++Nt == SPcapacity)
         {
-          data.resizeSPCont();
+          size_t increment = 50;
+          data.resizeSPCont(increment, InDet::SiSpacePointsSeedMakerEventData::ToolType::ITk);
           SPcapacity = data.ITkSP.size();
         }
       } ///< end of loop over SP within top candidate cell
@@ -1857,7 +1858,8 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
         /// so rarely should happen more than once per event.
         if (++Nb == SPcapacity)
         {
-          data.resizeSPCont();
+          size_t increment = 50;
+          data.resizeSPCont(increment, InDet::SiSpacePointsSeedMakerEventData::ToolType::ITk);
           SPcapacity = data.ITkSP.size();
         }
 
