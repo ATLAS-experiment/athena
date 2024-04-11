@@ -81,14 +81,14 @@ public:
 
   ZDCMsg::MessageFunctionPtr MakeMessageFunction()
   {
-    std::function<bool(int, std::string)> msgFunction = [this](int level, const std::string& message)-> bool
+    std::function<bool(int, std::string)> msgFunction = [this](int messageZdcLevel, const std::string& message)-> bool
     {
-      MSG::Level theLevel = static_cast<MSG::Level>(level);
-      bool test = theLevel >= this->msg().level();
-      if (test) {
-        this->msg() << message << endmsg;
+      MSG::Level messageAthenaLevel = static_cast<MSG::Level>(messageZdcLevel);
+      bool passesStreamOutputLevel = messageAthenaLevel >= this->msg().level();
+      if (passesStreamOutputLevel) {
+        this->msg(messageAthenaLevel) << message << endmsg;
       }
-      return test;
+      return passesStreamOutputLevel;
     };
 
     return ZDCMsg::MessageFunctionPtr(new ZDCMsg::MessageFunction(msgFunction));
