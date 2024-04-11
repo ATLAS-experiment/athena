@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package trf
 #
@@ -1813,47 +1813,41 @@ class JobTransform(TransformLogger):
         if isProd is False and os.getenv('TZAMIPW') is None: print ('Performance data will not get stored in the AMI db.'          )
         elif self._exportToAmi is True and self.name()!='Digi_trf':  # digi is off as it has no AMItag and is fast
         
-            #print ('-------', self.name(), '-------')
-            
             isMC = False
             isStream=''
             isAMItag=''
             isRun=-1
 
-            import PyUtils.AthFile as athFile 
+            from PyUtils.MetaReader import read_metadata
             # this loop just tries to find runnumber, stream, amitag. should not look at NTUP files as these have not metadata embeded
             for arg in self._positionalArgs: 
-                # print (arg.name())
                 if  arg.name()=='outputAODFile' or arg.name()=='outputESDFile' :
-                    # or arg.name().startswith('outputNTUP') 
-                    # arg.name()=='outputEvgenFile' or arg.name()=='outputHitsFile' or # arg.name().startswith('outputRDOFile'):
                     print ('========o= inputFilePeeker ============')
                     print (arg.name(), arg.value())
                     inFile=arg.value()
                                         
-                    inputFileSummary={}
+                    inputFileMetadata={}
                     try:
-                        fi = athFile.fopen(inFile)
-                        inputFileSummary = fi.fileinfos
+                        inputFileMetadata = read_metadata(inFile,None,'peeker')[inFile]
                     except Exception as err:
                         print ("Unable to open file:",inFile)
                         print ('caught:\t',err)
                     
                     try:
-                        if 'IS_SIMULATION' in inputFileSummary['evt_type']:
+                        if 'IS_SIMULATION' in inputFileMetadata['eventTypes']:
                             isMC = True
                         print ('isMC     ', isMC)
                         
-                        if 'triggerStreamOfFile' in inputFileSummary['tag_info']:
-                            isStream = inputFileSummary['tag_info']['triggerStreamOfFile']
+                        if 'triggerStreamOfFile' in inputFileMetadata:
+                            isStream = inputFileMetadata['triggerStreamOfFile']
                         print ('isStream ',isStream)
                         
-                        if 'AMITag' in inputFileSummary['tag_info']:
-                            isAMItag = inputFileSummary['tag_info']['AMITag']
+                        if 'AMITag' in inputFileMetadata:
+                            isAMItag = inputFileMetadata['AMITag']
                         print ('isAMItag ',isAMItag)
                         
-                        if 'run_number' in  inputFileSummary:
-                            isRun    = inputFileSummary['run_number'][0]
+                        if 'runNumbers' in  inputFileMetadata:
+                            isRun    = inputFileMetadata['runNumbers'][0]
                         print ('isRun    ', isRun)
                         
                         if isMC is True:
