@@ -18,10 +18,8 @@
 #include "ParticleJetTools/JetFlavourInfo.h"
 
 #include <cmath>
-#include <sstream>
 #include <algorithm>
-#include <vector>
-#include <string>
+
 
 
 namespace Analysis {
@@ -40,15 +38,15 @@ namespace Analysis {
     float wU;
   } ;
   
-  bool StructPTsorting( myIPxDinfo objA, myIPxDinfo objB) {
+  bool StructPTsorting( const myIPxDinfo & objA, const myIPxDinfo & objB) {
     return (objA.trkP)->pt() > (objB.trkP)->pt();
   }
   
-  bool StructD0Sigsorting( myIPxDinfo objA, myIPxDinfo objB) {
+  bool StructD0Sigsorting( const myIPxDinfo & objA, const myIPxDinfo & objB) {
     return fabs(objA.d0sig) > fabs(objB.d0sig);
   }
 
-  bool StructZ0D0Sigsorting( myIPxDinfo objA, myIPxDinfo objB) {
+  bool StructZ0D0Sigsorting( const myIPxDinfo & objA, const myIPxDinfo & objB) {
     return pow(objA.d0sig,2)+pow(objA.z0sig,2) > pow(objB.d0sig,2)+pow(objB.z0sig,2);
   }
   
