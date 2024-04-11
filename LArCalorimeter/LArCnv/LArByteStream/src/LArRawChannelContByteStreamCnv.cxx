@@ -113,7 +113,9 @@ LArRawChannelContByteStreamCnv::createRepConst(DataObject* pObj, IOpaqueAddress*
 
   const std::string& nm = pObj->registry()->name(); 
 
+  if ( pAddr != nullptr ) pAddr->release();
   pAddr = new  ByteStreamAddress(classID(),nm,""); 
+  pAddr->addRef();
 
   ATH_CHECK( m_tool->WriteLArRawChannels(ChannelContainer,*fea) );
   return StatusCode::SUCCESS;
