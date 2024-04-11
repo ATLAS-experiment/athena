@@ -110,8 +110,11 @@ StatusCode RoIBResultByteStreamCnv< ROBF >::createRep( DataObject* pObj, IOpaque
     ATH_MSG_ERROR("Failed to convert DataObject to RoIBResult");
     return StatusCode::FAILURE;
   }
+
+  if ( pAddr != nullptr ) pAddr->release();
   ByteStreamAddress* bsAddr = new ByteStreamAddress( classID(), pObj->registry()->name(), "" );
   pAddr = static_cast<IOpaqueAddress*>(bsAddr);
+  pAddr->addRef();
 
   // Retrieve the raw event pointer
   RawEventWrite* re = m_ByteStreamCnvSvc->getRawEvent();

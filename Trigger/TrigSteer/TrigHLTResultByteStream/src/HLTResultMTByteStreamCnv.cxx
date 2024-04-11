@@ -238,8 +238,10 @@ StatusCode HLT::HLTResultMTByteStreamCnv::createRep(DataObject* pObj, IOpaqueAdd
   }
 
   // Create a ByteStreamAddress for HLTResultMT
+  if ( pAddr != nullptr ) pAddr->release();
   ByteStreamAddress* bsAddr = new ByteStreamAddress(classID(), pObj->registry()->name(), "");
   pAddr = static_cast<IOpaqueAddress*>(bsAddr);
+  pAddr->addRef();
 
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;

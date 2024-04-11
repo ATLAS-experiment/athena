@@ -125,8 +125,10 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
   // Placeholder for other systems: L1Topo, L1Calo
 
   // Create a ByteStreamAddress for L1TriggerResult
+  if ( pAddr != nullptr ) pAddr->release();
   ByteStreamAddress* bsAddr = new ByteStreamAddress(classID(), pObj->registry()->name(), "");
   pAddr = static_cast<IOpaqueAddress*>(bsAddr);
+  pAddr->addRef();
 
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
