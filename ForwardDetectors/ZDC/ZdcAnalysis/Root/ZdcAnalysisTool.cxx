@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
@@ -16,6 +16,7 @@
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
+#include "AthContainers/ConstAccessor.h"
 
 namespace ZDC
 {
@@ -1451,6 +1452,9 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
       m_rpdDataAnalyzer.at(1)->reset();
     }
 
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc ("g0data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc ("g1data");
+
   const std::vector<unsigned short>* adcUndelayLG = 0;
   const std::vector<unsigned short>* adcUndelayHG = 0;
   
@@ -1487,18 +1491,11 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    continue;
 	  }
 	  else {
-	    const std::vector<uint16_t>* vector_p = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data"));
-	    if (!vector_p) {
-	      //  This is obviously a problem, generate a non-fatal but serious error and continue
-	      //
-	      ATH_MSG_WARNING("Could not retrieve waveform for side " << side << ", module " << zdcModule->zdcModule() << ", skipping this module");
-	      continue;
-	    }
-	    
 	    //
 	    // Pass the data to the RPD analysis tool 
 	    //
-	    m_rpdDataAnalyzer.at(side)->loadChannelData(rpdChannel, *vector_p);
+	    m_rpdDataAnalyzer.at(side)->loadChannelData(rpdChannel,
+                                                        g0dataAcc (*zdcModule));
 	  }
 	}
 	else {
@@ -1507,28 +1504,31 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	  //
 	  if (m_LHCRun==3) // no delay channels, so we drop the index
 	    {
-	      adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data")); // g0
-	      adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1data")); // g1
+	      adcUndelayLG = &g0dataAcc(*zdcModule); // g0
+	      adcUndelayHG = &g1dataAcc(*zdcModule); // g1
 	    }
 	  else if (m_LHCRun==2)
 	    {
 	      if (zdcModule->zdcType() == 1) continue; // skip position sensitive modules
 	      
+              static const SG::ConstAccessor<std::vector<uint16_t> > g0d1dataAcc ("g0d1data");
+              static const SG::ConstAccessor<std::vector<uint16_t> > g1d1dataAcc ("g1d1data");
+              static const SG::ConstAccessor<std::vector<uint16_t> > g0d0dataAcc ("g0d0data");
+              static const SG::ConstAccessor<std::vector<uint16_t> > g1d0dataAcc ("g1d0data");
+
 	      if (zdcModule->zdcModule() == 0 && m_flipEMDelay) // flip delay/non-delay for 2015 ONLY
 		{
-		  adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
-		  adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
-		  
-		  adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
-		  adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
+		  adcUndelayLG = &g0d1dataAcc(*zdcModule); // g0d1
+		  adcUndelayHG = &g1d1dataAcc(*zdcModule); // g1d1
+		  adcDelayLG   = &g0d0dataAcc(*zdcModule); // g0d0
+		  adcDelayHG   = &g1d0dataAcc(*zdcModule); // g1d0
 		}
 	      else // nominal configuation
 		{
-		  adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
-		  adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
-		  
-		  adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
-		  adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
+		  adcUndelayLG = &g0d0dataAcc(*zdcModule); // g0d0
+		  adcUndelayHG = &g1d0dataAcc(*zdcModule); // g1d0
+                  adcDelayLG   = &g0d1dataAcc(*zdcModule); // g0d1
+		  adcDelayHG   = &g1d1dataAcc(*zdcModule); // g1d1
 		}
 	    }
 	  else
