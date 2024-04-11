@@ -214,6 +214,7 @@ def setupDESDMCPSkimmingAlgCfg(flags, name= "DESDMCPEventKernel", **kwargs):
     EventFilterTool = result.getPrimaryAndMerge(setupAlignmentEventSkimmingToolCfg(flags)) if flags.Muon.DESDM_MCP.doAlignmentFormat else \
                       result.getPrimaryAndMerge(setupDESDMSkimmingToolsCfg(flags))    
     kwargs.setdefault("SkimmingTools", EventFilterTool)
+    kwargs.setdefault("doChronoStat", flags.Concurrency.NumThreads <= 1)
     the_alg = CompFactory.DerivationFramework.DerivationKernel(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

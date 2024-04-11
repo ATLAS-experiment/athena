@@ -52,23 +52,7 @@ StatusCode TGCCablingDbTool::updateAddress(StoreID::type /*storeID*/,
 }
 
 StatusCode TGCCablingDbTool::initialize() { 
-  ATH_MSG_INFO("initialize");
-  
-  // Get interface to IOVSvc
-  m_IOVSvc = nullptr;
-  StatusCode sc = service("IOVSvc", m_IOVSvc, true);
-  if(sc.isFailure() || !m_IOVSvc) {
-    ATH_MSG_FATAL("Unable to get the IOVSvc");
-    return sc;
-  }
-  
-  // Initialize the chrono service
-  sc = service("ChronoStatSvc", m_chronoSvc);
-  if(!sc.isSuccess() || !m_chronoSvc) {
-    ATH_MSG_FATAL("Could not find the ChronoSvc");
-    return StatusCode::FAILURE;
-  }
-  
+  ATH_MSG_INFO("initialize");  
   return StatusCode::SUCCESS;
 }
 

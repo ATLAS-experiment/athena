@@ -316,7 +316,98 @@ class TestFlagsSetupDynamic(FlagsSetup):
         clonef.loadAllDynamicFlags()
         self.assertTrue(clonef.hasFlag('W.A'))
         self.assertFalse(clonef.hasFlag('Z.A'))
-
+        
+    def test_nonReplacingCloneExists(self):
+        clonef = self.flags.cloneAndReplace('W', 'Z', True)
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W.A'))
+        self.assertTrue(clonef.hasFlag('Z.A'))
+    
+    def test_nonReplacingMultiCloneExists(self):
+        clonef = self.flags.cloneAndReplace('W1', 'Z', True)
+        clonef = clonef.cloneAndReplace('W2', 'Z', True)
+        clonef = clonef.cloneAndReplace('W3', 'W1', True)
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W1.A'))
+        self.assertTrue(clonef.hasFlag('W2.A'))
+        self.assertTrue(clonef.hasFlag('W3.A'))
+        self.assertTrue(clonef.hasFlag('Z.A'))
+    
+    def test_complexClone(self):
+        clonef = self.flags.cloneAndReplace('W1', 'Z', True)
+        clonef = clonef.cloneAndReplace('W2', 'Z', True)
+        clonef = clonef.cloneAndReplace('W3', 'W1', True)
+        clonef = clonef.cloneAndReplace('W4', 'W1', False)
+        clonef = clonef.cloneAndReplace('W5', 'Z', False)
+        self.assertTrue(clonef.hasFlag('W2.A'))
+        self.assertTrue(clonef.hasFlag('W3.A'))
+        self.assertTrue(clonef.hasFlag('W4.A'))
+        self.assertTrue(clonef.hasFlag('W5.A'))
+        self.assertFalse(clonef.hasFlag('W1.A'))
+        self.assertFalse(clonef.hasFlag('Z.A'))
+        
+    def test_circularClone(self):
+        clonef1 = self.flags.cloneAndReplace('W', 'Z')
+        clonef2 = clonef1.cloneAndReplace('Z', 'W')
+        clonef1.loadAllDynamicFlags()
+        clonef2.loadAllDynamicFlags()
+        self.assertTrue(clonef1.hasFlag('W.A'))
+        self.assertTrue(clonef2.hasFlag('Z.A'))
+        self.assertFalse(clonef1.hasFlag('Z.A'))
+        self.assertFalse(clonef2.hasFlag('W.A'))
+        
+    def test_circularNonReplacingClone(self):
+        clonef1 = self.flags.cloneAndReplace('W', 'Z', True)
+        clonef2 = clonef1.cloneAndReplace('Z', 'W', True)
+        clonef1.loadAllDynamicFlags()
+        clonef2.loadAllDynamicFlags()
+        self.assertTrue(clonef1.hasFlag('Z.A'))
+        self.assertTrue(clonef1.hasFlag('W.A'))
+        self.assertTrue(clonef2.hasFlag('Z.A'))
+        self.assertTrue(clonef2.hasFlag('W.A'))
+        
+    def test_complexCircularClone(self):
+        clonef0 = self.flags.cloneAndReplace('W', 'Z', True)
+        clonef0 = clonef0.cloneAndReplace('W1', 'W', True)
+        clonef0 = clonef0.cloneAndReplace('W2', 'W1', True)
+        clonef0 = clonef0.cloneAndReplace('WW', 'W')
+        clonef1 = clonef0.cloneAndReplace('ZZ', 'Z')
+        clonef2 = clonef1.cloneAndReplace('Z', 'ZZ')
+        clonef3 = clonef1.cloneAndReplace('Z', 'T')
+        
+        self.assertTrue(clonef0.hasFlag('Z.A'))
+        self.assertTrue(clonef0.hasFlag('W1.A'))
+        self.assertTrue(clonef0.hasFlag('W2.A'))
+        self.assertTrue(clonef0.hasFlag('WW.A'))
+        self.assertFalse(clonef0.hasFlag('W.A'))
+        
+        self.assertTrue(clonef1.hasFlag('ZZ.A'))
+        self.assertTrue(clonef1.hasFlag('W1.A'))
+        self.assertTrue(clonef1.hasFlag('W2.A'))
+        self.assertTrue(clonef1.hasFlag('WW.A'))
+        self.assertFalse(clonef1.hasFlag('Z.A'))
+        self.assertFalse(clonef1.hasFlag('W.A'))
+        
+        self.assertTrue(clonef2.hasFlag('Z.A'))
+        self.assertTrue(clonef2.hasFlag('W1.A'))
+        self.assertTrue(clonef2.hasFlag('W2.A'))
+        self.assertTrue(clonef2.hasFlag('WW.A'))
+        self.assertFalse(clonef2.hasFlag('ZZ.A'))
+        self.assertFalse(clonef2.hasFlag('W.A'))
+        
+        self.assertTrue(clonef3.hasFlag('ZZ.A'))
+        self.assertTrue(clonef3.hasFlag('W1.A'))
+        self.assertTrue(clonef3.hasFlag('W2.A'))
+        self.assertTrue(clonef3.hasFlag('WW.A'))
+        self.assertTrue(clonef3.hasFlag('Z.Abool'))
+        self.assertFalse(clonef3.hasFlag('Z.A'))
+        self.assertFalse(clonef3.hasFlag('W.A'))
+        self.assertFalse(clonef3.hasFlag('ZZ.Abool'))
+        self.assertFalse(clonef3.hasFlag('W.Abool'))
+        self.assertFalse(clonef3.hasFlag('W1.Abool'))
+        self.assertFalse(clonef3.hasFlag('W2.Abool'))
+        self.assertFalse(clonef3.hasFlag('WWW.Abool'))
+        
     def test_cloneIter(self):
         # top level check
         self.assertTrue('Z' in self.flags)

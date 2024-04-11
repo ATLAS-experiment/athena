@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import ROOT
 import sys
@@ -160,7 +160,7 @@ class L1CaloHVReader:
       try:
          db = dbSvc.openDatabase(dbString, False)        
       except Exception as e:
-         print ('Error: Problem opening database', e)
+         print(('Error: Problem opening database', e))
          sys.exit(1)
 
       folder_name = '/TRIGGER/L1Calo/V1/Results/HVCorrections'
@@ -170,7 +170,7 @@ class L1CaloHVReader:
       endUtime = int(time.time())
       startValKey = startUtime * self.UNIX2COOL
       endValKey = endUtime * self.UNIX2COOL
-      chsel = cool.ChannelSelection(0,sys.maxint)
+      chsel = cool.ChannelSelection(0,sys.maxsize)
 
       try:
          itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -189,10 +189,10 @@ class L1CaloHVReader:
          self.CorrLayer3[CoolId]  = payload['LayerMean3']
          self.CorrLayer4[CoolId]  = payload['LayerMean4']
    
-         self.AffectedCells1[CoolId]  = struct.unpack('B',payload['AffectedCells1'])[0]
-         self.AffectedCells2[CoolId]  = struct.unpack('B',payload['AffectedCells2'])[0]
-         self.AffectedCells3[CoolId]  = struct.unpack('B',payload['AffectedCells3'])[0]
-         self.AffectedCells4[CoolId]  = struct.unpack('B',payload['AffectedCells4'])[0]
+         self.AffectedCells1[CoolId]  = struct.unpack('B'.encode('utf-8'),payload['AffectedCells1'].encode('utf-8'))[0]
+         self.AffectedCells2[CoolId]  = struct.unpack('B'.encode('utf-8'),payload['AffectedCells2'].encode('utf-8'))[0]
+         self.AffectedCells3[CoolId]  = struct.unpack('B'.encode('utf-8'),payload['AffectedCells3'].encode('utf-8'))[0]
+         self.AffectedCells4[CoolId]  = struct.unpack('B'.encode('utf-8'),payload['AffectedCells4'].encode('utf-8'))[0]
             
 #        print ( " CoolId", CoolId ,"AffectedCells",  struct.unpack('B',self.AffectedCells1[CoolId])[0])
 
@@ -209,7 +209,7 @@ class L1CaloHVReader:
       try:
          db = dbSvc.openDatabase(dbString, False)        
       except Exception as e:
-         print ('Error: Problem opening database', e)
+         print(('Error: Problem opening database', e))
          sys.exit(1)
 
       folder_name = '/TRIGGER/L1Calo/V1/Results/RxLayers'
@@ -219,7 +219,7 @@ class L1CaloHVReader:
       endUtime = int(time.time())
       startValKey = startUtime * self.UNIX2COOL
       endValKey = endUtime * self.UNIX2COOL
-      chsel = cool.ChannelSelection(0,sys.maxint)
+      chsel = cool.ChannelSelection(0,sys.maxsize)
 
       try:
          itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -231,17 +231,17 @@ class L1CaloHVReader:
          CoolId = hex(int(row.channelId()))
          payload = row.payload()
         
-         self.NCells1[CoolId] = struct.unpack('B',payload['NCells1'])[0]
-         self.NCells2[CoolId] = struct.unpack('B',payload['NCells2'])[0]
-         self.NCells3[CoolId] = struct.unpack('B',payload['NCells3'])[0]
-         self.NCells4[CoolId] = struct.unpack('B',payload['NCells4'])[0]
+         self.NCells1[CoolId] = struct.unpack('B'.encode('utf-8'),payload['NCells1'].encode('utf-8'))[0]
+         self.NCells2[CoolId] = struct.unpack('B'.encode('utf-8'),payload['NCells2'].encode('utf-8'))[0]
+         self.NCells3[CoolId] = struct.unpack('B'.encode('utf-8'),payload['NCells3'].encode('utf-8'))[0]
+         self.NCells4[CoolId] = struct.unpack('B'.encode('utf-8'),payload['NCells4'].encode('utf-8'))[0]
 
-         self.NLayers[CoolId] = struct.unpack('B',payload['NLayers'])[0]
+         self.NLayers[CoolId] = struct.unpack('B'.encode('utf-8'),payload['NLayers'].encode('utf-8'))[0]
   
-         self.Name1[CoolId] = struct.unpack('B',payload['Name1'])[0]
-         self.Name2[CoolId] = struct.unpack('B',payload['Name2'])[0]
-         self.Name3[CoolId] = struct.unpack('B',payload['Name3'])[0]
-         self.Name4[CoolId] = struct.unpack('B',payload['Name4'])[0]
+         self.Name1[CoolId] = struct.unpack('B'.encode('utf-8'),payload['Name1'].encode('utf-8'))[0]
+         self.Name2[CoolId] = struct.unpack('B'.encode('utf-8'),payload['Name2'].encode('utf-8'))[0]
+         self.Name3[CoolId] = struct.unpack('B'.encode('utf-8'),payload['Name3'].encode('utf-8'))[0]
+         self.Name4[CoolId] = struct.unpack('B'.encode('utf-8'),payload['Name4'].encode('utf-8'))[0]
 
 
   
@@ -351,13 +351,13 @@ def PlotCalibrationHV(input_file_name=None):
 
 
   input_file = input_file_name
-  print ("Taking HV information from file",input_file )
+  print(("Taking HV information from file",input_file ))
   
   hv_status = L1CaloHVReader(input_file)
 
   large_hv_file = open('large_hv_corr.txt','w')
 
-  for ReceiverId in  hv_status.GetMeanCorections().keys():
+  for ReceiverId in  list(hv_status.GetMeanCorections().keys()):
 
     MeanHVCorrection = (hv_status.GetMeanCorections())[ReceiverId]
     CorrLayers = [0,0,0,0]

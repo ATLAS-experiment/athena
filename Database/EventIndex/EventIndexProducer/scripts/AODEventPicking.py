@@ -105,7 +105,7 @@ if '__main__' in __name__:
 
     # Configure the output stream
     log.info('== Configuring Output Stream')
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     cfg.merge(OutputStreamCfg(flags, 'AOD', takeItemsFromInput=True))
 
     # Configure metadata
@@ -114,7 +114,7 @@ if '__main__' in __name__:
     cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
     # Setup the output stream algorithm
-    StreamAOD = cfg.getEventAlgo('OutputStreamAOD')
+    StreamAOD = cfg.getEventAlgo(outputStreamName("AOD"))
     StreamAOD.ForceRead = True
     StreamAOD.AcceptAlgs += ['EventFilterAlg']
 

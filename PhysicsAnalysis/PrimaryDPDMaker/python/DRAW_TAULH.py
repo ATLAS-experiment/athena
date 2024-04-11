@@ -74,6 +74,7 @@ def DRAW_TAULHKernelCfg(configFlags, name='DRAW_TAULHKernel', **kwargs):
     # The main kernel algo
     DRAW_TAULHKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_TAULHKernel',
+        doChronoStat=(configFlags.Concurrency.NumThreads <= 1),
         AugmentationTools=augmentationTools,
         SkimmingTools=[combTool])
 

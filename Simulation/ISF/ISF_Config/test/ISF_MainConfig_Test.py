@@ -75,12 +75,12 @@ if __name__ == '__main__':
     from ISF_Config.ISF_MainConfig import ISF_KernelCfg
     cfg.merge(ISF_KernelCfg(flags))
 
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
     cfg.merge(OutputStreamCfg(flags, "HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True))
 
     # FIXME hack to match to buggy behaviour in old style configuration
-    OutputStreamHITS = cfg.getEventAlgo("OutputStreamHITS")
+    OutputStreamHITS = cfg.getEventAlgo(outputStreamName("HITS"))
     OutputStreamHITS.ItemList.remove("xAOD::EventInfo#EventInfo")
     OutputStreamHITS.ItemList.remove("xAOD::EventAuxInfo#EventInfoAux.")
 

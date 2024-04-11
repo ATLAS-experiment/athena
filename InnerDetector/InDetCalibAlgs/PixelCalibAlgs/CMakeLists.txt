@@ -39,8 +39,6 @@ atlas_add_executable( MakeReferenceFile
    ChargeCalibration/pixel/MakeReferenceFile.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils ${COOL_LIBRARIES} ${CORAL_LIBRARIES} )
-
-
    
 atlas_add_test( PixelMapping_test
    SOURCES test/PixelMapping_test.cxx
@@ -49,6 +47,6 @@ atlas_add_test( PixelMapping_test
    POST_EXEC_SCRIPT "nopost.sh"
 )
 
-atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat ChargeCalibration/common/mapping.csv)
-
+atlas_install_runtime ( share/HashVSdcsID.dat share/table_Run2.txt share/PixelMapping_Run2.dat )
+atlas_install_data (ChargeCalibration/common/mapping.csv)
 atlas_install_python_modules( python/*.py ChargeCalibration/pixel/python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

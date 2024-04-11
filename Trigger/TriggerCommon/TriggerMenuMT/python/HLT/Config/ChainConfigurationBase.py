@@ -46,12 +46,9 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
     def getStep(self, flags, stepID, stepPartName, sequenceCfgArray, comboHypoCfg=ComboHypoCfg, comboTools=[], **stepArgs):
         stepName = 'Step%s'%str(stepID) + '_' + stepPartName
         log.debug("Configuring step %s", stepName)
-
-        if flags.Trigger.fastMenuGeneration:
-            # do not generate Menu Sequences, just store the functions that can do that
-            seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]   
-        else:
-            seqArray = [gen(flags, **stepArgs) for gen in sequenceCfgArray]
+        
+        # do not generate Menu Sequences, just store the functions that can do that
+        seqArray = [functools.partial(gen, flags, **stepArgs) for gen in sequenceCfgArray]          
 
         if (len(seqArray)>0):                                
             if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                

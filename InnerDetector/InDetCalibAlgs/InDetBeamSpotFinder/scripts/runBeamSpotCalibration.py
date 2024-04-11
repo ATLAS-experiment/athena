@@ -70,8 +70,12 @@ if 'useBeamSpot' not in configMy.jobConfig:
     # change to True as soon as I have PrimaryVertexMonitoring in as well
     configMy.jobConfig['useBeamSpot'] = configMy.jobConfig.get('beamspottag','')!='' or configMy.jobConfig.get('beamspotfile','')!=''
 
-print("job configuration: ",configMy.jobConfig)
-
+#Printout of job configuration
+print("Job configuration: ")
+for option in configMy.jobConfig:
+    print("    ",option,': ',configMy.jobConfig[option])
+print("    ")
+    
 flags.Exec.OutputLevel = configMy.jobConfig['outputlevel']
 flags.Exec.SkipEvents = configMy.jobConfig['skipEvents']
 flags.Exec.MaxEvents = configMy.jobConfig['maxEvents']
@@ -94,6 +98,7 @@ acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
 acc.getService("MessageSvc").defaultLimit = configMy.jobConfig['MsgLimit']
+acc.getService(acc.getAppProps()['EventLoop']).EventPrintoutInterval = 10000
 
 from InDetBeamSpotFinder.InDetBeamSpotFinderConfig import InDetBeamSpotFinderCfg
 acc.merge(InDetBeamSpotFinderCfg(flags,configMy.jobConfig))

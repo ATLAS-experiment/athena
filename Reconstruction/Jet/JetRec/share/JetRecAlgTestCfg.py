@@ -230,10 +230,10 @@ if __name__=="__main__":
                            "xAOD::JetAuxContainer#"+jetcoll+"Aux.-PseudoJet"]
 
     # Now get the output stream components
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     cfg.merge(OutputStreamCfg(flags,"xAOD",ItemList=outputlist))
     from pprint import pprint
-    pprint( cfg.getEventAlgo("OutputStreamxAOD").ItemList )
+    pprint( cfg.getEventAlgo(outputStreamName("xAOD")).ItemList )
     cfg.printConfig()
     # For local tests, not in the CI
     # Print the contents of the store every event

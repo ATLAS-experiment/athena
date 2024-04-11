@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
     bool correctArgc = (whichPart < 0 or whichPart > 3) or (THR.compare("THR") == 0) or (THRintime.compare("THRintime") == 0) or (TOT.compare("TOT") == 0) or (dpath.compare("directory_path") == 0);
     
     if(correctArgc){
-        printf("Cannot continue, one arguments is incorrect or not filled correcly...\n");
+        printf("Cannot continue, one arguments is incorrect or not filled correctly...\n");
         printf("Helper below:\n**********************\n\n");
         printError(); 
         return 1;
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
     
     
     // creating the object for the pixel mapping 
-    PixelMapping pixmap(PathResolver::find_file("mapping.csv", "DATAPATH"));
+    PixelMapping pixmap(PathResolver::find_file("PixelCalibAlgs/mapping.csv", "DATAPATH"));
     
     // object to store all the necessary calibration information 
     std::map<unsigned int ,  std::vector<std::unique_ptr<CalibFrontEndInfo>> > map_values;
@@ -108,12 +108,12 @@ int main(int argc, char *argv[]) {
     }
     time(&end);
     printf("Time taken for threshold calibration:%7.1f seconds\n",double(end - start));
-
+    
     if(map_values.size() == 0){
 
         // If we are running over just one module, and it is not created already in the map means that this is not the correct layer
         if( std::strcmp(moduleName.c_str(), "") != 0 ){
-            printf("main::main: Running only one module: %s - It does not belog to %s\n",moduleName.c_str(), sWhichPart.at(whichPart).c_str());
+            printf("main::main: Running only one module: %s - It does not belong to %s\n",moduleName.c_str(), sWhichPart.at(whichPart).c_str());
             return 0;
         }
         printf("main::main: ERROR - Size of filled map is 0. Does the %s exist in the %s file?\n",sWhichPart.at(whichPart).c_str(),thres_f.c_str());

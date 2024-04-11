@@ -177,13 +177,13 @@ class FlagAddress(object):
         used = set()
         for flag in self._flags._flagdict.keys():
             if flag.startswith(self._name.rstrip('.') + '.'):
-                newflag = rmap[flag]
-                ntrim = len(self._name) + 1
-                n_dots_in = flag[:ntrim].count('.')
-                remaining = newflag.split('.')[n_dots_in]
-                if remaining not in used:
-                    yield remaining
-                    used.add(remaining)
+                for newflag in rmap[flag]:
+                    ntrim = len(self._name) + 1
+                    n_dots_in = flag[:ntrim].count('.')
+                    remaining = newflag.split('.')[n_dots_in]
+                    if remaining not in used:
+                        yield remaining
+                        used.add(remaining)
 
     def _subflag_itr(self):
         """Subflag iterator specialized for this address
@@ -196,7 +196,8 @@ class FlagAddress(object):
             if key.startswith(address.rstrip('.') + '.'):
                 ntrim = len(address) + 1
                 remaining = key[ntrim:]
-                yield rename[key], getattr(self, remaining)
+                for r in rename[key]:
+                    yield r, getattr(self, remaining)
 
     def asdict(self):
         """Convert to a python dictionary
@@ -239,7 +240,7 @@ class AthConfigFlags(object):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
 
     def _calculateHash(self):
-        return hash( (frozenset(self._renames), id(self._flagdict)) )
+        return hash( (frozenset({k: v for k, v in self._renames.items() if k != v}), id(self._flagdict)) )
 
     def __getattr__(self, name):
         # Avoid infinite recursion looking up our own attributes
@@ -295,10 +296,11 @@ class AthConfigFlags(object):
         rmap = self._renamed_map()
         used = set()
         for flag in self._flagdict:
-            first = rmap[flag].split('.',1)[0]
-            if first not in used:
-                yield first
-                used.add(first)
+            for r in rmap[flag]:
+                first = r.split('.',1)[0]
+                if first not in used:
+                    yield first
+                    used.add(first)
 
     def asdict(self):
         """Convert to a python dictionary
@@ -315,16 +317,26 @@ class AthConfigFlags(object):
 
         This is the inverse of _renamed, which maps new names to old
         names
-        """
+        
+        Returns a list of the new names corresponding to the old names
+        (since cloneAndReplace may or may not disable access to the old name,
+        it is possible that an old name renames to multiple new names)
+        """        
+        revmap = {}
+        
+        for new, old in self._renames.items():
+            if old not in revmap:
+                revmap[old] = [ new ]
+            else:
+                revmap[old] += [ new ]
+        
         def rename(key):
-            for new, old in self._renames.items():
+            for old, newlist in revmap.items():
                 if key.startswith(old + '.'):
                     stem = key.removeprefix(old)
-                    if not new:
-                        return ''
-                    else:
-                        return f'{new}{stem}'
-            return key
+                    return [ f'{new}{stem}' if new else '' for new in newlist ]
+            return [ key ]
+        
         return {x:rename(x) for x in self._flagdict.keys()}
 
     def _subflag_itr(self):
@@ -334,18 +346,19 @@ class AthConfigFlags(object):
         """
         self.loadAllDynamicFlags()
 
-        for old, new in self._renamed_map().items():
-            # Lots of modules are missing in analysis releases. I
-            # tried to prevent imports using the _addFlagsCategory
-            # function which checks if some module exists, but this
-            # turned in to quite a rabbit hole. Catching and ignoring
-            # the missing module exception seems to work, even if it's
-            # not pretty.
-            try:
-                yield new, getattr(self, old)
-            except ModuleNotFoundError as err:
-                _msg.debug(f'missing module: {err}')
-                pass
+        for old, newlist in self._renamed_map().items():
+            for new in newlist:
+                # Lots of modules are missing in analysis releases. I
+                # tried to prevent imports using the _addFlagsCategory
+                # function which checks if some module exists, but this
+                # turned in to quite a rabbit hole. Catching and ignoring
+                # the missing module exception seems to work, even if it's
+                # not pretty.
+                try:
+                    yield new, getattr(self, old)
+                except ModuleNotFoundError as err:
+                    _msg.debug(f'missing module: {err}')
+                    pass
 
     def addFlag(self, name, setDef, type=None, help=None):
         self._tryModify()
@@ -412,7 +425,9 @@ class AthConfigFlags(object):
             return True
 
         if name in self._renames:
-            return self.hasCategory(self._renames[name])
+            re_name = self._renames[name]
+            if re_name != name:
+                return self.hasCategory(re_name)
         
         # If not found do search through all keys.
         # TODO: could be improved by using a trie for _flagdict
@@ -428,7 +443,7 @@ class AthConfigFlags(object):
         return False
 
     def hasFlag(self, name):
-        return name in self._renamed_map().values()
+        return name in [y for x in self._renamed_map().values() for y in x]
 
     def _set(self,name,value):
         self._tryModify()
@@ -506,15 +521,24 @@ class AthConfigFlags(object):
 
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
-
-        # handle the case where one replaces A -> B and then B -> A in two cloneAndReplace
-        if replacementSubset in newFlags._renames and newFlags._renames[replacementSubset] == subsetToReplace:
-            del newFlags._renames[replacementSubset]
-            del newFlags._renames[subsetToReplace]
-        else: # brand new replacement
+        
+        if replacementSubset in newFlags._renames: #and newFlags._renames[replacementSubset]:
+            newFlags._renames[subsetToReplace] = newFlags._renames[replacementSubset]
+        else:
             newFlags._renames[subsetToReplace] = replacementSubset
-            if not keepOriginal:
+        
+        if not keepOriginal:
+            if replacementSubset not in newFlags._renames or newFlags._renames[replacementSubset] == replacementSubset:
                 newFlags._renames[replacementSubset] = "" # block access to original flags
+            else:
+                del newFlags._renames[replacementSubset]
+                #If replacementSubset was a "pure renaming" of another set of flags,
+                #the original set of flags gets propagated down to its potential further renamings:
+                #no need to worry about maintaining the intermediate steps in the renaming.
+        else:
+            if replacementSubset not in newFlags._renames:
+                newFlags._renames[replacementSubset] = replacementSubset
+                #For _renamed_map to know that these flags still work.
         newFlags._hash = None
         return newFlags
 

@@ -98,7 +98,7 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
       auto counts = eFexTower->et_count();
       for(size_t i=0;i<counts.size();i++) {
           if (eFexTower->disconnectedCount(i)) continue;
-          if (counts.at(i)==0 || counts.at(i)>1020) continue; // disconnected or masked channel
+          if (counts.at(i)==0 || (counts.at(i)>1020 && counts.at(i)!=1023)) continue; // absent (1025 from BS decoder), invalid (1022), empty (0) or masked (0) channel
           // special case logic for reordering |eta|=2.5 and overlap
           // and l1 1.8-2.0 ... need to put the merged sc counts into slots that wont be split
           int layer; int cell=i;

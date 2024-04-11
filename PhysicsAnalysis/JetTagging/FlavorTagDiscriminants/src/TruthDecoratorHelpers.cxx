@@ -78,7 +78,7 @@ namespace FlavorTagDiscriminants {
             if (!truth_particle) {
                 return TruthType::Label::NoTruth;
             }
-            // simple pdgid check for pion based on 
+            // simple pdgid check for pion based on
             // PhysicsAnalysis/MCTruthClassifier/Root/MCTruthClassifierGen.cxx#L1159
             if (std::abs(truth_particle->pdgId()) == 211) {
                 return TruthType::Label::Pion * truth_particle->charge();
@@ -101,31 +101,31 @@ namespace FlavorTagDiscriminants {
             return TruthType::Label::Other;
         }
 
-        int get_source_type(const xAOD::TruthParticle* truth_particle) {
-            /* this label gives information about the immediate parent 
-            of the truth particle */
-            if (!truth_particle or truth_particle->nParents() != 1) {
-                return TruthSource::Label::NoTruth;
+        int get_source_type(const int origin) {
+            /* this label gives information about the origin of secondary
+            particles (material interactions, gamme conversions, etc.)*/
+
+            if (!(InDet::TrkOrigin::isSecondary(origin))){
+	        return TruthSource::Label::NotSecondary;
+	        }
+            else if ( InDet::TrkOrigin::isHadronicInteraction(origin) ) {
+                return TruthSource::Label::HadronicInteraction;
             }
-            const auto parent = truth_particle->parent(0);
-            if (!parent) {
-                return TruthSource::Label::NoTruth;
+            else if ( InDet::TrkOrigin::isKshortDecay(origin) ) {
+                return TruthSource::Label::KshortDecay;
             }
-            else if (parent->isStrangeMeson()) {
-                return TruthSource::Label::KaonDecay;
-            }
-            else if (std::abs(parent->pdgId()) == 3122) {
+            else if ( InDet::TrkOrigin::isLambdaDecay(origin) ) {
                 return TruthSource::Label::LambdaDecay;
             }
-            else if (parent->isPhoton()) {
-                return TruthSource::Label::Conversion;
+            else if ( InDet::TrkOrigin::isGammaConversion(origin) ) {
+                return TruthSource::Label::GammaConversion;
             }
-
+	    // For simulation tracks not included in the above categories
             return TruthSource::Label::Other;
         }
 
-        int get_vertex_index(const xAOD::TruthVertex* this_vertex, 
-                             const xAOD::TruthVertex* truth_PV, 
+        int get_vertex_index(const xAOD::TruthVertex* this_vertex,
+                             const xAOD::TruthVertex* truth_PV,
                              std::vector<const xAOD::TruthVertex*>& seen_vertices,
                              const float truthVertexMergeDistance) {
             // no vertex

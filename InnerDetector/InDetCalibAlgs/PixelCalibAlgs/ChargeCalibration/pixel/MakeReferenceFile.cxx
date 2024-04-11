@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
     DbConnection connection(dbName);
     FolderSpec fs(folderName, tagName);
     Folder f(connection, fs);
-    const std::string fileName = tagName + ".log";
+    
     bool useLastIOV = true;
     cool::IObjectIteratorPtr objectsIterator = f.objectIterator(useLastIOV); // True to use the last IOV
     std::vector<std::string> myIOVs;
@@ -303,6 +303,7 @@ int main(int argc, char *argv[])
         myIOVs.push_back(display);
     }
 
+    const std::string fileName = tagName + ".log";
     std::ofstream opFile(fileName);
     if(!useLastIOV){
         // Saving in file the previous to last IOV - testing only so far.

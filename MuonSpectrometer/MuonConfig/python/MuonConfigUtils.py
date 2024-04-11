@@ -47,10 +47,10 @@ def SetupMuonStandaloneCA(args,flags):
     
 def SetupMuonStandaloneOutput(cfg, flags, itemsToRecord):
     # Set up output
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
 
     cfg.merge( OutputStreamCfg( flags, 'ESD', ItemList=itemsToRecord) )
-    outstream = cfg.getEventAlgo("OutputStreamESD")
+    outstream = cfg.getEventAlgo(outputStreamName("ESD"))
     outstream.ForceRead = True
 
     # Fix for ATLASRECTS-5151

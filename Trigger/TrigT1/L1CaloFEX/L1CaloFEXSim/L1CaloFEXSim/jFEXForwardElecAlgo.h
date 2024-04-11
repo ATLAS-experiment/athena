@@ -58,8 +58,6 @@ namespace LVL1 {
     std::unordered_map<int,std::vector<int> > m_map_Etvalues_EM;
     std::unordered_map<int,std::vector<int> > m_map_Etvalues_HAD;
     int m_jFEXalgoTowerID[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width];
-    int m_lowerEM_eta;
-    int m_upperEM_eta;
     int m_jfex;
     int m_fpga;
     static constexpr float m_2PI = 2*M_PI;
@@ -68,23 +66,26 @@ namespace LVL1 {
     const int m_Edge_dR3 = std::round( (std::pow(3*M_PI/32,2)) * 1e5  );
     const int m_Edge_dR4 = std::round( (std::pow(4*M_PI/32,2)) * 1e5  );
         
-    Gaudi::Property<std::string> m_SeedRingStr {this, "SeedRingMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_seed.dat"   , "Contains Trigger tower in seed"};
-    Gaudi::Property<std::string> m_1stRingStr  {this, "Energy1stRingMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_1stRing.dat" , "Contains Trigger tower in 1st Energy ring"};
-    Gaudi::Property<std::string> m_SearchGStr  {this, "SearchGMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchG.dat" , "Contains Trigger tower to find local max (greater than)"};
-    Gaudi::Property<std::string> m_SearchGeStr {this, "SearchGeMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGe.dat", "Contains Trigger tower to find local max (greater or equal than)"};
-    Gaudi::Property<std::string> m_SearchGTauStr  {this, "SearchGTauMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGTau.dat" , "Contains Trigger tower to find local max (greater than)"};
-    Gaudi::Property<std::string> m_SearchGeTauStr {this, "SearchGeTauMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGeTau.dat", "Contains Trigger tower to find local max (greater or equal than)"};
+    Gaudi::Property<std::string> m_IsoMapStr {this, "IsoMap", "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_iso.dat", "Contains Trigger towers in (forward) EM layer used for isolation"};
+    Gaudi::Property<std::string> m_Frac1MapStr {this, "Frac1Map", "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_frac.dat", "Contains Trigger towers in FCal layer2 used for hadronic fraction 1 discriminant"};
+    Gaudi::Property<std::string> m_Frac2MapStr {this, "Frac2Map", "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_frac2.dat", "Contains Trigger towers in FCal layer3 used for hadronic fraction 2 discriminant"};
+    Gaudi::Property<std::string> m_SearchGTauStr  {this, "SearchGTauMap", "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_searchGTau.dat" , "Contains Trigger tower to find local max (greater than)"};
+    Gaudi::Property<std::string> m_SearchGeTauStr {this, "SearchGeTauMap", "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_searchGeTau.dat", "Contains Trigger tower to find local max (greater or equal than)"};
        
     std::unordered_map<unsigned int, std::vector<unsigned int> > m_SeedRingMap;
     std::unordered_map<unsigned int, std::vector<unsigned int> > m_1stRingMap;
-    std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGMap;
-    std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeMap;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_IsoMap;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_Frac1Map;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_Frac2Map;
     std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGTauMap;
     std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeTauMap;
     
     virtual std::array<float,2> getEtaPhi(uint) override;
-    virtual std::array<uint,2> getEtEmHad(uint) override;
-    std::unordered_map<uint, jFEXForwardElecInfo> eleClusterList(void);
+    virtual std::array<int,2> getEtEmHad(uint) override;
+    
+    bool isValidSeed(uint seedTTID);
+    void findAndFillNextTT(jFEXForwardElecInfo& elCluster, int neta, int nphi);
+    
     StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);
   };
   

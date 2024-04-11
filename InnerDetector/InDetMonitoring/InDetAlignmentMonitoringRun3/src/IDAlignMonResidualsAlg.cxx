@@ -196,24 +196,15 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 
     //trackStateOnSurfaces is a vector of Trk::TrackStateOnSurface objects which contain information
     //on track at each (inner)detector surface it crosses eg hit used to fit track
-    ATH_MSG_DEBUG(
-      "** IDAlignMonResiduals::fillHistograms() ** track: " << nTracks << "  has " << trksItr->trackStateOnSurfaces()->size() <<
-        " TrkSurfaces");
+    ATH_MSG_DEBUG( "** IDAlignMonResiduals::fillHistograms() ** track: " << nTracks << "  has " << trksItr->trackStateOnSurfaces()->size() << " TrkSurfaces");
 
-
-    int nHits =  0;//counts number of tsos from which we can define residual/pull
-    int nTSOS = -1;//counts all TSOS on the track
+    int nHits =  0; //counts number of tsos from which we can define residual/pull
+    int nTSOS = -1; //counts all TSOS on the track
 
     //looping over the hits
     for (const Trk::TrackStateOnSurface* tsos : *trksItr->trackStateOnSurfaces()) {
 
       ++nTSOS;
-
-      //trackStateOnSurfaces is a vector of Trk::TrackStateOnSurface objects which contain information
-      //on track at each (inner)detector surface it crosses eg hit used to fit track
-      ATH_MSG_DEBUG(
-      "** IDAlignMonResiduals::fillHistograms() ** track: " << nTracks << "  has " << trksItr->trackStateOnSurfaces()->size() <<
-        " TrkSurfaces");
 
       if (tsos == nullptr) {
         ATH_MSG_DEBUG("     TSOS (hit) = " << nTSOS << " is NULL ");
@@ -221,17 +212,14 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       }
 
       //skipping outliers
-      ATH_MSG_DEBUG(
-        " --> testing hit " << nTSOS << "/" << trksItr->trackStateOnSurfaces()->size() << " to be measurement type");
+      ATH_MSG_DEBUG(" --> testing if hit " << nTSOS << "/" << trksItr->trackStateOnSurfaces()->size() << " is a track measurement");
       if(!tsos->type(Trk::TrackStateOnSurface::Measurement)) {
 	ATH_MSG_DEBUG("Skipping TSOS " << nTSOS << " because it is an outlier (or the first TSOS on the track)");
 	continue;
       }
 
       const Trk::MeasurementBase* mesh =tsos->measurementOnTrack();
-       ATH_MSG_DEBUG(
-        " --> Defined hit measurementOnTrack() for hit: " << nTSOS << "/" << trksItr->trackStateOnSurfaces()->size() << " of track " <<
-          nTracks);
+      ATH_MSG_DEBUG(" --> Defined hit measurementOnTrack() for hit: " << nTSOS << "/" << trksItr->trackStateOnSurfaces()->size() << " of track " << nTracks);
 
        //Trk::RIO_OnTrack object contains information on the hit used to fit the track at this surface
        const Trk::RIO_OnTrack* hit = dynamic_cast <const Trk::RIO_OnTrack*>(mesh);
@@ -242,7 +230,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	continue;
       }
 
-      ATH_MSG_DEBUG(" --> Going to retrive the track parameters of this TSOS: " << nTSOS);
+       ATH_MSG_DEBUG(" --> Going to retrive the track parameters of this TSOS: " << nTSOS);
       const Trk::TrackParameters* trackParameter = tsos->trackParameters();
       if(trackParameter==nullptr) {
 	//if no TrackParameters for TSOS we cannot define residuals
@@ -277,12 +265,17 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       int   modPhi = 9999;
 
       const Identifier & hitId = hit->identify();
-      ATH_MSG_DEBUG("Defining hit Identifier ");
       if (m_idHelper->is_trt(hitId)) detType = 2;
       else if (m_idHelper->is_sct(hitId)) detType = 1;
-      else  detType = 0;
+      else if (m_idHelper->is_pixel(hitId)) detType = 0;
+      else  detType = 99;
 
-
+      //hits with detType = 0 are no Inner Detector hits -> skip
+      if ( detType == 99) {
+        ATH_MSG_DEBUG(" --> Hit " << nTSOS << " with detector type " << detType << " is not an Inner Detector hit -> skip this hit");
+	continue;
+      }
+      
       //TRT hits: detType = 2
       if (detType == 2) {
         ATH_MSG_DEBUG("** IDAlignMonResidualsAlg::fillHistograms() ** Hit is from the TRT, finding residuals... ");
@@ -302,7 +295,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           ATH_MSG_WARNING("No TrackParameters associated with TRT TrkSurface " << nTSOS);
           continue;
         }
-        ATH_MSG_DEBUG("Found Trk::TrackParameters for hit " << nTSOS << " --> TRT hit (detType= " << detType);
+        ATH_MSG_DEBUG("Found Trk::TrackParameters for hit " << nTSOS << " --> TRT hit (detType= " << detType << ")" );
 
         //getting unbiased track parameters by removing the hit from the track and refitting
       	//std::unique_ptr <Trk::TrackParameters> trackParameterUnbiased;
@@ -336,9 +329,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(tsos->measurementOnTrack());
 
 	if (trtCircle != nullptr) {
-          ATH_MSG_DEBUG("** fillHistograms() ** Filling TRT HISTOS for hit/tsos " << nTSOS);
-
-          ATH_MSG_DEBUG(" fillHistograms() ** filling TRT histos:"
+          ATH_MSG_DEBUG(" fillHistograms() ** filling TRT histograms for hit/tsos #" << nTSOS
                         << "  Barrel/EndCap: " << barrel_ec
                         << "  layer/wheel: " << layer_or_wheel
                         << "  phi: " << phi_module
@@ -355,9 +346,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       	  		    , trketa);
       	}
       }
-      else {//have identified pixel or SCT hit
-	ATH_MSG_DEBUG("** fillHistograms() ** Hit is pixel or SCT, type: " << detType);
-
+      else { //have identified a PIXEL or SCT hit
 	if(m_doHitQuality) {
 	  ATH_MSG_DEBUG("applying hit quality cuts to Silicon hit...");
 
@@ -367,9 +356,9 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	    continue;
 	  }
 	  ATH_MSG_DEBUG("hit passed quality cuts");
-	} else
-	  ATH_MSG_DEBUG("hit quality cuts NOT APPLIED to Silicon hit.");
-
+	}
+	else ATH_MSG_DEBUG("hit quality cuts NOT APPLIED to Silicon hit.");
+	
 	//determining Si module physical position (can modify residual calculation eg. SCT endcaps)
 	if (detType==0){//pixel
 	  const Identifier& id = m_pixelID->wafer_id(hitId);
@@ -424,8 +413,10 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  biasedResidualX = (float)biasedResXY[0];
 	  biasedResidualY = (float)biasedResXY[1];
 
-	}else
+	}
+	else {
 	  ATH_MSG_DEBUG("No TrackParameters associated with Si TrkSurface "<< nTSOS << " - Hit is probably an outlier");
+	}
       }
 
 
@@ -590,7 +581,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	si_residualx_m = residualX;
 	fill(residualGroup, si_residualx_m);
 
-	ATH_MSG_DEBUG(" This is an SCT hit " << hitId << " - filling histograms");
+	ATH_MSG_DEBUG(" This is a SCT hit " << hitId << " - filling histograms");
 
 	if(barrelEC==0){//filling SCT barrel histograms
 	  int ModPhiShift[4] = {0, 42, 92, 150};
@@ -626,7 +617,8 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(residualGroup, modEtaShift_sct_barrel_m, residualX_sct_barrel_m);
 
 
-	} else if(barrelEC==2){//nine SCT endcap disks from 0-8
+	} // end SCT barrel
+	else if(barrelEC==2){//nine SCT endcap disks from 0-8
 	  int Nmods = 52;
 	  int gap_sct = 10;
 
@@ -648,7 +640,8 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  auto modPhiShift_sct_eca_m = Monitored::Scalar<int>( "m_modPhiShift_sct_eca", modPhi + layerDisk * (gap_sct + Nmods) );
 	  fill(residualGroup,  modPhiShift_sct_eca_m, residualX_sct_eca_m);
 
-	} else if(barrelEC==-2){
+	} // end SCT end-cap A
+	else if(barrelEC==-2){
 	  int Nmods = 52;
 	  int gap_sct = 10;
 
@@ -669,8 +662,8 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  auto residualX_sct_ecc_m = Monitored::Scalar<float>( "m_residualX_sct_ecc", residualX);
 	  auto modPhiShift_sct_ecc_m = Monitored::Scalar<int>( "m_modPhiShift_sct_ecc", modPhi + layerDisk * (gap_sct + Nmods) );
 	  fill(residualGroup,  modPhiShift_sct_ecc_m, residualX_sct_ecc_m);
-
-	}
+	  
+	} // end SCT end-cap C
       }// end of SCT
       ++nHits;
       //++nHitsEvent;

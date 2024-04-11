@@ -24,6 +24,7 @@
 #include "GaudiKernel/AlgTool.h"
 #include "GaudiKernel/Chrono.h"
 #include "GaudiKernel/ToolVisitor.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 
 #include "StoreGate/StoreGateSvc.h"             // Storegate stuff
 #include "StoreGate/DataHandle.h"
@@ -112,13 +113,12 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
         ATH_MSG_INFO("The following augmentation tools will be applied....");
         ATH_MSG_INFO(m_augmentationTools);
     }
- 
-    // get the chrono auditor
-    if ( m_chronoSvc.retrieve().isFailure() ) {
-	    ATH_MSG_FATAL("Failed to retrieve service " << m_chronoSvc);
-	    return StatusCode::FAILURE;
-    } 
 
+    if (m_doChronoStat) {
+      //get the chrono auditor
+      ATH_CHECK(m_chronoSvc.retrieve());
+    }
+   
     if (m_runSkimmingFirst) {
 	ATH_MSG_INFO("Skimming will be run before augmentation. Make sure your skimming does not depend on variables calculated in the augmentation step!");
     }
@@ -166,15 +166,18 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
     for (ToolHandle<IThinningTool> &a_tool_handle : m_thinningTools ) {
        visitTools(*a_tool_handle, renouncer);
     }
+
+   
     return StatusCode::SUCCESS;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode DerivationFramework::DerivationKernel::execute() {
-    
-    // On your marks.... get set....
-    Chrono chrono( &(*m_chronoSvc), name() ); 
+
+  IChronoSvc* cSvc=m_chronoSvc.get(); //Might be null ... 
+  // On your marks.... get set.... (but only if not in MT)
+  Chrono chrono( cSvc , name() ); 
     // GO!!!
 
     ATH_MSG_DEBUG(name() << " is processing next event...");

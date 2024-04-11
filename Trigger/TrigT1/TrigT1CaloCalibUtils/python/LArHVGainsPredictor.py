@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -21,6 +21,7 @@ import ROOT
 import os
 
 
+
 class OracleGainReader:
 
   def __init__(self):
@@ -31,7 +32,7 @@ class OracleGainReader:
     # get database service and open database
     dbSvc = cool.DatabaseSvcFactory.databaseService()
 
-    dbString = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200'
+    dbString = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=CONDBR2'
     try:
       db = dbSvc.openDatabase(dbString, False)        
     except Exception as e:
@@ -80,7 +81,7 @@ class GainPredictor:
     self.layer_weights_em  = {} # per eta bin
     self.layer_weights_had = {} # per eta bin
 
-    file_name = "HVcorrPhysicsWeights.txt"
+    file_name= ROOT.PathResolver.find_calib_file("TrigT1Calo/HVcorrPhysicsWeights_v1.txt")
 
     ### retrieve layer weights from .txt file
     

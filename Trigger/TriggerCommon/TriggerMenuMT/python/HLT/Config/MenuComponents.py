@@ -674,14 +674,13 @@ class ChainStep(object):
  
         self.name = name
         self.sequences = []
-        self.sequenceFunctions = Sequences
-        for iseq, seq in enumerate(Sequences):              
+        self.sequenceFunctions = Sequences    
+        for iseq, seq in enumerate(self.sequenceFunctions):              
             if not isinstance(seq, functools.partial):
-                log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", name, iseq)
+                log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", self.name, iseq)
                 log.error("[ChainStep] It rather seems to be of type %s trying to print it", type(seq))
-                raise RuntimeError("Sequence is not packaged in a tuple, see error message above" )
-                    
-                
+                raise RuntimeError("Sequence is not packaged in a tuple, see error message above" ) 
+                                                 
         self.onlyJets  = False
         sig_set = None
         if len(chainDicts) > 0  and 'signature' in chainDicts[0]: 
@@ -707,10 +706,10 @@ class ChainStep(object):
         self.makeCombo()
 
     def createSequences(self):
-        """ defered creation"""
+        """ creation of this step sequences with instantiation of the CAs"""
         log.debug("creating sequences for step %s", self.name)
-        for seq in self.sequenceFunctions:
-            self.sequences.append(seq()) # create the sequences
+        for seq in self.sequenceFunctions:                        
+            self.sequences.append(seq()) # create the sequences        
 
     def relabelLegIdsForJets(self):
 
