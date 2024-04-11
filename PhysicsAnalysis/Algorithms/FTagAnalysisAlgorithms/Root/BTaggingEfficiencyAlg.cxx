@@ -72,14 +72,16 @@ namespace CP
           // this selection accessor/decoration has nothing to do with
           // it.  You do the pre-selection via a view container like
           // for all the other CP algorithms.
+          CP::CorrectionCode valid;
           if (m_onlyEfficiency || (!m_onlyInefficiency && m_selectionHandle.getBool (*jet, sys)))
-          {
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_efficiencyTool->getScaleFactor (*jet, sf));
-          } else
-          {
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_efficiencyTool->getInefficiencyScaleFactor (*jet, sf));
-          }
-          m_scaleFactorDecoration.set (*jet, sf, sys);
+            valid = m_efficiencyTool->getScaleFactor (*jet, sf);
+          else
+            valid = m_efficiencyTool->getInefficiencyScaleFactor (*jet, sf);
+          ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
+          if (m_outOfValidity.get(*jet))
+            m_scaleFactorDecoration.set (*jet, sf, sys);
+          else
+            m_scaleFactorDecoration.set (*jet, invalidScaleFactor(), sys);
         } else {
           m_scaleFactorDecoration.set (*jet, invalidScaleFactor(), sys);
         }

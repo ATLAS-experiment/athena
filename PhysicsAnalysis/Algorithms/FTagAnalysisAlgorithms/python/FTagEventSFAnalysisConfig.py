@@ -33,7 +33,7 @@ class FTagEventSFConfig(ConfigBlock):
             particles, preselection = config.readNameAndSelection(self.containerName)
             alg.particles = particles
             alg.preselection = ((preselection + '&&' if preselection else '')
-                                + 'ftag_kin_select_' + selectionName + ',as_char')
+                                + 'no_ftag_' + selectionName + ',as_char')
             alg.scaleFactorInputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
             alg.scaleFactorOutputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
 

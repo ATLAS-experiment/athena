@@ -33,7 +33,6 @@ class FTagConfig (ConfigBlock):
         self.addOption ('btagWP', "FixedCutBEff_77", type=str)
         self.addOption ('btagger', "DL1r", type=str)
         self.addOption ('generator', "autoconfig", type=str)
-        self.addOption ('kinematicSelection', True, type=bool)
         self.addOption ('noEffSF', False, type=bool)
         self.addOption ('minPt', None, type=float)
         self.addOption ('bTagCalibFile', None, type=str,
@@ -203,20 +202,6 @@ class FTagConfig (ConfigBlock):
             elif config.geometry() >= LHCPeriod.Run3:
                 bTagCalibFile = "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root"
 
-        if self.kinematicSelection:
-            # Set up the ftag kinematic selection algorithm(s):
-            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagKinSelectionAlg'+postfix )
-            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-            alg.selectionTool.minPt = minPt
-            alg.selectionTool.maxEta = 2.5
-            alg.selectionDecoration = 'ftag_kin_select_' + selectionName + ',as_char'
-            alg.preselection = config.getPreselection (self.containerName, selectionName)
-            config.addSelection (self.containerName, selectionName,
-                                 alg.selectionDecoration,
-                                 preselection=True,
-                                 writeToOutput=False)
-            alg.particles = config.readName (self.containerName)
-
         # Set up the ftag selection algorithm(s):
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )
         config.addPrivateTool( 'selectionTool', 'BTaggingSelectionTool' )
@@ -224,7 +209,7 @@ class FTagConfig (ConfigBlock):
         alg.selectionTool.OperatingPoint = self.btagWP
         alg.selectionTool.JetAuthor = jetCollection
         alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
-        alg.selectionTool.MinPt = minPt
+        alg.selectionTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
         alg.preselection = config.getPreselection (self.containerName, selectionName)
         alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
         alg.particles = config.readName (self.containerName)
@@ -238,7 +223,7 @@ class FTagConfig (ConfigBlock):
             alg.selectionTool.OperatingPoint = self.btagWP
             alg.selectionTool.JetAuthor = jetCollection
             alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
-            alg.selectionTool.MinPt = minPt
+            alg.selectionTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
             alg.preselection = config.getPreselection (self.containerName, selectionName)
             alg.quantileDecoration = 'ftag_quantile_' + selectionName
             alg.jets = config.readName (self.containerName)
@@ -252,7 +237,7 @@ class FTagConfig (ConfigBlock):
             alg.efficiencyTool.TaggerName = self.btagger
             alg.efficiencyTool.OperatingPoint = self.btagWP
             alg.efficiencyTool.JetAuthor = jetCollection
-            alg.efficiencyTool.MinPt = minPt
+            alg.efficiencyTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
             alg.efficiencyTool.EfficiencyFileName = bTagCalibFile
             alg.efficiencyTool.ScaleFactorFileName = bTagCalibFile
             alg.efficiencyTool.SystematicsStrategy = self.systematicsStrategy
@@ -273,8 +258,8 @@ class FTagConfig (ConfigBlock):
             alg.scaleFactorDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
             alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
             alg.onlyEfficiency = self.btagWP == 'Continuous'
-            alg.outOfValidity = 2
-            alg.outOfValidityDeco = 'no_ftag_' + selectionName
+            alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
+            alg.outOfValidityDeco = 'no_ftag_' + selectionName + ',as_char'
             alg.preselection = config.getPreselection (self.containerName, selectionName)
             alg.jets = config.readName (self.containerName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_eff')
@@ -285,7 +270,6 @@ def makeFTagAnalysisConfig( seq, containerName,
                             btagWP = None,
                             btagger = None,
                             generator = None,
-                            kinematicSelection = None,
                             noEffSF = None,
                             minPt = None ):
     """Create a ftag analysis algorithm config
@@ -294,7 +278,6 @@ def makeFTagAnalysisConfig( seq, containerName,
       btagWP -- Flavour tagging working point
       btagger -- Flavour tagger
       generator -- Generator for MC/MC scale factors
-      kinematicSelection -- Wether to run kinematic selection
       noEffSF -- Disables efficiency and scale factor calculations
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
@@ -303,7 +286,6 @@ def makeFTagAnalysisConfig( seq, containerName,
     config.setOptionValue ('btagWP', btagWP)
     config.setOptionValue ('btagger', btagger)
     config.setOptionValue ('generator', generator)
-    config.setOptionValue ('kinematicSelection', kinematicSelection)
     config.setOptionValue ('noEffSF', noEffSF)
     config.setOptionValue ('minPt', minPt)
     seq.append (config)

@@ -828,6 +828,7 @@ BTaggingEfficiencyTool::getScaleFactor( int flavour, const Analysis::Calibration
   case Analysis::kError:
     ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor call to underlying code returned a kError!");
     return CorrectionCode::Error;
+  case Analysis::kRange:
   case Analysis::kExtrapolatedRange:
     return m_ignoreOutOfValidityRange ? CorrectionCode::Ok : CorrectionCode::OutOfValidityRange;
   case Analysis::kSuccess:
@@ -903,6 +904,7 @@ BTaggingEfficiencyTool::getEfficiency( int flavour, const Analysis::CalibrationD
   case Analysis::kError:
     ATH_MSG_ERROR("BTaggingEfficiencyTool::getEfficiency call to underlying code returned a kError!");
     return CorrectionCode::Error;
+  case Analysis::kRange:
   case Analysis::kExtrapolatedRange:
     return m_ignoreOutOfValidityRange ? CorrectionCode::Ok : CorrectionCode::OutOfValidityRange;
   case Analysis::kSuccess:
@@ -978,6 +980,7 @@ BTaggingEfficiencyTool::getInefficiency( int flavour, const Analysis::Calibratio
   case Analysis::kError:
     ATH_MSG_ERROR("BTaggingEfficiencyTool::getInefficiency call to underlying code returned a kError!");
     return CorrectionCode::Error;
+  case Analysis::kRange:
   case Analysis::kExtrapolatedRange:
     return m_ignoreOutOfValidityRange ? CorrectionCode::Ok : CorrectionCode::OutOfValidityRange;
   case Analysis::kSuccess:
@@ -1053,6 +1056,7 @@ BTaggingEfficiencyTool::getInefficiencyScaleFactor( int flavour, const Analysis:
   case Analysis::kError:
     ATH_MSG_ERROR("BTaggingEfficiencyTool::getInefficiencyScaleFactor call to underlying code returned a kError!");
     return CorrectionCode::Error;
+  case Analysis::kRange:
   case Analysis::kExtrapolatedRange:
     return m_ignoreOutOfValidityRange ? CorrectionCode::Ok : CorrectionCode::OutOfValidityRange;
   case Analysis::kSuccess:
@@ -1104,6 +1108,7 @@ BTaggingEfficiencyTool::getMCEfficiency( int flavour, const Analysis::Calibratio
   case Analysis::kError:
     ATH_MSG_ERROR("BTaggingEfficiencyTool::getMCEfficiency call to underlying code returned a kError!");
     return CorrectionCode::Error;
+  case Analysis::kRange:
   case Analysis::kExtrapolatedRange:
     return m_ignoreOutOfValidityRange ? CorrectionCode::Ok : CorrectionCode::OutOfValidityRange;
   case Analysis::kSuccess:
