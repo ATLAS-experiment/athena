@@ -11,9 +11,6 @@ def mistimedAlg(flags):
 
     acc = ComponentAccumulator()
 
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
-
     type_names = [
         # ===== CPM ================================================================
         "xAOD::CPMTowerContainer/CPMTowers",

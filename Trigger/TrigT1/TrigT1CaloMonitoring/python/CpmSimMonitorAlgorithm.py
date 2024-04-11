@@ -510,9 +510,6 @@ if __name__=='__main__':
     flags.lock()
     flags.dump() # print all the configs
 
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
-
     from AthenaConfiguration.MainServicesConfig import MainServicesSerialCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg = MainServicesSerialCfg()
