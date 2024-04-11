@@ -14,7 +14,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "JetTagTools/ITagTool.h"
-
+#include <string>
 #include <vector>
 #include <atomic>
 
