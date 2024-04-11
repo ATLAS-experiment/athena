@@ -157,6 +157,8 @@ void VisAttributes::setColorFromRGB(SoMaterial* mat, const std::string& type, co
         mat->diffuseColor.setValue(fr, fg, fb);
     else if (type == "specular")
         mat->specularColor.setValue(fr, fg, fb);
+    else if (type == "emissive")
+        mat->emissiveColor.setValue(fr, fg, fb);
     else 
         std::cout << "ERROR! Color type not supported ==> " << type << std::endl;
     
@@ -1107,39 +1109,45 @@ MatVisAttributes::MatVisAttributes() {
 
   // Adding ITk colors
   // PP0 material
+  // Services and Cooling
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 255, 128, 0);
-    m->shininess.setValue(0.67);
+    setColorFromRGB(m, "diffuse", 81, 163, 119);
+    setColorFromRGB(m, "ambient", 0, 40, 48);
+    setColorFromRGB(m, "specular", 255, 255, 255);
+    setColorFromRGB(m, "emissive", 0, 0, 0);
+    m->shininess.setValue(0.5);
+    m->transparency.setValue(0.6);
     // inner pixel system
     add( "PP0BMaterial",m);
     add( "PP0CMaterial",m);
     add( "PP0DMaterial",m);
     add( "PP0SMaterial",m);
     add( "PP0QMaterial",m);
+    // inner pixel system
     add( "SvcBrlPP0_30_Hor2_L2_Sec0_Material",m);
     add( "SvcBrlPP0_40_Hor3_L3_Sec0_Material",m);
     add( "SvcBrlPP0_50_Hor4_L4_Sec0_Material",m);
     add( "OutPixIncSec2PP0Material",m);
     add( "OutPixIncSec3PP0Material",m);
     add( "OutPixIncSec4PP0Material",m);
+  
+   add( "Type1ServiceBMaterial",m);
+   add( "Type1ServiceCMaterial",m);
+   add( "Type1ServiceDMaterial",m);
+   add( "Type1ServiceSMaterial",m);
+   add( "Type1ServiceQMaterial",m);
+   add( "Type1CoolingBMaterial",m);
+   add( "Type1CoolingEMaterial",m);
   }
 
-  // Services and Cooling
+  // PP1 material
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 0, 70, 0);
-    m->shininess.setValue(0.67);
-    // inner pixel system
-    add( "Type1ServiceBMaterial",m);
-    add( "Type1ServiceCMaterial",m);
-    add( "Type1ServiceDMaterial",m);
-    add( "Type1ServiceSMaterial",m);
-    add( "Type1ServiceQMaterial",m);
-    add( "Type1CoolingBMaterial",m);
-    add( "Type1CoolingEMaterial",m);
+    setColorFromRGB(m, "diffuse", 76, 76, 204);
+    setColorFromRGB(m, "emissive", 53, 53, 141);
+    m->transparency.setValue(0.7);
 
-    // PP1
     add( "matPixType2D",m);
     add( "matPixType2F",m);
     add( "matPixType2H",m);
@@ -1152,143 +1160,39 @@ MatVisAttributes::MatVisAttributes() {
     add( "PP1_T2_Power_lowr",m);
     add( "PP1_T2_Power",m);
     add( "PP1_T2_Power_midr",m);
-    add( "PP1_T1_Inner_Cone",m);
-    add( "PP1_T1_Outer_Cone",m);
-    add( "matPP1Type1PixOuter",m);
-    add( "matPP1OuterConnectors",m);
     add( "PP1_T1_Inner",m);
     add( "PP1_T1_Outer",m);
-    add( "matPP1Type1PixInner",m);
-    add( "PP1_T1_powerconnector_Al",m);
-    add( "matPP1InnerConnectors",m);
     add( "PP1_T2_Power_highr",m);
     add( "PP1_T2_cooling_quadrant",m);
+    add( "matPixCoolingOuter",m);
     add( "pixSvc_PP1_T2_R347_R420_CoolingInner",m);
     add( "MatB_PP1",m);
     add( "MatEC_PP1",m);
-
-  }
-
-  // other PP1
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 76, 76, 204);
-    m->shininess.setValue(0.67);
-    // inner pixel system
     add( "HeatExchanger",m);
-    add( "Pix_PP1OuterServices",m);
     add( "PP1_T1_Outer_Cyl",m);
     add( "PP1_T1_Inner_Cyl",m);
     add( "matPixCoolingSum",m);
     add( "AlAnticorodal",m);
     add( "matHeatExchanger",m);
-    add( "PP1_T1_cooling_Steel",m);
     add( "matPixCoolingInner",m);
-    add( "matPixCoolingOuter",m);
+    add( "PP1_T1_cooling_Steel",m);
+    add( "PP1_T1_powerconnector_Al",m);
+    add( "PP1_T1_Inner_Cone",m);
+    add( "matPP1Type1PixInner",m);
+    add( "matPP1InnerConnectors",m);
+    add( "matPP1Type1PixOuter",m);
+    add( "matPP1OuterConnectors",m);
+    add( "PP1_T1_Outer_Cone",m);
 
   }
 
-  // ITk Strip detector
-  {
-    // Aluminium
-    SoMaterial *m = new SoMaterial;
-    m->ambientColor.setValue (0.70, 0.72, 0.72);
-    m->diffuseColor.setValue (0.56, 0.57, 0.57);
-    m->specularColor.setValue(0.71, 0.48, 0.46);
-    m->shininess.setValue(0.23);
-    add("AlMetal",m);
-  }
-
-  {
-    // Silicon
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 46, 87, 11);
-    m->shininess.setValue(0.67);
-    add( "SiMetal", m);
-  }
-
-  {
-    // Titanium
-    SoMaterial *m = new SoMaterial;
-    m->diffuseColor.setValue (0.62, 0.62, 0.62);
-    m->specularColor.setValue (0.294, 0.294, 0.294);
-    m->shininess.setValue(.20);
-    add("TiMetal",m);
-    add("Ti6Al4V",m);
-  }
-
-  {
-    // Copper
-    SoMaterial *m = new SoMaterial;
-    m->diffuseColor.setValue (0.36, 0.43, 1.0);
-    m->specularColor.setValue (1.0, 1.0, 1.0);
-    m->shininess.setValue(.40);
-    add("CuMetal",m);
-  }
-
-  // a lot of flanges and mounting structures
+  // Hybrid material on ITk strip modules
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 150, 0, 0);
-    m->shininess.setValue(0.67);
-    m->transparency.setValue(0.5);
-    add( "CFRP",m);
-    add( "matSVatBulkhead",m);
-    add( "Honeycomb2pcf",m);
-    add( "Honeycomb3pcf",m);
-    add( "Honeycomb10pcf",m);
-    add( "CFRP174",m);
-    add( "CFRP179",m);
-    add( "matStiffDiscAve",m);
-    add( "SS304",m);
-    add( "K13C2U",m);
-    add( "k9Allcomp",m);
-    add( "Peek",m);
-    add( "K13D2U",m);
-    add( "CFoam",m);
-  }
-
-  // polymoderator
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 204, 178, 153);
-    m->shininess.setValue(0.67);
-    add( "SWX-201HD1Z",m);
-    add( "BoratedPolyethylene",m);
-  }
-
-  {
-    // Tungsten
-    SoMaterial *m = new SoMaterial;
-    m->diffuseColor.setValue (0.14, 0.14, 0.14);
-    m->specularColor.setValue(0.84, 0.94, 1.00);
-    m->shininess.setValue(0.20);
-    add( "matDCDC_PCB",m);
-    add( "matDCDC_Box",m);
-  }
-
-  {
-    SoMaterial *m = new SoMaterial;
-    m->diffuseColor.setValue (1, 1, 0.78);
-    add( "SE4445",m);
-    add( "GraphiteLoadedEpoxy",m);
-  }
-
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 0, 70, 0);
-    m->shininess.setValue(0.67);
-    add( "matEOS",m);
-    add( "Torlon",m);
-    add( "TorlonForCloseoutFar",m);
-    add( "TorlonForCloseoutNear",m);
-    add( "T300CF",m);
-  }
-
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 186, 122, 29);
-    m->shininess.setValue(0.67);
+    setColorFromRGB(m, "diffuse", 29, 86, 86);
+    setColorFromRGB(m, "ambient", 0, 0, 0);
+    setColorFromRGB(m, "specular", 0, 0, 0);
+    setColorFromRGB(m, "emissive", 59, 117, 176);
     add( "matB_HybridPCB",m);
     add( "matEC_HybridPCB",m);
     add( "matEC_HybridR0H0",m);
@@ -1305,15 +1209,8 @@ MatVisAttributes::MatVisAttributes() {
     add( "matEC_HybridR5H0",m);
     add( "matEC_HybridR5H1",m);
     add( "matPetalBusKapton",m);
-  }
-
-  {
-    // C02:
-    SoMaterial *m = new SoMaterial;
-    m->ambientColor.setValue(0.2, 0.2, 0.2);
-    m->diffuseColor.setValue(0.58, 0.47, 0.81);
-    m->specularColor.setValue(0.56, 0.55, 0.56);
-    add("CO2Liquid",m);
+    add( "matDCDC_PCB",m);
+    add( "matDCDC_Box",m);
   }
 
 //////////////
@@ -1422,50 +1319,85 @@ VolVisAttributes::VolVisAttributes() {
     //add( "RPC_AL_extsuppanel",m); // WIP
     add( "Rpclayer",m);
   }
-
+    
   // Adding ITk colors
+  // ITk Pixel sensors
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 46, 87, 11);
-    m->shininess.setValue(0.67);
+    setColorFromRGB(m, "diffuse", 81, 163, 119);
+    setColorFromRGB(m, "ambient", 0, 40, 48);
+    setColorFromRGB(m, "specular", 255, 255, 255);
+    setColorFromRGB(m, "emissive", 0, 0, 0);
+    m->shininess.setValue(0.5);
+
     // innermost pixel barrel layer
     add( "InnerBarrelSingleMod_Sensor",m);
     add( "InnerBarrelSingleMod_DeadVolume",m);
+    add( "InnerBarrelSingleMod_Chip",m);
+    add( "InnerBarrelSingleMod_Bonding",m);
     // next-to-innermost pixel barrel layer
     add( "InnerBarrelQuadMod_Sensor",m);
+    add( "InnerRingSingleMod_Chip",m);
     // innermost pixel endcap layer
     add( "InnerRingSingleMod_Sensor",m);
+    add( "InnerRingSingleMod_Bonding",m);
     // next-to-innermost pixel endcap layer
     add( "InnerEndcapQuadMod_Sensor",m);
+    // next-to-innermost pixel layers
+    add( "InnerQuadMod_Chip",m);
+    add( "InnerQuadMod_Bonding",m);
     // outer pixel barrel layers
     add( "OuterBarrelQuadMod_Sensor",m);
     add( "InclinedQuadMod_Sensor",m);
     // outer pixel endcap layers
     add( "OuterEndcapQuadMod_Sensor",m);
-  }
-
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 140, 143, 143);
-    m->shininess.setValue(0.67);
-    // innermost pixel barrel layer
-    add( "InnerBarrelSingleMod_Chip",m);
-    add( "InnerBarrelSingleMod_Bonding",m);
-    // innermost pixel endcap layer
-    add( "InnerRingSingleMod_Chip",m);
-    add( "InnerRingSingleMod_Bonding",m);
-    // next-to-innermost pixel layers
-    add( "InnerQuadMod_Chip",m);
-    add( "InnerQuadMod_Bonding",m);
     // outer pixel layers
     add( "OuterQuadMod_Chip",m);
     add( "OuterQuadMod_Bonding",m);
+
   }
 
+  // ITk Strip sensors
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 186, 122, 29);
-    m->shininess.setValue(0.67);
+    setColorFromRGB(m, "diffuse", 54, 163, 255);
+    setColorFromRGB(m, "ambient", 0, 0, 0);
+    setColorFromRGB(m, "specular", 0, 0, 0);
+    setColorFromRGB(m, "emissive", 37, 74, 111);
+
+    // strip barrel
+    add( "BRLSensorSS",m);
+    add( "BRLSensorMS",m);
+
+    // strip endcap
+    add( "ECSensor0",m);
+    add( "ECSensor1",m);
+    add( "ECSensor2",m);
+    add( "ECSensor3",m);
+    add( "ECSensor4",m);
+    add( "ECSensor5",m);
+
+    add( "ECSensorBack0",m);
+    add( "ECSensorBack1",m);
+    add( "ECSensorBack2",m);
+    add( "ECSensorBack3",m);
+    add( "ECSensorBack4",m);
+    add( "ECSensorBack5",m);
+
+  }
+
+  // ITk Pixel services
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 81, 163, 119);
+    setColorFromRGB(m, "ambient", 0, 40, 48);
+    setColorFromRGB(m, "specular", 255, 255, 255);
+    setColorFromRGB(m, "emissive", 0, 0, 0);
+    m->shininess.setValue(0.5);
+
+    m->transparency.setValue(0.6);
+    
+    // pigtails and flexes
     // innermost pixel barrel layer
     add( "InnerBarrelSingleMod_Pigtail",m);
     // next-to-innermost pixel layers
@@ -1473,13 +1405,8 @@ VolVisAttributes::VolVisAttributes() {
     add( "InnerQuadMod_QuadFlex",m);
     // outer pixel layers
     add( "OuterQuadMod_QuadFlex",m);
-  }
 
-  // Services and cooling
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 0, 70, 0);
-    m->shininess.setValue(0.67);
+    // Services and cooling
     // inner pixel system
     add( "InnerPixelBarrel_T0",m);
     add( "InnerPixEndcap_L0T0Back_ring",m);
@@ -1492,7 +1419,7 @@ VolVisAttributes::VolVisAttributes() {
     add( "L3HalfRingEndCapBusTapeRing",m);
     add( "L4endcapBusTape",m);
 
-    //
+    // other types and endcaps
     unsigned int sectors = 9;
     std::vector<unsigned int> layers = {2, 3, 4};
     for (auto& layer : layers) {
@@ -1592,26 +1519,8 @@ VolVisAttributes::VolVisAttributes() {
     add( "SvcEc_r339.2_339.3_z.4",m);
     add( "SvcEc_r339.7_339.8_z.4",m);
 
-    // ITk Strip
-    add ("SV_Barrel01",m);
-    add ("SV_Barrel12",m);
-    add ("SV_Barrel23",m);
-    add ("SV_Barrel3Out",m);
-    add ("SV_BarrelPastEndcap",m);
-    add ("SV_Endcap01",m);
-    add ("SV_Endcap12",m);
-    add ("SV_Endcap23",m);
-    add ("SV_Endcap34",m);
-    add ("SV_Endcap45",m);
-    add ("SV_Endcap5Out",m);
 
-  }
-
-  // Cooling
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 170, 255, 255);
-    m->shininess.setValue(0.67);
+    // cooling (when separated from services)
     // inner pixel system
     add( "InnerPixelBarrelCoolingL0",m);
     add( "InnerPixelBarrelCoolingL1",m);
@@ -1621,14 +1530,50 @@ VolVisAttributes::VolVisAttributes() {
     add( "L2HalfRingCoolingPipe",m);
     add( "L3HalfRingCoolingPipe",m);
     add( "L4endcapcoolingpipe",m);
+
   }
 
-  // Support structures
+  // ITk Strip services
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 150, 0, 0);
-    m->shininess.setValue(0.67);
+    setColorFromRGB(m, "diffuse", 28, 55, 83);
+    setColorFromRGB(m, "ambient", 0, 0, 0);
+    setColorFromRGB(m, "specular", 0, 0, 0);
+    setColorFromRGB(m, "emissive", 0, 87, 127);    
     m->transparency.setValue(0.5);
+
+    add ("SV_Barrel01",m);
+    add ("SV_Barrel12",m);
+    add ("SV_Barrel23",m);
+    add ("SV_Barrel3Out",m);
+    add ("SV_BarrelPastEndcap",m);
+    add ("SV_BarrelAtEC_lv",m);
+    add ("SV_Barrel_lv",m);
+    add ("SV_Endcap_lv",m);
+    add ("SV_Endcap01",m);
+    add ("SV_Endcap12",m);
+    add ("SV_Endcap23",m);
+    add ("SV_Endcap34",m);
+    add ("SV_Endcap45",m);
+    add ("SV_Endcap5Out",m);
+    add( "SVatBulkhead_lv",m);
+
+    add( "SVatBulkhead_lv",m);
+    add( "StaveSignalSS",m);
+    add( "StaveGround",m);
+
+  }
+
+  // ITk Pixel support structures
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 81, 163, 119);
+    setColorFromRGB(m, "ambient", 0, 40, 48);
+    setColorFromRGB(m, "specular", 255, 255, 255);
+    setColorFromRGB(m, "emissive", 0, 0, 0);
+    m->shininess.setValue(0.5);
+
+    m->transparency.setValue(0.6);
     // inner pixel system
     add( "IPTvol",m);
     add( "ISTvol",m);
@@ -1663,38 +1608,125 @@ VolVisAttributes::VolVisAttributes() {
     add( "L2HalfShell",m);
     add( "L3HalfShell",m);
     add( "L4HalfShell",m);
-  }
-
-  // Other support structures
-  {
-    SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 204, 178, 153);
-    m->shininess.setValue(0.67);
-
     add( "L2HalfRingEndCapFixingLug",m);
     add( "L3HalfRingEndCapFixingLug",m);
     add( "HalfRingEndCapFixingLug",m);
 
+    // other supports still in the pixel volume
     add( "FrontSupportFacing",m);
     add( "FrontSupportCore",m);
     add( "RearSupport",m);
+  }
 
+  // ITk Strip support structures
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 28, 55, 83);
+    setColorFromRGB(m, "ambient", 0, 0, 0);
+    setColorFromRGB(m, "specular", 0, 0, 0);
+    setColorFromRGB(m, "emissive", 0, 87, 127);    
+    m->transparency.setValue(0.5);
+    
+    add( "StripB_Cyl0",m);
+    add( "StripB_Cyl1",m);
+    add( "StripB_Cyl2",m);
+    add( "StripB_Cyl3",m);
+    add( "StripB_Cyl4",m);
+    add( "StaveCylHat0",m);
+    add( "StaveCylHat1",m);
+    add( "StaveCylHat2",m);
+    add( "StaveCylHat3",m);
+    add( "Flange0",m);
+    add( "Flange1",m);
+    add( "Flange2",m);
+    add( "Flange3",m);
+    add( "Interlink0",m);
+    add( "Interlink1",m);
+    add( "Interlink2",m);
+    add( "Interlink3",m);
+    add( "WheelInnerT",m);
+    add( "WheelOuterT",m);
+    add( "OC_Shell",m);
+    add( "ZBraceI",m);
+    add( "ZBraceO",m);
+    add( "ECPSTube",m);
+    add( "EC_InnerCyl",m);
+    add( "OCFlangeTop",m);
+    add( "OCFlangeFoot",m);
+    add( "OCHatTop",m);
+    add( "OCHatWall",m);
+    add( "OCHatFoot",m);
+    add( "PetalCore",m);
+    add( "BladeFace",m);
+    add( "BladeSideRod",m);
+    add( "BladeCore",m);
+    add( "LockBaseL",m);
+    add( "LockBaseH",m);
+    add( "RailWall",m);
+    add( "RailWedge",m);
+    add( "RailBolt",m);
+    add( "RailWheel",m);
+    add( "RailShelf",m);
+    add( "RailSquare",m);
+    add( "RailSquareT",m);
+    add( "RailSquare1",m);
+    add( "OCMountPadOuter",m);
+    add( "OCMountPadMiddle",m);
+    add( "OCMountPadInner",m);
+    add( "ZtubeD0D1",m);
+    add( "ZtubeD1D2",m);
+    add( "ZtubeD2D3",m);
+    add( "ZtubeD3D4",m);
+    add( "ZtubeD4D5",m);
+    add( "StiffDiscAve",m);
+    add( "Bulkhead",m);
+    add( "StaveFacesheetAll",m);
+    add( "EOS",m);
+    add( "StaveEOS_CFoam",m);
+    add( "StaveBusGlue",m);
+    add( "StaveCloseoutEOS_End",m);
+    add( "StaveCoreMS",m);
+    add( "StaveCoreSS",m);
+    add( "StaveMountC",m);
+    add( "StaveMountI",m);
+    add( "StaveMountE",m);
 
   }
+
+  // polymoderator
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 143, 145, 145);
+    setColorFromRGB(m, "ambient", 178, 184, 184);
+    setColorFromRGB(m, "specular", 181, 122, 117);
+    setColorFromRGB(m, "emissive", 0, 0, 0);
+    m->shininess.setValue(1);
+    add( "PolyMod",m);
+    add( "PolyMod_InnerLayer",m);
+    add( "InnerPolyMod",m);
+    add( "InnerPolyMod_InnerLayer",m);
+  }
+
 
   // volumes that don't need colors as they are made of air
   {
     SoMaterial *m = new SoMaterial;
-    setColorFromRGB(m, "diffuse", 204, 178, 153);
     m->transparency.setValue(1.0);
-
     add( "StaveCchannelAirEOS",m);
     add( "StaveCchannelAirLong",m);
     add( "StaveCchannelAirLongEOS",m);
     add( "PetalCloseoutShortSpace",m);
     add( "PetalCloseoutLongSpace",m);
-
   }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 76, 76, 204);
+    setColorFromRGB(m, "emissive", 53, 53, 141);
+    m->transparency.setValue(0.7);
+    add( "SealPlate",m);
+  }
+
   
   init();
 }

@@ -47,6 +47,7 @@ public:
   //Add extra geometry and track systems?
   static QStringList extraGeometrySystems();
   static QStringList extraTrackSystems();
+  static QStringList extraGuideSystems();
 
 private:
 
