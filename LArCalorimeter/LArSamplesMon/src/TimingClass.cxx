@@ -365,11 +365,11 @@ void LArSamples::TimingClass::Time(int dete, const std::string& nrun)
 void LArSamples::TimingClass::PlotFebAverageTime24(const std::string& nrun, const std::string& name)
 // ******************************************************************************* //
 {
-  string Filename = "FEB_time_fitMean_" + nrun + "_" + name + ".txt";
+  std::string Filename = "FEB_time_fitMean_" + nrun + "_" + name + ".txt";
 
-  ifstream f(Filename.c_str(), ios::in);
-  vector<double> mean;
-  vector<int> side;
+  std::ifstream f(Filename.c_str(), ios::in);
+  std::vector<double> mean;
+  std::vector<int> side;
 
   while (!f.eof())
   {
