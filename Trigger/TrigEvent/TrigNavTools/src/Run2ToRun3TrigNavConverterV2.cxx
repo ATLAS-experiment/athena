@@ -162,6 +162,10 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
     ATH_MSG_INFO("Will use Trigger Navigation decoded from TrigNavigation object");
   }
 
+  if (!m_chainsToSave.empty()) {
+    ATH_MSG_DEBUG("Will only save features for these chains " << m_chainsToSave);
+  }
+
   ATH_CHECK(m_configSvc.retrieve());
   ATH_CHECK(m_clidSvc.retrieve());
 
@@ -296,7 +300,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
 
   SG::WriteHandle<TrigCompositeUtils::DecisionContainer> outputNavigation = TrigCompositeUtils::createAndStore(m_trigOutputNavKey, context);
   auto decisionOutput = outputNavigation.ptr();
-  TrigCompositeUtils::newDecisionIn(decisionOutput, "HLTPassRaw"); // we rely on the fact that the 1st element is the top
+  TrigCompositeUtils::newDecisionIn(decisionOutput, TCU::summaryPassNodeName()); // we rely on the fact that the 1st element is the top
 
   if (m_doLinkFeatures)
   {
@@ -317,6 +321,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   ATH_CHECK(linkRoiNode(convProxies, *run2NavigationPtr));
   ATH_CHECK(linkTrkNode(convProxies, *run2NavigationPtr));
   ATH_CHECK(createSFNodes(convProxies, *decisionOutput, m_finalTEIdsToChains, context));
+  ATH_CHECK(updateTerminusNode(*decisionOutput, context));
   ATH_MSG_DEBUG("Conversion done, from " << convProxies.size() << " elements to " << decisionOutput->size() << " elements");
 
   // printProxies(convProxies, [](auto ){ return true;},
@@ -983,6 +988,48 @@ StatusCode Run2ToRun3TrigNavConverterV2::createSFNodes(const ConvProxySet_t &con
   // associate all nodes designated as final one with the filter nodes
 
   ATH_MSG_DEBUG("SF nodes made, output nav elements " << decisions.size());
+  return StatusCode::SUCCESS;
+}
+
+StatusCode Run2ToRun3TrigNavConverterV2::updateTerminusNode(xAOD::TrigCompositeContainer &decisions, const EventContext &) const
+{
+  // Check that only ChainIDs (not LegIDs) are present in the terminus "HLTPassRaw" node.
+  // Check that only chains which pass the event are included.
+  TCU::Decision* terminus = decisions.at(0);
+  ATH_CHECK( terminus->name() == TCU::summaryPassNodeName() );
+  TCU::DecisionIDContainer currentIDs;
+  TCU::DecisionIDContainer filteredIDs;
+  TCU::decisionIDs(terminus, currentIDs); // Extract, std::vector -> std::set
+  for (const TCU::DecisionID id : currentIDs)
+  {
+    const TCU::DecisionID idToCheck = ( TCU::isLegId(id) ? TCU::getIDFromLeg( HLT::Identifier(id) ).numeric() : id );
+    const std::string chainName = HLT::Identifier(idToCheck).name();
+    // Sanity check
+    if (!m_chainsToSave.empty())
+    {
+      if (std::find(m_chainsToSave.begin(), m_chainsToSave.end(), chainName) == m_chainsToSave.end())
+      {
+        ATH_MSG_ERROR("Navigation information for chain " << chainName << " in " 
+          << TCU::summaryPassNodeName() << " but this chain wasn't on the list of chains to save");
+        return StatusCode::FAILURE;
+      }
+    }
+    if (m_tdt->isPassed(chainName))
+    {
+      filteredIDs.insert(idToCheck);
+    }
+  }
+  terminus->setDecisions( std::vector<TCU::DecisionID>() ); // decisions.clear(), but via the xAOD setter function
+  TCU::insertDecisionIDs(filteredIDs, terminus); // Insert, std::set -> std::vector
+  ATH_MSG_VERBOSE("After filtering out leg IDs and checking isPassed, "
+    "the terminus node goes from " << currentIDs.size() << " to " << filteredIDs.size() << " chain IDs.");
+  if (msgLvl(MSG::VERBOSE))
+  {
+    for (const TCU::DecisionID id : filteredIDs)
+    { 
+      ATH_MSG_VERBOSE(" -- Retained passing ID: " << HLT::Identifier(id));
+    }
+  }
   return StatusCode::SUCCESS;
 }
 

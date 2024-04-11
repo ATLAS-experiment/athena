@@ -122,6 +122,7 @@ private:
   StatusCode createIMHNodes(ConvProxySet_t &, xAOD::TrigCompositeContainer &, const EventContext &) const;
   StatusCode createL1Nodes(const ConvProxySet_t &convProxies, xAOD::TrigCompositeContainer &decisions, const EventContext &context) const;
   StatusCode createSFNodes(const ConvProxySet_t &, xAOD::TrigCompositeContainer &, const TEIdToChainsMap_t &finalTEs, const EventContext &context) const;
+  StatusCode updateTerminusNode(xAOD::TrigCompositeContainer &, const EventContext &context) const;
 
   StatusCode linkFeaNode(ConvProxySet_t &convProxies, xAOD::TrigCompositeContainer &, const HLT::TrigNavStructure &run2Nav, const EventContext &context) const;
   StatusCode linkRoiNode(ConvProxySet_t &convProxies, const HLT::TrigNavStructure &run2Nav) const;
