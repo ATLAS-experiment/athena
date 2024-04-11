@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// a simple testing macro for the MuonSelectorTools_xAOD package
@@ -32,6 +32,7 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 
 // Local include(s):
 #include "MuonSelectorTools/MuonSelectionTool.h"
@@ -345,7 +346,8 @@ int main(int argc, char* argv[]) {
 
             // Check truth origin
             isMC = ei->eventType(xAOD::EventInfo::IS_SIMULATION);
-            int truthClass = isMC ? (*mu_itr)->auxdata<int>("truthType") : -999;
+            static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
+            int truthClass = isMC ? truthTypeAcc (**mu_itr) : -999;
 
             int truthType;
             if (truthClass == MCTruthPartClassifier::IsoMuon)
