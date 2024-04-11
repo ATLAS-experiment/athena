@@ -302,10 +302,13 @@ class SlimmingHelper:
                 if (triggerContent and self.IncludeTriggerNavigation):
                         # Run2
                         for item in CompulsoryTriggerNavigation:
+                                print("adding A:",item)
                                 self.FinalItemList.append(item)
                         # Run3
                         from TrigDecisionTool.TrigDecisionToolConfig import possible_keys
                         for item in possible_keys:
+                                print("adding B:",'xAOD::TrigCompositeContainer#'+item)
+                                print("adding C:",'xAOD::TrigCompositeAuxContainer#'+item+'Aux.')
                                 self.FinalItemList.append('xAOD::TrigCompositeContainer#'+item)
                                 self.FinalItemList.append('xAOD::TrigCompositeAuxContainer#'+item+'Aux.')
 
