@@ -34,7 +34,7 @@
 # may be unreadable.
 ####################################################################
 
-from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, CompulsoryDynamicContent
+from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, CompulsoryTriggerNavigation, CompulsoryDynamicContent
 from DerivationFrameworkCore.ContentHandler import ContentHandler
 from DerivationFrameworkCore.ContainersForExpansion import ContainersForExpansion
 from DerivationFrameworkCore.ContainersOnTheFly import ContainersOnTheFly
@@ -300,6 +300,10 @@ class SlimmingHelper:
                                 self.FinalItemList.append(item)
 
                 if (triggerContent and self.IncludeTriggerNavigation):
+                        # Run2
+                        for item in CompulsoryTriggerNavigation:
+                                self.FinalItemList.append(item)
+                        # Run3
                         from TrigDecisionTool.TrigDecisionToolConfig import possible_keys
                         for item in possible_keys:
                                 self.FinalItemList.append('xAOD::TrigCompositeContainer#'+item)
