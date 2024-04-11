@@ -7,7 +7,11 @@
 #include <Inventor/nodes/SoSeparator.h>
 #include <Inventor/nodes/SoVertexProperty.h>
 #include <Inventor/nodes/SoLineSet.h>
+#include <Inventor/nodes/SoCylinder.h>
 #include <Inventor/SbColor4f.h>
+#include <Inventor/nodes/SoMatrixTransform.h>
+#include <Inventor/SbRotation.h>
+#include <Inventor/SbMatrix.h>
 
 
 //____________________________________________________________________
@@ -48,7 +52,12 @@ VP1Lines::~VP1Lines()
 //____________________________________________________________________
 VP1Lines::Imp::Imp(VP1Lines *tc,SoSeparator * as)
   : theclass(tc), attachSep(as), shown(false),
-    colourAndTransp(SbColor4f(1,1,1,1)), direction(SbVec3f(0,0,0)), sep(0)
+    // lines are white by default
+    colourAndTransp(SbColor4f(1,1,1,1)),
+    // this is if you want them black
+    // colourAndTransp(SbColor4f(0,0,0,1)),
+    direction(SbVec3f(0,0,0)),
+    sep(0)
 {
   attachSep->ref();
 }
@@ -82,7 +91,36 @@ void VP1Lines::Imp::rebuild3DObjects()
   line->numVertices.enableNotify(TRUE);
   line->numVertices.touch();
 
-  sep->addChild(line);
+  // This is here if you want to
+  // convert lines into cylinders
+  bool convert = false;
+  if (convert) {
+    SbVec3f p1 = line_vertices->vertex[0].getValue();
+    SbVec3f p2 = line_vertices->vertex[1].getValue();
+    SoCylinder * cylinder = new SoCylinder;
+    cylinder->radius = 4.0;
+    float height = std::sqrt( direction[0]*direction[0]+
+                                direction[1]*direction[1]+
+                                direction[2]*direction[2]);
+    cylinder->height = height;
+
+    SbMatrix m;
+    m.setTranslate(SbVec3f(0,0.5*height,0));
+    SbVec3f v(p2); v -= p1;
+    SbRotation rotation(SbVec3f(0,1,0),v);
+    SbMatrix m2; m2.setRotate(rotation);
+    m.multRight(m2);
+    SbMatrix m3;
+    m3.setTranslate(p1);
+    m.multRight(m3);
+    SbMatrix mat;
+    mat = m;
+    SoMatrixTransform * mt = new SoMatrixTransform;
+    mt->matrix.setValue(mat);
+    sep->addChild(mt);
+    sep->addChild(cylinder);
+  } else sep->addChild(line);
+
   updateColour();
 
   if (save) {

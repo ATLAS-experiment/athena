@@ -37,6 +37,11 @@ def configureGeometry(flags, cfg):
 
         cfg.merge(ITkStripReadoutGeometryCfg(flags))
 
+    if flags.Detector.GeometryHGTD:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+
+        cfg.merge(HGTD_ReadoutGeometryCfg(flags))
+
     if flags.Detector.GeometryLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 

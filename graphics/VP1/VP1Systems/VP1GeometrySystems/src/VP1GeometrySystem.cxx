@@ -281,7 +281,10 @@ public:
       QStringList stationInfo(const MuonGM::MuonStation*);
     #endif
 
+  void expandAllChildren(VolumeHandle*, bool isPixel, bool brl, bool ecA, bool ecC);
   void showPixelModules(VolumeHandle*);
+  void showITkPixelModules(VolumeHandle*, bool brl, bool ecA, bool ecC);
+  void showITkStripModules(VolumeHandle*, bool brl, bool ecA, bool ecC);
   void showSCTBarrelModules(VolumeHandle*);
   void showSCTEndcapModules(VolumeHandle*);
 
@@ -2271,6 +2274,7 @@ void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool
       for (;itChl!=itChlE;++itChl) {
 	bool unzap(false);
 	(*itChl)->setState(VP1GeoFlags::ZAPPED);
+    if (not VP1JobConfigInfo::hasITkGeometry()) {
 	if (brl&&(*itChl)->hasName("barrelLog")) {
 	  unzap = true;
 	  m_d->showPixelModules(*itChl);
@@ -2285,6 +2289,12 @@ void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool
 	    (*itChl)->setState(VP1GeoFlags::EXPANDED);
 	  }
 	}
+    } else {
+      if ((*itChl)->hasName("ITkPixelDetector")) {
+        m_d->showITkPixelModules(*itChl, brl, ecA, ecC);
+        unzap = true;
+      }
+    }
 	if (unzap)
 	  (*itChl)->setState(VP1GeoFlags::EXPANDED);
       }
@@ -2297,6 +2307,7 @@ void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool
       (*it)->setState(VP1GeoFlags::CONTRACTED);
       bool unzap(false);
       (*it)->setState(VP1GeoFlags::ZAPPED);
+      if (not VP1JobConfigInfo::hasITkGeometry()) {
       if (brl&&(*it)->hasName("SCT_Barrel")) {
 	unzap = true;
 	m_d->showSCTBarrelModules(*it);
@@ -2306,6 +2317,10 @@ void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool
       } else if (ecC&&(*it)->hasName("SCT_ForwardC")) {
 	unzap = true;
 	m_d->showSCTEndcapModules(*it);
+      }
+      } else {
+        m_d->showITkStripModules(*it, brl, ecA, ecC);
+        unzap=true;
       }
       if (unzap)
 	(*it)->setState(VP1GeoFlags::EXPANDED);
@@ -2442,6 +2457,151 @@ void VP1GeometrySystem::Imp::showPixelModules(VolumeHandle* h)
     (*it)->setState(VP1GeoFlags::ZAPPED);
     showPixelModules(*it);
     (*it)->setState(VP1GeoFlags::EXPANDED);
+  }
+}
+
+void VP1GeometrySystem::Imp::expandAllChildren(VolumeHandle* h, bool isPixel, bool brl, bool ecA, bool ecC) {
+
+  if (h->nChildren()==0) {
+    if (isPixel and (ecA or ecC)) {
+      float translation_x, translation_y, translation_z, rotaxis_x, rotaxis_y, rotaxis_z, rotangle_radians;
+      VP1LinAlgUtils::decodeTransformation( h->getGlobalTransformToVolume(),
+                                            translation_x, translation_y, translation_z,
+                                            rotaxis_x, rotaxis_y, rotaxis_z, rotangle_radians );
+      if ((!ecA || !ecC) && ((ecA and (translation_z<0.)) or (ecC and (translation_z>0.) ))) {
+        h->setState(VP1GeoFlags::ZAPPED);
+        return;
+      }
+    }
+
+    // check if you have to select it
+    std::vector< std::string > selected_volumes = {};
+    if (brl) {
+      if (isPixel) {
+        selected_volumes.push_back("InnerBarrelSingleMod_Sensor");
+        selected_volumes.push_back("InnerBarrelQuadMod_Sensor");
+        selected_volumes.push_back("OuterBarrelQuadMod_Sensor");
+        selected_volumes.push_back("LongeronCoolingTube");
+        selected_volumes.push_back("InnerPixBarrelSupport_Stave");
+        selected_volumes.push_back("InnerPixBarrelSupport_Stave1");
+        selected_volumes.push_back("LongeronCornerBase");
+        selected_volumes.push_back("LongeronCornerEnd");
+        selected_volumes.push_back("LongeronTrussWall");
+        selected_volumes.push_back("LongeronCapBase");
+        selected_volumes.push_back("LongeronTopCap");
+
+      } else {
+        selected_volumes.push_back("BRLSensorSS");
+        selected_volumes.push_back("BRLSensorMS");
+        selected_volumes.push_back("B_HybridPCB");
+        selected_volumes.push_back("DCDC_PCB");
+        selected_volumes.push_back("DCDC_Box");
+        selected_volumes.push_back("Bex_HybridPCB_near");
+        selected_volumes.push_back("Bex_HybridPCB_far");
+      }
+    }
+    if (ecA or ecC) {
+      if (isPixel) {
+        selected_volumes.push_back("InclinedQuadMod_Sensor");
+        selected_volumes.push_back("InnerRingSingleMod_Sensor");
+        selected_volumes.push_back("InnerEndcapQuadMod_Sensor");
+        selected_volumes.push_back("OuterEndcapQuadMod_Sensor");
+        selected_volumes.push_back("L2HalfRingCoolingPipe");
+        selected_volumes.push_back("L3HalfRingCoolingPipe");
+        selected_volumes.push_back("L4endcapcoolingpipe");
+        selected_volumes.push_back("InclL2HalfShell");
+        selected_volumes.push_back("InclL2Support");
+        selected_volumes.push_back("InclL3HalfShell");
+        selected_volumes.push_back("InclL3Support");
+        selected_volumes.push_back("InclL4HalfShell");
+        selected_volumes.push_back("InclL4Support");
+        selected_volumes.push_back("InnerPixEndcap_CoupledRingSupport");
+        selected_volumes.push_back("InnerPixEndcap_IntermediateRingSupport");
+        selected_volumes.push_back("InnerPixEndcap_L1RingSupport");
+        selected_volumes.push_back("L2HalfRingCarbonFoamInner");
+        selected_volumes.push_back("L2HalfRingCarbonFoamOuter");
+        selected_volumes.push_back("L2HalfRingFaceSheet");
+        selected_volumes.push_back("L3HalfRingCarbonFoamInner");
+        selected_volumes.push_back("L3HalfRingCarbonFoamOuter");
+        selected_volumes.push_back("L3HalfRingFaceSheet");
+        selected_volumes.push_back("L4endcapinnerCarbonFoam");
+        selected_volumes.push_back("L4endcapouterCarbonFoam");
+        selected_volumes.push_back("L4endcapFaceSheet");
+        selected_volumes.push_back("L2HalfShell");
+        selected_volumes.push_back("L3HalfShell");
+        selected_volumes.push_back("L4HalfShell");
+      } else {
+        selected_volumes.push_back("ECSensor0");
+        selected_volumes.push_back("ECSensor1");
+        selected_volumes.push_back("ECSensor2");
+        selected_volumes.push_back("ECSensor3");
+        selected_volumes.push_back("ECSensor4");
+        selected_volumes.push_back("ECSensor5");
+        selected_volumes.push_back("ECSensorBack0");
+        selected_volumes.push_back("ECSensorBack1");
+        selected_volumes.push_back("ECSensorBack2");
+        selected_volumes.push_back("ECSensorBack3");
+        selected_volumes.push_back("ECSensorBack4");
+        selected_volumes.push_back("ECSensorBack5");
+      }
+    }
+
+    std::string name = h->getName().toStdString();
+
+    if (not isPixel and (ecA or ecC)) {
+      // check servises in the endcap
+      if (name.starts_with("ECHybrid") or name.starts_with("DCDC_EC"))
+        return;
+    }
+
+    if (std::find(selected_volumes.begin(), selected_volumes.end(), name) == selected_volumes.end()) {
+      h->setState(VP1GeoFlags::ZAPPED);
+      return;
+    }
+    return;
+  } else if (not isPixel and (h->getName().toStdString()=="PetalCore" or
+                              h->getName().toStdString()=="StaveCoreSS" or 
+                              h->getName().toStdString() =="StaveCoreMS")) {
+    return;
+  }
+  h->initialiseChildren();
+  
+  h->setState(VP1GeoFlags::EXPANDED);
+  VolumeHandle::VolumeHandleListItr it(h->childrenBegin()),itE(h->childrenEnd());
+  for (;it!=itE;++it) {
+    expandAllChildren(*it, isPixel, brl, ecA, ecC);
+  }
+}
+
+void VP1GeometrySystem::Imp::showITkPixelModules(VolumeHandle* h, bool brl, bool ecA, bool ecC)
+{
+  VP1Msg::messageDebug("VP1GeometrySystem::Imp::showITkPixelModules()");
+  h->initialiseChildren();
+  VolumeHandle::VolumeHandleListItr it(h->childrenBegin()),itE(h->childrenEnd());
+  // std::cout << "Processing volume with name = " << h->getName().toStdString() << " and " << h->nChildren() << " children..." << std::endl;
+  for (;it!=itE;++it) {
+    expandAllChildren(*it, true, brl, ecA, ecC);
+  }
+}
+
+
+void VP1GeometrySystem::Imp::showITkStripModules(VolumeHandle* h, bool brl, bool ecA, bool ecC)
+{
+  VP1Msg::messageDebug("VP1GeometrySystem::Imp::showITkStripModules()");
+  h->initialiseChildren();
+  VolumeHandle::VolumeHandleListItr it(h->childrenBegin()),itE(h->childrenEnd());
+  // std::cout << "Processing volume with name = " << h->getName().toStdString() << " and " << h->nChildren() << " children..." << std::endl;
+  for (;it!=itE;++it) {
+    if (brl and (*it)->hasName("ITkStrip_Barrel")) {
+      expandAllChildren(*it, false, brl, ecA, ecC);
+    }
+    else if (ecA and (*it)->hasName("ITkStrip_ForwardPlus")) {
+      expandAllChildren(*it, false, brl, ecA, ecC);
+    }
+    else if (ecC and (*it)->hasName("ITkStrip_ForwardMinus")) {
+      expandAllChildren(*it, false, brl, ecA, ecC);
+    } else
+      (*it)->setState(VP1GeoFlags::ZAPPED);
   }
 }
 

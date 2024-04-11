@@ -53,6 +53,7 @@ void VP13DCocktailChannel::init()
 {
   VP1GuideLineSystem * guidelinesystem = new VP1GuideLineSystem;
   addSystem(guidelinesystem);
+
   VP1GeometrySystem * geosys = new VP1GeometrySystem(VP1GeoFlags::AllMuonChambers);
   addSystem(geosys);
 
@@ -101,6 +102,8 @@ void VP13DCocktailChannel::init()
     addSystem(new VP1GeometrySystem(VP1GeoFlags::None,n),IVP13DStandardChannelWidget::StartDisabled);
   for (QString n : VP1SysConf::extraTrackSystems())
     addSystem(new VP1TrackSystem(n),IVP13DStandardChannelWidget::StartDisabled);
+  for (QString n : VP1SysConf::extraGuideSystems())
+    addSystem(new VP1GuideLineSystem(),IVP13DStandardChannelWidget::StartDisabled);
 
   VP1SysConf::setupStandardConnectionsAndOptions( guidelinesystem,geosys,tracksys,prdsys,0,VP1SysConf::EVENTSTUDIES );
 }

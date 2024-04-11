@@ -146,3 +146,20 @@ QStringList VP1SysConf::extraTrackSystems()
 
 }
 
+//____________________________________________________________________
+QStringList VP1SysConf::extraGuideSystems()
+{
+  bool ok;
+  unsigned nextra = VP1QtUtils::environmentVariableValue("VP1_NEXTRA_GUIDESYS").toUInt ( &ok );
+  if (!ok) nextra = 0;
+
+  if (nextra>20)
+    nextra=20;
+
+  QStringList l;
+  for (unsigned i=1;i<=nextra;++i)
+    l << ("AltGuide"+(i>1?QString::number(i):QString()));
+  return l;
+
+}
+
