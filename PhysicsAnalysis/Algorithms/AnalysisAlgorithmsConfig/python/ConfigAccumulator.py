@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
@@ -169,6 +169,7 @@ class ConfigAccumulator :
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
         self._eventcutflow = {}
+        self._muonCalibMode = -1
 
         # If we are in an Athena environment with ComponentAccumulator configuration
         # then the AlgSequence, which is Gaudi.AthSequencer, does not support '+=',
