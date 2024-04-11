@@ -102,7 +102,6 @@ StatusCode LArBadChannel2Ascii::execute() {
   const LArBadChanBitPacking packing;
   const LArBadChanSCBitPacking SCpacking;
 
-  // std::vector<std::vector<unsigned> > problemMatrix(nParts,std::vector<unsigned>(nProblemTypes) );
   std::vector<std::vector<unsigned> > problemMatrix(nProblemTypes, std::vector<unsigned>(nParts));
 
   std::vector<HWIdentifier>::const_iterator it = larOnlineID->channel_begin();
@@ -118,10 +117,10 @@ StatusCode LArBadChannel2Ascii::execute() {
     ++nConnected;
 
     DetPart dp = EMB;
-    if (larOnlineID->isEMECchannel(chid))
-      dp = EMEC;
-    else if (larOnlineID->isHECchannel(chid))
+    if (larOnlineID->isHECchannel(chid))
       dp = HEC;
+    else if (larOnlineID->isEMECchannel(chid))
+      dp = EMEC;
     else if (larOnlineID->isFCALchannel(chid))
       dp = FCAL;
 
