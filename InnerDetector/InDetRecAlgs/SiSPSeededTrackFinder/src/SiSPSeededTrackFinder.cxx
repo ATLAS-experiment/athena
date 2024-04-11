@@ -354,7 +354,11 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
   * The seed maker will internally reconfigure itself based on
   * the "1" argument for the "iteration" argument in this call. 
   **/ 
-  m_seedsmaker->newEvent(ctx, seedEventData, 1);
+  if(not m_SpacePointsPixelKey.empty()) {
+    m_seedsmaker->newEvent(ctx, seedEventData, 1);
+  } else {
+    ATH_MSG_WARNING("SpacePointsPixelKey is empty. Skipping the second seeding pass that uses pixel seeds.");
+  }
 
   /// perform vertex Z estimation and run second seeding pass
   std::pair<double,double> zBoundaries;

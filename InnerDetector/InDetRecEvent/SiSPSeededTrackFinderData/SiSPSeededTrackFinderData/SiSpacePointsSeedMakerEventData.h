@@ -274,23 +274,26 @@ namespace InDet {
     /// This is a compromise to avoid a fixed array size while
     /// still minimising the number of re-allocations
     void resizeSPCont(size_t increment=50, ToolType type = ToolType::ATLxk){
-      size_t currSize = SP.size();
-      size_t newSize = currSize + increment;
+      size_t currSizeSP = SP.size();
+      size_t newSizeSP = currSizeSP + increment;
       if (type == ToolType::ITk) {
-        ITkSP.resize(newSize, nullptr);
-        X.resize(newSize, 0.);
-        Y.resize(newSize, 0.);
-        Tn.resize(newSize);
+        size_t currSizeITkSP = ITkSP.size();
+        size_t newSizeITkSP = currSizeITkSP + increment;
+        ITkSP.resize(newSizeITkSP, nullptr);
+        X.resize(newSizeITkSP, 0.);
+        Y.resize(newSizeITkSP, 0.);
+        Tn.resize(newSizeITkSP);
+        SP.resize(newSizeSP, nullptr);
       } else {
-        SP.resize(newSize, nullptr);
+        SP.resize(newSizeSP, nullptr);
       }
-      R.resize(newSize, 0.);
-      Tz.resize(newSize, 0.);
-      Er.resize(newSize, 0.);
-      U.resize(newSize, 0.);
-      V.resize(newSize, 0.);
+      R.resize(newSizeSP, 0.);
+      Tz.resize(newSizeSP, 0.);
+      Er.resize(newSizeSP, 0.);
+      U.resize(newSizeSP, 0.);
+      V.resize(newSizeSP, 0.);
       if (type != ToolType::Cosmic) {
-        Zo.resize(newSize, 0.);
+        Zo.resize(newSizeSP, 0.);
       }
     }
 
