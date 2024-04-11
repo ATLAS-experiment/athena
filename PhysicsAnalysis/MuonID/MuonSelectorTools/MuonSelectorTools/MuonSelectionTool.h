@@ -130,16 +130,16 @@ namespace CP {
         asg::AcceptInfo m_acceptInfo;
 
         Gaudi::Property<double> m_maxEta{this, "MaxEta", 2.7, "Maximum eta range to select the muons"};
-        Gaudi::Property<int> m_quality{this, "MuQuality", 1,"Quality to select. Values correspond to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose (only for debug, not supported), 4=HighPt, 5=LowPtEfficiency"};
+        Gaudi::Property<int>  m_quality{this, "MuQuality", 1,"Quality to select. Values correspond to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose (only for debug, not supported), 4=HighPt, 5=LowPtEfficiency"};
         Gaudi::Property<bool> m_toroidOff{this, "ToroidOff", false, "Run the tool in Toroid off setup"};
         Gaudi::Property<bool> m_isRun3{this, "IsRun3Geo", false, "Switch to toggle the run 2 & run 3 geometry cuts. The tool will throw an exception if the run number does not match the expectations later"}; 
-        Gaudi::Property<bool> m_excludeNSWFromPrecisionLayers{this, "ExcludeNSWFromPrecisionLayers", false, "If True, cut on the number of precision layers will ignore the NSW, which is currently the recommended behaviour. Setting this to False is not supported and can be done only for development studies."};
-        Gaudi::Property<bool> m_recalcPrecisionLayerswNSW{this, "RecalcPrecisionLayerswNSW", true, "If True, recalculate the number of precision layers with the NSW."};
-        Gaudi::Property<bool> m_useCaloScore{this, "UseCaloScore", true,"Switch to use CaloScore for calo-tags in the Loose working point. False will revert back to CaloMuonIDTag, not recommended in rel. 22"};
-        Gaudi::Property<int> m_CaloScoreWP{this, "CaloScoreWP", 4,"currently there are 4 CaloScore WPs for test, WP4 is the recommended one"};
+        Gaudi::Property<bool> m_excludeNSWFromPrecisionLayers{this, "ExcludeNSWFromPrecisionLayers", false, "Cut on the nprecisionlayers ignoring the NSW"};
+        Gaudi::Property<bool> m_recalcPrecisionLayerswNSW{this, "RecalcPrecisionLayerswNSW", true, "Recalculate nprecisionlayers with internal criteria for NSW"};
+        Gaudi::Property<bool> m_useCaloScore{this, "UseCaloScore", true, "Use CaloScore for calo-tags in the Loose working point. False will revert back to CaloMuonIDTag (not recommended in Rel.22)"};
+        Gaudi::Property<int>  m_caloScoreWP{this, "CaloScoreWP", 4,"Currently there are 4 CaloScore WPs for testing; WP4 is the recommended one"};
         
         // Expert development options
-        Gaudi::Property<bool> m_TurnOffMomCorr{this, "TurnOffMomCorr", false};
+        Gaudi::Property<bool> m_turnOffMomCorr{this, "TurnOffMomCorr", false};
         Gaudi::Property<bool> m_disablePtCuts{this, "DisablePtCuts", false};
         Gaudi::Property<bool> m_developMode{this, "ExpertDevelopMode", false};
         Gaudi::Property<bool> m_TrtCutOff{this, "TrtCutOff", true};
@@ -151,7 +151,6 @@ namespace CP {
         Gaudi::Property<bool> m_useMVALowPt{this, "UseMVALowPt", false, "for users of low-pT working point to choose whether to use MVA and whether to include MuTagIMO muons. Not yet supported in release 22, crrently only for development studies."};
         Gaudi::Property<bool> m_useSegmentTaggedLowPt{this, "UseSegmentTaggedLowPt", false, "Use MVA low-pt WP. In development phase"};
         Gaudi::Property<bool> m_geoOnTheFly{this, "AllowSettingGeometryOnTheFly", false,"avoids crash if run2/run3 geo is wrongly set"};
-        Gaudi::Property<bool> m_forceGeometry{this, "ForceGeometry", false,"expert option for performance studies: if true, the geometry will be based on the IsRun3Geo property without any safety check"};
         Gaudi::Property<bool> m_doBadMuonVetoMimic{this, "DoBadMuonVetoMimic", false}; // switch to cut away the tail of very large smearing in MC to mimic the effect of the bad muon veto for 2-station muons in the high-pT selection
         Gaudi::Property<bool> m_allowComm{this, "AcceptCommChain", true, "Accepts muons from the EMEO chain if set to true"};
         
@@ -244,25 +243,28 @@ namespace CP {
             uint8_t MMHits{0};
         };
 
-        template <class P, class T, class S> inline void retrieveSummaryValue(const P& muon, T& value, const S type) const {
-            if (!muon.summaryValue(value, type)) {
+        template <class P, class T, class S> inline void retrieveSummaryValue(const P& muon, T& value, const S type, bool ignoreMissing = false) const {
+            if (!muon.summaryValue(value, type) && !ignoreMissing) {
                 ATH_MSG_FATAL(__FILE__ << ":" << __LINE__ << " Failed to retrieve summary value " << type);
                 throw std::runtime_error("MuonSelectorTool summary retrieval failed");
             }
         }
+
         inline void fillSummary(const xAOD::Muon& muon, hitSummary& summary) const;
 
         inline void retrieveParam(const xAOD::Muon& muon, float& value, const xAOD::Muon::ParamDef param) const;
 
         inline float qOverPsignificance(const xAOD::Muon& muon) const;
+
         inline float rhoPrime(const xAOD::Muon& muon) const;
 
         inline void IdMsPt(const xAOD::Muon& muon, float& idPt, float& msPt) const;
         
-        bool isRun3(bool allowForce=true) const
-        {
-          if(allowForce && (m_forceGeometry || !m_geoOnTheFly)) return m_isRun3;
-          int rn=getRunNumber(true);
+        void checkSanity() const;
+
+        bool isRun3(bool forceOnTheFly = false) const {
+          if (!m_geoOnTheFly && !forceOnTheFly) return m_isRun3;
+          int rn = getRunNumber(true);
           return rn>=399999;
         }
     };  // class MuonSelectionTool
