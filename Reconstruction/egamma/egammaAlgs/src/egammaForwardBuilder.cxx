@@ -23,8 +23,8 @@
 #include <cmath>
 
 namespace {
-  const float cellEtaSize = 0.25;
-  const float cellPhiSize = 0.25;
+  static constexpr float cellEtaSize = 0.1;
+  static constexpr float cellPhiSize = 0.1;
   
   template <typename... T>
   void copyMoments(const xAOD::CaloCluster& src, 
