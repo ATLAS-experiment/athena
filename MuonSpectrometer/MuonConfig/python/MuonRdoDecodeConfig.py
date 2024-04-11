@@ -82,9 +82,10 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     if RDOContainer:
         tool_kwargs["RDOContainer"] = RDOContainer
     
-    if not  flags.Muon.enableNRPC:
+    if not flags.Muon.enableNRPC:
         tool_kwargs["NrpcInputCollection"] = ""
 
+    tool_kwargs["xAODKey"] =  "RPC_Strips" if flags.Muon.writexAODPRD else ""
     
     #Setup RPC RDO decoder to be consistent with RPC readout settings
     rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)

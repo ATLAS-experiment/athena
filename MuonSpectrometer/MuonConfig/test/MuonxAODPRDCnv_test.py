@@ -24,6 +24,7 @@ cfg.merge(acc)
 
 itemsToRecord = ["xAOD::MdtDriftCircleContainer#*", "xAOD::MdtDriftCircleAuxContainer#*" ]
 itemsToRecord += ["xAOD::sTgcStripContainer#*", "xAOD::sTgcStripAuxContainer#*" ]
+itemsToRecord += ["xAOD::RpcStripContainer#*", "xAOD::RpcStripAuxContainer#*" ]
 SetupMuonStandaloneOutput(cfg, flags, itemsToRecord)
 
 # cfg.getService("StoreGateSvc").Dump = True

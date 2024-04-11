@@ -70,7 +70,7 @@ class RpcStrip_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Sets the TDC counts */
     void setTimeOverThreshold(float timeoverthreshold);
 
-    /** @brief set the pointer to the MdtReadoutElement */
+    /** @brief set the pointer to the ReadoutElement */
     void setReadoutElement(const MuonGMR4::RpcReadoutElement* readoutEle);
     /** @brief Retrieve the associated MdtReadoutElement. 
         If the element has not been set before, it's tried to load it on the fly. 
