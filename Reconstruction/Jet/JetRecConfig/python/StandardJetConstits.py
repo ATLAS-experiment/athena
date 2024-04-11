@@ -113,19 +113,19 @@ _stdInputList = [
                      ),
 
     JetInputExternal("GlobalParticleFlowObjects_noElectrons", xAODType.FlowElement,
-                        algoBuilder = inputcfg.buildPFlowSel_noElectrons,
-                        prereqs = ["input:JetETMissParticleFlowObjects", ],
-                        ),
+                     algoBuilder = inputcfg.buildPFlowSel_noElectrons,
+                     prereqs = ["input:JetETMissParticleFlowObjects", ],
+                     ),
 
     JetInputExternal("GlobalParticleFlowObjects_noMuons", xAODType.FlowElement,
-                        algoBuilder = inputcfg.buildPFlowSel_noMuons,
-                        prereqs = ["input:JetETMissParticleFlowObjects", ],
-                        ),            
+                     algoBuilder = inputcfg.buildPFlowSel_noMuons,
+                     prereqs = ["input:JetETMissParticleFlowObjects", ],
+                     ),            
 
     JetInputExternal("GlobalParticleFlowObjects_noLeptons", xAODType.FlowElement,
-                        algoBuilder = inputcfg.buildPFlowSel_noLeptons,
-                        prereqs = ["input:JetETMissParticleFlowObjects", ],
-                        ),
+                     algoBuilder = inputcfg.buildPFlowSel_noLeptons,
+                     prereqs = ["input:JetETMissParticleFlowObjects", ],
+                     ),
     
     # *****************************
     JetInputExternal("InDetTrackParticles",   xAODType.TrackParticle,
@@ -251,11 +251,30 @@ _stdInputList = [
 
     JetInputExternal("UFOCSSK", xAODType.FlowElement,
                      # in analysis releases, or if we have UFOCSSK in inputs don't  declare unneeded dependencies which could fail the config.
-                     prereqs =lambda parentjdef :  [] if (isAnalysisRelease() or 'UFOCSSK' in parentjdef._cflags.Input.Collections ) else ['input:GPFlowCSSK'], 
+                     prereqs =lambda parentjdef :  [] if (isAnalysisRelease() or 'UFOCSSK' in parentjdef._cflags.Input.Collections ) else ['input:GPFlowCSSK'],
                      filterfn =  lambda flag : ( (not isAnalysisRelease() or 'UFOCSSK' in flag.Input.Collections),  "Can't build UFO in Analysis projects and not UFOCSSK in input") ,
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK'])
                      ),
 
+    JetInputExternal("UFOCSSK_noElectrons", xAODType.FlowElement,
+                     prereqs =lambda parentjdef :  [] if (isAnalysisRelease() or 'UFOCSSK_noElectrons' in parentjdef._cflags.Input.Collections ) else ['input:GPFlowCSSK_noElectrons'],
+                     filterfn =  lambda flag : ( (not isAnalysisRelease() or 'UFOCSSK_noElectrons' in flag.Input.Collections),  "Can't build UFO in Analysis projects and not UFOCSSK in input") ,
+                     algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK_noElectrons'])
+                     ),
+
+    JetInputExternal("UFOCSSK_noMuons", xAODType.FlowElement,
+                     prereqs =lambda parentjdef :  [] if (isAnalysisRelease() or 'UFOCSSK_noMuons' in parentjdef._cflags.Input.Collections ) else ['input:GPFlowCSSK_noMuons'],
+                     filterfn =  lambda flag : ( (not isAnalysisRelease() or 'UFOCSSK_noMuons' in flag.Input.Collections),  "Can't build UFO in Analysis projects and not UFOCSSK in input") ,
+                     algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK_noMuons'])
+                     ),
+
+    JetInputExternal("UFOCSSK_noLeptons", xAODType.FlowElement,
+                     # in analysis releases, or if we have UFOCSSK in inputs don't declare unneeded dependencies which could fail the config.
+                     prereqs =lambda parentjdef :  [] if (isAnalysisRelease() or 'UFOCSSK_noLeptons' in parentjdef._cflags.Input.Collections ) else ['input:GPFlowCSSK_noLeptons'],
+                     filterfn =  lambda flag : ( (not isAnalysisRelease() or 'UFOCSSK_noLeptons' in flag.Input.Collections),  "Can't build UFO in Analysis projects and not UFOCSSK in input") ,
+                     algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK_noLeptons'])
+                     ),
+    
     JetInputExternal("UFO", xAODType.FlowElement,
                      prereqs = ['input:GPFlow'],
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlow'])
@@ -354,10 +373,23 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlowCSSK", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
                        'GlobalParticleFlowObjects', 'CSSKGParticleFlowObjects', jetinputtype="EMPFlow", label='EMPFlowCSSK'),
 
+    JetInputConstitSeq("GPFlowCSSK_noElectrons", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
+                       'GlobalParticleFlowObjects_noElectrons', 'CSSKGParticleFlowObjects_noElectrons', jetinputtype="EMPFlow", label='EMPFlowCSSK_noElectrons'),
 
+    JetInputConstitSeq("GPFlowCSSK_noMuons", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
+                       'GlobalParticleFlowObjects_noMuons', 'CSSKGParticleFlowObjects_noMuons', jetinputtype="EMPFlow", label='EMPFlowCSSK_noMuons'),
+
+    JetInputConstitSeq("GPFlowCSSK_noLeptons", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
+                       'GlobalParticleFlowObjects_noLeptons', 'CSSKGParticleFlowObjects_noLeptons', jetinputtype="EMPFlow", label='EMPFlowCSSK_noLeptons'),
 
     JetInputConstit("UFOCSSK", xAODType.FlowElement, "UFOCSSK" ),
 
+    JetInputConstit("UFOCSSK_noElectrons", xAODType.FlowElement, "UFOCSSK_noElectrons" ),
+
+    JetInputConstit("UFOCSSK_noMuons", xAODType.FlowElement, "UFOCSSK_noMuons" ),
+
+    JetInputConstit("UFOCSSK_noLeptons", xAODType.FlowElement, "UFOCSSK_noLeptons" ),
+    
     JetInputConstit("UFO", xAODType.FlowElement, "UFO" ),
     
     # *****************************
