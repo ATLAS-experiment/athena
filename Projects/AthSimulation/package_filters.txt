@@ -113,7 +113,6 @@
 + DetectorDescription/DetDescrCnvSvc
 + DetectorDescription/DetDescrCond/DetDescrCondAthenaPool
 + DetectorDescription/DetDescrCond/DetDescrCondTPCnv
-+ DetectorDescription/DetDescrCond/DetDescrCondTools
 + DetectorDescription/DetDescrCond/DetDescrConditions
 + DetectorDescription/DetDescrDictionary
 + DetectorDescription/GeoModel/AtlasGeoModel
