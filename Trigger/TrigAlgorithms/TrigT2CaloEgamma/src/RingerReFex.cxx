@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -27,6 +27,7 @@
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "AthContainers/Decorator.h"
 using namespace Monitored;
 
 
@@ -269,16 +270,25 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
     for( auto& rs : vec_rs )
       rs.fill_cells_info(cells_eta, cells_phi, cells_et, cells_sampling, cells_size, rings_sum, cells_id, cells_gain);
 
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_eta") = cells_eta;
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_et") = cells_et;
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_phi") = cells_phi;
-    ptrigRingerRings->auxdecor< std::vector<int> >("cells_sampling") = cells_sampling;
-    ptrigRingerRings->auxdecor< std::vector<int> >("cells_size") = cells_size;
-    ptrigRingerRings->auxdecor< std::vector<int> >("cells_id") = cells_id;
-    ptrigRingerRings->auxdecor< std::vector<float> >("cells_gain") = cells_gain;
+    static const SG::Decorator< std::vector<float> > cells_etaDec("cells_eta");
+    static const SG::Decorator< std::vector<float> > cells_etDec("cells_et");
+    static const SG::Decorator< std::vector<float> > cells_phiDec("cells_phi");
+    static const SG::Decorator< std::vector<int> > cells_samplingDec("cells_sampling");
+    static const SG::Decorator< std::vector<int> > cells_sizeDec("cells_size");
+    static const SG::Decorator< std::vector<int> > cells_idDec("cells_id");
+    static const SG::Decorator< std::vector<float> > cells_gainDec("cells_gain");
+    static const SG::Decorator< std::vector<double> > asym_rings_sumDec("asym_rings_sum");
+    static const SG::Decorator< std::vector<double> > rings_sumDec("rings_sum");
+    cells_etaDec(*ptrigRingerRings) = cells_eta;
+    cells_etDec(*ptrigRingerRings) = cells_et;
+    cells_phiDec(*ptrigRingerRings) = cells_phi;
+    cells_samplingDec(*ptrigRingerRings) = cells_sampling;
+    cells_sizeDec(*ptrigRingerRings) = cells_size;
+    cells_idDec(*ptrigRingerRings) = cells_id;
+    cells_gainDec(*ptrigRingerRings) = cells_gain;
 
-    if (m_doQuarter[0]) ptrigRingerRings->auxdecor< std::vector< double > >("asym_rings_sum") = rings_sum;
-    else  ptrigRingerRings->auxdecor< std::vector< double > >("rings_sum") = rings_sum;
+    if (m_doQuarter[0]) asym_rings_sumDec(*ptrigRingerRings) = rings_sum;
+    else  rings_sumDec(*ptrigRingerRings) = rings_sum;
   }
 
   auto clusLink = ElementLink<xAOD::TrigEMClusterContainer>(m_clusterContainerKey.key(),0,context);
