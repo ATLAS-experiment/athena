@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
@@ -13,37 +12,37 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY25"
 streamName = "StreamDAOD_BPHY25"
 
-def BPHY25Cfg(ConfigFlags):
+def BPHY25Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName)) # VKalVrt vertex fitter
+    isSimulation = flags.Input.isMC
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName)) # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-    pvrefitter = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags))
+    pvrefitter = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(pvrefitter)
     from TrkConfig.TrkV0FitterConfig import TrkV0VertexFitter_InDetExtrCfg
-    v0fitter = acc.popToolsAndMerge(TrkV0VertexFitter_InDetExtrCfg(ConfigFlags))
+    v0fitter = acc.popToolsAndMerge(TrkV0VertexFitter_InDetExtrCfg(flags))
     acc.addPublicTool(v0fitter)
     from TrackToVertex.TrackToVertexConfig import InDetTrackToVertexCfg
-    tracktovtxtool = acc.popToolsAndMerge(InDetTrackToVertexCfg(ConfigFlags))
+    tracktovtxtool = acc.popToolsAndMerge(InDetTrackToVertexCfg(flags))
     acc.addPublicTool(tracktovtxtool)
     from TrkConfig.TrkVKalVrtFitterConfig import V0VKalVrtFitterCfg
     gammafitter = acc.popToolsAndMerge(V0VKalVrtFitterCfg(
-        ConfigFlags, BPHYDerivationName+"_GammaFitter",
+        flags, BPHYDerivationName+"_GammaFitter",
         Robustness          = 6,
         usePhiCnst          = True,
         useThetaCnst        = True,
         InputParticleMasses = [0.511,0.511] ))
     acc.addPublicTool(gammafitter)
     from InDetConfig.InDetTrackSelectorToolConfig import V0InDetConversionTrackSelectorToolCfg
-    v0trackselect = acc.popToolsAndMerge(V0InDetConversionTrackSelectorToolCfg(ConfigFlags))
+    v0trackselect = acc.popToolsAndMerge(V0InDetConversionTrackSelectorToolCfg(flags))
     acc.addPublicTool(v0trackselect)
 
     # mass limits and constants used in the following
@@ -510,7 +509,7 @@ def BPHY25Cfg(ConfigFlags):
     ## V0 vertices
     from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
     BPHY25_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
-        ConfigFlags, derivation = BPHYDerivationName,
+        flags, derivation = BPHYDerivationName,
         V0ContainerName = "BPHY25V0Candidates",
         KshortContainerName = "BPHY25KsCandidates_dummy",
         LambdaContainerName = "BPHY25LambdaCandidates_dummy",
@@ -1405,7 +1404,7 @@ def BPHY25Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY25SlimmingHelper = SlimmingHelper("BPHY25SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY25SlimmingHelper = SlimmingHelper("BPHY25SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     BPHY25_AllVariables  = getDefaultAllVariables()
     BPHY25_StaticContent = []
@@ -1444,7 +1443,7 @@ def BPHY25Cfg(ConfigFlags):
     BPHY25SlimmingHelper.StaticContent = BPHY25_StaticContent
 
     BPHY25ItemList = BPHY25SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY25", ItemList=BPHY25ItemList, AcceptAlgs=["BPHY25Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY25", AcceptAlgs=["BPHY25Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY25", ItemList=BPHY25ItemList, AcceptAlgs=["BPHY25Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY25", AcceptAlgs=["BPHY25Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
