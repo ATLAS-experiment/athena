@@ -13,7 +13,6 @@ namespace Rec {
 GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::string &name,
                                                    const IInterface *parent)
     : AthAlgTool(type, name, parent), m_vertexFitterTool("Trk::TrkVKalVrtFitter/VertexFitterTool", this),
-      m_jetCollection("AntiKt4EMPFlowJets"), 
       m_deco_mass("mass"),
       m_deco_pt("pt"),
       m_deco_charge("charge"),
@@ -23,26 +22,12 @@ GNNVertexFitterTool::GNNVertexFitterTool(const std::string &type, const std::str
       m_deco_deltaR("deltaR"),
       m_deco_ntrk("ntrk"),
       m_deco_lxyz("Lxyz"),
-      m_deco_eFrac("efracsv"),
-      m_multiWithPrimary(true), 
-      m_minLxy(1), 
-      m_maxLxy(300), 
-      m_minSig3D(2),
-      m_maxChi2(20), 
-      m_minNTrack(2),
-      m_HFRatioThres(0.3),   
-      m_gnnModel("GN2v01"){
+      m_deco_eFrac("efracsv"){
   declareInterface<IGNNVertexFitterInterface>(this);
   declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackLinks");
   declareProperty("JetTrackOrigins", m_trackOriginsKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_TrackOrigin");
   declareProperty("JetVertexLinks", m_vertexLinksKey = "BTagging_AntiKt4EMPFlow."+m_gnnModel+"_VertexIndex");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
-  declareProperty("minLxy", m_minLxy, "Minimum radial distance from the PV");
-  declareProperty("maxLxy", m_maxLxy, "Maximum radial distance from the PV");
-  declareProperty("minSig3D", m_minSig3D, "Maximum 3D significance from the PV");
-  declareProperty("maxChi2", m_maxChi2, "Maximum Chi2 for fitted vertices");
-  declareProperty("HFRatio", m_HFRatioThres,
-                  "The threshold for the ratio between HF tracks and all tracks for a vertex");
   m_massPi = 139.5702 * Gaudi::Units::MeV;
 }
 
@@ -61,27 +46,11 @@ StatusCode GNNVertexFitterTool::initialize() {
   m_jetWriteDecorKeyVertexLink = m_jetCollection + "."+m_gnnModel+"VerticesLink";
   ATH_CHECK(m_jetWriteDecorKeyVertexLink.initialize());
 
- // m_jetWriteDecorKeyVertexNumber = m_jetCollection + "."+m_gnnModel+"VerticesNumber";
- // ATH_CHECK(m_jetWriteDecorKeyVertexNumber.initialize());
-
   // Retrieve tools
   ATH_CHECK(m_vertexFitterTool.retrieve());
   // Additional Info for Vertex Fit
   ATH_CHECK(m_beamSpotKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());
-
-
-  // Vertex decorators
-  //m_deco_mass      = std::make_unique< SG::AuxElement::Decorator<float> >("mass");
-  //m_deco_pt        = std::make_unique< SG::AuxElement::Decorator<float> >("pt");
-//  m_deco_charge    = std::make_unique< SG::AuxElement::Decorator<float> >("charge");
-//  m_deco_vPos      = std::make_unique< SG::AuxElement::Decorator<float> >("vPos");
-//  m_deco_lxy       = std::make_unique< SG::AuxElement::Decorator<float> >("Lxy");
-//  m_deco_sig3D     = std::make_unique< SG::AuxElement::Decorator<float> >("significance3d");
-//  m_deco_deltaR    = std::make_unique< SG::AuxElement::Decorator<float> >("deltaRJet");
-//  m_deco_ntrk      = std::make_unique< SG::AuxElement::Decorator<float> >("ntrk");
-//  m_deco_lxyz      = std::make_unique< SG::AuxElement::Decorator<float> >("Lxyz");
-//  m_deco_eFrac     = std::make_unique< SG::AuxElement::Decorator<float> >("efracsv");
 
   return StatusCode::SUCCESS;
 }
@@ -151,8 +120,6 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
     auto vertexCollection = vertexLinksHandle(*btag);
     auto trackCollection = trackLinksHandle(*btag);
     auto trackOriginCollection = trackOriginsHandle(*btag);
-
-    ATH_MSG_INFO(vertexCollection.size() << "   " << trackCollection.size() << "   " << trackOriginCollection.size());
 
     using indexList = std::vector<int>;
     using vertexHFMap = std::map<char, bool>;
@@ -274,7 +241,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         Amg::Vector3D vDir = newvrt.vertex - primVrt.position(); // Vertex Dirction in relation to Primary
 
         Amg::Vector3D jetVrtDir(jet->p4().Px(), jet->p4().Py(), jet->p4().Pz());
-
+        
         double vPos =
             (vDir.x() * newvrt.vertexMom.Px() + vDir.y() * newvrt.vertexMom.Py() + vDir.z() * newvrt.vertexMom.Pz()) /
             newvrt.vertexMom.Rho();
@@ -282,9 +249,9 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         double Lxy = sqrt(vDir[0] * vDir[0] + vDir[1] * vDir[1]);
         double Lxyz = sqrt(vDir[0] * vDir[0] + vDir[1] * vDir[1] + vDir[2] * vDir[2]);
         ATH_MSG_DEBUG("Lxyz  " << Lxyz);
-
+        
         double drJPVSV = Amg::deltaR(jetVrtDir, vDir); // DeltaR
-
+        
         int ntrk = newvrt.trkAtVrt.size(); // # Tracks in Vertex
 
         TLorentzVector MomentumVtx = TotalMom(xAODwrk->listSelTracks);
@@ -296,19 +263,13 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         // apply quality cuts
         if (ntrk < m_minNTrack)
           continue;
-        if (Lxy < m_minLxy ) 
-          continue;
-        if ( newvrt.vertex.perp() < m_minLxy)
-          continue;
         if (distToPV < m_minSig3D && newvrt.vertex.perp() > 24.0)
           continue;
-
-//       if (newvrt.vertex.perp() > m_Rbeampipe && Signif3D < m_minSig3D)
-//          continue;
-//        if (Lxy <= m_minD0)
-//          continue;
-//        if (newvrt.vertex.perp() < m_minPerp)
-
+        if (Lxy <= m_minLxy ) 
+          continue;
+        if ( newvrt.vertex.perp() < m_minPerp)
+          continue;
+        
         // Register Container
         auto* GNNvertex = outVertexContainer->emplace_back(new xAOD::Vertex);
 

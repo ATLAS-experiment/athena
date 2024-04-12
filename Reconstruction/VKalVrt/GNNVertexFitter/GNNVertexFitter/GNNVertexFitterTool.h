@@ -95,8 +95,6 @@ public:
 
 private:
 
-  std::string m_jetCollection;
-
   TLorentzVector TotalMom(const std::vector<const xAOD::TrackParticle *> &selTrk) const;
 
   double vrtVrtDist(const xAOD::Vertex &primVrt, const Amg::Vector3D &secVrt, const std::vector<double> &vrtErr,
@@ -125,15 +123,17 @@ private:
   SG::AuxElement::Decorator<float>  m_deco_lxyz;
   SG::AuxElement::Decorator<float>  m_deco_eFrac;
   
-  bool   m_multiWithPrimary;
-  double m_minLxy;
-  double m_maxLxy;
+  StringProperty    m_gnnModel{this, "GNNModel", "GN2v01", "GNN model being used" };
+  StringProperty    m_jetCollection{this, "JetCollection", "AntiKt4EMPFlowJets", "Jet Collection being used" };
+  BooleanProperty   m_multiWithPrimary {this, "multiPrimary", false, " Include Primary Vertices"};
+  DoubleProperty    m_minLxy{this, "minLxy", 2.0, "Minimum radial distance from the PV"};
+  DoubleProperty    m_minPerp{this, "minPerp", 2.0, "Minimum distance from the PV"};
+  DoubleProperty    m_maxLxy{this, "maxLxy", 300, "Maximum radial distance from the PV"};
+  DoubleProperty    m_minSig3D{this, "minSig3D", 20, "Minimum 3D significance from the PV"};
+  DoubleProperty    m_maxChi2{this, "maxChi2", 20, "Maximum Chi Squared"};
+  DoubleProperty    m_HFRatioThres{this, "HFRatio", 0.3, "The threshold for the Ratio between HF tracks and all track for a vertex"};
+  DoubleProperty    m_minNTrack{this, "minNTrk", 2, "Minimum number of tracks in a vertex"};
   double m_massPi;
-  double m_minSig3D;
-  double m_maxChi2;
-  int    m_minNTrack;
-  float  m_HFRatioThres;
-  std::string    m_gnnModel;
 };
 } // namespace Rec
 
