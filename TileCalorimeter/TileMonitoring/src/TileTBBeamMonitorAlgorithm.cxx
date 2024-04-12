@@ -275,6 +275,8 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
               if (channel < 2) {
                 sCounter[channel] = amplitude;
               } else if (channel == 2) {
+                // Before run #2310000 channel 2 was connected to PMT11 of muon wall.
+                // After this run this channel was connected to S3 scintillator.
                 if (run < 2310000) {
                   muonWall[10] = amplitude;
                   if (!m_maskedMuPMTs[10]) {
@@ -384,7 +386,7 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
   }
 
 
-  if (run >= 2310000) {
+  if (run > 2310000) {
     for (int counter = 0; counter < N_SCALER; ++counter) {
       auto monCounts = Monitored::Scalar<double>("counts", scaler[counter]);
       fill(m_tools[m_scalerGroups[counter]], monCounts);
@@ -526,7 +528,7 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
         }
       }
 
-      auto monCellEnergy = Monitored::Scalar<double>("cellEnergy", totalEnergy);
+      auto monCellEnergy = Monitored::Scalar<double>("cellEnergy", cellEnergy);
       auto monTotalEnergy = Monitored::Scalar<double>("totalEnergy", totalEnergy);
 
       for (int counter = 0; counter < N_CHERENKOV; ++counter) {
