@@ -1,8 +1,8 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def egammaArtSpecialContent(flags,cfg):
-    
-    StreamAOD = cfg.getEventAlgo("OutputStreamAOD")
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+    StreamAOD = cfg.getEventAlgo(outputStreamName("AOD"))
     List = StreamAOD.ItemList
     KeyForExisting = 'CaloCalTopoClustersAux'
     AdditionalEgamma = '.ENG_FRAC_EM'

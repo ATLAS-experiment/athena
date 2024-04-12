@@ -408,15 +408,15 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
 	std::string str_jfexname = m_jfex_string[m_jfexid];
 	uint minEtThreshold = thr_jEM.ptMinToTopoMeV(str_jfexname)/jFEXETResolution;
 	//uint Cval[9] = {1,2,3,20,30,40,20,30,40};//C values for iso, emfr1 and emfr2    
-	std::vector<uint> Ciso;
-	std::vector<uint> Chad1;
-	std::vector<uint> Chad2;
+	std::vector<int> Ciso;
+	std::vector<int> Chad1;
+	std::vector<int> Chad2;
 
 	for(std::unordered_map<uint, jFEXForwardElecInfo>::iterator itel = m_ForwardElecs.begin(); itel!=(m_ForwardElecs.end()); ++itel) {
 	  uint32_t TTID = itel->first;
 	  jFEXForwardElecInfo elCluster = itel->second;
 	  uint meta = elCluster.getCoreIeta();//check whether this is the one used by the Trigger conf
-
+    
 	  //retrieve jet rejection thresholds from trigger configuration
 	  auto wp_loose  = thr_jEM.isolation(TrigConf::Selection::WP::LOOSE, meta);
 	  auto wp_medium = thr_jEM.isolation(TrigConf::Selection::WP::MEDIUM, meta);
@@ -433,12 +433,15 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
 	  Chad2.push_back(wp_loose.frac2_fw());
 	  Chad2.push_back(wp_medium.frac2_fw());
 	  Chad2.push_back(wp_tight.frac2_fw());
-	  uint Cval[9] = {Ciso[0], Ciso[1], Ciso[2], Chad1[0], Chad1[1], Chad1[2], Chad2[0], Chad2[1], Chad2[2]};
+	  int Cval[9] = {Ciso[0], Ciso[1], Ciso[2], Chad1[0], Chad1[1], Chad1[2], Chad2[0], Chad2[1], Chad2[2]};
 
 	  elCluster.setup(Cval,jFEXETResolution);
-          elCluster.calcFwdElEDM();
+    elCluster.calcFwdElEDM();
+          
 	  uint etEM = elCluster.getEt();
 	  uint32_t FwdEl_tobword = elCluster.getTobWord();
+    
+          
 	  std::vector<uint32_t> FwdEltob_aux{FwdEl_tobword,TTID};
 	  if ( FwdEl_tobword != 0  && etEM>minEtThreshold) m_FwdEl_tobwords.push_back(FwdEltob_aux);
 	}

@@ -8,6 +8,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthParticle.h"
 
+#include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
 
 namespace FlavorTagDiscriminants {
     namespace TruthDecoratorHelpers {
@@ -25,16 +26,18 @@ namespace FlavorTagDiscriminants {
         }
         namespace TruthSource {
             enum Label {
-                NoTruth     = 0,
-                Other       = 1,
-                KaonDecay   = 2,
-                LambdaDecay = 3,
-                Conversion  = 4
+                NoTruth             = 0,
+                NotSecondary        = 1,
+                HadronicInteraction = 2,
+                KshortDecay         = 3,
+                LambdaDecay         = 4,
+                GammaConversion     = 5,
+                Other               = 6
             };
         }
         bool sort_particles(const xAOD::IParticle* particle_A, const xAOD::IParticle* particle_B);
         int get_truth_type(const xAOD::TruthParticle* truth_particle);
-        int get_source_type(const xAOD::TruthParticle* truth_particle);
+        int get_source_type(const int origin);
         
         bool is_bc_hadron(const xAOD::TruthParticle* truth_particle, int flavour);
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle);

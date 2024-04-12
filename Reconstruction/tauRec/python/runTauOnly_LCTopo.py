@@ -13,11 +13,12 @@
 import sys
 
 def tauSpecialContent(flags,cfg):
-    StreamAOD = cfg.getEventAlgo("OutputStreamAOD")
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+    StreamAOD = cfg.getEventAlgo(outputStreamName("AOD"))
     newList = [x for x in StreamAOD.ItemList if "Tau" in x]
     StreamAOD.ItemList = newList
 
-    StreamESD = cfg.getEventAlgo("OutputStreamESD")
+    StreamESD = cfg.getEventAlgo(outputStreamName("ESD"))
     newList = [x for x in StreamESD.ItemList if "Tau" in x]
     StreamESD.ItemList = newList
 

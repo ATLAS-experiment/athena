@@ -63,13 +63,13 @@ namespace LVL1 {
         bool m_storeEnergyRingTTIDs = true;    
         
         //FWD CVMFS files
-        Gaudi::Property<std::string> m_SeedRingStr {this, "SeedRingMap", "Run3L1CaloSimulation/JetMaps/2023_11_21/jFEX_FWD_seed.dat"   , "Contains Trigger tower in seed"};
-        Gaudi::Property<std::string> m_1stRingStr  {this, "Energy1stRingMap" , "Run3L1CaloSimulation/JetMaps/2023_11_21/jFEX_FWD_1stRing.dat" , "Contains Trigger tower in 1st Energy ring"};
-        Gaudi::Property<std::string> m_2ndRingStr  {this, "Energy2ndRingMap" , "Run3L1CaloSimulation/JetMaps/2023_11_21/jFEX_FWD_2ndRing.dat" , "Contains Trigger tower in 2nd energy ring"};
-        Gaudi::Property<std::string> m_CorrStr     {this, "CorrMap"    , "Run3L1CaloSimulation/JetMaps/2023_11_21/jFEX_FWD_corr.dat"    , "Contains Trigger tower to correct displacement (greater than)"};
-        Gaudi::Property<std::string> m_Corr2Str    {this, "Corr2Map"   , "Run3L1CaloSimulation/JetMaps/2023_11_21/jFEX_FWD_corr2.dat"   , "Contains Trigger tower to correct displacement (greater or equal than)"};
-        Gaudi::Property<std::string> m_SearchGStr  {this, "SearchGMap" , "Run3L1CaloSimulation/JetMaps/2023_11_21/jFEX_FWD_searchG.dat" , "Contains Trigger tower to find local max (greater than)"};
-        Gaudi::Property<std::string> m_SearchGeStr {this, "SearchGeMap", "Run3L1CaloSimulation/JetMaps/2023_11_21/jFEX_FWD_searchGe.dat", "Contains Trigger tower to find local max (greater or equal than)"};
+        Gaudi::Property<std::string> m_SeedRingStr {this, "SeedRingMap", "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_seed.dat"   , "Contains Trigger tower in seed"};
+        Gaudi::Property<std::string> m_1stRingStr  {this, "Energy1stRingMap" , "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_1stRing.dat" , "Contains Trigger tower in 1st Energy ring"};
+        Gaudi::Property<std::string> m_2ndRingStr  {this, "Energy2ndRingMap" , "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_2ndRing.dat" , "Contains Trigger tower in 2nd energy ring"};
+        Gaudi::Property<std::string> m_CorrStr     {this, "CorrMap"    , "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_corr.dat"    , "Contains Trigger tower to correct displacement (greater than)"};
+        Gaudi::Property<std::string> m_Corr2Str    {this, "Corr2Map"   , "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_corr2.dat"   , "Contains Trigger tower to correct displacement (greater or equal than)"};
+        Gaudi::Property<std::string> m_SearchGStr  {this, "SearchGMap" , "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_searchG.dat" , "Contains Trigger tower to find local max (greater than)"};
+        Gaudi::Property<std::string> m_SearchGeStr {this, "SearchGeMap", "Run3L1CaloSimulation/JetMaps/2024_04_09/jFEX_FWD_searchGe.dat", "Contains Trigger tower to find local max (greater or equal than)"};
         
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_SeedRingMap;
         std::unordered_map<unsigned int, std::vector<unsigned int> > m_1stRingMap;

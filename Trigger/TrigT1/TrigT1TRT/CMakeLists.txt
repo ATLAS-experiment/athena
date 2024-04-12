@@ -7,7 +7,9 @@ atlas_subdir( TrigT1TRT )
 atlas_add_component( TrigT1TRT
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel InDetRawData TRT_ConditionsServicesLib TRT_ReadoutGeometry TrigConfInterfaces TrigConfL1Data TrigT1Interfaces )
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel InDetRawData TRT_ConditionsServicesLib TRT_ReadoutGeometry TrigConfInterfaces TrigConfL1Data TrigT1Interfaces PathResolver )
 
 # Install files from the package:
+atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_data( share/*.json )

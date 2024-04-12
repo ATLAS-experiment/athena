@@ -388,10 +388,10 @@ if __name__=="__main__":
         "xAOD::PFOContainer#*ParticleFlowObjects",
         "xAOD::PFOAuxContainer#*ParticleFlowObjectsAux."
         ]
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     cfg.merge(OutputStreamCfg(cfgFlags,"xAOD",ItemList=outputlist))
     from pprint import pprint
-    pprint( cfg.getEventAlgo("OutputStreamxAOD").ItemList )
+    pprint( cfg.getEventAlgo(outputStreamName("xAOD")).ItemList )
 
     histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='expert-monitoring.root', OPT='RECREATE'"])
     cfg.addService(histSvc)

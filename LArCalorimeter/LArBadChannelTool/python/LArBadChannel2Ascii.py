@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFolders
-from AthenaConfiguration.ComponentAccumulator import ConfigurationError
 
 def LArBadChannel2AsciiCfg(flags,OutputFile,dbname="LAR_OFL",folder=None,tag=None,summaryfile=""):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
@@ -43,11 +42,9 @@ def LArBadChannel2AsciiCfg(flags,OutputFile,dbname="LAR_OFL",folder=None,tag=Non
     result.addCondAlgo(theLArBadChannelCondAlgo)
 
     if summaryfile!="":
-        if (flags.LArCalib.isSC):
-            raise ConfigurationError("LArBadChannels2Ascii: Summary file not yet implemented for SuperCells")
-
-        from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg
-        result.merge(LArKnownBadFebCfg(flags))
+        if (not flags.LArCalib.isSC):
+            from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg
+            result.merge(LArKnownBadFebCfg(flags))
     
     theLArBadChannels2Ascii=CompFactory.LArBadChannel2Ascii(SkipDisconnected=True)
     theLArBadChannels2Ascii.FileName=OutputFile
@@ -91,7 +88,7 @@ if __name__=="__main__":
     flags.IOVDb.DatabaseInstance="CONDBR2"
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=[args.runnumber]
-    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-06"
+    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2023-02"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     flags.LArCalib.isSC=args.SC

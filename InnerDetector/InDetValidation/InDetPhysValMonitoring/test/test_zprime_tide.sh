@@ -5,7 +5,6 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-include: 23.0/Athena
 # art-output: physval*.root
 # art-output: *.xml
 # art-output: dcube*
@@ -40,7 +39,7 @@ Reco_tf.py \
     --digiSeedOffset1="8" \
     --digiSeedOffset2="8" \
     --CA "default:True" \
-    --steering "doRDO_TRIG" "doTRIGtoALL" \
+    --steering "doRAWtoALL" \
     --outputDAOD_IDTIDEFile="DAOD_TIDE.pool.root"  \
     --outputRDOFile output.RDO.root \
     --multithreaded="True"

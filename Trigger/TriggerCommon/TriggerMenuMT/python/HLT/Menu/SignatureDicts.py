@@ -146,9 +146,10 @@ JetChainParts = {
     'trkpresel'    : # Tracking preselection
       ['nopresel',
        # Single jet
-       'preslej50emf72',
-       'preslej30emf72',
+       'preselj50emf72',
+       'preselj30emf72',
        'preselj20emf72',
+       'preselj20emf60',
        'preselj20emf48',
        'preselj20emf24',
        'preselj20emf12',
@@ -365,7 +366,7 @@ JetChainParts = {
                   'emergingPTF0p2dR0p4', 'emergingPTF0p1dR0p4', 'emergingPTF0p09dR0p4', 'emergingPTF0p08dR0p4', 'emergingPTF0p075dR0p4', 'emergingPTF0p07dR0p4', 'emergingPTF0p0dR0p4',
                   'tracklessdR1p2',      'tracklessdR0p4',
                   'calratio','calratiormbib','calratiovar','calratiovarrmbib',  # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
-                  'calratiovar135','calratiovar59' # Exotics CalRatio Jets ( requested by DPJ Team for alternative cut on ratio )
+                  'calratiovar103','calratiovar82','calratiovar59' # Exotics CalRatio Jets ( requested by DPJ Team for alternative cut on ratio )
               ],
 
     # Simple hypo configuration. Single property cuts defined as MINvarMAX

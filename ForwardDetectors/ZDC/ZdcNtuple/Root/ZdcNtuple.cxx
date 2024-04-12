@@ -179,6 +179,8 @@ StatusCode ZdcNtuple :: initialize ()
       m_outputTree->Branch("zdc_ZdcModuleTruthEM",&t_ZdcModuleTruthEM,"zdc_ZdcModuleTruthEM[2][7]/F");
       m_outputTree->Branch("zdc_ZdcModuleTruthNonEM",&t_ZdcModuleTruthNonEM,"zdc_ZdcModuleTruthNonEM[2][7]/F");
       m_outputTree->Branch("zdc_ZdModulecTruthEscaped",&t_ZdcModuleTruthEscaped,"zdc_ZdcModuleTruthEscaped[2][7]/F");
+      m_outputTree->Branch("zdc_ZdcModuleTruthNphotons",&t_ZdcModuleTruthNphotons,"zdc_ZdcModuleTruthNphotons[2][7]/i");
+      m_outputTree->Branch("zdc_RpdModuleTruthNphotons",&t_RpdModuleTruthNphotons,"zdc_RpdModuleTruthNphotons[2][16]/i");
 
       //Sums
       m_outputTree->Branch("zdc_ZdcTruthTotal",&t_ZdcTruthTotal,"zdc_ZdcTruthTotal[2]/F");
@@ -605,6 +607,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcModuleTruthEM[iside][imod] = 0; 
       t_ZdcModuleTruthNonEM[iside][imod] = 0; 
       t_ZdcModuleTruthEscaped[iside][imod] = 0;
+      t_ZdcModuleTruthNphotons[iside][imod] = 0;
+    }
+    for(int ch = 0; ch < 16; ++ch){
+      t_RpdModuleTruthNphotons[iside][ch] = 0;
     }
   }
 
@@ -779,6 +785,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
           t_ZdcModuleTruthEM     [iside][imod] = zdcMod->auxdataConst<float>("TruthEMEnergy" + auxSuffix);
           t_ZdcModuleTruthNonEM  [iside][imod] = zdcMod->auxdataConst<float>("TruthNonEMEnergy" + auxSuffix);
           t_ZdcModuleTruthEscaped[iside][imod] = zdcMod->auxdataConst<float>("TruthEscapedEnergy" + auxSuffix);
+          t_ZdcModuleTruthNphotons[iside][imod] = zdcMod->auxdataConst<unsigned int>("nPhotons" + auxSuffix);
         }
         //Calib hits are stored for all modules
         //Other data is only valid for module 1-4
@@ -861,6 +868,9 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
 	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
 	    t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupFrac" + auxSuffix);
+      if(m_isMC){
+        t_RpdModuleTruthNphotons[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("nPhotons" + auxSuffix);
+      }
 	  }
         if (enableOutputSamples)
           {

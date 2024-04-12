@@ -34,10 +34,10 @@ def TileCellMakerCfg(flags, mergeChannels=True, **kwargs):
 
     Arguments:
         flags  -- Athena configuration flags
-        Name -- name of Tile cell maker algorithm. Defautls to TileCellMaker
+        name -- name of Tile cell maker algorithm. Defautls to TileCellMaker
                 or TileCellMakerHG/TileCellMakerLG depending on only used gain.
         SkipGain - skip given gain. Defaults to -1 [use all gains]. Possible values: 0 [LG], 1 [HG].
-        CaloCellsOutputName -- name of Tile cell maker algorithm. Defautls to AllCalo
+        CaloCellsOutputName -- name of the output calo cell container. Defautls to AllCalo
                                or AllCaloHG/AllCaloLG depending on only used gain.
         DoCaloNeighborsCorrection -- correct dead cells. Assign as energy the average energy of
                                      the surrounding cells. Defaults to False.
@@ -51,20 +51,15 @@ def TileCellMakerCfg(flags, mergeChannels=True, **kwargs):
     skipGain = kwargs.get('SkipGain', -1) # Never skip any gain by default
 
     defaultName = 'TileCellMaker' if skipGain == -1 else 'TileCellMaker' + useGain[skipGain]
-    name = kwargs.get('Name', defaultName)
+    name = kwargs.get('name', defaultName)
 
     defaultOutputCells = 'AllCalo' if skipGain == -1 else 'AllCalo' + useGain[skipGain]
-    caloCellsOutputName = kwargs.get('Name', defaultOutputCells)
+    caloCellsOutputName = kwargs.get('CaloCellsOutputName', defaultOutputCells)
 
     doCaloNeighborsCorrection = kwargs.get('DoCaloNeighborsCorrection', False)
 
     from AthenaCommon.Logging import logging
     msg = logging.getLogger( 'TileCellMakerCfg' )
-
-    if flags.Tile.readDigits:
-        msg.info('Reconstruct Tile raw channels')
-        from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-        acc.merge( TileRawChannelMakerCfg(flags) )
 
     CaloCellMaker, CaloCellContainerFinalizerTool=CompFactory.getComps("CaloCellMaker","CaloCellContainerFinalizerTool",)
     from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
@@ -138,11 +133,11 @@ if __name__ == "__main__":
 
     acc.merge( TileCellMakerCfg(flags) )
 
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     acc.merge(OutputStreamCfg(flags, "ESD",
                               ItemList = [ 'CaloCellContainer#*', 'TileCellContainer#*']))
 
-    acc.getEventAlgo("OutputStreamESD").ExtraInputs = {('CaloCellContainer', 'StoreGateSvc+AllCalo')}
+    acc.getEventAlgo(outputStreamName("ESD")).ExtraInputs = {('CaloCellContainer', 'StoreGateSvc+AllCalo')}
 
     flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)

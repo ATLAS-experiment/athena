@@ -1,10 +1,10 @@
 #!/bin/env python
 
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from __future__ import print_function
+
 
 #from ROOT import gRandom,TCanvas,TH1F,TH2F
 import ROOT
@@ -44,7 +44,7 @@ class HVCorrectionCOOLReader:
     endUtime = int(time.time())
     startValKey = startUtime * self.UNIX2COOL
     endValKey = endUtime * self.UNIX2COOL
-    chsel = cool.ChannelSelection(0,sys.maxint)
+    chsel = cool.ChannelSelection(0,sys.maxsize)
 
     try:
       itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -75,7 +75,7 @@ class HVCorrectionCalculator:
     self.layer_weights_em  = {} # per eta bin
     self.layer_weights_had = {} # per eta bin
 
-    file_name = "HVcorrPhysicsWeights.txt"
+    file_name = ROOT.PathResolver.find_calib_file("TrigT1Calo/HVcorrPhysicsWeights_v1.txt")
 
     ### retrieve layer weights from .txt file
     
@@ -210,8 +210,8 @@ def writeHVToSqlite(name,input_dict):
   folder_description = '<timeStamp>time</timeStamp><addrHeader><address_header service_type="71" clid="1238547719"/></addrHeader><typeName>CondAttrListCollection</typeName>'
   f = db.createFolder( "/TRIGGER/Receivers/Factors/HVCorrections", folderSpec, folder_description)
 
-  print (" Now creating sqlite file for ", len(input_dict.keys()), " channels")
-  for i in input_dict.keys():
+  print (" Now creating sqlite file for ", len(list(input_dict.keys())), " channels")
+  for i in list(input_dict.keys()):
     data = cool.Record( spec )
     data['factor'] = input_dict[i][0]
     data['status'] = input_dict[i][1]
@@ -340,7 +340,7 @@ if __name__ == "__main__":
 
     print ("\nreading input channel list from oracle database")
         
-    receiver_list = geometry_convertor.receiver_to_ppm_map.keys()
+    receiver_list = list(geometry_convertor.receiver_to_ppm_map.keys())
 
   ### check if channel list is empty
 
@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
   for receiver in receiver_list:
     
-    if receiver not in hv_input.GetNLayers().keys():
+    if receiver not in list(hv_input.GetNLayers().keys()):
 
       continue # skip this receiver (it's non-LAr)
 
@@ -393,7 +393,7 @@ if __name__ == "__main__":
 
     layer_corr = [1.,1.,1.,1.] # default hv corrections
 
-    if receiver in hv_input.GetMeanCorections().keys(): # if mean hv correction > 1
+    if receiver in list(hv_input.GetMeanCorections().keys()): # if mean hv correction > 1
       
       if num_layers > 0:
         layer_corr[0] = (hv_input.GetCorLayer1()[receiver])

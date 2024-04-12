@@ -41,10 +41,9 @@ namespace LVL1 {
   StatusCode LVL1::jFEXForwardElecAlgo::initialize() {
     ATH_CHECK(m_jTowerContainerKey.initialize());
 
-    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SeedRingStr), m_SeedRingMap ));
-    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_1stRingStr), m_1stRingMap));
-    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGStr), m_SearchGMap));
-    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGeStr), m_SearchGeMap ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_IsoMapStr), m_IsoMap ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_Frac1MapStr), m_Frac1Map ));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_Frac2MapStr), m_Frac2Map ));
     ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGTauStr), m_SearchGTauMap));
     ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_SearchGeTauStr), m_SearchGeTauMap));
 
@@ -80,15 +79,15 @@ namespace LVL1 {
     return {tmpTower->centreEta(),tmpTower->centrePhi()};
   }
 
-  std::array<uint,2> LVL1::jFEXForwardElecAlgo::getEtEmHad(uint ttID) {
+  std::array<int,2> LVL1::jFEXForwardElecAlgo::getEtEmHad(uint ttID) {
     if(ttID == 0) {
       return {0,0};
     }
-    uint TT_EtEM = 0;
+    int TT_EtEM = 0;
     if(m_map_Etvalues_EM.find(ttID) != m_map_Etvalues_EM.end()) {
       TT_EtEM = m_map_Etvalues_EM[ttID][0];
     }
-    uint TT_EtHad = 0;
+    int TT_EtHad = 0;
     if(m_map_Etvalues_HAD.find(ttID) != m_map_Etvalues_HAD.end()) {
       TT_EtHad = m_map_Etvalues_HAD[ttID][0];
     }
@@ -103,37 +102,162 @@ namespace LVL1 {
     m_map_Etvalues_HAD=etmapHAD;
   }
   
-  std::unordered_map<uint, LVL1::jFEXForwardElecInfo> LVL1::jFEXForwardElecAlgo::eleClusterList(void) {
+  
+  bool LVL1::jFEXForwardElecAlgo::isValidSeed(uint seedTTID) {
+    auto [centreTT_EtEM,centreTT_EtHad] = getEtEmHad(seedTTID);
+    // check if seed has strictly more energy than its neighbours
+    {
+      auto it_seed_map = m_SearchGTauMap.find(seedTTID);
+      if(it_seed_map == m_SearchGTauMap.end()) {
+          ATH_MSG_ERROR("Could not find TT" << seedTTID << " in the seach (>) local maxima for tau/em file.");
+          return false;
+      }
+      for (const auto& gtt : it_seed_map->second ){
+        auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
+        if(tmp_EtEM>=centreTT_EtEM) {
+          return false;
+        }
+      }
+    }
+
+    // check if seed has equal or more energy than its neighbours
+    {
+      auto it_seed_map = m_SearchGeTauMap.find(seedTTID);
+      if(it_seed_map == m_SearchGeTauMap.end()) {
+          ATH_MSG_ERROR("Could not find TT" << seedTTID << " in the seach (>=) local maxima for tau/em file.");
+          return false;
+      }
+      for (const auto& gtt : it_seed_map->second ){
+        auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
+        if( tmp_EtEM>=centreTT_EtEM) {
+          return false;
+        }
+      }
+    }
+
+    return true;  
+  }
+  
+
+  void LVL1::jFEXForwardElecAlgo::findAndFillNextTT(jFEXForwardElecInfo& elCluster, int neta, int nphi) {
+    //determine direction for offsets (-1 : C-side, +1: A-side)
+    int direction = m_jfex < 3 ? -1 : +1;
+    
+    std::vector<std::pair<int,int>> neighbours;
+    //eta/phi index offsets depend on the position of the seed the cluster is created from
+    //differentiate the (many) different cases:
+    if ( direction>0 ? neta < FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta - 1    // A-side condition
+                     : neta > FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMB_start_eta)  // C-side condition
+    { //Barrel
+      neighbours = { {neta  , nphi+1},
+                     {neta  , nphi-1},
+                     {neta+1, nphi  },
+                     {neta-1, nphi  }
+                   };
+    } else if ( direction>0 ? neta == FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta - 1
+                            : neta == FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMB_start_eta ) 
+    { //Barrel next to Endcap
+      neighbours = { {neta, nphi+1},
+                     {neta, nphi-1},
+                     {neta-direction, nphi},
+                     {neta+direction, nphi/2} //boundary crossing into endcap -> reduced phi granularity
+                   };
+    } else if ( direction>0 ? neta == FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta 
+                            : neta == FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMB_start_eta - 1 ) 
+    { //Endcap next to Barrel
+      neighbours = { {neta, nphi+1},
+                     {neta, nphi-1},
+                     {neta+direction, nphi},
+                     {neta-direction, 2*nphi+0}, //crossing into barrel region, higher phi granularity
+                     {neta-direction, 2*nphi+1}, // -> consider both "touching" towers 
+                   };
+    } else if ( direction>0 ? neta > FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta         && neta < FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta - 1
+                            : neta < FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_end_eta - 1 && neta > FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_start_eta ) 
+    { //Endcap
+      neighbours = { {neta  , nphi+1},
+                     {neta  , nphi-1},
+                     {neta+1, nphi  },
+                     {neta-1, nphi  }
+                   };
+    } else if ( direction>0 ? neta == FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta - 1
+                            : neta == FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_start_eta ) 
+    { //Endcap next to FCal
+      neighbours = { {neta, nphi+1},
+                     {neta, nphi-1},
+                     {neta-direction, nphi},
+                     {neta+2*direction, nphi/2} //boundary crossing into FCal -> reduced phi granularity and skip first FCal bin
+                   };
+    } else if ( direction>0 ? neta == FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta + 1   //first FCal bin must be skipped!
+                            : neta == FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_start_eta - 2 ) //first FCal bin must be skipped!
+    { //FCal next to Endcap
+      //phi spacing in FCal is very wide, no longer consider adding towers in phi direction
+      neighbours = { {neta-2*direction, 2*nphi+0}, //boundary crossing into endcap, higher phi granularity
+                     {neta-2*direction, 2*nphi+1}, // -> consider both "touching" towers
+                     {neta+direction, nphi}
+                   };
+    } else if ( direction>0 ? neta > FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta + 1 && neta < FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_end_eta - 1
+                            : neta < FEXAlgoSpaceDefs::jFEX_algoSpace_C_FCAL_end_eta - 2   && neta > FEXAlgoSpaceDefs::jFEX_algoSpace_C_FCAL_start_eta ) 
+    { //FCal
+      neighbours = { {neta+1, nphi},
+                     {neta-1, nphi}
+                   };
+    } else if ( direction>0 ? neta == FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_end_eta - 1 
+                            : neta == FEXAlgoSpaceDefs::jFEX_algoSpace_C_FCAL_start_eta  ) 
+    { //FCal, last eta bin
+      neighbours = { {neta-direction, nphi}
+                   };    
+    } else {
+      ATH_MSG_ERROR("Eta index " << neta << " (side: "<< (direction>0?"A":"C") << ") does not seem to belong to any valid seed region");
+    }
+    
+    //iterate over neighbours, find most energetic one
+    for (const auto& candEtaPhi: neighbours) {
+      uint candID = m_jFEXalgoTowerID[candEtaPhi.second][candEtaPhi.first];
+      const auto [candTT_EtEM, candTT_EtHad] = getEtEmHad(candID);
+      if (candTT_EtEM > elCluster.getNextTTEtEM()) {
+        elCluster.setNextTTEtEM(candTT_EtEM);
+        elCluster.setNextTTID(candID);
+      }
+    }
+    
+  }
+
+  
+  std::unordered_map<uint, LVL1::jFEXForwardElecInfo> LVL1::jFEXForwardElecAlgo::calculateEDM(void) {
     std::unordered_map<uint, LVL1::jFEXForwardElecInfo> clusterList;
     std::vector<int> lower_centre_neta;
     std::vector<int> upper_centre_neta;
-    m_lowerEM_eta = 0;
-    m_upperEM_eta = 0;
    
     //check if we are in module 0 or 5 and assign corrrect eta FEXAlgoSpace parameters
     if(m_jfex == 0) {
       //Module 0 
-      lower_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMB_start_eta, FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_start_eta, FEXAlgoSpaceDefs::jFEX_algoSpace_C_FCAL_start_eta});
-      upper_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMB_end_eta, FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_end_eta,FEXAlgoSpaceDefs::jFEX_algoSpace_C_FCAL_end_eta });
-      m_lowerEM_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_lowerEM_eta;
-      m_upperEM_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_upperEM_eta;
+      lower_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMB_start_eta, // 28
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_start_eta, // 24
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_C_FCAL_start_eta}); // 12
+      
+      upper_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMB_end_eta, // 37
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_C_EMIE_end_eta, // 28
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_C_FCAL_end_eta }); // 24
     }
     else {
       //Module 5
-      lower_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMB_eta, FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta, FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta});
-      upper_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta, FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta, FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_end_eta});
-      m_lowerEM_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_lowerEM_eta;
-      m_upperEM_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_upperEM_eta;
+      lower_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMB_eta, // 8
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta, // 17
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta}); // 21
+                                
+      upper_centre_neta.assign({FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta, // 17
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta, // 21 
+                                FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_end_eta}); // 33
     }
 
     //define phi FEXAlgoSpace parameters
     std::vector<int> lower_centre_nphi{FEXAlgoSpaceDefs::jFEX_algoSpace_EMB_start_phi, FEXAlgoSpaceDefs::jFEX_algoSpace_EMIE_start_phi,  FEXAlgoSpaceDefs::jFEX_algoSpace_FCAL_start_phi};
     std::vector<int> upper_centre_nphi{FEXAlgoSpaceDefs::jFEX_algoSpace_EMB_end_phi, FEXAlgoSpaceDefs::jFEX_algoSpace_EMIE_end_phi,  FEXAlgoSpaceDefs::jFEX_algoSpace_FCAL_end_phi};
 
-    //loop over different EM/FCAL1 eta phi core fpga regions. These are potential seed  towers for electron clusters 
-    for(uint i = 0; i<3; i++) {
-      for(int nphi = lower_centre_nphi[i]; nphi < upper_centre_nphi[i]; nphi++) {
-	      for(int neta = lower_centre_neta[i]; neta < upper_centre_neta[i]; neta++) {
+    //loop over different EM/FCAL1 eta phi core fpga regions with different granularities. These are potential seed  towers for electron clusters 
+    for(uint region = 0; region<3; region++) {
+      for(int nphi = lower_centre_nphi[region]; nphi < upper_centre_nphi[region]; nphi++) {
+	      for(int neta = lower_centre_neta[region]; neta < upper_centre_neta[region]; neta++) {
           
           // ignore  seeds for |eta| < 2.3 or from the first FCAL eta bin                
           if (m_jfex == 0 && neta >= FEXAlgoSpaceDefs::jFEX_algoSpace_C_FwdEl_start) continue;
@@ -144,7 +268,10 @@ namespace LVL1 {
           // define ttID (only FCAL1 in the third region) which will be the key for class in map, ignore tower ID = 0
           uint ttID = m_jFEXalgoTowerID[nphi][neta];
           if(ttID == 0) continue;
+          //check if seed candidate is actual seed (passes local maximum criteria)
+          if(!isValidSeed(ttID)) continue;
           
+          //gather some first, basic information for resulting cluster/TOB
           jFEXForwardElecInfo elCluster;
           elCluster.setup(m_jfex, ttID, neta, nphi);
           const auto [centreTT_eta, centreTT_phi] = getEtaPhi(ttID);
@@ -156,87 +283,58 @@ namespace LVL1 {
           elCluster.setNextTTID(0);
           elCluster.setTTEtEMiso(0);
 
-          // cluster with jet radius for |eta|>=2.5 else tau radius
-          auto& gMap=(fabs(centreTT_eta)>=2.5 ? m_SearchGMap : m_SearchGTauMap);
-          auto& geMap=(fabs(centreTT_eta)>=2.5 ? m_SearchGeMap : m_SearchGeTauMap);
-          
-          // check if seed has strictly more energy than its neighbours
-          {
-            auto it_seed_map = gMap.find(ttID);
-            if(it_seed_map == gMap.end()) {
-                ATH_MSG_ERROR("Could not find TT" << ttID << " in the seach (>) local maxima for jets file.");
-                continue;
-            }
-            bool breakout=false;
-            for (const auto& gtt : it_seed_map->second ){
-              auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
-              if(tmp_EtEM>=centreTT_EtEM) {
-                breakout=true;
-                break;
-              }
-              // also test if cluster highest energy nearest neighbor
-              if (tmp_EtEM>elCluster.getNextTTEtEM()) {
-                elCluster.setNextTTEtEM(tmp_EtEM);
-                elCluster.setNextTTID(gtt);
-              }
-            }
-            if (breakout) continue;
-          }
+          //find "NextTT", i.e., highest ET neighbour
+          findAndFillNextTT(elCluster, neta, nphi);
 
-          // check if seed has equal or more energy than its neighbours
+          // sum up EM isolation using the isolation map and remove cluster ET
           {
-            auto it_seed_map = geMap.find(ttID);
-            if(it_seed_map == geMap.end()) {
-                ATH_MSG_ERROR("Could not find TT" << ttID << " in the seach (>) local maxima for jets file.");
-                continue;
-            }
-            bool breakout=false;
-            for (const auto& gtt : it_seed_map->second ){
-              auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
-              if( tmp_EtEM>=centreTT_EtEM) {
-                breakout=true;
-                break;
-              }
-              // also test if cluster nearest neighbor
-              if (tmp_EtEM>elCluster.getNextTTEtEM()){
-                elCluster.setNextTTEtEM(tmp_EtEM);
-                elCluster.setNextTTID(gtt);
-              }
-            }
-            if (breakout) continue;
-          }
-
-          // sum up EM isolation using the seed ring (<0.2) and 1st ring (<0.4) and remove cluster
-          {
-            int sumEt = 0;
-            {
-              auto it_seed_map = m_SeedRingMap.find(ttID);
-              if(it_seed_map == m_SeedRingMap.end()) {
-                  ATH_MSG_ERROR("Could not find TT" << ttID << " in Jet seed file.");
-                  continue;
-              }
-              for(const auto& gtt : it_seed_map->second){
+            int sumEtEM = 0;
+            auto it_iso_map = m_IsoMap.find(ttID);
+            if(it_iso_map != m_IsoMap.end()) {
+              for(const auto& gtt : it_iso_map->second){
                   auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
-                  sumEt += tmp_EtEM;  
+                  sumEtEM += tmp_EtEM;  
+              }
+              elCluster.setTTEtEMiso(sumEtEM-elCluster.getNextTTEtEM());
+            } else {
+                ATH_MSG_ERROR("Could not find TT" << ttID << " in jEM isolation map file.");
+            }
+          }
+          
+          if(fabs(centreTT_eta) < 3.2) {
+            // for non-FCal positions only Frac1 is meaningful and has a "trivial" mapping
+            elCluster.setTTEtHad1(centreTT_EtHad);
+            elCluster.setTTEtHad2(0);
+          } else {
+            // sum up Et for hadronic fraction 1
+            {
+              int sumEtHad1 = 0;
+              auto it_frac1_map = m_Frac1Map.find(ttID);
+              if(it_frac1_map != m_Frac1Map.end()) {
+                for(const auto& gtt : it_frac1_map->second){
+                    auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
+                    sumEtHad1 += tmp_EtHad;  
+                }
+                elCluster.setTTEtHad1(sumEtHad1);
+              } else { 
+                ATH_MSG_ERROR("Could not find TT" << ttID << " in jEM frac1 map file.");
               }
             }
-            auto it_seed_map = m_1stRingMap.find(ttID);
-            if(it_seed_map == m_1stRingMap.end()) {
-                ATH_MSG_ERROR("Could not find TT" << ttID << " in Jet seed file.");
-                continue;
+            
+            // sum up Et for hadronic fraction 2 (only FCal!)
+            {
+              int sumEtHad2 = 0;
+              auto it_frac2_map = m_Frac2Map.find(ttID);
+              if(it_frac2_map != m_Frac2Map.end()) {
+                for(const auto& gtt : it_frac2_map->second) {
+                    auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
+                    sumEtHad2 += tmp_EtHad;  
+                }
+                elCluster.setTTEtHad2(sumEtHad2);
+              } else { 
+                ATH_MSG_ERROR("Could not find TT" << ttID << " in jEM frac2 map file.");
+              }
             }
-            for(const auto& gtt : it_seed_map->second){
-                auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
-                sumEt += tmp_EtEM;  
-            }
-            elCluster.setTTEtEMiso(sumEt-centreTT_EtEM-elCluster.getNextTTEtEM());
-          }
-
-          // Calculate Ethad below |eta|<3.2, higher eta Ethad computed at the end of algo
-          if(fabs(centreTT_eta) < 3.2){
-            elCluster.setTTEtHad1(centreTT_EtHad);
-          }else{
-            elCluster.setTTEtHad1(0);
           }
 
           // save this cluster in the list
@@ -246,105 +344,6 @@ namespace LVL1 {
     }// 3 regions
     return clusterList;
   } 
-
-  std::unordered_map<uint, jFEXForwardElecInfo> LVL1::jFEXForwardElecAlgo::calculateEDM() {
-    // setting the lower/upper eta range for the FCAL 2 and 3 since they are not added in the seed information yet 
-    int lowerFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_lowerFCAL_eta;
-    int upperFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_upperFCAL_eta;
-    int lowerFCAL2_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_lowerFCAL2_eta;
-    int upperFCAL2_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_C_upperFCAL_eta;
-
-    if(m_jfex == 5) {
-      //Module 5                                                                                                                                   
-      lowerFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_lowerFCAL_eta;
-      upperFCAL_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_upperFCAL_eta;
-      lowerFCAL2_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_lowerFCAL_eta;
-      upperFCAL2_eta = FEXAlgoSpaceDefs::jFEX_algoSpace_A_upperFCAL2_eta;
-    }
-
-    // Retrieve FCAl1 clusters          
-    std::unordered_map<uint, jFEXForwardElecInfo> clusterList = eleClusterList();
-    for(auto& [ttID,elCluster] : clusterList) {
-      float centreTT_phi = elCluster.getCoreTTfPhi();
-      float centreTT_eta = elCluster.getCoreTTfEta();
-      if(fabs(centreTT_eta)<3.2) continue;// only FCAL clusters
-
-      // Adding the closest FCAL 2 and 3 TT to the hadronic energy  
-      float deltaRminl2 = 999, deltaRminl2b = 999, deltaRminl2c = 999, deltaRminl3 = 999;
-      uint TTmin2 = 0, TTmin2b = 0, TTmin2c = 0, TTmin3 = 0;
-      for(int nphi = 0; nphi < 8; nphi++) {
-    	  for(int neta = lowerFCAL_eta; neta < upperFCAL_eta; neta++) {
-	        int auxTTID = m_jFEXalgoTowerID[nphi][neta];
-	        auto [ TT_eta,TT_phi ] = getEtaPhi(auxTTID);
-	        // correct for transition over 2PI
-	        if(m_fpga==0 || m_fpga==3) {
-	          if(m_fpga==0) {
-	            if(TT_phi>M_PI){
-		            TT_phi = TT_phi-m_2PI;
-	            }
-	          }
-	          else {
-	            if(TT_phi<M_PI){
-		            TT_phi = TT_phi+m_2PI;
-	            }
-	          }
-	        }
-
-          // Search for hadronic SC closest in DR
-          int DeltaR = std::round( (std::pow((centreTT_eta - TT_eta),2) + std::pow((centreTT_phi - TT_phi),2)) * 1e5   );
-          if ( DeltaR < m_Edge_dR4 ) {
-            if (neta> lowerFCAL2_eta-1 && neta < upperFCAL2_eta){
-              // EtHad1, FCAL second layer 
-              if( DeltaR < deltaRminl2){
-                deltaRminl2c  = deltaRminl2b;
-                deltaRminl2b  = deltaRminl2;
-                deltaRminl2   = DeltaR;
-                TTmin2c = TTmin2b;
-                TTmin2b = TTmin2;
-                TTmin2 = auxTTID;
-      	      }
-              else if ( DeltaR < deltaRminl2b){
-                deltaRminl2c  = deltaRminl2b;
-		            deltaRminl2b  = DeltaR;
-                TTmin2c = TTmin2b;
-                TTmin2b = auxTTID;
-	            }
-              else if ( DeltaR < deltaRminl2c){
-                deltaRminl2c  = DeltaR;
-		            TTmin2c = auxTTID; 
-	            }
-	          }
-            else{
-	            // EtHad2, FCAL 3rd layer
-	            if( DeltaR < deltaRminl3){
-                deltaRminl3   = DeltaR;
-                TTmin3 = auxTTID;
-      	      }
-	          }
-	        }// search cone
-	      }
-      }//search end
-
-      //EHad1
-      auto [TT_EtEM2, TT_EtHad2] = getEtEmHad(TTmin2);
-      elCluster.setTTEtHad1(uint(TT_EtHad2));
-      // special treatment for ieta = 22, 2nd cell in FCAL1, eta ~3.2
-      if(elCluster.getCoreTTiEta() == FEXAlgoSpaceDefs::jFEX_algoSpace_FCAL1_2nd){ 
-  	    auto [TT_EtEM2b, TT_EtHad2b] = getEtEmHad(TTmin2b);
-	      elCluster.addTTEtHad1(uint(TT_EtHad2b));
-	      if((centreTT_phi> 0.9 && centreTT_phi<1.1) || (centreTT_phi> 4.1 && centreTT_phi<4.3)){
-	        auto [TT_EtEM2c, TT_EtHad2c] = getEtEmHad(TTmin2c);
-	        elCluster.addTTEtHad1(uint(TT_EtHad2c));
-	      } 
-      }//special cases
-
-      //EtHad2
-      auto [TT_EtEM3, TT_EtHad3] = getEtEmHad(TTmin3);
-      elCluster.setTTEtHad2(TT_EtHad3);
-    }// loop ver local maxima
-
-    return clusterList;
-  }
       
   StatusCode LVL1::jFEXForwardElecAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){
     std::string myline;

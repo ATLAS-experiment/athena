@@ -37,7 +37,9 @@ namespace DerivationFramework {
         // Some counters
         int m_eventCounter;
         int m_acceptCntr;        
-	bool m_runSkimmingFirst;        
+	bool m_runSkimmingFirst;
+ 
+        Gaudi::Property<bool> m_doChronoStat{this,"doChronoStat",true,"use ChronoStatSvc (only in serial jobs)"};
     };
     
 } // end of namespace

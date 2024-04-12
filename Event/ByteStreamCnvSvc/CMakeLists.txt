@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ByteStreamCnvSvc )
@@ -42,11 +42,6 @@ atlas_add_executable( AtlListBSEvents test/AtlListBSEvents.cxx
    LINK_LIBRARIES CxxUtils ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} )
 
 # Test(s) in the package:
-atlas_add_test( BSEventSelector
-   SCRIPT "athena.py --threads 1 ByteStreamCnvSvc/BSEventSelector_test_jobOptions.py"
-   LOG_IGNORE_PATTERN "from ES 0x"
-   LOG_SELECT_PATTERN "ByteStream.*Svc" )
-
 atlas_add_test( AtlCopyBSEvent1
    PRE_EXEC_SCRIPT "rm -f test.data*"
    SCRIPT "AtlCopyBSEvent -e 186882810,187403142,187404922,187419528 -o test.data /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"
@@ -95,5 +90,3 @@ atlas_add_test( ByteStreamMetadataToolTest
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
-atlas_install_scripts( share/catalogBytestreamFiles.sh )

@@ -266,7 +266,11 @@ if ( True ) :
     "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_FTF",
     "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_IDTrig",
     "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_FTF",
-    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_IDTrig"
+    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_IDTrig",
+
+    #displaced jet lrt
+    "HLT_j180_.*dispjet.*_L1J100:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ", 
+    "HLT_j180_.*dispjet.*_L1jJ160:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ"
 
     ]
 

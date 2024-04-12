@@ -12,6 +12,7 @@ def L1TRTSimCfg(flags, name="TrigT1TRT"):
     acc.merge(TRTStrawStatusCondAlgCfg(flags))
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc.addEventAlgo(CompFactory.LVL1.TrigT1TRT(name,
-                                                TTCMultiplicity = flags.Trigger.TRT.TTCMultiplicity
+                                                TTCMultiplicity = flags.Trigger.TRT.TTCMultiplicity,
+                                                maskedChipsFile = flags.Trigger.TRT.maskedChipsFile
                                                 ))
     return acc

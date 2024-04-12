@@ -50,11 +50,14 @@ private:
     DeadFEB,
     Noisy,
     Sporadic,
+    Distorted,
+    PeakReco,
+    Fibre,
     GrandTotalDead,
     nProblemTypes 
   };
 
-  static void writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs) ;
+  static void writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs, const std::vector<unsigned> nChans) ;
 
 
 };

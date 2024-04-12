@@ -133,12 +133,12 @@ def CommonSimulationCfg(flags, log):
         from LArG4SD.LArG4SDToolConfig import DeadMaterialCalibrationHitMergerCfg
         cfg.merge(DeadMaterialCalibrationHitMergerCfg(flags))
 
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     if flags.Output.HITSFileName:
         from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
         cfg.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=False, AcceptAlgs=AcceptAlgNames) )
         if flags.Sim.ISF.ReSimulation:
-            cfg.getEventAlgo("OutputStreamHITS").TakeItemsFromInput=False
+            cfg.getEventAlgo(outputStreamName("HITS")).TakeItemsFromInput=False
 
     if flags.Output.EVNT_TRFileName:
         from SimuJobTransforms.SimOutputConfig import getStreamEVNT_TR_ItemList

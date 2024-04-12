@@ -29,6 +29,8 @@ def readFile(name):
     if not os.path.exists(name):
         print("MergeCalibFiles - ERROR File name %22s not found" % name)
         return mydict
+    else:
+        print("MergeCalibFiles - Reading: %22s"% name)
     
     with open(name) as fp:
         lines = fp.readlines()

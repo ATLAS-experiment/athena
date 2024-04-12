@@ -215,6 +215,7 @@ public:
   float t_ZdcModuleTruthEM[2][7];
   float t_ZdcModuleTruthNonEM[2][7];
   float t_ZdcModuleTruthEscaped[2][7];
+  unsigned int t_ZdcModuleTruthNphotons[2][7];
 
   float t_RpdChannelBaseline[2][16];
   float t_RpdChannelPileupExpFitParams[2][16][2];
@@ -231,6 +232,7 @@ public:
   unsigned int t_RpdChannelStatus[2][16];
   float t_RpdChannelPileupFrac[2][16];
   unsigned int t_RpdSideStatus[2];
+  unsigned int t_RpdModuleTruthNphotons[2][16];
 
   bool t_centroidEventValid;
   unsigned int t_centroidStatus[2];
