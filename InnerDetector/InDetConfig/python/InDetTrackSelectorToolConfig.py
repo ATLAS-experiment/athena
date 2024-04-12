@@ -253,8 +253,7 @@ def InDetTRTDriftCircleCutToolCfg(flags, name='InDetTRTDriftCircleCutTool', **kw
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTActiveCondAlgCfg
     result = TRTActiveCondAlgCfg(flags) # To produce the input TRTCond::ActiveFraction CondHandle
     kwargs.setdefault("MinOffsetDCs", 5)
-    kwargs.setdefault("UseNewParameterization",
-                      flags.Tracking.ActiveConfig.useNewParameterizationTRT)
+    kwargs.setdefault("UseNewParameterization", flags.Tracking.useNewParamTRT)
     kwargs.setdefault("UseActiveFractionSvc", flags.Detector.EnableTRT)
     result.setPrivateTools(CompFactory.InDet.InDetTrtDriftCircleCutTool(name, **kwargs))
     return result

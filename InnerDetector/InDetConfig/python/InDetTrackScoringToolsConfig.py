@@ -87,8 +87,7 @@ def InDetTRT_SeededScoringToolCfg(
     kwargs.setdefault("minTRTPrecisionFraction",
                       flags.Tracking.BackTracking.minTRTPrecFrac)
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minSecondaryPt)
-    kwargs.setdefault("maxRPhiImp",
-                      flags.Tracking.ActiveConfig.maxSecondaryImpact)
+    kwargs.setdefault("maxRPhiImp", flags.Tracking.BackTracking.maxSecondaryImpact)
     kwargs.setdefault("minSiClusters", flags.Tracking.BackTracking.minClusters)
     kwargs.setdefault("maxSiHoles", flags.Tracking.BackTracking.maxHoles)
     kwargs.setdefault("maxPixelHoles", flags.Tracking.BackTracking.maxPixelHoles)

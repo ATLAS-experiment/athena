@@ -71,8 +71,7 @@ def TRT_TrackExtensionTool_xk_BaseCfg(
                       flags.Tracking.ActiveConfig.minTRTonTrk)
     kwargs.setdefault("ScaleHitUncertainty", 2)
     kwargs.setdefault("RoadWidth", 20.)
-    kwargs.setdefault("UseParameterization",
-                      flags.Tracking.ActiveConfig.useParameterizedTRTCuts)
+    kwargs.setdefault("UseParameterization", flags.Tracking.useNewParamTRT)
 
     acc.setPrivateTools(
         CompFactory.InDet.TRT_TrackExtensionTool_xk(name, **kwargs))

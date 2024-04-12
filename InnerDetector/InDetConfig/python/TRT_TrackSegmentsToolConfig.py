@@ -56,8 +56,7 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(
         kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
     kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.BackTracking.minTRT)
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
-    kwargs.setdefault("sharedFrac",
-                      flags.Tracking.ActiveConfig.maxSecondaryTRTShared)
+    kwargs.setdefault("sharedFrac", flags.Tracking.BackTracking.maxTRTSharedFrac)
 
     acc.setPrivateTools(
         CompFactory.InDet.TRT_TrackSegmentsMaker_ATLxk(name, **kwargs))
