@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStauRecoTool.h"
@@ -25,6 +25,7 @@
 #include "TrkDriftCircleMath/SegmentFinder.h"
 #include "TrkDriftCircleMath/TransformToLine.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace {
     constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458 inside calculateTof()/calculateBeta()
@@ -89,9 +90,11 @@ namespace MuonCombined {
 
     MuonStauRecoTool::TruthInfo* MuonStauRecoTool::getTruth(const xAOD::TrackParticle& indetTrackParticle) const {
         // in case we are using the truth, check if the truth link is set and create the TruthInfo object
-        if (m_doTruth && indetTrackParticle.isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {
+        static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
+          truthParticleLinkAcc("truthParticleLink");
+        if (m_doTruth && truthParticleLinkAcc.isAvailable(indetTrackParticle)) {
             const ElementLink<xAOD::TruthParticleContainer>& truthLink =
-                indetTrackParticle.auxdata<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink");
+                truthParticleLinkAcc(indetTrackParticle);
             if (truthLink.isValid()) { return new TruthInfo((*truthLink)->pdgId(), (*truthLink)->m(), (*truthLink)->p4().Beta()); }
         }
         return nullptr;
