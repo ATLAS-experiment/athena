@@ -194,12 +194,21 @@ def createTrackingConfigFlags():
     # Control cuts and settings for different lumi to limit CPU and disk space
     icf.addFlag("Tracking.cutLevel", cutLevel)
 
+    def useNewParamTRT(flags):
+        if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon:
+            return flags.Tracking.cutLevel >= 6
+        else:
+            return flags.Tracking.cutLevel >= 3
+    icf.addFlag("Tracking.useNewParamTRT", useNewParamTRT)
+
     # --- run back tracking and TRT only in RoI seed regions
     icf.addFlag("Tracking.BackTracking.doRoISeeded", lambda prevFlags:
                 prevFlags.Tracking.cutLevel>=13 and
                 prevFlags.Detector.EnableCalo)
     
     # --- defaults for backtracking
+    icf.addFlag("Tracking.BackTracking.maxTRTSharedFrac", 0.7)
+    icf.addFlag("Tracking.BackTracking.maxSecondaryImpact", 100.0 * Units.mm)
     icf.addFlag("Tracking.BackTracking.minClusters", 4)
     icf.addFlag("Tracking.BackTracking.minSiNotShared", 4)
     # cut is now on number of shared modules

@@ -113,16 +113,6 @@ def excludeUsedTRToutliers_ranges( inflags ):
     {'-5':  False,
     '6-':  True } )
 
-def useParameterizedTRTCuts_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-                   {'-2':  False,
-                    '3-':  True } )
-
-def useNewParameterizationTRT_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-2':  False,
-    '3-':  True } )
-
 def roadWidth_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
     {'-16':  20.0,
@@ -235,14 +225,6 @@ def createTrackingPassFlags():
     icf.addFlag("TRTSegFinderPtBins", TRTSegFinderPtBins_ranges)
     icf.addFlag("maxSegTRTShared", 0.7)
     icf.addFlag("excludeUsedTRToutliers", excludeUsedTRToutliers_ranges)
-
-    # --- triggers SegmentFinder and BackTracking
-    icf.addFlag("useParameterizedTRTCuts", useParameterizedTRTCuts_ranges )
-    icf.addFlag("useNewParameterizationTRT", useNewParameterizationTRT_ranges )
-    icf.addFlag("maxSecondaryTRTShared", 0.7)
-
-    # --- defaults for secondary tracking
-    icf.addFlag("maxSecondaryImpact", 100.0 * Units.mm) # low lumi
 
     icf.addFlag("usePixel"       		  , lambda pcf : pcf.Detector.EnablePixel )
     icf.addFlag("useTRT"        		  , lambda pcf : pcf.Detector.EnableTRT )
@@ -580,7 +562,6 @@ def createLargeD0TrackingPassFlags():
     icf.maxEta             = 5
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxZImpact         = 1500.0 * Units.mm
-    icf.maxSecondaryImpact = 300.0 * Units.mm
     icf.minSecondaryPt     = 500.0 * Units.MeV
     icf.minClusters        = 7
     icf.minSiNotShared     = 5
@@ -610,12 +591,11 @@ def createR3LargeD0TrackingPassFlags():
     icf.usePixelSeeding    = False
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
     icf.maxPT              = 1.0 * Units.TeV
-    icf.minPT              = 1.0 * Units.GeV                                                                                    
-    icf.maxEta             = 3                                                                                                        
+    icf.minPT              = 1.0 * Units.GeV
+    icf.maxEta             = 3
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxEMImpact        = 300 * Units.mm
     icf.maxZImpact         = 500 * Units.mm    
-    icf.maxSecondaryImpact = 300.0 * Units.mm  
     icf.minSecondaryPt     = 1000.0 * Units.MeV 
     icf.minClusters        = 8                  
     icf.minSiNotShared     = 6                 
@@ -655,7 +635,6 @@ def createLowPtLargeD0TrackingPassFlags():
     icf.maxEta             = 5
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxZImpact         = 1500.0 * Units.mm
-    icf.maxSecondaryImpact = 300.0 * Units.mm
     icf.minSecondaryPt     = 400.0 * Units.MeV
     icf.minClusters        = 5
     icf.minSiNotShared     = 5
@@ -889,10 +868,6 @@ def createHeavyIonTrackingPassFlags():
     
     icf.minPT              = lambda pcf: \
                              0.3 *Units.GeV  if pcf.Tracking.cutLevel in [3, 5] else 0.5 * Units.GeV
-    icf.useParameterizedTRTCuts = lambda pcf: \
-                                  False if pcf.Tracking.cutLevel >= 3 else True #Make these false on all HI cut levels >=3, since standard cut levels set it true from levels >=3
-    icf.useNewParameterizationTRT = lambda pcf: \
-                                    False if pcf.Tracking.cutLevel >= 3 else True
 
     #set this to 1.7 for all HI cut levels >=4, since standard cut levels set it to 2.0 from levels >=4. Not sure it has any effect, since we don't usually run mixed seeds (also true for HI?)
     icf.maxdImpactPPSSeeds = lambda pcf: \

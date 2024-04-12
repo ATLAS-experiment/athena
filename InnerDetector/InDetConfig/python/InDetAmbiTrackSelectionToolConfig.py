@@ -121,8 +121,7 @@ def InDetTRTAmbiTrackSelectionToolCfg(
     kwargs.setdefault("minNotShared", flags.Tracking.BackTracking.minSiNotShared)
     kwargs.setdefault("maxShared", flags.Tracking.BackTracking.maxShared)
     kwargs.setdefault("minTRTHits", flags.Tracking.BackTracking.minTRT)
-    kwargs.setdefault("UseParameterization",
-                      flags.Tracking.ActiveConfig.useParameterizedTRTCuts)
+    kwargs.setdefault("UseParameterization", flags.Tracking.useNewParamTRT)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("doPixelSplitting",
                       flags.Tracking.doPixelClusterSplitting)

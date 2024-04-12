@@ -110,8 +110,7 @@ def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
   flags.nHolesGapMax        = 2
   flags.nWeightedClustersMin= 6
   flags.roadWidth           =10.
-      
-  flags.useNewParameterizationTRT = True
+
   flags.minTRTonTrk          =9
 
   #TODO - simple ambiguitues
