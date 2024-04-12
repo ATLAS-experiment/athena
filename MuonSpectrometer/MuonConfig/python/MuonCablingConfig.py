@@ -31,27 +31,21 @@ def RPCCablingConfigCfg(flags):
     rpcTrigEta="/RPC/TRIGGER/CM_THR_ETA"
     rpcTrigPhi="/RPC/TRIGGER/CM_THR_PHI"
 
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    acc.merge(addFolders(flags, [rpcCabMap,rpcCabMapCorr], dbName, className='CondAttrListCollection' ))
+
     # This block with conditions override is only used in Trigger and Reco, and only needed until mid-May 2022.
     # See ATR-25059 for discussion. To avoid this block being executed in simulation/digitization,
     # skip this if ProductionStep is not Reconstruction or Default (i.e. unset)
     from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep in [ProductionStep.Reconstruction, ProductionStep.Default] and \
-            flags.Trigger.doLVL1 and flags.Trigger.enableL1MuonPhase1:
-        # Run3 trigger roads are not avaialble in the global tag yet (OFLCOND-MC16-SDR-RUN3-01)
-        # Relevant folder tags are set for now, until new global tag (RUN3-02) becomes avaialble
-        rpcTrigEta="/RPC/TRIGGER/CM_THR_ETA <tag>RPCTriggerCMThrEta_RUN12_MC16_04</tag> <forceRunNumber>330000</forceRunNumber>"
-        rpcTrigPhi="/RPC/TRIGGER/CM_THR_PHI <tag>RPCTriggerCMThrPhi_RUN12_MC16_04</tag> <forceRunNumber>330000</forceRunNumber>"
-
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    acc.merge(addFolders(flags, [rpcCabMap,rpcCabMapCorr], dbName, className='CondAttrListCollection' ))
-    # Same protection of ProductionStep as above, ATR-25059
-    if flags.Common.ProductionStep in [ProductionStep.Reconstruction, ProductionStep.Default] and \
             flags.Trigger.doLVL1 and not flags.Input.isMC:
-        # RPC trigger roads in the online database are not up-to-dated
-        # Use offline database for now
-        # Will switch to online database once online database has been updated (ATR-23465)
+        # Run3 trigger roads are not available in the HLT global tag yet (CONDBR2-HLTP-2023-01)
+        # Relevant folder tags are set for now, until new HLT global tag becomes available (ATLGBLCONDTAGS-76, ATR-23465)
         if flags.Trigger.enableL1MuonPhase1:
-            acc.merge(addFolders(flags, [rpcTrigEta,rpcTrigPhi], detDb='RPC_OFL', className='CondAttrListCollection', db='OFLP200'))
+            rpcTrigEta="/RPC/TRIGGER/CM_THR_ETA <tag>RPCTriggerCMThrEta_HLT-23-01</tag>"
+            rpcTrigPhi="/RPC/TRIGGER/CM_THR_PHI <tag>RPCTriggerCMThrPhi_HLT-23-01</tag>"
+            acc.merge(addFolders(flags, [rpcTrigEta,rpcTrigPhi], dbName, className='CondAttrListCollection'))
         else:
             conddbNameOffline = flags.Trigger.L1MuonSim.CondDBOffline if flags.Trigger.L1MuonSim.CondDBOffline != '' else "OFLCOND-MC16-SDR-RUN2-04"
             acc.merge(addFolders(flags, [rpcTrigEta,rpcTrigPhi], detDb='RPC_OFL', className='CondAttrListCollection', tag=conddbNameOffline, db='OFLP200' ))
