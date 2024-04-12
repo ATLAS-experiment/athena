@@ -39,7 +39,7 @@ else()
        bin/diff-athfile bin/diff-jobo-cfg.py bin/diffConfigs.py
        bin/diffPoolFiles.py bin/dlldep.py bin/dso-stats.py bin/dump-athfile.py
        bin/dumpAthfilelite.py bin/filter-and-merge-d3pd.py bin/getMetadata.py
-       bin/gprof2dot bin/issues bin/magnifyPoolFile.py bin/merge-poolfiles.py
+       bin/gprof2dot bin/issues bin/magnifyPoolFile.py
        bin/apydep.py bin/pool_extractFileIdentifier.py
        bin/pool_insertFileToCatalog.py bin/print_auditor_callgraph.py bin/pyroot.py
        bin/vmem-sz.py bin/meta-reader.py bin/meta-diff.py bin/dump-event-from-file.py
@@ -50,7 +50,6 @@ else()
     atlas_add_alias( checkMetaSG "checkMetaSG.py" )
     atlas_add_alias( dso-stats "dso-stats.py" )
     atlas_add_alias( gen_klass "acmd.py" "gen-klass" )
-    atlas_add_alias( merge-poolfiles "merge-poolfiles.py" )
     atlas_add_alias( diffConfigs "diffConfigs.py" )
     atlas_add_alias( filter-and-merge-d3pd "filter-and-merge-d3pd.py" )
     atlas_add_alias( diffPoolFiles "diffPoolFiles.py" )
