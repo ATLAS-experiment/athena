@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBjetBtagHypoAlg.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 
 TrigBjetBtagHypoAlg::TrigBjetBtagHypoAlg( const std::string& name, 
@@ -366,15 +367,17 @@ StatusCode TrigBjetBtagHypoAlg::monitor_flavor_bb_probabilities( const ElementLi
 
   auto monitor_pb = Monitored::Collection( "bbtag_"+var_name+"_pb", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
-      double pb = -1; 
-      pb =  (*bTagLink)->auxdata<float>(var_name+"_pb");
+      double pb = -1;
+      SG::ConstAccessor<float> acc(var_name+"_pb");
+      pb =  acc(**bTagLink);
       return pb; 
     } );
 
   auto monitor_pbb = Monitored::Collection( "bbtag_"+var_name+"_pbb", bTaggingEL,
     [var_name](const ElementLink< xAOD::BTaggingContainer >& bTagLink) { 
       double pbb = -1; 
-      pbb = (*bTagLink)->auxdata<float>(var_name+"_pbb");
+      SG::ConstAccessor<float> acc(var_name+"_pbb");
+      pbb = acc(**bTagLink);
       return pbb; 
     } );
 
@@ -399,7 +402,8 @@ ElementLinkVector<xAOD::BTaggingContainer> TrigBjetBtagHypoAlg::collect_valid_li
 
   ElementLinkVector<xAOD::BTaggingContainer> valid_bTaggingEL;
   for (const ElementLink< xAOD::BTaggingContainer > bTagLink : bTaggingEL) {
-    if ( not (*bTagLink)->auxdata<char>(tagger+"_isDefaults") ) { valid_bTaggingEL.push_back( bTagLink ); }
+    SG::ConstAccessor<char> acc(tagger+"_isDefaults");
+    if ( not acc(**bTagLink) ) { valid_bTaggingEL.push_back( bTagLink ); }
   }
   return valid_bTaggingEL;
 }
