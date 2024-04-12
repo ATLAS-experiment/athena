@@ -28,7 +28,7 @@ def NavConverterCfg(flags, chainsList = []):
 
     r2ToR3OutputName = getRun3NavigationContainerFromInput(flags)
 
-    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter", OutputLevel=2)
+    cnvAlg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigRun2ToRun3NavConverter") # optional OutputLevel=2
     cnvAlg.TrigDecisionTool = tdt
     cnvAlg.TrigNavReadKey = ""
     cnvAlg.TrigConfigSvc = tdt.TrigConfigSvc

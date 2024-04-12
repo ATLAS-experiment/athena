@@ -160,12 +160,9 @@ namespace ChainNameParser {
             m_itr = next == m_end ? next : next + 1;
             return true;
         }
-        else if (
-                next == m_end ||
-                (std::distance(m_itr, next) >= 2 && std::string(m_itr, m_itr + 2) == "L1"))
+        else if (next == m_end)
         {
-            // This new part is actually the L1 item. Signal that there's no more to explore by
-            // setting the iterator to the end
+            // Setting the iterator to the end
             m_itr = m_end;
             return true;
         }

@@ -303,8 +303,16 @@ class SlimmingHelper:
                                 self.FinalItemList.append(item)
 
                 if (triggerContent and self.IncludeTriggerNavigation):
+                        # Run2
                         for item in CompulsoryTriggerNavigation:
                                 self.FinalItemList.append(item)
+                        # Run3
+                        from TrigDecisionTool.TrigDecisionToolConfig import possible_keys
+                        for item in possible_keys:
+                                if item == "HLTNav_Summary": # This is not a compact navigation summary collection, unlike the others in this list
+                                        continue
+                                self.FinalItemList.append('xAOD::TrigCompositeContainer#'+item)
+                                self.FinalItemList.append('xAOD::TrigCompositeAuxContainer#'+item+'Aux.')
 
                 # Add non-xAOD and on-the-fly content (not covered by smart slimming so no expansion)
                 badItemsWildcards = []

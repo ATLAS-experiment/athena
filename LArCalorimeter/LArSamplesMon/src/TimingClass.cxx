@@ -361,6 +361,95 @@ void LArSamples::TimingClass::Time(int dete, const std::string& nrun)
 
 }
 
+// ******************************************************************************* //
+void LArSamples::TimingClass::PlotFebAverageTime24(const std::string& nrun, const std::string& name)
+// ******************************************************************************* //
+{
+  std::string Filename = "FEB_time_fitMean_" + nrun + "_" + name + ".txt";
+
+  std::ifstream f(Filename.c_str(), ios::in);
+  std::vector<double> mean;
+  std::vector<int> side;
+
+  while (!f.eof())
+  {
+    int n1, n2, n3, n4;
+    double n5, n6;
+
+    f >> n1 >> n2 >> n3 >> n4 >> n5 >> n6;
+
+    if (f.good() && !f.bad() && !f.fail())
+    {
+      mean.push_back(n5);
+      side.push_back(n2);
+    }
+  }
+
+  f.close();
+
+  TH1F *h = new TH1F(Form("FEB_Av_%s", name.c_str()), Form("FEB_Av_%s", name.c_str()), 240, -30., 30.);
+  TH1F *sAh = new TH1F(Form("FEB_Av_%s_sideA", name.c_str()), Form("FEB_Av_%s_sideA", name.c_str()), 240, -30., 30.);
+  TH1F *sCh = new TH1F(Form("FEB_Av_%s_sideC", name.c_str()), Form("FEB_Av_%s_sideC", name.c_str()), 240, -30., 30.);
+
+  for (unsigned int i = 0; i < mean.size(); i++)
+  {
+    h->Fill(mean[i]);
+    // Fill sides
+    if (side.at(i) == 1) // A
+      sAh->Fill(mean[i]);
+    else // C
+      sCh->Fill(mean[i]);
+  }
+
+  h->Sumw2();
+  sAh->Sumw2();
+  sCh->Sumw2();
+
+  TCanvas *c = new TCanvas(Form("c_FEB_Av_%s", name.c_str()), Form("c_FEB_Av_%s", name.c_str()), 129, 165, 700, 600);
+  c->cd();
+  c->SetLogy();
+  h->GetXaxis()->SetTitle("<t_{FEB}> [ns]");
+  h->GetYaxis()->SetTitle("Number of FEBs / 0.25 ns");
+  h->Draw("hist");
+
+  TString path = "Plots/";
+  c->Print(path + Form("t_FEB_%s.png", name.c_str()));
+  c->Print(path + Form("t_FEB_%s.eps", name.c_str()));
+  c->Print(path + Form("t_FEB_%s.pdf", name.c_str()));
+
+  TCanvas *sAc = new TCanvas(Form("c_FEB_Av_%s_sideA", name.c_str()), Form("c_FEB_Av_%s_sideA", name.c_str()), 129, 165, 700, 600);
+  sAc->cd();
+  sAc->SetLogy();
+  sAh->GetXaxis()->SetTitle("<t_{FEB}> [ns]");
+  sAh->GetYaxis()->SetTitle("Number of FEBs / 0.25 ns");
+  sAh->Draw("hist");
+  sAc->Print(path + Form("t_FEB_%s_sideA.png", name.c_str()));
+
+  TCanvas *sCc = new TCanvas(Form("c_FEB_Av_%s_sideC", name.c_str()), Form("c_FEB_Av_%s_sideC", name.c_str()), 129, 165, 700, 600);
+  sCc->cd();
+  sCc->SetLogy();
+  sCh->GetXaxis()->SetTitle("<t_{FEB}> [ns]");
+  sCh->GetYaxis()->SetTitle("Number of FEBs / 0.25 ns");
+  sCh->Draw("hist");
+  sCc->Print(path + Form("t_FEB_%s_sideC.png", name.c_str()));
+
+  std::string plotname = "FEB_average_" + nrun + "_" + name + ".root";
+  TFile *fi = new TFile(plotname.c_str(), "RECREATE");
+  h->Write();
+  fi->Close();
+
+  std::string plotnamesA = "FEB_average_" + nrun + "_" + name + "_sideA.root";
+  TFile *fisA = new TFile(plotnamesA.c_str(), "RECREATE");
+  sAh->Write();
+  fisA->Close();
+
+  std::string plotnamesC = "FEB_average_" + nrun + "_" + name + "_sideC.root";
+  TFile *fisC = new TFile(plotnamesC.c_str(), "RECREATE");
+  sCh->Write();
+  fisC->Close();
+
+  return;
+}
 
 // ******************************************************************************* //
 void LArSamples::TimingClass::PlotFebAverageTime(const std::string& nrun, const std::string& name)

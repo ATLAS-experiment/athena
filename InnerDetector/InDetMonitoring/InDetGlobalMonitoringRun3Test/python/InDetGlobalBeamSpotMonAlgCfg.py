@@ -26,6 +26,8 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=False):
     # Histograms for track-based beam spot monitoring:
     varName = 'm_trkD0Phi,m_trkD0;trkDPhi'
     bsGroup.defineHistogram(varName,type="TH2F",title="DCA vs Phi; #varphi (rad);d_{0} (#mum)", path=pathbs, xbins=100, xmin=-3.5, xmax=3.5, ybins=100, ymin=-1000, ymax=1000)
+    varName = 'm_trkD0;trkD0'
+    bsGroup.defineHistogram(varName, type="TH1F", title="DCA; d_{0} (#mum)",path=pathbs,xbins=100,xmin=-500,xmax=500)
 
     if (expert):
         varName = 'm_trkPt;trkPt'
@@ -37,6 +39,8 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=False):
     if (m_useBeamspot):
         varName = 'm_trkD0PhiCorr,m_trkD0Corr;trkDPhiCorr'
         bsGroup.defineHistogram(varName,type="TH2F",title="DCA vs Phi wrt Beamspot;#varphi (rad);d_{0} (#mum)",path=pathbs,xbins=100, xmin=-3.5,xmax=3.5, ybins=100, ymin=-500,ymax=500)
+        varName = 'm_trkD0Corr;trkD0Corr'
+        bsGroup.defineHistogram(varName, type="TH1F", title="DCA; d_{0} (#mum)",path=pathbs,xbins=100,xmin=-500,xmax=500)
         varName = 'm_bsX;bsX'
         bsGroup.defineHistogram(varName, type="TH1F", title="Beam spot position: x;x (mm)",path=pathbs,xbins=100,xmin=-10,xmax=10)
         varName = 'm_bsY;bsY'
@@ -53,16 +57,16 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=False):
     # The following histograms are made either relative to the current beamspot (from BeamCondSvc), or relative to the nomial beamspot at (0,0,0) without any tilt.
         if (m_useBeamspot):
             varName = 'm_pvXbeam;pvX'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: x - x_{beam};x-x_{beam} (#mum)",path=pathbs,xbins=100,xmin=-500,xmax=500)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: x - x_{beam};x-x_{beam} (#mum)",path=pathbs,xbins=100,xmin=-200,xmax=200)
             varName = 'm_pvYbeam;pvY'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: y - y_{beam};y-y_{beam} (#mum)",path=pathbs,xbins=100,xmin=-500,xmax=500)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: y - y_{beam};y-y_{beam} (#mum)",path=pathbs,xbins=100,xmin=-200,xmax=200)
             varName = 'm_pvZbeam;pvZ'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: z - z_{beam};z-z_{beam} (#mum)",path=pathbs,xbins=100,xmin=-500,xmax=500)
         else:
             varName = 'm_pvXbeam;pvX'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: x;x (mm)",path=pathbs,xbins=100,xmin=-10,xmax=10)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: x;x (mm)",path=pathbs,xbins=100,xmin=-2,xmax=2)
             varName = 'm_pvYbeam;pvY'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: y;y (mm)",path=pathbs,xbins=100,xmin=-10,xmax=10)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: y;y (mm)",path=pathbs,xbins=100,xmin=-2,xmax=2)
             varName = 'm_pvZbeam;pvZ'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: z;z (mm)",path=pathbs,xbins=100,xmin=-500,xmax=500)
     
