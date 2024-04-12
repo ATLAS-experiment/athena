@@ -55,7 +55,9 @@ StatusCode SCTRawContByteStreamCnv::createRepConst(DataObject* pDataObject, IOpa
 
   // Set up the IOpaqueAddress for Storegate
   std::string dataObjectName{pDataObject->registry()->name()};
+  if ( pOpaqueAddress != nullptr ) pOpaqueAddress->release();
   pOpaqueAddress = new ByteStreamAddress(classID(), dataObjectName, "");
+  pOpaqueAddress->addRef();
 
   // Use the tool to do the conversion
   ATH_CHECK(m_rawContByteStreamTool->convert(sctRDOCont) );
