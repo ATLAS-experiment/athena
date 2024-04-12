@@ -182,7 +182,7 @@ TriggerHLTList = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigCaloClusterMaker_slwAux'+RemoveCaloVariables, 'BS ESD AODFULL', 'Calo'), 
     ('xAOD::CaloClusterContainer#HLT_TrigCaloClusterMaker_topo', 'BS ESD', 'Calo'), 
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigCaloClusterMaker_topoAux'+RemoveCaloVariables,'BS ESD', 'Calo'), 
-    ('xAOD::CaloClusterContainer#HLT_TrigEFCaloCalibFex', 'BS ESD AODFULL AODSLIM', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_TrigEFCaloCalibFex', 'BS ESD AODFULL AODSLIM AODCONV', 'Egamma'),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEFCaloCalibFexAux'+RemoveCaloVariables, 'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     #egamma
