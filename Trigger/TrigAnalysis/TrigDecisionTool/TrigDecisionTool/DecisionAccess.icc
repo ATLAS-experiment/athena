@@ -61,7 +61,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::DecisionAccess::fea
                                                                   const int          restrictToLegIndex) const {
   const SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>* navRHK = cgm()->getRun3NavigationKeyPtr();
   if (!navRHK || navRHK->empty()) {
-    ATH_MSG_ERROR("Trig::DecisionAccess::features: Run 3 Trigger Navigation ReadHandleKey not set. Check that the TDT's 'NavigationFormat' property is set to 'TrigComposite' for R3, "
+    ATH_MSG_ERROR("Trig::DecisionAccess::features: Run 3 Trigger Navigation ReadHandleKey not set. " << (navRHK == nullptr ? "(nullptr)." : "(empty).") << " Check that the TDT's 'NavigationFormat' property is set to 'TrigComposite' for R3, "
       "and the 'HLTSummary' property is set to the correct HLTNav_Summary_OnlineSlimmed / HLTNav_Summary_AODSlimmed / HLTNav_Summary_DAODSlimmed collection for the given input file.");
     return std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> >();
   }
