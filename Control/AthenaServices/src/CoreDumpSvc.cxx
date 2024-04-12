@@ -518,9 +518,7 @@ std::string CoreDumpSvc::dump() const
 
   if (algContextSvc) {
     os << "Algorithm stack: ";
-    if ( &algContextSvc->algorithms()==nullptr || algContextSvc->algorithms().empty() ) {
-      os << "<EMPTY>" << "\n";
-    }
+    if ( algContextSvc->algorithms().empty() ) os << "<EMPTY>" << "\n";
     else {
       os << "\n";
       for (auto alg : algContextSvc->algorithms()) {
