@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: PyROOTInspector.cxx 790007 2016-12-15 17:46:55Z ssnyder $
@@ -132,6 +132,23 @@ new_pylist(PyObject *pylist, PyObject *item)
   return obj;
 }
 
+// PySequence_Check returns true if the class implements __getitem__
+// In newer cppyy versions, e.g. 3+, every class has __getitem__ implemented
+// even if the class does not provide sequence protocol
+// This is one practical way of dealing with this issue (not strictly 1-to-1)
+// See ATEAM-974 and root/issues/15161
+inline
+bool is_sequence(PyObject *obj)
+{
+  auto item = PySequence_Size(obj) > 0 ? PySequence_GetItem(obj, 0) : nullptr;
+  if (item) {
+    Py_DECREF(item);
+    return true;
+  }
+  PyErr_Clear();
+  return false;
+}
+
 void
 recurse_pyinspect(PyObject *pyobj,
                   PyObject *pyobj_name,
@@ -256,7 +273,7 @@ recurse_pyinspect(PyObject *pyobj,
   }
 
   Int_t hdr = 0;
-  if (PySequence_Check(pyobj)) {
+  if (is_sequence(pyobj)) {
     if (clsname == "CLHEP::Hep3Vector" ||
         clsname == "TLorentzVector" ||
         clsname == "TVector3")
@@ -443,7 +460,7 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
   }
 
   Int_t hdr = 0;
-  if (PySequence_Check(pyobj)) {
+  if (is_sequence(pyobj)) {
     if (!strcmp(tcls->GetName(), "CLHEP::Hep3Vector")) {
       hdr = 0;
     } else {
@@ -560,7 +577,6 @@ PyROOTInspector::pyroot_inspect2(PyObject *pyobj,
   ::recurse_pyinspect(pyobj, pyobj_name, pystack, persistentOnly, retvecs);
   return pystack;
 }
-
 
 } // namespace RootUtils
 
