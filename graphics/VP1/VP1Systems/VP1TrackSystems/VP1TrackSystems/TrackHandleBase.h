@@ -101,12 +101,14 @@ public:
   virtual unsigned getNPixelHits() const { return 0; }
   virtual unsigned getNSCTHits() const { return 0; }
   virtual unsigned getNTRTHits() const { return 0; }
-  virtual unsigned getNMuonHits() const { return (getNMDTHits()+getNRPCHits()+getNTGCHits()+getNCSCHits()); }
+  virtual unsigned getNMuonHits() const { return (getNMDTHits()+getNRPCHits()+getNTGCHits()+getNCSCHits()+getNMMHits()+getNsTGCHits()); }
   virtual unsigned getNMuonPhiHits() const { return 0; } //!< The number of phi hits is part of hit counts below (i.e. RPC hits include phi hits), but reported separately due to importance.
   virtual unsigned getNMDTHits() const { return 0; }
   virtual unsigned getNRPCHits() const { return 0; }
   virtual unsigned getNTGCHits() const { return 0; }
   virtual unsigned getNCSCHits() const { return 0; }
+  virtual unsigned getNMMHits() const { return 0; }
+  virtual unsigned getNsTGCHits() const { return 0; }
   virtual unsigned getNMuonPrecisionHits() const { return getNMDTHits() + getNCSCHits(); } // This should really only count eta csc hits. 
   virtual const Trk::FitQuality* getFitQuality() const {return 0;}
 

@@ -39,7 +39,7 @@
 TrackHandle_TrkTrack::TrackHandle_TrkTrack(TrackCollHandleBase* ch, const Trk::Track* trk)
   : TrackHandleBase(ch),
     m_nhits_pixel(0), m_nhits_sct(0), m_nhits_trt(0), m_nhits_muon_phi(0), m_nhits_rpc(0), m_nhits_mdt(0), 
-    m_nhits_tgc(0), m_nhits_csc(0), m_hitInfoStatus(-1),
+    m_nhits_tgc(0), m_nhits_csc(0), m_nhits_mm(0), m_nhits_stgc(0), m_hitInfoStatus(-1),
     m_trk(trk)
 {
 }
@@ -150,7 +150,7 @@ void TrackHandle_TrkTrack::currentMaterialChanged()
 void TrackHandle_TrkTrack::ensureInitSubSysHitInfo() const
 {
   if (m_hitInfoStatus==-1) 
-    m_hitInfoStatus = VP1TrackSummary::countHits( m_trk, m_nhits_pixel, m_nhits_sct, m_nhits_trt, m_nhits_muon_phi, m_nhits_rpc, m_nhits_mdt, m_nhits_tgc, m_nhits_csc) ? 1 : 0;
+    m_hitInfoStatus = VP1TrackSummary::countHits( m_trk, m_nhits_pixel, m_nhits_sct, m_nhits_trt, m_nhits_muon_phi, m_nhits_rpc, m_nhits_mdt, m_nhits_tgc, m_nhits_csc, m_nhits_mm, m_nhits_stgc) ? 1 : 0;
 }
 
 void TrackHandle_TrkTrack::fillObjectBrowser( QList<QTreeWidgetItem *>& listOfItems) 
@@ -315,7 +315,7 @@ QString TrackHandle_TrkTrack::shortInfo() const
   l += "|Pt|="+VP1Msg::str(mom.perp())+" [GeV], ";
   l += "|P|="+VP1Msg::str(mom.mag())+" [GeV], ";
   l += "Pix["+QString::number(getNPixelHits())+"], SCT["+QString::number(getNSCTHits())+"], TRT["+QString::number(getNTRTHits())
-   +"], MDT["+QString::number(getNMDTHits())+"], RPC["+QString::number(getNRPCHits())+"], TGC["+QString::number(getNTGCHits())+"], CSC["+QString::number(getNCSCHits())+"]";
+   +"], MDT["+QString::number(getNMDTHits())+"], RPC["+QString::number(getNRPCHits())+"], TGC["+QString::number(getNTGCHits())+"], CSC["+QString::number(getNCSCHits())+"], MM["+QString::number(getNMMHits())+"], sTGC["+QString::number(getNsTGCHits());
   return l;
 }
 

@@ -65,7 +65,6 @@ bool VP1TrackSanity::isSafe(const Trk::MeasurementBase* meas )
 {
   if (!meas)
     return false;
-  //TK: The following is mainly guess work - we need master Ed to implement really useful stuff!
   if (!meas->associatedSurface().associatedDetectorElement())
     return false;
   if (!meas->associatedSurface().associatedDetectorElementIdentifier().is_valid())
