@@ -4,7 +4,9 @@
 # @author Tadej Novak
 # @author Teng Jian Khoo
 
+import sys
 import os
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -25,7 +27,7 @@ athArgsParser.add_argument("--dump-config", action="store", dest="dump_config",
                            help="Dump the config in a pickle file")
 athArgsParser.add_argument("--data-type", action="store", dest="data_type",
                            default="data",
-                           help="Type of input to run over. Valid options are 'data', 'mc', 'afii'")
+                           help="Type of input to run over. Valid options are 'data', 'fullsim', 'fastsim'")
 athArgsParser.add_argument('--block-config', dest='block_config',
                            action='store_true', default=False,
                            help='Configure the job with block configuration')
@@ -40,31 +42,27 @@ athArgsParser.add_argument('--no-systematics', dest='no_systematics',
                            help='Configure the job to with no systematics')
 athArgsParser.add_argument('--physlite', dest='physlite',
                            action='store_true', default=False,
-                           help='Configure the job for physlite')
+                           help='Run the job on physlite')
 athArgsParser.add_argument('--only-nominal-or', dest='onlyNominalOR',
                            action='store_true', default=False,
                            help='Only run overlap removal for nominal (skip systematics)')
 athArgs = flags.fillFromArgs(parser=athArgsParser)
 
-dataType = athArgs.data_type
+dataType = DataType(athArgs.data_type)
 blockConfig = athArgs.block_config
 textConfig = athArgs.text_config
 forCompare = athArgs.for_compare
-isPhyslite = athArgs.physlite
 
-if dataType not in ["data", "mc", "afii"]:
-    raise Exception("invalid data type: " + dataType)
+print(f"Running on data type: {dataType.value}")
 
-print("Running on data type: " + dataType)
-
-if isPhyslite:
-    inputfile = {"data": 'ASG_TEST_FILE_LITE_DATA',
-                 "mc":   'ASG_TEST_FILE_LITE_MC',
-                 "afii": 'ASG_TEST_FILE_LITE_MC_AFII'}
+if athArgs.physlite:
+    inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_DATA',
+                 DataType.FullSim: 'ASG_TEST_FILE_LITE_MC',
+                 DataType.FastSim: 'ASG_TEST_FILE_LITE_MC_AFII'}
 else:
-    inputfile = {"data": 'ASG_TEST_FILE_DATA',
-                 "mc":   'ASG_TEST_FILE_MC',
-                 "afii": 'ASG_TEST_FILE_MC_AFII'}
+    inputfile = {DataType.Data:    'ASG_TEST_FILE_DATA',
+                 DataType.FullSim: 'ASG_TEST_FILE_MC',
+                 DataType.FastSim: 'ASG_TEST_FILE_MC_AFII'}
 
 # Set up the reading of the input file:
 if athArgs.input_file:
@@ -86,7 +84,7 @@ cfg.merge(CutFlowSvcCfg(flags))
 # Setup the configuration
 cp_cfg = makeSequence(dataType, blockConfig, textConfig, forCompare=forCompare,
                       noSystematics=athArgs.no_systematics,
-                      isPhyslite=isPhyslite,
+                      isPhyslite=athArgs.physlite,
                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR,
                       forceEGammaFullSimConfig=True)
 # Add all algorithms from the sequence to the job.
@@ -94,16 +92,13 @@ cfg.merge(cp_cfg)
 
 # Set up a histogram output file for the job:
 if blockConfig:
-    outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest." + \
-        dataType + ".hist.root' OPT='RECREATE'"
+    outputFile = f"ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest.{dataType.value}.hist.root' OPT='RECREATE'"
 elif textConfig:
-    outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsTextConfigTest." + \
-        dataType + ".hist.root' OPT='RECREATE'"
+    outputFile = f"ANALYSIS DATAFILE='FullCPAlgorithmsTextConfigTest.{dataType.value}.hist.root' OPT='RECREATE'"
 else:
-    outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsTest." + \
-        dataType + ".hist.root' OPT='RECREATE'"
+    outputFile = f"ANALYSIS DATAFILE='FullCPAlgorithmsTest.{dataType.value}.hist.root' OPT='RECREATE'"
 if athArgs.output_file:
-    outputFile = "ANALYSIS DATAFILE='" + athArgs.output_file + "' OPT='RECREATE'"
+    outputFile = f"ANALYSIS DATAFILE='{athArgs.output_file}' OPT='RECREATE'"
 cfg.addService(CompFactory.THistSvc(Output=[outputFile]))
 
 # Set EventPrintoutInterval to 100 events
@@ -117,5 +112,4 @@ if athArgs.dump_config:
         cfg.store(f)
 
 sc = cfg.run(500)
-import sys
 sys.exit(sc.isFailure())
