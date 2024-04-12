@@ -1,10 +1,11 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigVSIHypoAlg.h"
 
 #include "xAODTracking/TrackParticleAuxContainer.h"
+#include "AthContainers/ConstAccessor.h"
 #include "AthViews/ViewHelper.h"
 
 using TrigCompositeUtils::createAndStore;
@@ -116,11 +117,14 @@ StatusCode TrigVSIHypoAlg::execute(const EventContext& context) const
       float maxVtxNTrk = 0.;
       float maxVtxMass = 0.;
 
+      static const SG::ConstAccessor<float> vsi_massAcc ("vsi_mass");
+      static const SG::ConstAccessor<float> vsi_pTAcc ("vsi_pT");
+
       // Loop over all vertices and combine them into the std::vector after preselection and create the input for the hypotool
       for ( const xAOD::Vertex* vertex : *vtxContainer ) {
          if (vertex == nullptr) continue;
-         const float  mass  = (vertex->isAvailable<float>("vsi_mass"))?  vertex->auxdata<float>("vsi_mass")  : 0.;
-         const float  pT    = (vertex->isAvailable<float>("vsi_pT"))?    vertex->auxdata<float>("vsi_pT")    : 0.;
+         const float  mass  = vsi_massAcc.withDefault(*vertex, 0);
+         const float  pT    = vsi_pTAcc.withDefault(*vertex, 0);
          const size_t ntrk  = vertex->nTrackParticles();
 
          const float  x_ = vertex->position().x();
