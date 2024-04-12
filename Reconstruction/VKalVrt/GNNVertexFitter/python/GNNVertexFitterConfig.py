@@ -10,17 +10,17 @@ def GNNVertexFitterToolCfg(flags, name="GNNVertexFitterTool", **kwargs):
 
     acc.merge(BeamSpotCondAlgCfg(flags))
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    acc.setPrivateTools(CompFactory.Rec.GNNVertexFitterTool(GNNModel="GN2v01",
-                                                            JetCollection="AntiKt4EMPFlowJets",
-                                                            multiPrimary=False,
-                                                            minLxy=2, 
-                                                            minPerp=2,
-                                                            maxLxy=300,
-                                                            minSig3D=0,
-                                                            maxChi2=20,
-                                                            HFRatio=0.3,
-                                                            minNTrk=2,
-                                                            **kwargs))
+    kwargs.setdefault("GNNModel", "GN2v01")
+    kwargs.setdefault("JetCollection", "AntiKt4EMPFlowJets")
+    kwargs.setdefault("multiPrimary", False)
+    kwargs.setdefault("minLxy", 2)
+    kwargs.setdefault("minPerp", 2)
+    kwargs.setdefault("maxLxy", 300)
+    kwargs.setdefault("minSig3D", 20)
+    kwargs.setdefault("maxChi2", 20)
+    kwargs.setdefault("HFRatio", 0.3)
+    kwargs.setdefault("minNTrk", 2)
+    acc.setPrivateTools(CompFactory.Rec.GNNVertexFitterTool(**kwargs))
 
     return acc
       

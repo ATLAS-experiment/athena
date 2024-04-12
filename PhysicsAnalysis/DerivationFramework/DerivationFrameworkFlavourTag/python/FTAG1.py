@@ -28,9 +28,6 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     if flags.BTagging.AddV0Finder:
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix="FTAG1", container_name_prefix="FTAG"))
 
-#    from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
-#    acc.merge(GNNVertexFitterAlgCfg(flags, name="GNNVertexFitterAlg"))
-
     # thinning tools
     thinningTools = []
 
