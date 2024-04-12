@@ -41,6 +41,8 @@ public:
   virtual unsigned getNMDTHits() const { ensureInitSubSysHitInfo(); return m_nhits_mdt; }
   virtual unsigned getNTGCHits() const { ensureInitSubSysHitInfo(); return m_nhits_tgc; }
   virtual unsigned getNCSCHits() const { ensureInitSubSysHitInfo(); return m_nhits_csc; }
+  virtual unsigned getNMMHits() const { ensureInitSubSysHitInfo(); return m_nhits_mm; }
+  virtual unsigned getNSTGCHits() const { ensureInitSubSysHitInfo(); return m_nhits_stgc; }
   void visibleStateChanged();
   const std::vector< Amg::Vector3D > * provide_pathInfoPoints() const;
 
@@ -60,6 +62,8 @@ private:
   mutable unsigned m_nhits_mdt;
   mutable unsigned m_nhits_tgc;
   mutable unsigned m_nhits_csc;
+  mutable unsigned m_nhits_mm;
+  mutable unsigned m_nhits_stgc;
   mutable int m_hitInfoStatus;//!< -1: uninitialized, 0: not present, 1: present.
   void ensureInitSubSysHitInfo() const;
   const Trk::Segment* m_segment;

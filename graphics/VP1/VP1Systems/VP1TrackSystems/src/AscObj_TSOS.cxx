@@ -973,6 +973,8 @@ void AscObj_TSOS::addTransformToSurface(SoSeparator*& shape_simple,SoSeparator*&
       case TrkObjToString::CSC:
       case TrkObjToString::RPC:
       case TrkObjToString::MDT:
+      case TrkObjToString::MM:
+      case TrkObjToString::sTGC:
       {
         theHitTransform=m_hitToSoNode.createTransform(*rio, true);
         break;          

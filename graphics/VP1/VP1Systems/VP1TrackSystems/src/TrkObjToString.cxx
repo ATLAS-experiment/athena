@@ -29,7 +29,10 @@
 #include "MuonRIO_OnTrack/CscClusterOnTrack.h"
 #include "MuonRIO_OnTrack/RpcClusterOnTrack.h"
 #include "MuonRIO_OnTrack/TgcClusterOnTrack.h"
+#include "MuonRIO_OnTrack/sTgcClusterOnTrack.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
+#include "MuonRIO_OnTrack/MMClusterOnTrack.h"
+
 
 //CompetingROTs
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
@@ -60,22 +63,26 @@
 TrkObjToString::MeasurementType
 TrkObjToString::type(const Trk::PrepRawData* prd)
 {
-  if (dynamic_cast<const InDet::PixelCluster*> (prd))
-  {return TrkObjToString::Pixel;}
-  if (dynamic_cast<const InDet::SCT_Cluster*> (prd))
-  {return TrkObjToString::SCT;}
-  if (dynamic_cast<const InDet::TRT_DriftCircle*> (prd))
-  {return TrkObjToString::TRT;}
-  if (dynamic_cast<const Muon::CscPrepData*> (prd))
-  {return TrkObjToString::CSC;}
-  if (dynamic_cast<const Muon::RpcPrepData*> (prd))
-  {return TrkObjToString::RPC;}
-  if (dynamic_cast<const Muon::TgcPrepData*> (prd))
-  {return TrkObjToString::TGC;}
-  if (dynamic_cast<const Muon::MdtPrepData*> (prd))
-  {return TrkObjToString::MDT;}
+  if (prd->type(Trk::PrepRawDataType::PixelCluster))
+    return TrkObjToString::Pixel;
+  else if (prd->type(Trk::PrepRawDataType::SCT_Cluster))
+    return TrkObjToString::SCT;
+  else if (prd->type(Trk::PrepRawDataType::TRT_DriftCircle))
+    return TrkObjToString::TRT;
+  else if (prd->type(Trk::PrepRawDataType::CscPrepData))
+    return TrkObjToString::CSC;
+  else if (prd->type(Trk::PrepRawDataType::RpcPrepData))
+    return TrkObjToString::RPC;
+  else if (prd->type(Trk::PrepRawDataType::TgcPrepData))
+    return TrkObjToString::TGC;
+  else if (prd->type(Trk::PrepRawDataType::MdtPrepData))
+    return TrkObjToString::MDT;
+  else if (prd->type(Trk::PrepRawDataType::MMPrepData))
+    return TrkObjToString::MM;
+  else if (prd->type(Trk::PrepRawDataType::sTgcPrepData))
+    return TrkObjToString::sTGC;
 
-  return TrkObjToString::Unknown; // Couldn't cast ROT to anything known
+  return TrkObjToString::Unknown;
 }
 
 TrkObjToString::MeasurementType
@@ -97,6 +104,10 @@ TrkObjToString::type(const Trk::MeasurementBase* meas)
             {return TrkObjToString::TGC;}
         if (dynamic_cast<const Muon::MdtDriftCircleOnTrack*> (meas))
             {return TrkObjToString::MDT;}
+        if (dynamic_cast<const Muon::MMClusterOnTrack*> (meas))
+            {return TrkObjToString::MM;}
+        if (dynamic_cast<const Muon::sTgcClusterOnTrack*> (meas))
+            {return TrkObjToString::sTGC;}
     } else {
         // Other types
         if (dynamic_cast<const Trk::CompetingRIOsOnTrack*>(meas) )
@@ -147,6 +158,8 @@ QString TrkObjToString::name(const Trk::MeasurementBase& mb)
         case RPC:             { tmpname+="RPC"; break; }
         case TGC:             { tmpname+="TGC"; break; }
         case MDT:             { tmpname+="MDT"; break; }
+        case MM:             { tmpname+="MM"; break; }
+        case sTGC:             { tmpname+="sTGC"; break; }
         case Hole:
         case CompetingROT:
         case PseudoMeasurement:
@@ -204,6 +217,8 @@ TrkObjToString::shortInfo(const Trk::MeasurementBase& mb)
       case RPC:
       case TGC:
       case MDT:
+      case MM:
+      case sTGC:
       case Hole:
       {
         addBaseROTInfo(info,mb);

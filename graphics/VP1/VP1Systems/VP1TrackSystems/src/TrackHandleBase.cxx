@@ -746,7 +746,7 @@ void TrackHandleBase::Imp::rebuild3DObjects()
 
     if (labels&TrackSystemController::Hits){
       text <<"Pix["+VP1Msg::str(theclass->getNPixelHits())+"], SCT["+VP1Msg::str(theclass->getNSCTHits())+"], TRT["+VP1Msg::str(theclass->getNTRTHits())+"],"
-        <<" MDT["+QString::number(theclass->getNMDTHits())+"], RPC["+QString::number(theclass->getNRPCHits())+"], TGC["+QString::number(theclass->getNTGCHits())+"], CSC["+QString::number(theclass->getNCSCHits())+"]";
+        <<" MDT["+QString::number(theclass->getNMDTHits())+"], RPC["+QString::number(theclass->getNRPCHits())+"], TGC["+QString::number(theclass->getNTGCHits())+"], CSC["+QString::number(theclass->getNCSCHits())+"] MM["+QString::number(theclass->getNMMHits())+"], sTGC["+QString::number(theclass->getNsTGCHits())+"]";
     }
 
       if (labels&TrackSystemController::Direction ){
@@ -1540,7 +1540,7 @@ QStringList TrackHandleBase::baseInfo() const
     l << "Phi: "+VP1Msg::str(VP1LinAlgUtils::phiFromXY(mom.x(), mom.y() ));
   }
   l<<"Hit summary: Pix["+VP1Msg::str(getNPixelHits())+"], SCT["+VP1Msg::str(getNSCTHits())+"], TRT["+VP1Msg::str(getNTRTHits())
-    +"], MDT["+QString::number(getNMDTHits())+"], RPC["+QString::number(getNRPCHits())+"], TGC["+QString::number(getNTGCHits())+"], CSC["+QString::number(getNCSCHits())+"].";
+    +"], MDT["+QString::number(getNMDTHits())+"], RPC["+QString::number(getNRPCHits())+"], TGC["+QString::number(getNTGCHits())+"], CSC["+QString::number(getNCSCHits())+"] MM["+QString::number(getNMMHits())+"], sTGC["+QString::number(getNsTGCHits())+"]";
 
   return l;
   /** coverity 17186: this code is unreachable

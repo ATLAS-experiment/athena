@@ -33,7 +33,9 @@ public:
        unsigned& nhits_rpc, 
        unsigned& nhits_mdt, 
        unsigned& nhits_tgc, 
-       unsigned& nhits_csc
+       unsigned& nhits_csc,
+       unsigned& nhits_mm,
+       unsigned& nhits_stgc
        );
        
    static bool countHits( const Trk::Segment*,
@@ -44,7 +46,9 @@ public:
         unsigned& nhits_rpc, 
         unsigned& nhits_mdt, 
         unsigned& nhits_tgc, 
-        unsigned& nhits_csc
+        unsigned& nhits_csc,
+        unsigned& nhits_mm,
+        unsigned& nhits_stgc
         );
         
     static void addCounts( std::set<const Trk::TrkDetElementBase*>& detelems, const Trk::MeasurementBase* meas,
@@ -56,7 +60,9 @@ public:
         unsigned& nhits_rpc, 
         unsigned& nhits_mdt, 
         unsigned& nhits_tgc, 
-        unsigned& nhits_csc
+        unsigned& nhits_csc,
+        unsigned& nhits_mm,
+        unsigned& nhits_stgc
         );
         
 private:

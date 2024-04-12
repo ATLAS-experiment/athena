@@ -44,6 +44,8 @@ public:
     RPC,
     TGC,
     MDT,
+    MM,
+    sTGC,
     Hole,
     CompetingROT,
     PseudoMeasurement,
@@ -92,6 +94,8 @@ TrkObjToString::typeName(TrkObjToString::MeasurementType type)
         case RPC:               return std::string("RPC RIO_OnTrack");
         case TGC:               return std::string("TGC RIO_OnTrack");
         case MDT:               return std::string("MDT RIO_OnTrack");
+        case MM:                return std::string("MM RIO_OnTrack");
+        case sTGC:              return std::string("sTGC RIO_OnTrack");
         case Hole:              return std::string("Hole");
         case CompetingROT:      return std::string("CompetingROT");
         case PseudoMeasurement: return std::string("Pseudo");

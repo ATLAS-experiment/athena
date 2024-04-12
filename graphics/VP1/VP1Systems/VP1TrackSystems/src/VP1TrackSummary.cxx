@@ -35,10 +35,12 @@ bool VP1TrackSummary::countHits( const Trk::Track* trk,
     unsigned& nhits_rpc, 
     unsigned& nhits_mdt, 
     unsigned& nhits_tgc, 
-    unsigned& nhits_csc
+    unsigned& nhits_csc,
+    unsigned& nhits_mm,
+    unsigned& nhits_stgc
     )
 {
-    nPixelHits = nSCTHits = nTRTHits = nhits_muon_phi = nhits_rpc = nhits_mdt = nhits_tgc = nhits_csc = 0;
+    nPixelHits = nSCTHits = nTRTHits = nhits_muon_phi = nhits_rpc = nhits_mdt = nhits_tgc = nhits_csc = nhits_mm = nhits_stgc = 0;
     if (!trk)
         return false;
 
@@ -51,7 +53,7 @@ bool VP1TrackSummary::countHits( const Trk::Track* trk,
     Trk::TrackStates::const_iterator tsos_end = trk->trackStateOnSurfaces()->end();
     for (; tsos_iter != tsos_end; ++tsos_iter) {
         const Trk::MeasurementBase*       meas = *tsos_iter ? (*tsos_iter)->measurementOnTrack() : nullptr;
-        VP1TrackSummary::addCounts(detelems, meas, idhelper, nPixelHits , nSCTHits , nTRTHits , nhits_muon_phi , nhits_rpc , nhits_mdt , nhits_tgc , nhits_csc);
+        VP1TrackSummary::addCounts(detelems, meas, idhelper, nPixelHits , nSCTHits , nTRTHits , nhits_muon_phi , nhits_rpc , nhits_mdt , nhits_tgc , nhits_csc, nhits_mm, nhits_stgc);
     }
     return true;
 }
@@ -65,10 +67,12 @@ bool VP1TrackSummary::countHits( const Trk::Segment* seg,
     unsigned& nhits_rpc, 
     unsigned& nhits_mdt, 
     unsigned& nhits_tgc, 
-    unsigned& nhits_csc
+    unsigned& nhits_csc,
+    unsigned& nhits_mm,
+    unsigned& nhits_stgc
     )
 {
-    nPixelHits = nSCTHits = nTRTHits = nhits_muon_phi = nhits_rpc = nhits_mdt = nhits_tgc = nhits_csc = 0;
+    nPixelHits = nSCTHits = nTRTHits = nhits_muon_phi = nhits_rpc = nhits_mdt = nhits_tgc = nhits_csc = nhits_mm = nhits_stgc = 0;
     if (!seg)
         return false;
 
@@ -80,7 +84,7 @@ bool VP1TrackSummary::countHits( const Trk::Segment* seg,
     std::vector< const Trk::MeasurementBase * >::const_iterator tsos_iter = seg->containedMeasurements().begin(), tsos_end = seg->containedMeasurements().end();
     for (; tsos_iter != tsos_end; ++tsos_iter) {
         const Trk::MeasurementBase*       meas = *tsos_iter;
-        addCounts(detelems, meas, idhelper, nPixelHits , nSCTHits , nTRTHits , nhits_muon_phi , nhits_rpc , nhits_mdt , nhits_tgc , nhits_csc);
+        addCounts(detelems, meas, idhelper, nPixelHits , nSCTHits , nTRTHits , nhits_muon_phi , nhits_rpc , nhits_mdt , nhits_tgc , nhits_csc, nhits_mm, nhits_stgc);
     }
     return true;
 }
@@ -94,7 +98,9 @@ void VP1TrackSummary::addCounts( std::set<const Trk::TrkDetElementBase*>& detele
     unsigned& nhits_rpc, 
     unsigned& nhits_mdt, 
     unsigned& nhits_tgc, 
-    unsigned& nhits_csc
+    unsigned& nhits_csc,
+    unsigned& nhits_mm,
+    unsigned& nhits_stgc
     )
 {
     const Trk::CompetingRIOsOnTrack*  crot = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(meas);
@@ -123,6 +129,8 @@ void VP1TrackSummary::addCounts( std::set<const Trk::TrkDetElementBase*>& detele
         else if (idhelper->is_rpc(id)) ++nhits_rpc;
         else if (idhelper->is_tgc(id)) ++nhits_tgc;
         else if (idhelper->is_csc(id)) ++nhits_csc;
+        else if (idhelper->is_mm(id)) ++nhits_mm;
+        else if (idhelper->is_stgc(id)) ++nhits_stgc;
     }// FIXME! Implement Muon phi hits
     nhits_muon_phi=0;
     detelems.clear();   
