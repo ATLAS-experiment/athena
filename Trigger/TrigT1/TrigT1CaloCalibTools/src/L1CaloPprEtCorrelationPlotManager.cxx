@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibTools/L1CaloPprEtCorrelationPlotManager.h"
@@ -15,6 +15,7 @@
 #include "TrigT1CaloToolInterfaces/IL1TriggerTowerTool.h"
 #include "TrigT1CaloEvent/TriggerTower.h"
 
+#include "AthContainers/ConstAccessor.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "Identifier/Identifier.h"
 
@@ -106,16 +107,20 @@ double L1CaloPprEtCorrelationPlotManager::getMonitoringValue(const xAOD::Trigger
 
     if (ttCpEnergy <= m_EtMin) return -1000.;
     if (absEta < 3.2){
-      if ( trigTower->isAvailable< std::vector<float> > ("CaloCellEnergyByLayer") ) {
-        for (float e : trigTower->auxdataConst< std::vector<float> > ("CaloCellEnergyByLayer")) {
+      static const SG::ConstAccessor< std::vector<float> >
+        CaloCellEnergyByLayerAcc("CaloCellEnergyByLayer");
+      if ( CaloCellEnergyByLayerAcc.isAvailable(*trigTower) ) {
+        for (float e : CaloCellEnergyByLayerAcc(*trigTower)) {
           caloEnergy += e;
         }
         caloEnergy = caloEnergy / cosh( trigTower->eta() );
       }
     }//for central region only                                                                                                                                                                      
     else {
-      if( trigTower->isAvailable< std::vector<float> > ("CaloCellETByLayer") ){
-        for (float et : trigTower->auxdataConst< std::vector<float> > ("CaloCellETByLayer")) {
+      static const SG::ConstAccessor< std::vector<float> >
+        CaloCellETByLayerAcc("CaloCellETByLayer");
+      if( CaloCellETByLayerAcc.isAvailable(*trigTower) ){
+        for (float et : CaloCellETByLayerAcc(*trigTower)) {
           caloEnergy += et;
         }
       }
