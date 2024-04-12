@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from Campaigns.Utils import Campaign
 
 import logging
@@ -12,11 +13,20 @@ def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultC
     """Create a PRW analysis algorithm sequence
 
     Keyword arguments:
-      dataType -- The data type to run on ("data", "mc" or "afii")
+      dataType -- The data type enum
     """
 
-    if dataType not in ["data", "mc", "afii"] :
-        raise ValueError ("invalid data type: " + dataType)
+    if isinstance(dataType, str):
+        dataType = {
+            "data": DataType.Data,
+            "fullsim": DataType.FullSim,
+            "fastsim": DataType.FastSim,
+            "mc": DataType.FullSim,
+            "afii": DataType.FastSim,
+        }.get(dataType)
+
+        if not dataType:
+            raise ValueError ("invalid data type")
 
     # Create the analysis algorithm sequence object:
     seq = AnaAlgSequence( "PileupAnalysisSequence" )
@@ -36,7 +46,7 @@ def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultC
 
         if campaign:
             if userPileupConfigs is None:
-                if dataType == 'data':
+                if dataType is DataType.Data:
                     log.info('Data needs no configuration files')
                 else:
                     from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
@@ -63,7 +73,7 @@ def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultC
     alg = createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
     addPrivateTool( alg, 'pileupReweightingTool', 'CP::PileupReweightingTool' )
     alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
-    if not toolConfigFiles and dataType != "data":
+    if not toolConfigFiles and dataType is not DataType.Data:
         log.info("No PRW config files provided. Disabling reweighting")
         # Setting the weight decoration to the empty string disables the reweighting
         alg.pileupWeightDecoration = ""

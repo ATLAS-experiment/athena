@@ -15,7 +15,7 @@ if( XAOD_STANDALONE )
    function( add_test_job NAME DATA_TYPE )
 
       atlas_add_test( ${NAME}
-         SCRIPT FullCPAlgorithmsTest_eljob.py --data-type ${DATA_TYPE} --direct-driver --submission-dir submitDir-${NAME} --use-flags ${ARGN}
+         SCRIPT FullCPAlgorithmsTest_eljob.py --data-type ${DATA_TYPE} --direct-driver --submission-dir submitDir-${NAME} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
          PROPERTIES TIMEOUT 900 )
 
@@ -59,69 +59,62 @@ endif()
 
 
 add_test_job( TestJobDataSequence data --for-compare --no-systematics )
-add_test_job( TestJobDataConfig   data ${USE_FLAGS} --for-compare --block-config --no-systematics )
-add_test_job( TestJobDataTextConfig data ${USE_FLAGS} --for-compare --text-config ${CONFIG_PATH} --no-systematics )
-add_test_job( TestJobDataFull     data ${USE_FLAGS} --block-config --no-systematics )
-add_test_job( TestJobDataNominalOR   data ${USE_FLAGS} --block-config --no-systematics --only-nominal-or )
+add_test_job( TestJobDataConfig data --for-compare --block-config --no-systematics )
+add_test_job( TestJobDataTextConfig data --for-compare --text-config ${CONFIG_PATH} --no-systematics )
+add_test_job( TestJobDataFull data --block-config --no-systematics )
+add_test_job( TestJobDataNominalOR data --block-config --no-systematics --only-nominal-or )
 add_test_compare( TestJobDataCompare data TestJobDataSequence TestJobDataConfig )
 add_test_compare( TestJobDataCompareConfig data TestJobDataConfig TestJobDataTextConfig )
 
-add_test_job( TestJobFullSimSequence mc --for-compare )
-add_test_job( TestJobFullSimConfig   mc --for-compare --block-config )
-add_test_job( TestJobFullSimTextConfig  mc --for-compare --text-config ${CONFIG_PATH} )
-add_test_job( TestJobFullSimFull     mc --block-config )
-add_test_job( TestJobFullSimNominalOR   mc --block-config --only-nominal-or )
-add_test_compare( TestJobFullSimCompare mc TestJobFullSimSequence TestJobFullSimConfig )
-add_test_compare( TestJobFullSimCompareConfig mc TestJobFullSimConfig TestJobFullSimTextConfig )
+add_test_job( TestJobFullSimSequence fullsim --for-compare )
+add_test_job( TestJobFullSimConfig fullsim --for-compare --block-config )
+add_test_job( TestJobFullSimTextConfig fullsim --for-compare --text-config ${CONFIG_PATH} )
+add_test_job( TestJobFullSimFull fullsim --block-config )
+add_test_job( TestJobFullSimNominalOR fullsim --block-config --only-nominal-or )
+add_test_compare( TestJobFullSimCompare fullsim TestJobFullSimSequence TestJobFullSimConfig )
+add_test_compare( TestJobFullSimCompareConfig fullsim TestJobFullSimConfig TestJobFullSimTextConfig )
 
-add_test_job( TestJobFastSimSequence afii --for-compare )
-add_test_job( TestJobFastSimConfig   afii --for-compare --block-config )
-add_test_job( TestJobFastSimTextConfig   afii --for-compare --text-config ${CONFIG_PATH} )
-add_test_job( TestJobFastSimFull     afii --block-config )
-add_test_job( TestJobFastSimNominalOR   afii --block-config --only-nominal-or )
-add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastSimConfig )
-
-# FIX ME: the text configuration currently does not create weight_pileup_%SYS%
-# for FastSim.  Not quite sure why, but the practical solution for now is to
-# disable this comparison.
-#add_test_compare( TestJobFastSimCompareConfig afii TestJobFastSimConfig TestJobFastSimTextConfig )
-
-
-
+add_test_job( TestJobFastSimSequence fastsim --for-compare )
+add_test_job( TestJobFastSimConfig fastsim --for-compare --block-config )
+add_test_job( TestJobFastSimTextConfig fastsim --for-compare --text-config ${CONFIG_PATH} )
+add_test_job( TestJobFastSimFull fastsim --block-config )
+add_test_job( TestJobFastSimNominalOR fastsim --block-config --only-nominal-or )
+add_test_compare( TestJobFastSimCompare fastsim TestJobFastSimSequence TestJobFastSimConfig )
+# add_test_compare( TestJobFastSimCompareConfig fastsim TestJobFastSimConfig TestJobFastSimTextConfig )
 
 # FIX ME: There are some issues with the PHYSLITE tests that need to
 # be investigated, but until that happens I run some tests only in
 # AnalysisBase, and disable comparisons alltogether.
 
 add_test_job( TestJobDataSequenceLite data --for-compare --physlite --no-systematics )
-add_test_job( TestJobDataConfigLite   data ${USE_FLAGS} --for-compare --block-config --physlite --no-systematics )
-add_test_job( TestJobDataTextConfigLite data ${USE_FLAGS} --for-compare --text-config ${CONFIG_PATH} --physlite --no-systematics )
-add_test_job( TestJobDataFullLite     data ${USE_FLAGS} --block-config --physlite --no-systematics )
-add_test_job( TestJobDataNominalORLite    data ${USE_FLAGS} --block-config --only-nominal-or --physlite )
-#add_test_compare( TestJobDataCompareLite data TestJobDataSequenceLite TestJobDataConfigLite )
-#add_test_compare( TestJobDataCompareConfigLite data TestJobDataConfigLite TestJobDataTextConfigLite )
+add_test_job( TestJobDataConfigLite data --for-compare --block-config --physlite --no-systematics )
+add_test_job( TestJobDataTextConfigLite data --for-compare --text-config ${CONFIG_PATH} --physlite --no-systematics )
+add_test_job( TestJobDataFullLite data --block-config --physlite --no-systematics )
+add_test_job( TestJobDataNominalORLite data --block-config --only-nominal-or --physlite )
+# add_test_compare( TestJobDataCompareLite data TestJobDataSequenceLite TestJobDataConfigLite )
+# add_test_compare( TestJobDataCompareConfigLite data TestJobDataConfigLite TestJobDataTextConfigLite )
 
 
 if( XAOD_STANDALONE )
 
-   add_test_job( TestJobFullSimSequenceLite mc --for-compare --physlite )
-   add_test_job( TestJobFullSimConfigLite   mc --for-compare --block-config --physlite )
-   add_test_job( TestJobFullSimTextConfigLite mc --for-compare --text-config ${CONFIG_PATH} --physlite )
-   add_test_job( TestJobFullSimFullLite     mc --block-config --physlite )
-   add_test_job( TestJobFullSimNominalORLite    mc --block-config --only-nominal-or --physlite )
-   add_test_compare( TestJobFullSimCompareLite mc TestJobFullSimSequenceLite TestJobFullSimConfigLite )
+   add_test_job( TestJobFullSimSequenceLite fullsim --for-compare --physlite )
+   add_test_job( TestJobFullSimConfigLite fullsim --for-compare --block-config --physlite )
+   add_test_job( TestJobFullSimTextConfigLite fullsim --for-compare --text-config ${CONFIG_PATH} --physlite )
+   add_test_job( TestJobFullSimFullLite fullsim --block-config --physlite )
+   add_test_job( TestJobFullSimNominalORLite fullsim --block-config --only-nominal-or --physlite )
+   add_test_compare( TestJobFullSimCompareLite fullsim TestJobFullSimSequenceLite TestJobFullSimConfigLite )
 
-   add_test_job( TestJobFastSimSequenceLite afii --for-compare --physlite )
-   add_test_job( TestJobFastSimConfigLite   afii --for-compare --block-config --physlite )
-   add_test_job( TestJobFastSimTextConfigLite afii --for-compare --text-config ${CONFIG_PATH} --physlite )
-   add_test_job( TestJobFastSimFullLite     afii --block-config --physlite )
-   add_test_job( TestJobFastSimNominalORLite    afii --block-config --only-nominal-or --physlite )
-   add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
+   add_test_job( TestJobFastSimSequenceLite fastsim --for-compare --physlite )
+   add_test_job( TestJobFastSimConfigLite fastsim --for-compare --block-config --physlite )
+   add_test_job( TestJobFastSimTextConfigLite fastsim --for-compare --text-config ${CONFIG_PATH} --physlite )
+   add_test_job( TestJobFastSimFullLite fastsim --block-config --physlite )
+   add_test_job( TestJobFastSimNominalORLite fastsim --block-config --only-nominal-or --physlite )
+   add_test_compare( TestJobFastSimCompareLite fastsim TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 
    # this test is for testing that the algorithm monitors defined in EventLoop
    # don't break a job of reasonable complexity.  they are tested here instead of
    # in the EventLoop package, because we have a much more complex payload here.
-   add_test_job( TestJobDataConfigMonitors   data ${USE_FLAGS} --for-compare --block-config --no-systematics --algorithm-timer --algorithm-memory )
+   add_test_job( TestJobDataConfigMonitors data --for-compare --block-config --no-systematics --algorithm-timer --algorithm-memory )
    add_test_compare( TestJobDataCompareMonitor data TestJobDataConfig TestJobDataConfigMonitors )
 
 endif()

@@ -6,17 +6,19 @@
 
 # Read the submission directory as a command line argument. You can
 # extend the list of arguments with your private ones later on.
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+
 import optparse
 parser = optparse.OptionParser()
 parser.add_option( '-d', '--data-type', dest = 'data_type',
                    action = 'store', type = 'string', default = 'data',
-                   help = 'Type of data to run over. Valid options are data, mc, afii' )
+                   help="Type of input to run over. Valid options are 'data', 'fullsim', 'fastsim'")
 parser.add_option( '-s', '--submission-dir', dest = 'submission_dir',
                    action = 'store', type = 'string', default = 'submitDir',
                    help = 'Submission directory for EventLoop' )
-parser.add_option("--input-file", action = "append", dest = "input_file",
-                  default = None,
-                  help = "Specify the input file")
+parser.add_option( "--input-file", action = "append", dest = "input_file",
+                   default = None,
+                   help = "Specify the input file")
 parser.add_option( '-u', '--unit-test', dest='unit_test',
                    action = 'store_true', default = False,
                    help = 'Run the job in "unit test mode"' )
@@ -56,12 +58,6 @@ parser.add_option( '--for-compare', dest='for_compare',
 parser.add_option( '--physlite', dest='physlite',
                    action = 'store_true', default = False,
                    help = 'Configure the job for physlite' )
-parser.add_option( '--geometry', dest='geometry',
-                   action = 'store', type = 'string', default = 'RUN2',
-                   help = 'LHC Run period to run over. Valid options are RUN2, RUN3' )
-parser.add_option( '--use-flags', dest='use_flags',
-                   action = 'store_true', default = False,
-                   help = 'Use Athena-style configuration flags to set up the config blocks')
 parser.add_option( '--only-nominal-or', dest='onlyNominalOR',
                    action = 'store_true', default = False,
                    help = 'Only run overlap removal for nominal (skip systematics)')
@@ -77,33 +73,31 @@ ROOT.xAOD.TauJetContainer()
 # ideally we'd run over all of them, but we don't have a mechanism to
 # configure per-sample right now
 
-dataType = options.data_type
+dataType = DataType(options.data_type)
 blockConfig = options.block_config
 textConfig = options.text_config
 forCompare = options.for_compare
-isPhyslite = options.physlite
-geometry = options.geometry
+
+print(f"Running on data type: {dataType.value}")
+
+if options.physlite:
+    inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_DATA',
+                 DataType.FullSim: 'ASG_TEST_FILE_LITE_MC',
+                 DataType.FastSim: 'ASG_TEST_FILE_LITE_MC_AFII'}
+else:
+    inputfile = {DataType.Data:    'ASG_TEST_FILE_DATA',
+                 DataType.FullSim: 'ASG_TEST_FILE_MC',
+                 DataType.FastSim: 'ASG_TEST_FILE_MC_AFII'}
 
 # No R24 FastSim recommendations for EGamma yet
 forceEGammaFullSimConfig = True
-
-if dataType not in ["data", "mc", "afii"] :
-    raise Exception ("invalid data type: " + dataType)
 
 # Set up the sample handler object. See comments from the C++ macro
 # for the details about these lines.
 import os
 sh = ROOT.SH.SampleHandler()
 sh.setMetaString( 'nc_tree', 'CollectionTree' )
-sample = ROOT.SH.SampleLocal (dataType)
-if isPhyslite :
-    inputfile = {"data": 'ASG_TEST_FILE_LITE_DATA',
-                 "mc":   'ASG_TEST_FILE_LITE_MC',
-                 "afii": 'ASG_TEST_FILE_LITE_MC_AFII'}
-else :
-    inputfile = {"data": 'ASG_TEST_FILE_DATA',
-                 "mc":   'ASG_TEST_FILE_MC',
-                 "afii": 'ASG_TEST_FILE_MC_AFII'}
+sample = ROOT.SH.SampleLocal (dataType.value)
 if options.input_file:
     for file_idx in range(len(options.input_file)):
         testFile = options.input_file[file_idx]
@@ -114,15 +108,13 @@ else:
 sh.add (sample)
 sh.printContent()
 
-flags = None
-if options.use_flags:
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-    if options.input_file:
-        flags.Input.Files = options.input_file[:]
-    else:
-        flags.Input.Files = [testFile]
-    flags.lock()
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+if options.input_file:
+    flags.Input.Files = options.input_file[:]
+else:
+    flags.Input.Files = [testFile]
+flags.lock()
 
 # Create an EventLoop job.
 job = ROOT.EL.Job()
@@ -140,8 +132,7 @@ if options.factory_preload != '' :
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
 algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
-                       hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
-                       geometry=geometry,
+                       hardCuts = options.hard_cuts, isPhyslite=options.physlite,
                        autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR,
                        forceEGammaFullSimConfig=forceEGammaFullSimConfig)
 printSequenceAlgs( algSeq ) # For debugging

@@ -91,6 +91,13 @@ def addOutputCopyAlgorithms (algSeq, ca, postfix, inputContainer, outputContaine
 
 def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, forceEGammaFullSimConfig=False) :
 
+    if isinstance(dataType, DataType):
+        dataType = {
+            DataType.Data: 'data',
+            DataType.FullSim: 'mc',
+            DataType.FastSim: 'afii',
+        }.get(dataType)
+
     vars = []
     metVars = []
 
@@ -667,14 +674,13 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
                         'jet_': 'OutJets',
                         'met_': 'AnaMET',
                         ''    : 'EventInfo'}
-    if not(forceEGammaFullSimConfig and dataType=='afii' and forCompare):
+    if not(forceEGammaFullSimConfig and dataType is DataType.FastSim and forCompare):
         outputContainers['el_'] = 'OutElectrons'
 
     # create factory object to build block configurations
     from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
     config = ConfigFactory()
 
-    # noSystematics is passed in block from config accumulator
     configSeq += config.makeConfig('CommonServices')
     configSeq.setOptionValue('.systematicsHistogram', 'systematicsList')
     if forCompare:
@@ -684,8 +690,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     #   overran integrated luminosity for RunNumber=363262 (0.000000 vs 0.000000)
     if not isPhyslite:
         configSeq += config.makeConfig('PileupReweighting')
-        if dataType == 'afii' and forCompare:
-            prwfiles, lumicalcfiles = pileupConfigFiles( {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, None) )
+        if dataType is DataType.FastSim and forCompare:
+            prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
             configSeq.setOptionValue('.userPileupConfigs', prwfiles)
             configSeq.setOptionValue('.userLumicalcFiles', lumicalcfiles)
             configSeq.setOptionValue('.useDefaultConfig', False)
@@ -1005,7 +1011,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
             'disable ph_select_tight.*',
             'disable tau_select_tight.*',
             ]
-        if not (dataType == 'afii' and forceEGammaFullSimConfig):
+        if not (dataType is DataType.FastSim and forceEGammaFullSimConfig):
             disable_commands.append('disable el_select_loose.*')
     configSeq.setOptionValue ('.commands', disable_commands)
 
