@@ -121,9 +121,10 @@ def _main():
 						metavar='MODE',
 						type=str,
 						choices=['tiny', 'lite', 'full', 'peeker', 'iov'],
-						help="This flag provides the user capability to select the amount of metadata retrieved. There three options: "
+						help="This flag provides the user capability to select the amount of metadata retrieved. There are five options: "
 							"tiny (only those values used in PyJobTransforms), "
-							"lite (same output as dump-athfile), "
+							"lite, "
+                            "peeker, "
 							"full (all available data found), "
 							"and iov (full+iov details)" )
 
