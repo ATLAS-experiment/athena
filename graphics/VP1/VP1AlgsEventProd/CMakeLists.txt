@@ -8,3 +8,5 @@ atlas_add_component( VP1AlgsEventProd
    VP1AlgsEventProd/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES AthenaBaseComps GaudiKernel PathResolver
    VP1UtilsBase EventDisplaysOnlineLib)
+
+atlas_install_python_modules( python/*.py)

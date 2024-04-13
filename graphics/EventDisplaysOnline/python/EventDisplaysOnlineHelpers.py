@@ -4,39 +4,6 @@ import time
 from AthenaCommon.Logging import logging
 import os, sys
 
-def GetRunType():
-  """Get the run type by reading the run-type setting in the partition from IS """
-
-  mlog = logging.getLogger( 'EventDisplays' )
-
-  #Try to get the partition name
-  try :
-    partition = os.environ['TDAQ_PARTITION']
-  except KeyError :
-    partition = "ATLAS"
-    mlog.warning("TDAQ_PARTITION not defined in environment, using %s as default", partition)
-  
-  mlog.debug('Probing partition %s for RunType', partition)
-
-  #now try and read the information from IS
-  try :
-    runparams = ISObject(IPCPartition(partition), 'RunParams.RunParams','RunParams')
-    runparams.checkout()
-    runType = runparams.run_type
-  except UserWarning as err:
-    mlog.error(err)
-    #Set the default runtype
-    runType="collisions"
-    mlog.warning("Failed to read run type from IS, using %s as default", runType)
-  finally :
-    if runType not in ['collisions','singlebeam','cosmics']:
-      mlog.fatal("Invalid run type: %s", runType)
-      sys.exit(1)
-
-  mlog.info("Setting run type to: %s", runType)
-  return runType
-
-
 def GetBFields():
   mlog = logging.getLogger( 'EventDisplays' )
 
@@ -75,7 +42,7 @@ def GetBFields():
   #finally return our values
   return (solenoidOn,toroidOn)
 
-  
+
 def WaitForPartition(partitionName=None):
   mlog = logging.getLogger( 'EventDisplays' )
   partitionUp = False
@@ -90,9 +57,50 @@ def WaitForPartition(partitionName=None):
       mlog.info("%s partition is not up, sleeping for 30 seconds", partitionName)
       time.sleep(30)
 
+def EventCanBeSeenByPublic(projectTags=[]):
+# Is the data allowed to be seen by the general public on atlas live an\
+d in the CCC
+
+  try:
+    partition = IPCPartition('ATLAS')
+    RunParams = ISObject(partition, 'RunParams.RunParams', 'RunParams')
+    RunParams.checkout()
+
+    ready4physics = ISInfoAny()
+    ISInfoDictionary(partition).getValue('RunParams.Ready4Physics', rea\
+dy4physics)
+    print("physicsReady: %s " % ready4physics.get())
+
+    physicsReady = ISObject(partition, 'RunParams.Ready4Physics','Ready\
+4PhysicsInfo')
+    physicsReady.checkout()
+
+    ready4physics = ISInfoAny()
+    ISInfoDictionary(partition).getValue('RunParams.Ready4Physics', rea\
+dy4physics)
+    print("physicsReady: %s " % ready4physics.get())
+
+    physicsReady = ISObject(partition, 'RunParams.Ready4Physics','Ready\
+4PhysicsInfo')
+    physicsReady.checkout()
+    print("Ready for physics: %r" % (physicsReady.ready4physics))
+    print("RunParams.T0_project_tag", RunParams.T0_project_tag)
+
+    sendToPublicStream = False
+    if physicsReady.ready4physics and RunParams.T0_project_tag in proje\
+ctTags:
+      sendToPublicStream = True
+
+    return sendToPublicStream
+
+  except Exception:
+    print('Failed to get bool for EventCanBeSeenByPublic')
+    return False
 
 if __name__ == "__main__":
   runType=GetRunType()
   print ("RunType: %s"%runType)
   bFields = GetBFields()
   print ("BFields (Sol,Tor):",bFields)
+  isPublicEvent = EventCanBeSeenByPublic(['data24_13p6TeV'])
+  print("isPublicEvent:",isPublicEvent)

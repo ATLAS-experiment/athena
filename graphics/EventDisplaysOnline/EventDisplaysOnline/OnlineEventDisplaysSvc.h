@@ -22,12 +22,11 @@ class OnlineEventDisplaysSvc : public AthService, virtual public IOnlineEventDis
 
 protected:
   friend class SvcFactory<OnlineEventDisplaysSvc>;
-  
+
 public:
 
   OnlineEventDisplaysSvc( const std::string& name, ISvcLocator* pSvcLocator );
-  virtual ~OnlineEventDisplaysSvc();
-   
+
   static const InterfaceID& interfaceID();
 
   //To allow access to the IOnlineEventDisplaysSvc interface
@@ -37,21 +36,19 @@ public:
   StatusCode finalize();
   void beginEvent();
   void endEvent();
-  void handle(const Incident& incident );       
+  void handle(const Incident& incident );
   void createWriteableDir(std::string directory, gid_t zpgid);
   gid_t setOwnershipToZpGrpOrDefault();
   std::string getFileNamePrefix() override;
   std::string getEntireOutputStr() override;
   std::string getStreamName() override;
-  
+
 private:
   OnlineEventDisplaysSvc();
   SG::ReadHandleKey<xAOD::EventInfo> m_evt{this, "EventInfo", "EventInfo", "Input event information"};
   Gaudi::Property<std::string> m_outputDirectory {this, "OutputDirectory", "/atlas/EventDisplayEvents", "Output Directory"};
   Gaudi::Property<std::vector<std::string>> m_streamsWanted {this, "StreamsWanted", {}, "Desired trigger streams"};
   Gaudi::Property<std::vector<std::string>> m_publicStreams {this, "PublicStreams", {}, "Desired public streams"};
-  Gaudi::Property<std::string> m_eventNumber {this, "EventNumber", {}, "Event number"};
-  Gaudi::Property<std::string> m_runNumber {this, "RunNumber", {}, "Run number"};
   Gaudi::Property<bool> m_sendToPublicStream {this, "SendToPublicStream", false, "Allowed to be seen by the public on atlas live"};
   Gaudi::Property<bool> m_BeamSplash {this, "BeamSplash", false, "Is a beam splash event"};
   Gaudi::Property<bool> m_CheckPair {this, "CheckPair", true, "Check for matching ESD and JiveXML files"};
@@ -59,12 +56,14 @@ private:
   std::string m_FileNamePrefix = "JiveXML";
   std::string m_outputStreamDir = ".Unknown";
   std::string m_entireOutputStr = ".";
+  int m_runNumber;
+  long m_eventNumber;
+
 };
 
 inline const InterfaceID& OnlineEventDisplaysSvc::interfaceID()
-{ 
+{
   return IOnlineEventDisplaysSvc::interfaceID();
 }
 
 #endif
-

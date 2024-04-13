@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <JiveXML/StreamToFileTool.h>
@@ -10,13 +10,13 @@
 namespace JiveXML {
 
   /**
-   * Constructor 
+   * Constructor
    * - setup message service
    * - initialize properties
    */
   StreamToFileTool::StreamToFileTool( const std::string& type , const std::string& name, const IInterface* p):
     AthAlgTool(type,name,p){
-    
+
     //Provide interface
     declareInterface<IStreamTool>(this);
 
@@ -24,12 +24,19 @@ namespace JiveXML {
     declareProperty("FileNamePrefix", m_FileNamePrefix = "JiveXML");
     /// The file name suffix
     declareProperty("FileNameSuffix", m_FileNameSuffix = ".xml");
+
   }
 
   /**
    * Intialize - called once at the beginning
    */
   StatusCode StreamToFileTool::initialize(){
+    if(m_isOnline){
+      if(m_onlineEDsvc.retrieve().isFailure()){
+	ATH_MSG_ERROR("Could not locate the online event displays service");
+	return StatusCode::FAILURE;
+      }
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -46,27 +53,27 @@ namespace JiveXML {
    * @param RunNumber the run number
    * @param EventBuffer the string holding the complete event
    */
-   StatusCode StreamToFileTool::StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* EventBuffer ) { 
-   
-     if (msgLvl(MSG::INFO)) msg(MSG::INFO) << " m_FileNamePrefix: " << m_FileNamePrefix << endmsg;
+   StatusCode StreamToFileTool::StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* EventBuffer ) {
+     if(m_isOnline){
+       m_FileNamePrefix = m_onlineEDsvc->getFileNamePrefix();
+       ATH_MSG_DEBUG("m_FileNamePrefix: " << m_FileNamePrefix << " EventNumber: " << EventNumber);
+     }
      /// Get a pointer to a new file
      std::ofstream* outFile;
      StatusCode sc = NewFile(EventNumber,RunNumber,outFile);
      if (sc.isFailure()){
-        if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Could not open file for event " 
-           << EventNumber << " from run " << RunNumber << endmsg;
+       ATH_MSG_WARNING("Could not open file for event " << EventNumber << " from run " << RunNumber);
        return sc;
      }
-     /// Stream this event into the file 
+     /// Stream this event into the file
      (*outFile) << EventBuffer->str();
      outFile->flush();
      /// Check wether we could write the event
      if (!outFile->good()){
-       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Could not write event " 
-           << EventNumber << " from run " << RunNumber << endmsg;
+       ATH_MSG_WARNING("Could not open file for event " << EventNumber << " from run " << RunNumber);
        return StatusCode::FAILURE;
      }
-     
+
      /// Finally close the file
      sc = CloseFile(outFile);
      return sc;
@@ -78,24 +85,24 @@ namespace JiveXML {
    * @param EventNumber the event number
    * @param RunNumber the run number
    */
-   std::string StreamToFileTool::MakeFileName( const unsigned long EventNumber, const unsigned int RunNumber) const {
+   std::string StreamToFileTool::MakeFileName(const unsigned long EventNumber, const unsigned int RunNumber) const {
 
      //Generate a the return string with file prefix
      std::ostringstream name;
-     
+
      //Assemble file name
      name << m_FileNamePrefix << std::setfill('0');
      name << "_" << std::setw(5) << RunNumber;
      name << "_" << std::setw(5) << EventNumber;
-     name << m_FileNameSuffix; 
+     name << m_FileNameSuffix;
      return name.str();
    }
 
-   /** 
+   /**
     * Open a new file
     */
    StatusCode StreamToFileTool::NewFile( const unsigned long EventNumber, const unsigned int RunNumber, std::ofstream *& outputFile) const {
-      
+
       // Generate the file name
       std::string filename = MakeFileName(EventNumber,RunNumber);
 
@@ -104,24 +111,24 @@ namespace JiveXML {
 
       // check if it worked
       if ( !(outputFile->good()) ){
-        if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Unable to create output file with name " << filename << endmsg;
-        return StatusCode::FAILURE;
+	ATH_MSG_WARNING("Unable to create output file with name " << filename);
+	return StatusCode::FAILURE;
       }
 
       return StatusCode::SUCCESS;
     }
 
    /**
-    * Close the file 
-    */   
+    * Close the file
+    */
    StatusCode StreamToFileTool::CloseFile( std::ofstream *& outputFile ) const {
 
     //Try to close the file
     outputFile->close();
-    
+
     //See if it worked
     if (!outputFile->good()){
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING)  << "Unable to close file" << endmsg;
+      ATH_MSG_WARNING("Unable to close file");
     }
 
     //In any case delete object

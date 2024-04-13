@@ -11,11 +11,9 @@
 #include <cstdlib>  // For std::rand() and std::srand()
 #include "Python.h"
 
-OnlineEventDisplaysSvc::OnlineEventDisplaysSvc( const std::string& name, 
-			  ISvcLocator* pSvcLocator ) : 
+OnlineEventDisplaysSvc::OnlineEventDisplaysSvc( const std::string& name,
+			  ISvcLocator* pSvcLocator ) :
   AthService(name, pSvcLocator){}
-
-OnlineEventDisplaysSvc::~OnlineEventDisplaysSvc(){}
 
 void OnlineEventDisplaysSvc::beginEvent(){
 
@@ -25,24 +23,24 @@ void OnlineEventDisplaysSvc::beginEvent(){
   }
   std::vector<std::string> streams;
 
-  ATH_MSG_INFO("You have requested to only output JiveXML and ESD files when a trigger in the following streams was fired: ");
+  ATH_MSG_DEBUG("You have requested to only output JiveXML and ESD files when a trigger in the following streams was fired: ");
   for (std::string stream : m_streamsWanted){
-    ATH_MSG_INFO(stream);
+    ATH_MSG_DEBUG(stream);
   }
-  m_eventNumber = std::to_string(evt->eventNumber());
-  m_runNumber = std::to_string(evt->runNumber());
+  m_eventNumber = evt->eventNumber();
+  m_runNumber = evt->runNumber();
 
   //Check what trigger streams were fired, if in list of desired
-  //streams to be reconstructed pick one randomly 
+  //streams to be reconstructed pick one randomly
   for (const xAOD::EventInfo::StreamTag& tag : evt->streamTags()){
-    ATH_MSG_INFO ("A trigger in stream " << tag.type() << "_" << tag.name() << " was fired in this event.");
+    ATH_MSG_DEBUG("A trigger in stream " << tag.type() << "_" << tag.name() << " was fired in this event.");
     std::string stream_fullname = tag.type() + "_" + tag.name();
 
     if (m_streamsWanted.empty()) {
-      ATH_MSG_INFO ("You have not requested any specific streams, going to allow all streams");
+      ATH_MSG_WARNING("You have not requested any specific streams, going to allow all streams");
       streams.emplace_back(stream_fullname);
     }
-    
+
     else{
       //If the stream is in the list of streams requested, add it
       if(std::find(m_streamsWanted.begin(), m_streamsWanted.end(), tag.name()) != m_streamsWanted.end()){
@@ -52,11 +50,11 @@ void OnlineEventDisplaysSvc::beginEvent(){
       bool isPublicStream = std::find(m_publicStreams.begin(), m_publicStreams.end(), tag.name()) != m_publicStreams.end();
       if(m_sendToPublicStream && isPublicStream){
 	streams.emplace_back("Public");
-      }      
+      }
     }
   }
   for (std::string stream : streams){
-    ATH_MSG_INFO("streams where a trigger fired and in your desired streams list: " << stream);
+    ATH_MSG_DEBUG("streams where a trigger fired and in your desired streams list: " << stream);
   }
   std::random_shuffle(streams.begin(), streams.end());
   //Pick the first stream as the output directory
@@ -71,17 +69,14 @@ void OnlineEventDisplaysSvc::beginEvent(){
   m_entireOutputStr = m_outputDirectory + "/" + m_outputStreamDir;
   createWriteableDir(m_outputDirectory, zpgid);
   createWriteableDir(m_entireOutputStr, zpgid);
-  
+
   std::string FileNamePrefix = m_entireOutputStr + "/JiveXML";
   m_FileNamePrefix = FileNamePrefix;
-  ATH_MSG_INFO("in begin: " << m_entireOutputStr);
 }
 
 void OnlineEventDisplaysSvc::endEvent(){
   RootUtils::PyGILStateEnsure ensure;
-  if(m_BeamSplash){
-    m_CheckPair = false;
-  }
+
   PyObject* pCheckPair = PyBool_FromLong(m_CheckPair); // Use 0 for False
   PyObject* pBeamSplash = PyBool_FromLong(m_BeamSplash);
   PyObject* pMaxEvents = PyLong_FromLong(m_maxEvents);
@@ -99,7 +94,7 @@ void OnlineEventDisplaysSvc::endEvent(){
     }
     Py_DECREF(cleanDirectory);
     if(m_BeamSplash){
-      std::string JiveXMLFileName ="JiveXML_"+ m_runNumber+"_"+m_eventNumber+".xml";
+      std::string JiveXMLFileName ="JiveXML_"+ std::to_string(m_runNumber)+"_"+std::to_string(m_eventNumber)+".xml";
       const char* JiveXMLFileName_cString = JiveXMLFileName.c_str();
       PyObject* pJiveXMLFileName = PyUnicode_FromString(JiveXMLFileName_cString);
       PyObject* pArgs_zip = PyTuple_Pack(2, pDirectory, pJiveXMLFileName);
@@ -136,24 +131,24 @@ std::string OnlineEventDisplaysSvc::getStreamName(){
 void OnlineEventDisplaysSvc::createWriteableDir(std::string directory, gid_t zpgid){
 
   const char* char_dir = directory.c_str();
-  
+
   if (access(char_dir, F_OK) == 0) {
     struct stat directoryStat;
     if (stat(char_dir, &directoryStat) == 0 && S_ISDIR(directoryStat.st_mode) &&
 	access(char_dir, W_OK) == 0) {
-      ATH_MSG_INFO("Going to write file to existing directory: " << directory);
+      ATH_MSG_DEBUG("Going to write file to existing directory: " << directory);
       if (directoryStat.st_gid != zpgid) {
-	ATH_MSG_INFO("Setting group to 'zp' for directory: " << directory);
+	ATH_MSG_DEBUG("Setting group to 'zp' for directory: " << directory);
 	chown(char_dir, -1, zpgid);
       }
     } else {
-      ATH_MSG_INFO("Directory '" << directory << "' is not usable, trying next alternative");
+      ATH_MSG_WARNING("Directory '" << directory << "' is not usable, trying next alternative");
     }
   } else {
     try {
       mkdir(char_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
       chown(char_dir, -1, zpgid);
-      ATH_MSG_INFO("Created output directory " << directory);
+      ATH_MSG_DEBUG("Created output directory " << directory);
     } catch (const std::system_error& err) {
       std::cerr << "Failed to create output directory " << directory
 		<< err.what() << std::endl;
@@ -167,7 +162,7 @@ gid_t OnlineEventDisplaysSvc::setOwnershipToZpGrpOrDefault(){
   if (zp_group != nullptr) {
     zpgid = zp_group->gr_gid;
   } else {
-    ATH_MSG_INFO("If running on private machine, zp group might not exist. Just set to the likely value 1307.");
+    ATH_MSG_DEBUG("If running on private machine, zp group might not exist. Just set to the likely value 1307.");
     zpgid = 1307;
   }
   return zpgid;
@@ -182,29 +177,32 @@ StatusCode OnlineEventDisplaysSvc::initialize(){
   incSvc->addListener( this, "BeginEvent");
   incSvc->addListener( this, "StoreCleared");
 
+  if(m_BeamSplash){
+    m_CheckPair = false;
+  }
   ATH_CHECK( m_evt.initialize() );
-  
+
   return StatusCode::SUCCESS;
 }
 
 StatusCode OnlineEventDisplaysSvc::finalize(){
 
-  ATH_MSG_INFO("Finalizing " << name());
+  ATH_MSG_DEBUG("Finalizing " << name());
   return StatusCode::SUCCESS;
 }
 
 void OnlineEventDisplaysSvc::handle( const Incident& incident ){
-  ATH_MSG_INFO("Received incident " << incident.type() << " from " << incident.source() );
+  ATH_MSG_DEBUG("Received incident " << incident.type() << " from " << incident.source() );
   if ( incident.type() == IncidentType::BeginEvent && incident.source() == "BeginIncFiringAlg" ){
     beginEvent();
-    
+
   }
   if ( incident.type() == "StoreCleared" && incident.source() == "StoreGateSvc" ){
     endEvent();
   }
 }
 
-StatusCode OnlineEventDisplaysSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
+StatusCode OnlineEventDisplaysSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
 {
   if ( IOnlineEventDisplaysSvc::interfaceID().versionMatch(riid) ) {
     *ppvInterface = dynamic_cast<IOnlineEventDisplaysSvc*>(this);

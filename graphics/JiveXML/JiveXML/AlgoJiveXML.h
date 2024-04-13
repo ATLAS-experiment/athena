@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_ALGOJIVEXML_H
@@ -15,10 +15,10 @@
 
 //Forward declarations
 namespace JiveXML{
-  //  class IDataRetriever; 
+  //  class IDataRetriever;
   class IFormatTool;
   class IStreamTool;
-}  
+}
 
 namespace JiveXML {
 
@@ -31,32 +31,32 @@ namespace JiveXML {
    */
   class AlgoJiveXML : public AthAlgorithm {
 
-    public:
-   
-      //Constructor
-      AlgoJiveXML (const std::string& name, ISvcLocator* pSvcLocator);
+  public:
 
-      //Default Athena algorithm methods
-      StatusCode initialize();
-      StatusCode execute();
-      StatusCode finalize();
-    private:
+    //Constructor
+    AlgoJiveXML (const std::string& name, ISvcLocator* pSvcLocator);
 
-      Gaudi::Property<std::string> m_AtlasRelease {this, "AtlasRelease", "unknown", "The Athena release number"};
-      Gaudi::Property<std::vector<std::string>> m_dataTypes {this, "DataTypes", {}, "List of data retriever names to be run"}; 
-      Gaudi::Property<bool> m_writeToFile {this, "WriteToFile", true, "Whether XML files shall be produced"};
-      Gaudi::Property<bool> m_onlineMode {this, "OnlineMode", false, "Whether an XMLRPC server shall be started"};
-      Gaudi::Property<bool> m_writeGeometry {this, "WriteGeometry", false, "Whether Geometry-XML files shall be produced"};
-      Gaudi::Property<std::string> m_geometryVersionIn {this, "GeometryVersion", "default", "Geometry version as read from Athena"};
+    //Default Athena algorithm methods
+    StatusCode initialize();
+    StatusCode execute();
+    StatusCode finalize();
+  private:
+
+    Gaudi::Property<std::string> m_AtlasRelease {this, "AtlasRelease", "unknown", "The Athena release number"};
+    Gaudi::Property<std::vector<std::string>> m_dataTypes {this, "DataTypes", {}, "List of data retriever names to be run"};
+    Gaudi::Property<bool> m_writeToFile {this, "WriteToFile", true, "Whether XML files shall be produced"};
+    Gaudi::Property<bool> m_onlineMode {this, "OnlineMode", false, "Whether an XMLRPC server shall be started"};
+    Gaudi::Property<bool> m_writeGeometry {this, "WriteGeometry", false, "Whether Geometry-XML files shall be produced"};
+    Gaudi::Property<std::string> m_geometryVersionIn {this, "GeometryVersion", "default", "Geometry version as read from Athena"};
     Gaudi::Property<std::vector<std::string>> m_GeoWriterNames {this, "GeoWriterNames", {"JiveXML::GeometryWriter/GeometryWriter","JiveXML::MuonGeometryWriter/MuonGeometryWriter"}, "The names of the geometry-writer tools"};
     /**
      * The list of DataRetrievers. This is initialised using the list of names
      * supplied by the jobOptions. DataRetrievers are AlgTools residing in the
      * corresponding sub-detector packages (e.g. TrackRetriever in InDetJiveXML).
      **/
-    ToolHandleArray<JiveXML::IDataRetriever> m_DataRetrievers; 
+    ToolHandleArray<JiveXML::IDataRetriever> m_DataRetrievers;
 
-    /** 
+    /**
      * Handle to the formatting tool, which is passed on to
      * the data retrievers and converts the data into XML
      **/
@@ -72,4 +72,4 @@ namespace JiveXML {
   };
 
 }//namespace
-#endif 
+#endif

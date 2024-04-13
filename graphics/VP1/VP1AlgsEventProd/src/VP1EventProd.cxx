@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1AlgsEventProd/VP1EventProd.h"
@@ -48,7 +48,7 @@ VP1EventProd::~VP1EventProd()
 
 StatusCode VP1EventProd::initialize()
 {
-  ATH_MSG_INFO(" in initialize() ");
+  ATH_MSG_DEBUG(" in initialize() ");
 
   StatusCode result = StatusCode::SUCCESS;
 
@@ -61,12 +61,13 @@ StatusCode VP1EventProd::initialize()
   else
     incsvc->addListener(this, "BeginEvent", 0);
 
-  if(m_isOnline){
+   if(m_isOnline){
     if( m_onlineEDsvc.retrieve().isFailure()){
       ATH_MSG_ERROR("Could not locate the online event displays service");
       return StatusCode::FAILURE;
     }
-  }
+   }
+
   return result;
 }
 
@@ -77,25 +78,25 @@ StatusCode VP1EventProd::execute()
   if(m_isOnline){
     m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
 StatusCode VP1EventProd::finalize()
 {
-  ATH_MSG_INFO("in finalize() ");
+  ATH_MSG_DEBUG("in finalize() ");
 
-  //if(m_isOnline){
-  //m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-  //}
+  /* if(m_isOnline){
+    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
+    }*/
 
-  ATH_MSG_INFO("VP1ALG m_destinationDir " << m_destinationDir);
+  ATH_MSG_DEBUG("VP1ALG m_destinationDir " << m_destinationDir);
   // handle the output of the last event
   if(m_nEvent) {
 
     --m_nEvent; // since we don't use another call to handle() to process the last event, we need to revert the counter by one, otherwise the wrong file is looked for
 
-    ATH_MSG_INFO("--> Input POOL file: " << m_inputPoolFile);
+    ATH_MSG_DEBUG("--> Input POOL file: " << m_inputPoolFile);
 
     std::ostringstream ostri;
     ostri << m_inputPoolFile << "._" << std::setw(4) << std::setfill('0') << m_nEvent;
@@ -128,15 +129,15 @@ StatusCode VP1EventProd::finalize()
 
 void VP1EventProd::handle(const Incident& inc)
 {
-  ATH_MSG_INFO("in handle()... ");
-  ATH_MSG_INFO("Handling incident '" << inc.type() << "'");
+  ATH_MSG_DEBUG("in handle()... ");
+  ATH_MSG_DEBUG("Handling incident '" << inc.type() << "'");
 
-  //if(m_isOnline){
-  // m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-  //}
+  if(m_isOnline){
+    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
+  }
 
-  ATH_MSG_INFO("VP1ALG m_destinationDir " << m_destinationDir);
-  
+  ATH_MSG_DEBUG("VP1ALG m_destinationDir " << m_destinationDir);
+
   // Let VP1FileUtilities handle the output of the previous event.
   // Skip this if m_nEvent == 0,
   // because the processing of the event is not completed, yet;
@@ -146,8 +147,7 @@ void VP1EventProd::handle(const Incident& inc)
 
    unsigned  int nLastFile = m_nEvent - 1; // we copy the file produced while processing the previous event, so we need a file number of (current - 1)
 
-    ATH_MSG_INFO("--> Input POOL file: " << m_inputPoolFile);
-    ATH_MSG_INFO("VP1 event number: " << m_eventNumber );
+    ATH_MSG_DEBUG("--> Input POOL file: " << m_inputPoolFile);
     std::ostringstream ostri;
     ostri << m_inputPoolFile << "._" << std::setw(4) << std::setfill('0') << nLastFile;
 

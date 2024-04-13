@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@
 #include <chrono>         // std::chrono::seconds // C++11
 
 VP1FileUtilities::VP1FileUtilities(const std::string& inputDirectory,
-                   unsigned int fileLimit, const std::string& outputDir, bool forceMakeOutputDir, bool removeInputFile):
+		   unsigned int fileLimit, const std::string& outputDir, bool forceMakeOutputDir, bool removeInputFile):
   m_inputDirectory(inputDirectory),
   m_fileLimit(fileLimit),
   m_outputDirectory(outputDir),
@@ -48,13 +48,13 @@ VP1FileUtilities::VP1FileUtilities(const std::string& inputDirectory,
   if (m_outputDirectory != "") {
       QFileInfo inpDir(m_outputDirectory.c_str());
       if(!inpDir.exists()||!inpDir.isDir()||!inpDir.isReadable()||!inpDir.isWritable()) {
-          std::string errMessage = std::string("VP1FileUtilities: ERROR!! The directory ") + m_outputDirectory + std::string(" does not exist.");
-          if (m_forceMakeOutputDir) {
-              errMessage += "\nforceMakeOutputDir=True --> Creating the output folder now...";
-              QDir().mkdir(m_outputDirectory.c_str());
-          } else {
-              throw std::runtime_error(errMessage.c_str());
-          }
+	  std::string errMessage = std::string("VP1FileUtilities: ERROR!! The directory ") + m_outputDirectory + std::string(" does not exist.");
+	  if (m_forceMakeOutputDir) {
+	      errMessage += "\nforceMakeOutputDir=True --> Creating the output folder now...";
+	      QDir().mkdir(m_outputDirectory.c_str());
+	  } else {
+	      throw std::runtime_error(errMessage.c_str());
+	  }
       }
   }
 
@@ -68,13 +68,12 @@ void VP1FileUtilities::produceNewFile(const std::string& sourceFile,
 				      unsigned int runNumber,
 				      unsigned long long eventNumber,
 				      unsigned int timeStamp,
-                      const std::string& textLabel)
+		      const std::string& textLabel)
 {
   // Check if the sourceFile exists
   QString srcName(sourceFile.c_str());
   QFile srcFile(srcName);
-  std::cout << "VP1FileUtilities m_outputDirectory: " <<  m_outputDirectory << std::endl;
-  std::cout << "VP1FileUtilities eventNumber: " << eventNumber << std::endl;
+
   if(!srcFile.exists())
     throw std::runtime_error("Source file does not exist!");
 
@@ -118,47 +117,40 @@ void VP1FileUtilities::produceNewFile(const std::string& sourceFile,
       throw std::runtime_error("VP1FileUtilities -- Unable to copy the temp file to the new file, so unable to produce the new vp1 event file");
   }
 
+  // remove the input file (if not disabled by user)
+  std::cout << "VP1FileUtilities -- delete temp file? --> " <<  m_removeInputFile << std::endl;
+  if (m_removeInputFile) {
+    bool copyDone = false;
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now() ;
+    typedef std::chrono::duration<int,std::milli> millisecs_t ;
+    while (!copyDone) {
 
-  // the operation to time (for elapsed time)
-  //char ch;
-  //  std::cout << '?' && (std::cin >> ch);
-
-
-
-      // remove the input file (if not disabled by user)
-      std::cout << "VP1FileUtilities -- delete temp file? --> " <<  m_removeInputFile << std::endl;
-      if (m_removeInputFile) {
-          bool copyDone = false;
-          std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now() ;
-          typedef std::chrono::duration<int,std::milli> millisecs_t ;
-          while (!copyDone) {
-
-              // get handle on new file
-              QFileInfo checkFile(newFileName);
+      // get handle on new file
+      QFileInfo checkFile(newFileName);
 
 
-              // check if file exists (and it is a file, and not a directory)
-              if (checkFile.exists() && checkFile.isFile() && (checkFile.size() == inputSize) )
-              {
-                  std::cout << "VP1FileUtilities -- Size of the file to be deleted: " << checkFile.size() << std::endl;
-                  copyDone = true;
-                  if(!srcFile.remove())
-                      std::cerr << "VP1FileUtilities -- WARNING! Unable to delete " << sourceFile << std::endl;
-              }
-              else
-              {
-                  std::cout << "VP1FileUtilities -- I could not find the output file, so probably the copy action is not finished yet. I'll wait for a short while and I will retry..." << std::endl;
-                  std::this_thread::sleep_for(std::chrono::milliseconds(500)); //make the program waiting for 0.5 seconds
-                  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now() ;
-                  millisecs_t duration( std::chrono::duration_cast<millisecs_t>(end-start) ) ;
-                  if (duration.count() > 2000.0 )
-                  {
-                      std::cout << "VP1FileUtilities -- WARNING!!! " << duration.count() << " milliseconds passed and still I cannot find the output file. Probably there was a problem. Giving up with the removal of the source file...\n" ;
-                      copyDone = true;
-                  }
-              }
-          }
-      }
+      // check if file exists (and it is a file, and not a directory)
+      if (checkFile.exists() && checkFile.isFile() && (checkFile.size() == inputSize) )
+	{
+	  std::cout << "VP1FileUtilities -- Size of the file to be deleted: " << checkFile.size() << std::endl;
+	  copyDone = true;
+	  if(!srcFile.remove())
+	    std::cerr << "VP1FileUtilities -- WARNING! Unable to delete " << sourceFile << std::endl;
+	}
+      else
+	{
+	  std::cout << "VP1FileUtilities -- I could not find the output file, so probably the copy action is not finished yet. I'll wait for a short while and I will retry..." << std::endl;
+	  std::this_thread::sleep_for(std::chrono::milliseconds(500)); //make the program waiting for 0.5 seconds
+	  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now() ;
+	  millisecs_t duration( std::chrono::duration_cast<millisecs_t>(end-start) ) ;
+	  if (duration.count() > 2000.0 )
+	    {
+	      std::cout << "VP1FileUtilities -- WARNING!!! " << duration.count() << " milliseconds passed and still I cannot find the output file. Probably there was a problem. Giving up with the removal of the source file...\n" ;
+	      copyDone = true;
+	    }
+	}
+    }
+  }
 
   // create/update the latest event file
   QFile latestEvent(latestEventFileName);
@@ -195,8 +187,6 @@ void VP1FileUtilities::cleanUp()
   dir.setSorting(QDir::Time|QDir::Reversed);
   QFileInfoList list = dir.entryInfoList();
 
-  //std::cout << "m_fileLimit: " << m_fileLimit << " - list.size(): " << list.size() << " - list: " << list << std::endl;
-
   if(int(list.size()) > m_fileLimit)
   {
     const QFileInfo& fileInfo = list.at(0);
@@ -212,9 +202,8 @@ void VP1FileUtilities::cleanUp()
       std::cout << "VP1FileUtilities::cleanUp() - removing the file '" << poolCatalogStr << "' because it causes problems for subsequent Athena commands opening the copied file." << std::endl;
       QDir cwd = QDir::currentPath();
       if ( ! cwd.remove( poolCatalog ) )
-        std::cerr << "VP1FileUtilities WARNING! Unable to delete " << poolCatalogStr << std::endl;
+	std::cerr << "VP1FileUtilities WARNING! Unable to delete " << poolCatalogStr << std::endl;
   }
-
 
   return;
 }
