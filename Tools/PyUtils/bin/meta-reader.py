@@ -124,7 +124,7 @@ def _main():
 						help="This flag provides the user capability to select the amount of metadata retrieved. There are five options: "
 							"tiny (only those values used in PyJobTransforms), "
 							"lite, "
-                            "peeker, "
+							"peeker, "
 							"full (all available data found), "
 							"and iov (full+iov details)" )
 

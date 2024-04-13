@@ -36,7 +36,7 @@ else()
     atlas_install_python_modules( python/*.py python/scripts python/AthFile POST_BUILD_CMD ${ATLAS_FLAKE8} )
     atlas_install_scripts( bin/acmd.py bin/checkFile.py bin/checkPlugins.py
        bin/checkSG.py bin/checkMetaSG.py bin/checkTP.py bin/checkxAOD.py
-       bin/diff-athfile bin/diff-jobo-cfg.py bin/diffConfigs.py
+       bin/diff-jobo-cfg.py bin/diffConfigs.py
        bin/diffPoolFiles.py bin/dlldep.py bin/dso-stats.py
        bin/dumpAthfilelite.py bin/filter-and-merge-d3pd.py bin/getMetadata.py
        bin/gprof2dot bin/issues bin/magnifyPoolFile.py
