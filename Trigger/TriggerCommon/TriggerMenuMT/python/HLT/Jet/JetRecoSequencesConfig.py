@@ -14,7 +14,6 @@ from .JetRecoCommon import (
     getCalibMods,
     getClustersKey,
     getDecorList,
-    getJetContext,
     getHLTPrefix,
     isPFlow,
     doTracking,
@@ -102,8 +101,9 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
     acc.addSequence(parOR(seqname),primary=True)
     use_FS_tracking = doFSTracking(jetRecoDict)
 
-    context = getJetContext(jetRecoDict)
-
+    trkopt = jetRecoDict['trkopt']
+    context = flags.Jet.Context[trkopt]
+    
     is_pflow = isPFlow(jetRecoDict)
 
     # Add PFlow reconstruction if necessary
@@ -113,7 +113,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
         acc.merge(
             PFCfg(
                 flags,
-                jetRecoDict["trkopt"],
+                trkopt,
                 clustersin=clustersKey,
                 calclustersin="",
                 tracksin=context["Tracks"],
@@ -125,7 +125,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetDef = defineJets(
             flags,
             jetRecoDict,
-            pfoPrefix=f"HLT_{jetRecoDict['trkopt']}",
+            pfoPrefix=f"HLT_{trkopt}",
             prefix=getHLTPrefix(),
         )
     else:
@@ -150,7 +150,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetDef.modifiers += ["TrackMoments", "JVF", "JVT"]
         
     jetsOut = recordable(jetDef.fullname())
-    jetDef = solveDependencies(jetDef)
+    jetDef = solveDependencies(jetDef,flags)
 
     if not (
         jetRecoDict["constitMod"] == ""
@@ -277,8 +277,10 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         from TriggerMenuMT.HLT.Jet.JetRecoCommon import cleaningDict
         jetDef.modifiers += [f'Cleaning:{clean_wp}' for _,clean_wp in cleaningDict.items()]
 
+    # getjet context for our trkopt
+    context = flags.Jet.Context[jetRecoDict['trkopt']]
     # make sure all modifiers info is ready before passing jetDef to JetRecConfig helpers
-    jetDef = solveDependencies(jetDef) 
+    jetDef = solveDependencies(jetDef,flags) 
     # This algorithm creates the shallow copy and then also applies the calibration as part of the
     # modifiers list
     acc.addEventAlgo(
@@ -302,7 +304,6 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         and jetRecoDict['constitMod']==''        # exclude SK and CSSK chains
         and jetRecoDict['jetCalib']==jetCalibDef # exclude jets with not full default calibration
     ):
-        context = getJetContext(jetRecoDict)
 
         ftagseqname = f"jetFtagSeq_{jetRecoDict['trkopt']}"
         acc.addSequence(parOR(ftagseqname),seqname)
@@ -369,7 +370,7 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         "Sort",
         "Filter:{}".format(getFilterCut(jetRecoDict["recoAlg"])),
     ]
-    groomDef = solveGroomingDependencies(groomDef)
+    groomDef = solveGroomingDependencies(groomDef, flags)
 
     acc.addEventAlgo( JetRecConfig.getJetRecGroomAlg(
         groomDef,
@@ -384,7 +385,7 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         and jetRecoDict['constitMod']=='cssk'        # include only CSSK chains
         and jetRecoDict['jetCalib']==jetCalibDef # exclude jets without full default calibration
         ):
-        context = getJetContext(jetRecoDict)
+        context = flags.Jet.Context[jetRecoDict['trkopt']]
 
         ftagseqname = f"jetFtagSeq_{jetRecoDict['trkopt']}_largeR"
         acc.addSequence(parOR(ftagseqname), seqname)

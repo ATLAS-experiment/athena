@@ -16,7 +16,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from eflowRec.PFHLTConfig import PFCfg
 from JetRecConfig.JetRecConfig import getConstitModAlg_nojetdef
-from JetRecConfig.StandardJetContext import jetContextDic
 from TrigCaloRec.TrigCaloRecConfig import (
     hltCaloCellMakerCfg,
     jetmetTopoClusteringCfg,
@@ -83,7 +82,7 @@ def clusterInputCfg(flags, **recoDict) -> StepOutput:
         constit = defineJetConstit(jetRecoDict, clustersKey=clusters)
         acc.addEventAlgo(
             getConstitModAlg_nojetdef(
-                constit, context=jetRecoDict.get("trkopt", "default")
+                constit, flags, context=jetRecoDict.get("trkopt", "default"), 
             )
         )
         clusters = constit.containername
@@ -97,7 +96,7 @@ def trackingInputCfg(flags, **recoDict) -> StepOutput:
     return StepOutput.create(
         JetFSTrackingCfg(flags, "ftf", RoIs=trkFSRoI),
         step_idx=2,
-        **jetContextDic["ftf"],
+        **flags.Jet.Context.ftf,
     )
 
 
@@ -127,7 +126,7 @@ def pfoInputCfg(flags, **recoDict) -> StepOutput:
     )
     constit = defineJetConstit(jetRecoDict, pfoPrefix="HLT_ftf")
     acc.addEventAlgo(
-        getConstitModAlg_nojetdef(constit, context=jetRecoDict.get("trkopt", "default"))
+        getConstitModAlg_nojetdef(constit, flags, context=jetRecoDict.get("trkopt", "default"))
     )
     pfoPrefix = constit.containername
     if pfoPrefix.endswith("ParticleFlowObjects"):
@@ -216,6 +215,7 @@ def jetInputCfg(flags, force_tracks: bool = False, **recoDict) -> StepOutput:
             | {"calib": "em"}
         )
     )
+    
     inputs = StepOutput()
     if jrd["trkopt"] == "ftf":
         inputs.merge_other(trackingInputCfg(flags))
@@ -229,5 +229,5 @@ def jetInputCfg(flags, force_tracks: bool = False, **recoDict) -> StepOutput:
     jet_acc, jetName, jetDef = JetRecoCfg(flags, clustersKey=inputs["Clusters"], **jrd)
     acc.merge(jet_acc)
     return StepOutput.create(
-        acc, inputs, Jets=jetName, JetDef=jetDef, **jetContextDic[jrd["trkopt"]]
+        acc, inputs, Jets=jetName, JetDef=jetDef, **flags.Jet.Context[jrd["trkopt"]] 
     )
