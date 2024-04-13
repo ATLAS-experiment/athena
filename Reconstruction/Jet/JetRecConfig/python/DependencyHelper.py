@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 Functions to solve dependencies of Jet reco components.
@@ -11,29 +11,28 @@ collecting them in a JetDefinition.
 
 """
 from .JetDefinition import JetInputExternal, JetInputConstit, JetModifier, JetInputConstitSeq
-
 class _dummyJetDef:
     def __init__(self):
         self._prereqDic = {}
         self._prereqOrder = [] 
 
 
-def solveDependencies( jetdef0, flags=None ):
+def solveDependencies( jetdef0, flags ):
     """ Retrieve recursively all  dependencies described by str aliases (from modifiers, ghosts, etc..) within jetdef0.
     The aliases are converted in to proper config objects (like JetModifier, JetInputConstit,...) and are collected into
     a cloned version of jetdef0.
+
     The cloned version is returned and contains all the necessary information to build the actual C++ tools and algs.
      (in particular, the _prereqDic and _prereqOrder internal members of the clone are filled).
+    The cloned version also has its member '._cflags' set to the given config flags (might be used to instantiate the dependencies).
+    If jetdef0.context=='default' than the cloned version has its context set according to flags
     """
 
+    # create a clone onto which we can set internal variables to keep track of dependencies
     jetdef = jetdef0.clone()
-    # # start with the inputdef, cloning it so we're not altering a private copy
-    # jetdef.inputdef = jetdef.inputdef.clone()
-    # 
-
-    if jetdef._cflags is None and flags is not None:
-        jetdef._cflags = flags
-
+    jetdef._cflags = flags
+    jetdef._contextDic = flags.Jet.Context[jetdef0.context]
+    
     solveConstitDependencies(jetdef.inputdef, jetdef, inplace=True)
 
     jetdef._prereqDic['input:'+jetdef.inputdef.name] = jetdef.inputdef
@@ -62,7 +61,7 @@ def solveDependencies( jetdef0, flags=None ):
     return jetdef
 
 
-def solveGroomingDependencies( groomdef0 ):
+def solveGroomingDependencies( groomdef0, flags ):
     """Retrieve  all  dependencies described by str aliases in groomdef0.modifiers.
     
     The aliases are converted in to proper config objects (like JetModifier, JetInputConstit,...) and are collected into
@@ -71,7 +70,11 @@ def solveGroomingDependencies( groomdef0 ):
      (in particular, the _prereqDic and _prereqOrder internal members of the clone are filled).
     """
 
+    # if the context is "default", translate it into an actual context according to flags
     groomdef = groomdef0.clone()
+    groomdef._cflags = flags
+    groomdef._contextDic = flags.Jet.Context[groomdef0.context]
+    
     for mod in groomdef.modifiers:
         modInstance = aliasToModDef(mod, groomdef)
         groomdef._prereqDic['mod:'+mod] = modInstance
