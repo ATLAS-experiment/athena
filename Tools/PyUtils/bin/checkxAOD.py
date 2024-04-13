@@ -8,8 +8,6 @@
 # object/container.
 #
 
-from __future__ import print_function
-
 __author__  = "Sebastien Binet <binet@cern.ch>, " \
     "Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>, " \
     "RD Schaffer R.D.Schaffer@cern.ch"
@@ -35,6 +33,8 @@ if __name__ == "__main__":
        help = "Output CSV file name, to use with spreadsheets" )
     ( options, args ) = parser.parse_args()
 
+    # Ideally, categories ought to be defined such that they do NOT overlap,
+    # "PFO" and "Jet" currently overlap. The last match, if any, wins.
     # Set up categorization matching strings:
     categoryStrings = {
         "MetaData" : ["^DataHeader", "(.*)_mems$", "(.*)_timings$", "^Token$", "^RawInfoSummaryForTag$", "^index_ref$"],
@@ -89,6 +89,8 @@ if __name__ == "__main__":
                "input file" )
         pass
 
+    # Pattern for a static/dynamic auxiliary variable prefix
+    auxvarptn = re.compile( r"(.*)Aux(?:Dyn)?(?:\.|:)" )
     # Loop over the specified file(s):
     for fileName in fileNames:
 
@@ -105,19 +107,11 @@ if __name__ == "__main__":
             # if d.dirType != "B": continue
             # The name of this branch:
             brName = d.name
-            # Check if this is a static auxiliary store:
-            m = re.match( r"(.*)Aux\..*", d.name )
+            # Check if this is a static/dynamic auxiliary variable:
+            m = auxvarptn.match( d.name )
             if m:
                 # Yes, it is. And the name of the main object/container is:
                 brName = m.group( 1 )
-                pass
-            # Check if this is a dynamic auxiliary variable:
-            m = re.match( r"(.*)AuxDyn\..*", d.name )
-            if m:
-                # Oh yes, it is. Let's construct the name of the main
-                # object/container:
-                brName = m.group( 1 )
-                pass
             # Check if we already know this container:
             if brName in summedData.keys():
                 summedData[ brName ].memSize  += d.memSize
@@ -130,21 +124,19 @@ if __name__ == "__main__":
                                    d.memSizeNoZip,
                                    d.nEntries,
                                    d.dirType )
-                pass
+            # Set the C++ type name of the main object/container
+            if brName == d.name:
+                if summedData[ brName ].typeName and \
+                   summedData[ brName ].typeName != d.typeName:
+                    print(f"WARNING: Reset typeName {summedData[ brName ].typeName!r}"
+                          f" -> {d.typeName!r} for {brName}", file=sys.stderr)
+                summedData[ brName ].typeName = d.typeName
             pass
 
         # Order the records by size:
-        orderedData = []
-        for br in summedData.keys():
-            orderedData += [ summedData[ br ] ]
-            pass
+        orderedData = [rec for rec in summedData.values()]
         sorter = PF.PoolRecord.Sorter.DiskSize
         orderedData.sort( key = operator.attrgetter( sorter ) )
-
-        # Access the CollectionTree directly:
-        import ROOT
-        tfile = ROOT.TFile.Open( fileName )
-        ttree = tfile.Get( "CollectionTree" )
 
         # Print a header:
         print( "" )
@@ -164,29 +156,28 @@ if __name__ == "__main__":
             # special tlp branches with extra event information
             mtlp = re.match( "(.*)_tlp.$", d.name ) or re.match( "(.*)DataHeader(.*)", d.name )
             if d.nEntries != poolFile.dataHeader.nEntries and not mtlp: continue
-            # print d.name
 
-            br = ttree.GetBranch( d.name )
+            colTypeName = d.typeName
             d_name = d.name
-            if br:
+            if colTypeName:
                 m = re.match( "(.*)_[pv]._", d.name )
                 m1 = re.match( "(.*)_tlp._", d.name )
                 m2 = re.match( "(.*)_v.>_", d.name )
                 m3 = re.match( "([a-zA-Z]+)_(.*_[lL]inks?)", d.name )
                 if m:
-                    nameType = "%s (%s)" % ( d.name[m.end():], br.GetClassName() )
+                    nameType = "%s (%s)" % ( d.name[m.end():], colTypeName )
                     d_name   = d.name[m.end():]
                 elif m1:
-                    nameType = "%s (%s)" % ( d.name[m1.end():], br.GetClassName() )
+                    nameType = "%s (%s)" % ( d.name[m1.end():], colTypeName )
                     d_name   = d.name[m1.end():]
                 elif m2:
-                    nameType = "%s (%s)" % ( d.name[m2.end():], br.GetClassName() )
+                    nameType = "%s (%s)" % ( d.name[m2.end():], colTypeName )
                     d_name   = d.name[m2.end():]
                 elif m3:
-                    nameType = "%s (%s)" % ( m3.group(2), br.GetClassName() )
+                    nameType = "%s (%s)" % ( m3.group(2), colTypeName )
                     d_name   = m3.group(2)
                 else:
-                    nameType = "%s (%s)" % ( d.name, br.GetClassName() )
+                    nameType = "%s (%s)" % ( d.name, colTypeName )
             else:
                 m = re.match( "(.*)_v._", d.name )
                 m1 = re.match( "(.*)(_tlp.$)", d.name )
@@ -204,31 +195,21 @@ if __name__ == "__main__":
                     nameType = "%s (%s)" % ( d.name, "()" )
 
             # Find category:
-            found = False
-            catName = '*Unknown*'
+            if 'catName' in locals(): del catName
             for categ in categoryStrings:
                 for pattern in categoryStrings[ categ ]:
-                    # print d.name, d_name, pair, type(d.name), type(d_name), type(pair[0])
-                    m = None
-                    d_name_c=d_name
-                    mbkg = re.match("(.*)Bkg_",d_name)
-                    if mbkg:
-                       d_name_c   = re.sub("Bkg_","",d_name)
-                    try:
-                        m = re.match(pattern, d_name_c)
-                    except TypeError:
-                        pass
-                    if m:
-                        found = True
+                    if re.match(pattern, d_name.replace("Bkg_","")):
                         catName = categ
                         break
-                        # print d.name, categ
-                        pass
-                    pass
-                if not found:
-                    # print "Did not find category for:", d.name, d_name, br
-                    pass
-                pass
+                # Even if category is found, we continue to search for a match
+                # in the following categories and the last match, if any, wins.
+                # Ideally, categories ought to be defined such that they do NOT overlap
+                # ("PFO" and "Jet" currently overlap), then we can stop searching
+                # when category found.
+                # Or, perhaps, the "first match wins" may be considered the right strategy.
+
+            if 'catName' not in locals():
+                catName = '*Unknown*'
             # Add on category to name/type
             nameType += ' [' + catName + ']'
 
@@ -270,10 +251,7 @@ if __name__ == "__main__":
 
         # Now print out the categorized information
         # Order the records by size:
-        categorizedData = []
-        for br in categData.keys():
-            categorizedData += [ categData[ br ] ]
-            pass
+        categorizedData = list(categData.values())
         sorter = PF.PoolRecord.Sorter.DiskSize
         categorizedData.sort( key = operator.attrgetter( sorter ) )
 
@@ -306,10 +284,10 @@ if __name__ == "__main__":
         print( "=" * 80 )
         print( "CSV for categories disk size/evt and fraction:" )
         # print out comment separated list in descending order
-        print (",".join(dsName[::-1]))
-        b = ['{:<0.3f}'.format(i)  for i in ds[::-1]]
+        print (",".join(reversed(dsName)))
+        b = ['{:.3f}'.format(i)  for i in reversed(ds)]
         print (",".join(b))
-        b = ['{:<0.3f}'.format(i)  for i in dsFrac[::-1]]
+        b = ['{:.3f}'.format(i)  for i in reversed(dsFrac)]
         print (",".join(b))
         print( "=" * 80 )
         print( "" )
@@ -351,10 +329,10 @@ if __name__ == "__main__":
                     # Skip metadata items:
                     if d.nEntries != poolFile.dataHeader.nEntries: continue
                     # Construct the name of the entry:
-                    br = ttree.GetBranch(d.name)
-                    if not br: continue
+                    colTypeName = d.typeName
+                    if not colTypeName: continue
                     nameType = "%s (%s)" % \
-                        ( d.name, br.GetClassName() )
+                        ( d.name, colTypeName )
                     # Write the entry:
                     writer.writerow( [ nameType, d.diskSize / d.nEntries ] )
                     pass

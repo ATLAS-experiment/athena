@@ -4,7 +4,6 @@
 # @date:   March 2007
 #
 #
-from __future__ import with_statement, print_function
 
 __author__  = "Sebastien Binet <binet@cern.ch>"
 
@@ -406,12 +405,13 @@ class PoolOpts(object):
 
     @classmethod
     def isData(cls, name):
-        return not name.startswith("##") and name != PoolOpts.POOL_HEADER
+        return not name.startswith("##") and not cls.isDataHeader(name)
 
     @classmethod
     def isDataHeader(cls, name):
-        return ( name == PoolOpts.POOL_HEADER ) or \
-               ( name == PoolOpts.POOL_HEADER+"_DataHeader" )
+        return name in {cls.TTreeNames.DataHeader
+                        , cls.TTreeNames.DataHeader+"_DataHeader"
+                        , cls.RNTupleNames.DataHeader}
 
     @classmethod
     def isEventData(cls, name):
@@ -475,7 +475,8 @@ def make_pool_record (branch, dirType):
     diskSize     = branch.GetZipBytes() / Units.kb
     return PoolRecord(branch.GetName(), memSize, diskSize, memSizeNoZip,
                       branch.GetEntries(),
-                      dirType=dirType)
+                      dirType=dirType,
+                      typeName=branch.GetClassName())
 
 def extract_items(pool_file, verbose=True, items_type='eventdata'):
     """Helper function to read a POOL file and extract the item-list from the
@@ -520,7 +521,13 @@ class PoolRecord(object):
                      PoolRecord.Sorter.ContainerName ]
         pass
     def __init__(self, name, memSize, diskSize, memSizeNoZip, nEntries, dirType,
-                 detailedInfos = ""):
+                 detailedInfos = "", typeName = None):
+        """Initialize PoolRecord instance.
+
+        dirType    first letter of object type name that may distinguish the types:
+                   "T" for TTree, "B" for TBranch,
+                   "N" for RNTuple, "F" for RField
+        """
         object.__init__(self)
         self.name          = name
         self.memSize       = memSize
@@ -530,6 +537,7 @@ class PoolRecord(object):
         self.dirType       = dirType
         self.details       = detailedInfos
         self.augName       = ''
+        self.typeName      = typeName
         return
 
 class PoolFile(object):
@@ -593,6 +601,7 @@ class PoolFile(object):
             print("## importing ROOT...")
         import PyUtils.RootUtils as ru
         ROOT = ru.import_root()
+        self.ROOT = ROOT
         if self.verbose is True:
             print("## importing ROOT... [DONE]")
         # prevent ROOT from being too verbose
@@ -629,104 +638,144 @@ class PoolFile(object):
 
     def __processFile(self):
         ## first we try to fetch the DataHeader
-        name  = PoolOpts.POOL_HEADER
-        dhKey = self.poolFile.FindKey( name )
-        if dhKey:
-            nEntries = dhKey.ReadObj().GetEntries()
-        else:
-            name  = PoolOpts.POOL_HEADER + "_DataHeader"
+        for name in {PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader}:
             dhKey = self.poolFile.FindKey( name )
             if dhKey:
-                nEntries = dhKey.ReadObj().GetEntries()
-            else:
-                nEntries = 0
+                obj = self.poolFile.Get( name )
+                if isinstance(obj, self.ROOT.TTree):
+                    nEntries = obj.GetEntries()
+                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                    nEntries = self.ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                else:
+                    raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
+                break
+        else:
+            nEntries = 0
 
         keys = []
         containers = []
         for k in self.poolFile.GetListOfKeys():
-            treename = k.GetName()
-            containerName = k.ReadObj().GetName()
+            keyname = k.GetName()
+            obj = self.poolFile.Get( keyname )
+            if isinstance(obj, self.ROOT.TTree):
+                containerName = obj.GetName()
+                nEntries = obj.GetEntries()
+                dirType = "T"
+            elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                containerName = reader.GetDescriptor().GetName()
+                nEntries = reader.GetNEntries()
+                dirType = "N"
+            else:
+                raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
             if containerName not in containers:
                 keys.append(k)
                 containers.append(containerName)
                 pass
-            if treename.startswith(PoolOpts.POOL_HEADER) and not treename.endswith('Form'):
-                self.dataHeaderA[PoolOpts.augmentationName(k.GetName())] = \
+            if keyname.startswith(PoolOpts.POOL_HEADER) and not keyname.endswith('Form'):
+                self.dataHeaderA[PoolOpts.augmentationName(keyname)] = \
                     PoolRecord("DataHeader", 0, 0, 0,
-                               nEntries = k.ReadObj().GetEntries(),
-                               dirType = "T")
+                               nEntries = nEntries,
+                               dirType = dirType)
 
         keys.sort (key = lambda x: x.GetName())
         self.keys = keys
         del containers
         
         for k in keys:
-            tree = k.ReadObj()
-            name = tree.GetName()
-
-            if not PoolOpts.isDataHeader(name) and not PoolOpts.isData(name) :
-                continue
+            obj = self.poolFile.Get( k.GetName() )
+            if isinstance(obj, self.ROOT.TTree):
+                name = obj.GetName()
+            elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                name = reader.GetDescriptor().GetName()
 
             if PoolOpts.isDataHeader(name):
-                if name == PoolOpts.POOL_HEADER:
-                    contName     = "DataHeader"
-                else:
-                    contName     = name.replace(PoolOpts.POOL_HEADER+"_", "" )
-                memSize      = tree.GetTotBytes() / Units.kb
-                diskSize     = tree.GetZipBytes() / Units.kb
-                memSizeNoZip = 0.0
-                if diskSize < 0.001:
-                    memSizeNoZip = memSize
-                nEntries     = tree.GetEntries()
-                ## try to also handle non-T/P separated DataHeaders
-                ## (from old files)...
-                dhBranchNames = [
-                    br.GetName() for br in tree.GetListOfBranches()
-                    if br.GetName().count("DataHeader_p") > 0
-                ]
-                if len(dhBranchNames) == 1:
-                    dhBranch = tree.GetBranch(dhBranchNames[0])
-                    poolRecord = retrieveBranchInfos(
-                        dhBranch,
-                        PoolRecord( contName, 0., 0., 0.,
-                                    nEntries,
-                                    dirType = "T" ),
-                        ident = "  "
+                contName     = "DataHeader"
+                if isinstance(obj, self.ROOT.TTree):
+                    memSize      = obj.GetTotBytes() / Units.kb
+                    diskSize     = obj.GetZipBytes() / Units.kb
+                    memSizeNoZip = 0.0
+                    if diskSize < 0.001:
+                        memSizeNoZip = memSize
+                    nEntries     = obj.GetEntries()
+                    ## try to also handle non-T/P separated DataHeaders
+                    ## (from old files)...
+                    dhBranchNames = [
+                        br.GetName() for br in obj.GetListOfBranches()
+                        if br.GetName().count("DataHeader_p") > 0
+                    ]
+                    if len(dhBranchNames) == 1:
+                        dhBranch = obj.GetBranch(dhBranchNames[0])
+                        poolRecord = retrieveBranchInfos(
+                            dhBranch,
+                            PoolRecord( contName, 0., 0., 0.,
+                                        nEntries,
+                                        dirType = "T",
+                                        typeName = dhBranch.GetClassName()),
+                            ident = "  "
                         )
-                else:
+                    else:
+                        poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
+                                                nEntries,
+                                                dirType = "T")
+
+                    self.dataHeader = poolRecord
+                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                    diskSize = inspector.GetCompressedSize() / Units.kb
+                    memSize = inspector.GetUncompressedSize() / Units.kb
+
+                    memSizeNoZip = 0.0
+                    if diskSize < 0.001:
+                        memSizeNoZip = memSize
+                    nEntries     = reader.GetNEntries()
                     poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
                                             nEntries,
-                                            dirType = "T")
-                    
-                if contName == "DataHeader":
+                                            dirType = "N")
                     self.dataHeader = poolRecord
-                else:
-                    self.data += [ poolRecord ]
             elif PoolOpts.isData(name):
-                if not hasattr(tree, 'GetListOfBranches'):
-                    continue
-                branches = tree.GetListOfBranches()
-                ## print ("=-=->",name,type(tree).__name__)
-                dirType = "T"
-                if name in (PoolOpts.EVENT_DATA, PoolOpts.META_DATA):
-                    dirType = "B"
-                for i,branch in enumerate(branches):
-                    poolRecord = retrieveBranchInfos(
-                        branch,
-                        make_pool_record(branch, dirType),
-                        ident = "  "
+                if isinstance(obj, self.ROOT.TTree):
+                    if not hasattr(obj, 'GetListOfBranches'):
+                        continue
+                    branches = obj.GetListOfBranches()
+                    dirType = "T"
+                    if name in (PoolOpts.EVENT_DATA, PoolOpts.META_DATA):
+                        dirType = "B"
+                    for branch in branches:
+                        poolRecord = retrieveBranchInfos(
+                            branch,
+                            make_pool_record(branch, dirType),
+                            ident = "  "
                         )
-                    ## if dirType == "T":
-                    ##     poolRecord.name = name.replace( PoolOpts.EVENT_DATA,
-                    ##                                     "" )
-                    poolRecord.augName = PoolOpts.augmentationName(name)
-                    self.augNames.add(poolRecord.augName)
-                    self.data += [ poolRecord ]
-            else:
-                print("WARNING: Don't know how to deal with branch [%s]" % \
-                      name)
-
-            pass # loop over keys
+                        poolRecord.augName = PoolOpts.augmentationName(name)
+                        self.augNames.add(poolRecord.augName)
+                        self.data += [ poolRecord ]
+                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                    descriptor = reader.GetDescriptor()
+                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                    dirType = "N"
+                    if name in {PoolOpts.RNTupleNames.EventData, PoolOpts.RNTupleNames.MetaData}:
+                        dirType = "F"
+                    fieldZeroId = descriptor.GetFieldZeroId()
+                    for fieldDescriptor in descriptor.GetFieldIterable(fieldZeroId):
+                        fieldId = fieldDescriptor.GetId()
+                        fieldTreeInspector = inspector.GetFieldTreeInspector(fieldId)
+                        diskSize = fieldTreeInspector.GetCompressedSize() / Units.kb
+                        memSize = fieldTreeInspector.GetUncompressedSize() / Units.kb
+                        fieldDescriptor = fieldTreeInspector.GetDescriptor()
+                        typeName = fieldDescriptor.GetTypeName()
+                        fieldName = fieldDescriptor.GetFieldName()
+                        poolRecord = PoolRecord(fieldName, memSize, diskSize, memSize,
+                                                descriptor.GetNEntries(),
+                                                dirType=dirType,
+                                                typeName=typeName)
+                        poolRecord.augName = PoolOpts.augmentationName(name)
+                        self.augNames.add(poolRecord.augName)
+                        self.data += [ poolRecord ]
+        # loop over keys
         
         return
     
