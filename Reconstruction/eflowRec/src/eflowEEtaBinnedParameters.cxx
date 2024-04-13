@@ -53,9 +53,14 @@ void eflowEEtaBinnedParameters::initialise(const std::vector<double>& eBinBounds
 
  double eflowEEtaBinnedParameters::getInterpolation(const eflowParameters** bin1,
                                                           const eflowParameters** bin2,
-                                                          double e, double eta) const {
+                                                          double e, double eta, bool useLegacyEnergyBinIndexing) const {
   double weight;
-  int eBin = getEBinIndex(e);
+  int eBin = 0;
+  if (useLegacyEnergyBinIndexing) {
+    eBin = getEBinIndexLegacy(e);
+  } else {
+    eBin = getEBinIndex(e);
+  }
   int etaBin = getEtaBinIndex(eta);
 
   /* Check for invalid bins */
@@ -86,18 +91,22 @@ void eflowEEtaBinnedParameters::initialise(const std::vector<double>& eBinBounds
     *bin1 = m_bins[lowEBin][etaBin].get();
     *bin2 = m_bins[highEBin][etaBin].get();
 
-    if (LIN == m_mode) {
-      weight = (m_eBinBounds[highEBin] - e) / (m_eBinBounds[highEBin] - m_eBinBounds[lowEBin]);
-    } else {
-      weight = log(m_eBinBounds[highEBin] / e) / log(m_eBinBounds[highEBin] / m_eBinBounds[lowEBin]);
-    }
+    weight = log(m_eBinBounds[highEBin] / e) / log(m_eBinBounds[highEBin] / m_eBinBounds[lowEBin]);
   }
   return weight;
 }
 
 eflowFirstIntENUM eflowEEtaBinnedParameters::adjustLFI(double e, double eta,
-                                                   eflowFirstIntENUM j1st) const {
-  int eBinIndex = getEBinIndex(e);
+                                                   eflowFirstIntENUM j1st, bool useLegacyEnergyBinIndexing) const {
+
+
+  int eBinIndex = 0;               
+  if (useLegacyEnergyBinIndexing) {
+    eBinIndex = getEBinIndexLegacy(e);
+  } else {
+    eBinIndex = getEBinIndex(e);
+  }
+
   //hard code this check - needs to be rechecked if ever remake e/p tables
   //if e.g track extrapolation slightly off can have inconsistent j1st and eta (e.g eta = 1.52, j1st = EMB2) and hence fudgeMean is zero
   if (0 <= eBinIndex && eBinIndex <= 5) {
@@ -145,9 +154,4 @@ eflowFirstIntENUM eflowEEtaBinnedParameters::adjustLFI(double e, double eta,
   }
 
   return j1st;
-}
-
-bool eflowEEtaBinnedParameters::getOrdering(eflowRingSubtractionManager& subtMan, double e, double eta, eflowFirstIntENUM j1st) const {
-  const eflowEEtaBinnedParameters * tmp = this;
-  return subtMan.getOrdering(tmp, e, eta, j1st);
 }

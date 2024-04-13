@@ -105,6 +105,12 @@ private:
   /** Toggle whether we use the neural net energy */
   Gaudi::Property<bool> m_useNNEnergy{this, "useNNEnergy", false, "Toggle whether we use the neural net energy"};
 
+  /** Further discussion about why this flag exists can be found in https://its.cern.ch/jira/browse/ATLJETMET-1692
+   and https://indico.cern.ch/event/1388633/contributions/5837876/attachments/2809591/4903439/PFlow_EOverP_Feb2024.pdf
+   The Jira report discusses assorted problems with the treatment of energy bin indexes for the lookup of e/p values. In order to not change
+   the behaviour of produciton code a legacy option is introduced to allow us to fix the problem in future iterations of e/p derivations.s
+  */
+  Gaudi::Property<bool> m_useLegacyEBinIndex{this, "useLegacyEBinIndex", true, "Toggle whether we use the legacy energy bin index"};
 
 };
 

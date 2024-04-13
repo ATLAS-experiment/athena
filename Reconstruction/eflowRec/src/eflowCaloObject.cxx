@@ -62,7 +62,7 @@ double eflowCaloObject::getClusterEnergy() const {
 }
 
 void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction,
-const PFEnergyPredictorTool* energyP){
+const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
 
   for (auto *thisEfRecTrack : m_eflowRecTracks) {
 
@@ -97,7 +97,7 @@ const PFEnergyPredictorTool* energyP){
 
     /* Get parameters for j1st */
     eflowRingSubtractionManager& cellSubtractionManager = thisEfRecTrack->getCellSubtractionManager();
-    cellSubtractionManager.getOrdering(binnedParameters, trackE, trackEM1eta, j1st);
+    cellSubtractionManager.getOrdering(binnedParameters, trackE, trackEM1eta, j1st,useLegacyEnergyBinIndexing);
 
     /* Set expected energy in the eflowRecTrack object */
     const double expectedEnergy = energyP ? energyP->nnEnergyPrediction(thisEfRecTrack) : cellSubtractionManager.fudgeMean() * thisEfRecTrack->getTrack()->e();     
@@ -141,7 +141,7 @@ const PFEnergyPredictorTool* energyP){
         for (eflowTrackClusterLink* thisLink : *bestClusters_02) if (thisLink->getCluster()->getCluster()->e() > 0.0) theBestEfRecClusters_02.push_back(thisLink->getCluster());
         integrator->measureNewClus(theBestEfRecClusters_02, thisEfRecTrack);
         j1st = integrator->getFirstIntLayer();
-        cellSubtractionManager.getOrdering(binnedParameters, trackE, trackEM1eta, j1st);
+        cellSubtractionManager.getOrdering(binnedParameters, trackE, trackEM1eta, j1st,useLegacyEnergyBinIndexing);
         thisEfRecTrack->setEExpect(cellSubtractionManager.fudgeMean() * trackE, fabs(cellSubtractionManager.fudgeStdDev()*trackE)*fabs(cellSubtractionManager.fudgeStdDev()*trackE));
       }
       else {
