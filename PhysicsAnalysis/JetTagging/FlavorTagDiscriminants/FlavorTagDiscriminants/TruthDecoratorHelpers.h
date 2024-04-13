@@ -42,7 +42,7 @@ namespace FlavorTagDiscriminants {
         bool is_bc_hadron(const xAOD::TruthParticle* truth_particle, int flavour);
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle);
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle, int flavour);
-        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle, bool user_called=true);
+        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle, bool user_called=true, int depth=0);
 
         const xAOD::TruthVertex* get_truth_vertex(const xAOD::TruthParticle* truth );
         float get_distance(const xAOD::TruthVertex* vertex_A, const xAOD::TruthVertex* vertex_B);
