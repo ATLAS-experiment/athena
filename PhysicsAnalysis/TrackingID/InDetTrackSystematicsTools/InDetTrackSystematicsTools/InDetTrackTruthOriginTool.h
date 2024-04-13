@@ -50,6 +50,9 @@ namespace InDet {
 
     int getParentID(const xAOD::TruthParticle* part) const;
 
+    /** recursion-safe(r) version of isFrom */
+    virtual bool isFromRec(const xAOD::TruthParticle* truth, int flav, int depth=0) const;
+
     float m_matchingProbabilityCut;
 
     std::string m_truthParticleLinkName;

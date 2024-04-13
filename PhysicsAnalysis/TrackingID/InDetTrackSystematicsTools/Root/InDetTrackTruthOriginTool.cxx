@@ -158,22 +158,22 @@ namespace InDet {
     else if(m_isFullPileupTruth){
       const xAOD::TruthEventContainer* truthEventContainer(nullptr);
       if(evtStore()->retrieve(truthEventContainer, "TruthEvents").isFailure()){
-	ATH_MSG_ERROR("InDetTrackTruthOriginTool configured for full pile-up truth but could not retrieve TruthEvents container");
+        ATH_MSG_ERROR("InDetTrackTruthOriginTool configured for full pile-up truth but could not retrieve TruthEvents container");
       }
       const xAOD::TruthEvent* event = truthEventContainer ? truthEventContainer->at(0) : nullptr;
 
       if(event){
-	const auto& links = event->truthParticleLinks();
+        const auto& links = event->truthParticleLinks();
 
-	bool isFromHSProdVtx = false;
-	for (const auto& link : links){
-	  if(link.isValid() && truth == *link){
-	    isFromHSProdVtx = true;
-	    break;
-	  }
-	}
+        bool isFromHSProdVtx = false;
+        for (const auto& link : links){
+          if(link.isValid() && truth == *link){
+            isFromHSProdVtx = true;
+            break;
+          }
+        }
 
-	if(!isFromHSProdVtx) origin = origin | (0x1 << InDet::TrkOrigin::Pileup);
+        if(!isFromHSProdVtx) origin = origin | (0x1 << InDet::TrkOrigin::Pileup);
       }
     }
 
@@ -191,8 +191,14 @@ namespace InDet {
   }
 
   bool InDetTrackTruthOriginTool::isFrom(const xAOD::TruthParticle* truth, int flav) const {
+    return isFromRec( truth, flav, 0 );
+  }
+
+  bool InDetTrackTruthOriginTool::isFromRec(const xAOD::TruthParticle* truth, int flav, int depth) const {
 
     if ( truth == nullptr ) return false;
+
+    if ( depth > 30 ) return false;
 
     if( flav != 5 && flav != 4 && flav != 15 ) return false;
 
@@ -206,7 +212,7 @@ namespace InDet {
     for(unsigned int p=0; p<truth->nParents(); p++) {
       const xAOD::TruthParticle* parent = truth->parent(p);
       if(parent == truth ) continue ; // avoid infinite recursion
-      if( isFrom(parent, flav) ) return true;
+      if( isFromRec(parent, flav, depth+1) ) return true;
     }
 
     return false;

@@ -57,16 +57,20 @@ namespace FlavorTagDiscriminants {
             return is_weakly_decaying_hadron(truth_particle, 5) || is_weakly_decaying_hadron(truth_particle, 4);
         }
 
-        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle, bool user_called) {
+        const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle, bool user_called, int depth) {
             // get the weakly decaying parent hadron of truth_particle
+            // check for sensible input
             if ( truth_particle == nullptr ) { return nullptr; }
+            // loop protection
+            if (depth>30) { return nullptr; }
+            // if this is the weakly decaying hadron, stop here
             if ( !user_called && is_weakly_decaying_hadron(truth_particle) )  {
                 return truth_particle;
             }
             for (unsigned int p = 0; p < truth_particle->nParents(); p++) {
                 const auto parent = truth_particle->parent(p);
-		if(parent == truth_particle) continue;// avoid infinite recursion
-                const auto parent_hadron = get_parent_hadron(parent, false);
+                if(parent == truth_particle) continue;// avoid infinite recursion
+                const auto parent_hadron = get_parent_hadron(parent, false, depth+1);
                 if ( parent_hadron != nullptr ) {
                     return parent_hadron;
                 }
@@ -106,8 +110,8 @@ namespace FlavorTagDiscriminants {
             particles (material interactions, gamme conversions, etc.)*/
 
             if (!(InDet::TrkOrigin::isSecondary(origin))){
-	        return TruthSource::Label::NotSecondary;
-	        }
+                return TruthSource::Label::NotSecondary;
+                }
             else if ( InDet::TrkOrigin::isHadronicInteraction(origin) ) {
                 return TruthSource::Label::HadronicInteraction;
             }
@@ -120,7 +124,7 @@ namespace FlavorTagDiscriminants {
             else if ( InDet::TrkOrigin::isGammaConversion(origin) ) {
                 return TruthSource::Label::GammaConversion;
             }
-	    // For simulation tracks not included in the above categories
+            // For simulation tracks not included in the above categories
             return TruthSource::Label::Other;
         }
 
