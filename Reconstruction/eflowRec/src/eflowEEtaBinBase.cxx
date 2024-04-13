@@ -26,33 +26,25 @@ eflowEEtaBinBase::~eflowEEtaBinBase() = default;
 
 
 int eflowEEtaBinBase::getEBinIndex(double e) const {
-  if (LOG == m_mode) {
+   int nEBins = getNumEBins();
+   for (int i = 0; i < nEBins; i++) {
+     if (e > m_eBinBounds[i] && e < m_eBinBounds[i + 1]) return i;
+  } 
+  return 0;
+}
 
-    int nEBins = getNumEBins();
-    int bin = 0;
-    for (int i = nEBins - 1; i > 0; i--) {
-      if (e > sqrt(m_eBinBounds[i - 1] * m_eBinBounds[i])) {
-        bin = i;
-        break;
-      }
+int eflowEEtaBinBase::getEBinIndexLegacy(double e) const {
+
+  int nEBins = getNumEBins();
+  int bin = 0;
+  for (int i = nEBins - 1; i > 0; i--) {
+    if (e > sqrt(m_eBinBounds[i - 1] * m_eBinBounds[i])) {
+      bin = i;
+      break;
     }
-    return bin;
-
-  } else if (LIN == m_mode) {
-
-    int nEBins = getNumEBins();
-    int bin = 0;
-    for (int i = nEBins - 1; i > 0; i--) {
-      if (e > (m_eBinBounds[i - 1] * m_eBinBounds[i]) / 2.0) {
-        bin = i;
-        break;
-      }
-    }
-    return bin;
-
-  } else {
-    return -1;
   }
+  return bin;
+
 }
 
 int eflowEEtaBinBase::getEtaBinIndex(double eta) const {

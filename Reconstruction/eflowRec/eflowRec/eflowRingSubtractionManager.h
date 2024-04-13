@@ -47,7 +47,7 @@ class eflowRingSubtractionManager {
     
   double ringThickness(eflowCaloENUM layer) const  {return m_ringThickness[layer];}
 
-  bool getOrdering(const eflowEEtaBinnedParameters* binnedParameters, double e, double eta, eflowFirstIntENUM j1st);
+  bool getOrdering(const eflowEEtaBinnedParameters* binnedParameters, double e, double eta, eflowFirstIntENUM j1st, bool useLegacyEnergyBinIndexing);
 
  private:
 
