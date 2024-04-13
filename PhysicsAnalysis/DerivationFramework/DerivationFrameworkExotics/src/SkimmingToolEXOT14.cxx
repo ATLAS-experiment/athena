@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetAuxContainer.h"
+#include "AthContainers/Decorator.h"
 // #include "xAODTracking/TrackingPrimitives.h"
 
 // #include "JetCalibTools/JetCalibrationTool.h"
@@ -186,7 +187,8 @@ bool DerivationFramework::SkimmingToolEXOT14::SubcutTrigger() const {
 
   for (unsigned int i = 0; i < m_triggers.size(); i++) {
     bool thisTrig = m_trigDecisionTool->isPassed(m_triggers.at(i));
-    eventInfo->auxdecor< bool >(TriggerVarName(m_triggers.at(i))) = thisTrig;
+    SG::Decorator<bool> acc(TriggerVarName(m_triggers.at(i)));
+    acc(*eventInfo) = thisTrig;
     // ATH_MSG_INFO("TRIGGER = " << m_triggers.at(i) <<  " -->> " << thisTrig);
     passTrigger |= thisTrig;
   }
