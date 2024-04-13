@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -7,6 +7,7 @@
 
 // Framework includes
 #include "AthContainers/ConstDataVector.h"
+#include "AthContainers/ConstAccessor.h"
 
 // Local includes
 #include "AssociationUtils/MuJetOverlapTool.h"
@@ -234,9 +235,10 @@ namespace ORUtils
   {
     // Use the user decoration if configured
     if(!m_jetNumTrkDec.empty()) {
-      return jet.auxdata<int>(m_jetNumTrkDec);
+      SG::ConstAccessor<int> jetNumTrkAcc(m_jetNumTrkDec);
+      return jetNumTrkAcc(jet);
     }
-    static const SG::AuxElement::ConstAccessor< std::vector<int> > acc("NumTrkPt500");
+    static const SG::ConstAccessor< std::vector<int> > acc("NumTrkPt500");
     return acc(jet)[vtxIdx];
   }
 
@@ -247,9 +249,10 @@ namespace ORUtils
   {
     // Use the user decoration if configured
     if(!m_jetSumTrkPtDec.empty()) {
-      return jet.auxdata<float>(m_jetSumTrkPtDec);
+      SG::ConstAccessor<int> jetSumTrkPtAcc(m_jetSumTrkPtDec);
+      return jetSumTrkPtAcc(jet);
     }
-    static const SG::AuxElement::ConstAccessor< std::vector<float> > acc("SumPtTrkPt500");
+    static const SG::ConstAccessor< std::vector<float> > acc("SumPtTrkPt500");
     return acc(jet)[vtxIdx];
   }
 
