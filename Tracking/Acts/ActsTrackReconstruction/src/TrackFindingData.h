@@ -25,8 +25,7 @@
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "src/ITrackStatePrinter.h"
 
-#include <boost/container/flat_set.hpp>
-#include <boost/container/flat_map.hpp>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <variant>
@@ -331,7 +330,7 @@ namespace
 
   private:
     bool m_disabled = false;
-    boost::container::flat_multimap<const xAOD::UncalibratedMeasurement *, size_t> m_seedIndex;
+    std::unordered_multimap<const xAOD::UncalibratedMeasurement *, size_t> m_seedIndex;
     std::vector<size_t> m_nUsedMeasurements;
     std::vector<size_t> m_nSeedMeasurements;
     std::vector<bool> m_isDuplicateSeed;
