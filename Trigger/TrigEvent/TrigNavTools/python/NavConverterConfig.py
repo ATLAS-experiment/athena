@@ -9,7 +9,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger("NavConverterConfig")
 
 
-def NavConverterCfg(flags, chainsList = []):
+def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
     """Configures Run 1/2 to Run 3 navigation conversion algorithm for all triggers"""
     if len(chainsList) == 0:
         log.info("Chains list is empty, the conversion will happen for all chains, but no validation will be performed")
@@ -49,22 +49,24 @@ def NavConverterCfg(flags, chainsList = []):
     cnvAlg.doCompression = True # set True for compression
     acc.addEventAlgo(cnvAlg)
 
-    checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = False, TrigDecisionTool = tdt) # optional: OutputLevel = DEBUG
-    checker.RetrievalToolRun2Nav = CompFactory.Trig.IParticleRetrievalTool()
-    
-    # in conversion job  Run2 TDT is setup as default, we need to setup an alternative to access Run 3 format
-    run3tdt = CompFactory.Trig.TrigDecisionTool("Run3TrigDecisionTool",
-                                                HLTSummary = r2ToR3OutputName,
-                                                NavigationFormat = 'TrigComposite',
-                                                AcceptMultipleInstance=True,
-                                                TrigConfigSvc = tdt.TrigConfigSvc)
-    acc.addPublicTool(run3tdt)
-    checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
-    checker.Chains = chainsList
-    checker.TrigDecisionToolRun3 = run3tdt
-    checker.TrigDecisionToolRun2 = tdt
+    if runTheChecker:
+        checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = False, TrigDecisionTool = tdt) # optional: OutputLevel = DEBUG
+        checker.RetrievalToolRun2Nav = CompFactory.Trig.IParticleRetrievalTool()
+        
+        # in conversion job  Run2 TDT is setup as default, we need to setup an alternative to access Run 3 format
+        run3tdt = CompFactory.Trig.TrigDecisionTool("Run3TrigDecisionTool",
+                                                    HLTSummary = r2ToR3OutputName,
+                                                    NavigationFormat = 'TrigComposite',
+                                                    AcceptMultipleInstance=True,
+                                                    TrigConfigSvc = tdt.TrigConfigSvc)
+        acc.addPublicTool(run3tdt)
+        checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt)
+        checker.Chains = chainsList
+        checker.TrigDecisionToolRun3 = run3tdt
+        checker.TrigDecisionToolRun2 = tdt
 
-    acc.addEventAlgo(checker)
+        acc.addEventAlgo(checker)
+
     return acc
 
 
