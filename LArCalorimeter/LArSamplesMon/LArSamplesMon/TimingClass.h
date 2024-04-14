@@ -39,6 +39,7 @@ namespace LArSamples {
     void fitTimePerFebAllFebs( const std::string& nrun, const std::string& name );
     void Time( int dete, const std::string& nrun );
     void PlotFebAverageTime( const std::string& nrun, const std::string& name );
+    void PlotFebAverageTime24( const std::string& nrun, const std::string& name );
     void MergeFebTime( const std::string& nrun );
     void getFebCorrection( const std::string& nrun );
     void PlotFebtime();

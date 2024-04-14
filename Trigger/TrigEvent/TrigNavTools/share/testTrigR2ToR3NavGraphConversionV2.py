@@ -12,10 +12,11 @@ flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0Chain
 # can browse config for this file here: 
 flags.Detector.GeometryLAr=True
 flags.Detector.GeometryTile=True
-flags.Exec.MaxEvents = -1
+flags.Exec.MaxEvents = 20
 flags.Exec.SkipEvents = 0
 flags.Trigger.doEDMVersionConversion=True
 flags.fillFromArgs()
+flags.Concurrency.NumThreads=6
 flags.lock()
 
 # Initialize configuration object, add accumulator, merge, and run.
@@ -48,6 +49,8 @@ chains = list(TriggerAPI.getAllHLT(TriggerPeriod.y2018).keys())
 
 # these are cases to debug further
 #chains= ["HLT_g45_tight_L1EM22VHI_xe45noL1"] 
+# chains=["HLT_e300_etcut"]
+# chains=["HLT_e28_lhtight_nod0_e15_etcut_L1EM7_Zee"]
 
 from TrigNavTools.NavConverterConfig import NavConverterCfg
 cfg.merge(NavConverterCfg(flags, chainsList=chains))
@@ -66,6 +69,7 @@ cfg.merge(TileGMCfg(flags))
 
 
 msg = cfg.getService('MessageSvc'); 
+msg.verboseLimit=0
 msg.debugLimit=0
 msg.infoLimit=0 
 msg.warningLimit=0 

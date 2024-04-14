@@ -166,6 +166,7 @@ StatusCode InDetGlobalBeamSpotMonAlg::fillHistograms( const EventContext& ctx ) 
     auto trkDPhi_m = Monitored::Scalar<float>("m_trkD0Phi", phi0);
     auto trkD_m    = Monitored::Scalar<float>("m_trkD0", d0*1e3);
     fill(bsGroup, trkD_m, trkDPhi_m);
+    fill(bsGroup, trkD_m);
     
     // Currently we do the direct calculation of d0corr. We could
     // also use an extrapolator to calculate d0 wrt a
@@ -177,15 +178,15 @@ StatusCode InDetGlobalBeamSpotMonAlg::fillHistograms( const EventContext& ctx ) 
       float trkbeamspotx=tpb->vx();
       float trkbeamspoty=tpb->vy();
       float trkbeamspotz=tpb->vz();
-      
+
       float beamX = (beamSpotX-trkbeamspotx) + std::tan(beamTiltX-trkbeamlineTiltX) * (z0-beamSpotZ+trkbeamspotz);
       float beamY = (beamSpotY-trkbeamspoty) + std::tan(beamTiltY-trkbeamlineTiltY) * (z0-beamSpotZ+trkbeamspotz);
       float d0corr = d0 - ( -std::sin(phi0)*beamX + std::cos(phi0)*beamY );
-      
-      
+
       auto trkDPhiCorr_m  = Monitored::Scalar<float>("m_trkD0PhiCorr", phi0);
       auto trkDCorr_m     = Monitored::Scalar<float>("m_trkD0Corr", d0corr*1e3);
       fill(bsGroup, trkDPhiCorr_m, trkDCorr_m);
+      fill(bsGroup, trkDCorr_m);
     }
   } // track iterator
   
