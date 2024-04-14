@@ -5,6 +5,7 @@
 #include "DerivationFrameworkTau/TauIDDecoratorWrapper.h"
 #include "StoreGate/ReadHandle.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/Decorator.h"
 
 namespace DerivationFramework {
 
@@ -175,10 +176,14 @@ namespace DerivationFramework {
       // copy over the relevant decorations (scores and working points)
       const xAOD::TauJet* xTau = tauContainer->at(tau->index());
       for (const std::string& score : m_scores) {
-	xTau->auxdecor<float>(score) = tau->auxdataConst<float>(score);
+        SG::Decorator<float> scoreDec (score);
+        SG::ConstAccessor<float> scoreAcc (score);
+	scoreDec(*xTau) = scoreAcc(*tau);
       }
       for (const std::string& WP : m_WPs) {
-	xTau->auxdecor<char>(WP) = tau->auxdataConst<char>(WP);
+        SG::Decorator<char> WPDec (WP);
+        SG::ConstAccessor<char> WPAcc (WP);
+	WPDec(*xTau) = WPAcc(*tau);
       }
     }
 

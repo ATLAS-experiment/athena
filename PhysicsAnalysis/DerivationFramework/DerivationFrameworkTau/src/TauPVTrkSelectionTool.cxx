@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "xAODTracking/Vertex.h"
 #include "TauAnalysisTools/ITauTruthTrackMatchingTool.h"
 #include "xAODTau/TauJetContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace DerivationFramework {
 
@@ -85,6 +86,7 @@ namespace DerivationFramework {
       float tau_eta = pTau->eta();
       bool pass_selection = false;
       if (tau_pt > m_minPt && (fabs(tau_eta) < 1.37 || (fabs(tau_eta) > 1.52 && fabs(tau_eta) < 2.5))) pass_selection = true;
+      static const SG::Decorator<char> IsHadronicTrackDec("IsHadronicTrack");
       for (int i = 0; i < tauNtracks; i++) {
 #ifdef XAODTAU_VERSIONS_TAUJET_V3_H
         const xAOD::TauTrack* tauTrk = pTau->track(i);
@@ -96,7 +98,7 @@ namespace DerivationFramework {
         if (m_useTruth) {
           // identify tracks matched to tau decay products (hadrons only)
           if (!m_T3MT->classifyTrack(*tauTrk)) continue;
-          if (tauTrk->auxdecor<char>("IsHadronicTrack")) tracks->push_back(tauTrk_trk);
+          if (IsHadronicTrackDec(*tauTrk)) tracks->push_back(tauTrk_trk);
         } else {
           // use all tau tracks
           //TauTracks.push_back(const_cast<xAOD::TrackParticle*>(tauTrk));
