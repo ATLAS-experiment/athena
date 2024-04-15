@@ -149,14 +149,6 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         [
             'L1_jJ30_UNPAIRED_NONISO',
         ],
-        'UNPAIREDB1':
-        [
-            'L1_BCM_Wide_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB1'
-        ],
-        'UNPAIREDB2':
-        [
-            'L1_BCM_Wide_UNPAIREDB2', 'L1_BCM_2A_UNPAIREDB2', 'L1_BCM_2C_UNPAIREDB2'
-        ],
         'ABORTGAPNOTCALIB': [] # No more items defined in this historical bunchgroup
     }[ebitem]
 

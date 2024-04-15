@@ -52,14 +52,14 @@ def defineMenu():
         'L1_EN1_Thresholds',
         'L1_EN2_Thresholds',
 
-        # Require ZB(_EM15) threshold
-        'L1_ZB',
+        # Require ZeroBiasA/B threshold
+        'L1_ZeroBias',
     ]
 
     # CTP ID 509-511 are reserved for CALREQ
     L1MenuFlags.CtpIdMap = {
         # to be used to hardcode CTP IDs for specific items
-        # NB: 508 is reserved for the zero bias trigger, and 509-511 for the CALREQ triggers (at the moment, ATR-22654)
+        # NB: 509-511 for the CALREQ triggers (at the moment, ATR-22654)
 
         # High-frequency counters fixed to consecutive CTP IDs
         # 8 items with the high frequency per-bunch monitoring counters (HF:111)
@@ -72,9 +72,7 @@ def defineMenu():
         "L1_MBTS_2":484,
         "L1_MBTS_1_1":485,
         "L1_BCM_Wide":486,
-        # "L1_BCM_Wide":487,
-        #
-        "L1_ZeroBias": 508
+        # "":487,
     }
 
 
