@@ -166,6 +166,7 @@ class ComponentAccumulator(AccumulatorCachable):
         #Delete internal data structures, to be called after all properties are transferred to the C++ application
         #Purpose: Free memory
         del self._sequence
+        del self._allSequences
         del self._algorithms
         del self._conditionsAlgs
         del self._services
