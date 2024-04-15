@@ -3,15 +3,23 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def OnlineStreamToServerCfg(flags, OnlineEventDisplaysSvc = None):
+def OnlineStreamToServerCfg(flags, name='OnlineStreamToFileTool', **kwargs):
     acc = ComponentAccumulator()
-    
-    from JiveXML.ExternalONCRPCServerSvcConfig import ExternalONCRPCServerSvcCfg
-    acc.merge(ExternalONCRPCServerSvcCfg(flags))
 
-    streamToServerTool = CompFactory.JiveXML.StreamToServerTool(name='OnlineStreamToFileTool',
-                                                                StreamName = ".Unknown",
-                                                                OnlineEventDisplaysSvc = OnlineEventDisplaysSvc)
+    if "ExternalONCRPCServerSvc" not in kwargs:
+        from JiveXML.ExternalONCRPCServerSvcConfig import ExternalONCRPCServerSvcCfg
+        acc.merge(ExternalONCRPCServerSvcCfg(flags))
+        kwargs.setdefault("ExternalONCRPCServerSvc", acc.getService("ExternalONCRPCServerSvc"))
+
+    if "OnlineEventDisplaysSvc" not in kwargs:
+        from EventDisplaysOnline.EventDisplaysOnlineConfig import OnlineEventDisplaysSvcCfg
+        acc.merge(OnlineEventDisplaysSvcCfg(flags))
+        kwargs.setdefault("OnlineEventDisplaysSvc", acc.getService("OnlineEventDisplaysSvc"))
+
+    kwargs.setdefault("StreamName", ".Unknown")
+
+    streamToServerTool = CompFactory.JiveXML.StreamToServerTool(name, **kwargs)
+
     acc.setPrivateTools(streamToServerTool)
-                                                            
+
     return acc

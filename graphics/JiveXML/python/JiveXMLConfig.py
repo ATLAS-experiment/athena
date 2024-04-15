@@ -271,6 +271,7 @@ def CaloRetrieversCfg(flags, **kwargs):
                 name="CaloLArRetriever",
                 DoLArCellDetails=False,
                 DoBadLAr=False,
+                LArlCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50,
             )
         )
 
@@ -279,6 +280,7 @@ def CaloRetrieversCfg(flags, **kwargs):
                 name="CaloHECRetriever",
                 DoHECCellDetails=False,
                 DoBadHEC=False,
+                HEClCellThreshold = 500 if flags.OnlineEventDisplays.BeamSplashMode else 50,
             )
         )
 

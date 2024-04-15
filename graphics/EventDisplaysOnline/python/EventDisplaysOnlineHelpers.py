@@ -1,8 +1,8 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from ispy import ISObject, IPCPartition
+from ispy import ISObject, IPCPartition, ISInfoAny, ISInfoDictionary
 import time
 from AthenaCommon.Logging import logging
-import os, sys
+import sys
 
 def GetBFields():
   mlog = logging.getLogger( 'EventDisplays' )
@@ -57,9 +57,8 @@ def WaitForPartition(partitionName=None):
       mlog.info("%s partition is not up, sleeping for 30 seconds", partitionName)
       time.sleep(30)
 
-def EventCanBeSeenByPublic(projectTags=[]):
-# Is the data allowed to be seen by the general public on atlas live an\
-d in the CCC
+def EventCanBeSeenByPublic(projectTags):
+# Is the data allowed to be seen by the general public on atlas live and in the CCC
 
   try:
     partition = IPCPartition('ATLAS')
@@ -67,28 +66,16 @@ d in the CCC
     RunParams.checkout()
 
     ready4physics = ISInfoAny()
-    ISInfoDictionary(partition).getValue('RunParams.Ready4Physics', rea\
-dy4physics)
+    ISInfoDictionary(partition).getValue('RunParams.Ready4Physics', ready4physics)
     print("physicsReady: %s " % ready4physics.get())
 
-    physicsReady = ISObject(partition, 'RunParams.Ready4Physics','Ready\
-4PhysicsInfo')
-    physicsReady.checkout()
-
-    ready4physics = ISInfoAny()
-    ISInfoDictionary(partition).getValue('RunParams.Ready4Physics', rea\
-dy4physics)
-    print("physicsReady: %s " % ready4physics.get())
-
-    physicsReady = ISObject(partition, 'RunParams.Ready4Physics','Ready\
-4PhysicsInfo')
+    physicsReady = ISObject(partition, 'RunParams.Ready4Physics','Ready4PhysicsInfo')
     physicsReady.checkout()
     print("Ready for physics: %r" % (physicsReady.ready4physics))
     print("RunParams.T0_project_tag", RunParams.T0_project_tag)
 
     sendToPublicStream = False
-    if physicsReady.ready4physics and RunParams.T0_project_tag in proje\
-ctTags:
+    if physicsReady.ready4physics and RunParams.T0_project_tag in projectTags:
       sendToPublicStream = True
 
     return sendToPublicStream
@@ -97,10 +84,27 @@ ctTags:
     print('Failed to get bool for EventCanBeSeenByPublic')
     return False
 
+def GetUniqueJobID(): 
+  # Setup unique output files (so that multiple Athena jobs on the same machine don't interfere)
+  import os
+  jobId = os.environ.get('TDAQ_APPLICATION_NAME', '').split(':')
+  if not len(jobId) == 5:
+    from random import randint
+    jobId = ['Athena-EventProcessor', 'Athena-EventDisplays-Segment', 'EventDisplays-Rack', 'tmp', '%d' % randint(0, 999)]
+
+  return jobId
+    
+def GetRunNumber(partitionName):
+  part = IPCPartition(partitionName)
+  RunParams = ISObject(part, 'RunParams.RunParams', 'RunParams')
+  RunParams.checkout()
+  run_number = RunParams.getAttributeValue('run_number')
+  return run_number
+
 if __name__ == "__main__":
-  runType=GetRunType()
-  print ("RunType: %s"%runType)
+  runNumber=GetRunNumber()
+  print ("RunNumber: %s"%runNumber)
   bFields = GetBFields()
-  print ("BFields (Sol,Tor):",bFields)
+  print ("BFields (Sol,Tor):", bFields)
   isPublicEvent = EventCanBeSeenByPublic(['data24_13p6TeV'])
-  print("isPublicEvent:",isPublicEvent)
+  print("isPublicEvent:", isPublicEvent)

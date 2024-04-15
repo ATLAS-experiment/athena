@@ -5,11 +5,16 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
-def OnlineStreamToFileCfg(flags, OnlineEventDisplaysSvc = None):
+def OnlineStreamToFileCfg(flags,name='OnlineStreamToFileTool', **kwargs):
     acc = ComponentAccumulator()
-    streamToFileTool = CompFactory.JiveXML.StreamToFileTool(name='OnlineStreamToFileTool',
-                                                            OnlineEventDisplaysSvc = OnlineEventDisplaysSvc,
-                                                            IsOnline = True,
-                                                            OutputLevel = DEBUG)
+
+    if "OnlineEventDisplaysSvc" not in kwargs:
+        from EventDisplaysOnline.EventDisplaysOnlineConfig import OnlineEventDisplaysSvcCfg
+        acc.merge(OnlineEventDisplaysSvcCfg(flags))
+        kwargs.setdefault("OnlineEventDisplaysSvc", acc.getService("OnlineEventDisplaysSvc"))
+
+    kwargs.setdefault("IsOnline", True)
+
+    streamToFileTool = CompFactory.JiveXML.StreamToFileTool(name, OutputLevel = DEBUG, **kwargs)
     acc.setPrivateTools(streamToFileTool)
     return acc

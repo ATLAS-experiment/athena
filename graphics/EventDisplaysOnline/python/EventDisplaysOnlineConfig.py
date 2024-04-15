@@ -1,29 +1,28 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-if __name__ == "__main__":
-    from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetBFields,WaitForPartition
-    from AthenaConfiguration.Enums import BeamType
+def EventDisplaysOnlineCfg(flags, **kwargs):
+    from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetBFields, WaitForPartition, GetUniqueJobID, GetRunNumber
 
-    isCosmicData = False
-    isHIMode = False #TODO
-    isBeamSplashMode = False
-    isOfflineTest = True
-    testWithoutPartition = True
-    HorizontalMuons_quickReco = False
-
+    if not flags.OnlineEventDisplays.OfflineTest:
+        from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
+        autoConfigOnlineRecoFlags(flags, flags.OnlineEventDisplays.PartitionName)
+        
+    flags.OnlineEventDisplays.CosmicMode = False
+    flags.OnlineEventDisplays.HIMode = False 
+    flags.OnlineEventDisplays.BeamSplashMode = False
+    flags.OnlineEventDisplays.OfflineTest = True
+    
     # An explicit list for nominal data taking to exclude some high rate streams
     # Empty list to read all
-    streamsWanted = ['MinBias','express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
-    if isBeamSplashMode:
-        streamsWanted = ['MinBias'] #if trigger fails it will go to debug_HltError
+    flags.OnlineEventDisplays.TriggerStreams = ['MinBias','express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
+    if flags.OnlineEventDisplays.BeamSplashMode:
+        flags.OnlineEventDisplays.TriggerStreams = ['MinBias'] #if trigger fails it will go to debug_HltError
 
     # If testing at p1, create dir /tmp/your_user_name and write out to /tmp/your_user_name to see output
-    outputDirectory="/atlas/EventDisplayEvents/"
+    flags.OnlineEventDisplays.OutputDirectory = "/atlas/EventDisplayEvents/"
 
-    if isOfflineTest:
-        outputDirectory="."
-
-    sendToPublicStream = False # Gets set later, overwrite here to True to test it
+    if flags.OnlineEventDisplays.OfflineTest:
+        flags.OnlineEventDisplays.OutputDirectory = "."
 
     ##----------------------------------------------------------------------##
     ## When the ATLAS partition is not running you can use two test         ##
@@ -36,78 +35,66 @@ if __name__ == "__main__":
     ## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-11-02-01/         ##
     ## without_gatherer/GMTestPartition.data.xml                            ##
     ##----------------------------------------------------------------------##
-    partitionName = 'ATLAS' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
+    flags.OnlineEventDisplays.PartitionName='ATLAS' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
 
-    if isHIMode:
-        maxEvents=200 # Number of events to keep per stream in /atlas/EventDisplays/stream
-        projectTags=['data24_hi']
+    if flags.OnlineEventDisplays.HIMode:
+        flags.OnlineEventDisplays.MaxEvents=200
+        flags.OnlineEventDisplays.ProjectTag='data24_hi'
         projectName='data24_hi'
-        publicStreams=['HardProbes']
-    if isCosmicData:
-        maxEvents=200
-        projectTags=['data24_cos']
+        flags.OnlineEventDisplays.PublicStreams=['HardProbes']
+    if flags.OnlineEventDisplays.CosmicMode:
+        flags.OnlineEventDisplays.MaxEvents=200
+        flags.OnlineEventDisplays.ProjectTag='data24_cos'
         projectName='data24_cos'
-        publicStreams=['']
-    if isBeamSplashMode:
-        maxEvents=-1
-        projectTags=['data24_13p6TeV']
+        flags.OnlineEventDisplays.PublicStreams=['']
+    if flags.OnlineEventDisplays.BeamSplashMode:
+        flags.OnlineEventDisplays.MaxEvents=-1 # keep all the events
+        flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
         projectName='data24_13p6TeV'
-        publicStreams=['']
+        flags.OnlineEventDisplays.PublicStreams=['']
     else:
-        maxEvents=100
-        projectTags=['data24_13p6TeV']
+        flags.OnlineEventDisplays.MaxEvents=100
+        flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
         projectName='data24_13p6TeV'
-        publicStreams=['Main']
+        flags.OnlineEventDisplays.PublicStreams=['Main']
 
     # Pause this thread until the partition is up
-    if not testWithoutPartition or not isOfflineTest:
-        WaitForPartition(partitionName)
+    if not flags.OnlineEventDisplays.OfflineTest:
+        WaitForPartition(flags.OnlineEventDisplays.PartitionName)
 
-    # Setup unique output files (so that multiple Athena jobs on the same machine don't interfere)
-    import os
-    jobId = os.environ.get('TDAQ_APPLICATION_NAME', '').split(':')
-    if not len(jobId) == 5:
-        from random import randint
-        jobId = ['Athena-EventProcessor', 'Athena-EventDisplays-Segment', 'EventDisplays-Rack', 'tmp', '%d' % randint(0, 999)]
-
-    if not isOfflineTest:
+    if not flags.OnlineEventDisplays.OfflineTest:
+        import os
         IPC_timeout = int(os.environ['TDAQ_IPC_TIMEOUT'])
         print(" IPC_timeout Envrionment Variable = %d" %IPC_timeout)
 
-    ##----------------------------------------------------------------------##
-    # Define the flags
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-    if not isOfflineTest:
-        from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
-        autoConfigOnlineRecoFlags(flags, partitionName)
-
     # Conditions tag
     flags.IOVDb.DatabaseInstance = "CONDBR2"
-    if isOfflineTest:
+    if flags.OnlineEventDisplays.OfflineTest:
         flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-02'
     else:
         flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' # Online conditions tag
 
-    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00' # Geometry tag
+    # Geometry tag
+    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
 
-    if isHIMode:
+    if flags.OnlineEventDisplays.HIMode:
         flags.Beam.BunchSpacing = 100 # ns
 
     flags.Trigger.triggerConfig='DB'
 
+    jobId = GetUniqueJobID()
     # Test wth a small amount of events and write out to e.g. a tmp dir
-    if testWithoutPartition or partitionName != 'ATLAS' or isOfflineTest:
+    if flags.OnlineEventDisplays.PartitionName != 'ATLAS' or flags.OnlineEventDisplays.OfflineTest:        
         flags.Exec.MaxEvents = 3
-        flags.Output.ESDFileName = outputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
+        flags.Output.ESDFileName = flags.OnlineEventDisplays.OutputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
     else:
         flags.Exec.MaxEvents = 20000 # hack until we find a way to fix the memory fragmentation ATEAM-896, this resets the memory after 20k events
         flags.Output.ESDFileName = "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
 
     flags.Output.doWriteESD = True
-    #flags.Output.doJiveXML = False #we call the AlgoJive later on
+    flags.Output.doJiveXML = False #we call the AlgoJive later on
 
-    if isOfflineTest:
+    if flags.OnlineEventDisplays.OfflineTest:
         flags.Input.Files = ['/eos/home-m/myexley/sharedWithATLASauthors/data23_13p6TeV.00454188.physics_Main.daq.RAW._lb0633._SFO-12._0002.data']
     else:
         flags.Input.Files = [] # Files are read from the ATLAS (or GM test) partition
@@ -117,7 +104,7 @@ if __name__ == "__main__":
     flags.Detector.EnableFwdRegion = False
     flags.LAr.doHVCorr = False # ATLASRECTS-6823
     
-    if isBeamSplashMode or HorizontalMuons_quickReco:
+    if flags.OnlineEventDisplays.BeamSplashMode:
         flags.Reco.EnableJet=False
         flags.Reco.EnableMet=False
         flags.Reco.EnableTau=False
@@ -130,29 +117,13 @@ if __name__ == "__main__":
     flags.Exec.OutputLevel = INFO
     flags.Concurrency.NumThreads = 0
 
-    flags.Common.isOnline = not isOfflineTest
+    flags.Common.isOnline = not flags.OnlineEventDisplays.OfflineTest
 
-    if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
-        # Read run number from the partition
-        # For beam plashes when LAr running in 32 samples mode, the current run number to LAr config is needed
-        # IS stands for Information Service
-        from ispy import ISObject, IPCPartition, ISInfoAny, ISInfoDictionary
-        part = IPCPartition(partitionName)
-        RunParams = ISObject(part, 'RunParams.RunParams', 'RunParams')
-        RunParams.checkout()
-        run_number = RunParams.getAttributeValue('run_number')
+    if flags.OnlineEventDisplays.PartitionName == 'ATLAS' and not flags.OnlineEventDisplays.OfflineTest:
+        # For beam plashes when LAr running in a different samples mode, the current run number to LAr config is needed
+        run_number = GetRunNumber(flags.OnlineEventDisplays.PartitionName)
         flags.Input.OverrideRunNumber = True
         flags.Input.RunNumbers = [run_number]
-
-        # Is the data allowed to be seen by the general public on atlas live
-        ready4physics = ISInfoAny()
-        ISInfoDictionary(part).getValue('RunParams.Ready4Physics', ready4physics)
-        print("Ready for physics: %s " % ready4physics.get())
-        physicsReady = ISObject(part, 'RunParams.Ready4Physics','Ready4PhysicsInfo')
-        physicsReady.checkout()
-        print("Ready for physics: %r" % (physicsReady.ready4physics))
-        if physicsReady.ready4physics and RunParams.T0_project_tag in projectTags:
-            sendToPublicStream = True
 
         # Get the B field
         (solenoidOn,toroidOn)=GetBFields()
@@ -162,14 +133,15 @@ if __name__ == "__main__":
         flags.BField.endcapToroidOn = toroidOn
 
     # GM test partition needs to be given the below info
-    if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9'):
+    if (flags.OnlineEventDisplays.PartitionName == 'GMTestPartition' or flags.OnlineEventDisplays.PartitionName == 'GMTestPartitionT9'):
         flags.Input.OverrideRunNumber = True
         flags.Input.RunNumbers = [454188] # keep this number the same as (or close to) the run number of the file you are testing on
         flags.Input.LumiBlockNumbers = [1]
         flags.Input.ProjectName = projectName
 
-    if not testWithoutPartition:
-        if isCosmicData:
+    from AthenaConfiguration.Enums import BeamType    
+    if not flags.OnlineEventDisplays.OfflineTest:
+        if flags.OnlineEventDisplays.CosmicMode:
             flags.Beam.Type = BeamType.Cosmics
         else:
             flags.Beam.Type = BeamType.Collisions
@@ -181,32 +153,31 @@ if __name__ == "__main__":
     cfg = RecoSteering(flags)
 
     from IOVDbSvc.IOVDbSvcConfig import addOverride
-    if not isOfflineTest:
+    if not flags.OnlineEventDisplays.OfflineTest:
         cfg.merge(addOverride(flags, "/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v2", db=""))
 
-    # get the input files from the partition
-    if not testWithoutPartition:
+    # Get the input files from the partition
+    if not flags.OnlineEventDisplays.OfflineTest:
         from EventDisplaysOnline.ByteStreamConfig import ByteStreamCfg
-        cfg.merge(ByteStreamCfg(flags, partitionName, streamsWanted, isBeamSplashMode))
+        cfg.merge(ByteStreamCfg(flags, **kwargs))
 
     from EventDisplaysOnline.OnlineEventDisplaysSvcConfig import OnlineEventDisplaysSvcCfg
-    cfg.merge(OnlineEventDisplaysSvcCfg(flags, maxEvents, outputDirectory, sendToPublicStream, publicStreams, streamsWanted, isBeamSplashMode))
-    onlineEventDisplaysSvc = cfg.getService("OnlineEventDisplaysSvc")
+    cfg.merge(OnlineEventDisplaysSvcCfg(flags, **kwargs))
 
     from JiveXML.OnlineStreamToFileConfig import OnlineStreamToFileCfg
-    streamToFileTool = cfg.popToolsAndMerge(OnlineStreamToFileCfg(flags, OnlineEventDisplaysSvc = onlineEventDisplaysSvc))
+    streamToFileTool = cfg.popToolsAndMerge(OnlineStreamToFileCfg(flags, **kwargs))
 
     streamToServerTool = None
-    if not isOfflineTest:
+    if not flags.OnlineEventDisplays.OfflineTest:
         from JiveXML.OnlineStreamToServerConfig import OnlineStreamToServerCfg
-        streamToServerTool = cfg.popToolsAndMerge(OnlineStreamToServerCfg(flags, OnlineEventDisplaysSvc = onlineEventDisplaysSvc))
+        streamToServerTool = cfg.popToolsAndMerge(OnlineStreamToServerCfg(flags, **kwargs))
 
     from AthenaCommon.Constants import DEBUG
     from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
     cfg.merge(AlgoJiveXMLCfg(flags,
                              StreamToFileTool = streamToFileTool,
                              StreamToServerTool = streamToServerTool,
-                             OnlineMode = not isOfflineTest,
+                             OnlineMode = not flags.OnlineEventDisplays.OfflineTest,
                              OutputLevel = DEBUG))
 
     # This creates an ESD file per event which is renamed and moved to the desired output
@@ -216,19 +187,15 @@ if __name__ == "__main__":
     streamESD = cfg.getEventAlgo("OutputStreamESD")
 
     from VP1AlgsEventProd.VP1AlgsEventProdConfig import VP1AlgsEventProdCfg
-    cfg.merge(VP1AlgsEventProdCfg(flags, streamESD, OnlineEventDisplaysSvc = onlineEventDisplaysSvc))
+    cfg.merge(VP1AlgsEventProdCfg(flags, streamESD, **kwargs))
 
     # switch of the NSW segment making as it takes too much CPU in beamsplashes
-    if isBeamSplashMode or HorizontalMuons_quickReco:
+    if flags.OnlineEventDisplays.BeamSplashMode:
         cfg.getEventAlgo("MuonSegmentMaker").doStgcSegments=False
         cfg.getEventAlgo("MuonSegmentMaker").doMMSegments=False
         cfg.getEventAlgo("MuonSegmentMaker_NCB").doStgcSegments=False
         cfg.getEventAlgo("MuonSegmentMaker_NCB").doMMSegments=False
         cfg.dropEventAlgo("QuadNSW_MuonSegmentCnvAlg")
-
-    if isBeamSplashMode:
-        cfg.getPublicTool("CaloLArRetriever").LArlCellThreshold=500.
-        cfg.getPublicTool("CaloHECRetriever").HEClCellThreshold=500.
 
     cfg.getService("PoolSvc").WriteCatalog = "xmlcatalog_file:PoolFileCatalog_%s_%s.xml" % (jobId[3], jobId[4])
 
@@ -242,6 +209,12 @@ if __name__ == "__main__":
     with open("OnlineEventDisplays.pkl", "wb") as f:
         cfg.store(f)
 
+    return cfg
+        
+if __name__ == "__main__":
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    cfg = EventDisplaysOnlineCfg(flags)        
     # Execute
     sc = cfg.run()
     import sys

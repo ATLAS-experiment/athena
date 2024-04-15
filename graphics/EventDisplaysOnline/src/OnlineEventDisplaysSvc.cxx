@@ -46,10 +46,23 @@ void OnlineEventDisplaysSvc::beginEvent(){
       if(std::find(m_streamsWanted.begin(), m_streamsWanted.end(), tag.name()) != m_streamsWanted.end()){
 	streams.emplace_back(stream_fullname);
       }
-
-      bool isPublicStream = std::find(m_publicStreams.begin(), m_publicStreams.end(), tag.name()) != m_publicStreams.end();
-      if(m_sendToPublicStream && isPublicStream){
+      bool isPublic = false;
+      RootUtils::PyGILStateEnsure ensure;
+      std:: string projectTag = m_projectTag;
+      PyObject* pProjectTag = PyUnicode_FromString(projectTag.c_str());
+      PyObject* pModule = PyImport_ImportModule("EventDisplaysOnline.EventDisplaysOnlineHelpers");
+      if ( pModule ) {
+	PyObject* EventCanBeSeenByPublic = PyObject_GetAttrString(pModule, "EventCanBeSeenByPublic");
+	if ( EventCanBeSeenByPublic ) {
+	  isPublic = PyObject_CallObject(EventCanBeSeenByPublic, pProjectTag);
+	}
+	else {
+	  ATH_MSG_WARNING("Could not import EventDisplaysOnline.EventDisplaysOnlineHelpers.EventCanBeSeenByPublic");
+	}
+      }
+      if(isPublic){
 	streams.emplace_back("Public");
+	ATH_MSG_DEBUG("Can send event to public stream");
       }
     }
   }

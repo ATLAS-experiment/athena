@@ -48,8 +48,7 @@ private:
   SG::ReadHandleKey<xAOD::EventInfo> m_evt{this, "EventInfo", "EventInfo", "Input event information"};
   Gaudi::Property<std::string> m_outputDirectory {this, "OutputDirectory", "/atlas/EventDisplayEvents", "Output Directory"};
   Gaudi::Property<std::vector<std::string>> m_streamsWanted {this, "StreamsWanted", {}, "Desired trigger streams"};
-  Gaudi::Property<std::vector<std::string>> m_publicStreams {this, "PublicStreams", {}, "Desired public streams"};
-  Gaudi::Property<bool> m_sendToPublicStream {this, "SendToPublicStream", false, "Allowed to be seen by the public on atlas live"};
+  Gaudi::Property<std::string> m_projectTag {this, "ProjectTag", "", "Is needed to add streams to the Public trigger streams"};
   Gaudi::Property<bool> m_BeamSplash {this, "BeamSplash", false, "Is a beam splash event"};
   Gaudi::Property<bool> m_CheckPair {this, "CheckPair", true, "Check for matching ESD and JiveXML files"};
   Gaudi::Property<int> m_maxEvents {this, "MaxEvents", 200, "Number of events to keep per stream"};

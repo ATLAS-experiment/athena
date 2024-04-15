@@ -2,15 +2,16 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def ByteStreamCfg(flags, partitionName = '', streamsWanted=[], isBeamSplashMode = False):
+def ByteStreamCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
 
     from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
     acc.merge(EmonByteStreamCfg(flags))
 
+    #TODO kwargs?!
     bytestreamInput = acc.getService("ByteStreamInputSvc")
-    bytestreamInput.Partition = partitionName
+    bytestreamInput.Partition = flags.OnlineEventDisplays.PartitionName
     bytestreamInput.GroupName = "EventDisplaysOnline"
     bytestreamInput.PublishName = "EventDisplays"
     bytestreamInput.Key = "dcm"
@@ -19,17 +20,17 @@ def ByteStreamCfg(flags, partitionName = '', streamsWanted=[], isBeamSplashMode 
     bytestreamInput.UpdatePeriod = 200
     bytestreamInput.BufferSize = 10 # three times of keycount for beam splashes
     bytestreamInput.ISServer = '' # Disable histogramming
-    bytestreamInput.StreamNames = streamsWanted
+    bytestreamInput.StreamNames = flags.OnlineEventDisplays.TriggerStreams
     #bytestreamInput.StreamType = "physics" #comment out for all streams, e.g. if you also want claibration streams
     bytestreamInput.StreamLogic = "Or"
 
-    if isBeamSplashMode:
+    if flags.OnlineEventDisplays.BeamSplashMode:
         bytestreamInput.KeyCount = 62 # equal or greater than the number of DCMs for beam splashes
         bytestreamInput.BufferSize = 186 # three times of keycount for beam splashes
         bytestreamInput.Timeout = 144000000 #(40 hrs) for beam splashes
         bytestreamInput.StreamType = "physics" #if trigger fails it will go to debug_HltError
 
-    if partitionName != 'ATLAS':
+    if flags.OnlineEventDisplays.PartitionName != 'ATLAS':
         bytestreamInput.KeyValue = [ 'Test_emon_push' ]
         bytestreamInput.KeyCount = 1
 
