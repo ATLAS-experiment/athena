@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LongLivedParticleDPDMaker/KinkTrkSingleJetMetFilterTool.h"
 #include "FourMomUtils/P4Helpers.h"
+#include "AthContainers/ConstAccessor.h"
 #include <vector>
 
 class sortJetContainer{
@@ -271,12 +272,14 @@ bool DerivationFramework::KinkTrkSingleJetMetFilterTool::eventPassesFilter() con
 	continue;
       }
 
-      if(Tracklet->auxdata<UChar_t>("numberOfContribPixelLayers")<3){
+      static const SG::ConstAccessor<UChar_t> numberOfContribPixelLayersAcc("numberOfContribPixelLayers");
+      if(numberOfContribPixelLayersAcc(*Tracklet)<3){
 	passIsolatedTracklet = false;
 	continue;
       }
       
-      if(Tracklet->auxdata<UChar_t>("numberOfPixelSpoiltHits")>0){
+      static const SG::ConstAccessor<UChar_t> numberOfPixelSpoiltHitsAcc("numberOfPixelSpoiltHits");
+      if(numberOfPixelSpoiltHitsAcc(*Tracklet)>0){
 	passIsolatedTracklet = false;
 	continue;
       }
