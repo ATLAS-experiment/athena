@@ -26,7 +26,6 @@ atlas_add_dictionary( D3PDMakerTestDict
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
 
 # Tests
 set( D3PDMAKERTEST_REFERENCE_TAG D3PDMakerTest/D3PDMakerTest-01-00-00 ) 

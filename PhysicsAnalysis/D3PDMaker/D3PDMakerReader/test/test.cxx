@@ -18,9 +18,6 @@
 /**
  * Small example of how to use some of the generated classes for some simple
  * tasks. Used for code testing at the moment...
- *
- * To be able to compile the code, you first have to run the share/CodeGenerator_jobOptions.py
- * job.
  */
 int main() {
 
