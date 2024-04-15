@@ -52,16 +52,15 @@ tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
 
 if args.doTIDATier0 or args.doNewTIDATier0:   
 
+  histsvc=CompFactory.THistSvc()
+  histsvc.Output = ["CombinedMonitoring DATAFILE='data-hists-tier0.root' OPT='RECREATE'"]
+  acc.addService(histsvc)
+
   # this is the new location ...
-  from TrigInDetMonitoring.TIDAMonitoring import TIDAMonitoring
-  for git in TIDAMonitoring( flags, "idtrigger" ):
-    acc.addEventAlgo(git)
+  from TrigInDetMonitoring.TIDAMonitoring import TrigInDetMonConfig
+  acc.merge( TrigInDetMonConfig( flags ) )
 
-  THistSvc=CompFactory.THistSvc()
-  THistSvc.Output = ["EXPERT DATAFILE='data-hists-tier0.root' OPT='RECREATE'"]
-  acc.addService(THistSvc)
-
-
+  
 ############ TrigInDetAnalysis part ################################
 
 if ( True ) :
@@ -267,7 +266,11 @@ if ( True ) :
     "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_FTF",
     "HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V:HLT_IDTrack_Bmumux_IDTrig",
     "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_FTF",
-    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_IDTrig"
+    "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:HLT_IDTrack_Bmumux_IDTrig",
+
+    #displaced jet lrt
+    "HLT_j180_.*dispjet.*_L1J100:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ", 
+    "HLT_j180_.*dispjet.*_L1jJ160:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ"
 
     ]
 

@@ -46,9 +46,6 @@ public:
     m_useEtaBinning = false;
     m_maxEC_len = 1.5;
     m_vLUT.clear();
-
-    //TODO: remove once decision made
-    m_fix_seed_phi = false;
   }
 
   int m_maxBarrelPix, m_minEndcapPix, m_maxEndcapPix, m_maxSiliconLayer;
@@ -83,9 +80,6 @@ public:
   int m_useTrigSeedML;
   std::vector<TrigSeedML_LUT> m_vLUT;
   float m_maxEC_len;
-
-  //TODO: remove once decision made
-  bool m_fix_seed_phi;
 
 } TRIG_COMBINATORIAL_SETTINGS;
 

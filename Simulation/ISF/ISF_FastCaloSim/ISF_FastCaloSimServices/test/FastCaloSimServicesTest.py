@@ -38,12 +38,12 @@ def FastCaloSimServicesMainCfg(flags):
     from ISF_Config.ISF_MainConfig import ISF_KernelCfg
     acc.merge(ISF_KernelCfg(flags))
 
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
     from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
     acc.merge( OutputStreamCfg(flags, "HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True))
 
     # FIXME hack to match to buggy behaviour in old style configuration
-    OutputStreamHITS = acc.getEventAlgo("OutputStreamHITS")
+    OutputStreamHITS = acc.getEventAlgo(outputStreamName("HITS"))
     OutputStreamHITS.ItemList.remove("xAOD::EventInfo#EventInfo")
     OutputStreamHITS.ItemList.remove("xAOD::EventAuxInfo#EventInfoAux.")
 

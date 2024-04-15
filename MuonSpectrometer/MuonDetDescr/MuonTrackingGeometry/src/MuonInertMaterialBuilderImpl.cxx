@@ -26,72 +26,46 @@ Muon::MuonInertMaterialBuilderImpl::MuonInertMaterialBuilderImpl(
 StatusCode Muon::MuonInertMaterialBuilderImpl::initialize() {
 
     if (m_simplifyToLayers) {
-        ATH_MSG_INFO(
-            name()
-            << " option Simplify(Muon)GeometryToLayers no longer maintained ");
+        ATH_MSG_INFO(" option Simplify(Muon)GeometryToLayers no longer maintained ");
     }
-
-    ATH_MSG_INFO(name() << " initialize() successful");
-
+    ATH_MSG_INFO( " initialize() successful");
     return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumesImpl(
-    const MuonGM::MuonDetectorManager* muonMgr, bool blend) const {
+Muon::MuonInertMaterialBuilderImpl::DetachedVolVec
+    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumesImpl(const PVConstLink treeTop, bool blend) const {
+    
+    if (!treeTop) {
+        throw std::runtime_error("No tree top has been parsed");
+    }
     // collect inert material objects
-    auto mInert = std::make_unique<
-        std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>();
-
+    DetachedVolVec mInert{};
     // retrieve muon station prototypes from GeoModel
-    std::vector<
-        std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>
-        msTypes = buildDetachedTrackingVolumeTypes(muonMgr, blend);
-    ATH_MSG_INFO(name() << " obtained " << msTypes.size() << " prototypes");
+    auto msTypes = buildDetachedTrackingVolumeTypes(treeTop, blend);
+    ATH_MSG_DEBUG(" obtained " << msTypes.size() << " prototypes");
 
-    std::vector<std::pair<Trk::DetachedTrackingVolume*,
-                          std::vector<Amg::Transform3D>>>::const_iterator
-        msTypeIter = msTypes.begin();
-
-    for (; msTypeIter != msTypes.end(); ++msTypeIter) {
-        std::string msTypeName = (*msTypeIter).first->name();
-        const Trk::DetachedTrackingVolume* msTV = (*msTypeIter).first;
-        for (auto combTr : (*msTypeIter).second) {
-            std::unique_ptr<Trk::DetachedTrackingVolume> newStat{
-                msTV->clone(msTypeName, combTr)};
-            mInert->push_back(std::move(newStat));
+    
+    for (auto& [msTV, transforms]: msTypes) {
+        std::string msTypeName = msTV->name();
+        for (Amg::Transform3D&  combTr : transforms) {
+            std::unique_ptr<Trk::DetachedTrackingVolume> newStat{msTV->clone(msTypeName, combTr)};
+            mInert.push_back(std::move(newStat));
         }
     }
-
-    // clean up prototypes
-    for (auto& it : msTypes)
-        delete it.first;
-
-    ATH_MSG_INFO(name() << " returns  " << mInert.get()->size()
-                        << " objects (detached volumes)");
+    ATH_MSG_DEBUG(" returns  " << mInert.size() << " objects (detached volumes)");
 
     return mInert;
 }
 
-std::vector<
-    std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>
-Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(
-    const MuonGM::MuonDetectorManager* muonMgr, bool blend) const {
-    std::vector<
-        std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>
-        objs;
 
-    // link to top tree
-    const GeoVPhysVol* top = &(*(muonMgr->getTreeTop(0)));
-    if (!top) {
-        ATH_MSG_FATAL(
-            "Without physical Geovolume, the assembly of the passive material "
-            "becomes difficult");
-        return {};
-    }
+Muon::MuonInertMaterialBuilderImpl::DetachedVolumeVecWithTrfs
+    Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(const PVConstLink top, bool blend) const {
+  
+    DetachedVolumeVecWithTrfs objs{};
+    /// link to top tree
     GeoVolumeCursor vol(top);
     while (!vol.atEnd()) {
-        const GeoVPhysVol* cv = &(*(vol.getVolume()));
+        const GeoVPhysVol* cv = vol.getVolume();
         const GeoLogVol* clv = cv->getLogVol();
         const std::string_view vname = clv->getName();
         if (vname.size() > 7 && vname.substr(vname.size() - 7, 7) ==
@@ -99,54 +73,42 @@ Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(
         } else {
             bool accepted = true;
             if (vname.substr(0, 3) == "BAR" || vname.substr(0, 2) == "BT" ||
-                vname.substr(0, 6) == "EdgeBT" ||
-                vname.substr(0, 6) == "HeadBT")
+                vname.substr(0, 6) == "EdgeBT" || vname.substr(0, 6) == "HeadBT"){
                 accepted = m_buildBT;
-            else if (vname.substr(0, 3) == "ECT")
+            } else if (vname.substr(0, 3) == "ECT") {
                 accepted = m_buildECT;
-            else if (vname.substr(0, 4) == "Feet" ||
-                     (vname.size() > 7 && (vname.substr(3, 4) == "Feet" ||
-                                           vname.substr(4, 4) == "Feet")))
+            } else if (vname.substr(0, 4) == "Feet" ||
+                     (vname.size() > 7 && (vname.substr(3, 4) == "Feet" || vname.substr(4, 4) == "Feet"))) {
                 accepted = m_buildFeets;
-            else if (vname.substr(0, 4) == "Rail")
+            } else if (vname.substr(0, 4) == "Rail") {
                 accepted = m_buildRails > 0;
-            else if (vname.substr(0, 1) == "J")
+            } else if (vname.substr(0, 1) == "J") {
                 accepted = m_buildShields > 0;
             // NSW build inertmaterial for spacer frame, aluminium HUB, NJD disk
             // and A plate
-            else if (vname.substr(0, 3) == "NSW" &&
-                     vname.substr(1, 6) == "Spacer")
+            } else if (vname.substr(0, 3) == "NSW" && vname.substr(1, 6) == "Spacer") {
                 accepted = m_buildNSWInert;
-            else if (vname.substr(0, 3) == "NSW" && vname.substr(1, 2) == "Al")
+            } else if (vname.substr(0, 3) == "NSW" && vname.substr(1, 2) == "Al") {
                 accepted = m_buildNSWInert;
-            else if (vname.substr(0, 3) == "NJD")
+            } else if (vname.substr(0, 3) == "NJD"){
                 accepted = m_buildNSWInert;
-            else if (vname.substr(0, 1) == "A" && vname.substr(1, 5) == "Plate")
+            } else if (vname.substr(0, 1) == "A" && vname.substr(1, 5) == "Plate"){
                 accepted = m_buildNSWInert;
             // strange NSW will be anyway build
-            else if (vname.substr(0, 1) != "J")
+            } else if (vname.substr(0, 1) != "J") {
                 accepted = m_buildSupports > 0;
-
-            if (accepted)
-                ATH_MSG_VERBOSE(name() << " INERT muon object found:" << vname);
-            if (accepted)
-                ATH_MSG_VERBOSE(
-                    " INERT muon object found and accepted :" << vname);
-            if (!accepted)
-                ATH_MSG_VERBOSE(
-                    " INERT muon object found and rejected :" << vname);
-
+            }
             if (!accepted) {
+                ATH_MSG_VERBOSE(" INERT muon object found and rejected :" << vname);
                 vol.next();
                 continue;
             }
+            ATH_MSG_VERBOSE(" INERT muon object found and accepted :" << vname);
 
             if (msg().level() == MSG::VERBOSE)
                 printInfo(cv);
 
-            std::vector<
-                std::pair<const GeoVPhysVol*, std::vector<Amg::Transform3D>>>
-                vols;
+            std::vector<std::pair<const GeoVPhysVol*, std::vector<Amg::Transform3D>>> vols;
 
             bool simpleTree = false;
             if (!cv->getNChildVols()) {
@@ -157,53 +119,43 @@ Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(
                     simpleTree = true;
                 }
             } else {
-                getObjsForTranslation(cv, Trk::s_idTransform, vols);
+                getObjsForTranslation(cv, Amg::Transform3D::Identity(), vols);
             }
 
-            for (unsigned int ish = 0; ish < vols.size(); ish++) {
+            for (auto& [physVol, physVolTrfs]: vols) {
                 std::string protoName(vname);
                 if (!simpleTree)
-                    protoName += (vols[ish].first->getLogVol()->getName());
-                ATH_MSG_VERBOSE(
-                    " check in:"
-                    << protoName << ", made of "
-                    << vols[ish].first->getLogVol()->getMaterial()->getName()
-                    << " x0 "
-                    << vols[ish]
-                           .first->getLogVol()
-                           ->getMaterial()
-                           ->getRadLength()
-                    << "," << vols[ish].first->getLogVol()->getShape()->type());
+                    protoName += physVol->getLogVol()->getName();
+                ATH_MSG_VERBOSE(" check in:"<< protoName << ", made of "
+                    << physVol->getLogVol()->getMaterial()->getName()
+                    << " x0 " << physVol->getLogVol()->getMaterial()->getRadLength()
+                    << "," << physVol->getLogVol()->getShape()->type());
 
                 bool found = false;
                 for (auto& obj : objs) {
-                    if (protoName ==
-                        obj.first
-                            ->name()) {  // found in another branch already ?
+                    if (protoName == obj.first->name()) {  // found in another branch already ?
                         found = true;
-                        if (simpleTree)
+                        if (simpleTree) {
                             obj.second.push_back(vol.getTransform());
-                        else
-                            obj.second.insert(obj.second.end(),
-                                              vols[ish].second.begin(),
-                                              vols[ish].second.end());
+                        } else {
+                            obj.second.insert(obj.second.end(), 
+                                              std::make_move_iterator(physVolTrfs.begin()),
+                                              std::make_move_iterator(physVolTrfs.end()));
+                        }
                     }
                 }
-                if (found)
+                if (found) {
                     continue;
-
+                }
                 // envelope creation & simplification done with
                 // TrkDetDescrGeoModelCnv helpers
-                Trk::TrackingVolume* newType = m_volumeConverter.translate(
-                    vols[ish].first, m_simplify, blend, m_blendLimit);
-                Trk::DetachedTrackingVolume* typeDet = nullptr;
+                auto newType = m_volumeConverter.translate(physVol, m_simplify, blend, m_blendLimit);              
                 if (newType) {
-                    typeDet = new Trk::DetachedTrackingVolume(
-                        newType->volumeName(), newType);
-                    objs.emplace_back(typeDet, vols[ish].second);
+                    const std::string volName = newType->volumeName();
+                    auto typeDet = std::make_unique<Trk::DetachedTrackingVolume>(volName, newType.release());
+                    objs.emplace_back(std::move(typeDet), std::move(physVolTrfs));
                 } else {
-                    ATH_MSG_WARNING(name()
-                                    << " volume not translated: " << vname);
+                    ATH_MSG_WARNING("volume not translated: " << vname);
                 }
             }  // end new object
         }
@@ -214,11 +166,9 @@ Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumeTypes(
     for (auto& obj : objs)
         count += obj.second.size();
 
-    ATH_MSG_INFO(name() << " returns " << objs.size()
-                        << " prototypes, to be cloned into " << count
-                        << " objects");
+    ATH_MSG_DEBUG(" returns " << objs.size()<< " prototypes, to be cloned into " << count << " objects");
 
-    return (objs);
+    return objs;
 }
 
 void Muon::MuonInertMaterialBuilderImpl::printInfo(

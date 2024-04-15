@@ -79,6 +79,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         ThinningTools = thinningTools,
         SkimmingTools = skimmingTools,
         RunSkimmingFirst = not isNotPool,
+        doChronoStat=(flags.Concurrency.NumThreads <= 1),
         OutputLevel = INFO))
 
     # Phase 1 setup
@@ -133,7 +134,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # set up the slimming helper
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    L1CaloSlimmingHelper = SlimmingHelper("L1CaloSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections)
+    L1CaloSlimmingHelper = SlimmingHelper("L1CaloSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     AllVariables = []
     StaticContent = []

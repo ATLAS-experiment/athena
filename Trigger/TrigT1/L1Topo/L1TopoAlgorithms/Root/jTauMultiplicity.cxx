@@ -21,6 +21,8 @@
 #include "L1TopoEvent/TOBArray.h"
 #include "L1TopoEvent/jTauTOBArray.h"
 
+#include "TrigConfData/L1ThrExtraInfo.h"
+
 REGISTER_ALG_TCS(jTauMultiplicity)
 
 using namespace std;
@@ -28,10 +30,7 @@ using namespace std;
 
 TCS::jTauMultiplicity::jTauMultiplicity(const std::string & name) : CountingAlg(name)
 {
-   
-   
    setNumberOutputBits(12); //To-Do: Make this flexible to addapt to the menu. Each counting requires more than one bit
-
 }
 
 TCS::jTauMultiplicity::~jTauMultiplicity(){}
@@ -39,9 +38,8 @@ TCS::jTauMultiplicity::~jTauMultiplicity(){}
 
 TCS::StatusCode
 TCS::jTauMultiplicity::initialize() { 
-
-  m_threshold = getThreshold();
-  m_isoFW_JTAU = isolationFW_JTAU();
+  m_threshold = dynamic_cast<const TrigConf::L1Threshold_jTAU*>(getThreshold());
+  m_extraInfo = m_threshold->getExtraInfo();
 
   // book histograms
   std::string hname_accept = "jTauMultiplicity_accept_EtaPt_"+m_threshold->name();
@@ -67,10 +65,6 @@ TCS::StatusCode
 TCS::jTauMultiplicity::process( const TCS::InputTOBArray & input,
 			       Count & count )
 {
-
-  // Grab the threshold and cast it into the right type
-  const auto& jTAUThr = dynamic_cast<const TrigConf::L1Threshold_jTAU &>(*m_threshold);
-
   // Grab inputs
   const jTauTOBArray & jtaus = dynamic_cast<const jTauTOBArray&>(input);
 
@@ -82,9 +76,9 @@ TCS::jTauMultiplicity::process( const TCS::InputTOBArray & input,
       ++jtau ) {
     
     // Dividing by 4 standing for converting eta from 0.025 to 0.1 granularity as it is defined in the menu as 0.1 gran.
-    bool passed = (*jtau)->Et() > jTAUThr.thrValue100MeV((*jtau)->eta()/4);
+    bool passed = (*jtau)->Et() > m_threshold->thrValue100MeV((*jtau)->eta()/4);
 
-    if ( !isocut(TrigConf::Selection::wpToString(jTAUThr.isolation()), convertIsoToBit(*jtau)) ) {continue;}
+    if (!checkIsolation(*jtau)) continue;
 
     if (passed) {
       counting++; 
@@ -102,15 +96,10 @@ TCS::jTauMultiplicity::process( const TCS::InputTOBArray & input,
 
 }
 
-unsigned int
-TCS::jTauMultiplicity::convertIsoToBit(const TCS::jTauTOB * jtau) const {
-  unsigned int bit = 0;
-
-  // Assign the tightest accept WP as default bit
-  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Loose") ) bit = 1;
-  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Medium") ) bit = 2;
-  if( jtau->EtIso()*1024 < jtau->Et()*m_isoFW_JTAU.at("Tight") ) bit = 3;
-  
-  return bit;
+bool
+TCS::jTauMultiplicity::checkIsolation(const TCS::jTauTOB* jtau) const {
+  if(m_threshold->isolation() == WP::NONE) return true;
+  auto iso_wp = m_extraInfo->isolation(m_threshold->isolation(), jtau->etaDouble());
+  return jtau->EtIso()*1024 < jtau->Et()*iso_wp.isolation_fw();
 }
 

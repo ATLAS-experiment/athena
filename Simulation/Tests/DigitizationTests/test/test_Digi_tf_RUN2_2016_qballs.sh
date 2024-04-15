@@ -3,6 +3,7 @@
 # art-description: Run digitization of an MC16a qball sample with  MC20a geometry and conditions, 25ns pile-up
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 4096
 # art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: mc20a_qball.*.RDO.pool.root

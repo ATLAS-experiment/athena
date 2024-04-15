@@ -4,7 +4,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Package : MMRawDataMonAlg
 // Authors:   M. Biglietti, E. Rossi (Roma Tre)
-// 
 //
 // DESCRIPTION:
 // Subject: MM-->Offline Muon Data Quality
@@ -119,6 +118,7 @@ StatusCode MMRawDataMonAlg::initialize()
 	ATH_CHECK(m_MMContainerKey.initialize());
 	ATH_CHECK(m_meTrkKey.initialize());
       	ATH_CHECK(m_segm_type.initialize());
+	ATH_CHECK(m_mmtpRdoKey.initialize());
 
 	ATH_MSG_DEBUG(" end of initialize " );
 	ATH_MSG_INFO("MMRawDataMonAlg initialization DONE " );
@@ -142,30 +142,42 @@ StatusCode MMRawDataMonAlg::fillHistograms(const EventContext& ctx) const
 
 		//loop in MMPrepDataContainer
 		for(const Muon::MMPrepDataCollection* coll : *mm_container) {
-			for(const Muon::MMPrepData* prd : *coll) {
-				ATH_CHECK(fillMMOverviewVects(prd, overviewPlots, occupancyPlots));
+		  for(const Muon::MMPrepData* prd : *coll) {
+		    ATH_CHECK(fillMMOverviewVects(prd, overviewPlots, occupancyPlots));
 				ATH_CHECK(fillMMSummaryVects(prd, summaryPlots));
 				ATH_CHECK(fillMMHistograms(prd));
-			}
+		  }
 		}
-
+		
 		if(m_do_mm_overview) fillMMOverviewHistograms(overviewPlots, occupancyPlots, lumiblock);
-
+		
 		ATH_CHECK(fillMMSummaryHistograms(summaryPlots));
 		SG::ReadHandle<xAOD::TrackParticleContainer> meTPContainer{m_meTrkKey,ctx};
 		if (!meTPContainer.isValid()) {
-			ATH_MSG_FATAL("Nope. Could not retrieve "<<m_meTrkKey.fullKey());
-			return StatusCode::FAILURE;
+		  ATH_MSG_FATAL("Nope. Could not retrieve "<<m_meTrkKey.fullKey());
+		  return StatusCode::FAILURE;
 		}
 		clusterFromTrack(meTPContainer.cptr(),lumiblock);
 		MMEfficiency(meTPContainer.cptr());
+
+
+		
+		//trigger
+		SG::ReadHandle<xAOD::NSWMMTPRDOContainer> rdos =  SG::ReadHandle<xAOD::NSWMMTPRDOContainer>{m_mmtpRdoKey, ctx};
+		if (not rdos.isValid()) {
+		  ATH_MSG_INFO("NSW MMTP failed. Skipping");
+		  // return StatusCode::SUCCESS;
+		} else fillMMTrigger(rdos.cptr(),lumiblock);
+		
 		SG::ReadHandle<Trk::SegmentCollection> segms(m_segm_type, ctx);
-        if (!segms.isValid()) {
-        	ATH_MSG_ERROR("evtStore() does not contain MM segms Collection with name " << m_segm_type);
-        	return StatusCode::FAILURE;
-        }
-        clusterFromSegments(segms.cptr(),lumiblock);
+
+		if (!segms.isValid()) {
+		  ATH_MSG_INFO("evtStore() does not contain MM segms Collection with name " << m_segm_type);
+		  //		  return StatusCode::FAILURE;
+		}else
+		  clusterFromSegments(segms.cptr(),lumiblock);
 	}
+
 
 	return StatusCode::SUCCESS;
 }
@@ -382,6 +394,106 @@ StatusCode MMRawDataMonAlg::fillMMHistograms( const Muon::MMPrepData* ) const{
   return StatusCode::SUCCESS;
 }
 
+void  MMRawDataMonAlg::fillMMTrigger(const xAOD::NSWMMTPRDOContainer* mmtp, const int lb) const{
+
+    auto lb_tri=Monitored::Scalar<int>("lb_tri",lb);
+
+    for (const auto* rdo : *mmtp) {
+       auto sourceID = rdo->sourceID();
+       auto moduleID = rdo->moduleID();
+       int s_side = (sourceID >> 16) == 107 ? 1:-1;                  // 1 for A; -1 for C
+       auto side = Monitored::Scalar<int>("tri_side", s_side);
+       int iside= s_side>0 ? s_side : 0;			    
+       uint s_sector = (moduleID & 0xF) + 1;                  //0-15 --> 1-16
+       int oct = (int)((s_sector-1)/2.);
+       float sector_pos=(45/180.)*M_PI*oct; //large
+       if(s_sector%2==0 ) sector_pos=(45*oct+22.5)*M_PI/180.; //small
+       if(sector_pos>M_PI) sector_pos=sector_pos-2*M_PI;
+
+       auto trig_sector = Monitored::Scalar<int>("trig_sector", s_sector*s_side);
+
+       auto event_bcid=rdo->ROD_BCID();
+
+       auto bcid=Monitored::Scalar<int>("bcid",event_bcid);
+
+       std::vector<short unsigned int> art_bcids = rdo->art_BCID();
+       std::vector<unsigned char> layers=rdo->art_layer();
+       auto channels=rdo->art_channel();
+
+       fill("mmTrigger", trig_sector, lb_tri);
+
+       for (long unsigned int i=0; i< rdo->art_BCID().size(); i++ ){
+	 auto art_layer=static_cast<unsigned int>(layers[i]);
+	 auto art_channel = Monitored::Scalar<int>("art_channel", channels[i]);
+	 auto art_sector_layer = Monitored::Scalar<int>("art_sector_layer", s_side*8*(s_sector-1)+art_layer);
+
+	 const int rollover=3564;
+	 int art_bc=art_bcids[i];
+	 int relative = art_bc - event_bcid;;
+	 if (relative > rollover / 2) {
+	   relative -= rollover;
+	 } else if (relative <= -rollover / 2) {
+	   relative += rollover;
+	 }
+	 if (relative > (rollover-2048) / 2) {
+	   relative -= (rollover-2048);
+	 }
+	 auto art_deltaBC=Monitored::Scalar<int>("art_deltaBC",relative);
+	 auto art_deltaBC_perSector=Monitored::Scalar<int>("art_deltaBC_"+MM_Side[iside]+"_s"+std::to_string(s_sector),relative);
+	 auto art_bc_mon=Monitored::Scalar<int>("art_bc",art_bc);
+	 
+	 fill("mmTrigger", art_channel, trig_sector, art_sector_layer, art_deltaBC, art_bc_mon, bcid, lb_tri, art_deltaBC_perSector);
+       }
+
+       auto bcids =rdo->trig_BCID();
+       auto dthetas=rdo->trig_dTheta();
+       auto rids=rdo->trig_ROI_rID();
+       auto phiids=rdo->trig_ROI_phiID() ;
+
+
+       std::unordered_map<int, int> NROIPerBC;
+       for (int bc : bcids) 	 NROIPerBC[bc]++;
+       for (const auto& [value, count] : NROIPerBC) {
+	 auto nROIPerBC=Monitored::Scalar<int>("nROIPerBC",count);
+	 fill("mmTrigger_roi", nROIPerBC, trig_sector);
+       }
+
+       int nROI=rdo->trig_BCID().size();
+       for (int i=0; i< nROI; i++ ){
+	 auto phiID = (phiids[i] & 0b11111) * ((phiids[i] >> 5) ? 1 : -1);
+	 int sign = phiID > 0 ? 1 : -1;
+	 auto phi_conv = (phiID-0.5*sign)*(16./31.)*M_PI/180. + sector_pos; 
+	 if(phi_conv> M_PI)phi_conv = phi_conv - 2*M_PI;
+
+	 const float z_ref=7824.46;
+	 const float r_step=(5000-900)/256.;
+	 auto rID = static_cast<unsigned int>(rids[i]);
+	 float r_conv=r_step*rID+900;
+	 float eta_conv=-log(0.5*atan(r_conv/z_ref))*s_side;
+	 //	 auto dTheta=Monitored::Scalar<float>("dTheta_roi",static_cast<float>(dthetas[i])); 
+	 auto deltaBC=   Monitored::Scalar<int>("deltaBC", bcids[i]-event_bcid);
+	 auto deltaBC_perSector=   Monitored::Scalar<int>("deltaBC_"+MM_Side[iside]+"_s"+std::to_string(s_sector), bcids[i]-event_bcid);
+	 auto rid=Monitored::Scalar<int>("rid",rID);
+	 auto phiid=Monitored::Scalar<int>("phiid",phiID);
+	 auto rid_sector=Monitored::Scalar<int>("rid_"+MM_Side[iside]+"_s"+std::to_string(s_sector),rID);
+	 auto phiid_sector=Monitored::Scalar<int>("phiid_"+MM_Side[iside]+"_s"+std::to_string(s_sector),phiID);
+	 auto r_roi=Monitored::Scalar<float>("r_roi",r_conv);
+	 auto phi_roi=Monitored::Scalar<float>("phi_roi",phi_conv);
+	 auto eta_roi=Monitored::Scalar<float>("eta_roi",eta_conv);
+	 auto x_roi_sideA=Monitored::Scalar<float>("x_roi_sideA", r_conv*cos(phi_roi));
+	 auto y_roi_sideA=Monitored::Scalar<float>("y_roi_sideA", r_conv*sin(phi_roi));
+	 auto x_roi_sideC=Monitored::Scalar<float>("x_roi_sideC", r_conv*cos(phi_roi) );
+	 auto y_roi_sideC=Monitored::Scalar<float>("y_roi_sideC", r_conv*sin(phi_roi));
+
+	 fill("mmTrigger_roi", deltaBC, phiid, rid, trig_sector, phi_roi, eta_roi,r_roi, lb_tri, rid_sector, phiid_sector, deltaBC_perSector);
+	 if(s_side>0) fill("mmTrigger_roi", x_roi_sideA, y_roi_sideA);
+	 if(s_side<0) fill("mmTrigger_roi", x_roi_sideC, y_roi_sideC);
+
+     }
+  }
+  
+}
+
 void MMRawDataMonAlg::clusterFromTrack(const xAOD::TrackParticleContainer*  muonContainer, int lb) const
 {
 	MMSummaryHistogramStruct summaryPlots[2][2][4]; // side, multilayer, gas gap
@@ -420,13 +532,12 @@ void MMRawDataMonAlg::clusterFromTrack(const xAOD::TrackParticleContainer*  muon
 			int multi          = m_idHelperSvc->mmIdHelper().multilayer(rot_id);
 			int gap            = m_idHelperSvc->mmIdHelper().gasGap(rot_id);
 			int ch             = m_idHelperSvc->mmIdHelper().channel(rot_id);
-
+			
 			// MMS and MML phi sectors
 			//				int phisec = (stNumber%2==0) ? 1 : 0;
 			int sectorPhi = get_sectorPhi_from_stationPhi_stName(stPhi,stName); // 1->16
 			int PCB = get_PCB_from_channel(ch);
 			int iside = (stEta > 0) ? 1 : 0;
-
 			auto& vects = overviewPlots;
 			auto& thisSect = occupancyPlots[sectorPhi-1][iside];
 			
@@ -487,12 +598,12 @@ void MMRawDataMonAlg::clusterFromTrack(const xAOD::TrackParticleContainer*  muon
 
 				Identifier surfaceId = (trkState)->surface().associatedDetectorElementIdentifier();
 				if(!m_idHelperSvc->isMM(surfaceId)) continue;
-				
+			
 				int trk_stEta = m_idHelperSvc->mmIdHelper().stationEta(surfaceId);
 				int trk_stPhi = m_idHelperSvc->mmIdHelper().stationPhi(surfaceId);
 				int trk_multi = m_idHelperSvc->mmIdHelper().multilayer(surfaceId);
 				int trk_gap   = m_idHelperSvc->mmIdHelper().gasGap(surfaceId);
-				
+
 				if( (trk_stPhi == stPhi) && (trk_stEta == stEta) && (trk_multi == multi) && (trk_gap == gap)) {
 				  double x_trk = trkState->trackParameters()->parameters()[Trk::loc1];
 				  int sectorPhi = get_sectorPhi_from_stationPhi_stName(trk_stPhi,stName); // 1->16
@@ -506,8 +617,10 @@ void MMRawDataMonAlg::clusterFromTrack(const xAOD::TrackParticleContainer*  muon
 					}
 					auto residual_mon = Monitored::Scalar<float>("residual", res_stereo);
 					auto stPhi_mon = Monitored::Scalar<float>("stPhi_mon",sectorPhi);
+
 					fill("mmMonitor", residual_mon, eta_trk, phi_trk, stPhi_mon);
 					int abs_stEta = get_sectorEta_from_stationEta(stEta); // 0 or 1
+
 					if(m_doDetailedHists){
 					  auto& vectors = summaryPlots_full[side][sectorPhi-1][abs_stEta][multi-1][gap-1];
 					  vectors.residuals.push_back(res_stereo);

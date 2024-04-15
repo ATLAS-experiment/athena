@@ -125,6 +125,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Set TTC multiplicity required for the TRT fast-OR trigger
     flags.addFlag('Trigger.TRT.TTCMultiplicity', 4)
 
+    # Path to file with list of masked chips
+    flags.addFlag('Trigger.TRT.maskedChipsFile', 'TrigT1TRT/fastORmaskedChips.json')
+
 
     flags.addFlag('Trigger.doValidationMonitoring', False,
                   help='enable additional validation histograms')

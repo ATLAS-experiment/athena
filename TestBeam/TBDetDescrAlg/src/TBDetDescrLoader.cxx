@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Gaudi Includes
-//#include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
 
@@ -12,7 +11,7 @@
 //TBDetDescr includes
 #include "TBDetDescr/TBElementContainer.h"
 #include "TBDetDescr/TBDetDescrManager.h"
-#include "TBDetDescrAlg/TBDetDescrLoader.h"
+#include "TBDetDescrLoader.h"
 
 // Constructor & destructor
 TBDetDescrLoader::TBDetDescrLoader(const std::string& name, ISvcLocator* pSvcLocator)

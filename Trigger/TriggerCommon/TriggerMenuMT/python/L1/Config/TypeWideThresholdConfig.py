@@ -2,6 +2,7 @@
 
 from collections import OrderedDict as odict
 from dataclasses import dataclass
+from enum import Enum
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -81,6 +82,14 @@ def eFEXfwToFloatConversion_wstot(fw,bitshift):
     decimal = pow(2,bitshift)/fw
     return float("{:.3f}".format(decimal))
 
+def eTAUfwToFloatConversion_bdt(fw):
+    decimal = fw/4096
+    return float("{:.2f}".format(decimal))
+
+def eFEXfwToFloatConversion_minIsoEt(fw):
+    decimal = fw * 100.0 # To MeV units
+    return float("{:.3f}".format(decimal))
+
 # jFEX conversion based on ATR-21235
 def jFEXfloatToFWConversion(decimal):
     fw = round((1-decimal)/decimal)
@@ -103,7 +112,7 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
     if ttype == ThrType.eTAU:
         return getConfig_eTAU(do_eFex_BDT_Tau)
     if ttype == ThrType.cTAU:
-        return getConfig_cTAU()
+        return getConfig_cTAU(do_eFex_BDT_Tau)
     if ttype == ThrType.jTAU:
         return getConfig_jTAU()
     if ttype == ThrType.jJ:
@@ -380,23 +389,24 @@ class L1Config_eTAU:
         confObj = odict()
         confObj["workingPoints"] = odict()
         confObj["workingPoints"]["Loose"] = [
-            odict([("rCore", eFEXfwToFloatConversion(rCore_fw_loose, self.bitshift_rCore)), ("rCore_fw", rCore_fw_loose), 
+            odict([("rCore", eTAUfwToFloatConversion_bdt(rCore_fw_loose) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_loose, self.bitshift_rCore)), ("rCore_fw", rCore_fw_loose), 
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_loose, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_loose),
                   ]), 
         ]
         confObj["workingPoints"]["Medium"] = [
-            odict([("rCore", eFEXfwToFloatConversion(rCore_fw_medium, self.bitshift_rCore)), ("rCore_fw", rCore_fw_medium), 
+            odict([("rCore", eTAUfwToFloatConversion_bdt(rCore_fw_medium) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_medium, self.bitshift_rCore)), ("rCore_fw", rCore_fw_medium), 
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_medium, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_medium), 
                  ]),
         ]
         confObj["workingPoints"]["Tight"] = [
-            odict([("rCore", eFEXfwToFloatConversion(rCore_fw_tight, self.bitshift_rCore)), ("rCore_fw", rCore_fw_tight), 
+            odict([("rCore", eTAUfwToFloatConversion_bdt(rCore_fw_tight) if do_eFex_BDT_Tau else eFEXfwToFloatConversion(rCore_fw_tight, self.bitshift_rCore)), ("rCore_fw", rCore_fw_tight), 
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
                  ]),
         ]
         confObj["ptMinToTopo"] = 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
-        confObj["maxEt"] = 50 # PLACEHOLDER
+        confObj["minIsoEt"] = 0.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
+        confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
         confObj["algoVersion"] = int(do_eFex_BDT_Tau)
 
         # Check that FW values are integers
@@ -418,7 +428,6 @@ class L1Config_eTAU:
 
 getConfig_eTAU = L1Config_eTAU()
 
-
 @dataclass
 class L1Config_cTAU:
     # cTAU isolation parameters (ATR-28621):
@@ -426,32 +435,64 @@ class L1Config_cTAU:
     # jTAUCoreScale: 11 bits (0 - 2047)
     # (jTAU.EtIso + isolation_jTAUCoreScale_fw/1024 * jTAU.Et) / eTAU.Et < isolation_fw/1024 -> pass
 
+    # eTAU rCore/BDT WP: 2 bits (0 - 3)
+    # We can only specify the WP of the rCore/BDT selection, as defined in L1Config_eTAU above
+
+    # eTAU rHad WP: 2 bits (0 - 3)
+    # We can only specify the WP of the rHad selection, as defined in L1Config_eTAU above
+
+    class eTAUWP(Enum):
+        NoSelection = 0
+        Loose = 1
+        Medium = 2
+        Tight = 3
+        # Same values as in the TrigConf::Selection::WP enum
+
+        def rCoreMinCut(self, do_eFex_BDT_Tau=True) -> float:
+            return 0.0 if self is self.NoSelection else getConfig_eTAU(do_eFex_BDT_Tau)['workingPoints'][self.name][0]['rCore']
+        def rHadMinCut(self, do_eFex_BDT_Tau=True) -> float:
+            return 0.0 if self is self.NoSelection else getConfig_eTAU(do_eFex_BDT_Tau)['workingPoints'][self.name][0]['rHad']
+
     # Generic L, M and T WPs, for the cTAUSpare1/2
     isolation_fw_loose: int = 410
     isolation_jTAUCoreScale_fw_loose: int = 0
+    eTAU_rCoreMin_WP_fw_loose: eTAUWP = eTAUWP.NoSelection
+    eTAU_rHadMin_WP_fw_loose: eTAUWP = eTAUWP.NoSelection
 
     isolation_fw_medium: int = 410
     isolation_jTAUCoreScale_fw_medium: int = 0
+    eTAU_rCoreMin_WP_fw_medium: eTAUWP = eTAUWP.NoSelection
+    eTAU_rHadMin_WP_fw_medium: eTAUWP = eTAUWP.NoSelection
 
     isolation_fw_tight: int = 307
     isolation_jTAUCoreScale_fw_tight: int = 0
+    eTAU_rCoreMin_WP_fw_tight: eTAUWP = eTAUWP.NoSelection
+    eTAU_rHadMin_WP_fw_tight: eTAUWP = eTAUWP.NoSelection
 
     # Dedicated M thresholds for the primary items:
     #cTAU12M (Medium12)
     isolation_fw_medium12: int = 358
     isolation_jTAUCoreScale_fw_medium12: int = 0
+    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
+    eTAU_rHadMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
 
     #cTAU20M (Medium20)
     isolation_fw_medium20: int = 358
     isolation_jTAUCoreScale_fw_medium20: int = 0
+    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
+    eTAU_rHadMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
 
     #cTAU30M (Medium30)
     isolation_fw_medium30: int = 358
     isolation_jTAUCoreScale_fw_medium30: int = 0
+    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
+    eTAU_rHadMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
 
     #cTAU35M (Medium35)
     isolation_fw_medium35: int = 358
     isolation_jTAUCoreScale_fw_medium35: int = 0
+    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
+    eTAU_rHadMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
 
     def __post_init__(self):
         # By default, duplicate the configs of isolation_fw_loose and isolation_fw_tight:
@@ -459,15 +500,19 @@ class L1Config_cTAU:
             for wp in wp_list:
                 setattr(self, f'isolation_fw_{wp.lower()}', getattr(self, f'isolation_fw_{default_wp.lower()}'))
                 setattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}', getattr(self, f'isolation_jTAUCoreScale_fw_{default_wp.lower()}'))
+                setattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}', getattr(self, f'eTAU_rCoreMin_WP_fw_{default_wp.lower()}'))
+                setattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}', getattr(self, f'eTAU_rHadMin_WP_fw_{default_wp.lower()}'))
 
-    def __call__(self) -> odict:
+    def __call__(self, do_eFex_BDT_Tau=True) -> odict:
         confObj = odict()
         confObj['workingPoints'] = odict()
 
         for wp in ['Loose', 'Medium', 'Tight', 'Loose12', 'Loose20', 'Loose30', 'Loose35', 'Medium12', 'Medium20', 'Medium30', 'Medium35', 'Tight12', 'Tight20', 'Tight30', 'Tight35']:
             confObj['workingPoints'][wp] = [
                 odict([('isolation', cTAUfwToFlowConversion(getattr(self, f'isolation_fw_{wp.lower()}'))), ('isolation_fw', getattr(self, f'isolation_fw_{wp.lower()}')),
-                       ('isolation_jTAUCoreScale', cTAUfwToFlowConversion(getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'))), ('isolation_jTAUCoreScale_fw', getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'))]),
+                       ('isolation_jTAUCoreScale', cTAUfwToFlowConversion(getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'))), ('isolation_jTAUCoreScale_fw', getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}')),
+                       ('eTAU_rCoreMin', getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').rCoreMinCut(do_eFex_BDT_Tau)), ('eTAU_rCoreMin_WP_fw', getattr(self, f'eTAU_rCoreMin_WP_fw_{wp.lower()}').value),
+                       ('eTAU_rHadMin', getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').rHadMinCut(do_eFex_BDT_Tau)), ('eTAU_rHadMin_WP_fw', getattr(self, f'eTAU_rHadMin_WP_fw_{wp.lower()}').value)]),
             ]
 
         confObj['resolutionMeV'] = 100
@@ -575,15 +620,15 @@ def getConfig_gLJ():
     confObj = odict()
     confObj["ptMinToTopo1"] = 6 
     confObj["ptMinToTopo2"] = 6 
-    confObj["seedThrA"] = 3
-    confObj["seedThrB"] = 3
-    confObj["seedThrC"] = 3 
+    confObj["seedThrA"] = 20
+    confObj["seedThrB"] = 20
+    confObj["seedThrC"] = 20 
     confObj["rhoTowerMinA"] = -9.6 
     confObj["rhoTowerMinB"] = -9.6 
     confObj["rhoTowerMinC"] = -9.6 
-    confObj["rhoTowerMaxA"] = 0.25 
-    confObj["rhoTowerMaxB"] = 0.25 
-    confObj["rhoTowerMaxC"] = 0.25 
+    confObj["rhoTowerMaxA"] = 10 
+    confObj["rhoTowerMaxB"] = 10 
+    confObj["rhoTowerMaxC"] = 10 
     confObj["resolutionMeV"] = 200
 
     # Check that all values are integers in MeV
@@ -628,8 +673,8 @@ def getConfig_jTE():
 
 def getConfig_gXE():
     confObj = odict()
-    confObj["seedThrA"] = 24 
-    confObj["seedThrB"] = 24 
+    confObj["seedThrA"] = 16 
+    confObj["seedThrB"] = 16 
     confObj["seedThrC"] = 24 
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
@@ -642,7 +687,7 @@ def getConfig_gXE():
     confObj["XEJWOJ_a_C"] = 1003 
     confObj["XEJWOJ_b_A"] = 409 
     confObj["XEJWOJ_b_B"] = 409 
-    confObj["XEJWOJ_b_C"] = 409 
+    confObj["XEJWOJ_b_C"] = 0 
     confObj["XEJWOJ_c_A"] = 0 
     confObj["XEJWOJ_c_B"] = 0 
     confObj["XEJWOJ_c_C"] = 0 

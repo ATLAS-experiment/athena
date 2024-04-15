@@ -49,7 +49,11 @@ HistogramFiller* HistogramFillerFactory::create(const HistogramDef& def) {
       return new HistogramFillerProfile(def, histogramProvider);
     }
   } else if (def.type == "TProfile2D") {
-    return new HistogramFiller2DProfile(def, histogramProvider);
+    if (def.kAddBinsDynamically || def.kRebinAxes) {
+        return new HistogramFiller2DProfileRebinable(def, histogramProvider);
+    } else {
+        return new HistogramFiller2DProfile(def, histogramProvider);
+    }
   } else if (def.type == "TEfficiency") {
     return new HistogramFillerEfficiency(def, histogramProvider);
   } else if (def.type == "TTree") {

@@ -15,6 +15,7 @@
 #include "L1TopoInterfaces/AlgFactory.h"
 #include "L1TopoCommon/StatusCode.h"
 #include "L1TopoEvent/GenericTOB.h"
+#include "TrigConfData/L1Threshold.h"
 
 #include <vector>
 #include <string>
@@ -43,10 +44,6 @@ namespace TCS {
 
       void setLegacyMode(bool isLegacyTopo) {m_isLegacyTopo=isLegacyTopo;}
 
-      // l1menu  isolation info
-      void setIsolationFW_CTAU( const std::map<std::string, int>& isolationFW_CTAU, const std::map<std::string, int>& isolationFW_CTAU_jTAUCoreScale ) { m_isolationFW_CTAU = isolationFW_CTAU; m_isolationFW_CTAU_jTAUCoreScale = isolationFW_CTAU_jTAUCoreScale; }
-      void setIsolationFW_JTAU( const std::map<std::string, int>& isolationFW_JTAU ) { m_isolationFW_JTAU = isolationFW_JTAU; }
-
       // accessors
       const std::string & name() const { return m_name; }
       const std::string & className() const { return m_className; }
@@ -67,11 +64,6 @@ namespace TCS {
       bool isCountingAlg() const { return m_algType == COUNT; }
 
       bool isLegacyTopo() const { return m_isLegacyTopo; }
-
-      // l1menu isolation info
-      const std::map<std::string, int>& isolationFW_CTAU() const { return m_isolationFW_CTAU; }
-      const std::map<std::string, int>& isolationFW_CTAU_jTAUCoreScale() const { return m_isolationFW_CTAU_jTAUCoreScale; }
-      const std::map<std::string, int>& isolationFW_JTAU() const { return m_isolationFW_JTAU; }
 
       // Kinematic calculation
       unsigned int calcDeltaPhiBW(const TCS::GenericTOB* tob1, const TCS::GenericTOB* tob2);
@@ -128,9 +120,9 @@ namespace TCS {
 
       void fillHist2D(const std::string & histName, double x, double y);
       
-      bool isocut(const std::string& threshold, const unsigned int bit);
+      bool isocut(const std::string& threshold, const unsigned int bit) const;
       
-      bool isocut(const unsigned int threshold, const unsigned int bit);
+      bool isocut(const unsigned int threshold, const unsigned int bit) const;
    private:
 
       class ConfigurableAlgImpl;
@@ -150,11 +142,6 @@ namespace TCS {
       AlgType  m_algType; // stores type of alg (Sorting or Decision)
 
       bool m_isLegacyTopo;
-
-      std::map<std::string, int> m_isolationFW_CTAU; // FW isolation WPs for cTau
-      std::map<std::string, int> m_isolationFW_CTAU_jTAUCoreScale; // FW isolation WPs for cTau (jTAUCore factor)
-      std::map<std::string, int> m_isolationFW_JTAU; // FW isolation WPs for jTau 
-
    };
 
 std::ostream & operator<<(std::ostream &, const TCS::ConfigurableAlg &);

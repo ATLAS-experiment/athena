@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Script to set $LD_PRELOAD, steered by the following environment variables:
 #
@@ -38,9 +38,11 @@ fi
 #
 if [ "$USETCMALLOC" = "1" ] || [ "$USETCMALLOC" = "true" ] ; then
     if [ -z $TCMALLOCDIR ]; then
-        echo "ERROR: TCMALLOCDIR not defined"
-        exit 1
+        echo "WARNING: TCMALLOCDIR not defined; falling back to stdmalloc."
+        USETCMALLOC=0
     fi
+fi
+if [ "$USETCMALLOC" = "1" ] || [ "$USETCMALLOC" = "true" ] ; then
     # test, if minimal tcmalloc is available. fallback to full library, if not
     if [ "$USETCMALLOCMINIMAL" = "1" ] || [ "$USETCMALLOCMINIMAL" = "true" ] ; then
         if [ ! -e "$TCMALLOCDIR/libtcmalloc_minimal.so" ]; then

@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
 
 from TrigEDMConfig.TriggerEDM import recordable
-from TrigInDetConfig.utils import getFlagsForActiveConfig
+from TrigInDetConfig.utils import cloneFlagsToActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
 
 logging.getLogger().info("Importing %s",__name__)
@@ -52,15 +52,17 @@ def DJDispFragment(flags):
         UseZedPosition     = False)
 
     InViewRoIs = "InViewRoIs"
-    reco = InViewRecoCA("IMDJRoIFTF", RoITool = roiTool, mergeUsingFeature = True, 
-                        InViewRoIs = InViewRoIs,
-                        RequireParentView = False,ViewFallThrough = True)
+    
+    im_alg = CompFactory.EventViewCreatorAlgorithm("IM_DJRoIFTF", mergeUsingFeature = True, RoITool = roiTool, Views = "DJRoIViews", InViewRoIs = InViewRoIs, 
+                                                   RequireParentView = False, ViewFallThrough = True, ViewNodeName="DJRoIInViews")
+
+    reco = InViewRecoCA("DJRoIFTF", im_alg)
     
     acc = ComponentAccumulator()
     reco_seq = parOR('UncTrkrecoSeqDJTrigDispRecoSeq')
     acc.addSequence(reco_seq)
 
-    flagsWithTrk = getFlagsForActiveConfig(flags, flags.Trigger.InDetTracking.DJetLRT.name, log)
+    flagsWithTrk = cloneFlagsToActiveConfig(flags, flags.Trigger.InDetTracking.DJetLRT.input_name)
 
     lrt_algs = trigInDetLRTCfg(flagsWithTrk,
                                flags.Tracking.ActiveConfig.trkTracks_FTF,

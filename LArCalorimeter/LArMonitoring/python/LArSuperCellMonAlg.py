@@ -45,7 +45,8 @@ def LArSuperCellMonConfig(flags, **kwargs):
     cfg.merge(emulateSC_Cfg(flags))
 
     from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
-    cfg.merge(LArRAWtoSuperCellCfg(flags,mask=mask) )
+    # removed 5.3.2024 on Denis suggestion
+    #cfg.merge(LArRAWtoSuperCellCfg(flags,mask=mask) )
 
     # Reco SC:
     #get SC onl-offl mapping from DB    
@@ -83,8 +84,7 @@ def LArSuperCellMonConfig(flags, **kwargs):
     
     #return cfg
     algname='LArSuperCellMonAlg'
-    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO",doSCReco=True)
-
+    lArCellMonAlg=CompFactory.LArSuperCellMonAlg(algname,CaloCellContainerReco="SCell_ET_RECO", CaloCellContainerRef=flags.Trigger.L1.L1CaloSuperCellContainerName, doSCReco=True)
 
     if flags.Input.isMC is False and not flags.Common.isOnline:
        from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
@@ -116,7 +116,7 @@ def LArSuperCellMonConfigCore(helper, algclass, flags, isCosmics=False, isMC=Fal
     LArSuperCellMonAlg.MonGroupName = GroupName
 
     LArSuperCellMonAlg.EnableLumi = False
-    LArSuperCellMonAlg.CaloCellContainer = flags.LAr.DT.ET_IDKey
+    LArSuperCellMonAlg.CaloCellContainer = 'EmulatedSuperCells'
     LArSuperCellMonAlg.CaloCellContainerRef = flags.Trigger.L1.L1CaloSuperCellContainerName
     LArSuperCellMonAlg.RemoveMasked = RemoveMasked
     
@@ -330,6 +330,7 @@ if __name__=='__main__':
     from AthenaCommon.Constants import DEBUG
     from AthenaCommon.Constants import WARNING
     from AthenaConfiguration.Enums import LHCPeriod, BunchStructureSource
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from AthenaCommon.Logging import log
     log.setLevel(DEBUG)
 
@@ -342,7 +343,8 @@ if __name__=='__main__':
     #flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
     #flags.Input.Files = ['../data22_13p6TeV/data22_13p6TeV.00432180.physics_Main.daq.RAW._lb0335._SFO-16._0001.data']
     #flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
-    flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
+    #flags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00439798/data22_13p6TeV.00439798.express_express.daq.RAW/data22_13p6TeV.00439798.express_express.daq.RAW._lb1085._SFO-16._0001.data']
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-11._0001.1']
 
     #flags.Calo.Cell.doPileupOffsetBCIDCorr=True
     flags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
@@ -356,6 +358,7 @@ if __name__=='__main__':
     flags.Exec.OutputLevel=WARNING
     flags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
     #flags.Beam.BunchStructureSource=BunchStructureSource.Lumi
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     import sys
     flags.fillFromArgs(sys.argv[1:])
     flags.lock()
@@ -363,8 +366,8 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     cfg = MainServicesCfg(flags)
-    storeGateSvc = cfg.getService("StoreGateSvc")
-    storeGateSvc.Dump=True
+    #storeGateSvc = cfg.getService("StoreGateSvc")
+    #storeGateSvc.Dump=True
 
     # in case of tier0 workflow:
     #from CaloRec.CaloRecoConfig import CaloRecoCfg

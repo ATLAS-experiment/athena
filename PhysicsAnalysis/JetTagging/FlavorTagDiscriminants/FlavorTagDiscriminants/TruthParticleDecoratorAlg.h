@@ -45,7 +45,7 @@ namespace FlavorTagDiscriminants {
         "Exclusive truth type label of the truth particle"};
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_source_label {
       this, "ftagTruthSourceLabel", "ftagTruthSourceLabel", 
-        "Exclusive truth label for the immedate parent of the truth particle"};
+        "Exclusive truth label for the source of secondary particles"};
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_vertex_index {
       this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "ftagTruth vertex index of the truth particle"};

@@ -397,7 +397,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   if not flags.Tracking.ActiveConfig.doZFinderOnly:
     
     if flags.Detector.GeometryITk:
-      monTool = TrigFastTrackFinderMonitoringArg(flags, name = "trigfasttrackfinder_" + signature, doResMon=False)
+      monTool = TrigFastTrackFinderMonitoringArg(flags, name = signature, doResMon=False)
       from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
       trackSummaryTool = acc.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
     else:
@@ -445,7 +445,6 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         MonTool = monTool,
         Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
         RoIs = RoIs,
-        FixSeedPhi = flags.Trigger.InDetTracking.fixSeedPhi,
         ITkMode = True if flags.Detector.GeometryITk else False,
     )
     

@@ -17,14 +17,12 @@ if __name__ == '__main__':
     executorSet.add(athenaExecutor(name = 'LArNoiseBursts',
                                    skeletonCA='LArCafJobs.LArNoiseSkeleton',
                                    substep = 'e2a', inData = ['ESD',], outData = ['NTUP_LARNOISE','NTUP_HECNOISE']))
-   
     trf = transform(executor = executorSet) 
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)
     trf.parser.add_argument('--inputESDFile', nargs='+',
                             type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='input'),
                             help='Input pool file', group='Reco Files')
-   
     trf.parser.add_argument('--outputNTUP_LARNOISEFile', nargs='+',
                             type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output'),
                             help='Output LAr Noise Burst file', group='Ntuple Files')

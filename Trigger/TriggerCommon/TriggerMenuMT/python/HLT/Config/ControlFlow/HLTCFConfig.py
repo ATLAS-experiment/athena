@@ -251,6 +251,8 @@ def createDataFlow(flags, chains, allDicts):
         lastCFseq = None
         lastDecisions = []
         for nstep, chainStep in enumerate( chain.steps ):
+            #create all sequences CA in all steps to allow data flow connections
+            chainStep.createSequences()
             log.debug("\n************* Start connecting step %d %s for chain %s", nstep+1, chainStep.name, chain.name)           
             if nstep == 0:             
                 filterInput = chain.L1decisions

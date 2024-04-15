@@ -18,21 +18,15 @@ StatusCode Muon::MuonStationBuilderCond::initialize() {
     return Muon::MuonStationBuilderImpl::initialize();
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(
-    const EventContext& ctx,
+Muon::MuonStationBuilderCond::DetachedVolVec
+Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& ctx,
     SG::WriteCondHandle<Trk::TrackingGeometry>& whandle, bool blend) const {
 
-    SG::ReadCondHandle<MuonGM::MuonDetectorManager> readHandle{m_muonMgrReadKey,
-                                                               ctx};
-    if (!readHandle.isValid() || !(*readHandle)) {
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> readHandle{m_muonMgrReadKey, ctx};
+    if (!readHandle.isValid() ) {
         ATH_MSG_FATAL(m_muonMgrReadKey.fullKey() << " is not available.");
-        return {};
+        throw std::runtime_error("No detector manager available");
     }
     whandle.addDependency(readHandle);
-
-    const MuonGM::MuonDetectorManager* muonMgr = readHandle.cptr();
-
-    return Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
-        muonMgr, blend);
+ return Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(readHandle.cptr(), blend);
 }

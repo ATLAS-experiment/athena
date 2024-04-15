@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
 #include "TriggerMatchingTool/IIParticleRetrievalTool.h"
@@ -11,17 +11,20 @@
 #include <vector>
 
 namespace Trig {
-    class NavigationTesterAlg : public AthAlgorithm
+    class NavigationTesterAlg : public AthReentrantAlgorithm
     {
     public:
         NavigationTesterAlg(const std::string &name, ISvcLocator *pSvcLocator);
         ~NavigationTesterAlg() override = default;
 
         StatusCode initialize() override;
-        StatusCode execute() override;
+        StatusCode execute(const EventContext &context) const override;
 
     private:
         PublicToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "", "When enabled read navigation from TDT/off by default"};
+        PublicToolHandle<Trig::TrigDecisionTool> m_tdtRun3{this, "TrigDecisionToolRun3", "", "Use for directly accessing objects"};
+        PublicToolHandle<Trig::TrigDecisionTool> m_tdtRun2{this, "TrigDecisionToolRun2", "", "Use for directly accessing objects"};
+
         ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun2{
             this, "RetrievalToolRun2Nav", "", "The tool configured to use Run 2 format"};
         ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun3{
@@ -40,8 +43,10 @@ namespace Trig {
 
         using CombinationsVector=std::vector<std::vector<const xAOD::IParticle *>>;
         using CombinationsSet=std::set<std::set<const xAOD::IParticle *>>;
+        StatusCode verifyFlatContent(const std::string& chain) const;
         StatusCode verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const;
         StatusCode verifyCombinationsContent(const CombinationsSet& run2, const CombinationsSet& run3, const std::string& chain) const;
+        bool combinationsEmpty(const CombinationsVector& combs) const;
 
     }; //> end class AthAlgorithm
 }

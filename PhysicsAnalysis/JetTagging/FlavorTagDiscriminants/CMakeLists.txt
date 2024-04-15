@@ -32,7 +32,6 @@ set(FTDSource
   Root/GNN.cxx
   Root/GNNTool.cxx
   Root/GNNToolifiers.cxx
-  Root/customGetter.cxx
   Root/FlipTagEnums.cxx
   Root/AssociationEnums.cxx
   Root/VRJetOverlapDecorator.cxx
@@ -44,6 +43,10 @@ set(FTDSource
   Root/VRJetOverlapDecorator.cxx
   Root/FTagDataDependencyNames.cxx
   Root/TrackClassifier.cxx
+  Root/ConstituentsLoader.cxx
+  Root/TracksLoader.cxx
+  Root/IParticlesLoader.cxx
+  Root/CustomGetterUtils.cxx
   Root/StringUtils.cxx
 )
 if (NOT XAOD_STANDALONE)
@@ -74,6 +77,8 @@ atlas_add_library( FlavorTagDiscriminants
     xAODMuon
     xAODEgamma
     ElectronPhotonSelectorToolsLib
+    MuonAnalysisInterfacesLib
+    EgammaAnalysisInterfacesLib
   )
 
 

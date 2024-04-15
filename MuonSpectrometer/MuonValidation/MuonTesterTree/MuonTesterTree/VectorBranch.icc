@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSVECTORBRANCH_IXX
 #define MUONTESTER_MUONSVECTORBRANCH_IXX
-#include <AthenaKernel/getMessageSvc.h>
-#include <GaudiKernel/MsgStream.h>
 
+#include <MuonTesterTree/throwExcept.h>
 namespace MuonVal {
 template <class T> VectorBranch<T>::VectorBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 
@@ -20,8 +19,7 @@ VectorBranch<T>::VectorBranch(MuonTesterTree& tree, const std::string& name, con
 
 template <class T> bool VectorBranch<T>::fill(const EventContext&) {
     if (!initialized()) {
-        MsgStream log(Athena::getMessageSvc(), "VectorBranch()");
-        log << MSG::ERROR << "init()  -- The branch " << name() << " is not initialized yet." << endmsg;
+        ATH_MSG_ERROR("init()  -- The branch " << name() << " is not initialized yet.");
         return false;
     }
     if (!m_updated) m_variable.clear();
@@ -37,7 +35,7 @@ template <class T> T& VectorBranch<T>::operator[](size_t idx) { return get(idx);
 template <class T> T& VectorBranch<T>::get(size_t idx) {
     if (!m_updated) m_variable.clear();
     if (idx >= size()) {
-        if (!initialized()) { throw std::runtime_error(name() + " is not initialized yet"); }
+        if (!initialized()) { THROW_EXCEPTION(name() + " is not initialized yet"); }
         m_variable.resize(idx + 1, getDefault()); 
         m_updated = true;        
     }
@@ -47,13 +45,15 @@ template <class T> T& VectorBranch<T>::get(size_t idx) {
 template <class T> void VectorBranch<T>::push_back(const T& value) {
     if (!m_updated) m_variable.clear();
     // Throw an exception in cases where the branch is not initialized
-    if (!initialized()) { throw std::runtime_error(name() + " is not initialized yet"); }
+    if (!initialized()) { THROW_EXCEPTION(name() + " is not initialized yet"); }
     m_variable.push_back(value);
     m_updated = true;
 }
 template <class T> void VectorBranch<T>::operator+=(const T& value) { push_back(value); }
 template <class T> bool VectorBranch<T>::isUpdated() const { return m_updated; }
 template <class T> const T& VectorBranch<T>::getDefault() const { return m_default; }
-template <class T> void VectorBranch<T>::setDefault(const T& def) { m_default = def; }
+template <class T> void VectorBranch<T>::setDefault(const T& def) { m_default = def; m_hasDefault=true; }
+template <class T> bool VectorBranch<T>::hasDefault() const { return m_hasDefault; }
+
 }
 #endif

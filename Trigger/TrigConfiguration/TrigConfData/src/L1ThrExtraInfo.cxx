@@ -393,7 +393,9 @@ TrigConf::L1ThrExtraInfo_eTAU::load()
 {
    for( auto & x : m_extraInfo ) {
       if( x.first == "maxEt" ){
-         m_maxEt = 1000*x.second.getValue<unsigned int>();
+         m_maxEt = 1000*x.second.getValue<unsigned int>(); // Original in units of GeV
+      } else if( x.first == "minIsoEt" ){
+         m_minIsoEt = lround(1000 * x.second.getValue<float>()); // Original in units of GeV
       } else if( x.first == "ptMinToTopo" ) {
          m_ptMinToTopoMeV = lround(1000 * x.second.getValue<float>());
       } else if( x.first == "workingPoints" ) {
@@ -467,14 +469,19 @@ TrigConf::L1ThrExtraInfo_jTAU::load()
 TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU::WorkingPoints_cTAU( const boost::property_tree::ptree & pt ) {
    m_isDefined = true;
    m_isolation_d    = pt.get_optional<float>("isolation").get_value_or(0);
-   m_isolation_fw   = pt.get_optional<float>("isolation_fw").get_value_or(0);
+   m_isolation_fw   = pt.get_optional<unsigned int>("isolation_fw").get_value_or(0);
    m_isolation_jTAUCoreScale_d    = pt.get_optional<float>("isolation_jTAUCoreScale").get_value_or(0);
-   m_isolation_jTAUCoreScale_fw   = pt.get_optional<float>("isolation_jTAUCoreScale_fw").get_value_or(0);
+   m_isolation_jTAUCoreScale_fw   = pt.get_optional<unsigned int>("isolation_jTAUCoreScale_fw").get_value_or(0);
+   m_eTAU_rCoreMin_WP_d    = pt.get_optional<float>("eTAU_rCoreMin").get_value_or(0);
+   m_eTAU_rCoreMin_WP_fw   = pt.get_optional<unsigned int>("eTAU_rCoreMin_WP_fw").get_value_or(0);
+   m_eTAU_rHadMin_WP_d    = pt.get_optional<float>("eTAU_rHadMin").get_value_or(0);
+   m_eTAU_rHadMin_WP_fw   = pt.get_optional<unsigned int>("eTAU_rHadMin_WP_fw").get_value_or(0);
 }
 
 std::ostream &
 TrigConf::operator<<(std::ostream & os, const TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU & iso) {
    os << "isolation_fw=" << iso.isolation_fw() << ", isolation_jTAUCoreScale_fw=" << iso.isolation_jTAUCoreScale_fw();
+   os << ", eTAU_rCoreMin_WP_fw=" << iso.eTAU_rCoreMin_WP_fw() << ", eTAU_rHadMin_WP_fw=" << iso.eTAU_rHadMin_WP_fw();
    return os;
 }
 

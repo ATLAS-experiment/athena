@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY23.py
@@ -15,20 +15,20 @@ BPHYDerivationName = "BPHY23"
 streamName = "StreamDAOD_BPHY23"
 
 
-def BPHY23Cfg(ConfigFlags):
+def BPHY23Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    isSimulation = flags.Input.isMC
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags))
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
 
     # mass bounds and constants used in the following
@@ -98,10 +98,10 @@ def BPHY23Cfg(ConfigFlags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         DoVertexType           = 1)
 
-    BPHY23VertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))
+    BPHY23VertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))
 
     BPHY23PsiX3872_Jpsi2Trk = CompFactory.Analysis.JpsiPlus2Tracks(
         name                                = "BPHY23PsiX3872_Jpsi2Trk",
@@ -254,7 +254,7 @@ def BPHY23Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY23FourTrack_PsiX3872",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                  = False,
         DoVertexType             = 0)
 
@@ -264,7 +264,7 @@ def BPHY23Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY23FourTrack_Bs0",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                  = False,
         DoVertexType             = 0)
 
@@ -274,7 +274,7 @@ def BPHY23Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY23FourTrack_B0",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                  = False,
         DoVertexType             = 0)
 
@@ -284,7 +284,7 @@ def BPHY23Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY23FourTrack_Upsi2S",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                  = False,
         DoVertexType             = 0)
 
@@ -294,7 +294,7 @@ def BPHY23Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY23ThreeTrack_Zc3900",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                  = False,
         DoVertexType             = 0)
 
@@ -304,7 +304,7 @@ def BPHY23Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY23ThreeTrack_Bpm",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                  = False,
         DoVertexType             = 0)
 
@@ -314,7 +314,7 @@ def BPHY23Cfg(ConfigFlags):
         OutputVtxContainerName   = "BPHY23ThreeTrack_DpmDs",
         PVContainerName          = "PrimaryVertices",
         V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         RefitPV                  = False,
         DoVertexType             = 0)
 
@@ -330,7 +330,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Pimass, Pimass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_Psi")
 
@@ -346,7 +346,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Pimass, Pimass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_X3872")
 
@@ -362,7 +362,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Kmass, Kmass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_Bs0")
 
@@ -378,7 +378,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Kmass, Pimass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_B0Kpi")
 
@@ -394,7 +394,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Pimass, Kmass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_B0piK")
 
@@ -410,7 +410,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Pimass, Pimass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_Upsi2S")
 
@@ -427,7 +427,7 @@ def BPHY23Cfg(ConfigFlags):
         BMassLower                 = Zc_lo,
         BMassUpper                 = Zc_hi,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_Zc3900")
 
@@ -443,7 +443,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Kmass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_Bpm")
 
@@ -457,7 +457,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Pimass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_Ds")
 
@@ -471,7 +471,7 @@ def BPHY23Cfg(ConfigFlags):
         MassInputParticles         = [Mumass, Mumass, Pimass],
         Chi2Cut                    = 15.,
         TrkVertexFitterTool        = BPHY23VertexFit,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Tools                    = V0Tools,
         OutputVtxContainerName     = "BPHY23Revtx_Dpm")
 
@@ -906,7 +906,7 @@ def BPHY23Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY23SlimmingHelper = SlimmingHelper("BPHY23SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY23SlimmingHelper = SlimmingHelper("BPHY23SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     BPHY23_AllVariables  = getDefaultAllVariables()
     BPHY23_StaticContent = []
@@ -945,7 +945,7 @@ def BPHY23Cfg(ConfigFlags):
     BPHY23SlimmingHelper.StaticContent = BPHY23_StaticContent
 
     BPHY23ItemList = BPHY23SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY23", ItemList=BPHY23ItemList, AcceptAlgs=["BPHY23Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY23", AcceptAlgs=["BPHY23Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY23", ItemList=BPHY23ItemList, AcceptAlgs=["BPHY23Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY23", AcceptAlgs=["BPHY23Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

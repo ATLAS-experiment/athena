@@ -10,11 +10,9 @@
 # ====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
-from AthenaCommon.AlgSequence import AthSequencer as LegacyAthSequencer
-
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
-from AthenaCommon.CFElements import seqAND,_append
+from AthenaCommon.CFElements import seqAND, parAND
 from AthenaCommon.Constants import INFO
 
 # IDTIDE Variables to be excluded from AOD
@@ -33,17 +31,6 @@ IDTIDE_AOD_EXCLUDED_AUXDATA = [
     'IDTIDE_unbiased_z0SigmaSinTheta', 'IDTIDE_unbiased_z0SinTheta'
     ]
 
-
-# Main algorithm config
-def parSeq(name, subs=[]):
-    """ parallel sequencer """
-    seq = CompFactory.AthSequencer( name ) if isComponentAccumulatorCfg() else LegacyAthSequencer( name )
-    seq.ModeOR = False
-    seq.Sequential = False
-    seq.StopOverride = True
-    for s in subs:
-        _append(seq, s)
-    return seq
 
 def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     acc = ComponentAccumulator()
@@ -261,7 +248,7 @@ def IDTIDEKernelCfg(flags, StreamName=""):
     #        logger.info('IDPVM decorations to track particles already applied to input file not adding again.')
 
     IDTIDEPreselAlgSequenceName='IDTIDEPreselAlgSequence'
-    acc.addSequence(parSeq(IDTIDEPreselAlgSequenceName),
+    acc.addSequence(parAND(IDTIDEPreselAlgSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
     from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPrepDataToxAODCfg
@@ -269,7 +256,7 @@ def IDTIDEKernelCfg(flags, StreamName=""):
               sequenceName=IDTIDEPreselAlgSequenceName)
 
     IDTIDEPostProcSequenceName='IDTIDEPostProcSequence'
-    acc.addSequence(parSeq(IDTIDEPostProcSequenceName),
+    acc.addSequence(parAND(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
     from DerivationFrameworkInDet.InDetToolsConfig import (
@@ -290,7 +277,7 @@ def ITkTIDEKernelCfg(flags, StreamName=""):
     acc.merge(IDTIDEKernelCommonCfg(flags), sequenceName=IDTIDEPreselSequenceName)
 
     IDTIDEPreselAlgSequenceName='IDTIDEPreselAlgSequence'
-    acc.addSequence(parSeq(IDTIDEPreselAlgSequenceName),
+    acc.addSequence(parAND(IDTIDEPreselAlgSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
     from InDetConfig.InDetPrepRawDataToxAODConfig import ITkPrepDataToxAODCfg
@@ -298,7 +285,7 @@ def ITkTIDEKernelCfg(flags, StreamName=""):
               sequenceName=IDTIDEPreselAlgSequenceName)
 
     IDTIDEPostProcSequenceName='IDTIDEPostProcSequence'
-    acc.addSequence(parSeq(IDTIDEPostProcSequenceName),
+    acc.addSequence(parAND(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
     from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
@@ -329,7 +316,7 @@ def IDTIDECfg(flags):
     IDTIDESlimmingHelper = SlimmingHelper(
         "IDTIDESlimmingHelper",
         NamesAndTypes=flags.Input.TypedCollections,
-        ConfigFlags=flags)
+        flags=flags)
 
     AllVariables = []
     StaticContent = []

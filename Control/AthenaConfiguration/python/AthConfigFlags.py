@@ -3,6 +3,7 @@
 from copy import copy, deepcopy
 from difflib import get_close_matches
 from enum import EnumMeta
+import glob
 import importlib
 from AthenaCommon.Logging import logging
 from PyUtils.moduleExists import moduleExists
@@ -172,14 +173,17 @@ class FlagAddress(object):
 
     def __iter__(self):
         self._flags.loadAllDynamicFlags()
+        rmap = self._flags._renamed_map()
         used = set()
         for flag in self._flags._flagdict.keys():
             if flag.startswith(self._name.rstrip('.') + '.'):
-                ntrim = len(self._name) + 1
-                remaining = flag[ntrim:].split('.',1)[0]
-                if remaining not in used:
-                    yield remaining
-                    used.add(remaining)
+                for newflag in rmap[flag]:
+                    ntrim = len(self._name) + 1
+                    n_dots_in = flag[:ntrim].count('.')
+                    remaining = newflag.split('.')[n_dots_in]
+                    if remaining not in used:
+                        yield remaining
+                        used.add(remaining)
 
     def _subflag_itr(self):
         """Subflag iterator specialized for this address
@@ -192,7 +196,8 @@ class FlagAddress(object):
             if key.startswith(address.rstrip('.') + '.'):
                 ntrim = len(address) + 1
                 remaining = key[ntrim:]
-                yield rename[key], getattr(self, remaining)
+                for r in rename[key]:
+                    yield r, getattr(self, remaining)
 
     def asdict(self):
         """Convert to a python dictionary
@@ -235,9 +240,7 @@ class AthConfigFlags(object):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
 
     def _calculateHash(self):
-        fmap = self._renamed_map()
-        flags = ((fmap[x], y) for x, y in self._flagdict.items() if fmap[x])
-        return hash(frozenset((x, repr(y)) for x, y in flags))
+        return hash( (frozenset({k: v for k, v in self._renames.items() if k != v}), id(self._flagdict)) )
 
     def __getattr__(self, name):
         # Avoid infinite recursion looking up our own attributes
@@ -290,12 +293,14 @@ class AthConfigFlags(object):
 
     def __iter__(self):
         self.loadAllDynamicFlags()
+        rmap = self._renamed_map()
         used = set()
         for flag in self._flagdict:
-            first = flag.split('.',1)[0]
-            if first not in used:
-                yield first
-                used.add(first)
+            for r in rmap[flag]:
+                first = r.split('.',1)[0]
+                if first not in used:
+                    yield first
+                    used.add(first)
 
     def asdict(self):
         """Convert to a python dictionary
@@ -308,15 +313,30 @@ class AthConfigFlags(object):
 
 
     def _renamed_map(self):
+        """mapping from the old names to the new names
+
+        This is the inverse of _renamed, which maps new names to old
+        names
+        
+        Returns a list of the new names corresponding to the old names
+        (since cloneAndReplace may or may not disable access to the old name,
+        it is possible that an old name renames to multiple new names)
+        """        
+        revmap = {}
+        
+        for new, old in self._renames.items():
+            if old not in revmap:
+                revmap[old] = [ new ]
+            else:
+                revmap[old] += [ new ]
+        
         def rename(key):
-            for new, old in self._renames.items():
+            for old, newlist in revmap.items():
                 if key.startswith(old + '.'):
                     stem = key.removeprefix(old)
-                    if not new:
-                        return ''
-                    else:
-                        return f'{new}{stem}'
-            return key
+                    return [ f'{new}{stem}' if new else '' for new in newlist ]
+            return [ key ]
+        
         return {x:rename(x) for x in self._flagdict.keys()}
 
     def _subflag_itr(self):
@@ -326,18 +346,19 @@ class AthConfigFlags(object):
         """
         self.loadAllDynamicFlags()
 
-        for old, new in self._renamed_map().items():
-            # Lots of modules are missing in analysis releases. I
-            # tried to prevent imports using the _addFlagsCategory
-            # function which checks if some module exists, but this
-            # turned in to quite a rabbit hole. Catching and ignoring
-            # the missing module exception seems to work, even if it's
-            # not pretty.
-            try:
-                yield new, getattr(self, old)
-            except ModuleNotFoundError as err:
-                _msg.debug(f'missing module: {err}')
-                pass
+        for old, newlist in self._renamed_map().items():
+            for new in newlist:
+                # Lots of modules are missing in analysis releases. I
+                # tried to prevent imports using the _addFlagsCategory
+                # function which checks if some module exists, but this
+                # turned in to quite a rabbit hole. Catching and ignoring
+                # the missing module exception seems to work, even if it's
+                # not pretty.
+                try:
+                    yield new, getattr(self, old)
+                except ModuleNotFoundError as err:
+                    _msg.debug(f'missing module: {err}')
+                    pass
 
     def addFlag(self, name, setDef, type=None, help=None):
         self._tryModify()
@@ -404,7 +425,9 @@ class AthConfigFlags(object):
             return True
 
         if name in self._renames:
-            return self.hasCategory(self._renames[name])
+            re_name = self._renames[name]
+            if re_name != name:
+                return self.hasCategory(re_name)
         
         # If not found do search through all keys.
         # TODO: could be improved by using a trie for _flagdict
@@ -420,7 +443,7 @@ class AthConfigFlags(object):
         return False
 
     def hasFlag(self, name):
-        return name in self._flagdict
+        return name in [y for x in self._renamed_map().values() for y in x]
 
     def _set(self,name,value):
         self._tryModify()
@@ -465,6 +488,7 @@ class AthConfigFlags(object):
         cln = AthConfigFlags()
         cln._flagdict = deepcopy(self._flagdict)
         cln._dynaflags = copy(self._dynaflags)
+        cln._renames = deepcopy(self._renames)
         return cln
 
 
@@ -476,7 +500,7 @@ class AthConfigFlags(object):
         newflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon')
         """
 
-        _msg.info("cloning flags and replacing %s by %s", subsetToReplace, replacementSubset)
+        _msg.debug("cloning flags and replacing %s by %s", subsetToReplace, replacementSubset)
 
         self._loadDynaFlags( subsetToReplace )
         self._loadDynaFlags( replacementSubset )
@@ -486,14 +510,35 @@ class AthConfigFlags(object):
 
         #Sanity check: Don't replace a by a
         if (subsetToReplace == replacementSubset):
-            raise RuntimeError("Can not replace flags {} with themselves".format(subsetToReplace))
+            raise RuntimeError(f'Can not replace flags {subsetToReplace} with themselves')
+
+        # protect against subsequent remaps within remaps: clone = flags.cloneAndReplace('Y', 'X').cloneAndReplace('X.b', 'X.a')
+        for alias,src in self._renames.items():
+            if src == "": continue
+            if src+"." in subsetToReplace:
+                raise RuntimeError(f'Can not replace flags {subsetToReplace} by {replacementSubset} because of already present replacement of {alias} by {src}')
 
 
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
-        newFlags._renames[subsetToReplace] = replacementSubset
+        
+        if replacementSubset in newFlags._renames: #and newFlags._renames[replacementSubset]:
+            newFlags._renames[subsetToReplace] = newFlags._renames[replacementSubset]
+        else:
+            newFlags._renames[subsetToReplace] = replacementSubset
+        
         if not keepOriginal:
-            newFlags._renames[replacementSubset] = "" # block access to original flags
+            if replacementSubset not in newFlags._renames or newFlags._renames[replacementSubset] == replacementSubset:
+                newFlags._renames[replacementSubset] = "" # block access to original flags
+            else:
+                del newFlags._renames[replacementSubset]
+                #If replacementSubset was a "pure renaming" of another set of flags,
+                #the original set of flags gets propagated down to its potential further renamings:
+                #no need to worry about maintaining the intermediate steps in the renaming.
+        else:
+            if replacementSubset not in newFlags._renames:
+                newFlags._renames[replacementSubset] = replacementSubset
+                #For _renamed_map to know that these flags still work.
         newFlags._hash = None
         return newFlags
 
@@ -576,7 +621,7 @@ class AthConfigFlags(object):
         parser.add_argument("-i","--interactive", default=None, choices=["init","run"], help="Drop into interactive mode at <stage>")
         parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
         parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
-        parser.add_argument("--filesInput", default=None,nargs='+', help="Input file(s), supports * wildcard")
+        parser.add_argument("--filesInput", type=str, default=None, help="Input file(s), comma-separated list with wildcards")
         parser.add_argument("-l", "--loglevel", default=None, choices=["ALL","VERBOSE","DEBUG","INFO","WARNING","ERROR","FATAL"], help="logging level")
         parser.add_argument("--config-only", metavar='FILE', type=str, default=None, const=True, nargs='?', help="Stop after configuration and optionally pickle configuration to FILE (may not be respected by all diver scripts)")
         parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
@@ -585,7 +630,7 @@ class AthConfigFlags(object):
         parser.add_argument("--mtes", type=bool, default=None, help="Run multi-threaded event service")
         parser.add_argument("--mtes-channel", type=str, default=None, help="For multi-threaded event service: the name of communication channel between athena and pilot")
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
-        parser.add_argument("--pmon", type=str.lower, default=None, choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
+        parser.add_argument("--perfmon", type=str.lower, nargs='?', const='fastmonmt', choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
         parser.add_argument("--profile-python", type=str, default=None, metavar='FILE', help='profile python code, dump in %(metavar)s. End filename with .txt for quick summary only')
         parser.add_argument("--tracelevel", type=int, default=None, help='Trace python configuration code as it is executed. Verbosity is reduced according to the paramter.'\
                             ' 0: print everying, 1: exclude System and ROOT libraries, 2: exclude also GaudConfig2, 3: exclude ComponentAccumulator internals.'\
@@ -675,96 +720,73 @@ class AthConfigFlags(object):
         # remove the leftovers from the argList ... for later use in the do_help
         argList = [a for a in argList if a not in leftover]
 
-        #First, handle athena.py-like arguments:
+        # First, handle athena.py-like arguments (if available in parser):
+        def arg_set(dest):
+            """Check if dest is available in parser and has been set"""
+            return vars(args).get(dest, None) is not None
 
-        if args.debug is not None:
-            from AthenaCommon.Debugging import DbgStage
-            if args.debug not in DbgStage.allowed_values:
-                raise ValueError("Unknown debug stage, allowed values {}".format(DbgStage.allowed_values))
+        if arg_set('debug'):
             self.Exec.DebugStage=args.debug
 
-        if args.evtMax is not None:
+        if arg_set('evtMax'):
             self.Exec.MaxEvents=args.evtMax
 
-        if args.interactive is not None:
-            if args.interactive not in ("init","run"):
-                raise ValueError("Unknown value for interactive, allowed values are 'init' and 'run'")
+        if arg_set('interactive'):
             self.Exec.Interactive=args.interactive
 
-        if args.skipEvents is not None:
+        if arg_set('skipEvents'):
             self.Exec.SkipEvents=args.skipEvents
 
-        if args.filesInput is not None:
+        if arg_set('filesInput'):
             self.Input.Files = [] # remove generic
-            for f in args.filesInput:
-                #because of argparse used with nargs+, fileInput will also swallow arguments meant to be flags
-                if "=" in f:
-                    leftover.append(f)
-                else:
-                    for ffile in f.split(","):
-                        if '*' in ffile: # handle wildcard
-                            import glob
-                            self.Input.Files += glob.glob(ffile)
-                        else:
-                            self.Input.Files += [ffile]
+            for f in args.filesInput.split(","):
+                found = glob.glob(f)
+                # if not found, add string directly
+                self.Input.Files += found if found else [f]
 
-        if args.loglevel is not None:
+        if arg_set('loglevel'):
             from AthenaCommon import Constants
-            if hasattr(Constants,args.loglevel):
-                self.Exec.OutputLevel=getattr(Constants,args.loglevel)
-            else:
-                raise ValueError("Unknown log-level, allowed values are ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, FATAL")
+            self.Exec.OutputLevel = getattr(Constants, args.loglevel)
 
-        if args.config_only is not None:
+        if arg_set('config_only'):
             from os import environ
             environ["PICKLECAFILE"] = "" if args.config_only is True else args.config_only
 
-        if args.threads is not None:
+        if arg_set('threads'):
             self.Concurrency.NumThreads = args.threads
             #Work-around a possible inconsistency of NumThreads and NumConcurrentEvents that may
-            #occur when these values are set by the transforms and overwritten by --athenaopts .. 
+            #occur when these values are set by the transforms and overwritten by --athenaopts ..
             #See also ATEAM-907
             if args.concurrent_events is None and self.Concurrency.NumConcurrentEvents==0:
                 self.Concurrency.NumConcurrentEvents = args.threads
 
-
-        if args.concurrent_events is not None:
+        if arg_set('concurrent_events'):
             self.Concurrency.NumConcurrentEvents = args.concurrent_events
 
-        if args.nprocs is not None:
+        if arg_set('nprocs'):
             self.Concurrency.NumProcs = args.nprocs
 
-        if args.pmon is not None:
-            self._loadDynaFlags("PerfMon")
-            dispatch = {'fastmonmt' : 'PerfMon.doFastMonMT',
-                        'fullmonmt' : 'PerfMon.doFullMonMT'}
-            self._set(dispatch[args.pmon.lower()], True)
+        if arg_set('perfmon'):
+            from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+            setPerfmonFlagsFromRunArgs(self, args)
 
-        if args.mtes is not None:
+        if arg_set('mtes'):
             self.Exec.MTEventService = args.mtes
 
-        if args.mtes_channel is not None:
+        if arg_set('mtes_channel'):
             self.Exec.MTEventServiceChannel = args.mtes_channel
 
-        if args.profile_python is not None:
-            import cProfile, atexit
+        if arg_set('profile_python'):
+            from AthenaCommon.Debugging import dumpPythonProfile
+            import atexit, cProfile, functools
             cProfile._athena_python_profiler = cProfile.Profile()
             cProfile._athena_python_profiler.enable()
-            #Save stats to file at exit
-            def stop_prof():
-                if args.profile_python.endswith(".txt"):
-                     import pstats
-                     pstats.Stats(cProfile._athena_python_profiler,
-                                  stream=open(args.profile_python, 'w')).strip_dirs().sort_stats("time").print_stats()
-                     _msg.info("Python profile summary stored in %s", args.profile_python)
-                else:
-                     cProfile._athena_python_profiler.dump_stats(args.profile_python)
-                     _msg.info("Python profile stored in %s", args.profile_python)
 
-            atexit.register(stop_prof)
+            # Save stats to file at exit
+            atexit.register(functools.partial(dumpPythonProfile, args.profile_python))
 
 
-        #All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
+        # All remaining arguments are assumed to be key=value pairs to set arbitrary flags:
         for arg in leftover:
             if arg=='--':
                 argList += ["---"]

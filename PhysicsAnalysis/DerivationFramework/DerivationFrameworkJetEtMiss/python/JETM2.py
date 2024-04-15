@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM2.py
@@ -9,15 +9,15 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM2KernelCfg(ConfigFlags, name='JETM2Kernel', **kwargs):
+def JETM2KernelCfg(flags, name='JETM2Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for JETM2"""
     acc = ComponentAccumulator()
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         # thinning tools: 
         truthThinningTool = CompFactory.DerivationFramework.MenuTruthThinning(name               = "JETM2TruthThinning",
                                                                               StreamName         = kwargs['StreamName'],
@@ -32,15 +32,15 @@ def JETM2KernelCfg(ConfigFlags, name='JETM2Kernel', **kwargs):
         acc.addPublicTool(truthThinningTool)
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, ThinningTools = [truthThinningTool] if ConfigFlags.Input.isMC else []))
+    acc.addEventAlgo(DerivationKernel(name, ThinningTools = [truthThinningTool] if flags.Input.isMC else []))
 
     # Extra jet content:
-    acc.merge(JETM2ExtraContentCfg(ConfigFlags))
+    acc.merge(JETM2ExtraContentCfg(flags))
 
     return acc
 
 
-def JETM2ExtraContentCfg(ConfigFlags):
+def JETM2ExtraContentCfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -55,7 +55,7 @@ def JETM2ExtraContentCfg(ConfigFlags):
     # CHS R = 0.4 UFO jets
     #=======================================
 
-    algs = getInputAlgs(cst.UFO, flags=ConfigFlags)
+    algs = getInputAlgs(cst.UFO, flags=flags)
     for alg in algs:
         if isinstance(alg, ComponentAccumulator):
             acc.merge(alg)
@@ -70,13 +70,13 @@ def JETM2ExtraContentCfg(ConfigFlags):
     #=======================================
     # R = 1.0 truth WZ Dressed jets
     #=======================================
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         jetList += [AntiKt10TruthDressedWZSoftDrop]
 
     jetInternalFlags.isRecoJob = True
 
     for jd in jetList:
-        acc.merge(JetRecCfg(ConfigFlags,jd))
+        acc.merge(JetRecCfg(flags,jd))
 
     #=======================================
     # UFO CSSK event shape 
@@ -90,16 +90,16 @@ def JETM2ExtraContentCfg(ConfigFlags):
     # More detailed truth information
     #=======================================
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTopQuarkAndDownstreamParticlesCfg, AddTruthCollectionNavigationDecorationsCfg
-        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(ConfigFlags))
-        acc.merge(AddTruthCollectionNavigationDecorationsCfg(ConfigFlags, TruthCollections=["TruthTopQuarkWithDecayParticles","TruthBosonsWithDecayParticles"],prefix='Top'))
+        acc.merge(AddTopQuarkAndDownstreamParticlesCfg(flags))
+        acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=["TruthTopQuarkWithDecayParticles","TruthBosonsWithDecayParticles"],prefix='Top'))
 
 
     return acc
 
 
-def JETM2Cfg(ConfigFlags):
+def JETM2Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -108,10 +108,10 @@ def JETM2Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM2TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    JETM2TriggerListsHelper = TriggerListsHelper(flags)
 
     # Skimming, thinning, augmentation, extra content
-    acc.merge(JETM2KernelCfg(ConfigFlags, name="JETM2Kernel", StreamName = 'StreamDAOD_JETM2', TriggerListsHelper = JETM2TriggerListsHelper))
+    acc.merge(JETM2KernelCfg(flags, name="JETM2Kernel", StreamName = 'StreamDAOD_JETM2', TriggerListsHelper = JETM2TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -120,7 +120,7 @@ def JETM2Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM2SlimmingHelper = SlimmingHelper("JETM2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    JETM2SlimmingHelper = SlimmingHelper("JETM2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     JETM2SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
@@ -178,7 +178,7 @@ def JETM2Cfg(ConfigFlags):
     addOriginCorrectedClustersToSlimmingTool(JETM2SlimmingHelper,writeLC=True,writeEM=True)
 
     # Truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM2SlimmingHelper)
@@ -218,8 +218,8 @@ def JETM2Cfg(ConfigFlags):
 
     # Output stream
     JETM2ItemList = JETM2SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_JETM2", ItemList=JETM2ItemList, AcceptAlgs=["JETM2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_JETM2", AcceptAlgs=["JETM2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_JETM2", ItemList=JETM2ItemList, AcceptAlgs=["JETM2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM2", AcceptAlgs=["JETM2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

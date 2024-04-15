@@ -56,7 +56,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
         TDirectoryFile* rodDir = static_cast<TDirectoryFile*>(rodKey->ReadObj());
         TIter modItr = getModuleIterator(rodDir);
         const TString rodName(rodKey->GetName());
-        
+        printf("%s\n",rodName.Data());
         TKey* modKey;
         while ((modKey=static_cast<TKey*>(modItr()))) {
             const TString modName(modKey->GetName());
@@ -68,7 +68,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                 continue;
             }    
             
-            printf("%s -> %s\n",rodName.Data(),modName.Data());
+            printf("  -> %s\n",modName.Data());
             
             //creates arrays for the Tgraph
             std::array<std::array<float, m_ncharge>, m_nFE> totArrI{};
@@ -150,6 +150,8 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
             
             // loop over FE and create a graph for fitting            
             for(unsigned int FE = 0; FE < m_nFE; FE++) {
+
+                TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                 
                 std::vector<float> v_Q;
                 std::vector<float> v_Qerr;
@@ -196,10 +198,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     pixNormalParamsQuality = getParams_quality(functnormal.get()   );
                     pixSigParamsQuality    = getParams_quality(functnormalsig.get());
                     
-                    
                     if(m_savefile){
-                        
-                        TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                         
                         m_wFile->cd();
                         if( !m_wFile->Get(rodName+"/"+modName+"/TOTfits/"+subdir) ){
@@ -222,7 +221,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     graphnormal.reset();
                     graphsig.reset();
                     
-                }while(reFit_normalPix(pixNormalParams, v_Q, v_Qerr, v_TOT, v_TOTerr, v_TOTsig, v_TOTsigerr)     );
+                }while(reFit_normalPix(pixNormalParams, v_Q, v_Qerr, v_TOT, v_TOTerr, v_TOTsig, v_TOTsigerr, FE )     );
                 
                 
                 // Since we have modified the vector size we need to clear it and refill it for the long and gange pixels
@@ -246,7 +245,6 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     graflong  ->Fit(functlong.get() ,"MRQ");
                     
                     pixLongParams = getParams(functlong.get() ,3 );
-                    
                     pixLongParamsQuality = getParams_quality(functlong.get() );
                     
                     //delete the TF1                
@@ -280,9 +278,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                 }
                 
             } // End of FE loop
-            
         } // End of MOD
-        
     } // End of ROD
     
     // remove from memory
@@ -299,10 +295,12 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
 
 
 
-bool Calib::reFit_normalPix(std::vector<float> &params, std::vector<float> &q, std::vector<float> &qerr, std::vector<float> &tot, std::vector<float> &toterr, std::vector<float> &sig, std::vector<float> &sigerr){
+bool Calib::reFit_normalPix(std::vector<float> &params, std::vector<float> &q, std::vector<float> &qerr, std::vector<float> &tot, std::vector<float> &toterr, std::vector<float> &sig, std::vector<float> &sigerr, const unsigned int fe){
     
-    float vecFit_size = q.size() - m_qthresh;
-    float stopFit = (m_ncharge - m_qthresh)/2.0;
+    float vecFit_size = q.size()+1;
+    // float vecFit_size = q.size() - m_qthresh;
+    float stopFit = m_ncharge/2.0;
+    // float stopFit = (m_ncharge - m_qthresh)/2.0;
     if(vecFit_size < stopFit) {
 
         // Default values for the fit
@@ -335,7 +333,7 @@ bool Calib::reFit_normalPix(std::vector<float> &params, std::vector<float> &q, s
     if(*itr_max > m_chi_error){
         
         size_t n_max = std::distance(v_discrepancy.begin(), itr_max);
-        
+        printf("FE %02u Refitted, removing charge %5.0f with chi_error %7.5f\n", fe ,q.at(n_max),*itr_max);
         q.erase(q.begin()+n_max);
         qerr.erase(qerr.begin()+n_max);
         tot.erase(tot.begin()+n_max);
@@ -383,6 +381,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
     TIter rodItr = getRodIterator(timFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
+        const TString rodName(rodKey->GetName());
         TDirectoryFile* rodDir = static_cast<TDirectoryFile*>(rodKey->ReadObj());
         TKey* modKey;
         TIter modItr=getModuleIterator(rodDir);
@@ -432,7 +431,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
             int modID = pm.getID(std::string(modName));
             auto itr = map_info.find( modID );
             if (itr == map_info.end()) {
-                printf("Mod ID not found. Creating it -----> Inform Pixel Offline Software Experts... \n");
+                printf("Calib::fillTiming: ERROR - Mod ID= %16s not found. Creating it -----> Inform Pixel Offline Software Experts... \n",std::string(modName).c_str());
                 
                 map_info[modID] = std::vector<std::unique_ptr<CalibFrontEndInfo>> ();
                 
@@ -460,23 +459,39 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                             map_info[modID].at(FE)->set_GangedIntime(tim_mean);
                         }
                         else{
-                            printf("Error - Bad pixel in Calib::FillThresholds\n");
+                            printf("Error - Bad pixel in Calib::fillTiming\n");
                             return false;
                         }
-                        
-                        //map_info[modID].at(FE)->printVals();
-                        
                     }
                 }                 
-                
                 
             }
             else{
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
+                    TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                     for(unsigned int pixel=0; pixel<3; pixel++){
                         
                         // Saving information for the calibration
                         int tim_mean = histogramsTIM.at(FE).at(pixel)->GetMean();
+
+                        if(m_savefile){
+                            
+                            m_wFile->cd();
+                            if( !m_wFile->Get(rodName+"/"+modName+"/Thresholds/"+subdir) ){
+                                m_wFile->mkdir(rodName+"/"+modName+"/Thresholds/"+subdir,rodName);
+                            }
+
+                            m_wFile->cd(rodName+"/"+modName+"/Thresholds/"+subdir);
+
+                            histogramsTIM.at(FE).at(pixel)->SetTitle("Intime;Pixel intime;Counts");
+
+                            std::string type = "";
+                            if(pixel == 0) type = "normal";
+                            else if(pixel == 1) type = "long";
+                            else if(pixel == 2) type = "ganged";
+                            
+                            histogramsTIM.at(FE).at(pixel)->Write(TString("intime_"+type).Data(), TObject::kWriteDelete);
+                        }
                         
                         // Reset histograms for next front end
                         histogramsTIM.at(FE).at(pixel)->Reset("ICESM");
@@ -491,7 +506,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                             (itr->second).at(FE)->set_GangedIntime(tim_mean);
                         }
                         else{
-                            printf("Error - Bad pixel in Calib::FillThresholds\n");
+                            printf("Error - Bad pixel in Calib::fillTiming\n");
                             return false;
                         }
                     } // End of pixel type loop
@@ -552,6 +567,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
     TIter rodItr = getRodIterator(riThrFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
+        const TString rodName(rodKey->GetName());
         TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
         TKey* modKey;
         TIter modItr=getModuleIterator(rodDir);
@@ -609,12 +625,14 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
             
             int modID = pm.getID(std::string(modName));
             auto itr = map_info.find( modID );
+
+            // Map should be empty and therefore we need to create the key - if the key is repeated then it will throw an error
             if (itr == map_info.end()) {
 
                 map_info[modID] = std::vector<std::unique_ptr<CalibFrontEndInfo>> ();
                 
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
-                    
+                    TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                     map_info[modID].push_back( std::unique_ptr<CalibFrontEndInfo>() );
                     std::unique_ptr<CalibFrontEndInfo> p = std::make_unique<CalibFrontEndInfo>(modID,FE,std::string(modName),std::string(rodKey->GetName()));
                     map_info[modID].at(FE) = std::move(p);
@@ -625,28 +643,49 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                         int thr_mean = histogramsTHR.at(FE).at(pixel)->GetMean();
                         int thr_rms  = histogramsTHR.at(FE).at(pixel)->GetRMS();
                         int sig_mean = histogramsSIG.at(FE).at(pixel)->GetMean();
+
+                        if(m_savefile){
+                            
+                            m_wFile->cd();
+                            if( !m_wFile->Get(rodName+"/"+modName+"/Thresholds/"+subdir) ){
+                                m_wFile->mkdir(rodName+"/"+modName+"/Thresholds/"+subdir,rodName);
+                            }
+
+                            m_wFile->cd(rodName+"/"+modName+"/Thresholds/"+subdir);
+
+                            histogramsTHR.at(FE).at(pixel)->SetTitle("Threshold;Pixel threshold;Counts");
+                            histogramsSIG.at(FE).at(pixel)->SetTitle("Sigma;Pixel sigma;Counts");
+
+                            std::string type = "";
+                            if(pixel == 0) type = "normal";
+                            else if(pixel == 1) type = "long";
+                            else if(pixel == 2) type = "ganged";
+                            
+                            histogramsTHR.at(FE).at(pixel)->Write(TString("thres_"+type).Data(), TObject::kWriteDelete);
+                            histogramsSIG.at(FE).at(pixel)->Write(TString("sigma_"+type).Data(), TObject::kWriteDelete);  
+                        }                        
                         
                         // Reset histograms for next front end
                         histogramsTHR.at(FE).at(pixel)->Reset("ICESM");
                         histogramsSIG.at(FE).at(pixel)->Reset("ICESM");
                         
                         if(pixel == 0){ // normal
-                            map_info[modID].at(FE)->set_NormalTheshold(thr_mean);
+                            map_info[modID].at(FE)->set_NormalThreshold(thr_mean);
                             map_info[modID].at(FE)->set_NormalRms(thr_rms);
                             map_info[modID].at(FE)->set_NormalNoise(sig_mean);
                         }
                         else if(pixel == 1){ // long
-                            map_info[modID].at(FE)->set_LongTheshold(thr_mean);
+                            map_info[modID].at(FE)->set_LongThreshold(thr_mean);
                             map_info[modID].at(FE)->set_LongRms(thr_rms);
                             map_info[modID].at(FE)->set_LongNoise(sig_mean);                            
                         }
                         else if(pixel == 2){ // ganged
-                            map_info[modID].at(FE)->set_GangedTheshold(thr_mean);
+                            map_info[modID].at(FE)->set_GangedThreshold(thr_mean);
                             map_info[modID].at(FE)->set_GangedRms(thr_rms);
                             map_info[modID].at(FE)->set_GangedNoise(sig_mean);                            
                         }
                         else{
-                            printf("Error - Bad pixel in Calib::FillThresholds\n");
+                            printf("Calib::fillThresholds: ERROR - Bad pixel in Calib::fillThresholds\n");
                             return false;
                         }
                     }
@@ -654,7 +693,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                 
             }
             else{
-                printf("Error - REPEATED MOD ID! Contact Offline team\n");
+                printf("Calib::fillThresholds: ERROR - REPEATED MOD ID: %s! Contact Offline team\n",std::string(modName).c_str());
                 return false;
             }
         } // End of MOD loop 
@@ -728,7 +767,7 @@ TH2F* Calib::get2DHistogramFromPath( TDirectoryFile* rodDir, const TString & mod
     TDirectoryFile *histDir = static_cast<TDirectoryFile *>(rodDir->GetDirectory(fullHistoPath));
     
     if(!histDir){
-        printf("Error - Directory \"%s\" not found. Exiting..",fullHistoPath.Data());
+        printf("Error - Directory \"%s\" not found. Exiting..\n",fullHistoPath.Data());
         return nullptr;
     }
     TH2F *pTH2 = static_cast<TH2F*>((static_cast<TKey*>(histDir->GetListOfKeys()->First()))->ReadObj());

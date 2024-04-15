@@ -743,6 +743,9 @@ namespace Muon {
                 }
                 indexlast--;
             }
+            /// A small hack putting James last onto the actual stage and not let him 
+            /// fall into the orchestra pit...
+            indexlast = std::max(indexlast, 0);
             bool phifromextrapolation = false;
             if (!fitterData.secondEntry->phiHits().empty() || !fitterData.firstEntry->phiHits().empty()) phifromextrapolation = true;
 

@@ -22,6 +22,9 @@ selStr["saturNotMasked"] = "for unmasked SCs which are saturated"
 selStr["OFCbOFNotMasked"] = "for unmasked SCs with OFCb in overflow"
 selStr["onlofflEmismatch"] = "for unmasked SCs which pass #tau selection where online & offline energies are different"
 
+selStr["notMaskedEoflNe0"] = "for unmasked SCs with non-zero ET ofl"
+selStr["notMaskedEoflGt1"] = "for unmasked SCs with ET ofl > 1 GeV"
+
 
 
 def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes=[]):
@@ -143,7 +146,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
     
 
 
-
+    iphi_bins_dict = {"ALL": 63, "EMB": 63, "EMEC": 63, "HEC": 63, "FCAL": 15}
 
 
 
@@ -164,7 +167,11 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
         selStrPart = {}
         for sel in selStr.keys():
             selStrPart[sel] = "in "+part+" "+selStr[sel]
-            
+        iphi_bins = 63
+        for key in iphi_bins_dict.keys():
+            if part.startswith(key):
+                iphi_bins = iphi_bins_dict[key]
+                
         if part == "ALL":
             partxbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"]
             partybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"]
@@ -273,6 +280,23 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            xbins=partxbins,
                                            ybins=partybins,
                                            pattern=[(part)])
+
+
+            #####################
+
+            partGroup_digi.defineHistogram('Digi_part_BCID,Digi_part_iphi,Digi_part_diff_adc_ped;Diff_ADC_Ped_Per_BCID_Per_iphi_'+thisSel,
+                                           title='ADC - Pedestal '+selStrPart[thisSel]+': iphi vs BCID;BCID;iphi',
+                                           type='TProfile2D',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=3564,xmin=-0.5,xmax=3563.5,
+                                           ybins=iphi_bins+1,ymin=0,ymax=iphi_bins+1,  # Make a lardqglobals for ieta iphi?
+                                           pattern=[(part)])
+
+
+
+            ##################
+            
             
             partGroup_digi.defineHistogram('Digi_part_sampos,Digi_part_adc;ADCZoom_vs_SamplePosition_'+thisSel,
                                            title='ADC (zoom) vs sample position '+selStrPart[thisSel],
@@ -343,11 +367,11 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
         #### Plots from SC ET loop 
 
-        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked", "onlofflEmismatch" ]:
+        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked", "onlofflEmismatch", "notMaskedEoflNe0", "notMaskedEoflGt1"]:
             thisTopPath=f"/{thisSel}/{topPath}"
             # Histos that we only want for all partitions/layers combined lalala
             if part == "ALL":
-                partGroup_sc.defineHistogram('SC_part_latomeSourceidbin,SC_part_et_onl;SC_ET_Onl_vs_LATOME_'+thisSel,
+                partGroup_sc.defineHistogram('SC_part_latomesourceidbin,SC_part_et_onl;SC_ET_Onl_vs_LATOME_'+thisSel,
                                              title='SC ET [GeV] vs LATOME name '+selStrPart[thisSel]+'; ; ET SC [GeV]',
                                              type='TH2F',
                                              cutmask='SC_part_'+thisSel,
@@ -356,6 +380,27 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                              ybins=200, ymin=-10, ymax=200,
                                              xlabels=BinLabel_LATOME,
                                              pattern=[(part)])
+
+
+                partGroup_sc.defineHistogram('SC_part_LB,SC_part_latomesourceidbin;LB_vs_LATOME_'+thisSel,
+                                             title='LATOME name vs LB '+selStrPart[thisSel]+';LB;LATOME',
+                                             type='TH2F',
+                                             cutmask='SC_part_'+thisSel,
+                                             path=thisTopPath,                            
+                                             xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                             ybins=NLatomeBins,ymin=1,ymax=NLatomeBins+1,
+                                             ylabels=BinLabel_LATOME,
+                                             pattern=[(part)])
+
+                partGroup_sc.defineHistogram('SC_part_time,SC_part_et_ofl;time_vs_et_ofl_'+thisSel, 
+                                             title='SC coverage '+selStrPart[thisSel]+': #tau vs ET ofl;#tau;ET ofl',
+                                             type='TH2F',
+                                             cutmask='SC_part_'+thisSel,
+                                             path=thisTopPath,
+                                             xbins=500,xmin=-50,xmax=50,
+                                             ybins=500,ymin=-10,ymax=70,
+                                             pattern=[(part)])
+
             
                 partGroup_sc.defineHistogram('SC_part_latomesourceidbin,SC_part_time;MeanOfflineLATOMEtime_vs_LATOME_'+thisSel, 
                                              title='Average LATOME #tau from Offline computation per LATOME'+selStrPart[thisSel]+'; LATOME ; #tau [ns]',

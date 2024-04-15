@@ -32,28 +32,28 @@ class jFEXForwardElecInfo {
   
   // Setup with key parameters and menu info
   void setup(int jfex, uint ttid, int neta, int nphi); //used 
-  void setup(uint *cval, uint reso = 200);
+  void setup(int *cval, uint reso = 200);
 
   // Basic IDs and energies (TT level)
   uint  getCoreTTID();
   uint  getCoreIphi();
   uint  getCoreIeta();             //used
-  void  setCoreTTEtEM(uint ET_EM );//used
-  uint  getCoreTTEtEM();           //used 
+  void  setCoreTTEtEM(int ET_EM );//used
+  int  getCoreTTEtEM();           //used 
   void  setNextTTID(uint TTID );   //used  
   uint  getNextTTID();
-  void  setNextTTEtEM(uint ET_EM); //used 
-  uint  getNextTTEtEM();           //used 
-  void  setTTEtEMiso(uint iso_ET); //used     
+  void  setNextTTEtEM(int ET_EM); //used 
+  int  getNextTTEtEM();           //used 
+  void  setTTEtEMiso(int iso_ET); //used     
   void  addTTEtEMiso(int iso_ET);  //used 
-  uint  getTTEtEMiso();
-  void  setTTEtHad1(uint ET_HAD);  //used, EMfr1 
-  void  addTTEtHad1(uint ET_HAD);  //used, special SC 
-  uint  getTTEtHad1();
-  void  setTTEtHad2(uint ET_HAD);  //used, EMfr2 
-  uint  getTTEtHad2();
+  int  getTTEtEMiso();
+  void  setTTEtHad1(int ET_HAD);  //used, EMfr1 
+  void  addTTEtHad1(int ET_HAD);  //used, special SC 
+  int  getTTEtHad1();
+  void  setTTEtHad2(int ET_HAD);  //used, EMfr2 
+  int  getTTEtHad2();
   void  calcTTClusEtEM();          //used
-  uint  getTTClusEtEM();           //used
+  int  getTTClusEtEM();           //used
   void  includeTTinSearchWindow(uint TT_ID);
   std::vector<uint> getTTinSearchWindow();
   // floating point values
@@ -81,13 +81,13 @@ class jFEXForwardElecInfo {
 
  private:
 
-  uint  m_coreTTEtEM = 0;
+  int  m_coreTTEtEM = 0;
   uint  m_nextTTID = 0;
-  uint  m_nextTTEtEM = 0;
-  uint  m_TTEtEMiso = 0;
-  uint  m_TTEtHad1 = 0;
-  uint  m_TTEtHad2 = 0;
-  uint  m_TTClusEtEM = 0;
+  int  m_nextTTEtEM = 0;
+  int  m_TTEtEMiso = 0;
+  int  m_TTEtHad1 = 0;
+  int  m_TTEtHad2 = 0;
+  int  m_TTClusEtEM = 0;
   float m_coreTTfEta = 0;
   float m_coreTTfPhi = 0;
   std::vector<uint> m_TTsInSearchWindow = {};
@@ -97,7 +97,7 @@ class jFEXForwardElecInfo {
   int   m_iphi = 0; 
   uint  m_jfex = 0; 
   uint  m_reso = 200; 
-  uint  m_cval[9] = {1,2,3,20,30,40,20,30,40}; 
+  int  m_cval[9] = {1,2,3,20,30,40,20,30,40}; 
   //---- modified in calcTobValues  -----  
   uint  m_EtEMiso = 0;
   uint  m_EtHad1  = 0;

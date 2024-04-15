@@ -76,6 +76,10 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    gTowersType Btwr50 = {{{0}}};
    gTowersType Ctwr50 = {{{0}}};
 
+   gTowersType Asat = {{{0}}};
+   gTowersType Bsat = {{{0}}};
+   gTowersType Csat = {{{0}}};
+
 
    //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
    gTowersCentral tmp_gTowersIDs_subset_centralFPGA;
@@ -86,7 +90,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
       }
    }
    ATH_CHECK(m_gFEXFPGA_Tool->init(0));
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA, Atwr, Atwr50);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA, Atwr, Atwr50, Asat);
    m_gFEXFPGA_Tool->reset();
 
    //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +104,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
       }
    }
    ATH_CHECK(m_gFEXFPGA_Tool->init(1));
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA_B, Btwr, Btwr50);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA_B, Btwr, Btwr50, Bsat);
    m_gFEXFPGA_Tool->reset();
 
    //FPGA B----------------------------------------------------------------------------------------------------------------------------------------------
@@ -143,7 +147,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    }
 
    ATH_CHECK(m_gFEXFPGA_Tool->init(2));
-   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50);
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50, Csat);
    m_gFEXFPGA_Tool->reset();
 
    //FPGA C----------------------------------------------------------------------------------------------------------------------------------------------
@@ -158,9 +162,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int gLJ_seedThrB = 0;
    int gLJ_seedThrC = 0;
    gLJ_seedThrA = thr_gLJ.seedThrCounts('A'); //defined in GeV by default
-   // gLJ_seedThrA = gLJ_seedThrA/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
    gLJ_seedThrB = thr_gLJ.seedThrCounts('B'); //defined in GeV by default
-   // gLJ_seedThrB = gLJ_seedThrB/0.2; //rescaling with 0.2 GeV scale to get counts (corresponding to hw units) 
    gLJ_seedThrC = thr_gLJ.seedThrCounts('C'); //defined in GeV by default
 
    int gLJ_ptMinToTopoCounts1 = 0;
@@ -170,17 +172,11 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    float gLJ_rhoMaxA = 0;
    float gLJ_rhoMaxB = 0;
    float gLJ_rhoMaxC = 0;
-   float gLJ_rhoMinA = 0;
-   float gLJ_rhoMinB = 0;
-   float gLJ_rhoMinC = 0;
+ 
+   gLJ_rhoMaxA = (thr_gLJ.rhoTowerMax('A')*1000)/50;//Values are given in GeV, need to be converted with 50MeV scale to be used in PU calculation
+   gLJ_rhoMaxB = (thr_gLJ.rhoTowerMax('B')*1000)/50;//Values are given in GeV, need to be converted with 50MeV scale to be used in PU calculation
+   gLJ_rhoMaxC = (thr_gLJ.rhoTowerMax('C')*1000)/50;//Values are given in GeV, need to be converted with 50MeV scale to be used in PU calculation
 
-   gLJ_rhoMaxA = (thr_gLJ.rhoTowerMax('A'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMaxB = (thr_gLJ.rhoTowerMax('B'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMaxC = (thr_gLJ.rhoTowerMax('C'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMinA = (thr_gLJ.rhoTowerMin('A'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMinB = (thr_gLJ.rhoTowerMin('B'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   gLJ_rhoMinC = (thr_gLJ.rhoTowerMin('C'))*1000;//Note that the values are given in GeV but need to be converted in MeV to be used in PU calculation
-   
 
    //Parameters related to gJ (small-R jet objects - gBlock)
    auto & thr_gJ = l1Menu->thrExtraInfo().gJ();
@@ -197,9 +193,9 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int jetThreshold = FEXAlgoSpaceDefs::jetThr; //this threshold is set by the online software 
 
    if (FEXAlgoSpaceDefs::ENABLE_PUC == true){
-      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA, gLJ_rhoMinA,  1,  pucA);
-      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB, gLJ_rhoMinB,  1,  pucB);
-      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC, gLJ_rhoMinC,  1,  pucC);
+      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA,  1,  pucA);
+      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB,  1,  pucB);
+      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC,  1,  pucC);
    }
    
    
@@ -212,10 +208,9 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    std::array<uint32_t, 7> CTOB1_dat = {0};
    std::array<uint32_t, 7> CTOB2_dat = {0};
 
-   // Use the gFEXJetAlgoTool
 
    // Pass the energy matrices to the algo tool, and run the algorithms
-   auto tobs_v = m_gFEXJetAlgoTool->largeRfinder(Atwr, Btwr, Ctwr, pucA, pucB, pucC,
+   auto tobs_v = m_gFEXJetAlgoTool->largeRfinder(Atwr, Btwr, Ctwr, Asat, Bsat, Csat, pucA, pucB, pucC,
                                                  gLJ_seedThrA, gLJ_seedThrB, gLJ_seedThrC, gJ_ptMinToTopoCounts1, gJ_ptMinToTopoCounts2, 
                                                  jetThreshold, gLJ_ptMinToTopoCounts1, gLJ_ptMinToTopoCounts2,
                                                  ATOB1_dat, ATOB2_dat,

@@ -39,10 +39,10 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     kwargs.setdefault("TRT_HT_OccupancyCorrectionEndcap", 0.090)
     kwargs.setdefault("TRT_HT_OccupancyCorrectionBarrelNoE", 0.060)
     kwargs.setdefault("TRT_HT_OccupancyCorrectionEndcapNoE", 0.050)
-    kwargs.setdefault("TRT_HT_OccupancyCorrectionBarrelAr", 0.040)
-    kwargs.setdefault("TRT_HT_OccupancyCorrectionEndcapAr", 0.041)
-    kwargs.setdefault("TRT_HT_OccupancyCorrectionBarrelArNoE", 0.033)
-    kwargs.setdefault("TRT_HT_OccupancyCorrectionEndcapArNoE", 0.042)
+    kwargs.setdefault("TRT_HT_OccupancyCorrectionBarrelAr", 0.100)
+    kwargs.setdefault("TRT_HT_OccupancyCorrectionEndcapAr", 0.101)
+    kwargs.setdefault("TRT_HT_OccupancyCorrectionBarrelArNoE", 0.088)
+    kwargs.setdefault("TRT_HT_OccupancyCorrectionEndcapArNoE", 0.102)
 
     from InDetConfig.TRT_ElectronPidToolsConfig import TRT_OverlayLocalOccupancyCfg
     kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_OverlayLocalOccupancyCfg(flags)))

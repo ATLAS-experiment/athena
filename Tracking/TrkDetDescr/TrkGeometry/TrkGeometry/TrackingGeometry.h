@@ -160,16 +160,9 @@ public:
   void dump(MsgStream& out, const std::string& head) const;
 
   // get ownership of Muon Tracking Geometry Elements
-  void ownMuonElements(
-      std::unique_ptr<std::vector<
-          std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>&&
-          muonInertMaterialConstituents,
-      std::unique_ptr<
-          const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>&&
-          muonStations,
-      std::unique_ptr<
-          const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>&&
-          muonInertObjs);
+  void addToGarbage(std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>&& garbageVec);
+  void addToGarbage(std::vector<std::unique_ptr<Trk::TrackingVolume>>&& garbageVec);
+
 
  private:
   /** Geometry Builder busineess:
@@ -196,7 +189,6 @@ public:
 
   /**  private method to be called from GeometryBuilder: return the world with
    * ownership */
-  const TrackingVolume* checkoutHighestTrackingVolume() const;
   TrackingVolume* checkoutHighestTrackingVolume();
 
   /** print VolumeInformation with Level */
@@ -209,7 +201,7 @@ public:
                         const Layer* layer);
 
   /** The known world - and the beam */
-  TrackingVolume* m_world;
+  TrackingVolume* m_world{};
 
   /** The unique boundary Layers */
   std::map<Layer*, int> m_boundaryLayers;
@@ -221,17 +213,10 @@ public:
   NavigationLevel m_navigationLevel;
 
   /** keep ownership of MuonTrackingGeometry elements in here */
-  std::unique_ptr<std::vector<
-    std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>
-    m_muonInertMaterialConstituents;
   // muon chambers
-  std::unique_ptr<
-    const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-    m_muonStations;
-  // muon inert material
-  std::unique_ptr<
-    const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-    m_muonInertObjs;
+  std::vector<std::shared_ptr<DetachedTrackingVolume>> m_detachedVolGarbage{};  
+  std::vector<std::shared_ptr<TrackingVolume>> m_trkVolumeGarbage{};
+ 
 };
 
 } // end of namespace

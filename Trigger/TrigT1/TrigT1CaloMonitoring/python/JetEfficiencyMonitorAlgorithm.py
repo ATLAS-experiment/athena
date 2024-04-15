@@ -216,9 +216,6 @@ if __name__=='__main__':
 
     flags.dump() # print all the configs
 
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
-
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg = MainServicesCfg(flags)

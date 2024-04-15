@@ -1,79 +1,68 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#
-# Output file can be checked (and navigation graphs converted using):
-#  
-# athena TrigNavTools/navGraphDump.py
-# see there for more info
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+import sys
 
-if __name__=='__main__':
-    import sys
+# Set the Athena configuration flags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
 
-    # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
+flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1"]
+# can browse config for this file here: 
+flags.Detector.GeometryLAr=True
+flags.Detector.GeometryTile=True
+flags.Exec.MaxEvents = 20
+flags.Exec.SkipEvents = 0
+flags.Trigger.doEDMVersionConversion=True
+flags.fillFromArgs()
+flags.Concurrency.NumThreads=6
+flags.lock()
 
-    flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1"]
+# Initialize configuration object, add accumulator, merge, and run.
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 
-    flags.Output.AODFileName = "outAOD.pool.root"
-    flags.Detector.GeometryLAr=True
-    flags.Detector.GeometryTile=True
-    flags.Exec.MaxEvents = 1000
-    flags.fillFromArgs()
-    flags.lock()
+from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+cfg = MainServicesCfg(flags)
+cfg.merge(PoolReadCfg(flags))
 
-    # Initialize configuration object, add accumulator, merge, and run.
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
+cfg.merge(MetaDataSvcCfg(flags))
 
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(flags)
-    cfg.merge(PoolReadCfg(flags))
+confSvc = CompFactory.TrigConf.xAODConfigSvc("xAODConfigSvc")
+cfg.addService(confSvc)
+from AthenaCommon.Constants import DEBUG
 
+from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+triggerListsHelper = TriggerListsHelper(flags)
+chains = triggerListsHelper.Run2TriggerNamesNoTau + triggerListsHelper.Run2TriggerNamesTau
 
-    from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-    cfg.merge(MetaDataSvcCfg(flags))
+# these are cases to debug further
+#chains= ["HLT_g45_tight_L1EM22VHI_xe45noL1"] 
+# chains=["HLT_e300_etcut"]
+# chains=["HLT_e28_lhtight_nod0_e15_etcut_L1EM7_Zee"]
 
-    confSvc = CompFactory.TrigConf.xAODConfigSvc("xAODConfigSvc")
-    cfg.addService(confSvc)
-    from AthenaCommon.Constants import DEBUG
-    alg = CompFactory.Run2ToRun3TrigNavConverterV2("TrigNavCnv", OutputLevel=DEBUG, TrigConfigSvc=confSvc)
-    alg.doSelfValidation = False
-    alg.doCompression = True
-    alg.addTauTracks = False
+from TrigNavTools.NavConverterConfig import NavConverterCfg
+cfg.merge(NavConverterCfg(flags, chainsList=chains, runTheChecker=True))
 
-    alg.Collections = ["xAOD::TrigEMCluster", "xAOD::TrigEMClusterContainer", "xAOD::TrigRingerRings", "xAOD::TrigRingerRingsContainer", "xAOD::TrigRNNOutput", "xAOD::TrigRNNOutputContainer", "xAOD::CaloClusterContainer", "xAOD::L2StandAloneMuonContainer", "xAOD::L2StandAloneMuonAuxContainer", "xAOD::L2CombinedMuonContainer", "xAOD::L2CombinedMuonAuxContainer","xAOD::L2IsoMuonContainer", "xAOD::MuonContainer", "xAOD::MuonAuxContainer","xAOD::TauJetContainer", "xAOD::ElectronContainer", "xAOD::PhotonContainer", "xAOD::JetContainer", "xAOD::BTaggingContainer", "xAOD::BTagVertexContainer", "xAOD::JetElementContainer", "xAOD::TrigMissingET", "xAOD::TrigBphysContainer"]
-    if (alg.addTauTracks):
-        alg.Collections.append("xAOD::TauTrackContainer")
-    
-    # simple mu test cases
-    alg.Chains = ["HLT_mu4","HLT_mu6","HLT_mu10","HLT_mu6_2mu4","HLT_mu22"]
+# input EDM needs calo det descrition for conversion (uff)
+from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+from TileGeoModel.TileGMConfig import TileGMCfg
+cfg.merge(LArGMCfg(flags))
+cfg.merge(TileGMCfg(flags))
 
-    alg.Rois = ["initialRoI","forID","forID1","forID2","forMS","forSA","forTB","forMT","forCB"]
+# enable to get the navigation graphs *.dot files
+# from TrigValAlgs.TrigValAlgsConfig import TrigEDMCheckerCfg
+# cfg.merge(TrigEDMCheckerCfg(flags, doDumpAll=False))
+# cfg.getEventAlgo("TrigEDMChecker").doDumpTrigCompsiteNavigation=True
 
-
-    cfg.addEventAlgo(alg, sequenceName="AthAlgSeq")
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    outputType="AOD"
-    toRecord = ["xAOD::TrigCompositeContainer#HLTNav_All", "xAOD::TrigCompositeAuxContainer#HLTNav_AllAux.",
-                "xAOD::TrigCompositeContainer#HLTNav_Summary", "xAOD::TrigCompositeAuxContainer#HLTNav_SummaryAux."]
-    outputCfg = OutputStreamCfg(flags, outputType, ItemList=toRecord, disableEventTag=True, takeItemsFromInput = True)
-    streamAlg = outputCfg.getEventAlgo("OutputStream"+outputType)
-    # need to expand possible options for the OutputStreamCfg to be able to pass also the metadata containers
-    streamAlg.MetadataItemList += ["xAOD::TriggerMenuContainer#TriggerMenu", "xAOD::TriggerMenuAuxContainer#TriggerMenuAux."]
-    cfg.addPublicTool(CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool"))
-    cfg.addService( CompFactory.MetaDataSvc("MetaDataSvc", MetaDataTools = [cfg.getPublicTool("TriggerMenuMetaDataTool")]))
-
-    cfg.merge(outputCfg)
-
-    # input EDM needs calo det descrition for conversion (uff)
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(LArGMCfg(flags))
-    cfg.merge(TileGMCfg(flags))
-
-    cfg.printConfig(withDetails=True, summariseProps=False) # set True for exhaustive info
-    sc = cfg.run()
-    sys.exit(0 if sc.isSuccess() else 1)
+msg = cfg.getService('MessageSvc'); 
+msg.verboseLimit=0
+msg.debugLimit=0
+msg.infoLimit=0 
+msg.warningLimit=0 
+msg.Format='% F%35W%C% F%9W%e%7W%R%T %0W%M'
+cfg.printConfig(withDetails=True, summariseProps=False) # set True for exhaustive info
+sc = cfg.run()
+sys.exit(0 if sc.isSuccess() else 1)

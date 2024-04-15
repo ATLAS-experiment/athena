@@ -182,7 +182,7 @@ TriggerHLTList = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigCaloClusterMaker_slwAux'+RemoveCaloVariables, 'BS ESD AODFULL', 'Calo'), 
     ('xAOD::CaloClusterContainer#HLT_TrigCaloClusterMaker_topo', 'BS ESD', 'Calo'), 
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigCaloClusterMaker_topoAux'+RemoveCaloVariables,'BS ESD', 'Calo'), 
-    ('xAOD::CaloClusterContainer#HLT_TrigEFCaloCalibFex', 'BS ESD AODFULL AODSLIM', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_TrigEFCaloCalibFex', 'BS ESD AODFULL AODSLIM AODCONV', 'Egamma'),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEFCaloCalibFexAux'+RemoveCaloVariables, 'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     #egamma
@@ -511,7 +511,7 @@ TriggerHLTList = [
     ('xAOD::JetTrigAuxContainer#HLT_a4tcemsubFSAux.',                    'BS ESD AODFULL', 'Jet'),
 
 
-    ('xAOD::JetContainer#HLT_a4tcemsubjesFS',                            'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetContainer#HLT_a4tcemsubjesFS',                            'BS ESD AODFULL AODSLIM AODCONV', 'Jet'),
     ('xAOD::JetTrigAuxContainer#HLT_a4tcemsubjesFSAux.',                 'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetContainer#HLT_a4tcemnojcalibFS',                          'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetTrigAuxContainer#HLT_a4tcemnojcalibFSAux.',               'BS ESD AODFULL', 'Jet'),

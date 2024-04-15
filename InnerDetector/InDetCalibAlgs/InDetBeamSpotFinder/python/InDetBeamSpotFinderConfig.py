@@ -34,9 +34,13 @@ def InDetBeamSpotVertexCfg(flags, jobConfig={}, name="InDetBeamSpotVertex", **kw
     return result
 
 def InDetBeamSpotFinderCfg(flags, jobConfig={}, name="InDetBeamSpotFinder", **kwargs):
-    # Add BunchCrossingCondData
-    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    result = BunchCrossingCondAlgCfg(flags)
+    result = ComponentAccumulator()
+    if 'UseFilledBCIDsOnly' in jobConfig:
+        if jobConfig['UseFilledBCIDsOnly']:
+            # Add BunchCrossingCondData
+            print("Set bunch crossing")
+            from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+            result = BunchCrossingCondAlgCfg(flags)
 
     if "BeamSpotToolList" not in kwargs:
         kwargs.setdefault("BeamSpotToolList", [

@@ -173,9 +173,9 @@ for j in alljetdefs:
         outputlist += ["xAOD::VertexContainer#PrimaryVertices"]
 
 
-from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
 cfg.merge(OutputStreamCfg(flags,"xAOD",ItemList=outputlist))
-pprint( cfg.getEventAlgo("OutputStreamxAOD").ItemList )
+pprint( cfg.getEventAlgo(outputStreamName("xAOD")).ItemList )
 
 # Optionally, print the contents of the store every event
 cfg.getService("StoreGateSvc").Dump = args.dumpSG

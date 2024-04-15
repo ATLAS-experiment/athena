@@ -34,7 +34,7 @@ def list_directories(parent_dir, recurse=True):
     for x in rv:
         if 'common' in x:
             truerv = [x] + truerv
-        elif x.split("/")[-1] in whitelist or whitelist==[]:
+        elif x.split("/")[-1] in whitelist or whitelist==['']:
             truerv.append(x)
     return truerv
 

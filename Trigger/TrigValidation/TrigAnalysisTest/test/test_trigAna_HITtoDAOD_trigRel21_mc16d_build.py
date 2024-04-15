@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test running HITS->RDO in main/23.0, then RDO->RDO_TRIG in 21.0-mc16d, then RDO_TRIG->AOD in main/23.0, then AOD->DAOD with multiprocess in main
 # art-type: build
@@ -8,7 +8,7 @@
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input, Step
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 # HITS -> RDO step in main/23.0
@@ -38,15 +38,6 @@ rdo2rdotrig.args += ' --imf="all:True"'
 rdo2rdotrig.args += ' --conditionsTag="RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02"'
 rdo2rdotrig.args += ' --preInclude "all:Campaigns/MC20d.py"'
 rdo2rdotrig.timeout = 5400 # default = 3600 s
-
-# Clear AthFile cache from r21 because it is incompatible with py3 r22 (ATR-21489)
-rm_cache = ExecStep.ExecStep('ClearAthFileCache')
-rm_cache.type = 'other'
-rm_cache.input = ''
-rm_cache.executable = 'rm'
-rm_cache.args = '-f athfile-cache.ascii.gz'
-rm_cache.auto_report_result = False  # Do not set art-result for this step
-rm_cache.output_stream = Step.Step.OutputStream.STDOUT_ONLY  # Do not create a log file for this step
 
 # RDO_TRIG -> AOD step in main/23.0
 rdotrig2aod = ExecStep.ExecStep('RDOTriggertoAOD')
@@ -78,7 +69,7 @@ aod2daod.args += ' --asetup="all:Athena,main,latest"'
 # Define the test with the above steps
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [hit2rdo, rdo2rdotrig, rm_cache, rdotrig2aod, aod2daod]
+test.exec_steps = [hit2rdo, rdo2rdotrig, rdotrig2aod, aod2daod]
 test.check_steps = CheckSteps.default_check_steps(test)
 add_analysis_steps(test)
 

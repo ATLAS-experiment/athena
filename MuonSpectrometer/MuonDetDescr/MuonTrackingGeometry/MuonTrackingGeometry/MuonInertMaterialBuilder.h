@@ -34,12 +34,10 @@ class MuonInertMaterialBuilder final
     virtual StatusCode initialize() override;
 
     /** Method returning cloned and positioned material objects */
-    std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
-    buildDetachedTrackingVolumes(bool blend = false) const;
+    DetachedVolVec buildDetachedTrackingVolumes(bool blend = false) const;
 
    private:
-    const MuonGM::MuonDetectorManager* m_muonMgr =
-        nullptr;  //!< the MuonDetectorManager
+    const MuonGM::MuonDetectorManager* m_muonMgr{nullptr};  //!< the MuonDetectorManager
 };
 
 }  // namespace Muon

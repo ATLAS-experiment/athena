@@ -6,7 +6,7 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, MetadataCategory, ProductionStep
-from OutputStreamAthenaPool.OutputStreamConfig import addToMetaData
+from OutputStreamAthenaPool.OutputStreamConfig import addToMetaData, outputStreamName
 
 
 @dataclass
@@ -105,7 +105,6 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
     tools = MetaDataHelperLists()
     result = ComponentAccumulator()
     log = logging.getLogger("SetupMetaDataForStreamCfg")
-    outputStreamName = f"Stream{streamName}"
 
     if category == MetadataCategory.FileMetaData:
         tools.mdToolNames.append("xAODMaker::FileMetaDataTool")
@@ -115,22 +114,22 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
         ]
         tools.helperTools.append(
             CompFactory.xAODMaker.FileMetaDataCreatorTool(
-                f"{outputStreamName}_FileMetaDataCreatorTool",
+                f"{outputStreamName(streamName)}_FileMetaDataCreatorTool",
                 OutputKey="FileMetaData",
-                StreamName=outputStreamName,
+                StreamName=outputStreamName(streamName),
             )
         )
     elif category == MetadataCategory.EventStreamInfo:
         esiTool = CompFactory.MakeEventStreamInfo(
-            f"{outputStreamName}_MakeEventStreamInfo",
-            Key=outputStreamName,
-            DataHeaderKey=outputStreamName,
+            f"{outputStreamName(streamName)}_MakeEventStreamInfo",
+            Key=outputStreamName(streamName),
+            DataHeaderKey=outputStreamName(streamName),
             EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
             if flags.Common.ProductionStep == ProductionStep.PileUpPresampling
             else "EventInfo",
         )
         tools.mdItems += [
-            f"EventStreamInfo#{outputStreamName}",
+            f"EventStreamInfo#{outputStreamName(streamName)}",
         ]
         tools.helperTools.append(esiTool)
 
@@ -138,18 +137,18 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
         if kwargs.get("mergeJob", False):
             tools.mdTools += [
                 CompFactory.CopyEventStreamInfo(
-                    f"{outputStreamName}_CopyEventStreamInfo"
+                    f"{outputStreamName(streamName)}_CopyEventStreamInfo"
                 ),
             ]
 
     elif category == MetadataCategory.EventFormat:
         efTool = CompFactory.xAODMaker.EventFormatStreamHelperTool(
-            f"{outputStreamName}_EventFormatStreamHelperTool",
-            Key=f"EventFormat{outputStreamName}",
-            DataHeaderKey=outputStreamName,
+            f"{outputStreamName(streamName)}_EventFormatStreamHelperTool",
+            Key=f"EventFormat{outputStreamName(streamName)}",
+            DataHeaderKey=outputStreamName(streamName),
         )
         tools.mdItems += [
-            f"xAOD::EventFormat#EventFormat{outputStreamName}",
+            f"xAOD::EventFormat#EventFormat{outputStreamName(streamName)}",
         ]
         tools.helperTools.append(efTool)
         tools.mdToolNames.append("xAODMaker::EventFormatMetaDataTool")

@@ -18,8 +18,7 @@ namespace FlavorTagDiscriminants {
 
   TrackLeptonDecoratorAlg::TrackLeptonDecoratorAlg(
     const std::string& name, ISvcLocator* loc )
-    : AthReentrantAlgorithm(name, loc),
-      m_electronID_tool("AsgElectronLikelihoodTool/electronID_tool") {}
+    : AthReentrantAlgorithm(name, loc) {}
 
   StatusCode TrackLeptonDecoratorAlg::initialize() {
     ATH_MSG_INFO( "Inizializing " << name() << "... " );
@@ -35,8 +34,10 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_MuonContainerKey.initialize() );
 
     // Initialise electron ID tool
-    ATH_CHECK(m_electronID_tool.setProperty("WorkingPoint", m_electronID_wp));
-    ATH_CHECK(m_electronID_tool.initialize());
+    ATH_CHECK(m_electronID_tool.retrieve());
+    
+    // Initialise muon ID tool
+    ATH_CHECK(m_muonID_tool.retrieve());
 
     // Prepare decorators
     m_dec_lepton_id = m_TrackContainerKey.key() + "." + m_dec_lepton_id.key();
@@ -104,7 +105,7 @@ namespace FlavorTagDiscriminants {
       if ( !track ) { continue; }
 
       // apply electron ID requirement
-      bool LH_selection = (bool)m_electronID_tool.accept(electron);
+      bool LH_selection = bool{m_electronID_tool->accept(electron)};
       if (!LH_selection) { continue; }
 
       // decorate the track
@@ -115,9 +116,9 @@ namespace FlavorTagDiscriminants {
     // reconstruction of an electron and a muon (which can happen in rare cases)
     for ( const auto muon : *muons ) {
 
-      // minimal quality requirement: check we have a combined muon
-      if (muon->muonType() != xAOD::Muon::Combined) { continue; }
-
+      if ( !m_muonID_tool->accept(*muon) ) {
+        continue;
+      }
       // get associated InDet track
       auto track_link = muon->inDetTrackParticleLink();
       if ( !track_link.isValid() ) { continue; }
@@ -135,7 +136,7 @@ namespace FlavorTagDiscriminants {
 
       // decorate the track
       decor_lepton_id(*track) = -13 * muon->charge();
-      decor_muon_quality(*track) = muon->quality();
+      decor_muon_quality(*track) = m_muonID_tool->getQuality(*muon);
       decor_muon_qOverPratio(*track) = track->qOverP() / ms_track->qOverP();
       decor_muon_momentumBalanceSignificance(*track) = momBalSig;
       decor_muon_scatteringNeighbourSignificance(*track) = scatNeighSig;

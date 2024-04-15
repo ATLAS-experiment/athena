@@ -102,11 +102,11 @@ public:
   Gaudi::Property<double>      m_qsfFallTime        {this, "qsfFallTime"        , 4         , "Rise time of the RPD pulses"                                         };
   Gaudi::Property<double>      m_qsfFilter          {this, "qsfFilter"          , 4         , "Rise time of the RPD pulses"                                         };
   Gaudi::Property<float >      m_zdcAdcPerPhoton    {this, "zdcAdcPerPhoton"    , 0.000498  , "ADC counts per detected photon in the ZDCs"                          };
-  Gaudi::Property<float >      m_rpdAdcPerPhoton    {this, "rpdAdcPerPhoton"    , 0.000498  , "ADC counts per detected photon in the RPDs"                          };
   Gaudi::Property<bool  >      m_LTQuadStepFilt     {this, "LTQuadStepFilt"     , false     , "Use LT Quad Step Filter waveform for ZDC channels"                   };
   Gaudi::Property<bool  >      m_delayChannels      {this, "delayChannels"      , false     , "Include delayed channels in the output"                              };
   Gaudi::Property<bool  >      m_doRPD              {this, "doRPD"              , false     , "Include RPD channels in the output"                                  };
   Gaudi::Property<bool  >      m_doBRAN             {this, "doBRAN"             , false     , "Include BRAN channels in the output"                                 };
+  Gaudi::Property<std::vector< float> > m_rpdAdcPerPhoton {this, "rpdAdcPerPhoton", {5.25 , 1.7}, "ADC counts per detected photon in the RPDs"};
   
 };
 

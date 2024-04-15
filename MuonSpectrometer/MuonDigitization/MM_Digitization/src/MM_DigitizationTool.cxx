@@ -1,20 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// MM_DigitizationTool
-// ------------
-// Authors: Nektarios Chr. Benekos <nectarios.benekos@cern.ch>
-//          Konstantinos Karakostas <Konstantinos.Karakostas@cern.ch>
-//
-// Major Contributions From: Verena Martinez
-//                           Tomoyuki Saito
-//
-// Major Restructuring for r21+ From: Lawrence Lee <lawrence.lee.jr@cern.ch>
-//
-////////////////////////////////////////////////////////////////////////////////
 
 // Inputs
 #include "MuonSimData/MuonSimData.h"
@@ -42,6 +29,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 // VMM Mapping
 #include "MM_Digitization/MM_StripVmmMappingTool.h"
@@ -158,9 +146,11 @@ StatusCode MM_DigitizationTool::initialize() {
         m_vmmReadoutMode = "peak";
     else if (vmmReadoutMode.find("threshold") != std::string::npos)
         m_vmmReadoutMode = "threshold";
-    else
+    else {
         ATH_MSG_ERROR("MM_DigitizationTool can't interperet vmmReadoutMode option! (Should be 'peak' or 'threshold'.) Contains: "
                       << m_vmmReadoutMode);
+        return StatusCode::FAILURE;
+    }
     std::string vmmARTMode = m_vmmARTMode;
     // convert vmmARTMode to lower case
     std::for_each(vmmARTMode.begin(), vmmARTMode.end(), [](char& c) { c = ::tolower(c); });
@@ -444,7 +434,6 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
     ATH_CHECK(sdoContainer.record(std::make_unique<MuonSimDataCollection>()));
     ATH_MSG_DEBUG("MmSDOCollection recorded in StoreGate.");
 
-    IdentifierHash moduleHash = 0;
 
     if (m_maskMultiplet == 3) { return StatusCode::SUCCESS; }
 
@@ -461,6 +450,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
     std::vector<std::unique_ptr<MmDigitCollection> > collections;
 
     // nextDetectorElement-->sets an iterator range with the hits of current detector element , returns a bool when done
+    const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
     while (m_timedHitCollection_MM->nextDetectorElement(i, e)) {
         Identifier layerID;
         std::vector<MM_ElectronicsToolInput> v_stripDigitOutput;  
@@ -490,7 +480,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             // see what are the members of MMSimHit
 
             // convert sim id helper to offline id
-            MM_SimIdToOfflineId simToOffline(&m_idHelperSvc->mmIdHelper());
+            MM_SimIdToOfflineId simToOffline(&idHelper);
 
             // get the hit Identifier and info
             int simId = hit.MMId();
@@ -513,14 +503,12 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             ATH_MSG_DEBUG("> hitID  " << hitID << " Hit bunch time  " << bunchTime << " tot " << globalHitTime << " tof/G4 time "
                                       << hit.globalTime() << " globalHitPosition " << globalHitPosition << "hit: r "
                                       << globalHitPosition.perp() << " z " << globalHitPosition.z() << " mclink " << particleLink
-                                      << " station eta " << m_idHelperSvc->mmIdHelper().stationEta(layerID) << " station phi "
-                                      << m_idHelperSvc->mmIdHelper().stationPhi(layerID) << " multiplet "
-                                      << m_idHelperSvc->mmIdHelper().multilayer(layerID));
+                                      << m_idHelperSvc->toStringGasGap(layerID));
 
             // For collection of inputs to throw back in SG
 
             // remove hits in masked multiplet
-            if (m_maskMultiplet == m_idHelperSvc->mmIdHelper().multilayer(layerID)) continue;
+            if (m_maskMultiplet == idHelper.multilayer(layerID)) continue;
 
             //
             // Hit Information And Preparation
@@ -532,13 +520,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             // Sanity Checks
             //
             if (!m_idHelperSvc->isMM(layerID)) {
-                ATH_MSG_WARNING("layerID does not represent a valid MM layer: "
-                                << m_idHelperSvc->mmIdHelper().stationNameString(m_idHelperSvc->mmIdHelper().stationName(layerID)));
-                continue;
-            }            
-
-            if (m_idHelperSvc->mmIdHelper().stationPhi(layerID) == 0) {
-                ATH_MSG_WARNING("unexpected phi range " << m_idHelperSvc->mmIdHelper().stationPhi(layerID));
+                ATH_MSG_WARNING("layerID does not represent a valid MM layer: "<< m_idHelperSvc->toString(layerID));
                 continue;
             }
 
@@ -548,14 +530,14 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
                 ATH_MSG_WARNING("Failed to retrieve detector element for: " << m_idHelperSvc->toString(layerID));
                 continue;
             }
-	    const std::vector<int>& readoutSide=detectorReadoutElement->getReadoutSide();
+    	    const std::vector<int>& readoutSide=detectorReadoutElement->getReadoutSide();
 
             //
             // Sanity Checks
             //
             ////////////////////////////////////////////////////////////////////
 
-            const std::string stName = m_idHelperSvc->mmIdHelper().stationNameString(m_idHelperSvc->mmIdHelper().stationName(layerID));
+            const std::string stName = m_idHelperSvc->stationNameString(layerID);
 
 	    
             ////////////////////////////////////////////////////////////////////
@@ -595,18 +577,17 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             Amg::Vector2D positionOnSurfaceUnprojected{stripLayerPosition.x(), stripLayerPosition.y()};
 
             Amg::Vector3D localDirection = surf.transform().inverse().linear() * globalHitDirection;
-            Amg::Vector3D localDirectionTime(0., 0., 0.);
+            Amg::Vector3D localDirectionTime{Amg::Vector3D::Zero()};
 
             // drift direction in backwards-chamber should be opposite to the incident direction.
-            if ((readoutSide).at(m_idHelperSvc->mmIdHelper().gasGap(layerID) - 1) == 1) {
+            if ((readoutSide).at(idHelper.gasGap(layerID) - 1) == 1) {
                 localDirectionTime = localDirection;
                 inAngle_XZ = (-inAngle_XZ);
             } else
-                localDirectionTime = surf.transform().inverse().linear() *
-                                     Amg::Vector3D(hit.globalDirection().x(), hit.globalDirection().y(), -hit.globalDirection().z());
+                localDirectionTime = surf.transform().inverse().linear() * globalHitDirection;
 
             /// move the initial track point to the readout plane
-            int gasGap = m_idHelperSvc->mmIdHelper().gasGap(layerID);
+            int gasGap = idHelper.gasGap(layerID);
             double shift = 0.5 * detectorReadoutElement->getDesign(layerID)->thickness;
             double scale = 0.0;
             if (gasGap == 1 || gasGap == 3) {
@@ -630,8 +611,8 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             double scaleSDO = -stripLayerPosition.z() / localDirection.z();
             Amg::Vector3D hitAtCenterOfGasGap = stripLayerPosition + scaleSDO * localDirection;
             Amg::Vector3D hitAtCenterOfGasGapGlobal = surf.transform() * hitAtCenterOfGasGap;
-            ATH_MSG_DEBUG("strip layer position z" << stripLayerPosition.z() << "hitAtCenterOfGasGap x" << hitAtCenterOfGasGap.x() << " y "
-                                                   << hitAtCenterOfGasGap.y() << " z " << hitAtCenterOfGasGap.z() << " gas gap " << gasGap);
+            ATH_MSG_DEBUG("strip layer position z" << stripLayerPosition.z() << "hitAtCenterOfGasGap " 
+                                                   << Amg::toString(hitAtCenterOfGasGap)<< " gas gap " << gasGap);
 
             // Don't consider electron hits below m_energyThreshold
             if (hit.kineticEnergy() < m_energyThreshold && std::abs(hit.particleEncoding()) == 11) {
@@ -640,9 +621,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
 
             // Perform Bound Check (making the call from the detector element to consider edge passivation)
             if (!detectorReadoutElement->insideActiveBounds(layerID, positionOnSurface)) {
-                ATH_MSG_DEBUG("m_exitcode = 1 : shiftTimeOffset = " << shiftTimeOffset << "hitOnSurface.z  = " << hitOnSurface.z()
-                                                                    << ", hitOnSurface.x  = " << hitOnSurface.x()
-                                                                    << ", hitOnSurface.y  = " << hitOnSurface.y());
+                ATH_MSG_DEBUG("m_exitcode = 1 : shiftTimeOffset = " << shiftTimeOffset << " "<<Amg::toString(hitOnSurface));
                 continue;
             }
 
@@ -658,16 +637,17 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             }
 
             // Re-definition Of ID
-            Identifier parentID = m_idHelperSvc->mmIdHelper().parentID(layerID);
-            Identifier digitID = m_idHelperSvc->mmIdHelper().channelID(parentID, m_idHelperSvc->mmIdHelper().multilayer(layerID),
-                                                                       m_idHelperSvc->mmIdHelper().gasGap(layerID), stripNumber);
+            Identifier parentID = idHelper.parentID(layerID);
+            Identifier digitID = idHelper.channelID(parentID, 
+                                                    idHelper.multilayer(layerID),
+                                                    idHelper.gasGap(layerID), stripNumber);
 
             // contain (name, eta, phi, multiPlet)
-            m_idHelperSvc->mmIdHelper().get_module_hash(layerID, moduleHash);
+            const IdentifierHash moduleHash = m_idHelperSvc->moduleHash(layerID);
 
             ATH_MSG_DEBUG(" looking up collection using moduleHash "
-                          << static_cast<int>(moduleHash) << " " << m_idHelperSvc->mmIdHelper().print_to_string(layerID)
-                          << " digitID: " << m_idHelperSvc->mmIdHelper().print_to_string(digitID));
+                          << static_cast<int>(moduleHash) << " " << m_idHelperSvc->toString(layerID)
+                          << " digitID: " << m_idHelperSvc->toString(digitID));
 
             const MuonGM::MuonChannelDesign* mmChannelDesign = detectorReadoutElement->getDesign(digitID);
             double distToChannel = mmChannelDesign->distanceToChannel(positionOnSurface, stripNumber);
@@ -677,7 +657,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             int geoStripNumber = mmChannelDesign->channelNumber(positionOnSurface);
             if (geoStripNumber == -1) ATH_MSG_WARNING("Failed to retrieve strip number");
             // retrieve channel position of closest active strip
-            Amg::Vector2D chPos;
+            Amg::Vector2D chPos{Amg::Vector2D::Zero()};
             if (!mmChannelDesign->center(geoStripNumber, chPos)) {
                 ATH_MSG_DEBUG("Failed to retrieve channel position for closest strip number "
                               << geoStripNumber
@@ -697,12 +677,11 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
 
             // Obtain Magnetic Field At Detector Surface
             Amg::Vector3D hitOnSurfaceGlobal = surf.transform() * hitOnSurface;
-            Amg::Vector3D magneticField{0.,0.,0.};
+            Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
             fieldCache.getField(hitOnSurfaceGlobal.data(), magneticField.data());
 
             // B-field in local cordinate, X ~ #strip, increasing to outer R, Z ~ global Z but positive to IP
-            Amg::Vector3D localMagneticField =
-                surf.transform().linear().inverse() * magneticField;
+            Amg::Vector3D localMagneticField = surf.transform().linear().inverse() * magneticField;
             if ((readoutSide).at(m_muonHelper->GetLayer(simId) - 1) == -1)
                 localMagneticField[Amg::y] = -localMagneticField[Amg::y];
 
@@ -719,7 +698,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
                 stripNumber, distToChannel, inAngle_XZ, inAngle_YZ, localMagneticField,
                 detectorReadoutElement->numberOfMissingBottomStrips(layerID) + 1,
                 detectorReadoutElement->numberOfStrips(layerID) - detectorReadoutElement->numberOfMissingTopStrips(layerID),
-                m_idHelperSvc->mmIdHelper().gasGap(layerID), eventTime + globalHitTime);
+                idHelper.gasGap(layerID), eventTime + globalHitTime);
 
             // fill the SDO collection in StoreGate
             // create here deposit for MuonSimData, link and tof
@@ -741,42 +720,18 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             float gainFraction = 1.0;
             if (m_doSmearing) {
                 // build identifier including the strip since layerId does not contain teh strip number
-                Identifier id = m_idHelperSvc->mmIdHelper().channelID(layerID, m_idHelperSvc->mmIdHelper().multilayer(layerID),
-                                                                      m_idHelperSvc->mmIdHelper().gasGap(layerID), stripNumber);
+                Identifier id = idHelper.channelID(layerID, 
+                                                   idHelper.multilayer(layerID),
+                                                   idHelper.gasGap(layerID), stripNumber);
                 ATH_CHECK(m_smearingTool->getGainFraction(id, gainFraction));
             }
             double stripPitch = detectorReadoutElement->getDesign(layerID)->channelWidth();
 
-            MM_StripToolOutput tmpStripOutput =
-                m_StripsResponseSimulation->GetResponseFrom(stripDigitInput, gainFraction, stripPitch, rndmEngine);
+            MM_StripToolOutput tmpStripOutput = m_StripsResponseSimulation->GetResponseFrom(stripDigitInput, gainFraction, stripPitch, rndmEngine);
             MM_ElectronicsToolInput stripDigitOutput(tmpStripOutput.NumberOfStripsPos(), tmpStripOutput.chipCharge(),
                                                      tmpStripOutput.chipTime(), digitID, hit.kineticEnergy());
 
-            // This block is purely validation
-            for (size_t i = 0; i < tmpStripOutput.NumberOfStripsPos().size(); ++i) {
-                int tmpStripID = tmpStripOutput.NumberOfStripsPos().at(i);
-                bool isValid{false};
-                Identifier cr_id = m_idHelperSvc->mmIdHelper().channelID(
-                    stName, m_idHelperSvc->mmIdHelper().stationEta(layerID), m_idHelperSvc->mmIdHelper().stationPhi(layerID),
-                    m_idHelperSvc->mmIdHelper().multilayer(layerID), m_idHelperSvc->mmIdHelper().gasGap(layerID), tmpStripID, isValid);
-                if (!isValid) {
-                    ATH_MSG_WARNING("MicroMegas digitization: failed to create a valid ID for (chip response) strip n. "
-                                    << tmpStripID << "; associated positions will be set to 0.0.");
-                } else {
-                    Amg::Vector2D cr_strip_pos{0., 0.};
-                    if (!detectorReadoutElement->stripPosition(cr_id, cr_strip_pos)) {
-                        ATH_MSG_WARNING("MicroMegas digitization: failed to associate a valid local position for (chip response) strip n. "
-                                        << tmpStripID << "; associated positions will be set to 0.0.");
-                    }
-                }
-            }
-
             v_stripDigitOutput.push_back(stripDigitOutput);
-
-            //
-            // Strip Response Simulation For This Hit
-            //
-            ////////////////////////////////////////////////////////////////////
 
         }  // Hit Loop
 
@@ -796,157 +751,61 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
         //
         MM_ElectronicsToolInput stripDigitOutputAllHits = combinedStripResponseAllHits(v_stripDigitOutput);
         if (!m_idHelperSvc->isMM(stripDigitOutputAllHits.digitID())) {
-            ATH_MSG_WARNING("Identifier from stripdigitOutputAllHits " << stripDigitOutputAllHits.digitID()
-                                                                       << " is not a MM Identifier, skipping");
+            ATH_MSG_WARNING("Identifier from stripdigitOutputAllHits " 
+                            << m_idHelperSvc->toString(stripDigitOutputAllHits.digitID())
+                            << " is not a MM Identifier, skipping");
             continue;
         }
 
         // Create Electronics Output with peak finding setting
         //
-        MM_DigitToolOutput electronicsPeakOutput(m_ElectronicsResponseSimulation->getPeakResponseFrom(stripDigitOutputAllHits));
-        if (!electronicsPeakOutput.isValid())
-            ATH_MSG_DEBUG(
-                "MM_DigitizationTool::doDigitization() -- there is no electronics response (peak finding mode) even though there is a "
-                "strip response.");
-
-        // Create Electronics Output with threshold setting
-        //
-        MM_DigitToolOutput electronicsThresholdOutput(m_ElectronicsResponseSimulation->getThresholdResponseFrom(stripDigitOutputAllHits));
-        if (!electronicsThresholdOutput.isValid())
-            ATH_MSG_DEBUG(
-                "MM_DigitizationTool::doDigitization() -- there is no electronics response (threshold mode) even though there is a strip "
-                "response.");
-
-        // Choose which of the above outputs is used for readout
-        //
-        MM_DigitToolOutput* electronicsOutputForReadout = nullptr;
-        if (m_vmmReadoutMode == "peak")
-            electronicsOutputForReadout = &electronicsPeakOutput;
-        else if (m_vmmReadoutMode == "threshold")
-            electronicsOutputForReadout = &electronicsThresholdOutput;
-        else {
-            ATH_MSG_ERROR("Failed to setup readout signal from VMM. Readout mode incorrectly set");
-            return StatusCode::FAILURE;
+        
+        MM_DigitToolOutput electronicsOutputForReadout {m_vmmReadoutMode == "peak" 
+                                                         ? m_ElectronicsResponseSimulation->getPeakResponseFrom(stripDigitOutputAllHits)
+                                                         : m_ElectronicsResponseSimulation->getThresholdResponseFrom(stripDigitOutputAllHits)};
+        if (!electronicsOutputForReadout.isValid()) {
+            ATH_MSG_DEBUG("MM_DigitizationTool::doDigitization() -- "<<
+                         " there is no electronics response (peak finding mode) even though there is a strip response.");
         }
-        // but this should be impossible from initialization checks
-
-        // Choose which of the above outputs is used for triggering
-        //
-        MM_DigitToolOutput* electronicsOutputForTriggerPath = nullptr;
-        if (m_vmmARTMode == "peak")
-            electronicsOutputForTriggerPath = &electronicsPeakOutput;
-        else if (m_vmmARTMode == "threshold")
-            electronicsOutputForTriggerPath = &electronicsThresholdOutput;
-        else {
-            ATH_MSG_ERROR("Failed to setup trigger signal from VMM. Readout mode incorrectly set");
-            return StatusCode::FAILURE;
-        }
-        // but this should be impossible from initialization checks
-
-        // Apply Dead-time for strip
-        //
-        MM_DigitToolOutput electronicsOutputForTriggerPathWStripDeadTime(
-            m_ElectronicsResponseSimulation->applyDeadTimeStrip(*electronicsOutputForTriggerPath));
-
-        // ART: The fastest strip signal per VMM id should be selected for trigger
-        //
-        int chMax = m_idHelperSvc->mmIdHelper().channelMax(layerID);
-        int stationEta = m_idHelperSvc->mmIdHelper().stationEta(layerID);
-        MM_ElectronicsToolTriggerOutput electronicsTriggerOutput(
-            m_ElectronicsResponseSimulation->getTheFastestSignalInVMM(electronicsOutputForTriggerPathWStripDeadTime, chMax, stationEta));
-
-        // Apply Dead-time in ART
-        //
-        MM_ElectronicsToolTriggerOutput electronicsTriggerOutputAppliedARTDeadTime(
-            m_ElectronicsResponseSimulation->applyDeadTimeART(electronicsTriggerOutput));
-
-        // To apply an arbitrary time-smearing of VMM signals
-        //
-        MM_ElectronicsToolTriggerOutput electronicsTriggerOutputAppliedARTTiming(
-            m_ElectronicsResponseSimulation->applyARTTiming(electronicsTriggerOutputAppliedARTDeadTime, rndmEngine, 0., 0.));
-
-        const MM_ElectronicsToolTriggerOutput& finalElectronicsTriggerOutput(electronicsTriggerOutputAppliedARTTiming);
-
-        //
-        // VMM Simulation
-        //
-        ////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////
-        //
-        // (VMM-Level) Output Of Digitization
-        //
-        std::unique_ptr<MmDigit> newDigit = nullptr;
-
-        if (!m_doSmearing) {
-            newDigit =
-                std::make_unique<MmDigit>(stripDigitOutputAllHits.digitID(), electronicsOutputForReadout->stripTime(),
-                                          electronicsOutputForReadout->stripPos(), electronicsOutputForReadout->stripCharge(),
-                                          electronicsOutputForReadout->stripTime(), electronicsOutputForReadout->stripPos(),
-                                          electronicsOutputForReadout->stripCharge(), finalElectronicsTriggerOutput.chipTime(),
-                                          finalElectronicsTriggerOutput.NumberOfStripsPos(), finalElectronicsTriggerOutput.chipCharge(),
-                                          finalElectronicsTriggerOutput.MMFEVMMid(), finalElectronicsTriggerOutput.VMMid());
-        } else {
-            std::vector<int> stripPosSmeared;
-            std::vector<float> stripChargeSmeared;
-            std::vector<float> stripTimeSmeared;
-            Identifier digitId = stripDigitOutputAllHits.digitID();
-            for (unsigned int i = 0; i < electronicsOutputForReadout->stripTime().size(); ++i) {
-                int pos = electronicsOutputForReadout->stripPos().at(i);
-                float time = electronicsOutputForReadout->stripTime().at(i);
-                float charge = electronicsOutputForReadout->stripCharge().at(i);
-                bool acceptStrip = true;
-
-                /// use the smearing tool to update time and charge
-                ATH_CHECK(m_smearingTool->smearTimeAndCharge(digitId, time, charge, acceptStrip,rndmEngine));
-
-                if (acceptStrip) {
-                    stripPosSmeared.push_back(pos);
-                    stripTimeSmeared.push_back(time);
-                    stripChargeSmeared.push_back(charge);
-                } else {
-                    /// drop the strip
-                    continue;
-                }
-            }
-
-            if (!stripPosSmeared.empty()) {
-                newDigit =
-                    std::make_unique<MmDigit>(digitId, stripTimeSmeared, stripPosSmeared, stripChargeSmeared, stripTimeSmeared,
-                                              stripPosSmeared, stripChargeSmeared, finalElectronicsTriggerOutput.chipTime(),
-                                              finalElectronicsTriggerOutput.NumberOfStripsPos(), finalElectronicsTriggerOutput.chipCharge(),
-                                              finalElectronicsTriggerOutput.MMFEVMMid(), finalElectronicsTriggerOutput.VMMid());
-            } else {
+       
+        
+        for (unsigned int firedCh = 0; firedCh < electronicsOutputForReadout.stripPos().size(); ++firedCh) {
+            
+            const int channel = electronicsOutputForReadout.stripPos()[firedCh];
+            float time = electronicsOutputForReadout.stripTime()[firedCh];
+            float charge = electronicsOutputForReadout.stripCharge()[firedCh];
+            bool isValid{false};
+            const Identifier digitID = idHelper.channelID(stripDigitOutputAllHits.digitID(),
+                                                          idHelper.multilayer(stripDigitOutputAllHits.digitID()),
+                                                          idHelper.gasGap(stripDigitOutputAllHits.digitID()),
+                                                          channel, isValid);
+            if (!isValid) {
+                ATH_MSG_DEBUG("Ghost strip fired... Ghost busters... ");
                 continue;
             }
-        }
+            bool acceptStrip = true;
+            if (m_doSmearing) {
+                /// use the smearing tool to update time and charge
+                ATH_CHECK(m_smearingTool->smearTimeAndCharge(digitID, time, charge, acceptStrip, rndmEngine));
 
-        // The collections should use the detector element hashes not the module hashes to be consistent with the PRD granularity.
-        // IdentifierHash detIdhash ;
-        // set RE hash id
-        const Identifier elemId = m_idHelperSvc->mmIdHelper().elementID(stripDigitOutputAllHits.digitID());
-        if (!m_idHelperSvc->isMM(elemId)) {
-            ATH_MSG_WARNING("given Identifier " << elemId.get_compact() << " is not a MM Identifier, skipping");
-            continue;
+            }
+            if (!acceptStrip) {
+                ATH_MSG_DEBUG("Exaggeated with smearing "<<m_idHelperSvc->toString(digitID));
+                continue;
+            }
+            std::unique_ptr<MmDigit> newDigit = std::make_unique<MmDigit>(digitID, time, charge);
+            
+            const IdentifierHash moduleHash = m_idHelperSvc->moduleHash(digitID);
+            if (moduleHash >= collections.size()) {
+                collections.resize(moduleHash+1);
+            }
+            MmDigitCollection* coll = collections[moduleHash].get();
+            if (!coll) {
+                collections[moduleHash] = std::make_unique<MmDigitCollection>(m_idHelperSvc->chamberId(digitID), moduleHash);
+                coll = collections[moduleHash].get();
+            }
+            coll->push_back(std::move(newDigit));            
         }
-        m_idHelperSvc->mmIdHelper().get_module_hash(elemId, moduleHash);
-
-        // store new collection
-        if (moduleHash >= collections.size()) {
-          collections.resize (moduleHash+1);
-        }
-        MmDigitCollection* coll = collections[moduleHash].get();
-        if (!coll) {
-            collections[moduleHash] = std::make_unique<MmDigitCollection>(elemId, moduleHash);
-            coll = collections[moduleHash].get();
-        }
-        coll->push_back(std::move(newDigit));
-
-        //
-        // (VMM-Level) Output Of Digitization
-        //
-        ////////////////////////////////////////////////////////////////////
-
         v_stripDigitOutput.clear();
     }
 

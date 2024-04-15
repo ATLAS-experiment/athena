@@ -438,7 +438,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         }
     }
     return StatusCode::SUCCESS;
-}
+} 
 
 // For MHT, MST, and MET, it sums the x and y components across FPGAs, and also returnes
 // the sum in quadrature (which is actually only used for MET, and discared for MHT and MST)
@@ -453,36 +453,44 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     int16_t sum_x = 0;
     int16_t sum_y = 0;
 
-    if (type == 1) {
+    // Extract the x and y components and sum them for the three FPGAs
+    for (size_t fpga = 0; fpga < 3; fpga++) {
+        int16_t x = tob[fpga] >> gPos::GLOBAL_X_BIT & gPos::GLOBAL_X_MASK;
+        int16_t y = tob[fpga] >> gPos::GLOBAL_Y_BIT & gPos::GLOBAL_Y_MASK;
+        if (x & 0x00080000) { x  = 0xFFFF0000 | x;  }
+        if (y & 0x00080000) { y  = 0xFFFF0000 | y;  }
+        sum_x += x;
+        sum_y += y;
+    }
+
+    if (type == 1) {//we are considering the scalar case (sum_x = MET and sum_y = SumEt) 
         ATH_MSG_DEBUG("  scalar tob, saving " << scalar << " in X component");
-        sum_x = scalar;
-        sum_y = 0;
+        sum_x = scalar; //Total MET
+        if( sum_y > 0x000FFF) sum_y = 0x000FFF; //Overflow control for SumEt
+        if( sum_y < 0) sum_y = 0;
 
     } else {
-
-        // Extract the x and y components and sum them for the three FPGAs
-        for (size_t fpga = 0; fpga < 3; fpga++) {
-            int16_t x = tob[fpga] >> gPos::GLOBAL_X_BIT & gPos::GLOBAL_X_MASK;
-            int16_t y = tob[fpga] >> gPos::GLOBAL_Y_BIT & gPos::GLOBAL_Y_MASK;
-            sum_x += x;
-            sum_y += y;
-        }
-        // Apply truncation
-        sum_x = sum_x >> gPos::GLOBAL_BIT_TRUNCATION;
-        sum_y = sum_y >> gPos::GLOBAL_BIT_TRUNCATION;
-
         if (sum_x < -0x0007FF) sum_x = -0x0007FF;
-        if (sum_y < -0x0007FF) sum_y = -0x0007FF;
-
         if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
+
+        if (sum_y < -0x0007FF) sum_y = -0x0007FF;
         if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
     }
 
     ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);
 
+    uint32_t METword = 0;
+
+    METword = (sum_y &  0x00000FFF) << 0; //set the Quantity2 to the corresponding slot (LSB)
+    METword = METword | (sum_x  &  0x00000FFF) << 12;//Quantity 1 (in bit number 12)
+    if (sum_y != 0) METword = METword | 0x00000001 << 24;//Status bit for Quantity 2 (0 if quantity is null)
+    if (sum_x != 0) METword = METword | 0x00000001 << 25;//Status bit for Quantity 1 (0 if quantity is null)
+    METword = METword | (type  &  0x0000001F) << 26;//TOB ID (5 bits starting at 26)
+
     // Save to the EDM
     std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
     container->push_back(std::move(myEDM));
+    container->back()->setWord(METword);
     container->back()->setQuantityOne(sum_x);
     container->back()->setQuantityTwo(sum_y);
     container->back()->setScaleOne(m_gXE_scale);
@@ -491,12 +499,11 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     container->back()->setStatusTwo(1);
     container->back()->setSaturated(0);
     container->back()->setGlobalType(type);
+    
 
     int MET2 = sum_x * sum_x + sum_y * sum_y;
-    int16_t MET = 0x0;
-
-    if (MET2 > 0x000FFF) MET = 0x000FFF;
-    else MET = std::sqrt(MET2);
+    int16_t MET = std::sqrt(MET2);
+    if (MET > 0x000FFF) MET = 0x000FFF;
 
     return MET;
 

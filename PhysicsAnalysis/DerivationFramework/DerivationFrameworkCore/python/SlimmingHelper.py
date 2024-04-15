@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ####################################################################
 # SlimmingHelper.py
@@ -67,15 +67,8 @@ class lockable_list(list):
 def buildNamesAndTypes(*args):
         namesAndTypes = {}
         if len(args)==0:
-                # 1st possibility: non-CA job, user didn't provide a list from ComponentAccumulator 
-                from RecExConfig.InputFilePeeker import inputFileSummary
-                if inputFileSummary['eventdata_items'] is not None:
-                        for item in inputFileSummary['eventdata_items']:
-                                namesAndTypes[item[1].strip('.')] = item[0]
-                # 2nd possibility: CA job, user provided the list from ComponentAccumulator
-                else:
-                        from DerivationFrameworkCore.StaticNamesAndTypes import StaticNamesAndTypes
-                        namesAndTypes = StaticNamesAndTypes
+                from DerivationFrameworkCore.StaticNamesAndTypes import StaticNamesAndTypes
+                namesAndTypes = StaticNamesAndTypes
         else:
                 for item in args[0]:
                         item = item.split('#')
@@ -83,7 +76,7 @@ def buildNamesAndTypes(*args):
         return namesAndTypes      
 
 class SlimmingHelper:
-        def __init__(self,inputName,**kwargs):
+        def __init__(self, inputName, flags, **kwargs):
                 self.__dict__["_locked"] = False
                 self.name = inputName
                 self.FinalItemList = lockable_list() # The final item list that will be appended to the output stream
@@ -93,7 +86,7 @@ class SlimmingHelper:
                 self.SmartCollections = lockable_list()
                 self.AllVariables = lockable_list() # Containers for which all branches should be kept
                 self.AppendToDictionary = {}
-                self.ConfigFlags = kwargs.pop("ConfigFlags", None) # Config flags to be set in CA configs
+                self.flags = flags
                 self.IncludeTriggerNavigation = True
                 self.IncludeAdditionalTriggerContent = False
                 self.IncludeMuonTriggerContent = False
@@ -235,7 +228,7 @@ class SlimmingHelper:
                                 masterItemList.extend(self.GetExtraItems(item))
 
                 #Add on-the-fly containers to the dictionary
-                for _cont,_type in ContainersOnTheFly(self.ConfigFlags):
+                for _cont,_type in ContainersOnTheFly(self.flags):
                         if _cont not in self.AppendToDictionary:
                                 self.AppendToDictionary[_cont]=_type
 
@@ -307,8 +300,16 @@ class SlimmingHelper:
                                 self.FinalItemList.append(item)
 
                 if (triggerContent and self.IncludeTriggerNavigation):
+                        # Run2
                         for item in CompulsoryTriggerNavigation:
                                 self.FinalItemList.append(item)
+                        # Run3
+                        from TrigDecisionTool.TrigDecisionToolConfig import possible_keys
+                        for item in possible_keys:
+                                if item == "HLTNav_Summary": # This is not a compact navigation summary collection, unlike the others in this list
+                                        continue
+                                self.FinalItemList.append('xAOD::TrigCompositeContainer#'+item)
+                                self.FinalItemList.append('xAOD::TrigCompositeAuxContainer#'+item+'Aux.')
 
                 # Add non-xAOD and on-the-fly content (not covered by smart slimming so no expansion)
                 badItemsWildcards = []
@@ -348,7 +349,7 @@ class SlimmingHelper:
         def GetSmartItems(self,collectionName):
                 # Look up what is needed for this container type
                 items = []
-                if collectionName not in FullListOfSmartContainers(self.ConfigFlags):
+                if collectionName not in FullListOfSmartContainers(self.flags):
                         raise RuntimeError("Smart slimming container "+collectionName+" does not exist or does not have a smart slimming list")
                 if collectionName=="EventInfo":
                         from DerivationFrameworkCore.EventInfoContent import EventInfoContent
@@ -363,15 +364,15 @@ class SlimmingHelper:
                         from DerivationFrameworkEGamma.PhotonsCPContent import PhotonsCPContent
                         items.extend(PhotonsCPContent)
                 elif collectionName=="Muons":
-                        if not self.ConfigFlags:
+                        if not self.flags:
                             raise RuntimeError("We're in the era of component accumulator. Please setup your job with CA if you want to have muons")
                         from DerivationFrameworkMuons.MuonsCommonConfig import MuonCPContentCfg
-                        items.extend(MuonCPContentCfg(self.ConfigFlags))
+                        items.extend(MuonCPContentCfg(self.flags))
                 elif collectionName=="MuonsLRT":
-                        if not self.ConfigFlags:
+                        if not self.flags:
                             raise RuntimeError("We're in the era of component accumulator. Please setup your job with CA if you want to have muons")
                         from DerivationFrameworkMuons.MuonsCommonConfig import MuonCPContentLRTCfg
-                        items.extend(MuonCPContentLRTCfg(self.ConfigFlags))                        
+                        items.extend(MuonCPContentLRTCfg(self.flags))
                 elif collectionName=="TauJets":
                         from DerivationFrameworkTau.TauJetsCPContent import TauJetsCPContent
                         items.extend(TauJetsCPContent)
@@ -489,57 +490,63 @@ class SlimmingHelper:
                 elif collectionName=="AntiKtVR30Rmax4Rmin02PV0TrackJets":
                         from DerivationFrameworkJetEtMiss.AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent import AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent
                         items.extend(AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent)
+                elif collectionName=="BTagging_AntiKt4UFOCSSK":
+                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
+                        items.extend(BTaggingStandardContent("AntiKt4UFOCSSKJets", self.flags))
+                elif collectionName=="BTagging_AntiKt4UFOCSSK_expert":
+                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
+                        items.extend(BTaggingExpertContent("AntiKt4UFOCSSKJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4EMPFlow":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4EMPFlowJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("AntiKt4EMPFlowJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4EMPFlow_expert":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt4EMPFlowJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt4EMPFlowJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4EMTopo":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4EMTopoJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("AntiKt4EMTopoJets", self.flags))
                 elif collectionName=="BTagging_AntiKtVR30Rmax4Rmin02Track":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.flags))
                 elif collectionName=="BTagging_AntiKtVR30Rmax4Rmin02Track_expert":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.flags))
                 elif collectionName=="BTagging_AntiKt2Track":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt2PV0TrackJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("AntiKt2PV0TrackJets", self.flags))
                 elif collectionName=="BTagging_AntiKt3Track":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt3PV0TrackJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("AntiKt3PV0TrackJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4Track":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4PV0TrackJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("AntiKt4PV0TrackJets", self.flags))
                 elif collectionName=="BTagging_AntiKt8EMTopoExKt2Sub":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt8EMTopoExKt2SubJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt8EMTopoExKt2SubJets", self.flags))
                 elif collectionName=="BTagging_AntiKt8EMTopoExKt3Sub":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt8EMTopoExKt3SubJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt8EMTopoExKt3SubJets", self.flags))
                 elif collectionName=="BTagging_AntiKt8EMTopoExCoM2Sub":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt8EMTopoExCoM2SubJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt8EMTopoExCoM2SubJets", self.flags))
                 elif collectionName=="BTagging_AntiKt8EMPFlowExKt2Sub":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt2SubJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt2SubJets", self.flags))
                 elif collectionName=="BTagging_AntiKt8EMPFlowExKt3Sub":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt3SubJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt3SubJets", self.flags))
                 elif collectionName=="BTagging_AntiKt8EMPFlowExKt2GASub":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt2GASubJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt2GASubJets", self.flags))
                 elif collectionName=="BTagging_AntiKt8EMPFlowExKt3GASub":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt3GASubJets", self.ConfigFlags))
+                        items.extend(BTaggingExpertContent("AntiKt8EMPFlowExKt3GASubJets", self.flags))
                 elif collectionName=="BTagging_DFAntiKt4HI":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("DFAntiKt4HIJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("DFAntiKt4HIJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4HI":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4HIJets", self.ConfigFlags))
+                        items.extend(BTaggingStandardContent("AntiKt4HIJets", self.flags))
                 elif collectionName=="InDetTrackParticles":
                         from DerivationFrameworkInDet.InDetTrackParticlesCPContent import InDetTrackParticlesCPContent
                         items.extend(InDetTrackParticlesCPContent)

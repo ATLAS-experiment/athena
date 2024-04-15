@@ -36,7 +36,7 @@ def createLArMonConfigFlags():
     # and individual parameters
     acf.addFlag('LArMon.doLArRawMonitorSignal', False)
     # parameters for individual algos
-    acf.addFlag('LArMon.customFEBsToMonitor','endcapAft19slot12,endcapAft19slot09,endcapAft20slot09')
+    acf.addFlag('LArMon.customFEBsToMonitor',['endcapAft19slot12','endcapAft19slot09','endcapAft20slot09'])
     return acf
 
 def addLArMonFlags():

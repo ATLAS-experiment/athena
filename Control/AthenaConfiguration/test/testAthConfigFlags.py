@@ -2,8 +2,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import Format
 
+import argparse
 import copy
 import unittest
 
@@ -178,27 +180,6 @@ class BasicTests(FlagsSetup):
         copy.copy(self.flags)
         copy.deepcopy(self.flags)
 
-    def test_delete(self):
-        # test item delete
-        no_A = copy.deepcopy(self.flags)
-        self.assertTrue( no_A.hasCategory("A") )
-        del no_A['A']
-        with self.assertRaises(AttributeError):
-            no_A.A
-        self.assertNotEqual(self.flags, no_A)
-        self.assertFalse( no_A.hasCategory("A") )
-        # test attribute delete
-        cval = self.flags.A.B.C
-        no_C = copy.deepcopy(self.flags)
-        del no_C.A.B.C
-        with self.assertRaises(AttributeError):
-            no_C.A.B.C
-        # test adding back a flag
-        no_C.addFlag("A.B.C", cval)
-        no_C.lock()
-        self.flags.lock()
-        self.assertEqual(no_C.athHash(), self.flags.athHash())
-
     def test_asdict(self):
         adict = self.flags.A.asdict()
         self.assertEqual(self.flags.A.B.C, adict['B']['C'])
@@ -278,7 +259,6 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.flags.X.a = 30
         copyf = self.flags.cloneAndReplace( "X", "Z.Xclone1")
         self.assertEqual( copyf.X.a, 20, "dynamically loaded flags have wrong value")
-#        self.assertEqual( copyf.T.Abool, False, "The flags clone does not have dynamic flags")
         copyf.dump()
 
         self.flags.lock()
@@ -301,6 +281,12 @@ class TestFlagsSetupDynamic(FlagsSetup):
         print("\nFlag after double remap ..")
         print("-"*80)
 
+    def test_overwriteFlagsProtectAgainstSubClones(self):
+        self.flags.lock()
+        newf = self.flags.cloneAndReplace("R", "X")
+        with self.assertRaises(RuntimeError):
+            newf = newf.cloneAndReplace("X.R", "A")
+    
     def test_copyAsDict(self):
         """test for asdict with cloned flags"""
         zdict = self.flags.asdict()['Z']
@@ -324,43 +310,173 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.assertTrue( self.flags.hasFlag("Z.A") )
         self.assertTrue( self.flags.hasCategory("Z.C") )
 
-    def test_cloneHash(self):
-        # compare copy hash to clone hash, should be equal
+    def test_cloneExists(self):
+        """test if flags can be found after cloning"""
+        clonef = self.flags.cloneAndReplace('W', 'Z')
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W.A'))
+        self.assertFalse(clonef.hasFlag('Z.A'))
+        
+    def test_nonReplacingCloneExists(self):
+        clonef = self.flags.cloneAndReplace('W', 'Z', True)
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W.A'))
+        self.assertTrue(clonef.hasFlag('Z.A'))
+    
+    def test_nonReplacingMultiCloneExists(self):
+        clonef = self.flags.cloneAndReplace('W1', 'Z', True)
+        clonef = clonef.cloneAndReplace('W2', 'Z', True)
+        clonef = clonef.cloneAndReplace('W3', 'W1', True)
+        clonef.loadAllDynamicFlags()
+        self.assertTrue(clonef.hasFlag('W1.A'))
+        self.assertTrue(clonef.hasFlag('W2.A'))
+        self.assertTrue(clonef.hasFlag('W3.A'))
+        self.assertTrue(clonef.hasFlag('Z.A'))
+    
+    def test_complexClone(self):
+        clonef = self.flags.cloneAndReplace('W1', 'Z', True)
+        clonef = clonef.cloneAndReplace('W2', 'Z', True)
+        clonef = clonef.cloneAndReplace('W3', 'W1', True)
+        clonef = clonef.cloneAndReplace('W4', 'W1', False)
+        clonef = clonef.cloneAndReplace('W5', 'Z', False)
+        self.assertTrue(clonef.hasFlag('W2.A'))
+        self.assertTrue(clonef.hasFlag('W3.A'))
+        self.assertTrue(clonef.hasFlag('W4.A'))
+        self.assertTrue(clonef.hasFlag('W5.A'))
+        self.assertFalse(clonef.hasFlag('W1.A'))
+        self.assertFalse(clonef.hasFlag('Z.A'))
+        
+    def test_circularClone(self):
+        clonef1 = self.flags.cloneAndReplace('W', 'Z')
+        clonef2 = clonef1.cloneAndReplace('Z', 'W')
+        clonef1.loadAllDynamicFlags()
+        clonef2.loadAllDynamicFlags()
+        self.assertTrue(clonef1.hasFlag('W.A'))
+        self.assertTrue(clonef2.hasFlag('Z.A'))
+        self.assertFalse(clonef1.hasFlag('Z.A'))
+        self.assertFalse(clonef2.hasFlag('W.A'))
+        
+    def test_circularNonReplacingClone(self):
+        clonef1 = self.flags.cloneAndReplace('W', 'Z', True)
+        clonef2 = clonef1.cloneAndReplace('Z', 'W', True)
+        clonef1.loadAllDynamicFlags()
+        clonef2.loadAllDynamicFlags()
+        self.assertTrue(clonef1.hasFlag('Z.A'))
+        self.assertTrue(clonef1.hasFlag('W.A'))
+        self.assertTrue(clonef2.hasFlag('Z.A'))
+        self.assertTrue(clonef2.hasFlag('W.A'))
+        
+    def test_complexCircularClone(self):
+        clonef0 = self.flags.cloneAndReplace('W', 'Z', True)
+        clonef0 = clonef0.cloneAndReplace('W1', 'W', True)
+        clonef0 = clonef0.cloneAndReplace('W2', 'W1', True)
+        clonef0 = clonef0.cloneAndReplace('WW', 'W')
+        clonef1 = clonef0.cloneAndReplace('ZZ', 'Z')
+        clonef2 = clonef1.cloneAndReplace('Z', 'ZZ')
+        clonef3 = clonef1.cloneAndReplace('Z', 'T')
+        
+        self.assertTrue(clonef0.hasFlag('Z.A'))
+        self.assertTrue(clonef0.hasFlag('W1.A'))
+        self.assertTrue(clonef0.hasFlag('W2.A'))
+        self.assertTrue(clonef0.hasFlag('WW.A'))
+        self.assertFalse(clonef0.hasFlag('W.A'))
+        
+        self.assertTrue(clonef1.hasFlag('ZZ.A'))
+        self.assertTrue(clonef1.hasFlag('W1.A'))
+        self.assertTrue(clonef1.hasFlag('W2.A'))
+        self.assertTrue(clonef1.hasFlag('WW.A'))
+        self.assertFalse(clonef1.hasFlag('Z.A'))
+        self.assertFalse(clonef1.hasFlag('W.A'))
+        
+        self.assertTrue(clonef2.hasFlag('Z.A'))
+        self.assertTrue(clonef2.hasFlag('W1.A'))
+        self.assertTrue(clonef2.hasFlag('W2.A'))
+        self.assertTrue(clonef2.hasFlag('WW.A'))
+        self.assertFalse(clonef2.hasFlag('ZZ.A'))
+        self.assertFalse(clonef2.hasFlag('W.A'))
+        
+        self.assertTrue(clonef3.hasFlag('ZZ.A'))
+        self.assertTrue(clonef3.hasFlag('W1.A'))
+        self.assertTrue(clonef3.hasFlag('W2.A'))
+        self.assertTrue(clonef3.hasFlag('WW.A'))
+        self.assertTrue(clonef3.hasFlag('Z.Abool'))
+        self.assertFalse(clonef3.hasFlag('Z.A'))
+        self.assertFalse(clonef3.hasFlag('W.A'))
+        self.assertFalse(clonef3.hasFlag('ZZ.Abool'))
+        self.assertFalse(clonef3.hasFlag('W.Abool'))
+        self.assertFalse(clonef3.hasFlag('W1.Abool'))
+        self.assertFalse(clonef3.hasFlag('W2.Abool'))
+        self.assertFalse(clonef3.hasFlag('WWW.Abool'))
+        
+    def test_cloneIter(self):
+        # top level check
+        self.assertTrue('Z' in self.flags)
+        self.assertTrue('A' in self.flags.Z)
+        clonez2w = self.flags.cloneAndReplace('W', 'Z')
+        self.assertFalse('Z' in clonez2w)
+        self.assertTrue('W' in clonez2w)
+        self.assertFalse('Z' in clonez2w.W)
+        self.assertTrue('A' in clonez2w.W)
+
+        # check one level down
+        self.assertTrue('C' in self.flags.Z)
+        clonec2x = self.flags.cloneAndReplace('Z.X', 'Z.C')
+        self.assertTrue('X' in clonec2x.Z)
+        self.assertFalse('C' in clonec2x.Z)
+
+    def test_delete(self):
+        # test item delete
+        no_A = copy.deepcopy(self.flags)
+        self.assertTrue( no_A.hasCategory("A") )
+        del no_A['A']
+        with self.assertRaises(AttributeError):
+            no_A.A
+        self.assertNotEqual(self.flags, no_A)
+        self.assertFalse( no_A.hasCategory("A") )
+        # test attribute delete
+        cval = self.flags.A.B.C
+        no_C = copy.deepcopy(self.flags)
+        del no_C.A.B.C
+        with self.assertRaises(AttributeError):
+            no_C.A.B.C
+        # test adding back a flag
+        no_C.addFlag("A.B.C", cval)
+        no_C.lock()
+        self.flags.lock()
+        self.assertEqual(no_C.A.B.C, self.flags.A.B.C)
+
+    def test_hash_after_loadAllDynamic(self):
         copyflags = copy.deepcopy(self.flags)
-        copyflags.loadAllDynamicFlags()
         copyflags.lock()
-        copyhash = copyflags.athHash()
-        cloneflags = self.flags.clone()
-        cloneflags.loadAllDynamicFlags()
-        cloneflags.lock()
-        clonehash = cloneflags.athHash()
-        self.assertEqual(copyhash, clonehash)
+        initialHash = copyflags.athHash()
+        copyflags.loadAllDynamicFlags()
+        postHash = copyflags.athHash()
+        self.assertEqual(initialHash, postHash, "After loading all dynamic flags the hash has changed")
 
-        # compare copy hash to cloneAndReplace hash, should not be equal
-        clonew = self.flags.cloneAndReplace('W', 'Z')
-        clonew.loadAllDynamicFlags()
-        clonew.lock()
-        clonewhash = clonew.athHash()
-        # this should not be equal, the flags don't have the same
-        # content
-        self.assertNotEqual(clonewhash, clonehash)
+    def test_hash_clonedFlagsHaveDifferenHash(self):
+        cloneFlags = self.flags.clone()
+        cloneFlags.lock()
+        cloneHash = cloneFlags.athHash()
 
-        # copy back into Z
-        clonez = clonew.cloneAndReplace('Z', 'W')
-        clonez.lock()
-        clonezhash = clonez.athHash()
-        self.assertEqual(clonehash, clonezhash)
+        cloneFlags2 = self.flags.clone()
+        cloneFlags2.lock()
+        cloneHash2 = cloneFlags2.athHash()
+        self.assertNotEqual(cloneHash, cloneHash2, "flags after another clone should have different hash")
 
-        # compare first clone to second clone
-        cloneflags2 = self.flags.clone()
-        cloneflags2.loadAllDynamicFlags()
-        cloneflags2.lock()
-        clonehash2 = cloneflags2.athHash()
-        # this should be equal, they have the same flags
-        self.assertEqual(clonehash2, clonehash)
-        # this should not be equal, since a group was replaced
-        self.assertNotEqual(clonehash2, clonewhash)
+    def test_hash_cloneAndReplace(self):
+        origFlags = self.flags.clone()
+        origFlags.lock()
+        origHash = origFlags.athHash()
 
+        cloneWFlags = origFlags.cloneAndReplace('W', 'Z')
+        cloneWHash = cloneWFlags.athHash()
+
+        self.assertNotEqual(origHash, cloneWHash, "flags after clone and replace should have different hash")
+
+
+        cloneZFlags = cloneWFlags.cloneAndReplace('Z', 'W')
+        cloneZHash = cloneZFlags.athHash()
+        self.assertEqual(origHash, cloneZHash, "cloneAndReplace reversing application should restore the hash")
 
 class TestDynamicDependentFlags(unittest.TestCase):
     def test(self):
@@ -380,12 +496,7 @@ class TestDynamicDependentFlags(unittest.TestCase):
 
 class FlagsFromArgsTest(unittest.TestCase):
     def setUp(self):
-        self.flags = AthConfigFlags()
-        self.flags.addFlag('Exec.OutputLevel',3) #Global Output Level
-        self.flags.addFlag('Exec.MaxEvents',-1)
-        self.flags.addFlag("Exec.SkipEvents",0)
-        self.flags.addFlag("Exec.DebugStage","")
-        self.flags.addFlag('Input.Files',[])
+        self.flags = initConfigFlags()
         self.flags.addFlag('detA.flagB',0)
         self.flags.addFlag("detA.flagC","")
         self.flags.addFlag("detA.flagD", [], type=list)
@@ -429,6 +540,7 @@ class FlagsFromArgsTest(unittest.TestCase):
 class FlagsHelpTest(unittest.TestCase):
     def setUp(self):
         self.flags = AthConfigFlags()
+        self.parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
         self.flags.addFlag("Flag0","",help="This is Flag0")
         self.flags.addFlag("CatA.Flag1","",help="This is Flag1")
         self.flags.addFlag("CatA.SubCatA.Flag2","",help="This is Flag2")
@@ -440,9 +552,13 @@ class FlagsHelpTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             f = io.StringIO()
             with contextlib.redirect_stdout(f):
-                self.flags.fillFromArgs(args.split(" "))
-        if expected not in f.getvalue(): print(f.getvalue())
-        self.assertTrue(expected in f.getvalue())
+                self.flags.fillFromArgs(args.split(" "), parser=self.parser)
+        # Ignore whitespace changes
+        expected = ' '.join(expected.split())
+        value = ' '.join(f.getvalue().split())
+        if expected not in value:
+            print(f.getvalue())
+        self.assertTrue(expected in value)
 
     def test_basicHelp(self):
         # tests printing top-level help message
@@ -481,8 +597,8 @@ flags and positional arguments:
         # in the help text. This is useful to see the 'effect' of other arguments on the flags
         # this test also shows the use of the list terminator e.g. for fileInput list
         self.flags.addFlag("Input.Files",[],help="List of input files")
-        self.do_test(args="--filesInput file1 file2 -- --help Input",expected="""flags:
-  Input.Files  : List of input files (default: ['file1', 'file2'])
+        self.do_test(args="CatA.SubCatA.Flag2=42 -- --help CatA.SubCatA",expected="""flags:
+  CatA.SubCatA.Flag2  : This is Flag2 (default: 42)
 """)
 
 

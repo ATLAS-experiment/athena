@@ -64,11 +64,14 @@ StatusCode LArBadChannelCondAlg::execute(const EventContext& ctx) const{
        std::vector<std::pair<HWIdentifier,LArBadChannel> > bcVec = 
          LArBadChanBlobUtils::decodeBlob<LArBadChannel>( &blob, chanSize, stateSize, endian,
           					       version, msg());
-     
+
        for (auto& idBC : bcVec) {
-         badChannelCont->add(idBC.first,idBC.second);
+         if (m_isSC) {
+           idBC.second.setSC();
+         }
+         badChannelCont->add(idBC.first, idBC.second);
        }
-       
+
      }// end loop over COOL channels
   }
    
@@ -88,7 +91,10 @@ StatusCode LArBadChannelCondAlg::execute(const EventContext& ctx) const{
      LArBadChannelDecoder decoder(&(*onlineID), m_isSC);
      std::vector<std::pair<HWIdentifier,LArBadChannel> > bcVec = decoder.readASCII(m_inputFileName,LArBadChannelState::MAXCOOLCHAN, msg());
      for (auto& idBC : bcVec) {
-       badChannelCont->add(idBC.first,idBC.second);
+       if (m_isSC) {
+         idBC.second.setSC();
+       }
+       badChannelCont->add(idBC.first, idBC.second);
      }
   } //end if have ASCII filename
    

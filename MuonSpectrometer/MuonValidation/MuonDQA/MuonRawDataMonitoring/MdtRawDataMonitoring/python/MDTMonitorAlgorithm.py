@@ -1,5 +1,5 @@
 #
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration                                                                                           
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -7,11 +7,6 @@ from AthenaConfiguration.Enums import LHCPeriod
 from MdtRawDataMonitoring.MdtMonUtils import getMDTLabel, getMDTLabelx
 from MdtRawDataMonitoring.MDTTubeMax import tubeMax, tubeMax_smdt
 from MdtRawDataMonitoring.MDTChambers import mdtBA,mdtBC,mdtEA,mdtEC
-
-def MdtMonitoringConfigOld(inputFlags):
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    helper = AthMonitorCfgHelperOld(inputFlags,'MdtAthMonitorCfg')
-    return helper.result()
 
 
 def MdtMonitoringConfig(inputFlags):

@@ -23,22 +23,26 @@
 #include "ChargeCalibration/common/PixelMapping.h"
 #include "ChargeCalibration/pixel/tools/CalibFrontEndInfo.h"
 
-
 #include <map>
 #include <iostream>
 #include <array>
+#include <cmath>
 
 
 
 
 class Calib {
     public:
-        Calib (int whichPart, bool saveFile) {
+        Calib (int whichPart, bool saveFile, std::string moduleName = "") {
             m_whichPart = whichPart;
             
             if(saveFile){
                 m_savefile = saveFile;
                 m_wFile = std::make_unique<TFile>(m_layers.at(whichPart)+".HIST.root","RECREATE");
+            }
+            if( std::strcmp(moduleName.c_str(), "") != 0 ){
+                m_runOneMOD = true;
+                m_testMOD = moduleName;
             }
         };
         ~ Calib (){
@@ -57,7 +61,7 @@ class Calib {
         std::unique_ptr<TFile> m_wFile; 
         
         bool m_runOneMOD = false;
-        TString m_testMOD = "L0_B01_S1_C7_M2C";
+        TString m_testMOD = "";
         
         static constexpr float m_chi_error = 0.05;
         
@@ -104,7 +108,7 @@ class Calib {
         bool moduleInPart(const TString & modName);
         std::vector<float> getParams(const TF1 *f, unsigned int params);
         std::vector<float> getParams_quality(const TF1 *f);
-        bool reFit_normalPix(std::vector<float> &params, std::vector<float> &q, std::vector<float> &qerr, std::vector<float> &tot, std::vector<float> &toterr, std::vector<float> &sig, std::vector<float> &sigerr);
+        bool reFit_normalPix(std::vector<float> &params, std::vector<float> &q, std::vector<float> &qerr, std::vector<float> &tot, std::vector<float> &toterr, std::vector<float> &sig, std::vector<float> &sigerr, const unsigned int fe);
         void graphTitles(const std::unique_ptr<TGraphErrors> &graph, const std::string &name, const std::string &Yname);
         
         class  funcTot {

@@ -13,6 +13,7 @@
 #include "TROOT.h"
 #include "TApplication.h"
 #include "TSystem.h"
+#include "TFile.h"
 #include "CxxUtils/checker_macros.h"
 
 using namespace LArSamples;
@@ -57,8 +58,11 @@ int  main ATLAS_NOT_THREAD_SAFE (int argc, char** argv) {
     std::cout << "ERROR: Failed to merge files" << std::endl;
     result=-2;
   }
-  else
+  else {
     std::cout << "Wrote output file " << outFileName << " with " << output->nEvents() << " events." << std::endl;
+    output->file()->Close();
+    std::cout << "Out file closed"<<std::endl;
+  }  
 
   return result;
 }

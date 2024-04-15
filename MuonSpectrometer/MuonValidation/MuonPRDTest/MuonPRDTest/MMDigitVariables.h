@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonPRDTEST_MMDigitVARIABLES_H
@@ -7,6 +7,7 @@
 
 #include "MuonDigitContainer/MmDigitContainer.h"
 #include "MuonPRDTest/PrdTesterModule.h"
+#include "MuonTesterTree/TwoVectorBranch.h"
 
 namespace MuonPRDTest{
     class MMDigitVariables : public PrdTesterModule {
@@ -22,23 +23,10 @@ namespace MuonPRDTest{
     private:
         SG::ReadHandleKey<MmDigitContainer> m_key{};
         ScalarBranch<unsigned int>& m_NSWMM_nDigits{parent().newScalar<unsigned int>("N_Digits_MM")};
-        VectorBranch<std::vector<float>>& m_NSWMM_dig_time{parent().newVector<std::vector<float>>("Digits_MM_time")};
-        VectorBranch<std::vector<float>>& m_NSWMM_dig_charge{parent().newVector<std::vector<float>>("Digits_MM_charge")};
-        VectorBranch<std::vector<int>>& m_NSWMM_dig_stripPosition{parent().newVector<std::vector<int>>("Digits_MM_stripPosition")};
-        VectorBranch<std::vector<float>>& m_NSWMM_dig_sr_time{parent().newVector<std::vector<float>>("Digits_MM_stripResponse_time")};
-        VectorBranch<std::vector<float>>& m_NSWMM_dig_sr_charge{parent().newVector<std::vector<float>>("Digits_MM_stripResponse_charge")};
-        VectorBranch<std::vector<int>>& m_NSWMM_dig_sr_stripPosition{parent().newVector<std::vector<int>>("Digits_MM_stripResponse_stripPosition")};
-        VectorBranch<std::vector<float>>& m_NSWMM_dig_time_trigger{parent().newVector<std::vector<float>>("Digits_MM_time_trigger")};
-        VectorBranch<std::vector<float>>& m_NSWMM_dig_charge_trigger{parent().newVector<std::vector<float>>("Digits_MM_charge_trigger")};
-        VectorBranch<std::vector<int>>& m_NSWMM_dig_position_trigger{parent().newVector<std::vector<int>>("Digits_MM_position_trigger")};
-        VectorBranch<std::vector<int>>& m_NSWMM_dig_MMFE_VMM_id_trigger{parent().newVector<std::vector<int>>("Digits_MM_MMFE_VMM_id_trigger")};
-        VectorBranch<std::vector<int>>& m_NSWMM_dig_VMM_id_trigger{parent().newVector<std::vector<int>>("Digits_MM_VMM_id_trigger")};
-        VectorBranch<double>& m_NSWMM_dig_stripLposX{parent().newVector<double>("Digits_MM_stripLposX")};
-        VectorBranch<double>& m_NSWMM_dig_stripLposY{parent().newVector<double>("Digits_MM_stripLposY")};
-        ThreeVectorBranch m_NSWMM_dig_stripGpos{parent(), "Digits_MM_stripGpos"};
-        VectorBranch<double>& m_NSWMM_dig_sr_stripLposX{parent().newVector<double>("Digits_MM_stripResponse_stripLposX")};
-        VectorBranch<double>& m_NSWMM_dig_sr_stripLposY{parent().newVector<double>("Digits_MM_stripResponse_stripLposY")};
-        ThreeVectorBranch m_NSWMM_dig_sr_stripGpos{parent(), "Digits_MM_stripResponse_stripGpos"};
+        VectorBranch<float>& m_NSWMM_dig_time{parent().newVector<float>("Digits_MM_time")};
+        VectorBranch<float>& m_NSWMM_dig_charge{parent().newVector<float>("Digits_MM_charge")};
+        TwoVectorBranch m_NSWMM_dig_stripLpos{parent(), "Digits_MM_stripLpos"};        
+        ThreeVectorBranch m_NSWMM_dig_stripGpos{parent(), "Digits_MM_stripGpos"};       
         MmIdentifierBranch m_NSWMM_dig_id{parent(), "Digits_MM"};
     };
 };

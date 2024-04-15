@@ -123,9 +123,6 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty("Triplet_MinPtFrac",        m_tripletMinPtFrac = 0.3,"Triplet pT threshold is pTmin*Triplet_MinPtFrac");
   declareProperty("doSeedRedundancyCheck",    m_checkSeedRedundancy = false,"skip Triplets already used in a track");
 
-  //TODO: remove once decision made
-  declareProperty("FixSeedPhi",            m_tcs.m_fix_seed_phi = false,"apply the fix for the seed phi");
-
   /** settings for the ML-enhanced track seeding */
   declareProperty("UseTrigSeedML",              m_tcs.m_useTrigSeedML = 0,"set ML-based seed selection mode (0 disables)" );
   declareProperty("TrigSeedML_LUT",             m_trigseedML_LUT = "trigseed_ml_pixel_barrel_kde.lut","LUT used by ML-based seed selection");
@@ -433,6 +430,7 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("No Roi found for " << m_roiCollectionKey.key() );
       return StatusCode::FAILURE;
     }
+
     TrigRoiDescriptor internalRoI = **roiCollection->begin();
 
     ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));

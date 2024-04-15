@@ -35,10 +35,16 @@ LArSamples::TimingClass::~TimingClass()
 void LArSamples::TimingClass::timePerFebAllFebs(const std::string& nrun, const std::string& name)
 // ***************************************************************************** //
 {
-
   ofstream file; 
   string fname = "TimingFile" + nrun + "_" + name + ".txt"; 
-  file.open(fname.c_str(), ios::out);
+
+  if(FileEmptyCheck(fname))
+  {
+    std::cout<<" +++++ The file:" << fname <<" is empty, time-fit will not be performed +++"<<std::endl;
+    return;
+  }
+  else 
+    file.open(fname.c_str(), ios::out);
 
   for( uint i = 0; i < m_interface->nChannels(); i++ ){ 
     if( i%10000 == 0 ) cout << "Processing entry " << i << endl;
@@ -89,10 +95,18 @@ void LArSamples::TimingClass::timePerFebAllFebs(const std::string& nrun, const s
 }
 
 // ********************************************************************************** //
+bool LArSamples::TimingClass::FileEmptyCheck(const std::string& fname)
+// ********************************************************************************** //
+{
+  std::ifstream file(fname);
+  return file.peek() == std::ifstream::traits_type::eof();
+}
+
+// ********************************************************************************** //
 void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, const std::string& name)
 // ********************************************************************************** //
 {
-  
+
   for( int d = 0; d < 2; d++ ){ //side 
     for( int ft = 0; ft < 32; ft++ ){ //feedthrough
       for( int sl = 0; sl < 15; sl++ ) //slot
@@ -108,6 +122,13 @@ void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, cons
   std::vector< std::vector<double> > myvec;
   string tfilename; 
   tfilename = "TimingFile" + nrun + "_" + name + ".txt"; 
+
+  if(FileEmptyCheck(tfilename))
+  {
+    std::cout<<" +++++ The file:" << tfilename <<" is empty, time-fit will not be performed +++"<<std::endl;
+    return ;
+  }
+
   myvec = readTimingFiles(tfilename);
 
   string Filename = "OFCTime_PerFEB_" + name + ".root"; 
@@ -259,7 +280,7 @@ void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, cons
 void LArSamples::TimingClass::Time(int dete, const std::string& nrun)
 /************************************************************/
 {
-  
+
   TH1F *h = new TH1F( Form("h_%d", dete) , Form("h_%d", dete) , 160, -20, 20 );
   h->Sumw2();
 
@@ -340,6 +361,95 @@ void LArSamples::TimingClass::Time(int dete, const std::string& nrun)
 
 }
 
+// ******************************************************************************* //
+void LArSamples::TimingClass::PlotFebAverageTime24(const std::string& nrun, const std::string& name)
+// ******************************************************************************* //
+{
+  std::string Filename = "FEB_time_fitMean_" + nrun + "_" + name + ".txt";
+
+  std::ifstream f(Filename.c_str(), ios::in);
+  std::vector<double> mean;
+  std::vector<int> side;
+
+  while (!f.eof())
+  {
+    int n1, n2, n3, n4;
+    double n5, n6;
+
+    f >> n1 >> n2 >> n3 >> n4 >> n5 >> n6;
+
+    if (f.good() && !f.bad() && !f.fail())
+    {
+      mean.push_back(n5);
+      side.push_back(n2);
+    }
+  }
+
+  f.close();
+
+  TH1F *h = new TH1F(Form("FEB_Av_%s", name.c_str()), Form("FEB_Av_%s", name.c_str()), 240, -30., 30.);
+  TH1F *sAh = new TH1F(Form("FEB_Av_%s_sideA", name.c_str()), Form("FEB_Av_%s_sideA", name.c_str()), 240, -30., 30.);
+  TH1F *sCh = new TH1F(Form("FEB_Av_%s_sideC", name.c_str()), Form("FEB_Av_%s_sideC", name.c_str()), 240, -30., 30.);
+
+  for (unsigned int i = 0; i < mean.size(); i++)
+  {
+    h->Fill(mean[i]);
+    // Fill sides
+    if (side.at(i) == 1) // A
+      sAh->Fill(mean[i]);
+    else // C
+      sCh->Fill(mean[i]);
+  }
+
+  h->Sumw2();
+  sAh->Sumw2();
+  sCh->Sumw2();
+
+  TCanvas *c = new TCanvas(Form("c_FEB_Av_%s", name.c_str()), Form("c_FEB_Av_%s", name.c_str()), 129, 165, 700, 600);
+  c->cd();
+  c->SetLogy();
+  h->GetXaxis()->SetTitle("<t_{FEB}> [ns]");
+  h->GetYaxis()->SetTitle("Number of FEBs / 0.25 ns");
+  h->Draw("hist");
+
+  TString path = "Plots/";
+  c->Print(path + Form("t_FEB_%s.png", name.c_str()));
+  c->Print(path + Form("t_FEB_%s.eps", name.c_str()));
+  c->Print(path + Form("t_FEB_%s.pdf", name.c_str()));
+
+  TCanvas *sAc = new TCanvas(Form("c_FEB_Av_%s_sideA", name.c_str()), Form("c_FEB_Av_%s_sideA", name.c_str()), 129, 165, 700, 600);
+  sAc->cd();
+  sAc->SetLogy();
+  sAh->GetXaxis()->SetTitle("<t_{FEB}> [ns]");
+  sAh->GetYaxis()->SetTitle("Number of FEBs / 0.25 ns");
+  sAh->Draw("hist");
+  sAc->Print(path + Form("t_FEB_%s_sideA.png", name.c_str()));
+
+  TCanvas *sCc = new TCanvas(Form("c_FEB_Av_%s_sideC", name.c_str()), Form("c_FEB_Av_%s_sideC", name.c_str()), 129, 165, 700, 600);
+  sCc->cd();
+  sCc->SetLogy();
+  sCh->GetXaxis()->SetTitle("<t_{FEB}> [ns]");
+  sCh->GetYaxis()->SetTitle("Number of FEBs / 0.25 ns");
+  sCh->Draw("hist");
+  sCc->Print(path + Form("t_FEB_%s_sideC.png", name.c_str()));
+
+  std::string plotname = "FEB_average_" + nrun + "_" + name + ".root";
+  TFile *fi = new TFile(plotname.c_str(), "RECREATE");
+  h->Write();
+  fi->Close();
+
+  std::string plotnamesA = "FEB_average_" + nrun + "_" + name + "_sideA.root";
+  TFile *fisA = new TFile(plotnamesA.c_str(), "RECREATE");
+  sAh->Write();
+  fisA->Close();
+
+  std::string plotnamesC = "FEB_average_" + nrun + "_" + name + "_sideC.root";
+  TFile *fisC = new TFile(plotnamesC.c_str(), "RECREATE");
+  sCh->Write();
+  fisC->Close();
+
+  return;
+}
 
 // ******************************************************************************* //
 void LArSamples::TimingClass::PlotFebAverageTime(const std::string& nrun, const std::string& name)
@@ -425,7 +535,6 @@ void LArSamples::TimingClass::PlotFebAverageTime(const std::string& nrun, const 
 void LArSamples::TimingClass::MergeFebTime( const std::string& nrun )
 // ******************************************************* //
 {
-  
   ofstream mergedfile;
   string name = "FEB_time_fitMean_" + nrun + ".txt";
   mergedfile.open( name.c_str(), ios::out );
@@ -435,6 +544,12 @@ void LArSamples::TimingClass::MergeFebTime( const std::string& nrun )
   for( int i = 0; i < 4; i++ ){
     string tmpname = detparts[i]; 
     string file = "FEB_time_fitMean_" + nrun + "_" + tmpname + ".txt";    
+
+    if(FileEmptyCheck(file))
+    {
+      std::cout<<" +++++ no information for " << tmpname <<", therefore it's timing information is not merged +++"<<std::endl;
+      continue;
+    }
     
     ifstream f( file.c_str(), ios::in ); 
     while( !f.eof() ){	 
@@ -683,7 +798,6 @@ void LArSamples::TimingClass::PlotFebtime()
 bool LArSamples::TimingClass::EnergyThreshold( int calo, int layer, int quality, int ft, int slot, double energy, double time )
 // **************************************************************************************************************************** //
 { 
-
   bool pass = true;
   if( quality > 4000 ) pass = false; 
 
@@ -730,7 +844,6 @@ bool LArSamples::TimingClass::EnergyThreshold( int calo, int layer, int quality,
 vector< vector<double> > LArSamples::TimingClass::readTimingFiles(const std::string& file)
 // ******************************************************************************* //
 {  
-
   std::vector< std::vector <double> > Data; 
   
   ifstream f( file.c_str() );
@@ -804,7 +917,6 @@ vector< vector<double> > LArSamples::TimingClass::readTimingFiles(const std::str
 double LArSamples::TimingClass::getTimeWeightedMedian(std::vector<double> time, const std::vector<double>& time2, const std::vector<double>& weight, double totalW)
 // ********************************************************************************************************************************************* //
 { 
-  
   TGraph *g = new TGraph();
   double wmedian = -99., weights, w0 = -1., cumulWeights = 0.0; 
   int Size = time.size();

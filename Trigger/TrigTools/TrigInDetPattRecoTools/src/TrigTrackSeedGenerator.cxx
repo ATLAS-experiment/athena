@@ -979,15 +979,8 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
       //5. phi0 cut
 
       if ( !fullPhi ) {
-        double uc;
-
-        //TODO: remove once decision made
-        //for now put this change behind a flag
-        if(m_settings.m_fix_seed_phi){
-          uc = 2*B_pS_r - A;
-        }else{
-          uc = 2*(B*pS_r - A);
-        }
+        //previously an incorrect calculation was used uc = 2*(B*pS_r - A); see ATR-28202 for details
+        double uc = 2*B_pS_r - A;
 
         const double phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
 

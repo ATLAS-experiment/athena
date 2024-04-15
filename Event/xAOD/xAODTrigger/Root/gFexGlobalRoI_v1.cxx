@@ -132,22 +132,25 @@ namespace xAOD {
 
    /// Methods that require combining results or applying scales
 
-   /// MET/SumEt on TOB scale
+   /// Methods to convert the TOB's quantities accordingto the resolution provided
+   /// METquantityOne() is for converting all quantityOne of MET TOBs (METx, MHTx, MSTx, MET)
    float gFexGlobalRoI_v1::METquantityOne() const {
     if (globalType() != gNull){
         return quantityOne()*tobEtScaleOne();
     }
     return -999;
    }
-
+   /// METquantityTwo() is for converting all quantityTwo of MET TOBs, except SumEt (METy, MHTy, MSTy)
+   /// Note that the scale to be used is still ScaleOne
    float gFexGlobalRoI_v1::METquantityTwo() const {
     if (globalType() != gNull){
-      return quantityTwo()*tobEtScaleTwo();
+      return quantityTwo()*tobEtScaleOne();
     }
 
     return -999;
    }
-
+   /// SumEt() is for converting SumEt (METy, MHTy, MSTy)
+   /// Note that SumEt is the only quanity that use a different scale (ScaleTwo)
    float gFexGlobalRoI_v1::SumEt() const {
     if (globalType() == gScalar ){
         return quantityTwo()*tobEtScaleTwo();

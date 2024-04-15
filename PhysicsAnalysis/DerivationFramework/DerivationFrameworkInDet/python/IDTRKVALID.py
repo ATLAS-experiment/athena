@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # ====================================================================
 # IDTRKVALID.py
@@ -32,7 +32,7 @@ def IDTRKVALID_ANDToolCfg(flags, name='IDTRKVALID_ANDTool'):
         SecondObjectRequirements = sel_muon2,
         MassHypothesis           = 105.66,
         SecondMassHypothesis     = 105.66,
-        StoreGateEntryName       = "ZmumuMass"))
+        StoreGateEntryName       = "DRZmumuMass"))
 
     IDTRKVALID_SkimmingTool = acc.getPrimaryAndMerge(
         xAODStringSkimmingToolCfg(flags, name="IDTRKVALID_SkimmingTool",
@@ -85,9 +85,6 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
         IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
         skimmingTools.append(IDTRKVALID_ANDTool)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        "IDTRKVALIDKernelPresel", SkimmingTools=skimmingTools))
-
     # ====================================================================
     # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS
     # ====================================================================
@@ -112,18 +109,6 @@ def IDTRKVALID_PixelModuleStatus_KernelCfg(
     DFEI = acc.getPrimaryAndMerge(EventInfoPixelModuleStatusMonitoringCfg(flags))
     augmentationTools.append(DFEI)
 
-    skimmingTools = []
-    if flags.InDet.DRAWZSelection:
-        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
-        skimmingTools.append(IDTRKVALID_ANDTool)
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools = augmentationTools,
-        SkimmingTools     = skimmingTools,
-        ThinningTools     = [],
-        RunSkimmingFirst  = True))
-
     return acc
 
 def IDTRKVALID_ITkPixelModuleStatus_KernelCfg(
@@ -137,18 +122,6 @@ def IDTRKVALID_ITkPixelModuleStatus_KernelCfg(
     DFEI = acc.getPrimaryAndMerge(
         ITkEventInfoPixelModuleStatusMonitoringCfg(flags))
     augmentationTools.append(DFEI)
-
-    skimmingTools = []
-    if flags.InDet.DRAWZSelection:
-        IDTRKVALID_ANDTool = acc.getPrimaryAndMerge(IDTRKVALID_ANDToolCfg(flags))
-        skimmingTools.append(IDTRKVALID_ANDTool)
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools = augmentationTools,
-        SkimmingTools     = skimmingTools,
-        ThinningTools     = [],
-        RunSkimmingFirst  = True))
 
     return acc
 
@@ -248,7 +221,7 @@ def IDTRKVALIDCfg(flags):
     IDTRKVALIDSlimmingHelper = SlimmingHelper(
         "IDTRKVALIDSlimmingHelper",
         NamesAndTypes = flags.Input.TypedCollections,
-        ConfigFlags   = flags)
+        flags         = flags)
 
     AllVariables = []
     StaticContent = []
@@ -302,11 +275,15 @@ def IDTRKVALIDCfg(flags):
             IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
                 "PixelClusters": "xAOD::TrackMeasurementValidationContainer",
                 "PixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+                "PixelMSOSs": "xAOD::TrackStateValidationContainer",
+                "PixelMSOSsAux": "xAOD::TrackStateValidationAuxContainer"
             })
         if flags.InDet.DAODStoreSCT:
             IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
                 "SCT_Clusters": "xAOD::TrackMeasurementValidationContainer",
-                "SCT_ClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"
+                "SCT_ClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+                "SCT_MSOSs": "xAOD::TrackStateValidationContainer",
+                "SCT_MSOSsAux": "xAOD::TrackStateValidationAuxContainer"
             })
 
     if flags.Detector.GeometryITk:
@@ -314,11 +291,15 @@ def IDTRKVALIDCfg(flags):
             IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
                 "ITkPixelClusters": "xAOD::TrackMeasurementValidationContainer",
                 "ITkPixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+                "ITkPixelMSOSs": "xAOD::TrackStateValidationContainer",
+                "ITkPixelMSOSsAux": "xAOD::TrackStateValidationAuxContainer"
             })
         if flags.ITk.DAODStoreStrip:
             IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
                 "ITkStripClusters": "xAOD::TrackMeasurementValidationContainer",
-                "ITkStripClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"
+                "ITkStripClustersAux": "xAOD::TrackMeasurementValidationAuxContainer",
+                "ITkStripMSOSs": "xAOD::TrackStateValidationContainer",
+                "ITkStripMSOSsAux": "xAOD::TrackStateValidationAuxContainer"
             })
 
     SmartCollections += ["Muons", "Electrons", "Photons"]
@@ -337,14 +318,14 @@ def IDTRKVALIDCfg(flags):
 
     if flags.Detector.GeometryID:
         if flags.InDet.DAODStorePixel:
-            AllVariables += ["PixelClusters"]
+            AllVariables += ["PixelClusters","PixelMSOSs"]
         if flags.InDet.DAODStoreSCT:
-            AllVariables += ["SCT_Clusters"]
+            AllVariables += ["SCT_Clusters","SCT_MSOSs"]
     if flags.Detector.GeometryITk:
         if flags.ITk.DAODStorePixel:
-            AllVariables += ["ITkPixelClusters"]
+            AllVariables += ["ITkPixelClusters","ITkPixelMSOSs"]
         if flags.ITk.DAODStoreStrip:
-            AllVariables += ["ITkStripClusters"]
+            AllVariables += ["ITkStripClusters","ITkStripMSOSs"]
 
     IDTRKVALIDSlimmingHelper.AppendToDictionary.update({
         "TauJets": "xAOD::TauJetContainer",

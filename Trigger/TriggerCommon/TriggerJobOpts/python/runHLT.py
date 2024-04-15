@@ -44,8 +44,6 @@ def set_flags(flags):
 
    # Increase scheduler checks and verbosity
    flags.Scheduler.CheckDependencies = True
-   flags.Scheduler.ShowControlFlow = True
-   flags.Scheduler.ShowDataDeps = True
    flags.Scheduler.EnableVerboseViews = True
    flags.Input.FailOnUnknownCollections = True
    flags.Scheduler.AutoLoadUnmetDependencies = False
@@ -102,6 +100,10 @@ def runHLTCfg(flags):
    if log.getEffectiveLevel() <= logging.DEBUG:
        cfg.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
 
+   # Disable spurious warnings from HepMcParticleLink (ATR-21838)
+   if flags.Input.isMC:
+      cfg.addService(CompFactory.MessageSvc(setError=["HepMcParticleLink"]))
+
    from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
    AccumulatorDecorator.printStats()
 
@@ -154,6 +156,12 @@ def athenaCfg(flags):
       if not flags.Output.RDOFileName:
          flags.Output.RDOFileName = 'RDO_TRIG.pool.root'
 
+   # Enable verbose control/data flow printouts if in a
+   # restricted menu, typical for debugging
+   if flags.Trigger.selectChains or len(flags.Trigger.enabledSignatures)==1:
+      flags.Scheduler.ShowControlFlow = True
+      flags.Scheduler.ShowDataDeps = True
+
    # Configure main services
    _allflags = flags.clone()   # copy including Concurrency flags
    _allflags.lock()
@@ -163,10 +171,6 @@ def athenaCfg(flags):
 
    # Lock flags
    lock_and_restrict(flags)
-
-   if flags.Input.isMC:
-      # Disable spurious warnings from HepMcParticleLink (ATR-21838)
-      cfg.addService(CompFactory.MessageSvc(setError=["HepMcParticleLink"]))
 
    if flags.Input.Format is Format.BS:
        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg

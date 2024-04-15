@@ -269,9 +269,12 @@ namespace TrigConf {
          L1ThrExtraInfoBase(thrTypeName, data) { load(); }
       virtual ~L1ThrExtraInfo_eTAU() override = default;
       virtual std::string className() const override { return "L1ThrExtraInfo_eTAU"; }
-      unsigned int maxEtMeV()  const { return m_maxEt; }
-      unsigned int maxEtCounts(const unsigned int resolutionMeV)  const { return TrigConf::energyInCounts( m_maxEt, resolutionMeV ); }
-      float maxEt()  const { return m_maxEt/1000.0f; }
+      unsigned int minIsoEtMeV() const { return m_minIsoEt; }
+      unsigned int minIsoEtCounts(const unsigned int resolutionMeV) const { return TrigConf::energyInCounts( m_minIsoEt, resolutionMeV ); }
+      float minIsoEt() const { return m_minIsoEt/1000.0f; }
+      unsigned int maxEtMeV() const { return m_maxEt; }
+      unsigned int maxEtCounts(const unsigned int resolutionMeV) const { return TrigConf::energyInCounts( m_maxEt, resolutionMeV ); }
+      float maxEt() const { return m_maxEt/1000.0f; }
       float ptMinToTopo() const { return m_ptMinToTopoMeV/1000.0f; }
       unsigned int ptMinToTopoMeV() const { return m_ptMinToTopoMeV; }
       unsigned int ptMinToTopoCounts() const { return energyInCounts( m_ptMinToTopoMeV, resolutionMeV() ); }
@@ -282,7 +285,8 @@ namespace TrigConf {
       /** Update the internal members */
       void load();
       /** eTAU specific data */
-      unsigned int m_maxEt { 0 };
+      unsigned int m_minIsoEt { 0 }; // In MeV
+      unsigned int m_maxEt { 0 }; // In MeV
       unsigned int m_ptMinToTopoMeV{0};
       std::map<TrigConf::Selection::WP, ValueWithEtaDependence<WorkingPoints_eTAU>> m_isolation{};
       unsigned int m_algoVersion { 0 };
@@ -348,16 +352,26 @@ namespace TrigConf {
       public:
          WorkingPoints_cTAU( const boost::property_tree::ptree & );
          bool isDefined() const { return m_isDefined; }
-         int isolation_fw() const { return m_isolation_fw; }
+         unsigned int isolation_fw() const { return m_isolation_fw; }
          float isolation_d() const { return m_isolation_d; }
-         int isolation_jTAUCoreScale_fw() const { return m_isolation_jTAUCoreScale_fw; }
+         unsigned int isolation_jTAUCoreScale_fw() const { return m_isolation_jTAUCoreScale_fw; }
          float isolation_jTAUCoreScale_d() const { return m_isolation_jTAUCoreScale_d; }
+         float eTAU_rCoreMin_WP_d() const { return m_eTAU_rCoreMin_WP_d; }
+         unsigned int eTAU_rCoreMin_WP_fw() const { return m_eTAU_rCoreMin_WP_fw; }
+         Selection::WP eTAU_rCoreMin_WP() const { return static_cast<Selection::WP>(m_eTAU_rCoreMin_WP_fw); }
+         float eTAU_rHadMin_WP_d() const { return m_eTAU_rHadMin_WP_d; }
+         unsigned int eTAU_rHadMin_WP_fw() const { return m_eTAU_rHadMin_WP_fw; }
+         Selection::WP eTAU_rHadMin_WP() const { return static_cast<Selection::WP>(m_eTAU_rHadMin_WP_fw); }
       private:
          bool m_isDefined {false};
-         int m_isolation_fw {0};
+         unsigned int m_isolation_fw {0};
          float m_isolation_d {0};
-         int m_isolation_jTAUCoreScale_fw {0};
+         unsigned int m_isolation_jTAUCoreScale_fw {0};
          float m_isolation_jTAUCoreScale_d {0};
+         float m_eTAU_rCoreMin_WP_d {0};
+         unsigned int m_eTAU_rCoreMin_WP_fw {0};
+         float m_eTAU_rHadMin_WP_d {0};
+         unsigned int m_eTAU_rHadMin_WP_fw {0};
       };
       L1ThrExtraInfo_cTAU(const std::string & thrTypeName, const ptree & data) :
          L1ThrExtraInfoBase(thrTypeName, data) { load(); }

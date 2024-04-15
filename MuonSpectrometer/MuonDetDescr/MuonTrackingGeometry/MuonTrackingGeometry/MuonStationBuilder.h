@@ -26,9 +26,7 @@ class MuonStationBuilder final
                        const IInterface*);
     virtual ~MuonStationBuilder() = default;
     virtual StatusCode initialize() override;
-    virtual std::unique_ptr<
-        std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
-    buildDetachedTrackingVolumes(bool blend = false) const override;
+    virtual DetachedVolumeVec buildDetachedTrackingVolumes(bool blend = false) const override;
 
    private:
     const MuonGM::MuonDetectorManager* m_muonMgr = nullptr;

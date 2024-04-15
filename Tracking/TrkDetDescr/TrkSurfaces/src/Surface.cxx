@@ -20,36 +20,18 @@
 #include <iostream>
 #include <utility>
 
-Trk::Surface::Surface()
-  : Trk::ObjectCounter<Trk::Surface>()
-  , m_transforms(nullptr)
-  , m_associatedDetElement(nullptr)
-  , m_associatedDetElementId()
-  , m_associatedLayer(nullptr)
-  , m_materialLayer(nullptr)
-  , m_owner(Trk::noOwn)
-{
-}
+Trk::Surface::Surface() = default;
 
 ATH_FLATTEN
 Trk::Surface::Surface(const Amg::Transform3D& tform)
   : Trk::ObjectCounter<Trk::Surface>()
   , m_transforms(std::make_unique<Transforms>(tform))
-  , m_associatedDetElement(nullptr)
-  , m_associatedDetElementId()
-  , m_associatedLayer(nullptr)
-  , m_materialLayer(nullptr)
-  , m_owner(Trk::noOwn)
 {
 }
 
 Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement)
   : Trk::ObjectCounter<Trk::Surface>()
-  , m_transforms(nullptr)
   , m_associatedDetElement(&detelement)
-  , m_associatedDetElementId()
-  , m_associatedLayer(nullptr)
-  , m_materialLayer(nullptr)
   , m_owner(Trk::DetElOwn)
 {
 }
@@ -57,11 +39,8 @@ Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement)
 Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement,
                       const Identifier& id)
   : Trk::ObjectCounter<Trk::Surface>()
-  , m_transforms(nullptr)
   , m_associatedDetElement(&detelement)
   , m_associatedDetElementId(id)
-  , m_associatedLayer(nullptr)
-  , m_materialLayer(nullptr)
   , m_owner(Trk::DetElOwn)
 {
 }
@@ -77,8 +56,6 @@ ATH_FLATTEN
 Trk::Surface::Surface(const Surface& sf)
   : Trk::ObjectCounter<Trk::Surface>(sf)
   , m_transforms(std::make_unique<Transforms>(sf.transform()))
-  , m_associatedDetElement(nullptr)
-  , m_associatedDetElementId()
   , m_associatedLayer(sf.m_associatedLayer)
   , m_materialLayer(sf.m_materialLayer)
   , m_owner(Trk::noOwn)
@@ -95,11 +72,6 @@ ATH_FLATTEN
 // and the identifier to invalid also invalidates the material layer
 Trk::Surface::Surface(const Surface& sf, const Amg::Transform3D& shift)
   : Trk::ObjectCounter<Trk::Surface>(sf)
-  , m_transforms(nullptr)
-  , m_associatedDetElement(nullptr)
-  , m_associatedDetElementId()
-  , m_associatedLayer(nullptr)
-  , m_materialLayer(nullptr)
   , m_owner(Trk::noOwn)
 {
   if (sf.m_transforms) {

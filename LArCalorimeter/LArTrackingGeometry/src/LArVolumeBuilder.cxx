@@ -265,9 +265,9 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
         
     // dynamic cast to 'Tubs' shape
     const GeoPcon* lArBarrelPosPcon = dynamic_cast<const GeoPcon*>(lArBarrelPosShape);
-    lArBarrelPosBounds = (lArBarrelPosPcon) ? Trk::GeoShapeConverter::convert(lArBarrelPosPcon, zBoundaries) : nullptr;
+    lArBarrelPosBounds = (lArBarrelPosPcon) ? Trk::GeoShapeConverter::convert(lArBarrelPosPcon, zBoundaries).release() : nullptr;
     const GeoPcon* lArBarrelNegPcon = dynamic_cast<const GeoPcon*>(lArBarrelNegShape);
-    lArBarrelNegBounds = (lArBarrelNegPcon) ? Trk::GeoShapeConverter::convert(lArBarrelNegPcon, zBoundaries) : nullptr;
+    lArBarrelNegBounds = (lArBarrelNegPcon) ? Trk::GeoShapeConverter::convert(lArBarrelNegPcon, zBoundaries).release() : nullptr;
     
     if (lArBarrelPosBounds)
       ATH_MSG_VERBOSE( " -> Positive Barrel Bounds: " << *lArBarrelPosBounds );
@@ -1117,16 +1117,16 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
     // dynamic cast to 'Pcon' shape
     const GeoPcon* lArPositiveHec1Pcon = dynamic_cast<const GeoPcon*>(lArPositiveHec1Shape);
     lArPositiveHec1Bounds = (lArPositiveHec1Pcon) ? Trk::GeoShapeConverter::convert(lArPositiveHec1Pcon, 
-										   positiveEndcapZboundariesHec1) : nullptr;
+										   positiveEndcapZboundariesHec1).release() : nullptr;
     const GeoPcon* lArPositiveHec2Pcon = dynamic_cast<const GeoPcon*>(lArPositiveHec2Shape);
     lArPositiveHec2Bounds = (lArPositiveHec2Pcon) ? Trk::GeoShapeConverter::convert(lArPositiveHec2Pcon,
-										   positiveEndcapZboundariesHec2) : nullptr;
+										   positiveEndcapZboundariesHec2).release() : nullptr;
     const GeoPcon* lArNegativeHec1Pcon = dynamic_cast<const GeoPcon*>(lArNegativeHec1Shape);
     lArNegativeHec1Bounds = (lArNegativeHec1Pcon) ? Trk::GeoShapeConverter::convert(lArNegativeHec1Pcon,
-										   negativeEndcapZboundariesHec1) : nullptr;
+										   negativeEndcapZboundariesHec1).release() : nullptr;
     const GeoPcon* lArNegativeHec2Pcon = dynamic_cast<const GeoPcon*>(lArNegativeHec2Shape);
     lArNegativeHec2Bounds = (lArNegativeHec2Pcon) ? Trk::GeoShapeConverter::convert(lArNegativeHec2Pcon,
-										   negativeEndcapZboundariesHec2) : nullptr;
+										   negativeEndcapZboundariesHec2).release() : nullptr;
     
     if (lArPositiveHec1Bounds)
       ATH_MSG_VERBOSE( " -> Positive Hec1 Bounds: " << *lArPositiveHec1Bounds );
@@ -1303,18 +1303,18 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 
      // dynamic cast to 'Pcon' shape
      const GeoTubs* lArPositiveFcal1Tubs = dynamic_cast<const GeoTubs*>(lArPositiveFcal1Shape);
-     lArPositiveFcal1Bounds = (lArPositiveFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal1Tubs) : nullptr;
+     lArPositiveFcal1Bounds = (lArPositiveFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal1Tubs).release() : nullptr;
      const GeoTubs* lArPositiveFcal2Tubs = dynamic_cast<const GeoTubs*>(lArPositiveFcal2Shape);
-     lArPositiveFcal2Bounds = (lArPositiveFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal2Tubs) : nullptr;
+     lArPositiveFcal2Bounds = (lArPositiveFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal2Tubs).release() : nullptr;
      const GeoTubs* lArPositiveFcal3Tubs = dynamic_cast<const GeoTubs*>(lArPositiveFcal3Shape);
-     lArPositiveFcal3Bounds = (lArPositiveFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal3Tubs) : nullptr;
+     lArPositiveFcal3Bounds = (lArPositiveFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArPositiveFcal3Tubs).release() : nullptr;
 
      const GeoTubs* lArNegativeFcal1Tubs = dynamic_cast<const GeoTubs*>(lArNegativeFcal1Shape);
-     lArNegativeFcal1Bounds = (lArNegativeFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal1Tubs) : nullptr;
+     lArNegativeFcal1Bounds = (lArNegativeFcal1Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal1Tubs).release() : nullptr;
      const GeoTubs* lArNegativeFcal2Tubs = dynamic_cast<const GeoTubs*>(lArNegativeFcal2Shape);
-     lArNegativeFcal2Bounds = (lArNegativeFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal2Tubs) : nullptr;
+     lArNegativeFcal2Bounds = (lArNegativeFcal2Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal2Tubs).release() : nullptr;
      const GeoTubs* lArNegativeFcal3Tubs = dynamic_cast<const GeoTubs*>(lArNegativeFcal3Shape);
-     lArNegativeFcal3Bounds = (lArNegativeFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal3Tubs) : nullptr;
+     lArNegativeFcal3Bounds = (lArNegativeFcal3Tubs) ? Trk::GeoShapeConverter::convert(lArNegativeFcal3Tubs).release() : nullptr;
 
      if (lArPositiveFcal1Bounds)
            ATH_MSG_VERBOSE( " -> Positive Fcal1 Bounds: " << *lArPositiveFcal1Bounds );

@@ -39,16 +39,6 @@ class MemCheckAction(argparse.Action):
             setattr(args, 'memchk_mode', 'leak-check')
 
 
-class PerfMonAction(argparse.Action):
-    """Enable PerfMon"""
-    def __call__(self, parser, args, values, option_string=None):
-        import PerfMonComps.PerfMonFlags as pmf
-        opts = values.split(',')
-        # This will throw ValueError in case an invalid option is chosen:
-        pmf._decode_pmon_opts(opts, dry_run=True)
-        setattr(args, self.dest, opts)
-
-
 class AthHelp(argparse.Action):
    """Custom help to hide/show expert groups"""
    def __call__(self, parser, namespace, values, option_string=None):
@@ -144,9 +134,6 @@ def getArgumentParser():
     g.add_argument('--skipEvents', metavar='N', type=int,
                    help='number of events to skip')
 
-    g.add_argument('-r', '--repeat-evts', metavar='N', type=int, dest='nbr_repeat_evts',
-                   help='number of times to repeat each event from a given input file')
-
     g.add_argument('-c', '--command', metavar='CMD',
                    help='one-liner, runs before any scripts')
 
@@ -169,11 +156,11 @@ def getArgumentParser():
     g.add_argument('--mtes-channel', metavar='NAME', default='EventService_EventRanges',
                    help='yampl channel name between pilot and AthenaMT in event service mode')
 
-    g.add_argument('-v', '--version', action='version', version=get_version(),
+    g.add_argument('--version', action='version', version=get_version(),
                    help='print version number')
 
-    g.add_argument('-h', '--help', nargs='?', choices=['all'], action=AthHelp,
-                   help='show help message ("all" for expert options)')
+    g.add_argument('-h', '--help', action='help',
+                   help='show help message')
 
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Run mode')
@@ -187,8 +174,8 @@ def getArgumentParser():
     g.add_argument('--drop-and-reload', action='store_true', dest='drop_reload',
                    help='offload configuration and start new process')
 
-    g.add_argument('--config-only', metavar='FILE',
-                   help='run configuration and store in %(metavar)s')
+    g.add_argument('--config-only', metavar='FILE', nargs='?', default=False, const=True,
+                   help='run only configuration and optionally store in %(metavar)s')
 
     g.add_argument('--dump-configuration', metavar='FILE', dest='config_dump_file',
                    help='dump an ASCII version of the configuration to %(metavar)s')
@@ -196,11 +183,8 @@ def getArgumentParser():
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Monitoring and debugging')
 
-    g.add_argument('--perfmon', dest='do_pmon', action='store_const', const=['perfmon'],
-                   help='enable performance monitoring toolkit (same as --pmon=perfmon)')
-
-    g.add_argument('--pmon', metavar='NAME', dest='do_pmon', action=PerfMonAction,
-                   help='enable performance monitoring toolkit')
+    g.add_argument('--perfmon', metavar='MODE', nargs='?', const='fastmonmt',
+                   help='enable performance monitoring toolkit in MODE')
 
     g.add_argument('--profile-python', metavar='FILE',
                    help='profile python code, dump in %(metavar)s (.pkl or .txt)')
@@ -248,13 +232,6 @@ def getArgumentParser():
 
     g.add_argument('--enable-ers-hdlr', metavar='y/n', default='n', choices=['y','n'],
                    help='enable or not the ERS handler [%(default)s]')
-
-    # Hidden (expert) options
-    g = parser.add_argument_group('Expert options')
-    parser.expert_groups.append(g)
-
-    g.add_argument('--cppyy_minvmem', type=float, dest='cppyy_minvmem',
-                   help="artificial vmem bump around cppys's import")
 
     return parser
 

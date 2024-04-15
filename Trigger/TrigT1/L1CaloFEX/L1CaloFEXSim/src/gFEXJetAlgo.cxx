@@ -39,6 +39,9 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
                                const gTowersType& Atwr, 
                                const gTowersType& Btwr,
                                const gTowersType& Ctwr,
+                               const gTowersType& Asat, 
+                               const gTowersType& Bsat,
+                               const gTowersType& Csat,
                                int pucA, int pucB, int pucC, int gLJ_seedThrA, int gLJ_seedThrB, int gLJ_seedThrC, 
                                int gJ_ptMinToTopoCounts1, int gJ_ptMinToTopoCounts2,
                                int jetThreshold, int gLJ_ptMinToTopoCounts1, int gLJ_ptMinToTopoCounts2,
@@ -50,6 +53,7 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   // s = status (1 if above threshold)
   // v = value 200 MeV LSB
   // eta and phi are bin numbers
+  std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gTOBsat    = {{0,0,0,0,0,0}};
   std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBs   = {{0,0,0,0,0,0}};
   std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBv   = {{0,0,0,0,0,0}};
   std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> gJetTOBeta = {{0,0,0,0,0,0}};
@@ -72,6 +76,21 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
     for(int jcolumn=0;jcolumn<FEXAlgoSpaceDefs::ABCcolumnsEng;jcolumn++){
       CNtwr[irow][jcolumn] =  Ctwr[irow][jcolumn]  ;     
       CPtwr[irow][jcolumn] =  Ctwr[irow][jcolumn+FEXAlgoSpaceDefs::ABCcolumnsEng] ;
+    }
+
+    for(unsigned int jcolumn=0;jcolumn<FEXAlgoSpaceDefs::ABcolumns;jcolumn++){
+
+      if( jcolumn < 6 ) {
+        // TOB1
+        if( Asat[irow][jcolumn] == 1 )  gTOBsat[0] = 1;
+        if( Bsat[irow][jcolumn] == 1 )  gTOBsat[2] = 1;
+        if( Csat[irow][jcolumn] == 1 )  gTOBsat[4] = 1;
+      } else {
+        //TOB2 
+        if( Asat[irow][jcolumn] == 1 ) gTOBsat[1] = 1;
+        if( Bsat[irow][jcolumn] == 1 ) gTOBsat[3] = 1;
+        if( Csat[irow][jcolumn] == 1 ) gTOBsat[5] = 1;
+      }
     }
   }
 
@@ -113,9 +132,17 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   addInternalRin(AjetsAlt, ArpsAltOut);
   addInternalRin(BjetsAlt, BrpsAltOut);
 
-  // SaturateJets( AjetsAlt, Asat );
-  // SaturateJets( BjetsAlt, Bsat );
-  // SaturateJets( CjetsAlt, CCsat );
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
+      // set 18 bits on
+      if (Asat[irow][icolumn] != 0){
+      }
+    }
+  }
+
+  SaturateJets( AjetsAlt, Asat );
+  SaturateJets( BjetsAlt, Bsat );
+  SaturateJets( CjetsAlt, Csat );
 
 
   gTowersType AjetsRestricted;
@@ -544,6 +571,37 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   CTOB2_dat[3] =  CTOB2_dat[3] | ( ( gJetTOBphi[5] & 0x0000001F ) <<26);
 
 
+  if( gTOBsat[0] ) {
+    ATOB1_dat[1] =  ( ATOB1_dat[1] | 0x80000000 );
+    ATOB1_dat[3] =  ( ATOB1_dat[3] | 0x80000000 );
+  }
+
+  if( gTOBsat[1] ) {
+    ATOB2_dat[1] =  ( ATOB2_dat[1] | 0x80000000 );
+    ATOB2_dat[3] =  ( ATOB2_dat[3] | 0x80000000 );
+  }
+
+  if( gTOBsat[2] ) {
+    BTOB1_dat[1] =  ( BTOB1_dat[1] | 0x80000000 );
+    BTOB1_dat[3] =  ( BTOB1_dat[3] | 0x80000000 );
+  }
+
+  if( gTOBsat[3] ) {
+    BTOB2_dat[1] =  ( BTOB2_dat[1] | 0x80000000 );
+    BTOB2_dat[3] =  ( BTOB2_dat[3] | 0x80000000 );
+  }
+
+  if( gTOBsat[4] ) {
+    CTOB1_dat[1] =  ( CTOB1_dat[1] | 0x80000000 );
+    CTOB1_dat[3] =  ( CTOB1_dat[3] | 0x80000000 );
+  }
+
+  if( gTOBsat[5] ) {
+    CTOB2_dat[1] =  ( CTOB2_dat[1] | 0x80000000 );
+    CTOB2_dat[3] =  ( CTOB2_dat[3] | 0x80000000 );
+  }
+
+
   // zero tob 4 word
 
   ATOB1_dat[4] =  0 ;
@@ -850,11 +908,12 @@ void gFEXJetAlgo::ZeroNegative(gTowersType & jets) const{
 
 
 // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/jet_eng.vhd#L538
-void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType & sat ) const {
+void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType sat ) const {
    for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
-      // set 18 bits on
-      if(sat[irow][icolumn] ) jets[irow][icolumn] = 0x0003ffff; 
+      if(static_cast<unsigned>(sat[irow][icolumn])) {
+        jets[irow][icolumn] = 0x0003ffff;
+      }
     }
   }
 }
@@ -1277,7 +1336,7 @@ void gFEXJetAlgo::jetOutAB(const gTowersType & jets,
 }
 
 
-void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp /*, int &PUChres*/) const {
+void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp /*, int &PUChres*/) const {
   // input are 50 MeV "fine" scale towers (i.e. inputScale = 1)
   // to use 200 MeV towers use inputScale = 4  
   // PUCp output is the pileup correction for 69 towers at 200 MeV energy scale 
@@ -1293,7 +1352,7 @@ void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int
       if (fineGT > FEXAlgoSpaceDefs::fineCeiling ) fineGT = FEXAlgoSpaceDefs::fineCeiling;
       if (fineGT < FEXAlgoSpaceDefs::fineFloor ) fineGT = FEXAlgoSpaceDefs::fineFloor;
 
-      if( (fineGT > rhoThreshold_Min) && (fineGT < rhoThreshold_Max) ) {
+      if( fineGT < rhoThreshold_Max ) {
       pucSum = pucSum + fineGT;
       nSum = nSum + 1;
       }

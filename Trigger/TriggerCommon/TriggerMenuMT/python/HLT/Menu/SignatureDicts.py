@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
-log.info("Importing %s",__name__)
+log.debug("Importing %s",__name__)
 
 from copy import deepcopy
 
@@ -146,9 +146,10 @@ JetChainParts = {
     'trkpresel'    : # Tracking preselection
       ['nopresel',
        # Single jet
-       'preslej50emf72',
-       'preslej30emf72',
+       'preselj50emf72',
+       'preselj30emf72',
        'preselj20emf72',
+       'preselj20emf60',
        'preselj20emf48',
        'preselj20emf24',
        'preselj20emf12',
@@ -365,7 +366,7 @@ JetChainParts = {
                   'emergingPTF0p2dR0p4', 'emergingPTF0p1dR0p4', 'emergingPTF0p09dR0p4', 'emergingPTF0p08dR0p4', 'emergingPTF0p075dR0p4', 'emergingPTF0p07dR0p4', 'emergingPTF0p0dR0p4',
                   'tracklessdR1p2',      'tracklessdR0p4',
                   'calratio','calratiormbib','calratiovar','calratiovarrmbib',  # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
-                  'calratiovar135','calratiovar59' # Exotics CalRatio Jets ( requested by DPJ Team for alternative cut on ratio )
+                  'calratiovar103','calratiovar82','calratiovar59' # Exotics CalRatio Jets ( requested by DPJ Team for alternative cut on ratio )
               ],
 
     # Simple hypo configuration. Single property cuts defined as MINvarMAX
@@ -380,9 +381,9 @@ JetChainParts = {
     'momCuts'       : # Generic moment cut on single jets
        ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
-    ['2timing'],
+    ['2timing','2timing15'],
     'timeSig'       : # delayed jets, based on pT-dependent significance of delay [sigma]
-    ['1timeSig', '1p5timeSig', '2timeSig', '3timeSig'],
+    ['1timeSig', '1p5timeSig', '2timeSig', '3timeSig','2timeSig15','3timeSig15'],
     'prefilters'      : # Pre-hypo jet selectors (including cleaning)
     ['CLEANlb', 'CLEANllp', 'MASK300ceta210XX300nphi10',
      # ptrangeXrY (X, Y matches regex \d+)  triggers a prehypo selection of

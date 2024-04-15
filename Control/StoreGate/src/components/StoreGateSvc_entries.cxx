@@ -2,7 +2,7 @@
 #include "StoreGate/ActiveStoreSvc.h"
 #include "StoreGate/tools/SGImplSvc.h"
 #include "StoreGate/SegMemSvc.h"
-#include "../SGHiveMgrSvc.h"
+#include "StoreGate/SGHiveMgrSvc.h"
 
 DECLARE_COMPONENT( ActiveStoreSvc )
 DECLARE_COMPONENT( StoreGateSvc )

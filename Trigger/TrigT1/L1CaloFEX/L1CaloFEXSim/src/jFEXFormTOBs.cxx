@@ -168,7 +168,7 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bo
     }
     
     //  Appliying jet calibration
-    if (calibParameters.first > m_jetEtaCalibrationBeginTimestamp) {
+    if (calibParameters.first > m_jetEtaCalibrationBeginTimestamp || m_isMC) {
         jFEXSmallRJetTOBEt = Get_eta_calibrated_SRj_ET(EtClus, jFEX, eta, Resolution, calibParameters.second);
     } else {
         jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus, Resolution, calibParameters.second);

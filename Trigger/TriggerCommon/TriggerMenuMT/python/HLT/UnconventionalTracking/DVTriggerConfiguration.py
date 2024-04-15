@@ -2,7 +2,7 @@
 from AthenaCommon.CFElements import seqAND
 from AthenaCommon.Logging import logging
 
-from TrigInDetConfig.utils import getFlagsForActiveConfig
+from TrigInDetConfig.utils import cloneFlagsToActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -40,7 +40,7 @@ def DVRecoFragment(flags):
     
     reco = InViewRecoCA('DVRecoStep',viewMaker=inputMakerAlg)
 
-    flagsWithTrk = getFlagsForActiveConfig(flags, flags.Trigger.InDetTracking.DVtxLRT.name, log)
+    flagsWithTrk = cloneFlagsToActiveConfig(flags, flags.Trigger.InDetTracking.DVtxLRT.name)
 
     lrt_algs = trigInDetLRTCfg(
         flagsWithTrk,

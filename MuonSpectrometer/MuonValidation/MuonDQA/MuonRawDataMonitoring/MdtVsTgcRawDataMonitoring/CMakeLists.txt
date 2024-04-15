@@ -1,6 +1,4 @@
-################################################################################
-# Package: MdtVsTgcRawDataMonitoring
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MdtVsTgcRawDataMonitoring )
@@ -15,7 +13,4 @@ atlas_add_component( MdtVsTgcRawDataMonitoring
                      src/functions/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib StoreGateLib xAODMuon GaudiKernel MuonReadoutGeometry MuonPrepRawData MuonSegment MuonTrigCoinData MuonDQAUtilsLib muonEvent TrkSegment GeoPrimitives Identifier EventPrimitives MuonCalibIdentifier MuonRDO MuonCompetingRIOsOnTrack MuonRIO_OnTrack TrkSurfaces TrkEventPrimitives TrkRIO_OnTrack )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 

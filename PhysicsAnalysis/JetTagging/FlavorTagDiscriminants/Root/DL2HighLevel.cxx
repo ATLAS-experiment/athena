@@ -40,7 +40,7 @@ namespace FlavorTagDiscriminants {
       throw std::logic_error("DL2 doesn't support multiple inputs");
     }
 
-    auto [input_config, trk_config, options] = dataprep::createGetterConfig(
+    auto [input_config, constituents_configs, options] = dataprep::createGetterConfig(
       config, flip_config, std::move(remap_scalar), track_link_type);
     options.default_output_value = default_output_value;
 
@@ -48,7 +48,7 @@ namespace FlavorTagDiscriminants {
       new DL2(
         config,                 // lwtnn config
         input_config,           // EDM input config
-        trk_config,             // edm track input config
+        constituents_configs,   // edm track input config
         options
         ));
   }

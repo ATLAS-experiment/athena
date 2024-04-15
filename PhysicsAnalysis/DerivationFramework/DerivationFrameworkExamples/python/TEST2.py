@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # TEST2.py - derivation framework example demonstrating skimming via means of string 
 
@@ -37,15 +37,15 @@ def TEST2KernelCfg(flags, name='TEST2Kernel', **kwargs):
     return acc
 
 
-def TEST2Cfg(ConfigFlags):
+def TEST2Cfg(flags):
 
     acc = ComponentAccumulator()
-    acc.merge(TEST2KernelCfg(ConfigFlags, name="TEST2Kernel"))
+    acc.merge(TEST2KernelCfg(flags, name="TEST2Kernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST2SlimmingHelper = SlimmingHelper("TEST2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TEST2SlimmingHelper = SlimmingHelper("TEST2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TEST2SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",
@@ -65,7 +65,7 @@ def TEST2Cfg(ConfigFlags):
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
     TEST2ItemList = TEST2SlimmingHelper.GetItemList()
 
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST2", ItemList=TEST2ItemList, AcceptAlgs=["TEST2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TEST2", AcceptAlgs=["TEST2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TEST2", ItemList=TEST2ItemList, AcceptAlgs=["TEST2Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TEST2", AcceptAlgs=["TEST2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

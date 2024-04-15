@@ -7,8 +7,8 @@ import logging
 
 
 def getFlagsForActiveConfig(
-    flags: AthConfigFlags, config_name: str, log: logging.Logger
-):
+    flags: AthConfigFlags, config_name: str, log: logging.Logger) -> AthConfigFlags:
+    
     """Get the flags for the named config, ensure that they are set to be active
 
     Parameters
@@ -44,6 +44,16 @@ def getFlagsForActiveConfig(
             "Menu code invoked ID config without flags.Tracking.ActiveConfig for %s",
             config_name,
         )
+    return cloneFlagsToActiveConfig(flags, config_name)
+
+
+
+def cloneFlagsToActiveConfig(
+    flags: AthConfigFlags, config_name: str) -> AthConfigFlags:
+    """
+    do InDet/ITk specific clone and replace of ActiveConfig without checking flags vs config_name
+    
+    """
     return flags.cloneAndReplace(
         "Tracking.ActiveConfig",
         ("Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking.") + config_name,

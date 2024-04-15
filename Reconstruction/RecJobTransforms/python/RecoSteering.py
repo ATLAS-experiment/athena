@@ -231,6 +231,7 @@ def RecoSteering(flags):
     # setup output
     acc.flagPerfmonDomain('IO')
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
 
     if flags.Output.doWriteESD:
         # Needed for Trk::Tracks TPCnv
@@ -250,9 +251,9 @@ def RecoSteering(flags):
             )
         )
         log.info("ESD ItemList: %s", acc.getEventAlgo(
-            "OutputStreamESD").ItemList)
+            outputStreamName("ESD")).ItemList)
         log.info("ESD MetadataItemList: %s", acc.getEventAlgo(
-            "OutputStreamESD").MetadataItemList)
+            outputStreamName("ESD")).MetadataItemList)
         log.info("---------- Configured ESD writing")
 
     if flags.Output.doWriteAOD:
@@ -269,9 +270,9 @@ def RecoSteering(flags):
             )
         )
         log.info("AOD ItemList: %s", acc.getEventAlgo(
-            "OutputStreamAOD").ItemList)
+            outputStreamName("AOD")).ItemList)
         log.info("AOD MetadataItemList: %s", acc.getEventAlgo(
-            "OutputStreamAOD").MetadataItemList)
+            outputStreamName("AOD")).MetadataItemList)
         log.info("---------- Configured AOD writing")
 
     if flags.Output.doJiveXML:

@@ -88,10 +88,6 @@ namespace  GlobalSim {
 			     const TrigConf::L1Menu*);
  
   uint32_t interpretGenericParam(const std::string&);
-
-  std::map<std::string, int> isolationFW_CTAU(const TrigConf::L1Menu* l1menu);
-  std::map<std::string, int> isolationFW_CTAU_jTAUCoreScale(const TrigConf::L1Menu* l1menu);
-  std::map<std::string, int> isolationFW_JTAU(const TrigConf::L1Menu* l1menu);
 }
 
 namespace GlobalSim {
@@ -605,10 +601,6 @@ namespace GlobalSim {
 	throw std::runtime_error("Error down casting to CountingAlg");
       }
 
-      pca->setIsolationFW_CTAU(isolationFW_CTAU(l1menu), isolationFW_CTAU_jTAUCoreScale(l1menu));
-      pca->setIsolationFW_JTAU(isolationFW_JTAU(l1menu));
-	
-      
       pca->setThreshold(l1thr);
       alg->setL1TopoHistSvc(histSvc);
       pca->initialize();
@@ -698,98 +690,6 @@ namespace GlobalSim {
 					l1menu);
    }
  }
-
-  std::map<std::string, int> isolationFW_CTAU(const TrigConf::L1Menu* l1menu){
-    const TrigConf::L1ThrExtraInfo_cTAU& ctauExtraInfo =
-      l1menu->thrExtraInfo().cTAU();
-    
-    int CTAU_iso_fw_loose  =
-      static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE,
-					       0).isolation_fw());
-    
-    int CTAU_iso_fw_medium =
-      static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM,
-					       0).isolation_fw());
-    
-    int CTAU_iso_fw_tight  =
-      static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT,
-					       0).isolation_fw());
-    
-    auto isolationFW = std::map<std::string, int>();
-
-    isolationFW[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)]
-      = CTAU_iso_fw_loose;
-
-    isolationFW[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)]
-      = CTAU_iso_fw_medium;
-
-    isolationFW[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)]
-      = CTAU_iso_fw_tight;
-
-    return isolationFW;
-  }
-
-  std::map<std::string, int> isolationFW_CTAU_jTAUCoreScale(const TrigConf::L1Menu* l1menu){
-    const TrigConf::L1ThrExtraInfo_cTAU& ctauExtraInfo =
-      l1menu->thrExtraInfo().cTAU();
-    
-    int CTAU_iso_fw_jTAUCoreScale_loose  =
-      static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE,
-					       0).isolation_jTAUCoreScale_fw());
-    
-    int CTAU_iso_fw_jTAUCoreScale_medium =
-      static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM,
-					       0).isolation_jTAUCoreScale_fw());
-    
-    int CTAU_iso_fw_jTAUCoreScale_tight  =
-      static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT,
-					       0).isolation_jTAUCoreScale_fw());
-    
-    auto isolationFW_jTAUCoreScale = std::map<std::string, int>();
-
-    isolationFW_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)]
-      = CTAU_iso_fw_jTAUCoreScale_loose;
-
-    isolationFW_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)]
-      = CTAU_iso_fw_jTAUCoreScale_medium;
-
-    isolationFW_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)]
-      = CTAU_iso_fw_jTAUCoreScale_tight;
-
-    return isolationFW_jTAUCoreScale;
-  }
-  
-  std::map<std::string, int> isolationFW_JTAU(const TrigConf::L1Menu* l1menu){
-    const TrigConf::L1ThrExtraInfo_jTAU&  jtauExtraInfo =
-      l1menu->thrExtraInfo().jTAU();
-    
-    int JTAU_iso_fw_loose  =
-      static_cast<int>(jtauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE,
-					       0).isolation_fw());
-    
-    int JTAU_iso_fw_medium =
-      static_cast<int>(jtauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM,
-					       0).isolation_fw());
-    
-    int JTAU_iso_fw_tight  =
-      static_cast<int>(jtauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT,
-					       0).isolation_fw());
-    
-    auto isolationFW = std::map<std::string, int>();
-
-    isolationFW[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)]
-      = JTAU_iso_fw_loose;
-
-    isolationFW[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)]
-      = JTAU_iso_fw_medium;
-
-    isolationFW[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)]
-      = JTAU_iso_fw_tight;
-
-    return isolationFW;
-  }
-
-
 
 }
 

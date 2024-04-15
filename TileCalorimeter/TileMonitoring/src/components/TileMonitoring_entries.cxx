@@ -1,31 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "../TilePaterMonTool.h"
 #include "../TileFatherMonTool.h"
-#include "../TileCellMonTool.h"
-#include "../TileTowerMonTool.h"
-#include "../TileClusterMonTool.h"
-#include "../TileMuIdMonTool.h"
-#include "../TileL2MonTool.h"
-#include "../TileMuonFitMonTool.h"
 #include "../TileDigitsMonTool.h"
 #include "../TileRawChannelMonTool.h"
-#include "../TileDQFragMonTool.h"
-#include "../TileDQFragLWMonTool.h"
-#include "../TileRODMonTool.h"
-#include "../TileJetMonTool.h"
-#include "../TileDigiNoiseMonTool.h"
-#include "../TileTMDBDigitsMonTool.h"
-#include "../TileTMDBRawChannelMonTool.h"
 #include "../TileCellNoiseMonTool.h"
-#include "../TileRawChannelTimeMonTool.h"
-#include "../TileRawChannelNoiseMonTool.h"
-#include "../TileTBBeamMonTool.h"
-#include "../TileTBMonTool.h"
 #include "../TileTBCellMonTool.h"
-#include "../TileTBPulseMonTool.h"
 #include "../TileJetMonitorAlgorithm.h"
 #include "../TileDigitsFlxMonitorAlgorithm.h"
 #include "../TileDQFragMonitorAlgorithm.h"
@@ -51,28 +33,10 @@
 
 DECLARE_COMPONENT( TileFatherMonTool )
 DECLARE_COMPONENT( TilePaterMonTool )
-DECLARE_COMPONENT( TileCellMonTool )
-DECLARE_COMPONENT( TileTowerMonTool )
-DECLARE_COMPONENT( TileClusterMonTool )
-DECLARE_COMPONENT( TileMuIdMonTool )
-DECLARE_COMPONENT( TileL2MonTool )
-DECLARE_COMPONENT( TileMuonFitMonTool )
 DECLARE_COMPONENT( TileDigitsMonTool )
 DECLARE_COMPONENT( TileRawChannelMonTool )
-DECLARE_COMPONENT( TileDQFragMonTool )
-DECLARE_COMPONENT( TileDQFragLWMonTool )
-DECLARE_COMPONENT( TileRODMonTool )
-DECLARE_COMPONENT( TileJetMonTool )
-DECLARE_COMPONENT( TileDigiNoiseMonTool )
-DECLARE_COMPONENT( TileTMDBDigitsMonTool )
-DECLARE_COMPONENT( TileTMDBRawChannelMonTool )
 DECLARE_COMPONENT( TileCellNoiseMonTool )
-DECLARE_COMPONENT( TileRawChannelTimeMonTool )
-DECLARE_COMPONENT( TileRawChannelNoiseMonTool )
-DECLARE_COMPONENT( TileTBBeamMonTool )
-DECLARE_COMPONENT( TileTBMonTool )
 DECLARE_COMPONENT( TileTBCellMonTool )
-DECLARE_COMPONENT( TileTBPulseMonTool )
 DECLARE_COMPONENT( TileJetMonitorAlgorithm )
 DECLARE_COMPONENT( TileDigitsFlxMonitorAlgorithm )
 DECLARE_COMPONENT( TileDQFragMonitorAlgorithm )

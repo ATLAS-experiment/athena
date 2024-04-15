@@ -111,6 +111,12 @@ namespace LVL1 {
     /** Calculates eta and phi from ieta and iphi**/
     void getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi) const;
 
+    /** Sets saturation flag **/
+    void setIsSaturated(char isSaturated);
+
+    /** Returns true if is saturated **/
+    char isSaturated() const;
+
     /** Internal data */
   private:
     int m_eta;
@@ -125,6 +131,8 @@ namespace LVL1 {
     int m_tower_id;
     int m_posneg = 0;
     int m_noisecut = -100000; //noisecut currently not used by gFEX, leave it here in case we need it (default value is < of minimum negative energy received by gFEX)
+
+    char m_saturated;
   };
 
 } // end of namespace

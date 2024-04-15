@@ -28,13 +28,11 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
                               MNBLooseFEBDefStr=""):
 
     # first configure known bad FEBs
-    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-    if isComponentAccumulatorCfg():
-       from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-       cfg=ComponentAccumulator()
-       from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg, LArKnownMNBFebCfg
-       cfg.merge(LArKnownBadFebCfg(flags))
-       cfg.merge(LArKnownMNBFebCfg(flags))
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    cfg=ComponentAccumulator()
+    from LArBadChannelTool.LArBadFebsConfig import LArKnownBadFebCfg, LArKnownMNBFebCfg
+    cfg.merge(LArKnownBadFebCfg(flags))
+    cfg.merge(LArKnownMNBFebCfg(flags))
 
     larNoisyROMonAlg = helper.addAlgorithm(algoinstance,'larNoisyROMonAlg')
 
@@ -81,15 +79,8 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
          "L1_XE70",
          "L1_XE80"
     ]
-    doTrigger=False
-    if isComponentAccumulatorCfg():
-      if flags.DQ.useTrigger or LArNoisyROMonForceTrigger:
-        doTrigger=True
-    else:    
-      if flags.doHLTMon or LArNoisyROMonForceTrigger:
-        doTrigger=True
 
-    if doTrigger:
+    if flags.DQ.useTrigger or LArNoisyROMonForceTrigger:
        larNoisyROMonAlg.doTrigger = True  
        larNoisyROMonAlg.EFNoiseBurstTriggers = EFNoiseBurstTriggersList
        larNoisyROMonAlg.L1NoiseBurstTriggers = L1NoiseBurstTriggersList
@@ -241,11 +232,8 @@ def LArNoisyROMonConfigCore(helper,algoinstance,flags,
                                  xbins=l1siz+1,xmin=0.5,xmax=l1siz+1.5,
                                  xlabels=larNoisyROMonAlg.L1NoiseBurstTriggers.append("NONE"))
 
-    pass
-
-    if isComponentAccumulatorCfg():
-       cfg.merge(helper.result())
-       return cfg
+    cfg.merge(helper.result())
+    return cfg
     
 
 if __name__=='__main__':

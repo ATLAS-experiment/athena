@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKINGGEOMETRY_MUONSTATIONBUILDERIMPL_H
@@ -30,7 +30,7 @@ class MaterialProperties;
 
 namespace Muon {
 
-typedef std::pair<Amg::Transform3D, int> GMInfo;
+
 
 /** @class MuonStationBuilderImpl
 
@@ -41,12 +41,13 @@ typedef std::pair<Amg::Transform3D, int> GMInfo;
 
 class MuonStationBuilderImpl : public AthAlgTool {
    public:
+    using GMInfo = std::pair<Amg::Transform3D, int>;
     virtual ~MuonStationBuilderImpl() = default;
     virtual StatusCode initialize() override;
 
-    std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-    buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr,
-                                     bool blend = false) const;
+    using DetachedVolVec = std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>;
+    DetachedVolVec buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr,
+                                                    bool blend = false) const;
 
    protected:
     MuonStationBuilderImpl(const std::string&, const std::string&,
@@ -55,7 +56,7 @@ class MuonStationBuilderImpl : public AthAlgTool {
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>>
+    std::vector<std::pair<const GeoVPhysVol*, std::vector<GMInfo>>>
     retrieveGMsensitive(const MuonGM::MuonDetectorManager* muonMgr) const;
 
     std::unique_ptr<Trk::DetachedTrackingVolume>
@@ -66,16 +67,17 @@ class MuonStationBuilderImpl : public AthAlgTool {
     void encloseLayers(const Trk::DetachedTrackingVolume*) const;
     void identifyLayers(Trk::DetachedTrackingVolume*, Identifier, int, int,
                         const MuonGM::MuonDetectorManager*) const;
-    void identifyNSWLayers(Trk::DetachedTrackingVolume* station, Identifier id,
-                           const MuonGM::MuonDetectorManager* muonMgr) const;
+    
+    void identifyNSWLayers(Trk::DetachedTrackingVolume& station, 
+                           const Identifier& id) const;
 
-    void identifyPrototype(Trk::TrackingVolume*, int, int,
-                           const Amg::Transform3D&,
-                           const MuonGM::MuonDetectorManager*) const;
+    void identifyPrototype(Trk::TrackingVolume& station, int eta, int phi,
+                           const Amg::Transform3D& transf,
+                           const MuonGM::MuonDetectorManager* muonMgr) const;
 
     Identifier resolveId(std::string vname, GMInfo gm_info, int& eta, int& phi,
                          const MuonGM::MuonDetectorManager* muonMgr) const;
-    void checkLayerId(std::string comment,
+    void checkLayerId(std::string_view comment,
                       const MuonGM::MuonDetectorManager* muonMgr, Identifier id,
                       const Trk::Layer* lay) const;
 

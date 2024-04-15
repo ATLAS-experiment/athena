@@ -41,7 +41,7 @@ def commonServicesCfg(flags):
         TopAlg=["AthSequencer/AthMasterSeq"]) )
 
     from AthenaConfiguration.MainServicesConfig import AvalancheSchedulerSvcCfg
-    cfg.merge( AvalancheSchedulerSvcCfg(flags) )
+    cfg.merge( AvalancheSchedulerSvcCfg(flags, maxParallelismExtra=1 if flags.Trigger.enableAsyncIO else 0) )
 
     # SGCommitAuditor to sweep new DataObjects at end of Alg execute
     cfg.addAuditor( CompFactory.SGCommitAuditor() )

@@ -29,5 +29,4 @@ atlas_add_dictionary( LArStrHelperDict
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/LArMonitoring_jobOption.py share/LArAffectedRegionsAlg_jobOptions.py share/LArCollisionTimeMonAlg_jobOptions.py )
 atlas_install_scripts( share/StateLessPT_TestFile_NewConfig.py share/StateLessPT_NewConfig.py )

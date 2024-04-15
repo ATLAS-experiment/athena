@@ -74,54 +74,7 @@ private:
     }
 
 
-  template <typename T> unsigned int fillHistos(const SG::ReadHandleKey<T>& key1, const SG::ReadHandleKey<T>& key2, const std::string& eventType, const EventContext& ctx, const std::string& signa = "" ) const {
-      SG::ReadHandle<T> tobs1{key1, ctx};
-      SG::ReadHandle<T> tobs2{key2, ctx};
-
-      std::set<uint32_t> word0s2;
-      if(tobs2.isValid()) {
-          for(auto tob : *tobs2) {
-              word0s2.insert(tob->word0());
-          }
-      }
-
-      auto signature = Monitored::Scalar<std::string>("Signature",signa);
-      auto evtType = Monitored::Scalar<std::string>("EventType",eventType);
-      auto tobMismatched = Monitored::Scalar<float>("tobMismatched",0.0);
-
-      // for each collection record if TOB is matched or not
-      unsigned int nUnmatched = 0;
-      if(tobs1.isValid()) {
-          for(auto tob : *tobs1) {
-              tobMismatched=100;
-              if(word0s2.find(tob->word0()) == word0s2.end()) {
-                  nUnmatched++;
-              } else {
-                  tobMismatched=0;
-              }
-              fill("mismatches",signature,evtType,tobMismatched);
-//              if(tobMismatched && this->msgLevel(MSG::DEBUG)) {
-//                  std::cout << "evtNumber " << GetEventInfo(ctx)->eventNumber() << " " << tobs1.key() << " " << (groupSuffix=="2" ? "L1_eFexDataTowers" : "L1_eFexEmulatedTowers") << " mismatched: 0x" << std::hex << tob->word0() << std::dec << " (" << tob->eta() << "," << tob->phi() << ")" << std::endl;
-//                  for(auto tower : *towers) {
-//                      if (std::abs(tower->eta() - tob->eta()) < 0.2 && std::abs(P4Helpers::deltaPhi(tower->phi(),tob->phi()))<0.2) {
-//                          std::cout << tower->eta() << " " << tower->phi() << " : ";
-//                          for(auto& c : tower->et_count()) std::cout << c << ",";
-//                          std::cout << std::endl;
-//                      }
-//                  }
-//              }
-          }
-          if(tobs2.isValid() && tobs1->size() < tobs2->size()) {
-              tobMismatched=100;
-              for(unsigned int i=0;i<(tobs2->size()-tobs1->size());i++) {
-                  nUnmatched++;
-                  fill("mismatches",signature,tobMismatched,evtType);
-              }
-          }
-      }
-      return nUnmatched;
-
-  }
+  template <typename T> unsigned int fillHistos(const SG::ReadHandleKey<T>& key1, const SG::ReadHandleKey<T>& key2, const EventContext& ctx, const std::string& signa = "" ) const;
 
 
 };

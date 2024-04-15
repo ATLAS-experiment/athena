@@ -24,11 +24,14 @@ Interface definition for eFEXegAlgo
     static const InterfaceID& interfaceID( ) ;
 
 
-    virtual void pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp) const = 0;
+    virtual void pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp) const = 0;
 
     virtual std::vector<std::unique_ptr<gFEXJetTOB>> largeRfinder(const gTowersType& Atwr, 
                                                                   const gTowersType& Btwr,
                                                                   const gTowersType& CNtwr,
+                                                                  const gTowersType& Asat, 
+                                                                  const gTowersType& Bsat,
+                                                                  const gTowersType& CNsat,
                                                                   int pucA, int pucB, int pucC, int gLJ_seedThrA, int gLJ_seedThrB, int gLJ_seedThrC,
                                                                   int gJ_ptMinToTopoCounts1, int gJ_ptMinToTopoCounts2, 
                                                                   int jetThreshold, int gLJ_ptMinToTopoCounts1, int gLJ_ptMinToTopoCounts2,

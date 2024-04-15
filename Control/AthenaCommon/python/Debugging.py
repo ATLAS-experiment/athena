@@ -89,3 +89,22 @@ See https://www.kernel.org/doc/Documentation/security/Yama.txt and prctl(2).
     libc.prctl (0x59616d61, 0xffffffffffffffff)
 
     return
+
+
+def dumpPythonProfile(filename):
+    """Save python profile data of the default athena profiler instance
+    into filename (.txt or .pkl format).
+    """
+    from AthenaCommon.Logging import log
+    import cProfile
+    import pstats
+
+    profiler = cProfile._athena_python_profiler
+    profiler.disable()
+    if filename.endswith(".txt"):
+        stats = pstats.Stats(profiler, stream=open(filename, 'w'))
+        stats.strip_dirs().sort_stats("time").print_stats()
+        log.info("Python profile summary stored in %s", filename)
+    else:
+        profiler.dump_stats(filename)
+        log.info("Python profile stored in %s", filename)

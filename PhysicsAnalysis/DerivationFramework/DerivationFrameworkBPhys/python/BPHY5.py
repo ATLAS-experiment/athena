@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY5.py
@@ -347,7 +347,7 @@ def BPHY5Cfg(flags):
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-   BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+   BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
    StaticContent = []

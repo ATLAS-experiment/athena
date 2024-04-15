@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( TrigTauMatching )
@@ -32,6 +32,3 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODCore xAODTau AsgTools
       TrigConfxAODLib TrigDecisionToolLib TrigTauMatchingLib )
 endif()
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

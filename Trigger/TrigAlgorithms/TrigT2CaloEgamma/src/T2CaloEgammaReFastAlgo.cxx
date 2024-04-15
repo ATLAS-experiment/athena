@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -159,7 +159,7 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
     }
 
 
-      if ( caloDDE != 0 ){
+      if ( caloDDE != nullptr ){
         if ( caloDDE->is_lar_em_barrel() ){
           for( ToolHandleArray<IEgammaCalibration>::const_iterator
                       ical=m_calibsBarrel.begin();
@@ -211,8 +211,9 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
     clPhi = ptrigEmCluster->phi();
     clETrings = et_calib*1e-3;
    
-    res_et = (et_calib - et_uncalib)/et_uncalib;
-    
+    if (et_uncalib != 0.) {
+      res_et = (et_calib - et_uncalib)/et_uncalib;
+    }
 
     if ( ptrigEmCluster->e277() > 0.01 ) clReta = ptrigEmCluster->e237()/ptrigEmCluster->e277();
 
@@ -220,4 +221,3 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
 
   return StatusCode::SUCCESS;
 }
-

@@ -528,14 +528,15 @@ void TRTDigSettings::fillDefaults(const InDetDD::TRT_DetectorManager* detmgr) {
   // Delta-ray suppression tune tagged as 01-01-03
   // Delta-ray suppression tune with backward compatibility with non suppressed delta-ray simulation tagged as 01-01-07
   // Delta-ray suppression HT middle-bit fraction tune - 2015 data; 01-01-16
+  // HT rough-tune on 2022 data R23 for mc23e production
   m_trtRangeCutProperty = m_doubleparMap["TrtRangeCutProperty"].valueSetByUser;//To avoid overwritting warning message and to use python configured value
   if(std::abs(m_trtRangeCutProperty-0.05) >= std::numeric_limits<double>::epsilon()){
     m_lowThresholdBar        = 0.260*CLHEP::keV;
     m_lowThresholdEC         = 0.275*CLHEP::keV;
     m_highThresholdBarShort  = 5.195*CLHEP::keV;
     m_highThresholdBarLong   = 4.751*CLHEP::keV;
-    m_highThresholdECAwheels = 5.513*CLHEP::keV;
-    m_highThresholdECBwheels = 5.326*CLHEP::keV;
+    m_highThresholdECAwheels = 4.941*CLHEP::keV;
+    m_highThresholdECBwheels = 4.868*CLHEP::keV;
     m_trEfficiencyBarrel = 0.774;
     m_trEfficiencyEndCapA = 0.909;
     m_trEfficiencyEndCapB = 0.809;
@@ -556,13 +557,14 @@ void TRTDigSettings::fillDefaults(const InDetDD::TRT_DetectorManager* detmgr) {
   // (Argon) Initial tuning by Artem July 2014. See log file. Requires fine tuning.
   // HT middle-bit fraction tune - wider shaping function; 01-00-24
   // HT middle-bit fraction tune - 2015 data; 01-01-16
+  // HT rough-tune on 2022 data R23 for mc23e production (required also overlay correction tune)
   // Argon LT tune to 2015 data; r22
   m_lowThresholdBarArgon        = 0.100*CLHEP::keV;
   m_lowThresholdECArgon         = 0.100*CLHEP::keV;
-  m_highThresholdBarShortArgon  = 2.607*CLHEP::keV;
-  m_highThresholdBarLongArgon   = 2.540*CLHEP::keV;
-  m_highThresholdECAwheelsArgon = 2.414*CLHEP::keV;
-  m_highThresholdECBwheelsArgon = 2.295*CLHEP::keV;
+  m_highThresholdBarShortArgon  = 2.271*CLHEP::keV;
+  m_highThresholdBarLongArgon   = 2.061*CLHEP::keV;
+  m_highThresholdECAwheelsArgon = 2.168*CLHEP::keV;
+  m_highThresholdECBwheelsArgon = 2.089*CLHEP::keV;
   m_trEfficiencyBarrelArgon = 0.61;
   m_trEfficiencyEndCapAArgon = 0.80;
   m_trEfficiencyEndCapBArgon = 0.80;

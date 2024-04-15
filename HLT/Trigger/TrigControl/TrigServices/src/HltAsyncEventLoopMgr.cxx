@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -18,6 +18,7 @@
 #include "ByteStreamData/ByteStreamMetadataContainer.h"
 #include "EventInfoUtils/EventInfoFromxAOD.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/SGHiveMgrSvc.h"
 
 // Gaudi includes
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -32,14 +33,12 @@
 #include "eformat/StreamTag.h"
 #include "owl/time.h"
 
-// Boost includes
-#include <boost/filesystem.hpp>
-
 // ROOT includes
 #include "TROOT.h"
 #include "TSystem.h"
 
 // System includes
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -133,6 +132,20 @@ StatusCode HltAsyncEventLoopMgr::initialize()
     ATH_MSG_INFO(" ---> NumThreads                = " << threads);
   else
     ATH_MSG_WARNING("Failed to retrieve the job property AvalancheSchedulerSvc.ThreadPoolSize");
+
+  const std::string& procs = m_jobOptionsSvc->get("DataFlowConfig.DF_NumberOfWorkers");
+  if (!procs.empty()) {
+    ATH_MSG_INFO(" ---> NumProcs                  = " << procs);
+    try {
+      SG::HiveMgrSvc::setNumProcs(std::stoi(procs));
+    }
+    catch (const std::logic_error& ex) {
+      ATH_MSG_ERROR("Cannot convert " << procs << "to integer: " << ex.what());
+      return StatusCode::FAILURE;
+    }
+  }
+  else
+    ATH_MSG_WARNING("Failed to retrieve the job property DataFlowconfig.DF_NumberOfWorkers");
 
   if (m_maxParallelIOTasks.value() <= 0) {
     ATH_CHECK(m_maxParallelIOTasks.fromString(threads));
@@ -432,18 +445,18 @@ StatusCode HltAsyncEventLoopMgr::hltUpdateAfterFork(const ptree& /*pt*/)
   // Nothing happens if the online TrigMonTHistSvc is used as there are no output files.
   SmartIF<IIoComponent> histsvc = serviceLocator()->service("THistSvc", /*createIf=*/ false).as<IIoComponent>();
   if ( !m_ioCompMgr->io_retrieve(histsvc.get()).empty() ) {
-    boost::filesystem::path worker_dir = boost::filesystem::absolute("athenaHLT_workers");
+    std::filesystem::path worker_dir = std::filesystem::absolute("athenaHLT_workers");
     std::ostringstream oss;
     oss << "athenaHLT-" << std::setfill('0') << std::setw(2) << m_workerID;
     worker_dir /= oss.str();
     // Delete worker directory if it exists already
-    if ( boost::filesystem::exists(worker_dir) ) {
-      if ( boost::filesystem::remove_all(worker_dir) == 0 ) {
+    if ( std::filesystem::exists(worker_dir) ) {
+      if ( std::filesystem::remove_all(worker_dir) == 0 ) {
         ATH_MSG_FATAL("Cannot delete previous worker directory " << worker_dir);
         return StatusCode::FAILURE;
       }
     }
-    if ( !boost::filesystem::create_directories(worker_dir) ) {
+    if ( !std::filesystem::create_directories(worker_dir) ) {
       ATH_MSG_FATAL("Cannot create worker directory " << worker_dir);
       return StatusCode::FAILURE;
     }
@@ -1557,7 +1570,7 @@ StatusCode HltAsyncEventLoopMgr::processFinishedEvent()
   if (check("Failed to retrieve the HLTResult DataObject", HLT::OnlineErrorCode::NO_HLT_RESULT)) {return sc;}
 
   // Check for result truncation
-  if (!hltResult->getTruncatedModuleIds().empty()) {sc = StatusCode::FAILURE;}
+  if (!hltResult->getTruncatedModuleIds().empty() && hltResult->severeTruncation()) {sc = StatusCode::FAILURE;}
   if (check("HLT result truncation", HLT::OnlineErrorCode::RESULT_TRUNCATION)) {return sc;}
 
   // Convert the HLT result to the output data format

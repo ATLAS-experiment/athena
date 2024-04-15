@@ -68,6 +68,8 @@ LArNoiseCorrelationMonAlg::initialize()
   // initialize superclass
   ATH_CHECK( AthMonitorAlgorithm::initialize() ); 
 
+  if(m_plotsOFF) return StatusCode::SUCCESS; // will not plot anything
+
   /*now the group*/
   m_noiseCorrGroups=Monitored::buildToolMap<int>(m_tools,m_noiseCorrGroupName,m_FEBlist);
   

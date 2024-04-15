@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 
@@ -15,6 +15,10 @@ from TrigHLTJetHypo.prefilter_mask import prefilter_mask
 from TrigHLTJetHypo.prefilter_ptrange import prefilter_ptrange
 from TrigHLTJetHypo.prefilter_maxmult import prefilter_maxmult
 from TrigHLTJetHypo.prefilter_clean import prefilter_clean
+
+from TrigHLTJetHypo.hypoToolDisplay import hypoToolDisplay
+
+
 
 from TrigHLTJetHypo.makeConditionFilterConfigurer import (
     makeConditionFilterConfigurer,
@@ -251,14 +255,11 @@ def make_fastreduction_configurers(chain_dict):
     scenario chain parts, and n-1 for the non-simple scenario.
     """
     
-
     chain_parts = chain_dict['chainParts']
 
     simple_chainparts = [
         cp for cp in chain_parts if cp['hypoScenario'] == 'simple']
-
     simple_cpis = [cp['chainPartIndex'] for cp in simple_chainparts]
-
     # check that all the simple scenario parts occur before 
     # non-simple scenario chain parts
 
@@ -287,7 +288,7 @@ def make_fastreduction_configurers(chain_dict):
 
     scenario_chainparts =[
         cp for cp in chain_parts if cp['hypoScenario'] != 'simple']
-
+           
     if scenario_chainparts:
         for scenario_chainpart in scenario_chainparts:
             # scenario_chainpart = scenario_chainparts[0]
@@ -360,6 +361,8 @@ def getLabelIndices(chain_dict):
 
 def  hypotool_from_chaindict(chain_dict, visit_debug=False):
 
+    toolfactory.reset()
+
     if visit_debug:
         fn = chain_dict['chainName'] + '_chaindict.log'
         from pprint import pprint
@@ -395,6 +398,9 @@ def  hypotool_from_chaindict(chain_dict, visit_debug=False):
     hypo_tool = toolclass(**args)
     hypo_tool.visit_debug = visit_debug
 
+    if (visit_debug):
+        hypoToolDisplay(hypo_tool,
+                        do_dot=True)
         
     return hypo_tool
 

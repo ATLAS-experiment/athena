@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,7 +23,7 @@ using namespace pix;
 
 BOOST_AUTO_TEST_SUITE(PixelMappingTest)
   BOOST_AUTO_TEST_CASE(PixelMappingConstructor){
-     const std::string fname("mapping.csv");
+     const std::string fname("PixelCalibAlgs/mapping.csv");
      std::string file = PathResolver::find_file (fname, "DATAPATH");
      BOOST_TEST_MESSAGE("Now opening mapping file: ");
      BOOST_TEST_MESSAGE(file);
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(PixelMappingTest)
   }
   
   BOOST_AUTO_TEST_CASE(PixelMappingMethod){
-    const std::string fname("mapping.csv");
+    const std::string fname("PixelCalibAlgs/mapping.csv");
     std::string file = PathResolver::find_file (fname, "DATAPATH");
     //LI_S15_A_34_M3_A7, 2036, 4, 0, 0, 0
     const std::string name{"LI_S15_A_34_M3_A7"};

@@ -168,6 +168,12 @@ TrigConf::L1Threshold_eTAU::load()
    m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
 }
 
+const std::shared_ptr<TrigConf::L1ThrExtraInfo_jTAU>
+TrigConf::L1Threshold_jTAU::getExtraInfo() const
+{
+   return dynamic_pointer_cast<TrigConf::L1ThrExtraInfo_jTAU>(m_extraInfo.lock());
+}
+
 void
 TrigConf::L1Threshold_jTAU::load()
 {
@@ -176,6 +182,12 @@ TrigConf::L1Threshold_jTAU::load()
    // reject TOBs outside explicitly defined eta ranges 
    // by requiring an impossibly high threshold
    m_etaDepThrValue.setOutsideRangeValue(getAttribute("maxValue", true, 14000000));
+}
+
+const std::shared_ptr<TrigConf::L1ThrExtraInfo_cTAU>
+TrigConf::L1Threshold_cTAU::getExtraInfo() const
+{
+   return dynamic_pointer_cast<TrigConf::L1ThrExtraInfo_cTAU>(m_extraInfo.lock());
 }
 
 void

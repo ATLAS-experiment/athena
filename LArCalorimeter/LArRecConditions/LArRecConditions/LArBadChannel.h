@@ -88,6 +88,22 @@ class  LArBadChannel {
   /// Returns true if no problems at all (all bits at zero)
   bool good() const {return m_word == 0;}
 	
+
+  //Cases used only for supercells
+  bool maskedOSUM() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::maskedOSUMBit); else return false;}
+  bool deformedTail() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::DeformedTailBit); else return false;}
+  bool deformedPulse() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::DeformedPulseBit); else return false;}
+  bool nonLinearRamp() const{ if (m_isSC) return statusBad( LArBadChannelSCEnum::NonLinearRampBit); else return false;}
+  bool ADCJump() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::ADCJumpBit); else return false;}
+  bool SCAProblem() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::SCAProblemBit); else return false;}
+  bool offOFCs() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::OffOFCsBit); else return false;}
+  bool offAmplitude() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::OffAmplitudeBit); else return false;}
+  bool offScale() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::OffScaleBit); else return false;}
+  bool lowLightFibre() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::lowLightFibreBit); else return false;}
+  bool transmissionErrorFibre() const {if (m_isSC) return statusBad( LArBadChannelSCEnum::transmissionErrorFibreBit); else return false;}
+
+
+  //Common cases (regular and supercell)
   bool deadReadout() const { if(m_isSC) return statusBad( LArBadChannelSCEnum::deadReadoutBit); else return statusBad( LArBadChannelEnum::deadReadoutBit);}
   bool deadCalib() const { if(m_isSC) return statusBad( LArBadChannelSCEnum::deadCalibBit); else return statusBad( LArBadChannelEnum::deadCalibBit);} 
   bool deadPhys() const { if(m_isSC) return statusBad( LArBadChannelSCEnum::deadPhysBit); else return statusBad( LArBadChannelEnum::deadPhysBit);} 
@@ -125,6 +141,9 @@ class  LArBadChannel {
   LArBadChannel& operator|=(LArBadChannel other) {m_word|=other.m_word; return *this;}
 
   BitWord packedData() const {return m_word;}
+
+  bool isSC() const {return m_isSC;}
+  void setSC() {m_isSC=true;}
 
  private:
 

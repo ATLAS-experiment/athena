@@ -10,6 +10,15 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.GfexSimMonitorAlgorithm,'GfexSimMonAlg')
 
 
+    helper.defineHistogram('LBNString,Signature;h_mismatched_DataTowerEvts',
+                           fillGroup="mismatches",
+                           paths=['Shifter/Sim','Expert/Sim'],
+                           hanConfig={"algorithm":"Histogram_Empty"},
+                           type='TH2I', cutmask='SimulationReady', # not all of gfex simulation is considered ready at this time
+                           title='Mismatched DataTower Events;LB:FirstEvtNum;Signature;Events',
+                           xlabels=[""],
+                           ybins=1,ymin=0,ymax=1,
+                           opt=['kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('EventType,Signature,tobMismatched;h_simSummary',title='Sim-HW Mismatches (percentage);Event Type;Signature',
                            fillGroup="mismatches",
                            path='Expert/Sim/detail', # place summary plot in the detail path in Expert audience
@@ -18,9 +27,9 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                            xlabels=["DataTowers","EmulatedTowers"],
                            ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
                            opt=['kCanRebin','kAlwaysCreate'],merge="merge")
-    helper.defineTree('LBNString,Signature,EventNumber,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
-                      "lbnString/string:Signature/string:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
-                      title="mismatched;LBN;Signature",fillGroup="mismatches")
+    helper.defineTree('LBNString,Signature,LBN,EventNumber,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+                      "lbnString/string:Signature/string:lbn/l:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
+                      title="mismatched;LBN:EventNumber;Signature",fillGroup="mismatches")
 
     return helper.result()
 
@@ -50,9 +59,6 @@ if __name__=='__main__':
     flags.Exec.SkipEvents = args.skipEvents
 
     flags.lock()
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

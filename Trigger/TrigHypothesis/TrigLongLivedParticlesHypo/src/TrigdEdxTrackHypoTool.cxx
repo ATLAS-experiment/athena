@@ -30,13 +30,13 @@ TrigdEdxTrackHypoTool::~TrigdEdxTrackHypoTool() {}
 
 StatusCode TrigdEdxTrackHypoTool::initialize()
 {
-   ATH_MSG_INFO( "Initialization completed successfully:" );
-   ATH_MSG_INFO( "  cutTrackPtGeV         = " << m_cutTrackPtGeV) ; 
-   ATH_MSG_INFO( "  cutTrackEta           = " << m_cutTrackEta );  
-   ATH_MSG_INFO( "  cutTrackdEdx          = " << m_cutTrackdEdx );  
-   ATH_MSG_INFO( "  cutTrackNhighdEdxHits = " << m_cutTrackNhighdEdxHits ); 
-   ATH_MSG_INFO( "  cutTrackHighdEdxDef   = " << m_cutTrackHighdEdxDef ); 
-   ATH_MSG_INFO( "Tool configured for chain/id: " << m_decisionId );
+   ATH_MSG_DEBUG( "Initialization completed successfully:" );
+   ATH_MSG_DEBUG( "  cutTrackPtGeV         = " << m_cutTrackPtGeV) ; 
+   ATH_MSG_DEBUG( "  cutTrackEta           = " << m_cutTrackEta );  
+   ATH_MSG_DEBUG( "  cutTrackdEdx          = " << m_cutTrackdEdx );  
+   ATH_MSG_DEBUG( "  cutTrackNhighdEdxHits = " << m_cutTrackNhighdEdxHits ); 
+   ATH_MSG_DEBUG( "  cutTrackHighdEdxDef   = " << m_cutTrackHighdEdxDef ); 
+   ATH_MSG_DEBUG( "Tool configured for chain/id: " << m_decisionId );
    
    return StatusCode::SUCCESS;
 }

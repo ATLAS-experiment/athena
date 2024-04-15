@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY22.py
@@ -12,20 +12,20 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY22"
 streamName = "StreamDAOD_BPHY22"
 
-def BPHY22Cfg(ConfigFlags):
+def BPHY22Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    isSimulation = flags.Input.isMC
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags))
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
     BPHY22_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
                         name = "BPHY22_AugOriginalCounts",
@@ -63,7 +63,7 @@ def BPHY22Cfg(ConfigFlags):
               VertexSearchTool       = BPHY22MuPiFinder,
               OutputVtxContainerName = "BPHY22MuPiCandidates",
               V0Tools                = V0Tools,
-              PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+              PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
               PVContainerName        = "PrimaryVertices",
               RefPVContainerName     = "SHOULDNOTBEUSED")
 
@@ -98,13 +98,13 @@ def BPHY22Cfg(ConfigFlags):
            OutputVtxContainerName = "BPHY22DiTrkCandidates",
            PVContainerName        = "PrimaryVertices",
            V0Tools                = V0Tools,
-           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
            RefPVContainerName     = "SHOULDNOTBEUSED",
            CheckCollections       = True,
            CheckVertexContainers  = ['BPHY22MuPiCandidates'])
 
 
-    BMuDstVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName, CascadeCnstPrecision = 1e-6))
+    BMuDstVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName, CascadeCnstPrecision = 1e-6))
     
     BPHY22MuDpst = CompFactory.DerivationFramework.MuPlusDpstCascade(
         name                     = "BPHY22MuDpst",
@@ -157,13 +157,13 @@ def BPHY22Cfg(ConfigFlags):
            name                   = "BPHY22Dh3SelectAndWrite",
            VertexSearchTool     = BPHY22Dh3Finder,
            V0Tools                = V0Tools,
-           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
            OutputVtxContainerName = "BPHY22Dh3Candidates",
            PVContainerName        = "PrimaryVertices",
            RefPVContainerName     = "SHOULDNOTBEUSED",
            MaxPVrefit             = 1000)
 
-    BMuDxVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName+"BMuDxVertexFit", CascadeCnstPrecision = 1e-6))
+    BMuDxVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName+"BMuDxVertexFit", CascadeCnstPrecision = 1e-6))
 
     BPHY22MuDs = CompFactory.DerivationFramework.MuPlusDsCascade(
            name                        = "BPHY22MuDs",
@@ -276,7 +276,7 @@ def BPHY22Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    BPHY22SlimmingHelper = SlimmingHelper("BPHY22SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY22SlimmingHelper = SlimmingHelper("BPHY22SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     # Needed for trigger objects
     BPHY22SlimmingHelper.IncludeMuonTriggerContent  = True
@@ -322,7 +322,7 @@ def BPHY22Cfg(ConfigFlags):
     BPHY22SlimmingHelper.AllVariables = AllVariables
     BPHY22SlimmingHelper.StaticContent = StaticContent
     BPHY22ItemList = BPHY22SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY22", ItemList=BPHY22ItemList, AcceptAlgs=["BPHY22Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY22", AcceptAlgs=["BPHY22Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY22", ItemList=BPHY22ItemList, AcceptAlgs=["BPHY22Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY22", AcceptAlgs=["BPHY22Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc

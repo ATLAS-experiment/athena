@@ -45,7 +45,6 @@ namespace FlavorTagDiscriminants {
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
-    CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
     
@@ -108,10 +107,15 @@ namespace FlavorTagDiscriminants {
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
       dec_parent_barcode(*truth_particle) = truth_parent ? truth_parent->barcode() : -2;
 
-      // get exclusive truth origin
+      // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);
+
       int truth_origin_label = InDet::ExclusiveOrigin::getExclusiveOrigin(truth_origin);
       dec_origin_label(*truth_particle) = truth_origin_label;
+
+      int truth_source_label = TruthDecoratorHelpers::get_source_type(truth_origin);
+      dec_source_label(*truth_particle) = truth_source_label;
+
       
       // get the truth vertex of the particle and store for now
       auto truth_vertex = TruthDecoratorHelpers::get_truth_vertex(truth_particle);
@@ -119,9 +123,6 @@ namespace FlavorTagDiscriminants {
 
       // decorate truth type
       dec_type_label(*truth_particle) = TruthDecoratorHelpers::get_truth_type(truth_particle);
-
-      // decorate truth source
-      dec_source_label(*truth_particle) = TruthDecoratorHelpers::get_source_type(truth_particle);
     }
 
     // check sorted_truth_particles and tp_truth_vertices have the same length

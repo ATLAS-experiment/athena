@@ -48,7 +48,7 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     xLabelsStationsPlanes = ['fA3','fA2','fA1','fA0','nA3','nA2','nA1','nA0','nC0','nC1','nC2','nC3','fC0','fC1','fC2','fC3']
     xLabelsForEventsPerStation = [ 'fA', '-','-','-', 'nA', '-', '-', '-', 'nC', '-', '-', '-', 'fC', '-', '-', '-', ]
     xLabelsHitBarVsTrain = [ 'A', 'B', 'C', 'D']
-    yLabelsHitBarVsTrain = [ '3', '2', '1', '0']
+    yLabelsHitBarVsTrain = [ '0', '1', '2', '3']
     xLabelsToFEff = [ 'A', 'B', 'C', 'D', 'Tr']
     yLabelsToFEff = [ '0', '1', '2', '3']
     #xLabelsStationsPlanesProposed = ['fC3', 'fC2', 'fC1', 'fC0', 'nC3', 'nC2', 'nC1', 'nC0', 'nA0', 'nA1', 'nA2', 'nA3', 'fA0', 'fA1' 'fA2','fA3']
@@ -237,7 +237,12 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     arrayToF.defineHistogram('lbAToF', title='ToF hits vs lumiblock divided by <mu> (train {0}, bar {1}), side A; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/sideA', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'lbAToF_Weight')
     arrayToF.defineHistogram('lbCToF', title='ToF hits vs lumiblock divided by <mu> (train {0}, bar {1}), side C; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/sideC', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'lbCToF_Weight')
     
-    
+    #array for ToF cross-bar delta t
+    chan_combinations_list = [  "0AB", "0AC", "0AD", "0BC", "0BD", "0CD", "1AB", "1AC", "1AD", "1BC", "1BD", "1CD", 
+                    "2AB", "2AC", "2AD", "2BC", "2BD", "2CD", "3AB", "3AC", "3AD", "3BC", "3BD", "3CD"]
+    arrayToFCrossBarDeltaT = helper.addArray([chan_combinations_list], afpToFAlgorithm, 'AFPToFTool', topPath='AFP/ToF/')
+    arrayToFCrossBarDeltaT.defineHistogram('crossBarDeltaT_A', title='ToF cross-bar <delta> time (channel combination {0}), side A; <delta> t, [ps]; events', type='TH1D', path='DeltaTime/sideA', xbins=400, xmin=-1500.0, xmax=1500.0)
+    arrayToFCrossBarDeltaT.defineHistogram('crossBarDeltaT_C', title='ToF cross-bar <delta> time (channel combination {0}), side C; <delta> t, [ps]; events', type='TH1D', path='DeltaTime/sideC', xbins=400, xmin=-1500.0, xmax=1500.0)
     # Finalize. The return value should be a tuple of the ComponentAccumulator
     result.merge(helper.result())
     return result
@@ -248,7 +253,7 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = ['/eos/user/v/vlysenko/AOD_data22_13p6TeV_DS_429142/data22_13p6TeV.00429142.physics_Main.merge.AOD.f1253_m2112._lb0521._0001.1']
+    flags.Input.Files = ['/eos/user/v/vlysenko/AOD_testing/AOD_data22_13p6TeV_DS_429142/data22_13p6TeV.00429142.physics_Main.merge.AOD.f1253_m2112._lb0521._0001.1']
     flags.Input.isMC = False
     flags.Output.HISTFileName = 'AFPTest-337176-10k-FMETrains-MU.root'
     

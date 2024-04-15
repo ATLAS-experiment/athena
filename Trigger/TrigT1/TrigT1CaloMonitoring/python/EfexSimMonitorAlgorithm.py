@@ -36,7 +36,7 @@ def EfexSimMonitoringConfig(flags):
                            fillGroup="mismatches",
                            paths=['Shifter/Sim','Expert/Sim'],
                            hanConfig={"algorithm":"Histogram_Empty"},
-                           type='TH2I', cutmask='IsDataTowers',
+                           type='TH2I', cutmask='SimulationReady',
                            title='Mismatched DataTower Events;LB:FirstEvtNum;Signature;Events',
                            xlabels=[""],
                            ybins=1,ymin=0,ymax=1,
@@ -48,9 +48,9 @@ def EfexSimMonitoringConfig(flags):
                            xlabels=[""],
                            ybins=1,ymin=0,ymax=1,
                            opt=['kCanRebin','kAlwaysCreate'],merge='merge')
-    helper.defineTree('LBNString,LBN,EventNumber,fexReadout,timeSince,timeUntil,tobType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
-                      "lbnString/string:lbn/l:eventNumber/l:fexReadout/i:timeSince/I:timeUntil/I:tobType/i:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
-                      title="mismatched;LBN",fillGroup="mismatches")
+    helper.defineTree('LBNString,Signature,LBN,EventNumber,EventType,timeSince,timeUntil,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+                      "lbnString/string:Signature/string:lbn/l:eventNumber/l:EventType/string:timeSince/I:timeUntil/I:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
+                      title="mismatched;LBN:EvtNum;Signature",fillGroup="mismatches")
 
 
     result.merge(helper.result())
@@ -73,9 +73,6 @@ if __name__=='__main__':
 
     flags.lock()
     flags.dump() # print all the configs
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg  
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

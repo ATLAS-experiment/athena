@@ -97,6 +97,7 @@ if __name__=='__main__':
     _addBoolArgument(parser, 'online', help='Online environment running')
 
     parser.add_argument('--no-mon', action='store_false', dest='mon', help='Do not run Tile monitoring algorithms')
+    parser.add_argument('--cosmics', action='store_true', help='Use cosmics streams for online Tile monitoring')
     parser.add_argument('--jivexml', action='store_true', help='Create Jive XML output')
     parser.add_argument('--stateless', action="store_true", help='Run Online Tile monitoring in partition')
     parser.add_argument('--use-mbts-trigger', action="store_true", dest='useMbtsTrigger', help='Use L1 MBTS triggers')
@@ -114,13 +115,12 @@ if __name__=='__main__':
     parser.add_argument('--lvl1Logic', default='Ignore', choices=['And','Or','Ignore'], help='EMON, default: Ignore')
     parser.add_argument('--lvl1Origin', default='TAV', choices=['TBP','TAP','TAV'], help='EMON, default: TAV')
     parser.add_argument('--streamType', default='physics', help='EMON, HLT stream type (e.g. physics or calibration)')
-    parser.add_argument('--streamNames', default=['express','Main','Standby','CosmicCalo','L1Calo','ZeroBias','Background','MinBias','CosmicMuons','IDCosmic'], help='EMON, List of HLT stream names')
+    parser.add_argument('--streamNames', default=['express','Main','Standby','L1Calo','ZeroBias','Background','MinBias'], help='EMON, List of HLT stream names')
     parser.add_argument('--streamLogic', default='Or', choices=['And','Or','Ignore'], help='EMON, default: Or')
     parser.add_argument('--triggerType', type=int, default=256, help='EMON, LVL1 8 bit trigger type, default: 256')
     parser.add_argument('--groupName', default="TilePhysMon", help='EMON, Name of the monitoring group')
     parser.add_argument('--postProcessingInterval', type=int, default=10000000,
                         help='Number of events between postprocessing steps (<0: disabled, >evtMax: during finalization)')
-    parser.add_argument('--perfmon', action='store_true', help='Run perfmon')
 
     update_group = parser.add_mutually_exclusive_group()
     update_group.add_argument('--frequency', type=int, default=0, help='EMON, Frequency (in number of events) of publishing histograms')
@@ -159,7 +159,7 @@ if __name__=='__main__':
         elif args.noise:
             publishInclude = ".*Summary.*|.*DMUErrors.*|.*DigiNoise.*"
             parser.set_defaults(streamType='physics', streamNames=['CosmicCalo'], streamLogic='And', include=publishInclude,
-                                triggerType=0x82, frequency=300, updatePeriod=0, keyCount=1000, groupName='TileNoiseMon', postProcessingInterval=299)
+                                triggerType=0x82, frequency=300, updatePeriod=0, keyCount=100, groupName='TileNoiseMon', postProcessingInterval=299)
         elif args.mbts:
 
             _l1Items = []
@@ -167,7 +167,9 @@ if __name__=='__main__':
             _l1Names += ['L1_MBTSA' + str(counter) for counter in range(0, 16)]
             _l1Names += ['L1_MBTSC' + str(counter) for counter in range(0, 16)]
             parser.set_defaults(lvl1Logic='Or', lvl1Origin='TBP', lvl1Items=_l1Items, lvl1Names=_l1Names,
-                                keyCount=1000, groupName='TileMBTSMon', useMbtsTrigger = True)
+                                keyCount=100, groupName='TileMBTSMon', useMbtsTrigger = True)
+        elif args.cosmics:
+            parser.set_defaults(postProcessingInterval=100, groupName='TileCosmicsMon', streamNames=['CosmicCalo','CosmicMuons','IDCosmic'])
         else:
             parser.set_defaults(postProcessingInterval=100)
 
@@ -193,9 +195,9 @@ if __name__=='__main__':
     if args.mbts and args.useMbtsTrigger:
         flags.Trigger.triggerConfig = 'DB'
 
+    flags.Input.Files = []
     if args.stateless:
         _configFlagsFromPartition(flags, args.partition, log)
-        flags.Input.Files = []
         flags.Input.isMC = False
         flags.Input.Format = Format.BS
         if args.mbts and args.useMbtsTrigger:
@@ -208,25 +210,29 @@ if __name__=='__main__':
                 flags.Beam.Type = beamType
 
     else:
-        if args.filesInput:
-            flags.Input.Files = args.filesInput.split(",")
-        elif args.laser:
-            inputDirectory = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00"
-            inputFile = "data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data"
-            flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
-            flags.Input.RunNumbers = [363899]
-        elif args.cis:
-            inputDirectory = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00"
-            inputFile = "data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data"
-            flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
-            flags.Input.RunNumbers = [363899]
-        elif args.noise:
-            inputDirectory = 'root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/det-tile/test'
-            inputFile = 'data12_8TeV.00201555.physics_ZeroBiasOverlay.merge.RAW._lb0150._SFO-ALL._0001.1'
-            flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
-        else:
-            from AthenaConfiguration.TestDefaults import defaultTestFiles
-            flags.Input.Files = defaultTestFiles.RAW_RUN2
+        # Initial configuration flags from command line arguments (to be used to set up defaults)
+        flags.fillFromArgs(parser=parser)
+        if not (args.filesInput or flags.Input.Files):
+            if args.laser:
+                inputDirectory = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00"
+                inputFile = "data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data"
+                flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
+                flags.Input.RunNumbers = [363899]
+            elif args.cis:
+                inputDirectory = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00"
+                inputFile = "data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data"
+                flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
+                flags.Input.RunNumbers = [363899]
+            elif args.noise:
+                inputDirectory = 'root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/det-tile/test'
+                inputFile = 'data12_8TeV.00201555.physics_ZeroBiasOverlay.merge.RAW._lb0150._SFO-ALL._0001.1'
+                flags.Input.Files = [os.path.join(inputDirectory, inputFile)]
+            else:
+                from AthenaConfiguration.TestDefaults import defaultTestFiles
+                flags.Input.Files = defaultTestFiles.RAW_RUN2
+
+            if any([args.cis, args.laser]):
+                flags.Input.ProjectName = flags.Input.Files[0].split(os.path.sep)[-1].split('.')[0]
 
     runNumber = flags.Input.RunNumbers[0]
     if not flags.Input.isMC:
@@ -262,10 +268,6 @@ if __name__=='__main__':
     # Override default configuration flags from command line arguments
     flags.fillFromArgs(parser=parser)
 
-    # perfmon
-    if args.perfmon:
-        flags.PerfMon.doFullMonMT=True
-
     if args.preExec:
         log.info('Executing preExec: %s', args.preExec)
         exec(args.preExec)
@@ -278,11 +280,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
-
-    # Add perfmon
-    if args.perfmon:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
 
     typeNames = ['CTP_RDO/CTP_RDO'] if args.mbts and args.useMbtsTrigger else []
 
@@ -314,6 +311,7 @@ if __name__=='__main__':
         bsEmonInputSvc.StreamLogic = args.streamLogic
         bsEmonInputSvc.GroupName = args.groupName
         bsEmonInputSvc.ProcessCorruptedEvents = True
+        bsEmonInputSvc.BufferSize = 200
 
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 

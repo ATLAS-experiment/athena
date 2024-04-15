@@ -24,9 +24,13 @@ class GfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
 
   private:
 
-    bool compareJetRoI(const std::string& label, const SG::ReadHandleKey<xAOD::gFexJetRoIContainer>& tobs1Key, const SG::ReadHandleKey<xAOD::gFexJetRoIContainer>& tobs2Key, const EventContext& ctx) const;
+    bool compareJetRoI(const std::string& label, const SG::ReadHandleKey<xAOD::gFexJetRoIContainer>& tobs1Key, const SG::ReadHandleKey<xAOD::gFexJetRoIContainer>& tobs2Key, const EventContext& ctx, bool simReady=false) const;
 
     bool compareGlobalRoI(const std::string& label, const SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer>& tobs1Key, const SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer>& tobs2Key, const EventContext& ctx) const;
+
+    // map hold the binlabels (in form of LBN:FirstEventNum) to use for each lb
+    mutable std::map<int,std::string> m_firstEvents ATLAS_THREAD_SAFE;
+    mutable std::mutex m_firstEventsMutex;
 
 
     // container keys for Data tobs

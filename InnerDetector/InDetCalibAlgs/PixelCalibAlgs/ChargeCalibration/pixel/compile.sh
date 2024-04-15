@@ -1,1 +1,0 @@
-g++ -O2  `root-config --cflags --libs` ../common/PixelMapping.cxx PixelCalib.C -o PixelCalib.exe

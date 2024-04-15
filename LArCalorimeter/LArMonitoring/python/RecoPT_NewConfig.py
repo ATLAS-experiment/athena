@@ -76,7 +76,7 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
            egammaTopoClusterCopier = CompFactory.egammaTopoClusterCopier(
                                                  name='egammaLArCopier',InputTopoCollection="CaloTopoClusters",
                                                  OutputTopoCollection="egammaClusters",
-                                                 OutputTopoCollectionShallow="tmp_egammaClusters",
+                                                 #OutputTopoCollectionShallow="tmp_egammaClusters",
                                                  )
            acc.addEventAlgo(egammaTopoClusterCopier)
 
@@ -156,7 +156,7 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
         egammaTopoClusterCopier = CompFactory.egammaTopoClusterCopier(
                                               name='egammaLArCopier',InputTopoCollection="CaloTopoClusters",
                                               OutputTopoCollection="egammaClusters",
-                                              OutputTopoCollectionShallow="tmp_egammaClusters",
+                                              #OutputTopoCollectionShallow="tmp_egammaClusters",
                                               )
         acc.addEventAlgo(egammaTopoClusterCopier)
 

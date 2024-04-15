@@ -116,17 +116,21 @@ InDetBeamSpotRooFit::FitStatus InDetBeamSpotRooFit::fit(std::vector< BeamSpot::V
     rfData.add(RooArgSet(x,y,z,vxx,vyy,vxy));
   }
 
-  Double_t vxxMean = rfData.reduce(Cut(vtxCut))->mean(vxx);
-  Double_t vyyMean = rfData.reduce(Cut(vtxCut))->mean(vyy);
+  // ROOT assumes the user takes ownership of the reduced dataset
+  // Therefore, wrap it into a unique pointer so that we don't leak it
+  auto reducedDSvtxCut = std::unique_ptr<RooAbsData>(rfData.reduce(Cut(vtxCut)));
+
+  Double_t vxxMean = reducedDSvtxCut->mean(vxx);
+  Double_t vyyMean = reducedDSvtxCut->mean(vyy);
   Double_t axStart = 0, ayStart = 0, kStart = m_kStart;
-  Double_t wxxStart = rfData.reduce(Cut(vtxCut))->sigma(x);
-  Double_t wyyStart = rfData.reduce(Cut(vtxCut))->sigma(y);
+  Double_t wxxStart = reducedDSvtxCut->sigma(x);
+  Double_t wyyStart = reducedDSvtxCut->sigma(y);
   Double_t sxStart = sqrt(std::abs(wxxStart*wxxStart - kStart*kStart*vxxMean));
   Double_t syStart = sqrt(std::abs(wyyStart*wyyStart - kStart*kStart*vyyMean));
-  Double_t szStart = rfData.reduce(Cut(vtxCut))->sigma(z);
-  Double_t mxStart = rfData.reduce(Cut(vtxCut))->mean(x);
-  Double_t myStart = rfData.reduce(Cut(vtxCut))->mean(y);
-  Double_t mzStart = rfData.reduce(Cut(vtxCut))->mean(z);
+  Double_t szStart = reducedDSvtxCut->sigma(z);
+  Double_t mxStart = reducedDSvtxCut->mean(x);
+  Double_t myStart = reducedDSvtxCut->mean(y);
+  Double_t mzStart = reducedDSvtxCut->mean(z);
   Double_t rhoStart = 0;
 
   RooRealVar ax("ax","Tilt x",axStart,-1,1);
@@ -179,13 +183,17 @@ InDetBeamSpotRooFit::FitStatus InDetBeamSpotRooFit::fit(std::vector< BeamSpot::V
   //repeat for y and z
 
 
-  RooFitResult *r = fitModel.fitTo( *(rfData.reduce(Cut(combinedCut))) ,ConditionalObservables(RooArgSet(vxx,vyy,vxy)),Save(),PrintLevel(-1),PrintEvalErrors(-1));
+  // ROOT assumes the user takes ownership of the reduced dataset
+  // Therefore, wrap it into a unique pointer so that we don't leak it
+  auto reducedDScombinedCut = std::unique_ptr<RooAbsData>(rfData.reduce(Cut(combinedCut)));
+
+  RooFitResult *r = fitModel.fitTo( *(reducedDScombinedCut.get()) ,ConditionalObservables(RooArgSet(vxx,vyy,vxy)),Save(),PrintLevel(-1),PrintEvalErrors(-1));
 
   r->Print();
-  m_nUsed = rfData.reduce(Cut(combinedCut))->numEntries();
+  m_nUsed = reducedDScombinedCut->numEntries();
 
   ATH_MSG_INFO( "A total of " << m_vertexCount << " vertices passed pre-selection. Of which "
-			           << rfData.reduce(Cut(combinedCut))->numEntries()<<" vertices will be used in the ML fit.") ;
+			           << reducedDScombinedCut->numEntries()<<" vertices will be used in the ML fit.") ;
 
 
   if ( r->edm() <= 10e-04 && r->covQual() == 3){

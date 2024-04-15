@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -128,20 +128,20 @@ def TCAL1KernelCfg(flags, name='TCAL1Kernel', **kwargs):
     return acc
 
 
-def TCAL1Cfg(ConfigFlags):
+def TCAL1Cfg(flags):
     """Configure the TCAL1 derivation framework"""
 
     TCAL1Prefix = 'TCAL1_'
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TCAL1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    TCAL1TriggerListsHelper = TriggerListsHelper(flags)
 
     acc = ComponentAccumulator()
-    acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="StreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
+    acc.merge(TCAL1KernelCfg(flags, name="TCAL1Kernel", StreamName="StreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     TCAL1SlimmingHelper.SmartCollections = ['EventInfo', 'Muons', 'AntiKt4EMTopoJets', 'AntiKt4EMPFlowJets', 'MET_Baseline_AntiKt4EMTopo', 'MET_Baseline_AntiKt4EMPFlow', 'PrimaryVertices']
 
     TCAL1ExtraVariables = f'Muons.{TCAL1Prefix}etrkcone40'
@@ -163,7 +163,7 @@ def TCAL1Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
                                                OutputContainerPrefix = "TrigMatch_", 
@@ -172,12 +172,12 @@ def TCAL1Cfg(ConfigFlags):
                                                OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = TCAL1TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TCAL1SlimmingHelper)        
 
     TCAL1ItemList = TCAL1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TCAL1", ItemList=TCAL1ItemList, AcceptAlgs=["TCAL1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TCAL1", AcceptAlgs=["TCAL1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TCAL1", ItemList=TCAL1ItemList, AcceptAlgs=["TCAL1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TCAL1", AcceptAlgs=["TCAL1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

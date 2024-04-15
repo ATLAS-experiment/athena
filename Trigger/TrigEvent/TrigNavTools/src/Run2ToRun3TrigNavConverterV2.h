@@ -21,6 +21,7 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TrigConfHLTData/HLTSignature.h"
 #include "TrigConfHLTData/HLTTriggerElement.h"
+#include "TrigConfHLTUtils/HLTUtils.h"
 
 // STL includes
 #include <string>
@@ -121,6 +122,7 @@ private:
   StatusCode createIMHNodes(ConvProxySet_t &, xAOD::TrigCompositeContainer &, const EventContext &) const;
   StatusCode createL1Nodes(const ConvProxySet_t &convProxies, xAOD::TrigCompositeContainer &decisions, const EventContext &context) const;
   StatusCode createSFNodes(const ConvProxySet_t &, xAOD::TrigCompositeContainer &, const TEIdToChainsMap_t &finalTEs, const EventContext &context) const;
+  StatusCode updateTerminusNode(xAOD::TrigCompositeContainer &, const EventContext &context) const;
 
   StatusCode linkFeaNode(ConvProxySet_t &convProxies, xAOD::TrigCompositeContainer &, const HLT::TrigNavStructure &run2Nav, const EventContext &context) const;
   StatusCode linkRoiNode(ConvProxySet_t &convProxies, const HLT::TrigNavStructure &run2Nav) const;
@@ -128,13 +130,25 @@ private:
 
   // helpers
   //!< both method skip TrigPassBits
+  std::vector<HLT::TriggerElement::FeatureAccessHelper> filterFEAs(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TrigNavStructure &navigationDecoder) const;
+  // produces summary of attached objects (FEAs) in a form of a hash
   uint64_t feaToHash(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TriggerElement *te_ptr, const HLT::TrigNavStructure &navigationDecoder) const;
-  bool feaEqual(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &a, const std::vector<HLT::TriggerElement::FeatureAccessHelper> &b) const;
 
   //!< returns true if this particular feature is to be saved (linked)
   bool feaToSave(const HLT::TriggerElement::FeatureAccessHelper &fea) const;
 
   bool roiToSave(const HLT::TrigNavStructure &run2Nav, const HLT::TriggerElement::FeatureAccessHelper &fea) const;
+
+  // debugging aid, prints selected proxies
+  void printProxies(const ConvProxySet_t& proxies,
+                    std::function<bool(const ConvProxy*)> selector=[](const ConvProxy*){return true;},
+                    std::vector<std::function<void(const ConvProxy*)>> printers={}) const;
+
+  // useful printers
+  std::function<void(const ConvProxy*)> m_chainIdsPrinter = [&](const ConvProxy* p){ for (auto id: p->passChains ) ATH_MSG_DEBUG("chain id " << id); };
+  std::function<void(const ConvProxy*)> m_teIDPrinter = [&](const ConvProxy* p){ ATH_MSG_DEBUG("TE id " << TrigConf::HLTUtils::hash2string(p->te->getId())); };
+
+
 
   std::size_t getFeaSize(const ConvProxy &) const;
 
@@ -164,6 +178,8 @@ private:
   CLID m_CaloClusterContainerCLID{0};
   CLID m_TrackParticleContainerCLID{0};
   CLID m_TauTrackContainerCLID{0};
+
+
 };
 
 #endif // TRIGNAVTOOLS_RUN2TORUN3TRIGNAVCONVERTERV2_H

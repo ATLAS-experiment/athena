@@ -80,7 +80,7 @@ def TriggerMatchingCommonRun2ToRun3Cfg(ConfigFlags, **kwargs):
 
     # And then run the run 3 slimming on the output of NavConverter
     triggerList = kwargs['TriggerList']
-    acc.merge(NavConverterCfg(ConfigFlags, chainsFilter = triggerList))
+    acc.merge(NavConverterCfg(ConfigFlags, chainsList = triggerList))
     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTDerivationCfg
     acc.merge(TrigNavSlimmingMTDerivationCfg(ConfigFlags,chainsFilter=triggerList))
 

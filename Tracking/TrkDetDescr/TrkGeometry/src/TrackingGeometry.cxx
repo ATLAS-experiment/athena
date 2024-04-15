@@ -18,30 +18,41 @@
 // GaudiKernel
 #include "GaudiKernel/MsgStream.h"
 
-Trk::TrackingGeometry::TrackingGeometry(Trk::TrackingVolume* highestVolume,
-                                        Trk::NavigationLevel navLev)
-  : m_world(highestVolume)
-  , m_navigationLevel(navLev)
-{
+
+
+Trk::TrackingGeometry::TrackingGeometry(TrackingVolume* highestVolume,
+                                        NavigationLevel navLev):
+   m_world(highestVolume),
+  m_navigationLevel(navLev) {
   // for the time being only world
-  if (m_world)
-    registerTrackingVolumes(*m_world);
+  if (!m_world) return;
+  registerTrackingVolumes(*m_world);
 }
 
-Trk::TrackingGeometry::~TrackingGeometry()
-{
-  delete m_world;
-  auto bLayerIter = m_boundaryLayers.begin();
-  auto bLayerIterE = m_boundaryLayers.end();
-  for (; bLayerIter != bLayerIterE; ++bLayerIter) {
-    delete bLayerIter->first;
-  }
+Trk::TrackingGeometry::~TrackingGeometry() {
+    if (m_world) delete m_world;
 }
+void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<DetachedTrackingVolume>>&& garbageVec) {
+  std::copy_if(std::make_move_iterator(garbageVec.begin()), std::make_move_iterator(garbageVec.end()),
+               std::back_inserter(m_detachedVolGarbage),
+               [](const std::unique_ptr<DetachedTrackingVolume>& ptr){
+                  return ptr.get () != nullptr;
+               });
+  
+}
+void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<TrackingVolume>>&& garbageVec){
+      std::copy_if(std::make_move_iterator(garbageVec.begin()), std::make_move_iterator(garbageVec.end()),
+                  std::back_inserter(m_trkVolumeGarbage),
+                  [](const std::unique_ptr<TrackingVolume>& ptr){
+                      return ptr.get () != nullptr;
+                  });
+}
+
 
 const Trk::TrackingVolume*
 Trk::TrackingGeometry::lowestTrackingVolume(const Amg::Vector3D& gp) const
 {
-  const Trk::TrackingVolume* searchVolume = m_world;
+  const Trk::TrackingVolume* searchVolume = highestTrackingVolume();
   const Trk::TrackingVolume* currentVolume = nullptr;
   while (currentVolume != searchVolume && searchVolume) {
     currentVolume = searchVolume;
@@ -65,7 +76,7 @@ Trk::TrackingGeometry::lowestDetachedTrackingVolumes(
 const Trk::TrackingVolume*
 Trk::TrackingGeometry::lowestStaticTrackingVolume(const Amg::Vector3D& gp) const
 {
-  const Trk::TrackingVolume* searchVolume = m_world;
+  const Trk::TrackingVolume* searchVolume = highestTrackingVolume();
   const Trk::TrackingVolume* currentVolume = nullptr;
   while (currentVolume != searchVolume && searchVolume) {
     currentVolume = searchVolume;
@@ -121,11 +132,8 @@ Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
     Trk::Layer* bLayer =
       bound->surfaceRepresentation().materialLayer();
     if (bLayer) {
-      auto bfIter = m_boundaryLayers.find(bLayer);
-      if (bfIter != m_boundaryLayers.end())
-        ++(bfIter->second);
-      else
-        m_boundaryLayers[bLayer] = 0;
+      int& layerCount{m_boundaryLayers[bLayer]};
+      ++layerCount;
     }
   }
 }
@@ -134,7 +142,7 @@ void Trk::TrackingGeometry::compactify(MsgStream& msg, TrackingVolume* vol)
 {
   msg << MSG::VERBOSE
       << "====== Calling TrackingGeometry::compactify() ===== " << std::endl;
-  Trk::TrackingVolume* tVolume = vol ? vol : m_world;
+  Trk::TrackingVolume* tVolume = vol ? vol : highestTrackingVolume();
   size_t cSurfaces = 0;
   size_t tSurfaces = 0;
   if (tVolume) {
@@ -153,15 +161,14 @@ void Trk::TrackingGeometry::compactify(MsgStream& msg, TrackingVolume* vol)
 void
 Trk::TrackingGeometry::synchronizeLayers(MsgStream& msg, TrackingVolume* vol)
 {
-  Trk::TrackingVolume* tVolume = vol ? vol : m_world;
+  Trk::TrackingVolume* tVolume = vol ? vol : highestTrackingVolume();
   tVolume->synchronizeLayers(msg);
 }
 
 Trk::TrackingVolume*
-Trk::TrackingGeometry::checkoutHighestTrackingVolume()
-{
-  Trk::TrackingVolume* checkoutVolume = m_world;
-  m_world = nullptr;
+Trk::TrackingGeometry::checkoutHighestTrackingVolume() {
+  Trk::TrackingVolume* checkoutVolume{nullptr};
+  std::swap(m_world, checkoutVolume);
   // clear the boundary layers they go with the highest volume
   m_boundaryLayers.clear();
   return checkoutVolume;

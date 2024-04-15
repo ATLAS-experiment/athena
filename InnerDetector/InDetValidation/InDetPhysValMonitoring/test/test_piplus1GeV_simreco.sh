@@ -5,7 +5,6 @@
 # art-input-nfiles: 1
 # art-include: main/Athena
 # art-include: 24.0/Athena
-# art-include: 23.0/Athena
 # art-output: physval*.root
 # art-output: SiHitValid*.root
 # art-output: *Analysis*.root

@@ -34,6 +34,7 @@ protected:
     // Phase1 L1 tau threshold information
     Gaudi::Property<std::map<std::string, float>> m_L1_Phase1_thresholds{this, "L1Phase1Thresholds", {}};
     Gaudi::Property<std::map<std::string, uint64_t>> m_L1_Phase1_threshold_patterns{this, "L1Phase1ThresholdPatterns", {}};
+    Gaudi::Property<bool> m_L1_select_by_et_only{this, "SelectL1ByETOnly", false};
 
     // Toggle efficiency and variable plots
     Gaudi::Property<bool> m_do_efficiency_plots{this, "DoEfficiencyPlots", true};
@@ -102,21 +103,21 @@ private:
     // StorageGate keys
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "LArStatusFlag", "EventInfo.larFlags", "Key for EventInfo object"}; // To get data-dependencies right
 
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_offlineTauJetKey{this, "offlineTauJetKey", "TauJets", "Offline taujet container key"};
+    SG::ReadHandleKey<xAOD::TauJetContainer> m_offlineTauJetKey{this, "OfflineTauJetKey", "TauJets", "Offline taujet container key"};
 
-    SG::ReadHandleKey<xAOD::EmTauRoIContainer> m_legacyl1TauRoIKey{ this, "legacyl1TauRoIKey","LVL1EmTauRoIs","Tau Legacy L1 RoI key"};
-    SG::ReadHandleKey<xAOD::eFexTauRoIContainer>  m_phase1l1eTauRoIKey{this, "phase1l1eTauRoIKey", "L1_eTauRoI","eTau Phase1 L1 RoI key"};
-    SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1eTauRoIThresholdPatternsKey{this, "phase1l1eTauRoIThresholdPatternsKey", "L1_eTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the eTau RoIs"};
-    SG::ReadHandleKey<xAOD::jFexTauRoIContainer>  m_phase1l1jTauRoIKey{this, "phase1l1jTauRoIKey", "L1_jFexTauRoI","jTau Phase1 L1 RoI key"};
-    SG::ReadDecorHandleKey<xAOD::jFexTauRoIContainer> m_phase1l1jTauRoIThresholdPatternsKey{this, "phase1l1jTauRoIThresholdPatternsKey", "L1_jFexTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the jTau RoIs"};
-    SG::ReadHandleKey<xAOD::eFexTauRoIContainer>  m_phase1l1cTauRoIKey{this, "phase1l1cTauRoIKey", "L1_cTauRoI","cTau Phase1 L1 RoI key"};
-    SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1cTauRoIDecorKey{this, "phase1l1cTauRoIjTauRoILinkKey", "L1_cTauRoI.jTauLink", "Decoration for the link from eTau to the matching jTau"};
-    SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1cTauRoIThresholdPatternsKey{this, "phase1l1cTauRoIThresholdPatternsKey", "L1_cTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the cTau RoIs"};
+    SG::ReadHandleKey<xAOD::EmTauRoIContainer> m_legacyl1TauRoIKey{ this, "LegacyL1TauRoIKey", "LVL1EmTauRoIs", "Tau Legacy L1 RoI key"};
+    SG::ReadHandleKey<xAOD::eFexTauRoIContainer>  m_phase1l1eTauRoIKey{this, "Phase1L1eTauRoIKey", "L1_eTauRoI", "eTau Phase1 L1 RoI key"};
+    SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1eTauRoIThresholdPatternsKey{this, "Phase1L1eTauRoIThresholdPatternsKey", "L1_eTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the eTau RoIs"};
+    SG::ReadHandleKey<xAOD::jFexTauRoIContainer>  m_phase1l1jTauRoIKey{this, "Phase1L1jTauRoIKey", "L1_jFexTauRoI", "jTau Phase1 L1 RoI key"};
+    SG::ReadDecorHandleKey<xAOD::jFexTauRoIContainer> m_phase1l1jTauRoIThresholdPatternsKey{this, "Phase1L1jTauRoIThresholdPatternsKey", "L1_jFexTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the jTau RoIs"};
+    SG::ReadHandleKey<xAOD::eFexTauRoIContainer>  m_phase1l1cTauRoIKey{this, "Phase1L1cTauRoIKey", "L1_cTauRoI", "cTau Phase1 L1 RoI key"};
+    SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1cTauRoIDecorKey{this, "Phase1L1cTauRoIjTauRoILinkKey", "L1_cTauRoI.jTauLink", "Decoration for the link from eTau to the matching jTau"};
+    SG::ReadDecorHandleKey<xAOD::eFexTauRoIContainer> m_phase1l1cTauRoIThresholdPatternsKey{this, "Phase1L1cTauRoIThresholdPatternsKey", "L1_cTauRoI.thresholdPatterns", "Decoration for the threshold patterns for the cTau RoIs"};
 
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetKey{this, "hltTauJetKey", "HLT_TrigTauRecMerged_MVA", "HLT tracktwoMVA taujet container key"};
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetLLPKey{this, "hltTauJetLLPKey", "HLT_TrigTauRecMerged_LLP", "HLT tracktwoLLP taujet container key"};
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetLRTKey{this, "hltTauJetLRTKey", "HLT_TrigTauRecMerged_LRT", "HLT trackLRT taujet container key"};
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetCaloMVAOnlyKey{this, "hltTauJetCaloMVAOnlyKey", "HLT_TrigTauRecMerged_CaloMVAOnly", "HLT ptonly taujet container key"};
+    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetKey{this, "HLTTauJetKey", "HLT_TrigTauRecMerged_MVA", "HLT tracktwoMVA taujet container key"};
+    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetLLPKey{this, "HLTTauJetLLPKey", "HLT_TrigTauRecMerged_LLP", "HLT tracktwoLLP taujet container key"};
+    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetLRTKey{this, "HLTTauJetLRTKey", "HLT_TrigTauRecMerged_LRT", "HLT trackLRT taujet container key"};
+    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetCaloMVAOnlyKey{this, "HLTTauJetCaloMVAOnlyKey", "HLT_TrigTauRecMerged_CaloMVAOnly", "HLT ptonly taujet container key"};
 
     const SG::ReadHandleKey<xAOD::TauJetContainer>& getOnlineContainerKey(const std::string& trigger) const;
 

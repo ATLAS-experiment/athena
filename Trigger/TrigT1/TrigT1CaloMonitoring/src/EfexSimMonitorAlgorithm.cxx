@@ -35,9 +35,13 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
 
 StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
-    // check flag that indicates if simulation was done with fexReadout (primary) or not (secondary)
-    // SG::ReadDecorHandle<xAOD::EventInfo,bool> usedSecondaryDecor(m_decorKey,ctx);
-    // auto fexReadout = Monitored::Scalar<unsigned int>("fexReadout", !(usedSecondaryDecor.isAvailable() && usedSecondaryDecor(*GetEventInfo(ctx))));
+    fillHistos(m_eFexEmSimContainerKey,m_eFexEmContainerKey,ctx,"eEM");
+    fillHistos(m_eFexTauSimContainerKey,m_eFexTauContainerKey,ctx,"eTAU");
+    return StatusCode::SUCCESS;
+}
+
+template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG::ReadHandleKey<T>& key1, const SG::ReadHandleKey<T>& key2, const EventContext& ctx, const std::string& signa ) const {
+
 
     auto fexReadout = Monitored::Scalar<unsigned int>("fexReadout", 0);
     if(!m_eFexTowerContainerKey.empty()) {
@@ -65,19 +69,51 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         else if((timeUntil>=0&&timeUntil<10)) EventType+="+JustBefore";
     }
 
+    SG::ReadHandle<T> tobs1{key1, ctx};
+    SG::ReadHandle<T> tobs2{key2, ctx};
 
-    unsigned int nUnmatched_em = 0;
-    nUnmatched_em += fillHistos(m_eFexEmSimContainerKey,m_eFexEmContainerKey,EventType,ctx,"eEM"); // match sim to data
-    unsigned int nUnmatched_tau = 0;
-    nUnmatched_tau += fillHistos(m_eFexTauSimContainerKey,m_eFexTauContainerKey,EventType,ctx,"eTAU"); // match sim to data
+    if(!tobs1.isValid()) {
+        return 0;
+    }
 
+    std::set<uint32_t> word0s2;
+    if(tobs2.isValid()) {
+        for(const auto tob : *tobs2) {
+            word0s2.insert(tob->word0());
+        }
+    }
 
-    if( (nUnmatched_em || nUnmatched_tau) ) {
+    auto signature = Monitored::Scalar<std::string>("Signature",signa);
+    auto evtType = Monitored::Scalar<std::string>("EventType",EventType);
+    auto tobMismatched = Monitored::Scalar<float>("tobMismatched",0.0);
+
+    bool mismatches=false;
+
+    // for each collection record if TOB is matched or not
+
+    for(const auto tob : *tobs1) {
+        tobMismatched=100;
+        if(word0s2.find(tob->word0()) == word0s2.end()) {
+            mismatches=true;
+        } else {
+            tobMismatched=0;
+        }
+        fill("mismatches",signature,evtType,tobMismatched);
+    }
+    if(tobs2.isValid() && tobs1->size() < tobs2->size()) {
+        tobMismatched=100;
+        mismatches=true;
+        for(unsigned int i=0;i<(tobs2->size()-tobs1->size());i++) {
+            fill("mismatches",signature,tobMismatched,evtType);
+        }
+    }
+
+    if (mismatches) {
         // record all tobs to the debug tree .. one entry in the tree = 1 tobType for 1 event
         auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
         auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
         auto lbnString = Monitored::Scalar<std::string>("LBNString","");
-        auto& firstEvents = (fexReadout) ? m_firstEvents_DataTowers : m_firstEvents_EmulatedTowers;
+        auto& firstEvents = (fexReadout==1) ? m_firstEvents_DataTowers : m_firstEvents_EmulatedTowers;
         {
             std::scoped_lock lock(m_firstEventsMutex);
             auto itr = firstEvents.find(lbn);
@@ -97,23 +133,15 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         auto stobEtas = Monitored::Collection("simEtas", setas);
         auto stobPhis = Monitored::Collection("simPhis", sphis);
         auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
-
-        auto tobType = Monitored::Scalar<unsigned int>("tobType",0);
-        auto signature = Monitored::Scalar<std::string>("Signature","eEM");
-
-        if(nUnmatched_em) {
-            fillVectors(m_eFexEmContainerKey,ctx,detas,dphis,dword0s);
-            fillVectors(m_eFexEmSimContainerKey,ctx,setas,sphis,sword0s);
-            fill("mismatches",lbn,lbnString,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature);
-        }
-        if(nUnmatched_tau) {
-            tobType = 1; signature = "eTAU";
-            fillVectors(m_eFexTauContainerKey,ctx,detas,dphis,dword0s);
-            fillVectors(m_eFexTauSimContainerKey,ctx,setas,sphis,sword0s);
-            fill("mismatches",lbn,lbnString,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature);
-        }
+        auto simReady = Monitored::Scalar<bool>("SimulationReady",fexReadout==1); // used to control if filling plot that is actually monitored in DQM
+        fillVectors(key2,ctx,detas,dphis,dword0s);
+        fillVectors(key1,ctx,setas,sphis,sword0s);
+        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
 
 
     }
-  return StatusCode::SUCCESS;
+
+
+    return mismatches;
+
 }

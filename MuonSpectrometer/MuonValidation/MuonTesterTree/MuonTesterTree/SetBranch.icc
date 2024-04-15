@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONSSetBranch_IXX
 #define MUONTESTER_MUONSSetBranch_IXX
-#include <AthenaKernel/getMessageSvc.h>
-#include <GaudiKernel/MsgStream.h>
 
+#include "MuonTesterTree/throwExcept.h"
 namespace MuonVal {
 template <class T> SetBranch<T>::SetBranch(TTree* tree, const std::string& name) : MuonTesterBranch(tree, name) {}
 
@@ -13,8 +12,7 @@ template <class T> SetBranch<T>::SetBranch(MuonTesterTree& tree, const std::stri
 
 template <class T> bool SetBranch<T>::fill(const EventContext&) {
     if (!initialized()) {
-        MsgStream log(Athena::getMessageSvc(), "SetBranch()");
-        log << MSG::ERROR << "init()  -- The branch " << name() << " is not initialized yet." << endmsg;
+        ATH_MSG_ERROR("fill()  -- The  set branch " << name() << " is not initialized yet.");
         return false;
     }
     if (!m_updated) m_variable.clear();
@@ -46,7 +44,7 @@ template <class T> const std::set<T>& SetBranch<T>::get() const {
 template <class T> void SetBranch<T>::insert(const T& value) {
     if (!m_updated) m_variable.clear();
     // Throw an exception in cases where the branch is not initialized
-    if (!initialized()) { throw std::runtime_error(name() + " is not initialized yet"); }
+    if (!initialized()) { THROW_EXCEPTION(name() + " is not initialized yet"); }
     m_variable.insert(value);
     m_updated = true;
 }

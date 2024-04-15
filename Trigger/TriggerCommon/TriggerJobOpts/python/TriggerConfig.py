@@ -484,14 +484,14 @@ def triggerPOOLOutputCfg(flags):
         itemsToRecord.append('xAOD::EventAuxInfo#EventInfoAux.')
 
 
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
         acc.merge(OutputStreamCfg(flags, outputType, ItemList=itemsToRecord,
                                   disableEventTag=True, takeItemsFromInput=(outputType == 'RDO')))
         from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
         acc.merge(SetupMetaDataForStreamCfg(flags, outputType,
                                             createMetadata=[MetadataCategory.TriggerMenuMetaData]))
 
-        alg = acc.getEventAlgo("OutputStream"+outputType)
+        alg = acc.getEventAlgo(outputStreamName(outputType))
         # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriterMT
         alg.ExtraInputs |= {
             ("xAOD::TrigDecision", str(decmaker.TrigDecisionKey)),
@@ -581,7 +581,7 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
             if len(el) >= 4: # see if there is an alias
                 aliases = [ str(a) for a in el[3] if isinstance(a, Alias) ]
                 if len(aliases) == 1:
-                    __log.info("GapFiller configuration found an aliased type '%s' for '%s'", aliases[0], collType)
+                    __log.debug("GapFiller configuration found an aliased type '%s' for '%s'", aliases[0], collType)
                     collType = aliases[0]
                 elif len(aliases) > 1:
                     __log.error("GapFiller configuration found inconsistent '%s' (too many aliases?)", aliases)
@@ -592,12 +592,12 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
             propName = collType.split(":")[-1]
             if hasattr( tool, propName ):
                 setattr( tool, propName, collNameList )
-                __log.info("GapFiller will create EDM collection type '%s' for '%s'", collType, collNameList)
+                __log.debug("GapFiller will create EDM collection type '%s' for '%s'", collType, collNameList)
             else:
-                __log.info("EDM collections of type %s are not going to be added to StoreGate, if not created by the HLT", collType )
+                __log.debug("EDM collections of type %s are not going to be added to StoreGate, if not created by the HLT", collType )
 
     if decObj or decObjHypoOut:
-        __log.info("GapFiller is ensuring the creation of all the decision object collections")
+        __log.debug("GapFiller is ensuring the creation of all the decision object collections")
         __log.debug("'%s'", decObj)
         # Gap filler is also used to perform re-mapping of the HypoAlg outputs which is a sub-set of decObj
         tool.FixLinks = list(decObjHypoOut)

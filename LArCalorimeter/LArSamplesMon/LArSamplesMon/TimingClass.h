@@ -39,11 +39,13 @@ namespace LArSamples {
     void fitTimePerFebAllFebs( const std::string& nrun, const std::string& name );
     void Time( int dete, const std::string& nrun );
     void PlotFebAverageTime( const std::string& nrun, const std::string& name );
+    void PlotFebAverageTime24( const std::string& nrun, const std::string& name );
     void MergeFebTime( const std::string& nrun );
     void getFebCorrection( const std::string& nrun );
     void PlotFebtime();
     
     bool EnergyThreshold( int calo, int layer, int quality, int ft, int slot, double energy, double time );
+    bool FileEmptyCheck( const std::string& fname);
 
     double Median[2][32][16]{};
     double param[4][2][32][16]{};

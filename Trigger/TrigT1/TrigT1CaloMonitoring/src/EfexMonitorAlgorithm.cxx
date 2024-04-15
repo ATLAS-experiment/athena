@@ -37,6 +37,10 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
 
   ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillHistograms");
 
+  auto locIdx = Monitored::Scalar<std::string>("locIdx","");
+  auto tobEt = Monitored::Scalar<float>("tobEt",0);
+  auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
+
   // Loop over EM read handle keys in key array
   for (const SG::ReadHandleKey<xAOD::eFexEMRoIContainer>& key : m_eFexEMTobKeyList){
     SG::ReadHandle<xAOD::eFexEMRoIContainer> eFexContainer (key, ctx);
@@ -55,7 +59,9 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
       auto tobType = Monitored::Scalar<std::string>("tobType","em");
       for(const xAOD::eFexEMRoI* roi : *emDataContPtr){
-        seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
+          locIdx = std::to_string(roi->iPhi()/8) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
+          seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
+          fill(m_packageName+"_"+key.key(),tobEt,lbn,locIdx);
       }
     }
   } // Finished EM loop
@@ -78,7 +84,9 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
       auto tobType = Monitored::Scalar<std::string>("tobType","tau");
       for(const xAOD::eFexTauRoI* roi : *tauDataContPtr){
+        locIdx = std::to_string(roi->iPhi()/8) + ":" + std::to_string(roi->iEta());tobEt = roi->et();
         seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
+        fill(m_packageName+"_"+key.key(),tobEt,lbn,locIdx);
       }
     }
   } // Finished Tau loop

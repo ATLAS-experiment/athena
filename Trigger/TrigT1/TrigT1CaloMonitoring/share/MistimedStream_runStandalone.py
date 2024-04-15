@@ -27,8 +27,6 @@ def main():
     flags.Output.HISTFileName = "ExampleMonitorOutput_LVL1_"+runNumber+".root"
     
     flags.lock()
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)

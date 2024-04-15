@@ -32,10 +32,14 @@ def ZdcRecOutputCfg(flags):
     acc.merge(addToESD(flags,ZDC_ItemList))
     acc.merge(addToAOD(flags,ZDC_ItemList))
 
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    acc.merge(SetupMetaDataForStreamCfg(flags,streamName="AOD"))
+    
+
     return acc
 
 
-def ZdcAnalysisToolCfg(flags, run, config="LHCf2022", DoCalib=False, DoTimeCalib=False, DoTrigEff=False):
+def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoTimeCalib=False, DoTrigEff=False):
     acc = ComponentAccumulator()
 
     print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
@@ -58,7 +62,7 @@ def ZdcLEDAnalysisToolCfg(flags, config = 'ppPbPb2023'):
     return acc
 
 
-def ZdcTrigValToolCfg(flags, config = 'LHCf2022'):
+def ZdcTrigValToolCfg(flags, config = 'PbPb2023'):
     acc = ComponentAccumulator()
     
     acc.merge(TrigDecisionToolCfg(flags))
@@ -135,7 +139,8 @@ def ZdcRecRun3Cfg(flags):
     elif flags.Input.ProjectName == "data23_900GeV":
         config = "pp2023"
     elif flags.Input.ProjectName == "data23_comm":
-        config = "pp2023"
+        config = "PbPb2023"
+        doCalib = True
     elif flags.Input.ProjectName == "data23_13p6TeV":
         config = "pp2023"
     elif flags.Input.ProjectName == "data23_5p36TeV":
@@ -143,17 +148,20 @@ def ZdcRecRun3Cfg(flags):
     elif flags.Input.ProjectName == "data23_hi":
         config = "PbPb2023"
         doCalib = True
-
+        doTimeCalib = True
+        
     print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
     centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
 
-    if ( (flags.Input.isMC) or (flags.Trigger.doZDC) ): # if doZDC flag is true we are in a trigger reprocessing -> no TrigValidTool
+    if ( flags.Input.isMC ):
+        zdcTools = [anaTool,centroidTool] # expand list as needed
+    elif ( flags.Trigger.doZDC ): # if doZDC flag is true we are in a trigger reprocessing -> no TrigValidTool
         zdcTools = [anaTool] # expand list as needed
     elif (flags.Common.isOnline): # running online, no trigger info
         zdcTools = [anaTool,centroidTool] # expand list as needed
-    else:
+    else: # default (not MC, not trigger repoc, not online)
         trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))   
         zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed
         
@@ -298,14 +306,12 @@ def ZdcRecCfg(flags):
 
 if __name__ == '__main__':
 
-    """ This is selftest & Zdc analysis transform at the same time"""
+    """ This is selftest & ZDC calibration transform at the same time"""
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
     flags = initConfigFlags()
-
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
@@ -352,6 +358,7 @@ if __name__ == '__main__':
     if not pn:
         raise ValueError('Unknown project name')
     
+
     if not isLED:
         year = int(pn.split('_')[0].split('data')[1])
         if (year < 20):
@@ -360,8 +367,10 @@ if __name__ == '__main__':
         elif (year > 20):
             flags.Trigger.EDMVersion=3
             flags.GeoModel.Run = LHCPeriod.Run3
+            flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     else:
         flags.Trigger.EDMVersion=3
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
         flags.GeoModel.Run = LHCPeriod.Run3
 
     if (flags.Input.isMC):

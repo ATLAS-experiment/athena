@@ -13,6 +13,7 @@
 #include <utility>  //for std::pair
 #include <vector>
 
+#include "AthenaBaseComps/AthMessaging.h"
 #include "TrkDetDescrGeoModelCnv/GeoMaterialConverter.h"
 #include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
 #include "TrkDetDescrGeoModelCnv/VolumeIntersection.h"
@@ -27,7 +28,7 @@ class VolumeBounds;
 
 namespace Trk {
 
-typedef std::pair<Material, double> MaterialComponent;
+using MaterialComponent = std::pair<Material, double>;
 
 struct VolumeSpan {
     double phiMin{0.};
@@ -43,9 +44,10 @@ struct VolumeSpan {
 };
 
 struct VolumePart {
-    std::vector<const Volume*> parts;
-    float sign{};
+    std::vector<std::shared_ptr<Volume>> parts{};
+    double sign{1.};
 };
+using VolumePartVec = std::vector<VolumePart>;
 
 /**
   @class VolumeConverter
@@ -55,43 +57,35 @@ struct VolumePart {
   @author sarka.todorova@cern.ch
   */
 
-class VolumeConverter {
+class VolumeConverter : public AthMessaging {
 
    public:
+    VolumeConverter();
     /** translation of GeoVPhysVol to Trk::TrackingVolume */
-    TrackingVolume* translate(const GeoVPhysVol* gv, bool simplify, bool blend,
-                              double blendMassLimit) const;
+    std::unique_ptr<TrackingVolume> translate(const GeoVPhysVol* gv,
+                                              bool simplify, bool blend,
+                                              double blendMassLimit) const;
 
-    /** Simplification of tracking volume : default :  envelope creation :
-   envelope has an analytically calculable volume
-   // simplify:  material is diluted to fill the envelope
-   // blendInfo:    material content is stored to allow material blending  */
-    //	TrackingVolume*  simplifyVolume( TrackingVolume* trvol, bool simplify,
-    //bool blendInfo, 		     std::vector<std::vector<std::pair<std::unique_ptr<const
-    //Trk::Volume>, double> > >* constituentsVector) const;
-
+    using VolumePair =
+        std::pair<std::shared_ptr<Volume>, std::shared_ptr<Volume>>;
+    using VolumePairVec = std::vector<VolumePair>;
     /** Decomposition of volume into set of non-overlapping subtractions from
      * analytically calculable volume */
-    std::vector<std::pair<const Trk::Volume*, const Trk::Volume*> >
-    splitComposedVolume(const Trk::Volume* trVol,
-                        std::vector<const Trk::Volume*>& vv) const;
+    VolumePairVec splitComposedVolume(const Volume& trVol) const;
 
-    double resolveBooleanVolume(const Trk::Volume* trVol,
-                                double tolerance) const;
+    double resolveBooleanVolume(const Volume& trVol, double tolerance) const;
 
     /** Estimation of the geometrical volume span */
-    const Trk::VolumeSpan* findVolumeSpan(const Trk::VolumeBounds* volBounds,
-                                          const Amg::Transform3D& transform,
-                                          double zTol, double phiTol) const;
+    std::unique_ptr<VolumeSpan> findVolumeSpan(
+        const VolumeBounds& volBounds, const Amg::Transform3D& transform,
+        double zTol, double phiTol) const;
 
     /** Volume calculation : by default return analytical solution only */
-    double calculateVolume(const Trk::Volume* vol, bool nonBooleanOnly = false,
+    double calculateVolume(const Volume& vol, bool nonBooleanOnly = false,
                            double precision = 1.e-3) const;
 
     /**  the tricky part of volume calculation */
-    double estimateFraction(
-        std::pair<const Trk::Volume*, const Trk::Volume*> sub,
-        double precision) const;
+    double estimateFraction(const VolumePair& sub, double precision) const;
 
     /** material collection for layers */
     void collectMaterial(const GeoVPhysVol* pv, Trk::MaterialProperties& layMat,
@@ -107,7 +101,7 @@ class VolumeConverter {
 
     Trk::GeoShapeConverter m_geoShapeConverter;     //!< shape converter
     Trk::GeoMaterialConverter m_materialConverter;  //!< material converter
-    Trk::VolumeIntersection m_intersectionHelper;   //!< overlaps
+    VolumeIntersection m_intersectionHelper;        //!< overlaps
 
     static constexpr double s_precisionInX0 =
         1.e-3;  // tentative required precision of the material thickness

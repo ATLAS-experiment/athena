@@ -249,7 +249,7 @@ def CellWeightToolCfg(flags):
     inputn = "Topo"
     onlyCellWeight = False
     from CaloClusterCorrection.StandardCellWeightCalib import H1Calibration, editParm
-    (key,folder,tag) = H1Calibration.getCalibDBParams(finder,mainparam,inputn, onlyCellWeight, isMC)
+    (key,folder,tag) = H1Calibration.getCalibDBParams(flags, finder, mainparam, inputn, onlyCellWeight, isMC)
     # H1Calibration.loadCaloFolder(result, flags, folder, tag, isMC)
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if isMC:

@@ -10,16 +10,22 @@ TrigTauInfo::TrigTauInfo(const std::string& trigger)
     parseTriggerString();
 }
 
-TrigTauInfo::TrigTauInfo(const std::string& trigger, const std::map<int, int>& L1Phase1ThrMap_eTAU, const std::map<int, int>& L1Phase1ThrMap_jTAU)
+TrigTauInfo::TrigTauInfo(const std::string& trigger, const std::map<std::string, float>& L1Phase1_thresholds)
     : m_trigger{trigger}
 {
-    parseTriggerString(L1Phase1ThrMap_eTAU, L1Phase1ThrMap_jTAU);
+    parseTriggerString(L1Phase1_thresholds);
 }
 
 TrigTauInfo::TrigTauInfo(const std::string& trigger, const std::map<std::string, float>& L1Phase1_thresholds, const std::map<std::string, uint64_t>& L1Phase1_threshold_patterns)
     : m_trigger{trigger}
 {
     parseTriggerString(L1Phase1_thresholds, L1Phase1_threshold_patterns);
+}
+
+TrigTauInfo::TrigTauInfo(const std::string& trigger, const std::map<int, int>& L1Phase1ThrMap_eTAU, const std::map<int, int>& L1Phase1ThrMap_jTAU)
+    : m_trigger{trigger}
+{
+    parseTriggerString(L1Phase1ThrMap_eTAU, L1Phase1ThrMap_jTAU);
 }
 
 void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
@@ -40,8 +46,10 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     std::regex gamma_rgx("^(\\d*)g(\\d+)$");
     std::regex jet_rgx("^(\\d*)j(\\d+)$");
     std::regex met_rgx("^xe(\\d+)$");
+    std::regex noalg_rgx("^noalg$");
     std::regex l1_rgx("^L1.*$");
-    std::regex l1_tau_rgx("(\\d*)(e|j|c|)TAU(\\d+)(L|M|T|HM|H|IM|I|)");
+    std::regex l1_tau_rgx("(\\d*)(e|j|c|)TAU(\\d+)(L|M|T|HL|HM|HT|H|IM|I|)");
+    std::regex l1_toposeparate_rgx("^(\\d{0,2})(DETA|DPHI)(\\d{0,2})$");
     std::regex topo_rgx("^.*(invm|dR|deta|dphi)AB.*$");
     std::vector<std::regex*> all_regexes = {&tau_rgx, &elec_rgx, &muon_rgx, &gamma_rgx, &jet_rgx, &met_rgx, &l1_rgx};
 
@@ -87,12 +95,14 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
             } else if(std::regex_match(leg[0], match, met_rgx)) {
                 unsigned int threshold = std::stoi(match[2].str());
                 m_HLTMETThr.push_back(threshold);
+            } else if(std::regex_match(leg[0], match, noalg_rgx)) {
+                m_isStreamer = true;
             } else if(std::regex_match(leg[0], l1_rgx)) { // Treat the L1 items as a leg
                 for(size_t j = 0; j < leg.size(); j++) {
                     if(std::regex_match(leg[j], topo_rgx)) continue; // Remove HLT topo sections, not part of the L1 item
 
-                    // L1Topo items (they all include a "-" in the name):
-                    if(leg[j].find("-") != std::string::npos) {
+                    // L1Topo items (they all include a "-" in the name, or have a separate "##DETA/PHI##_" prefix):
+                    if(leg[j].find("-") != std::string::npos || std::regex_match(leg[j], l1_toposeparate_rgx)) {
                         // We only keep information from the legacy L1Topo item, from which we will not always use all thresholds
                         // Since we won't be adding any more Legacy thresholds, let's hard-code it...
                         if(leg[0] == "L1TAU60" && leg[j] == "DR-TAU12ITAU12I") leg[j] = "TAU12IM"; // L1_TAU60_DR-TAU20ITAU12I, uses "TAU12IM" threshold from the L1Topo item
@@ -127,6 +137,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
             size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
             std::string item_type = match[2].str(); // e, j, c, or ""
             int threshold = std::stoi(match[3].str());
+            std::string item_isolation = match[4].str(); // "", L, M, T, HL, HM, HT, IM, H
             
             // Set the Phase 1 thresholds to -1
             if(remove_L1_phase1_thresholds && (item_type == "e" || item_type == "j" || item_type == "c")) threshold = -1;
@@ -135,12 +146,40 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 m_tauL1Items.push_back(s.substr(match[1].str().size()));
                 m_tauL1Thr.push_back(threshold);
                 m_tauL1Type.push_back(item_type + "TAU");
+                m_tauL1Iso.push_back(item_isolation);
                 m_tauL1ThresholdPattern.push_back(-1);
             }
             rgx_iter++;
         }
 
         m_L1Item = "L1" + m_L1Items[0];
+    }
+}
+
+void TrigTauInfo::parseTriggerString(const std::map<std::string, float>& L1Phase1_thresholds)
+{
+    parseTriggerString();
+
+    for(size_t i = 0; i < m_tauL1Items.size(); i++) {
+        if(m_tauL1Type.at(i) == "TAU") continue; // Skip the legacy items
+
+        const std::string& item = m_tauL1Items.at(i);
+        
+        m_tauL1Thr[i] = L1Phase1_thresholds.at(item);
+    }
+}
+
+void TrigTauInfo::parseTriggerString(const std::map<std::string, float>& L1Phase1_thresholds, const std::map<std::string, uint64_t>& L1Phase1_threshold_patterns)
+{
+    parseTriggerString();
+
+    for(size_t i = 0; i < m_tauL1Items.size(); i++) {
+        if(m_tauL1Type.at(i) == "TAU") continue; // Skip the legacy items
+
+        const std::string& item = m_tauL1Items.at(i);
+        
+        m_tauL1Thr[i] = L1Phase1_thresholds.at(item);
+        m_tauL1ThresholdPattern[i] = L1Phase1_threshold_patterns.at(item);
     }
 }
 
@@ -156,19 +195,5 @@ void TrigTauInfo::parseTriggerString(const std::map<int, int>& L1Phase1ThrMap_eT
         } else if(item_type == "jTAU") {
             m_tauL1Thr[i] = L1Phase1ThrMap_jTAU.at(m_tauL1Thr.at(i));
         }
-    }
-}
-
-void TrigTauInfo::parseTriggerString(const std::map<std::string, float>& L1Phase1_thresholds, const std::map<std::string, uint64_t>& L1Phase1_threshold_patterns)
-{
-    parseTriggerString();
-
-    for(size_t i = 0; i < m_tauL1Items.size(); i++) {
-        if(m_tauL1Type.at(i) == "TAU") continue; // Skip the legacy items
-
-        const std::string& item = m_tauL1Items.at(i);
-        
-        m_tauL1Thr[i] = L1Phase1_thresholds.at(item);
-        m_tauL1ThresholdPattern[i] = L1Phase1_threshold_patterns.at(item);
     }
 }

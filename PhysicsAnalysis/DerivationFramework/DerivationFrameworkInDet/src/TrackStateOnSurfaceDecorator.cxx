@@ -265,7 +265,6 @@ namespace DerivationFramework {
       decorTRTPhase(*eventInfo) = trtPhase_time;
     } //extra event info
 
-
     // --- Add track states containers
     if(m_addPRD){
       // Get clusters and the mapping between xAOD::PRD and Trk::PRD
@@ -666,7 +665,6 @@ namespace DerivationFramework {
 	}
 
 
-
         // Track extrapolation
         std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolateTrack(ctx,*trkTrack,trackState->surface()) );
 
@@ -723,8 +721,11 @@ namespace DerivationFramework {
           }
         }
 
-        if(!measurement)
-          continue;
+        if(!measurement) { continue; }
+
+        if (isTRT && !trtDCOffsets.isValid() && !trtDCs.isValid()) { continue; }
+        if (isSCT && !sctClusterOffsets.isValid() && !sctClusters.isValid()) { continue; }
+        if (isPixel && !pixelClusterOffsets.isValid() && !pixelClusters.isValid()) { continue; }
 
         const Trk::RIO_OnTrack* hit = measurement ? dynamic_cast<const Trk::RIO_OnTrack*>(measurement) : nullptr;
 

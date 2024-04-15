@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_LLP1.py
@@ -439,7 +439,7 @@ def LLP1Cfg(flags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     LLP1SlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",

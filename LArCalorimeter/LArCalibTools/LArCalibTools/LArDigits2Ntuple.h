@@ -37,7 +37,7 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Item<long> m_ntNsamples;
   NTuple::Item<short> m_gain;
   NTuple::Item<short> m_bcid;
-  NTuple::Item<short> m_ELVL1Id;
+  NTuple::Item<unsigned long> m_ELVL1Id;
   NTuple::Item<unsigned long long> m_IEvent;
   NTuple::Array<short>  m_samples;
   //

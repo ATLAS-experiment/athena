@@ -67,8 +67,8 @@ StatusCode TrigHitDVHypoAlg::initialize()
 	 if( swp == "tight"  && m_tools_loosest_wp >= 3 ) m_tools_loosest_wp = 3;
       }
    }
-   ATH_MSG_INFO( "Lowest jetEt used in hypo tools = " << m_tools_lowest_jetEt << " (GeV)" );
-   ATH_MSG_INFO( "Loosest WP used in hypo tools = " << m_tools_loosest_wp << " (loose=1,medium=2,tight=3)");
+   ATH_MSG_DEBUG( "Lowest jetEt used in hypo tools = " << m_tools_lowest_jetEt << " (GeV)" );
+   ATH_MSG_DEBUG( "Loosest WP used in hypo tools = " << m_tools_loosest_wp << " (loose=1,medium=2,tight=3)");
    // loose : eta<2.0, SP seed=true,  BDT eff=0.9
    // medium: eta<2.0, SP seed=false, BDT eff=0.75
    // tight : eta<1.0, SP seed=false, BDT eff=0.75
