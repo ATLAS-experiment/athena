@@ -98,8 +98,8 @@ class AccessMode(JobProperty):
             else:
                 import AthenaRootComps.ReadAthenaxAODHybrid # noqa: F401
             if self.StoredValue=="ClassAccess": AppMgr.ServiceMgr.EventSelector.AccessMode = 1
-        elif self.StoredValue=="BranchAccess": AppMgr.ServiceMgr.EventSelector.AccessMode = 0
-        elif self.StoredValue=="AthenaAccess": AppMgr.ServiceMgr.EventSelector.AccessMode = 2
+            elif self.StoredValue=="BranchAccess": AppMgr.ServiceMgr.EventSelector.AccessMode = 0
+            elif self.StoredValue=="AthenaAccess": AppMgr.ServiceMgr.EventSelector.AccessMode = 2
         elif self.StoredValue=="POOLAccess":
             if hasattr(AppMgr.ServiceMgr,"EventSelector"):
                 if AppMgr.ServiceMgr.EventSelector.getType()!="EventSelectorAthenaPool": 
