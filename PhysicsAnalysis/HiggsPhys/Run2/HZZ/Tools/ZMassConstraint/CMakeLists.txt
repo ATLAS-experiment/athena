@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( ZMassConstraint )
@@ -24,6 +24,3 @@ atlas_add_dictionary( ZMassConstraintDict
    ZMassConstraint/ZMassConstraintDict.h
    ZMassConstraint/selection.xml
    LINK_LIBRARIES ZMassConstraintLib )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
