@@ -21,7 +21,7 @@ import re
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
-# Pool of mutable ComboHypo instances
+# Pool of mutable ComboHypo instances (FIXME: ATR-29181)
 _ComboHypoPool = dict()
 
 
@@ -229,6 +229,9 @@ class ComboMaker(AlgNode):
         # reset the chains, why do we need to do it?
         setattr(self.Alg, self.prop1, {})
         setattr(self.Alg, self.prop2, {})
+
+    def __del__(self):
+        self.acc.wasMerged()
 
     def create (self, name):
         log.debug("ComboMaker.create %s",name)        
