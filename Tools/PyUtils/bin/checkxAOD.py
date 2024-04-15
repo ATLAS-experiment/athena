@@ -33,8 +33,12 @@ if __name__ == "__main__":
        help = "Output CSV file name, to use with spreadsheets" )
     ( options, args ) = parser.parse_args()
 
-    # Ideally, categories ought to be defined such that they do NOT overlap,
-    # "PFO" and "Jet" currently overlap. The last match, if any, wins.
+    # Ideally, pattern lists ought to be defined such that categories do NOT overlap.
+    # Should they overlap, the last, i.e., lower on this list, matched category, if any, wins.
+    # The following categories currently overlap:
+    # "PFO" and "Jet", "Muon" and "LRT",
+    # "Trig" and "LRT", "Trig" and "PFO",
+    # "Trig" and "caloringer", "InDet" and "LRT"
     # Set up categorization matching strings:
     categoryStrings = {
         "MetaData" : ["^DataHeader", "(.*)_mems$", "(.*)_timings$", "^Token$", "^RawInfoSummaryForTag$", "^index_ref$"],
@@ -89,8 +93,8 @@ if __name__ == "__main__":
                "input file" )
         pass
 
-    # Pattern for a static/dynamic auxiliary variable prefix
-    auxvarptn = re.compile( r"(.*)Aux(?:Dyn)?(?:\.|:)" )
+    # Pattern for a static/dynamic auxiliary variable identification
+    auxvarptn = re.compile( r"Aux(?:Dyn)?(?:\.|:)" )
     # Loop over the specified file(s):
     for fileName in fileNames:
 
@@ -108,10 +112,10 @@ if __name__ == "__main__":
             # The name of this branch:
             brName = d.name
             # Check if this is a static/dynamic auxiliary variable:
-            m = auxvarptn.match( d.name )
+            m = auxvarptn.search( d.name )
             if m:
                 # Yes, it is. And the name of the main object/container is:
-                brName = m.group( 1 )
+                brName = d.name[:m.start()]
             # Check if we already know this container:
             if brName in summedData.keys():
                 summedData[ brName ].memSize  += d.memSize
@@ -154,61 +158,49 @@ if __name__ == "__main__":
         for d in orderedData:
             # keep branches with either the same number of entries as the number of events, or the
             # special tlp branches with extra event information
-            mtlp = re.match( "(.*)_tlp.$", d.name ) or re.match( "(.*)DataHeader(.*)", d.name )
+            mtlp = re.search( "_tlp.$", d.name ) or "DataHeader" in d.name
             if d.nEntries != poolFile.dataHeader.nEntries and not mtlp: continue
 
             colTypeName = d.typeName
-            d_name = d.name
             if colTypeName:
-                m = re.match( "(.*)_[pv]._", d.name )
-                m1 = re.match( "(.*)_tlp._", d.name )
-                m2 = re.match( "(.*)_v.>_", d.name )
-                m3 = re.match( "([a-zA-Z]+)_(.*_[lL]inks?)", d.name )
-                if m:
-                    nameType = "%s (%s)" % ( d.name[m.end():], colTypeName )
-                    d_name   = d.name[m.end():]
-                elif m1:
-                    nameType = "%s (%s)" % ( d.name[m1.end():], colTypeName )
-                    d_name   = d.name[m1.end():]
-                elif m2:
-                    nameType = "%s (%s)" % ( d.name[m2.end():], colTypeName )
-                    d_name   = d.name[m2.end():]
-                elif m3:
-                    nameType = "%s (%s)" % ( m3.group(2), colTypeName )
-                    d_name   = m3.group(2)
+                for ptn in ("(?:_[pv]._|_tlp._|_v.>_)(.*)", "^[a-zA-Z]+_(.*_[lL]inks?)"):
+                    m = re.search(ptn, d.name)
+                    if m:
+                        d_name   = m.group(1)
+                        break
                 else:
-                    nameType = "%s (%s)" % ( d.name, colTypeName )
+                    m = re.search("_tlp.$", d.name)
+                    if m:
+                        d_name = d.name[:m.start()].replace("_",":")
+                    else:
+                        d_name   = d.name
+                nameType = "%s (%s)" % (d_name, colTypeName)
             else:
-                m = re.match( "(.*)_v._", d.name )
-                m1 = re.match( "(.*)(_tlp.$)", d.name )
-                # print "match",m,m1
+                m = re.search( "_v._", d.name )
                 if m:
-                    nameType = "%s (%s)" % ( d.name[m.end():], (d.name[:m.end()-1]) )
                     d_name   = d.name[m.end():]
-                elif m1:
-                    # print "m1:",m1.group(),m1.group(1)
-                    nt = m1.group(1).replace("_",":") + m1.group(2)
-                    n  = m1.group(1).replace("_",":")
-                    nameType = "%s (%s)" % ( n, nt )
-                    d_name   = n
+                    nameType = "%s (%s)" % ( d_name, (d.name[:m.end()-1]) )
                 else:
-                    nameType = "%s (%s)" % ( d.name, "()" )
+                    m = re.search("_tlp.$", d.name)
+                    if m:
+                        d_name = d.name[:m.start()].replace("_",":")
+                        nameType = "%s (%s)" % (d_name, d_name + m.group())
+                    else:
+                        d_name = d.name
+                        nameType = "%s (%s)" % ( d.name, "()" )
 
             # Find category:
-            if 'catName' in locals(): del catName
-            for categ in categoryStrings:
+            for categ in reversed(categoryStrings.keys()):
                 for pattern in categoryStrings[ categ ]:
                     if re.match(pattern, d_name.replace("Bkg_","")):
                         catName = categ
+                        # Stop searching since category found
                         break
-                # Even if category is found, we continue to search for a match
-                # in the following categories and the last match, if any, wins.
-                # Ideally, categories ought to be defined such that they do NOT overlap
-                # ("PFO" and "Jet" currently overlap), then we can stop searching
-                # when category found.
-                # Or, perhaps, the "first match wins" may be considered the right strategy.
-
-            if 'catName' not in locals():
+                else:
+                    continue
+                # Stop searching since category found
+                break
+            else:
                 catName = '*Unknown*'
             # Add on category to name/type
             nameType += ' [' + catName + ']'
@@ -303,7 +295,7 @@ if __name__ == "__main__":
         memSize = 0.0
         diskSize = 0.0
         for d in orderedData:
-            mtlp = re.match( "(.*)_tlp.$", d.name ) or re.match( "(.*)DataHeader(.*)", d.name )
+            mtlp = re.search( "_tlp.$", d.name ) or "DataHeader" in d.name
             if d.nEntries == poolFile.dataHeader.nEntries or mtlp: continue
             print( "%12.3f kb %12.3f kb       %s" %
                    ( d.memSize, d.diskSize, d.name ) )
