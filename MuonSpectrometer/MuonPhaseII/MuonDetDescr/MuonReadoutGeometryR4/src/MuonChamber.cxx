@@ -7,6 +7,33 @@
 #include <ActsGeoUtils/NoDeletePtr.h>
 
 
+namespace ActsTrk {
+template<> 
+    TransformCacheDetEle<MuonGMR4::MuonChamber>::TransformCacheDetEle(const IdentifierHash& hash, 
+                                                                     const MuonGMR4::MuonChamber* chamber):
+        TransformCache{hash, chamber->detectorType()},
+        m_parent{chamber} {}
+template<> const IDetectorElement*
+        TransformCacheDetEle<MuonGMR4::MuonChamber>::parent() const { return nullptr; }
+template <> Amg::Transform3D 
+    TransformCacheDetEle<MuonGMR4::MuonChamber>::fetchTransform(const DetectorAlignStore* store) const{
+        ActsGeometryContext gctx{};
+        /// If the store is given, assume that the tracking alignment already caches the transformations
+        /// of the needed detector surfaces --> We can build a geo context on the fly.
+        if (store) {
+            auto copyStore = std::make_unique<DetectorAlignStore>(detectorType());
+            copyStore->geoModelAlignment = store->geoModelAlignment;
+            copyStore->trackingAlignment = store->trackingAlignment;
+            copyStore->internalAlignment = store->internalAlignment;
+            gctx.setStore(std::move(copyStore)); 
+        }        
+        const auto& pars{m_parent->parameters()};
+        return pars.readoutEles[0]->localToGlobalTrans(gctx) * pars.centerTrans;
+
+    }
+
+}
+
 
 namespace MuonGMR4 {
 
@@ -43,19 +70,6 @@ const Amg::Transform3D& MuonChamber::localToGlobalTrans(const ActsGeometryContex
 }            
 Amg::Transform3D MuonChamber::globalToLocalTrans(const ActsGeometryContext& gctx) const {
     return localToGlobalTrans(gctx).inverse(); 
-}
-Amg::Transform3D MuonChamber::fromLayerToGlobal(const AlignmentStore* store) const {
-    ActsGeometryContext gctx{};
-    /// If the store is given, assume that the tracking alignment already caches the transformations
-    /// of the needed detector surfaces --> We can build a geo context on the fly.
-    if (store) {
-        auto copyStore = std::make_unique<AlignmentStore>(detectorType());
-        copyStore->geoModelAlignment = store->geoModelAlignment;
-        copyStore->trackingAlignment = store->trackingAlignment;
-        copyStore->internalAlignment = store->internalAlignment;
-        gctx.setStore(std::move(copyStore)); 
-    }        
-    return m_args.readoutEles[0]->localToGlobalTrans(gctx) * m_args.centerTrans;
 }
 double MuonChamber::halfXLong() const { return m_args.halfXLong; }
 double MuonChamber::halfXShort() const { return m_args.halfXShort; }

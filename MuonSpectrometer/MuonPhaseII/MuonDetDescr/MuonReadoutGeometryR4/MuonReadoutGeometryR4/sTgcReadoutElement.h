@@ -266,7 +266,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
                                      const unsigned int channelType, 
                                      const unsigned int channel,
                                      const unsigned int wireInGrp = 0);
-
+    friend class ActsTrk::TransformCacheDetEle<sTgcReadoutElement>;
    private:
         /// Returns channel position for a given identifierHash
         static unsigned int channelNumber(const IdentifierHash& measHash);
@@ -286,9 +286,13 @@ class sTgcReadoutElement : public MuonReadoutElement {
         const unsigned int m_hashShiftChType{2*CxxUtils::count_ones(static_cast<unsigned int>(numLayers()))};
 };
 
-std::ostream& operator<<(
-    std::ostream& ostr, const MuonGMR4::sTgcReadoutElement::parameterBook& pars);
+std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::sTgcReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4
+
+namespace ActsTrk{
+    template <> Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+}
 
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.icc>
 #endif

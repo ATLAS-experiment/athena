@@ -5,6 +5,14 @@
 #define MUONREADOUTGEOMETRYR4_STGCREADOUTELEMENT_ICC
 
 
+namespace ActsTrk{
+    template <> inline Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const{
+            return  m_parent->toStation(store) * m_parent->fromGapToChamOrigin(hash());
+        }
+}
+
+
 namespace MuonGMR4 {
     namespace sTgcIdMeasHashFields {
         constexpr unsigned int minusOne = -1;

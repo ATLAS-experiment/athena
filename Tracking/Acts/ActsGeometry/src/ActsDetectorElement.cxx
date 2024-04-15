@@ -51,35 +51,6 @@ constexpr double length_unit = 1_mm;
 ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detElem) :
   GeoVDetectorElement{detElem.getMaterialGeom()},
   m_type{detElem.isPixel() ? DetectorType::Pixel : DetectorType::Sct},
-  m_trfCache{0,[this,&detElem](const DetectorAlignStore* store, const IdentifierHash&) {
-
-      const InDetDD::SiDetectorDesign &design = detElem.design();
-      const Trk::SurfaceBounds::BoundsType boundsType = detElem.bounds().type();
-
-      // extra shift for split row modules
-      Amg::Transform3D extraTransform{Amg::CLHEPTransformToEigen(detElem.recoToHitTransform())};    
-      if (boundsType == Trk::SurfaceBounds::Rectangle &&
-          typeid(design) == typeid(InDetDD::StripBoxDesign) ) {
-
-          extraTransform = design.moduleShift() * extraTransform;
-
-      } else if (boundsType == Trk::SurfaceBounds::Annulus) {
-        // need to rotate pi/2 to reproduce ABXY orientation, phiS so that phi=0
-        // is center and symmetric
-        const double phiShift = M_PI_2 - static_cast<const InDetDD::StripStereoAnnulusDesign&>(design).stereo();
-
-        const Amg::Vector2D origin2D = static_cast<const Acts::AnnulusBounds&>(m_surface->bounds()).moduleOrigin();
-        const Amg::Translation3D transl{origin2D.x(), origin2D.y(), 0};
-        const Amg::Transform3D originTrf{transl * Amg::getRotateZ3D(-phiShift)};
-        extraTransform = extraTransform * originTrf.inverse();
-      }
-      GeoAlignmentStore* alignStore = store ? store->geoModelAlignment.get() : nullptr;
-      Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(alignStore) * extraTransform;
-      // need to make sure translation has correct units
-      l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
-
-      return l2g;
-  },this},
   m_detElement{&detElem} {
 
 
@@ -118,8 +89,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
   } else if (boundsType == Trk::SurfaceBounds::Annulus) {
 
     const InDetDD::SiDetectorDesign &design = detElem.design();
-    const auto *annulus =
-        dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&design);
+    const auto *annulus = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&design);
     if (annulus == nullptr) {
       throw std::domain_error("ActsDetectorElement got inconsistent surface");
     }
@@ -157,8 +127,8 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
                                          const Identifier &id) :
     GeoVDetectorElement{detElem.getMaterialGeom()},
     m_type{DetectorType::Trt}, 
-    m_trfCache{0,[trf](const DetectorAlignStore* , const IdentifierHash&) { return trf; },this},
     m_detElement{&detElem}, 
+    m_trtTrf{std::make_unique<Amg::Transform3D>(trf)},
     m_explicitIdentifier(id) {
 
   // we know this is a straw
@@ -189,14 +159,6 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
 ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) :
     GeoVDetectorElement{detElem.getMaterialGeom()},
     m_type{DetectorType::Hgtd}, 
-    m_trfCache{0, [this](const DetectorAlignStore* store, const IdentifierHash&) {
-
-        GeoAlignmentStore* geoModelStore = store ? store->geoModelAlignment.get() : nullptr;
-        Amg::Transform3D l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore);
-        // need to make sure translation has correct units
-        l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
-        return l2g;
-    }, this},
     m_detElement{&detElem}, 
     m_thickness{detElem.thickness()}, 
     m_explicitIdentifier{id} {
@@ -222,6 +184,48 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &de
   }
 }
 
+Amg::Transform3D ActsDetectorElement::transform(const ActsTrk::DetectorAlignStore* store) const {
+   
+    GeoAlignmentStore* geoModelStore = store ? store->geoModelAlignment.get() : nullptr;
+    Amg::Transform3D l2g{Amg::Transform3D::Identity()};
+   switch (m_type) {
+      case DetectorType::Hgtd:{
+         l2g= m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore);
+         break;
+      } case DetectorType::Trt: {
+         l2g = (*m_trtTrf);
+         break;
+      }
+      /// Pixel or Sct
+      default: {
+          const auto& detElem = static_cast<const InDetDD::SiDetectorElement&>(*m_detElement);
+          const InDetDD::SiDetectorDesign&design = detElem.design();
+          const Trk::SurfaceBounds::BoundsType boundsType = detElem.bounds().type();
+
+          // extra shift for split row modules
+          Amg::Transform3D extraTransform{Amg::CLHEPTransformToEigen(detElem.recoToHitTransform())};    
+          if (boundsType == Trk::SurfaceBounds::Rectangle &&
+              typeid(design) == typeid(InDetDD::StripBoxDesign) ) {            
+              extraTransform = design.moduleShift() * extraTransform;
+          } else if (boundsType == Trk::SurfaceBounds::Annulus) {
+              // need to rotate pi/2 to reproduce ABXY orientation, phiS so that phi=0
+              // is center and symmetric
+              const double phiShift = M_PI_2 - static_cast<const InDetDD::StripStereoAnnulusDesign&>(design).stereo();
+
+              const Amg::Vector2D origin2D = static_cast<const Acts::AnnulusBounds&>(m_surface->bounds()).moduleOrigin();
+              const Amg::Translation3D transl{origin2D.x(), origin2D.y(), 0};
+              const Amg::Transform3D originTrf{transl * Amg::getRotateZ3D(-phiShift)};
+              extraTransform = extraTransform * originTrf.inverse();
+          }
+          l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore) * extraTransform;
+      }
+   };
+   // need to make sure translation has correct units
+   l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
+
+   return l2g;
+
+}
 IdentityHelper ActsDetectorElement::identityHelper() const {
   if (detectorType() == DetectorType::Pixel || detectorType() == DetectorType::Sct) {
         return IdentityHelper(static_cast<const InDetDD::SiDetectorElement *>(m_detElement));
@@ -231,11 +235,7 @@ IdentityHelper ActsDetectorElement::identityHelper() const {
 }
 
 const Acts::Transform3 &ActsDetectorElement::transform(const Acts::GeometryContext &anygctx) const {
-    // any cast to known context type
-    const ActsGeometryContext *gctx = anygctx.get<const ActsGeometryContext *>();
-    // unpack the alignment store from the context
-    return m_trfCache.getTransform(gctx->getStore(detectorType()).get());
-
+    return m_trfCache.transform(anygctx);
 }
 
 unsigned int ActsDetectorElement::storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const {

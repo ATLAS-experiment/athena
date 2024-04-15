@@ -39,10 +39,7 @@ StatusCode sTgcReadoutElement::initElement() {
          ATH_MSG_FATAL("Layer "<<m_pars.stripLayers[layer]<<" has a very strange hash. Expect "<<layer);
        return StatusCode::FAILURE;
       }
-      ATH_CHECK(insertTransform(m_pars.stripLayers[layer].hash(), 
-                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
-                                    return toStation(store) * fromGapToChamOrigin(hash); 
-                                 }));
+      ATH_CHECK(insertTransform<sTgcReadoutElement>(m_pars.stripLayers[layer].hash()));
    }
    for (unsigned int layer = 0; layer < m_pars.wireGroupLayers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -50,10 +47,7 @@ StatusCode sTgcReadoutElement::initElement() {
          ATH_MSG_FATAL("Layer "<<m_pars.wireGroupLayers[layer]<<" has a very strange hash. Expect "<<layer);
        return StatusCode::FAILURE;
       }
-      ATH_CHECK(insertTransform(m_pars.wireGroupLayers[layer].hash(), 
-                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
-                                    return toStation(store) * fromGapToChamOrigin(hash); 
-                                 }));
+      ATH_CHECK(insertTransform<sTgcReadoutElement>(m_pars.wireGroupLayers[layer].hash()));
    }
    for (unsigned int layer = 0; layer < m_pars.padLayers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -61,10 +55,7 @@ StatusCode sTgcReadoutElement::initElement() {
          ATH_MSG_FATAL("Layer "<<m_pars.padLayers[layer]<<" has a very strange hash. Expect "<<layer);
        return StatusCode::FAILURE;
       }
-      ATH_CHECK(insertTransform(m_pars.padLayers[layer].hash(), 
-                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
-                                    return toStation(store) * fromGapToChamOrigin(hash); 
-                                 }));     
+      ATH_CHECK(insertTransform<sTgcReadoutElement>(m_pars.padLayers[layer].hash()));
    }
    ActsGeometryContext gctx{};
    m_gasGapPitch = (center(gctx, createHash(1, sTgcIdHelper::sTgcChannelTypes::Strip, 0)) -
