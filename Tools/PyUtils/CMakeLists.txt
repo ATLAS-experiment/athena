@@ -36,8 +36,8 @@ else()
     atlas_install_python_modules( python/*.py python/scripts python/AthFile POST_BUILD_CMD ${ATLAS_FLAKE8} )
     atlas_install_scripts( bin/acmd.py bin/checkFile.py bin/checkPlugins.py
        bin/checkSG.py bin/checkMetaSG.py bin/checkTP.py bin/checkxAOD.py
-       bin/diff-athfile bin/diff-jobo-cfg.py bin/diffConfigs.py
-       bin/diffPoolFiles.py bin/dlldep.py bin/dso-stats.py bin/dump-athfile.py
+       bin/diff-jobo-cfg.py bin/diffConfigs.py
+       bin/diffPoolFiles.py bin/dlldep.py bin/dso-stats.py
        bin/dumpAthfilelite.py bin/filter-and-merge-d3pd.py bin/getMetadata.py
        bin/gprof2dot bin/issues bin/magnifyPoolFile.py
        bin/apydep.py bin/pool_extractFileIdentifier.py
@@ -54,7 +54,6 @@ else()
     atlas_add_alias( filter-and-merge-d3pd "filter-and-merge-d3pd.py" )
     atlas_add_alias( diffPoolFiles "diffPoolFiles.py" )
     atlas_add_alias( print_auditor_callgraph "print_auditor_callgraph.py" )
-    atlas_add_alias( dump-athfile "dump-athfile.py" )
     atlas_add_alias( pyroot "pyroot.py" )
     atlas_add_alias( checkxAOD "checkxAOD.py" )
     atlas_add_alias( checkSG "checkSG.py" )
