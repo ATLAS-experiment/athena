@@ -4,6 +4,14 @@
 #ifndef MUONGEOMODELR4_MUONREADOUTELEMENT_ICC
 #define MUONGEOMODELR4_MUONREADOUTELEMENT_ICC
 
+
+namespace ActsTrk{
+    template <> inline Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::MuonReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
+        return m_parent->toStation(store);
+   }
+}
+
 namespace MuonGMR4 {
 
 inline const GeoAlignableTransform* MuonReadoutElement::alignableTransform() const { return m_args.alignTransform; }
@@ -40,6 +48,19 @@ inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsGeometr
 inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, 
                                                                       const Identifier& id) const {
     return localToGlobalTrans(ctx, layerHash(id));
+}
+
+template<class MuonImpl>
+StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash) {    
+    TransformCacheMap::const_iterator cache = m_localToGlobalCaches.find(hash);
+    if (cache != m_localToGlobalCaches.end()) {
+        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
+                   <<" has already a transformation cached for hash "<<hash);
+        return StatusCode::FAILURE;
+    }
+    auto newCache = std::make_unique<ActsTrk::TransformCacheDetEle<MuonImpl>>(hash, static_cast<MuonImpl*>(this));
+    m_localToGlobalCaches.insert(std::make_pair(hash, std::move(newCache)));
+    return StatusCode::SUCCESS;
 }
 
 }  // namespace MuonGMR4

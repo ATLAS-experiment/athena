@@ -114,6 +114,9 @@ class MmReadoutElement : public MuonReadoutElement {
 
     const StripLayer& stripLayer(const Identifier& measId) const;    
     const StripLayer& stripLayer(const IdentifierHash& measHash) const;    
+ 
+    friend ActsTrk::TransformCacheDetEle<MmReadoutElement>;
+
    private:
        
     
@@ -132,6 +135,11 @@ class MmReadoutElement : public MuonReadoutElement {
 };
 std::ostream& operator<<(std::ostream& ostr, const MmReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4
+
+namespace ActsTrk{
+    template <> Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::MmReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+}
 
 
 #include <MuonReadoutGeometryR4/MmReadoutElement.icc>

@@ -34,9 +34,7 @@ StatusCode MuonReadoutElement::createGeoTransform() {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
        return StatusCode::FAILURE;
     }
-    return insertTransform(geoTransformHash(), [this](const DetectorAlignStore* store, const IdentifierHash&){
-            return toStation(store);
-    });
+    return insertTransform<MuonReadoutElement>(geoTransformHash());
 }
 IdentifierHash MuonReadoutElement::geoTransformHash() {     
     static const IdentifierHash hash{static_cast<unsigned>(~0)-1};
@@ -72,22 +70,6 @@ unsigned int MuonReadoutElement::storeAlignedTransforms(const ActsTrk::DetectorA
     return aligned;
 }
 
-StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
-                                               TransformMaker make) {
-    return insertTransform(hash, std::make_shared<const TransformMaker>(make));
-}
-StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
-                                               std::shared_ptr<const TransformMaker> make) {
-    
-    TransformCacheMap::const_iterator cache = m_localToGlobalCaches.find(hash);
-    if (cache != m_localToGlobalCaches.end()) {
-        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
-                   <<" has already a transformation cached for hash "<<hash);
-        return StatusCode::FAILURE;
-    }
-    m_localToGlobalCaches.insert(std::make_pair(hash, std::make_unique<ActsTrk::TransformCache>(hash, make, this)));
-    return StatusCode::SUCCESS;
-}
 Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx) const {
     return globalToLocalTrans(ctx, geoTransformHash());
 }

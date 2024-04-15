@@ -13,7 +13,7 @@ namespace ActsTrk {
         if (alignStore) {
             const Amg::Transform3D* cache = alignStore->trackingAlignment->getTransform(m_clientNo);
             if (cache) return *cache;
-            const Amg::Transform3D& trf{alignStore->trackingAlignment->setTransform(m_clientNo, (*m_transform)(alignStore, m_hash))};
+            const Amg::Transform3D& trf{alignStore->trackingAlignment->setTransform(m_clientNo, fetchTransform(alignStore))};
             /// If an external alignment store is presented release the nominal transformation
             releaseNominalCache();
             return trf;
@@ -21,12 +21,32 @@ namespace ActsTrk {
         /// Fall back solution to go onto the nominal cache    
         if (!m_nomCache) {
             std::unique_lock guard{m_mutex};
-            m_nomCache.set(std::make_unique<Amg::Transform3D>((*m_transform)(nullptr, m_hash)));
+            m_nomCache.set(std::make_unique<Amg::Transform3D>(fetchTransform(alignStore)));
             return (*m_nomCache);
         }
         std::shared_lock guard{m_mutex};
         return (*m_nomCache);
     }
+    inline IdentifierHash TransformCache::hash() const { return m_hash; }
+#ifndef SIMULATIONBASE
+    ATH_FLATTEN
+    inline const Amg::Transform3D& TransformCache::transform(const Acts::GeometryContext& anygctx) const {
+        const ActsGeometryContext* gctx = anygctx.get<const ActsGeometryContext*>();    
+        // unpack the alignment store from the context
+        return getTransform(gctx->getStore(m_type).get());
 
- }
+    }
+#endif
+
+
+template<typename CachingDetectorEle>
+   TransformCacheDetEle<CachingDetectorEle>::TransformCacheDetEle(const IdentifierHash& hash,
+                                                      const CachingDetectorEle* parentEle):
+        TransformCache(hash, parentEle->detectorType()),
+        m_parent{parentEle} {}
+template<typename CachingDetectorEle>
+    const IDetectorElement* TransformCacheDetEle<CachingDetectorEle>::parent()  const {
+        return m_parent;
+    }
+}
 #endif
