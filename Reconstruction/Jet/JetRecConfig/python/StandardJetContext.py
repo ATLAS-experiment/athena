@@ -46,7 +46,14 @@ def createJetContextFlags():
 
     #***********************
     # The default context is Run3 or Run4 according to other global flags :
-    flags.addFlag("Jet.Context.default", lambda prevFlags: prevFlags.Jet.Context.Run3 if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else prevFlags.Jet.Context.Run4)
+    def _defaultFlag(prevFlags):
+        try:
+            run = prevFlags.GeoModel.Run
+        except ValueError:
+            # No GeoModel.Run -> we are in a Truth job, return an empty context.
+            return {}                
+        return prevFlags.Jet.Context.Run3 if run <= LHCPeriod.Run3 else prevFlags.Jet.Context.Run4
+    flags.addFlag("Jet.Context.default", _defaultFlag)
 
 
 
