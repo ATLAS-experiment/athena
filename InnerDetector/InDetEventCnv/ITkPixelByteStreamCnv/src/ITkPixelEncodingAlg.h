@@ -8,14 +8,35 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 
+namespace InDetDD {
+  class PixelDetectorManager;
+}
+
+class PixelID;
+
+
 class ITkPixelEncodingAlg : public AthReentrantAlgorithm 
 {
   public:
-    virtual StatusCode initialize() override;
-    virtual StatusCode execute (const EventContext& ctx) const override;
+    ITkPixelEncodingAlg(const std::string &name, ISvcLocator *pSvcLocator);
+    ~ITkPixelEncodingAlg(){}
+
+    virtual StatusCode initialize();
+    virtual StatusCode execute (const EventContext& ctx) const;
 
   private:
 
+    enum Region {
+      INVALID_REGION=-1, BARREL, ENDCAP, N_REGIONS
+    };
+
+
+    const InDetDD::PixelDetectorManager*           m_pixelManager;                   //!< the Si Detector Manager
+    const PixelID*                                 m_pixIdHelper;  
+
+    static constexpr float s_pitch50x50=0.050;
+
+    void fillChipMaps() const;
 };
 #endif
 

@@ -4,7 +4,8 @@
 
 #include "../ITkPixelRawDataProviderTool.h"
 #include "../ITkPixelRodDecoder.h"
-
+#include "../ITkPixelEncodingAlg.h"
 
 DECLARE_COMPONENT( ITkPixelRawDataProviderTool )  
 DECLARE_COMPONENT( ITkPixelRodDecoder )
+DECLARE_COMPONENT( ITkPixelEncodingAlg )
