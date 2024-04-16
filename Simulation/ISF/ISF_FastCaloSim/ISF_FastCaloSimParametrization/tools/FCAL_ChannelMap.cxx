@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -17,6 +17,8 @@
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
+#include <cmath>
+#include <stdexcept>
 
 /* === Geometrical parameters === */
 //const double cm = 0.01;
@@ -26,24 +28,24 @@ const double FCAL_ChannelMap::m_tubeSpacing[] = {0.75*cm, 0.8179*cm, 0.90*cm};
 
 FCAL_ChannelMap::FCAL_ChannelMap( int flag)
 {
-
+  static const double root3_2 = std::sqrt(3.)/2;
   /* === Initialize geometrical dimensions */
   for(int i=0; i<3; i++){
     m_tubeDx[i] = m_tubeSpacing[i] / 2.;
-    m_tubeDy[i] = m_tubeSpacing[i] * sqrt(3.)/2.;
+    m_tubeDy[i] = m_tubeSpacing[i] * root3_2;
   }
 
   // FCAL1 small cells are 2x2 tubes
   m_tileDx[0] = 2. * m_tubeSpacing[0];
-  m_tileDy[0] = 2. * m_tubeSpacing[0] * sqrt(3.)/2.;
+  m_tileDy[0] = 2. * m_tubeSpacing[0] * root3_2;
 
   // FCAL2 small cells are 2x3 tubes
   m_tileDx[1] = 2. * m_tubeSpacing[1];
-  m_tileDy[1] = 3. * m_tubeSpacing[1] * sqrt(3.)/2.;
+  m_tileDy[1] = 3. * m_tubeSpacing[1] * root3_2;
 
   // FCAL3 cells are 6x6 tubes
   m_tileDx[2] = 6. * m_tubeSpacing[2];
-  m_tileDy[2] = 6. * m_tubeSpacing[2] * sqrt(3.)/2.;
+  m_tileDy[2] = 6. * m_tubeSpacing[2] * root3_2;
 
 
   m_invert_x = flag & 1;
@@ -92,7 +94,7 @@ void FCAL_ChannelMap::add_tube(const std::string & tileName, int mod, int /*id*/
 
 
 //Gabe: new to include HV and LARFCALELECRTODES ID
-void FCAL_ChannelMap::add_tube(const std::string & tileName, int mod, int /*id*/, int i, int j, double x, double y, std::string hvFT) {
+void FCAL_ChannelMap::add_tube(const std::string & tileName, int mod, int /*id*/, int i, int j, double x, double y, const std::string & hvFT) {
 
   // Get three integers from the tileName:
   std::istringstream tileStream1(std::string(tileName,1,1));
