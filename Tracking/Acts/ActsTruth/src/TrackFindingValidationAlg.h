@@ -105,7 +105,9 @@ namespace ActsTrk
      };
      DebugCounter<TrackFindingValidationDebugHists> m_debugCounter;
 
-     constexpr static unsigned int s_NMeasurementTypes = static_cast<unsigned int>(xAOD::UncalibMeasType::sTgcStripType)+1u;
+     // s_NMeasurementTypes is equal to the number of UncalibMeasType, but we have to remove the "Other" option, which
+     // corresponds to an unknown type
+     constexpr static unsigned int s_NMeasurementTypes = static_cast<unsigned int>(xAOD::UncalibMeasType::nTypes) - 1u;
 
      // statistics counter
      enum ECounter {
