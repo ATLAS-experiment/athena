@@ -18,7 +18,8 @@
 
 //======================================================================================================
 Prompt::DecoratePromptLeptonImproved::DecoratePromptLeptonImproved(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator)
+  AthAlgorithm(name, pSvcLocator),
+  m_BDTVarKey(Def::NONE)
 {}
 
 //=============================================================================
@@ -68,6 +69,17 @@ StatusCode Prompt::DecoratePromptLeptonImproved::initialize()
 
   m_varTMVA.resize(m_allVars.size());
 
+
+  //
+  // Get key for recording BDT output
+  //
+  m_BDTVarKey = m_vars->registerDynamicVar(m_BDTName);
+  
+  if(m_BDTVarKey == Def::NONE) {
+    ATH_MSG_ERROR("Failed to create key for BDT name=" << m_BDTName);
+    return StatusCode::FAILURE;
+  }
+
   //
   // Fill decorator maps
   //
@@ -80,12 +92,14 @@ StatusCode Prompt::DecoratePromptLeptonImproved::initialize()
 
   ATH_MSG_DEBUG("Initialized DecoratePromptLeptonImproved.");
 
-  return StatusCode::SUCCESS;
-
   //
   // Initialize TMVA Reader
   //
-  // TODO: need to implement
+  ATH_CHECK(initializeTMVAReader());
+  
+  ATH_MSG_DEBUG("Initialized TMVA Reader.");
+
+  return StatusCode::SUCCESS;
 }
 
 //=============================================================================
@@ -170,6 +184,49 @@ StatusCode Prompt::DecoratePromptLeptonImproved::execute()
   return StatusCode::SUCCESS;
 }
 
+ 
+//=============================================================================
+bool Prompt::DecoratePromptLeptonImproved::initializeTMVAReader()
+{   
+  //
+  // Make new instance of TMVA Reader and add variables
+  //
+  m_TMVAReader = std::make_unique<TMVA::Reader>();
+
+  for(unsigned i = 0; i < m_allVars.size(); ++i) { 
+    m_TMVAReader->AddVariable(m_vars->asStr(m_allVars.at(i)), &m_varTMVA[i]);
+  }
+  
+  //
+  // Get path to xml training file
+  //
+  std::string fullPathToFile = PathResolverFindCalibFile("JetTagNonPromptLepton/" 
+                             + m_configFileVersion 
+                             + "/TMVAClassification_" + m_methodTitleMVA + ".weights.xml");
+ 
+  if(!m_configPathOverride.empty()) {
+    ATH_MSG_INFO("Override path resolver result");
+    fullPathToFile = m_configPathOverride;
+  }
+
+  ATH_MSG_INFO("TMVA configuration file: " + fullPathToFile);
+  ATH_MSG_INFO("TMVA method name: " + m_methodTitleMVA);
+
+  //
+  // Book an instance of BDT reader if path is available
+  //
+  if(fullPathToFile == "") {
+    ATH_MSG_ERROR("Could not find path to xml training file");
+    return false;
+  }
+  else {
+    m_TMVAReader->BookMVA(m_methodTitleMVA.toString(), fullPathToFile);
+  }
+
+  return true;
+}
+
+
 //=============================================================================
 StatusCode Prompt::DecoratePromptLeptonImproved::initializeDecorators()
 {
@@ -200,6 +257,10 @@ StatusCode Prompt::DecoratePromptLeptonImproved::initializeDecorators()
   //
   // Fill additional variables
   //
+  if(!m_floatMap.insert(floatDecoratorMap::value_type(m_BDTVarKey, SG::AuxElement::Decorator<float>(m_BDTName))).second) {
+    ATH_MSG_ERROR("Failed to add variable: " << m_vars->asStr(m_BDTVarKey)); 
+    return StatusCode::FAILURE;
+  }
 
   for(const std::string &evar: m_extraDecoratorFloatVars) {
     const Def::Var ekey = m_vars->registerDynamicVar(evar);
@@ -343,9 +404,9 @@ void Prompt::DecoratePromptLeptonImproved::decorateElec(
 
   Prompt::VarHolder vars;
 
-  const xAOD::Jet *track_jet = findTrackJet(electron, trackJets);
+  std::pair<double, const xAOD::Jet*> match = findTrackJet(electron, trackJets);
 
-  if(track_jet) {
+  if(match.second) {
     //
     // Get muon calorimeter energy variable, RNN and secondary vertex variables
     //
@@ -354,12 +415,12 @@ void Prompt::DecoratePromptLeptonImproved::decorateElec(
     //
     // Get mutual variables, passing track as argument
     //
-    getMutualVariables(electron, *track_jet, electron.trackParticle(), vars);
+    getMutualVariables(electron, *match.second, electron.trackParticle(), vars);
 
     //
     // Pass variables to TMVA
     //
-    // TODO: setup TMVA decoration
+    addVarsToTMVA(vars);
   }
   else {
     //
@@ -391,9 +452,9 @@ void Prompt::DecoratePromptLeptonImproved::decorateMuon(
 
   Prompt::VarHolder vars;
 
-  const xAOD::Jet *track_jet = findTrackJet(muon, trackJets);
+  std::pair<double, const xAOD::Jet*> match = findTrackJet(muon, trackJets);
 
-  if(track_jet) {
+  if(match.second) {
     //
     // Get muon calorimeter energy variable, RNN and secondary vertex variables
     //
@@ -402,12 +463,12 @@ void Prompt::DecoratePromptLeptonImproved::decorateMuon(
     //
     // Get mutual variables, passing track as argument
     //
-    getMutualVariables(muon, *track_jet, muon.primaryTrackParticle(), vars);
+    getMutualVariables(muon, *match.second, muon.primaryTrackParticle(), vars);
 
     //
     // Add variables to TMVA Reader
     //
-    // TODO: setup TMVA decoration
+    addVarsToTMVA(vars);
   }
   else {
     //
@@ -683,6 +744,33 @@ float Prompt::DecoratePromptLeptonImproved::accessIsolation(
 }
 
 //=============================================================================
+void Prompt::DecoratePromptLeptonImproved::addVarsToTMVA(Prompt::VarHolder &vars)
+{
+  //
+  // Add variables to TMVA reader
+  //
+  for(unsigned i = 0; i < m_allVars.size(); ++i) {  
+    m_varTMVA[i] = 0.0;
+
+    if(!vars.getVar(m_allVars.at(i), m_varTMVA[i])) {
+      ATH_MSG_WARNING("Missing input variable: " << m_vars->asStr(m_allVars.at(i)));   
+    }
+  }
+
+  //
+  // Decorate lepton with classifier response, if goodJet
+  //
+  float bdt_weight = m_TMVAReader->EvaluateMVA(m_methodTitleMVA.toString());
+
+  if(m_BDTVarKey != Def::NONE) {
+    vars.addVar(m_BDTVarKey, bdt_weight);
+  }
+  else {
+    ATH_MSG_WARNING("addVarsToTMVA - invalid Def::Var key for " << m_BDTName);
+  }
+}
+
+//=============================================================================
 void Prompt::DecoratePromptLeptonImproved::fillVarDefault(Prompt::VarHolder &vars) const
 {
   //
@@ -737,7 +825,7 @@ void Prompt::DecoratePromptLeptonImproved::decorateAuxLepton(
 }
 
 //=============================================================================
-template<class T> const xAOD::Jet* Prompt::DecoratePromptLeptonImproved::findTrackJet(const T &part,
+template<class T> std::pair<double, const xAOD::Jet*> Prompt::DecoratePromptLeptonImproved::findTrackJet(const T &part,
                           const xAOD::JetContainer &jets)
 {
   //
@@ -745,6 +833,7 @@ template<class T> const xAOD::Jet* Prompt::DecoratePromptLeptonImproved::findTra
   //
   const xAOD::Jet *minjet = 0;
   double           mindr  = 10.0;
+  std::pair<double, const xAOD::Jet*> match(mindr, minjet);
 
   for(const xAOD::Jet* jet: jets) {
     const double dr = part.p4().DeltaR(jet->p4());
@@ -752,15 +841,17 @@ template<class T> const xAOD::Jet* Prompt::DecoratePromptLeptonImproved::findTra
     if(!minjet || dr < mindr) {
       mindr  = dr;
       minjet = jet;
+      match = std::make_pair(mindr, minjet);
     }
   }
 
 
   if(minjet && mindr < m_maxLepTrackJetDR) {
-    return minjet;
+    return match;
   }
-
-  return 0;
+  
+  minjet = 0;
+  return std::make_pair(10., minjet);
 }
 
 //=============================================================================

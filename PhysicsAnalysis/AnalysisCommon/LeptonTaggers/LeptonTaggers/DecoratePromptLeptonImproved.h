@@ -66,6 +66,8 @@ namespace Prompt
 
   private:
 
+    bool initializeTMVAReader();
+
     StatusCode initializeDecorators();
     void initializeConstAccessors();
 
@@ -105,6 +107,8 @@ namespace Prompt
     float accessIsolation(SG::AuxElement::ConstAccessor<float> &isoAccessor,
         const xAOD::IParticle &particle);
 
+    void addVarsToTMVA(Prompt::VarHolder &vars);
+
     void fillVarDefault(Prompt::VarHolder &vars) const;
 
     void decorateAuxLepton(
@@ -112,7 +116,7 @@ namespace Prompt
       Prompt::VarHolder &vars
     );
 
-    template<class T> const xAOD::Jet* findTrackJet(const T &part, const xAOD::JetContainer &jets);
+    template<class T> std::pair<double, const xAOD::Jet*> findTrackJet(const T &part, const xAOD::JetContainer &jets);
 
     double getVertexLongitudinalNormDist(const xAOD::IParticle &lepton,
                                          const xAOD::Vertex    *secondaryVertex,
@@ -189,6 +193,8 @@ namespace Prompt
     std::vector<Prompt::Def::Var>                        m_allVars;
 
     std::unique_ptr<Prompt::VarHolder> m_vars;
+
+    Prompt::Def::Var                                     m_BDTVarKey;
 
     shortDecoratorMap                                    m_shortMap;
     floatDecoratorMap                                    m_floatMap;
