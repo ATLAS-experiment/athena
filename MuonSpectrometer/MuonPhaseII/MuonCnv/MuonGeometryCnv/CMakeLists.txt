@@ -4,11 +4,13 @@
 atlas_subdir( MuonGeometryCnv )
 
 
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers )
 # Component(s) in the package:
 atlas_add_component( MuonGeometryCnv
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib MuonAlignmentDataR4
-                                     MuonReadoutGeometryR4 MuonReadoutGeometry StoreGateLib TrkSurfaces)
+                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES}  AthenaBaseComps GeoPrimitives MuonIdHelpersLib 
+                                    MuonAlignmentDataR4 MuonReadoutGeometryR4 MuonReadoutGeometry StoreGateLib TrkSurfaces)
 
 atlas_install_python_modules( python/*.py)

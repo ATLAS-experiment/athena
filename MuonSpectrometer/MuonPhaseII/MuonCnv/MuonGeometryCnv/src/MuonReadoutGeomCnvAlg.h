@@ -8,6 +8,7 @@
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <StoreGate/WriteCondHandleKey.h>
 #include <StoreGate/ReadCondHandleKey.h>
+#include <StoreGate/CondHandleKeyArray.h>
 
 #include <MuonReadoutGeometry/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
@@ -30,16 +31,32 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         bool isReEntrant() const override { return false; }
     
     private:
+        StatusCode buildStation(const ActsGeometryContext& gctx,
+                                MuonGM::MuonDetectorManager& mgr,
+                                const Identifier& stationId,
+                                PVLink world) const;
+
         StatusCode buildMdt(const ActsGeometryContext& gctx,
                             MuonGM::MuonDetectorManager* mgr,
                             PVLink world) const;
 
+        StatusCode buildRpc(const ActsGeometryContext& gctx,
+                            MuonGM::MuonDetectorManager* mgr,
+                            PVLink world) const;
+
+        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+                                  const MuonGMR4::RpcReadoutElement& refEle,
+                                  const MuonGM::RpcReadoutElement& testEle) const;
+
+        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+                                  const MuonGMR4::MdtReadoutElement& refEle,
+                                  const MuonGM::MdtReadoutElement& testEle) const;
+                                  
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         SG::WriteCondHandleKey<MuonGM::MuonDetectorManager> m_writeKey{this, "WriteKey", "MuonDetectorManager"};
         
-        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
-                                                              "Alignment key"};
+        SG::ReadCondHandleKeyArray<ActsTrk::DetectorAlignStore> m_alignStoreKeys{this, "AlignmentKeys", {}, "Alignment key"};
         
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 

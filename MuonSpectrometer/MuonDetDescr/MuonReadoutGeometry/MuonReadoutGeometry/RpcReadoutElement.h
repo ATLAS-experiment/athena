@@ -15,12 +15,9 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MuonStripDesign.h"
 #include "CxxUtils/ArrayHelper.h"
-class GeoVFullPhysVol;
 
-namespace Muon {
-    class CombinedMuonAlignModule;
-    class RpcAlignModule;
-}  // namespace Muon
+
+class MuonReadoutGeomCnvAlg;
 
 namespace MuonGM {
     /**
@@ -55,8 +52,7 @@ namespace MuonGM {
     */
 
     class RpcReadoutElement final : public MuonClusterReadoutElement {
-        friend class Muon::RpcAlignModule;
-        friend class Muon::CombinedMuonAlignModule;
+        friend class ::MuonReadoutGeomCnvAlg;
         friend class MuonChamber;
         friend class MuonChamberLite;
 

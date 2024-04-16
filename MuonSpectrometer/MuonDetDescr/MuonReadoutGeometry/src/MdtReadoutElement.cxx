@@ -238,8 +238,8 @@ namespace MuonGM {
                     m_zsignRO_tubeFrame.set(1);
             }
         }
-        if (!m_zsignRO_tubeFrame
-                 .isValid()) {  // if no CRO in a chamber in AMDB (BIS in layout R), use the standard convention for RO-HV side
+        // if no CRO in a chamber in AMDB (BIS in layout R), use the standard convention for RO-HV side
+        if (!m_zsignRO_tubeFrame.isValid()) {  
             int sign = 0;
             if (barrel()) {
                 if (sideA()) {
@@ -949,8 +949,8 @@ namespace MuonGM {
     }
 
     void MdtReadoutElement::fillCache() {
-            ATH_MSG_DEBUG( "Filling cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify()));
-#ifndef NDEBUG
+        ATH_MSG_DEBUG( "Filling cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify()));
+
         const Trk::PlaneSurface* tmpSurface = dynamic_cast<const Trk::PlaneSurface*>(&surface());  //<! filling m_associatedSurface
         const Trk::SurfaceBounds* tmpBounds = nullptr;                         //<! filling m_associatedBounds
         if (barrel())
@@ -960,7 +960,6 @@ namespace MuonGM {
         ATH_MSG_VERBOSE( "global Surface / Bounds pointers " << tmpSurface << " " << tmpBounds );
         ATH_MSG_VERBOSE( "global Normal " << normal() );
 
-#endif
         const Trk::CylinderBounds* tmpCil = nullptr;
         const Trk::SaggedLineSurface* tmpSaggL = nullptr;
         Amg::Vector3D myPoint{Amg::Vector3D::Zero()};
@@ -988,7 +987,6 @@ namespace MuonGM {
                             }
                         },
                         &*cv);
-#ifndef NDEBUG
                     if (found) {
                         ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " transform at origin  "
                             << Amg::toString(myTransform.linear()) );
@@ -996,21 +994,17 @@ namespace MuonGM {
                         ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube bounds pointer  " << tmpCil );
                         ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube surface pointer " << tmpSaggL );
                     }
-#endif
                 } else {
                     // print in order to compute !!!
                     myTransform = transform(tl, tube);                                           //<! filling m_tubeTransf
                     myPoint = center(tl, tube);                                                  //<! filling m_tubeCenter
                     tmpCil = dynamic_cast<const Trk::CylinderBounds*>(&bounds(tl, tube));        //<! filling m_tubeBounds
                     tmpSaggL = dynamic_cast<const Trk::SaggedLineSurface*>(&surface(tl, tube));  //<! filling m_tubeSurfaces
-#ifndef NDEBUG
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " transform at origin  "
-                        << myTransform * Amg::Vector3D::Zero() );
+                                    << Amg::toString(myTransform.translation()) );
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube center          " << myPoint );
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube bounds pointer  " << tmpCil );
                     ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube surface pointer " << tmpSaggL );
-
-#endif
                 }
             }
         }
