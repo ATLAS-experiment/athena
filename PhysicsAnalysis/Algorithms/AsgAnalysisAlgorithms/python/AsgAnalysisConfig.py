@@ -16,9 +16,17 @@ class CommonServicesConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (CommonServicesConfig, self).__init__ ()
-        self.addOption ('runSystematics', None, type=bool)
-        self.addOption ('filterSystematics', None, type=str)
-        self.addOption ('systematicsHistogram', None , type=str)
+        self.addOption ('runSystematics', None, type=bool,
+            info="whether to turn on the computation of systematic variations. "
+            "The default is to run them on MC.")
+        self.addOption ('filterSystematics', None, type=str,
+            info="a regexp string against which the systematics names will be "
+            "matched. Only positive matches are retained and used in the evaluation "
+            "of the various algorithms.")
+        self.addOption ('systematicsHistogram', None , type=str,
+            info="the name (string) of the histogram to which a list of executed "
+            "systematics will be printed. The default is None (don't write out "
+            "the histogram).")
 
     def makeAlgs (self, config) :
 
@@ -52,13 +60,25 @@ class PileupReweightingBlock (ConfigBlock):
 
     def __init__ (self) :
         super (PileupReweightingBlock, self).__init__ ()
-        self.addOption ('campaign', None, type=None)
-        self.addOption ('files', None, type=None)
-        self.addOption ('useDefaultConfig', True, type=bool)
-        self.addOption ('userLumicalcFiles', None, type=None)
-        self.addOption ('userLumicalcFilesPerCampaign', None, type=None)
-        self.addOption ('userPileupConfigs', None, type=None)
-        self.addOption ('userPileupConfigsPerCampaign', None, type=None)
+        self.addOption ('campaign', None, type=None,
+            info="the MC campaign for the PRW auto-configuration.")
+        self.addOption ('files', None, type=None,
+            info="the input files being processed (list of strings). "
+            "Alternative to auto-configuration.")
+        self.addOption ('useDefaultConfig', True, type=bool,
+            info="whether to use the central PRW files. The default is True.")
+        self.addOption ('userLumicalcFiles', None, type=None,
+            info="user-provided lumicalc files (list of strings). Alternative "
+            "to auto-configuration.")
+        self.addOption ('userLumicalcFilesPerCampaign', None, type=None,
+            info="user-provided lumicalc files (dictionary of list of strings, "
+            "with MC campaigns as the keys). Alternative to auto-configuration.")
+        self.addOption ('userPileupConfigs', None, type=None,
+            info="user-provided PRW files (list of strings). Alternative to "
+            "auto-configuration. Alternative to auto-configuration.")
+        self.addOption ('userPileupConfigsPerCampaign', None, type=None,
+            info="user-provided PRW files (dictionary of list of strings, with "
+            "MC campaigns as the keys)")
 
 
     def makeAlgs (self, config) :
@@ -192,9 +212,16 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
     def __init__ (self) :
         super (GeneratorAnalysisBlock, self).__init__ ()
-        self.addOption ('saveCutBookkeepers', True, type=bool)
-        self.addOption ('runNumber', None, type=int)
-        self.addOption ('cutBookkeepersSystematics', None, type=bool)
+        self.addOption ('saveCutBookkeepers', True, type=bool,
+            info="whether to save the cut bookkeepers information into the "
+            "output file. The default is True.")
+        self.addOption ('runNumber', None, type=int,
+            info="the MC runNumber (int). The default is None (autoconfigure "
+            "from metadata).")
+        self.addOption ('cutBookkeepersSystematics', None, type=bool,
+            info="whether to also save the cut bookkeepers systematics. The "
+            "default is None (follows the global systematics flag). Set to "
+            "False or True to override.")
 
     def makeAlgs (self, config) :
 
@@ -228,15 +255,31 @@ class GeneratorAnalysisBlock (ConfigBlock):
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (PtEtaSelectionBlock, self).__init__ ()
-        self.containerName = containerName
-        self.selectionName = selectionName
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('minPt', None, type=float)
-        self.addOption ('maxEta', None, type=float)
-        self.addOption ('selectionDecoration', 'selectPtEta', type=str)
-        self.addOption ('useClusterEta', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="the name of the selection to append this to. The default is "
+            "'' (empty string), meaning that the cuts are applied to every "
+            "object within the container. Specifying a name (e.g. loose) "
+            "applies the cut only to those object who also pass that selection.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here since we tend apply a single set of "
+            "pT and eta cuts to a given type of object.")
+        self.addOption ('minPt', None, type=float,
+            info="minimum pT value to cut on, in MeV. No default value.")
+        self.addOption ('maxEta', None, type=float,
+            info="maximum |eta| value to cut on. No default value.")
+        self.addOption ('selectionDecoration', 'selectPtEta', type=str,
+            info="the name of the decoration to set.")
+        self.addOption ('useClusterEta', False, type=bool,
+            info="whether to use the cluster eta (etaBE(2)) instead of the object "
+            "eta (for electrons and photons). The default is False.")
+
 
     def makeAlgs (self, config) :
 
@@ -261,11 +304,21 @@ class PtEtaSelectionBlock (ConfigBlock):
 class ObjectCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an object cutflow"""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (ObjectCutFlowBlock, self).__init__ ()
-        self.containerName = containerName
-        self.selectionName = selectionName
-        self.addOption ('postfix', '', type=str)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="the name of the selection to perform the cutflow for. The "
+            "default is '' (empty string), meaning that the cutflow is "
+            "performed for every object within the container. Specifying a "
+            "name (e.g. loose) generates the cutflow only for those object "
+            "that also pass that selection.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here.")
 
     def makeAlgs (self, config) :
 
@@ -283,12 +336,23 @@ class ObjectCutFlowBlock (ConfigBlock):
 class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (EventCutFlowBlock, self).__init__ ()
-        self.containerName = containerName
-        self.selectionName = selectionName
-        self.addOption ('customSelections', [], type=None)
-        self.addOption ('postfix', '', type=str)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container, typically EventInfo.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="the name of an optional selection decoration to use.")
+        self.addOption ('customSelections', [], type=None,
+            info="the selections for which to generate cutflow histograms. If "
+            "a single string, corresponding to a particular event selection, "
+            "the event cutflow for that selection will be looked up. If a list "
+            "of strings, will use explicitly those selections. If left blank, "
+            "all selections attached to the container will be looked up.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply in the naming of cutflow histograms. Set "
+            "it when defining multiple cutflows.")
 
     def makeAlgs (self, config) :
 
@@ -317,16 +381,32 @@ class EventCutFlowBlock (ConfigBlock):
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
-    def __init__ (self, containerName, configName) :
+    def __init__ (self, containerName='', configName='') :
+        # configName is not used. To be removed.
         super (OutputThinningBlock, self).__init__ ()
-        self.containerName = containerName
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('selection', '', type=str)
-        self.addOption ('selectionName', '', type=str)
-        self.addOption ('outputName', None, type=str)
-        self.addOption ('deepCopy', False, type=bool)
-        self.addOption ('sortPt', False, type=bool, info="whether to sort objects in pt")
-        self.addOption ('noUniformSelection', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here.")
+        self.addOption ('selection', '', type=str,
+            info="the name of an optional selection decoration to use.")
+        self.addOption ('selectionName', '', type=str,
+            info="the name of the selection to append this to. The default is "
+            "'' (empty string), meaning that the cuts are applied to every "
+            "object within the container. Specifying a name (e.g. loose) "
+            "applies the cut only to those object who also pass that selection.")
+        self.addOption ('outputName', None, type=str,
+            info="an optional name for the output container.")
+        # TODO: add info string
+        self.addOption ('deepCopy', False, type=bool,
+            info="")
+        self.addOption ('sortPt', False, type=bool,
+            info="whether to sort objects in pt")
+        # TODO: add info string
+        self.addOption ('noUniformSelection', False, type=bool,
+            info="")
 
     def makeAlgs (self, config) :
 
@@ -369,9 +449,15 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 
     def __init__ (self, containerName='') :
         super (IFFLeptonDecorationBlock, self).__init__()
-        self.containerName = containerName
-        self.addOption ('separateChargeFlipElectrons', True, type=bool)
-        self.addOption ('decoration', 'IFFClass_%SYS%', type=str)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input electron or muon container.")
+        self.addOption ('separateChargeFlipElectrons', True, type=bool,
+            info="whether to consider charged-flip electrons as a separate class. "
+            "The default is True (recommended).")
+        self.addOption ('decoration', 'IFFClass_%SYS%', type=str,
+            info="the name (str) of the decoration set by the IFF "
+            "TruthClassificationTool. The default is 'IFFClass_%SYS%'.")
 
     def makeAlgs (self, config) :
         # the classification is only for MC
@@ -394,12 +480,19 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
-    def __init__ (self, algoName):
+    def __init__ (self, algoName=''):
         super(PerEventSFBlock, self).__init__()
-        self.algoName = algoName
-        self.addOption('particles', '', type=str)
-        self.addOption('objectSF', '', type=str)
-        self.addOption('eventSF', '', type=str)
+        self.addOption('algoName', algoName, type=str,
+            noneAction='error',
+            info="unique name given to the underlying algorithm computing the "
+            "per-event scale factors")
+        self.addOption('particles', '', type=str,
+            info="the input object container, with a possible selection, in the "
+            "format container or container.selection.")
+        self.addOption('objectSF', '', type=str,
+            info="the name of the per-object SF decoration to be used.")
+        self.addOption('eventSF', '', type=str,
+            info="the name of the per-event SF decoration.")
 
     def makeAlgs(self, config):
         if config.dataType() is DataType.Data:
@@ -418,9 +511,12 @@ class PerEventSFBlock (ConfigBlock):
 class SelectionDecorationBlock (ConfigBlock):
     """the ConfigBlock to add selection decoration to a container"""
 
-    def __init__ (self, containers) :
+    def __init__ (self, containers='') :
         super (SelectionDecorationBlock, self).__init__ ()
-        self.containers = containers
+        # TODO: add info string
+        self.addOption('containers', containers, type=str,
+            noneAction='error',
+            info="")
 
     def makeAlgs(self, config):
         for container in self.containers:

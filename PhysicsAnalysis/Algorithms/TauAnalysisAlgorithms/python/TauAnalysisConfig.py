@@ -8,12 +8,22 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 class TauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
 
-    def __init__ (self, containerName) :
+    def __init__ (self, containerName='') :
         super (TauCalibrationConfig, self).__init__ ()
         self.containerName = containerName
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('rerunTruthMatching', True, type=bool)
-        self.addOption ('decorateTruth', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here since the calibration is common to "
+            "all taus.")
+        self.addOption ('rerunTruthMatching', True, type=bool,
+            info="whether to rerun truth matching (sets up an instance of "
+            "CP::TauTruthMatchingAlg). The default is True.")
+        # TODO: add info string
+        self.addOption ('decorateTruth', False, type=bool,
+            info="")
 
 
     def makeAlgs (self, config) :
@@ -76,14 +86,28 @@ class TauWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (16 Mar 22)."""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (TauWorkingPointConfig, self).__init__ ()
-        self.containerName = containerName
-        self.selectionName = selectionName
-        self.addOption ('postfix', None, type=str)
-        self.addOption ('quality', None, type=str)
-        self.addOption ('legacyRecommendations', False, type=bool)
-        self.addOption ('noEffSF', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="the name of the tau-jet selection to define (e.g. tight or "
+            "loose).")
+        self.addOption ('postfix', None, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as selectionName is used internally.")
+        self.addOption ('quality', None, type=str,
+            info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
+            "Loose, VeryLoose, NoID.")
+        self.addOption ('legacyRecommendations', False, type=bool,
+            info="whether to use legacy tau-jet BDT and electron veto "
+            "recommendations. The default is False.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available. The default is False.")
 
     def createCommonSelectionTool (self, config, tauSelectionAlg, configPath, postfix) :
 

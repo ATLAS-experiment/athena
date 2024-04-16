@@ -10,22 +10,54 @@ from Campaigns.Utils import Campaign
 class TriggerAnalysisBlock (ConfigBlock):
     """the ConfigBlock for trigger analysis"""
 
-    def __init__ (self, configName) :
+    # configName is not used
+    def __init__ (self, configName='') :
         super (TriggerAnalysisBlock, self).__init__ ()
-        self.addOption ('triggerChainsPerYear', {}, type=None)
-        self.addOption ('triggerChainsForSelection', [], type=None)
-        self.addOption ('prescaleLumiCalcFiles', [], type=None)
-        self.addOption ('noFilter', False, type=bool)
-        self.addOption ('noL1', False, type=bool)
-        self.addOption ('electronID', '', type=str)
-        self.addOption ('electronIsol', '', type=str)
-        self.addOption ('photonIsol', '', type=str)
-        self.addOption ('muonID', '', type=str)
-        self.addOption ('electrons', '', type=str)
-        self.addOption ('muons', '', type=str)
-        self.addOption ('photons', '', type=str)
-        self.addOption ('noEffSF', False, type=bool)
-        self.addOption ('noGlobalTriggerEff', False, type=bool)
+        self.addOption ('triggerChainsPerYear', {}, type=None,
+            info="a dictionary with key (string) the year and value (list of "
+            "strings) the trigger chains. You can also use || within a string "
+            "to enforce an OR of triggers without looking up the individual "
+            "triggers. Used for both trigger selection and SFs. "
+            "The default is {} (empty dictionary).")
+        self.addOption ('triggerChainsForSelection', [], type=None,
+            info="a list of trigger chains (list of strings) to be used for "
+            "trigger selection. Only set it if you need a different setup "
+            "than for trigger SFs. The default is [] (empty list).")
+        self.addOption ('prescaleLumiCalcFiles', [], type=None,
+            info="a list of lumical files (list of strings) to calculate "
+            "trigger prescales. The default is [] (empty list).")
+        self.addOption ('noFilter', False, type=bool,
+            info="do not apply an event filter. The default is False, i.e. "
+            "remove events not passing trigger selection and matching.")
+        # TODO: add info string
+        self.addOption ('noL1', False, type=bool,
+            info="")
+        self.addOption ('electronID', '', type=str,
+            info="the electron ID WP (string) to use.")
+        self.addOption ('electronIsol', '', type=str,
+            info="the electron isolation WP (string) to use.")
+        self.addOption ('photonIsol', '', type=str,
+            info="the photon isolation WP (string) to use.")
+        self.addOption ('muonID', '', type=str,
+            info="the muon quality WP (string) to use.")
+        self.addOption ('electrons', '', type=str,
+            info="the input electron container, with a possible selection, in "
+            "the format container or container.selection.")
+        self.addOption ('muons', '', type=str,
+            info="the input muon container, with a possible selection, in the "
+            "format container or container.selection.")
+        self.addOption ('photons', '', type=str,
+            info="the input photon container, with a possible selection, in "
+            "the format container or container.selection.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available. Still performs the global trigger "
+            "matching (same behaviour as on data). The default is False.")
+        self.addOption ('noGlobalTriggerEff', False, type=bool,
+            info="disables the global trigger efficiency tool (including "
+            "matching), which is only suited for electron/muon/photon "
+            "trigger legs. The default is False.")
 
     def makeTriggerDecisionTool(self, config):
 

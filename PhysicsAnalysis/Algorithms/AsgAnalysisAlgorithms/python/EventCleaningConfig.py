@@ -10,14 +10,24 @@ class EventCleaningBlock (ConfigBlock):
 
     def __init__ (self) :
         super (EventCleaningBlock, self).__init__ ()
-        self.addOption ('runPrimaryVertexSelection', True, type=bool)
-        self.addOption ('runEventCleaning', False, type=bool)
-        self.addOption ('userGRLFiles', [], type=None)
-        self.addOption ('minTracksPerVertex', 2, type=int)
-        self.addOption ('selectionFlags', ['DFCommonJets_eventClean_LooseBad'], type=None)
+        self.addOption ('runPrimaryVertexSelection', True, type=bool,
+            info="whether to run primary vertex selection. The default is True.")
+        self.addOption ('runEventCleaning', False, type=bool,
+            info="whether to run event cleaning (sets up an instance of "
+            "CP::EventFlagSelectionAlg). The default is False.")
+        self.addOption ('userGRLFiles', [], type=None,
+            info="a list of GRL files (list of strings) to select data from. "
+            "The default is [] (empty list).")
+        self.addOption ('minTracksPerVertex', 2, type=int,
+            info="minimum number (integer) of tracks per vertex. The default is 2.")
+        self.addOption ('selectionFlags', ['DFCommonJets_eventClean_LooseBad'], type=None,
+            info="lags (list of strings) to use for jet cleaning. The default is "
+            "['DFCommonJets_eventClean_LooseBad'].")
         # This is a vector<bool>, so parsing True/False is not handled
         # in AnalysisBase, but we can evade this with numerical values
-        self.addOption ('invertFlags', [0], type=None)
+        self.addOption ('invertFlags', [0], type=None,
+            info="list of booleans determining whether to invert the cut of the "
+            "above selectionFlags. The default is [0].")
 
     def getDefaultGRLs (self, data_year) :
         """ returns a reasonable set of GRLs that should be suited for most analyses """

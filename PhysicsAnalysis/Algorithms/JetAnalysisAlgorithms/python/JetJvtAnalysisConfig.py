@@ -9,12 +9,18 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 class JetJvtAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the JVT sequence"""
 
-    def __init__ (self, containerName) :
+    def __init__ (self, containerName='') :
         super (JetJvtAnalysisConfig, self).__init__ ()
+        self.setBlockName('JVT')
         self.addDependency('OverlapRemoval', required=False)
-        self.containerName = containerName
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('enableFJvt', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Typically "
+            "not needed here.")
+        self.addOption ('enableFJvt', False, type=bool,
+            info="whether to enable forward JVT calculations. The default is False.")
 
 
     def makeAlgs (self, config) :
