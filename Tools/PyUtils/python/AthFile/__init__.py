@@ -20,7 +20,6 @@ __pseudo_all__ = [
 import functools
 import PyUtils.Decorators as _decos
 from . import impl as _impl
-from . import tests as _tests
 AthFile = _impl.AthFile
 
 def _update_cache(fct):
@@ -50,7 +49,6 @@ class ModuleFacade(types.ModuleType):
         self.__dict__[ '__name__' ] = module.__name__
         self.__dict__[ '__file__' ] = module.__file__
 
-        self.__dict__['_tests'] = _tests
         self.__dict__['_impl']  = _impl
         self.__dict__['_guess_file_type'] = _guess_file_type
 
@@ -105,10 +103,6 @@ class ModuleFacade(types.ModuleType):
     @_decos.forking
     def exists(self, fname):
         return self.server.exists(fname)
-
-    @property
-    def tests(self):
-        return self._tests
 
     @_update_cache  # also decorate with _update_cache to pick-up the changes 
     @_decos.forking # from the forked athfile server...
