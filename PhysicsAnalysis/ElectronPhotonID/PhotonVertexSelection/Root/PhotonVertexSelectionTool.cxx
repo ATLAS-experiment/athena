@@ -124,7 +124,7 @@ namespace CP {
       // Set input variables for MVA
 
       if (not sumPt.isAvailable(*vertex)) {
-	sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
+        sumPt(*vertex) = xAOD::PVHelpers::getVertexSumPt(vertex, 1, false);
       }
 
       if (not sumPt2.isAvailable(*vertex)) {
