@@ -28,7 +28,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     m_d0BsRange = 0.05
      
     # Set a folder name from the user options
-    folderName = "ExtendedTracks_NoTriggerSelection"
+    folderName = "ExtendedTracks"
     if "TrackName" in kwargs:
         folderName = kwargs["TrackName"]
     
