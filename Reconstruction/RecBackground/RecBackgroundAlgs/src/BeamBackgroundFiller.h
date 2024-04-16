@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RECBACKGROUNDALGS_BEAMBACKGROUNDFILLER
@@ -19,6 +19,8 @@
 #include "TrkSegment/SegmentCollection.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODJet/JetContainer.h"
+#include "GaudiKernel/SystemOfUnits.h"
+#include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
 
 /**
  * @brief Implementation of the Beam Background Identification Method
@@ -42,30 +44,30 @@ class BeamBackgroundFiller : public AthReentrantAlgorithm {
 
  private:
   struct Cache {
-    int m_numSegment = 0;  // number of segments with the direction parallel to
+    int m_numSegment{0};  // number of segments with the direction parallel to
                            // the beam pipe
-    int m_numSegmentEarly = 0;     // number of early segments
-    int m_numSegmentACNoTime = 0;  // number of matched pairs of segments on
+    int m_numSegmentEarly{0};     // number of early segments
+    int m_numSegmentACNoTime{0};  // number of matched pairs of segments on
                                    // side A and side C
-    int m_numSegmentAC = 0;        // number of matched pairs of segments with
+    int m_numSegmentAC{0};        // number of matched pairs of segments with
                                    // corresponding time difference
-    int m_numMatched = 0;      // number of clusters matched with the segments
-    int m_numNoTimeLoose = 0;  // number of clusters identified by the "No-Time
+    int m_numMatched{0};      // number of clusters matched with the segments
+    int m_numNoTimeLoose{0};  // number of clusters identified by the "No-Time
                                // Method"
-    int m_numNoTimeMedium = 0;
-    int m_numNoTimeTight = 0;
-    int m_numOneSidedLoose = 0;  // number of clusters identified by the
+    int m_numNoTimeMedium{0};
+    int m_numNoTimeTight{0};
+    int m_numOneSidedLoose{0};  // number of clusters identified by the
                                  // "One-Sided Method"
-    int m_numOneSidedMedium = 0;
-    int m_numOneSidedTight = 0;
-    int m_numTwoSidedNoTime = 0;  // number of clusters identified by the
+    int m_numOneSidedMedium{0};
+    int m_numOneSidedTight{0};
+    int m_numTwoSidedNoTime{0};  // number of clusters identified by the
                                   // "Two-Sided No-Time Method"
-    int m_numTwoSided = 0;  // number of clusters identified by the "Two-Sided
+    int m_numTwoSided{0};  // number of clusters identified by the "Two-Sided
                             // Method"
-    int m_numClusterShape = 0;  // number of clusters identified by the
+    int m_numClusterShape{0};  // number of clusters identified by the
                                 // "Cluster-Shape Method"
-    int m_numJet = 0;           // number of fake jets
-    int m_direction = 0;  // direction of beam halo from the "Two-Sided Method"
+    int m_numJet{0};           // number of fake jets
+    int m_direction{0};  // direction of beam halo from the "Two-Sided Method"
                           // (positive for A->C, negative for C->A)
     // link to the calorimeter cluster
     ElementLinkVector<xAOD::CaloClusterContainer> m_indexClus{};
@@ -95,7 +97,7 @@ class BeamBackgroundFiller : public AthReentrantAlgorithm {
 
   // Function calculating time for mboy CSC segments
   // (needed until release 17.1.0, does not work on AOD)
-  double GetSegmentTime(const Muon::MuonSegment* pMuonSegment) const;
+  double GetSegmentTime(const Muon::MuonSegment& pMuonSegment) const;
 
   // Function to identify fake jets
   void FindFakeJets(const EventContext& ctx, Cache& cache) const;
@@ -105,14 +107,9 @@ class BeamBackgroundFiller : public AthReentrantAlgorithm {
       Cache& cache) const;
 
   /** ReadHandleKey for Trk::SegmentCollection from CSC */
-  SG::ReadHandleKey<Trk::SegmentCollection> m_cscSegmentContainerReadHandleKey{
-      this, "cscSegmentContainerKey", "NCB_TrackMuonSegments",
-      "ReadHandleKey for Trk::SegmentCollection from CSC"};
-
-  /** ReadHandleKey for Trk::SegmentCollection from MDT */
-  SG::ReadHandleKey<Trk::SegmentCollection> m_mdtSegmentContainerReadHandleKey{
-      this, "mdtSegmentContainerKey", "TrackMuonSegments",
-      "ReadHandleKey for Trk::SegmentCollection from MDT"};
+  SG::ReadHandleKeyArray<Trk::SegmentCollection> m_segmentKeys{
+      this, "SegmentKeys", {"NCB_TrackMuonSegments", /*"TrackMuonSegments" */}  ,
+      "Muon segment collections from the MS patterns"};
 
   /** ReadHandleKey for CaloClusterContainer */
   SG::ReadHandleKey<xAOD::CaloClusterContainer>
@@ -129,25 +126,32 @@ class BeamBackgroundFiller : public AthReentrantAlgorithm {
   SG::WriteHandleKey<BeamBackgroundData> m_beamBackgroundDataWriteHandleKey{
       this, "BeamBackgroundKey", "BeamBackgroundData",
       "WriteHandleKey for BeamBackgroundData"};
+  
+  ToolHandle<Muon::IMuonSegmentSelectionTool> m_segmentSelector{this, "SegmentSelector",""};
 
-  // switch to turn on/off the time reconstruction for CSC segments
-  bool m_doMuonBoyCSCTiming;
+  
+  /// Inclanation cut between the segment position and its direction
+  Gaudi::Property<double> m_thetaCutNCB{this, "cutThetaNCB", 5. * Gaudi::Units::deg};
 
-  // cuts used in the Beam Background Identification Method
-  double m_cutThetaCsc;
-  double m_cutThetaMdtI;
-  double m_cutPhiSeg;
-  double m_cutPhiCsc;
-  double m_cutPhiMdtI;
-  double m_cutRadiusCsc;
-  double m_cutRadiusMdtI;
-  double m_cutEnergy;
-  double m_cutRadiusLow;
-  double m_cutRadiusHigh;
-  double m_cutMuonTime;
-  double m_cutClusTime;
-  double m_cutTimeDiffAC;
-  double m_cutDrdz;
+  Gaudi::Property<double> m_cutDphiSegAC{this,"cutPhi", 4.* Gaudi::Units::deg};
+
+  /// Minimum cut on the cluster energy to be considered
+  Gaudi::Property<double> m_clusEnergyCut{this,"clustEnergy", 10. *Gaudi::Units::GeV};
+  // CSC :  881 < R < 2081
+  // LAr barrel :  1500 < R < 1970
+  // TileCal :  2280 < R < 4250
+  Gaudi::Property<double> m_clusRadiusLow{this, "cutRadiusLow", 881. * Gaudi::Units::mm};
+  Gaudi::Property<double> m_clusRadiusHigh{this,"cutRadiusHigh", 4250. * Gaudi::Units::mm};
+
+  Gaudi::Property<double> m_cutDphiClusSeg{this, "cutDphiClusSeg", 4.* Gaudi::Units::deg};
+  Gaudi::Property<double> m_cutDradClusSeg{this,"cutDrClusSet", 40. * Gaudi::Units::cm};
+
+
+
+  Gaudi::Property<double> m_cutMuonTime{this, "cutMuonTime", 25.};
+  Gaudi::Property<double> m_cutClusTime{this,"cutClusTime", 2.5};
+  Gaudi::Property<double> m_cutTimeDiffAC{this,"cutTimeDiffAC", 25.};
+  Gaudi::Property<double> m_cutDrdz{this,"cutDrdz", 0.15};
   ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{
       this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",
       "Handle to the service providing the IMuonEDMHelperSvc interface"};
