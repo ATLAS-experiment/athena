@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -27,51 +27,54 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
         data_types += ["JiveXML::SegmentRetriever/SegmentRetriever"]
         data_types += ["JiveXML::TrackRetriever/TrackRetriever"]
 
-    if flags.Detector.EnablePixel:
+    if flags.Detector.EnablePixel and flags.Detector.GeometryPixel:
         data_types += ["JiveXML::PixelClusterRetriever/PixelClusterRetriever"]
         if haveRDO:
             data_types += ["JiveXML::PixelRDORetriever/PixelRDORetriever"]
-    if flags.Detector.EnableTRT:
+    if flags.Detector.EnableTRT and flags.Detector.GeometryTRT:
         data_types += ["JiveXML::TRTRetriever/TRTRetriever"]
-    if haveRDO and flags.Detector.EnableSCT:
+    if haveRDO and flags.Detector.EnableSCT and flags.Detector.GeometrySCT:
         data_types += ["JiveXML::SCTRDORetriever/SCTRDORetriever"]
 
-    # TODO this datatype is not yet understood by Atlantis
-    data_types += ["JiveXML::BeamSpotRetriever/BeamSpotRetriever"]
+    if not flags.OnlineEventDisplays.OfflineTest:
+        # TODO this datatype is not yet understood by Atlantis
+        data_types += ["JiveXML::BeamSpotRetriever/BeamSpotRetriever"]
 
     # Truth (from TruthJiveXML_DataTypes.py)
     if not readAOD:
         data_types += ["JiveXML::TruthTrackRetriever/TruthTrackRetriever"]
     data_types += ["JiveXML::TruthMuonTrackRetriever/TruthMuonTrackRetriever"]
 
-    if flags.Detector.EnableCalo:
+    if flags.Detector.EnableCalo and flags.Detector.GeometryCalo:
         # Taken from CaloJiveXML_DataTypes.py
         # TODO find correct flag and check the LArDigitRetriever is doing what we want it to do
         #if doLArDigits:
             #data_types += ["JiveXML::LArDigitRetriever/LArDigitRetriever"]
         #else:
-        data_types += ["JiveXML::CaloFCalRetriever/CaloFCalRetriever"]
-        data_types += ["JiveXML::CaloLArRetriever/CaloLArRetriever"]
-        data_types += ["JiveXML::CaloHECRetriever/CaloHECRetriever"]
+        if flags.Detector.EnableLAr and flags.Detector.GeometryLAr:
+            data_types += ["JiveXML::CaloFCalRetriever/CaloFCalRetriever"]
+            data_types += ["JiveXML::CaloHECRetriever/CaloHECRetriever"]
+            data_types += ["JiveXML::CaloLArRetriever/CaloLArRetriever"]
         #end of else
-        data_types += ["JiveXML::CaloMBTSRetriever/CaloMBTSRetriever"]
-        data_types += ["JiveXML::CaloTileRetriever/CaloTileRetriever"]
+        if flags.Detector.EnableMBTS and flags.Detector.GeometryMBTS:
+            data_types += ["JiveXML::CaloMBTSRetriever/CaloMBTSRetriever"]
+        if flags.Detector.EnableTile and flags.Detector.GeometryTile:
+            data_types += ["JiveXML::CaloTileRetriever/CaloTileRetriever"]
         data_types += ["JiveXML::CaloClusterRetriever/CaloClusterRetriever"]
 
-    if flags.Detector.EnableMuon:
+    if flags.Detector.EnableMuon and flags.Detector.GeometryMuon:
         # Taken from MuonJiveXML_DataTypes.py
-        if flags.Detector.EnableMDT:
+        if flags.Detector.EnableMDT and flags.Detector.GeometryMDT:
             data_types += ["JiveXML::MdtPrepDataRetriever/MdtPrepDataRetriever"]
-        if flags.Detector.EnableTGC:
+        if flags.Detector.EnableTGC and flags.Detector.GeometryTGC:
             data_types += ["JiveXML::TgcPrepDataRetriever/TgcPrepDataRetriever"]
-        if flags.Detector.EnableRPC:
+            data_types += ["JiveXML::sTgcPrepDataRetriever/sTgcPrepDataRetriever"]
+        if flags.Detector.EnableRPC and flags.Detector.GeometryRPC:
             data_types += ["JiveXML::RpcPrepDataRetriever/RpcPrepDataRetriever"]
-        if flags.Detector.EnableCSC:
+        if flags.Detector.EnableCSC and flags.Detector.GeometryCSC:
             data_types += ["JiveXML::CSCClusterRetriever/CSCClusterRetriever"]
             data_types += ["JiveXML::CscPrepDataRetriever/CscPrepDataRetriever"]
-        if flags.Detector.EnablesTGC:
-            data_types += ["JiveXML::sTgcPrepDataRetriever/sTgcPrepDataRetriever"]
-        if flags.Detector.EnableMM:
+        if flags.Detector.EnableMM and flags.Detector.GeometryMM:
             data_types += ["JiveXML::MMPrepDataRetriever/MMPrepDataRetriever"]
         # TODO Not sure if below are still needed?
         # data_types += ["JiveXML::TrigMuonROIRetriever/TrigMuonROIRetriever"]
@@ -105,19 +108,19 @@ def InDetRetrieversCfg(flags):
     result = ComponentAccumulator()
     # Do we need to add equivalent of InDetFlags.doSlimming=False (in JiveXML_RecEx_config.py)? If so, why?
     # Following is based on InDetJiveXML_DataTypes.py and TrkJiveXML_DataTypes.py
-    if flags.Detector.EnablePixel:
+    if flags.Detector.EnablePixel and flags.Detector.GeometryPixel:
         result.merge(PixelClusterRetrieverCfg(flags))
 
-    if flags.Detector.EnableID:
-        if flags.Detector.GeometryPixel and flags.Detector.GeometrySCT:
+    if flags.Detector.EnableID and flags.Detector.GeometryID and flags.Detector.EnablePixel and flags.Detector.GeometryPixel and flags.Detector.EnableSCT and flags.Detector.GeometrySCT:
             result.merge(SiClusterRetrieverCfg(flags))
             result.merge(SiSpacePointRetrieverCfg(flags))
-        result.merge(TrackRetrieverCfg(flags))
+            result.merge(TrackRetrieverCfg(flags))
 
-    if flags.Detector.EnableTRT:
+    if flags.Detector.EnableTRT and flags.Detector.GeometryTRT:
         result.merge(TRTRetrieverCfg(flags))
 
-    result.merge(BeamSpotRetrieverCfg(flags))
+    if not flags.OnlineEventDisplays.OfflineTest:
+        result.merge(BeamSpotRetrieverCfg(flags))
 
     return result
 
@@ -256,7 +259,7 @@ def CaloRetrieversCfg(flags, **kwargs):
                 DoFCalDigit=False,
             )
         )
- 
+
     else:
         result.addPublicTool(
             CompFactory.JiveXML.CaloFCalRetriever(
@@ -288,7 +291,7 @@ def CaloRetrieversCfg(flags, **kwargs):
         CompFactory.JiveXML.CaloClusterRetriever(name = "CaloClusterRetriever",**kwargs
         )
     )
-    
+
     result.addPublicTool(
         CompFactory.JiveXML.CaloTileRetriever(
             name = "CaloTileRetriever",
@@ -316,20 +319,19 @@ def MuonRetrieversCfg(flags, **kwargs):
     result = ComponentAccumulator()
     #kwargs.setdefault("StoreGateKey", "MDT_DriftCircles")
 
-    if flags.Detector.EnableMuon:
+    if flags.Detector.EnableMuon and flags.Detector.GeometryMuon:
         # Taken from MuonJiveXML_DataTypes.py
-        if flags.Detector.EnableMDT:
+        if flags.Detector.EnableMDT and flags.Detector.GeometryMDT:
             result.addPublicTool(CompFactory.JiveXML.MdtPrepDataRetriever(name="MdtPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableTGC:
+        if flags.Detector.EnableTGC and flags.Detector.GeometryTGC:
             result.addPublicTool(CompFactory.JiveXML.TgcPrepDataRetriever(name="TgcPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableRPC:
+            result.addPublicTool(CompFactory.JiveXML.sTgcPrepDataRetriever(name="sTgcPrepDataRetriever"), **kwargs)
+        if flags.Detector.EnableRPC and flags.Detector.GeometryRPC:
             result.addPublicTool(CompFactory.JiveXML.RpcPrepDataRetriever(name="RpcPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableCSC:
+        if flags.Detector.EnableCSC and flags.Detector.GeometryCSC:
             result.addPublicTool(CompFactory.JiveXML.CSCClusterRetriever(name="CSCClusterRetriever"), **kwargs)
             result.addPublicTool(CompFactory.JiveXML.CscPrepDataRetriever(name="CscPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnablesTGC:
-            result.addPublicTool(CompFactory.JiveXML.sTgcPrepDataRetriever(name="sTgcPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableMM:
+        if flags.Detector.EnableMM and flags.Detector.GeometryMM:
             result.addPublicTool(CompFactory.JiveXML.MMPrepDataRetriever(name="MMPrepDataRetriever"), **kwargs)
         # TODO Not sure if below are still needed?
         # data_types += ["JiveXML::TrigMuonROIRetriever/TrigMuonROIRetriever"]
@@ -431,7 +433,7 @@ def TriggerRetrieversCfg(flags):
         #--- TriggerInfo (Etmiss, etc)
         result.addPublicTool(
             CompFactory.JiveXML.TriggerInfoRetriever(
-                name="TriggerInfoRetriever" 
+                name="TriggerInfoRetriever"
             )
         )
 
@@ -461,7 +463,7 @@ def TriggerRetrieversCfg(flags):
         )
     return result
 
-def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
+def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
     # This is based on a few old-style configuation files:
     # JiveXML_RecEx_config.py
     # JiveXML_jobOptionBase.py
@@ -484,13 +486,13 @@ def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
         result.merge(TruthTrackRetrieverCfg(flags))
 
     if haveRDO or readESD:
-        if flags.Detector.EnableID:
+        if flags.Detector.EnableID and flags.Detector.GeometryID:
             result.merge(InDetRetrieversCfg(flags))
 
-        if flags.Detector.EnableCalo:
+        if flags.Detector.EnableCalo and flags.Detector.GeometryCalo:
             result.merge(CaloRetrieversCfg(flags))
 
-        if flags.Detector.EnableMuon:
+        if flags.Detector.EnableMuon and flags.Detector.GeometryMuon:
             result.merge(MuonRetrieversCfg(flags))
 
     result.merge(xAODRetrieversCfg(flags))

@@ -8,7 +8,7 @@ def VP1AlgsEventProdCfg(flags, StreamESD, **kwargs):
     acc = ComponentAccumulator()
 
     if "OnlineEventDisplaysSvc" not in kwargs:
-        from EventDisplaysOnline.EventDisplaysOnlineConfig import OnlineEventDisplaysSvcCfg
+        from EventDisplaysOnline.OnlineEventDisplaysSvcConfig import OnlineEventDisplaysSvcCfg
         acc.merge(OnlineEventDisplaysSvcCfg(flags))
         kwargs.setdefault("OnlineEventDisplaysSvc", acc.getService("OnlineEventDisplaysSvc"))
 

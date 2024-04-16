@@ -12,9 +12,9 @@ def OnlineEventDisplaysSvcCfg(flags, name = "OnlineEventDisplaysSvc", **kwargs):
     kwargs.setdefault("ProjectTag", flags.OnlineEventDisplays.ProjectTag)
     kwargs.setdefault("StreamsWanted", flags.OnlineEventDisplays.TriggerStreams)
     kwargs.setdefault("BeamSplash", flags.OnlineEventDisplays.BeamSplashMode)
-
+    kwargs.setdefault("CheckPair", False)
     onlineEventDisplaysSvc = CompFactory.OnlineEventDisplaysSvc(name, **kwargs)
-  
+
     acc.addService(onlineEventDisplaysSvc, create=True)
 
     return acc

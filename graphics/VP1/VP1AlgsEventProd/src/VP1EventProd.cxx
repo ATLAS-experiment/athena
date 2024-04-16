@@ -106,15 +106,15 @@ StatusCode VP1EventProd::finalize()
     ATH_MSG_DEBUG("VP1 alg event number: " << m_eventNumber);
     try {
 
-	/* clean the output directory if m_maxProducedFiles == 0
-	 * or keep up to 'm_maxProducedFiles' output files
-	 */
-	VP1FileUtilities fileUtil(".", m_maxProducedFiles, m_destinationDir, m_createDestinationDir, m_removeTempInputFiles); // inputDir, fileLimit, outputDir, forceMakeOutputDir, removeInputFile
+        /* clean the output directory if m_maxProducedFiles == 0
+         * or keep up to 'm_maxProducedFiles' output files
+         */
+        VP1FileUtilities fileUtil(".", m_maxProducedFiles, m_destinationDir, m_createDestinationDir, m_removeTempInputFiles); // inputDir, fileLimit, outputDir, forceMakeOutputDir, removeInputFile
 
-	if (m_outputFileType != "")
-	    fileUtil.produceNewFile(inputFileName, m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp+"."+m_outputFileType); // with UNIX and human-readable timestamp
-	else
-	    fileUtil.produceNewFile(inputFileName, m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp); // with UNIX timestamp
+        if (m_outputFileType != "")
+            fileUtil.produceNewFile(inputFileName, m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp+"."+m_outputFileType); // with UNIX and human-readable timestamp
+        else
+            fileUtil.produceNewFile(inputFileName, m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp); // with UNIX timestamp
     }
     catch(std::runtime_error& err) {
       ATH_MSG_WARNING("Exception caught: " << err.what());
@@ -132,9 +132,9 @@ void VP1EventProd::handle(const Incident& inc)
   ATH_MSG_DEBUG("in handle()... ");
   ATH_MSG_DEBUG("Handling incident '" << inc.type() << "'");
 
-  if(m_isOnline){
+  /*if(m_isOnline){
     m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-  }
+    }*/
 
   ATH_MSG_DEBUG("VP1ALG m_destinationDir " << m_destinationDir);
 
@@ -156,15 +156,15 @@ void VP1EventProd::handle(const Incident& inc)
 
     try {
 
-	/* clean the output directory if m_maxProducedFiles == 0
-	 * or keep up to 'm_maxProducedFiles' output files
-	 */
-	VP1FileUtilities fileUtil(".", m_maxProducedFiles, m_destinationDir, m_createDestinationDir, m_removeTempInputFiles); // inputDir, fileLimit, outputDir, forceMakeOutputDir, removeInputFile
+        /* clean the output directory if m_maxProducedFiles == 0
+         * or keep up to 'm_maxProducedFiles' output files
+         */
+        VP1FileUtilities fileUtil(".", m_maxProducedFiles, m_destinationDir, m_createDestinationDir, m_removeTempInputFiles); // inputDir, fileLimit, outputDir, forceMakeOutputDir, removeInputFile
 
-	if (m_outputFileType != "")
-	    fileUtil.produceNewFile(ostri.str(), m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp+"."+m_outputFileType); // with UNIX and human-readable timestamp
-	else
-	    fileUtil.produceNewFile(ostri.str(), m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp); // with UNIX timestamp
+        if (m_outputFileType != "")
+            fileUtil.produceNewFile(ostri.str(), m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp+"."+m_outputFileType); // with UNIX and human-readable timestamp
+        else
+            fileUtil.produceNewFile(ostri.str(), m_runNumber, m_eventNumber, m_timeStamp, m_humanTimestamp); // with UNIX timestamp
 
     }
     catch(std::runtime_error& err) {
@@ -193,8 +193,8 @@ void VP1EventProd::handle(const Incident& inc)
   m_timeStamp = context.eventID().time_stamp();
 
   ATH_MSG_DEBUG(" Got run number = " << m_runNumber
-	  << ", event number = " << m_eventNumber
-	  << ", UNIX timestamp = " << m_timeStamp);
+          << ", event number = " << m_eventNumber
+          << ", UNIX timestamp = " << m_timeStamp);
 
   time_t t_timestamp = m_timeStamp;
   struct tm ltm;
@@ -202,16 +202,16 @@ void VP1EventProd::handle(const Incident& inc)
 
   // print various components of tm structure.
   ATH_MSG_DEBUG("Year: "<< 1900 + ltm.tm_year
-	  << " - " << "Month: "<< 1 + ltm.tm_mon<< " - "  // tm_mon is in the range [0, 11], so 1 must be added to get real months
-	  << "Day: "<<  ltm.tm_mday
-	  << " - " "Time: "<< ltm.tm_hour << ":" << ltm.tm_min << ":" << ltm.tm_sec << "CEST"
-	 );
+          << " - " << "Month: "<< 1 + ltm.tm_mon<< " - "  // tm_mon is in the range [0, 11], so 1 must be added to get real months
+          << "Day: "<<  ltm.tm_mday
+          << " - " "Time: "<< ltm.tm_hour << ":" << ltm.tm_min << ":" << ltm.tm_sec << "CEST"
+         );
 
   std::ostringstream ostri;
   ostri  << 1900 + ltm.tm_year
-	  << "-" << 1 + ltm.tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
-	  << "-" << ltm.tm_mday
-	  << "T" << ltm.tm_hour << "-" << ltm.tm_min << "-" << ltm.tm_sec << "CEST";
+          << "-" << 1 + ltm.tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
+          << "-" << ltm.tm_mday
+          << "T" << ltm.tm_hour << "-" << ltm.tm_min << "-" << ltm.tm_sec << "CEST";
 
   m_humanTimestamp = ostri.str();
   ATH_MSG_DEBUG("'human readable' timestamp: " << m_humanTimestamp);

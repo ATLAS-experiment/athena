@@ -33,8 +33,8 @@ namespace JiveXML {
   StatusCode StreamToFileTool::initialize(){
     if(m_isOnline){
       if(m_onlineEDsvc.retrieve().isFailure()){
-	ATH_MSG_ERROR("Could not locate the online event displays service");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("Could not locate the online event displays service");
+        return StatusCode::FAILURE;
       }
     }
     return StatusCode::SUCCESS;
@@ -108,11 +108,11 @@ namespace JiveXML {
 
       // create a new output stream
       outputFile = new std::ofstream(filename.c_str());
-
+      ATH_MSG_DEBUG("outputFile "<< filename);
       // check if it worked
       if ( !(outputFile->good()) ){
-	ATH_MSG_WARNING("Unable to create output file with name " << filename);
-	return StatusCode::FAILURE;
+        ATH_MSG_WARNING("Unable to create output file with name " << filename);
+        return StatusCode::FAILURE;
       }
 
       return StatusCode::SUCCESS;

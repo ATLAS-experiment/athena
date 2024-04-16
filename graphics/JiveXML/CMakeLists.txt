@@ -3,7 +3,6 @@
 # Declare the package name:
 atlas_subdir( JiveXML )
 
-
 # External package(s).
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 if( ( "${ATLAS_OS_ID}" STREQUAL "centos9" ) OR ( "${ATLAS_OS_ID}" STREQUAL "el9" ) )
@@ -24,8 +23,8 @@ else()
    PUBLIC_HEADERS JiveXML
    INCLUDE_DIRS ${RPC_INCLUDE_DIRS}
    LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel EventDisplaysOnlineLib
-   PRIVATE_LINK_LIBRARIES xAODEventInfo ) 
-endif() 
+   PRIVATE_LINK_LIBRARIES xAODEventInfo )
+endif()
 
 atlas_add_component( JiveXML
                      src/components/*.cxx

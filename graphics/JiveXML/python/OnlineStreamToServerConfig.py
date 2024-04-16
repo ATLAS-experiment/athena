@@ -12,7 +12,7 @@ def OnlineStreamToServerCfg(flags, name='OnlineStreamToFileTool', **kwargs):
         kwargs.setdefault("ExternalONCRPCServerSvc", acc.getService("ExternalONCRPCServerSvc"))
 
     if "OnlineEventDisplaysSvc" not in kwargs:
-        from EventDisplaysOnline.EventDisplaysOnlineConfig import OnlineEventDisplaysSvcCfg
+        from EventDisplaysOnline.OnlineEventDisplaysSvcConfig import OnlineEventDisplaysSvcCfg
         acc.merge(OnlineEventDisplaysSvcCfg(flags))
         kwargs.setdefault("OnlineEventDisplaysSvc", acc.getService("OnlineEventDisplaysSvc"))
 

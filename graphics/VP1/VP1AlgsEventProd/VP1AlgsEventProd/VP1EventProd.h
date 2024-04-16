@@ -30,7 +30,7 @@
 #include <string>
 
 class VP1EventProd: public AthAlgorithm,
-		    public IIncidentListener
+                    public IIncidentListener
 {
  public:
   VP1EventProd(const std::string& name, ISvcLocator* pSvcLocator);

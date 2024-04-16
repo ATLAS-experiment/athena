@@ -50,7 +50,7 @@ private:
   Gaudi::Property<std::vector<std::string>> m_streamsWanted {this, "StreamsWanted", {}, "Desired trigger streams"};
   Gaudi::Property<std::string> m_projectTag {this, "ProjectTag", "", "Is needed to add streams to the Public trigger streams"};
   Gaudi::Property<bool> m_BeamSplash {this, "BeamSplash", false, "Is a beam splash event"};
-  Gaudi::Property<bool> m_CheckPair {this, "CheckPair", true, "Check for matching ESD and JiveXML files"};
+  Gaudi::Property<bool> m_CheckPair {this, "CheckPair", false, "Check for matching ESD and JiveXML files"};
   Gaudi::Property<int> m_maxEvents {this, "MaxEvents", 200, "Number of events to keep per stream"};
   std::string m_FileNamePrefix = "JiveXML";
   std::string m_outputStreamDir = ".Unknown";

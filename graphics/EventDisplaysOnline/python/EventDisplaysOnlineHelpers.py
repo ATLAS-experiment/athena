@@ -81,10 +81,10 @@ def EventCanBeSeenByPublic(projectTags):
     return sendToPublicStream
 
   except Exception:
-    print('Failed to get bool for EventCanBeSeenByPublic')
+    print('Failed to get bool for EventCanBeSeenByPublic, this is expected for offline test and GM test paritions')
     return False
 
-def GetUniqueJobID(): 
+def GetUniqueJobID():
   # Setup unique output files (so that multiple Athena jobs on the same machine don't interfere)
   import os
   jobId = os.environ.get('TDAQ_APPLICATION_NAME', '').split(':')
@@ -93,7 +93,7 @@ def GetUniqueJobID():
     jobId = ['Athena-EventProcessor', 'Athena-EventDisplays-Segment', 'EventDisplays-Rack', 'tmp', '%d' % randint(0, 999)]
 
   return jobId
-    
+
 def GetRunNumber(partitionName):
   part = IPCPartition(partitionName)
   RunParams = ISObject(part, 'RunParams.RunParams', 'RunParams')

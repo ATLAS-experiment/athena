@@ -9,7 +9,6 @@ def ByteStreamCfg(flags, **kwargs):
     from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
     acc.merge(EmonByteStreamCfg(flags))
 
-    #TODO kwargs?!
     bytestreamInput = acc.getService("ByteStreamInputSvc")
     bytestreamInput.Partition = flags.OnlineEventDisplays.PartitionName
     bytestreamInput.GroupName = "EventDisplaysOnline"

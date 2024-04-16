@@ -6,12 +6,12 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     if not flags.OnlineEventDisplays.OfflineTest:
         from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
         autoConfigOnlineRecoFlags(flags, flags.OnlineEventDisplays.PartitionName)
-        
+
     flags.OnlineEventDisplays.CosmicMode = False
-    flags.OnlineEventDisplays.HIMode = False 
+    flags.OnlineEventDisplays.HIMode = False
     flags.OnlineEventDisplays.BeamSplashMode = False
-    flags.OnlineEventDisplays.OfflineTest = True
-    
+    flags.OnlineEventDisplays.OfflineTest = False
+
     # An explicit list for nominal data taking to exclude some high rate streams
     # Empty list to read all
     flags.OnlineEventDisplays.TriggerStreams = ['MinBias','express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
@@ -40,22 +40,18 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     if flags.OnlineEventDisplays.HIMode:
         flags.OnlineEventDisplays.MaxEvents=200
         flags.OnlineEventDisplays.ProjectTag='data24_hi'
-        projectName='data24_hi'
         flags.OnlineEventDisplays.PublicStreams=['HardProbes']
     if flags.OnlineEventDisplays.CosmicMode:
         flags.OnlineEventDisplays.MaxEvents=200
         flags.OnlineEventDisplays.ProjectTag='data24_cos'
-        projectName='data24_cos'
         flags.OnlineEventDisplays.PublicStreams=['']
     if flags.OnlineEventDisplays.BeamSplashMode:
         flags.OnlineEventDisplays.MaxEvents=-1 # keep all the events
         flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
-        projectName='data24_13p6TeV'
         flags.OnlineEventDisplays.PublicStreams=['']
     else:
         flags.OnlineEventDisplays.MaxEvents=100
         flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
-        projectName='data24_13p6TeV'
         flags.OnlineEventDisplays.PublicStreams=['Main']
 
     # Pause this thread until the partition is up
@@ -84,7 +80,7 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
 
     jobId = GetUniqueJobID()
     # Test wth a small amount of events and write out to e.g. a tmp dir
-    if flags.OnlineEventDisplays.PartitionName != 'ATLAS' or flags.OnlineEventDisplays.OfflineTest:        
+    if flags.OnlineEventDisplays.PartitionName != 'ATLAS' or flags.OnlineEventDisplays.OfflineTest:
         flags.Exec.MaxEvents = 3
         flags.Output.ESDFileName = flags.OnlineEventDisplays.OutputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
     else:
@@ -103,7 +99,7 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     flags.Detector.GeometryForward = False
     flags.Detector.EnableFwdRegion = False
     flags.LAr.doHVCorr = False # ATLASRECTS-6823
-    
+
     if flags.OnlineEventDisplays.BeamSplashMode:
         flags.Reco.EnableJet=False
         flags.Reco.EnableMet=False
@@ -137,9 +133,9 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         flags.Input.OverrideRunNumber = True
         flags.Input.RunNumbers = [454188] # keep this number the same as (or close to) the run number of the file you are testing on
         flags.Input.LumiBlockNumbers = [1]
-        flags.Input.ProjectName = projectName
+        flags.Input.ProjectName = flags.OnlineEventDisplays.ProjectTag
 
-    from AthenaConfiguration.Enums import BeamType    
+    from AthenaConfiguration.Enums import BeamType
     if not flags.OnlineEventDisplays.OfflineTest:
         if flags.OnlineEventDisplays.CosmicMode:
             flags.Beam.Type = BeamType.Cosmics
@@ -172,13 +168,11 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         from JiveXML.OnlineStreamToServerConfig import OnlineStreamToServerCfg
         streamToServerTool = cfg.popToolsAndMerge(OnlineStreamToServerCfg(flags, **kwargs))
 
-    from AthenaCommon.Constants import DEBUG
     from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
     cfg.merge(AlgoJiveXMLCfg(flags,
                              StreamToFileTool = streamToFileTool,
                              StreamToServerTool = streamToServerTool,
-                             OnlineMode = not flags.OnlineEventDisplays.OfflineTest,
-                             OutputLevel = DEBUG))
+                             OnlineMode = not flags.OnlineEventDisplays.OfflineTest))
 
     # This creates an ESD file per event which is renamed and moved to the desired output
     # dir in the VP1 Event Prod alg
@@ -210,11 +204,11 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         cfg.store(f)
 
     return cfg
-        
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    cfg = EventDisplaysOnlineCfg(flags)        
+    cfg = EventDisplaysOnlineCfg(flags)
     # Execute
     sc = cfg.run()
     import sys
