@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -557,6 +557,14 @@ InDet::InDetTestPixelLayerTool::getPixelLayerParameters(
 {
   //// Cylinder bigger than the b-layer ////
   ATH_MSG_DEBUG("Trying to extrapolate to pixelLayer");
+
+  if(std::abs(trackpar->position().z())>10000.){
+    ATH_MSG_DEBUG("Pathological track parameter well outside of detector");
+    ATH_MSG_DEBUG("Propagator might have issue with this, discarding");
+    ATH_MSG_VERBOSE("dumping track parameters " << *trackpar);
+    return false;
+  }
+
   Amg::Transform3D surfTrans;
   surfTrans.setIdentity();
   Trk::CylinderSurface BiggerThanPixelLayerSurface(surfTrans, m_outerRadius, 10000.0);
