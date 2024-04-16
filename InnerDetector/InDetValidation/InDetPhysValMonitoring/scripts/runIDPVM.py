@@ -21,6 +21,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doTracksInJets", help='also run tracks in jets', action='store_true', default=False)
     IDPVMparser.add_argument("--doTracksInBJets", help='also run tracks in jets', action='store_true', default=False)
     IDPVMparser.add_argument("--doTruthOrigin", help='make plots by track origin', action='store_true', default=False)
+    IDPVMparser.add_argument("--doDuplicate", help='make duplicate plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doHitLevelPlots", help='make hit residual / eff plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doPerAuthor", help='make plots by track author', action='store_true', default=False)
     IDPVMparser.add_argument("--doExpertPlots", help='run additional expert-level plots', action='store_true', default=False)
@@ -77,6 +78,7 @@ flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
 flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
 flags.PhysVal.IDPVM.doValidateHILoose = MyArgs.doHILoose
 flags.PhysVal.IDPVM.doTruthOriginPlots = MyArgs.doTruthOrigin
+flags.PhysVal.IDPVM.doDuplicatePlots = MyArgs.doDuplicate
 flags.PhysVal.IDPVM.doValidateMuonMatchedTracks = MyArgs.doMuonMatchedTracks
 flags.PhysVal.IDPVM.doValidateElectronMatchedTracks = MyArgs.doElectronMatchedTracks
 flags.PhysVal.IDPVM.doValidateLargeD0Tracks = MyArgs.doLargeD0Tracks

@@ -197,6 +197,8 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
 
   rttConfig.doTrtExtensionPlots = m_doTRTExtensionPlots;
 
+  rttConfig.doDuplicatePlots = m_doDuplicatePlots;
+
   /// turn off truth if none is present
   if (m_truthParticleName.key().empty()){
     rttConfig.doFakePlots = false; 
@@ -479,7 +481,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
     if(!isAssociatedTruth) nMissingAssociatedTruth++;
     m_monPlots->fillFakeRate(*thisTrack, isFake, isAssociatedTruth, puEvents, beamSpotWeight);
 
-    if (m_fillTruthToRecoNtuple) {
+    if (m_fillTruthToRecoNtuple || m_doDuplicatePlots) {
       // Decorate track particle with extra flags
       decorateTrackParticle(*thisTrack, accept);
 
@@ -499,13 +501,13 @@ InDetPhysValMonitoringTool::fillHistograms() {
           cachedAssoc->second.push_back(thisTrack);
         }
       }
-      else {
+      else if(m_fillTruthToRecoNtuple){
         // Fill track only entries with dummy truth values
         m_monPlots->fillNtuple(*thisTrack, primaryvertex);
       }
     }
   }
-  if (m_fillTruthToRecoNtuple) {
+  if (m_fillTruthToRecoNtuple || m_doDuplicatePlots) {
     // Now fill all truth-to-track associations
     // Involves some double-filling of truth particles in cases where multiple tracks share the same truth association,
     // these duplicates can be filtered in the ntuple by selecting only the 'best matched' truth-associated track particles.
@@ -520,15 +522,18 @@ InDetPhysValMonitoringTool::fillHistograms() {
         [](const xAOD::TrackParticle* t1, const xAOD::TrackParticle* t2) { return getMatchingProbability(*t1) > getMatchingProbability(*t2); }
       );
 
-      // Fill all tracks associated to to this truth particle, also recording 'truth match ranking' as index in probability-sorted vector of matched tracks
-      for (int itrack = 0; itrack < (int) cachedAssoc.second.size(); itrack++) {
+      if(m_fillTruthToRecoNtuple){
+        // Fill all tracks associated to to this truth particle, also recording 'truth match ranking' as index in probability-sorted vector of matched tracks
+        for (int itrack = 0; itrack < (int) cachedAssoc.second.size(); itrack++) {
           const xAOD::TrackParticle* thisTrack = cachedAssoc.second[itrack];
           
           // Fill track entries with truth association
           m_monPlots->fillNtuple(*thisTrack, *thisTruth, primaryvertex, itrack);
+        }
       }
     }
   }
+
   m_monPlots->fill(nTrackTOT, truthMu, actualMu, nVertices, beamSpotWeight);
 
   //FIXME: I don't get why... this is here
@@ -550,8 +555,18 @@ InDetPhysValMonitoringTool::fillHistograms() {
     if (accept) {
       ++nSelectedTruthTracks; // total number of truth which pass cuts per event
       bool isEfficient(false); // weight for the trackeff histos
-      
       m_monPlots->fill(*thisTruth, beamSpotWeight); // This is filling truth-only plots
+
+      if(m_doDuplicatePlots){
+        auto cachedAssoc = cacheTruthMatching.find(thisTruth);
+        // Check if truth particle already present in cache
+        if (cachedAssoc == cacheTruthMatching.end()) {
+          // If not yet present, then no track associated
+          cacheTruthMatching[thisTruth] = {};
+        }
+        m_monPlots->fillDuplicate(*thisTruth, cacheTruthMatching[thisTruth], beamSpotWeight);
+      }
+
       //
       //Loop over reco tracks to find the match
       //
