@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -16,15 +16,9 @@
 #define FCAL_CHANNELMAP_H
 
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
-
-#include <math.h>
 #include <vector>
-#include <functional>
 #include <map>
 #include <string>
-#include <stdexcept>
 
 
 /** This class contains the tube and tile maps for the FCAL <br>
@@ -47,7 +41,7 @@ public:
     class TubePosition {                                           //
     public:                                                        //
       TubePosition();                                              //
-      TubePosition(tileName_t name, float x, float y, std::string hvFT);//
+      TubePosition(tileName_t name, float x, float y, const std::string & hvFT);//
       tileName_t  get_tileName() const;                            //
       float       x() const;                                       //
       float       y() const;                                       //
@@ -117,7 +111,7 @@ public:
 
     // Fill this.  The information comes from the database.
     void add_tube (const std::string & tileName, int mod, int id, int i, int j, double xCm, double yCm);//original
-    void add_tube (const std::string & tileName, int mod, int id, int i, int j, double xCm, double yCm, std::string hvFT);//29-03-07 include HV 
+    void add_tube (const std::string & tileName, int mod, int id, int i, int j, double xCm, double yCm, const std::string & hvFT);//29-03-07 include HV 
 
 
     // Finish the job. Create the tile map.
@@ -179,7 +173,7 @@ FCAL_ChannelMap::TubePosition::TubePosition()
 {}
  
 inline
-FCAL_ChannelMap::TubePosition::TubePosition(tileName_t name, float x, float y, std::string hvFT)
+FCAL_ChannelMap::TubePosition::TubePosition(tileName_t name, float x, float y, const std::string & hvFT)
     :
     m_tileName(name),
     m_x(x),
