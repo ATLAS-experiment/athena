@@ -675,7 +675,7 @@ def getConfig_gXE():
     confObj = odict()
     confObj["seedThrA"] = 16 
     confObj["seedThrB"] = 16 
-    confObj["seedThrC"] = 24 
+    confObj["seedThrC"] = 36 
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
     confObj["XERHO_sigmaPosC"] = 3 

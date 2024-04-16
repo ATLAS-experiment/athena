@@ -191,8 +191,10 @@ class MonitorDef:
                     "L1_TRT_FILLED",
                     "L1_BPTX0_BGRP12", "L1_BPTX1_BGRP12",
                     "L1_NSW_MONITOR",
+                    #Background
                     "L1_BCM_Wide",
-                    "L1_BCM_2A_EMPTY", "L1_BCM_2C_EMPTY",
+                    "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
+                    #AFP
                     "L1_AFP_A_AND_C_TOF_T0T1",
                     "L1_AFP_FSA_BGRP12", "L1_AFP_FSC_BGRP12",
                     "L1_AFP_FSA_TOF_T0_BGRP12", "L1_AFP_FSA_TOF_T1_BGRP12", "L1_AFP_FSA_TOF_T2_BGRP12", "L1_AFP_FSA_TOF_T3_BGRP12",
@@ -333,10 +335,8 @@ class MonitorDef:
                 # LAr Zee
                 "L1_LAR-ZEE-eEM",
                 # Background
-                "L1_BCM_Wide", "L1_BCM_Wide_EMPTY", "L1_BCM_Wide_BGRP12",
-                "L1_BCM_2A_UNPAIREDB1", "L1_BCM_2C_UNPAIREDB1", "L1_BCM_2A_UNPAIREDB2", "L1_BCM_2C_UNPAIREDB2",
+                "L1_BCM_Wide",
                 "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
-                "L1_BCM_2A_EMPTY", "L1_BCM_2C_EMPTY",
                 # Muons
                 "L1_MU3V", "L1_MU5VF",
                 "L1_MU8F", "L1_MU8VF",
@@ -422,9 +422,9 @@ class MonitorDef:
 
         # if any of the HF items are changed CTP and OLC shall be informed (via TrigOps)
         monItemsHF[TBP|TAP|TAV] = [
-           "L1_jJ30",
-           "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
-           "L1_BCM_Wide",
+            "L1_jJ30",
+            "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
+            "L1_BCM_Wide", "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN"
         ]
 
 

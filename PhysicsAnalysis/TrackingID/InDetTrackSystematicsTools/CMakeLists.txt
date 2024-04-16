@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of the package:
 atlas_subdir( InDetTrackSystematicsTools )
@@ -43,9 +43,6 @@ atlas_add_executable( graph_to_function
    LINK_LIBRARIES ${ROOT_LIBRARIES} )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 
 # This will allow us to put files into data/ to test new calibration files
 # Uncomment this line after putting test files into data/, then run "make" again to install.

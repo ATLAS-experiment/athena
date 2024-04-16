@@ -57,6 +57,7 @@ public:
                        std::vector<unsigned int> &Remums) override;
   virtual unsigned int getBDTScore() const override { return 0; }
   virtual unsigned int getBDTCondition() const override { return 0; };
+  virtual unsigned int getBDTHadFracCondition() const override { return 0; };
   void setSCellEncoder(LVL1::eFEXtauTOB *tob) const;
 
 protected:
