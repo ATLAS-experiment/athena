@@ -117,7 +117,8 @@ def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", RDOContainer = None,  **k
     if not flags.Trigger.doHLT:
        tool_args.setdefault("PrdCacheString", "")
        tool_args.setdefault("CoinCacheString", "")
-    
+    tool_args.setdefault("xAODKey", "TGCStrips" if flags.Muon.writexAODPRD else "")
+
     if RDOContainer: tool_args.setdefault("RDOContainer", RDOContainer)
     kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool", **tool_args))
 
