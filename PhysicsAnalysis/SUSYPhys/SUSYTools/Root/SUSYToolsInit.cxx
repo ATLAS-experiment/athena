@@ -89,7 +89,7 @@ using namespace ST;
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
   } else ATH_CHECK(TOOLHANDLE.retrieve());
 
-#define CONFIG_EG_EFF_TOOL_KEY( TOOLHANDLE, TOOLNAME, KEYNAME, KEY )        \
+#define CONFIG_EG_EFF_TOOL_KEY( TOOLHANDLE, TOOLNAME, KEYNAME, KEY, MAP )   \
   if( !TOOLHANDLE.isUserConfigured() ) {                                \
     TOOLHANDLE.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+TOOLNAME); \
     ATH_MSG_INFO( "Will now set key \"" << KEYNAME << "\" to value \"" << KEY << "\" when configuring an AsgElectronEfficiencyCorrectionTool" ); \
@@ -98,6 +98,7 @@ using namespace ST;
       ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", static_cast<int>(data_type))); \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrelationModel", m_EG_corrModel) ); \
     ATH_CHECK( TOOLHANDLE.setProperty("OutputLevel", this->msg().level()) ); \
+    ATH_CHECK( TOOLHANDLE.setProperty("MapFilePath", MAP) ); \
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
   } else if (!isData()) ATH_CHECK(TOOLHANDLE.retrieve());
 
@@ -936,17 +937,17 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_MSG_DEBUG( "Setting data type to " << data_type);
     }
 
-    toolName = "AsgElectronEfficiencyCorrectionTool_reco";
-    CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_reco, toolName, "RecoKey", "Reconstruction");
-
-    //-- get KEYS supported by egamma SF tools
     m_eleEffMapFilePathRun2 = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt";
-    
+
     if(!m_isRun3) {
       ATH_MSG_INFO( "Running on Run2 samples; Using egamma SF tools from R21 map ");
       ATH_MSG_INFO( m_eleEffMapFilePathRun2);
     }
-    
+
+    toolName = "AsgElectronEfficiencyCorrectionTool_reco";
+    CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_reco, toolName, "RecoKey", "Reconstruction", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
+
+    //-- get KEYS supported by egamma SF tools
     std::vector<std::string> eSF_keys = getElSFkeys( m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
 
     if (m_eleId.find("NoPix") != std::string::npos || m_eleId == "VeryLooseLLH" || m_eleId == "LooseLLH" || m_eleId == "Medium") {
@@ -958,7 +959,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       // electron id
       toolName = "AsgElectronEfficiencyCorrectionTool_id_" + m_eleId;
-      CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_id, toolName, "IdKey", eleId);
+      CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_id, toolName, "IdKey", eleId, m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
 
       // override map file use if correction file list is set for WP
       std::map<std::string,std::string> corrFNList;
@@ -1351,7 +1352,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_egammaCalibTool.isUserConfigured()) {
       m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool");
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", "es2018_R21_v0") ); //used for analysis using data processed with 21.0
+      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2018_R21_v0") ); //Fallback to R21 egamma model for Run 2
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
       ATH_CHECK( m_egammaCalibTool.setProperty("useFastSim", isAtlfast()?1:0) );
       ATH_CHECK( m_egammaCalibTool.setProperty("OutputLevel", this->msg().level()) );
