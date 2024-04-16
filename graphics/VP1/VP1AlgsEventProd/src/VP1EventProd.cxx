@@ -86,9 +86,9 @@ StatusCode VP1EventProd::finalize()
 {
   ATH_MSG_DEBUG("in finalize() ");
 
-  /* if(m_isOnline){
+  if(m_isOnline){
     m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-    }*/
+  }
 
   ATH_MSG_DEBUG("VP1ALG m_destinationDir " << m_destinationDir);
   // handle the output of the last event
@@ -132,10 +132,10 @@ void VP1EventProd::handle(const Incident& inc)
   ATH_MSG_DEBUG("in handle()... ");
   ATH_MSG_DEBUG("Handling incident '" << inc.type() << "'");
 
-  /*if(m_isOnline){
+  if(m_isOnline){
     m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-    }*/
-
+    }
+  
   ATH_MSG_DEBUG("VP1ALG m_destinationDir " << m_destinationDir);
 
   // Let VP1FileUtilities handle the output of the previous event.
