@@ -8,17 +8,25 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 class FTagEventSFConfig(ConfigBlock):
     """the ConfigBlock for the event-level FTAG scale factor"""
 
-    def __init__(self, containerName, selectionName):
+    def __init__(self, containerName='', selectionName=''):
         super(FTagEventSFConfig, self).__init__()
         self.addDependency('OverlapRemoval', required=True)
-        self.containerName = containerName
-        self.postfix = selectionName
-        self.addOption('btagWP', "FixedCutBEff_77", type=str)
-        self.addOption('btagger', "DL1r", type=str)
+        self.addOption('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as internally the string "
+            "f'{btagger}_{btagWP}' is used.")
+        self.addOption('btagWP', "FixedCutBEff_77", type=str,
+            info="the flavour tagging WP. The default is FixedCutBEff_77.")
+        self.addOption('btagger', "DL1r", type=str,
+            info="the flavour tagging algorithm: DL1dv01, GN2v00. The default is DL1r.")
 
     def makeAlgs(self, config):
 
-        selectionName = self.postfix
+        selectionName = self.selectionName
         if selectionName is None or selectionName == '':
             selectionName = self.btagger + '_' + self.btagWP
 
@@ -47,8 +55,6 @@ def makeFTagEventSFConfig(seq, containerName,
                           btagger=None):
 
     config = FTagEventSFConfig(containerName, selectionName)
-    if btagWP is not None:
-        config.setOptionValue('btagWP', btagWP)
-    if btagger is not None:
-        config.setOptionValue('btagger', btagger)
+    config.setOptionValue('btagWP', btagWP)
+    config.setOptionValue('btagger', btagger)
     seq.append(config)

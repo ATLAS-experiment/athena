@@ -1,5 +1,8 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+from AnaAlgorithm.Logging import logging
+logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
+
 from functools import wraps
 from random import randrange
 def groupBlocks(func):
@@ -83,7 +86,7 @@ class ConfigSequence:
                                 f" for {block} but was not found.")
                     # check to see if block is already infront of deps
                     if depIdx > i:
-                        print(f"> Moving {block} after {blocks[depIdx]}")
+                        logCPAlgCfgSeq.info(f"Moving {block} after {blocks[depIdx]}")
                         # depIdx > i so after pop, depIdx -= 1 -> depIdx is after dep
                         blocks.insert(depIdx, blocks.pop(i))
                         return False
@@ -161,14 +164,13 @@ class ConfigSequence:
             blocks[-1].setOptionValue (optionName, value, **kwargs)
 
 
-    def printOptions(self):
+    def printOptions(self, verbose=False):
         """
         Prints options and their values for each config block in a config sequence
         """
         for config in self:
-            print(config)
-            for opt in config.getOptions():
-                print(f"    {opt}: {config.getOptionValue(opt)}")
+            logCPAlgCfgSeq.info(config.__class__.__name__)
+            config.printOptions(verbose=verbose)
 
 
     def getOptions(self):
@@ -201,11 +203,11 @@ class ConfigSequence:
                 if valType is not None and opt_type != valType:
                     raise ValueError(f'{name} should be of type {valType} not {opt_type}')
                 self.setOptionValue (f'.{name}', options[name])
-                print(f"    {name}: {options[name]}")
+                logCPAlgCfgSeq.info(f"    {name}: {options[name]}")
             else:
                 # add default used to config
                 options[name] = valDefault
-                print(f"    {name}: {valDefault}")
+                logCPAlgCfgSeq.info(f"    {name}: {valDefault}")
         return algOptions
 
 

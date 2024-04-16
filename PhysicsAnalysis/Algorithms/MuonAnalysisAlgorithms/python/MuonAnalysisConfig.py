@@ -9,16 +9,30 @@ from AthenaConfiguration.Enums import LHCPeriod
 class MuonCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the muon four-momentum correction"""
 
-    def __init__ (self, containerName) :
+    def __init__ (self, containerName='') :
         super (MuonCalibrationConfig, self).__init__ ()
-        self.containerName = containerName
-        self.addOption ('postfix', "", type=str)
-        self.addOption ('ptSelectionOutput', False, type=bool)
-        self.addOption ('trackSelection', True, type=bool)
-        self.addOption ('recalibratePhyslite', True, type=bool)
-        self.addOption ('maxEta', 2.7, type=float)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', "", type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here since the calibration is common to "
+            "all muons.")
+        self.addOption ('ptSelectionOutput', False, type=bool,
+            info="pT cut to apply to calibrated muons, in MeV. "
+            "The default is 3.0 GeV.")
+        self.addOption ('trackSelection', True, type=bool,
+            info="whether or not to set up an instance of "
+            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
+            "z_0 sin(theta) cuts. The default is True.")
+        self.addOption ('recalibratePhyslite', True, type=bool,
+            info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
+            "PHYSLITE derivations. The default is True.")
+        self.addOption ('maxEta', 2.7, type=float,
+            info="maximum muon |eta| (float). The default is 2.7.")
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
-                        info='only for testing purposes, turn on to ignore NSW hits and fix a crash with older derivations (p-tag <p5834)')
+            info="only for testing purposes, turn on to ignore NSW hits and "
+            "fix a crash with older derivations (p-tag <p5834)")
 
     def makeAlgs (self, config) :
 
@@ -91,19 +105,41 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (10 Mar 22)."""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (MuonWorkingPointConfig, self).__init__ ()
-        self.containerName = containerName
-        self.selectionName = selectionName
-        self.addOption ('postfix', selectionName, type=str)
-        self.addOption ('quality', None, type=str)
-        self.addOption ('isolation', None, type=str)
-        self.addOption ('qualitySelectionOutput', True, type=bool)
-        self.addOption ('systematicBreakdown', False, type=bool)
-        self.addOption ('onlyRecoEffSF', False, type=bool)
-        self.addOption ('noEffSF', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="the name of the muon selection to define (e.g. tight or loose).")
+        self.addOption ('postfix', selectionName, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as selectionName is used internally.")
+        self.addOption ('quality', None, type=str,
+            info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
+            "Loose, LowPt, HighPt.")
+        self.addOption ('isolation', None, type=str,
+            info="the isolation WP (string) to use. Supported isolation WPs: "
+            "PflowLoose_VarRad, PflowTight_VarRad, Loose_VarRad, "
+            "Tight_VarRad, NonIso.")
+        self.addOption ('qualitySelectionOutput', True, type=bool,
+            info="whether to retain only muons satisfying the quality "
+            "requirements (bad muon veto). The default is True.")
+        self.addOption ('systematicBreakdown', False, type=bool,
+            info="enables the full breakdown of efficiency SF systematics "
+            "(1 NP per uncertainty source, instead of 1 NP in total). "
+            "The default is False.")
+        self.addOption ('onlyRecoEffSF', False, type=bool,
+            info="same as noEffSF, but retains the ID scale factor. "
+            "Experimental! only useful for CI tests. The default is False.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available. The default is False.")
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
-                        info='only for testing purposes, turn on to ignore NSW hits and fix a crash with older derivations (p-tag <p5834)')
+            info="only for testing purposes, turn on to ignore NSW hits and "
+            "fix a crash with older derivations (p-tag <p5834)")
 
     def makeAlgs (self, config) :
         from xAODMuon.xAODMuonEnums import xAODMuonEnums

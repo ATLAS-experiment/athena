@@ -18,6 +18,9 @@
 import inspect
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 
+from AnaAlgorithm.Logging import logging
+logCPAlgCfgFactory = logging.getLogger('CPAlgCfgFactory')
+
 
 def getDefaultArgs(func):
     """return dict(par, val) with all func parameters with defualt values"""
@@ -31,7 +34,7 @@ def getDefaultArgs(func):
 
 def getFuncArgs(func):
     """return list of input parameters"""
-    if isinstance(func, dict):
+    if inspect.isclass(func):
         args = list(inspect.signature(func.__init__).parameters.keys())
         args.remove('self')
     else:
@@ -95,7 +98,7 @@ class FactoryBlock():
                     continue
                 else:
                     raise ValueError(f"{arg} is required for {funcName}")
-            if isinstance(func, type):
+            if inspect.isclass(func):
                 configSeq.append(func(**args))
             else:
                 func(**args)
@@ -159,20 +162,31 @@ class ConfigFactory():
         return
 
 
-    def printAlgs(self, printOpts=False):
+    def printAlgs(self, printOpts=True):
         """Prints algorithms exposed to configuration"""
+        printed = [] # some subblocks exist for multiple superblocks
         def printAlg(algs):
             for alg, algInfo in algs.items():
                 algName = algInfo.alg.__name__
                 algOptions = algInfo.options
-                algDefaults = algInfo.defaults
-                print(f"{alg} -> {algName}")
-                if printOpts and algOptions:
-                    for opt in algOptions:
-                        if algDefaults and opt in algDefaults:
-                            print(f"    {opt}: {algDefaults[opt]}")
-                        else:
-                            print(f"    {opt}")
+                if algName not in printed:
+                    printed.append(algName)
+                    logCPAlgCfgFactory.info(f"\033[4m{alg}\033[0m -> \033[4m{algName}\033[0m")
+                    if printOpts:
+                        try:
+                            if inspect.isclass(algInfo.alg):
+                                # block
+                                algInfo.alg().printOptions(verbose=printOpts)
+                            else:
+                                # make function
+                                seq = ConfigSequence()
+                                algInfo.alg(seq=seq)
+                                seq.printOptions(verbose=printOpts)
+                        except Exception:
+                            # either a TypeError or something else due to missing args
+                            # try to print something for casses with required args
+                            for opt in algOptions:
+                                logCPAlgCfgFactory.info(f"    {opt}")
                 printAlg(algInfo.subAlgs)
         printAlg(self._algs)
         return
@@ -199,8 +213,8 @@ class ConfigFactory():
         """add algorithms and options"""
 
         # CommonServices
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeCommonServicesConfig
-        self.addAlgConfigBlock(algName="CommonServices", alg=makeCommonServicesConfig)
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import CommonServicesConfig
+        self.addAlgConfigBlock(algName="CommonServices", alg=CommonServicesConfig)
 
         # pileup reweighting
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PileupReweightingBlock
@@ -216,13 +230,13 @@ class ConfigFactory():
         from JetAnalysisAlgorithms.JetJvtAnalysisConfig import JetJvtAnalysisConfig
         self.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
             superBlocks="Jets")
-        from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
-        self.addAlgConfigBlock(algName="FlavourTagging", alg=makeFTagAnalysisConfig,
+        from FTagAnalysisAlgorithms.FTagAnalysisConfig import FTagConfig
+        self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
-        from FTagAnalysisAlgorithms.FTagEventSFAnalysisConfig import makeFTagEventSFConfig
+        from FTagAnalysisAlgorithms.FTagEventSFAnalysisConfig import FTagEventSFConfig
         self.addAlgConfigBlock(algName="FlavourTaggingEventSF",
-                               alg=makeFTagEventSFConfig,
+                               alg=FTagEventSFConfig,
                                defaults={'selectionName': ''},
                                superBlocks="Jets")
 
@@ -255,8 +269,8 @@ class ConfigFactory():
             superBlocks="TauJets")
 
         # SystObjectLink
-        from AsgAnalysisAlgorithms.SystObjectLinkConfig import makeSystObjectLinkConfig
-        self.addAlgConfigBlock(algName="SystObjectLink", alg=makeSystObjectLinkConfig,
+        from AsgAnalysisAlgorithms.SystObjectLinkConfig import SystObjectLinkBlock
+        self.addAlgConfigBlock(algName="SystObjectLink", alg=SystObjectLinkBlock,
             superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
         # IFF truth classification
@@ -265,12 +279,12 @@ class ConfigFactory():
             superBlocks=["Electrons","Muons"])
 
         # generator level analysis
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeGeneratorAnalysisConfig 
-        self.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=makeGeneratorAnalysisConfig)
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
+        self.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=GeneratorAnalysisBlock)
 
         # pT/Eta Selection
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
-        self.addAlgConfigBlock(algName="PtEtaSelection", alg=makePtEtaSelectionConfig,
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import PtEtaSelectionBlock
+        self.addAlgConfigBlock(algName="PtEtaSelection", alg=PtEtaSelectionBlock,
             defaults={'selectionName': ''},
             superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 

@@ -15,18 +15,42 @@ import PATCore.ParticleDataType
 class PhotonCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the photon four-momentum correction"""
 
-    def __init__ (self, containerName) :
+    def __init__ (self, containerName='') :
         super (PhotonCalibrationConfig, self).__init__ ()
-        self.containerName = containerName
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('crackVeto', False, type=bool)
-        self.addOption ('enableCleaning', True, type=bool)
-        self.addOption ('cleaningAllowLate', False, type=bool)
-        self.addOption ('recomputeIsEM', False, type=bool)
-        self.addOption ('ptSelectionOutput', False, type=bool)
-        self.addOption ('recalibratePhyslite', True, type=bool)
-        self.addOption ('minPt', 10e3, type=float)
-        self.addOption ('forceFullSimConfig', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here since the calibration is common to "
+            "all photons.")
+        self.addOption ('crackVeto', False, type=bool,
+            info="whether to perform LAr crack veto based on the cluster eta, "
+            "i.e. remove photons within 1.37<|eta|<1.52. "
+            "The default is False.")
+        self.addOption ('enableCleaning', True, type=bool,
+            info="whether to enable photon cleaning (DFCommonPhotonsCleaning). "
+            "The default is True.")
+        self.addOption ('cleaningAllowLate', False, type=bool,
+            info="whether to ignore timing information in cleaning "
+            "(DFCommonPhotonsCleaningNoTime). The default is False.")
+        self.addOption ('recomputeIsEM', False, type=bool,
+            info="whether to recompute the photon shower shape fudge "
+            "corrections (sets up an instance of CP::PhotonShowerShapeFudgeAlg). "
+            "The default is False, i.e. to use derivation variables.")
+        self.addOption ('ptSelectionOutput', False, type=bool,
+            info="whether or not to apply a minimum pT cut to "
+            "calibrated photons. The default is False.")
+        self.addOption ('recalibratePhyslite', True, type=bool,
+            info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
+            "PHYSLITE derivations. The default is True.")
+        self.addOption ('minPt', 10e3, type=float,
+            info="the minimum pT cut to apply to calibrated photons. "
+            "The default is 10 GeV.")
+        self.addOption ('forceFullSimConfig', False, type=bool,
+            info="whether to force the tool to use the configuration meant for "
+            "full simulation samples. Only for testing purposes. "
+            "The default is False.")
 
 
     def makeAlgs (self, config) :
@@ -156,17 +180,39 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (PhotonWorkingPointConfig, self).__init__ ()
-        self.containerName = containerName
-        self.selectionName = selectionName
-        self.addOption ('postfix', selectionName, type=str)
-        self.addOption ('qualityWP', None, type=str)
-        self.addOption ('isolationWP', None, type=str)
-        self.addOption ('recomputeIsEM', False, type=bool)
-        self.addOption ('doFSRSelection', False, type=bool)
-        self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
-        self.addOption ('forceFullSimConfig', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="the name of the photon selection to define (e.g. tight or "
+            "loose).")
+        self.addOption ('postfix', selectionName, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as selectionName is used internally.")
+        self.addOption ('qualityWP', None, type=str,
+            info="the ID WP (string) to use. Supported ID WPs: Tight, Loose.")
+        self.addOption ('isolationWP', None, type=str,
+            info="the ID WP (string) to use. Supported isolation WPs: "
+            "FixedCutLoose, FixedCutTight, TightCaloOnly, NonIso.")
+        self.addOption ('recomputeIsEM', False, type=bool,
+            info="whether to rerun the cut-based selection. The default is "
+            "False, i.e. to use derivation flags.")
+        self.addOption ('doFSRSelection', False, type=bool,
+            info="whether to accept additional photons close to muons for the "
+            "purpose of FSR corrections to these muons. Expert feature "
+            "requested by the H4l analysis running on PHYSLITE. "
+            "The default is False.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available. The default is False.")
+        self.addOption ('forceFullSimConfig', False, type=bool,
+            info="whether to force the tool to use the configuration meant "
+            "for full simulation samples. Only for testing purposes. "
+            "The default is False.")
 
     def makeAlgs (self, config) :
 

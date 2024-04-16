@@ -12,6 +12,10 @@ import pathlib
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
 
+from AnaAlgorithm.Logging import logging
+logCPAlgTextCfg = logging.getLogger('CPAlgTextCfg')
+
+
 def readYaml(yamlPath):
     """Loads YAML file into a dictionary"""
     if not os.path.isfile(yamlPath):
@@ -42,9 +46,7 @@ class TextConfig(ConfigFactory):
     def setConfig(self, config):
         """Print YAML configuration file."""
         if self._textConfig:
-            # should this be an error?
-            #raise ValueError("Configuration has already been loaded.")
-            print("WARNING: Overwritting existing configuration.")
+            raise Exception("Configuration already exists.")
         # should check to make sure that config is type dict or OrderedDict
         self._textConfig = config
         return
@@ -99,7 +101,7 @@ class TextConfig(ConfigFactory):
                 elif containerName is not None and 'containerName' not in options:
                     options['containerName'] = containerName
                 # will check which options are associated alg and not options
-                print(f"Configuring {block.algName}")
+                logCPAlgTextCfg.info(f"Configuring {block.algName}")
                 seq, funcOpts = block.makeConfig(options)
                 if not seq._blocks:
                     continue
@@ -167,17 +169,17 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
 
     config = TextConfig(configPath)
 
-    print("\n>>> Configuration file read in:")
+    logCPAlgTextCfg.info("Configuration file read in:")
     config.printConfig()
 
-    print("\n>>> Default algorithms:")
+    logCPAlgTextCfg.info("Default algorithms:")
     config.printAlgs(printOpts=True)
 
-    print("\n>>> Configuring algorithms based on YAML file:")
+    logCPAlgTextCfg.info("Configuring algorithms based on YAML file:")
     configSeq = config.configure()
 
     # defaults are added to config as algs are configured
-    print("\n>>> Configuration used:")
+    logCPAlgTextCfg.info("Configuration used:")
     config.printConfig()
 
     # compile
@@ -185,7 +187,7 @@ def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlag
     configSeq.fullConfigure(configAccumulator)
 
     # blocks can be reordered during configSeq.fullConfigure
-    print("\n>>> ConfigBlocks and their configuration:")
+    logCPAlgTextCfg.info("ConfigBlocks and their configuration:")
     configSeq.printOptions()
 
     from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
