@@ -14,6 +14,7 @@
 
 // Asg tools
 #include "egammaUtils/ShowerDepthTool.h"
+#include <AsgMessaging/MessageCheck.h>
 
 // ROOT include(s).
 #include <TString.h>
@@ -173,10 +174,20 @@ getVertexMomentum(const xAOD::Vertex* vertex,
   SG::AuxElement::ConstAccessor<float> eta(derivationPrefix + "eta");
   SG::AuxElement::ConstAccessor<float> phi(derivationPrefix + "phi");
 
-  if (useAux and pt.isAvailable(*vertex) and eta.isAvailable(*vertex) and
-      phi.isAvailable(*vertex)) {
-    v.SetPtEtaPhiM(pt(*vertex), eta(*vertex), phi(*vertex), 0.0);
-    return v;
+  if (useAux and pt.isAvailable(*vertex) and eta.isAvailable(*vertex) and phi.isAvailable(*vertex)) {
+    // protect against decoreated nan values (from Rel24 on?) 
+    if(!std::isnan(pt(*vertex)) and !std::isnan(eta(*vertex)) and !std::isnan(phi(*vertex))){ 
+      v.SetPtEtaPhiM(pt(*vertex), eta(*vertex), phi(*vertex), 0.0);
+      return v;
+    }
+    else{
+      using namespace asg::msgUserCode;
+      ANA_MSG_WARNING("PhotonVertexHelpers::getVertexMomentum : "
+                      << "NaN detected in Vertex decorations (pt, eta, phi) = "
+                      << " (" <<  pt(*vertex) <<  ", " << eta(*vertex) << ", " << phi(*vertex) << ")");
+      ANA_MSG_WARNING("PhotonVertexHelpers::getVertexMomentum : "
+                      << "Recompute sum tracks 4-momenta from associated TrackParticles");
+    }
   }
 
   // Sum the 4-momenta of all track particles at the vertex
