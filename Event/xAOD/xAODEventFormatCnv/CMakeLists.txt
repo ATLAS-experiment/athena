@@ -55,24 +55,24 @@ atlas_add_dictionary( xAODEventFormatCnvTestDict
   EXTRA_FILES src/test/dict/*.cxx )
 
 # Install files from the package.
-atlas_install_joboptions( share/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Test(s) in the package.
-atlas_add_test( Write
-  SCRIPT athena.py --threads=8 xAODEventFormatCnv/EventFormatWriteTestJobOptions.py
-  POST_EXEC_SCRIPT nopost.sh )
+atlas_add_test( WriteEventFormat
+  SCRIPT python -m xAODEventFormatCnv.TestWriteEventFormat
+  POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( Read
-  SCRIPT athena.py --threads=8 xAODEventFormatCnv/EventFormatReadTestJobOptions.py
-  POST_EXEC_SCRIPT nopost.sh
-  DEPENDS Write )
+atlas_add_test( ReadEventFormat
+  SCRIPT python -m xAODEventFormatCnv.TestReadEventFormat
+  POST_EXEC_SCRIPT noerror.sh
+  DEPENDS WriteEventFormat )
 
-atlas_add_test( ReadWrite
-  SCRIPT athena.py --threads=8 xAODEventFormatCnv/EventFormatReadWriteJobOptions.py
-  POST_EXEC_SCRIPT nopost.sh
-  DEPENDS Write )
+atlas_add_test( ReadWriteEventFormat
+  SCRIPT python -m xAODEventFormatCnv.TestReadWriteEventFormat
+  POST_EXEC_SCRIPT noerror.sh
+  DEPENDS WriteEventFormat )
 
-atlas_add_test( Content
-  SCRIPT test/TestEventFormatContent.py readWriteTestStream0.pool.root EventFormat
+atlas_add_test( EventFormatContent
+  SCRIPT test/TestEventFormatContent.py ReadWriteTest0.pool.root EventFormat
   POST_EXEC_SCRIPT nopost.sh
-  DEPENDS ReadWrite )
+  DEPENDS ReadWriteEventFormat )
