@@ -1,6 +1,6 @@
 
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 def BSMonitoringConfig(inputFlags):
     '''Function to configure LVL1 BSMonitoring algorithm in the monitoring system.'''
@@ -727,9 +727,6 @@ if __name__=='__main__':
     flags.Output.HISTFileName = 'ExampleMonitorOutput_CTPMonitoring.root'
     flags.lock()
     #flags.dump() # print all the configs
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg  
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
