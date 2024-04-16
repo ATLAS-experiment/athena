@@ -102,7 +102,7 @@ namespace MuonGM {
                 << gasGap << ", measuresPhi: " << measphi   << ", strip:" << strip );
 
         // global position of a generic strip !!!!!
-        const Amg::Vector3D localP = localStripPos(doubletPhi, gasGap, measphi  , strip);
+        const Amg::Vector3D localP = localStripPos(doubletPhi, gasGap, measphi, strip);
 
         const Amg::Transform3D& rpcTrans{absTransform()};
 
