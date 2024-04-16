@@ -110,13 +110,17 @@ def decodeThreshold( threshold_btag ):
         return None
 
 
-    btagger = "DL1d20211216"
+    btagger = "GN120220813" # default tagger for boffperf chain monitoring
     bbtagger = "dl1dbb20230314"
 
     bbcut = bbTaggingWP.get(threshold_btag)
 
     # remove the bb part to get the b-only cut
     threshold_btag = threshold_btag.split("bb", maxsplit=1)[0]
+
+    # for chains wanting to use DL1d
+    if "dl1d" in threshold_btag:
+        btagger = "DL1d20211216"
 
     # for chains wanting to use GN1
     if "gn1" in threshold_btag:

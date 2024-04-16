@@ -63,6 +63,7 @@ def getBJetSequenceCfg(flags, jc_name=None):
     BjetAthSequence = SelectionCA( f"BjetAthSequence_{jc_name}_step2", )
     BjetAthSequence.mergeReco(bJetBtagSequence, robPrefetchCA=robPrefetch)
 
+    from TrigBjetHypo.TrigBjetMonitoringConfig import TrigBjetOnlineMonitoring
     hypo = CompFactory.TrigBjetBtagHypoAlg(
         f"TrigBjetBtagHypoAlg_{jc_name}",
         # keys
@@ -73,6 +74,8 @@ def getBJetSequenceCfg(flags, jc_name=None):
         # links for navigation
         BTaggingLink = BTagName.replace( "HLT_","" ),
         PrmVtxLink = InputMakerAlg.RoITool.PrmVtxLink,
+        # monitoring tool for the global histograms
+        MonTool = TrigBjetOnlineMonitoring(flags)
     )
     BjetAthSequence.addHypoAlgo(hypo)
 
