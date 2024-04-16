@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiClusterizationTool package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -120,7 +120,7 @@ def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
 
 
 def TrigPixelRDOToolCfg(flags, name="InDetTrigPixelRDOTool"):
-    return InDetPixelRDOToolCfg(flags, name, PixelDetElStatus="")
+    return InDetPixelRDOToolCfg(flags, name, PixelDetElStatus="", PrintDuplicate=False)
 
 
 def MergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs):
