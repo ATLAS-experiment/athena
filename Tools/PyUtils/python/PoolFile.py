@@ -11,7 +11,6 @@ __author__  = "Sebastien Binet <binet@cern.ch>"
 __all__ = [
     'PoolFileCatalog',
     'extract_stream_names',
-    'extract_streams_from_tag',
     'PoolOpts',
     'extract_items',
     'PoolRecord',
@@ -28,7 +27,6 @@ from builtins import range
 from dbm import whichdb
 
 from .Helpers import ShutUp
-from .Decorators import forking
 
 ### --- data ------------------------------------------------------------------
 class Units (object):
@@ -261,124 +259,6 @@ def extract_stream_names(fname):
     import PyUtils.AthFile as af
     f = af.fopen(fname)
     return f.fileinfos['stream_names']
-
-@forking
-def extract_streams_from_tag (fname,
-                              tree_name=None,
-                              nentries=-1,
-                              stream_refs=None):
-    """find the GUID(s) of a list of streams which are contained inside a TAG
-       file.
-       @params:
-       `fname`       the filename of the TAG file to inspect
-                     (can be a LFN or FID)
-       `tree_name`   the name of the TTree containing the stream-refs
-                     (ROOT.APRDefaults.TTreeNames.EventTag is the default)
-       `nentries`    the number of entries to inspect, among the ttree entries
-                     (-1: all the entries)
-       `stream_refs` a list of stream names
-                     (ex: ['StreamAOD_ref', 'Stream1_ref'] or,
-                          None - to inspect all the stream refs in the TAG)
-
-    example:
-     >>> streams = extract_streams_from_tag ('tag.pool')
-     >>> from pprint import pprint
-     >>> pprint (streams)
-     {'Stream1_ref': ['BEE16671-B9F6-DA11-8219-00304871B611'],
-      'StreamAOD_ref': ['96F3018E-A0AC-DD11-8115-000423D59D52'],
-      'StreamESD_ref': ['384D0CFC-9FAC-DD11-A905-000423D59D52'],
-      'StreamRDO_ref': ['22C5BD99-3059-DB11-8D44-0030488365E6']}
-     >>> from PoolFile import PoolFileCatalog as pfc
-     >>> pprint (pfc().pfn(streams['StreamAOD_ref'][0]))
-     ['aod.pool']
-    """
-    
-    import PyUtils.RootUtils as ru
-    ROOT = ru.import_root()
-
-    print("::: opening file [%s]..." % fname)
-    # get the "final" file name (handles all kind of protocols)
-    import PyUtils.AthFile as af
-    try:
-        protocol, fname = af.server.fname(fname)
-    except Exception:
-        print("::: warning: problem extracting file name from PoolFileCatalog")
-        print("::: warning: will use [%s]" % fname)
-    
-    f = ROOT.TFile.Open (fname, "read")
-    assert not f.IsZombie() and f.IsOpen(), \
-           "problem opening POOL file [%s]"%fname
-
-    if tree_name is None: tree_name = ROOT.APRDefaults.TTreeNames.EventTag
-    t = f.Get( tree_name )
-    assert isinstance(t, ROOT.TTree), \
-           "could not retrieve tree [%s]" % tree_name
-    
-    # interesting branch names
-    branches = [str(b.GetName()) for b in t.GetListOfBranches()
-                if b.GetName().endswith ("_ref")]
-    if stream_refs is None:
-        stream_refs = branches
-    else:
-        _streams = stream_refs[:]
-        stream_refs = []
-        for ref in _streams:
-            if ref not in branches:
-                print("::: discarding [%s] from file chasing..."%ref)
-            else:
-                stream_refs.append (ref)
-    if nentries <= 0: nentries = t.GetEntries()
-    else:             nentries = min (nentries, t.GetEntries())
-    print("::: chasing streams: %s in tree: [%s]" % (stream_refs, tree_name))
-    print("::: ...over entries: %r" % nentries)
-    
-    # disable everything...
-    t.SetBranchStatus ("*", 0)
-
-    streams = dict()
-    for ref in stream_refs:
-        streams[ref] = list() # list of FileIDs, according to POOL
-                              # ex: 'B2B485E1-BB37-DD11-984C-0030487A17BA'
-        # but (re-)enable the branches we are interested in
-        t.SetBranchStatus (ref, 1)
-    
-    import re
-    # Pool token are of the form:
-    # '[DB=7CCD8D32-BC37-DD11-967E-0030487CD916]\
-    #  [CNT=POOLContainer_DataHeader]\
-    #  [CLID=72FBBC6F-C8BE-4122-8790-DC627696C176]\
-    #  [TECH=00000202]\
-    #  [OID=0000008C-000002BA]'
-    token = re.compile (r'\[DB=(?P<FID>.*?)\]'
-                        r'\[CNT=(?P<CNT>.*?)\]'
-                        r'\[CLID=(?P<CLID>.*?)\]'
-                        r'\[TECH=(?P<TECH>.*?)\]'
-                        r'\[OID=(?P<OID>.*?)\]')
-    for i in range(nentries):
-        t.GetEntry (i)
-        for ref in stream_refs:
-            try:
-                token_str = getattr(t, ref)
-            except (AttributeError, TypeError):
-                # MN: TypeError is a bug in ROOT 5.34.25, fixed in 5.34.30
-                # filthy work-around...
-                try:
-                    token_branch = t.GetBranch (ref)
-                    token_branch.GetEntry(i)
-                    token_str = token_branch.GetLeaf("Token").GetValueString()
-                except Exception:
-                    print("::: could not access stream-ref [%s] (entry #%i)",
-                          (ref, i))
-                    continue
-            tok = token.match (token_str)
-            if not tok:
-                print("::: invalid POOL token: [%s]" % token_str)
-                continue
-            streams[ref].append (tok.group('FID'))
-
-    for ref in stream_refs:
-        streams[ref] = list(set(streams[ref]))
-    return streams
 
 class PoolOpts(object):
     # default names of APR file storage elements
