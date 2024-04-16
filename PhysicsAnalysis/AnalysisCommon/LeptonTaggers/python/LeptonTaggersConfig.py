@@ -249,8 +249,8 @@ def getStringFloatVars(BDT_name, part_type=''):
     float_vars = []
 
     if BDT_name == 'PromptLeptonImprovedVeto':
-        float_vars += ['Topoetcone30rel',
-                       'Ptvarcone30_TightTTVA_pt500rel',
+        float_vars += ['topoetcone30rel',
+                       'ptvarcone30_TightTTVA_pt500rel',
                        'PromptLeptonRNN_prompt',
                        'PtFrac',
                        'DRlj',
@@ -258,8 +258,8 @@ def getStringFloatVars(BDT_name, part_type=''):
                        'CandVertex_normDistToPriVtxLongitudinalBest']
     elif (BDT_name == 'PromptLeptonImprovedVetoBARR'
           or BDT_name == 'PromptLeptonImprovedVetoECAP'):
-        float_vars += ['Topoetcone30rel',
-                       'Ptvarcone30rel',
+        float_vars += ['topoetcone30rel',
+                       'ptvarcone30rel',
                        'PromptLeptonRNN_prompt',
                        'PtFrac',
                        'DRlj',
@@ -297,25 +297,21 @@ def DecoratePromptLeptonImprovedCfg(
     kwargs.setdefault("PrimaryVertexContainerName", 'PrimaryVertices')
     kwargs.setdefault("ClusterContainerName", 'CaloCalTopoClusters')
 
-    kwargs.setdefault("ConfigFileVersion", '')
     kwargs.setdefault("BDTName", BDT_name)
     kwargs.setdefault("InputVarDecoratePrefix", 'PromptLeptonImprovedInput_')
     kwargs.setdefault("PrintTime", False)
-    kwargs.setdefault("OutputLevel", 3)
-
+    kwargs.setdefault("OutputLevel", 10)
 
     #
     # Read configuration from AFS for this initial merge request, will switch to cvmfs with second request
     #
     if lepton_name == 'Electrons':
         kwargs.setdefault("MethodTitleMVA", f'BDT_Electron_{BDT_name}')
-        kwargs.setdefault("ConfigFileVersion",
-                          f'InputData-2020-02-25/BDT/Electron/{BDT_name}')
+        kwargs.setdefault("ConfigFileVersion", 'InputData-2020-02-25/BDT/Electron/' + BDT_name)
         kwargs.setdefault("accessorRNNVars", ['PromptLeptonRNN_prompt'])
     elif lepton_name == 'Muons':
         kwargs.setdefault("MethodTitleMVA", f'BDT_Muon_{BDT_name}')
-        kwargs.setdefault("ConfigFileVersion",
-                          f'InputData-2020-02-25/BDT/Muon/{BDT_name}')
+        kwargs.setdefault("ConfigFileVersion", 'InputData-2020-02-25/BDT/Muon/' + BDT_name)
         kwargs.setdefault("accessorRNNVars", ['PromptLeptonRNN_prompt'])
     else:
         raise ValueError(f'Decorate{BDT_name} - unknown lepton type: "{lepton_name}"')
@@ -419,8 +415,8 @@ def GetExtraPromptVariablesForDxAOD(name='', addSpectators=False, onlyBDT=True):
     prompt_vars += "PromptLeptonInput_LepJetPtFrac.PromptLeptonInput_DRlj."
     prompt_vars += "PromptLeptonInput_PtFrac.PromptLeptonInput_PtRel."
     prompt_vars += "PromptLeptonInput_DL1mu.PromptLeptonInput_rnnip."
-    prompt_vars += "PromptLeptonInput_TopoEtCone20Rel.PromptLeptonInput_PtVarCone20Rel."
-    prompt_vars += "PromptLeptonInput_TopoEtCone30Rel.PromptLeptonInput_PtVarCone30Rel."
+    prompt_vars += "PromptLeptonInput_topoetcone20rel.PromptLeptonInput_ptvarcone20rel."
+    prompt_vars += "PromptLeptonInput_topoetcone30rel.PromptLeptonInput_ptvarcone30rel."
 
     prompt_vars += "PromptLeptonInput_SecondaryVertexIndexVector.PromptLeptonInput_SecondaryVertexIndexVectorInDet.PromptLeptonInput_SecondaryVertexIndexVectorMerge.PromptLeptonInput_SecondaryVertexIndexVectorDeepMerge."
     prompt_vars += "rhocen.rhofor.SecVtxLinks.RefittedPriVtxLink.RefittedPriVtxWithoutLeptonLink."
@@ -432,16 +428,16 @@ def GetExtraPromptVariablesForDxAOD(name='', addSpectators=False, onlyBDT=True):
         prompt_vars += "PromptLeptonInput_JetPt.PromptLeptonInput_JetEta.PromptLeptonInput_JetPhi.PromptLeptonInput_JetM."
 
     if name == "" or name == "Electrons":
-        prompt_vars += "ptvarcone40.topoetcone20.topoetcone20ptCorrection.ptcone20_TightTTVA_pt500.ptcone20_TightTTVA_pt1000.ptvarcone20_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt500.ptvarcone30_TightTTVA_pt1000.ptvarcone40_TightTTVALooseCone_pt500"
+        prompt_el_vars = "ptvarcone40.topoetcone20.topoetcone20ptCorrection.ptcone20_TightTTVA_pt500.ptcone20_TightTTVA_pt1000.ptvarcone20_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt500.ptvarcone30_TightTTVA_pt1000.ptvarcone40_TightTTVALooseCone_pt500"
 
-        prompt_lep_vars += ["Electrons.%s" %prompt_vars]
+        prompt_lep_vars += ["Electrons." + prompt_vars + prompt_el_vars]
         prompt_lep_vars += ["SecVtxContainer_Electrons.%s" %secondaryvertex_vars]
         prompt_lep_vars += ["SecVtx_ConvVtxContainer_Electrons.%s" %secondaryvertex_vars]
 
     if name == "" or name == "Muons":
-        prompt_vars += "ET_Core.ET_EMCore.ET_HECCore.ET_TileCore.EnergyLoss.EnergyLossSigma.MeasEnergyLoss.MeasEnergyLossSigma.ParamEnergyLoss.ParamEnergyLossSigmaMinus.ParamEnergyLossSigmaPlus.neflowisol20.neflowisol30.neflowisol40.ptvarcone20_TightTTVA_pt500.ptvarcone30_TightTTVA_pt500.ptvarcone40_TightTTVA_pt500.ptvarcone20_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt1000.ptvarcone40_TightTTVA_pt1000.caloExt_Decorated.caloExt_eta.caloExt_phi"
+        prompt_mu_vars = "ET_Core.ET_EMCore.ET_HECCore.ET_TileCore.EnergyLoss.EnergyLossSigma.MeasEnergyLoss.MeasEnergyLossSigma.ParamEnergyLoss.ParamEnergyLossSigmaMinus.ParamEnergyLossSigmaPlus.neflowisol20.neflowisol30.neflowisol40.ptvarcone20_TightTTVA_pt500.ptvarcone30_TightTTVA_pt500.ptvarcone40_TightTTVA_pt500.ptvarcone20_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt1000.ptvarcone40_TightTTVA_pt1000.caloExt_Decorated.caloExt_eta.caloExt_phi"
 
-        prompt_lep_vars += ["Muons.%s" %prompt_vars]
+        prompt_lep_vars += ["Muons." + prompt_vars + prompt_mu_vars]
         prompt_lep_vars += ["SecVtxContainer_Muons.%s" %secondaryvertex_vars]
 
     return prompt_lep_vars
@@ -472,17 +468,17 @@ def GetExtraImprovedPromptVariablesForDxAOD(name='', onlyBDT=False):
 
     if name == "" or name == "Electrons":
         # Add PromptLeptonTagger electron RNN and new inputs for PromptLeptonImprovedVetoBARR/PromptLeptonImprovedVetoECAP
-        prompt_vars += "PromptLeptonRNN_prompt.PromptLeptonRNN_non_prompt_b.PromptLeptonRNN_non_prompt_c.PromptLeptonRNN_conversion."
-        prompt_vars += "PromptLeptonImprovedVetoBARR.PromptLeptonImprovedVetoECAP.PromptLeptonImprovedInput_TrackJetNTrack.PromptLeptonImprovedInput_PtRel.PromptLeptonImprovedInput_CaloClusterSumEtRel.PromptLeptonImprovedInput_CandVertex_normDistToPriVtxLongitudinalBest_ThetaCutVtx"
+        prompt_el_vars = "PromptLeptonRNN_prompt.PromptLeptonRNN_non_prompt_b.PromptLeptonRNN_non_prompt_c.PromptLeptonRNN_conversion."
+        prompt_el_vars += "PromptLeptonImprovedVetoBARR.PromptLeptonImprovedVetoECAP.PromptLeptonImprovedInput_TrackJetNTrack.PromptLeptonImprovedInput_PtRel.PromptLeptonImprovedInput_CaloClusterSumEtRel.PromptLeptonImprovedInput_CandVertex_normDistToPriVtxLongitudinalBest_ThetaCutVtx"
 
-        prompt_lep_vars += ["Electrons.%s" %prompt_vars]
+        prompt_lep_vars += ["Electrons." + prompt_vars + prompt_el_vars]
 
     if name == "" or name == "Muons":
         # Add PromptLeptonTagger muon RNN and new inputs for PromptLeptonImprovedVeto
-        prompt_vars += "PromptLeptonRNN_prompt.PromptLeptonRNN_non_prompt_b.PromptLeptonRNN_non_prompt_c."
-        prompt_vars += "PromptLeptonImprovedVeto.PromptLeptonImprovedInput_ptvarcone30_TightTTVA_pt500rel.PromptLeptonImprovedInput_CaloClusterERel.PromptLeptonImprovedInput_CandVertex_normDistToPriVtxLongitudinalBest"
+        prompt_mu_vars = "PromptLeptonRNN_prompt.PromptLeptonRNN_non_prompt_b.PromptLeptonRNN_non_prompt_c."
+        prompt_mu_vars += "PromptLeptonImprovedVeto.PromptLeptonImprovedInput_ptvarcone30_TightTTVA_pt500rel.PromptLeptonImprovedInput_CaloClusterERel.PromptLeptonImprovedInput_CandVertex_normDistToPriVtxLongitudinalBest"
 
-        prompt_lep_vars += ["Muons.%s" %prompt_vars]
+        prompt_lep_vars += ["Muons." + prompt_vars + prompt_mu_vars]
 
     return prompt_lep_vars
 
@@ -497,7 +493,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.Enums import ProductionStep
     FLAGS.Common.ProductionStep = ProductionStep.Derivation
 
-    FLAGS.Exec.MaxEvents = 3
+    FLAGS.Exec.MaxEvents = 10
 
     # use one of the predefined files
     from AthenaConfiguration.TestDefaults import defaultTestFiles
