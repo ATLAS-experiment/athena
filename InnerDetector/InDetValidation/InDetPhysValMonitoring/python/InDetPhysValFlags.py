@@ -24,6 +24,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("doTruthOriginPlots", False )
     icf.addFlag("doPerAuthorPlots", False )
     icf.addFlag("doHitLevelPlots", False )
+    icf.addFlag("doDuplicatePlots", False )
     icf.addFlag("runDecoration", True )
     icf.addFlag("setTruthStrategy", "HardScatter" )
     icf.addFlag("jetsNameForHardScatter", 'AntiKt4EMTopoJets' ) # when building jets, what types of jets are built (used for hardScatterStrategy == 2)

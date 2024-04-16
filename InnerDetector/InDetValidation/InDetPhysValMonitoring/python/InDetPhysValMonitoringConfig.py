@@ -169,6 +169,8 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                           flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple)
         kwargs.setdefault("doTruthOriginPlots",
                           flags.PhysVal.IDPVM.doTruthOriginPlots)
+        kwargs.setdefault("doDuplicatePlots",
+                          flags.PhysVal.IDPVM.doDuplicatePlots)
         kwargs.setdefault("doPerAuthorPlots",
                           flags.PhysVal.IDPVM.doPerAuthorPlots)
         kwargs.setdefault("doHitLevelPlots",
