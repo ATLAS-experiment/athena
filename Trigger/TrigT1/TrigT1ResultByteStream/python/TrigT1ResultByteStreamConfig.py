@@ -583,7 +583,6 @@ if __name__ == '__main__':
   acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM))
 
   # get rid of warning about propagating input attribute list ... since there is none
-  # note it's odd that the AthenaCommon.globalflags input format property doesn't get updated appropriately by flags??
   acc.getEventAlgo("EventInfoTagBuilder").PropagateInput = (flags.Input.Format != Format.BS)
 
 
