@@ -531,7 +531,8 @@ def MuonSegmentFinderNCBAlgCfg(flags, name="MuonSegmentMaker_NCB", **kwargs):
                                                                                    name ="MuonNSWSegmentFinderTool", 
                                                                                    TrackCleaner = cleaner,
                                                                                    SeedMMStereos = False,
-                                                                                   IPConstraint = False))
+                                                                                   IPConstraint = False,
+                                                                                   CaloConstraint = True))
         kwargs.setdefault("NSWSegmentMaker", segment_finder)
     the_alg = CompFactory.MuonSegmentFinderAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True) 

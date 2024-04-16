@@ -269,6 +269,11 @@ namespace Muon {
         ATH_CHECK(m_trackCleaner.retrieve());
         ATH_CHECK(m_trackSummary.retrieve());
         ATH_CHECK(m_muonClusterCreator.retrieve());
+        if (m_ipConstraint && m_caloConstraint) {
+            ATH_MSG_FATAL("The muon should come from the IP && horizontally from the Calo..."<<
+            "We need to place a very good basball player at the calo exit to deflect the muon horizontally.");
+            return StatusCode::FAILURE;
+        }
         ATH_MSG_DEBUG(" Max cut " << m_maxClustDist);
         return StatusCode::SUCCESS;
     }
@@ -650,9 +655,26 @@ namespace Muon {
         return segments;
     }
 
+    std::unique_ptr<Trk::PseudoMeasurementOnTrack> MuonNSWSegmentFinderTool::caloConstraint(const Trk::TrackParameters& startpar) const {
+         if (!m_caloConstraint) return nullptr;
+         constexpr double errVtx{1.*Gaudi::Units::m};
+         Amg::MatrixX covVtx(2,2);
+         covVtx.setIdentity();
+         covVtx = errVtx * errVtx * covVtx;
+         const Amg::Vector3D parPos{startpar.position()};
+         Amg::Vector3D projection{parPos.x(), parPos.y(), 0};
+        //  project
+        Trk::PerigeeSurface perVtx(projection);
+        return std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(Trk::DefinedParameter(0, Trk::locX),
+                                                                                    Trk::DefinedParameter(1, Trk::locY)), 
+                                                               std::move(covVtx),
+                                                               std::move(perVtx));
+
+    }
+
     std::unique_ptr<Trk::PseudoMeasurementOnTrack> MuonNSWSegmentFinderTool::ipConstraint(const EventContext& /*ctx*/) const {
         if (!m_ipConstraint) return nullptr;
-        constexpr double errVtx{100.};
+        constexpr double errVtx{10.*Gaudi::Units::cm};
         Amg::MatrixX covVtx(1, 1);
         covVtx(0, 0) = errVtx * errVtx;
         /// Beamspot constraint?
@@ -682,11 +704,14 @@ namespace Muon {
         std::vector<const Trk::MeasurementBase*> vecFitPts;
         unsigned int nHitsEta = etaHitVec.size();
         unsigned int nHitsPhi = phiHitVec.size();
-        vecFitPts.reserve(nHitsEta + nHitsPhi + 2 + m_ipConstraint);
+        vecFitPts.reserve(nHitsEta + nHitsPhi + 2 + m_ipConstraint + m_caloConstraint);
 
-        std::unique_ptr<Trk::PseudoMeasurementOnTrack> pseudoVtx{ipConstraint(ctx)}, pseudoPhi1{nullptr}, pseudoPhi2{nullptr};
+        std::unique_ptr<Trk::PseudoMeasurementOnTrack> pseudoVtx{ipConstraint(ctx)}, 
+                                                       pseudoVtxCalo{caloConstraint(startpar)},
+                                                       pseudoPhi1{nullptr}, pseudoPhi2{nullptr};
         // is chosen, add a pseudo measurement as vtx at the center of ATLAS
         if (pseudoVtx) { vecFitPts.push_back(pseudoVtx.get()); }
+        if (pseudoVtxCalo) { vecFitPts.push_back(pseudoVtxCalo.get()); }
 
         if (!nHitsPhi) {
             // generate two pseudo phi measurements for the fit,

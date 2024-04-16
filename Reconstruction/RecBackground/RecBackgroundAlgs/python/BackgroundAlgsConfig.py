@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,11 +9,10 @@ def BackgroundAlgsCfg(flags):
   result=ComponentAccumulator()
 
   result.merge(LArCollisionTimeCfg(flags))
-
-  haveCSC=flags.Detector.GeometryCSC 
-
-  result.addEventAlgo(CompFactory.BeamBackgroundFiller(cscSegmentContainerKey=("NCB_TrackMuonSegments" if haveCSC else "")))
-
+  from AthenaConfiguration.Enums import BeamType
+  if flags.Beam.Type is BeamType.Collisions:
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentSelectionToolCfg
+    result.addEventAlgo(CompFactory.BeamBackgroundFiller(SegmentSelector = result.popToolsAndMerge(MuonSegmentSelectionToolCfg(flags))))
   result.addEventAlgo(CompFactory.BcmCollisionTimeAlg())
 
   result.addEventAlgo(CompFactory.BackgroundWordFiller(IsMC=flags.Input.isMC))

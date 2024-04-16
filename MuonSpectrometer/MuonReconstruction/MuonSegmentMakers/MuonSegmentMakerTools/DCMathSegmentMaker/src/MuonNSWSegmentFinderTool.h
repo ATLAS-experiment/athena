@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONROADFINDERTOOL_H
-#define MUONROADFINDERTOOL_H
+#ifndef MUONNSWSEGMENTFINDERTOOL_H
+#define MUONNSWSEGMENTFINDERTOOL_H
 
 #include <utility>
 #include <vector>
@@ -179,6 +179,9 @@ namespace Muon {
         ToolHandle<IMuonClusterOnTrackCreator> m_muonClusterCreator{this, "MuonClusterCreator", ""};
 
         Gaudi::Property<bool> m_ipConstraint{this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
+        
+        /// Use a virtual point at the calorimeter exit with same Z as constraint...
+        Gaudi::Property<bool> m_caloConstraint{this, "CaloConstraint", false};
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};
         Gaudi::Property<int> m_nOfSeedLayers{this, "NOfSeedLayers", 1};
 
@@ -277,6 +280,8 @@ namespace Muon {
 
         /// creates the IP constraint
         std::unique_ptr<Trk::PseudoMeasurementOnTrack> ipConstraint(const EventContext& ctx) const;
+        std::unique_ptr<Trk::PseudoMeasurementOnTrack> caloConstraint(const Trk::TrackParameters& startpar) const;
+        
 
         std::vector<NSWSeed> resolveAmbiguities(std::vector<NSWSeed>&& unresolved) const;
         std::vector<std::unique_ptr<Muon::MuonSegment>> resolveAmbiguities(const EventContext& ctx, 
