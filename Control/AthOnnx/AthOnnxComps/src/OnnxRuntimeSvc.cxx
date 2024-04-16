@@ -2,7 +2,7 @@
 
 // Local include(s).
 #include "OnnxRuntimeSvc.h"
-#include <core/session/onnxruntime_c_api.h>
+#include <onnxruntime_c_api.h>
 
 namespace AthOnnx {
   OnnxRuntimeSvc::OnnxRuntimeSvc(const std::string& name, ISvcLocator* svc) :
