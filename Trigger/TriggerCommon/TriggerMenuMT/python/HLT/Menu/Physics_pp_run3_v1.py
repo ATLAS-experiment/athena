@@ -364,6 +364,12 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_jJ90', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryPhIGroup+MultiMuonGroup),
         ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_jXE80', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=PrimaryPhIGroup+MultiMuonGroup),
         ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L110DR-MU14FCH-MU5VF', l1SeedThresholds=['MU14FCH','FSNOSEED'],   groups=PrimaryL1MuGroup+MultiMuonGroup+Topo2Group),
+        ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_UNPAIRED_ISO', l1SeedThresholds=['MU14FCH','FSNOSEED'], stream=['Late'], groups=PrimaryL1MuGroup+MultiMuonGroup),
+        ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_EMPTY', l1SeedThresholds=['MU14FCH','FSNOSEED'], stream=['Late'], groups=PrimaryL1MuGroup+MultiMuonGroup),
+        ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L110DR-MU14FCH-MU5VF_UNPAIRED_ISO', l1SeedThresholds=['MU14FCH','FSNOSEED'], stream=['Late'],  groups=PrimaryL1MuGroup+MultiMuonGroup+Topo2Group),
+        ChainProp(name='HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L110DR-MU14FCH-MU5VF_EMPTY', l1SeedThresholds=['MU14FCH','FSNOSEED'], stream=['Late'],   groups=PrimaryL1MuGroup+MultiMuonGroup+Topo2Group),
+
+
     ]
 
     chains['Egamma'] += [
