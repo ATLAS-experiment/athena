@@ -117,7 +117,7 @@ namespace ActsTrk
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
-               static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::sTgcStripType)+1u>
+               static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
        measurement_to_truth_association_maps{};
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();

@@ -12,7 +12,7 @@
 
 namespace ActsTrk
 {
-   // constexpr unsigned int NHitCounter = static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::sTgcStripType)+1u;
+   // constexpr unsigned int NHitCounter = static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes);
    // constexpr unsigned int NTruthParticlesPerTrack = 5;  // a tiny fraction of measurements will have more than
    //                                                      // 6 associated GenParticles
    // using HitCounterArray = std::array<uint8_t,  NHitCounter>;

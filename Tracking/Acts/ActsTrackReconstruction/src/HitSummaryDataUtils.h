@@ -271,14 +271,14 @@ namespace ActsTrk {
    void gatherTrackSummaryData(const ActsTrk::TrackContainer &tracksContainer,
                                const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
                                const std::array<const InDetDD::SiDetectorElementCollection *,
-                                                to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> &siDetEleColl,
-                               const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u>
+                                                to_underlying(xAOD::UncalibMeasType::nTypes)> &siDetEleColl,
+                               const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::nTypes)>
                                         &measurement_to_summary_type,
                                SumOfValues &chi2_stat_out,
                                HitSummaryData &hit_info_out,
                                std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType > &param_state_idx_out,
                                std::array<std::array<uint8_t,to_underlying(HitCategory::N)>,
-                                          to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> &special_hit_counts_out);
+                                          to_underlying(xAOD::UncalibMeasType::nTypes)> &special_hit_counts_out);
  
 }
 #endif

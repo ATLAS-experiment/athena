@@ -91,12 +91,11 @@ namespace {
 
 namespace {
    // Create lut to map neasurement types (pixel and strips only) to hit summary types. 
-   std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> makeMeasurementToSummaryTypeMap() {
-      std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> ret;
+   std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::nTypes)> makeMeasurementToSummaryTypeMap() {
+      std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::nTypes)> ret;
       for (unsigned short &elm : ret) {
          elm = xAOD::numberOfTrackSummaryTypes;
       }
-      assert(ActsTrk::to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u == 8u );
       ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
       ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
       return ret;
@@ -213,13 +212,13 @@ namespace ActsTrk
     std::shared_ptr<Acts::PerigeeSurface> perigee_surface = makePerigeeSurface(beamspot_data);
     track_particles->reserve( tracksContainer->size());
 
-    std::array<const InDetDD::SiDetectorElementCollection *,to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> siDetEleColl {};
+    std::array<const InDetDD::SiDetectorElementCollection *,to_underlying(xAOD::UncalibMeasType::nTypes)> siDetEleColl {};
     for (unsigned int idx=0; idx <m_siDetEleCollToMeasurementType.size(); ++idx ) {
        MAKE_CHECKED_HANDLE(ctx, m_siDetEleCollKey[idx], "detector element collection",
                            siDetEleColl[m_siDetEleCollToMeasurementType[idx] ] );
     }
 
-   static const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u>
+   static const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::nTypes)>
       measurementToSummaryType ATLAS_THREAD_SAFE (makeMeasurementToSummaryTypeMap());
 
 
@@ -269,9 +268,9 @@ namespace ActsTrk
        // gather track state indices for parameter conversion
        // @TODO add support for muons
        
-       // xAOD::UncalibMeasType::sTgcStripType + 1 is expected to be the number of UncalibMeasTypes
+       // xAOD::UncalibMeasType::underlying_type is expected to be the number of UncalibMeasTypes
        std::array<std::array<uint8_t,to_underlying(HitCategory::N)>,
-                 to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> specialHitCounts{};
+                 to_underlying(xAOD::UncalibMeasType::nTypes)> specialHitCounts{};
 
        SumOfValues chi2_stat;
        gatherTrackSummaryData(*tracksContainer,
