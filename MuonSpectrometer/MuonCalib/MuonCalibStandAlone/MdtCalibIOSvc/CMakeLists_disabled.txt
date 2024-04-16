@@ -9,6 +9,3 @@ atlas_add_component( MdtCalibIOSvc
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel MdtCalibData MdtCalibInterfacesLib MdtCalibRt MdtCalibT0 MdtCalibUtils MuonCalibIdentifier MuonCalibMath MuonCalibStandAloneBaseLib MuonIdHelpersLib MuonReadoutGeometry )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
