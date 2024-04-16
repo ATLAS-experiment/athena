@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Andrei Gaponenko, 2008
@@ -54,16 +54,16 @@ buildTruthTrajectory(TruthTrajectory *result, const HepMC::ConstGenParticlePtr& 
 
 		// copy the outer half to result
 		while(!tmp.empty()) {
-			result->emplace_back(tmp.top());
+                  result->emplace_back(tmp.top(),0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
 			tmp.pop();
 		}
 
 		// The input particle itself
-		result->emplace_back(input);
+		result->emplace_back(input,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
 
 		// Now continue towards the interaction point
 		while( (next = getMother(current)) ) {
-			result->emplace_back(current = next);
+			result->emplace_back(current = next,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
 		}
 	}
 }

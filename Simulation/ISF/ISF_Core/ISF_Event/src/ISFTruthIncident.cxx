@@ -207,10 +207,10 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFP
   const HepMcParticleLink* oldHMPL = particle.getParticleLink();
   HepMcParticleLink* newHMPL = nullptr;
   if (oldHMPL) {
-    newHMPL = new HepMcParticleLink(hepTruthParticle, oldHMPL->eventIndex());
+    newHMPL = new HepMcParticleLink(hepTruthParticle, oldHMPL->eventIndex(), HepMcParticleLink::IS_EVENTNUM);
     delete oldHMPL;
   } else {
-    newHMPL = new HepMcParticleLink(hepTruthParticle);
+    newHMPL = new HepMcParticleLink(hepTruthParticle, 0, HepMcParticleLink::IS_EVENTNUM); // FIXME should be HepMcParticleLink::IS_POSITION
   }
   particle.setParticleLink(newHMPL);
 
