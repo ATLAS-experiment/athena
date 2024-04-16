@@ -1025,9 +1025,9 @@ double MissingMassProb::MHtProbabilityHH(MissingMassInput& preparedInput, const 
 //SpeedUp static instantation
 // first index is the calibration set : 0: MMC2011, 1:MMC2012
 // second index is the decay 0 : lepton, 1 : 1 prong, 2 3 prong
-double MissingMassProb::s_fit_param[2][3][6][5];
+thread_local double MissingMassProb::s_fit_param[2][3][6][5];
 // first parameter: 0- for 1-prong; 1- for 3-prong
-double MissingMassProb::s_ter_sigma_par[2][10][3];
+thread_local double MissingMassProb::s_ter_sigma_par[2][10][3];
 
 // returns dTheta3D probability based on ATLAS parameterization
 double MissingMassProb::dTheta3d_probabilityFast(MissingMassInput& preparedInput, const int & tau_type,const double & dTheta3d,const  double & P_tau) {
