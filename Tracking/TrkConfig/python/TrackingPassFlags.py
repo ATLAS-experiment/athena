@@ -355,19 +355,17 @@ def createITkTrackingPassFlags():
 def createITkHeavyIonTrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension        = "HeavyIon"
-   
-    icf.minClusters      = [9]
-    icf.minSiNotShared   = [7]
-    icf.nHolesMax        = [0]
-    icf.nHolesGapMax     = [0]
+    icf.maxPrimaryImpact = [2.0 * Units.mm]
+    icf.minPT            = [0.4 *Units.GeV]
+    icf.minPTSeed        = 0.4 * Units.GeV
+    icf.minClusters      = [6]
+    icf.minSiNotShared   = [6]
     icf.Xi2max           = [6.]
-    icf.Xi2maxNoAdd      = [10.]
-    icf.minPT              = [0.3 *Units.GeV]
-    icf.maxPixelHoles =  [1] 
-    icf.maxSctHoles =  [1] 
-    icf.maxDoubleHoles   = [0]    
+    icf.Xi2maxNoAdd      = [9.]
+    icf.maxPixelHoles    = [1] 
+    icf.maxSctHoles      = [1] 
+    icf.maxDoubleHoles   = [0] 
     icf.doBremRecoverySi = False
-
     return icf
 
 
