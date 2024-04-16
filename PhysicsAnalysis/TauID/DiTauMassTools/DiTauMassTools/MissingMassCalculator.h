@@ -170,8 +170,8 @@ private:
   TRandom2 * m_randomGen;
   
   //SpeedUp static array for efficient access
-  static double s_fit_param[2][3][6][5];
-  static double s_ter_sigma_par[2][10][3];
+  static thread_local double s_fit_param[2][3][6][5];
+  static thread_local double s_ter_sigma_par[2][10][3];
   //cache quantities for efficient NuPSolution calculation
 
 
