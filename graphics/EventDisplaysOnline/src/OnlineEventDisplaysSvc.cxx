@@ -112,10 +112,7 @@ void OnlineEventDisplaysSvc::beginEvent(){
 }
 
 void OnlineEventDisplaysSvc::endEvent(){
-   RootUtils::PyGILStateEnsure ensure;
-  if(m_BeamSplash){
-    m_CheckPair = false;
-  }
+  RootUtils::PyGILStateEnsure ensure;
   PyObject* pCheckPair = PyBool_FromLong(m_CheckPair);
   PyObject* pBeamSplash = PyBool_FromLong(m_BeamSplash);
   PyObject* pMaxEvents = PyLong_FromLong(m_maxEvents);
@@ -232,7 +229,9 @@ StatusCode OnlineEventDisplaysSvc::initialize(){
   for (std::string stream : m_streamsWanted){
     ATH_MSG_DEBUG(stream);
   }
-  
+  if(m_BeamSplash){
+    m_CheckPair = false;
+  }  
   incSvc->addListener( this, "BeginEvent");
   incSvc->addListener( this, "StoreCleared");
 
