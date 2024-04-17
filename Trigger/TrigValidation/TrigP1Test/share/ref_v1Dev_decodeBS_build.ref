@@ -8505,7 +8505,7 @@ HLT_mu14_idtp_L1MU8F:
     1: 2
 HLT_mu14_ivarloose_tau25_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU12IM_3J12:
   eventCount: 0
-HLT_mu14_ivarloose_tau25_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_eTAU20M_3jJ30:
+HLT_mu14_ivarloose_tau25_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_cTAU20M_3jJ30:
   eventCount: 0
 HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU20IM:
   eventCount: 0
@@ -8514,12 +8514,12 @@ HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU20IM:
   stepFeatures:
     0: 2
     1: 1
-HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_eTAU20M:
+HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_cTAU30M:
   eventCount: 0
   stepCounts:
     0: 1
   stepFeatures:
-    0: 3
+    0: 2
     1: 1
 HLT_mu14_mu14_idperf_50invmAB130_L12MU8F:
   eventCount: 0
@@ -8527,7 +8527,7 @@ HLT_mu14_mu14_idtp_idZmumu_L12MU8F:
   eventCount: 0
 HLT_mu14_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1MU8F_TAU12IM_XE35:
   eventCount: 0
-HLT_mu14_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1MU8F_eTAU20M_jXE70:
+HLT_mu14_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1MU8F_cTAU20M_jXE70:
   eventCount: 0
   stepCounts:
     0: 1
