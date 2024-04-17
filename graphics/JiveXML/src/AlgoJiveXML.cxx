@@ -83,6 +83,7 @@ namespace JiveXML{
       ATH_MSG_INFO("Retrieving default file streaming tool");
       ATH_CHECK(m_StreamToFileTool.retrieve());
     }
+    ATH_MSG_INFO("online " << m_onlineMode);
     /// Get the streaming tools
     if (m_onlineMode){
       ATH_MSG_INFO("Retrieving default server streaming tool");
@@ -297,7 +298,7 @@ namespace JiveXML{
         ATH_MSG_WARNING( "Could not stream event to file" );
       }
     }
-    if(m_onlineMode==true){
+    if(m_onlineMode){
       ATH_MSG_DEBUG("Streaming event to server");
       if ( (m_StreamToServerTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
         ATH_MSG_WARNING( "Could not stream event to server" );

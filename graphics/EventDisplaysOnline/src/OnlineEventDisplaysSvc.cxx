@@ -23,10 +23,6 @@ void OnlineEventDisplaysSvc::beginEvent(){
   }
   std::vector<std::string> streams;
 
-  ATH_MSG_DEBUG("You have requested to only output JiveXML and ESD files when a trigger in the following streams was fired: ");
-  for (std::string stream : m_streamsWanted){
-    ATH_MSG_DEBUG(stream);
-  }
   m_eventNumber = evt->eventNumber();
   m_runNumber = evt->runNumber();
 
@@ -232,7 +228,11 @@ StatusCode OnlineEventDisplaysSvc::initialize(){
   ATH_MSG_DEBUG("Initializing " << name());
   IIncidentSvc* incSvc = nullptr;
   ATH_CHECK( service("IncidentSvc",incSvc) );
-
+  ATH_MSG_DEBUG("You have requested to only output JiveXML and ESD files when a trigger in the following streams was fired: ");
+  for (std::string stream : m_streamsWanted){
+    ATH_MSG_DEBUG(stream);
+  }
+  
   incSvc->addListener( this, "BeginEvent");
   incSvc->addListener( this, "StoreCleared");
 
