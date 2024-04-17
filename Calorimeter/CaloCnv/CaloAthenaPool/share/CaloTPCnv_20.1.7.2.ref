@@ -3,7 +3,9 @@ Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking i
 Py:MetaReader        INFO Current mode used: lite
 Py:MetaReader        INFO Current filenames: ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/esd/ESD-20.1.7.2.pool.root']
 Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key
-ApplicationMgr    SUCCESS 
+Py:MetaReader     WARNING Found multiple values for AtlasRelease: ['AtlasProduction-20.1.7.2', 'AtlasProduction-17.0.6.4']. Looking for possible duplicates.
+Py:MetaReader     WARNING Multiple values for AtlasRelease may mean the same, or the input file was produced in multi-step job. Ignoring all but the first entry: AtlasRelease = AtlasProduction-20.1.7.2
+ApplicationMgr    SUCCESS
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v36r0)
                                           running on pcaz004 on Thu Sep 30 10:02:24 2021
