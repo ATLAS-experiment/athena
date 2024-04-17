@@ -172,8 +172,6 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
         for (unsigned int j = 0; j < cache.m_indexSeg.size(); j++) {
             const Muon::MuonSegment* seg = dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[j]));
         
-            const Identifier id = m_edmHelperSvc->chamberId(*seg);
-        
             const Amg::Vector3D& globalPos = seg->globalPosition();
             const double phiSeg = globalPos.phi();
 
