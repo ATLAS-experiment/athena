@@ -10,7 +10,7 @@ class FTagEventSFConfig(ConfigBlock):
 
     def __init__(self, containerName='', selectionName=''):
         super(FTagEventSFConfig, self).__init__()
-        self.addDependency('OverlapRemoval', required=True)
+        self.addDependency('OverlapRemoval', required=False)
         self.addOption('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the input container.")
