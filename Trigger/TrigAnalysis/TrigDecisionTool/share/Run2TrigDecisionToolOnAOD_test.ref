@@ -1,4 +1,3 @@
-Py:UnitTest          INFO Event Inputs
 Py:UnitTest          INFO Event Algorithm Sequences
 Py:UnitTest          INFO Top sequence 0
 Py:UnitTest          INFO \__ AthAlgSeq (seq: PAR AND)

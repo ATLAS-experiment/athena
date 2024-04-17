@@ -220,10 +220,9 @@ class ComponentAccumulator(AccumulatorCachable):
     # in the list with a trailing `-', then only the name of the component
     # will be printed, not its properties.
     def printConfig(self, withDetails=False, summariseProps=False,
-                    onlyComponents = [], printDefaults=False, printComponentsOnly=False, prefix=None):
+                    onlyComponents = [], printDefaults=False, printComponentsOnly=False, printSequenceTreeOnly=False, prefix=None):
         msg = logging.getLogger(prefix) if prefix else self._msg
 
-        msg.info( "Event Inputs" )
         msg.info( "Event Algorithm Sequences" )
 
         def printSeqAndAlgs(seq, nestLevel = 0,
@@ -255,6 +254,9 @@ class ComponentAccumulator(AccumulatorCachable):
         for n,s in enumerate(self._allSequences):
             msg.info( "Top sequence %d", n )
             printSeqAndAlgs(s, onlyComponents = onlyComponents)
+
+        if printSequenceTreeOnly:
+            return
 
         self.printCondAlgs (summariseProps = summariseProps,
                             onlyComponents = onlyComponents)
