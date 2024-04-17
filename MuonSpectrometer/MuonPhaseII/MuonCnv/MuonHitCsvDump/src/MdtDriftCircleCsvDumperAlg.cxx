@@ -5,6 +5,7 @@
 #include "MdtDriftCircleCsvDumperAlg.h"
 
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
+#include "MuonSpacePoint/MuonSpacePoint.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include<fstream>
@@ -15,6 +16,7 @@ MdtDriftCircleCsvDumperAlg::MdtDriftCircleCsvDumperAlg(const std::string& name, 
  AthAlgorithm{name, pSvcLocator} {}
 
  StatusCode MdtDriftCircleCsvDumperAlg::initialize(){
+   ATH_CHECK(m_geoCtxKey.initialize());
    ATH_CHECK(m_inDriftCircleKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
    return StatusCode::SUCCESS;
@@ -40,11 +42,19 @@ MdtDriftCircleCsvDumperAlg::MdtDriftCircleCsvDumperAlg(const std::string& name, 
 
    SG::ReadHandle<xAOD::MdtDriftCircleContainer> readDriftCircles{m_inDriftCircleKey, context};
    ATH_CHECK(readDriftCircles.isPresent());
+   
+   SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, context};
+   ATH_CHECK(gctxHandle.isPresent());
+   const ActsGeometryContext& gctx{*gctxHandle};
+
    const MdtIdHelper& mdtHelper{m_idHelperSvc->mdtIdHelper()};
 
    for(const xAOD::MdtDriftCircle* driftCircle : *readDriftCircles){
-      const Amg::Vector3D tubePos{xAOD::toEigen(driftCircle->tubePosInStation())};
-      const Identifier tubeId{(Identifier::value_type)driftCircle->identifier()};
+      
+      const MuonR4::MuonSpacePoint spacePoint{gctx, driftCircle};
+
+      const Amg::Vector3D& tubePos{spacePoint.positionInChamber()};
+      const Identifier& tubeId{spacePoint.identify()};
       file<<driftCircle->driftRadius()<<delim;
       file<<tubePos.x()<<delim;
       file<<tubePos.y()<<delim;

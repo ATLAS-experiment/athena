@@ -27,6 +27,7 @@ MuonSimHitCsvDumperAlg::MuonSimHitCsvDumperAlg(const std::string& name, ISvcLoca
    AthAlgorithm{name, pSvcLocator} {}
 
 StatusCode MuonSimHitCsvDumperAlg::initialize() {
+   ATH_CHECK(m_geoCtxKey.initialize());
    ATH_CHECK(m_inSimHitKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
    ATH_CHECK(detStore()->retrieve(m_r4DetMgr));
@@ -35,8 +36,11 @@ StatusCode MuonSimHitCsvDumperAlg::initialize() {
 }
 
 StatusCode MuonSimHitCsvDumperAlg::execute(){
-    
-   const ActsGeometryContext gctx{};
+   
+   const EventContext & context = Gaudi::Hive::currentContext();
+   SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, context};
+   ATH_CHECK(gctxHandle.isPresent());
+   const ActsGeometryContext& gctx{*gctxHandle};
 
    // these are the conventions by ACTS
    std::ofstream file{std::string(Form("event%09zu-",++m_event))+"MuonSimHit.csv"};
@@ -52,7 +56,7 @@ StatusCode MuonSimHitCsvDumperAlg::execute(){
    file<<"LocalDirectiony"<<delim;
    file<<"LocalDirectionz"<<std::endl;
 
-   const EventContext & context = Gaudi::Hive::currentContext();
+
    std::set<TrueHitInChamb> usedStations{};
    for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key : m_inSimHitKey) {
 

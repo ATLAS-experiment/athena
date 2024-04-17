@@ -7,6 +7,7 @@
 #include <AthenaBaseComps/AthAlgorithm.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <StoreGate/ReadHandleKey.h>
+#include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
 
 /** The MuonStripCsvDumperAlg reads the RpcStripContainer and dumps information to csv files
@@ -24,6 +25,8 @@ class MuonStripCsvDumperAlg: public AthAlgorithm {
 
    private:
 
+    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    
     SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer> m_stripContainerKey{this, "ContainerKey", 
                                                                                   "", "Key to the Rpc/Tgc container"};
 
