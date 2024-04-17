@@ -31,6 +31,7 @@ The tool is supposed to run on derivations (e.g. **DAOD_PHYS/TOPQ/SUSY**), as it
     - [Charge-flip muons](#charge-flip-muons)
     - [KnownUnknown leptons](#knownunknown-leptons)
     - [Unknown leptons](#unknown-leptons)
+5. [Flowchart of IFF TruthClassification Tool](#5-iff-truthclassification-flowchart)
     
 ---
 
@@ -53,7 +54,6 @@ Based on this input, the function `StatusCode TruthClassificationTool::classify(
 + LightFlavorDecay
 + ChargeFlipMuon
 + NonMuonLike
-+ PromptMuonLike
 + TauDecayLike
 + BHadronDecayLike
 + CHadronDecayLike
@@ -164,10 +164,9 @@ Muons with mis-identified charge can be selected. Similarly to electrons, it wor
 
 A muon is classified as Non-muon-Like (**IFF class 12**), if its truth-type is corresponding to electrons, e.g. isolated electron (`== 2`), non-isolated electron (`== 3`) or background electron (`== 4`) for any truth-origin. 
 
-### The 4-like muons
+### The 3-like muons
 
 Muons with Unknown truth-type (`== 0`) and NonDefined truth-origin (`== 0`) could associate to a truth matched muon. Exploiting the properties of a truth muon could offer the information of its truth parent and thus the interaction behind. Muons with one truth matched parent is considered in this case. 
-If the parent is W/Z, top or higgs, the muon is classified as PromptMuonLike (**IFF class 40**). 
 
 If the parent is tau, the muon is classified as TauDecayLike (**IFF class 70**). 
 
@@ -178,10 +177,20 @@ We exclude the consideration of ccbarmeson in this category.
 
 ### KnownUnknown leptons
 
-The `KnownUnknown` category (**IFF class 1**)  refers to leptons which can (in principle) be classified, but the tool fails with the classification due to missing information (e.g. the truth-type/origin correspond to the unknown (or non-defined) cases in the MCTruthClassifier (`== 0/1`).  This type of leptons is not recommended to be used (or to have a significant impact) for fake lepton estimations or efficiency measurements. Please contact the developers of the tool or the IFF contacts if these types occur frequently for the leptons in your analysis.  
+The `KnownUnknown` category (**IFF class 1**)  refers to leptons which can (in principle) be classified, but the tool fails with the classification due to missing information (e.g. the truth-type/origin correspond to the unknown (or non-defined) cases in the MCTruthClassifier (`== 0/1`)).  This type of leptons is not recommended to be used (or to have a significant impact) for fake lepton estimations or efficiency measurements. Please contact the developers of the tool or the IFF contacts if these types occur frequently for the leptons in your analysis.  
 
 ### Unknown leptons
 
 Leptons are entering the category `Unknown` (**IFF class 0**), if they cannot be attributed to any or the classes listed above. If leptons of this category are encountered in an analysis, the user should contact the IFF group (see mailing lists above) and report the details about the unclassified leptons (truth-origin/type, mother-particle-origin/type, PDG-ID, etc.), as well as the MC files where such leptons are found. The IFFTruhClassifier team will take care and classify these leptons. Merge requested proposed by the user with a fix are also higher encouraged!
 
 Ideally, leptons should never fall into this category.
+
+## 5. Flowcharts of IFF TruthClassification Tool
+Schematic flowcharts of IFF TruthClassification Tool are shown below.  
+Details about the classification should refer to [Details about the Lepton Categories](#4-details-about-the-lepton-categories)
+
+**<p style="font-size: 20px;">Classification of Electrons</p>**
+<img src="./Photos/ele_flowchart.svg" alt="Flow Chart of Electron TruthClassification" width="800px">
+
+**<p style="font-size: 20px;">Classification of Muons</p>**
+<img src="./Photos/muon_flowchart.svg" alt="Flow Chart of Electron TruthClassification" width="1100px">

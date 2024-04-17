@@ -558,33 +558,28 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
   }
 
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // Promptlike, TauLike, BHadLike, CHadLike
+  // TauLike, BHadLike, CHadLike
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // Check if the matched parent of truth muon fall into these 4 xxxLike
+  // Check if the matched parent of truth muon fall into these 3 xxxLike
   // Only truth muon with one matched parent is considered
-  // If parent is top, W, Z or Higgs, the muons is promptlike
-  // If parent is tau, the muons is taulike
-  // If parent is bhadron, the muons is bHadlike
+  // If parent is tau, the muons is TauLike
+  // If parent is bhadron/b quark, the muons is BHadLike
+  // If parent is chadron/c quark, the muons is CHadLike
   if (type == MCTruthPartClassifier::Unknown && origin == MCTruthPartClassifier::NonDefined){
     if( truthParticle != nullptr && truthParticle->nParents() == 1 && truthParticle->parent(0) != nullptr){
       const xAOD::TruthParticle *parent = truthParticle->parent(0);
       int parent_pdgid = parent->pdgId(); 
-      if(parent->isTop() || parent->isW() || parent->isZ() || parent->isHiggs()){
-        classification = Truth::Type::PromptMuonLike;
-        ATH_MSG_WARNING("Muon type promptmuonlike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ;
-        return StatusCode::SUCCESS;
-      }
       if(parent->isTau()){
         classification = Truth::Type::TauDecayLike;
         ATH_MSG_WARNING("Muon type taudecaylike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ; 
         return StatusCode::SUCCESS;
       }
-      if(parent->isBottomHadron()){
+      if(parent->isBottomHadron() || parent->hasBottom()){
         classification = Truth::Type::BHadronDecayLike;
         ATH_MSG_WARNING("Muon type bhadrondecaylike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ; 
         return StatusCode::SUCCESS;
       }
-      if(parent->isCharmHadron()){ 
+      if(parent->isCharmHadron() || parent->hasCharm()){ 
         if( (parent_pdgid / 1000) % 10 != 0 || (parent_pdgid / 100) % 10 != 4 || (parent_pdgid / 10) % 10 != 4){ // to exclude ccbarmeson 
           classification = Truth::Type::CHadronDecayLike;
           ATH_MSG_WARNING("Muon type chadrondecaylike: type = " << type << ", origin = " << origin << ", parent = " << parent_pdgid) ; 
