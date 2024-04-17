@@ -59,8 +59,8 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
   }
 
   if( trkAnaDefSvc->useTruth() ) {
-    ATH_CHECK( trkAnaColls.fillTruthTrackVec(
-        trkAnaColls.truthTrackVec( TrackAnalysisCollections::FULL ),
+    ATH_CHECK( trkAnaColls.fillTruthPartVec(
+        trkAnaColls.truthPartVec( TrackAnalysisCollections::FULL ),
         TrackAnalysisCollections::FS ) );
   }
 

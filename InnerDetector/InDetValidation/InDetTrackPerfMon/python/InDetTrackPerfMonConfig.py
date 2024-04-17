@@ -31,24 +31,10 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
 
     kwargs.setdefault( "MatchingType", flags.PhysVal.IDTPM.currentTrkAna.MatchingType )
 
-    testToRefDecoName = "testToRefLink"
-    refToTestDecoName = "refToTestLinks"
-    if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "DeltaRMatch":
-        testToRefDecoName = "testToRefDRLink"
-        refToTestDecoName = "refToTestDRLinks"
-    if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "TruthMatch":
-        testToRefDecoName = "trackToTruthLink"
-        refToTestDecoName = "truthToTrackLinks"
-
-    kwargs.setdefault( "TestToRefDecoName",
-                       testToRefDecoName + flags.PhysVal.IDTPM.currentTrkAna.anaTag )
-    kwargs.setdefault( "RefToTestDecoName",
-                       refToTestDecoName + flags.PhysVal.IDTPM.currentTrkAna.anaTag )
-
-    if flags.PhysVal.IDTPM.currentTrkAna.TestType == "Trigger":
+    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
+         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
         kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
 
-    ## TODO - to be uncommented in future MRs
     kwargs.setdefault( "doTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.doTrackParameters )
     kwargs.setdefault( "doEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.doEfficiencies )
     kwargs.setdefault( "doOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.doOfflineElectrons )
@@ -85,7 +71,8 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
             TrackQualitySelectionToolCfg( flags,
                 name="TrackQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-    if "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType :
+    if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
+         ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
 
         kwargs.setdefault( "TriggerTrkParticleContainerName",
                            flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
@@ -128,7 +115,8 @@ def InDetTrackPerfMonCfg( flags ):
     ## Truth-hit decorator
     useTruth = False
     for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
-        if "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ):
+        if ( ( "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".TestType" ) ) or
+             ( "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ) ) ):
             useTruth = True
             break
 

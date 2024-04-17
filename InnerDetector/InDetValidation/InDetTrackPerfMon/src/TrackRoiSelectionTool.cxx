@@ -268,7 +268,7 @@ StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
   const TrigRoiDescriptor* const* roi = roiLink.cptr();
 
   /// Trigger tracks RoI selection
-  ATH_CHECK( trkAnaColls.fillTestTrackVec(
+  ATH_CHECK( trkAnaColls.fillTrigTrackVec(
       getTrigTracks( m_triggerTrkParticleName, roiLink ),
       TrackAnalysisCollections::InRoI ) );
 
@@ -283,9 +283,9 @@ StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
 
   /// Truth particles RoI selection 
   if( trkAnaDefSvc->useTruth() ) {
-    ATH_CHECK( trkAnaColls.fillTruthTrackVec(
+    ATH_CHECK( trkAnaColls.fillTruthPartVec(
         getTracks(
-            trkAnaColls.truthTrackVec( TrackAnalysisCollections::FS ),
+            trkAnaColls.truthPartVec( TrackAnalysisCollections::FS ),
             *roi ),
         TrackAnalysisCollections::InRoI ) );
   }

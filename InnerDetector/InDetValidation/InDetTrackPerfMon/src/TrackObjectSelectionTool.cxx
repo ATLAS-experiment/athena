@@ -91,7 +91,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
 
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with " << m_objectQuality.value() << 
-                   " Electron with transverse energy = " << ET( *ele ) );
+                   " Electron with transverse energy = " << eT( *ele ) );
 
     return true;
   }
@@ -105,7 +105,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
 
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with " << m_objectQuality.value() <<
-                   " Muon with transverse energy = " << ET( *mu ) );
+                   " Muon with transverse energy = " << eT( *mu ) );
 
     return true;
   }
@@ -123,7 +123,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
                    " matches with " << m_objectQuality.value() <<
                    " hadronic " << m_tauNprongs.value() << "prong " <<
                    m_tauType.value() << " Tau with transverse energy = " <<
-                   ET( *tau ) );
+                   eT( *tau ) );
 
     return true;
   }

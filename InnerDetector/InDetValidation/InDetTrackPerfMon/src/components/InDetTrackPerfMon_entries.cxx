@@ -13,9 +13,9 @@
 #include "../OfflineTauDecoratorAlg.h"
 #include "../TrackObjectSelectionTool.h"
 #include "../TrackTruthMatchingTool.h"
+#include "../TruthTrackMatchingTool.h"
+#include "../DeltaRMatchingTool.h"
 /// TODO - To be included in later MRs
-//#include "InDetTrackPerfMon/DeltaRtrackMatchingTool_trk.h"
-//#include "InDetTrackPerfMon/DeltaRtrackMatchingTool_trkTruth.h"
 //#include "InDetTrackPerfMon/HistogramDefinitionSvc.h"
 //#include "InDetTrackPerfMon/ReadJsonHistoDefTool.h"
 
@@ -30,8 +30,10 @@ DECLARE_COMPONENT( IDTPM::OfflineMuonDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineTauDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::TrackObjectSelectionTool )
 DECLARE_COMPONENT( IDTPM::TrackTruthMatchingTool )
+DECLARE_COMPONENT( IDTPM::TruthTrackMatchingTool )
+DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trk )
+DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trkTruth )
+DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_truthTrk )
 /// TODO - To be included in later MRs
 //DECLARE_COMPONENT( ReadJsonHistoDefTool )
 //DECLARE_COMPONENT( IDTPM::HistogramDefinitionSvc )
-//DECLARE_COMPONENT( IDTPM::DeltaRtrackMatchingTool_trk )
-//DECLARE_COMPONENT( IDTPM::DeltaRtrackMatchingTool_trkTruth )

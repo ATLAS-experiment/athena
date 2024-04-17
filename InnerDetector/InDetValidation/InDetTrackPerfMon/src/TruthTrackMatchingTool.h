@@ -2,14 +2,16 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INDETTRACKPERFMON_TRACKTRUTHMATCHINGTOOL_H
-#define INDETTRACKPERFMON_TRACKTRUTHMATCHINGTOOL_H
+#ifndef INDETTRACKPERFMON_TRUTHTRACKMATCHINGTOOL_H
+#define INDETTRACKPERFMON_TRUTHTRACKMATCHINGTOOL_H
 
 /**
- * @file   TrackTruthMatchingTool.h
- * @author Marco Aparo <marco.aparo@cern.ch>, Thomas Strebler <thomas.strebler@cern.ch>
- * @date   26 April 2023
- * @brief  Tool to perform matching of tracks and truth particles via truthParticleLink decorations
+ * @file   TruthTrackMatchingTool.h
+ * @author Marco Aparo <marco.aparo@cern.ch>
+ * @date   04 April 2024
+ * @brief  Tool to perform matching of truth particles
+ *         and tracks via their truthParticleLink decorations.
+ *         The track with the highest truthMatchProbability is chosen
  */
 
 /// Athena include(s).
@@ -20,16 +22,16 @@
 
 namespace IDTPM {
 
-  class TrackTruthMatchingTool : 
-      public virtual ITrackMatchingTool,  
+  class TruthTrackMatchingTool :
+      public virtual ITrackMatchingTool,
       public asg::AsgTool {
 
   public:
 
-    ASG_TOOL_CLASS( TrackTruthMatchingTool, ITrackMatchingTool );
+    ASG_TOOL_CLASS( TruthTrackMatchingTool, ITrackMatchingTool );
 
     /// Constructor 
-    TrackTruthMatchingTool( const std::string& name );
+    TruthTrackMatchingTool( const std::string& name );
 
     /// Initialize
     virtual StatusCode initialize() override;
@@ -52,29 +54,29 @@ namespace IDTPM {
       return StatusCode::SUCCESS;
     }
 
-    /// track -> truth matching
+    /// track -> truth matching (disabled)
     virtual StatusCode match(
-        const std::vector< const xAOD::TrackParticle* >& vTest,
-        const std::vector< const xAOD::TruthParticle* >& vRef,
-        ITrackMatchingLookup& matches ) const override;
-
-    /// truth -> track matching (disabled)
-    virtual StatusCode match(
-        const std::vector< const xAOD::TruthParticle* >&,
         const std::vector< const xAOD::TrackParticle* >&,
+        const std::vector< const xAOD::TruthParticle* >&,
         ITrackMatchingLookup& ) const override
     {
-      ATH_MSG_DEBUG( "truth -> track matching disabled" );
+      ATH_MSG_DEBUG( "track -> truth matching disabled" );
       return StatusCode::SUCCESS;
     }
+
+    /// truth -> track matching
+    virtual StatusCode match(
+        const std::vector< const xAOD::TruthParticle* >& vTest,
+        const std::vector< const xAOD::TrackParticle* >& vRef,
+        ITrackMatchingLookup& matches ) const override;
 
   private:
 
     FloatProperty m_truthProbCut { 
         this, "MatchingTruthProb", 0.5, "Minimal truthProbability for valid matching" };
 
-  }; // class TrackTruthMatchingTool
+  }; // class TruthTrackMatchingTool
 
 } // namespace IDTPM
 
-#endif // > !INDETTRACKPERFMON_TRACKTRUTHMATCHINGTOOL_H
+#endif // > !INDETTRACKPERFMON_TRUTHTRACKMATCHINGTOOL_H

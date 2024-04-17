@@ -49,10 +49,10 @@ def InDetOutputCfg( flags, **kwargs ):
         })
 
         ## adding TruthParticleContainers
-        truthTracks = getattr( flags.PhysVal.IDTPM, trkAnaName+'.TruthPartKey' )
+        truthParticles = getattr( flags.PhysVal.IDTPM, trkAnaName+'.TruthPartKey' )
         itemsToRecord.update({
-            'xAOD::TruthParticleContainer#'+truthTracks,
-            'xAOD::TruthParticleAuxContainer#'+truthTracks+'Aux.',
+            'xAOD::TruthParticleContainer#'+truthParticles,
+            'xAOD::TruthParticleAuxContainer#'+truthParticles+'Aux.',
         })
 
         ## adding object containers

@@ -18,7 +18,7 @@ asetup Athena,main,latest
 ```  
 to get the most up-to date nightly or 
 ```
-asetup Athena,24.0.16
+asetup Athena,25.0.2
 ``` 
 to get a stable release. Recent releases can be found [like this](https://gitlab.cern.ch/atlas/athena/-/tags?sort=updated_desc&search=release) and the search will filter by name.
 Release numbering is explained [here](https://atlassoftwaredocs.web.cern.ch/athena/athena-releases/).

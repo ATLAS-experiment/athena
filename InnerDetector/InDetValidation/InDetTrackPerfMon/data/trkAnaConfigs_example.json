@@ -9,6 +9,16 @@
         "MatchingType"  : "TruthMatch", 
         "SubFolder"  : "TrkAnaTrig1/"
     },
+    "TrkAnaTrig1Purity" : {
+        "enabled" : true,
+        "TestType"  : "Truth",
+        "RefType"   : "Trigger", 
+        "TrigTrkKey"    : "HLT_IDTrack_Electron_IDTrig",
+        "ChainNames"    : [ "HLT_e26_idperf_loose_L1EM22VHI", 
+                            "HLT_e5_idperf_tight_L1EM3" ],
+        "MatchingType"  : "TruthMatch", 
+        "SubFolder"  : "TrkAnaTrig1/"
+    },
     "TrkAnaTrig2" : {
         "enabled" : true,
         "TestType"  : "Trigger",
