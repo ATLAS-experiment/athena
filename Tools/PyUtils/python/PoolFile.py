@@ -382,7 +382,9 @@ def extract_streams_from_tag (fname,
 
 class PoolOpts(object):
     # default names of APR file storage elements
-    # copied here from APRDefaults.h for performance (as the first dictionary access takes 7 sec)
+    # copied here from RootUtils/APRDefaults.h for performance (as the first dictionary access takes 7 sec)
+    # see ATEAM-973 for a more detailed discussion
+    # the definitions here should be kept in sync with those!
     class TTreeNames:
         EventData   = "CollectionTree"
         EventTag    = "POOLCollectionTree"
