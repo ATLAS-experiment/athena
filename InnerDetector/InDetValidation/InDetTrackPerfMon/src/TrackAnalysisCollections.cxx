@@ -21,7 +21,7 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections(
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
     m_anaTag( anaTag ), m_trkAnaDefSvc( nullptr )
 {
-  m_truthTrackVec.resize( NStages );
+  m_truthPartVec.resize( NStages );
   m_offlTrackVec.resize( NStages );
   m_trigTrackVec.resize( NStages );
 }
@@ -59,7 +59,7 @@ StatusCode IDTPM::TrackAnalysisCollections::initialize()
 /// --- Fill FULL containers ---
 /// ----------------------------
 /// Truth particles
-StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackContainer(
+StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
   const SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey )
 {
   if( m_trkAnaDefSvc->useTruth() ) {
@@ -73,16 +73,16 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackContainer(
     }
 
     /// Fill container
-    m_truthTrackContainer = pColl.ptr();
+    m_truthPartContainer = pColl.ptr();
 
     /// Fill FULL vector
-    m_truthTrackVec[ FULL ].clear(); 
-    m_truthTrackVec[ FULL ].insert(
-      m_truthTrackVec[ FULL ].begin(),
+    m_truthPartVec[ FULL ].clear(); 
+    m_truthPartVec[ FULL ].insert(
+      m_truthPartVec[ FULL ].begin(),
       pColl->begin(), pColl->end() );
   } else {
-    m_truthTrackContainer = nullptr;
-    m_truthTrackVec[ FULL ].clear();
+    m_truthPartContainer = nullptr;
+    m_truthPartVec[ FULL ].clear();
   }
 
   return StatusCode::SUCCESS; 
@@ -157,9 +157,9 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTestTruthVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   if( m_trkAnaDefSvc->isTestTruth() ) {
-    m_truthTrackVec[ stage ].clear(); 
-    m_truthTrackVec[ stage ].insert( 
-      m_truthTrackVec[ stage ].begin(),
+    m_truthPartVec[ stage ].clear(); 
+    m_truthPartVec[ stage ].insert( 
+      m_truthPartVec[ stage ].begin(),
       vec.begin(), vec.end() );
     return StatusCode::SUCCESS; 
   }
@@ -199,9 +199,9 @@ StatusCode IDTPM::TrackAnalysisCollections::fillRefTruthVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
-    m_truthTrackVec[ stage ].clear(); 
-    m_truthTrackVec[ stage ].insert( 
-      m_truthTrackVec[ stage ].begin(),
+    m_truthPartVec[ stage ].clear(); 
+    m_truthPartVec[ stage ].insert( 
+      m_truthPartVec[ stage ].begin(),
       vec.begin(), vec.end() );
     return StatusCode::SUCCESS; 
   }
@@ -236,14 +236,14 @@ StatusCode IDTPM::TrackAnalysisCollections::fillRefTrackVec(
 }
 
 /// Truth tracks
-StatusCode IDTPM::TrackAnalysisCollections::fillTruthTrackVec(
+StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartVec(
   const std::vector< const xAOD::TruthParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   if( m_trkAnaDefSvc->useTruth() ) {
-    m_truthTrackVec[ stage ].clear();
-    m_truthTrackVec[ stage ].insert(
-      m_truthTrackVec[ stage ].begin(),
+    m_truthPartVec[ stage ].clear();
+    m_truthPartVec[ stage ].insert(
+      m_truthPartVec[ stage ].begin(),
       vec.begin(), vec.end() );
     return StatusCode::SUCCESS;
   }
@@ -301,7 +301,7 @@ bool IDTPM::TrackAnalysisCollections::empty(
   bool isOfflEmpty  = m_trkAnaDefSvc->useOffline() ?
                       m_offlTrackVec[ stage ].empty() : false;
   bool isTruthEmpty = m_trkAnaDefSvc->useTruth() ?
-                      m_truthTrackVec[ stage ].empty() : false;
+                      m_truthPartVec[ stage ].empty() : false;
 
   if( isTrigEmpty or isOfflEmpty or isTruthEmpty ) return true;
 
@@ -313,17 +313,17 @@ void IDTPM::TrackAnalysisCollections::clear(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   if( stage == FULL ) {
-    m_truthTrackVec[ FULL ].clear();
+    m_truthPartVec[ FULL ].clear();
     m_offlTrackVec[ FULL ].clear();
     m_trigTrackVec[ FULL ].clear();
   }
   if( stage == FULL or stage == FS ) {
-    m_truthTrackVec[ FS ].clear();
+    m_truthPartVec[ FS ].clear();
     m_offlTrackVec[ FS ].clear();
     m_trigTrackVec[ FS ].clear();
   }
   if( stage == FULL or stage == FS or stage == InRoI ) {
-    m_truthTrackVec[ InRoI ].clear();
+    m_truthPartVec[ InRoI ].clear();
     m_offlTrackVec[ InRoI ].clear();
     m_trigTrackVec[ InRoI ].clear();
   }
@@ -342,11 +342,11 @@ void IDTPM::TrackAnalysisCollections::copyFS()
     m_offlTrackVec[ FS ].end() );
 
   /// truth copy
-  m_truthTrackVec[ InRoI ].clear(); 
-  m_truthTrackVec[ InRoI ].insert( 
-    m_truthTrackVec[ InRoI ].begin(),
-    m_truthTrackVec[ FS ].begin(),
-    m_truthTrackVec[ FS ].end() );
+  m_truthPartVec[ InRoI ].clear(); 
+  m_truthPartVec[ InRoI ].insert( 
+    m_truthPartVec[ InRoI ].begin(),
+    m_truthPartVec[ FS ].begin(),
+    m_truthPartVec[ FS ].end() );
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after in RoI copy: " << printInfo( InRoI ) );
@@ -360,7 +360,7 @@ const xAOD::TruthParticleContainer*
 IDTPM::TrackAnalysisCollections::testTruthContainer()
 {
   if( m_trkAnaDefSvc->isTestTruth() ) {
-    return m_truthTrackContainer;
+    return m_truthPartContainer;
   }
 
   return nullptr;
@@ -386,7 +386,7 @@ const xAOD::TruthParticleContainer*
 IDTPM::TrackAnalysisCollections::refTruthContainer()
 {
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
-    return m_truthTrackContainer;
+    return m_truthPartContainer;
   }
 
   return nullptr;
@@ -416,7 +416,7 @@ IDTPM::TrackAnalysisCollections::testTruthVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   if( m_trkAnaDefSvc->isTestTruth() ) {
-    return m_truthTrackVec[ stage ];
+    return m_truthPartVec[ stage ];
   }
 
   ATH_MSG_DEBUG( "No Test truth vector found" );
@@ -446,7 +446,7 @@ IDTPM::TrackAnalysisCollections::refTruthVec(
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
-    return m_truthTrackVec[ stage ];
+    return m_truthPartVec[ stage ];
   }
 
   ATH_MSG_DEBUG( "No Reference truth vector found" );
@@ -495,7 +495,7 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
     ss << "==========================================" << std::endl;
 
   it = 0;
-  for( const xAOD::TruthParticle* thisTruthParticle : m_truthTrackVec[ stage ] ) {
+  for( const xAOD::TruthParticle* thisTruthParticle : m_truthPartVec[ stage ] ) {
     ss << "Truth particle"
        << " : pt = "  << pT( *thisTruthParticle )
        << " : eta = " << eta( *thisTruthParticle )
@@ -505,7 +505,7 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
     it++;
   }
 
-  if( not m_truthTrackVec[ stage ].empty() )
+  if( not m_truthPartVec[ stage ].empty() )
       ss << "==========================================" << std::endl;
 
   it = 0;
@@ -544,16 +544,16 @@ std::string IDTPM::TrackAnalysisCollections::printMatchInfo()
 }
 
 
-/// --------------------------------
-/// --- update chainRoiNames set ---
-/// --------------------------------
+/// ----------------------------
+/// --- update chainRois map ---
+/// ----------------------------
 bool IDTPM::TrackAnalysisCollections::updateChainRois(
-    const std::string& chainRoi )
+    const std::string& chainRoi, const std::string& roiStr )
 {
   ATH_MSG_DEBUG( "Updating TrackAnalysisCollection with ChainRoiName: " << chainRoi );
 
-  std::pair< std::set<std::string>::iterator, bool > result =
-      m_chainRois.insert( chainRoi );
+  std::pair< mapChainRoi_t::iterator, bool > result =
+      m_chainRois.insert( mapChainRoi_t::value_type( chainRoi, roiStr ) );
 
   if( not result.second ) {
     ATH_MSG_WARNING( "ChainRoiName has already been cached. No update." );

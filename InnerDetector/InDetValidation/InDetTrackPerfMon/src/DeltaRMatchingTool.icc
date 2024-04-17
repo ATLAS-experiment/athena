@@ -1,0 +1,235 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/**
+ * @file DeltaRMatchingTool.icc
+ * @author Marco Aparo, Thomas Strebler
+ **/
+
+/// local includes
+#include "TrackMatchingLookup.h"
+#include "TrackParmetersHelper.h"
+
+/// STL include(s)
+#include <cmath> // std::fabs
+#include <algorithm> // for std::sort, std::lower_bound, std::upper_bound, std::set_intersection
+#include <iterator> // std::back_inserter
+
+
+/// ------------------------
+/// ----- matchVectors -----
+/// ------------------------
+template< typename T, typename R >
+StatusCode IDTPM::DeltaRMatchingToolBase<T, R>::matchVectors(
+    const std::vector< const T* >& vTest,
+    const std::vector< const R* >& vRef,
+    ITrackMatchingLookup& matches ) const
+{
+  for( const T* t : vTest ) {
+    /// Skip invalid test
+    if( not t ) continue;
+
+    /// Find matched reference
+    const R* r = getMatchedRef( *t, vRef );
+
+    /// Skip if no reference is found
+    if( not r ) continue;
+
+    ATH_MSG_DEBUG( "Found matched reference with pT = " << pT(*r) );
+
+    /// Updating lookup table with new match
+    ATH_CHECK( matches.update( *t, *r ) );
+  } // loop over vTest
+
+  return StatusCode::SUCCESS;
+}
+
+
+/// -------------------------
+/// ----- getMatchedRef -----
+/// -------------------------
+template< typename T, typename R >
+const R* IDTPM::DeltaRMatchingToolBase<T, R>::getMatchedRef(
+    const T& t, const std::vector< const R* >& vRef ) const
+{
+  ATH_MSG_DEBUG( "Reference vector size before sorting = " << vRef.size() );
+
+  /// Initially making copies of the whole reference vector
+  std::vector< const R* > vec_pt( vRef );
+  std::vector< const R* > vec_eta( vRef );
+  std::vector< const R* > vec_phi( vRef );
+
+  /// Sorting vec_pt by increasing pT
+  std::sort( vec_pt.begin(), vec_pt.end(),
+             []( const R* r1, const R* r2 ) -> bool{ 
+               return ( pT(*r1) < pT(*r2) ); } );
+
+  /// Sorting vec_eta by increasing eta
+  std::sort( vec_eta.begin(), vec_eta.end(),
+             []( const R* r1, const R* r2 ) -> bool{ 
+               return ( eta(*r1) < eta(*r2) ); } );
+
+  /// Sorting vec_phi by increasing phi
+  std::sort( vec_phi.begin(),  vec_phi.end(),
+             []( const R* r1, const R* r2 ) -> bool{ 
+               return ( phi(*r1) < phi(*r2) ); } );
+
+  ATH_MSG_DEBUG( "Reference vector size after pT sorting = " << vec_pt.size() );
+  ATH_MSG_DEBUG( "Reference vector size after eta sorting = " << vec_eta.size() );
+  ATH_MSG_DEBUG( "Reference vector size after phi sorting = " << vec_phi.size() );
+
+  /// Perform search in reference vectors to select the references
+  /// in the [eta(t)-dR, eta(t)+dR], [phi(t)-dR, phi(t)+dR] ranges
+  /// and, if applicable, in the [pT(t)*(1-pTres),pT(t)*(1+pTres)] range
+  typename std::vector< const R* >::iterator  it_pt_lower = 
+      m_pTResMax < 0 ? vec_pt.begin() : 
+      std::lower_bound( vec_pt.begin(), vec_pt.end(),
+                        pT(t) * ( 1. - m_pTResMax ),
+                        []( const R* r, const float& val ) -> bool{
+                          return pT(*r) < val; } );
+
+  typename std::vector< const R* >::iterator  it_pt_upper =
+      m_pTResMax < 0 ? vec_pt.end() :
+      std::upper_bound( vec_pt.begin(), vec_pt.end(),
+                        pT(t) * ( 1. + m_pTResMax ),
+                        []( const float& val, const R* r ) -> bool{
+                          return val < pT(*r); } );
+
+  typename std::vector< const R* >::iterator  it_eta_lower = 
+      m_dRmax < 0 ? vec_eta.begin() :
+      std::lower_bound( vec_eta.begin(), vec_eta.end(),
+                        eta(t) - m_dRmax,
+                        []( const R* r, const float& val ) -> bool{
+                          return eta(*r) < val; } );
+
+  typename std::vector< const R* >::iterator  it_eta_upper =
+      m_dRmax < 0 ? vec_eta.end() :
+      std::upper_bound( vec_eta.begin(), vec_eta.end(),
+                        eta(t) + m_dRmax,
+                        []( const float& val, const R* r ) -> bool{
+                          return val < eta(*r); } );
+
+  /// Dealing with cyclic nature of phi:
+  /// Determining whether phi range wraps around +-PI
+  bool wrapLow = phi(t) - m_dRmax < -M_PI;
+  bool wrapHigh = phi(t) + m_dRmax > M_PI;
+  bool wrap = wrapLow or wrapHigh;
+
+  typename std::vector< const R* >::iterator  it_phi_lower =
+      m_dRmax < 0 ? vec_phi.begin() :
+      std::lower_bound( vec_phi.begin(), vec_phi.end(),
+                        phi(t) - m_dRmax + ( wrapLow ? 2.*M_PI : 0 ),
+                        []( const R* r, const float& val ) -> bool{
+                          return phi(*r) < val; } );
+
+  typename std::vector< const R* >::iterator  it_phi_upper =
+      m_dRmax < 0 ? vec_phi.end() :
+      std::upper_bound( vec_phi.begin(), vec_phi.end(),
+                        phi(t) + m_dRmax + ( wrapHigh ? -2.*M_PI : 0 ),
+                        []( const float& val, const R* r ) -> bool{
+                          return val < phi(*r); } );
+
+  /// Break early if no reference track passed the selection
+  if( m_pTResMax > 0 and it_pt_upper < it_pt_lower ) {
+    ATH_MSG_DEBUG( "Break early: out of pTres range" );
+    return nullptr;
+  }
+
+  if( m_dRmax > 0 and it_eta_upper < it_eta_lower ) {
+    ATH_MSG_DEBUG( "Break early: out of eta range" );
+    return nullptr;
+  }
+
+  if( m_dRmax > 0 and ( ( !wrap and it_phi_upper < it_phi_lower ) or
+             ( wrap and it_phi_upper > it_phi_lower ) ) ) {
+    ATH_MSG_DEBUG( "Break early: out of phi range" );
+    return nullptr;
+  }
+
+  /// Initialise base set
+  std::vector< const R* > set( vec_pt );
+
+  /// Sort, pointer-based; necessary for set_intersection
+  std::sort( set.begin(), set.end() );
+
+  /// Compute subset of selected truth particles
+  std::vector< const R* > subset_pt( it_pt_lower, it_pt_upper );
+  std::vector< const R* > subset_eta( it_eta_lower, it_eta_upper );
+  std::vector< const R* > subset_phi;
+  if( !wrap ) {
+    subset_phi = std::vector< const R* >( it_phi_lower, it_phi_upper );
+  } else {
+    subset_phi = std::vector< const R* >( vec_phi.begin(), it_phi_upper );
+    subset_phi.insert( subset_phi.end(), it_phi_lower, vec_phi.end() );
+  }
+
+  ATH_MSG_DEBUG( "Reference vector subset_pt size  = " << subset_pt.size() );
+  ATH_MSG_DEBUG( "Reference vector subset_eta size = " << subset_eta.size() );
+  ATH_MSG_DEBUG( "Reference vector subset_phi size = " << subset_phi.size() );
+
+  /// Add subsets according to specified cut values
+  std::vector< std::vector< const R* > > subsets;
+  if( m_pTResMax > 0 ) {
+    subsets.push_back( subset_pt );
+  }
+  if( m_dRmax > 0 ) {
+    subsets.push_back( subset_eta );
+    subsets.push_back( subset_phi );
+  }
+
+  /// Compute successive intersections between base set and subset
+  for( std::vector< const R* > subset : subsets ) {
+
+    /// -- Sort, pointer-based; necessary for set::set_intersection
+    std::sort( subset.begin(), subset.end() );
+
+    /// -- Set intersection
+    std::vector< const R* > intersection;
+    std::set_intersection(
+        set.begin(), set.end(),
+        subset.begin(), subset.end(),
+        std::back_inserter( intersection ) );
+
+    /// -- Break early if intersection is empty
+    if( intersection.empty() ) {
+      ATH_MSG_DEBUG( "Break early: empty intersection" );
+      return nullptr;
+    }
+    set = intersection;
+  }
+
+  /// vector "set" now contains all matched reference tracks
+  ATH_MSG_DEBUG( "Reference vector subsets intersection size = " << set.size() );
+  /// Now picking the best match... 
+
+  /// If only pT-matching, return the closest track in pTres
+  if( m_dRmax < 0 ) {
+    int i_pTres_best(-1);
+    float pTres_best(999.);
+    for( size_t i=0 ; i<set.size() ; i++ ) {
+      float pTres_tmp =
+          std::fabs( pT(t) - pT( *(set.at(i)) ) ) / std::fabs( pT(t) );
+      if( pTres_tmp < pTres_best ) {
+        pTres_best = pTres_tmp;
+        i_pTres_best = i;
+      }
+    }
+    if( i_pTres_best < 0 ) return nullptr;
+    return set.at( i_pTres_best );
+  }
+
+  /// Otherwise, compute dR for all remaining reference tracks
+  /// and return the closest one in dR
+  int i_dR_best(-1);
+  float dR_best(999.);
+  for( size_t i=0 ; i<set.size() ; i++ ) {
+    float dR_tmp = deltaR( t, *(set.at(i)) ); 
+    if( dR_tmp < dR_best and dR_tmp < m_dRmax ) {
+      dR_best = dR_tmp;
+      i_dR_best = i;
+    }
+  }
+  if( i_dR_best < 0 ) return nullptr;
+  return set.at(i_dR_best);
+}

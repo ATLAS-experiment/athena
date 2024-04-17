@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <set>
+#include <unordered_map>
 
 
 namespace IDTPM {
@@ -63,7 +63,7 @@ namespace IDTPM {
     /// --- Setter methods ---
 
     /// fill FULL collections and vectors
-    StatusCode fillTruthTrackContainer(
+    StatusCode fillTruthPartContainer(
         const SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey );
 
     StatusCode fillOfflTrackContainer(
@@ -91,7 +91,7 @@ namespace IDTPM {
         Stage stage = FULL );
 
     /// get truth/offline/trigger track vector (TEST or REFERENCE)
-    StatusCode fillTruthTrackVec(
+    StatusCode fillTruthPartVec(
         const std::vector< const xAOD::TruthParticle* >& vec,
         Stage stage = FULL );
 
@@ -131,8 +131,8 @@ namespace IDTPM {
     const xAOD::TrackParticleContainer* refTrackContainer();
 
     /// get truth/offline/trigger track containers (TEST or REFERENCE)
-    const xAOD::TruthParticleContainer* truthTrackContainer() {
-      return m_truthTrackContainer; }
+    const xAOD::TruthParticleContainer* truthPartContainer() {
+      return m_truthPartContainer; }
     const xAOD::TrackParticleContainer* offlTrackContainer() {
       return m_offlTrackContainer; }
     const xAOD::TrackParticleContainer* trigTrackContainer() {
@@ -147,8 +147,8 @@ namespace IDTPM {
     const std::vector< const xAOD::TrackParticle* >& refTrackVec( Stage stage = FULL );
 
     /// get truth/offline/trigger track vector (TEST or REFERENCE)
-    const std::vector< const xAOD::TruthParticle* >& truthTrackVec( Stage stage = FULL ) {
-      return m_truthTrackVec[ stage ]; }
+    const std::vector< const xAOD::TruthParticle* >& truthPartVec( Stage stage = FULL ) {
+      return m_truthPartVec[ stage ]; }
     const std::vector< const xAOD::TrackParticle* >& offlTrackVec( Stage stage = FULL ) {
       return m_offlTrackVec[ stage ]; }
     const std::vector< const xAOD::TrackParticle* >& trigTrackVec( Stage stage = FULL ) {
@@ -160,8 +160,8 @@ namespace IDTPM {
     /// print matching information
     std::string printMatchInfo();
 
-    /// update chainRoiNames set
-    bool updateChainRois( const std::string& chainRoi );
+    /// update chainRois map
+    bool updateChainRois( const std::string& chainRoi, const std::string& roiStr );
 
   private:
 
@@ -171,12 +171,12 @@ namespace IDTPM {
 
     /// --- Collections class variables ---
     /// Full collections
-    const xAOD::TruthParticleContainer* m_truthTrackContainer{nullptr};
+    const xAOD::TruthParticleContainer* m_truthPartContainer{nullptr};
     const xAOD::TrackParticleContainer* m_offlTrackContainer{nullptr};
     const xAOD::TrackParticleContainer* m_trigTrackContainer{nullptr};
 
     /// vectors of track/truth particles at different stages of the selection/workflow
-    std::vector<std::vector< const xAOD::TruthParticle* >> m_truthTrackVec{};
+    std::vector<std::vector< const xAOD::TruthParticle* >> m_truthPartVec{};
     std::vector<std::vector< const xAOD::TrackParticle* >> m_offlTrackVec{};
     std::vector<std::vector< const xAOD::TrackParticle* >> m_trigTrackVec{};
 
@@ -187,8 +187,9 @@ namespace IDTPM {
     /// Lookup table for test-reference matching
     std::unique_ptr< ITrackMatchingLookup > m_matches;
 
-    /// Set of chainRoiNames for caching
-    std::set< std::string > m_chainRois{};
+    /// map of chainRoiNames for caching
+    typedef std::unordered_map< std::string, std::string > mapChainRoi_t;
+    mapChainRoi_t m_chainRois{};
  
   }; // class TrackAnalysisCollections
 
