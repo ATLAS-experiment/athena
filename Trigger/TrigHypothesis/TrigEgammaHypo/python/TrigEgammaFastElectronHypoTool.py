@@ -150,7 +150,7 @@ class TrigEgammaFastElectronHypoToolConfig:
     monTool.defineHistogram('CaloPhi', type='TH1F', path='EXPERT', title="FastElectron Hypo #phi^{calo} ; #phi^{calo};Nevents", xbins=320, xmin=-3.2, xmax=3.2)
     monTool.defineHistogram('d0Value', type="TH1F", path='EXPERT', title="FastElectron Hypo Track d0; d0 [mm]", xbins=100, xmin=-1, xmax=1)
     if self.tool().DoRinger:
-      monTool.defineHistogram('NNOutput',type='TH1F', path='EXPERT',title="NN Output; NN; Count", xbins=17,xmin=-8,xmax=+8),
+      monTool.defineHistogram('NNOutput',type='TH1F', path='EXPERT',title="NN Output; NN; Count", xbins=17,xmin=-8,xmax=+8)
 
     monTool.HistPath = 'FastElectronHypo/'+self.__name
     self.tool().MonTool = monTool
