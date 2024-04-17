@@ -2,85 +2,84 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-//  Initial version:                                       
-//  - 2017, Sep -- Riccardo Maria BIANCHI                  
-//                 <riccardo.maria.bianchi@cern.ch>        
-//  Main updates:                                          
-//  - 2024, Feb -- Riccardo Maria BIANCHI                  
-//                 <riccardo.maria.bianchi@cern.ch>   
-//                 Moved configuration to ComponentAccumulator (CA)   
-//  - 2024, Mar -- Riccardo Maria BIANCHI                  
-//                 <riccardo.maria.bianchi@cern.ch> 
-//                 Removed GeoExporter, moved all to DumpGeo     
+//  Initial version:
+//  - 2017, Sep -- Riccardo Maria BIANCHI
+//                 <riccardo.maria.bianchi@cern.ch>
+//  Main updates:
+//  - 2024, Feb -- Riccardo Maria BIANCHI
+//                 <riccardo.maria.bianchi@cern.ch>
+//                 Moved configuration to ComponentAccumulator (CA)
+//  - 2024, Mar -- Riccardo Maria BIANCHI
+//                 <riccardo.maria.bianchi@cern.ch>
+//                 Removed GeoExporter, moved all to DumpGeo
 
 #include "DumpGeo/DumpGeo.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "GeoModelUtilities/GeoModelExperiment.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
+#include "GeoModelUtilities/GeoModelExperiment.h"
 
 // From GeoModel in Externals
-#include "GeoModelKernel/GeoVolumeCursor.h"
-#include "GeoModelKernel/GeoVDetectorManager.h"
-#include "GeoModelKernel/GeoBox.h"
 #include "GeoModelDBManager/GMDBManager.h"
+#include "GeoModelKernel/GeoBox.h"
+#include "GeoModelKernel/GeoVDetectorManager.h"
+#include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelWrite/WriteGeoModel.h"
-// #include "GeoModelHelpers/defineWorld.h" // not available in 24.0... 
+// #include "GeoModelHelpers/defineWorld.h" // not available in 24.0...
 
 // C++ includes
-#include <vector>
-#include <stdexcept>
-#include <iostream>
+#include <cstdlib>  //For setenv
 #include <iomanip>
-#include <cstdlib> //For setenv
+#include <iostream>
+#include <stdexcept>
+#include <vector>
 
 // Units
 #include "GeoModelKernel/Units.h"
 #define UNITS GeoModelKernelUnits  // so we can use, e.g., 'UNITS::cm'
 
-
-//TODO: replace this with GeoModelHelpers/defineWorld.h
+// TODO: replace this with GeoModelHelpers/defineWorld.h
 //_____________________________________________________________________________________
-GeoPhysVol* createTheWorld()
-{
-  // Define the units
-  #define gr   UNITS::gram
-  #define mole UNITS::mole
-  #define cm3  UNITS::cm3
+GeoPhysVol* createTheWorld() {
+// Define the units
+#define gr UNITS::gram
+#define mole UNITS::mole
+#define cm3 UNITS::cm3
 
   // Define the chemical elements
-  GeoElement*  Nitrogen = new GeoElement ("Nitrogen" ,"N"  ,  7.0 ,  14.0067 *gr/mole);
-  GeoElement*  Oxygen   = new GeoElement ("Oxygen"   ,"O"  ,  8.0 ,  15.9995 *gr/mole);
-  GeoElement*  Argon    = new GeoElement ("Argon"    ,"Ar" , 18.0 ,  39.948  *gr/mole);
-  GeoElement*  Hydrogen = new GeoElement ("Hydrogen" ,"H"  ,  1.0 ,  1.00797 *gr/mole);
+  GeoElement* Nitrogen =
+      new GeoElement("Nitrogen", "N", 7.0, 14.0067 * gr / mole);
+  GeoElement* Oxygen = new GeoElement("Oxygen", "O", 8.0, 15.9995 * gr / mole);
+  GeoElement* Argon = new GeoElement("Argon", "Ar", 18.0, 39.948 * gr / mole);
+  GeoElement* Hydrogen =
+      new GeoElement("Hydrogen", "H", 1.0, 1.00797 * gr / mole);
 
   // Define the materials
-  double densityOfAir=0.001214 *gr/cm3;
-  GeoMaterial *air = new GeoMaterial("Air", densityOfAir);
-  air->add(Nitrogen  , 0.7494);
+  double densityOfAir = 0.001214 * gr / cm3;
+  GeoMaterial* air = new GeoMaterial("Air", densityOfAir);
+  air->add(Nitrogen, 0.7494);
   air->add(Oxygen, 0.2369);
   air->add(Argon, 0.0129);
   air->add(Hydrogen, 0.0008);
   air->lock();
- 
+
   //-----------------------------------------------------------------------------------//
   // create the world volume container and
   // get the 'world' volume, i.e. the root volume of the GeoModel tree
-  const GeoBox* worldBox = new GeoBox(1000*UNITS::cm, 1000*UNITS::cm, 1000*UNITS::cm);
+  const GeoBox* worldBox =
+      new GeoBox(1000 * UNITS::cm, 1000 * UNITS::cm, 1000 * UNITS::cm);
   const GeoLogVol* worldLog = new GeoLogVol("WorldLog", worldBox, air);
   GeoPhysVol* world = new GeoPhysVol(worldLog);
   return world;
 }
 
 //____________________________________________________________________
-DumpGeo::DumpGeo(const std::string& name, ISvcLocator* svcLocator):
-  AthAlgorithm(name, svcLocator)
-{}
+DumpGeo::DumpGeo(const std::string& name, ISvcLocator* svcLocator)
+    : AthAlgorithm(name, svcLocator) {}
 
 //____________________________________________________________________
-StatusCode DumpGeo::initialize()
-{
+StatusCode DumpGeo::initialize() {
   ATH_MSG_DEBUG("in initialize()");
 
   ATH_MSG_INFO("===================================================");
@@ -88,124 +87,163 @@ StatusCode DumpGeo::initialize()
   ATH_MSG_INFO("===================================================");
 
   ATH_MSG_INFO("Accessing the ATLAS geometry...");
-  const GeoModelExperiment * theExpt = nullptr;
-  ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
+  const GeoModelExperiment* theExpt = nullptr;
+  ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
 
   // Get the ATLAS GEOMETRY 'World' volume
   PVConstLink world(theExpt->getPhysVol());
 
-  ATH_MSG_INFO("User filter DetectorManagers: " << m_user_filterDetManagersList);
+  ATH_MSG_INFO(
+      "User filter DetectorManagers: " << m_user_filterDetManagersList);
 
   ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc", name());
   ATH_CHECK(geoDbTag.retrieve());
-  ATH_MSG_INFO("This is the Geometry TAG we are dumping: " << geoDbTag->atlasVersion());
-
+  ATH_MSG_INFO(
+      "This is the Geometry TAG we are dumping: " << geoDbTag->atlasVersion());
 
   GeoPhysVol* volTop = createTheWorld();
 
+  // Get list of managers
+  // We fill a set from the output vector,
+  // so we can use its built-in 'count' method later,
+  // to search for DetManagers
+  ATH_MSG_INFO(
+      "List of the GeoModel Detector Managers that are being dumped: ");
+  std::set<std::string> managersList{};
+  {
+    std::vector<std::string> blub = theExpt->getListOfManagers();
+    managersList.insert(blub.begin(), blub.end());
+  }
+  if (msgLvl(MSG::INFO)) {
+    for (auto const& man : managersList) {
+      // get the DetectorManager
+      const GeoVDetectorManager* manager = theExpt->getManager(man);
+      unsigned int nTreetops = manager->getNumTreeTops();
+      std::cout << "\t" << man << " [contains " << nTreetops << " treetops]"
+                << std::endl;
+      // if (msgLvl(MSG::VERBOSE)) {
+        for (unsigned int i = 0; i < nTreetops; ++i) {
+          PVConstLink treetop(manager->getTreeTop(i));
+          // get treetop's volume
+          const GeoVPhysVol* vol = treetop;
+          // get treetop's logvol's name
+          std::string volName = vol->getLogVol()->getName();
+          std::cout << "\t\t treetop: " << volName << std::endl;
+        }
+      // }
+    }
+  }
 
-  if ( !(m_user_filterDetManagersList.empty()) ) {
-    
-    // Get list of managers
-    // We fill a set from the output vector, 
-    // so we can use its built-in 'count' method later,
-    // to search for DetManagers
-    ATH_MSG_INFO("List of GeoModel Detector Managers: ");
-    std::set<std::string> managersList{};
-    {
-       std::vector<std::string> blub = theExpt->getListOfManagers();
-       managersList.insert(blub.begin(), blub.end());
-    }    
+  if (!(m_user_filterDetManagersList.empty())) {
+
+    // // Get list of managers
+    // // We fill a set from the output vector,
+    // // so we can use its built-in 'count' method later,
+    // // to search for DetManagers
+    // ATH_MSG_INFO("List of GeoModel Detector Managers: ");
+    // std::set<std::string> managersList{};
+    // {
+    //    std::vector<std::string> blub = theExpt->getListOfManagers();
+    //    managersList.insert(blub.begin(), blub.end());
+    // }
 
     // Convert the list of det managers passed by the user into a set
     std::set<std::string> user_managersList{};
     {
-       user_managersList.insert(m_user_filterDetManagersList.begin(), m_user_filterDetManagersList.end());
+      user_managersList.insert(m_user_filterDetManagersList.begin(),
+                               m_user_filterDetManagersList.end());
     }
 
-    // safety check: 
+    // safety check:
     // check that all DetManagers requested by the user are in the list
     // If not, print an error message to warn the user and return
     for (auto& userDet : user_managersList) {
-      if ( !managersList.count(userDet)) {
-        ATH_MSG_FATAL("This Detector Manager you requested to dump is not in the list of DetectorManagers for the geometry tag you are using: " << userDet);
-        throw GaudiException("The Detector Manager you requested to dump is not in the list of DetectorManagers.", 
-                                    "DumpGeo", StatusCode::FAILURE);
+      if (!managersList.count(userDet)) {
+        ATH_MSG_FATAL(
+            "This Detector Manager you requested to dump is not in the list of "
+            "DetectorManagers for the geometry tag you are using: "
+            << userDet);
+        throw GaudiException(
+            "The Detector Manager you requested to dump is not in the list of "
+            "DetectorManagers.",
+            "DumpGeo", StatusCode::FAILURE);
       }
     }
 
+    if (!(managersList.empty())) {
+      for (auto const& mm : managersList) {
+        // get the DetectorManager
+        const GeoVDetectorManager* manager = theExpt->getManager(mm);
 
-    if ( !(managersList.empty()) ) {
-    for (auto const& mm : managersList)
-      {
-          // get the DetectorManager
-          const GeoVDetectorManager* manager = theExpt->getManager(mm);
+        // get the name of the DetectorManager
+        std::string detManName = manager->getName();
+        ATH_MSG_INFO("\tDetectorManager: " << detManName);
 
-          // get the name of the DetectorManager
-          std::string detManName = manager->getName();
-          ATH_MSG_INFO("\tDetectorManager: " << detManName);
+        // get the DetManager's TreeTops
+        unsigned int nTreetops = manager->getNumTreeTops();
+        ATH_MSG_INFO("\t" << mm << " - # TreeTops: " << nTreetops);
 
-          // get the DetManager's TreeTops
-          unsigned int nTreetops = manager->getNumTreeTops();
-          ATH_MSG_INFO("\t" << mm << " - # TreeTops: " << nTreetops);
+        // if ( nTreetops > 0) && isStringInVector(m_user_filterDetManagersList,
+        // detManName) ) {
+        if ((nTreetops > 0) && user_managersList.count(detManName)) {
 
-          // if ( nTreetops > 0) &&  isStringInVector(m_user_filterDetManagersList, detManName) ) {
-          if ( ( nTreetops > 0) &&  user_managersList.count(detManName) ) {
-              
-              for(unsigned int i=0; i < nTreetops; ++i) {
+          for (unsigned int i = 0; i < nTreetops; ++i) {
 
-                  PVConstLink treetop(manager->getTreeTop(i));
+            PVConstLink treetop(manager->getTreeTop(i));
 
-                  // get treetop's volume
-                  const GeoVPhysVol* vol = treetop;
-                  
-                  // get volume's transform
-                  // NOTE: we use getDefX() to get the transform without any alignment
-                  GeoTransform* volXf = new GeoTransform( vol->getDefX() );
-                  
-                  // get volume's logvol's name
-                  std::string volName = vol->getLogVol()->getName();
-                  ATH_MSG_DEBUG("\t\t treetop: " << volName);
+            // get treetop's volume
+            const GeoVPhysVol* vol = treetop;
 
+            // get volume's transform
+            // NOTE: we use getDefX() to get the transform without any alignment
+            GeoTransform* volXf = new GeoTransform(vol->getDefX());
 
-                  // Add to the main volume a GeoNameTag with the name of the DetectorManager 
-                  volTop->add(new GeoNameTag(detManName));
-                  // add Transform and Volume to the main PhysVol
-                  volTop->add(volXf);
-                  volTop->add(const_cast<GeoVPhysVol*>(vol));
+            // get volume's logvol's name
+            std::string volName = vol->getLogVol()->getName();
+            ATH_MSG_DEBUG("\t\t treetop: " << volName);
 
-                  if (msgLvl (MSG::DEBUG)) {
-                    // DEBUG: dive into the Treetop
-                    if ("BeamPipe"==detManName) {
-                      GeoVolumeCursor av(treetop);
-                      while (!av.atEnd()) {
-                          ATH_MSG_DEBUG("\t\ttreetop n." << i << " - child name: "  << av.getName());
-                          av.next(); // increment volume cursor.
-                      } // end while
-                    }
-                  }
-              } // end for
-          } // end if
-      } // end for
+            // Add to the main volume a GeoNameTag with the name of the
+            // DetectorManager
+            volTop->add(new GeoNameTag(detManName));
+            // add Transform and Volume to the main PhysVol
+            volTop->add(volXf);
+            volTop->add(const_cast<GeoVPhysVol*>(vol));
+
+            if (msgLvl(MSG::DEBUG)) {
+              // DEBUG: dive into the Treetop
+              if ("BeamPipe" == detManName) {
+                GeoVolumeCursor av(treetop);
+                while (!av.atEnd()) {
+                  ATH_MSG_DEBUG("\t\ttreetop n."
+                                << i << " - child name: " << av.getName());
+                  av.next();  // increment volume cursor.
+                }             // end while
+              }
+            }
+          }  // end for
+        }    // end if
+      }      // end for
     }
-  } 
+  }
 
   // DEBUG inspection
-  if (msgLvl (MSG::DEBUG)) {
-    ATH_MSG_DEBUG("Looping over top volumes in the GeoModel tree (children of the 'World' volume)...");
+  if (msgLvl(MSG::DEBUG)) {
+    ATH_MSG_DEBUG(
+        "Looping over top volumes in the GeoModel tree (children of the "
+        "'World' volume)...");
     GeoVolumeCursor av(world);
     while (!av.atEnd()) {
       std::string volname = av.getName();
       ATH_MSG_DEBUG("\t* relevant NameTag:" << volname);
-      av.next(); // increment volume cursor.
+      av.next();  // increment volume cursor.
     }
   }
 
   ATH_MSG_INFO("Creating the SQLite DB file...");
-  if ( m_outFileName.empty()) {
+  if (m_outFileName.empty()) {
     ATH_MSG_FATAL("The name of the output SQLite file is not set!");
-    throw GaudiException("The name of the output SQLite file is not set!", 
-                                "DumpGeo", StatusCode::FAILURE);
+    throw GaudiException("The name of the output SQLite file is not set!",
+                         "DumpGeo", StatusCode::FAILURE);
   }
   ATH_MSG_INFO("Output file name: " << m_outFileName);
 
@@ -214,37 +252,40 @@ StatusCode DumpGeo::initialize()
 
   // check the DB connection
   if (db.checkIsDBOpen())
-      ATH_MSG_INFO("OK! Database is open!");
+    ATH_MSG_INFO("OK! Database is open!");
   else {
-      ATH_MSG_ERROR(" ***** Database ERROR!! Exiting..." );      
-              throw GaudiException("The GeoModel SQLite .db file could not be opened successfully.", 
-                                    "DumpGeo", StatusCode::FAILURE);
+    ATH_MSG_ERROR(" ***** Database ERROR!! Exiting...");
+    throw GaudiException(
+        "The GeoModel SQLite .db file could not be opened successfully.",
+        "DumpGeo", StatusCode::FAILURE);
   }
 
   ATH_MSG_INFO("Traversing the GeoModel tree...");
-    // Dump the tree volumes into a DB
-    GeoModelIO::WriteGeoModel dumpGeoModelGraph(db); // init the GeoModel node action
-    // visit all GeoModel nodes  
-    if ( !(m_user_filterDetManagersList.empty()) ) {
-      volTop->exec(&dumpGeoModelGraph); 
-    } else {
-      world->exec(&dumpGeoModelGraph); 
-    }
+  // Dump the tree volumes into a DB
+  GeoModelIO::WriteGeoModel dumpGeoModelGraph(
+      db);  // init the GeoModel node action
+  // visit all GeoModel nodes
+  if (!(m_user_filterDetManagersList.empty())) {
+    volTop->exec(&dumpGeoModelGraph);
+  } else {
+    world->exec(&dumpGeoModelGraph);
+  }
   ATH_MSG_INFO("Saving the GeoModel tree to the DB...");
-    dumpGeoModelGraph.saveToDB(); // save to the SQlite DB file
-    ATH_MSG_ALWAYS("DONE. Geometry saved to " << m_outFileName);
+  dumpGeoModelGraph.saveToDB();  // save to the SQlite DB file
+  ATH_MSG_ALWAYS("DONE. Geometry saved to " << m_outFileName);
 
   // Quick test if DEBUG
-  if (msgLvl (MSG::DEBUG)) {
-    ATH_MSG_DEBUG("Test - list of all the GeoMaterial nodes in the persistified geometry:");
+  if (msgLvl(MSG::DEBUG)) {
+    ATH_MSG_DEBUG(
+        "Test - list of all the GeoMaterial nodes in the persistified "
+        "geometry:");
     db.printAllMaterials();
-    ATH_MSG_DEBUG("Test - list of all the GeoElement nodes in the persistified geometry:");
+    ATH_MSG_DEBUG(
+        "Test - list of all the GeoElement nodes in the persistified "
+        "geometry:");
     db.printAllElements();
   }
 
   ATH_MSG_DEBUG("End of DumpGeo::init().");
   return StatusCode::SUCCESS;
 }
-
-
-

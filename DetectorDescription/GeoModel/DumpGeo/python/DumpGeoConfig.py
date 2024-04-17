@@ -54,6 +54,14 @@ def configureGeometry(flags, cfg):
              InDetServiceMaterialCfg)
         cfg.merge(InDetServiceMaterialCfg(flags))
 
+    if flags.Detector.GeometryCavern:
+        from AtlasGeoModel.CavernGMConfig import CavernGeometryCfg
+        cfg.merge(CavernGeometryCfg(flags))
+    
+    if flags.Detector.GeometryZDC:
+        from ZDC_GeoM.ZdcGeoModelConfig import ZDC_DetToolCfg
+        cfg.merge(ZDC_DetToolCfg(flags))
+
 
 
 
@@ -188,7 +196,7 @@ if __name__=="__main__":
     _logger.verbose("+ ... Done")
 
     if args.detDescr:
-        _logger.verbose("+ About to set a custom user-defined detector description tag: '%s'" % args.detDescr)
+        _logger.verbose("+ About to set this detector description tag: '%s'" % args.detDescr)
         flags.GeoModel.AtlasVersion = args.detDescr
         _logger.verbose("+ ... Done")
 
