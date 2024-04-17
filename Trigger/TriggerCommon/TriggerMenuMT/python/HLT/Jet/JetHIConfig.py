@@ -324,9 +324,9 @@ def HLTMakeModulatorTool(mod_key, **kwargs):
         stdJetModifiers[label] = JetModifier(
             "HIUEModulatorTool",
             tname,
-            DoV2 = getattr(mod, 'DoV2'),
-            DoV3 = getattr(mod, 'DoV3'),
-            DoV4 = getattr(mod, 'DoV4'),
+            DoV2 = mod.DoV2,
+            DoV3 = mod.DoV3,
+            DoV4 = mod.DoV4,
             EventShapeKey=mod_key)
 
     return mod
