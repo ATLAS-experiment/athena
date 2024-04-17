@@ -20,9 +20,6 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
 
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
-
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags, 'StgcAthMonitorCfg')
 
