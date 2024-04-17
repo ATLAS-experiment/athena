@@ -325,7 +325,7 @@ public:
    * @param auxid The aux data item being operated on.
    * @param dst Container for the destination vector.
    *            Declared as a rvalue reference to allow passing a temporary
-   *            here (such as from AuvVectorInterface).
+   *            here (such as from AuxVectorInterface).
    * @param dst_index Index of the first destination element in the vector.
    * @param src Container for the source vector.
    * @param src_index Index of the first source element in the vector.
