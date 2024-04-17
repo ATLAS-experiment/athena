@@ -159,7 +159,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(std::vector<FPGATrackSimRoa
   // that can be used to map to the above
   for (size_t iroad = 0; iroad < roads.size(); iroad++) {
     m_roadnumber = iroad;
-    FPGATrackSimRoad_Hough *road = dynamic_cast<FPGATrackSimRoad_Hough*>(roads[iroad]);
+    FPGATrackSimRoad *road = roads[iroad];
     if (road == nullptr) continue; // Not Hough roads
 
     std::vector<std::vector<int>> combs = ::getComboIndices(road->getNHits_layer());
@@ -204,9 +204,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(std::vector<FPGATrackSimRoa
 	      m_isBarrel.push_back(hit->isBarrel() ? 1 : 0);
 	      m_etawidth.push_back(hit->getEtaWidth());
 	      m_phiwidth.push_back(hit->getPhiWidth());
-	      m_etamodule.push_back(hit->getFPGATrackSimEtaModule());
+	      m_etamodule.push_back(hit->getEtaModule());
 	      m_phimodule.push_back(hit->getPhiModule());
-	      m_ID.push_back(hit->getFPGATrackSimIdentifierHash());
+	      m_ID.push_back(hit->getIdentifierHash());
             }
 	  }
 	// done looping over hits, now we do the truth calculation for this track candidate

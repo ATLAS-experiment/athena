@@ -74,6 +74,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::initialize()
   ATH_CHECK(m_EvtSel.retrieve());
   ATH_CHECK(m_roadFinderTool.retrieve());
   if (m_doClustering) ATH_CHECK(m_clusteringTool.retrieve());
+  if (m_doSpacePoints) ATH_CHECK(m_spacePointsTool.retrieve());
 
   if (m_doHoughConstants) {
     if (m_ideal_geom == 0) {
@@ -101,6 +102,13 @@ StatusCode FPGATrackSimMatrixGenAlgo::initialize()
   // Retrieve slice information
   m_sliceMin = m_EvtSel->getMin();
   m_sliceMax = m_EvtSel->getMax();
+
+  // Check q/pt binning information
+  if (m_qOverPtBins.size() == 0) {
+    ATH_MSG_ERROR("q/pt bin information not set in matrix element job options!");
+    return StatusCode::FAILURE;
+  }
+
 
   // Histograms
   ATH_CHECK(bookHistograms());
@@ -212,6 +220,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
   // For each training track, find the sector it belongs to and accumulate the
   // hit coordinates and track parameters.
   for (FPGATrackSimTruthTrack const & track : tracks) {
+
     // Get list of hits associated to the current truth track
     std::vector<FPGATrackSimHit> & track_hits = barcode_hits[track.getBarcode()];
     
@@ -227,7 +236,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
     m_h_trackQoP_okRegion->Fill(track.getQOverPt());
     
     //For the Hough constants, find the Hough roads
-    std::vector<FPGATrackSimRoad_Hough*> houghRoads;
+    std::vector<FPGATrackSimRoad*> houghRoads;
     if (m_doHoughConstants){
       
       std::vector<const FPGATrackSimHit*> phits;
@@ -239,10 +248,9 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
       if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
       
       if (!roads.empty()){
-	for (FPGATrackSimRoad* r : roads){
-	  FPGATrackSimRoad_Hough* hr = dynamic_cast<FPGATrackSimRoad_Hough*>(r);
-	  houghRoads.push_back(hr);
-	}
+        for (FPGATrackSimRoad* hr : roads){
+          houghRoads.push_back(hr);
+        }
       }
       
       if (!houghRoads.empty()){
@@ -250,7 +258,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
 	double x = 0.0;
 	
 	//For each Hough road, make the accumulator
-	for (FPGATrackSimRoad_Hough* hr : houghRoads){
+	for (FPGATrackSimRoad* hr : houghRoads){
 	  y = hr->getY();
 	  x = hr->getX();
 	  
@@ -290,8 +298,8 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
 
 
 // Converts raw hits from header into logical hits, and filters those in FPGATrackSim layers
-// Could replace this with the RawToLogical tool
-std::vector<FPGATrackSimHit> FPGATrackSimMatrixGenAlgo::getLogicalHits() 
+// Could replace this with the RawToLogical tool (but probably won't)
+std::vector<FPGATrackSimHit> FPGATrackSimMatrixGenAlgo::getLogicalHits()
 {
   std::vector<FPGATrackSimHit> hits;
   //Setup the logical header...
@@ -303,21 +311,26 @@ std::vector<FPGATrackSimHit> FPGATrackSimMatrixGenAlgo::getLogicalHits()
   StatusCode sc = m_hitMapTool->convert(stage, *m_eventHeader, logicalHeader);
   if (sc.isFailure()) ATH_MSG_ERROR("Hit mapping failed");
 
+  // Since the clustering tool modifies the logical towers-- refactored this
+  // to only access the output hits from the towers.
   if (m_doClustering) {
     std::vector<FPGATrackSimCluster> clustered_hits;
     sc = m_clusteringTool->DoClustering(logicalHeader, clustered_hits);
     if (sc.isFailure()) ATH_MSG_ERROR("Clustering failed");
-    for (FPGATrackSimCluster const & cluster : clustered_hits) {
-      FPGATrackSimHit clusterEquiv = cluster.getClusterEquiv();
-      hits.push_back(clusterEquiv);
-    }
   }
-  else {
-    std::vector<FPGATrackSimTowerInputHeader> towers = logicalHeader.towers();
-    for(auto &tower:towers){
-      std::vector<FPGATrackSimHit> const & towerHits = tower.hits();
-      for (FPGATrackSimHit const & hit : towerHits)
-	hits.push_back(hit);
+  // Optionally do spacepoints (as well).
+  if (m_doSpacePoints) {
+    std::vector<FPGATrackSimCluster> spacepoints;
+    sc = m_spacePointsTool->DoSpacePoints(logicalHeader, spacepoints);
+    if (sc.isFailure()) ATH_MSG_ERROR("Spacepoints failed");
+  }
+
+  // It should now be safe to pull the towers, regardless.
+  std::vector<FPGATrackSimTowerInputHeader> towers = logicalHeader.towers();
+  for (auto &tower : towers) {
+    std::vector<FPGATrackSimHit> const & towerHits = tower.hits();
+    for (FPGATrackSimHit const & hit : towerHits) {
+      hits.push_back(hit);
     }
   }
   return hits;
@@ -395,18 +408,25 @@ std::map<int, std::vector<FPGATrackSimHit>> FPGATrackSimMatrixGenAlgo::makeBarco
 FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit) const
 {
   if ((new_hit.getSection() == old_hit.getSection()) && (new_hit.getLayer() == old_hit.getLayer())
-      && (new_hit.getFPGATrackSimEtaModule() == old_hit.getFPGATrackSimEtaModule()) && (new_hit.getPhiModule() == old_hit.getPhiModule())) {
+      && (new_hit.getEtaModule() == old_hit.getEtaModule()) && (new_hit.getPhiModule() == old_hit.getPhiModule())) {
     ATH_MSG_DEBUG("Two hits on same module");
     return selectHit_returnCode::SH_FAILURE;
   }
   
+  // Always prefer spacepoints, regardless of all other considerations.
+  // This is necessary in part due to spacepoint duplication.
+  if (old_hit.getHitType() == HitType::spacepoint && new_hit.getHitType() != HitType::spacepoint) {
+    return selectHit_returnCode::SH_KEEP_OLD;
+  } else if (old_hit.getHitType() != HitType::spacepoint && new_hit.getHitType() == HitType::spacepoint) {
+    return selectHit_returnCode::SH_KEEP_NEW;
+  }
 
   int new_section = new_hit.getSection();
   int old_section = old_hit.getSection();
 
   if (old_section == new_section) {
 
-    if (old_hit.getFPGATrackSimEtaModule() == new_hit.getFPGATrackSimEtaModule()) {
+    if (old_hit.getEtaModule() == new_hit.getEtaModule()) {
       int rmax = 0;
       if (m_doHoughConstants) {
 	int reg = m_FPGATrackSimMapping->RegionMap_1st()->getRegions(new_hit)[0]; // just take region with lowest index
@@ -473,7 +493,7 @@ FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selec
     }
     // Two endcap hits on same side: different disks: take the lower-z
     else {
-      ATH_MSG_DEBUG("Keeping the lower-z of the two disks hit");
+      ATH_MSG_DEBUG("Keeping the lower-z of the two disks (" << old_disk << ", " << new_disk << ") hit");
       if (old_disk > new_disk) return selectHit_returnCode::SH_KEEP_NEW;
       else return selectHit_returnCode::SH_KEEP_OLD;
     }
@@ -520,16 +540,47 @@ bool FPGATrackSimMatrixGenAlgo::filterSectorHits(std::vector<FPGATrackSimHit> co
     }
   }
   
-  int nwc(0);
-  // Check we have 8 hits
-  for (int i = 0; i < m_nLayers; ++i) {
-    if (layer_count[i] == 0) {
+  // Count number of wildcards, spacepoints, and pixel hits.
+  int nwc = 0;
+  int num_sp = 0;
+  int num_pixel = 0;
+
+  // Check we have the right number of hits
+  // Check we have the right number of hits.
+  for (int i = 0; i < m_nLayers; ++i)
+  {
+    if (layer_count[i] == 0)
+    {
       ATH_MSG_DEBUG("Layer " << i << " has no hits");
       nwc++;
     }
+
+    // Now that we've decided which hit to use-- check their type.
+    if (sector_hits[i].getHitType() == HitType::spacepoint) {
+      num_sp += 1;
+    }
+    if (sector_hits[i].isPixel()) {
+      num_pixel += 1;
+    }
   }
-  
-  if (nwc > m_MaxWC) {
+
+  ATH_MSG_DEBUG("Found " << nwc << " wildcards compared to maximum: " << m_MaxWC);
+  // Divide by 2 due to spacepoint duplication.
+  num_sp /= 2;
+  ATH_MSG_DEBUG("Found " << num_sp << " spacepoints after removing duplicates.");
+  // Require we don't have too many wildcards.
+  if (nwc > m_MaxWC)
+  {
+    fillTrackPars(m_h_notEnoughHits, t);
+    return false;
+  }
+  // Require that we have a certain number of "2D" hits (i.e. pixels and spacepoints)
+  // The effect of this is that we can ensure we have 4/5 2D hits but 7/9 hits total.
+  // NOTE Again, uncomment logic below for second stage running.
+  num_sp += num_pixel;
+  int minSpacePlusPixel = /*m_isSecondStage ? m_minSpacePlusPixel2 :*/ m_minSpacePlusPixel;
+  if (num_sp < minSpacePlusPixel) {
+    ATH_MSG_DEBUG("Not enough pixel hits + spacepoints (" << num_sp << " < " << minSpacePlusPixel << ")");
     fillTrackPars(m_h_notEnoughHits, t);
     return false;
   }
@@ -574,25 +625,39 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   std::vector<module_t> modules(m_nLayers);
   FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
 
-  double qoverpt = track.getQ() / track.getPt();
+  //find the bin!
+  // NOTE: this only implements q/pt binning, not the subregion / eta pattern-based constants for now.
   int sectorbin = 0;
-  for (unsigned bin = 0; bin < htt::QOVERPT_BINS.size()-1; bin++) {
-    sectorbin = bin;
-    if (qoverpt < htt::QOVERPT_BINS[bin+1]) break;
+  double qoverpt = track.getQ() / track.getPt();
+  if (m_absQOverPtBinning) qoverpt = abs(qoverpt);
+  for (unsigned bin = 0; bin < m_qOverPtBins.size()-1; bin++) {
+    sectorbin = fpgatracksim::QPT_SECTOR_OFFSET * bin;
+    if (qoverpt < m_qOverPtBins[bin+1]) break;
   }
-
-
+  
   // Create sector definitions (list of modules)
+  std::string module_printout = "";
   for (int i = 0; i < m_nLayers; i++)
     {
       if (sector_hits[i].getHitType() != HitType::wildcard) {
-	if (m_single) modules[i] = sector_hits[i].getFPGATrackSimIdentifierHash();
-	else modules[i] = sectorbin; // Here we used to set the identifier, now just global zero! we can change this by large region if needed
+        if (m_single) modules[i] = sector_hits[i].getIdentifierHash();
+        else {
+          modules[i] = sectorbin;
+          // Modify sectorbin by a "type" field, which for now means: 0 = not spacepoint, 1 = spacepoint.
+          // This will fail if we have more than 99 q/pt bins!
+          if (sector_hits[i].getHitType() == HitType::spacepoint) {
+              modules[i] += fpgatracksim::SPACEPOINT_SECTOR_OFFSET;
+          }
+          module_printout += std::to_string(modules[i]) + ", ";
+        }
       }
       else {
         modules[i] = -1; // WC
       }
     }
+
+  ATH_MSG_DEBUG("Generating track in sectorbin = " << sectorbin << " with modules: " << module_printout);
+
 
   if (m_single) {
     const int ToKeep[13] = {2200,2564,2861,3831,5368,14169,14173,20442,20446,29625,29629,42176,42180};
@@ -627,7 +692,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   // Hough Constants parameters
   double y = accumulator.second.pars.qOverPt;
   double x = accumulator.second.pars.phi;
-  double const houghRho = htt::A * y; // Aq/pT
+  double const houghRho = fpgatracksim::A * y; // Aq/pT
 
   // Vectorize (flatten) coordinates
   std::vector<double> coords;
@@ -636,57 +701,75 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
     if (sector_hits[i].getHitType() != HitType::wildcard) {
       double hitGPhi = sector_hits[i].getGPhi(); // need to be careful about 2 pi boundary in the future!
       
-      if (m_doHoughConstants){
-	double expectedGPhi = x; // to get the intersection of the hough road with detector layer
-	
-	hitGPhi += ( sector_hits[i].getR() - htt::TARGET_R_1STAGE[i] ) * houghRho; //first order
-	expectedGPhi -= htt::TARGET_R_1STAGE[i] * houghRho; //first order
-	
-	if ( m_ideal_geom > 1 ) {
-	  hitGPhi += ( pow( sector_hits[i].getR() * houghRho, 3.0 ) / 6.0 ); //higher order
-	  expectedGPhi -= ( pow( htt::TARGET_R_1STAGE[i] * houghRho, 3.0 ) / 6.0 ); //higher order
-	}
-	
-	if (m_doDeltaPhiConsts) {
-	  coords.push_back(hitGPhi - expectedGPhi);
-	  coordsG.push_back(hitGPhi - expectedGPhi);
-	} else {
-	  coords.push_back(hitGPhi);
-	  coordsG.push_back(hitGPhi);
-	}
+      // If this is a spacepoint the target R should be the average of the two layers.
+      // TODO, get this to be loaded in from a mean radii file into the mapping infrastructure.
+      double target_r = fpgatracksim::TARGET_R_1STAGE[i];
+      if (sector_hits[i].getHitType() == HitType::spacepoint) {
+        int other_layer = (sector_hits[i].getSide() == 0) ? i + 1 : i - 1;
+        target_r = (target_r + fpgatracksim::TARGET_R_1STAGE[other_layer]) / 2.;
       }
-      else {
-	// Idealise phi coordinate if requested
-	if ( m_ideal_geom > 0 ) {
-	  hitGPhi += ( sector_hits[i].getR() - htt::TARGET_R_2STAGE[i] ) * trackTwoRhoInv; //first order
-	}
-	if ( m_ideal_geom > 1 ) {
-	  hitGPhi += ( pow( sector_hits[i].getR() * trackTwoRhoInv, 3.0 ) / 6.0 ); //higher order
-	}
-	coords.push_back(hitGPhi);
-	coordsG.push_back(hitGPhi);
+
+      // Create phi for any hits that are not spacepoints, as well as "inner" spacepoints.
+      // but not outer spacepoints. this avoids duplicate coordinates.
+      if (sector_hits[i].getHitType() != HitType::spacepoint || sector_hits[i].getSide() == 0) {
+
+        if (m_doHoughConstants){
+          double expectedGPhi = x; // to get the intersection of the hough road with detector layer
+
+          hitGPhi += ( sector_hits[i].getR() - target_r ) * houghRho; //first order
+          expectedGPhi -= target_r * houghRho; //first order
+
+          if ( m_ideal_geom > 1 ) {
+            hitGPhi += ( pow( sector_hits[i].getR() * houghRho, 3.0 ) / 6.0 ); //higher order
+            expectedGPhi -= ( pow( target_r * houghRho, 3.0 ) / 6.0 ); //higher order
+          }
+
+          if (m_doDeltaPhiConsts) {
+            coords.push_back(hitGPhi - expectedGPhi);
+            coordsG.push_back(hitGPhi - expectedGPhi);
+          } else {
+            coords.push_back(hitGPhi);
+            coordsG.push_back(hitGPhi);
+            ATH_MSG_DEBUG("Pushed back phi coord = " << hitGPhi);
+          }
+        }
+        else {
+          // Idealise phi coordinate if requested
+          if ( m_ideal_geom > 0 ) {
+            hitGPhi += ( sector_hits[i].getR() - target_r ) * trackTwoRhoInv; //first order
+          }
+          if ( m_ideal_geom > 1 ) {
+            hitGPhi += ( pow( sector_hits[i].getR() * trackTwoRhoInv, 3.0 ) / 6.0 ); //higher order
+          }
+          coords.push_back(hitGPhi);
+          coordsG.push_back(hitGPhi);
+        }
       }
       
-      if (sector_hits[i].getDim() == 2){
-	double hitZ = sector_hits[i].getZ();
-	
-	if(m_doHoughConstants){
-	  hitZ -= sector_hits[i].getGCotTheta() * (sector_hits[i].getR() - htt::TARGET_R_1STAGE[i]);
-	  if ( m_ideal_geom > 1 )
-	    hitZ -= (sector_hits[i].getGCotTheta() * pow (sector_hits[i].getR(), 3.0) * houghRho * houghRho) / 6.0;
-	}
-	else{
-	  if ( m_ideal_geom > 0 ) {
-	    hitZ -= sector_hits[i].getGCotTheta() * (sector_hits[i].getR() - htt::TARGET_R_2STAGE[i]);
-	  }
-	  if ( m_ideal_geom > 1 ) {
-	    hitZ -= sector_hits[i].getGCotTheta() * ( pow (sector_hits[i].getR(), 3.0) * trackTwoRhoInv * trackTwoRhoInv) / 6.0;
-	  }
-	}
-	
-	coords.push_back(hitZ);
-	coordsG.push_back(hitZ);
+      // Create a z coordinate for the "outer" layer of the spacepoint and for 2D pixel hits.
+      // This means that a spacepoint will write out (phi, eta) pairs, but (0, phi) or (phi, 0) if it's missing.
+      if (sector_hits[i].getDim() == 2 || (sector_hits[i].getHitType() == HitType::spacepoint && (sector_hits[i].getPhysLayer() % 2) == 1)) {
+        double hitZ = sector_hits[i].getZ();
+
+        if(m_doHoughConstants){
+          hitZ -= sector_hits[i].getGCotTheta() * (sector_hits[i].getR() - target_r);
+          if ( m_ideal_geom > 1 )
+            hitZ -= (sector_hits[i].getGCotTheta() * pow (sector_hits[i].getR(), 3.0) * houghRho * houghRho) / 6.0;
+        }
+        else{
+          if ( m_ideal_geom > 0 ) {
+            hitZ -= sector_hits[i].getGCotTheta() * (sector_hits[i].getR() - target_r);
+          }
+          if ( m_ideal_geom > 1 ) {
+            hitZ -= sector_hits[i].getGCotTheta() * ( pow (sector_hits[i].getR(), 3.0) * trackTwoRhoInv * trackTwoRhoInv) / 6.0;
+          }
+        }
+
+        coords.push_back(hitZ);
+        coordsG.push_back(hitZ);
+        ATH_MSG_DEBUG("Pushed back z coord = " << hitZ);
       }
+
     }
     else {
       coords.push_back(0);

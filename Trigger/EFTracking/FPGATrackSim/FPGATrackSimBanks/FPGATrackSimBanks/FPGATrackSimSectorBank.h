@@ -45,11 +45,23 @@ class FPGATrackSimSectorBank
         // If multiple hits have different hashIDs, will prefer most popular, then random.
         sector_t findSector(std::vector<std::vector<const FPGATrackSimHit*>> const & hits) const;
 
+
+        // Helper functions to set and retrieve information about the sector q/pt binning.
+	std::vector<double> getQOverPtBins() const { return m_qOverPtBins; }
+        size_t getNQOverPtBins() const {return m_qOverPtBins.size(); }
+        bool isAbsQOverPtBinning() const { return m_absQOverPtBinning; }
+        void storeQOverPtBinning(std::vector<double> qOverPtBins, bool absBinning);
+
+
     private:
 
         size_t m_nLayers = 0UL;
         std::vector<std::vector<module_t>> m_s2mMap; // sector to module map. index by (sector, layer)
         std::vector<std::multimap<module_t, sector_t>> m_m2sMap; // module to sector map. index by (layer, module).
+
+        // Store these as part of the sector bank.
+        std::vector<double> m_qOverPtBins;
+        bool m_absQOverPtBinning = false;
 
         // Helpers
         void readHeader(std::ifstream & fin);

@@ -322,7 +322,7 @@ StatusCode FPGATrackSimHough1DShiftTool::getRoads(const std::vector<const FPGATr
     }
 
   roads.reserve(m_roads.size());
-  for (FPGATrackSimRoad_Hough & r : m_roads) roads.push_back(&r);
+  for (FPGATrackSimRoad & r : m_roads) roads.push_back(&r);
 
   m_event++;
   return StatusCode::SUCCESS;
@@ -346,7 +346,7 @@ std::vector<boost::dynamic_bitset<>> FPGATrackSimHough1DShiftTool::makeHitMasks(
 }
 
 
-FPGATrackSimRoad_Hough FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, std::vector<int> const & shifts)
+FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, std::vector<int> const & shifts)
 {
   std::vector<const FPGATrackSimHit*> road_hits;
   layer_bitmask_t hitLayers = 0;
@@ -371,7 +371,7 @@ FPGATrackSimRoad_Hough FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<
   auto sorted_hits = ::sortByLayer(road_hits);
   sorted_hits.resize(m_nLayers); // If no hits in last layer, return from sortByLayer will be too short
 
-  FPGATrackSimRoad_Hough r;
+  FPGATrackSimRoad r;
   r.setHitLayers(hitLayers);
   r.setHits(sorted_hits);
   r.setSubRegion(m_subRegion);
@@ -389,7 +389,7 @@ FPGATrackSimRoad_Hough FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<
 float FPGATrackSimHough1DShiftTool::getPtFromShiftDiff(int shift) const
 {
   if (m_iterLayer == 0) ATH_MSG_FATAL("getPtFromShiftDiff() iterLayer can't be 0");
-  return (shift * m_phiStep / htt::A) / (m_r[m_iterLayer] - m_r[0]);
+  return (shift * m_phiStep / fpgatracksim::A) / (m_r[m_iterLayer] - m_r[0]);
 }
 
 
@@ -424,9 +424,9 @@ float FPGATrackSimHough1DShiftTool::qPt(float r, float deltaPhi) const
     float r1=m_r[0];
     float r2=r;
     float sign = deltaPhi>0 ? 1 : -1;
-    return sign*1/(2*htt::A) * sqrt((4*sin(deltaPhi)*sin(deltaPhi))/( r1*r1 + r2*r2 -2*r2*r1*cos(deltaPhi)));
+    return sign*1/(2*fpgatracksim::A) * sqrt((4*sin(deltaPhi)*sin(deltaPhi))/( r1*r1 + r2*r2 -2*r2*r1*cos(deltaPhi)));
   }
-  return sin(deltaPhi) / (htt::A * r);
+  return sin(deltaPhi) / (fpgatracksim::A * r);
 }
 
 float FPGATrackSimHough1DShiftTool::phitrkDiff(float r1, float phi1,  float r2,  float phi2) const
@@ -458,7 +458,7 @@ static inline std::string instance_name(std::string const & s)
 
 static inline float deltaPhi(float r, float qPt)
 {
-  return asin(htt::A * r * qPt);
+  return asin(fpgatracksim::A * r * qPt);
 }
 
 

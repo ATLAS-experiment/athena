@@ -66,6 +66,7 @@ bool FPGATrackSimBankSvc::LoadFitConstantBank_2nd(int missedPlane)
 bool FPGATrackSimBankSvc::LoadSectorBank_1st()
 {
   m_SectorBank_1st = std::unique_ptr<FPGATrackSimSectorBank> (new FPGATrackSimSectorBank(m_path_sectorbank_1st));
+  m_SectorBank_1st->storeQOverPtBinning(m_qOverPtBins, m_absQOverPtBinning);
   return true;
 }
 
@@ -73,6 +74,7 @@ bool FPGATrackSimBankSvc::LoadSectorBank_1st()
 bool FPGATrackSimBankSvc::LoadSectorBank_2nd()
 {
   m_SectorBank_2nd = std::unique_ptr<FPGATrackSimSectorBank> (new FPGATrackSimSectorBank(m_path_sectorbank_2nd));
+  m_SectorBank_2nd->storeQOverPtBinning(m_qOverPtBins, m_absQOverPtBinning);
   return true;
 }
 

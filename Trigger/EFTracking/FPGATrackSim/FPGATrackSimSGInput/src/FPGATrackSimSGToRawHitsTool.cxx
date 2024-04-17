@@ -184,7 +184,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackS
             const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(hitId);
             tmpOfflineHit.setClusterID(sielement->identifyHash());
             tmpOfflineHit.setTrackNumber(iTrk);
-            tmpOfflineHit.setLayer(m_pixelId->layer_disk(hitId));
+            tmpOfflineHit.setLayer(m_sctId->layer_disk(hitId));
             tmpOfflineHit.setLocX(((float)measurement->localParameters()[Trk::locX]));
             tmpOfflineHit.setLocY(-99999.9);
           }

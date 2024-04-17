@@ -154,7 +154,7 @@ StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<const FPGA
 	    }
     
   roads.reserve(m_roads.size());
-  for (FPGATrackSimRoad_Hough & r : m_roads) roads.push_back(&r);
+  for (FPGATrackSimRoad & r : m_roads) roads.push_back(&r);
     
   return StatusCode::SUCCESS;
 }
@@ -166,7 +166,14 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
   for (FPGATrackSimHit const * hit : hits)
     {
       if (std::find(layers.begin(), layers.end(), hit->getLayer()) == layers.end()) continue;
-      if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
+
+      if (m_subRegion >= 0) {
+        // NOTE: uncomment middle piece if we port over 2nd stage functionality.
+        auto* subrmap = /*(m_2ndStage) ? m_FPGATrackSimMapping->SubRegionMap_2nd() :*/ m_FPGATrackSimMapping->SubRegionMap();
+        if (!(subrmap->isInRegion(m_subRegion, *hit))) {
+          continue;
+        }
+      }
 
       // This scans over y (pT) because that is more efficient in memory, in C.
       // Unknown if firmware will want to scan over x instead.
@@ -316,7 +323,7 @@ double FPGATrackSimHoughTransformTool::yToX(double y, FPGATrackSimHit const * hi
       double r = hit->getR(); // mm
       double phi_hit = hit->getGPhi(); // radians
       double d0 = std::isnan(m_parMin.d0) ? 0 : m_parMin.d0; // mm, assume min = max
-      x = asin(r * htt::A * y - d0 / r) + phi_hit;
+      x = asin(r * fpgatracksim::A * y - d0 / r) + phi_hit;
 
       if (m_fieldCorrection) x += fieldCorrection(m_EvtSel->getRegionID(), y, r);
     }
@@ -369,20 +376,41 @@ unsigned FPGATrackSimHoughTransformTool::getExtension(unsigned y, unsigned layer
   return 0;
 }
 
-void FPGATrackSimHoughTransformTool::matchIdealGeoSector(FPGATrackSimRoad_Hough & r) const
+void FPGATrackSimHoughTransformTool::matchIdealGeoSector(FPGATrackSimRoad & r) const
 {
-  float pt = r.getY()*0.001; // convert to MeV
-  auto bounds = std::equal_range(htt::QOVERPT_BINS.begin(),htt::QOVERPT_BINS.end(),pt);
-  int sectorbin = bounds.first-htt::QOVERPT_BINS.begin()-1;
 
-  // those bins are for tracks between the values, can't be below first value or more than the last value
+  // This logic is now identical between the 1D and 2D Hough tools. Perhaps it should
+  // be moved into the sector bank class?
+
+  // We now look up the binning information in the sector bank.
+  const FPGATrackSimSectorBank* sectorbank = m_FPGATrackSimBankSvc->SectorBank_1st();
+
+  // Look up q/pt (or |q/pt|) from the Hough road, convert to MeV.
+  double qoverpt = r.getY()*0.001;
+  if (sectorbank->isAbsQOverPtBinning()) {
+      qoverpt = abs(qoverpt);
+  }
+
+  int sectorbin = 0;
+
+  // Retrieve the bin boundaries from the sector bank; map this onto them.
+  std::vector<double> qoverpt_bins = sectorbank->getQOverPtBins();
+  auto bounds = std::equal_range(qoverpt_bins.begin(), qoverpt_bins.end(), qoverpt);
+
+  sectorbin = fpgatracksim::QPT_SECTOR_OFFSET*(bounds.first - qoverpt_bins.begin() - 1);
+
   if (sectorbin < 0) sectorbin = 0;
-  if (sectorbin > static_cast<int>(htt::QOVERPT_BINS.size()-2)) sectorbin =  htt::QOVERPT_BINS.size()-2;
-  std::vector<module_t> modules;
+  if ((sectorbin / 10) > static_cast<int>(qoverpt_bins.size() - 2))sectorbin = 10*(qoverpt_bins.size() - 2);
 
+  if (m_doRegionalMapping){
+    int subregion = r.getSubRegion();
+    sectorbin += subregion*fpgatracksim::SUBREGION_SECTOR_OFFSET;
+  }
+  std::vector<module_t> modules;
   for (unsigned int il = 0; il < r.getNLayers(); il++) {
     if (r.getNHits_layer()[il] == 0) {
       modules.push_back(-1);
+
       layer_bitmask_t wc_layers = r.getWCLayers();
       wc_layers |= (0x1 << il);
       r.setWCLayers(wc_layers);
@@ -395,18 +423,30 @@ void FPGATrackSimHoughTransformTool::matchIdealGeoSector(FPGATrackSimRoad_Hough 
       wcHits.push_back(wcHit);
       r.setHits(il,wcHits);
     }
-    else
+    else {
       modules.push_back(sectorbin);
+    }
   }
-  const FPGATrackSimSectorBank* sectorbank = m_FPGATrackSimBankSvc->SectorBank_1st();
-  r.setSector(sectorbank->findSector(modules));
+
+  // If we are using eta patterns. We need to first run the roads through the road filter.
+  // Then the filter will be responsible for setting the actual sector.
+  // As a hack, we can store the sector bin ID in the road for now.
+  // This is fragile! If we want to store a different ID for each layer, it will break.
+
+  // Similarly, we do the same thing for spacepoints. this probably means we can't combine the two.
+  // maybe better to store the module array instead of just a number?
+
+  r.setSectorBin(sectorbin);
+  if (!m_doEtaPatternConsts && !m_useSpacePoints) {
+      r.setSector(sectorbank->findSector(modules));
+  }
 }
 
 // Creates a road from hits that pass through the given bin (x, y), and pushes it onto m_roads
 void FPGATrackSimHoughTransformTool::addRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y)
 {
   m_roads.emplace_back();
-  FPGATrackSimRoad_Hough & r = m_roads.back();
+  FPGATrackSimRoad & r = m_roads.back();
 
   r.setRoadID(m_roads.size() - 1);
   r.setPID(y * m_imageSize_y + x);
@@ -423,8 +463,7 @@ void FPGATrackSimHoughTransformTool::addRoad(std::vector<std::vector<const FPGAT
   r.setHitLayers(hitLayers);
   r.setSubRegion(m_subRegion);
 
-  if (m_useSectors) r.setSector(m_FPGATrackSimBankSvc->SectorBank_1st()->findSector(hits));
-  else if (m_idealGeoRoads) matchIdealGeoSector(r);
+  matchIdealGeoSector(r);
 }
 
 

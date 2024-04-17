@@ -39,11 +39,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<FPGATrackSimRoad *> &r
   // Loop over roads
   for (auto iroad : roads) {
 
-    FPGATrackSimRoad_Hough *hough_road = dynamic_cast<FPGATrackSimRoad_Hough *>(iroad);
-    double y = 0;
-    if (hough_road != nullptr) {
-      y = hough_road->getY();
-    }
+    double y = iroad->getY();
 
     // Error checking
     int sector = iroad->getSector();

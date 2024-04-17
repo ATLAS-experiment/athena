@@ -166,6 +166,9 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
 	Gaudi::Property <bool> m_fieldCorrection { this, "fieldCorrection", true, "Apply corrections to hough equation due to field nonuniformity"};
 	Gaudi::Property <bool> m_useSectors { this, "useSectors", false, "Will reverse calculate the sector for track-fitting purposes"};
 	Gaudi::Property <bool> m_idealGeoRoads { this, "IdealGeoRoads", true, "Set sectors to use ideal geometry fit constants"};
+	Gaudi::Property <bool> m_doRegionalMapping { this, "RegionalMapping", false,  "Use the sub-region maps to define the sector"};
+	Gaudi::Property <bool> m_doEtaPatternConsts { this, "doEtaPatternConsts", false, "Whether to use the eta pattern tool for constant generation"};
+	Gaudi::Property <bool> m_useSpacePoints { this, "useSpacePoints", false, "Whether we are using spacepoints."};
 
         std::vector<std::vector<unsigned>> m_combineLayer2D; // 2d array of combined layers i.e. [[1,2,3],[0,4,5],[6,7]] will combine (L1, L2, L3), (L0, L4, L5), (L6, L7)
 
@@ -186,7 +189,7 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
         // Event Storage
 
         Image m_image;
-        std::vector<FPGATrackSimRoad_Hough> m_roads;
+        std::vector<FPGATrackSimRoad> m_roads;
 
 
         ///////////////////////////////////////////////////////////////////////
@@ -203,7 +206,7 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
         std::pair<unsigned, unsigned> yToXBins(size_t yBin_min, size_t yBin_max, FPGATrackSimHit const * hit) const;
         unsigned getExtension(unsigned y, unsigned layer) const;
         bool passThreshold(Image const & image, unsigned x, unsigned y) const;
-        void matchIdealGeoSector(FPGATrackSimRoad_Hough & r) const;
+        void matchIdealGeoSector(FPGATrackSimRoad & r) const;
         void addRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y);
         void addRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y);
         void addRoad(std::vector<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y);

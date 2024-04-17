@@ -38,6 +38,10 @@ empty_tag = {
     'sectorBank_2nd':           '',     # Filename for the second stage sectors
     'sectorSlices':             '',     # Filename for the sector slices
 
+    ### Sector Generation
+    'sectorQPtBins':    [-0.001, -0.0005, 0, 0.0005, 0.001], # q/pt bin edges.
+    'qptAbsBinning':    False, # Whether to bin in |q/pt| when defining sectors or not
+
     ### Constant Generation
     'missHitsConsts':   False,  # Whether to generate constants for all permutations of missing hits
 }
@@ -84,7 +88,10 @@ FPGATrackSimBankTags = {
             ### Matrix Generation
             'WCmax':            2,
             ### Constant Generation
-            'missHitsConsts':   False
+            'missHitsConsts':   False,
+            ### Sector Generation
+            'sectorQPtBins':    [-0.001, -0.0005, 0, 0.0005, 0.001], # q/pt bin edges.
+            'qptAbsBinning':    False, # Whether to bin in |q/pt| when defining sectors or not
         },
         'EF_TaskForce_dev23': {
             ### Basic
@@ -122,7 +129,10 @@ FPGATrackSimBankTags = {
             ### Matrix Generation
             'WCmax':            2,
             ### Constant Generation
-            'missHitsConsts':   False
+            'missHitsConsts':   False,
+            ### Sector Generation
+            'sectorQPtBins':    [-0.001, -0.0005, 0, 0.0005, 0.001], # q/pt bin edges.
+            'qptAbsBinning':    False, # Whether to bin in |q/pt| when defining sectors or not
         },
         '21.9.2': {
             ### Basic
@@ -160,7 +170,10 @@ FPGATrackSimBankTags = {
             ### Matrix Generation
             'WCmax':            2,
             ### Constant Generation
-            'missHitsConsts':   False
+            'missHitsConsts':   False,
+            ### Sector Generation
+            'sectorQPtBins':    [-0.001, -0.0005, 0, 0.0005, 0.001], # q/pt bin edges.
+            'qptAbsBinning':    False, # Whether to bin in |q/pt| when defining sectors or not
         },
         'jahreda_20-07-20' : {
             'name':              'jahreda_20-07-20',
@@ -196,7 +209,10 @@ FPGATrackSimBankTags = {
             ### Matrix Generation
             'WCmax':            2,
             ### Constant Generation
-            'missHitsConsts':   False
+            'missHitsConsts':   False,
+            ### Sector Generation
+            'sectorQPtBins':    [-0.001, -0.0005, 0, 0.0005, 0.001], # q/pt bin edges.
+            'qptAbsBinning':    False, # Whether to bin in |q/pt| when defining sectors or not
         }
 }
 

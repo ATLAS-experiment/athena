@@ -93,7 +93,7 @@ StatusCode FPGATrackSimLLPDoubletHoughTransformTool::getRoads(const std::vector<
         }
     }
     roads.reserve(m_roads.size());
-    for (FPGATrackSimRoad_Hough & r : m_roads) roads.push_back(&r);
+    for (FPGATrackSimRoad & r : m_roads) roads.push_back(&r);
     m_event++;
     return StatusCode::SUCCESS;   
 }
@@ -139,7 +139,7 @@ StatusCode FPGATrackSimLLPDoubletHoughTransformTool::fillImage(const FPGATrackSi
     return StatusCode::SUCCESS;
 }
 
-FPGATrackSimRoad_Hough FPGATrackSimLLPDoubletHoughTransformTool::createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned /*x*/, unsigned /*y*/) const {
+FPGATrackSimRoad FPGATrackSimLLPDoubletHoughTransformTool::createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned /*x*/, unsigned /*y*/) const {
     // Get the road hits
     std::vector<const FPGATrackSimHit*> road_hits;
     layer_bitmask_t hitLayers = 0;
@@ -152,7 +152,7 @@ FPGATrackSimRoad_Hough FPGATrackSimLLPDoubletHoughTransformTool::createRoad(std:
     auto sorted_hits = ::sortByLayer(road_hits);
     sorted_hits.resize(8); // If no hits in last layer, return from sortByLayer will be too short
 
-    FPGATrackSimRoad_Hough r;
+    FPGATrackSimRoad r;
     r.setHitLayers(hitLayers);
     r.setHits(sorted_hits);
     return r;

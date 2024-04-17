@@ -189,7 +189,7 @@ void FPGATrackSimEtaPatternFilterTool::addHitsToMap(FPGATrackSimRoad* r)
     for (auto & hit : r->getHits(lyr))
       if (hit->getHitType() != HitType::wildcard)
 	{
-	  ModuleId mod = { hit->getDetType(), hit->getDetectorZone(), hit->getFPGATrackSimEtaModule() };
+	  ModuleId mod = { hit->getDetType(), hit->getDetectorZone(), (int)(hit->getEtaModule()) };
 	  auto itr = m_moduleHits[lyr].find(mod);
 	  if (itr != m_moduleHits[lyr].end())
 	    itr->second.addHit(hit);
@@ -231,14 +231,14 @@ void FPGATrackSimEtaPatternFilterTool::addRedundantPatterns(std::set<EtaPattern>
     }
 }
 
-FPGATrackSimRoad_Hough FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, FPGATrackSimRoad* origr) const
+FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, FPGATrackSimRoad* origr) const
 {
-  auto p = dynamic_cast<FPGATrackSimRoad_Hough*>(origr);
+  auto p = dynamic_cast<FPGATrackSimRoad*>(origr);
   if (not p){
     ATH_MSG_FATAL("Dynamic cast failure in FPGATrackSimEtaPatternFilterTool::buildRoad");
     throw "FPGATrackSimEtaPatternFilterTool::buildRoad error";
   }
-  FPGATrackSimRoad_Hough r(*p); // only works with Hough roads TODO!
+  FPGATrackSimRoad r(*p); // only works with Hough roads TODO!
 
   r.setHitLayers(patt.second);
   for (unsigned lyr = 0; lyr < m_nLayers; lyr++)

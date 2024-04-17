@@ -115,7 +115,7 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
         ///////////////////////////////////////////////////////////////////////
         // Event Storage
 
-        std::vector<FPGATrackSimRoad_Hough> m_roads;
+        std::vector<FPGATrackSimRoad> m_roads;
 
         ///////////////////////////////////////////////////////////////////////
         // Metadata and Monitoring
@@ -138,9 +138,9 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
         double yToX(double y, FPGATrackSimHit const * h) const;
         std::pair<unsigned, unsigned> yToXBins(size_t yBin_min, size_t yBin_max, FPGATrackSimHit const * hit) const;
         bool passThreshold(Image const & image, unsigned x, unsigned y) const;
-        void matchIdealGeoSector(FPGATrackSimRoad_Hough & r) const;
-	FPGATrackSimRoad_Hough createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const;
-        FPGATrackSimRoad_Hough createRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const;
+        void matchIdealGeoSector(FPGATrackSimRoad & r) const;
+	FPGATrackSimRoad createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const;
+        FPGATrackSimRoad createRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const;
         void addRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y);
         void addRoad(std::vector<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y);
         int conv(unsigned y, unsigned x) { return m_conv[y * m_convSize_x + x]; } // NOTE: y index is first

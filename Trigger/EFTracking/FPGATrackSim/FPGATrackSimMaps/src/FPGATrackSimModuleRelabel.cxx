@@ -33,7 +33,7 @@ bool FPGATrackSimModuleRelabel::remap(FPGATrackSimHit& hit) const {
     // Re-assign layers in the pixel endcap to be each individual disk
     if (hit.isPixel() && !hit.isBarrel()) {
         if (hit.getPhysLayer() < m_ringIndex->size()) {
-            unsigned newlayer = hit.getFPGATrackSimEtaModule() + (*m_ringIndex)[hit.getPhysLayer()];
+            unsigned newlayer = hit.getEtaModule() + (*m_ringIndex)[hit.getPhysLayer()];
             int newmodule = 100*newlayer + hit.getEtaIndex() / 10;
 
             hit.setPhysLayer(newlayer);

@@ -14,7 +14,7 @@
 
 class FPGATrackSimTrack : public TObject {
 
-public:
+ public:
 
   TrackCorrType getTrackCorrType() const { return m_trackCorrType; }
   TrackStage getTrackStage() const { return m_trackStage; }
@@ -62,6 +62,8 @@ public:
   float getEtaCoord(int ilayer) const;
   float getPhiCoord(int ilayer) const;
 
+  bool isValidCand() const    { return m_isValidCand; }
+
   void setTrackCorrType(TrackCorrType v) { m_trackCorrType = v; }
   void setTrackStage(TrackStage v) { m_trackStage = v; }
   void setDoDeltaGPhis(bool v) { m_doDeltaGPhis = v; }
@@ -87,6 +89,8 @@ public:
   void setBarcode(const signed long& v) { m_barcode = v; }
   void setBarcodeFrac(const float& v) { m_barcode_frac = v; }
 
+  void setValidCand(bool v)   { m_isValidCand = v; }
+
   void calculateTruth(); // this will calculate the above quantities based on the hits
   void setNLayers(int); //Reset/resize the track hits vector
   void setFPGATrackSimHit(unsigned i, const FPGATrackSimHit& hit);
@@ -105,7 +109,7 @@ public:
 
   friend std::ostream& operator<<(std::ostream&, const FPGATrackSimTrack&);
 
-private:
+ private:
 
   TrackCorrType m_trackCorrType = TrackCorrType::None; // type of correction to make for track coordinates
   TrackStage m_trackStage = TrackStage::FIRST; // Is this a 1st stage or second stage track?
@@ -139,8 +143,12 @@ private:
   signed long m_eventindex = -1; // matched particle event index
   signed long m_barcode = -1; // matched geant particle barcode
   float m_barcode_frac = 0.0F; // largest "matching fraction" with any "good"
-                        // geant particle, corresponding to the
-                        // particle with m_barcode
+  // geant particle, corresponding to the
+  // particle with m_barcode
+
+  // Is this a valid track candidate for fitting?
+  // At the moment, this is only *not* true if the track candidate has an illegal mix of duplicated spacepoints.
+  bool m_isValidCand = true;
 
   // Overlap removal member
   // There is currently only one algorithm
@@ -148,7 +156,5 @@ private:
 
   ClassDef(FPGATrackSimTrack, 2)
 };
-
-
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H

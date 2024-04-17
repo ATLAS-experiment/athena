@@ -55,7 +55,4 @@ inline double eucangle(double x, double y, double z, double u, double v, double 
 }
 
 
-constexpr std::array< double, 8 > TARGET_R_1STAGE = { 291.3, 396.9, 559.5, 565.5, 759.3, 765.3, 996.9, 1003};
-constexpr std::array< double, 13 > TARGET_R_2STAGE = { 33.9, 99.7, 160.4, 228.5, 291.3, 396.9, 403.2, 559.5, 565.5, 759.3, 765.3, 996.9, 1003};
-
 #endif

@@ -99,7 +99,7 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
 
   ///////////////////////////////////////////////////////////////////////
   // Event Storage
-  std::vector<FPGATrackSimRoad_Hough> m_postfilter_roads;
+  std::vector<FPGATrackSimRoad> m_postfilter_roads;
   
   ///////////////////////////////////////////////////////////////////////
   // Convenience
@@ -123,7 +123,7 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
   void resetCounters();
   void addHitsToMap(FPGATrackSimRoad* r);
   void addRedundantPatterns(std::set<EtaPattern> & usedPatterns, EtaPattern const & currPatt, unsigned nExtra);
-  FPGATrackSimRoad_Hough buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, FPGATrackSimRoad* origr) const;
+  FPGATrackSimRoad buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, FPGATrackSimRoad* origr) const;
   std::string to_string(const EtaPattern &patt) const;
   std::string to_string(const FPGATrackSimRoad &road) const;
   std::string to_string(const std::vector<unsigned> &v) const;
