@@ -47,7 +47,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doPRW", help='apply pileup reweight', action='store_true', default=False)
     IDPVMparser.add_argument("--maxTrkJetDR", help='the maximum dR to jets to allow for track-in-jet plots', type=float, default=0.4)
     IDPVMparser.add_argument("--JetAbsEtaMax", help='Maximum Eta value for jet selection', type=float, default=-1)
-
+    IDPVMparser.add_argument("--PrimaryVertexContainer", help='Name of the primary vertex container', choices=['PrimaryVertices', 'ActsPrimaryVertices', 'HggPrimaryVertices'], default='PrimaryVertices')
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -102,11 +102,16 @@ flags.PhysVal.IDPVM.doPRW = MyArgs.doPRW
 flags.PhysVal.IDPVM.doActs = MyArgs.doActs
 flags.PhysVal.IDPVM.doHGTD = MyArgs.doHGTD
 flags.PhysVal.IDPVM.maxTrkJetDR = MyArgs.maxTrkJetDR
+flags.PhysVal.IDPVM.PrimaryVertexContainer = MyArgs.PrimaryVertexContainer
 if MyArgs.JetAbsEtaMax != -1:
     flags.PhysVal.IDPVM.JetAbsEtaMax = MyArgs.JetAbsEtaMax
 
 flags.Exec.SkipEvents = MyArgs.skipEvents
 flags.Exec.MaxEvents = MyArgs.maxEvents
+
+# force the vertex for hgg case
+if flags.PhysVal.IDPVM.hardScatterStrategy == 3:
+    flags.PhysVal.IDPVM.PrimaryVertexContainer = 'HggPrimaryVertices'
 
 flags.lock()
 
