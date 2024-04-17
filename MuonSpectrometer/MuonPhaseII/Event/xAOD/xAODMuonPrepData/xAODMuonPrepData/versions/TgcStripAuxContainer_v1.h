@@ -31,7 +31,6 @@ class TgcStripAuxContainer_v1 : public AuxContainerBase {
     std::vector<uint16_t> channelNumber{};
     std::vector<uint8_t> gasGap{};
     std::vector<uint8_t> measuresPhi{};
-    std::vector<PosAccessor<3>::element_type> stripPosInStation{};
     /// @}
 };
 }  // namespace xAOD
