@@ -320,7 +320,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     return cfg
 
 
-def MainEvgenServicesCfg(flags, LoopMgr='AthenaEventLoopMgr',seqName="AthAlgSeq"):
+def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr"):
     """ComponentAccumulator-based equivalent of:
     import AthenaCommon.AtlasUnixGeneratorJob
 
@@ -331,9 +331,6 @@ def MainEvgenServicesCfg(flags, LoopMgr='AthenaEventLoopMgr',seqName="AthAlgSeq"
     cfg = MainServicesCfg(flags, LoopMgr)
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
     cfg.merge (McEventSelectorCfg (flags))
-    # Temporarily inject the xAOD::EventInfo converter here to allow for adiabatic migration of the clients
-    cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(AODKey = 'McEventInfo'),sequenceName=seqName)
-
     return cfg
 
 

@@ -38,6 +38,9 @@ def CommonSimulationCfg(flags, log):
         # Cases 3a, 3b
         from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
         cfg = MainEvgenServicesCfg(flags)
+        # Make sure we get xAOD::EventInfo
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+        cfg.merge(EventInfoCnvAlgCfg(flags))
         # For Simulation we need to override the RunNumber to pick up
         # the right conditions. These next two lines are required for
         # this to work.
