@@ -43,8 +43,10 @@ namespace xAODMaker {
       { EventInfo::Error,   xAOD::EventInfo::Error}
     };
 
+#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
    /// Hard-coded location of the beam position information
    static const std::string INDET_BEAMPOS = "/Indet/Beampos";
+#endif
 
 
    EventInfoCnvTool::EventInfoCnvTool( const std::string& type,
