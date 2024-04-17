@@ -43,6 +43,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("doHGTD", False)
     icf.addFlag("maxTrkJetDR", 0.4)
     icf.addFlag('JetAbsEtaMax', lambda pcf: 2.5 if pcf.Detector.GeometryID else 4.0)
+    icf.addFlag('PrimaryVertexContainer', 'PrimaryVertices')
     
     return icf
 

@@ -106,7 +106,8 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     kwargs.setdefault("EnableLumi", False)
 
     acc.merge(HistogramDefinitionSvcCfg(flags))
-
+    kwargs.setdefault('VertexContainerName', flags.PhysVal.IDPVM.PrimaryVertexContainer)
+    
     # if we are running with sumpT(w) hard scatter selection, we need to schedule jet finding
     if flags.PhysVal.IDPVM.hardScatterStrategy == 2:
 
@@ -142,11 +143,11 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                     SelectionMode=flags.PhysVal.IDPVM.hardScatterStrategy,
                     # make sure the HS selection tool picks up the correct jets
                     JetContainer=flags.PhysVal.IDPVM.jetsNameForHardScatter,
-                    VertexContainer="PrimaryVertices" if not doHyyHSSelection else "HggPrimaryVertices"
+                    VertexContainer=flags.PhysVal.IDPVM.PrimaryVertexContainer
                 )))
 
         if doHyyHSSelection:
-            kwargs.setdefault("VertexContainerName", "HggPrimaryVertices")
+            assert flags.PhysVal.IDPVM.PrimaryVertexContainer == 'HggPrimaryVertices'
 
         if flags.PhysVal.IDPVM.doValidateTracksInJets:
             kwargs.setdefault("JetContainerName", 'AntiKt4EMPFlowJets')

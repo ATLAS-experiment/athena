@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<!--
+ DCube configuration XML file = dcube_IDPVMPlots_ACTS_CKF_ITk.xml
+ auto-generated using DCube 5.4 by Krzysztof Daniel Ciba (Krzysztof.Ciba@NOSPAMgmail.com)
+ on Wed, 29 Mar 2023 16:20:57 BST
+ from Root reference file: ttbar_pu200/idpvm.root
+ Statistics tests:
+ "['KS']"
+ Legend:
+ * KS    - Kolmogorov-Smirnov test (default)
+ * chi2  - chi2 test
+ * bbb   - bin-by-bin comparision
+ * meany - avg eff mean y [TProfiles only!]
+ * all   - all above tests
+ Tweaks:
+ [1] remove or comment out (using HTML comments tags) histograms not relevant
+     to your analysis
+ [2] provide a new content to "ref_desc" and "mon_desc" tags to something
+     more meaningful
+ [3] and of course feel free to change attribute "tests" in each "hist" tag
+ [4] limits of p-value warning and failure can be set by changing attributes
+     in <plimit> tag
+ [5] if you want to make plots FOR EVERY histogram in your monitored file
+     change attribute "inclusive" in <mode> tag to "true"
+-->
+<dcube_client_config>
+ <dcube branch="*" cmtconfig="*" install="*" jobId="*" project="*">
+  <!--
+  ###################################################
+  DCubeClient for:
+  [1] branch: *
+  [2] install: *
+  [3] cmtconfig: *
+  [4] project: *
+  [5] jobId: *
+  [6] reference root file: ttbar_pu200/idpvm.root
+  [7] p-values limits FAIL = 0.750000 WARN = 0.950000
+  ###################################################
+-->
+  <reference file="ttbar_pu200/idpvm.root"/>
+  <ref_desc></ref_desc>
+  <test_desc></test_desc>
+  <plimit fail="0.75" warn="0.95"/>
+  <TDirectory name="/">
+   <TDirectory name="SquirrelPlots">
+    <TDirectory name="Vertices">
+     <TDirectory name="AllPrimaryVertices">
+      <hist2D name="vx_n_vs_truthMu" plotopts="" tests="KS" type="TH2F"/>
+      <hist2D name="vx_n_vs_actualMu" plotopts="" tests="KS" type="TH2F"/>
+     </TDirectory>
+     <TDirectory name="HardScatteringVertex">
+      <hist1D name="vx_x" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_y" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_z" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_err_x" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_err_y" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_err_z" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_chi2_over_ndf" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_type" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_nTracks" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_track_weights" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_z_diff" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_z_diff_pull" plotopts="" tests="KS" type="TH1F"/>
+     </TDirectory>
+    </TDirectory>
+   </TDirectory>
+  </TDirectory>
+ </dcube>
+</dcube_client_config>
