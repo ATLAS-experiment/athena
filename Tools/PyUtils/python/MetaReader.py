@@ -466,6 +466,48 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 if '/TagInfo' in meta_dict[filename]:
                     for key, value in meta_dict[filename]['/TagInfo'].items():
                         if isinstance(value, list) and value:
+                            if len(unique_values := set(value)) > 1:
+                                msg.warn(
+                                    f"Found multiple values for {key}: {value}. "
+                                    "Looking for possible duplicates."
+                                )
+                                maybe_ok = False
+                                if key == "AMITag":
+                                    # curate duplicates like: ['s3681_q453', 's3681_q453_'] or ["s3681_q453", "q453_s3681"]
+                                    unique_amitags = set()
+                                    for amitags in unique_values:
+                                        unique_amitags.add(
+                                            "_".join({tag for tag in amitags.split("_") if tag})
+                                        )
+                                    if len(unique_amitags) == 1:
+                                        maybe_ok = True
+                                elif key == "beam_energy":
+                                    # handle duplicates like: ['6500000', '6500000.0'] or [3, "3"]
+                                    unique_energies = set()
+                                    for energy in unique_values:
+                                        try:
+                                            energy = int(energy)
+                                        except ValueError:
+                                            try:
+                                                energy = float(energy)
+                                            except ValueError:
+                                                pass
+                                        unique_energies.add(energy)
+                                    if len(unique_energies) == 1:
+                                        maybe_ok = True
+                                elif key in ["AtlasRelease", "IOVDbGlobalTag", "AODFixVersion"]:
+                                    maybe_ok = True
+                                if maybe_ok:
+                                    msg.warn(
+                                        f"Multiple values for {key} may mean the same, or "
+                                        "the input file was produced in multi-step job. "
+                                        f"Ignoring all but the first entry: {key} = {value[0]}"
+                                    )
+                                else:
+                                    raise ValueError(
+                                        f"{key} from /TagInfo contains more than 1 unique value: {value}"
+                                    )
+
                             meta_dict[filename]['/TagInfo'][key] = value[0]
 
             if promote is None:

@@ -247,6 +247,9 @@ PP="$PP"'|Empty temporary A-line container'
 # Warnings from mini-projects, not holding all the EDM classes.
 PP="$PP"'|AuxDynReader::init.*Could not find auxid for'
 
+# Warnings from MetaReader concerning multiple values in /TagInfo.
+PP="$PP"'|^Py:MetaReader.* WARNING (Found multiple values|Multiple values) for '
+
 test=$1
 if [ -z "$ATLAS_CTEST_TESTSTATUS" ]; then
     echo "post.sh> Warning: athena exit status is not available "
