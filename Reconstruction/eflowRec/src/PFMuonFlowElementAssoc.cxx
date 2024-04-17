@@ -149,6 +149,8 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
             //if so then we will decorate the charged FE with the fraction of cluster energy that was matched
             if (!m_useMuonTopoClusters){
                 const xAOD::CaloCluster* muonCluster = muon->cluster();
+                //these clusters are expected to be nullptr sometimes
+                if (!muonCluster) continue;                
                 unsigned int counter = 0;
                 for (auto thisCluster : FE->otherObjects()){
                     const xAOD::CaloCluster* thisCaloCluster = dynamic_cast<const xAOD::CaloCluster*>(thisCluster);
@@ -311,6 +313,8 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
             // retrieve element link again to cluster
             // use elem link to retrieve container
             const xAOD::CaloCluster* MuonCluster = muon->cluster();
+            //these clusters are expected to be nullptr sometimes
+            if (!MuonCluster) continue;
             // retrieve the vector of delta R between muon and its associated calo cluster.
             muon_ClusterInfo_deltaR_WriteDecorHandle(*muon) =  MuonCluster ? xAOD::P4Helpers::deltaR(MuonCluster,muon,false) : -1.;
         }
