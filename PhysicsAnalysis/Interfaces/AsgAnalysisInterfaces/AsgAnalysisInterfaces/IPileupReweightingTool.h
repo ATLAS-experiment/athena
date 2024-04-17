@@ -48,6 +48,9 @@ class TPileupReweighting;
          /// Get the dataWeight used to 'unprescale' data collected from a given trigger combination. mu_dependency is recommended to be true
          virtual float getDataWeight( const xAOD::EventInfo& eventInfo, const TString& trigger, bool mu_dependent=true ) = 0;
 
+        /// Get weight used to 'prescale' Monte Carlo for given trigger comibnation. 
+        virtual float getPrescaleWeight( const xAOD::EventInfo& eventInfo , const TString& trigger, bool mu_dependent=true ) = 0;
+
          /// Get a random run number for this MC event, mu_dependency is recommended ... jetetmiss seem to like it muchly
          virtual int getRandomRunNumber( const xAOD::EventInfo& eventInfo , bool mu_dependent=true) = 0;
 
