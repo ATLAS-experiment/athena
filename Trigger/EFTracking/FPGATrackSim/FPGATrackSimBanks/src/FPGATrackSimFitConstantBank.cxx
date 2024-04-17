@@ -418,7 +418,7 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	newhit.setLayer(missedplane);
 	newhit.setSection(0);
 	if (m_isIdealCoordFit) {
-	  double target_r = (m_isFirstStage) ? htt::TARGET_R_1STAGE[missedplane] : htt::TARGET_R_2STAGE[missedplane];
+	  double target_r = (m_isFirstStage) ? fpgatracksim::TARGET_R_1STAGE[missedplane] : fpgatracksim::TARGET_R_2STAGE[missedplane];
 	  newhit.setX(target_r*TMath::Cos(missing_hits[m]));
 	  newhit.setY(target_r*TMath::Sin(missing_hits[m]));
 	}
@@ -439,7 +439,7 @@ int FPGATrackSimFitConstantBank::missing_point_guess(sector_t sector, FPGATrackS
 	newhit.setLayer(missedplane);
 	newhit.setSection(0);
 	if (m_isIdealCoordFit) {
-	  double target_r = (m_isFirstStage) ? htt::TARGET_R_1STAGE[missedplane] : htt::TARGET_R_2STAGE[missedplane];
+	  double target_r = (m_isFirstStage) ? fpgatracksim::TARGET_R_1STAGE[missedplane] : fpgatracksim::TARGET_R_2STAGE[missedplane];
 	  newhit.setX(target_r*TMath::Cos(missing_hits[m]));
 	  newhit.setY(target_r*TMath::Sin(missing_hits[m]));
 	  newhit.setZ(missing_hits[m+1]);

@@ -75,6 +75,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_NNTrackTool.retrieve(EnableTool{m_doNNTrack}));
     ATH_CHECK(m_roadFilterTool.retrieve(EnableTool{m_filterRoads}));
     ATH_CHECK(m_roadFilterTool2.retrieve(EnableTool{m_filterRoads2}));
+    if (m_doSpacepoints) ATH_CHECK(m_spRoadFilterTool.retrieve(EnableTool{m_spRoadFilterTool}));
     ATH_CHECK(m_trackFitterTool_1st.retrieve(EnableTool{m_doTracking}));
     ATH_CHECK(m_overlapRemovalTool_1st.retrieve());
     ATH_CHECK(m_trackFitterTool_2nd.retrieve(EnableTool{m_runSecondStage && m_doTracking}));
@@ -167,7 +168,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     auto mon_nhits_1st = Monitored::Scalar<unsigned>("nHits_1st", hits_1st.size());
     auto mon_nhits_1st_unmapped = Monitored::Scalar<unsigned>("nHits_1st_unmapped", m_hits_1st_miss.size());
     Monitored::Group(m_monTool, mon_nhits_1st, mon_nhits_1st_unmapped);
-
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
 
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
@@ -199,6 +199,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_filterRoads2) {
         ATH_CHECK(m_roadFilterTool2->filterRoads(roads_1st, postfilter2_roads));
         roads_1st = postfilter2_roads;
+    }
+
+    // Spacepoint road filter tool. Needed when fitting to spacepoints.
+    std::vector<FPGATrackSimRoad*> postfilter3_roads;
+    if (m_doSpacepoints) {
+        ATH_CHECK(m_spRoadFilterTool->filterRoads(roads_1st, postfilter3_roads));
+        roads_1st = postfilter3_roads;
     }
 
     TIME(m_troad_filter);
@@ -333,12 +340,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             if(firstHit) firstHit = false;
             else         m_outputHitTxtStream << ", ";
 
-            // In the absence of hit.getIdentifier hash, need to get it back from
-            // FPGATrackSimIdentifierHash = (m_identifierHash << 2) + m_etaIndex; // see FPGATrackSimHit.cxx
-            // unsigned identifierHash = hit.getFPGATrackSimIdentifierHash();
-            // if(hit.isStrip())
-            //   identifierHash = (hit.getFPGATrackSimIdentifierHash() - hit.getEtaIndex()) >> 2;
-            // But instead can just use hit.getIdentifierHash() having uncommented it from FPGATrackSimHit.h
             m_outputHitTxtStream << "[" << hit.isStrip() << ", " << hit.getIdentifierHash() << ", "
                                  << hit.getEtaIndex() << ", " << hit.getPhiIndex() << "]";
           }

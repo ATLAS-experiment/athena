@@ -80,7 +80,7 @@ class FPGATrackSimPhiRoadFilterTool : public extends <AthAlgTool, IFPGATrackSimR
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
-        FPGATrackSimRoad_Hough buildRoad(FPGATrackSimRoad* origr) const;
+        FPGATrackSimRoad buildRoad(FPGATrackSimRoad* origr) const;
 };
 
 

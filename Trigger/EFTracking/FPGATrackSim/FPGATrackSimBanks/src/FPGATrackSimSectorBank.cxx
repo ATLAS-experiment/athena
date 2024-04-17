@@ -155,15 +155,30 @@ sector_t FPGATrackSimSectorBank::findSector(std::vector<std::vector<const FPGATr
         }
         else if (hits[i].size() == 1)
         {
-            modules[i] = hits[i][0]->getFPGATrackSimIdentifierHash();
+            modules[i] = hits[i][0]->getIdentifierHash();
 	}
         else
         {
             std::unordered_map<unsigned, unsigned> hashCount;
-            for (const FPGATrackSimHit* h : hits[i]) hashCount[h->getFPGATrackSimIdentifierHash()]++;
+            for (const FPGATrackSimHit* h : hits[i]) hashCount[h->getIdentifierHash()]++;
             modules[i] = std::max_element(hashCount.begin(), hashCount.end())->first;
         }
     }
 
     return findSector(modules);
 }
+
+
+// Helper function. Store the q/pt binning information for this set of sectors here.
+void FPGATrackSimSectorBank::storeQOverPtBinning(std::vector<double> qOverPtBins, bool absBinning)
+{
+  m_absQOverPtBinning = absBinning;
+
+  // Retrieve q/pt binning information. Fallback to no binning if not set.
+  // Note that this behavior on whether or not we are using |q/pt|.
+  m_qOverPtBins = qOverPtBins;
+  if (m_qOverPtBins.size() == 0) {
+    ANA_MSG_FATAL("q/pt bin information not set in bank tag!");
+  }
+}
+

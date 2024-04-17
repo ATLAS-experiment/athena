@@ -152,7 +152,13 @@ void FPGATrackSimRegionMap::loadModuleIDLUT(std::string const & filepath)
 
 bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &hit) const
 {
-    return isInRegion(region, hit.getLayer(), hit.getSection(), hit.getFPGATrackSimEtaModule(), hit.getPhiModule());
+    // To avoid confusion and double-counting, by convention, always use the coordinates of the inner hit
+    // when testing if a spacepoint is in a (sub)region.
+    if (hit.getHitType() == HitType::spacepoint) {
+        return isInRegion(region, hit.getPairedLayer(), hit.getPairedSection(), hit.getPairedEtaModule(), hit.getPairedPhiModule());
+    } else {
+        return isInRegion(region, hit.getLayer(), hit.getSection(), hit.getEtaModule(), hit.getPhiModule());
+    }
 }
 
 
@@ -213,7 +219,7 @@ uint32_t FPGATrackSimRegionMap::getUnmappedID(uint32_t region, const FPGATrackSi
 
   uint32_t layer   = hit.getLayer();
   uint32_t section = hit.getSection();
-  int eta          = hit.getFPGATrackSimEtaModule();
+  int eta          = hit.getEtaModule();
   int phi          = hit.getPhiModule();
 
     int err[] = {1,1,1,1,1,1};

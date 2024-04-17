@@ -73,14 +73,12 @@ public:
     void setEtaWidth(unsigned v) { m_etaWidth = v; }
     void setPhiWidth(unsigned v) { m_phiWidth = v; }
     unsigned getIdentifierHash() const { return m_identifierHash; } // TODO note this might break things in the same way as getSide() a few lines below. If so, recomment.
-    unsigned getFPGATrackSimIdentifierHash() const; // TODO UPDATE THIS FOR REL22
     unsigned getLayerDisk() const { return m_layer_disk; } // ITk layer number
     unsigned getSide() const { return m_side; } // strip side TODO note this has been uncommented on 4/20/21. If wrappers suddenly break, recomment this. Same for getIdentifierHash above.
     unsigned getPhysLayer() const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
     unsigned getEtaWidth() const { return m_etaWidth; }
     unsigned getPhiWidth() const { return m_phiWidth; }
-    //unsigned getEtaModule() const { return m_etaModule; }
-    int getFPGATrackSimEtaModule() const; // TODO UPDATE THIS FOR REL22
+    unsigned getEtaModule() const { return m_etaModule; }
     unsigned getPhiModule() const { return m_phiModule; }
 
     // --- Mapped Location ---
@@ -103,10 +101,25 @@ public:
     float getPhiCoord() const { return m_phiIndex; }
     float getEtaCoord() const { return m_etaIndex; }
 
+    float getPhiWindow() const { return m_phiWindow; }
+
+    // Converts the hit into a spacepoint. Keeps copies of the local information.
+    void makeSpacepoint(float x, float y, float z, float window, FPGATrackSimHit& other, FPGATrackSimMultiTruth& new_truth);
+
+    // Retrieves a (copy of) the original hit with the original local coordinates used to make a SP.
+    // If not a SP, returns a copy of this hit.
+    const FPGATrackSimHit getOriginalHit() const;
+
+    // These return coordinates for the inner hit in the pair, if a SP
+    int getPairedEtaModule() const { return m_pairedEtaModule; }
+    unsigned getPairedPhiModule() const { return m_pairedPhiModule; }
+    unsigned getPairedSection() const { return m_pairedSection; }
+    unsigned getPairedLayer() const { return m_pairedLayer; }
+
     // --- Global Coordinates ---
-    void setX(float v) { m_x = v; }
-    void setY(float v) { m_y = v; }
-    void setZ(float v) { m_z = v; }
+    void setX(float v) { m_originalX = m_x; m_x = v; }
+    void setY(float v) { m_originalY = m_y; m_y = v; }
+    void setZ(float v) { m_originalZ = m_z; m_z = v; }
     float getX() const { return m_x; }
     float getY() const { return m_y; }
     float getZ() const { return m_z; }
@@ -161,6 +174,20 @@ protected:
     float m_x = 0;  // Hit position in global coordinates
     float m_y = 0;
     float m_z = 0;
+
+    // Original X/Y/Z coordinates, if this is a spacepoint
+    float m_originalX = 0;
+    float m_originalY = 0;
+    float m_originalZ = 0;
+
+    // Phi window used in spacepoint calculation
+    float m_phiWindow = 0;
+
+    // These are the coordinates of the inner layer in a SP
+    unsigned m_pairedPhiModule = -1;
+    int m_pairedEtaModule = -1;
+    unsigned m_pairedSection = 0;
+    unsigned m_pairedLayer = 0;
 
     // --- Truth and Other ---
     unsigned m_hw_word = 0; // store Strip and Pixel cluster positions as integers using the same FPGATrackSim_IM HW definition

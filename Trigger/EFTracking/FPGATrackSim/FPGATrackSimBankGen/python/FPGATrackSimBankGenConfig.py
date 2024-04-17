@@ -14,6 +14,16 @@ from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUni
 from AthenaCommon.SystemOfUnits import GeV
 
 
+def FPGATrackSimSpacePointsToolCfg(flags):
+    result=ComponentAccumulator()
+    SpacePointTool = CompFactory.FPGATrackSimSpacePointsTool()
+    SpacePointTool.Filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
+    SpacePointTool.FilteringClosePoints = False
+    SpacePointTool.PhiWindow = 0.008
+    SpacePointTool.Duplication = True
+    result.setPrivateTools(SpacePointTool)
+    return result
+
 def prepareFlagsForFPGATrackSimBankGen(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
     return newFlags
@@ -54,14 +64,11 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     theFPGATrackSimMatrixGenAlg.TRAIN_PDG = 13
     theFPGATrackSimMatrixGenAlg.NBanks = 1
 
-    ### the use of spacepoints hasn't been moved over to rel24, it will be done in the future
-    # Require that we have at least 4/5 2D hits (complete spacepoints + pixels).
-    # This will *disallow* tracks that are missing a pixel hit and a spacepoint,
-    # and also disallow tracks that are missing more than one spacepoint.
-    # This can also be achieved by just running a 8/9 threshold.
-    #####theFPGATrackSimMatrixGenAlg.minSpacePlusPixel = 4
-    ###theFPGATrackSimMatrixGenAlg.doSpacePoints = True
-    #theFPGATrackSimMatrixGenAlg.SpacePointTool = acc.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
+    theFPGATrackSimMatrixGenAlg.SpacePoints = True
+    theFPGATrackSimMatrixGenAlg.SpacePointTool = acc.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
+
+    # We should make it possible to configure this, probably.
+    theFPGATrackSimMatrixGenAlg.minSpacePlusPixel = 4
 
     # Override this. It gets set somewhere from bank_tag.
     theFPGATrackSimMatrixGenAlg.WCmax = 2
@@ -71,6 +78,12 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
 
     theFPGATrackSimMatrixGenAlg.FPGATrackSimSGToRawHitsTool = acc.popToolsAndMerge(FPGATrackSimSGToRawHitsToolCfg(flags))
     theFPGATrackSimMatrixGenAlg.FPGATrackSimClusteringFTKTool = CompFactory.FPGATrackSimClusteringTool()
+
+    # Do we really want to use the tag system for this? I think so but unsure if modernization needed.
+    import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
+    bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
+    theFPGATrackSimMatrixGenAlg.sectorQPtBins = bank_tag['sectorQPtBins']
+    theFPGATrackSimMatrixGenAlg.qptAbsBinning = bank_tag['qptAbsBinning']
 
     acc.addEventAlgo(theFPGATrackSimMatrixGenAlg)
 

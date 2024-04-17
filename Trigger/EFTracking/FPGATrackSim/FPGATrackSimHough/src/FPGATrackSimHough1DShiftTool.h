@@ -154,7 +154,7 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
         ///////////////////////////////////////////////////////////////////////
         // Event Storage
 
-        std::vector<FPGATrackSimRoad_Hough> m_roads;
+        std::vector<FPGATrackSimRoad> m_roads;
 
         ///////////////////////////////////////////////////////////////////////
         // Metadata and Monitoring
@@ -170,7 +170,7 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
         float getPtFromShiftDiff(int shift) const;
         void readShifts(std::string const & filepath);
         std::vector<boost::dynamic_bitset<>> makeHitMasks(const std::vector<const FPGATrackSimHit*> & hits);
-        FPGATrackSimRoad_Hough makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, std::vector<int> const & shifts);
+        FPGATrackSimRoad makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, std::vector<int> const & shifts);
         void printHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks) const;
         void drawHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks, std::string const & name);
         void drawHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks, std::string const & name, std::vector<int> const & shifts);

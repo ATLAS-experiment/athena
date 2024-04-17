@@ -1,3 +1,4 @@
+
 // Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include <algorithm>
@@ -74,12 +75,12 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vec
 {
     m_tracks_missinghits_track.clear();
 
-    FPGATrackSimRoad_Hough *hough_road = dynamic_cast<FPGATrackSimRoad_Hough*>(road);
     double y = 0.0;
     double x = 0.0;
-    if (hough_road != nullptr && m_IdealCoordFitType != TrackCorrType::None ) {
-      y = hough_road->getY();
-      x = hough_road->getX();
+    if (road != nullptr && m_IdealCoordFitType != TrackCorrType::None ) {
+      y = road->getY();
+      x = road->getX();
+      ATH_MSG_DEBUG("Attempting to fit Hough road with y = " << y << ", x = " << x << ", sector = " << road->getSector());
     }
 
     // Error checking
@@ -133,7 +134,12 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vec
     size_t nFits = std::min((size_t)m_max_ncomb, track_cands.size());
     for (size_t icomb = 0; icomb < nFits; icomb++)
     {
-        bool ok;
+        // Before we start, make sure this track candidate has not been marked as invalid
+        // due to combinatorics issues with spacepoints.
+        bool ok = track_cands[icomb].isValidCand();
+        if (!ok) {
+            continue;
+        }
         if (nMissing == 0 || m_guessinghits)
         {
 	        ok = m_nominalBank->linfit(sector, track_cands[icomb], m_do2ndStage);
@@ -193,10 +199,8 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vec
             for (FPGATrackSimTrack & t : tracks)
 	      if (t.getChi2ndof() > m_Chi2Dof_recovery_min && t.getChi2ndof() < m_Chi2Dof_recovery_max){
 		double y(0);
-		FPGATrackSimRoad_Hough *hough_road = dynamic_cast<FPGATrackSimRoad_Hough*>(road);
-		if (hough_road != nullptr && m_IdealCoordFitType != TrackCorrType::None)
-		  y = hough_road->getY();
-
+		if (road != nullptr && m_IdealCoordFitType != TrackCorrType::None)
+		  y = road->getY();
 		t = recoverTrack(t, norecovery_mask, sector, y);
 
 	      }
@@ -319,6 +323,16 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
             else
             {
                 const FPGATrackSimHit* hit = road.getHits(layer)[hit_indices[layer]];
+                // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
+                // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
+                // That require another field on the track object, but it avoids having to change the sizes
+                // of arrays computed above.
+                if (hit->getHitType() == HitType::spacepoint && (hit->getPhysLayer() % 2) == 1) {
+                    const FPGATrackSimHit inner_hit = track_cands[icomb].getFPGATrackSimHits().at(layer - 1);
+                    if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
+                        track_cands[icomb].setValidCand(false);
+                    }
+                }
                 track_cands[icomb].setFPGATrackSimHit(layer, *hit);               
             }
         }

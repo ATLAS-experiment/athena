@@ -60,11 +60,18 @@ def FPGATrackSimBankSvcCfg(flags):
         f'{pathBankSvc}corrgen_raw_13L_skipPlane5.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane6.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane7.gcon']
-    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_8L_reg0_checkGood1.gcon'
+    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_9L_reg0_checkGood1.gcon'
     FPGATrackSimBankSvc.constants_2nd = f'{pathBankSvc}corrgen_raw_13L_reg0_checkGood1.gcon'
-    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_8L_reg0_checkGood1.patt'
+    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_9L_reg0_checkGood1.patt'
     FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg0_checkGood1.patt'
-    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_8L_reg0.root'
+    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_9L_reg0.root'
+
+    # These should be configurable. The tag system needs updating though.
+    import FPGATrackSimConfTools.FPGATrackSimTagConfig as FPGATrackSimTagConfig
+    bank_tag = FPGATrackSimTagConfig.getTags(stage='bank')['bank']
+    FPGATrackSimBankSvc.sectorQPtBins = bank_tag['sectorQPtBins']
+    FPGATrackSimBankSvc.qptAbsBinning = bank_tag['qptAbsBinning']
+
     result.addService(FPGATrackSimBankSvc, create=True, primary=True)
     return result
 
@@ -115,6 +122,7 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
         HoughTransform.traceHits = True
         HoughTransform.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
+        HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints
         tools.append(HoughTransform)
 
     RF.tools = tools
@@ -145,10 +153,10 @@ def FPGATrackSimDataFlowToolCfg(flags):
 
 def FPGATrackSimSpacePointsToolCfg(flags):
     result=ComponentAccumulator()
-    SpacePointTool = CompFactory.FPGATrackSimSpacePointsTool_v2()
+    SpacePointTool = CompFactory.FPGATrackSimSpacePointsTool()
     SpacePointTool.Filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
     SpacePointTool.FilteringClosePoints = False
-    SpacePointTool.PhiWindow = 0.008
+    SpacePointTool.PhiWindow = 0.004
     SpacePointTool.Duplication = True
     result.addPublicTool(SpacePointTool, primary=True)
     return result
@@ -345,6 +353,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.DataFlowTool = result.getPrimaryAndMerge(FPGATrackSimDataFlowToolCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.SpacePointTool = result.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
 
+
     RoadFilter = CompFactory.FPGATrackSimEtaPatternFilterTool()
     RoadFilter.FPGATrackSimMappingSvc = FPGATrackSimMaping
     theFPGATrackSimLogicalHistProcessAlg.RoadFilter = RoadFilter
@@ -371,6 +380,15 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.OverlapRemoval_2nd = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalTool_2ndCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.TrackFitter_2nd = result.getPrimaryAndMerge(FPGATrackSimTrackFitterTool_2ndCfg(flags))
 
+    # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
+    if flags.Trigger.FPGATrackSim.ActiveConfig.spacePoints:
+        SPRoadFilter = CompFactory.FPGATrackSimSpacepointRoadFilterTool()
+        SPRoadFilter.filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
+        SPRoadFilter.minSpacePlusPixel = 4
+        # TODO guard here against threshold being more htan one value?
+        SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
+        theFPGATrackSimLogicalHistProcessAlg.SPRoadFilterTool = SPRoadFilter
+        theFPGATrackSimLogicalHistProcessAlg.Spacepoints = True
 
     if flags.Trigger.FPGATrackSim.ActiveConfig.secondStage:
         FPGATrackSimExtrapolatorTool = CompFactory.FPGATrackSimExtrapolator()
@@ -403,7 +421,7 @@ if __name__ == "__main__":
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
-    
+
     flags.lock()
     acc=MainServicesCfg(flags)
     
@@ -417,11 +435,11 @@ if __name__ == "__main__":
         if flags.Input.isMC:
             from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
             acc.merge(GEN_AOD2xAODCfg(flags))
-        
+
         if flags.Detector.EnableCalo:
             from CaloRec.CaloRecoConfig import CaloRecoCfg
             acc.merge(CaloRecoCfg(flags))
-        
+
         if not flags.Reco.EnableTrackOverlay:
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))

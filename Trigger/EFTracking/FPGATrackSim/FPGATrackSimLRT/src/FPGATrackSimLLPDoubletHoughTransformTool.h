@@ -47,7 +47,7 @@ private:
 
 
     typedef vector2D<std::pair<int, std::unordered_set<const FPGATrackSimHit*>>> Image;
-    std::vector<FPGATrackSimRoad_Hough> m_roads;
+    std::vector<FPGATrackSimRoad> m_roads;
 
     const double m_acceptedDistanceBetweenLayersMin = 200; // min R disstance for hits pair filtering
     const double m_acceptedDistanceBetweenLayersMax = 600;
@@ -59,7 +59,7 @@ private:
     bool passThreshold(Image const & image, int x, int y) const;
     bool isLocalMaxima(Image const & image, int x, int y) const;
 
-    FPGATrackSimRoad_Hough createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const;
+    FPGATrackSimRoad createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const;
     unsigned m_event = 0;
     void drawImage(Image const & image) const;
 
