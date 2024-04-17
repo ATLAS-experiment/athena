@@ -22,6 +22,3 @@ atlas_add_component( MuonTGRecTools
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} MuonTGRecToolsLib AthLinks StoreGateLib GeneratorObjects MuonReadoutGeometry MuonStationIndexLib xAODTracking MuonDetDescrUtils MuonDigitContainer MuonCompetingRIOsOnTrack MuonLayerEvent MuonRIO_OnTrack MuonRecToolInterfaces MuonSimData MuonSimEvent RecoToolInterfaces TrkMaterialOnTrack TrkMeasurementBase TrkParameters TrkRIO_OnTrack MuonCombinedEvent )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
