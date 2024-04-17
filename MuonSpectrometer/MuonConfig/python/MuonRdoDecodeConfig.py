@@ -181,10 +181,13 @@ def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))
     from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
-    kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))    
+    kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))   
+    kwargs["xAODKey"] =  "MM_Clusters" if flags.Muon.writexAODPRD else ""
+ 
     the_tool = CompFactory.Muon.MmRdoToPrepDataToolMT(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
+
 
 def MMRDODecodeCfg(flags, name="MM_RdoToMM_PrepData", **kwargs):
     acc = ComponentAccumulator()
