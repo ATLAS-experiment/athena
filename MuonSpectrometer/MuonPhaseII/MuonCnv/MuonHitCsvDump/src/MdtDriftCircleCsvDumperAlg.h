@@ -5,9 +5,10 @@
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
    
-#include<string>
+
 
 #include <AthenaBaseComps/AthAlgorithm.h>
+#include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <StoreGate/ReadHandleKey.h>
 
@@ -27,7 +28,8 @@ class MdtDriftCircleCsvDumperAlg: public AthAlgorithm {
      StatusCode execute() override;
 
    private:
-
+    
+    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     // drift circles in xAOD format 
     SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_inDriftCircleKey{
     this, "DriftCircleKey", "xAODMdtCircles", "mdt circle container"};
