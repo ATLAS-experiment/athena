@@ -18,10 +18,7 @@ atlas_add_library( FPGATrackSimBanksLib
 # Declare Gaudi component(s) in the package
 atlas_add_component( FPGATrackSimBanks
    src/components/*.cxx
-   LINK_LIBRARIES FPGATrackSimBanksLib )
-
-# Install files from the package and run flake8 test:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 )  
+   LINK_LIBRARIES FPGATrackSimBanksLib )  
 
 
 #atlas_add_test(             FPGATrackSimFitConstantBank_test

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FPGATrackSimAlgorithms )
@@ -16,6 +16,4 @@ atlas_add_component( FPGATrackSimAlgorithms
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
-atlas_install_joboptions( share/*jobOptions*.py )
-atlas_install_joboptions( share/skeleton.*.py )
 atlas_install_runtime( scripts/*_tf.py )

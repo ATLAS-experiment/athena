@@ -23,9 +23,6 @@ atlas_add_component(
     LINK_LIBRARIES      FPGATrackSimMapsLib FPGATrackSimConfToolsLib
 )
 
-# Install files from the package:
-atlas_install_python_modules( python/*.py )
-
 # Tests in the package:
 atlas_add_test(         FPGATrackSimPlaneMap
     SOURCES             test/FPGATrackSimPlaneMap_test.cxx
