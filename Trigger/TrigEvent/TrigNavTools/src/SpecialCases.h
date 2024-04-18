@@ -9,5 +9,6 @@ namespace SpecialCases {
   const std::regex egammaDiEtcut{".*etcut.*etcut.*"};
   const std::regex egammaEtcut{".*etcut.*"};
   const std::regex egammaCombinedWithEtcut{"HLT_(e|g).*_(e|g).*etcut.*"};
+  const std::regex isTopo{".*(Jpsi|Zee).*"};
 
 }
