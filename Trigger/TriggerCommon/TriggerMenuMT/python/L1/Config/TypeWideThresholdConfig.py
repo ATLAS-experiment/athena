@@ -363,9 +363,9 @@ class L1Config_eTAU:
 
     # BDT eTAU score cuts
     # 12 bits (0 - 4095), BDT > threshold -> pass
-    BDT_fw_loose = 2
-    BDT_fw_medium = 12
-    BDT_fw_tight = 32
+    BDT_fw_loose = 130
+    BDT_fw_medium = 200
+    BDT_fw_tight = 240
 
     # RHad isolation cuts
     # 8 bits (0 - 255), rHad > threshold -> pass
@@ -405,7 +405,7 @@ class L1Config_eTAU:
         ]
         confObj["ptMinToTopo"] = 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
-        confObj["minIsoEt"] = 0.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
+        confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
         confObj["algoVersion"] = int(do_eFex_BDT_Tau)
 
@@ -471,27 +471,27 @@ class L1Config_cTAU:
 
     # Dedicated M thresholds for the primary items:
     #cTAU12M (Medium12)
-    isolation_fw_medium12: int = 358
-    isolation_jTAUCoreScale_fw_medium12: int = 0
-    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium12: int = 620 + 870
+    isolation_jTAUCoreScale_fw_medium12: int = 870
+    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
 
     #cTAU20M (Medium20)
-    isolation_fw_medium20: int = 358
-    isolation_jTAUCoreScale_fw_medium20: int = 0
-    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium20: int = 620 + 870
+    isolation_jTAUCoreScale_fw_medium20: int = 870
+    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
 
     #cTAU30M (Medium30)
-    isolation_fw_medium30: int = 358
-    isolation_jTAUCoreScale_fw_medium30: int = 0
-    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium30: int = 500 + 870
+    isolation_jTAUCoreScale_fw_medium30: int = 870
+    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
 
     #cTAU35M (Medium35)
-    isolation_fw_medium35: int = 358
-    isolation_jTAUCoreScale_fw_medium35: int = 0
-    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium35: int = 385 + 500
+    isolation_jTAUCoreScale_fw_medium35: int = 500
+    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.Tight
     eTAU_rHadMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
 
     def __post_init__(self):
