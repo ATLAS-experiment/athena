@@ -426,7 +426,7 @@ namespace MCTesting {
     ASSERT_EQ(particle1,testLink1c.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink1d(particle1,event_number1);
+    HepMcParticleLink testLink1d(particle1,event_number1,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink1d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1d.barcode());
     ASSERT_EQ( HepMC::uniqueID(particle1), testLink1d.id());
@@ -527,7 +527,7 @@ namespace MCTesting {
     ASSERT_EQ(particle2,testLink2c.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink2d(particle2,event_number2);
+    HepMcParticleLink testLink2d(particle2,event_number2,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink2d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2d.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle2), testLink2d.id());
@@ -633,7 +633,7 @@ namespace MCTesting {
     ASSERT_EQ(particle3,testLink3c.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink3d(particle3,event_number3);
+    HepMcParticleLink testLink3d(particle3,event_number3,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink3d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle3), testLink3d.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle3), testLink3d.id());
@@ -709,7 +709,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink4a(particle4,event_number4);
+    HepMcParticleLink testLink4a(particle4,event_number4,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink4a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle4), testLink4a.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle4), testLink4a.id());
@@ -1006,7 +1006,7 @@ namespace MCTesting {
     ASSERT_TRUE( testLink1c.isValid() );
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink1d(particle1,event_number1);
+    HepMcParticleLink testLink1d(particle1,event_number1,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink1d.isValid() );
     // A HepMcParticleLink built using the barcode and the event_number of
     // the GenEvent.
@@ -1064,7 +1064,7 @@ namespace MCTesting {
     ASSERT_TRUE( testLink2c.isValid() );
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink2d(particle2,event_number2);
+    HepMcParticleLink testLink2d(particle2,event_number2,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink2d.isValid() );
     // A HepMcParticleLink built using the barcode and the event_number of
     // the GenEvent.
@@ -1163,7 +1163,7 @@ namespace MCTesting {
     ASSERT_TRUE( testLink3c.isValid() );
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink3d(particle3,event_number1);
+    HepMcParticleLink testLink3d(particle3,event_number1,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink3d.isValid() );
     // A HepMcParticleLink built using the barcode and the event_number of
     // the GenEvent.
@@ -1268,7 +1268,7 @@ namespace MCTesting {
     ASSERT_EQ(*(testLink1a.cptr()),*(testLink1b.cptr()));
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink1c(particle1,event_number1);
+    HepMcParticleLink testLink1c(particle1,event_number1,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink1c.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1c.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle1), testLink1c.id());
@@ -1312,7 +1312,7 @@ namespace MCTesting {
     ASSERT_EQ(particle2,testLink2b.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // event_number of the GenEvent.
-    HepMcParticleLink testLink2c(particle2,event_number2);
+    HepMcParticleLink testLink2c(particle2,event_number2,HepMcParticleLink::IS_EVENTNUM);
     ASSERT_TRUE( testLink2c.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2c.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle2), testLink2c.id());

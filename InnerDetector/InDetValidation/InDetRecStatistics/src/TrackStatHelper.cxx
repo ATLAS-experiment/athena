@@ -426,7 +426,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
     bool matched = false;
     int nmatched = 0;
     
-    HepMcParticleLink hmpl2(particle,truth->second);
+    HepMcParticleLink hmpl2(particle,truth->second,HepMcParticleLink::IS_EVENTNUM); // FIXME truth->second is actually the position of the GenEvent in the McEventCollection!! See InDetRecStatisticsAlg::selectGenSignal(...) method (only client of TrackStatsHelper)
     recoToTruthMap::iterator rttIter=rttMap.find(hmpl2);
     if(rttIter != rttMap.end()){
       for(imap = rttMap.lower_bound(hmpl2); imap !=rttMap.upper_bound(hmpl2); ++imap){
@@ -513,7 +513,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
       bool matched = false;
       int nmatched = 0;
       
-      HepMcParticleLink hmpl2(particle,truth->second);
+      HepMcParticleLink hmpl2(particle,truth->second,HepMcParticleLink::IS_EVENTNUM); // FIXME truth->second is actually the position of the GenEvent in the McEventCollection!! See InDetRecStatisticsAlg::selectGenSignal(...) method (only client of TrackStatsHelper)
       recoToTruthMap::iterator rttIter=rttMap.find(hmpl2);
       if(rttIter != rttMap.end()){
 	for(imap = rttMap.lower_bound(hmpl2); imap !=rttMap.upper_bound(hmpl2); ++imap){
