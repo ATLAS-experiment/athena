@@ -58,10 +58,34 @@ def configureGeometry(flags, cfg):
         from AtlasGeoModel.CavernGMConfig import CavernGeometryCfg
         cfg.merge(CavernGeometryCfg(flags))
     
+
+    # Forward detectors (disabled by default)
+    if flags.Detector.GeometryLucid or flags.Detector.GeometryALFA or flags.Detector.GeometryAFP or flags.Detector.GeometryFwdRegion :
+        from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
+        cfg.merge(ForDetGeometryCfg(flags))
     if flags.Detector.GeometryZDC:
         from ZDC_GeoM.ZdcGeoModelConfig import ZDC_DetToolCfg
         cfg.merge(ZDC_DetToolCfg(flags))
 
+    
+    # Calorimeters
+        # if flags.Detector.GeometryMBTS:
+    # Inner Detector
+        # if flags.Detector.GeometryBCM:
+
+    # Upgrade ITk Inner Tracker is a separate and parallel detector
+        # if flags.Detector.GeometryBCMPrime:
+        # if flags.Detector.GeometryPLR:
+
+    # # HGTD
+    # if flags.Detector.GeometryHGTD:
+    #     #set up geometry
+    #     if flags.HGTD.Geometry.useGeoModelXml:
+    #         from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
+    #     else:
+    #         from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
+    #     cfg.merge(HGTD_SimulationGeometryCfg(flags))
+        
 
 
 

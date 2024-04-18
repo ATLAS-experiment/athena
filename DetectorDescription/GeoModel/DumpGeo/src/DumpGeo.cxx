@@ -12,6 +12,7 @@
 //  - 2024, Mar -- Riccardo Maria BIANCHI
 //                 <riccardo.maria.bianchi@cern.ch>
 //                 Removed GeoExporter, moved all to DumpGeo
+//  - 2024, Apr -- Added missing sub-systems: Cavern, HGTD, FWD detectors, ...
 
 #include "DumpGeo/DumpGeo.h"
 
@@ -107,53 +108,40 @@ StatusCode DumpGeo::initialize() {
   // We fill a set from the output vector,
   // so we can use its built-in 'count' method later,
   // to search for DetManagers
-  ATH_MSG_INFO(
-      "List of the GeoModel Detector Managers that are being dumped: ");
+  ATH_MSG_INFO("Dumping the GeoModel tree...");
   std::set<std::string> managersList{};
   {
     std::vector<std::string> blub = theExpt->getListOfManagers();
     managersList.insert(blub.begin(), blub.end());
   }
   if (msgLvl(MSG::INFO)) {
+    std::cout
+        << "List of the GeoModel Detector Managers that are being dumped: "
+        << std::endl;
     for (auto const& man : managersList) {
       // get the DetectorManager
       const GeoVDetectorManager* manager = theExpt->getManager(man);
       unsigned int nTreetops = manager->getNumTreeTops();
       std::cout << "\t" << man << " [contains " << nTreetops << " treetops]"
                 << std::endl;
-      // if (msgLvl(MSG::VERBOSE)) {
-        for (unsigned int i = 0; i < nTreetops; ++i) {
-          PVConstLink treetop(manager->getTreeTop(i));
-          // get treetop's volume
-          const GeoVPhysVol* vol = treetop;
-          // get treetop's logvol's name
-          std::string volName = vol->getLogVol()->getName();
-          std::cout << "\t\t treetop: " << volName << std::endl;
-        }
-      // }
+      for (unsigned int i = 0; i < nTreetops; ++i) {
+        PVConstLink treetop(manager->getTreeTop(i));
+        // get treetop's volume
+        const GeoVPhysVol* vol = treetop;
+        // get treetop's logvol's name
+        std::string volName = vol->getLogVol()->getName();
+        std::cout << "\t\t treetop: " << volName << std::endl;
+      }
     }
   }
 
   if (!(m_user_filterDetManagersList.empty())) {
-
-    // // Get list of managers
-    // // We fill a set from the output vector,
-    // // so we can use its built-in 'count' method later,
-    // // to search for DetManagers
-    // ATH_MSG_INFO("List of GeoModel Detector Managers: ");
-    // std::set<std::string> managersList{};
-    // {
-    //    std::vector<std::string> blub = theExpt->getListOfManagers();
-    //    managersList.insert(blub.begin(), blub.end());
-    // }
-
     // Convert the list of det managers passed by the user into a set
     std::set<std::string> user_managersList{};
     {
       user_managersList.insert(m_user_filterDetManagersList.begin(),
                                m_user_filterDetManagersList.end());
     }
-
     // safety check:
     // check that all DetManagers requested by the user are in the list
     // If not, print an error message to warn the user and return
@@ -220,9 +208,9 @@ StatusCode DumpGeo::initialize() {
                 }             // end while
               }
             }
-          }  // end for
-        }    // end if
-      }      // end for
+          }
+        }
+      }
     }
   }
 
