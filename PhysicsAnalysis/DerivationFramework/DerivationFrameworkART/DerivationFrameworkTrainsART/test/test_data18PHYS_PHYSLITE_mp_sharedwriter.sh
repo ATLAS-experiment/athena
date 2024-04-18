@@ -54,3 +54,11 @@ readDataHeader.py --filesInput=DAOD_PHYSLITE.art.pool.root > readDataHeader_PHYS
 tail readDataHeader_PHYSLITE.txt | grep -q "Application Manager Terminated successfully"
 
 echo "art-result: $? readDataHeader PHYSLITE"
+
+checkMetadata.py --filesInput=DAOD_PHYS.art.pool.root > checkMetadata_PHYS.txt 2>&1
+
+echo "art-result: $? checkMetadata PHYS"
+
+checkMetadata.py --filesInput=DAOD_PHYSLITE.art.pool.root > checkMetadata_PHYSLITE.txt 2>&1
+
+echo "art-result: $? checkMetadata PHYSLITE"
