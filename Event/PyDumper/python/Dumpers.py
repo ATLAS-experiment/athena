@@ -1425,13 +1425,13 @@ def dump_DetailedTrackTruthCollection (c, f):
     fprint (f, ' ', c.trackCollectionLink().key(), c.size())
     for p in toiter1(c):
         fprint (f, '\n   %3d' % p.first.index(), ' common ')
-        dump_SubDetHitStatistics (p.second.statsCommon(), f),
+        dump_SubDetHitStatistics (p.second.statsCommon(), f)
         fprint (f, '\n      ', ' track ')
-        dump_SubDetHitStatistics (p.second.statsTrack(), f),
+        dump_SubDetHitStatistics (p.second.statsTrack(), f)
         fprint (f, '\n      ', ' truth ')
-        dump_SubDetHitStatistics (p.second.statsTruth(), f),
+        dump_SubDetHitStatistics (p.second.statsTruth(), f)
         fprint (f, '\n      ', ' trajectory ')
-        dump_TruthTrajectory (p.second.trajectory(), f),
+        dump_TruthTrajectory (p.second.trajectory(), f)
     return
               
         
@@ -1737,7 +1737,7 @@ def dump_AttributeList (p, f):
     #for x in p:
     #    print ('yyy1', type(x))
     ss = ROOT.std.ostringstream()
-    getattr(p, 'print')(ss)
+    p.print(ss)
     #print ('yyy2', ss.str())
     #for i in range (p.size()):
     #    print ('yyy3', i, p[i], type(p[i]))
@@ -1811,7 +1811,7 @@ def dump_TrigMonSeq (p, f):
     fprint (f, p.getEncoded(), list(p.getVarKey()), list(p.getVarVal()))
     for a in p.getAlg():
         fprint (f, '\n        ')
-        dump_TrigMonAlg (p, f)
+        dump_TrigMonAlg (a, f)
     return
 
 def dump_TrigMonTE (p, f):
@@ -1868,22 +1868,22 @@ def dump_TrigConfChain (p, f):
     fprint (f, '\n      sigs')
     for s in p.getSignature():
         fprint (f, '\n        ')
-        dump_TrigConfSig (p, f)
+        dump_TrigConfSig (s, f)
         
     return
 
 def dump_TrigConfAlg (p, f):
     ss = ROOT.ostringstream()
-    getattr(p, 'print')(ss)
+    p.print(ss)
     fprint (f, p.index(), ss.str())
     return
 
 def dump_TrigConfSeq (p, f):
     fprint (f, p.getName(), p.getIndex(), p.getId(), p.getTopoTE())
     fprint (f, '\n      algs')
-    for s in p.getAlg():
+    for a in p.getAlg():
         fprint (f, '\n        ')
-        dump_TrigConfAlg (p, f)
+        dump_TrigConfAlg (a, f)
     fprint (f, '\n      input TE', list(p.getInputTEs()))
     return
 
@@ -2239,7 +2239,7 @@ def dump_AlignmentEffectsOnTrack (p, f):
 
 
 def dump_TrackStateOnSurface (p, f):
-    dump_FitQuality (p.fitQualityOnSurface(), f), p.types().to_string(),
+    dump_FitQuality (p.fitQualityOnSurface(), f)
     fprint (f, '\n    pm ')
     dump_parameters (p.trackParameters(), f)
     fprint (f, '\n    ms ')
@@ -2391,7 +2391,7 @@ def dump_MissingETSigHypo (h, f):
              ))
     if h.getObject():
         fprint (f, '\n     ')
-        dump_Fourvec (h.getObject(), f),
+        dump_Fourvec (h.getObject(), f)
     for r in range(3):
         fprint (f, '\n     %d %f %f %f %f %f' %
                 (r,
@@ -2601,7 +2601,7 @@ def dump_LinkToTrackParticleBase (l, f):
 
 
 def dump_VxTrackAtVertex (t, f):
-    dump_FitQuality (t.trackQuality(), f),
+    dump_FitQuality (t.trackQuality(), f)
     fprint (f, '%f %f' %
             (t.vtxCompatibility(),
              t.weight()))
@@ -3412,7 +3412,7 @@ def dump_Assocs (a, f, colltype):
         fprint (f, '->')
         for p in coll:
             fprint (f, typename(p.__class__))
-            dump_Fourvec (p, f),
+            dump_Fourvec (p, f)
         if errflag:
             fprint (f, '  [Got invalid EL error]')
     return
@@ -5554,7 +5554,7 @@ def format_obj (x, name=None):
         else:
             l = ', '.join ([format_obj(x[i], name) for i in range(x.size())])
         return '[' + l + ']'
-    if type(x) == PyAthena.xAOD.CaloClusterBadChannelData_v1:
+    if isinstance(x, PyAthena.xAOD.CaloClusterBadChannelData_v1):
         return '<BadChannel: %6.3f/%6.3f/%2d: %04x>' % \
                (x.eta(), x.phi(), x.layer(), x.badChannel())
     if tname == 'set<unsigned int>':
@@ -5633,9 +5633,8 @@ def dump_auxitem (x, auxid, f = sys.stdout):
     return
 
 
-def dump_auxdata (x, exclude=[], f = sys.stdout):
+def dump_auxdata (x, exclude=None, f = sys.stdout):
     reg=ROOT.SG.AuxTypeRegistry.instance()
-    #auxids = list(x.getAuxIDs())
     if cppyy.addressof (x) == 0:
         fprint (f, '<null pointer>', x, type(x))
         return
@@ -5646,9 +5645,8 @@ def dump_auxdata (x, exclude=[], f = sys.stdout):
         raise
     auxids = [(reg.getName(id), id) for id in auxids]
     auxids.sort()
-    #fprint (f, auxids)
     for name, auxid in auxids:
-        if name in exclude: continue
+        if exclude and name in exclude: continue
         fprint (f,  name + ': ')
         dump_auxitem (x, auxid, f)
         fprint (f, '\n    ')
