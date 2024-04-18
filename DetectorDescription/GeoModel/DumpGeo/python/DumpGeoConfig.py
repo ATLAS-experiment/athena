@@ -77,14 +77,14 @@ def configureGeometry(flags, cfg):
         # if flags.Detector.GeometryBCMPrime:
         # if flags.Detector.GeometryPLR:
 
-    # # HGTD
-    # if flags.Detector.GeometryHGTD:
-    #     #set up geometry
-    #     if flags.HGTD.Geometry.useGeoModelXml:
-    #         from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
-    #     else:
-    #         from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
-    #     cfg.merge(HGTD_SimulationGeometryCfg(flags))
+    # HGTD
+    if flags.Detector.GeometryHGTD:
+        #set up geometry
+        if flags.HGTD.Geometry.useGeoModelXml:
+            from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
+        else:
+            from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
+        cfg.merge(HGTD_SimulationGeometryCfg(flags))
         
 
 
