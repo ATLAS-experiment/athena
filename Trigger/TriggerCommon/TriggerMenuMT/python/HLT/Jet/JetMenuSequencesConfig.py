@@ -238,7 +238,7 @@ def jetCaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
     def makejetCaloHypoMenuSequence():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
     return functools.partial(makejetCaloHypoMenuSequence), jetDef
-    
+
 
 # A full hypo selecting only on heavy ion calo jets (step 1)
 # Passing isPerf = True disables the hypo
