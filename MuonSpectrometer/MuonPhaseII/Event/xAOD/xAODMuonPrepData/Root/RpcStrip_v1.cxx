@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -14,7 +14,6 @@
 
 namespace {
     static const std::string preFixStr{"Rpc_"};
-    static const xAOD::PosAccessor<3> accStripPos{preFixStr + "stripPosInStation"};
 }
 namespace xAOD {
 
@@ -36,13 +35,6 @@ IdentifierHash RpcStrip_v1::measurementHash() const {
 }
 IdentifierHash RpcStrip_v1::layerHash() const {
     return MuonGMR4::RpcReadoutElement::createHash(0, gasGap(), doubletPhi(), measuresPhi());
-}
-void RpcStrip_v1::setStripPosInStation(const MeasVector<3>& pos){
-    VectorMap<3> v{accStripPos(*this).data()};
-    v = pos;
-}
-ConstVectorMap<3> RpcStrip_v1::stripPosInStation() const {
-    return ConstVectorMap<3>{accStripPos(*this).data()};
 }
 
 }  // namespace xAOD

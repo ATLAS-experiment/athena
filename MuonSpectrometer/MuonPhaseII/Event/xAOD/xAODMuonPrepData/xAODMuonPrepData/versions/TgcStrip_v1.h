@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_TGCSTRIP_V1_H
 #define XAODMUONPREPDATA_VERSION_TGCSTRIP_V1_H
@@ -61,13 +61,7 @@ class TgcStrip_v1 : public UncalibratedMeasurement_v1 {
         If the element has not been set before, it's tried to load it on the fly. 
         Exceptions are thrown if that fails as well */
     const MuonGMR4::TgcReadoutElement* readoutElement() const;
-    /** @brief Returns the local position of the strip within
-     *        the Muon Station (I.e. the center plane between 2 multilayers)
-     */
-    ConstVectorMap<3> stripPosInStation() const;
 
-    /** @brief Sets the position of the strip within a muon station*/
-    void setStripPosInStation(const MeasVector<3>& pos);
     private:
 #ifdef __CLING__
     /// Down cast the memory of the readoutElement cache if the object is stored to disk 
