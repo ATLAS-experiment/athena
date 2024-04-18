@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 def L1CaloL1TopoMonitoringConfig(inputFlags):
     '''Function to configure LVL1 L1CaloL1Topo algorithm in the monitoring system.'''
@@ -209,9 +209,6 @@ if __name__=='__main__':
 
     flags.lock()
     flags.dump() # print all the configs
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesSerialCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

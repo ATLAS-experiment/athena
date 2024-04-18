@@ -88,10 +88,6 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     # TODO: Why does it complain that G4AtlasAlgConf.G4AtlasAlg has no "Verbosities" object? Fix.
     # FIXME GaudiConfig2 seems to fail to distinguish an empty dict {} from None
     verbosities=dict(foo="bar")
-    #from AthenaCommon.AppMgr import ServiceMgr
-    #if ServiceMgr.MessageSvc.OutputLevel <= 2:
-    #    verbosities["Tracking"]="1"
-    #    print verbosities
     kwargs.setdefault("Verbosities", verbosities)
 
     # Set commands for the G4AtlasAlg

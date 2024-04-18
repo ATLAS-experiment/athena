@@ -24,7 +24,7 @@ def addTLAStep(flags, chain, chainDict):
         
         log.debug("addTLAStep: processing signature: %s", cPart['signature'] )
         # call the sequence from their respective signatures
-        tlaSequencesList.append(functools.partial(getTLASignatureSequence, flags, chainDict=chainDict, chainPart=cPart)), #signature=cPart['signature'])),
+        tlaSequencesList.append(functools.partial(getTLASignatureSequence, flags, chainDict=chainDict, chainPart=cPart))
             
     log.debug("addTLAStep: About to add a step with: %d parallel sequences.", len(tlaSequencesList))            
     

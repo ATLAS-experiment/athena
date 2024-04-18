@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @brief: Trigger executor to call base transforms
 # @details: Based on athenaExecutor with some modifications
@@ -259,7 +259,7 @@ class trigRecoExecutor(athenaExecutor):
             with open(mergeBSFileList, 'w') as BSFileList:
                 for fname in inputFiles:
                     BSFileList.write(f'{fname}\n')
-        except (IOError, OSError) as e:
+        except OSError as e:
             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'), 
                 f'Got an error when writing list of BS files to {mergeBSFileList}: {e}')
         

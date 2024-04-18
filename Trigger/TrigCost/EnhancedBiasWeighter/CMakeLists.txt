@@ -27,4 +27,4 @@ atlas_add_dictionary( EnhancedBiasWeighterDict
                       LINK_LIBRARIES EnhancedBiasWeighterLib )
 
 # Install files from the package:
-atlas_install_scripts( share/RunEBWeightsComputation.py share/ExtractEBRunDetails.py share/MergeEBWeightsFiles.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( share/RunEBWeightsComputation.py share/ExtractEBRunDetails.py share/MergeEBWeightsFiles.py share/ValidateEBMenu.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

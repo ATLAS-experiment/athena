@@ -156,6 +156,10 @@ unsigned int LVL1::eFEXtauBDTAlgo::getBDTCondition() const {
   return m_bdtAlgoImpl->getBDTCondition();
 }
 
+unsigned int LVL1::eFEXtauBDTAlgo::getBDTHadFracCondition() const {
+  return m_bdtAlgoImpl->getFracCondition();
+}
+
 bool LVL1::eFEXtauBDTAlgo::isBDT() const { return true; }
 
 void LVL1::eFEXtauBDTAlgo::setThresholds(

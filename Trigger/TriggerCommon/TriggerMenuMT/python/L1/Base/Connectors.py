@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 
-import re
 from enum import Enum
 from collections import OrderedDict as odict
 
@@ -80,17 +79,6 @@ class MenuConnectorsCollection(object):
         else:
             newConnector = OpticalConnector(name, cformat, ctype, legacy, connDef)
         self.connectors[name] = newConnector
-
-        if newConnector.ctype == CType.CTPIN:
-            try:
-                zbThr = connDef["zeroBias"]
-                thr = re.match(r"^ZB_\d?(?P<thr>\w*)",zbThr).groupdict()["thr"] # extract the threshold
-                if thr not in connDef["thresholds"]:
-                    raise RuntimeError("Connector %s contains zero bias threshold %s but not the corresponding threshold %s" % (name, zbThr, thr))
-                newConnector.addTriggerLine( TriggerLine( name = zbThr, startbit = 30,  flatindex = 30, nbits = 1) )
-            except KeyError:
-                # for connectors without zeroBias threshold
-                pass
 
     def json(self):
         confObj = odict()

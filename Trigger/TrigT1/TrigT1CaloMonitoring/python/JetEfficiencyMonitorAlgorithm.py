@@ -10,8 +10,8 @@ def JetEfficiencyMonitoringConfig(flags):
 
     result = ComponentAccumulator()
     ###########################################################################
-    # Jet and particle flow config required for data POOL files
-    if flags.Input.Format is Format.POOL and not flags.Input.isMC:
+    # Jet and particle flow config required for data POOL files except if is already an AOD
+    if flags.Input.Format is Format.POOL and not flags.Input.isMC and not any(["AOD" in a for a in flags.Input.ProcessingTags]):
         from JetRecConfig.JetRecConfig import JetRecCfg
         from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
         from JetRecConfig.JetConfigFlags import jetInternalFlags

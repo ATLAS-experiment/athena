@@ -74,20 +74,18 @@ RequiredL1Items = [
 
 FixedIDMap = {
         # to be used to hardcode CTP IDs for specific items
-        # NB: 508 is reserved for the zero bias trigger, and 509-511 for the CALREQ triggers (at the moment, ATR-22654)
+        # NB: 509-511 for the CALREQ triggers (at the moment, ATR-22654)
 
         # High-frequency counters fixed to consecutive CTP IDs
         # 8 items with the high frequency per-bunch monitoring counters (HF:111)
         # should be in consecutive cpid, starting a ctpid number with ctpid%16 = 0
         # ATR-23836
-        "L1_BCM_2A_FIRSTEMPTY":480,
-        "L1_BCM_2C_FIRSTEMPTY":481,
+        "L1_BCM_2A_FIRSTINTRAIN":480,
+        "L1_BCM_2C_FIRSTINTRAIN":481,
         "L1_jJ30":482,
         "L1_MBTS_1":483,
         "L1_MBTS_2":484,
         "L1_MBTS_1_1":485,
         "L1_BCM_Wide":486,
-        # "L1_BCM_Wide":487,
-        #
-        "L1_ZB_eEM": 508,
+        # "":487,
     }
