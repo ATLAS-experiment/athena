@@ -231,6 +231,17 @@ def addMainSequences(flags, cfg):
     cfg.flagPerfmonDomain(previousPerfmonDomain)
 
 
+def addEvgenSequences(flags, cfg):
+    from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Generator), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Fix), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.PreFilter), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Test), parentName="AthAlgSeq")
+    # TODO: needs to setup proper filtering sequence
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Filter), parentName="AthAlgSeq")
+    cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName="AthAlgSeq")
+
+
 def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     # Set the Python OutputLevel on the root logger
     from AthenaCommon.Logging import log
@@ -324,7 +335,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     return cfg
 
 
-def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr"):
+def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr", withSequences=True):
     """ComponentAccumulator-based equivalent of:
     import AthenaCommon.AtlasUnixGeneratorJob
 
@@ -334,7 +345,11 @@ def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr"):
     """
     cfg = MainServicesCfg(flags, LoopMgr)
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge (McEventSelectorCfg (flags))
+    cfg.merge(McEventSelectorCfg(flags))
+
+    if withSequences:
+        addEvgenSequences(flags, cfg)
+
     return cfg
 
 
@@ -344,7 +359,7 @@ if __name__=="__main__":
     try:
         flags.Input.RunNumbers = [284500] # Set to either MC DSID or MC Run Number
         flags.Input.TimeStamps = [1] # dummy value
-        cfg = MainEvgenServicesCfg(flags)
+        cfg = MainEvgenServicesCfg(flags, withSequences=True)
     except ModuleNotFoundError:
         #  The McEventSelector package required by MainEvgenServicesCfg is not part of the AthAnalysis project
         cfg = MainServicesCfg(flags)

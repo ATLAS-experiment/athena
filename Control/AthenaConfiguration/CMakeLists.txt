@@ -63,6 +63,10 @@ if( NOT XAOD_ANALYSIS )
     atlas_add_test( AllConfigFlagsTest_EVNT
                     SCRIPT test/testAllConfigFlags_EVNT.py
                     POST_EXEC_SCRIPT nopost.sh )
+
+    atlas_add_test( GeneratorSequencesConfig
+                    SCRIPT test/testGeneratorSequences.py
+                    POST_EXEC_SCRIPT nopost.sh )
 endif()
 
 # tests that should not run in analysis releases and in AthGeneration
