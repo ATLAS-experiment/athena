@@ -30,6 +30,9 @@ StreamName="EventInfoPoolFile1"
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 acc=MainEvgenServicesCfg(flags)
 
+from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+acc.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True), sequenceName="AthAlgSeq")
+
 #Add some LAr and Tile conditions,  this is the payload obj for this test
 from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 acc.merge(LArGMCfg(flags))
