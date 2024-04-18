@@ -27,6 +27,12 @@ class FilePeekerTool():
         self.peeked_data = self._do_peeking()
         return self._save_db_cache()
 
+    def getPeekedData(self,key):
+        self.peeked_data = self._do_peeking()
+        if key in self.peeked_data.keys():
+            return self.peeked_data[key]
+        return
+
     def _do_peeking(self):
         """ the real function doing all the work of peeking at the APR file
         @return a dict of peeked-at data
@@ -34,7 +40,7 @@ class FilePeekerTool():
 
         import uuid
         stdout_fname = (
-            'athfile-%i-%s.log.txt' %
+            'peeker-tool-%i-%s.log.txt' %
             (os.getpid(), uuid.uuid4())
             )
         stdout = open(stdout_fname, "w")

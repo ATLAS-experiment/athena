@@ -316,7 +316,6 @@ class PoolOpts(object):
 
     pass # class PoolOpts
 
-
 def _get_total_size (branch):
    if PoolOpts.FAST_MODE:
        return -1.
@@ -328,6 +327,105 @@ def _get_total_size (branch):
        basket = branch.GetBasket(bnum)
        brSize += basket.GetObjlen() - 8
    return brSize
+
+def _fname(fname):
+    """take a file name, return the pair (protocol, 'real' file name)
+    """
+    fname = os.path.expanduser(os.path.expandvars(fname))
+
+    def _normalize_uri(uri):
+        if uri.startswith('/'):
+            return 'file:'+uri
+        return uri
+
+    from urllib.parse import urlsplit
+    url = urlsplit(_normalize_uri(fname))
+    protocol = url.scheme
+    def _normalize(fname):
+        from posixpath import normpath
+        fname = normpath(fname)
+        if fname.startswith('//'): fname = fname[1:]
+        return fname
+
+    if protocol in ('', 'file', 'pfn'):
+        protocol = ''
+        fname = _normalize(url.path)
+
+        ## hack for '/castor/cern.ch/...' paths
+        if fname.startswith('/castor/'):
+            protocol = 'rfio'
+            fname = protocol + ':' + fname
+
+    elif protocol in ('rfio', 'castor'):
+        protocol = 'rfio'
+        fname = _normalize(url.path)
+        fname = protocol+':'+fname
+
+    elif protocol in ('root','dcap', 'dcache', 'http', 'https', 'dav', 'davs'):
+        pass
+
+    elif protocol in ('gsidcap',):
+        protocol = 'gfal:gsidcap'
+        pass
+
+    elif protocol in ('lfn','fid',):
+        # percolate through the PoolFileCatalog
+        from PyUtils.PoolFile import PoolFileCatalog as pfc
+        fname = pfc().pfn(protocol+':'+url.path)
+        pass
+
+    elif protocol in ('ami',):
+        # !! keep order of tokens !
+        for token in ('ami:', '//', '/'):
+            if fname.startswith(token):
+                fname = fname[len(token):]
+            fname = 'ami://' + fname
+            pass
+
+    else:
+        print(f'## warning: unknown protocol [{protocol}]. we will just return our input')
+        pass
+
+    return (protocol, fname)
+
+def _setup_ssl(root):
+    x509_proxy = os.environ.get('X509_USER_PROXY', '')
+    if x509_proxy:
+        # setup proper credentials
+        root.TSSLSocket.SetUpSSL(
+            x509_proxy,
+            "/etc/grid-security/certificates",
+            x509_proxy,
+            x509_proxy)
+    else:
+        print("## warning: protocol https is requested but no X509_USER_PROXY was found! (opening the file might fail.)")
+        pass
+    return
+
+def _root_open(fname):
+    import PyUtils.RootUtils as ru
+    root = ru.import_root()
+    import re
+
+    with ShutUp(filters=[
+        re.compile('TClass::TClass:0: RuntimeWarning: no dictionary for class.*') ]):
+        root.gSystem.Load('libRootCollection')
+        root_open = root.TFile.Open
+
+        # we need to get back the protocol b/c of the special
+        # case of secure-http which needs to open TFiles as TWebFiles...
+        protocol, _ = _fname(fname)
+        if protocol == 'https':
+            _setup_ssl(root)
+            root_open = root.TWebFile.Open
+
+        f = root_open(fname, 'READ')
+        if f is None or not f:
+            import errno
+            raise IOError(errno.ENOENT,
+                          'No such file or directory',fname)
+        return f
+    return
 
 def retrieveBranchInfos( branch, poolRecord, ident = "" ):
     fmt = "%s %3i %8.3f %8.3f %8.3f %s"
@@ -380,10 +478,13 @@ def extract_items(pool_file, verbose=True, items_type='eventdata'):
             "(allowed values: %r)" % _allowed_values
             ])
         raise ValueError(err)
-    import PyUtils.AthFile as af
-    f = af.fopen(pool_file)
+
     key = '%s_items' % items_type
-    items = f.fileinfos[key]
+    f_root = _root_open(pool_file)
+    import PyUtils.FilePeekerTool as fpt
+    fp = fpt.FilePeekerTool(f_root)
+    items = fp.getPeekedData(key)
+
     if items is None:
         items = []
     return items
