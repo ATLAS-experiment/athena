@@ -165,9 +165,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const override final;
 
+     friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
+   protected:
      /// Returns the transformation into the center of the readout volume
      Amg::Transform3D toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
-   protected:
       
      /// Inserts a transfomration for caching
      template <class MuonDetImpl> StatusCode insertTransform(const IdentifierHash& hash);
