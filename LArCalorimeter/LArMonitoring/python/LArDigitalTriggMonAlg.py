@@ -553,8 +553,6 @@ if __name__=='__main__':
    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
    cfg.merge(LArBadChannelCfg(flags, isSC=True))
 
-
-   #from AthenaCommon.AppMgr import (ServiceMgr as svcMgr,ToolSvc)
    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
    SCData_acc =  LArRawSCDataReadingCfg(flags)
    SCData_acc.OutputLevel=WARNING
