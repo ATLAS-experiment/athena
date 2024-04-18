@@ -39,6 +39,7 @@ class xAODSimHitToMmMeasCnvAlg : public AthReentrantAlgorithm {
     private:
         CLHEP::HepRandomEngine* getRandomEngine(const EventContext& ctx) const;
   
+
         SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_readKey{this, "InputCollection", "xMmSimHits",
                                                               "Name of the new xAOD SimHit collection"};
         

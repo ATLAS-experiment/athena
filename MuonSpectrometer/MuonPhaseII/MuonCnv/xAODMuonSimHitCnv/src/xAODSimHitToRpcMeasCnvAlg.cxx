@@ -28,6 +28,7 @@ xAODSimHitToRpcMeasCnvAlg::xAODSimHitToRpcMeasCnvAlg(const std::string& name,
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode xAODSimHitToRpcMeasCnvAlg::initialize(){
+    ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -47,7 +48,10 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
 
-    const ActsGeometryContext gctx{};
+    SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
+    ATH_CHECK(gctxHandle.isPresent());
+    const ActsGeometryContext& gctx{*gctxHandle};
+
     SG::WriteHandle<xAOD::RpcStripContainer> prdContainer{m_writeKey, ctx};
     ATH_CHECK(prdContainer.record(std::make_unique<xAOD::RpcStripContainer>(),
                                   std::make_unique<xAOD::RpcStripAuxContainer>()));
@@ -121,10 +125,7 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setDoubletPhi(id_helper.doubletPhi(prdId));
         prd->setMeasuresPhi(id_helper.measuresPhi(prdId));
         prd->setTime(hitTime);
-        prd->setAmbiguityFlag(0);
-        const Amg::Vector3D strip3D  = lPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D globToCenter{readOutEle->getChamber()->globalToLocalTrans(gctx)};
-        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D));
+        prd->setAmbiguityFlag(0);        
     };
 
     for (const xAOD::MuonSimHit* simHit : *simHitContainer) {

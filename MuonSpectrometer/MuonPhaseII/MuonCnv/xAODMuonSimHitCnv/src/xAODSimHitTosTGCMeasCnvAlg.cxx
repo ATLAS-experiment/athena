@@ -43,7 +43,6 @@ StatusCode xAODSimHitTosTGCMeasCnvAlg::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     
-    const ActsGeometryContext gctx{};
     SG::WriteHandle<xAOD::sTgcStripContainer> prdContainer{m_writeKey, ctx};
     ATH_CHECK(prdContainer.record(std::make_unique<xAOD::sTgcStripContainer>(),
                                   std::make_unique<xAOD::sTgcStripAuxContainer>()));
