@@ -16,6 +16,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimAnalysisConfig \
     --evtMax=${RDO_EVT} \
     Trigger.FPGATrackSim.mapsDir=${MAPS} \
     Trigger.FPGATrackSim.tracking=True \
+    Trigger.FPGATrackSim.sampleType='skipTruth' \
     Trigger.FPGATrackSim.bankDir=${BANKS}
 ls -l
 echo "... analysis on RDO, this part is done ..."
