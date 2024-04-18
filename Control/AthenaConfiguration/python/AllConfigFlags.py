@@ -24,8 +24,9 @@ def initConfigFlags():
     from AthenaCommon.Constants import INFO
     acf.addFlag('Exec.OutputLevel', INFO, help='Global OutputLevel')
     acf.addFlag('Exec.PrintAlgsSequence', False, help='print algorithm sequence in ApplicationMgr')
-    acf.addFlag('Exec.MaxEvents', -1, help='number of events to proceess (-1 for all)')
-    acf.addFlag('Exec.SkipEvents', 0, help='number of events to skip')
+    acf.addFlag('Exec.MaxEvents', -1, type=int, help='number of events to proceess (-1 for all)')
+    acf.addFlag('Exec.SkipEvents', 0, type=int, help='number of events to skip')
+    acf.addFlag('Exec.FirstEvent', 1, type=int, help='first event number when not reading from input file')
     acf.addFlag('Exec.DebugStage', '', help='attach debugger at stage: conf, init, exec, fini')
     acf.addFlag('Exec.Interactive', "", help='interactive prompt at stage: init, exec')
     acf.addFlag('Exec.FPE', 0, help='FPE check mode: -2 (no FPE check), -1 (abort with core-dump), 0 (FPE Auditor w/o stack-tace) , >0 (number of stack-traces printed by the job)')
