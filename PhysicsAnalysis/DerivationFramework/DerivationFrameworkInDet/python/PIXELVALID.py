@@ -255,7 +255,9 @@ def PixelVALIDCfg(flags):
             "MET_Core_AntiKt4LCTopo": "xAOD::MissingETContainer",
             "MET_Reference_AntiKt4LCTopo": "xAOD::MissingETContainer",
             "MET_Core_AntiKt4LCTopoAux": "xAOD::MissingETAuxContainer",
-            "MET_Reference_AntiKt4LCTopoAux": "xAOD::MissingETAuxContainer"})
+            "MET_Reference_AntiKt4LCTopoAux": "xAOD::MissingETAuxContainer",
+            "PixelClusters": "xAOD::TrackMeasurementValidationContainer",
+            "PixelClustersAux": "xAOD::TrackMeasurementValidationAuxContainer"})
 
         SmartCollections += ["Muons", "Electrons", "Photons"]
 
@@ -265,6 +267,7 @@ def PixelVALIDCfg(flags):
                          "InDetTrackParticles",
                          "InDetLargeD0TrackParticles",
                          "PixelMSOSs",
+                         "PixelClusters",
                          "Kt4EMTopoOriginEventShape",
                          "Kt4LCTopoOriginEventShape",
                          "NeutralParticleFlowIsoCentralEventShape",
@@ -389,6 +392,6 @@ def PixelVALIDCfg(flags):
 
     acc.merge(SetupMetaDataForStreamCfg(
         flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernel"],
-        createMetadata=[MetadataCategory.CutFlowMetaData]))
+        createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TriggerMenuMetaData]))
 
     return acc
