@@ -122,25 +122,16 @@ def JetTagMonitorConfig(inputFlags):
     jetTagMonAlg.JVTpTCut = 60.0
     jetTagMonAlg.JVTetaCut = 2.4
      
-    #Main b-tagging algorithm r22: DL1dv00
-    #r22 benchmarks from: https://ftag.docs.cern.ch/recommendations/r22-preliminary/#working-point-definition-for-dl1dv00
-    jetTagMonAlg.TaggerName = "DL1dv00"
+    #Temporarily monitoring DL1dv01 while FTAG software is updated to make GN2v01 available also outside Derivations.
+    #Benchmarks from: https://ftag.docs.cern.ch/recommendations/algs/r22-preliminary/#preliminary-recommendation-as-of-07102023-superseded
+    jetTagMonAlg.TaggerName = "DL1dv01"
     
-    if jetTagMonAlg.TaggerName == "DL1dv00" :
-     jetTagMonAlg.WP60Cut = 4.884
-     jetTagMonAlg.WP70Cut = 3.494
-     jetTagMonAlg.WP77Cut = 2.443
-     jetTagMonAlg.WP85Cut = 0.930
+    if jetTagMonAlg.TaggerName == "DL1dv01" :
+     jetTagMonAlg.WP60Cut = 4.854
+     jetTagMonAlg.WP70Cut = 3.493
+     jetTagMonAlg.WP77Cut = 2.456
+     jetTagMonAlg.WP85Cut = 0.948
      jetTagMonAlg.cFraction = 0.018
-     MV_bins = 100
-     MV_start = -6.0
-     MV_stop = 14.0
-    else : #r21 DL1r WPs
-     jetTagMonAlg.WP60Cut = 2.75
-     jetTagMonAlg.WP70Cut = 2.01
-     jetTagMonAlg.WP77Cut = 1.42
-     jetTagMonAlg.WP85Cut = 0.41
-     jetTagMonAlg.cFraction = 0.08
      MV_bins = 100
      MV_start = -6.0
      MV_stop = 14.0
