@@ -7,8 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from TrigInDetConfig.utils import getFlagsForActiveConfig
-from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg, trigInDetPrecisionTrackingCfg
-from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
+from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg, trigInDetPrecisionTrackingCfg, trigInDetVertexingCfg
 from InDetConfig.UsedInVertexFitTrackDecoratorConfig import getUsedInVertexFitTrackDecoratorAlg
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -107,12 +106,11 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
     else:
         vertexInputTracks = flagsWithTrk.Tracking.ActiveConfig.tracks_FTF
 
+
     acc.merge(
-        InDetTrigPriVxFinderCfg(
-            flagsWithTrk,
-            inputTracks = vertexInputTracks,
-            outputVtx =   flagsWithTrk.Tracking.ActiveConfig.vertex,
-        )
+        trigInDetVertexingCfg(flagsWithTrk,             
+                              inputTracks = vertexInputTracks,
+                              outputVtx =   flagsWithTrk.Tracking.ActiveConfig.vertex)
     )
 
     # make sure we output only the key,value related to tracks (otherwise, alg duplication issues)

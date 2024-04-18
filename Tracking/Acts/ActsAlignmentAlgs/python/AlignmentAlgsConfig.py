@@ -24,7 +24,7 @@ def ActsAlignStoreProviderAlgCfg(flags, name="AlignStoreProviderAlg", **kwargs):
                                                                       if kwargs["LoadDetectorVolumeSvc"] else "")
 
     the_alg = CompFactory.ActsTrk.AlignStoreProviderAlg(name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
+    result.addCondAlgo(the_alg, primary = True)
     return result
 
 def DetectorAlignCondAlgCfg(flags, name="DetectorAlignCondAlg", **kwargs):
@@ -148,5 +148,5 @@ def ActsGeometryContextAlgCfg(flags, name="GeometryContextAlg", **kwargs):
     kwargs.setdefault("AlignmentStores", AlignmentStores)
 
     the_alg = CompFactory.ActsTrk.GeometryContextAlg(name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
+    result.addCondAlgo(the_alg, primary = True)
     return result
