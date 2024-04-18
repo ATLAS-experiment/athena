@@ -91,6 +91,9 @@ if len(flags.Input.Files)>0:
   flags.DQ.Environment = "user"
   # triggerConfig should default to DB which is appropriate if running on data
   if flags.Input.isMC: flags.Trigger.triggerConfig='FILE' # uses the generated L1Menu (see below)
+  elif flags.Trigger.triggerConfig=='INFILE':
+    # this happens with AOD data files, but this is incompatible with the setup of the LVL1ConfigSvc
+    flags.Trigger.triggerConfig="DB" # so force onto DB usage
 
 # due to https://gitlab.cern.ch/atlas/athena/-/merge_requests/65253 must now specify geomodel explicitly if cant take from input file, but can autoconfigure it based on LHCPeriod set above
 if flags.GeoModel.AtlasVersion is None:
@@ -241,9 +244,11 @@ if flags.DQ.doMonitoring:
     cfg.merge(GfexMonitoringConfig(flags))
     from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
     cfg.merge(GfexSimMonitoringConfig(flags))
-    # can't include efficiency monitoring because requires too many things we don't have
-    # from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
-    # cfg.merge(JetEfficiencyMonitoringConfig(flags))
+    # generally can't include efficiency monitoring because requires too many things we don't have
+    # but b.c. alg requires TrigDecisionTool, we activate it if DQ.useTrigger explicitly set
+    if flags.DQ.useTrigger:
+      from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
+      cfg.merge(JetEfficiencyMonitoringConfig(flags))
 
   # input data monitoring
   if flags.Trigger.L1.doCaloInputs and not flags.Input.isMC:

@@ -13,6 +13,3 @@ atlas_add_component( LUCID_Monitoring
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib LUCID_RawEvent )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-

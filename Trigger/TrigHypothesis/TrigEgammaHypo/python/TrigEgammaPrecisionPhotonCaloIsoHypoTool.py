@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -135,9 +135,9 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
                             xbins=13, xmin=-1.5, xmax=12.5,  opt="kCumulative", xlabels=cuts)
 
     if flags.Trigger.doValidationMonitoring:
-      monTool.defineHistogram('etcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo etcone20; etcone20;", xbins=50, xmin=0, xmax=5.0),
-      monTool.defineHistogram('topoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo; topoetcone20;", xbins=50, xmin=-10, xmax=10),
-      monTool.defineHistogram('reletcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo etcone20/et; etcone20/et;", xbins=50, xmin=-0.5, xmax=0.5),
+      monTool.defineHistogram('etcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo etcone20; etcone20;", xbins=50, xmin=0, xmax=5.0)
+      monTool.defineHistogram('topoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo; topoetcone20;", xbins=50, xmin=-10, xmax=10)
+      monTool.defineHistogram('reletcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo etcone20/et; etcone20/et;", xbins=50, xmin=-0.5, xmax=0.5)
       monTool.defineHistogram('reltopoetcone20',type='TH1F',path='EXPERT',title= "PrecisionPhotonCaloIso Hypo; topoetcone20/pt;", xbins=50, xmin=-0.5, xmax=0.5)
 
     self.tool().MonTool = monTool

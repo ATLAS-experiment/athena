@@ -6,11 +6,13 @@
 #include <GaudiKernel/StatusCode.h>
 #include "AthLinks/ElementLinkVector.h"
 #include "TrigConfHLTUtils/HLTUtils.h"
+#include "TrigNavStructure/Types.h"
 #include "xAODTrigger/TrigPassBitsContainer.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
 #include "Run2ToRun3TrigNavConverterV2.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
+#include "TrigConfHLTData/HLTSequenceList.h"
 #include "SpecialCases.h"
 
 namespace TCU = TrigCompositeUtils;
@@ -349,10 +351,56 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   return StatusCode::SUCCESS;
 }
 
+size_t Run2ToRun3TrigNavConverterV2::is2LegTopoChain(const TrigConf::HLTChain* ptrChain) const {
+  // chains of configs structure
+  // A  B
+  //  \/
+  //  C
+  // where C is the output TE of sequence consuming A & B
+  // sometimes there are an additional leafs
+  //  C
+  //  |
+  //  D
+  if ( not std::regex_match(ptrChain->name(), SpecialCases::isTopo) ) return 0;
+  size_t stepToConsider = 0;
+  const size_t sigsSize = ptrChain->signatures().size();
+  if ( sigsSize < 2 ) return 0;
+  for ( size_t step = sigsSize-1; step > 1; step --) {
+    if ( (ptrChain->signatures()[step-1])->outputTEs().size() == 2 and (ptrChain->signatures()[step])->outputTEs().size() == 1 )  {
+      stepToConsider = step;
+      break;
+    }
+  }
+  if ( stepToConsider == 0 ) return 0; // not a topo
+
+  //counting is right, need to see now if TEs are connected
+  auto finalTE = (ptrChain->signatures()[stepToConsider])->outputTEs()[0];
+  auto preFinalTEs = (ptrChain->signatures()[stepToConsider-1])->outputTEs();
+
+  auto finalSeq =  m_configSvc->sequences().getSequence(finalTE->id());
+  std::set<HLT::te_id_type> tesInSeq;
+  std::set<HLT::te_id_type> tesInChain;
+
+  for ( auto te: finalSeq->inputTEs()) {
+     tesInSeq.insert(te->id()); 
+  }
+
+  for ( auto te: preFinalTEs) {
+     tesInChain.insert(te->id()); 
+  }
+
+  if (tesInSeq == tesInChain)  {
+    return stepToConsider;
+  }
+  return 0;
+}
+
 StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMap_t &allTEs, TEIdToChainsMap_t &finalTEs) const
 {
-  // port chains iteration code from previous version
+
   ATH_CHECK(not m_configSvc->chains().empty());
+
+  // obtain map output TE -> input TE via sequences
   for (auto ptrChain : m_configSvc->chains())
   {
     std::string chainName = ptrChain->name();    
@@ -422,6 +470,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
 
     
     if ( multiplicities.size() > 1 ) {
+      ATH_MSG_DEBUG(" this " << (is2LegTopoChain(ptrChain) ? "is": "is not") << " topological chain");
       // the chain structure (in terms of multiplicities) may change along the way
       // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
       // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
