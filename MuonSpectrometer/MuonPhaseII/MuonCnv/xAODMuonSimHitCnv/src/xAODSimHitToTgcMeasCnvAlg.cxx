@@ -26,6 +26,7 @@ xAODSimHitToTgcMeasCnvAlg::xAODSimHitToTgcMeasCnvAlg(const std::string& name,
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode xAODSimHitToTgcMeasCnvAlg::initialize(){
+    ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -45,7 +46,10 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
 
-    const ActsGeometryContext gctx{};
+    SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
+    ATH_CHECK(gctxHandle.isPresent());
+    const ActsGeometryContext& gctx{*gctxHandle};
+
     SG::WriteHandle<xAOD::TgcStripContainer> prdContainer{m_writeKey, ctx};
     ATH_CHECK(prdContainer.record(std::make_unique<xAOD::TgcStripContainer>(),
                                   std::make_unique<xAOD::TgcStripAuxContainer>()));
@@ -70,9 +74,6 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setMeasuresPhi(measPhi);
         const MuonGMR4::TgcReadoutElement* readOutEle = m_DetMgr->getTgcReadoutElement(hitId);
         prd->setReadoutElement(readOutEle);
-        const Amg::Vector3D strip3D = lPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D& globToCenter{readOutEle->getChamber()->localToGlobalTrans(gctx)};
-        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
     };
     
     auto processEtaHit = [&] (const Amg::Vector3D& locSimHitPos,

@@ -42,7 +42,6 @@ StatusCode xAODSimHitToMdtMeasCnvAlg::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
 
-    const ActsGeometryContext gctx{};
     SG::WriteHandle<xAOD::MdtDriftCircleContainer> prdContainer{m_writeKey, ctx};
     ATH_CHECK(prdContainer.record(std::make_unique<xAOD::MdtDriftCircleContainer>(),
                                   std::make_unique<xAOD::MdtDriftCircleAuxContainer>()));
@@ -65,8 +64,6 @@ StatusCode xAODSimHitToMdtMeasCnvAlg::execute(const EventContext& ctx) const {
         const MuonGMR4::MdtReadoutElement* readOutEle = m_DetMgr->getMdtReadoutElement(hitId);
         prd->setReadoutElement(readOutEle);
 
-        const Amg::Vector3D globTubePos = readOutEle->center(gctx, prd->measurementHash());
-        prd->setTubePosInStation(xAOD::toStorage(readOutEle->getChamber()->globalToLocalTrans(gctx) * globTubePos));
         /// extract the resolution from the Mdt calibration data
         bool bound{false};
         const MuonCalib::MdtFullCalibData* tubeContants = mdtCalibData->getCalibData(hitId, msgStream());

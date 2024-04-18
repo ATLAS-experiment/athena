@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONSIMHITCNV_xAODSimHitToTgcMeasurementCnvAlg_H
 #define XAODMUONSIMHITCNV_xAODSimHitToTgcMeasurementCnvAlg_H
@@ -40,6 +40,8 @@ class xAODSimHitToTgcMeasCnvAlg : public AthReentrantAlgorithm {
     private:
         CLHEP::HepRandomEngine* getRandomEngine(const EventContext& ctx) const;
   
+        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+
         SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_readKey{this, "InputCollection", "xTgcSimHits",
                                                               "Name of the new xAOD SimHit collection"};
         
