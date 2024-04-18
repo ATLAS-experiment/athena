@@ -126,15 +126,14 @@ def JetTagMonitorConfig(inputFlags):
     #Benchmarks from: https://ftag.docs.cern.ch/recommendations/algs/r22-preliminary/#preliminary-recommendation-as-of-07102023-superseded
     jetTagMonAlg.TaggerName = "DL1dv01"
     
-    if jetTagMonAlg.TaggerName == "DL1dv01" :
-     jetTagMonAlg.WP60Cut = 4.854
-     jetTagMonAlg.WP70Cut = 3.493
-     jetTagMonAlg.WP77Cut = 2.456
-     jetTagMonAlg.WP85Cut = 0.948
-     jetTagMonAlg.cFraction = 0.018
-     MV_bins = 100
-     MV_start = -6.0
-     MV_stop = 14.0
+    jetTagMonAlg.WP60Cut = 4.854
+    jetTagMonAlg.WP70Cut = 3.493
+    jetTagMonAlg.WP77Cut = 2.456
+    jetTagMonAlg.WP85Cut = 0.948
+    jetTagMonAlg.cFraction = 0.018
+    MV_bins = 100
+    MV_start = -6.0
+    MV_stop = 14.0
     
     ### STEP 4 ###
     # Add some tools. N.B. Do not use your own trigger decision tool. Use the

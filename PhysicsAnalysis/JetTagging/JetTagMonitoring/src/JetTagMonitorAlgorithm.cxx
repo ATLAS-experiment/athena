@@ -703,7 +703,7 @@ double JetTagMonitorAlgorithm::getTaggerWeight(const xAOD::Jet *jet) const {
 
   bTaggingObject->pu(m_TaggerName,mv_pu);
   bTaggingObject->pc(m_TaggerName,mv_pc);
-  bTaggingObject->pb(m_TaggerName,mv_pb); 
+  bTaggingObject->pb(m_TaggerName,mv_pb);
   //DL1* formula (standard)
   if ( mv_pb != 0 && (mv_pu != 0 || mv_pc != 0)) {
     mv = log( mv_pb / ( mv_pu * ( 1 - m_cFraction ) + mv_pc * m_cFraction ) );
