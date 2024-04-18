@@ -25,15 +25,15 @@ def SPCountHypoToolGen(chainDict):
         hypo.pixCLMax = 150 # TODO revisit tightening those
         hypo.sctSPMax = 150 # as above
     if "sp_pix" in chainDict["chainName"]:
-        hypo.pixCL = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("pix"))
+        hypo.pixCL = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("pix"))
     if "sp_vpix" in chainDict["chainName"]:
         hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
         hypo.sctSP = -1
-        hypo.pixCLMax = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("vpix"))
+        hypo.pixCLMax = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("vpix"))
     if "nototpix" in chainDict["chainName"]:
         hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
         hypo.sctSP = -1
-        hypo.pixCLnoToT = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("nototpix"))
+        hypo.pixCLnoToT = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("nototpix"))
 
     return hypo
 
@@ -89,7 +89,7 @@ def MbtsHypoToolGen(flags, chainDict):
 def TrigZVertexHypoToolGen(chainDict):
     hypo = CompFactory.TrigZVertexHypoTool(chainDict["chainName"])
     if "pusup" in chainDict["chainName"]:
-        hypo.minWeight = int(chainDict["chainParts"][0]["pileupInfo"].strip("pusup"))
+        hypo.minWeight = int(chainDict["chainParts"][0]["pileupInfo"].removeprefix("pusup"))
     else:
         hypo.minWeight = -1 # pass always
 

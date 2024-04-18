@@ -647,8 +647,8 @@ def zip_longest_parallel(AllSteps, multiplicity, fillvalue=None):
                 value = fillvalue
             values.append(value)
             if int(multiplicity[i]) > 1 and value == fillvalue:
-                for i in range(int(multiplicity[i]-1)):
-                   values.append(value) 
+                values.extend([fillvalue]*int(multiplicity[i]-1))
+
         yield tuple(values)
 
 
