@@ -187,7 +187,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
             all_chains += [(chainDict,chainConfig,lengthOfChainConfigs)]
-
+            
             #update the alignment group length dictionary if we have a longer number of steps
             #or the signature isn't registered in the dictionary yet
             for config_length, config_grp in lengthOfChainConfigs:
@@ -228,7 +228,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # decoding of the chain name
         log.info("Will now get chain dictionaries for each chain")
         self.getChainDicts(flags)
-        
+
         if flags.Trigger.disableCPS:
             log.warning('Removing all CPS group because the flag Trigger.disableCPS is set')
             for chainDict in self.chainDicts:
@@ -537,20 +537,19 @@ def generateMenuMT(flags):
     (menu.L1Prescales, menu.HLTPrescales, menu.chainsInMenu) = MenuPrescaleConfig(HLTMenuConfig, flags)
     from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import applyHLTPrescale
     applyHLTPrescale(HLTMenuConfig, menu.HLTPrescales, menu.signaturesOverwritten)
- 
+
     # make sure that we didn't generate any steps that are fully empty in all chains
     # if there are empty steps, remove them
     finalListOfChainConfigs = menu.resolveEmptySteps(finalListOfChainConfigs)
 
     log.debug("finalListOfChainConfig %s", finalListOfChainConfigs)
     log.info("Making the HLT configuration tree")
-    menuAcc=makeHLTTree(flags)
-
+    menuAcc, CFseq_list = makeHLTTree(flags)
     # Configure ChainFilters for ROBPrefetching
     from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
     if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
         from TrigGenericAlgs.TrigGenericAlgsConfig import prefetchingInitialRoIConfig
-        menuAcc.merge( prefetchingInitialRoIConfig(flags, HLTMenuConfig.configsList()), 'HLTBeginSeq')
+        menuAcc.merge( prefetchingInitialRoIConfig(flags, CFseq_list), 'HLTBeginSeq')
 
     log.info("Checking the L1HLTConsistency...")
     from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
@@ -575,7 +574,7 @@ def makeHLTTree(flags):
 
     acc = ComponentAccumulator()    
     steps = seqAND('HLTAllSteps')
-    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList())
+    finalDecisions, CFseq_list, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList())
     if log.getEffectiveLevel() <= logging.DEBUG:
         menuAcc.printConfig()
 
@@ -612,4 +611,4 @@ def makeHLTTree(flags):
 
     from AthenaCommon.CFElements import checkSequenceConsistency 
     checkSequenceConsistency(steps)
-    return acc
+    return acc, CFseq_list
