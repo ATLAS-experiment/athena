@@ -9,7 +9,9 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include <mutex>
+#include <tuple>
 #include "RootAuxDynIO/RootAuxDynDefs.h"
 
 class TBranch;
@@ -17,7 +19,7 @@ class TTree;
 class TFile;
 class TClass;
 
-namespace ROOT { namespace Experimental {
+namespace ROOT::Experimental {
   class RNTupleReader;
 #if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
   namespace Detail {
@@ -26,7 +28,7 @@ namespace ROOT { namespace Experimental {
 #else
   class RFieldBase;
 #endif
-} }
+}
 namespace SG { class IAuxStoreIO;  class auxid_set_t; }
 
 
@@ -40,6 +42,7 @@ namespace RootAuxDynIO
    using ROOT::Experimental::RNTupleReader;
    class IRootAuxDynReader;
    class IRootAuxDynWriter;
+   class IRNTupleAuxDynWriter;
    class IRNTupleWriter;
 
    /// check if a field/branch with fieldname and type tc has IAuxStore interface
@@ -61,9 +64,12 @@ namespace RootAuxDynIO
    std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel,
                                                               int offsettab_len, bool do_branch_fill);
    
-   std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader);
-   std::unique_ptr<IRNTupleWriter>    getNTupleAuxDynWriter(TFile*,  const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
+   std::unique_ptr<IRootAuxDynReader>    getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type, RNTupleReader* reader);
+   std::unique_ptr<IRNTupleAuxDynWriter> getNTupleAuxDynWriter();
+   std::unique_ptr<IRNTupleWriter>       getNTupleWriter(TFile*,  const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
 
+   // The convention for the tuple is <name, type, data>
+   typedef std::tuple<std::string, std::string, void*> attrDataTuple;
 
    class IRootAuxDynReader
    {
@@ -108,39 +114,15 @@ namespace RootAuxDynIO
       virtual void setBranchFillMode(bool) = 0;
    };
 
-   
-   /// Interface for a generic RNTuple-based Writer (can handle both normal objects and AuxDyn attributes
-   class IRNTupleWriter {
+   /// Interface for a RNTuple-based Writer that handles AuxDyn attributes 
+   /// Works in conjuction with the generic writer
+   class IRNTupleAuxDynWriter {
    public:
-      virtual ~IRNTupleWriter() {}
+      /// Default Destructor
+      virtual ~IRNTupleAuxDynWriter() = default;
 
-      virtual const std::string& getName() const = 0;
-
-      virtual size_t size() const = 0;
-
-      /// Add a new field to the RNTuple
-      virtual void addField( const std::string& field_name, const std::string& attr_type ) = 0;
-
-      /// Supply data address for a given field
-      virtual void addFieldValue( const std::string& field_name, void* attr_data ) = 0;
-
-      /// handle writing of dynamic xAOD attributes of an AuxContainer - called from RNTupleContainer::writeObject()
-      /// should report bytes written  - it does not do than yet though
-      //  may throw exceptions
-      virtual int writeAuxAttributes(const std::string& base_branch, SG::IAuxStoreIO* store, size_t rows_written ) = 0;
-
-      /// Add a APR container to this RNTuple - if there is more than one than do grouped DB commit
-      virtual void increaseClientCount() = 0;
-      /// Check if there is more than one container writing to this RNTuple
-      virtual bool isGrouped() const = 0;
-      
-      /// is there a need to call commit()?
-      virtual bool needsCommit() const = 0;
-
-      /// Call Fill() on the ROOT object used by this writer
-      virtual int commit() = 0;
-
-      virtual void close() = 0;
+      /// Collect Aux data information to be writting out
+      virtual std::vector<attrDataTuple> collectAuxAttributes( const std::string& base_branch, SG::IAuxStoreIO* store ) = 0;
    };
 
 } // namespace
