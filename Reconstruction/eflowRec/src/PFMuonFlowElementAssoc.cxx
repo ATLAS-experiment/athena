@@ -313,8 +313,6 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
             // retrieve element link again to cluster
             // use elem link to retrieve container
             const xAOD::CaloCluster* MuonCluster = muon->cluster();
-            //these clusters are expected to be nullptr sometimes
-            if (!MuonCluster) continue;
             // retrieve the vector of delta R between muon and its associated calo cluster.
             muon_ClusterInfo_deltaR_WriteDecorHandle(*muon) =  MuonCluster ? xAOD::P4Helpers::deltaR(MuonCluster,muon,false) : -1.;
         }
