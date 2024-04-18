@@ -49,7 +49,7 @@ trigger_keys = [
 ]
 
 
-def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = [],
+def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = None,
                   unique_tag_info_values = True, ignoreNonExistingLocalFiles=False):
     """
     This tool is independent of Athena framework and returns the metadata from a given file.
@@ -80,6 +80,9 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
     # Check the value of mode parameter
     if mode not in ('tiny', 'lite', 'full', 'peeker', 'iov'):
         raise NameError('Allowed values for "mode" parameter are: "tiny", "lite", "peeker", "iov" or "full"')
+
+    if meta_key_filter is None:
+        meta_key_filter = []
 
     # Disable 'full' and 'iov' in non-Gaudi environments
     if not isGaudiEnv():
@@ -374,7 +377,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 for name, content in persistent_instances.items():
                     key = name
                     if hasattr(content, 'm_folderName'):
-                        key = getattr(content, 'm_folderName')
+                        key = content.m_folderName
 
                     # Some transition AODs contain both the Run2 and Run3 metadata formats. We only wish to read the Run3 format if such a file is encountered.
                     has_r3_trig_meta = ('TriggerMenuJson_HLT' in persistent_instances or 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT' in persistent_instances)
@@ -549,7 +552,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             meta_dict[filename]['auto_flush'] = 1
 
             if hasattr(data_reader, 'GUID'):
-                meta_dict[filename]['file_guid'] = getattr(data_reader, 'GUID')()
+                meta_dict[filename]['file_guid'] = data_reader.GUID()
 
             # compression level and algorithm, for BS always ZLIB
             meta_dict[filename]['file_comp_alg'] = 1
@@ -596,13 +599,13 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         k, v = md.split('=')
                         bs_metadata[k] = v
 
-                bs_metadata['detectorMask'] = getattr(data_reader, 'detectorMask')()
-                bs_metadata['runNumbers'] = getattr(data_reader, 'runNumber')()
-                bs_metadata['lumiBlockNumbers'] = getattr(data_reader, 'lumiblockNumber')()
-                bs_metadata['projectTag'] = getattr(data_reader, 'projectTag')()
-                bs_metadata['stream'] = getattr(data_reader, 'stream')()
+                bs_metadata['detectorMask'] = data_reader.detectorMask()
+                bs_metadata['runNumbers'] = data_reader.runNumber()
+                bs_metadata['lumiBlockNumbers'] = data_reader.lumiblockNumber()
+                bs_metadata['projectTag'] = data_reader.projectTag()
+                bs_metadata['stream'] = data_reader.stream()
                 #bs_metadata['beamType'] = getattr(data_reader, 'beamType')()
-                beamTypeNbr= getattr(data_reader, 'beamType')()
+                beamTypeNbr= data_reader.beamType()
                 #According to info from Rainer and Guiseppe the beam type is
                 #O: no beam
                 #1: protons
@@ -611,7 +614,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 elif (beamTypeNbr==1 or beamTypeNbr==2):  bs_metadata['beamType'] = 'collisions'
                 else: bs_metadata['beamType'] = 'unknown'
 
-                bs_metadata['beamEnergy'] = getattr(data_reader, 'beamEnergy')()
+                bs_metadata['beamEnergy'] = data_reader.beamEnergy()
 
                 meta_dict[filename]['eventTypes'] = bs_metadata.get('eventTypes', [])
                 meta_dict[filename]['GeoAtlas'] = bs_metadata.get('geometry', None)
@@ -879,7 +882,7 @@ def _extract_fields_iov( iov_container, idx_range ):
              result[attr_name].append(attr_value)
 
      max_element_count = 0
-     for name, content in result.items():
+     for content in result.values():
          if len(content) > max_element_count:
              max_element_count = len(content)
 
