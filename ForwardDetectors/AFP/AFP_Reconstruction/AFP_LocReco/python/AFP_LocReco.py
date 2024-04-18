@@ -63,9 +63,7 @@ def AFP_LocReco_TD_Cfg(flags, kwargs={}):
         acc = ComponentAccumulator()
 
         if flags.Input.isMC:
-                # if other tags are desired, they can be set also in postExec, e.g.
-                # --postExec 'from IOVDbSvc.CondDB import conddb; conddb.addOverride("/FWD/AFP/ToFParameters/Local","AFPMCToFLoc-329484-02");'
-
+                # if other tags are desired, they can be set also in postExec
                 acc.merge(addFolders(flags, "/FWD/AFP/ToFParameters/Local<tag>AFPMCToFLoc-ideal-01</tag>", 'FWD_OFL', className='CondAttrListCollection', db='OFLP200'))
                 tofLocParamTool  = CompFactory.getComp("AFP::ToFLocParamDBTool")("ToFLocParamDBTool", loc_param_key="/FWD/AFP/ToFParameters/Local")
         else:
@@ -142,21 +140,4 @@ def AFP_LocReco_TD_HLT(flags):
         acc.merge(AFP_LocReco_TD_Cfg(flags, {"tracksContainerName": recordable("HLT_AFPToFTrackContainer")}))
 
         return acc
-
-#-- SiAlignDBTester part ------------------------------------------------------------
-# this is a setup for ReadCondHandle (see AFP_DBTools/SiAlignDBTester)
-
-# from IOVDbSvc.CondDB import conddb
-
-# conddb.addFolder("CALO","/CALO/HadCalibration2/CaloEMFrac", className='CaloLocalHadCoeff')
-# conddb.addFolderSplitOnline("INDET","/Indet/Onl/Beampos", "/Indet/Beampos", className='AthenaAttributeList')
-
-# schema = "<db>sqlite://;schema=Example.db;dbname=CONDBR2</db>"
-# folder = "/FWD/AFP/LocalAlignment"
-# locTag="<tag>AFPAlignLoc-00</tag>"
-
-# conddb.addFolder("", schema+folder+locTag, className='CondAttrListCollection')
-
-# from AFP_DBTools.AFP_DBToolsConf      import SiAlignDBTester
-# TopLocRecSeq += SiAlignDBTester("SiAlignDBTester", OutputLevel=DEBUG)
 
