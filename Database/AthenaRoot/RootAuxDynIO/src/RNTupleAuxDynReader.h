@@ -14,7 +14,6 @@
 #include <map>
 #include <string>
 
-namespace RootAuxDynIO { class IRNTupleWriter; }
 namespace ROOT::Experimental {
    class RNTupleReader; 
 }

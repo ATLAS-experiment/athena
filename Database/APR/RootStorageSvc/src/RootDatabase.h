@@ -20,7 +20,6 @@
 #include <mutex>
 #include <unordered_map>
 
-
 // Forward declarations
 namespace ROOT { namespace Experimental {
    class RNTupleReader;
@@ -33,7 +32,9 @@ class TBranch;
 class IFileMgr;
 namespace RootAuxDynIO {
    class IRootAuxDynReader;
-   class IRNTupleWriter;
+}
+namespace RootStorageSvc {
+   class RNTupleWriterHelper;
 }
 
 /*
@@ -124,7 +125,7 @@ namespace pool  {
     // mutex to prevent concurrent read I/O from AuxDynReader
     std::recursive_mutex  m_iomutex;
 
-    std::map<std::string, std::unique_ptr<RootAuxDynIO::IRNTupleWriter> >  m_ntupleWriterMap;
+    std::map<std::string, std::unique_ptr<RootStorageSvc::RNTupleWriterHelper> >  m_ntupleWriterMap;
     std::map<std::string, std::unique_ptr<RNTupleReader> >                 m_ntupleReaderMap;
 
     using indexLookup_t = std::unordered_map<uint64_t, uint64_t>;
@@ -244,9 +245,9 @@ namespace pool  {
     // translate index value to row# for a given RNTuple  
     uint64_t            indexLookup(RNTupleReader *ps, uint64_t idx_val);
 
-    /// return NTupleWriter for a given ntuple_name
+    /// Return RNTupleWriterHelper for a given ntuple_name
     /// create a new one if needed when create==true
-    RootAuxDynIO::IRNTupleWriter*  getNTupleWriter(const std::string& ntuple_name, bool create=false);
+    RootStorageSvc::RNTupleWriterHelper*  getNTupleWriter(const std::string& ntuple_name, bool create=false);
 
   protected:
     // Execute any pending Fills before commit or flush

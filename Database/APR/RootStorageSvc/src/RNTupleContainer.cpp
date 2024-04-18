@@ -24,6 +24,7 @@
 #include "RNTupleContainer.h"
 #include "RootDataPtr.h"
 #include "RootDatabase.h"
+#include "RNTupleWriterHelper.h"
 
 // Root include files
 #include "ROOT/RNTuple.hxx"
@@ -184,6 +185,14 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
             log << DbPrintLvl::Debug << "Adding new RNTuple Field: name=" << dsc.fieldname 
                 << "  typename=" << dsc.typeName() << DbPrint::endmsg;
             m_ntupleWriter->addField( dsc.fieldname, dsc.typeName() );
+            if( dsc.hasAuxStore() ) {
+               dsc.auxdyn_writer = RootAuxDynIO::getNTupleAuxDynWriter();
+               if( !dsc.auxdyn_writer ) {
+                  log << DbPrintLvl::Error << "Cannot get AuxDyn writer for " << dsc.fieldname
+                      << DbPrint::endmsg;
+                  return Error;
+               }
+            }
          }
       }
       else if( mode & (pool::READ | pool::UPDATE) ) {
@@ -310,8 +319,11 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
        case DbColumn::POINTER:
           dsc.object            = p.ptr;
           try {
-             if( dsc.hasAuxStore() ) {
-                num_bytes += m_ntupleWriter->writeAuxAttributes( dsc.fieldname, dsc.getIOStorePtr(), dsc.rows_written );
+             if( dsc.auxdyn_writer ) {
+                auto attrList = dsc.auxdyn_writer->collectAuxAttributes( dsc.fieldname, dsc.getIOStorePtr() );
+                for(const auto& itr : attrList) {
+                   m_ntupleWriter->addAttribute( itr );
+                }
              }
           } catch(const std::exception& exc) {
              DbPrint err(m_name);

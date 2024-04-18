@@ -18,6 +18,8 @@
 #include "POOLCore/DbPrint.h"
 #include "RootUtils/APRDefaults.h"
 #include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RNTupleWriterHelper.h"
+#include "RootUtils/APRDefaults.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -920,16 +922,16 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
             if (cl != nullptr && cl->InheritsFrom("TTree")) {
                TTree* tree = static_cast<TTree*>(m_file->Get(key->GetName()));
                DbPrint log( m_file->GetName() );
-               if (tree != nullptr && tree->GetBranch("index_ref") != nullptr && tree->GetEntries() > 0) {
+               if (tree != nullptr && tree->GetBranch(APRDefaults::IndexColName) != nullptr && tree->GetEntries() > 0) {
                   TList* friendTrees(tree->GetListOfFriends());
                   if (friendTrees != nullptr && !friendTrees->IsEmpty()) {
-                     log << DbPrintLvl::Debug << "BuildIndex for index_ref to " << tree->GetName() << DbPrint::endmsg;
-                     tree->BuildIndex("index_ref");
+                     log << DbPrintLvl::Debug << "BuildIndex for " << APRDefaults::IndexColName << " to " << tree->GetName() << DbPrint::endmsg;
+                     tree->BuildIndex(APRDefaults::IndexColName);
                      for (const auto&& obj: *friendTrees) {
                         TTree* friendTree = tree->GetFriend(obj->GetName());
-                        if (friendTree != nullptr && friendTree->GetBranch("index_ref") != nullptr && friendTree->GetEntries() > 0) {
-                           log << DbPrintLvl::Debug << "BuildIndex for index_ref to " << friendTree->GetName() << DbPrint::endmsg;
-                           friendTree->BuildIndex("index_ref");
+                        if (friendTree != nullptr && friendTree->GetBranch(APRDefaults::IndexColName) != nullptr && friendTree->GetEntries() > 0) {
+                           log << DbPrintLvl::Debug << "BuildIndex for " << APRDefaults::IndexColName << " to " << friendTree->GetName() << DbPrint::endmsg;
+                           friendTree->BuildIndex(APRDefaults::IndexColName);
                         }
                      }
                   }
@@ -1118,7 +1120,7 @@ RootDatabase::getNTupleReader(const std::string& ntuple_name)
 }
 
 
-RootAuxDynIO::IRNTupleWriter*
+RootStorageSvc::RNTupleWriterHelper*
 RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
 {
    auto& writer = m_ntupleWriterMap[ntuple_name];
@@ -1127,7 +1129,7 @@ RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
          DbPrint log("RootDatabase.getNTupleWriter");
          log << DbPrintLvl::Warning << "Buffered writing doesn't work reliably in MT jobs yet, use at your own risk!" << DbPrint::endmsg;
       }
-      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
+      writer = std::make_unique<RootStorageSvc::RNTupleWriterHelper>(m_file, ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
    }
    if( writer and create ) {
       // treat the create flag as an indication of a new container client and count them
@@ -1147,7 +1149,7 @@ uint64_t RootDatabase::indexLookup([[maybe_unused]] RNTupleReader* reader, uint6
       indexLookup_t &index = m_ntupleIndexMap[reader];
       index.reserve(reader->GetNEntries());
       // This is the field in which the indices are kept
-      auto indexRefField = reader->GetView<uint64_t>("index_ref");
+      auto indexRefField = reader->GetView<uint64_t>(APRDefaults::IndexColName);
       // Loop over the events, read the index values and fill the map
       uint64_t row{0};
       for(const auto& entry : reader->GetEntryRange()) {

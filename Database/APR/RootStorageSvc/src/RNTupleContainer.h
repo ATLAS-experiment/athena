@@ -22,7 +22,8 @@
 // Forward declarations
 class TClass;
 namespace SG { class IAuxStoreIO; }
-namespace RootAuxDynIO { class IRNTupleWriter; }
+namespace RootAuxDynIO { class IRootAuxDynReader; class IRNTupleAuxDynWriter; }
+namespace RootStorageSvc { class RNTupleWriterHelper; }
 namespace ROOT::Experimental { class RNTupleReader; }
 
 #include "ROOT/RNTupleView.hxx"
@@ -70,6 +71,9 @@ class RNTupleContainer : public DbContainerImp
     // AuxDyn RNTuple reader (managed by the Database)
     std::unique_ptr<RootAuxDynIO::IRootAuxDynReader> auxdyn_reader;
 
+    // AuxDyn RNTuple writer (managed by the Database)
+    std::unique_ptr<RootAuxDynIO::IRNTupleAuxDynWriter> auxdyn_writer;
+
     FieldDesc(const DbColumn& c);
     FieldDesc(FieldDesc const& other) = delete;
     FieldDesc(FieldDesc&& other) = default;
@@ -107,8 +111,10 @@ class RNTupleContainer : public DbContainerImp
    int64_t            m_indexBump;
    const uint32_t     m_indexMulti;
 
-   RootAuxDynIO::IRNTupleWriter*     m_ntupleWriter = nullptr;
-   /// Note: the Fields need to be destroyed before the page source is gone
+   /// Internal cache of the RNTupleWriterHelper
+   RootStorageSvc::RNTupleWriterHelper*     m_ntupleWriter = nullptr;
+
+   /// Internal cache of the native RNTupleReader
    RNTupleReader*       m_ntupleReader{};
 
  public:
