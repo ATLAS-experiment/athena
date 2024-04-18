@@ -49,7 +49,7 @@ def createJetContextFlags():
     def _defaultFlag(prevFlags):
         try:
             run = prevFlags.GeoModel.Run
-        except ValueError:
+        except (ValueError, RuntimeError) : # several exceptions can be thrown... catch any of them
             # No GeoModel.Run -> we are in a Truth job, return an empty context.
             return {}                
         return prevFlags.Jet.Context.Run3 if run <= LHCPeriod.Run3 else prevFlags.Jet.Context.Run4
@@ -77,13 +77,13 @@ def createJetContextFlags():
 
     # ****************
     # Add Jet trigger context :
-    if moduleExists("TriggerMenuMT.HLT.Jet"):
+    if moduleExists("TriggerMenuMT"):
         from TriggerMenuMT.HLT.Jet.JetRecoCommon import addJetContextFlags
         addJetContextFlags(flags)
 
     # ****************
     # Add HIGG1D1 context :
-    if moduleExists("DerivationFrameworkHiggs.HIGG1D1CustomJetsConfig"):
+    if moduleExists("DerivationFrameworkHiggs"):
         from DerivationFrameworkHiggs.HIGG1D1CustomJetsConfig import addJetContextFlags
         addJetContextFlags(flags)
         
