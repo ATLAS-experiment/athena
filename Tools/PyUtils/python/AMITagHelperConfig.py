@@ -89,6 +89,10 @@ def AMITagCfg(flags, runArgs=None, fixBroken=False):
             tags += [runArgs.AMIConfig]
             log.info(f'Adding AMITag from execution: {runArgs.AMIConfig}')
 
+    if not tags:
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        return ComponentAccumulator()
+
     valueAMITag = '_'.join(tags)
 
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
