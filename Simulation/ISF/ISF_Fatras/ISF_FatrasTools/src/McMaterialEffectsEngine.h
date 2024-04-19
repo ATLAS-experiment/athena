@@ -1,11 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-
-///////////////////////////////////////////////////////////////////
-// McMaterialEffectsEngine.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_FATRASTOOLS_MCMATERIALEFFECTENIGINE_H
 #define ISF_FATRASTOOLS_MCMATERIALEFFECTENIGINE_H
@@ -27,7 +22,6 @@
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 
 // ISF
-#include "ISF_Event/ITruthIncident.h"
 #include "ISF_Event/ISFParticleContainer.h"
 
 // Barcode

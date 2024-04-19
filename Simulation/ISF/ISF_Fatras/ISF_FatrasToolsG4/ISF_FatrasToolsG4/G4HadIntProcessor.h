@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////////////////
-// G4HadIntProcessor.h, (c) ATLAS Detector software
-/////////////////////////////////////////////////////////////////// 
 #ifndef ISF_FATRASTOOLSG4_G4HADINTPROCESSOR_H
 #define ISF_FATRASTOOLSG4_G4HADINTPROCESSOR_H
 
@@ -28,7 +25,6 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
 // ISF
-#include "ISF_Event/ITruthIncident.h"
 #include "ISF_Event/ISFParticleContainer.h"
 
 // Forward Declarations
