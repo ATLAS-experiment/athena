@@ -1,0 +1,9 @@
+{
+    "TrkAnaOffl1" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth", 
+        "MatchingType"  : "TruthMatch", 
+        "SubFolder"  : "TrkAnaOffl1/"
+    }
+}

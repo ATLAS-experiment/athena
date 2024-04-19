@@ -10,7 +10,7 @@ def GetCustomAthArgs() :
     IDTPMparser.add_argument( "--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int )
     IDTPMparser.add_argument( "--debug", help="Enable debugging messages", action="store_true", default=False )
     IDTPMparser.add_argument( "--dirName", help="Main directory name for storing plots", default="InDetTrackPerfMonPlots/" )
-    IDTPMparser.add_argument( "--outputFileName", help='Name of output file', default="myIDTPM_out" )
+    IDTPMparser.add_argument( "--outputFilePrefix", help='Name of output file', default="myIDTPM_out" )
     IDTPMparser.add_argument( "--writeAOD_IDTPM", help="Write output file for reprocessing", action="store_true", default=False )
     IDTPMparser.add_argument( "--trkAnaCfgFile", help='File with track analysis setup (.json format)', default='Default' )
     IDTPMparser.add_argument( "--unpackTrigChains", help="Run each configured trigger chain in a separate track analysis", action="store_true", default=False )
@@ -33,10 +33,10 @@ for path in MyArgs.inputFileNames.split( ',' ):
     flags.Input.Files += glob( path )
 
 ## Outputs
-flags.PhysVal.OutputFileName = MyArgs.outputFileName + '.HIST.root'
+flags.PhysVal.OutputFileName = MyArgs.outputFilePrefix + '.HIST.root'
 flags.addFlag( 'Output.doWriteAOD_IDTPM', MyArgs.writeAOD_IDTPM )
 flags.addFlag( 'Output.AOD_IDTPMFileName',
-               MyArgs.outputFileName + '.AOD_IDTPM.pool.root' )
+               MyArgs.outputFilePrefix + '.AOD_IDTPM.pool.root' )
 
 ## Set output log level
 if MyArgs.debug:
