@@ -142,6 +142,12 @@ def MC23dSingleBeamspot(flags):
     # override only pile-up profile
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run450000_MC23d_SingleBeamspot' 
 
+def MC23eSingleBeamspot(flags):
+    """MC23e flags for MC to match 2024 Run 3 data (initial pile-up profile estimate, single beamspot version)"""
+    MC23e(flags)
+
+    # override only pile-up profile
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run470000_MC23e_SingleBeamspot'
 
 def MC23LowMu(flags):
     """MC23 flags for MC to match Run 3 data with low pile-up"""
