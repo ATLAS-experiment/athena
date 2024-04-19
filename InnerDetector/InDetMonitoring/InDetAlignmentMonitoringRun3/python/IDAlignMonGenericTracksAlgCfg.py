@@ -100,12 +100,28 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'Number of SCT hits per track (Barrel);Number of SCT hits in Barrel;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeSCTHits+1, xmin=-0.5, xmax=m_rangeSCTHits +0.5)
 
+    varName = 'm_nscthits_per_track_eca;Nscthits_per_track_eca'
+    title = 'Number of SCT hits per track (ECA);Number of SCT hits in EndCap A;Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeSCTHits+1, xmin=-0.5, xmax=m_rangeSCTHits +0.5)
+    
+    varName = 'm_nscthits_per_track_ecc;Nscthits_per_track_ecc'
+    title = 'Number of SCT hits per track (ECC);Number of SCT hits in EndCap C;Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeSCTHits+1, xmin=-0.5, xmax=m_rangeSCTHits +0.5)
+    
     varName = 'm_ntrthits_per_track;Ntrthits_per_track'
     title = 'Number of TRT hits per track;Number of TRT hits;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeTRTHits+1, xmin=-0.5, xmax=m_rangeTRTHits +0.5)
 
     varName = 'm_ntrthits_per_track_barrel;Ntrthits_per_track_barrel'
     title = 'Number of TRT hits per track (Barrel);Number of TRT hits in Barrel;Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeTRTHits+1, xmin=-0.5, xmax=m_rangeTRTHits +0.5)
+
+    varName = 'm_ntrthits_per_track_eca;Ntrthits_per_track_eca'
+    title = 'Number of TRT hits per track (ECA);Number of TRT hits in EndCap A;Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeTRTHits+1, xmin=-0.5, xmax=m_rangeTRTHits +0.5)
+    
+    varName = 'm_ntrthits_per_track_ecc;Ntrthits_per_track_ecc'
+    title = 'Number of TRT hits per track (ECC);Number of TRT hits in EndCap C;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeTRTHits+1, xmin=-0.5, xmax=m_rangeTRTHits +0.5)
 
     varName = 'm_eta_2fillpix,m_npixelhits_per_track_2filleta;Npixhits_vs_eta'
@@ -140,9 +156,17 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'phi;Track #phi;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI)
 
+    varName = 'm_errPhi0;err_Phi0'
+    title = '#phi_{0} error;Error of #phi_{0} [rad];Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax= 0.010)
+
     varName = 'm_z0;z0_origin'
     title = 'z_{0} (computed vs origin); z_{0} (origin) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_z0Range, xmax=m_z0Range)
+
+    varName = 'm_errZ0;err_z0_origin'
+    title = 'z_{0} error (computed vs origin); z_{0} error (origin) [mm]; Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.3)
 
     varName = 'm_z0_bscorr;z0'
     title = 'z_{0} (corrected for beamspot);z_{0} [mm]; Tracks'
@@ -156,6 +180,10 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'd_{0} (computed vs origin);d_{0} (origin) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0Range, xmax=m_d0Range)
 
+    varName = 'm_errD0;err_d0_origin'
+    title = 'd_{0} error (computed vs origin);d_{0} error (origin) [mm]; Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=60, xmin=0, xmax=0.30)
+
     varName = 'm_d0_bscorr;d0'
     title = 'd_{0} (corrected for beamspot);d_{0} (BS) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0BsRange, xmax=m_d0BsRange)
@@ -164,9 +192,21 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'p_{T};Signed Track p_{T} [GeV];Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange)
 
+    varName = 'm_errPt;err_pT'
+    title = 'p_{T} error;Signed Track p_{T} error [GeV];Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0., xmax=1.)
+
     varName = 'm_p;P'
     title = 'Track Momentum P;Signed Track P [GeV];Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange)
+
+    varName = 'm_pTRes;pTResolution'
+    title = 'Momentum resolution;pTRes;Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=100, xmin=0, xmax=1.0)
+
+    varName = 'm_pTResOverP;pTRes_OverP'
+    title = 'Momentum resolution / Momentum;pTResOverP;Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=100, xmin=0, xmax=0.05)
 
     varName = 'm_phi_2filld0bscorr,m_d0_bscorr_2fillphi;D0VsPhi0'
     title = 'd_{0} (BS) Vs #phi_{0};#phi_{0} [rad];d_{0} (BS) [mm]'
