@@ -32,7 +32,7 @@ namespace CaloRecGPU
   template <int eta_grid, int phi_grid, bool respect_deltas>
   struct EtaPhiMapEntry<eta_grid, phi_grid, respect_deltas, true>
   {
-    friend class EtaPhiMapEntry<eta_grid, phi_grid, respect_deltas, false>;
+    friend struct EtaPhiMapEntry<eta_grid, phi_grid, respect_deltas, false>;
 
     static constexpr int s_max_overlap_cells = 10;
     //We could/should try to refine things

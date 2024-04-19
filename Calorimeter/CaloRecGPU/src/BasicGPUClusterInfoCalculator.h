@@ -56,7 +56,7 @@ class BasicGPUClusterInfoCalculator:
 
   virtual ~BasicGPUClusterInfoCalculator() = default;
 
-  virtual size_t size_of_temporaries() const
+  virtual size_t size_of_temporaries() const override
   {
     if (m_preserveClusterMoments)
       {
