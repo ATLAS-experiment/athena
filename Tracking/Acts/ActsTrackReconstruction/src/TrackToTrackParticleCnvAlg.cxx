@@ -11,6 +11,7 @@
 #include "Acts/Propagator/detail/JacobianEngine.hpp"
 #include "ActsInterop/Logger.h"
 
+#include "AthContainers/Decorator.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "MagFieldElements/AtlasFieldCache.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -232,6 +233,8 @@ namespace ActsTrk
     HitSummaryData hitInfo;
 
     unsigned int converted_track_states=0;
+
+    static const SG::AuxElement::Decorator<ElementLink<ActsTrk::TrackContainer> > trackLink("actsTrack");
     
     using namespace Acts::UnitLiterals;
     for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : *tracksContainer) {
@@ -473,7 +476,13 @@ namespace ActsTrk
              ATH_MSG_ERROR("Invalid size of param element " << param.size() <<  " != 6" );
           }
        }
+
        track_particle->setTrackParameters(parametersVec);
+
+       // add element to link to the correspond track
+       trackLink(*track_particle)
+          = ElementLink<ActsTrk::TrackContainer>( tracksContainer,
+                                                  track.index() );
     }
     ATH_MSG_DEBUG( "Converted " <<  tracksContainer->size() << " acts tracks into " << track_particles->size()
                   << " track particles with parameters for " << converted_track_states << " track states.");
