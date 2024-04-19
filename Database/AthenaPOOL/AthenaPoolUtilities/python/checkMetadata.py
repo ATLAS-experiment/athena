@@ -119,7 +119,7 @@ def validateInputMetadata(infile):
     if (
         "data_year" in tag_info
         and isinstance(tag_info["data_year"], list)
-        and set(tag_info["data_year"]) > 1
+        and len(set(tag_info["data_year"])) > 1
     ):
         logging.error("/TagInfo contains values from different data taking periods")
         return 1
