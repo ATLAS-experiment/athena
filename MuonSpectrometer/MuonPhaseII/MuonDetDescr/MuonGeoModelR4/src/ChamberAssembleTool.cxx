@@ -129,10 +129,13 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
 
       const Amg::Transform3D axisRotation{Amg::getRotateZ3D(-90. * Gaudi::Units::deg) *
                                           Amg::getRotateY3D(-90. * Gaudi::Units::deg)};
+
+      constexpr double margin = 1.*Gaudi::Units::cm;
     
     for (defineArgs& candidate : muonChamberCandidates) {
          std::vector<Amg::Vector3D> edgePoints{};
          std::vector<Identifier> reIds{};
+         double minPhi{1.e6};
          const Amg::Transform3D toCenter = axisRotation * candidate.readoutEles[0]->globalToLocalTrans(gctx);
          for (const MuonReadoutElement* re : candidate.readoutEles) {
             const GeoShape* readOutShape = re->getMaterialGeom()->getLogVol()->getShape();
@@ -151,7 +154,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             reIds.push_back(re->identify());
          }
          
-         double minX{1.e6}, minY{1.e6}, minZ{1.e6}, maxX{-1.e6}, maxY{-1.e6}, maxZ{-1.e6};
+         double minX{1.e6}, minY{1.e6}, minZ{1.e6}, maxX{-1.e6}, maxY{-1.e6}, maxZ{-1.e6}, maxXNegY{-1.e6};;
          
          /// Determine the height and the width of the trapezoidal volume bounds
          for (const Amg::Vector3D& edge : edgePoints) {
@@ -166,14 +169,48 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
          const double midY = 0.5*(minY + maxY);
          const double midZ = 0.5*(minZ + maxZ);
 
-         candidate.halfY = 0.5*(maxY - minY);
-         candidate.halfZ = 0.5*(maxZ - minZ);
- 
-         candidate.halfXShort = candidate.halfXLong = 0.5*(maxX - minX);
-
+         const double hLengthY = 0.5 * (maxY - minY);
+         const double hLengthZ = 0.5 * (maxZ - minZ);
          
          candidate.centerTrans = axisRotation.inverse() * Amg::Translation3D{midX, midY, midZ};
          
+         for (const Amg::Vector3D &edge : edgePoints) {
+            // translate the edges to the local frame of the chamber
+            const Amg::Vector2D &localedge =
+                (Amg::getTranslate3D(-midX, -midY, -midZ) * edge)
+                    .block<2, 1>(0, 0);
+
+            if (std::abs(localedge.y() + hLengthY) < 15. * Gaudi::Units::cm) {
+                maxXNegY = std::max(maxXNegY, localedge.x());
+            }
+         }
+
+           const Amg::Vector2D refEdge{maxXNegY, -hLengthY};
+
+        // find the minimum angle between the edge points to define the
+        // trapezoidal bounds of the chamber
+
+        for (const Amg::Vector3D &edge : edgePoints) {
+            const Amg::Vector2D &localedge =
+                (Amg::getTranslate3D(-midX, -midY, -midZ) * edge)
+                    .block<2, 1>(0, 0);
+            if (std::abs(localedge.y() - refEdge.y()) < 1.e-10) continue;
+
+            if (localedge.x() > refEdge.x() ||
+                std::abs(localedge.x() - refEdge.x()) < 1.e-10) {
+                double phi = std::atan2((localedge.y() - refEdge.y()),
+                                   (localedge.x() - refEdge.x()));
+                minPhi = std::min(minPhi, phi);
+            }
+        }
+
+          // Define the trapezoidal bounds of the chamber
+        candidate.halfXShort = maxXNegY + margin;
+        candidate.halfY = hLengthY + margin;
+        candidate.halfZ = hLengthZ + margin;
+        candidate.halfXLong =
+        candidate.halfXShort + 2 * candidate.halfY / std::tan(minPhi) + margin;
+
          if(msgLvl(MSG::VERBOSE)) {
             std::stringstream debugStream{};
             debugStream<<"minY: "<<minY<<", maxY: "<<maxY<<", minZ: "<<minZ<<", maxZ: "<<maxZ<<" -- ";

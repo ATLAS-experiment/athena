@@ -81,7 +81,7 @@ std::shared_ptr<Acts::Volume> MuonChamber::boundingVolume(const ActsGeometryCont
     return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
 }
 std::shared_ptr<Acts::TrapezoidVolumeBounds> MuonChamber::bounds() const {
-    return std::make_shared<Acts::TrapezoidVolumeBounds>(halfXLong(), halfXShort(), halfY(), halfZ());
+    return std::make_shared<Acts::TrapezoidVolumeBounds>(halfXShort(), halfXLong(), halfY(), halfZ());
 }
 
 std::ostream& operator<<(std::ostream& ostr, 
