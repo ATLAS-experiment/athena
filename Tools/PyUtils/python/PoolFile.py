@@ -547,8 +547,7 @@ class PoolFile(object):
 
         # get the "final" file name (handles all kind of protocols)
         try:
-            import PyUtils.AthFile as af
-            protocol, fileName = af.server.fname(fileName)
+            protocol, fileName = _fname(fileName)
         except Exception as err:
             print("## warning: problem opening PoolFileCatalog:\n%s"%err)
             import traceback
