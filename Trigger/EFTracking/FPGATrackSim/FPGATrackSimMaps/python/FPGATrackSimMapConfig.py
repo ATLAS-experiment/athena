@@ -1,17 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-'''
-@author Riley Xu - rixu@cern.ch
-@date March 3rd 2020
-@brief This file declares functions to make and configure the map service.
-'''
-
-import os
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.trfUtils import findFile
 from PyJobTransforms.trfLogger import msg
+import os
 
-from FPGATrackSimMaps.FPGATrackSimMapsConf import FPGATrackSimMappingSvc, FPGATrackSimHitFilteringTool
-import FPGATrackSimConfTools.FPGATrackSimConfigCompInit as FPGATrackSimConfig
 
 def findFileWithTest(datapath,filename):
     retv = findFile(datapath,filename)
@@ -20,69 +12,29 @@ def findFileWithTest(datapath,filename):
         raise OSError(2, "Couldn't find file", filename)
     return retv
 
-def addMapSvc(tag):
+def getRegionIndex(map_tag):
     '''
-    Creates and returns a FPGATrackSimMapSvc object, configured with the specified tag.
-
-    This function adds the returned map service instance to SvcMgr, and ALSO ADDS
-    the EventSelectionSvc, which the map svc depends on
+    Note the region member of the tag is a string
     '''
-    FPGATrackSimConfig.addEvtSelSvc(tag)
-
-    MyFPGATrackSimMappingSvc = FPGATrackSimMappingSvc()
-
-    filepaths = [
-            'pmap',
-            'rmap',
-            'modulemap',
-            'subrmap',
-            'NNmap',
-    ]
-
-    formats = {
-            'region': FPGATrackSimConfig.getRegionIndex(tag),
-            'regionName': FPGATrackSimConfig.getRegionName(tag),
-    }
-
-    for param in filepaths:
-        if tag['formatted']:
-            path = tag[param].format(**formats)
-        else:
-            path = tag[param]
-        setattr(MyFPGATrackSimMappingSvc, param, path)
-
-    MyFPGATrackSimMappingSvc.mappingType = tag['mappingType']
-    MyFPGATrackSimMappingSvc.layerOverride = tag['layerOverride']
+    try:
+        return int(map_tag['region'])
+    except ValueError:
+        return map_tag['regionNames'].index(map_tag['region'])
  
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr += MyFPGATrackSimMappingSvc
+   
+def getRegionName(map_tag):
+    return map_tag['regionNames'][getRegionIndex(map_tag)]
 
-    return MyFPGATrackSimMappingSvc
+def getSampleType(map_tag):
+    return map_tag['sampleType']
 
-
-
-def addHitFilteringTool(tag):
-    '''
-    Creates and adds the hit filtering tool to the tool svc
-    '''
-
-    HitFilteringTool = FPGATrackSimHitFilteringTool()
-
-    for param in HitFilteringTool.__slots__:
-        if param in tag:
-            setattr(HitFilteringTool, param, tag[param])
-
-    from AthenaCommon.AppMgr import ToolSvc
-    ToolSvc += HitFilteringTool
-
-    return HitFilteringTool
-
-
+def getWithPU(map_tag):
+    return map_tag['withPU']
 
 def getNSubregions(tag):
     formats = {
-            'region': FPGATrackSimConfig.getRegionIndex(tag),
-            'regionName': FPGATrackSimConfig.getRegionName(tag),
+            'region': getRegionIndex(tag),
+            'regionName': getRegionName(tag),
     }
 
     if tag['formatted']:
@@ -95,9 +47,3 @@ def getNSubregions(tag):
         fields = f.readline().split()
         assert(fields[0] == 'towers')
         return int(fields[1])
-
-
-def _applyTag(MyFPGATrackSimMappingSvc, tag):
-    '''
-    Helper function that sets the filepaths of the MapSvc using the supplied tag
-    '''
