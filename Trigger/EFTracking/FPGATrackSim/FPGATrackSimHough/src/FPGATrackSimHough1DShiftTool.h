@@ -1,7 +1,7 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 
-#ifndef FPGATrackSimHOUGH1DSHIFTTOOL_H
-#define FPGATrackSimHOUGH1DSHIFTTOOL_H
+#ifndef FPGATRACKSIMHOUGH1DSHIFTTOOL_H
+#define FPGATRACKSIMHOUGH1DSHIFTTOOL_H
 
 /**
  * @file FPGATrackSimHough1DShiftTool.h
@@ -10,7 +10,7 @@
  * @brief Implements road finding using Elliot's simplified Hough transform.
  *
  * Declarations in this file:
- *      class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrackSimRoadFinderTool
+ *      class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public FPGATrackSimRoadFinderToolI
  *
  * Using the Lorentz force equation, one can relate the phi of a track and the
  * coordinate of a single hit:
@@ -46,10 +46,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
-#include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
-#include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
-#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
-#include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 
 #include "TFile.h"
 
@@ -57,6 +53,12 @@
 #include <vector>
 #include <map>
 #include <boost/dynamic_bitset_fwd.hpp>
+
+class IFPGATrackSimEventSelectionSvc;
+class IFPGATrackSimMappingSvc;
+class IFPGATrackSimBankSvc;
+
+
 
 /*
  * The hits of an event are stored in a bit vector for each layer, with the number
@@ -79,7 +81,7 @@
  *      q       : e
  *      pT      : GeV / c
  */
-class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoadFinderTool>
+class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrackSimRoadFinderTool
 {
     public:
 
@@ -89,9 +91,10 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
         FPGATrackSimHough1DShiftTool(const std::string&, const std::string&, const IInterface*);
 
         virtual StatusCode initialize() override;
+        virtual StatusCode finalize() override;
 
         ///////////////////////////////////////////////////////////////////////
-        // IFPGATrackSimRoadFinderTool
+        // FPGATrackSimRoadFinderToolI
 
         virtual StatusCode getRoads(const std::vector<const FPGATrackSimHit*> & hits, std::vector<FPGATrackSimRoad*> & roads) override;
 
@@ -100,56 +103,73 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
         ///////////////////////////////////////////////////////////////////////
         // Handles
 
-	ServiceHandle<IFPGATrackSimEventSelectionSvc> m_EvtSel {this, "FPGATrackSimEventSelectionSvc", "FPGATrackSimEventSelectionSvc"};
-        ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc {this, "FPGATrackSimBankSvc", "FPGATrackSimBankSvc"};
-        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
+        ServiceHandle<IFPGATrackSimEventSelectionSvc>  m_EvtSel;
+        ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping;
+        ServiceHandle<IFPGATrackSimBankSvc> m_FPGATrackSimBankSvc;
 
         ///////////////////////////////////////////////////////////////////////
         // Properties
 
-        Gaudi::Property <int> m_subRegion { this, "subRegion", 0," -1 for entire region (no slicing)"};
-	Gaudi::Property <float> m_phiMin { this, "phi_min", 0, "min phi"};
-	Gaudi::Property <float> m_phiMax { this, "phi_max", 0, "max phi"};
-	Gaudi::Property <float> m_qptMin { this, "qpT_min", 0, "min q/pt"};
-	Gaudi::Property <float> m_qptMax { this, "qpT_max", 0, "max q/pt"};
-	Gaudi::Property<unsigned> m_phiBins  { this, "nBins", 0, "n phi bins"};
-	Gaudi::Property<unsigned> m_threshold  { this, "threshold", 0,"Minimum number of hit layers to fire a road"};
-	Gaudi::Property<unsigned> m_iterStep  { this, "iterStep", 0, "Instead of iterating over steps in pT, we iterate over iterStep-bin shifts in iterLayer"};
-	Gaudi::Property<unsigned> m_iterLayer  { this, "iterLayer", 0, "Instead of iterating over steps in pT, we iterate over iterStep-bin shifts in iterLayer"};
-	Gaudi::Property<bool> m_useDiff  { this, "useDiff", false, "use diff"};
-	Gaudi::Property<bool> m_variableExtend  { this, "variableExtend", false, "varriable extend"};
-	Gaudi::Property<bool> m_phiRangeCut  { this, "phiRangeCut", true, "apply phi range cut"};
-	Gaudi::Property<float> m_d0spread  { this, "d0spread", -1, "negative means the spread is disabled, value in mm"};
-	Gaudi::Property<std::vector<float> > m_hitExtendProperty  { this, "hitExtend", {}, "Number of adjacent bins that each hit fires (can be fractional)"};
-	Gaudi::Property<std::vector<float> > m_hitExtend { this, "hitExtend", {}, "Hit Extend second copy because property is const and can't be changed to default"};
-	Gaudi::Property<std::string> m_bitShift_path  { this, "bitShifts", "","Instead of calculating bit shifts, input a list of shifts via a text file"};
-	Gaudi::Property<std::string> m_radii_file  { this, "radiiFile", "","Use this file to specify radii"};
+        Gaudi::Property<bool> m_traceHits { this, "traceHits", true, "Trace each hit that goes in a bin. Disabling this will save memory/time since each bin doesn't have to store all its hits but the roads created won't have hits from convolution, etc."};
 
-        // this is only good for barrel, use "
-        float m_r_phys[int(SiliconTech::nTechs)][8] = {{396.7,    402.7,  559.5,  565.6,  759.5,  765.7,  997.1,  1003.4},
-						       {39.2,     100.2,  160.3,  228.3,  291.1,      0,      0,       0}};
+        Gaudi::Property<bool> m_doEtaPatternConsts { this, "doEtaPatternConsts", false, "Whether to use the eta pattern tool for constant generation"};
+        Gaudi::Property<bool> m_useSpacePoints { this, "useSpacePoints", false, "Whether we are using spacepoints." };
+        Gaudi::Property<bool> m_useSectors { this, "useSectors", false, "Will reverse calculate the sector for track-fitting purposes" };
+        Gaudi::Property<bool> m_idealGeoRoads { this, "IdealGeoRoads", false, "Set sectors to use ideal geometry fit constants" };
+        Gaudi::Property<bool> m_doRegionalMapping { this, "RegionalMapping", false, "Use the sub-region maps to define the sector" };
+
+        Gaudi::Property<int> m_subRegion { this, "subRegion", 0, "Sub region of this transform, or -1 for full region" };
+        Gaudi::Property<float> m_phiMin { this, "phiMin", 0, "Minimum phi of transform" };
+        Gaudi::Property<float> m_phiMax { this, "phiMin", 0, "Maximum phi of transform" };
+        Gaudi::Property<float> m_qptMin { this, "qptMin", 0, "Minimum q/pT of transform" };
+        Gaudi::Property<float> m_qptMax { this, "qptMax", 0, "Maximum q/pT of transform" };
+
+        Gaudi::Property<unsigned> m_phiBins { this, "nBins", 0, "Number of phi bins used by transform." };
+        Gaudi::Property<unsigned> m_threshold { this, "threshold", 0, "Minimum number of layers hit to accept as a road (inclusive)" };
+        Gaudi::Property<unsigned> m_iterStep { this, "iterStep", 0, "Instead of iterating over steps in pT, we iterate over iterStep-bin shifts in iterLayer" };
+        Gaudi::Property<unsigned> m_iterLayer { this, "iterLayer", 0, "Instead of iterating over steps in pT, we iterate over iterStep-bin shifts in iterLayer" };
+
+        Gaudi::Property<bool> m_useDiff { this, "useDiff", false, "Use the diff of inner and outer layer" };
+        Gaudi::Property<bool> m_variableExtend { this, "variableExtend", false, "Do variable extension based off of hit delta R" };
+        Gaudi::Property<bool> m_phiRangeCut {this, "phiRangeCut", false, "Require tracks to be in phi range to avoid counting minbias roads for larger region" };
+
+        Gaudi::Property<float> m_d0spread {this, "d0spread", -1.0, "Make patterns with a d0spread as given, negative value turns it off" };
+        Gaudi::Property<std::vector<float>> m_hitExtendProperty {this, "hitExtend", {}, "Number of adjacent bins that a hit triggers" };
+        Gaudi::Property<std::string> m_bitShift_path { this, "bitShifts", "", "Instead of calculating bit shifts, input a list of shifts via a text file" };
+        Gaudi::Property<std::string> m_radii_file { this, "radiiFile", "", "Provide file with mean radii per layer for each subregion" };
+        Gaudi::Property<bool> m_applyDropable { this, "applyDropable", false, "Enable logic that prevents redundant patterns with dropped hits" };
+        Gaudi::Property<int> m_neighborWindow { this, "neighborWindow", 0, "Supress if neighbors have higher number of hit layers" };
+        Gaudi::Property<unsigned> m_historyWindow {this, "historyWindow", 0, "Suppress if previous N bit shifts have neighbors with higher nubmer of hit layers" };
+        Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Apply corrections to hough equation due to field nonuniformity" };
+        Gaudi::Property<float> m_enhanceHighPt {this, "enhanceHighPt", -1.0, "if positive, double number of patterns for region with qpT below value" };
 
 
-	std::vector<float> m_r;  // will be filled from m_r_phys at start or from m_radii_file
+        std::vector<float> m_hitExtend; // need second copy because property is "const" and can't be changed to default
+        std::vector<float> m_r;  // will be filled from m_radii_file
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience
 
-        unsigned m_nLayers = 0; // alias to m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
+        unsigned m_nLayers; // alias to m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
 
-        float m_phiStep = 0; // width of one phi bin
+        float m_phiStep; // width of one phi bin
         std::vector<double> m_bins; // size == m_phiBins + 1.
             // Bin boundaries, where m_bins[i] is the lower bound of bin i.
             // These are calculated from m_phiMin/Max.
 
-        FPGATrackSimTrackPars m_regionMin = (0); // alias to m_EvtSel->getRegions()->getMin(m_EvtSel->getReginID())
-        FPGATrackSimTrackPars m_regionMax = (0); // alias to m_EvtSel->getRegions()->getMax(m_EvtSel->getReginID())
+        FPGATrackSimTrackPars m_regionMin; // alias to m_EvtSel->getRegions()->getMin(m_EvtSel->getReginID())
+        FPGATrackSimTrackPars m_regionMax; // alias to m_EvtSel->getRegions()->getMax(m_EvtSel->getReginID())
 
         std::vector<std::vector<int>> m_shifts; // size (nShifts, nLayers)
         std::vector<boost::dynamic_bitset<>> m_dropable; // size (nShifts, nLayers)
             // for shift patterns, we can cut duplication by only allowing some layers to be missed when doing 7/8
 
+        std::vector<float> m_qpt; // size (nShifts)
+        std::vector<std::vector<float>> m_phivals; // size (nShifts, nLayers)
         std::vector<std::vector<int>> m_d0shifts; // size (nShifts, nLayers), optional subshifts by d0
+        std::vector<unsigned> m_currentcounts; // just here so we don't reallocate every call
+        std::deque<std::vector<unsigned>> m_vetolist; // last N events, bit string of hit layers per bin
+
   
         ///////////////////////////////////////////////////////////////////////
         // Event Storage
@@ -160,7 +180,7 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
         // Metadata and Monitoring
 
         unsigned m_event = 0;
-        std::string m_name= ""; // Gets the instance name from the full gaudi name
+        std::string m_name; // Gets the instance name from the full gaudi name
         TFile m_monitorFile;
 
         ///////////////////////////////////////////////////////////////////////
@@ -170,8 +190,12 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
         float getPtFromShiftDiff(int shift) const;
         void readShifts(std::string const & filepath);
         std::vector<boost::dynamic_bitset<>> makeHitMasks(const std::vector<const FPGATrackSimHit*> & hits);
-        FPGATrackSimRoad makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, std::vector<int> const & shifts);
+
+        FPGATrackSimRoad makeRoad(std::vector<const FPGATrackSimHit*> hits, int bin_track, size_t iShift);
+        void matchIdealGeoSector(FPGATrackSimRoad & r) const;
+        bool passThreshold(std::vector<boost::dynamic_bitset<>>& binHits, int bin ) const;
         void printHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks) const;
+
         void drawHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks, std::string const & name);
         void drawHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks, std::string const & name, std::vector<int> const & shifts);
         void printShifts() const;
@@ -181,9 +205,10 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
         std::pair<float, bool> phitrk(int bin, std::vector<int> const &  shifts ) const; // returns phi of track and a bool if the
                                                                                        // value is invalid because at the edge
         float qPt(float r, float deltaPhi) const;
+        float deltaPhi(float r, float qPt) const;
 
         void calculated0Shifts();
-        std::vector<int> applyVariation(std::vector<int> &base, std::vector<int> &var, int sign) const;
+        std::vector<int> applyVariation(std::vector<int> base, std::vector<int> var, int sign) const;
         void calculateDropable();
         std::vector<int> shiftWithDrop(std::vector<int>& shift,unsigned droplayer) const;
 
@@ -191,4 +216,4 @@ class FPGATrackSimHough1DShiftTool : public extends<AthAlgTool, IFPGATrackSimRoa
 };
 
 
-#endif // FPGATrackSimHOUGH1DSHIFTTOOL_H
+#endif // FPGATRACKSIMHOUGH1DSHIFTTOOL_H
