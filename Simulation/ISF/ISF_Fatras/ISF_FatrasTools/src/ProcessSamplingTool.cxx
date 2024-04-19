@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ProcessSamplingTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "ProcessSamplingTool.h"
@@ -13,7 +9,6 @@
 #include "TrkParameters/TrackParameters.h"
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Event/ITruthIncident.h"
 #include "ISF_Event/ISFTruthIncident.h"
 #include "ISF_Interfaces/ITruthSvc.h"
 #include "TruthUtils/MagicNumbers.h"
