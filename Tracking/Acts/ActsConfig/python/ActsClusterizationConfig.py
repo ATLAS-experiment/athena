@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import BeamType
 
 def ActsPixelClusteringToolCfg(flags,
                                name: str = "ActsPixelClusteringTool",
@@ -23,7 +24,12 @@ def ActsPixelClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
 
-    kwargs.setdefault("PixelOfflineCalibData", "")
+    kwargs.setdefault(
+        'UseWeightedPosition',
+        not (flags.Tracking.doPixelDigitalClustering or flags.Beam.Type is BeamType.Cosmics)
+    )
+
+    kwargs.setdefault('UseBroadErrors', flags.Beam.Type is BeamType.Cosmics)
 
     acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
@@ -50,7 +56,6 @@ def ActsStripClusteringToolCfg(flags,
     kwargs.setdefault("maxFiredStrips", 0)
 
     if flags.ITk.selectStripIntimeHits and 'timeBins' not in kwargs:
-        from AthenaConfiguration.Enums import BeamType
         coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
         kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
 

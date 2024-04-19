@@ -81,8 +81,6 @@ private:
 	"Tool to retreive Lorentz angle"
     };
 
-    Gaudi::Property<bool> m_doErrCalib {this, "CalibrateErrors", true};
-
     // in micrometers
     Gaudi::Property<int> m_thickness {this, "PixelThickness", 250};
 

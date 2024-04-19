@@ -219,13 +219,11 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::calibrate(
     pos[Acts::eBoundLoc0] += deltaX;
     pos[Acts::eBoundLoc1] += deltaY;
 
-    if (m_doErrCalib) {
-	auto [errX, errY] = getCorrectedError(*errorData, *detElement, angles, cluster);
-	if (errX > 0)
-	    cov(0, 0) = errX * errX;
-	if (errY > 0)
-	    cov(1, 1) = errY * errY;
-    }
+    auto [errX, errY] = getCorrectedError(*errorData, *detElement, angles, cluster);
+    if (errX > 0)
+	cov(0, 0) = errX * errX;
+    if (errY > 0)
+	cov(1, 1) = errY * errY;
     
     return std::make_pair(pos, cov);
 }

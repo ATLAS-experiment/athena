@@ -134,7 +134,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
         from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
 
-        if flags.Beam.Type is not BeamType.Cosmics:
+        if not (flags.Tracking.doPixelDigitalClustering or flags.Beam.Type is BeamType.Cosmics):
             if flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClustering:
                 kwargs.setdefault(
                     'PixelCalibrator',

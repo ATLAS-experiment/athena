@@ -20,7 +20,6 @@ namespace ActsTrk {
 static inline double square(const double x){
   return x*x;
 }  
-constexpr double ONE_TWELFTH = 1./12.;  
   
 void clusterAddCell(PixelClusteringTool::Cluster& cl,
 		    const PixelClusteringTool::Cell& cell)
@@ -39,8 +38,6 @@ StatusCode PixelClusteringTool::initialize()
   if (not m_chargeDataKey.empty()) ATH_CHECK(m_pixelReadout.retrieve());
   
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
-  ATH_CHECK(m_offlineCalibDataKey.initialize(not m_offlineCalibDataKey.empty() and
-					     m_errorStrategy == 2));
   
   ATH_MSG_DEBUG(name() << " successfully initialized");
   return StatusCode::SUCCESS;
@@ -64,12 +61,6 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     calibData = calibDataHandle.cptr();
   }
   
-  const PixelCalib::PixelOfflineCalibData *offlineCalibData = nullptr;
-  if (not m_offlineCalibDataKey.empty() and m_errorStrategy == 2) {
-    SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibDataHandle(m_offlineCalibDataKey, ctx);
-    offlineCalibData = offlineCalibDataHandle.cptr();
-  }
-
   const InDetDD::PixelModuleDesign& design = 
 	dynamic_cast<const InDetDD::PixelModuleDesign&>(element->design());
 
@@ -106,6 +97,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
 				    moduleHash,
 				    m_pixelReadout->getFE(id, moduleID),
 				    tot);
+
       // These numbers are taken from the Cluster Maker Tool
       if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash < 12 or moduleHash > 2035)) {
         charge = tot/8.0*(8000.0-1200.0)+1200.0;
@@ -145,8 +137,14 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     
     InDetDD::SiCellId si_cell = element->cellIdFromIdentifier(id);
     InDetDD::SiLocalPosition pos = design.localPositionOfCell(si_cell);
-    pos_acc += tot * pos;
-    tot_acc += tot;
+
+    if (m_useWeightedPos) {
+	pos_acc += tot * pos;
+	tot_acc += tot;
+    } else {
+	pos_acc += pos;
+	tot_acc += 1;
+    }
   }
   
   if (tot_acc > 0)
@@ -180,67 +178,22 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   Amg::Vector3D globalPos(M[0]*Ax[0]+M[1]*Ay[0]+R[0],M[0]*Ax[1]+M[1]*Ay[1]+R[1],M[0]*Ax[2]+M[1]*Ay[2]+R[2]);
 
   // Compute error matrix
-  auto errorMatrix = Amg::MatrixX(2,2);
-  errorMatrix.setIdentity();
-
-  const double eta = std::abs(globalPos.eta());
-  const Amg::Vector2D& colRow = siWidth.colRow();
-  const double zPitch = siWidth.z()/colRow.y();
-  const Identifier clusterID = Identifier(); // ???
-  const int layer = pixelID.layer_disk(clusterID);
-  const int phimod = pixelID.phi_module(clusterID);
-  
-  switch (m_errorStrategy) {
-  case 0:
-    errorMatrix.fillSymmetric(0,0, square(siWidth.phiR()) * ONE_TWELFTH);
-    errorMatrix.fillSymmetric(1,1, square(siWidth.z()) * ONE_TWELFTH);
-    break;
-    
-  case 2:
-    // use parameterization only if the cluster does not
-    // contain long pixels or ganged pixels
-    // Also require calibration service is available....
-    if (not hasGanged and
-	zPitch > 399 * micrometer and
-	zPitch < 401 * micrometer) {
-      if (offlineCalibData) {
-        if (element->isBarrel()) {
-          int ibin = offlineCalibData->getPixelClusterErrorData()->getBarrelBin(eta,
-										static_cast<int>(colRow.y()),
-										static_cast<int>(colRow.x()));
-          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelPhiError(ibin);
-          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelBarrelEtaError(ibin);
-          errorMatrix.fillSymmetric(0,0, pow(phiError,2));
-          errorMatrix.fillSymmetric(1,1, pow(etaError,2));
-        }
-        else {
-          int ibin = offlineCalibData->getPixelClusterErrorData()->getEndcapBin(static_cast<int>(colRow.y()),
-										static_cast<int>(colRow.x()));
-          double phiError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapPhiError(ibin);
-          double etaError = offlineCalibData->getPixelClusterErrorData()->getPixelEndcapRError(ibin);
-          errorMatrix.fillSymmetric(0,0, square(phiError));
-          errorMatrix.fillSymmetric(1,1, square(etaError));
-        }
-      }
-    } else {
-      // cluster with ganged and/or long pixels
-      errorMatrix.fillSymmetric(0,0, square(siWidth.phiR()/colRow.x()) * ONE_TWELFTH);
-      errorMatrix.fillSymmetric(1,1, square(zPitch) * ONE_TWELFTH);
-    }
-    break;
-   
-  case 10:
-    errorMatrix.fillSymmetric(0,0, square( getPixelCTBPhiError(layer, phimod, static_cast<int>(colRow.x())) ));
-    errorMatrix.fillSymmetric(1,1, square(siWidth.z()/colRow.y()) * ONE_TWELFTH);
-    break;
-    
-  case 1:
-  default:
-    errorMatrix.fillSymmetric(0,0, square(siWidth.phiR()/colRow.x()) * ONE_TWELFTH);
-    errorMatrix.fillSymmetric(1,1, square(siWidth.z()/colRow.y()) * ONE_TWELFTH);
-    break;
+  float width0, width1;
+  if (m_broadErrors) {
+      // Use cluster width
+      width0 = siWidth.phiR();
+      width1 = siWidth.z();
+  } else {
+      // Use pixel width
+      width0 = siWidth.phiR() / siWidth.colRow().x();
+      width1 = siWidth.z() / siWidth.colRow().y();
   }
 
+  auto errorMatrix = Amg::MatrixX(2,2);
+  errorMatrix.setIdentity();
+  // Assume uniform distribution
+  errorMatrix.fillSymmetric(0,0, width0 * width0 / 12.0);
+  errorMatrix.fillSymmetric(1,1, width1 * width1 / 12.0);
 
   // Actually create the cluster (i.e. fill the values)
   IdentifierHash idHash = element->identifyHash();
