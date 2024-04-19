@@ -6,9 +6,11 @@ def JetEfficiencyMonitoringConfig(flags):
 
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.Enums import Format
-
+    from AthenaConfiguration.ComponentFactory import CompFactory
     result = ComponentAccumulator()
+
+
+    from AthenaConfiguration.Enums import Format
     ###########################################################################
     # Jet and particle flow config required for data POOL files except if is already an AOD
     if flags.Input.Format is Format.POOL and not flags.Input.isMC and not any(["AOD" in a for a in flags.Input.ProcessingTags]):
@@ -32,8 +34,8 @@ def JetEfficiencyMonitoringConfig(flags):
         metCA.addEventAlgo(getMETMakerAlg('AntiKt4EMPFlow'))
         result.merge(metCA)
     ###########################################################################
+    
     # make the athena monitoring helper
-    from AthenaConfiguration.ComponentFactory import CompFactory
     from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.JetEfficiencyMonitorAlgorithm,'JetEfficiencyMonAlg')
     groupName = 'JetEfficiencyMonitor' # the monitoring group name is also used for the package name
@@ -189,7 +191,7 @@ def JetEfficiencyMonitoringConfig(flags):
 
     acc = helper.result()
     result.merge(acc)
-    print("flags.DQ.Environment = " +flags.DQ.Environment )
+    print("flags.DQ.Environment = " + flags.DQ.Environment )
     return result
  
 
