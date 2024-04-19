@@ -172,7 +172,7 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts):
     if len(chains) == 0:
         log.info("[decisionTreeFromChains] Configuring empty decisionTree")
         acc.addSequence(HLTNode)
-        return ([], acc)
+        return ([], [], acc)
         
     ( finalDecisions, CFseq_list) = createDataFlow(flags, chains)        
     addChainsToDataFlow(flags, CFseq_list, allDicts) 
