@@ -21,7 +21,7 @@ if "__main__" == __name__:
   flags.Detector.GeometryID    = True
   flags.Detector.GeometryPixel = True
   flags.Detector.GeometrySCT   = True
-  flags.Detector.GeometryCalo  = True
+  flags.Detector.GeometryCalo  = False
   flags.Detector.GeometryMuon  = False
   flags.Detector.GeometryTRT   = True
   flags.Acts.TrackingGeometry.MaterialSource = "None"
@@ -54,9 +54,10 @@ if "__main__" == __name__:
 
   # Service will have removed TRT and Calo
   # We want them enabled for testing
+  # Temporarily disabling Calo though
   tgSvc.BuildSubDetectors += [
-    "TRT",
-    "Calo"
+    "TRT"
+    #"Calo"
   ]
 
   # needed to construct the calo geometry in ACTS

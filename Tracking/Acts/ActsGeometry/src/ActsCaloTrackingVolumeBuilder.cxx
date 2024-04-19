@@ -61,7 +61,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
 
 
   // generate the calo cell volume description
-  std::vector<std::unique_ptr<Acts::AbstractVolume>> cells;
+  std::vector<std::unique_ptr<Acts::Volume>> cells;
   cells = cellFactory();
 
   ATH_MSG_VERBOSE("Collected " << cells.size() << " calo cells");
@@ -86,8 +86,8 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
 
   // build a BVH octree for the bounding boxes
   // but only AFTER we've built the calo volume bounds
-  Box* top;
-  top = Acts::make_octree(boxStore, prims, 1, 0.1);
+  // Box* top;
+  // top = Acts::make_octree(boxStore, prims, 1, 0.1);
 
   // Create Tracking Volume that coutains the Calo
   // This needs to own the Abstract Volumes (cells), but we
@@ -101,14 +101,17 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
     cellVols.push_back(std::move(up));
   }
 
-  std::shared_ptr<Acts::TrackingVolume> calo
-      = Acts::TrackingVolume::create(Acts::Transform3::Identity(),
-                                     caloVolBounds,
-                                     std::move(boxStore),
-                                     std::move(cellVols),
-                                     top,
-                                     nullptr,  // no material for now
-                                     "Calo");
+  // This was removed in https://github.com/acts-project/acts/pull/3029
+  // To be reimplemented using new geometry model instead of explicit TrackingVolume content
+  throw std::runtime_error{"Calo building for ACTS currently disabled"};
+  std::shared_ptr<Acts::TrackingVolume> calo;
+      // = Acts::TrackingVolume::create(Acts::Transform3::Identity(),
+                                     // caloVolBounds,
+                                     // std::move(boxStore),
+                                     // std::move(cellVols),
+                                     // top,
+                                     // nullptr,  // no material for now
+                                     // "Calo");
 
   // We need to interglue all the volumes together
   std::shared_ptr<Acts::TrackingVolume> mutInsideVolume
@@ -278,10 +281,10 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
        caloRMin, caloRMax, (caloDZ1 - caloDZ2) / 2.);
 
   // they share the same bounds and tvol array
-  auto posContainer = Acts::TrackingVolume::create(posTrf, posNegCylBounds, tVolArrPosNeg);
+  auto posContainer = std::make_shared<Acts::TrackingVolume>(posTrf, posNegCylBounds, tVolArrPosNeg);
   ATH_MSG_VERBOSE("Built positive container " << *posContainer);
   ATH_MSG_VERBOSE(" - containing: " << calo->volumeName());
-  auto negContainer = Acts::TrackingVolume::create(negTrf, posNegCylBounds, tVolArrPosNeg);
+  auto negContainer = std::make_shared<Acts::TrackingVolume>(negTrf, posNegCylBounds, tVolArrPosNeg);
   ATH_MSG_VERBOSE("Built negative container " << *negContainer);
   ATH_MSG_VERBOSE(" - containing: " << calo->volumeName());
 
@@ -303,7 +306,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
           tVolOrderedCtr, std::move(binUtilityCtr));
 
 
-  auto ctrContainer = Acts::TrackingVolume::create(Acts::Transform3::Identity(),
+  auto ctrContainer = std::make_shared<Acts::TrackingVolume>(Acts::Transform3::Identity(),
                           std::make_shared<Acts::CylinderVolumeBounds>(
                           caloRMin, caloRMax, caloDZ2),
                           tVolArrCtr);
@@ -314,7 +317,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   // and now combine those together into another one
   Acts::TrackingVolumeArrayCreator tvac{Acts::TrackingVolumeArrayCreator::Config{}};
 
-  auto mainContainer = Acts::TrackingVolume::create(Acts::Transform3::Identity(),
+  auto mainContainer = std::make_shared<Acts::TrackingVolume>(Acts::Transform3::Identity(),
       std::make_shared<Acts::CylinderVolumeBounds>(
       caloRMin, caloRMax, caloDZ1),
       tvac.trackingVolumeArray(gctx, {negContainer, ctrContainer, posContainer},
@@ -487,7 +490,7 @@ namespace {
   }
 }
 
-Acts::AbstractVolume
+Acts::Volume
 ActsCaloTrackingVolumeBuilder::build_endcap(double z,
              double dz,
              double eta,
@@ -551,13 +554,13 @@ ActsCaloTrackingVolumeBuilder::build_endcap(double z,
 
   auto cubo = std::make_shared<Acts::GenericCuboidVolumeBounds>(
       std::array<Acts::Vector3, 8>({{p1, p2, p3, p4, p5, p6, p7, p8}}));
-  Acts::AbstractVolume vol(globalToLocal, std::move(cubo));
+  Acts::Volume vol(globalToLocal, std::move(cubo));
 
   return vol;
 }
 
 
-Acts::AbstractVolume
+Acts::Volume
 ActsCaloTrackingVolumeBuilder::build_barrel(double r,
              double dr,
              double eta,
@@ -623,12 +626,12 @@ ActsCaloTrackingVolumeBuilder::build_barrel(double r,
   auto cubo = std::make_shared<Acts::GenericCuboidVolumeBounds>(
       std::array<Acts::Vector3, 8>({{p1, p2, p3, p4, p5, p6, p7, p8}}));
 
-  Acts::AbstractVolume vol(globalToLocal, std::move(cubo));
+  Acts::Volume vol(globalToLocal, std::move(cubo));
 
   return vol;
 }
 
-Acts::AbstractVolume
+Acts::Volume
 ActsCaloTrackingVolumeBuilder::build_box(double x, double dx, double y, double dy, double z, double dz) const
 {
   // std::cout << "build box" << std::endl;
@@ -670,12 +673,12 @@ ActsCaloTrackingVolumeBuilder::build_box(double x, double dx, double y, double d
 
   auto cubo = std::make_shared<Acts::GenericCuboidVolumeBounds>(
       std::array<Acts::Vector3, 8>({{p1, p2, p3, p4, p5, p6, p7, p8}}));
-  Acts::AbstractVolume vol(globalToLocal, std::move(cubo));
+  Acts::Volume vol(globalToLocal, std::move(cubo));
 
   return vol;
 }
 
-std::vector<std::unique_ptr<Acts::AbstractVolume>>
+std::vector<std::unique_ptr<Acts::Volume>>
 ActsCaloTrackingVolumeBuilder::cellFactory() const
 {
   //Acts::ply_helper<double> ply_lar;
@@ -688,7 +691,7 @@ ActsCaloTrackingVolumeBuilder::cellFactory() const
   float  scale;
 
   // storage of cells we will produce
-  std::vector<std::unique_ptr<Acts::AbstractVolume>> cells;
+  std::vector<std::unique_ptr<Acts::Volume>> cells;
   cells.reserve(m_caloMgr->element_size());  // about 180k
 
   for(auto it = m_caloMgr->element_begin();it < m_caloMgr->element_end();++it) {
@@ -735,7 +738,7 @@ ActsCaloTrackingVolumeBuilder::cellFactory() const
     case 11:
     case 17:
       dz *= scale;
-      cells.push_back(std::make_unique<Acts::AbstractVolume>(
+      cells.push_back(std::make_unique<Acts::Volume>(
           build_endcap(z, dz, eta_raw, deta, phi_raw, dphi)));
       break;
     case 0:
@@ -751,7 +754,7 @@ ActsCaloTrackingVolumeBuilder::cellFactory() const
     case 19:
     case 20:
       dr *= scale;
-      cells.push_back(std::make_unique<Acts::AbstractVolume>(
+      cells.push_back(std::make_unique<Acts::Volume>(
           build_barrel(r, dr, eta_raw, deta, phi_raw, dphi)));
       break;
     case 21:
@@ -761,7 +764,7 @@ ActsCaloTrackingVolumeBuilder::cellFactory() const
       dx *= scale;
       dy *= scale;
       // dz *= scale;
-      cells.push_back(std::make_unique<Acts::AbstractVolume>(
+      cells.push_back(std::make_unique<Acts::Volume>(
           build_box(x, dx, y, dy, z, dz)));
       break;
     default:

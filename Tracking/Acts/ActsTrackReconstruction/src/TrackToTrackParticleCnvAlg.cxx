@@ -417,12 +417,7 @@ namespace ActsTrk
           //       for(ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType idx : tmp_param_state_idx) {
           ActsTrk::TrackStateBackend::ConstTrackStateProxy
              state = tracksContainer->trackStateContainer().getTrackState(*idx_iter);
-          auto flag = state.typeFlags();
-          const Acts::BoundTrackParameters
-             actsParam(state.referenceSurface().getSharedPtr(),
-                       !flag.test(Acts::TrackStateFlag::OutlierFlag) ? state.smoothed()           : state.filtered(),
-                       !flag.test(Acts::TrackStateFlag::OutlierFlag) ? state.smoothedCovariance() : state.filteredCovariance(),
-                       hypothesis);
+          const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
 
           Acts::Vector3 position = actsParam.position(gctx.context());
           Acts::Vector3 momentum = actsParam.momentum();
@@ -506,10 +501,7 @@ namespace ActsTrk
   Acts::BoundTrackParameters TrackToTrackParticleCnvAlg::parametersAtBeamLine(const EventContext &ctx,
                                                         const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
                                                         const Acts::PerigeeSurface &perigee_surface) const {
-     Acts::BoundTrackParameters trackParam(track.referenceSurface().getSharedPtr(),
-                                           track.parameters(),
-                                           track.covariance(),
-                                           track.particleHypothesis());
+     Acts::BoundTrackParameters trackParam = track.createParametersAtReference();
 
      std::optional<const Acts::BoundTrackParameters>
         perigeeParam = m_extrapolationTool->propagate(ctx,
