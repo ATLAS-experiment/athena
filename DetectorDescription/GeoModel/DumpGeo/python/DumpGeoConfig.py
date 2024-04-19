@@ -11,13 +11,18 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def configureGeometry(flags, cfg):
+
+    # Beam pipe
     if flags.Detector.GeometryBpipe:
         from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
         cfg.merge(BeamPipeGeometryCfg(flags))
 
+    # Inner Detectors
     if flags.Detector.GeometryPixel:
         from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
         cfg.merge(PixelReadoutGeometryCfg(flags))
+    # TODO: do we need to set this separately?
+    # if flags.Detector.GeometryBCM:
 
     if flags.Detector.GeometrySCT:
         from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
@@ -27,26 +32,7 @@ def configureGeometry(flags, cfg):
         from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
         cfg.merge(TRT_ReadoutGeometryCfg(flags))
 
-    if flags.Detector.GeometryITkPixel:
-        from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        cfg.merge(ITkPixelReadoutGeometryCfg(flags))
-
-    if flags.Detector.GeometryITkStrip:
-        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        cfg.merge(ITkStripReadoutGeometryCfg(flags))
-
-    if flags.Detector.GeometryLAr:
-        from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-        cfg.merge(LArGMCfg(flags))
-
-    if flags.Detector.GeometryTile:
-        from TileGeoModel.TileGMConfig import TileGMCfg
-        cfg.merge(TileGMCfg(flags))
-
-    if flags.Detector.GeometryMuon:
-        from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-        cfg.merge(MuonGeoModelCfg(flags))
-
+    # InDetServMat
     # Trigger the build of the InDetServMat geometry 
     # if any ID subsystems have been enabled
     if flags.Detector.GeometryID:
@@ -54,11 +40,47 @@ def configureGeometry(flags, cfg):
              InDetServiceMaterialCfg)
         cfg.merge(InDetServiceMaterialCfg(flags))
 
+    # Calorimeters
+    if flags.Detector.GeometryLAr:
+        from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+        cfg.merge(LArGMCfg(flags))
+
+    if flags.Detector.GeometryTile:
+        from TileGeoModel.TileGMConfig import TileGMCfg
+        cfg.merge(TileGMCfg(flags))
+    # TODO: do we need to set this separately?
+    # if flags.Detector.GeometryMBTS:
+
+    # Muon spectrometer
+    if flags.Detector.GeometryMuon:
+        from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+        cfg.merge(MuonGeoModelCfg(flags))
+
+    # HGTD (defined only for Run4 geometry tags)
+    if flags.Detector.GeometryHGTD:
+        #set up geometry
+        if flags.HGTD.Geometry.useGeoModelXml:
+            from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
+        else:
+            from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
+        cfg.merge(HGTD_SimulationGeometryCfg(flags))
+        
+    # ITk (defined only for Run4 geometry tags)
+    if flags.Detector.GeometryITkPixel:
+        from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+        cfg.merge(ITkPixelReadoutGeometryCfg(flags))
+    if flags.Detector.GeometryITkStrip:
+        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+        cfg.merge(ITkStripReadoutGeometryCfg(flags))
+    # TODO: do we need to set those separately?
+    # if flags.Detector.GeometryBCMPrime:
+    # if flags.Detector.GeometryPLR:
+
+    # Cavern (disabled by default)
     if flags.Detector.GeometryCavern:
         from AtlasGeoModel.CavernGMConfig import CavernGeometryCfg
         cfg.merge(CavernGeometryCfg(flags))
     
-
     # Forward detectors (disabled by default)
     if flags.Detector.GeometryLucid or flags.Detector.GeometryALFA or flags.Detector.GeometryAFP or flags.Detector.GeometryFwdRegion :
         from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
@@ -68,25 +90,6 @@ def configureGeometry(flags, cfg):
         cfg.merge(ZDC_DetToolCfg(flags))
 
     
-    # Calorimeters
-        # if flags.Detector.GeometryMBTS:
-    # Inner Detector
-        # if flags.Detector.GeometryBCM:
-
-    # Upgrade ITk Inner Tracker is a separate and parallel detector
-        # if flags.Detector.GeometryBCMPrime:
-        # if flags.Detector.GeometryPLR:
-
-    # HGTD
-    if flags.Detector.GeometryHGTD:
-        #set up geometry
-        if flags.HGTD.Geometry.useGeoModelXml:
-            from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
-        else:
-            from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_SimulationGeometryCfg
-        cfg.merge(HGTD_SimulationGeometryCfg(flags))
-        
-
 
 
 def getATLASVersion():
