@@ -23,7 +23,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
-#include "src/ITrackStatePrinter.h"
+#include "src/TrackStatePrinter.h"
 
 #include <unordered_map>
 #include <utility>

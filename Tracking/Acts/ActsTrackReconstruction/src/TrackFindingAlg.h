@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
@@ -14,7 +14,7 @@
 // Tools
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "src/ITrackStatePrinter.h"
+#include "src/TrackStatePrinter.h"
 
 // ACTS
 #include "ActsEvent/Seed.h"
@@ -75,7 +75,7 @@ namespace ActsTrk
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-    ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
+    ToolHandle<ActsTrk::TrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<ActsTrk::MutableTrackStateBackend>> m_pixelCalibTool{
       this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};

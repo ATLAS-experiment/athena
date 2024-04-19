@@ -1,31 +1,44 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKFINDINGTOOL_TRACKSTATEPRINTER_H
-#define ACTSTRKFINDINGTOOL_TRACKSTATEPRINTER_H 1
+#ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_H
+#define ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_H 1
 
 // Base
-#include "src/ITrackStatePrinter.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // ATHENA
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "GaudiKernel/EventContext.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "xAODInDetMeasurement/SpacePoint.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/TrackStateType.hpp"
 
 // PACKAGE
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsEvent/Seed.h"
+#include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // Other
+#include <vector>
 #include <memory>
 #include <tuple>
 #include <boost/container/small_vector.hpp>
+
+namespace Acts
+{
+  class Surface;
+}
 
 namespace InDetDD
 {
@@ -34,7 +47,7 @@ namespace InDetDD
 
 namespace ActsTrk
 {
-  class TrackStatePrinter : public extends<AthAlgTool, ActsTrk::ITrackStatePrinter>
+  class TrackStatePrinter : virtual public AthAlgTool
   {
   public:
     TrackStatePrinter(const std::string &type, const std::string &name,
@@ -48,7 +61,7 @@ namespace ActsTrk
     printMeasurements(const EventContext &ctx,
                       const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
                       const std::vector<const InDetDD::SiDetectorElementCollection *> &detectorElementCollections,
-                      const std::vector<size_t> &offsets) const override;
+                      const std::vector<size_t> &offsets) const;
 
     void
     printSeed(const Acts::GeometryContext &tgContext,
@@ -56,19 +69,21 @@ namespace ActsTrk
               const Acts::BoundTrackParameters &initialParameters,
               size_t measurementOffset,
               size_t iseed,
-              bool isKF) const override;
+              bool isKF) const;
 
+    template <typename track_container_t>
     void
     printTrack(const Acts::GeometryContext &tgContext,
-               const ActsTrk::MutableTrackContainer &tracks,
-               const ActsTrk::MutableTrackContainer::TrackProxy &track,
-               const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const override;
+               const track_container_t &tracks,
+               const typename track_container_t::TrackProxy &track,
+               const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const;
 
+    template <typename track_state_proxy_t>
     void
     printTrackState(const Acts::GeometryContext &tgContext,
-                    const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
+                    const track_state_proxy_t &state,
                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
-                    bool useFiltered = false) const override;
+                    bool useFiltered = false) const;
 
     using MeasurementInfo = std::tuple<size_t,
                                        const ATLASUncalibSourceLink *,
@@ -102,8 +117,16 @@ namespace ActsTrk
                                          const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
                                          const InDetDD::SiDetectorElementCollection *detectorElements,
                                          size_t offset) const;
+
+    // static member functions used by TrackStatePrinter.icc
+    static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound);
+    static std::string actsSurfaceName(const Acts::Surface &surface);
+    static std::string trackStateName(Acts::ConstTrackStateType trackStateType);
+
   };
 
 } // namespace
+
+#include "src/TrackStatePrinter.icc"
 
 #endif
