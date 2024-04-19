@@ -94,10 +94,12 @@ namespace FlavorTagDiscriminants {
       // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool
       // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool 
       {Truth::Type::LightFlavorDecay, 6}, //From light muon
-      {Truth::Type::PromptMuonLike, 7}, //4-like muons
-      {Truth::Type::TauDecayLike, 7}, //4-like muons
-      {Truth::Type::BHadronDecayLike, 7}, //4-like muons
-      {Truth::Type::CHadronDecayLike, 7}, //4-like muons
+      {Truth::Type::TauDecay, 7}, //From tau muon
+      {Truth::Type::PromptMuonLike, 8}, //4-like muons
+      {Truth::Type::TauDecayLike, 8}, //4-like muons
+      {Truth::Type::BHadronDecayLike, 8}, //4-like muons
+      {Truth::Type::CHadronDecayLike, 8}, //4-like muons
+      {Truth::Type::NonMuonlike, 8}, //Non-muons like muons
     };
   };
 }
