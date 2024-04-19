@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackStatePrinter.h"
@@ -7,6 +7,7 @@
 // Athena
 #include "TrkParameters/TrackParameters.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
@@ -18,34 +19,24 @@
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 
-#include "ActsEvent/TrackContainer.h"
-
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
+#include "ActsEvent/TrackContainer.h"
 #include "ActsInterop/Logger.h"
 
 // Other
+#include <vector>
+#include <iostream>
 #include <sstream>
 
 namespace ActsTrk
 {
   /// =========================================================================
-  /// Debug printout routines
-  /// This is only required by code in this file, so we keep it in the anonymous namespace.
-  /// The actual TrackStatePrinter class definition comes later.
+  /// file-local static functions and static TrackStatePrinter member functions.
+  /// TrackStatePrinter class method definitions comes later.
   /// =========================================================================
 
-  /// format all arguments and return as a string.
-  /// Used here to apply std::setw() to the combination of values.
-  template <typename... Types>
-  static std::string to_string(Types &&...values)
-  {
-    std::ostringstream os;
-    (os << ... << values);
-    return os.str();
-  }
-
-  static std::string trackStateName(Acts::ConstTrackStateType trackStateType)
+  std::string TrackStatePrinter::trackStateName(Acts::ConstTrackStateType trackStateType)
   {
     static constexpr std::array<std::tuple<bool, Acts::TrackStateFlag, char>, 6> trackStateNames{{
         {false, Acts::TrackStateFlag::ParameterFlag, '-'},
@@ -65,7 +56,7 @@ namespace ActsTrk
   }
 
   // compact surface/boundary name
-  static std::string actsSurfaceName(const Acts::Surface &surface)
+  std::string TrackStatePrinter::actsSurfaceName(const Acts::Surface &surface)
   {
     std::string name = surface.name();
     if (name.compare(0, 6, "Acts::") == 0)
@@ -394,7 +385,7 @@ namespace ActsTrk
     std::cout << '\n';
   }
 
-  static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound)
+  void TrackStatePrinter::printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound)
   {
     auto p = Acts::transformBoundToFreeParameters(surface, tgContext, bound);
     std::cout << std::fixed
@@ -409,15 +400,14 @@ namespace ActsTrk
               << std::defaultfloat << std::setprecision(-1);
   }
 
-} // anonymous namespace
+  /// =========================================================================
+  /// TrackStatePrinter class method definitions
+  /// =========================================================================
 
-/// =========================================================================
-namespace ActsTrk
-{
   TrackStatePrinter::TrackStatePrinter(const std::string &type,
                                        const std::string &name,
                                        const IInterface *parent)
-      : base_class(type, name, parent)
+      : AthAlgTool(type, name, parent)
   {
   }
 
@@ -472,126 +462,6 @@ namespace ActsTrk
     printParameters(initialParameters.referenceSurface(), tgContext, initialParameters.parameters());
     std::cout << '\n'
               << std::flush;
-  }
-
-  void
-  TrackStatePrinter::printTrack(const Acts::GeometryContext &tgContext,
-                                 const ActsTrk::MutableTrackContainer &tracks,
-                                 const ActsTrk::MutableTrackContainer::TrackProxy &track,
-                                 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset) const
-  {
-    const auto lastMeasurementIndex = track.tipIndex();
-    // to print track states from inside outward, we need to reverse the order of visitBackwards().
-    std::vector<ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy> states;
-    states.reserve(lastMeasurementIndex + 1); // could be an overestimate
-    size_t npixel = 0, nstrip = 0;
-    tracks.trackStateContainer().visitBackwards(
-        lastMeasurementIndex,
-        [&states, &npixel, &nstrip](const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state) -> void
-        {
-          if (state.hasCalibrated())
-          {
-            if (state.calibratedSize() == 1)
-              ++nstrip;
-            else if (state.calibratedSize() == 2)
-              ++npixel;
-          }
-          states.push_back(state);
-        });
-
-    if (track.nMeasurements() + track.nOutliers() != npixel + nstrip)
-    {
-      ATH_MSG_WARNING("Track has " << track.nMeasurements() + track.nOutliers() << " measurements + outliers, but "
-                                    << npixel + nstrip << " pixel + strip hits");
-    }
-
-    const Acts::BoundTrackParameters per(track.referenceSurface().getSharedPtr(),
-                                          track.parameters(),
-                                          track.covariance(),
-                                          track.particleHypothesis());
-    std::cout << std::setw(5) << lastMeasurementIndex << ' '
-              << std::left
-              << std::setw(4) << "parm" << ' '
-              << std::setw(21) << actsSurfaceName(per.referenceSurface()) << ' '
-              << std::setw(22) << to_string("#hit=", npixel, '/', nstrip, ", #hole=", track.nHoles()) << ' '
-              << std::right;
-    printParameters(per.referenceSurface(), tgContext, per.parameters());
-    std::cout << std::fixed << std::setw(8) << ' '
-              << std::setw(7) << std::setprecision(1) << track.chi2() << ' '
-              << std::left
-              << "#out=" << track.nOutliers()
-              << ", #sh=" << track.nSharedHits()
-              << std::right << std::defaultfloat << std::setprecision(-1) << '\n';
-
-    for (auto i = states.size(); i > 0;)
-    {
-      printTrackState(tgContext, states[--i], container_offset);
-    }
-  }
-
-  void
-  TrackStatePrinter::printTrackState(const Acts::GeometryContext &tgContext,
-                                     const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
-                                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
-                                     bool useFiltered) const
-  {
-    if (!m_printFilteredStates && useFiltered)
-      return;
-
-    ptrdiff_t index = -1;
-
-    if (state.hasUncalibratedSourceLink())
-    {
-      ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-      index = (*sl)->index();
-      for (const auto &[container, offset] : container_offset)
-      {
-        if ((*sl)->container() == container)
-        {
-          index += offset;
-          break;
-        }
-      }
-    }
-
-    std::cout << std::setw(5) << state.index() << ' ';
-    char ptype = !m_printFilteredStates ? ' '
-                 : useFiltered          ? 'F'
-                                        : 'S';
-    if (state.hasCalibrated())
-    {
-      std::cout << ptype << std::setw(2) << state.calibratedSize() << 'D';
-    }
-    else if (state.typeFlags().test(Acts::TrackStateFlag::HoleFlag))
-    {
-      std::cout << std::setw(4) << "hole";
-    }
-    else
-    {
-      std::cout << ptype << std::setw(3) << " ";
-    }
-    std::cout << ' '
-              << std::left
-              << std::setw(21) << actsSurfaceName(state.referenceSurface()) << ' ';
-    if (index >= 0)
-    {
-      std::cout << std::setw(22) << index << ' ';
-    }
-    else
-    {
-      std::cout << std::setw(22) << to_string(state.referenceSurface().geometryId()) << ' ';
-    }
-    std::cout << std::right;
-    const auto &parameters = !useFiltered          ? state.parameters()
-                             : state.hasFiltered() ? state.filtered()
-                                                   : state.predicted();
-    printParameters(state.referenceSurface(), tgContext, parameters);
-    std::cout << ' '
-              << std::fixed
-              << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
-              << std::setw(7) << std::setprecision(1) << state.chi2() << ' '
-              << std::defaultfloat << std::setprecision(-1)
-              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags()) << '\n';
   }
 
   void
