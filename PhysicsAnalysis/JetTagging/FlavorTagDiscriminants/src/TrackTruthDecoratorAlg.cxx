@@ -119,6 +119,9 @@ namespace FlavorTagDiscriminants {
       // decorate muon tracks with truth origin
       for ( const auto muon : *muons ) {
 
+        // Check if the muon is a combined muon
+        if (muon->muonType() != xAOD::Muon::MuonType::Combined) { continue; }
+
         // Classify muon truth origin (https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/AnalysisCommon/TruthClassification)
         unsigned int muTruthOrigin = 0;
         ATH_CHECK(m_truthLeptonTool->classify(*muon, muTruthOrigin));
@@ -148,7 +151,8 @@ namespace FlavorTagDiscriminants {
           }
           else {
             // raise an error if the muon truth origin label is not found in the map
-            ATH_MSG_ERROR("Muon truth origin not found");
+            ATH_MSG_ERROR("Muon truth origin not found in the map: " << static_cast<int>(muTruthOriginType));
+            return StatusCode::FAILURE;
           }
         }
 
