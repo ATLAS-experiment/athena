@@ -16,7 +16,7 @@
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Surfaces/DiscSurface.hpp"
-#include "Acts/EventData/detail/TransformationBoundToFree.hpp"
+#include "Acts/EventData/TransformationHelpers.hpp"
 
 #include "ActsEvent/TrackContainer.h"
 
@@ -396,7 +396,7 @@ namespace ActsTrk
 
   static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound)
   {
-    auto p = Acts::detail::transformBoundToFreeParameters(surface, tgContext, bound);
+    auto p = Acts::transformBoundToFreeParameters(surface, tgContext, bound);
     std::cout << std::fixed
               << std::setw(10) << std::setprecision(4) << bound[Acts::eBoundLoc0] << ' '
               << std::setw(10) << std::setprecision(4) << bound[Acts::eBoundLoc1] << ' '

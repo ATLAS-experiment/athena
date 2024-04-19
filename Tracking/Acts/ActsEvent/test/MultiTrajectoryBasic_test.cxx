@@ -11,6 +11,7 @@
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "ActsEvent/MultiTrajectory.h"
 #include "CommonHelpers/GenerateParameters.hpp"

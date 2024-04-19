@@ -63,12 +63,13 @@ namespace ActsTrk {
                                                                                  const Acts::ParticleHypothesis &particle_hypothesis)
    {
       if (param.covariance().has_value()) {
-
-         Acts::Vector3 direction(param.direction());
-         Acts::BoundMatrix b2c; 
+         Acts::FreeVector freeParams = Acts::transformBoundToFreeParameters(
+			 param.referenceSurface(), tgContext, param.parameters());
+         Acts::Vector3 position = freeParams.segment<3>(Acts::eFreePos0);
+         Acts::Vector3 direction = freeParams.segment<3>(Acts::eFreeDir0);
+         Acts::BoundMatrix b2c;
          Acts::detail::boundToCurvilinearTransportJacobian(direction, // magnFieldVect.normalized(),
-                                                           param.referenceSurface().boundToFreeJacobian(tgContext,
-                                                                                                        param.parameters()),
+                                                           param.referenceSurface().boundToFreeJacobian(tgContext, position, direction),
                                                            Acts::FreeMatrix::Identity(),
                                                            computeFreeToPathDerivatives(direction,
                                                                                         param.parameters()[Acts::eBoundQOverP],

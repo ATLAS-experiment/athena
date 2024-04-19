@@ -27,6 +27,7 @@
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/Utilities/TrackHelpers.hpp"
 // ACTS glue
 #include "ActsEvent/TrackContainer.h"
 
@@ -142,6 +143,9 @@ namespace ActsTrk
     Navigator navigator(cfg, logger().cloneWithSuffix("Navigator"));
     Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
+    // Using the CKF propagator as extrapolator
+    Extrapolator extrapolator = propagator;
+
     std::vector<double> etaBins;
     // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore
     if (m_etaBins.size() > 2)
@@ -154,6 +158,7 @@ namespace ActsTrk
       measurementSelectorCuts.numMeasurementsCutOff = m_numMeasurementsCutOff;
 
     Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(), std::move(measurementSelectorCuts)}};
+    Acts::MeasurementSelector measurementSelector(measurementSelectorCfg);
 
     std::vector<double> absEtaEdges;
     absEtaEdges.reserve(etaBins.size() + 2);
@@ -202,7 +207,7 @@ namespace ActsTrk
 
     ATH_MSG_INFO(trackSelectorCfg);
 
-    m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}, {}, trackSelectorCfg}});
+    m_trackFinder.reset(new CKF_pimpl{CKF_config{std::move(extrapolator), {std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelector, {}, {}, {}, trackSelectorCfg}});
 
     trackFinder().pOptions.maxSteps = m_maxPropagationStep;
     trackFinder().pSecondOptions.maxSteps = m_maxPropagationStep;
@@ -210,7 +215,6 @@ namespace ActsTrk
     trackFinder().pSecondOptions.direction = trackFinder().pOptions.direction.invert();
 
     trackFinder().ckfExtensions.updater.connect<&gainMatrixUpdate>();
-    trackFinder().ckfExtensions.smoother.connect<&gainMatrixSmoother>();
     trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::MutableTrackStateBackend>>(&trackFinder().measurementSelector);
 
     initStatTables();
@@ -464,11 +468,8 @@ namespace ActsTrk
                                trackFinder().ckfExtensions,
                                trackFinder().pOptions,
                                &(*pSurface));
-    options.smoothing = true;
     std::optional<TrackFinderOptions> secondOptions;
     if (m_doTwoWay) {
-      options.smoothingTargetSurfaceStrategy = Acts::CombinatorialKalmanFilterTargetSurfaceStrategy::first;
-
       secondOptions.emplace(tgContext,
                             mfContext,
                             calContext,
@@ -476,9 +477,7 @@ namespace ActsTrk
                             trackFinder().ckfExtensions,
                             trackFinder().pSecondOptions,
                             &(*pSurface));
-      secondOptions->filterTargetSurface = pSurface.get();
-      secondOptions->smoothing = true;
-      secondOptions->smoothingTargetSurfaceStrategy = Acts::CombinatorialKalmanFilterTargetSurfaceStrategy::last;
+      secondOptions->targetSurface = pSurface.get();
     }
 
     ActsTrk::MutableTrackContainer tracksContainerTemp;
@@ -502,6 +501,13 @@ namespace ActsTrk
     options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
     if (m_doTwoWay)
       secondOptions->extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
+
+    Acts::PropagatorOptions<Acts::ActionList<Acts::MaterialInteractor>,
+                            Acts::AbortList<Acts::EndOfWorldReached>>
+    extrapolationOptions(tgContext, mfContext);
+
+    Acts::TrackExtrapolationStrategy extrapolationStrategy =
+        Acts::TrackExtrapolationStrategy::firstOrLast;
 
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
@@ -628,6 +634,14 @@ namespace ActsTrk
       for (auto &firstTrack : tracksForSeed) {
         std::size_t nsecond = 0;
 
+        auto smoothingResult = Acts::smoothTrack(tgContext, firstTrack, logger());
+        if (!smoothingResult.ok()) {
+          ATH_MSG_DEBUG("Smoothing for seed "
+                     << iseed << " and first track " << firstTrack.index()
+                     << " failed with error " << smoothingResult.error());
+          continue;
+        }
+
         if (m_doTwoWay) {
           std::optional<ActsTrk::MutableMultiTrajectory::TrackStateProxy> firstState;
           for (auto st : firstTrack.trackStatesReversed()) {
@@ -668,7 +682,25 @@ namespace ActsTrk
 
                 Acts::calculateTrackQuantities(secondTrack);
 
+                auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
+                    secondTrack, *pSurface, trackFinder().extrapolator, extrapolationOptions,
+                    extrapolationStrategy, logger());
+                if (!extrapolationResult.ok()) {
+                  ATH_MSG_WARNING("Extrapolation for seed "
+                            << iseed << " and second track " << secondTrack.index()
+                            << " failed with error " << extrapolationResult.error());
+
+                  // restore first track
+                  (*firstFirstState).previous() = Acts::kTrackIndexInvalid;
+
+                  continue;
+                }
+
                 addTrack(secondTrack);
+
+                // restore first track
+                (*firstFirstState).previous() = Acts::kTrackIndexInvalid;
+
                 ++nsecond;
               }
             }
@@ -679,6 +711,17 @@ namespace ActsTrk
             ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
             ++event_stat[category_i][kNoSecond];
           }
+
+          auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
+              firstTrack, *pSurface, trackFinder().extrapolator, extrapolationOptions,
+              extrapolationStrategy, logger());
+          if (!extrapolationResult.ok()) {
+            ATH_MSG_WARNING("Extrapolation for seed "
+                      << iseed << " and first " << firstTrack.index()
+                      << " failed with error " << extrapolationResult.error());
+            continue;
+          }
+
           addTrack(firstTrack);
         }
         nfirst++;

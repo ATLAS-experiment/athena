@@ -150,6 +150,71 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
 }
 
 
+void ActsTrk::MutableMultiTrajectory::addTrackStateComponents_impl(
+    ActsTrk::IndexType istate,
+    Acts::TrackStatePropMask mask) {
+  using namespace Acts::HashedStringLiteral;
+  INSPECTCALL( this << " " <<  mask << " " << m_trackStatesAux->size() << " " << previous);
+  assert(m_trackStatesAux && "Missing Track States backend");
+  constexpr size_t NDim = 6; // TODO take this from somewhere
+
+  // set kInvalid
+  using Acts::MultiTrajectoryTraits::kInvalid;
+
+  using namespace Acts;
+
+  auto addParam = [this]() -> ActsTrk::IndexType {
+    stepResize(m_trackParametersAux.get(), m_trackParametersSize, 60);
+    // TODO ask AK if this resize could be method of aux container
+    m_trackParametersAux->params[m_trackParametersSize].resize(NDim);
+    m_trackParametersAux->covMatrix[m_trackParametersSize].resize(NDim*NDim);
+    m_trackParametersSize++;
+    return m_trackParametersSize-1;
+  };
+
+  auto addJacobian = [this]() -> ActsTrk::IndexType {
+    stepResize(m_trackJacobiansAux.get(), m_trackJacobiansSize);
+    m_trackJacobiansAux->jac[m_trackJacobiansSize].resize(NDim*NDim);
+    m_trackJacobiansSize++;
+    return m_trackJacobiansSize-1;
+  };
+
+  auto addMeasurement = [this]() -> ActsTrk::IndexType {
+    stepResize(m_trackMeasurementsAux.get(), m_trackMeasurementsSize );
+    m_trackMeasurementsAux->meas[m_trackMeasurementsSize].resize(NDim);
+    m_trackMeasurementsAux->covMatrix[m_trackMeasurementsSize].resize(NDim*NDim);
+    m_trackMeasurementsSize++;
+    return m_trackMeasurementsSize-1;
+  };
+
+  if ((m_trackStatesAux->predicted[istate] == kInvalid) &&
+      ACTS_CHECK_BIT(mask, TrackStatePropMask::Predicted)) {
+    m_trackStatesAux->predicted[istate] = addParam();
+  }
+
+  if ((m_trackStatesAux->filtered[istate] == kInvalid) &&
+      ACTS_CHECK_BIT(mask, TrackStatePropMask::Filtered)) {
+    m_trackStatesAux->filtered[istate] = addParam();
+  }
+
+  if ((m_trackStatesAux->smoothed[istate] == kInvalid) &&
+      ACTS_CHECK_BIT(mask, TrackStatePropMask::Smoothed)) {
+    m_trackStatesAux->smoothed[istate] = addParam();
+  }
+
+  if ((m_trackStatesAux->jacobian[istate] == kInvalid) &&
+      ACTS_CHECK_BIT(mask, TrackStatePropMask::Jacobian)) {
+    m_trackStatesAux->jacobian[istate] = addJacobian();
+  }
+
+  if ((m_trackStatesAux->calibrated[istate] == kInvalid) &&
+      ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
+    m_trackStatesAux->calibrated[istate]  = addMeasurement();
+    m_calibratedSourceLinks.emplace_back(std::nullopt);
+    m_trackStatesAux->measDim[istate] = m_trackMeasurementsAux->meas[m_trackStatesAux->calibrated[istate]].size();
+  }
+}
+
 
 void ActsTrk::MutableMultiTrajectory::shareFrom_impl(
     ActsTrk::IndexType iself,

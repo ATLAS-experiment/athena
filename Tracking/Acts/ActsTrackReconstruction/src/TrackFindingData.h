@@ -51,16 +51,6 @@ namespace
     return updater.template operator()<ActsTrk::MutableTrackStateBackend>(gctx, trackState, direction, logger);
   }
 
-  static Acts::Result<void>
-  gainMatrixSmoother(const Acts::GeometryContext &gctx,
-                     ActsTrk::MutableTrackStateBackend &trajectory,
-                     size_t entryIndex,
-                     const Acts::Logger &logger)
-  {
-    Acts::GainMatrixSmoother smoother;
-    return smoother.template operator()<ActsTrk::MutableTrackStateBackend>(gctx, trajectory, entryIndex, logger);
-  }
-
   // Helper class to describe ranges of measurements
   // the range provides the measurement collection index and  element index range (begin, end)
   struct MeasurementRange : public std::pair<unsigned int, unsigned int>
@@ -217,6 +207,7 @@ namespace
   using Stepper = Acts::EigenStepper<>;
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
+  using Extrapolator = Propagator;
   using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::MutableTrackStateBackend>;
 
   // Small holder class to keep CKF and related objects.
@@ -225,6 +216,8 @@ namespace
   // ActsTrk::TrackFindingAlg::CKF_pimpl inherits from CKF_config to prevent -Wsubobject-linkage warning.
   struct CKF_config
   {
+    // Extrapolator
+    Extrapolator extrapolator;
     // CKF algorithm
     CKF ckf;
     // CKF configuration

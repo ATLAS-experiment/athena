@@ -98,7 +98,7 @@ namespace ActsTrk
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [this, &tgContext, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT, &hypothesis](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          [this, &tgContext, &track, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT, &hypothesis](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.hasReferenceSurface() || !state.referenceSurface().associatedDetectorElement())
@@ -113,10 +113,7 @@ namespace ActsTrk
             // State is a hole (no associated measurement), use predicted parameters
             if (flag.test(Acts::TrackStateFlag::HoleFlag))
             {
-              const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-                                                         state.predicted(),
-                                                         state.predictedCovariance(),
-                                                         hypothesis);
+              const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
               parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
               auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
 
@@ -148,20 +145,14 @@ namespace ActsTrk
             // The state was tagged as an outlier or (TODO!) was missed in the reverse filtering, use filtered parameters
             else if (flag.test(Acts::TrackStateFlag::OutlierFlag))
             {
-              const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-                                                         state.filtered(),
-                                                         state.filteredCovariance(),
-                                                         hypothesis);
+              const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
               parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
               typePattern.set(Trk::TrackStateOnSurface::Outlier);
             }
             // The state is a measurement state, use smoothed parameters
             else
             {
-              const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-                                                         state.smoothed(),
-                                                         state.smoothedCovariance(),
-                                                         hypothesis);
+              const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
 
               // is it really necessary to keep our own copy of all the smoothed parameters?
               actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
