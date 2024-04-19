@@ -15,7 +15,7 @@ def TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(
             RungeKuttaPropagatorCfg(flags)))
 
     kwargs.setdefault("NumberMomentumChannel",
-                      flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
+                      flags.Tracking.BackTracking.TRTSegFinderPtBins)
 
     acc.addCondAlgo(
         CompFactory.InDet.TRT_TrackSegmentsMakerCondAlg_ATLxk(name, **kwargs))
@@ -40,7 +40,7 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(
     acc = TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(
         flags,
         name = 'InDetTRT_SeedsMakerCondAlg',
-        pTmin = flags.Tracking.ActiveConfig.minSecondaryPt)
+        pTmin = flags.Tracking.BackTracking.minPt)
 
     if "TrackExtensionTool" not in kwargs:
         from InDetConfig.TRT_TrackExtensionToolConfig import (
@@ -51,11 +51,11 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(
     kwargs.setdefault("TRT_ClustersContainer", 'TRT_DriftCircles')
     kwargs.setdefault("RemoveNoiseDriftCircles", False)
     kwargs.setdefault("NumberMomentumChannel",
-                      flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
+                      flags.Tracking.BackTracking.TRTSegFinderPtBins)
     if InputCollections is not None:
         kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
     kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.BackTracking.minTRT)
-    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
+    kwargs.setdefault("pTmin", flags.Tracking.BackTracking.minPt)
     kwargs.setdefault("sharedFrac", flags.Tracking.BackTracking.maxTRTSharedFrac)
 
     acc.setPrivateTools(

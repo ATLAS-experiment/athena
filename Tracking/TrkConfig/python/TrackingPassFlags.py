@@ -29,18 +29,6 @@ def minPT_ranges( inflags ):
     '2-13': 0.4 * Units.GeV,
     '14-':  0.5 * Units.GeV } )
 
-def minSecondaryPT_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-1':   0.4 * Units.GeV,
-    '2-18': 1.0 * Units.GeV,
-    '19-': 3.0 * Units.GeV } )
-
-def minTRTonlyPt_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-1':   0.4 * Units.GeV,
-    '2-5': 1.0 * Units.GeV,
-    '6-': 2.0 * Units.GeV, } )
-
 def minClusters_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
     {'-14':  7,
@@ -103,16 +91,6 @@ def doZBoundary_ranges( inflags ):
     {'-9':  False,
     '10-':  True } )
 
-def TRTSegFinderPtBins_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-1':  70,
-    '2-':  50 } )
-
-def excludeUsedTRToutliers_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-5':  False,
-    '6-':  True } )
-
 def roadWidth_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
     {'-16':  20.0,
@@ -149,11 +127,8 @@ def createTrackingPassFlags():
     icf.addFlag("storeSeparateContainer", False)
     icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
-    icf.addFlag("minPT", minPT_ranges )
-    icf.addFlag("minSecondaryPt", minSecondaryPT_ranges ) #Pt cut for back tracking + segment finding for these
-    icf.addFlag("minTRTonlyPt", minTRTonlyPt_ranges ) #Pt cut for TRT only
-
     # --- first set kinematic defaults
+    icf.addFlag("minPT", minPT_ranges )
     icf.addFlag("maxPT", 1000.0 * Units.TeV) # off!
     icf.addFlag("minEta", -1) # off!
     icf.addFlag("maxEta", 2.7)
@@ -216,15 +191,6 @@ def createTrackingPassFlags():
 
     # --- Z Boundary Seeding
     icf.addFlag("doZBoundary", doZBoundary_ranges)
-    
-    # --------------------------------------
-    # --- BACK TRACKING cuts
-    # --------------------------------------
-
-    # --- settings for segment finder
-    icf.addFlag("TRTSegFinderPtBins", TRTSegFinderPtBins_ranges)
-    icf.addFlag("maxSegTRTShared", 0.7)
-    icf.addFlag("excludeUsedTRToutliers", excludeUsedTRToutliers_ranges)
 
     icf.addFlag("usePixel"       		  , lambda pcf : pcf.Detector.EnablePixel )
     icf.addFlag("useTRT"        		  , lambda pcf : pcf.Detector.EnableTRT )
@@ -494,11 +460,7 @@ def createMinBiasTrackingPassFlags():
     icf.minPT =                   0.1 * Units.GeV
 
     icf.minClusters               = 5
-    icf.minSecondaryPt            = 0.4 * Units.GeV  # Pt cut for back tracking + segment finding for these
-    icf.minTRTonlyPt              = 0.4 * Units.GeV  # Pt cut for TRT only
-    icf.TRTSegFinderPtBins        = 50
     icf.maxdImpactSSSSeeds        = 20.0    # apply cut on SSS seeds
-    icf.excludeUsedTRToutliers    = False   # TRT outliers are added to the exclusion list
     icf.doBremRecoverySi          = False
 
     return icf
@@ -560,7 +522,6 @@ def createLargeD0TrackingPassFlags():
     icf.maxEta             = 5
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxZImpact         = 1500.0 * Units.mm
-    icf.minSecondaryPt     = 500.0 * Units.MeV
     icf.minClusters        = 7
     icf.minSiNotShared     = 5
     icf.maxShared          = 2   # cut is now on number of shared modules
@@ -594,7 +555,6 @@ def createR3LargeD0TrackingPassFlags():
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxEMImpact        = 300 * Units.mm
     icf.maxZImpact         = 500 * Units.mm    
-    icf.minSecondaryPt     = 1000.0 * Units.MeV 
     icf.minClusters        = 8                  
     icf.minSiNotShared     = 6                 
     icf.maxShared          = 2   # cut is now on number of shared modules
@@ -633,7 +593,6 @@ def createLowPtLargeD0TrackingPassFlags():
     icf.maxEta             = 5
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxZImpact         = 1500.0 * Units.mm
-    icf.minSecondaryPt     = 400.0 * Units.MeV
     icf.minClusters        = 5
     icf.minSiNotShared     = 5
     icf.maxShared          = 2   # cut is now on number of shared modules
@@ -923,7 +882,6 @@ def createPixelTrackingPassFlags():
     icf.useSCT           = False
     icf.useSCTSeeding    = False
     icf.useTRT           = False
-    icf.minSecondaryPt   = 3 * Units.GeV
     icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
                            else 10. * Units.mm if pcf.Tracking.doUPC \
                            else 5. * Units.mm
@@ -1079,16 +1037,15 @@ if __name__ == "__main__":
   flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
 
   assert flags.Tracking.cutLevel == 19 , "default cut level is wrong"
-  assert flags.Tracking.ActiveConfig.minSecondaryPt == 3.0 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minSecondaryPt)
-  flags.Tracking.cutLevel = 2
-  assert flags.Tracking.ActiveConfig.minSecondaryPt == 1.0 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minSecondaryPt)
-  assert flags.Tracking.BeamGasPass.minSecondaryPt == 1.0 * Units.GeV, "wrong cut value {}, not following cutLevel setting ".format(flags.Tracking.BeamGasPass.minSecondaryPt)
+  assert flags.Tracking.ActiveConfig.minPT == 0.5 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minPT)
+  flags.Tracking.cutLevel = 3
+  assert flags.Tracking.ActiveConfig.minPT == 0.4 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minPT)
+  assert flags.Tracking.HeavyIonPass.minPT == 0.3 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.HeavyIonPass.minPT)
 
   assert flags.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
-  assert flags.Tracking.HeavyIonPass.minSecondaryPt == 1.0 * Units.GeV, "wrong cut value, overwrite"
 
-  l.info("flags.Tracking.ActiveConfig.minSecondaryPt %f", flags.Tracking.ActiveConfig.minSecondaryPt * 1.0)
-  l.info("type(flags.Tracking.ActiveConfig.minSecondaryPt) " + str(type(flags.Tracking.ActiveConfig.minSecondaryPt)))
+  l.info("flags.Tracking.ActiveConfig.minPT %f", flags.Tracking.ActiveConfig.minPT * 1.0)
+  l.info("type(flags.Tracking.ActiveConfig.minPT) " + str(type(flags.Tracking.ActiveConfig.minPT)))
 
 
 
