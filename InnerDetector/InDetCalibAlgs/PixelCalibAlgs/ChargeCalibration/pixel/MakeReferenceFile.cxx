@@ -295,25 +295,37 @@ int main(int argc, char *argv[])
     bool useLastIOV = true;
     cool::IObjectIteratorPtr objectsIterator = f.objectIterator(useLastIOV); // True to use the last IOV
     std::vector<std::string> myIOVs;
+    std::vector<std::string> myIOVs_names;
     while (objectsIterator->goToNext())
     {
         const cool::IObject &thisObject = objectsIterator->currentRef();
+        std::size_t posPar = iovToString(thisObject).find("]");
+        std::size_t posCom = iovToString(thisObject).find(",");
+        myIOVs_names.push_back(iovToString(thisObject).substr(1,posPar-1).replace(posCom-1,1,"_"));
         std::string display = iovToString(thisObject) + " (" + std::to_string(thisObject.channelId()) + ")\n";
         display += payloadToString(thisObject);
         myIOVs.push_back(display);
     }
 
-    const std::string fileName = tagName + ".log";
-    std::ofstream opFile(fileName);
     if(!useLastIOV){
         // Saving in file the previous to last IOV - testing only so far.
-        opFile << myIOVs.at(myIOVs.size()-2);
+        for(unsigned int i = 0 ; i < myIOVs_names.size(); i++){
+            std::cout << myIOVs_names.at(i) << std::endl;
+            const std::string fileName = myIOVs_names.at(i)+"_"+tagName + ".log";
+            std::ofstream opFile(fileName);
+            opFile << myIOVs.at(i);
+            opFile << std::endl;
+            opFile.close();            
+        }
     }
-    else{
+    else{    
+        const std::string fileName = tagName + ".log";
+        std::ofstream opFile(fileName);
         opFile << myIOVs.back();
+        opFile << std::endl;
+        opFile.close();
     }
 
-    opFile << std::endl;
-    opFile.close();
+
     return returnCode;
 }
