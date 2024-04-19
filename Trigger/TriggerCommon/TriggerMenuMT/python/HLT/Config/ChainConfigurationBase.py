@@ -55,7 +55,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
                 # Bind flags to comboHypo generator if needed
                 if 'flags' in inspect.signature(comboHypoCfg).parameters:
                     comboHypoCfg = functools.partial(comboHypoCfg, flags)
-                return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools) 
+                return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools)
 
         # if not returned any step
         raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)

@@ -3,7 +3,6 @@
 # Declare the package name:
 atlas_subdir( JiveXML )
 
-
 # External package(s).
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 if( ( "${ATLAS_OS_ID}" STREQUAL "centos9" ) OR ( "${ATLAS_OS_ID}" STREQUAL "el9" ) )
@@ -16,20 +15,20 @@ if ( RPC_FOUND )
    JiveXML/*.h src/*.cxx
    PUBLIC_HEADERS JiveXML
    INCLUDE_DIRS ${RPC_INCLUDE_DIRS}
-   LINK_LIBRARIES ${RPC_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel
+   LINK_LIBRARIES ${RPC_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel EventDisplaysOnlineLib
    PRIVATE_LINK_LIBRARIES xAODEventInfo )
 else()
   atlas_add_library( JiveXMLLib
    JiveXML/*.h src/*.cxx
    PUBLIC_HEADERS JiveXML
    INCLUDE_DIRS ${RPC_INCLUDE_DIRS}
-   LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel
-   PRIVATE_LINK_LIBRARIES xAODEventInfo ) 
-endif() 
+   LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel EventDisplaysOnlineLib
+   PRIVATE_LINK_LIBRARIES xAODEventInfo )
+endif()
 
 atlas_add_component( JiveXML
                      src/components/*.cxx
-                     LINK_LIBRARIES JiveXMLLib )
+                     LINK_LIBRARIES JiveXMLLib)
 
 # Install files from the package:
 atlas_install_runtime( test/*.xml test/*.xsl )

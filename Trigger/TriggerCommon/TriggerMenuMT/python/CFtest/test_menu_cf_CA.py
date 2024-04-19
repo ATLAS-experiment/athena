@@ -68,7 +68,7 @@ def makeMenu(flags):
     # from here generate the ControlFlow and the Dataflow
     # doing the same as menu.generateMT()
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import makeHLTTree
-    menuCA = makeHLTTree(flags)
+    menuCA, cfseqlist = makeHLTTree(flags)
     return menuCA
 
 def main():

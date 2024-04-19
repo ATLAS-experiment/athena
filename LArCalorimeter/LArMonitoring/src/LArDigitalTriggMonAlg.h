@@ -104,8 +104,8 @@ private:
     EMECPNS, //CALOSAMPLING(PreSamplerE, 0, 1) //  4
     EMEC1NS,  //CALOSAMPLING(EME1,        0, 1) //  5
     EMEC2NS,  //CALOSAMPLING(EME2,        0, 1) //  6
-    EMEC2NS,  //CALOSAMPLING(EME3,        0, 1) //  7
-    EMEC2NS,  //CALOSAMPLING(HEC0,        0, 1) //  8
+    EMEC3NS,  //CALOSAMPLING(EME3,        0, 1) //  7
+    HEC0NS,  //CALOSAMPLING(HEC0,        0, 1) //  8
     HEC1NS,   //CALOSAMPLING(HEC1,        0, 1) //  9
     HEC2NS,   //CALOSAMPLING(HEC2,        0, 1) // 10
     HEC3NS,   //CALOSAMPLING(HEC3,        0, 1) // 11

@@ -459,6 +459,11 @@ def initConfigFlags():
         return createHIRecConfigFlags()
     _addFlagsCategory(acf, "HeavyIon", __hi, "HIRecConfig")
 
+    def __onlineED():
+        from EventDisplaysOnline.EventDisplaysOnlineFlags import createOnlineEventDisplayFlags
+        return createOnlineEventDisplayFlags()
+    _addFlagsCategory(acf, "OnlineEventDisplays", __onlineED, 'EventDisplaysOnline' )
+    
     def __dq():
         from AthenaMonitoring.DQConfigFlags import createDQConfigFlags
         dqf = createDQConfigFlags()
