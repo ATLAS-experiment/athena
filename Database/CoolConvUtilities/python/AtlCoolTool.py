@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-
-from __future__ import print_function
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from PyCool import cool
 from re import match
@@ -174,7 +172,7 @@ class AtlCoolTool:
         
         Otherwise it must be a valid cool.IDatabase object.
         """
-        if type( database ) == str:
+        if isinstance(database, str):
             self.db, connectString = connect( database )
         else:
             self.db = database
@@ -748,7 +746,7 @@ class AtlCoolTool:
         if self.db.existsFolder(node):
             f=self.db.getFolder(node)
             if action=='R':
-                action=='L'
+                action='L'
                 res.append('Folder %s is a leaf node, ignoring recursion' % node)
         elif self.db.existsFolderSet(node):
             f=self.db.getFolderSet(node)
