@@ -355,9 +355,6 @@ class EmptyMenuSequence:
         """Connect filter to the InputMaker"""
         self.maker.addInput(outfilter)
 
-    def createHypoTools(self, chainDict):
-        log.debug("This sequence is empty. No Hypo to configure")
-    
     def getHypoToolConf(self):
         return None
 
@@ -467,17 +464,7 @@ class MenuSequenceCA:
         """Connect filter to the InputMaker"""
         log.debug("connecting %s to inputs of %s", outfilter, self.maker.Alg.name)
         self.maker.addInput(outfilter)
-
-    def createHypoTools(self, flags, chainDict):
-        if isinstance(self._hypoToolConf, list):
-            log.warning ("This sequence %s has %d multiple HypoTools ",self.sequence.name, len(self.hypoToolConf))
-            for hypo, hypoToolConf in zip(self._hypo, self._hypoToolConf):
-                hypoToolConf.setConf( chainDict )
-                hypo.addHypoTool(flags, self._hypoToolConf)
-        else:
-            self._hypoToolConf.setConf( chainDict )
-            self._hypo.addHypoTool(flags, self._hypoToolConf) #this creates the HypoTools
-            
+          
     def getHypoToolConf(self) :
         return self._hypoToolConf
 
@@ -620,23 +607,7 @@ class Chain(object):
             return 0
         return not_empty_mult[0]
     
-    def createHypoTools(self, flags):
-        """ This is extrapolating the hypotool configuration from the chain name"""
-        log.debug("createHypoTools for chain %s", self.name)        
-        
-        for step in self.steps:
-            if step.combo is None:
-                continue
-            log.debug("createHypoTools for Step %s", step.name)
-            log.debug('%s in new hypo tool creation method, step mult= %d', self.name, sum(step.multiplicity))
-            log.debug("N(seq)=%d, N(chainDicts)=%d", len(step.sequences), len(step.stepDicts))
-            for seq, onePartChainDict in zip(step.sequences, step.stepDicts):
-                log.debug('    seq: %s, onePartChainDict:', seq.name)
-                log.debug('    %s', onePartChainDict)
-                seq.createHypoTools( flags, onePartChainDict )
-            
-            step.createComboHypoTools(flags, self.name)
-
+    
     # Receives a pair with the topo config function and an identifier string,
     # optionally also a target step name
     # The string is needed to rename the step after addition of the ComboHypoTool
@@ -647,8 +618,8 @@ class Chain(object):
 
     def __repr__(self):
         return "-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
-                    self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))
-
+                    self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))       
+        
 
 # next:  can we remove multiplicity array, if it can be retrieved from the ChainDict?
 class ChainStep(object):
@@ -712,7 +683,6 @@ class ChainStep(object):
             self.sequences.append(seq()) # create the sequences        
 
     def relabelLegIdsForJets(self):
-
         has_jets = False
         leg_counter = []    
 
@@ -796,7 +766,7 @@ class ChainStep(object):
         if key not in _ComboHypoPool:            
             _ComboHypoPool[key] = createComboAlg(None, name=comboName, comboHypoCfg=self.comboHypoCfg)
         self.combo = _ComboHypoPool[key]
-        
+                
 
     def createComboHypoTools(self, flags, chainName):
         chainDict = HLTMenuConfig.getChainDictFromChainName(chainName)
@@ -816,10 +786,11 @@ class ChainStep(object):
         if len(self.sequenceFunctions) == 0:        
             return "--- ChainStep %s ---\n is Empty, ChainDict = %s "%(self.name,  ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])) )
         
-        repr_string= "--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequences size = %d "%\
+        repr_string= "--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequences = %s "%\
           (self.name,  ' '.join(map(str,[mult for mult in self.multiplicity])),
              ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])),
-             len(self.sequenceFunctions) )
+             ' '.join(map(str, [seq.func.__name__ for seq in self.sequenceFunctions]) ))
+             
         if self.combo is not None:
             repr_string += "\n + ComboHypo = %s" % self.combo.Alg.name
             if len(self.comboToolConfs)>0:

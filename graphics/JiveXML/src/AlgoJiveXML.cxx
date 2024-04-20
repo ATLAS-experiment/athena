@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/AlgoJiveXML.h"
@@ -7,6 +7,7 @@
 #include "JiveXML/IGeometryWriter.h"
 #include "JiveXML/XMLFormatTool.h"
 #include "JiveXML/StreamToFileTool.h"
+#include "JiveXML/StreamToServerTool.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -18,30 +19,7 @@
 namespace JiveXML{
 
   AlgoJiveXML::AlgoJiveXML(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator) {
-
-    //Configurable properties
-    declareProperty("AtlasRelease"       ,m_AtlasRelease = "unknown", "The Athena release number");
-    declareProperty("DataTypes"          ,m_dataTypes, "List of data retriever names to be run");
-    declareProperty("WriteToFile"        ,m_writeToFile = true, "Whether XML files shall be produced");
-    declareProperty("OnlineMode"         ,m_onlineMode  = false, "Whether an XMLRPC server shall be started");
-    declareProperty("WriteGeometry"      ,m_writeGeometry = false, "Whether Geometry-XML files shall be produced");
-    declareProperty("GeometryVersion"    ,m_geometryVersionIn = "default", "Geometry version as read from Athena");
-    declareProperty("GeometryWriterTools",m_GeoWriterNames, "The names of the geometry-writer tools");
-
-    /// Default list of geometries to write
-    m_GeoWriterNames.push_back("JiveXML::GeometryWriter/GeometryWriter");
-    m_GeoWriterNames.push_back("JiveXML::MuonGeometryWriter/MuonGeometryWriter");
-
-    //Array of tools that retrieve the data, set public and createIf as default
-    declareProperty("DataRetrievers", m_DataRetrievers = ToolHandleArray<IDataRetriever>( NULL ,true));
-
-    //Generate XMLFormatTool as default privat format tool
-    declareProperty("FormatTool", m_FormatTool = ToolHandle<IFormatTool>("JiveXML::XMLFormatTool/XMLFormatTool",this));
-
-    //Array of tools for streaming events, set public and createIf as default
-    declareProperty("StreamTools", m_StreamTools = ToolHandleArray<IStreamTool>(NULL,true));
-  }
+    AthAlgorithm(name, pSvcLocator) {}
 
   /**
    * Initialize - called once in the beginning
@@ -49,8 +27,7 @@ namespace JiveXML{
    * - Get GeometryWriters and write geometry if asked for
    * - Get the formatting tool
    * - Get the data retrievers
-   * - Get the streaming tools, including defaults if asked for
-   */
+   * - Get the streaming tools, including defaults if asked for   */
   StatusCode AlgoJiveXML::initialize(){
 
     //be verbose
@@ -103,28 +80,20 @@ namespace JiveXML{
      */
     ATH_MSG_DEBUG("Retrieving streaming tools");
     if (m_writeToFile){
-      ATH_MSG_INFO("Adding default file streaming tool");
-      m_StreamTools.push_back("JiveXML::StreamToFileTool/StreamToFileTool");
+      ATH_MSG_INFO("Retrieving default file streaming tool");
+      ATH_CHECK(m_StreamToFileTool.retrieve());
     }
-    if (m_onlineMode){
-      ATH_MSG_INFO("Adding default XMLRPC streaming tool");
-      m_StreamTools.push_back("JiveXML::XMLRPCStreamTool/XMLRPCStreamTool");
-    }
-
+    ATH_MSG_INFO("online " << m_onlineMode);
     /// Get the streaming tools
-    if (m_StreamTools.size() == 0) {
-      ATH_MSG_WARNING("No streaming tools defined, events will be created but not stored!");
-    } else {
-      if (m_StreamTools.retrieve().isFailure()){
-        ATH_MSG_ERROR("Unable to retrieve streaming tools !");
-        return StatusCode::FAILURE;
-      }
-    }
+    if (m_onlineMode){
+      ATH_MSG_INFO("Retrieving default server streaming tool");
+      ATH_CHECK(m_StreamToServerTool.retrieve());
+   }
 
     /**
-     * Get the IDataRetrievers requested in the m_dataTypes list from the toolSvc 
+     * Get the IDataRetrievers requested in the m_dataTypes list from the toolSvc
      * and store them in the ToolHandleArray
-     */ 
+     */
     ATH_MSG_DEBUG("Obtaining list of data retrievers");
 
     /// Iteratate over the given data types
@@ -149,6 +118,15 @@ namespace JiveXML{
 
     ATH_MSG_INFO("Retrieving data from " << m_DataRetrievers.size() << " tools" );
 
+    ATH_MSG_INFO("List property settings: ");
+    ATH_MSG_INFO("AtlasRelease: " << m_AtlasRelease);
+    ATH_MSG_INFO("DataTypes: " << m_dataTypes );
+    ATH_MSG_INFO("WriteToFile: " << m_writeToFile);
+    ATH_MSG_INFO("OnlineMode: " << m_onlineMode);
+    ATH_MSG_INFO("WriteGeometry: " << m_writeGeometry);
+    ATH_MSG_INFO("GeometryVersion: " << m_geometryVersionIn);
+    ATH_MSG_INFO("GeoWriterNames: "  << m_GeoWriterNames );
+
     return StatusCode::SUCCESS;
   }
 
@@ -160,8 +138,8 @@ namespace JiveXML{
    */
   StatusCode AlgoJiveXML::execute() {
 
-    /** 
-     * Firstly retrieve all the event header information 
+    /**
+     * Firstly retrieve all the event header information
      */
     //The run and event number of the current event
     unsigned int runNo = 0, lumiBlock = 0;
@@ -182,7 +160,7 @@ namespace JiveXML{
       return StatusCode::FAILURE;
     }else{
     // Event/xAOD/xAODEventInfo/trunk/xAODEventInfo/versions/EventInfo_v1.h
-     ATH_MSG_VERBOSE(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()  // is '222222' for mc events ?
+     ATH_MSG_DEBUG(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()  // is '222222' for mc events ?
           << ", eventNumber: " << eventInfo->eventNumber()
           << ", mcChannelNumber: " << eventInfo->mcChannelNumber()
           << ", mcEventNumber: "  << eventInfo->mcEventNumber() // MC: use this instead of runNumber
@@ -192,33 +170,33 @@ namespace JiveXML{
           << ", eventTypeBitmask: "  << eventInfo->eventTypeBitmask()
           << ", actualInteractionsPerCrossing: "  << eventInfo->actualInteractionsPerCrossing()
           << ", averageInteractionsPerCrossing: "  << eventInfo->averageInteractionsPerCrossing()
-          ); 
+          );
     }
 
     // new treatment of mc_channel_number for mc12
     // from: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/PileupDigitization#Contents_of_Pileup_RDO
     unsigned int mcChannelNo = 0;
     bool firstEv = true;
-      
+
     //+++ Get sub-event info object
     ATH_MSG_DEBUG( "Sub Event Infos: " );
     for (const xAOD::EventInfo::SubEvent& subevt : eventInfo->subEvents()) {
       const xAOD::EventInfo* sevt = subevt.ptr();
       if (sevt) {
-        if (firstEv){ 
-          mcChannelNo =  sevt->mcChannelNumber(); // the 'real' mc-channel 
-          ATH_MSG_INFO( " mc_channel from SubEvent   : " << sevt->mcChannelNumber() );
+        if (firstEv){
+          mcChannelNo =  sevt->mcChannelNumber(); // the 'real' mc-channel
+          ATH_MSG_DEBUG( " mc_channel from SubEvent   : " << sevt->mcChannelNumber() );
           firstEv = false;
         }
         ATH_MSG_VERBOSE("Sub Event Info:\n  Time         : " << subevt.time()
                         << "  Index        : " << subevt.index()
                         << "  Provenance   : " << subevt.type()                         // This is the provenance stuff: signal, minbias, cavern, etc
-                        << "  Run Number   : " << sevt->runNumber()           
-                        << "  Event Number : " << sevt->eventNumber()         
-                        << "  ns Offset    : " << sevt->timeStampNSOffset() 
-                        << "  Lumi Block   : " << sevt->lumiBlock()           
-                        << "  mc_channel   : " << sevt->mcChannelNumber() 
-                        << "  BCID         : " << sevt->bcid()    
+                        << "  Run Number   : " << sevt->runNumber()
+                        << "  Event Number : " << sevt->eventNumber()
+                        << "  ns Offset    : " << sevt->timeStampNSOffset()
+                        << "  Lumi Block   : " << sevt->lumiBlock()
+                        << "  mc_channel   : " << sevt->mcChannelNumber()
+                        << "  BCID         : " << sevt->bcid()
                         << "  Geo version  : " << m_geometryVersionIn
                         );
       }
@@ -232,14 +210,14 @@ namespace JiveXML{
 // Note: 4294967293 is the maximum value for a unsigned long
 
     if ( mcChannelNo != 0 ){ runNo = mcChannelNo + 140000000; } // indicating 'mc14'
-    ATH_MSG_INFO( " runNumber for filename: " << runNo << ", eventNumber: " << eventNo);
+    ATH_MSG_DEBUG( " runNumber for filename: " << runNo << ", eventNumber: " << eventNo);
 
     if ( eventInfo->lumiBlock() ){
       lumiBlock = eventInfo->lumiBlock();
-    }else{ 
-      lumiBlock = -1; // placeholder 
-    } 
-    if ( mcChannelNo != 0 ) lumiBlock = -1; // mask for mc11a    
+    }else{
+      lumiBlock = -1; // placeholder
+    }
+    if ( mcChannelNo != 0 ) lumiBlock = -1; // mask for mc11a
 
     // lumiBlock from mc can be just huge number, ignore then
     if ( lumiBlock > 1000000 ) { lumiBlock = 0; }
@@ -257,7 +235,7 @@ namespace JiveXML{
       struct tm utctime;
       gmtime_r(&unixtime, &utctime);
       found1 = (DataType(dateTime).toString().find("CEST"));
-      found2 = (DataType(dateTime).toString().find("CET")); 
+      found2 = (DataType(dateTime).toString().find("CET"));
       if ( int(found1)<0 && int(found2)<0 ){ // not found is -1
          strftime(dateTime, 32, "%Y-%m-%d %H:%M:%S UTC", &utctime);
          ATH_MSG_DEBUG( " TIME NOT CET/CEST. Adjusted to:" << dateTime );
@@ -276,8 +254,8 @@ namespace JiveXML{
     }
 
     /**
-     * Now iterate over all the IDataRetrievers and 
-     * write their data to the xml file by giving it the XMLWriter 
+     * Now iterate over all the IDataRetrievers and
+     * write their data to the xml file by giving it the XMLWriter
      */
     ATH_MSG_DEBUG("Starting loop over data retrievers" );
     //Loop over data retrievers
@@ -294,8 +272,8 @@ namespace JiveXML{
       //Only catch std::exception
       } catch ( std::exception& ex ){
         //Now show some message
-        ATH_MSG_FATAL("Caught exception in " << (*DataRetrieverItr)->name() 
-                          << " while retrieving data for " << (*DataRetrieverItr)->dataTypeName() 
+        ATH_MSG_FATAL("Caught exception in " << (*DataRetrieverItr)->name()
+                          << " while retrieving data for " << (*DataRetrieverItr)->dataTypeName()
                           << " : " << ex.what() );
         //and return with an error
         return StatusCode::FAILURE;
@@ -314,16 +292,18 @@ namespace JiveXML{
     /**
      * Now stream the events to all registered streaming tools
      */
-    ATH_MSG_DEBUG( "Starting loop over event streamers" );
-    //Loop over streaming tools
-    ToolHandleArray<IStreamTool>::iterator StreamToolsItr = m_StreamTools.begin();
-    for ( ; StreamToolsItr != m_StreamTools.end(); ++StreamToolsItr ){
-      ATH_MSG_INFO("Streaming event to " << (*StreamToolsItr)->name() );
-        if ( (*StreamToolsItr)->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() ){
-           ATH_MSG_WARNING( "Could not stream event to " << (*StreamToolsItr)->name() );
-        } 
+    if(m_writeToFile){
+      ATH_MSG_DEBUG("Streaming event to file");
+      if ( (m_StreamToFileTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
+        ATH_MSG_WARNING( "Could not stream event to file" );
+      }
     }
-    ATH_MSG_DEBUG( "Finished loop over event streamers" );
+    if(m_onlineMode){
+      ATH_MSG_DEBUG("Streaming event to server");
+      if ( (m_StreamToServerTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
+        ATH_MSG_WARNING( "Could not stream event to server" );
+      }
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -334,12 +314,13 @@ namespace JiveXML{
    */
   StatusCode AlgoJiveXML::finalize() {
 
-    ATH_MSG_VERBOSE( "finalize()" );  
+    ATH_MSG_VERBOSE( "finalize()" );
 
     /// Release all the tools
     m_DataRetrievers.release().ignore();
     m_FormatTool.release().ignore();
-    m_StreamTools.release().ignore();
+    m_StreamToFileTool.release().ignore();
+    m_StreamToServerTool.release().ignore();
 
     return StatusCode::SUCCESS;
   }

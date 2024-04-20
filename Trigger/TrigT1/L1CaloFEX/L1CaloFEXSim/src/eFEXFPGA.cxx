@@ -551,6 +551,12 @@ void eFEXFPGA::SetIsoWP(const std::vector<unsigned int>& CoreEnv, const std::vec
   // Working point evaluted by Core * 2^bitshift > Threshold * Environment conditions
   std::unordered_map<unsigned int, unsigned int> bsmap { {3, 8}, {5, 32}};
 
+  // if core (denom) has overflowed, automatically pass all thresholds
+  if (CoreEnv[0] > 0xffff) {
+      workingPoint = 3;
+      return;
+  }
+
   unsigned int large = CoreEnv[0]*bsmap[bitshift]; // core
   unsigned int small = CoreEnv[1]; // env
   
@@ -558,13 +564,8 @@ void eFEXFPGA::SetIsoWP(const std::vector<unsigned int>& CoreEnv, const std::vec
   if (large > 0xffff ) large = 0xffff;
   if (small > 0xffff ) small = 0xffff;
 
-  // Pass all if shifted core sum overflows
-  if (large == 0xffff) {
-    workingPoint = 3;
-    return;
-  }
   // Fail all if env sum overflows
-  else if (small == 0xffff) {
+  if (small == 0xffff) {
     workingPoint = 0;
     return;
   }
