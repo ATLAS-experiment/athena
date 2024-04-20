@@ -98,7 +98,7 @@ namespace ActsTrk
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [this, &tgContext, &track, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT, &hypothesis](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          [this, &tgContext, &track, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.hasReferenceSurface() || !state.referenceSurface().associatedDetectorElement())

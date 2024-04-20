@@ -48,7 +48,7 @@ namespace ISF {
                       AtlasDetDescr::AtlasRegion geoID,
                       ISF::KillPrimary killsPrimary = ISF::fPrimarySurvives,
                       const HepMC::FourVector *position = 0);
-    ~ISFTruthIncident();
+    virtual ~ISFTruthIncident();
 
     ISFTruthIncident( const ISFTruthIncident& ) = delete;
     ISFTruthIncident& operator= ( const ISFTruthIncident& ) = delete;

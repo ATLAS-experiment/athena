@@ -17,10 +17,7 @@
 using CLHEP::micrometer;
 
 namespace ActsTrk {
-static inline double square(const double x){
-  return x*x;
-}  
-  
+
 void clusterAddCell(PixelClusteringTool::Cluster& cl,
 		    const PixelClusteringTool::Cell& cell)
 {

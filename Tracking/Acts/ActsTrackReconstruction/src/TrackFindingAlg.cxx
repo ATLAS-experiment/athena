@@ -467,7 +467,7 @@ namespace ActsTrk
                                slAccessorDelegate,
                                trackFinder().ckfExtensions,
                                trackFinder().pOptions,
-                               &(*pSurface));
+                               pSurface.get());
     std::optional<TrackFinderOptions> secondOptions;
     if (m_doTwoWay) {
       secondOptions.emplace(tgContext,
@@ -476,7 +476,7 @@ namespace ActsTrk
                             slAccessorDelegate,
                             trackFinder().ckfExtensions,
                             trackFinder().pSecondOptions,
-                            &(*pSurface));
+                            pSurface.get());
       secondOptions->targetSurface = pSurface.get();
     }
 
