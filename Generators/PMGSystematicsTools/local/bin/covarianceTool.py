@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 The `covarianceTool.py` executable dis a helper which uses the functions provided by `covarianceToolsLibrary.py` to perform the
@@ -246,11 +246,11 @@ def markupYODAwithCorrelationsFromYODAs(reference, correlationsDir):
   histos = [name for name in yoda.read(reference, unpatterns=".*RAW.*")]
   for histname in histos:
     hAll = yoda.read(reference, unpatterns=".*RAW.*")[histname]
-    if type(hAll) == yoda.core.Histo1D: hAll = hAll.mkScatter()
+    if type(hAll) is yoda.core.Histo1D: hAll = hAll.mkScatter()
     for f in infiles.keys():
       systname = f.split("/")[-1].replace(".yoda", "")
       h = yoda.read(f, unpatterns=".*RAW.*")[histname]
-      if type(h) == yoda.core.Scatter2D:
+      if type(h) is yoda.core.Scatter2D:
         nBins = h.numPoints()
         for ipt in range(nBins):
            binValues[ipt] = h.points()[ipt].y()
@@ -259,7 +259,7 @@ def markupYODAwithCorrelationsFromYODAs(reference, correlationsDir):
            errAv = (abs(errs[1]) + abs(errs[0])) * 0.5
            binErrors.setdefault(ipt, {}).setdefault(systname, {})['up'] = errs[1]
            binErrors.setdefault(ipt, {}).setdefault(systname, {})['dn'] = -1 * errs[0]
-      elif type(h) == yoda.core.Histo1D:
+      elif type(h) is yoda.core.Histo1D:
         nBins = h.numBins
         for ipt in range(nBins):
            binValues[ipt] = h.bins()[ipt].sumW()
@@ -273,7 +273,7 @@ def markupYODAwithCorrelationsFromYODAs(reference, correlationsDir):
       for f in reference.split(","):
         hists = yoda.read(f, unpatterns=".*RAW.*")
         for name in hists:
-            if not type(hists[name]) == yoda.core.Scatter2D: continue
+            if not type(hists[name]) is yoda.core.Scatter2D: continue
             nominal = [(hists[name].points()[i].y()) for i in range(hists[name].numPoints())]
             if (len(nominal) != nBins): continue
             totalDiff = 0
