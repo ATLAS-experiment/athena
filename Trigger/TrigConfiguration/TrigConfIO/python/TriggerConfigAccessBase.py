@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os
 import json
@@ -301,7 +301,7 @@ class ConfigDBLoader(ConfigLoader):
                 continue # to next source
 
             configblob = cursor.currentRow()[0].data()
-            if type(configblob) != str:
+            if type(configblob) is not str:
                 configblob = configblob.readline()
             config = json.loads(configblob, object_pairs_hook = odict)
             session.transaction().commit()
