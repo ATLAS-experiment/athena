@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import eformat
 from AthenaCommon.Logging import logging
@@ -8,12 +8,12 @@ _allowed_tag_types = [eformat.helper.tagtype_to_string(t) for t in eformat.helpe
 
 class StreamInfo(object):
     def __init__(self, name, streamType, obeysLumiBlock, forceFullEventBuilding):
-        assert type(name) == str, "name has to be str"
-        assert type(streamType) == str, "streamType has to be str"
+        assert type(name) is str, "name has to be str"
+        assert type(streamType) is str, "streamType has to be str"
         assert streamType in _allowed_tag_types, "streamType '"+streamType+"' is not one of "+\
                                                  "the allowed types: "+str(_allowed_tag_types)
-        assert type(obeysLumiBlock) == bool, "obeysLumiBlock has to be bool"
-        assert type(forceFullEventBuilding) == bool, "forceFullEventBuilding has to be bool"
+        assert type(obeysLumiBlock) is bool, "obeysLumiBlock has to be bool"
+        assert type(forceFullEventBuilding) is bool, "forceFullEventBuilding has to be bool"
         self.__data = [name, streamType, obeysLumiBlock, forceFullEventBuilding]
 
     def __str__(self):

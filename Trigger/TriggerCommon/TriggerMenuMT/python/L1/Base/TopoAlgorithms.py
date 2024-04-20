@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict as odict
 from operator import attrgetter
@@ -64,7 +64,7 @@ class MenuTopoAlgorithmsCollection(object):
                 self.topoAlgos[cat][AlgType.MULT] = odict()
 
     def addAlgo(self, algo, category):
-        if type(category) != AlgCategory:
+        if type(category) is not AlgCategory:
             raise RuntimeError( "No category is provided when adding topo algo %s to menu" % algo.name)
 
         if isinstance(algo,DecisionAlgo):
