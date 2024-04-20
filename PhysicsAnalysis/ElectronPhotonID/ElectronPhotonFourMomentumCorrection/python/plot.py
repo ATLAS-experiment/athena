@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """ Produce plots about egamma calibration systematics and corrections """
 
@@ -1091,7 +1091,7 @@ def plot_all_scales(
         value_properties = []
         type_properties = []
 
-        if type(esmodel) != str:
+        if type(esmodel) is not str:
             key_properties = esmodel[1]
             value_properties = esmodel[2]
             type_properties = esmodel[3]
