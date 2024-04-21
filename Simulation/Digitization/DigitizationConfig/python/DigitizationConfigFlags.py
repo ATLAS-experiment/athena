@@ -135,6 +135,8 @@ def createDigitizationCfgFlags():
     flags.addFlag("Digitization.DoFastDigi", [])
     # Set the flag to True if the Common.ProductionStep is not one of the steps in the list
     flags.addFlag("Digitization.ReadParametersFromDB", lambda prevFlags : prevFlags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.Overlay, ProductionStep.FastChain])
+    # Do TRT high threshold overrides for heay ion runs
+    flags.addFlag("Digitization.TRT.HeavyIonHT", False)
     return flags
 
 
