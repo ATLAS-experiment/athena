@@ -559,6 +559,11 @@ def generateMenuMT(flags):
     checkCPSGroups(HLTMenuConfig.dictsList())
 
     # Cleanup menu singletons to allow garbage collection (ATR-28855)
+
+    # Temporary hack for ATR-29211:
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    ComponentAccumulator._checkUnmerged = False
+
     GenerateMenuMT.clear()
     from TriggerMenuMT.HLT.Config import MenuComponents
     MenuComponents._ComboHypoPool.clear()
