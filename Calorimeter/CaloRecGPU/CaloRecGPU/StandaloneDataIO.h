@@ -40,7 +40,7 @@ struct StandaloneDataIO
 
   struct ConstantInformation
   {
-    friend class StandaloneDataIO;
+    friend struct StandaloneDataIO;
 
    public:
 
@@ -109,7 +109,7 @@ struct StandaloneDataIO
 
   struct EventInformation
   {
-    friend class StandaloneDataIO;
+    friend struct StandaloneDataIO;
 
    public:
     inline static ErrorState read_cluster_info(const std::filesystem::path & file,
