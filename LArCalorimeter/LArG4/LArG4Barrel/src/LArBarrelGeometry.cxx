@@ -1212,7 +1212,7 @@ namespace LArG4 {
           currentCellData.etaBin=0;
           currentCellData.phiBin=phisave;
 
-        } else if (zZpos >= m_zMaxBarrel || abs_eta >= 1.40) { // inactive matter between EMB and scintillator
+        } else if (zZpos >= m_zMaxBarrel - 10 || abs_eta >= 1.40) { // inactive matter between EMB and scintillator including some margin for error
           if (abs_eta >1.0 && abs_eta < 1.5) {
             sampling=2;
             region=2;
@@ -1229,22 +1229,46 @@ namespace LArG4 {
           }
         } else {
           if (!m_testbeam) {
-            ATH_MSG_ERROR("LArBarrelGeometry: cannot find region for DM hit...");
-            ATH_MSG_ERROR("r,z,eta,phi " << radiusZpos << " " << zZpos << " " << etaZpos << " " << phiZpos);
-            ATH_MSG_ERROR("x,y,z (Atlas) " << p.x() << " " << p.y() << " " << p.z());
-            ATH_MSG_ERROR(" inSTAC " << inSTAC);
             const G4double thisStepEnergyDeposit = a_step->GetTotalEnergyDeposit() * a_step->GetTrack()->GetWeight();
-            ATH_MSG_ERROR(" eDeposited " << thisStepEnergyDeposit);
-            const G4VPhysicalVolume* vol = thisStepPoint->GetPhysicalVolume();
-            const G4String volName = vol->GetName();
-            ATH_MSG_ERROR(" volName " << volName);
-            const G4int ndep = g4navigation->GetDepth();
-            for (G4int ii=0;ii<=ndep;ii++) {
-              const G4VPhysicalVolume* v1 = g4navigation->GetVolume(ii);
-              const G4String vname = v1->GetName();
-              ATH_MSG_ERROR("vname " << vname);
+            if (thisStepEnergyDeposit > 1){
+              ATH_MSG_ERROR("LArBarrelGeometry: cannot find region for DM hit...");
+              ATH_MSG_ERROR("m_zMinBarrel: " << m_zMinBarrel);
+              ATH_MSG_ERROR("m_zMaxBarrel: " << m_zMaxBarrel);
+              ATH_MSG_ERROR("m_rMinAccordion: " << m_rMinAccordion);
+              ATH_MSG_ERROR("m_rMaxAccordion: " << m_rMaxAccordion);
+              ATH_MSG_ERROR("r,z,eta,phi " << radiusZpos << " " << zZpos << " " << etaZpos << " " << phiZpos);
+              ATH_MSG_ERROR("x,y,z (Atlas) " << p.x() << " " << p.y() << " " << p.z());
+              ATH_MSG_ERROR(" inSTAC " << inSTAC);
+              ATH_MSG_ERROR(" eDeposited " << thisStepEnergyDeposit);
+              const G4VPhysicalVolume* vol = thisStepPoint->GetPhysicalVolume();
+              const G4String volName = vol->GetName();
+              ATH_MSG_ERROR(" volName " << volName);
+              const G4int ndep = g4navigation->GetDepth();
+              for (G4int ii=0;ii<=ndep;ii++) {
+                const G4VPhysicalVolume* v1 = g4navigation->GetVolume(ii);
+                const G4String vname = v1->GetName();
+                ATH_MSG_ERROR("vname " << vname);
+              }
+            }else{
+              ATH_MSG_WARNING("LArBarrelGeometry: cannot find region for DM hit...");
+              ATH_MSG_WARNING("m_zMinBarrel: " << m_zMinBarrel);
+              ATH_MSG_WARNING("m_zMaxBarrel: " << m_zMaxBarrel);
+              ATH_MSG_WARNING("m_rMinAccordion: " << m_rMinAccordion);
+              ATH_MSG_WARNING("m_rMaxAccordion: " << m_rMaxAccordion);
+              ATH_MSG_WARNING("r,z,eta,phi " << radiusZpos << " " << zZpos << " " << etaZpos << " " << phiZpos);
+              ATH_MSG_WARNING("x,y,z (Atlas) " << p.x() << " " << p.y() << " " << p.z());
+              ATH_MSG_WARNING(" inSTAC " << inSTAC);
+              ATH_MSG_WARNING(" eDeposited " << thisStepEnergyDeposit);
+              const G4VPhysicalVolume* vol = thisStepPoint->GetPhysicalVolume();
+              const G4String volName = vol->GetName();
+              ATH_MSG_WARNING(" volName " << volName);
+              const G4int ndep = g4navigation->GetDepth();
+              for (G4int ii=0;ii<=ndep;ii++) {
+                const G4VPhysicalVolume* v1 = g4navigation->GetVolume(ii);
+                const G4String vname = v1->GetName();
+                ATH_MSG_WARNING("vname " << vname);
+              }
             }
-
           }
           // in test beam case, we can get there for leakage on the side (in phi) of the module
           // in this case, we attribute an identifier like inactive material
