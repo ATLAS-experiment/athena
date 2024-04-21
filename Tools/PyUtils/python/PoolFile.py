@@ -10,7 +10,6 @@ __author__  = "Sebastien Binet <binet@cern.ch>"
 ### --- data ------------------------------------------------------------------
 __all__ = [
     'PoolFileCatalog',
-    'extract_stream_names',
     'PoolOpts',
     'extract_items',
     'PoolRecord',
@@ -243,22 +242,6 @@ class PoolFileCatalog(object):
         return self.pfn (url_or_fid)
     
     pass
-
-def extract_stream_names(fname):
-    """find the stream names ('StreamESD', 'StreamAOD',...) contained in a
-       given POOL file
-    @params:
-     `fname`     the filename of the POOL file to inspect (can be LFN or PFN)
-
-    example:
-     >>> import PyUtils.PoolFile as pf
-     >>> streams = pf.extract_stream_names ('ESD.pool.root')
-     >>> print streams
-     ['StreamESD']
-    """
-    import PyUtils.AthFile as af
-    f = af.fopen(fname)
-    return f.fileinfos['stream_names']
 
 class PoolOpts(object):
     # default names of APR file storage elements
@@ -547,8 +530,7 @@ class PoolFile(object):
 
         # get the "final" file name (handles all kind of protocols)
         try:
-            import PyUtils.AthFile as af
-            protocol, fileName = af.server.fname(fileName)
+            protocol, fileName = _fname(fileName)
         except Exception as err:
             print("## warning: problem opening PoolFileCatalog:\n%s"%err)
             import traceback

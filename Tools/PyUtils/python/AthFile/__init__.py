@@ -50,7 +50,6 @@ class ModuleFacade(types.ModuleType):
         self.__dict__[ '__file__' ] = module.__file__
 
         self.__dict__['_impl']  = _impl
-        self.__dict__['_guess_file_type'] = _guess_file_type
 
         self.__dict__['server'] = _impl.g_server
         
@@ -144,43 +143,6 @@ class ModuleFacade(types.ModuleType):
     ##     return super(ModuleFacade, self).__del__()
     
     pass # class ModuleFacade
-
-###
-
-def _guess_file_type(fname, msg):
-    """guess the type of an input file (bs,rdo,esd,aod,...)
-    """
-    input_type = None
-    import PyUtils.AthFile as af
-    try:
-        file_type,file_name = af.ftype(fname)
-    except Exception:
-        raise # for now
-    if file_type == 'bs':
-        input_type = 'bs'
-    elif file_type == 'pool':
-        import PyUtils.PoolFile as pf
-        stream_names = pf.extract_stream_names(fname)
-        stream_names = [s.lower() for s in stream_names]
-        if len(stream_names) > 1:
-            msg.warning('got many stream names: %r', stream_names)
-            msg.warning('only considering the 1st one...')
-        elif len(stream_names) <= 0:
-            msg.warning('got an empty list of stream names')
-            raise SystemExit(1)
-        stream_name = stream_names[0]
-        input_type = {
-            'stream1':    'rdo',
-            'streamesd' : 'esd',
-            'streamaod' : 'aod',
-            # FIXME: TODO: TAG, DPD
-            }.get(stream_name, 'aod')
-
-    else:
-        msg.error('unknown file type (%s) for file [%s]',
-                  file_type, file_name)
-    return input_type
-
 
 ### exec at import ------------------------------------------------------------
 import sys
