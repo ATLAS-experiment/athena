@@ -48,10 +48,6 @@ class FTagConfig (ConfigBlock):
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale factors "
             "are not available. The default is False.")
-        self.addOption ('minPt', None, type=float,
-            info="minimum jet pT used in the kinematic selection of jets. "
-            "The default is 20 GeV for EMPFlow and EMTopo jets, or 10 GeV for "
-            "VR-track jets.")
         self.addOption ('bTagCalibFile', None, type=str,
             info="calibration file for CDI")
         self.addOption ('systematicsStrategy', 'SFEigen', type=str,
@@ -178,17 +174,6 @@ class FTagConfig (ConfigBlock):
         if postfix != "" and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        # Kinematic selection depending on validity of the calibration
-        # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22
-        minPt = self.minPt
-        if minPt is None:
-            if "EMPFlow" in jetCollection:
-                minPt = 20e3
-            elif "EMTopo" in jetCollection:
-                minPt = 20e3
-            elif "VR" in jetCollection:
-                minPt = 10e3
-
         # MC/MC scale factors defined only for Run 2 and Run 3
         if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
             # special setting: allow for on-the-fly look up of the generator information
@@ -296,8 +281,7 @@ def makeFTagAnalysisConfig( seq, containerName,
                             btagWP = None,
                             btagger = None,
                             generator = None,
-                            noEffSF = None,
-                            minPt = None ):
+                            noEffSF = None ):
     """Create a ftag analysis algorithm config
 
     Keyword arguments:
@@ -305,7 +289,6 @@ def makeFTagAnalysisConfig( seq, containerName,
       btagger -- Flavour tagger
       generator -- Generator for MC/MC scale factors
       noEffSF -- Disables efficiency and scale factor calculations
-      minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
 
     config = FTagConfig (containerName, selectionName)
@@ -313,5 +296,4 @@ def makeFTagAnalysisConfig( seq, containerName,
     config.setOptionValue ('btagger', btagger)
     config.setOptionValue ('generator', generator)
     config.setOptionValue ('noEffSF', noEffSF)
-    config.setOptionValue ('minPt', minPt)
     seq.append (config)
