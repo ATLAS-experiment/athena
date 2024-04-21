@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimHough1DShiftTool.cxx
@@ -27,9 +27,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <iostream>
 
-static inline std::string to_string(std::vector<int> v);
 static inline std::string to_string(std::vector<size_t> v);
-static inline std::string to_string(std::vector<boost::dynamic_bitset<>> & v);
 static inline std::string instance_name(std::string const & s);
 static inline boost::dynamic_bitset<> lshift(boost::dynamic_bitset<> const & b, int n);
 static inline boost::dynamic_bitset<> rshift(boost::dynamic_bitset<> const & b, int n);
@@ -681,31 +679,6 @@ float FPGATrackSimHough1DShiftTool::deltaPhi(float r, float qPt) const
     return dPhi;
 }
 
-
-static inline std::string to_string(std::vector<int> v)
-{
-    std::ostringstream oss;
-    oss << "[";
-    if (!v.empty())
-    {
-        std::copy(v.begin(), v.end()-1, std::ostream_iterator<int>(oss, ", "));
-        oss << v.back();
-    }
-    oss << "]";
-    return oss.str();
-}
-
-
-static inline std::string to_string(std::vector<boost::dynamic_bitset<>> & v)
-{
-    std::ostringstream oss;
-    for (auto bs : v) {
-	std::string s;
-	boost::to_string(bs,s);
-	oss << "[" << s <<  "]";
-    }
-    return oss.str();
-}
 
 static inline std::string to_string(std::vector<size_t> v)
 {
