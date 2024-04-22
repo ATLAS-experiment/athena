@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  KalmanMETCorrection.h
 //  TopoCore
 //  Created by Joerg Stelzer on 11/16/12.
+//  Re-written by Ralf Gugel on 04/19/24.
 
 #ifndef __TopoCore__KalmanMETCorrection__
 #define __TopoCore__KalmanMETCorrection__
 
 #include <iostream>
 #include "L1TopoInterfaces/DecisionAlg.h"
+#include "L1TopoAlgorithms/KalmanMETCorrectionConstants.h"
 
 namespace TCS {
    
@@ -30,7 +32,7 @@ namespace TCS {
       
 
    private:
-
+      int            p_correctionLut[KFMET::nEtaBins][KFMET::nLogEtBins] {};
       //parType_t      p_NumberLeading1 = { 0 };
       parType_t      p_NumberLeading2 = { 0 };
       parType_t      p_XE[6] = {0, 0, 0,0,0,0};

@@ -23,6 +23,10 @@ namespace TSU {
      static const std::vector<std::string> Sinleg;
      static const std::vector<std::string> Cos;
      static const std::vector<std::string> Sin;
+     static const std::vector<int> CoslegInt;
+     static const std::vector<int> SinlegInt;
+     static const std::vector<int> CosInt;
+     static const std::vector<int> SinInt;
      static int atan2leg(TSU::L1TopoDataTypes<16,0> x, TSU::L1TopoDataTypes<16,0> y);
      static int atan2(TSU::L1TopoDataTypes<16,0> x, TSU::L1TopoDataTypes<16,0> y);
    };

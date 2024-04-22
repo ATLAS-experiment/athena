@@ -6,6 +6,7 @@
 #define L1TopoSimulationUtils_Conversions
 
 #include <math.h>
+#include <string>
 
 namespace TSU {
 
@@ -29,6 +30,12 @@ namespace TSU {
     
     /* @brief convert a floating point eta coordinate to L1Topo's internal integer representation */
     int toTopoEta(float eta);
+   
+    /* @brief convert an (unsigned) representation of a bit string into a signed value assuming a given length of the bit string (incl. possible sign bit) */
+    int toSigned(unsigned bits, unsigned length);
+    /* @brief convert string representation of a bit string into a signed value assuming a given length of the bit string (incl. possible sign bit) */
+    int toSigned(const std::string& bits);
+   
    
 }
 #endif
