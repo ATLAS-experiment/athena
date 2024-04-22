@@ -257,6 +257,7 @@ class GenerateMenuMT(metaclass=Singleton):
         log.info('Aligning the following signatures: %s',sorted(menuAlignment.sets_to_align))
         log.debug('Length of each of the alignment groups: %s',self.configLengthDict)
 
+        chainConfigs = []
 
         for chainDict,chainConfig,lengthOfChainConfigs in self.allChainsForAlignment:
 
@@ -276,12 +277,13 @@ class GenerateMenuMT(metaclass=Singleton):
               #parallel-merged single-signature chains or single signature chains. Anything that needs no splitting!
               if len(set(alignmentGroups)) == 1: 
                   alignedChainConfig = menuAlignment.single_align(chainDict, chainConfig)
-                  HLTMenuConfig.registerChain( chainDict, alignedChainConfig )
+                  HLTMenuConfig.registerChain( chainDict )
+                  chainConfigs.append( alignedChainConfig )
 
               elif len(alignmentGroups) >= 2:
                   alignedChainConfig = menuAlignment.multi_align(chainDict, chainConfig, lengthOfChainConfigs)
-
-                  HLTMenuConfig.registerChain( chainDict, alignedChainConfig )              
+                  HLTMenuConfig.registerChain( chainDict )
+                  chainConfigs.append( alignedChainConfig )
 
               else: 
                   log.error("Menu can't deal with combined chains with more than two alignmentGroups at the moment. oops...")
@@ -293,18 +295,15 @@ class GenerateMenuMT(metaclass=Singleton):
                 pp = pprint.PrettyPrinter(indent=4, depth=8)
                 log.error('The chain dictionary is: %s', pp.pformat(chainDict))
                 raise Exception("Please fix the menu or the chain.")
-        
-        
-        
+
         # align event building sequences
         log.info("[generateAllChainConfigs] general alignment complete, will now align TLA chains")
-        TLABuildingSequences.alignTLASteps(HLTMenuConfig.configs(), HLTMenuConfig.dicts())    
+        TLABuildingSequences.alignTLASteps(chainConfigs, HLTMenuConfig.dicts())
         log.info("[generateAllChainConfigs] general and TLA alignment complete, will now align PEB chains")
-        EventBuildingSequences.alignEventBuildingSteps(HLTMenuConfig.configs(), HLTMenuConfig.dicts())
-        
-         
+        EventBuildingSequences.alignEventBuildingSteps(chainConfigs, HLTMenuConfig.dicts())
+
         log.info("[generateAllChainConfigs] all chain configurations have been generated.")
-        return HLTMenuConfig.configsList()
+        return chainConfigs
 
 
     def getChainsFromMenu(self, flags):
@@ -543,7 +542,7 @@ def generateMenuMT(flags):
 
     log.debug("finalListOfChainConfig %s", finalListOfChainConfigs)
     log.info("Making the HLT configuration tree")
-    menuAcc, CFseq_list = makeHLTTree(flags)
+    menuAcc, CFseq_list = makeHLTTree(flags, finalListOfChainConfigs)
     # Configure ChainFilters for ROBPrefetching
     from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
     if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
@@ -571,7 +570,7 @@ def generateMenuMT(flags):
     return menuAcc
     
 
-def makeHLTTree(flags):
+def makeHLTTree(flags, chainConfigs):
     """
     Generate appropriate Control Flow Graph wiht all HLT algorithms
     """
@@ -582,7 +581,7 @@ def makeHLTTree(flags):
 
     acc = ComponentAccumulator()    
     steps = seqAND('HLTAllSteps')
-    finalDecisions, CFseq_list, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList())
+    finalDecisions, CFseq_list, menuAcc = decisionTreeFromChains(flags, steps, chainConfigs, HLTMenuConfig.dictsList())
     if log.getEffectiveLevel() <= logging.DEBUG:
         menuAcc.printConfig()
 
@@ -609,10 +608,10 @@ def makeHLTTree(flags):
     
     # generate JSON representation of the config
     from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON
-    generateJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
+    generateJSON(flags, HLTMenuConfig.dictsList(), menuAcc.getSequence("HLTAllSteps"))
 
     from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generatePrescaleJSON
-    generatePrescaleJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
+    generatePrescaleJSON(flags, HLTMenuConfig.dictsList())
 
     from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
     generateDefaultMonitoringJSON(flags, HLTMenuConfig.dictsList())

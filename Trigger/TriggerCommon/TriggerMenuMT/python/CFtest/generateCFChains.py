@@ -251,3 +251,5 @@ def generateCFChains(flags):
         menu.chainsInMenu['Combined'] = [
             makeChain(flags, name='HLT_e3_etcut_mu6_L12eEM10L_MU8F', L1Thresholds=["eEM10L", "MU8F"],  ChainSteps=[comboStep_et_mufast ])
         ]
+
+    return menu

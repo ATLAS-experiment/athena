@@ -242,7 +242,7 @@ def createDataFlow(flags, chains):
                     #create the sequences CA of this step in fast mode
                     chainStep.createSequences()
                 # add the step to a new group
-                CFgroup = CFGroup( ChainStep = chainStep, FilterAlg = sequenceFilter) #, fastMenu = flags.Trigger.fastMenuGeneration)
+                CFgroup = CFGroup( ChainStep = chainStep, FilterAlg = sequenceFilter)
                 CFgroup.connect(filterOutput)
                 CFSeqByFilterName[nstep][sequenceFilter.Alg.getName()] = CFgroup
                 CFseqList[nstep].append(CFgroup)

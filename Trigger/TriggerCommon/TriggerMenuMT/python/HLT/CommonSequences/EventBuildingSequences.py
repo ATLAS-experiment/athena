@@ -316,39 +316,30 @@ def findEventBuildingStep(chainConfig):
 
 
 def alignEventBuildingSteps(chain_configs, chain_dicts):
-    def is_peb_dict(chainNameAndDict):
-        return len(chainNameAndDict[1]['eventBuildType']) > 0
 
-    all_peb_chain_dicts = dict(filter(is_peb_dict, chain_dicts.items()))
-    all_peb_chain_names = list(all_peb_chain_dicts.keys())
-
-    def is_peb_config(chainNameAndConfig):
-        return chainNameAndConfig[0] in all_peb_chain_names
-
-    all_peb_chain_configs = dict(filter(is_peb_config, chain_configs.items()))
-
-    maxPebStepPosition = {} # {eventBuildType: N}
+    all_peb_chain_configs = [ch for ch in chain_configs if len(chain_dicts[ch.name]['eventBuildType'])>0]
 
     def getPebStepPosition(chainConfig):
         pebStep = findEventBuildingStep(chainConfig)
         return chainConfig.steps.index(pebStep) + 1
 
     # First loop to find the maximal PEB step positions to which we need to align
-    for chainName, chainConfig in all_peb_chain_configs.items():        
-        pebStepPosition = getPebStepPosition(chainConfig)
-        ebt = all_peb_chain_dicts[chainName]['eventBuildType']
+    maxPebStepPosition = {} # {eventBuildType: N}
+    for chain in all_peb_chain_configs:
+        pebStepPosition = getPebStepPosition(chain)
+        ebt = chain_dicts[chain.name]['eventBuildType']
         if ebt not in maxPebStepPosition or pebStepPosition > maxPebStepPosition[ebt]:
             maxPebStepPosition[ebt] = pebStepPosition
 
     # Second loop to insert empty steps before the PEB steps where needed
-    for chainName, chainConfig in all_peb_chain_configs.items():
-        pebStepPosition = getPebStepPosition(chainConfig)
-        ebt = all_peb_chain_dicts[chainName]['eventBuildType']
+    for chain in all_peb_chain_configs:
+        pebStepPosition = getPebStepPosition(chain)
+        ebt = chain_dicts[chain.name]['eventBuildType']
         if pebStepPosition < maxPebStepPosition[ebt]:
             numStepsNeeded = maxPebStepPosition[ebt] - pebStepPosition
-            log.debug('Aligning PEB step for chain %s by adding %d empty steps', chainName, numStepsNeeded)
-            chainConfig.insertEmptySteps('EmptyPEBAlign', numStepsNeeded, pebStepPosition-1)
-            chainConfig.numberAllSteps()
+            log.debug('Aligning PEB step for chain %s by adding %d empty steps', chain.name, numStepsNeeded)
+            chain.insertEmptySteps('EmptyPEBAlign', numStepsNeeded, pebStepPosition-1)
+            chain.numberAllSteps()
 
 
 def isFullScan(chain):
