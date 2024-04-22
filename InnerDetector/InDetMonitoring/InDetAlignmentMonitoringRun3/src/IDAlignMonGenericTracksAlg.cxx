@@ -344,7 +344,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       Err_z0       = Amg::error(*measPer->covariance(), Trk::z0);
       Err_phi      = Amg::error(*measPer->covariance(), Trk::phi0);
       Err_theta    = Amg::error(*measPer->covariance(), Trk::theta);
-      Err_eta      = Err_theta / (2 * sin(trktheta/2) * cos(trktheta/2));
+      Err_eta      = Err_theta / sin(trktheta);
       Err_qOverP   = Amg::error(*measPer->covariance(), Trk::qOverP) * 1000;
       Err_Pt       = sin(trktheta) * Err_qOverP / pow(qOverP, 2);
       if (qOverP < 0) charge = -1;
@@ -516,8 +516,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     // Phi
     auto phi_m = Monitored::Scalar<float>( "m_phi", trkphi );
     fill(genericTrackGroup, phi_m);
-    auto errPhi0_m = Monitored::Scalar<float>( "m_errPhi0", Err_phi );
-    fill(genericTrackGroup, errPhi0_m);
+    auto errPhi_m = Monitored::Scalar<float>( "m_errPhi", Err_phi );
+    fill(genericTrackGroup, errPhi_m);
     // z0
     auto z0_m = Monitored::Scalar<float>( "m_z0", trkz0 );
     fill(genericTrackGroup, z0_m);
@@ -563,16 +563,15 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, pT_m);
     auto errPt_m = Monitored::Scalar<float>( "m_errPt", Err_Pt );
     fill(genericTrackGroup, errPt_m);
+    auto errPt_2fillpT_m = Monitored::Scalar<float>( "m_errPt_2fillpT", Err_Pt );
+    auto pT_2fillerrPt_m = Monitored::Scalar<float>( "m_pT_2fillerrPt", pT );
+    fill(genericTrackGroup, pT_2fillerrPt_m, errPt_2fillpT_m);
 
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);
 
     auto pTRes_m = Monitored::Scalar<float>( "m_pTRes", std::fabs(Err_qOverP / qOverP) );
     fill(genericTrackGroup, pTRes_m);
-
-    auto pTResOverP_m = Monitored::Scalar<float>( "m_pTResOverP", std::fabs(Err_qOverP / qOverP * qOverP));
-    fill(genericTrackGroup, pTResOverP_m);
-
 
   } //
   // end of loop on trks

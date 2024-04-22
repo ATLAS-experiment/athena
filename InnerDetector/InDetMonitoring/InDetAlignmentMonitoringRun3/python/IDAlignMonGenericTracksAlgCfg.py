@@ -146,7 +146,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_errEta;err_Eta'
     title = 'eta error;Track #eta error;Number of Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.010)
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.002)
 
     varName = 'm_eta_pos;eta_pos'
     title = 'eta for positive tracks; #eta(#plusq);Number of Tracks'
@@ -157,19 +157,19 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)
 
     varName = 'm_phi;phi'
-    title = 'phi;Track #phi;Number of Tracks'
+    title = '#phi;Track #phi;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI)
 
-    varName = 'm_errPhi0;err_Phi0'
-    title = '#phi_{0} error;Error of #phi_{0} [rad];Number of Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax= 0.010)
+    varName = 'm_errPhi;err_Phi'
+    title = '#phi error;Error of #phi [rad];Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax= 0.002)
 
     varName = 'm_z0;z0_origin'
     title = 'z_{0} (computed vs origin); z_{0} (origin) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_z0Range, xmax=m_z0Range)
 
-    varName = 'm_errZ0;err_z0_origin'
-    title = 'z_{0} error (computed vs origin); z_{0} error (origin) [mm]; Tracks'
+    varName = 'm_errZ0;err_z0'
+    title = 'z_{0} error; z_{0} error [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.3)
 
     varName = 'm_z0_bscorr;z0'
@@ -184,9 +184,9 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'd_{0} (computed vs origin);d_{0} (origin) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0Range, xmax=m_d0Range)
 
-    varName = 'm_errD0;err_d0_origin'
-    title = 'd_{0} error (computed vs origin);d_{0} error (origin) [mm]; Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=60, xmin=0, xmax=0.30)
+    varName = 'm_errD0;err_d0'
+    title = 'd_{0} error;d_{0} error [mm]; Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=60, xmin=0, xmax=0.05)
 
     varName = 'm_d0_bscorr;d0'
     title = 'd_{0} (corrected for beamspot);d_{0} (BS) [mm]; Tracks'
@@ -198,7 +198,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_errPt;err_pT'
     title = 'p_{T} error;Signed Track p_{T} error [GeV];Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0., xmax=1.)
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0., xmax=3.)
+
+    varName = 'm_pT_2fillerrPt,m_errPt_2fillpT;errpTvspT'
+    title = 'p_{T} error Vs p_{T};p_{T};p_{T} error'
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange, ybins=50, ymin=0., ymax=3.)
 
     varName = 'm_p;P'
     title = 'Track Momentum P;Signed Track P [GeV];Tracks'
@@ -206,11 +210,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_pTRes;pTResolution'
     title = 'Momentum resolution;pTRes;Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=100, xmin=0, xmax=1.0)
-
-    varName = 'm_pTResOverP;pTRes_OverP'
-    title = 'Momentum resolution / Momentum;pTResOverP;Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=100, xmin=0, xmax=0.05)
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=100, xmin=0, xmax=0.1)
 
     varName = 'm_phi_2filld0bscorr,m_d0_bscorr_2fillphi;D0VsPhi0'
     title = 'd_{0} (BS) Vs #phi_{0};#phi_{0} [rad];d_{0} (BS) [mm]'
