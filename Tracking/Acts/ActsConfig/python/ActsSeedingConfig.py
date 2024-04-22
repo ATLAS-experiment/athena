@@ -323,7 +323,7 @@ def ActsMainSeedingCfg(flags) -> ComponentAccumulator:
 
     return acc
 
-def ActsConversionSeedingCkf(flags) -> ComponentAccumulator:
+def ActsConversionSeedingCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     if flags.Detector.EnableITkStrip:
@@ -356,7 +356,7 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsMainSeedingCfg(flags))
     # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        acc.merge(ActsConversionSeedingCkf(flags))
+        acc.merge(ActsConversionSeedingCfg(flags))
     # Any other pass -> Validation mainly
     else:
         acc.merge(ActsMainSeedingCfg(flags))
