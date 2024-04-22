@@ -29,7 +29,7 @@ Reco_tf.py \
     --outputAODFile AOD.acts.pool.root \
     --outputESDFile ESD.acts.pool.root \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSeedsFlags" \
-    --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkValidateActsSeedsPass.storeTrackSeeds=True;flags.Tracking.ITkValidateActsSeedsPass.storeSiSPSeededTracks=False;" \
+    --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=False;" \
     --maxEvents ${n_events} \
     --multithreaded
 

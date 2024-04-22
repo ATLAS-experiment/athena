@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
@@ -17,11 +17,11 @@ def CombinedTrackingPassFlagSets(flags):
     # Primary Pass(es)
     from TrkConfig.TrkConfigFlags import TrackingComponent
     validation_configurations = {
-        TrackingComponent.ValidateActsClusters : "ValidateActsClusters",
-        TrackingComponent.ValidateActsSpacePoints : "ValidateActsSpacePoints",
-        TrackingComponent.ValidateActsSeeds : "ValidateActsSeeds",
-        TrackingComponent.ValidateActsTracks : "ValidateActsTracks",
-        TrackingComponent.ValidateActsAmbiguityResolution : "ValidateActsAmbiguityResolution",
+        TrackingComponent.ActsValidateClusters : "ActsValidateClusters",
+        TrackingComponent.ActsValidateSpacePoints : "ActsValidateSpacePoints",
+        TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
+        TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
+        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
         TrackingComponent.BenchmarkSpot : "ActsBenchmarkSpot"
     }
     
@@ -330,8 +330,8 @@ def ITkTrackFinalCfg(flags,
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
             f"PRDtoTrackMap{TrackContainer}"),
-        isActsAmbi = 'ValidateActsResolvedTracks' in splitProbName or \
-        'ValidateActsAmbiguityResolution' in splitProbName or \
+        isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
+        'ActsValidateAmbiguityResolution' in splitProbName or \
         'ActsConversion' in splitProbName or \
         ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
