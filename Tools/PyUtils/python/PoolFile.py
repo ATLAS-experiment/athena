@@ -453,10 +453,13 @@ def make_pool_record (branch, dirType):
     zipBytes = branch.GetZipBytes()
     memSizeNoZip = memSize if zipBytes < 0.001 else 0.
     diskSize     = branch.GetZipBytes() / Units.kb
+    typeName = branch.GetClassName()
+    if not typeName and (leaf := branch.GetListOfLeaves().At(0)):
+        typeName = leaf.GetTypeName()
     return PoolRecord(branch.GetName(), memSize, diskSize, memSizeNoZip,
                       branch.GetEntries(),
                       dirType=dirType,
-                      typeName=branch.GetClassName())
+                      typeName=typeName)
 
 def extract_items(pool_file, verbose=True, items_type='eventdata'):
     """Helper function to read a POOL file and extract the item-list from the
@@ -690,12 +693,15 @@ class PoolFile(object):
                     ]
                     if len(dhBranchNames) == 1:
                         dhBranch = obj.GetBranch(dhBranchNames[0])
+                        typeName = dhBranch.GetClassName()
+                        if not typeName and (leaf := dhBranch.GetListOfLeaves().At(0)):
+                            typeName = leaf.GetTypeName()
                         poolRecord = retrieveBranchInfos(
                             dhBranch,
                             PoolRecord( contName, 0., 0., 0.,
                                         nEntries,
                                         dirType = "T",
-                                        typeName = dhBranch.GetClassName()),
+                                        typeName = typeName ),
                             ident = "  "
                         )
                     else:
