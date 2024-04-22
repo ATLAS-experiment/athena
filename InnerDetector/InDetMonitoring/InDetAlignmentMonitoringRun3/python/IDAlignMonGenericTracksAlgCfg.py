@@ -144,6 +144,10 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'eta;Track #eta;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)
 
+    varName = 'm_errEta;err_Eta'
+    title = 'eta error;Track #eta error;Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.010)
+
     varName = 'm_eta_pos;eta_pos'
     title = 'eta for positive tracks; #eta(#plusq);Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_etaBins, xmin=-m_etaRange, xmax=m_etaRange)

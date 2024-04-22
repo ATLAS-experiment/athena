@@ -296,6 +296,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     float Err_phi        = -999;
     float trktheta       = -999;
     float Err_theta      = -999;
+    float Err_eta        = -999;
     float trketa         = -999;
     float qOverP         = -999;
     float Err_qOverP     = -999;
@@ -343,6 +344,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       Err_z0       = Amg::error(*measPer->covariance(), Trk::z0);
       Err_phi      = Amg::error(*measPer->covariance(), Trk::phi0);
       Err_theta    = Amg::error(*measPer->covariance(), Trk::theta);
+      Err_eta      = Err_theta / (2 * sin(trktheta/2) * cos(trktheta/2));
       Err_qOverP   = Amg::error(*measPer->covariance(), Trk::qOverP) * 1000;
       Err_Pt       = sin(trktheta) * Err_qOverP / pow(qOverP, 2);
       if (qOverP < 0) charge = -1;
@@ -485,6 +487,9 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, chi2oDoF_m);
     auto eta_m = Monitored::Scalar<float>( "m_eta", trketa );
     fill(genericTrackGroup, eta_m);
+    auto errEta_m = Monitored::Scalar<float>( "m_errEta", Err_eta );
+    fill(genericTrackGroup, errEta_m);
+
 
     // pixel hits vs eta
     auto eta_2fillpix_m = Monitored::Scalar<float>( "m_eta_2fillpix", trketa );
@@ -507,8 +512,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       auto eta_neg_m = Monitored::Scalar<float>( "m_eta_neg", trketa );
       fill(genericTrackGroup, eta_neg_m);
     }
-
-    //Eta
 
     // Phi
     auto phi_m = Monitored::Scalar<float>( "m_phi", trkphi );
