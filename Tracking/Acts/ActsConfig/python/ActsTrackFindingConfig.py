@@ -8,12 +8,13 @@ from ActsInterop import UnitConstants
 # Tools
 
 def isdet(flags,
-          pixel: list,
-          strip: list) -> list:
+          *,
+          pixel: list = None,
+          strip: list = None) -> list:
     keys = []
-    if flags.Detector.EnableITkPixel:
+    if flags.Detector.EnableITkPixel and pixel is not None:
         keys += pixel
-    if flags.Detector.EnableITkStrip:
+    if flags.Detector.EnableITkStrip and strip is not None:
         keys += strip
     return keys
 
@@ -22,7 +23,7 @@ def ActsTrackStatePrinterCfg(flags,
                              **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("InputSpacePoints", isdet(flags, ["ITkPixelSpacePoints"], ["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
+    kwargs.setdefault("InputSpacePoints", isdet(flags, pixel=["ITkPixelSpacePoints"], strip=["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
@@ -49,12 +50,12 @@ def ActsMainTrackFindingAlgCfg(flags,
     acc = ComponentAccumulator()
 
     # Seed labels and collections. These 3 lists must match element for element.
-    kwargs.setdefault("SeedLabels", isdet(flags, ["PPP"], ["SSS"]))
-    kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, ["ActsPixelEstimatedTrackParams"], ["ActsStripEstimatedTrackParams"]))
-    kwargs.setdefault("SeedContainerKeys", isdet(flags, ["ActsPixelSeeds"], ["ActsStripSeeds"]))
+    kwargs.setdefault("SeedLabels", isdet(flags, pixel=["PPP"], strip=["SSS"]))
+    kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]))
+    kwargs.setdefault("SeedContainerKeys", isdet(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
     # Measurement collections. These 2 lists must match element for element.
-    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"]))
-    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, ["ITkPixelDetectorElementCollection"], ["ITkStripDetectorElementCollection"]))
+    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkStripClusters"]))
+    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, pixel=["ITkPixelDetectorElementCollection"], strip=["ITkStripDetectorElementCollection"]))
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 
@@ -150,30 +151,25 @@ def ActsMainTrackFindingAlgCfg(flags,
     return acc
 
 
-def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
+def ActsTrackFindingCfg(flags,
+                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    # Acts Main pass
-    if flags.Tracking.ActiveConfig.extension == "Acts":
-        acc.merge(ActsMainTrackFindingAlgCfg(flags,
-                                             SeedLabels = isdet(flags, ["PPP"], ["SSS"]) if not flags.Tracking.doITkFastTracking else ["PPP"], 
-                                             EstimatedTrackParametersKeys = isdet(flags, ["ActsPixelEstimatedTrackParams"], ["ActsStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else ["ActsPixelEstimatedTrackParams"],
-                                             SeedContainerKeys = isdet(flags, ["ActsPixelSeeds"], ["ActsStripSeeds"]) if not flags.Tracking.doITkFastTracking else ["ActsPixelSeeds"],
-                                             UncalibratedMeasurementContainerKeys = isdet(flags, ["ITkPixelClusters_InView"], ["ITkStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, ["ITkPixelClusters"], ["ITkStripClusters"])))
-    # Acts Conversion pass
-    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        acc.merge(ActsMainTrackFindingAlgCfg(flags,
-                                             name="ActsConversionTrackFindingAlg",
-                                             ACTSTracksLocation="ActsConversionTracks",
-                                             SeedLabels=["SSS"],
-                                             EstimatedTrackParametersKeys=["ActsConversionStripEstimatedTrackParams"],
-                                             SeedContainerKeys=["ActsConversionStripSeeds"],
-                                             UncalibratedMeasurementContainerKeys=isdet(flags, ["ITkPixelClusters_InView"], ["ITkConversionStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, ["ITkPixelClusters"], ["ITkConversionStripClusters"])
-                                             ))
-    # Any other pass -> mainly validation
+    kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
+    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
+        kwargs.setdefault('SeedLabels', isdet(flags, strip=["SSS"]))
+        kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, strip=["ActsConversionStripEstimatedTrackParams"]))
+        kwargs.setdefault('SeedContainerKeys', isdet(flags, strip=["ActsConversionStripSeeds"]))
+        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_InView"], strip=["ITkConversionStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkConversionStripClusters"]))
     else:
-        acc.merge(ActsMainTrackFindingAlgCfg(flags))
+        kwargs.setdefault('SeedLabels', isdet(flags, pixel=["PPP"], strip=["SSS"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["PPP"]))
+        kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["ActsPixelEstimatedTrackParams"]))
+        kwargs.setdefault('SeedContainerKeys', isdet(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["ActsPixelSeeds"]))
+        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_InView"], strip=["ITkStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkStripClusters"]))
         
+    acc.merge(ActsMainTrackFindingAlgCfg(flags,
+                                         name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",
+                                         **kwargs))
     return acc
 
 def ActsMainAmbiguityResolutionAlgCfg(flags,
@@ -197,22 +193,14 @@ def ActsMainAmbiguityResolutionAlgCfg(flags,
     return acc
 
 
-def ActsAmbiguityResolutionCfg(flags) -> ComponentAccumulator:
+def ActsAmbiguityResolutionCfg(flags,
+                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
-    # Acts Main pass
-    if flags.Tracking.ActiveConfig.extension == "Acts":
-        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags))
-    # Acts Conversion pass
-    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
-                                                    name="ActsConversionAmbiguityResolution",
-                                                    TracksLocation="ActsConversionTracks",
-                                                    ResolvedTracksLocation="ActsConversionResolvedTracks"))
-    # Any other pass -> mainly validation
-    else:
-        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags))
-        
+    kwargs.setdefault('TracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
+    kwargs.setdefault('ResolvedTracksLocation', f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks")
+    acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
+                                                name=f"{flags.Tracking.ActiveConfig.extension}AmbiguityResolutionAlg",
+                                                **kwargs))
     return acc
 
 def ActsTrackToTrackParticleCnvAlgCfg(flags,
