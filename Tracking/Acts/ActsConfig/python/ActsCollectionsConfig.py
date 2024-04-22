@@ -20,7 +20,7 @@ class TrackBackends:
                  'TrackStateSurfaces',
                  'TrackSurfaces')
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.collections = dict()
         for el in TrackBackends.postFixes:
             self.collections[el] = None
@@ -33,7 +33,7 @@ class TrackBackends:
         return message
             
     @staticmethod
-    def extractPrefix(collection: str) -> str:
+    def extractPrefix(*, collection: str) -> str:
         assert isinstance(collection, str)        
         for el in TrackBackends.postFixes:
             if collection.endswith(el):
@@ -48,6 +48,7 @@ class TrackBackends:
         return True
         
     def addCollection(self,
+                      *,
                       collection: str) -> None:
         assert isinstance(collection, str)
         for el in TrackBackends.postFixes:
@@ -99,9 +100,9 @@ def ActsPoolReadCfg(flags) -> ComponentAccumulator:
 
         # Track Backend Collections
         if colType in TrackBackends.types:
-            prefix = TrackBackends.extractPrefix(colName)
+            prefix = TrackBackends.extractPrefix(collection=colName)
             StoredTracks[prefix] = StoredTracks.get(prefix, TrackBackends())
-            StoredTracks[prefix].addCollection(colName)
+            StoredTracks[prefix].addCollection(collection=colName)
             continue
 
     for (key, backends) in StoredTracks.items():

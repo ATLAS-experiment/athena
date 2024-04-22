@@ -4,18 +4,23 @@
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 
 #include <string>
+#include <regex>
 
 #include "StoreGate/WriteHandle.h"
 
 namespace ActsTrk {
 
 std::string prefixFromTrackContainerName(const std::string& tracks) {
-  auto sindex = tracks.find("Tracks");
-  if (sindex == std::string::npos)
+  std::regex word_regex("(.*)Tracks$");
+  std::smatch match_regex;
+  
+  if ( not std::regex_search(tracks, match_regex, word_regex) or match_regex.size() < 2) {
     throw std::runtime_error(
-          std::string("prefixFromTrackContainerName: key does not contain "
-                    "Tracks in the name ") + tracks);
-  return tracks.substr(0, tracks.find("Tracks"));
+       std::string("prefixFromTrackContainerName: key does not contain "
+		   "Tracks in the name ") + tracks);
+  }
+
+  return match_regex[1].str();
 }
 
 template <typename T, typename IFACE, typename AUX>
