@@ -218,6 +218,12 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
     ++buff_AllClusters;
 
+    if (m_doTrackMatching && egRec->getNumberOfTrackParticles() == 0) {
+      // Later we may want to use these for so called forward photons.
+      ATH_MSG_DEBUG("EgammaRec without track particle");
+      continue;
+    }
+
     //common part
     xAOD::Electron* el = xaodFrwd->push_back(std::make_unique<xAOD::Electron>());
     el->setAuthor(xAOD::EgammaParameters::AuthorFwdElectron);
@@ -225,7 +231,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
     // from here one, we need both track matching and
     // having tracks .
-    if (m_doTrackMatching && egRec->getNumberOfTrackParticles() != 0) {
+    if (m_doTrackMatching) {
 
       ++buff_MatchedClusters;
       el->setTrackParticleLinks(egRec->trackParticleElementLinks());
