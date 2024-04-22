@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_FatrasTools )
@@ -14,14 +14,10 @@ atlas_add_component( ISF_FatrasTools
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} TruthUtils AthenaBaseComps AthenaKernel AtlasDetDescr BarcodeEventLib CxxUtils EventPrimitives GaudiKernel GeoPrimitives ISF_Event ISF_FatrasInterfaces ISF_InterfacesLib StoreGateLib TrkDetDescrInterfaces TrkDetDescrUtils TrkEventPrimitives TrkExInterfaces TrkExUtils TrkGeometry TrkMaterialOnTrack TrkNeutralParameters TrkParameters TrkSurfaces TrkTrack TrkVolumes TruthUtils )
 
 foreach( name
-         EnergyLossSamplerBetheHeitler_test
          McEnergyLossUpdator_test
-         MultipleScatteringSamplerGaussianMixture_test
-         MultipleScatteringSamplerGeneralMixture_test
-         MultipleScatteringSamplerHighland_test
          PhotonConversionTool_test
        )
- 
+
     atlas_add_test( ${name}
                     SOURCES test/${name}.cxx
                     LINK_LIBRARIES AthenaKernel GaudiKernel ISF_FatrasInterfaces ISF_InterfacesLib TestTools TrkExInterfaces TrkGeometry TrkMaterialOnTrack
