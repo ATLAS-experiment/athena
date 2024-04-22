@@ -64,7 +64,7 @@ from AthenaCommon.SystemOfUnits import MeV
 @clonable
 @onlyAttributesAreProperties
 class JetDefinition(object):
-    _allowedattributes = ['_cflags'] # onlyAttributesAreProperties will add all properties to this list.
+    _allowedattributes = ['_cflags','_contextDic'] # onlyAttributesAreProperties will add all properties to this list.
     def __init__(self,
                  algorithm,           # The fastjet clustering algorithm
                  radius,              # The jet radius specifier (clustering cutoff)
@@ -117,6 +117,7 @@ class JetDefinition(object):
         self._prereqOrder = [] 
         self._internalAtt = {}
         self._cflags = None # pointer to AthenaConfiguration.ConfigFlags. Mainly to allow to invoke building of input dependencies which are outside Jet domain during std reco
+        self._contextDic = None # pointer to the context dictionnary. Convenient shortcut used to configure input or modifier dependencies 
         self.byVertex = byVertex
         self._locked = lock
 

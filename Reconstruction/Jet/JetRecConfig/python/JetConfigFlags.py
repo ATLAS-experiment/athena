@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import HIMode
+from JetRecConfig.StandardJetContext import createJetContextFlags
 
 def createJetConfigFlags():
     flags = AthConfigFlags()
@@ -11,6 +12,7 @@ def createJetConfigFlags():
                   lambda prevFlags: prevFlags.Reco.HIMode in [HIMode.HI,HIMode.UPC,HIMode.HIP] )
     flags.addFlag("Jet.useCalibJetThreshold", True)
 
+    flags.addFlagsCategory("Jet.Context",createJetContextFlags)
     return flags
 
 
