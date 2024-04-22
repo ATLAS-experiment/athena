@@ -186,11 +186,5 @@ Leptons are entering the category `Unknown` (**IFF class 0**), if they cannot be
 Ideally, leptons should never fall into this category.
 
 ## 5. Flowcharts of IFF TruthClassification Tool
-Schematic flowcharts of IFF TruthClassification Tool are shown below.  
-Details about the classification should refer to [Details about the Lepton Categories](#4-details-about-the-lepton-categories)
-
-**<p style="font-size: 20px;">Classification of Electrons</p>**
-<img src="./Photos/ele_flowchart.svg" alt="Flow Chart of Electron TruthClassification" width="800px">
-
-**<p style="font-size: 20px;">Classification of Muons</p>**
-<img src="./Photos/muon_flowchart.svg" alt="Flow Chart of Electron TruthClassification" width="1100px">
+Schematic flowcharts of IFF TruthClassification Tool could be found [here](https://atlas-iff.docs.cern.ch/truthleptonclassificationscheme/). 
+Details about the classification should refer to [Details about the Lepton Categories](#4-details-about-the-lepton-categories). 
