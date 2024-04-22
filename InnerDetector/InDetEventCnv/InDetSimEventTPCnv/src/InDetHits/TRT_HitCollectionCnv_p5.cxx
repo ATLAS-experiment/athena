@@ -54,7 +54,8 @@ void TRT_HitCollectionCnv_p5::transToPers(const TRTUncompressedHitCollection* tr
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   const IProxyDict* proxy = Atlas::getExtendedEventContext(ctx).proxy();
-  const HepMcParticleLink * lastLink=nullptr;
+  int lastIndex{-1};
+  int lastTruthId{-1};
   int lastId = -1;
   double lastT = 0.0*CLHEP::ns;
   unsigned int idx = 0;
@@ -66,22 +67,25 @@ void TRT_HitCollectionCnv_p5::transToPers(const TRTUncompressedHitCollection* tr
   for (TRTUncompressedHitCollection::const_iterator it = transCont->begin(); it != transCont->end(); ++it) {
 
     TRTUncompressedHitCollection::const_iterator trtHit = it;
+    const HepMcParticleLink * currentLink = &(trtHit->particleLink());
+    const int truthId = currentLink->id();
+    int index{0};
+    if (HepMcParticleLink::getEventPositionInCollection(currentLink->eventIndex(),
+                                                        proxy).at(0) != 0) {
+      index = currentLink->eventIndex();
+    }
 
-    if ( !lastLink || (trtHit->particleLink() != *lastLink)  ||  (idx - endTruthID > 65500)) {   // max unsigned short =  65535;
-      // store truth id once for set of consecutive hits with same truth id
-      lastLink = &(trtHit->particleLink());
-      persCont->m_truthID.push_back(lastLink->id());
-      unsigned short index{0};
-      const HepMcParticleLink::index_type position =
-        HepMcParticleLink::getEventPositionInCollection(lastLink->eventIndex(),
-                                                        proxy).at(0);
-      if (position!=0) {
-        index = lastLink->eventIndex();
-        if(lastLink->eventIndex()!=static_cast<HepMcParticleLink::index_type>(index)) {
-          log << MSG::WARNING << "Attempting to persistify an eventIndex larger than max unsigned short!" << endmsg;
-        }
+    if ( lastTruthId != truthId || lastIndex != index || (idx - endTruthID > 65500) ) {   // max unsigned short =  65535;
+      lastTruthId = truthId;
+      lastIndex = index;
+      const unsigned short persIndex = static_cast<unsigned short>(index);
+      if (static_cast<HepMcParticleLink::index_type>(lastIndex) != static_cast<HepMcParticleLink::index_type>(persIndex)) {
+        log << MSG::WARNING << "Attempting to persistify an eventIndex larger than max unsigned short!" << endmsg;
       }
-      persCont->m_mcEvtIndex.push_back(index);
+      // store truthId and eventIndex once for set of consecutive hits
+      // with the same truthId and eventIndex.
+      persCont->m_truthID.push_back(static_cast<unsigned int>(lastTruthId));
+      persCont->m_mcEvtIndex.push_back(persIndex);
 
       if ( idx > 0 ) {
         persCont->m_nTruthID.push_back(idx - endTruthID);
