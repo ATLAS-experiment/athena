@@ -29,9 +29,9 @@ def getIDTrackSelectionTool(toolname, **toolProps):
         idtracksel.TrackSummaryTool = ""
     return idtracksel
 
-def getTrackSelAlg(trkOpt="default", trackSelOpt=False):
-    from JetRecConfig.StandardJetContext import jetContextDic
-    trkProperties = jetContextDic[trkOpt]
+def getTrackSelAlg(jetdef, trackSelOpt=False):
+    trkProperties = jetdef._contextDic
+    trkOpt=jetdef.context
 
     trackToolProps = dict(**trkProperties["trackSelOptions"])
 
@@ -54,12 +54,9 @@ def getTrackSelAlg(trkOpt="default", trackSelOpt=False):
     return trkSelAlg
 
 
-def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
+def getJetTrackVtxAlg( trkProperties, algname="jetTVA", **ttva_overide):
     """  theSequence and ttva_overide are options used in trigger  (HLT/Jet/JetTrackingConfig.py)"""
     from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
-    from JetRecConfig.StandardJetContext import jetContextDic
-
-    trkProperties = jetContextDic[trkOpt]
 
     ttva_options = dict(
         TrackContName = trkProperties["Tracks"],
@@ -78,36 +75,6 @@ def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
                                          )
     return alg
 
-
-def getPV0TrackVertexAssoAlg(trkOpt="", theSequence=None):
-    if trkOpt: "_{}".format(trkOpt)
-    from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
-    from JetRecConfig.StandardJetContext import jetContextDic
-
-    trkProperties = jetContextDic[trkOpt]
-    tvatool = getTTVAToolForReco("trackjettvassoc",
-                                WorkingPoint = "Nonprompt_All_MaxWeight",
-                                TrackContName = trkProperties["JetTracks"],
-                                )
-
-    jettvassoc = CompFactory.JetTrackVtxAssoAlg("trackjetTVAAlg",
-            TrackParticleContainer = trkProperties["JetTracks"],
-            TrackVertexAssociation = "PV0"+trkProperties["TVA"],
-            VertexContainer        = trkProperties["Vertices"],
-            TrackVertexAssoTool    = tvatool
-            )
-    return jettvassoc, tvatool
-
-def getPV0TrackSelAlg(tvaTool, trkOpt="default"):
-    from JetRecConfig.StandardJetContext import jetContextDic
-    trkProperties = jetContextDic[trkOpt]
-    pv0trackselalg = CompFactory.PV0TrackSelectionAlg("pv0tracksel_trackjet",
-            InputTrackContainer = trkProperties["JetTracks"],
-            VertexContainer = trkProperties["Vertices"],
-            OutputTrackContainer = "PV0"+trkProperties["JetTracks"],
-            TVATool = tvaTool,
-            )
-    return pv0trackselalg
 
 def getPFlowSelAlg():
     # PFlow objects matched to electrons/muons filtering algorithm 

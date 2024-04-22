@@ -19,6 +19,7 @@ class GroomingDefinition(object):
     and aslo a groomSpecAsStr() function.
 
     """
+    _allowedattributes = ['_cflags','_contextDic'] # onlyAttributesAreProperties will add all properties to this list.
     tooltype = None
     groomalg = None
     def __init__(self, 
@@ -47,6 +48,8 @@ class GroomingDefinition(object):
         self._prereqDic = {}
         self._prereqOrder = [] 
         self._locked = lock
+        self._cflags = None # pointer to AthenaConfiguration.ConfigFlags. Mainly to allow to invoke building of input dependencies which are outside Jet domain during std reco
+        self._contextDic = None # pointer to the context dictionnary. Convenient shortcut used to configure input or modifier dependencies 
 
 
     def __hash__(self):

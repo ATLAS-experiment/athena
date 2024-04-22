@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
                                                                       
@@ -17,23 +17,21 @@ from AthenaCommon import Logging
 jetmomentlog = Logging.logging.getLogger('JetMomentToolsConfig')
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from JetRecConfig.StandardJetContext import jetContextDic
 
 from xAODBase.xAODType import xAODType
 
 
-def idTrackSelToolFromJetCtx(trkOpt="default"):
+def idTrackSelToolFromJetCtx(trkOpt,trkProperties):
     """returns a InDetTrackSelectionTool configured with the jet context corresponding to trkOpt
       (technically wrapped inside a JetTrackSelectionTool) 
     """
     # JetTrackSelectionTool is still used by trk moment tools.
     # it should be deprecated in favor of simply the InDet tool
-    from JetRecConfig.StandardJetContext import jetContextDic
     from JetRecTools.JetRecToolsConfig import getIDTrackSelectionTool #
 
     return  CompFactory.JetTrackSelectionTool(
         f"tracsel{trkOpt}",
-        Selector        = getIDTrackSelectionTool(f"trackSel{trkOpt}", **jetContextDic[trkOpt]["trackSelOptions"])
+        Selector        = getIDTrackSelectionTool(f"trackSel{trkOpt}", **trkProperties["trackSelOptions"])
     )
 
 
@@ -97,15 +95,15 @@ def getConstitFourMomTool(jetdef, modspec=""):
 
 # Jet vertex fraction with selection.
 def getJVFTool(jetdef, modspec):
-    # retrieve the tracking keys to be used with modspec :
-    trackingKeys = jetContextDic[modspec or jetdef.context]
+    trkopt = modspec or jetdef.context # allow to overide jetdef.context if modspec is specified
+    trackingKeys = jetdef._cflags.Jet.Context[trkopt]
     jvf = CompFactory.JetVertexFractionTool(
         "jvf",
         VertexContainer = trackingKeys["Vertices"],
         AssociatedTracks = trackingKeys["GhostTracksLabel"],
         TrackVertexAssociation = trackingKeys["TVA"],
         TrackParticleContainer  = trackingKeys["Tracks"],
-        TrackSelector = idTrackSelToolFromJetCtx(modspec or jetdef.context),
+        TrackSelector = idTrackSelToolFromJetCtx(trkopt, trackingKeys),
         SuppressInputDependence = True,
         UseOriginVertex = jetdef.byVertex
     )
@@ -116,7 +114,7 @@ def getJVFTool(jetdef, modspec):
 def getJVTTool(jetdef, modspec):
     jvt = CompFactory.JetVertexTaggerTool(
         "jvt",
-        VertexContainer = jetContextDic[modspec or jetdef.context]["Vertices"],
+        VertexContainer = jetdef._cflags.Jet.Context[modspec or jetdef.context]["Vertices"],
         SuppressInputDependence = True,
         UseOriginVertex = jetdef.byVertex
     )
@@ -126,15 +124,16 @@ def getJVTTool(jetdef, modspec):
 def getNNJvtTool(jetdef, modspec):
     nnjvt = CompFactory.getComp("JetPileupTag::JetVertexNNTagger")(
         "nnjvt",
-        VertexContainer = jetContextDic[modspec or jetdef.context]["Vertices"],
+        VertexContainer = jetdef._cflags.Jet.Context[modspec or jetdef.context]["Vertices"],
         SuppressInputDependence = True
     )
     return nnjvt
 
 
 def getTrackMomentsTool(jetdef, modspec):
-    # retrieve the tracking keys to be used with modspec : 
-    trackingKeys = jetContextDic[modspec or jetdef.context]
+    # retrieve the tracking keys to be used with modspec :
+    trkopt = modspec or jetdef.context # allow to overide jetdef.context if modspec is specified    
+    trackingKeys = jetdef._cflags.Jet.Context[trkopt]
 
     trackmoments = CompFactory.JetTrackMomentsTool(
         "trkmoms",
@@ -142,15 +141,16 @@ def getTrackMomentsTool(jetdef, modspec):
         AssociatedTracks = trackingKeys["GhostTracksLabel"],
         TrackVertexAssociation = trackingKeys["TVA"],
         TrackMinPtCuts = [500, 1000],
-        TrackSelector = idTrackSelToolFromJetCtx(modspec or jetdef.context), 
+        TrackSelector = idTrackSelToolFromJetCtx(trkopt,trackingKeys), 
         DoPFlowMoments = 'PFlow' in jetdef.fullname() or 'UFO' in jetdef.fullname() ,
     )
     return trackmoments
 
 def getTrackSumMomentsTool(jetdef, modspec):
-    jettrackselloose = idTrackSelToolFromJetCtx(modspec or jetdef.context)
+    trkopt = modspec or jetdef.context # allow to overide jetdef.context if modspec is specified    
+    trackingKeys = jetdef._cflags.Jet.Context[trkopt]
+    jettrackselloose = idTrackSelToolFromJetCtx(trkopt,trackingKeys)
     # retrieve the tracking keys to be used with modspec : 
-    trackingKeys = jetContextDic[modspec or jetdef.context]
     tracksummoments = CompFactory.JetTrackSumMomentsTool(
         "trksummoms",
         VertexContainer = trackingKeys["Vertices"],
@@ -166,7 +166,7 @@ def getTrackSumMomentsTool(jetdef, modspec):
 def getOriginCorrVxTool(jetdef, modspec):
     origin_setpv = CompFactory.JetOriginCorrectionTool(
       "jetorigin_setpv",
-      VertexContainer = jetContextDic[modspec or jetdef.context]["Vertices"],
+      VertexContainer = jetdef._cflags.Jet.Context[modspec or jetdef.context]["Vertices"],
       OriginCorrectedName = "",
       OnlyAssignPV = True,
     )
@@ -187,13 +187,13 @@ def getJetPtAssociationTool(jetdef, modspec):
 
 
 def getQGTaggingTool(jetdef, modspec):
-
-    trackingKeys = jetContextDic[modspec or jetdef.context]
+    trkopt = modspec or jetdef.context # allow to overide jetdef.context if modspec is specified
+    trackingKeys = jetdef._cflags.Jet.Context[trkopt]
 
     qgtagging = CompFactory.JetQGTaggerVariableTool('qgtagging',
                                                     VertexContainer = trackingKeys["Vertices"],
                                                     TrackVertexAssociation = trackingKeys["TVA"],
-                                                    TrackSelector = idTrackSelToolFromJetCtx(modspec or jetdef.context),
+                                                    TrackSelector = idTrackSelToolFromJetCtx(trkopt,trackingKeys),
                                                    )
 
     return qgtagging
@@ -209,7 +209,7 @@ def getPFlowfJVTTool(jetdef, modspec):
 
     wPFOTool = CompFactory.getComp('CP::WeightPFOTool')("fJVT__wPFO")
 
-    trackingKeys = jetContextDic[modspec or jetdef.context]
+    trackingKeys = jetdef._cflags.Jet.Context[modspec or jetdef.context]
 
     fJVTTool = CompFactory.JetForwardPFlowJvtTool("fJVT",
                                                   verticesName = trackingKeys["Vertices"],
@@ -231,7 +231,7 @@ def getPFlowbJVTTool(jetdef, modspec):
 
     wPFOTool = CompFactory.getComp('CP::WeightPFOTool')("bJVT__wPFO")
 
-    trackingKeys = jetContextDic[modspec or jetdef.context]
+    trackingKeys = jetdef._cflags.Jet.Context[modspec or jetdef.context]
 
     bJVTTool = CompFactory.JetBalancePFlowJvtTool('bJVT',
                                                   verticesName = trackingKeys["Vertices"],

@@ -155,8 +155,7 @@ def runUFOReconstruction(flags, constits, caloClusterName="CaloCalTopoClusters",
     if isinstance(constits, JetDefinition):
         jdef = constits 
         constits = jdef.inputdef
-        from JetRecConfig.StandardJetContext import jetContextDic
-        trackParticleName = jetContextDic[jdef.context]['Tracks'] # defaults to "InDetTrackParticles"
+        trackParticleName = jdef._contextDic['Tracks'] # defaults to "InDetTrackParticles"
     else:
         trackParticleName = "InDetTrackParticles"
         
