@@ -78,41 +78,28 @@ def findTLAStep(chainConfig):
 
 def alignTLASteps(chain_configs, chain_dicts):
 
-    def is_tla_dict(chainNameAndDict):
-        return  'PhysicsTLA' in chainNameAndDict[1]['eventBuildType'] 
-
-    all_tla_chain_dicts = dict(filter(is_tla_dict, chain_dicts.items()))
-    all_tla_chain_names = list(all_tla_chain_dicts.keys())
-
-    
-    def is_tla_config(chainNameAndConfig):
-        return chainNameAndConfig[0] in all_tla_chain_names
-
-    all_tla_chain_configs = dict(filter(is_tla_config, chain_configs.items()))
-
-
-    maxTLAStepPosition = 0 # {eventBuildType: N}
+    all_tla_chain_configs = [ch for ch in chain_configs if 'PhysicsTLA' in chain_dicts[ch.name]['eventBuildType']]
 
     def getTLAStepPosition(chainConfig):
         tlaStep = findTLAStep(chainConfig)
-
         log.debug('getTLAStepPosition found step %s and return %d',tlaStep,chainConfig.steps.index(tlaStep) + 1)
         return chainConfig.steps.index(tlaStep) + 1
 
     # First loop to find the maximal TLA step positions to which we need to align
-    for chainName, chainConfig in all_tla_chain_configs.items():
-        tlaStepPosition = getTLAStepPosition(chainConfig)
+    maxTLAStepPosition = 0 # {eventBuildType: N}
+    for chain in all_tla_chain_configs:
+        tlaStepPosition = getTLAStepPosition(chain)
         if tlaStepPosition > maxTLAStepPosition:
             maxTLAStepPosition = tlaStepPosition
 
     log.debug('maxTLAStepPosition=%d',maxTLAStepPosition)
     
     # Second loop to insert empty steps before the TLA steps where needed
-    for chainName, chainConfig in all_tla_chain_configs.items():        
-        tlaStepPosition = getTLAStepPosition(chainConfig)
-        log.debug('Aligning TLA step at step %d for chain %s ', tlaStepPosition, chainName)
+    for chain in all_tla_chain_configs:
+        tlaStepPosition = getTLAStepPosition(chain)
+        log.debug('Aligning TLA step at step %d for chain %s ', tlaStepPosition, chain.name)
         if tlaStepPosition < maxTLAStepPosition:
             numStepsNeeded = maxTLAStepPosition - tlaStepPosition
-            log.debug('Aligning TLA step for chain %s by adding %d empty steps', chainName, numStepsNeeded)
-            chainConfig.insertEmptySteps('EmptyTLAAlign', numStepsNeeded, tlaStepPosition-1)
-            chainConfig.numberAllSteps()
+            log.debug('Aligning TLA step for chain %s by adding %d empty steps', chain.name, numStepsNeeded)
+            chain.insertEmptySteps('EmptyTLAAlign', numStepsNeeded, tlaStepPosition-1)
+            chain.numberAllSteps()
