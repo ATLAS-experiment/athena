@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/Include.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -10,7 +10,7 @@ traced. Note, however, that this option interferes with pdb and trace."""
 # Don't want to use from __future__ import print_function here: that would
 # then apply to everything that we read with include().
 import builtins
-printfunc = getattr(builtins,'print')
+printfunc = builtins.print
 import os, sys, re, fnmatch
 from AthenaCommon.Utils.unixtools import FindFile
 
@@ -187,7 +187,7 @@ class Include( object ):
    def block( self, fn ):
       """Disallow the given filename(s) from being included again."""
 
-      if type(fn) == list:
+      if type(fn) is list:
          self._once += fn
       else:
          self._once.append( fn )

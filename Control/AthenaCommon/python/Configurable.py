@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/Configurable.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -117,7 +117,7 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
             name = cls.DefaultedName
          else:
             name = cls.getType()
-      elif not name or type(name) != str:
+      elif not name or type(name) is not str:
        # unnamed, highly specialized user code, etc. ... unacceptable
          raise TypeError( 'could not retrieve name from %s.__init__ arguments' % cls.__name__ )
 
@@ -159,8 +159,7 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
                      try:
                       # the following may result in the same init tried several
                       # times, but we shouldn't be in this loop too often anyway
-                        confinit = getattr( confklass, '__init__' )
-                        if n in confinit.__code__.co_varnames:
+                        if n in confklass.__init__.__code__.co_varnames:
                            acceptableKeyWord = True
                            break
                      except AttributeError:
@@ -263,7 +262,7 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
       self._flags &= ~self._fInSetDefaults
       if '_fIsLocked' in dct: 
          if dct[ '_fIsLocked' ]:
-            self._flags != self._fIsLocked
+            self._flags &= self._fIsLocked
          else:
             self._flags &= ~self._fIsLocked
          del dct['_fIsLocked']
@@ -379,7 +378,7 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
          pass
 
    def remove( self, items ):
-      if type(items) != list and type(items) != tuple:
+      if not isinstance(items, (list, tuple)):
          items = [ items ]
 
       self.__children = [ e for e in self.__children if e not in items ]
