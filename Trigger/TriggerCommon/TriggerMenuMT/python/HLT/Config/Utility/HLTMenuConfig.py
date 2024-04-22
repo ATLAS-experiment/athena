@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #########################################################################################
 #
@@ -6,17 +6,15 @@
 #
 #########################################################################################
 
-import sys
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-class HLTMenuConfig(object):
+class HLTMenuConfig:
     """
-    Repository of all configured chains. Contains chain dictionaries and Menu Chain objects
+    Repository of all configured chains. Contains chain dictionaries and Menu Chain objects.
     """
-    from collections import OrderedDict
-    __allChainConfigs   = OrderedDict()
-    __allChainDicts     = OrderedDict()
+    __allChainConfigs = {}
+    __allChainDicts   = {}
 
     @classmethod
     def registerChain(cls, chainDict, chainConfig):
@@ -34,10 +32,14 @@ class HLTMenuConfig(object):
         log.debug("Registered chain %s", chainConfig.name ) 
 
     @classmethod
+    def destroy(cls):
+        """Release memory and make the class unusable"""
+        del cls.__allChainConfigs
+        del cls.__allChainDicts
+
+    @classmethod
     def isChainRegistered(cls, chainName):
-        if chainName in cls.__allChainDicts:
-            return True
-        return False
+        return chainName in cls.__allChainDicts
 
     @classmethod
     def dicts(cls):
@@ -49,56 +51,15 @@ class HLTMenuConfig(object):
 
     @classmethod
     def dictsList(cls):
-
-        return list(cls.__allChainDicts.values())
+        return cls.__allChainDicts.values()
 
     @classmethod
     def configsList(cls):
-        return list(cls.__allChainConfigs.values())
+        return cls.__allChainConfigs.values()
 
     @classmethod
     def getChainDictFromChainName(cls, chainName):
-        assert chainName in cls.__allChainDicts, "Chain of name {} not registered, all registered {}".format(chainName, cls.__allChainDicts.keys())
         return cls.__allChainDicts[chainName]
-
-
-
-
-##############################
-# this function was supposed to be part of the class but doesn't work for now
-# hope to be able to integrate it at a later stage
-##############################
-def getConfFromChainName(chainName, allChainDicts = None):  
-    # expects something like this: 'HLT_mu8_e8'       : ['HLT_mu8','HLT_e8'],        
-    chainPartNames = []
-    
-    # This should be not needed once all TrigUpgrade code is transferred to TriggerMenuMT
-    dictToUse = []        
-    if allChainDicts:
-        dictToUse =  allChainDicts
-    else:
-        log.error("This option is not working right now, need the allChainDicts to be passed for now")
-        #dictToUse = self.allChainDicts
-        sys.exit("ERROR when calling getConfFromChainName, didn't pass dictionary") 
-        
-        
-    for cDict in dictToUse:
-        if chainName == cDict["chainName"]:
-            for cPart in cDict["chainParts"]:
-                cPName = cPart['chainPartName']
-                if "HLT_" in cPName:
-                    chainPartNames.append(cPName)
-                else:
-                    chainPartNames.append('HLT_'+cPName)
-                    
-    if len(chainPartNames) == 0:
-        log.error("getConfFromChainName: Wrong chain name given: found %s", chainName)
-        sys.exit("ERROR, in getConfFromChainName: Wrong chain configuration") 
-        return [chainName]
-    else:
-        log.info("getConfFromChainName: Called chain %s and hypoTool conf %s", chainName, chainPartNames)
-        return chainPartNames
-
 
 
 if __name__ == "__main__": # selftest

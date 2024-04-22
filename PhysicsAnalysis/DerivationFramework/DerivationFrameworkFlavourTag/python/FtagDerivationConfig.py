@@ -11,6 +11,7 @@ from FlavorTagDiscriminants.FoldDecoratorConfig import FoldDecoratorCfg
 from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
 from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
 from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+from AthenaConfiguration.Enums import LHCPeriod
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
@@ -64,7 +65,11 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
                 trackAugmenterPrefix=trackAugmenterPrefix
             )
         )
-
+    
+    if cfgFlags.GeoModel.Run < LHCPeriod.Run4:
+      from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
+      acc.merge(GNNVertexFitterAlgCfg(cfgFlags, name="GNNVertexFitterAlg"))
+    
     return acc
 
 def HLTJetFTagDecorationCfg(cfgFlags):

@@ -590,7 +590,7 @@ class AthConfigFlags(object):
                 else:
                     print(formatStr.format( renamed, truncate("{}".format(repr(self._flagdict[name] ) )) ))
 
-        if len(self._dynaflags) != 0:
+        if len(self._dynaflags) != 0 and any([compiled.match(x) for x in self._dynaflags.keys()]):
             print("Flag categories that can be loaded dynamically")
             print("{:25} : {:>30} : {}".format( "Category","Generator name", "Defined in" ) )
             for name,gen_and_prefix in sorted(self._dynaflags.items()):

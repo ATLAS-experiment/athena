@@ -30,12 +30,6 @@ def bphysicsSignatures():
 def allSignatures():
     return set(calibCosmicMonSignatures() + combinedSignatures() + jointSignatures() + bphysicsSignatures() + defaultSignatures() + testSignatures())
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
 class FilterChainsToGenerate(object):
     """
@@ -51,13 +45,19 @@ class FilterChainsToGenerate(object):
             (not self.selectChains or chain in self.selectChains) and chain not in self.disableChains)
   
 
-# for now we make this a singleton because calling menu generation twice leads to problems
-class GenerateMenuMT(object, metaclass=Singleton):
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
-    # Applicable to all menu instances
-    calibCosmicMonSigs = calibCosmicMonSignatures()
-    combinedSigs = combinedSignatures()
-    defaultSigs = defaultSignatures()  # for noalg chains
+    def clear(cls):
+        cls._instances.clear()
+
+
+class GenerateMenuMT(metaclass=Singleton):
+    """Singleton class for trigger menu"""
 
     # Define which signatures (folders) are required for each slice
     def getRequiredSignatures(theslice):
@@ -69,9 +69,9 @@ class GenerateMenuMT(object, metaclass=Singleton):
             'Bjet': ['Bjet','Jet'],
             # Egamma contains two signatures
             'Egamma': ['Electron','Photon'],
-            'Combined': GenerateMenuMT.combinedSigs,
+            'Combined': combinedSignatures(),
         })
-        return set(signatureDeps[theslice]+GenerateMenuMT.defaultSigs) # always allow streamers
+        return set(signatureDeps[theslice]+defaultSignatures()) # always allow streamers
 
     def __init__(self):
         self.chainsInMenu = {}  # signature : [chains]
@@ -521,9 +521,8 @@ def generateMenuMT(flags):
     generateL1Menu(flags)
     createL1PrescalesFileFromMenu(flags)
 
-    # Generate the menu, stolen from HLT_standalone
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
-    menu = GenerateMenuMT() 
+    # generate HLT menu
+    menu = GenerateMenuMT()
 
     chainsToGenerate = FilterChainsToGenerate(flags)
     menu.setChainFilter(chainsToGenerate)
@@ -559,6 +558,15 @@ def generateMenuMT(flags):
     from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
     checkCPSGroups(HLTMenuConfig.dictsList())
 
+    # Cleanup menu singletons to allow garbage collection (ATR-28855)
+
+    # Temporary hack for ATR-29211:
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    ComponentAccumulator._checkUnmerged = False
+
+    GenerateMenuMT.clear()
+    from TriggerMenuMT.HLT.Config import MenuComponents
+    MenuComponents._ComboHypoPool.clear()
 
     return menuAcc
     

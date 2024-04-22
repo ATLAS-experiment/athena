@@ -362,10 +362,11 @@ class L1Config_eTAU:
     rCore_fw_tight = 32
 
     # BDT eTAU score cuts
-    # 12 bits (0 - 4095), BDT > threshold -> pass
+    # 12 bits (0 - 4095), BDT > 4 * threshold -> pass
+    # CAREFUL!! THE THRESHOLDS HERE ARE MULTIPLIED BY 4 IN THE eFEX FIRMWARE!
     BDT_fw_loose = 130
     BDT_fw_medium = 200
-    BDT_fw_tight = 240
+    BDT_fw_tight = 224
 
     # RHad isolation cuts
     # 8 bits (0 - 255), rHad > threshold -> pass
