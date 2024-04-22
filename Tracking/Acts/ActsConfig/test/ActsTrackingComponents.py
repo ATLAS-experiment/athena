@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-def printConfiguration(flags):
+def printConfiguration(flags) -> None:
     print()
     print("************************************************************************")
     
@@ -22,11 +22,11 @@ if __name__ == "__main__":
     from TrkConfig.TrkConfigFlags import TrackingComponent
     configurations = ["Main",
                       "Acts",
-                      "ValidateActsClusters",
-                      "ValidateActsSpacePoints",
-                      "ValidateActsSeeds",
-                      "ValidateActsTracks",
-                      "ValidateActsAmbiguityResolution",
+                      "ActsValidateClusters",
+                      "ActsValidateSpacePoints",
+                      "ActsValidateSeeds",
+                      "ActsValidateTracks",
+                      "ActsValidateAmbiguityResolution",
                       "ActsBenchmarkSpot"]
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     # Test workflow with ambiguity resolution
     flags.Acts.doAmbiguityResolution = True
-    current_flags = deduceConfiguration(flags, "ValidateActsTracks")
+    current_flags = deduceConfiguration(flags, "ActsValidateTracks")
     printConfiguration(current_flags)
 
     # Test workflow with Conversion pass

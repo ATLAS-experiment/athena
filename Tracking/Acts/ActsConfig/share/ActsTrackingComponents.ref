@@ -68,7 +68,7 @@ Tracking.ITkActsPass           points to                        nothing
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ValidateActsClusters
+                     Active Config is ActsValidateClusters
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : False
 Tracking.ActiveConfig.doAthenaSeed       : True
@@ -80,8 +80,8 @@ Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsClustersPass 
-Tracking.ITkValidateActsClustersPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateClustersPass 
+Tracking.ITkActsValidateClustersPass points to                        nothing 
 Tracking.ActiveConfig.doActsAmbiguityResolution : False
 Tracking.ActiveConfig.doActsCluster      : True
 Tracking.ActiveConfig.doActsSeed         : False
@@ -95,13 +95,13 @@ Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsClustersPass 
-Tracking.ITkValidateActsClustersPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateClustersPass 
+Tracking.ITkActsValidateClustersPass points to                        nothing 
 ************************************************************************
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ValidateActsSpacePoints
+                     Active Config is ActsValidateSpacePoints
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -113,8 +113,8 @@ Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsSpacePointsPass 
-Tracking.ITkValidateActsSpacePointsPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateSpacePointsPass 
+Tracking.ITkActsValidateSpacePointsPass points to                        nothing 
 Tracking.ActiveConfig.doActsAmbiguityResolution : False
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : False
@@ -128,13 +128,13 @@ Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsSpacePointsPass 
-Tracking.ITkValidateActsSpacePointsPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateSpacePointsPass 
+Tracking.ITkActsValidateSpacePointsPass points to                        nothing 
 ************************************************************************
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ValidateActsSeeds
+                     Active Config is ActsValidateSeeds
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -146,8 +146,8 @@ Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsSeedsPass 
-Tracking.ITkValidateActsSeedsPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateSeedsPass 
+Tracking.ITkActsValidateSeedsPass points to                        nothing 
 Tracking.ActiveConfig.doActsAmbiguityResolution : False
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : False
@@ -161,13 +161,13 @@ Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsSeedsPass 
-Tracking.ITkValidateActsSeedsPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateSeedsPass 
+Tracking.ITkActsValidateSeedsPass points to                        nothing 
 ************************************************************************
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ValidateActsTracks
+                     Active Config is ActsValidateTracks
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True [function]
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -179,8 +179,8 @@ Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
-Tracking.ITkValidateActsTracksPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
+Tracking.ITkActsValidateTracksPass points to                        nothing 
 Tracking.ActiveConfig.doActsAmbiguityResolution : False [function]
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : True
@@ -194,13 +194,13 @@ Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
-Tracking.ITkValidateActsTracksPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
+Tracking.ITkActsValidateTracksPass points to                        nothing 
 ************************************************************************
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ValidateActsAmbiguityResolution
+                     Active Config is ActsValidateAmbiguityResolution
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : True
@@ -212,8 +212,8 @@ Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsAmbiguityResolutionPass 
-Tracking.ITkValidateActsAmbiguityResolutionPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateAmbiguityResolutionPass 
+Tracking.ITkActsValidateAmbiguityResolutionPass points to                        nothing 
 Tracking.ActiveConfig.doActsAmbiguityResolution : True
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : False
@@ -227,8 +227,8 @@ Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsAmbiguityResolutionPass 
-Tracking.ITkValidateActsAmbiguityResolutionPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateAmbiguityResolutionPass 
+Tracking.ITkActsValidateAmbiguityResolutionPass points to                        nothing 
 ************************************************************************
 
 ************************************************************************
@@ -266,7 +266,7 @@ Tracking.ITkActsBenchmarkSpotPass points to                        nothing
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ValidateActsResolvedTracks
+                     Active Config is ActsValidateResolvedTracks
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False [function]
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -278,8 +278,8 @@ Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
-Tracking.ITkValidateActsTracksPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
+Tracking.ITkActsValidateTracksPass points to                        nothing 
 Tracking.ActiveConfig.doActsAmbiguityResolution : True [function]
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : True
@@ -293,8 +293,8 @@ Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
-Tracking.ITkValidateActsTracksPass points to                        nothing 
+Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
+Tracking.ITkActsValidateTracksPass points to                        nothing 
 ************************************************************************
 
 ************************************************************************

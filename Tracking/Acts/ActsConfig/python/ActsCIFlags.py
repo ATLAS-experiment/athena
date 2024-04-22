@@ -3,7 +3,7 @@
 
 from TrkConfig.TrkConfigFlags import TrackingComponent
 
-def actsAloneWorkflowFlags(flags):
+def actsAloneWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = True
@@ -11,7 +11,7 @@ def actsAloneWorkflowFlags(flags):
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
     
     
-def actsWorkflowFlags(flags):
+def actsWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts workflow to reco sequence"""
     flags.DQ.useTrigger = False
     flags.Acts.doAnalysis = True
@@ -21,51 +21,51 @@ def actsWorkflowFlags(flags):
                                 TrackingComponent.ActsChain]
     flags.Output.HISTFileName = "ActsMonitoringOutput.root" 
 
-def actsValidateClustersFlags(flags):
+def actsValidateClustersFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use cluster conversion [xAOD -> InDet] with both Athena and Acts sequences"""
-    flags.Tracking.recoChain = [TrackingComponent.ValidateActsClusters]
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateClusters]
 
-def actsValidateSpacePointsFlags(flags):
+def actsValidateSpacePointsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use for validating Athena-based space point formation"""
-    flags.Tracking.recoChain = [TrackingComponent.ValidateActsSpacePoints]
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateSpacePoints]
 
-def actsCoreValidateSpacePointsFlags(flags):
+def actsCoreValidateSpacePointsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use for validating ACTS-based space point formation"""
     from ActsConfig.ActsConfigFlags import SpacePointStrategy
     flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore
     actsValidateSpacePointsFlags(flags)
     
-def actsValidateSeedsFlags(flags):
+def actsValidateSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
-    flags.Tracking.recoChain = [TrackingComponent.ValidateActsSeeds]
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateSeeds]
     flags.Tracking.writeSeedValNtuple = True
 
-def actsValidateOrthogonalSeedsFlags(flags):
+def actsValidateOrthogonalSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (orthogonal seeding)"""
     from ActsConfig.ActsConfigFlags import SeedingStrategy
     flags.Acts.SeedingStrategy = SeedingStrategy.Orthogonal
     actsValidateSeedsFlags(flags)
 
-def actsValidateTracksFlags(flags):
+def actsValidateTracksFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction"""
     flags.Acts.doAmbiguityResolution = False
-    flags.Tracking.recoChain = [TrackingComponent.ValidateActsTracks]
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateTracks]
 
-def actsValidateResolvedTracksFlags(flags):
+def actsValidateResolvedTracksFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction with ambi. resolution"""
     actsValidateTracksFlags(flags)
     flags.Acts.doAmbiguityResolution = True
 
-def actsValidateAmbiguityResolutionFlags(flags):
+def actsValidateAmbiguityResolutionFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use Acts Ambiguity Resolution after Athena reconstruction"""
     flags.Reco.EnableHGTDExtension = False
-    flags.Tracking.recoChain = [TrackingComponent.ValidateActsAmbiguityResolution]
+    flags.Tracking.recoChain = [TrackingComponent.ActsValidateAmbiguityResolution]
 
-def actsValidateGSFFlags(flags):
+def actsValidateGSFFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
     from ActsConfig.ActsConfigFlags import TrackFitterType
     flags.Acts.trackFitterType = TrackFitterType.GaussianSumFitter
 
-def actsBenchmarkSpotFlags(flags):
+def actsBenchmarkSpotFlags(flags) -> None:
     """flags for Reco_tf with CA used for becnkmarking with SPOT"""
     flags.Tracking.recoChain = [TrackingComponent.BenchmarkSpot]

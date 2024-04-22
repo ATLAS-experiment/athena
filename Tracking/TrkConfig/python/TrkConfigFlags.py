@@ -45,11 +45,11 @@ class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
     ActsChain = "ActsChain"  # full Acts Chain
     # Validation options
-    ValidateActsClusters = "ValidateActsClusters"
-    ValidateActsSpacePoints = "ValidateActsSpacePoints"
-    ValidateActsSeeds = "ValidateActsSeeds"
-    ValidateActsTracks = "ValidateActsTracks"
-    ValidateActsAmbiguityResolution = "ValidateActsAmbiguityResolution"
+    ActsValidateClusters = "ActsValidateClusters"
+    ActsValidateSpacePoints = "ActsValidateSpacePoints"
+    ActsValidateSeeds = "ActsValidateSeeds"
+    ActsValidateTracks = "ActsValidateTracks"
+    ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
     # Benchmarking
     BenchmarkSpot = "BenchmarkSpot"
     # GNN
@@ -510,11 +510,11 @@ def createTrackingConfigFlags():
     from ActsConfig.ActsTrackingPassFlags import (
         createActsTrackingPassFlags,
         createActsConversionTrackingPassFlags,
-        createValidateActsClustersTrackingPassFlags,
-        createValidateActsSpacePointsTrackingPassFlags,
-        createValidateActsSeedsTrackingPassFlags,
-        createValidateActsTracksTrackingPassFlags,
-        createValidateActsAmbiguityResolutionTrackingPassFlags,
+        createActsValidateClustersTrackingPassFlags,
+        createActsValidateSpacePointsTrackingPassFlags,
+        createActsValidateSeedsTrackingPassFlags,
+        createActsValidateTracksTrackingPassFlags,
+        createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsBenchmarkSpotTrackingPassFlags
     )
 
@@ -522,16 +522,16 @@ def createTrackingConfigFlags():
                           createActsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsConversionPass',
                           createActsConversionTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsClustersPass",
-                          createValidateActsClustersTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsSpacePointsPass",
-                          createValidateActsSpacePointsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsSeedsPass",
-                          createValidateActsSeedsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsTracksPass",
-                          createValidateActsTracksTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsAmbiguityResolutionPass",
-                          createValidateActsAmbiguityResolutionTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateClustersPass",
+                          createActsValidateClustersTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateSpacePointsPass",
+                          createActsValidateSpacePointsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateSeedsPass",
+                          createActsValidateSeedsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",
+                          createActsValidateTracksTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
+                          createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
                           createActsBenchmarkSpotTrackingPassFlags, prefix=True)
 
