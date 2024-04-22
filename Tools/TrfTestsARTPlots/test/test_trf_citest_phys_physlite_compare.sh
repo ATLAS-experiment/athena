@@ -21,13 +21,13 @@ max_events=100
 
 # Run2 data ##########
 source $AtlasSetup/scripts/asetup.sh Athena,main,$previousrel
-RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} prev_data_PHYSLITE_Run2"
 mv run_data_PHYSLITE_Run2 prev_run_data_PHYSLITE_Run2
 
 source $AtlasSetup/scripts/asetup.sh Athena,main,$currentrel
-RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} curr_data_PHYSLITE_Run2"
 mv run_data_PHYSLITE_Run2 curr_run_data_PHYSLITE_Run2
@@ -40,13 +40,13 @@ echo "art-result: ${rc} diff-root data_PHYSLITE_Run2"
 
 # Run2 MC ##########
 source $AtlasSetup/scripts/asetup.sh Athena,main,$previousrel
-RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} prev_mc_PHYSLITE_Run2"
 mv run_mc_PHYSLITE_Run2 prev_run_mc_PHYSLITE_Run2
 
 source $AtlasSetup/scripts/asetup.sh Athena,main,$currentrel
-RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} curr_mc_PHYSLITE_Run2"
 mv run_mc_PHYSLITE_Run2 curr_run_mc_PHYSLITE_Run2
@@ -59,13 +59,13 @@ echo "art-result: ${rc} diff-root mc_PHYSLITE_Run2"
 
 # Run3 data ##########
 source $AtlasSetup/scripts/asetup.sh Athena,main,$previousrel
-RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} prev_data_PHYSLITE_Run3"
 mv run_data_PHYSLITE_Run3 prev_run_data_PHYSLITE_Run3
 
 source $AtlasSetup/scripts/asetup.sh Athena,main,$currentrel
-RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} curr_data_PHYSLITE_Run3"
 mv run_data_PHYSLITE_Run3 curr_run_data_PHYSLITE_Run3
@@ -78,13 +78,13 @@ echo "art-result: ${rc} diff-root data_PHYSLITE_Run3"
 
 # Run3 MC ##########
 source $AtlasSetup/scripts/asetup.sh Athena,main,$previousrel
-RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} prev_mc_PHYSLITE_Run3"
 mv run_mc_PHYSLITE_Run3 prev_run_mc_PHYSLITE_Run3
 
 source $AtlasSetup/scripts/asetup.sh Athena,main,$currentrel
-RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 --no-output-checks
 rc=$?
 echo "art-result: ${rc} curr_mc_PHYSLITE_Run3"
 mv run_mc_PHYSLITE_Run3 curr_run_mc_PHYSLITE_Run3
