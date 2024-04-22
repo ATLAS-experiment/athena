@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict as odict
 
@@ -122,7 +122,7 @@ class SortingAlgo(TopoAlgo):
                     variable.value = ((variable.value - _mu_for_decision ) if variable.value>0 else variable.value)
             confObj["variableParameters"].append(odict([("name", variable.name),("value", variable.value)]))
 
-            if type(variable.value) == float:
+            if type(variable.value) is float:
                 raise RuntimeError("In algorithm %s the variable %s with value %r is of type float but must be int" % (self.name,variable.name,variable.value))
         return confObj
 
@@ -168,7 +168,7 @@ class DecisionAlgo(TopoAlgo):
                             if (len(self.inputs)>1 and (variable.name==_minet+str(tobid+1) or (tobid==0 and variable.name==_minet))) or (len(self.inputs)==1 and (variable.name.find(_minet)>=0)):
                                 variable.value = ((variable.value - _mu_for_decision ) if variable.value>0 else variable.value)
 
-            if type(variable.value) == float:
+            if type(variable.value) is float:
                 raise RuntimeError("In algorithm %s the variable %s with value %r is of type float but must be int" % (self.name,variable.name,variable.value))
 
             if variable.selection >= 0:

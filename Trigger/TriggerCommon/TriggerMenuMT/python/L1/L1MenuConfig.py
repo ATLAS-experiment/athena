@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 from importlib import import_module
@@ -180,7 +180,7 @@ class L1MenuConfig(object):
         for cat in AlgCategory.getAllCategories():
             outputLines = []
             for algo in self._registeredTopoAlgos[cat].values():
-                outputLines += algo.outputs if (type(algo.outputs) == list) else [ algo.outputs ]
+                outputLines += algo.outputs if (type(algo.outputs) is list) else [ algo.outputs ]
             _topoTriggers[cat] = sorted(outputLines)
             log.info("... found %i topo triggerlines (source: %s)", len(_topoTriggers[cat]), cat )
             log.debug("%r", _topoTriggers[cat])
@@ -542,7 +542,7 @@ class L1MenuConfig(object):
                 if connDef["type"] == "ctpin" or connDef["format"] != "multiplicity":
                     continue
                 for thrName in connDef["thresholds"]:
-                    if type(thrName) == tuple:
+                    if type(thrName) is tuple:
                         (thrName, _) = thrName
                     if (thrName is None) or (thrName in self.l1menu.thresholds):
                         continue
@@ -571,7 +571,7 @@ class L1MenuConfig(object):
                     continue
                 for sGrp in connDef["signalGroups"]:
                     for thrName in sGrp["signals"]:
-                        if type(thrName) == tuple:
+                        if type(thrName) is tuple:
                             (thrName, _) = thrName
                         if thrName is None or thrName in self.l1menu.thresholds:
                             continue
@@ -588,12 +588,12 @@ class L1MenuConfig(object):
                 if connDef["type"] != "ctpin":
                     continue
                 for entry in connDef["thresholds"]:
-                    if type(entry) == dict:
+                    if type(entry) is dict:
                         # section that defines topo legacy thresholds 
                         thrNames = sum([x.outputlines for x in entry["algorithms"]],[])
-                    elif type(entry) == str:
+                    elif type(entry) is str:
                         thrNames = [ entry ]
-                    elif type(entry) == tuple:
+                    elif type(entry) is tuple:
                         thrNames = [ entry[0] ]
 
                     for thrName in thrNames:
