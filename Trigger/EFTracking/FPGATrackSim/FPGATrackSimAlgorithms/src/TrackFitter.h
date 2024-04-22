@@ -1,13 +1,12 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TRACKFITTER_H
 #define TRACKFITTER_H
 
 /**
- * @author Unknown
- * @date Unknown
+ * @author Riley Xu riley.xu@cern.ch
+ * @date March 3, 2020
  *
- * Major update March 3, 2020 - Riley Xu riley.xu@cern.ch
  *
  * This class fits tracks from roads.
  */
@@ -19,7 +18,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
 
-#include <list>
 #include <vector>
 
 class TrackFitter
