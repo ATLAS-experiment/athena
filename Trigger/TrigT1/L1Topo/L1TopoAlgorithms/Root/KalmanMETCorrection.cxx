@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * KalmanMETCorrection.cpp
  * Created by Joerg Stelzer on 11/16/12.
+ * Re-written by Ralf Gugel on 04/19/24.
  *
  * @brief algorithm calculates the KF correction per jet , get new XE and apply cut 
  *
@@ -21,7 +22,7 @@
 // Bitwise implementation utils
 #include "L1TopoSimulationUtils/L1TopoDataTypes.h"
 #include "L1TopoSimulationUtils/Trigo.h"
-#include "L1TopoSimulationUtils/Hyperbolic.h"
+#include "L1TopoSimulationUtils/Conversions.h"
 //
 
 REGISTER_ALG_TCS(KalmanMETCorrection)
@@ -30,8 +31,7 @@ TCS::KalmanMETCorrection::KalmanMETCorrection(const std::string & name) : Decisi
 {
    defineParameter("InputWidth", 9);
    defineParameter("NumResultBits", 6);
-   constexpr size_t nWeightWords = 49;
-   for (size_t weightIndex = 0; weightIndex < nWeightWords; weightIndex++) {
+   for (size_t weightIndex = 0; weightIndex < TCS::KFMET::nWeightWords; weightIndex++) {
       defineParameter("weights"+std::to_string(weightIndex), 0);   
    }
    defineParameter("MinET", 0);
@@ -66,6 +66,40 @@ TCS::KalmanMETCorrection::initialize() {
 
    TRG_MSG_INFO("number output : " << numberOutputBits());
    
+   //retrieve all weight words (in compacted representation)
+   std::vector<unsigned> weightWords(TCS::KFMET::nWeightWords);
+   for (size_t weightIndex = 0; weightIndex < TCS::KFMET::nWeightWords; weightIndex++) {
+      weightWords[weightIndex] = parameter("weights"+std::to_string(weightIndex)).value();
+   }
+   //unpack and convert individual weights
+   for (size_t iET=0; iET < TCS::KFMET::nLogEtBins; ++iET) {
+      for (size_t jEta=0; jEta < TCS::KFMET::nEtaBins; ++jEta) {
+          if (jEta == TCS::KFMET::nEtaBins-1) {
+            p_correctionLut[jEta][iET] = 0; //eta fallback bin
+            continue;
+          }
+          //assuming here that weights are max. 32 bits each to simplify unpacking logic
+          size_t startBit = (iET + jEta * TCS::KFMET::nLogEtBins) * TCS::KFMET::correctionBitWidth;
+          constexpr unsigned weightMask = (1 << TCS::KFMET::correctionBitWidth)-1;
+          unsigned rawValue = ( weightWords[startBit/32] >> (startBit%32) ) & weightMask;
+          int nOverflowBits = (startBit%32) + TCS::KFMET::correctionBitWidth - 32;
+          if (nOverflowBits > 0) {
+            //overflow into next word
+            //          ( next word & bit mask for parts of 2nd word ) << bits already taken from previus word
+            rawValue |= (weightWords[startBit/32 + 1] & ( (1 << nOverflowBits) - 1 ) ) <<  (TCS::KFMET::correctionBitWidth - nOverflowBits);
+          }
+          //convert raw value to suitable signed integer (assuming 2's complement)
+          p_correctionLut[jEta][iET] = TSU::toSigned(rawValue, TCS::KFMET::correctionBitWidth );
+          /*
+          if (rawValue >> (TCS::KFMET::correctionBitWidth-1) == 0) { //sign bit is not set
+            p_correctionLut[jEta][iET] = rawValue;
+          } else {
+            constexpr int twosComplementOffset = 1 << TCS::KFMET::correctionBitWidth; // 2^bitwidth
+            p_correctionLut[jEta][iET] = rawValue - twosComplementOffset;
+          }
+          */
+      }
+   }
    
    return StatusCode::SUCCESS;
 }
@@ -74,87 +108,60 @@ TCS::KalmanMETCorrection::initialize() {
 
 TCS::StatusCode
 TCS::KalmanMETCorrection::processBitCorrect( const std::vector<TCS::TOBArray const *> & input,
-                      const std::vector<TCS::TOBArray *> & output,
+                      const std::vector<TCS::TOBArray *> & /*output*/,
                       Decision & decision )
 
 {
-
+   
+   if (isLegacyTopo()){
+      //KFMET was never fully commissioned on legacy L1Topo, hence, simply ignore
+      return TCS::StatusCode::SUCCESS;
+   }
+   
    if(input.size()!=2) {
       TCS_EXCEPTION("KalmanMETCorrection alg must have exactly two input list (jets and MET list), but got " << input.size());
    }
-    //TEMPORARILY TURNED INTO A STUB (to avoid understood exceptions)
-    // TODO: re-write based on Run 3 prescription
-    return TCS::StatusCode::SUCCESS;
-
+   
    const TCS::GenericTOB & met = (*input[0])[0];
-
-   double  KFmet = 0;
-   double KFmetphi = 0;
-//   double summetx = met.Et()*cos(met.phiDouble());
-//   double summety = met.Et()*sin(met.phiDouble());
-   double summetx = met.Ex();
-   double summety = met.Ey();
-   double corrfactor = 0;
-  
-   TRG_MSG_DEBUG("metsumx " << summetx << " metsumy " << summety );
- 
-   KFLUT  LUTobj;
-
-   // loop over  jets
+   int64_t metXY[2] {met.Ex(), met.Ey()};
+   int64_t jetSumXY[2] {0, 0};
    for( TOBArray::const_iterator tob = input[1]->begin(); 
            tob != input[1]->end() && distance( input[1]->begin(), tob) < p_NumberLeading2;
-           ++tob) 
-         {
-
-       if( (*tob)->Et() <= p_MinEt ) continue; // E_T cut
-       int ipt = LUTobj.getetbin((*tob)->Et());
-       int jeta = LUTobj.getetabin(abs((*tob)->etaDouble()));   //etaDouble = 0.1 * eta
-
-       corrfactor = LUTobj.getcorrKF(ipt,jeta);   
-
-       // This part of the code has to be reviewed again for phase1 BW simulation
-       // Algorithm crashing when jJet inputs are enabled in the menu
-       float cosphi;
-       float sinphi;
-       if (isLegacyTopo()){
-	 cosphi = TSU::Kinematics::calcCosLegacy((*tob)->phi());
-	 sinphi = TSU::Kinematics::calcSinLegacy((*tob)->phi());
-       }
-       else {
-	 cosphi = TSU::Kinematics::calcCos((*tob)->phi());
-	 sinphi = TSU::Kinematics::calcSin((*tob)->phi());
-       }
-
-       summetx += (-1.)*(*tob)->Et()*cosphi*corrfactor ;
-       summety += (-1.)*(*tob)->Et()*sinphi*corrfactor ;
-            
-
-        TRG_MSG_DEBUG("corr  " << corrfactor);
-	TRG_MSG_DEBUG("metsumx " << summetx << " metsumy " << summety );
-
-       corrfactor = 0;
-  }
-   
-   
-   KFmet = sqrt(summetx*summetx + summety*summety);
-
-   if (KFmet > 0 ) KFmetphi=isLegacyTopo()?TSU::Trigo::atan2leg(summetx,summety):TSU::Trigo::atan2(summetx,summety);
-
-   for(unsigned int i=0; i<numberOutputBits(); ++i) {
-
-      bool accept = KFmet > p_XE[i];
-
-      decision.setBit( i, accept );
-
-      if(accept)
-         output[i]->push_back( CompositeTOB( GenericTOB::createOnHeap( GenericTOB(KFmet,0,KFmetphi) ) ));
+           ++tob) {
+      if( (*tob)->Et() <= p_MinEt ) continue; // E_T cut
+      unsigned tobEta = abs((*tob)->eta());
+      size_t etaBin = TCS::KFMET::lookupEtaBin.count(tobEta) ?  TCS::KFMET::lookupEtaBin.at(tobEta) : TCS::KFMET::lookupEtaBinFallback;
       
-      TRG_MSG_DEBUG("Old met " << sqrt(met.Ex()*met.Ex()+met.Ey()*met.Ey()) << ". Comparing new MET (phi)" << KFmet << "(" << KFmetphi << ")" << " with cut " << p_XE[i] << ". " << (KFmet > p_XE[i]?"Pass":"Fail"));
-
+      //ignore given number of least significant bits right away
+      unsigned tobET  = (*tob)->Et() >> TCS::KFMET::jetEtBinOffset;
+      unsigned etBin = 0;
+      //KFMET LUT is binned in log2(ET) with ET in Topo's internal granularity
+      //-> determining the bin index reduces to determining the position of the higest non-zero bit
+      //   highest log2(ET) bin also acts as overflow bin
+      while (tobET > 1 && etBin < TCS::KFMET::nLogEtBins-1) {
+          etBin++;
+          tobET >>= 1;
+      }
+      int scaledEt = (*tob)->Et() * p_correctionLut[etaBin][etBin];
+      unsigned tobPhi = (*tob)->phi();
+      jetSumXY[0] += scaledEt * TSU::Trigo::CosInt.at(tobPhi);
+      jetSumXY[1] += scaledEt * TSU::Trigo::SinInt.at(tobPhi);
+      
    }
-
-
-   return TCS::StatusCode::SUCCESS;
+   
+   //compute "corrected" MET values
+   int64_t kfmetXY[2] {
+      metXY[0] + ( jetSumXY[0] >> (TCS::KFMET::correctionDecimalBitWidth + 10 /*cos/sin decimal bits*/) ),
+      metXY[1] + ( jetSumXY[1] >> (TCS::KFMET::correctionDecimalBitWidth + 10 /*cos/sin decimal bits*/) )
+   };
+   
+   uint64_t kfmetSq = kfmetXY[0] * kfmetXY[0] + kfmetXY[1] * kfmetXY[1];
+   
+   for(unsigned int i=0; i<numberOutputBits(); ++i) {
+      decision.setBit( i, kfmetSq > p_XE[i]*p_XE[i] );
+    }    
+    
+    return TCS::StatusCode::SUCCESS;
 
 }
 
@@ -164,66 +171,6 @@ TCS::KalmanMETCorrection::process( const std::vector<TCS::TOBArray const *> & in
                       Decision & decision )
 
 {
-
-   if(input.size()!=2) {
-      TCS_EXCEPTION("KalmanMETCorrection alg must have exactly two input list (jets and MET list), but got " << input.size());
-   }
-
-    //TEMPORARILY TURNED INTO A STUB (to avoid understood exceptions)
-    // TODO: re-write based on Run 3 prescription
-return TCS::StatusCode::SUCCESS;
-
-   const TCS::GenericTOB & met = (*input[0])[0];
-
-   double  KFmet = 0;
-   double KFmetphi = 0;
-//   double summetx = met.Et()*cos(met.phiDouble());
-//   double summety = met.Et()*sin(met.phiDouble());
-   double summetx = met.Ex();
-   double summety = met.Ey();
-   double corrfactor = 0;
-  
-   TRG_MSG_DEBUG("metsumx " << summetx << " metsumy " << summety );
- 
-   KFLUT  LUTobj;
-
-   // loop over  jets
-   for( TOBArray::const_iterator tob = input[1]->begin(); 
-           tob != input[1]->end() && distance( input[1]->begin(), tob) < p_NumberLeading2;
-           ++tob) 
-         {
-
-       if( (*tob)->Et() <= p_MinEt ) continue; // E_T cut
-       int ipt = LUTobj.getetbin((*tob)->Et());
-       int jeta = LUTobj.getetabin(abs((*tob)->etaDouble()));
-
-       corrfactor = LUTobj.getcorrKF(ipt,jeta);   
-       summetx += (-1.)*(*tob)->Et()*cos((*tob)->phiDouble())*corrfactor ;
-       summety += (-1.)*(*tob)->Et()*sin((*tob)->phiDouble())*corrfactor ;
-
-        TRG_MSG_DEBUG("corr  " << corrfactor);
-         TRG_MSG_DEBUG("metsumx " << summetx << " metsumy " << summety );
-
-       corrfactor = 0;
-  }
-   
-   
-   KFmet = sqrt(summetx*summetx + summety*summety);
-   if (KFmet > 0 ) KFmetphi= 10*atan2(summety,summetx);
-
-   for(unsigned int i=0; i<numberOutputBits(); ++i) {
-
-      bool accept = KFmet > p_XE[i];
-
-      decision.setBit( i, accept );
-
-      if(accept)
-         output[i]->push_back( CompositeTOB( GenericTOB::createOnHeap( GenericTOB(KFmet,0,KFmetphi) ) ));
-      
-      TRG_MSG_DEBUG("Old met " << met << ". Comparing new MET (phi)" << KFmet << "(" << KFmetphi << ")" << " with cut " << p_XE[i] << ". " << (KFmet > p_XE[i]?"Pass":"Fail"));
-
-   }
-
-
-   return TCS::StatusCode::SUCCESS;
+  //we have a bitwise correct implementation, so use it
+  return this->processBitCorrect(input, output, decision);
 }
