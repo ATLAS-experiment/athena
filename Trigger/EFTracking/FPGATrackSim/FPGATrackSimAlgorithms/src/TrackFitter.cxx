@@ -1,5 +1,5 @@
 
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include <algorithm>
 #include <iostream>
@@ -72,12 +72,17 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vec
  * fits them using the constant bank, and filters them based on the chi2 of the fit.
  */
  int TrackFitter::fitTracks(FPGATrackSimRoad *road, std::vector<FPGATrackSimTrack>& tracks)
-{
+{   
+    if (not road){
+      ATH_MSG_WARNING("road pointer is null in TrackFitter::fitTracks");
+      return FITTRACKS_BAD;
+    }
+    
     m_tracks_missinghits_track.clear();
 
     double y = 0.0;
     double x = 0.0;
-    if (road != nullptr && m_IdealCoordFitType != TrackCorrType::None ) {
+    if (m_IdealCoordFitType != TrackCorrType::None ) {
       y = road->getY();
       x = road->getX();
       ATH_MSG_DEBUG("Attempting to fit Hough road with y = " << y << ", x = " << x << ", sector = " << road->getSector());
