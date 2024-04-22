@@ -302,7 +302,7 @@ class trigRecoExecutor(athenaExecutor):
             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                 'Exception raised when selecting stream with trigbs_extractStream.py in file {0}: {1}'.format(allStreamsFileName, e))
         if splitStreamFailure != 0:
-            msg.error('trigbs_extractStream.py returned error (%s) no split BS file created', splitStreamFailure)
+            msg.warning('trigbs_extractStream.py returned error (%s) no split BS file created', splitStreamFailure)
             return 1
         else:
             # know that the format will be of the form ####._athenaHLT.####.data
