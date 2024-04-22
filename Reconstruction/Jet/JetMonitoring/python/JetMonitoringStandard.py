@@ -55,15 +55,15 @@ commonHistoSpecs = [
 
 
     # 2D histos, by concatenating 1D histo specifications :
-    "pt;m",
-    "pt;eta",
-    "phi;eta",
+    "m;pt",
+    "eta;pt",
+    "eta;phi",
 
 
     # TProfile2D : just use 3 variables. For now the sytem will automatically
     #  interpret it as a TProfile2D (the 3rd variable being profiled)
-    "phi;eta;e",  # --> Average Energy vs pt and eta
-    "phi;eta;pt", # --> Average pt vs phi and eta
+    "eta;phi;e",  # --> Average Energy vs pt and eta
+    "eta;phi;pt", # --> Average pt vs phi and eta
 
     # Histograms build from a selection of filtered jets.
     #  Use a SelectSpec dictionary to define the selection, and the histo to be drawn from it.

@@ -11,8 +11,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to           Tracking.ITkMainPass 
 Tracking.ITkMainPass           points to                        nothing 
@@ -26,8 +24,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to           Tracking.ITkMainPass 
 Tracking.ITkMainPass           points to                        nothing 
@@ -44,8 +40,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to           Tracking.ITkActsPass 
 Tracking.ITkActsPass           points to                        nothing 
@@ -59,8 +53,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to           Tracking.ITkActsPass 
 Tracking.ITkActsPass           points to                        nothing 
@@ -77,8 +69,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsClustersPass 
 Tracking.ITkValidateActsClustersPass points to                        nothing 
@@ -92,8 +82,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsClustersPass 
 Tracking.ITkValidateActsClustersPass points to                        nothing 
@@ -110,8 +98,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsSpacePointsPass 
 Tracking.ITkValidateActsSpacePointsPass points to                        nothing 
@@ -125,8 +111,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : True
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsSpacePointsPass 
 Tracking.ITkValidateActsSpacePointsPass points to                        nothing 
@@ -143,8 +127,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : True
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsSeedsPass 
 Tracking.ITkValidateActsSeedsPass points to                        nothing 
@@ -158,8 +140,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : True
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsSeedsPass 
 Tracking.ITkValidateActsSeedsPass points to                        nothing 
@@ -176,8 +156,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
 Tracking.ITkValidateActsTracksPass points to                        nothing 
@@ -191,8 +169,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : True [function]
 Tracking.ActiveConfig.doActsTrack        : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
 Tracking.ITkValidateActsTracksPass points to                        nothing 
@@ -209,8 +185,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : True
 Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsAmbiguityResolutionPass 
 Tracking.ITkValidateActsAmbiguityResolutionPass points to                        nothing 
@@ -224,8 +198,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsAmbiguityResolutionPass 
 Tracking.ITkValidateActsAmbiguityResolutionPass points to                        nothing 
@@ -242,8 +214,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkActsBenchmarkSpotPass 
 Tracking.ITkActsBenchmarkSpotPass points to                        nothing 
@@ -257,8 +227,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkActsBenchmarkSpotPass 
 Tracking.ITkActsBenchmarkSpotPass points to                        nothing 
@@ -275,8 +243,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : True
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
 Tracking.ITkValidateActsTracksPass points to                        nothing 
@@ -290,8 +256,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False [function]
 Tracking.ActiveConfig.doActsTrack        : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
 Tracking.ITkValidateActsTracksPass points to                        nothing 
@@ -308,8 +272,6 @@ Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkActsConversionPass 
 Tracking.ITkActsConversionPass points to                        nothing 
@@ -323,8 +285,6 @@ Tracking.ActiveConfig.doActsToAthenaSeed : False
 Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
 Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
-Flag categories that can be loaded dynamically
-Category                  :                 Generator name : Defined in
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkActsConversionPass 
 Tracking.ITkActsConversionPass points to                        nothing 

@@ -163,14 +163,20 @@ class ComponentAccumulator(AccumulatorCachable):
         return summary
 
     def _cleanup(self): 
-        #Delete internal data structures, to be called after all properties are transferred to the C++ application
-        #Purpose: Free memory
+        # Delete internal data structures, to be called after all properties are transferred to the C++ application
         del self._sequence
+        del self._allSequences
         del self._algorithms
         del self._conditionsAlgs
         del self._services
         del self._publicTools
         del self._auditors
+
+        # Clear all AccumulatorCaches
+        from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
+        AccumulatorDecorator.clearCache()
+
+        # Run garbage collector
         import gc
         gc.collect()
 

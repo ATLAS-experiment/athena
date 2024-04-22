@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 import unittest
@@ -51,6 +51,25 @@ class TestCache(unittest.TestCase):
         y = fac(hashwrapper(11))
         info = fac.getInfo()
         self.assertEqual(info["hits"] , 1)
+
+    def test_clear(self):
+        """Test clearing of all caches"""
+        @AccumulatorCache
+        def bar():
+            return 42
+
+        self.assertEqual(bar(), 42)
+        self.assertEqual(bar(), 42)
+        self.assertEqual(bar.getInfo()["hits"], 1)
+
+        AccumulatorDecorator.clearCache()
+        self.assertEqual(bar.getInfo()["cache_size"], 0)
+        self.assertEqual(bar.getInfo()["hits"], 0)
+        self.assertEqual(bar.getInfo()["misses"], 0)
+        self.assertEqual(bar(), 42)
+        self.assertEqual(bar.getInfo()["misses"], 1)
+        self.assertEqual(bar(), 42)
+        self.assertEqual(bar.getInfo()["hits"], 1)
 
     def test_instance_method(self):
         class Foo:
