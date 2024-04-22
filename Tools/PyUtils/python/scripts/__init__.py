@@ -11,9 +11,6 @@ acmdlib.register('diff-root', 'PyUtils.scripts.diff_root_files')
 acmdlib.register('dump-root', 'PyUtils.scripts.dump_root_file')
 acmdlib.register('gen-klass', 'PyUtils.scripts.gen_klass')
 
-acmdlib.register('merge-files', 'PyUtils.scripts.merge_files')
-acmdlib.register('filter-files', 'PyUtils.scripts.filter_files')
-
 acmdlib.register('cmake.depends', 'PyUtils.scripts.cmake_depends')
 acmdlib.register('cmake.new-skeleton', 'PyUtils.scripts.cmake_newskeleton')
 acmdlib.register('cmake.new-pkg', 'PyUtils.scripts.cmake_newpkg')
