@@ -57,7 +57,6 @@ void compare (const SiHit& p1,
 void compareWithoutPos (const SiHitCollection& p1,
               const SiHitCollection& p2)
 {
-  //assert (p1.Name() == p2.Name());
   assert (p1.size() == p2.size());
   for (size_t i = 0; i < p1.size(); i++)
     compareWithoutPos (p1[i], p2[i]);
@@ -67,7 +66,6 @@ void compareWithoutPos (const SiHitCollection& p1,
 void compare (const SiHitCollection& p1,
               const SiHitCollection& p2)
 {
-  //assert (p1.Name() == p2.Name());
   assert (p1.size() == p2.size());
   for (size_t i = 0; i < p1.size(); i++)
     compare (p1[i], p2[i]);
@@ -99,11 +97,10 @@ void compare (const SiHitCollection_p3& p1,
   // Less than the numberOfStrings as we don't require the start/end
   // positions of consecutive SiHits to match up in this case, so as all
   // delta-ray hits are grouped together they get a single entry
-  //std::cout << "p1.m_barcode.size() = " << p1.m_barcode.size() << ", p2.m_barcode.size() = " << p2.m_barcode.size() << std::endl;
-  //assert ( p1.m_barcode.size() == p2.m_barcode.size());
-  //assert ( p1.m_mcEvtIndex.size() == p2.m_mcEvtIndex.size());
-  //assert ( p1.m_evtColl.size() == p2.m_evtColl.size());
-  //assert ( p1.m_nBC.size() == p2.m_nBC.size());
+  assert ( p1.m_barcode.size() == p2.m_barcode.size());
+  assert ( p1.m_mcEvtIndex.size() == p2.m_mcEvtIndex.size());
+  assert ( p1.m_evtColl.size() == p2.m_evtColl.size());
+  assert ( p1.m_nBC.size() == p2.m_nBC.size());
   assert ( p1.m_id.size() == p2.m_id.size());
   assert ( p1.m_nId.size() == p2.m_nId.size());
 }
