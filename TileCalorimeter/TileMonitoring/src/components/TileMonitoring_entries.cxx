@@ -30,6 +30,7 @@
 #include "../TileTBPulseMonitorAlgorithm.h"
 #include "../TileTBMonitorAlgorithm.h"
 #include "../TileTBBeamMonitorAlgorithm.h"
+#include "../TileTBCellMonitorAlgorithm.h"
 
 DECLARE_COMPONENT( TileFatherMonTool )
 DECLARE_COMPONENT( TilePaterMonTool )
@@ -59,3 +60,4 @@ DECLARE_COMPONENT( TileRawChannelMonitorAlgorithm )
 DECLARE_COMPONENT( TileTBPulseMonitorAlgorithm )
 DECLARE_COMPONENT( TileTBMonitorAlgorithm )
 DECLARE_COMPONENT( TileTBBeamMonitorAlgorithm )
+DECLARE_COMPONENT( TileTBCellMonitorAlgorithm )
