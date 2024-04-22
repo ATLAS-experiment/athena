@@ -573,6 +573,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto pTRes_m = Monitored::Scalar<float>( "m_pTRes", std::fabs(Err_qOverP / qOverP) );
     fill(genericTrackGroup, pTRes_m);
 
+    auto pTRes_2fillpT_m = Monitored::Scalar<float>( "m_pTRes_2fillpT", std::fabs(Err_qOverP / qOverP) );
+    auto pT_2fillpTRes_m = Monitored::Scalar<float>( "m_pT_2fillpTRes", pT );
+    fill(genericTrackGroup, pT_2fillpTRes_m, pTRes_2fillpT_m);
+
   } //
   // end of loop on trks
   //

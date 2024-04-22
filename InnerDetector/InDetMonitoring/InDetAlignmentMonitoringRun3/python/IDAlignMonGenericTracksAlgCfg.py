@@ -204,6 +204,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'p_{T} error Vs p_{T};p_{T};p_{T} error'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange, ybins=50, ymin=0., ymax=3.)
 
+    varName = 'm_pT_2fillpTRes,m_pTRes_2fillpT;pTResVspT'
+    title = 'p_{T} Resolution Vs p_{T};p_{T};p_{T} Resolution'
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange, ybins=100, ymin=0, ymax=0.1)
+
+
     varName = 'm_p;P'
     title = 'Track Momentum P;Signed Track P [GeV];Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange)
