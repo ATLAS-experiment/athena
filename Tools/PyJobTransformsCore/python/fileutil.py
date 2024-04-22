@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -23,7 +23,7 @@ def retry_function_time( func, args, retryException,
     original exception if it still fails after a total retry time of <retryMaxTime>.
     <func>: function to be called
     <args>: tuple with the function arguments, or the single function argument"""
-    if type(args) != tuple: args = (args,)
+    if type(args) is not tuple: args = (args,)
     retryDelay = retryStartTime
     if retryDelay <= 0: retryDelay = 0.1 # avoid infinite loop
     OK = False

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 
@@ -11,7 +11,7 @@ logger = logging.getLogger("OverlayMetadataConfig")
 _fileMetadata = dict()
 
 def _getFileMD(filenames):
-    if type(filenames) == list:
+    if type(filenames) is list:
         filename = filenames[0]
     else:
         filename = filenames
