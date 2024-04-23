@@ -86,7 +86,7 @@ namespace FlavorTagDiscriminants {
         "Lepton truth classification tool"};
 
     // Defining a map for proper muon origin labels 
-    std::map<Truth::Type,unsigned int> m_muTruthMap = {
+    std::unordered_map<Truth::Type,unsigned int> m_muTruthMap = {
       {Truth::Type::Unknown, 0}, //Fake(Uknown) muon
       {Truth::Type::KnownUnknown, 1}, //KnownUknown muon
       {Truth::Type::PromptMuon, 2}, //Prompt muon
