@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_TRANSIENTADDRESS_H
@@ -175,6 +175,8 @@ namespace SG {
 
     ///< all alias names for a DataObject. They come from setAlias
     TransientAliasSet m_transientAlias;
+
+    static const std::string s_emptyString;
   };
   /////////////////////////////////////////////////////////////////////
   // inlined code:
@@ -212,8 +214,7 @@ namespace SG {
     if (m_name.isValid()) {
       return *m_name.ptr();
     }
-    static const std::string empty;
-    return empty;
+    return s_emptyString;
   }
 
   /// Get the primary (hashed) SG key.
