@@ -1,5 +1,5 @@
 #! /bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Class to obtain the chain configuration dictionary from the short or long name
@@ -639,7 +639,7 @@ def dictFromChainName(flags, chainInfo):
     """
 
     # these if/elif/else statements are due to temporary development
-    if type(chainInfo) == str:
+    if type(chainInfo) is str:
         chainName       = chainInfo
         l1Thresholds    = []
         stream          = ''

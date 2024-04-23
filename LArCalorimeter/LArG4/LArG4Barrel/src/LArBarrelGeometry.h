@@ -69,6 +69,7 @@ namespace LArG4 {
       double m_rMaxAccordion;
       double m_zMinBarrel;
       double m_zMaxBarrel;
+      double m_zMaxBarrelDMMargin;
       double m_etaMaxBarrel;
 
       // GU 11/06/2003  total number of cells in phi

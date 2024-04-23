@@ -9,6 +9,9 @@
 #   - emuMenuTest: chains are generated in the menu framework as HLT_TestChain**, and run on emulated data 
 #   - emuManual: chains are genrated manually and run on emulated data
 
+import itertools
+import functools
+
 from AthenaCommon.Logging import logging
 log = logging.getLogger('test_menu_cf_CA')
 from AthenaCommon.Constants import DEBUG
@@ -43,32 +46,35 @@ def set_flags(flags):
 
 
 def configure(flags, args):
-   
+
     from TriggerMenuMT.CFtest.generateCFChains import generateCFChains
     from TriggerMenuMT.CFtest.EmuStepProcessingConfig import generateEmuEvents, generateChainsManually, generateEmuMenu
     
     if args.menuType == 'menuManual': 
         # test generating chains from real sequences and real data
-        generateCFChains(flags)     
+        menu = generateCFChains(flags)
+        chains = list(itertools.chain(*menu.chainsInMenu.values()))
     elif args.menuType == 'emuMenuTest': 
         # test using menu code (HLT_TestChain) with dummy sequences and events
         generateEmuEvents()
-        generateEmuMenu(flags)
+        chains = generateEmuMenu(flags)
     elif args.menuType == 'emuManual':
         # test generating emulation chains with dummy segments and events
         generateEmuEvents()
-        generateChainsManually(flags)
+        chains = generateChainsManually(flags)
     else:
         log.error("Input parameter %s not accepted",args.menuType)
 
+    return chains
 
-def makeMenu(flags):
+def makeMenu(flags, args):
     from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu
     generateL1Menu(flags)
     # from here generate the ControlFlow and the Dataflow
     # doing the same as menu.generateMT()
+    chains = configure(flags, args)
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import makeHLTTree
-    menuCA, cfseqlist = makeHLTTree(flags)
+    menuCA, cfseqlist = makeHLTTree(flags, chains)
     return menuCA
 
 def main():
@@ -94,9 +100,8 @@ def main():
     del _allflags    
     flags.lock()
 
-    configure(flags, args)
     from TriggerJobOpts.TriggerConfig import triggerRunCfg
-    menu = triggerRunCfg(flags, menu=makeMenu)
+    menu = triggerRunCfg(flags, menu=functools.partial(makeMenu, args=args))
     cfg.merge(menu)
     cfg.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
 

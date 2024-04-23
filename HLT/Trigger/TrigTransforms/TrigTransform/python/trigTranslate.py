@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @brief: Trigger translator to setup arguments for athenaHLT
 # @details: to be used with Trig_tf_reco.py and trigRecoExe.py
@@ -99,7 +99,7 @@ def getTranslated(runArgs, name, substep, first, output):
             for f in v:
                 optionList.append(item.format(k, f))
         else:
-            if type(v) == list:
+            if type(v) is list:
                 v = ''.join(v)
             optionList.append(item.format(k, v))
 

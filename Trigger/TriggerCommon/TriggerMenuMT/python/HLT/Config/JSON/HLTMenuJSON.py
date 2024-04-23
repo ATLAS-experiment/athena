@@ -80,7 +80,7 @@ def __getSequencerAlgs(stepsData):
             sequencerAlgs[ sequencer.getName() ] = list(map(lambda x: x.getFullJobOptName(), findAllAlgorithms(sequencer)))
     return sorted(sequencerAlgs.items(), key=lambda t: t[0])
 
-def generateJSON(flags, chainDicts, chainConfigs, HLTAllSteps):
+def generateJSON(flags, chainDicts, HLTAllSteps):
     """ Generates JSON given the ChainProps and sequences
     """
     # Menu dictionary that is used to create the JSON content
