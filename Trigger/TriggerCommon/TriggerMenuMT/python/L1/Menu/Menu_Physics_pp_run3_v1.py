@@ -360,7 +360,7 @@ def defineMenu():
         'L1_AFP_A_AND_C_TOF_CEP-CjJ100','L1_AFP_A_AND_C_TOF_T0T1_CEP-CjJ100',
 
         #ATR-28563
-        'L1_LLPDPHI-jXE27-jJ27',
+        'L1_LLPDPHI-jXE40-jJ40',
         
         ]
 

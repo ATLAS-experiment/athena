@@ -16075,7 +16075,7 @@ HLT_j20_calratiovar_j70_j50a_j0_DJMASS900j50dphi260x200deta_roiftf_preselj20emf7
   stepFeatures:
     0: 4
     1: 48
-HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE27-jJ27:
+HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40:
   eventCount: 0
   stepCounts:
     0: 3
@@ -28347,8 +28347,8 @@ HLT_noalg_L1J75:
   eventCount: 9
 HLT_noalg_L1J85:
   eventCount: 5
-HLT_noalg_L1LLPDPHI-jXE27-jJ27:
-  eventCount: 11
+HLT_noalg_L1LLPDPHI-jXE40-jJ40:
+  eventCount: 8
 HLT_noalg_L1MU10BO:
   eventCount: 7
 HLT_noalg_L1MU10BOM:

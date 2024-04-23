@@ -1534,7 +1534,7 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
         #LLPDPHI - ATR-28563
-        toponame = "0DPHI15-jXE27delay-jJ27s"
+        toponame = "0DPHI10-jXE40delay-jJ40s"
         alg = AlgConf.DeltaPhiIncl2( name = toponame, inputs = ['jXEs', 'jJs'], outputs = [ toponame ])
         alg.addgeneric('NumResultBits', 1)            
         alg.addgeneric('Delay1', 1)
@@ -1543,10 +1543,10 @@ class TopoAlgoDef:
         alg.addgeneric('InputWidth2', HW.jJetOutputWidthSort)
         alg.addgeneric('MaxTob1', 1)
         alg.addgeneric('MaxTob2', 6)
-        alg.addvariable('MinET1', 27*_et_conversion)
-        alg.addvariable('MinET2', 27*_et_conversion)
+        alg.addvariable('MinET1', 40*_et_conversion)
+        alg.addvariable('MinET2', 40*_et_conversion)
         alg.addvariable('MinDeltaPhi', 0*_phi_conversion)
-        alg.addvariable('MaxDeltaPhi', 15*_phi_conversion)
+        alg.addvariable('MaxDeltaPhi', 10*_phi_conversion)
         tm.registerTopoAlgo(alg)
 
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
