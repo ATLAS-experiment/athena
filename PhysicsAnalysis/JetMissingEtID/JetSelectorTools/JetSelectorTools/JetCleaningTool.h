@@ -45,6 +45,7 @@ public:
   /** Levels of cut */
   enum CleaningLevel
   {
+    SuperLooseBadLLP,
     VeryLooseBadLLP,
     LooseBad,
     LooseBadLLP,

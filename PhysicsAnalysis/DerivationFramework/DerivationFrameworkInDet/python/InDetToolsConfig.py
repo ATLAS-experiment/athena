@@ -398,6 +398,17 @@ def InDetTrackSelectionToolWrapperCfg(
             name, **kwargs), primary=True)
     return acc
 
+# Tool for decorating the track and calo isolation
+
+
+def IsolationTrackDecoratorCfg(flags, name, **kwargs):
+    """Confiure the isolation track decorator tool"""
+    acc = ComponentAccumulator()
+    IsolationTrackDecorator = CompFactory.DerivationFramework.IsolationTrackDecorator
+    acc.addPublicTool(IsolationTrackDecorator(name, **kwargs),
+                      primary = True)
+    return acc
+
 # Tool for thinning TrackParticle containers via string selection
 
 

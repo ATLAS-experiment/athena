@@ -107,3 +107,8 @@ def KalmanVertexUpdatorCfg(flags, name='KalmanVertexUpdator', **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.Trk.KalmanVertexUpdator(name, **kwargs))
     return acc
+
+def KalmanVertexTrackUpdatorCfg(flags, name='KalmanVertexTrackUpdator', **kwargs):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.Trk.KalmanVertexTrackUpdator(name, **kwargs))
+    return acc
