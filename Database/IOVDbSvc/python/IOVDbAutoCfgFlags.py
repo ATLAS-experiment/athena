@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('IOVDbAutoCfgFlags')
@@ -20,7 +20,7 @@ def getDatabaseInstanceDefault(prevFlags):
     try:
         year=int(projectName[4:6])
     except Exception:
-        log.warning("Failed to extract year from project tag "+ projectName+". Guessing run2")
+        log.warning("Failed to extract year from project tag "+ projectName+". Assuming CONDBR2.")
         return "CONDBR2"
         
     if (year>13):
