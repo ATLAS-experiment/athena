@@ -8,7 +8,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def FullScanLRTMenuSequence(flags):
+def FullScanLRTMenuSequenceGenCfg(flags):
 
     # Construct the full reco sequence
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTCfg

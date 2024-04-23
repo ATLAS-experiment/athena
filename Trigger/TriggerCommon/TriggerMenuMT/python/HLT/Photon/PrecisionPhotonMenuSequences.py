@@ -15,7 +15,7 @@ def tag(ion):
 
 
 @AccumulatorCache
-def precisionPhotonSequenceCfg(flags, ion=False, is_probe_leg=False):
+def precisionPhotonSequenceGenCfg(flags, ion=False, is_probe_leg=False):
     """ This function creates the PrecisionPhoton sequence"""
     # Prepare first the EventView
     InViewRoIs="PrecisionPhotonRoIs"                                          

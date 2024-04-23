@@ -13,7 +13,7 @@ def tag(ion):
 
 
 @AccumulatorCache
-def precisionElectronSequence_GSFCfg(flags, ion=False, variant='_GSF', is_probe_leg=False):
+def precisionElectron_GSFSequenceGenCfg(flags, ion=False, variant='_GSF', is_probe_leg=False):
     """ 
     Similar setup as ../PrecisionElectronMenuSequences.py; tailored for GSF chains
     """
@@ -34,6 +34,6 @@ def precisionElectronSequence_GSFCfg(flags, ion=False, variant='_GSF', is_probe_
     selAcc.mergeHypo(TrigEgammaPrecisionElectronHypoAlgCfg(flags, "TrigEgamma"+tag(ion)+"HypoAlg"+variant+probeInfo, TrigEgammaKeys.precisionElectronContainer ))
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict, isProbe=is_probe_leg)
 
-def precisionElectronSequence_GSF_LRTCfg(flags, is_probe_leg=False):
+def precisionElectron_GSF_LRTSequenceGenCfg(flags, is_probe_leg=False):
     # This is to call precisionElectronMenuSequence for the _LRT variant
-    return precisionElectronSequence_GSFCfg(flags, ion=False, variant='_LRTGSF',is_probe_leg=is_probe_leg)
+    return precisionElectron_GSFSequenceGenCfg(flags, ion=False, variant='_LRTGSF',is_probe_leg=is_probe_leg)

@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 # This produces a menu sequence for a step that runs FS FTF tracking
 # No selection is applied -- all rejection comes from subsequent steps
-def getFullScanRecoOnlySequence(flags):
+def getFullScanRecoOnlySequenceGenCfg(flags):
 
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 

@@ -84,7 +84,7 @@ def EnhancedBiasHypoToolGen(chainDict):
     return tool
 
 
-def enhancedBiasMenuSequence(flags):
+def enhancedBiasMenuSequenceGenCfg(flags):
 
     reco = enhancedBiasReco(flags)
     selAcc = SelectionCA("enhancedBiasSequence") 
@@ -105,6 +105,6 @@ class EnhancedBiasChainConfiguration(ChainConfigurationBase):
         chainSteps = []
         log.debug("Assembling chain for %s", self.chainName)
 
-        chainSteps.append( self.getStep(flags, 1, "EnhancedBias", [enhancedBiasMenuSequence]) )
+        chainSteps.append( self.getStep(flags, 1, "EnhancedBias", [enhancedBiasMenuSequenceGenCfg]) )
 
         return self.buildChain(chainSteps)
