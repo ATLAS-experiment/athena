@@ -149,6 +149,8 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
             //if so then we will decorate the charged FE with the fraction of cluster energy that was matched
             if (!m_useMuonTopoClusters){
                 const xAOD::CaloCluster* muonCluster = muon->cluster();
+                //these clusters are expected to be nullptr sometimes
+                if (!muonCluster) continue;                
                 unsigned int counter = 0;
                 for (auto thisCluster : FE->otherObjects()){
                     const xAOD::CaloCluster* thisCaloCluster = dynamic_cast<const xAOD::CaloCluster*>(thisCluster);
