@@ -44,6 +44,7 @@ class PixelClusterSplittingType(FlagEnum):
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
     ActsChain = "ActsChain"  # full Acts Chain
+    ActsHeavyIon = "ActsHeavyIon"
     # Validation options
     ActsValidateClusters = "ActsValidateClusters"
     ActsValidateSpacePoints = "ActsValidateSpacePoints"
@@ -515,7 +516,8 @@ def createTrackingConfigFlags():
         createActsValidateSeedsTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
-        createActsBenchmarkSpotTrackingPassFlags
+        createActsBenchmarkSpotTrackingPassFlags,
+        createActsHeavyIonTrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
@@ -534,6 +536,8 @@ def createTrackingConfigFlags():
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
                           createActsBenchmarkSpotTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
+                          createActsHeavyIonTrackingPassFlags, prefix=True)
 
     # GNN
     from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags

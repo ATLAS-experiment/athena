@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -21,6 +21,29 @@ def createActsTrackingPassFlags():
     # enabled. Ambi. can be activated/deactivated with 
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+
+    return icf
+
+def createActsHeavyIonTrackingPassFlags():
+    icf = createITkHeavyIonTrackingPassFlags()
+    icf.extension = "ActsHeavyIon"
+    deactivateAthenaComponents(icf)
+    icf.doAthenaCluster = True
+    icf.doAthenaToActsCluster = True
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    # If we do not want acts ambi resolution, first do the track convertion
+    # and then the Athena ambi
+    icf.doActsToAthenaTrack = lambda pcf : not pcf.Acts.doAmbiguityResolution
+    icf.doAthenaAmbiguityResolution = lambda pcf : not pcf.Acts.doAmbiguityResolution
+    # If we want acts ambi, first do the ambi and then convert the tracks
+    # without Athena ambi
+    icf.doActsAmbiguityResolution = lambda pcf : pcf.Acts.doAmbiguityResolution
+    icf.doActsToAthenaResolvedTrack = lambda pcf : pcf.Acts.doAmbiguityResolution
+
+    # Deactivate CTIDE processor fit
+    icf.doAmbiguityProcessorTrackFit = False
 
     return icf
 

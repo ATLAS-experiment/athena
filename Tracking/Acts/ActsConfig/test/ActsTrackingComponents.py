@@ -22,6 +22,7 @@ if __name__ == "__main__":
     from TrkConfig.TrkConfigFlags import TrackingComponent
     configurations = ["Main",
                       "Acts",
+                      "ActsHeavyIon",
                       "ActsValidateClusters",
                       "ActsValidateSpacePoints",
                       "ActsValidateSeeds",
