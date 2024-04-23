@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 @AccumulatorCache
-def getBJetSequenceCfg(flags, jc_name=None):
+def getBJetSequenceGenCfg(flags, jc_name=None):
     if not jc_name:
         raise ValueError("jet collection name is empty - pass the full HLT jet collection name to getBJetSequenceCfg().")
 

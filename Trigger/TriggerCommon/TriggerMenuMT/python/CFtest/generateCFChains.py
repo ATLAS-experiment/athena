@@ -19,13 +19,13 @@ def generateCFChains(flags):
     # egamma chains
     ##################################################################
     if 'Egamma' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
-        from TriggerMenuMT.HLT.Electron.FastElectronMenuSequences import fastElectronSequenceCfg
-        from TriggerMenuMT.HLT.Electron.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloSequenceGenCfg
+        from TriggerMenuMT.HLT.Electron.FastElectronMenuSequences import fastElectronSequenceGenCfg
+        from TriggerMenuMT.HLT.Electron.PrecisionCaloMenuSequences import precisionCaloSequenceGenCfg
 
-        fastCaloSeq = functools.partial(fastCaloMenuSequenceCfg, flags, name='Electron' )
-        electronSeq = functools.partial(fastElectronSequenceCfg, flags )
-        precisionCaloSeq = functools.partial(precisionCaloSequenceCfg, flags )
+        fastCaloSeq = functools.partial(fastCaloSequenceGenCfg, flags, name='Electron' )
+        electronSeq = functools.partial(fastElectronSequenceGenCfg, flags )
+        precisionCaloSeq = functools.partial(precisionCaloSequenceGenCfg, flags )
         
         FastCaloStep      = makeChainStep("ElectronFastCaloStep", [fastCaloSeq])
         FastElectronStep  = makeChainStep("ElectronFastTrackStep", [electronSeq])
@@ -39,12 +39,12 @@ def generateCFChains(flags):
             ]
         menu.chainsInMenu['Egamma'] += electronChains
 
-        from TriggerMenuMT.HLT.Photon.FastPhotonMenuSequences import fastPhotonSequenceCfg
-        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
+        from TriggerMenuMT.HLT.Photon.FastPhotonMenuSequences import fastPhotonSequenceGenCfg
+        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloSequenceGenCfg
 
-        fastCaloSeq            = functools.partial(fastCaloMenuSequenceCfg, flags, name='Photon' )
-        fastPhotonSeq          = functools.partial(fastPhotonSequenceCfg, flags )
-        precisionCaloPhotonSeq = functools.partial(precisionCaloSequenceCfg, flags )
+        fastCaloSeq            = functools.partial(fastCaloSequenceGenCfg, flags, name='Photon' )
+        fastPhotonSeq          = functools.partial(fastPhotonSequenceGenCfg, flags )
+        precisionCaloPhotonSeq = functools.partial(precisionCaloSequenceGenCfg, flags )
         
         FastCaloStep            = makeChainStep("PhotonFastCaloStep", [fastCaloSeq])
         fastPhotonStep          = makeChainStep("PhotonStep2", [fastPhotonSeq])
@@ -59,21 +59,24 @@ def generateCFChains(flags):
     # muon chains
     ##################################################################
     if 'Muon' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence, muCombSequence, muEFSASequence, muEFCBSequence, muEFSAFSSequence, muEFCBFSSequence
+        from TriggerMenuMT.HLT.Muon.MuonMenuSequences import (
+            muFastSequenceGenCfg, muCombSequenceGenCfg, 
+            muEFSASequenceGenCfg, muEFCBSequenceGenCfg, muEFSAFSSequenceGenCfg, muEFCBFSSequenceGenCfg
+        )
 
         MuonChains  = []
         # step1
-        mufastS= functools.partial(muFastSequence,flags)
+        mufastS= functools.partial(muFastSequenceGenCfg,flags)
         step1mufast=makeChainStep("Step1_muFast", [ mufastS ])
         # step2
-        mucombS = functools.partial(muCombSequence,flags)
+        mucombS = functools.partial(muCombSequenceGenCfg,flags)
         step2muComb=makeChainStep("Step2_muComb", [ mucombS ])
         # step3
-        muEFSAS = functools.partial(muEFSASequence,flags)
+        muEFSAS = functools.partial(muEFSASequenceGenCfg,flags)
         step3muEFSA=makeChainStep("Step3_muEFSA", [ muEFSAS ])
         #/step3muIso =makeChainStep("Step3_muIso",  [ muIsoSequence() ])
         # step4
-        muEFCBS = functools.partial(muEFCBSequence,flags)
+        muEFCBS = functools.partial(muEFCBSequenceGenCfg,flags)
         step4muEFCB = makeChainStep("Step4_muEFCB", [ muEFCBS ])
         emptyStep   = makeChainStep("Step2_empty", multiplicity=[])
 
@@ -101,8 +104,8 @@ def generateCFChains(flags):
         
         #FS Muon trigger
         # Full scan MS tracking step
-        muEFSAFSS = functools.partial(muEFSAFSSequence,flags)
-        muEFCBFSS = functools.partial(muEFCBFSSequence,flags)
+        muEFSAFSS = functools.partial(muEFSAFSSequenceGenCfg,flags)
+        muEFCBFSS = functools.partial(muEFCBFSSequenceGenCfg,flags)
         stepFSmuEFSA=makeChainStep("Step_FSmuEFSA", [muEFSAFSS])
         stepFSmuEFCB=makeChainStep("Step_FSmuEFCB", [muEFCBFSS])
         MuonChains += [ makeChain(flags, name='HLT_mu6noL1_L1MU5VF', L1Thresholds=["FSNOSEED"],  ChainSteps=[stepFSmuEFSA, stepFSmuEFCB])]
@@ -117,18 +120,18 @@ def generateCFChains(flags):
     from TriggerMenuMT.HLT.Jet.JetRecoCommon import jetRecoDictFromString
     def jetCaloHypoMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
-        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloHypoMenuSequence
-        return jetCaloHypoMenuSequence(flags, isPerf=False, **jetRecoDict)
+        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloHypoMenuSequenceGenCfg
+        return jetCaloHypoMenuSequenceGenCfg(flags, isPerf=False, **jetRecoDict)
 
     def jetCaloPreselMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
-        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloPreselMenuSequence
-        return jetCaloPreselMenuSequence(flags, **jetRecoDict)
+        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloPreselMenuSequenceGenCfg
+        return jetCaloPreselMenuSequenceGenCfg(flags, **jetRecoDict)
 
     def jetTrackingHypoMenuSequenceFromString(jet_def_str,clustersKey):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
-        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequence
-        return jetFSTrackingHypoMenuSequence(flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
+        from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequenceGenCfg
+        return jetFSTrackingHypoMenuSequenceGenCfg(flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
 
     if 'Jet' in flags.Trigger.enabledSignatures:
 
@@ -170,13 +173,13 @@ def generateCFChains(flags):
     # bjet chains
     ##################################################################
     if 'Bjet' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Bjet.BjetMenuSequences import getBJetSequenceCfg
+        from TriggerMenuMT.HLT.Bjet.BjetMenuSequences import getBJetSequenceGenCfg
 
         jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
         jetSeq_a4_tc_em_gsc_ftf, jetDef = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subjesgscIS_ftf",emclusters)
         jc_name = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
 
-        bjet_sec= functools.partial(getBJetSequenceCfg, flags, jc_name)
+        bjet_sec= functools.partial(getBJetSequenceGenCfg, flags, jc_name)
         
         step1 = makeChainStep("Step_jet_a4_tc_em_presel", [jetSeq_a4_tc_em_presel])
         step2 = makeChainStep("Step_jet_a4_tc_em_gsc_ftf", [jetSeq_a4_tc_em_gsc_ftf])
@@ -213,15 +216,15 @@ def generateCFChains(flags):
     # B-physics and light states chains
     ##################################################################
     if 'Bphysics' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence, muCombSequence, muEFSASequence, muEFCBSequence
+        from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequenceGenCfg, muCombSequenceGenCfg, muEFSASequenceGenCfg, muEFCBSequenceGenCfg
         from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, DimuEFComboHypoCfg
         
-        muFast = functools.partial(muFastSequence, flags)
+        muFast = functools.partial(muFastSequenceGenCfg, flags)
         step1_dimufast=makeChainStep("Step1_dimuFast", [muFast], multiplicity=[2])
-        mucombS = functools.partial(muCombSequence, flags)
+        mucombS = functools.partial(muCombSequenceGenCfg, flags)
         step2_dimuComb=makeChainStep("Step2_dimuComb", [mucombS], multiplicity=[2], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
-        muEFSAS = functools.partial(muEFSASequence, flags)
-        muEFCBS = functools.partial(muEFCBSequence, flags)
+        muEFSAS = functools.partial(muEFSASequenceGenCfg, flags)
+        muEFCBS = functools.partial(muEFCBSequenceGenCfg, flags)
 
         step3_dimuEFSA=makeChainStep("Step3_dimuEFSA", [muEFSAS], multiplicity=[2])
         step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBS], multiplicity=[2], comboHypoCfg=functools.partial(DimuEFComboHypoCfg,flags))
@@ -240,11 +243,11 @@ def generateCFChains(flags):
     ##################################################################
     doCombinedSlice = True
     if doCombinedSlice:
-        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
-        fastCaloSeq = functools.partial(fastCaloMenuSequenceCfg,flags, name='Electron')
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloSequenceGenCfg
+        fastCaloSeq = functools.partial(fastCaloSequenceGenCfg,flags, name='Electron')
         
-        from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence
-        muFast = functools.partial(muFastSequence,flags)
+        from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequenceGenCfg
+        muFast = functools.partial(muFastSequenceGenCfg,flags)
 
         comboStep_et_mufast = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast], multiplicity=[1,1])
 

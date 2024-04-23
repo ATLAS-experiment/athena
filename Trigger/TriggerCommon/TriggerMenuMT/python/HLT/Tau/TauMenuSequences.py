@@ -51,7 +51,7 @@ def _caloSeq(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauCaloMVAMenuSeq(flags, is_probe_leg=False):
+def tauCaloMVAMenuSequenceGenCfg(flags, is_probe_leg=False):
     (selAcc , menuCA) = _caloSeq(flags, is_probe_leg)
     return menuCA 
 
@@ -127,7 +127,7 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauFTFTauCoreSeq(flags, is_probe_leg=False):
+def tauFTFTauCoreSequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauCore',log)
 
     name='Core'
@@ -136,7 +136,7 @@ def tauFTFTauCoreSeq(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauFTFTauLRTSeq(flags, is_probe_leg=False):
+def tauFTFTauLRTSequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name='LRT'
     (selAcc , menuCA) = _ftfCoreSeq(newflags,name,is_probe_leg)
@@ -178,7 +178,7 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauFTFTauIsoSeq(flags, is_probe_leg=False):
+def tauFTFTauIsoSequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'Iso'
     (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
@@ -228,7 +228,7 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
+def tauPrecTrackIsoSequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'Iso'
     (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
@@ -236,7 +236,7 @@ def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauPrecTrackLRTSeq(flags, is_probe_leg=False):
+def tauPrecTrackLRTSequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name = 'LRT'
     (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
@@ -281,7 +281,7 @@ def _tauPrecSeq(flags,name,is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauTrackTwoMVASeq(flags, is_probe_leg=False):
+def tauTrackTwoMVASequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'MVA'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
@@ -289,7 +289,7 @@ def tauTrackTwoMVASeq(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauTrackTwoLLPSeq(flags, is_probe_leg=False):
+def tauTrackTwoLLPSequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauIso',log)
     name = 'LLP'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
@@ -297,7 +297,7 @@ def tauTrackTwoLLPSeq(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauTrackLRTSeq(flags, is_probe_leg=False):
+def tauTrackLRTSequenceGenCfg(flags, is_probe_leg=False):
     newflags = getFlagsForActiveConfig(flags,'tauLRT',log)
     name = 'LRT'
     (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)

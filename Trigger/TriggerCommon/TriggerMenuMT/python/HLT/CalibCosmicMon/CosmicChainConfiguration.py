@@ -16,7 +16,7 @@ def TrackCountHypoToolGen(chainDict):
     hypo.minNtrks = 1
     return hypo
 
-def CosmicsTrkSequenceCfg(flags):
+def CosmicsTrkSequenceGenCfg(flags):
 
     trkRecoSeq = InViewRecoCA("CosmicTrkRecoSeq", InViewRoIs = "CosmicRoIs")
 
@@ -71,7 +71,7 @@ class CosmicChainConfiguration(ChainConfigurationBase):
         # --------------------
         if 'cosmic_id' in self.chainName:
             steps += [  self.getStep(flags, 1, 'Empty', [EmptyMenuSequenceCfg], name="EmptyBeforeCosmicID"),
-                        self.getStep(flags, 2, 'CosmicTracking', [CosmicsTrkSequenceCfg]) ]
+                        self.getStep(flags, 2, 'CosmicTracking', [CosmicsTrkSequenceGenCfg]) ]
 
         return self.buildChain(steps)
 

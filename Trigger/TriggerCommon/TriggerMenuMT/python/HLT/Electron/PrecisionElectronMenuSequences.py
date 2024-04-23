@@ -13,7 +13,7 @@ def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Electron'
 
 @AccumulatorCache
-def precisionElectronSequenceCfg(flags, ion=False, variant='',is_probe_leg = False):
+def precisionElectronSequenceGenCfg(flags, ion=False, variant='',is_probe_leg = False):
     """ seventh step:  precision electron....."""
     
     inViewRoIs = "precisionElectron"
@@ -33,6 +33,6 @@ def precisionElectronSequenceCfg(flags, ion=False, variant='',is_probe_leg = Fal
     selAcc.mergeHypo(TrigEgammaPrecisionElectronHypoAlgCfg(flags, "TrigEgamma"+tag(ion)+"HypoAlg_noGSF"+variant+probeInfo, TrigEgammaKeys.precisionElectronContainer ))
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict, isProbe=is_probe_leg)
 
-def precisionElectronSequence_LRTCfg(flags, is_probe_leg=False):
+def precisionElectron_LRTSequenceGenCfg(flags, is_probe_leg=False):
     # This is to call precisionElectronMenuSequence for the _LRT variant
-    return precisionElectronSequenceCfg(flags, ion=False, variant='_LRT',is_probe_leg=is_probe_leg)
+    return precisionElectronSequenceGenCfg(flags, ion=False, variant='_LRT',is_probe_leg=is_probe_leg)

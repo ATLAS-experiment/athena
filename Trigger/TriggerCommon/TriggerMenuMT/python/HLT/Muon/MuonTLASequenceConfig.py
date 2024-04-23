@@ -37,7 +37,7 @@ def MuonTLASequenceCfg(flags, muons):
     selAcc.addHypoAlgo(hypo)
     return selAcc
 
-def MuonTLAMenuSequenceCfg( flags, muChainPart):
+def MuonTLAMenuSequenceGenCfg( flags, muChainPart):
     muonsIn = getMuonCollections(muChainPart)  
     selAcc=MuonTLASequenceCfg(flags, muons=muonsIn)
 

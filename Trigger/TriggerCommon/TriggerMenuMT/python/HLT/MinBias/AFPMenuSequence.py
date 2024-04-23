@@ -39,7 +39,7 @@ def AFPTrkRecoBaseSequenceCfg(flags):
 
 
 @AccumulatorCache
-def AFPTrkSequenceCfg(flags):
+def AFPTrkSequenceGenCfg(flags):
     def trigStreamerAFPHypoTool(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
 
@@ -120,7 +120,7 @@ def AFPGlobalRecoSequenceCfg(flags):
 
 
 @AccumulatorCache
-def AFPGlobalSequenceCfg(flags):
+def AFPGlobalSequenceGenCfg(flags):
     def trigStreamerAFPToFHypoTool(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
     
@@ -143,7 +143,7 @@ def AFPToFDeltaZToolGen(chainDict):
     return hypotool
 
 @AccumulatorCache
-def AFPToFDeltaZSequenceCfg(flags):
+def AFPToFDeltaZSequenceGenCfg(flags):
 
     recoAcc = AFPGlobalRecoSequenceCfg(flags)
 
@@ -181,8 +181,8 @@ if __name__ == '__main__':
     flags.lock()
 
 
-    afp_trk = AFPTrkSequenceCfg(flags)
+    afp_trk = AFPTrkSequenceGenCfg(flags)
     afp_trk.ca.printConfig(withDetails=True)
 
-    afp_glob = AFPGlobalSequenceCfg(flags)
+    afp_glob = AFPGlobalSequenceGenCfg(flags)
     afp_glob.ca.printConfig(withDetails=True)

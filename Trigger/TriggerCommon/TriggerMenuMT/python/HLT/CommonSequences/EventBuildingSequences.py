@@ -26,7 +26,7 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         log.error('eventBuildType \'%s\' not found in the allowed Event Building identifiers', eventBuildType)
         return
 
-    seq = functools.partial(pebMenuSequenceCfg, flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
+    seq = functools.partial(pebMenuSequenceGenCfg, flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
 
     if len(chain.steps)==0:
         # noalg PEB chain
@@ -285,7 +285,7 @@ def pebInputMaker(flags, chain, eventBuildType):
     return maker
 
 
-def pebMenuSequenceCfg(flags, chain, eventBuildType, chainDict):
+def pebMenuSequenceGenCfg(flags, chain, eventBuildType, chainDict):
     '''
     Return the MenuSequenceCA for the PEB input maker for this chain.
     '''

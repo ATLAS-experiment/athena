@@ -13,7 +13,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
 
-def UTTJetRecoSequence(flags):
+def UTTJetRecoSequenceGenCfg(flags):
 
         topoClusterSequence = jetmetTopoClusteringCfg(flags,RoIs = '')
         clustersKey = "HLT_TopoCaloClustersFS"
@@ -55,7 +55,7 @@ def UTTJetRecoSequence(flags):
                               )
 
 
-def HitDVHypoSequence(flags):
+def HitDVHypoSequenceGenCfg(flags):
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import TrigHitDVHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import TrigHitDVHypoAlgCfg
 
