@@ -19,7 +19,7 @@ def RenameHitCollectionsOnReadCfg(flags):
         if flags.Detector.EnableTRT:
             result.merge(InputRenameCfg("TRTUncompressedHitCollection","TRTUncompressedHits","TRTUncompressedHitsOLD"))
         if flags.Detector.EnableBCMPrime:
-            pass #TODO
+            result.merge(InputRenameCfg("SiHitCollection","BCMPrimeHits","BCMPrimeHitsOLD"))
         if flags.Detector.EnableITkPixel:
             result.merge(InputRenameCfg("SiHitCollection","ITkPixelHits","ITkPixelHitsOLD"))
         if flags.Detector.EnableITkStrip:
