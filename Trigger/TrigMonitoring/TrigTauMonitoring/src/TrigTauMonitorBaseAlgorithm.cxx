@@ -300,7 +300,7 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::classifyTausAll(co
     std::vector<const xAOD::TauJet*> tau_vec;
 
     for(const xAOD::TauJet* tau : taus) {
-        if(tau->pt() < threshold) continue;
+        if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
         tau_vec.push_back(tau);
     }
 
@@ -313,7 +313,7 @@ std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, s
     std::vector<const xAOD::TauJet*> tau_vec_0p, tau_vec_1p, tau_vec_mp;
 
     for(const xAOD::TauJet* tau : taus) {
-        if(tau->pt() < threshold) continue;
+        if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
 
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
@@ -332,7 +332,7 @@ std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> Tr
     std::vector<const xAOD::TauJet*> tau_vec_1p, tau_vec_3p;
 
     for(const xAOD::TauJet* const tau : taus) {
-        if(tau->pt()/Gaudi::Units::GeV < threshold) continue;
+        if(tau->pt() < threshold*Gaudi::Units::GeV) continue;
 
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
