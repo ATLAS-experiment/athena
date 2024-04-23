@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BkgOut_h
 #define BkgOut_h
 
-extern "C" { void* bkgout_address_(void); }
+#include <cstdint>
+
+
+extern "C" { uintptr_t bkgout_address_(void); }
 
 class BkgOut {
 public:
@@ -60,7 +63,7 @@ private:
 inline
 BkgOut::BKGOUT* BkgOut::bkgout()
 {
-  static BKGOUT* ptr = static_cast<BKGOUT*>(bkgout_address_());
+  static BKGOUT* ptr = reinterpret_cast<BKGOUT*>(bkgout_address_());
   return ptr;
 }
 
