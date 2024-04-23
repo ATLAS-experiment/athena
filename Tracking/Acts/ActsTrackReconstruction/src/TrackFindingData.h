@@ -5,6 +5,9 @@
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H 1
 
 // ACTS
+#include "Acts/EventData/VectorTrackContainer.hpp"
+#include "Acts/EventData/TrackContainer.hpp"
+#include "Acts/EventData/TrackProxy.hpp"
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
@@ -37,18 +40,22 @@ namespace
   /// This is only required by code in TrackFindingAlg.cxx, so we keep it in the anonymous namespace.
   /// =========================================================================
 
+  // containers used during the reconstruction
+  using RecoTrackStateContainer = ActsTrk::TrackFindingAlg::RecoTrackStateContainer;
+  using RecoTrackStateContainerProxy = ActsTrk::TrackFindingAlg::RecoTrackStateContainerProxy;
+
   /// Borrowed from Athena Tracking/Acts/ActsTrkTools/ActsTrkFittingTools/src/ActsKalmanFitter.ipp
   /// We could also access them directly from there, but that would pull inline a lot of other stuff we
   /// don't need.
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-                   typename ActsTrk::MutableTrackStateBackend::TrackStateProxy trackState,
+                   RecoTrackStateContainerProxy trackState,
                    Acts::Direction direction,
                    const Acts::Logger &logger)
   {
     Acts::GainMatrixUpdater updater;
-    return updater.template operator()<ActsTrk::MutableTrackStateBackend>(gctx, trackState, direction, logger);
+    return updater.template operator()<RecoTrackStateContainer>(gctx, trackState, direction, logger);
   }
 
   // Helper class to describe ranges of measurements
@@ -207,8 +214,8 @@ namespace
   using Stepper = Acts::EigenStepper<>;
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
+  using CKF = Acts::CombinatorialKalmanFilter<Propagator, RecoTrackStateContainer>;
   using Extrapolator = Propagator;
-  using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::MutableTrackStateBackend>;
 
   // Small holder class to keep CKF and related objects.
   // Keep a unique_ptr<CKF_pimpl> in TrackFindingAlg, so we don't have to expose the
@@ -224,7 +231,7 @@ namespace
     Acts::MeasurementSelector measurementSelector;
     Acts::PropagatorPlainOptions pOptions;
     Acts::PropagatorPlainOptions pSecondOptions;
-    Acts::CombinatorialKalmanFilterExtensions<ActsTrk::MutableTrackStateBackend> ckfExtensions;
+    Acts::CombinatorialKalmanFilterExtensions<RecoTrackStateContainer> ckfExtensions;
     // Track selection
     Acts::TrackSelector trackSelector;
   };
