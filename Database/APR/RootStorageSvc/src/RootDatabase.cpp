@@ -62,7 +62,7 @@ RootDatabase::RootDatabase() :
         m_defWritePolicy(TObject::kOverwrite),   // On write create new versions
         m_branchOffsetTabLen(0),
         m_defTreeCacheLearnEvents(-1),
-        m_rntBufferedWriteEnabled(false),
+        m_rntBufferedWriteEnabled(true),
         m_rntReaderMetricsEnabled(false),
         m_rntWriterMetricsEnabled(false),
         m_indexMasterID(0),
@@ -1125,10 +1125,6 @@ RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
 {
    auto& writer = m_ntupleWriterMap[ntuple_name];
    if( !writer and create ) {
-      if ( Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 0 and m_rntBufferedWriteEnabled ) {
-         DbPrint log("RootDatabase.getNTupleWriter");
-         log << DbPrintLvl::Warning << "Buffered writing doesn't work reliably in MT jobs yet, use at your own risk!" << DbPrint::endmsg;
-      }
       writer = std::make_unique<RootStorageSvc::RNTupleWriterHelper>(m_file, ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
    }
    if( writer and create ) {
