@@ -36,6 +36,12 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
+
+    # Acts Heavy Ion Pass
+    if TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsHeavyIonPass")]
         
     # GNN pass
     if TrackingComponent.GNNChain in flags.Tracking.recoChain:

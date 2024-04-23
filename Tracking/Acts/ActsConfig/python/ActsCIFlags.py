@@ -10,7 +10,12 @@ def actsAloneWorkflowFlags(flags) -> None:
     from TrkConfig.TrkConfigFlags import TrackingComponent
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
     
-    
+def actsHeavyIonFlags(flags) -> None:
+    flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
+    flags.Tracking.doTruth = False
+    flags.Reco.EnableHGTDExtension = False
+    flags.Acts.doAmbiguityResolution = False
+
 def actsWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts workflow to reco sequence"""
     flags.DQ.useTrigger = False

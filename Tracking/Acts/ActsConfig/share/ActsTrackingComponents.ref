@@ -60,6 +60,35 @@ Tracking.ITkActsPass           points to                        nothing
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
+                     Active Config is ActsHeavyIon
+Tracking.ActiveConfig.doAthenaAmbiguityResolution : True [function]
+Tracking.ActiveConfig.doAthenaCluster    : True
+Tracking.ActiveConfig.doAthenaSeed       : False
+Tracking.ActiveConfig.doAthenaSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsCluster : True
+Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
+Tracking.ActiveConfig.doAthenaToActsTrack : False
+Tracking.ActiveConfig.doAthenaTrack      : False
+Flag categories that are redirected by the cloneAndReplace
+Tracking.ActiveConfig          points to   Tracking.ITkActsHeavyIonPass 
+Tracking.ITkActsHeavyIonPass   points to                        nothing 
+Tracking.ActiveConfig.doActsAmbiguityResolution : False [function]
+Tracking.ActiveConfig.doActsCluster      : False
+Tracking.ActiveConfig.doActsSeed         : True
+Tracking.ActiveConfig.doActsSpacePoint   : True
+Tracking.ActiveConfig.doActsToAthenaCluster : False
+Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False [function]
+Tracking.ActiveConfig.doActsToAthenaSeed : False
+Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
+Tracking.ActiveConfig.doActsToAthenaTrack : True [function]
+Tracking.ActiveConfig.doActsTrack        : True
+Flag categories that are redirected by the cloneAndReplace
+Tracking.ActiveConfig          points to   Tracking.ITkActsHeavyIonPass 
+Tracking.ITkActsHeavyIonPass   points to                        nothing 
+************************************************************************
+
+************************************************************************
+******************** Tracking reconstruction Config ********************
                      Active Config is ActsValidateClusters
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : False
