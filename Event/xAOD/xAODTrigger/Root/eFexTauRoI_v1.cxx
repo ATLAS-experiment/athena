@@ -175,8 +175,7 @@ namespace xAOD {
    /// Tau BDT score, only available in xTOBs 
    unsigned int eFexTauRoI_v1::bdtScore() const {
      /// Was the BDT algorithm run?
-     if (tobVersion() != BDT) return 0;
-     /// If the object is not an xTOB this will return 0
+     if (tobVersion() != BDT || type() != xTOB) return 0;
      return (word0() >> s_bdtScoreBit) & s_bdtScoreMask;
    }
     
