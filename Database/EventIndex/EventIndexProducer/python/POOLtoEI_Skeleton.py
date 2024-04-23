@@ -58,7 +58,7 @@ def configurePOOL2EIglobals(runArgs, flags):
     job.DoProvenanceRef = getArgVal(runArgs, "provenance", True)
     job.DoTriggerInfo = getArgVal(runArgs, 'trigger', True)
     job.SendToBroker = getArgVal(runArgs, "sendtobroker", False)
-    job.EiDsName = getArgVal(runArgs, "eidsname", "Unknown.Input.Dataset.Name")
+    job.EiDsName = getArgVal(runArgs, "eidsname", None)
     job.TestBrk = getArgVal(runArgs, "testbrk", False)
     job.EiFmt = getArgVal(runArgs, "eifmt", 0)
 

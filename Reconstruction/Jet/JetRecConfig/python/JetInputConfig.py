@@ -67,7 +67,7 @@ def buildLabelledTruth(parentjetdef, truthmod):
     )
 
 def buildPV0TrackSel(parentjetdef, spec):
-    from InDetConfig.TrackVertexAssociationToolConfig import getTTVAToolForReco    
+    from InDetConfig.TrackVertexAssociationToolConfig import getTTVAToolForReco
     trkOptions = parentjetdef._contextDic
     tvaTool = getTTVAToolForReco("trackjetTVAtool", 
                                  HardScatterLinkDeco = "",

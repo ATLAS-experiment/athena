@@ -30,13 +30,13 @@ public:
   static const InterfaceID& interfaceID();
 
   //To allow access to the IOnlineEventDisplaysSvc interface
-  StatusCode queryInterface( const InterfaceID& riid, void** ppvIf );
+  StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) override;
 
-  StatusCode initialize();
-  StatusCode finalize();
+  StatusCode initialize() override;
+  StatusCode finalize() override;
   void beginEvent();
   void endEvent();
-  void handle(const Incident& incident );
+  void handle(const Incident& incident ) override;
   void createWriteableDir(std::string directory, gid_t zpgid);
   gid_t setOwnershipToZpGrpOrDefault();
   std::string getFileNamePrefix() override;

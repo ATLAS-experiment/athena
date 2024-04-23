@@ -323,15 +323,15 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
   unsigned long long Et2Topo_central = central_ExTopoLong*central_ExTopoLong + central_EyTopoLong*central_EyTopoLong;
   unsigned int EtTopo_central =  std::sqrt( Et2Topo_central );
 
-  TCS::jXETOB jxe( -(global_ExTopo), -(global_EyTopo), EtTopo, TCS::JXE );
-  TCS::jXETOB jxec( -(central_ExTopo), -(central_EyTopo), EtTopo_central, TCS::JXEC );
+  TCS::jXETOB jxe( global_ExTopo, global_EyTopo, EtTopo, TCS::JXE );
+  TCS::jXETOB jxec( central_ExTopo, central_EyTopo, EtTopo_central, TCS::JXEC );
 
-  jxe.setExDouble( static_cast<double>(-global_ExTopo*m_EtDouble_conversion) );
-  jxe.setEyDouble( static_cast<double>(-global_EyTopo*m_EtDouble_conversion) );
+  jxe.setExDouble( static_cast<double>(global_ExTopo*m_EtDouble_conversion) );
+  jxe.setEyDouble( static_cast<double>(global_EyTopo*m_EtDouble_conversion) );
   jxe.setEtDouble( static_cast<double>(EtTopo*m_EtDouble_conversion) );
   jxe.setEt2( Et2Topo );
-  jxec.setExDouble( static_cast<double>(-central_ExTopo*m_EtDouble_conversion) );
-  jxec.setEyDouble( static_cast<double>(-central_EyTopo*m_EtDouble_conversion) );
+  jxec.setExDouble( static_cast<double>(central_ExTopo*m_EtDouble_conversion) );
+  jxec.setEyDouble( static_cast<double>(central_EyTopo*m_EtDouble_conversion) );
   jxec.setEtDouble( static_cast<double>(EtTopo_central*m_EtDouble_conversion) );
   jxec.setEt2( Et2Topo_central );
 

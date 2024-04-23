@@ -212,6 +212,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   
   // Get EventInfo
   int lb       = GetEventInfo(ctx)->lumiBlock();
+  auto lb_event_m    = Monitored::Scalar<int>( "m_lb_event", lb );
   auto lb_m    = Monitored::Scalar<int>( "m_lb", lb );
   int run      = GetEventInfo(ctx)->runNumber();
   auto run_m   = Monitored::Scalar<int>( "m_run", run );
@@ -234,6 +235,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     // beam spot vs LB
     fill(genericTrackGroup, lb_m, beamSpotY_m);
     fill(genericTrackGroup, lb_m, beamSpotX_m);
+    fill(genericTrackGroup, lb_event_m);
 
     // interactions per beam crossing
     fill(genericTrackGroup, mu_m);
@@ -263,6 +265,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     }
   }
   
+  //
+  // Start loop on tracks
+  //
+
   ATH_MSG_DEBUG ("Start loop on tracks. Number of tracks " << trks->size());
   for (const Trk::Track* trksItr: *trks) {
 
@@ -283,11 +289,18 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     int DoF              = 0;
     float chi2oDoF       = -999;
     float trkd0          = -999;
+    float Err_d0         = -999;
     float trkz0          = -999;
+    float Err_z0         = -999;
     float trkphi         = -999;
+    float Err_phi        = -999;
     float trktheta       = -999;
+    float Err_theta      = -999;
+    float Err_eta        = -999;
     float trketa         = -999;
     float qOverP         = -999;
+    float Err_qOverP     = -999;
+    float Err_Pt         = -999;
     float trkpt          = -999;
     float trkP           = -999;
     float charge         = 0;
@@ -326,13 +339,19 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       trketa       = measPer->eta(); 
       qOverP       = perigeeParams[Trk::qOverP]*1000.;  
       if(qOverP) trkP = 1/qOverP;
-      trkpt        = measPer->pT()/1000.;  
+      trkpt        = measPer->pT()/1000.; 
+      Err_d0       = Amg::error(*measPer->covariance(), Trk::d0); 
+      Err_z0       = Amg::error(*measPer->covariance(), Trk::z0);
+      Err_phi      = Amg::error(*measPer->covariance(), Trk::phi0);
+      Err_theta    = Amg::error(*measPer->covariance(), Trk::theta);
+      Err_eta      = Err_theta / sin(trktheta);
+      Err_qOverP   = Amg::error(*measPer->covariance(), Trk::qOverP) * 1000;
+      Err_Pt       = sin(trktheta) * Err_qOverP / pow(qOverP, 2);
       if (qOverP < 0) charge = -1;
       else charge=+1; 
       if (trketa < - m_barrelEta) isTrackECC = true;
       if (trketa > m_barrelEta) isTrackECA = true;
       if (!isTrackECA and !isTrackECC) isTrackBarrel = true;
-
 
       // correct the track d0 for the vertex position
       // would rather corrected for the beamline but could not find beamline
@@ -359,7 +378,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     ATH_MSG_DEBUG(nTracks << " is a good track!");  
 
     // fill lb histogram for each accepted track 
-    // fill(genericTrackGroup, lb_m);	
+    auto lb_track_m = Monitored::Scalar<int>( "m_lb_track", lb );
+    fill(genericTrackGroup, lb_track_m);	
 
     int nhpixB=0, nhpixECA=0, nhpixECC=0, nhsctB=0, nhsctECA=0, nhsctECC=0, nhtrtB=0, nhtrtECA=0, nhtrtECC=0;
 
@@ -435,23 +455,41 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
 
     auto nhits_per_track_m = Monitored::Scalar<float>( "m_nhits_per_track", nhits );
     fill(genericTrackGroup, nhits_per_track_m);
+    //Pixel hits
     auto npixelhits_per_track_m = Monitored::Scalar<float>( "m_npixelhits_per_track", nhpix );
     fill(genericTrackGroup, npixelhits_per_track_m);
     auto npixelhits_per_track_barrel_m = Monitored::Scalar<float>( "m_npixelhits_per_track_barrel", nhpixB );
     fill(genericTrackGroup, npixelhits_per_track_barrel_m);
+    auto npixelhits_per_track_eca_m = Monitored::Scalar<float>( "m_npixelhits_per_track_eca", nhpixECA );
+    fill(genericTrackGroup, npixelhits_per_track_eca_m);
+    auto npixelhits_per_track_ecc_m = Monitored::Scalar<float>( "m_npixelhits_per_track_ecc", nhpixECC );
+    fill(genericTrackGroup, npixelhits_per_track_ecc_m);
+    //SCT hits
     auto nscthits_per_track_m = Monitored::Scalar<float>( "m_nscthits_per_track", nhsct );
     fill(genericTrackGroup, nscthits_per_track_m);
     auto nscthits_per_track_barrel_m = Monitored::Scalar<float>( "m_nscthits_per_track_barrel", nhsctB );
     fill(genericTrackGroup, nscthits_per_track_barrel_m);
+    auto nscthits_per_track_eca_m = Monitored::Scalar<float>( "m_nscthits_per_track_eca", nhsctECA );
+    fill(genericTrackGroup, nscthits_per_track_eca_m);
+    auto nscthits_per_track_ecc_m = Monitored::Scalar<float>( "m_nscthits_per_track_ecc", nhsctECC );
+    fill(genericTrackGroup, nscthits_per_track_ecc_m);
+    //TRT hits
     auto ntrthits_per_track_m = Monitored::Scalar<float>( "m_ntrthits_per_track", nhtrt );
     fill(genericTrackGroup, ntrthits_per_track_m);
     auto ntrthits_per_track_barrel_m = Monitored::Scalar<float>( "m_ntrthits_per_track_barrel", nhtrtB );
     fill(genericTrackGroup, ntrthits_per_track_barrel_m);
+    auto ntrthits_per_track_eca_m = Monitored::Scalar<float>( "m_ntrthits_per_track_eca", nhtrtECA );
+    fill(genericTrackGroup, ntrthits_per_track_eca_m);
+    auto ntrthits_per_track_ecc_m = Monitored::Scalar<float>( "m_ntrthits_per_track_ecc", nhtrtECC );
+    fill(genericTrackGroup, ntrthits_per_track_ecc_m);
 
     auto chi2oDoF_m = Monitored::Scalar<float>( "m_chi2oDoF", chi2oDoF );
     fill(genericTrackGroup, chi2oDoF_m);
     auto eta_m = Monitored::Scalar<float>( "m_eta", trketa );
     fill(genericTrackGroup, eta_m);
+    auto errEta_m = Monitored::Scalar<float>( "m_errEta", Err_eta );
+    fill(genericTrackGroup, errEta_m);
+
 
     // pixel hits vs eta
     auto eta_2fillpix_m = Monitored::Scalar<float>( "m_eta_2fillpix", trketa );
@@ -475,17 +513,26 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       fill(genericTrackGroup, eta_neg_m);
     }
 
+    // Phi
     auto phi_m = Monitored::Scalar<float>( "m_phi", trkphi );
     fill(genericTrackGroup, phi_m);
+    auto errPhi_m = Monitored::Scalar<float>( "m_errPhi", Err_phi );
+    fill(genericTrackGroup, errPhi_m);
+    // z0
     auto z0_m = Monitored::Scalar<float>( "m_z0", trkz0 );
     fill(genericTrackGroup, z0_m);
+    auto errZ0_m = Monitored::Scalar<float>( "m_errZ0", Err_z0 );
+    fill(genericTrackGroup, errZ0_m);
     auto z0_bscorr_m = Monitored::Scalar<float>( "m_z0_bscorr", trkz0-beamSpotZ );
     fill(genericTrackGroup, z0_bscorr_m);
     float z0sintheta = trkz0*(sin(trktheta));
     auto z0sintheta_m = Monitored::Scalar<float>( "m_z0sintheta", z0sintheta );
     fill(genericTrackGroup, z0sintheta_m);
+    //d0
     auto d0_m = Monitored::Scalar<float>( "m_d0", trkd0 );
     fill(genericTrackGroup, d0_m);
+    auto errD0_m = Monitored::Scalar<float>( "m_errD0", Err_d0 );
+    fill(genericTrackGroup, errD0_m);
     auto d0_bscorr_m = Monitored::Scalar<float>( "m_d0_bscorr", d0bscorr );
     fill(genericTrackGroup, d0_bscorr_m);
     //d0 vs phi 
@@ -510,14 +557,29 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       auto d0_bscorrECC_m = Monitored::Scalar<float>( "m_d0_bscorrECC", d0bscorr );
       fill(genericTrackGroup, phi_2filld0bscorrECC_m, d0_bscorrECC_m);
     } 
-
+    //pT and p
     float pT = charge*trkpt;
     auto pT_m = Monitored::Scalar<float>( "m_pT", pT );
     fill(genericTrackGroup, pT_m);
+    auto errPt_m = Monitored::Scalar<float>( "m_errPt", Err_Pt );
+    fill(genericTrackGroup, errPt_m);
+    auto errPt_2fillpT_m = Monitored::Scalar<float>( "m_errPt_2fillpT", Err_Pt );
+    auto pT_2fillerrPt_m = Monitored::Scalar<float>( "m_pT_2fillerrPt", pT );
+    fill(genericTrackGroup, pT_2fillerrPt_m, errPt_2fillpT_m);
+
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);
 
-  } // end of loop on trks
+    auto pTRes_m = Monitored::Scalar<float>( "m_pTRes", std::fabs(Err_qOverP / qOverP) );
+    fill(genericTrackGroup, pTRes_m);
+
+    auto pTRes_2fillpT_m = Monitored::Scalar<float>( "m_pTRes_2fillpT", std::fabs(Err_qOverP / qOverP) );
+    auto pT_2fillpTRes_m = Monitored::Scalar<float>( "m_pT_2fillpTRes", pT );
+    fill(genericTrackGroup, pT_2fillpTRes_m, pTRes_2fillpT_m);
+
+  } //
+  // end of loop on trks
+  //
 
   // histo with the count of used(good) tracks
   auto ngTracks_m = Monitored::Scalar<float>( "m_ngTracks", ngTracks );

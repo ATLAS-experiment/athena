@@ -7,6 +7,7 @@
 '''
 
 from AthenaConfiguration.Enums import Format
+from TileMonitoring.TileMonitoringCfgHelper import getLegacyChannelForDemonstrator
 
 
 def getPMT(partition, channel):
@@ -36,26 +37,6 @@ def getPMT(partition, channel):
             pmt = 1 - pmt
 
     return pmt
-
-
-def getLegacyChannelForDemonstrator(useDemoCabling, partition, drawer, channel):
-    ''' Function to get legacy channel number from Tile Demonatrator '''
-
-    legacyChannel = channel
-    if (useDemoCabling == 2015 and partition == 'EBC' and drawer == 1):
-        demo2legacy = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                       26, 25, 24, 29, 31, 32, 27, 28, 30, 35, 34, 33, 38, 37, 43, 44, 41, 40, 39, 36, 42, 47, 46, 45]
-        legacyChannel = demo2legacy[channel]
-    elif useDemoCabling >= 2016 and useDemoCabling <= 2019 and partition == 'LBC' and (drawer == 1 or drawer > 2):
-        demo2legacy = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                       26, 25, 24, 29, 28, 27, 32, 31, 30, 35, 34, 33, 38, 37, 36, 41, 40, 39, 44, 43, 42, 47, 46, 45]
-        legacyChannel = demo2legacy[channel]
-    elif useDemoCabling >= 2018 and partition == 'EBC' and drawer >= 2:
-        demo2legacyEB = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-                         31, 32, 30, 35, 33, 34, 38, 37, 41, 40, 39, 36, 26, 25, 24, 29, 28, 27, 44, 43, 42, 47, 46, 45]
-        legacyChannel = demo2legacyEB[channel]
-
-    return legacyChannel
 
 
 def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], useDemoCabling=2018, **kwargs):

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict as odict
 from itertools import groupby
@@ -112,7 +112,7 @@ class BunchGroupSet(object):
 
 
     def resize(self, newsize):
-        if type(self.bunchGroups) != list:
+        if type(self.bunchGroups) is not list:
             self.bunchGroups = []
         self.bunchGroups += newsize * [None]
         self.bunchGroups = self.bunchGroups[:newsize]

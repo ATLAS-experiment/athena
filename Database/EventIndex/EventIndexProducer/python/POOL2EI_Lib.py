@@ -119,14 +119,6 @@ class POOL2EI(PyAthena.Alg):
         self._dsname = re.sub('_sub[0-9]{10}', '', self._dsname)
         self._dsname = re.sub('/$', '', self._dsname)
 
-        # token match regex
-        import re
-        self._re_pool_token = re.compile(r'\[DB=(?P<db>.*?)\]'
-                                         r'\[CNT=(?P<cnt>.*?)\]'
-                                         r'\[CLID=(?P<clid>.*?)\]'
-                                         r'\[TECH=(?P<tech>.*?)\]'
-                                         r'\[OID=(?P<oid>.*?)\]').match
-
         # load our pythonizations:
         for cls_name in ('EventStreamInfo', 'EventType', 'PyEventType'):
             cls = getattr(PyAthena, cls_name)  # noqa: F841
@@ -767,6 +759,9 @@ class POOL2EI(PyAthena.Alg):
                 tap = xtd.tap()
                 tav = xtd.tav()
                 trigL1 = compressB64(v2b(tbp) + v2b(tap) + v2b(tav))
+                del tbp
+                del tap
+                del tav
 
                 # L2
                 trigL2_PH = xtd.lvl2PassedPhysics()  # 256*32 bits = 8192 bits
@@ -776,6 +771,9 @@ class POOL2EI(PyAthena.Alg):
                     compressB64(v2b(trigL2_PH)),
                     compressB64(v2b(trigL2_PT)),
                     compressB64(v2b(trigL2_RS)))
+                del trigL2_PH
+                del trigL2_PT
+                del trigL2_RS
 
                 # EF
                 trigEF_PH = xtd.efPassedPhysics()    # 256*32 bits = 8192 bits
@@ -785,6 +783,9 @@ class POOL2EI(PyAthena.Alg):
                     compressB64(v2b(trigEF_PH)),
                     compressB64(v2b(trigEF_PT)),
                     compressB64(v2b(trigEF_RS)))
+                del trigEF_PH
+                del trigEF_PT
+                del trigEF_RS
 
                 del xtd
 
@@ -815,6 +816,32 @@ class POOL2EI(PyAthena.Alg):
         # Self reference and Provenance
         # ======================================================
 
+        def guid2string(guid):
+            # get guid as string
+            # native method toString() seems to produce a memory leak
+            # use getters for class Guid
+            # data1(), data2(), data3() are translated to integers in python
+            # data4(i) is translated from char in C++ to string in python
+            s="{:08X}-{:04X}-{:04X}-{:02X}{:02X}-{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}".format(
+                guid.data1(), guid.data2(), guid.data3(),
+                ord(guid.data4(0)[0]), ord(guid.data4(1)[0]),
+                ord(guid.data4(2)[0]), ord(guid.data4(3)[0]),
+                ord(guid.data4(4)[0]), ord(guid.data4(5)[0]),
+                ord(guid.data4(6)[0]), ord(guid.data4(7)[0]))
+            return s
+
+        def token2string (tk, replace_empty_cntID=False):
+            # get token as string
+            # native method toString() seems to produce a memory leak
+            # use getter for class Token
+            cntID = tk.contID()
+            if replace_empty_cntID and cntID == "":
+                cntID = "POOLContainer(DataHeader)"
+            stk = "[DB={}][CNT={}][CLID={}][TECH={:08X}][OID={:016X}-{:016X}]".format(
+                guid2string(tk.dbID()), cntID, guid2string(tk.classID()),
+                tk.technology(), tk.oid().first, tk.oid().second)
+            return stk
+
         Pstream_refs = {}  # provenance references
         procTag = None
 
@@ -836,56 +863,44 @@ class POOL2EI(PyAthena.Alg):
             if dh.sizeProvenance() > 0:
                 prv = dh.beginProvenance()
                 for i in range(dh.sizeProvenance()):
-                    try:
-                        tk = prv.getToken().toString()
-                        match = self._re_pool_token(tk)
-                    except Exception:
-                        tk = prv.getToken()
-                        match = self._re_pool_token(tk)
-                    if not match:
-                        _warning('Provenance token can not be parsed: {}'
-                                 .format(tk))
-                        continue
-                    d = match.groupdict()
                     key = prv.getKey()
+                    tk = prv.getToken()
                     if key.startswith("Output"):
-                        _warning('Provenance toke starts with Output: {}'
+                        _warning('Provenance token starts with Output: {}'
                                  .format(key))
                         key = key[6:]
                     if key.startswith("Input"):
-                        _warning('Provenance toke starts with Input: {}'
+                        _warning('Provenance token starts with Input: {}'
                                  .format(key))
                         key = key[5:]
                     # CNT might be empty. Complete information
                     if key == "StreamRAW":
-                        stk = "[DB={}][CNT={}][CLID={}]" \
-                              "[TECH={}][OID={}]".format(
-                                  d['db'], d['cnt'], d['clid'],
-                                  d['tech'], d['oid'])
+                        stk = token2string(tk, replace_empty_cntID=False)
                     elif key in ("StreamAOD", "StreamESD", "StreamRDO",
                                  "StreamHITS", "StreamEVGEN",
                                  "EmbeddingStream"):
-                        if d['cnt'] == "":
-                            d['cnt'] = "POOLContainer(DataHeader)"
-                        stk = "[DB={}][CNT={}][CLID={}]" \
-                              "[TECH={}][OID={}]".format(
-                                  d['db'], d['cnt'], d['clid'],
-                                  d['tech'], d['oid'])
+                        stk = token2string(tk, replace_empty_cntID=True)
                     else:
-                        _info("provenance {}={}".format(key, tk))
+                        stk = token2string(tk, replace_empty_cntID=False)
+                        _info("provenance {}={}".format(key, stk))
                         _info('Unknown provenance stream: {}'.format(key))
                         # do not raise error, just continue. mar-2024
                         #   _error('Unknown provenance stream: {}'.format(key))
                         #   raise RuntimeError('Unknown provenance stream')
+                        del tk
+                        del key
                         prv += 1
                         continue
                     _info("## P" + key + "_ref: " + stk)
                     if key not in Pstream_refs:
                         # keep only the first provenance found for each straam
                         Pstream_refs[key] = stk
+                    del tk
+                    del key
                     prv += 1
                 del prv
 
+            
         # get self reference.
         # look for the processing tag key in the Data Object vector
         if self._eif_spb is not None:
@@ -897,17 +912,8 @@ class POOL2EI(PyAthena.Alg):
                 if key.startswith('Stream'):
                     _info("## Stream: " + key)
                 if key in [procTag, 'StreamAOD']:
-                    try:
-                        match = self._re_pool_token(dhe.getToken().toString())
-                    except Exception:
-                        match = self._re_pool_token(dhe.getToken())
-                    if not match:
-                        continue
-                    d = match.groupdict()
-                    if d['cnt'] == "":
-                        d['cnt'] = "POOLContainer(DataHeader)"
-                    stk = "[DB={}][CNT={}][CLID={}][TECH={}][OID={}]".format(
-                        d['db'], d['cnt'], d['clid'], d['tech'], d['oid'])
+                    tk = dhe.getToken()
+                    stk = token2string(tk, replace_empty_cntID=True)
                     _info("## " + key + "_ref: " + stk)
                     if self._eif_spb is not None:
                         if key == tokenPB0.name:
@@ -915,15 +921,18 @@ class POOL2EI(PyAthena.Alg):
                                   "with value {1}".format(key, stk))
                         tokenPB0.name = key
                         tokenPB0.token = stk
+                    del tk
+                del key
                 dhe += 1
+            dh.end()
             del dhe
 
-        # Update self reference  token to handle fast merged files.
+        # Update self reference token to handle fast merged files.
         try:
             stk = store.proxy(dh).address().par().c_str()
             if self._eif_spb is not None:
                 tokenPB0.token = stk
-            _info("Updated ref token " + stk)
+                _info("Updated ref token " + stk)
             del stk
         except Exception:
             pass
@@ -961,7 +970,7 @@ class POOL2EI(PyAthena.Alg):
         self._eif_totentries += 1  # for all input files
 
         store.clearStore()
-
+        
         return StatusCode.Success
 
     # ----------------------------------------
@@ -985,6 +994,8 @@ class POOL2EI(PyAthena.Alg):
             self._eif_spb.write(spb)
 
             self._eif_spb.close()
+
+        _info("Total number of events processed: {}".format(self._eif_totentries))
 
         return StatusCode.Success
 
