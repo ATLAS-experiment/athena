@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FortranAlgorithm.h"
 
 extern "C" {
-  void initialize_(const int& lun, const char*, int);
+  void initialize_(const int& lun, const char*, long int);
   void execute_(const int& lun);
   void finalize_(const int& lun);
   void _gfortran_flush_i4 (int*);
