@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SGTools/TransientAddress.h"
@@ -11,6 +11,8 @@
 #include <assert.h>
 
 using SG::TransientAddress;
+
+const std::string TransientAddress::s_emptyString;
 
 // Default Constructor:
 TransientAddress::TransientAddress()
