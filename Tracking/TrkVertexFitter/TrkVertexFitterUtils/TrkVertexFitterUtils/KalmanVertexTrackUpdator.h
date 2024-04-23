@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrkVertexFitterUtils_KalmanVertexTrackUpdator_H
@@ -51,7 +51,7 @@ namespace Trk
 /**
  * Destructor
  */
-   ~KalmanVertexTrackUpdator();
+   ~KalmanVertexTrackUpdator() = default;
 
 /**
  * Update method  
@@ -60,9 +60,13 @@ namespace Trk
     
   private:
   
-   ToolHandle< IVertexUpdator > m_Updator;
+   ToolHandle< IVertexUpdator > m_Updator {
+     this, "VertexUpdator", "Trk::KalmanVertexUpdator"};
   
-   double m_maxWeight;
+   DoubleProperty m_maxWeight {
+     this, "MaximalWeight", 0.001, "Max weight of a given track in the vertex reconstruction"};
+   BooleanProperty m_skipInvertibleCheck {
+     this, "SkipInvertibleCheck", false, "skip the invertible check for the track CovMat and the vertex CovMat"};
 
  }; //end of class definitions
 } //end of the namespace definitions
