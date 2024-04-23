@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// PhotonConversionTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "PhotonConversionTool.h"
@@ -254,7 +250,9 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                                pdg1,
                                                1 + HepMC::SIM_STATUS_THRESHOLD,
                                                time,
-                                               *parent );
+                                               *parent,
+                                                    0 // FIXME hard-coded id
+                                                    );
       // in the validation mode, add process info
       if (m_validationMode) {
       	ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();
@@ -279,7 +277,9 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                                pdg2,
                                                1 + HepMC::SIM_STATUS_THRESHOLD,
                                                time,
-                                               *parent );
+                                               *parent,
+                                                     0 // FIXME hard-coded id
+                                                     );
       
       // in the validation mode, add process info
       if (m_validationMode) {
@@ -358,7 +358,9 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                                                pdg1,
                                                                1,
                                                                time,
-                                                               *parent));
+                                                               *parent,
+                                                               0 // FIXME hard-coded id
+                                                               ));
     
     std::unique_ptr<ISF::ISFParticle> ch2(new ISF::ISFParticle(vertex,
                                                                p2*childDirection,
@@ -367,7 +369,9 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                                                pdg2,
                                                                1,
                                                                time,
-                                                               *parent));
+                                                               *parent,
+                                                               0 // FIXME hard-coded id
+                                                               ));
 
     ISF::ISFParticleVector children{ch1.release(),
                                     ch2.release()};

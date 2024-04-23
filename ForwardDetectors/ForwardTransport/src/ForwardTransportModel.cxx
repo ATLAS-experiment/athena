@@ -188,6 +188,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
     {
       // Create postTransportISP if required.
       const auto pBarcode = HepMC::barcode(gParticle);
+      const auto particleID = HepMC::uniqueID(gParticle);
       auto tBinding = std::make_unique<ISF::TruthBinding>(gParticle);
       auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, gEvent->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
       const Amg::Vector3D pos(postTransportPosition.x(), postTransportPosition.y(), postTransportPosition.z());
@@ -200,6 +201,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                             initialISP->status(), // For now leave particle status unchanged - TODO potentially revisit this in the future.
                                                             time, // TODO Update??
                                                             *initialISP,
+                                                            particleID,
                                                             pBarcode,
                                                             tBinding.release(),
                                                             hmpl.release());

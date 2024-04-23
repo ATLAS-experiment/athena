@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ISFTrajectory.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "ISFTrajectory.h"
@@ -115,8 +111,10 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
         // ITruthSvc::registerTruthIncident call above
         auto currentGenPart = atlasG4EvtUserInfo->GetCurrentlyTraced();
         baseIsp->getTruthBinding()->setTruthParticle( currentGenPart );
-        Barcode::ParticleBarcode newBarcode = HepMC::barcode(currentGenPart);
-        baseIsp->setBarcode( newBarcode );
+        Barcode::ParticleBarcode newBarcode = HepMC::barcode(currentGenPart); // FIXME barcode-based
+        baseIsp->setBarcode( newBarcode ); // FIXME barcode-based
+        int id = HepMC::uniqueID(currentGenPart);
+        baseIsp->setId( id );
       }
     }
     else {

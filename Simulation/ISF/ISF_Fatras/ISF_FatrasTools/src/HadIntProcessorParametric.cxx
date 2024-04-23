@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// HadIntProcessorParametric.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "HadIntProcessorParametric.h"
@@ -620,7 +616,9 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 							 pdgid[i],
 							 1 + HepMC::SIM_STATUS_THRESHOLD,
 							 time,
-							 *parent );
+							 *parent,
+                                                         0 // FIXME hardcoded id
+                                                         );
 	// in the validation mode, add process info
 	if (m_validationMode) {
 	  ISF::ParticleUserInformation* validInfo = new ISF::ParticleUserInformation();

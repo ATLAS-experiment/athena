@@ -114,10 +114,16 @@ int iGeant4::Geant4TruthIncident::parentPdgCode() const {
   return  m_step->GetTrack()->GetDefinition()->GetPDGEncoding();
 }
 
-Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() {
+Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() { // TODO Remove this method
   auto parent = parentParticle();
 
   return (parent) ? HepMC::barcode(parent) : Barcode::fUndefinedBarcode;
+}
+
+int iGeant4::Geant4TruthIncident::parentUniqueID() {
+  auto parent = parentParticle();
+
+  return (parent) ? HepMC::uniqueID(parent) : Barcode::fUndefinedBarcode;
 }
 
 int iGeant4::Geant4TruthIncident::parentStatus()  {

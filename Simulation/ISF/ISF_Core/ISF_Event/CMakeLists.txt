@@ -27,5 +27,3 @@ atlas_add_test( ISFTruthIncident_test
                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                   LINK_LIBRARIES ${CLHEP_LIBRARIES}  AtlasHepMCLib AtlasHepMCsearchLib ${EIGEN_LIBRARIES} ${GTEST_LIBRARIES} CxxUtils GeneratorObjects TestTools AthenaBaseComps AtlasDetDescr GeoPrimitives GeneratorObjects GaudiKernel ISF_Event CxxUtils
                   POST_EXEC_SCRIPT nopost.sh )
-
-

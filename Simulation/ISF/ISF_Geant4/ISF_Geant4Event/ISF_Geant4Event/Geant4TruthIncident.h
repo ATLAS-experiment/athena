@@ -63,7 +63,9 @@ namespace iGeant4 {
       /** Return the PDG Code of the parent particle */
       int                       parentPdgCode() const override final;
       /** Return the barcode of the parent particle */
-      Barcode::ParticleBarcode  parentBarcode() override final;
+      Barcode::ParticleBarcode  parentBarcode() override final; // TODO Remove this method
+      /** Return the unique ID of the parent particle */
+      int  parentUniqueID() override final;
       /** Return the status of the parent particle */
       int  parentStatus() override final;
       /** Return a boolean whether or not the parent particle survives the incident */

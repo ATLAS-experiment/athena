@@ -98,6 +98,8 @@ namespace ISFTesting {
     virtual HepMC::GenParticlePtr      parentParticle() override {return nullptr;};
     /** Return the barcode of the parent particle */
     virtual Barcode::ParticleBarcode  parentBarcode() override {return 1;};
+    /** Return the unique ID of the parent particle */
+    virtual int  parentUniqueID() override {return 1;}
     /** Return a boolean whether or not the parent particle survives the incident */
     virtual bool                      parentSurvivesIncident() const override {return false;};
     /** Return the parent particle after the TruthIncident vertex (and assign

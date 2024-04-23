@@ -225,6 +225,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
                             1, ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
+                            genPart->id(), // id
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink);
@@ -279,6 +280,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
                             1,  ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
+                            genPart->id(), // id
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink
@@ -333,6 +335,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
                             1, ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
+                            genPart->id(), // id
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink
