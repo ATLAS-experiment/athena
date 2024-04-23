@@ -61,8 +61,8 @@ void ZDC_DetFactory::initializePbPb2015(){
                {true, true, true, true}};
     m_zdcPos = {{-397.0, -27.0, 153.0, 303.0}, //Positions of the ZDC modules
                 {-397.0, -27.0, 153.0, 303.0}};
-    m_zdcPixelStart_Stop = {{{1,8}, {0,9}, {0,0}, {0,0}}, //Pixel start and stop layers for each ZDC
-                            {{0,0}, {0,9}, {0,0}, {0,0}}};
+    m_zdcModType = {{3,2,1,1}, //Module types of the ZDC modules
+                    {1,2,1,1}};
 }
 
 void ZDC_DetFactory::initializePbPb2023(){
@@ -70,11 +70,11 @@ void ZDC_DetFactory::initializePbPb2023(){
     m_BRANs_On = true; //Flag for both BRAN modules
     m_zdcOn = {{true, true, true, true}, //If the given ZDC is on
                {true, true, true, true}};
-    m_zdcPos = {{-394.5, 38.5, 220.8, 375.8},
-                {-325.5, 6.5, 188.8, 343.8}};
-    m_zdcPixelStart_Stop = {{{1,8}, {0,9}, {0,0}, {0,0}}, //Pixel start and stop layers for each ZDC
-                            {{0,0}, {0,9}, {0,0}, {0,0}}};
-    m_rpdPos = {new GeoAlignableTransform(GeoTrf::Translate3D(-2.012 * Gaudi::Units::mm, 21.388 * Gaudi::Units::mm, -178.0 * Gaudi::Units::mm)),
+    m_zdcPos = {{-344, 52.15, 220.8, 375.8},
+                {-325.5, 20.15, 188.8, 343.8}};
+    m_zdcModType = {{3,2,1,1}, //Module types of the ZDC modules
+                    {1,2,1,1}};
+    m_rpdPos = {new GeoAlignableTransform(GeoTrf::Translate3D(2.012 * Gaudi::Units::mm, 21.388 * Gaudi::Units::mm, -178.0 * Gaudi::Units::mm)),
                 new GeoAlignableTransform(GeoTrf::Translate3D(1.774 * Gaudi::Units::mm, 21.344 * Gaudi::Units::mm, -210.0 * Gaudi::Units::mm))};
     m_branPos = {-89.5, -121.5};
 }
@@ -110,7 +110,7 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
          **************************************************/
         for(int module = 0; module < 4; ++module){
             if(!m_zdcOn[side][module]) continue;
-            ZDC_ZDCModule *zdcMod = new ZDC_ZDCModule(m_detectorStore, sideSign ,module, m_zdcID, m_zdcPixelStart_Stop[side][module].first, m_zdcPixelStart_Stop[side][module].second);
+            ZDC_ZDCModule *zdcMod = new ZDC_ZDCModule(m_detectorStore, sideSign ,module, m_zdcID, m_zdcModType[side][module]);
             zdcMod->create(Envelope_Physical, new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_zdcPos[side][module] * Gaudi::Units::mm)));
         }
 
