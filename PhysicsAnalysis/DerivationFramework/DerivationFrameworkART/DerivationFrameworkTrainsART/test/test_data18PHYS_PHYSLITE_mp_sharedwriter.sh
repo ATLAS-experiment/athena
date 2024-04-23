@@ -8,6 +8,7 @@
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
 # art-output: readDataHeader*.txt
+# art-output: checkMetadata*.txt
 # art-athena-mt: 4
 
 ATHENA_CORE_NUMBER=4 Derivation_tf.py \
