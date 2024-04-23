@@ -21,7 +21,7 @@ namespace SG {
  * The type of the item is given by the template parameter @c T,
  * and the @c ALLOC gives the type of the vector allocator.
  * If an item with the same name was previously requested
- * with a different type, then raise an @c AuxTypeMismatch exception.
+ * with a different type, then throw an @c AuxTypeMismatch exception.
  */
 template <class T, class ALLOC>
 SG::auxid_t
@@ -31,6 +31,24 @@ AuxTypeRegistry::getAuxID (const std::string& name,
 {
   return findAuxID (name, clsname, flags, typeid(T), &typeid(ALLOC), nullptr,
                     &AuxTypeRegistry::makeFactory<T, ALLOC>);
+}
+
+
+/**
+ * @brief Verify type for an aux variable.
+ * @param auxid The ID of the variable to check.
+ * @param flags Optional flags qualifying the type.  See above.
+ *
+ * If the type of @c auxid is not compatible with the supplied
+ * types @c T / @c ALLOC, then throw a @c SG::ExcAuxTypeMismatch exception.
+ * Also may throw @c SG::ExcAtomicMismatch.
+ */
+template <class T, class ALLOC>
+void
+AuxTypeRegistry::checkAuxID (const SG::auxid_t auxid,
+                             const Flags flags /*= Flags::None*/)
+{
+  return checkAuxID (auxid, typeid(T), typeid(ALLOC), flags);
 }
 
 
