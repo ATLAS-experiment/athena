@@ -150,7 +150,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
             mismatches = true;
         }
         tobMismatched = (isMatched) ? 0 : 100;
-        fill("mismatches",eventType,Signature,tobMismatched,simReady);
+        fill("mismatches",eventType,Signature,tobMismatched);
     }
 
 
@@ -188,7 +188,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
             for (const auto w: sword0s) std::cout << w << " ";
             std::cout << std::endl << std::dec;
         }
-        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature);
+        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady);
     }
 
     return !mismatches;
@@ -242,6 +242,46 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
         }
         tobMismatched = (isMatched) ? 0 : 100; //100*(!isMatched && !isPartMatched); - commented out. Is from when was treating part-matches as matches
         fill("mismatches",eventType,Signature,tobMismatched);
+    }
+
+    if(mismatches) {
+        // fill the debugging tree with all the words for this signature
+        auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
+        auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
+        auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
+        {
+            std::scoped_lock lock(m_firstEventsMutex);
+            auto itr = m_firstEvents.find(lbn);
+            if(itr==m_firstEvents.end()) {
+                m_firstEvents[lbn] = std::to_string(lbn)+":"+std::to_string(evtNumber);
+                itr = m_firstEvents.find(lbn);
+            }
+            lbnString = itr->second;
+        }
+        std::vector<float> detas{};std::vector<float> setas{}; // will be empty, b.c. meaningless for global TOBs
+        std::vector<float> dphis{};std::vector<float> sphis{};
+        std::vector<unsigned int> dword0s{};std::vector<unsigned int> sword0s{};
+        for(const auto tob1 : *tobs1Cont) {
+            dword0s.push_back(tob1->word());
+        }
+        for(const auto tob2 : *tobs2Cont) {
+            sword0s.push_back(tob2->word());
+        }
+        auto dtobEtas = Monitored::Collection("dataEtas", detas);
+        auto dtobPhis = Monitored::Collection("dataPhis", dphis);
+        auto dtobWord0s = Monitored::Collection("dataWord0s", dword0s);
+        auto stobEtas = Monitored::Collection("simEtas", setas);
+        auto stobPhis = Monitored::Collection("simPhis", sphis);
+        auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
+        if(msgLvl(MSG::DEBUG)) {
+            std::cout << "LBN: " << std::string(lbnString) << " EventNumber: " << ULong64_t(evtNumber) << " signature: " << label << std::endl;
+            std::cout << "  data : " << std::hex;
+            for (const auto w: dword0s) std::cout << w << " ";
+            std::cout << std::endl << "  sim  : ";
+            for (const auto w: sword0s) std::cout << w << " ";
+            std::cout << std::endl << std::dec;
+        }
+        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature);
     }
 
 

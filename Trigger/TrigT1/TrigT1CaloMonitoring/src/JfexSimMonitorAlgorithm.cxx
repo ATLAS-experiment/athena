@@ -87,12 +87,12 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
 
 
-    compareRoI("jJ",EventType,m_data_key_jJ, m_simu_key_jJ,ctx,false);
-    compareRoI("jLJ",EventType,m_data_key_jLJ, m_simu_key_jLJ,ctx,false);
-    compareRoI("jTAU",EventType,m_data_key_jTau, m_simu_key_jTau,ctx,false);
+    compareRoI("jJ",EventType,m_data_key_jJ, m_simu_key_jJ,ctx,!jFexTowerContainer->empty());
+    //compareRoI("jLJ",EventType,m_data_key_jLJ, m_simu_key_jLJ,ctx,false); - commented out b.c. jFEX doesn't produce Large jets now
+    compareRoI("jTAU",EventType,m_data_key_jTau, m_simu_key_jTau,ctx,!jFexTowerContainer->empty());
     compareRoI("jEM",EventType,m_data_key_jEM, m_simu_key_jEM,ctx,false);
-    compareRoI("jXE",EventType,m_data_key_jXE, m_simu_key_jXE,ctx,false);
-    compareRoI("jTE",EventType,m_data_key_jTE, m_simu_key_jTE,ctx,false);
+    compareRoI("jXE",EventType,m_data_key_jXE, m_simu_key_jXE,ctx,!jFexTowerContainer->empty());
+    compareRoI("jTE",EventType,m_data_key_jTE, m_simu_key_jTE,ctx,!jFexTowerContainer->empty());
 
 
     return StatusCode::SUCCESS;
@@ -107,7 +107,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
         return false;
     }
     SG::ReadHandle<T> tobs2Cont{tobs2Key, ctx};
-    if(!tobs1Cont.isValid()) {
+    if(!tobs2Cont.isValid()) {
         return false;
     }
 
@@ -117,6 +117,8 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
     auto Signature = Monitored::Scalar<std::string>("Signature",label);
     auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
     auto simReady = Monitored::Scalar<bool>("SimulationReady",simReadyFlag);
+    auto IsDataTowers = Monitored::Scalar<bool>("IsDataTowers",evenType=="DataTowers");
+    auto IsEmulatedTowers = Monitored::Scalar<bool>("IsEmulatedTowers",!IsDataTowers);
 
     for(const auto tob1 : *tobs1Cont) {
         bool isMatched = false;
@@ -134,7 +136,14 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
             mismatches = true;
         }
         tobMismatched = (isMatched) ? 0 : 100;
-        fill("mismatches",eventType,Signature,tobMismatched,simReady);
+        fill("mismatches",eventType,Signature,tobMismatched);
+    }
+    if(tobs2Cont.isValid() && tobs1Cont->size() < tobs2Cont->size()) {
+        tobMismatched=100;
+        mismatches=true;
+        for(unsigned int i=0;i<(tobs2Cont->size()-tobs1Cont->size());i++) {
+            fill("mismatches",eventType,Signature,tobMismatched);
+        }
     }
 
     if(mismatches) {
@@ -170,7 +179,7 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
             for (const auto w: sword0s) std::cout << w << " ";
             std::cout << std::endl << std::dec;
         }
-        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType);
+        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType,IsDataTowers,IsEmulatedTowers,simReady);
     }
 
     return !mismatches;
