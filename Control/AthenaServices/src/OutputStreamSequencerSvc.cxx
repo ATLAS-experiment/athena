@@ -98,7 +98,8 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
    // in AthenaSP there is no context so go with the first slot
    if( !has_context )  slot = 0;
    m_lastIncident = inc.type();
-   ATH_MSG_INFO("Handling incident of type " << m_lastIncident );
+   ATH_MSG_INFO("Handling incident of type " << m_lastIncident << " for slot=" << slot
+                << (!has_context? " NO event context":"") );
 
    if( inc.type() == incidentName() ) {  // NextEventRange 
       std::string rangeID;
@@ -201,6 +202,20 @@ std::string OutputStreamSequencerSvc::currentRangeID() const
    std::lock_guard lockg( m_mutex );
    if( slot >= m_rangeIDinSlot.size() ) return "";
    return m_rangeIDinSlot[ slot ];
+}
+
+
+std::string OutputStreamSequencerSvc::setRangeID(const std::string rangeID)
+{
+   auto slot = Gaudi::Hive::currentContext().slot();
+   if( slot == EventContext::INVALID_CONTEXT_ID )  slot = 0;
+   std::lock_guard lockg( m_mutex );
+   if( slot >= m_rangeIDinSlot.size() ) {
+      throw std::runtime_error("OutputStreamSequencer::setRangeID(): slot out of range");
+   }
+   std::string oldrange =  m_rangeIDinSlot[ slot ];
+   m_rangeIDinSlot[ slot ] = rangeID;
+   return oldrange;
 }
 
 
