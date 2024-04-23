@@ -61,6 +61,10 @@ class GroomingDefinition(object):
     def __ne__(self,rhs):
         return (not self.__eq__(rhs))
 
+    def lock(self):
+        if not self._locked:
+            self._locked = True
+
     # Define core attributes as properties, with
     # custom setter/getter such that if changed, these
     # force resetting of the jet name

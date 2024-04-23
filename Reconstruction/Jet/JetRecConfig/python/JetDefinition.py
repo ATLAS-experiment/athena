@@ -29,6 +29,8 @@ jetlog = Logging.logging.getLogger('JetDefinition')
 from xAODBase.xAODType import xAODType
 from .Utilities import make_lproperty, onlyAttributesAreProperties, clonable, make_alias
 
+from copy import deepcopy
+
 def formatRvalue(parameter):
     """Define the convention that we write R truncating the decimal point
     if R>=1, then we write R*10.
@@ -130,6 +132,24 @@ class JetDefinition(object):
 
     def __ne__(self,rhs):
         return (not self.__eq__(rhs))
+
+    def lock(self):
+        if not self._locked:
+            self._locked = True
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        nocopy = ['_cflags']
+        for k, v in self.__dict__.items():
+            if k in nocopy:
+                if v:
+                    assert(v.locked())
+                setattr(result, k, v)
+            else:
+                setattr(result, k, deepcopy(v, memo))
+        return result
 
     # Define core attributes as properties, with
     # custom setter/getter such that if changed, these
