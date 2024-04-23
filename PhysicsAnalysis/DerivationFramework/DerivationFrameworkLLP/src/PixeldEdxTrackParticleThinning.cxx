@@ -177,7 +177,7 @@ StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::doThinning() con
     m_counter.at(bin)++;
 
     // Relatively higher dE/dx tracks
-    static const float dEdxThr { pow( 10, 0.1 ) };
+    static const float dEdxThr { static_cast<float>(pow( 10, 0.1 )) };
     if( dEdx > dEdxThr ) {
       
       mask.at(i) = ( (m_counter.at(bin) % preScale10) == 0 );
