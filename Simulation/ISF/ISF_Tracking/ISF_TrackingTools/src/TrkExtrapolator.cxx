@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TrkExtrapolator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "TrkExtrapolator.h"
@@ -119,7 +115,9 @@ ISF::ISFParticle* ISF::TrkExtrapolator::extrapolate( const ISF::ISFParticle &par
                                                        particle.pdgCode(),
                                                        particle.status(),
                                                        particle.timeStamp(),
-                                                       particle );
+                                                       particle,
+                                                       particle.id() // FIXME should this be undefined instead?
+                                                       );
   
   // cleanup
   delete extrapolatedPars;

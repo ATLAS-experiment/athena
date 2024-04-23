@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_Algorithms )
@@ -44,7 +44,7 @@ atlas_add_test( SimKernelMT_test
                 ${GMOCK_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AtlasDetDescr AtlasHepMCLib
                 CxxUtils GaudiKernel GeneratorObjects GeoPrimitives HepMC_InterfacesLib ISF_Event ISF_InterfacesLib
-                StoreGateLib TrackRecordLib
+                StoreGateLib TrackRecordLib TruthUtils
                 POST_EXEC_SCRIPT nopost.sh
                 ENVIRONMENT
                 "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"

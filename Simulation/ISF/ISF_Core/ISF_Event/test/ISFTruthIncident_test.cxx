@@ -174,8 +174,10 @@ namespace MCTesting {
       int status     =  200045;
       double time    = 923.;
       Barcode::ParticleBarcode partBC = 1;
+      Barcode::ParticleBarcode partID = 1;
       ISF::TruthBinding *truth = 0;
       Barcode::ParticleBarcode part2BC = 2;
+      Barcode::ParticleBarcode part2ID = 2;
       m_isp1 = std::make_unique<ISF::ISFParticle>(
                                                   pos,
                                                   mom,
@@ -185,6 +187,7 @@ namespace MCTesting {
                                                   status,
                                                   time,
                                                   test::origin,
+                                                  partID,
                                                   partBC,
                                                   truth );
       m_isp2 = std::make_unique<ISF::ISFParticle>(
@@ -196,6 +199,7 @@ namespace MCTesting {
                                                   status,
                                                   time,
                                                   *(m_isp1.get()), // parent
+                                                  part2ID,
                                                   part2BC,
                                                   truth );
 
@@ -235,6 +239,10 @@ namespace MCTesting {
   TEST_F(ISFTruthIncident_test, testParentBarcode) {
     ASSERT_EQ(m_isp1->barcode(), m_truthIncident->parentBarcode());
 
+  }
+
+  TEST_F(ISFTruthIncident_test, testParentUniqueID) {
+     ASSERT_EQ(m_isp1->id(), m_truthIncident->parentUniqueID());
   }
 
   TEST_F(ISFTruthIncident_test, testNumberOfChildren) {

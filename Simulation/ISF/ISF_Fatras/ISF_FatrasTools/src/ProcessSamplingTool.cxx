@@ -266,7 +266,9 @@ ISF::ISFParticleVector  iFatras::ProcessSamplingTool::interact(const ISF::ISFPar
                                         22,
                                         1 + HepMC::SIM_STATUS_THRESHOLD,
                                         eCell.time,
-                                        *parent );
+                                        *parent,
+                                                     0 // FIXME hard-coded id
+                                                     );
 
     ISF::ISFParticle* child2 = new ISF::ISFParticle( position,
                                         (1-fr)*momentum,
@@ -275,7 +277,9 @@ ISF::ISFParticleVector  iFatras::ProcessSamplingTool::interact(const ISF::ISFPar
                                         22,
                                         1 + HepMC::SIM_STATUS_THRESHOLD,
                                         eCell.time,
-                                        *parent );
+                                        *parent,
+                                                     0 // FIXME hard-coded id
+                                                     );
 
     childVector.push_back(child1);     
     childVector.push_back(child2);     

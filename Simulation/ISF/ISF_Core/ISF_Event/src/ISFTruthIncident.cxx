@@ -95,8 +95,12 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
     return getHepMCTruthParticle(m_parent);
 }
 
-Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() {
+Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
   return m_parent.barcode();
+}
+
+int ISF::ISFTruthIncident::parentUniqueID() {
+  return m_parent.id();
 }
 
 bool ISF::ISFTruthIncident::parentSurvivesIncident() const {

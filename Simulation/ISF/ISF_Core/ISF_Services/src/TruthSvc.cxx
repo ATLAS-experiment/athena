@@ -180,8 +180,8 @@ void ISF::TruthSvc::registerTruthIncident( ISF::ITruthIncident& ti, bool saveAll
   }
 
   // the parent particle -> get its barcode
-  Barcode::ParticleBarcode parentBC = ti.parentBarcode();
-  if ( m_skipIfNoParentBarcode && (parentBC==Barcode::fUndefinedBarcode) ) {
+  Barcode::ParticleBarcode parentBC = ti.parentBarcode(); // FIXME barcode-based
+  if ( m_skipIfNoParentBarcode && (parentBC==Barcode::fUndefinedBarcode) ) {  // TODO switch to using ti.parentUniqueID()
     ATH_MSG_VERBOSE( "Parent particle in TruthIncident does not have a barcode,"
                      << " will not record this TruthIncident.");
     return;
