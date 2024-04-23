@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CxxUtils )
@@ -6,13 +6,14 @@ atlas_subdir( CxxUtils )
 # External dependencies:
 find_package( Boost )
 find_package( TBB )
+find_package( UUID )
 
 # The main library of the package:
 atlas_add_library( CxxUtils
    Root/*.cxx
    PUBLIC_HEADERS CxxUtils
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} )
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS}
+   PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} ${UUID_LIBRARIES} )
 
 # Additional libraries in the package:
 atlas_add_library( exctrace_collector src/exctrace/exctrace_collector.cxx
