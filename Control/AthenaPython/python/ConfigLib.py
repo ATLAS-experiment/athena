@@ -15,7 +15,6 @@ __author__ = "Sebastien Binet <binet@cern.ch>"
 __all__ = [
     'read_file',
     'copy_file',
-    #'merge_files',
     'AutoCfg',
     ]
 
