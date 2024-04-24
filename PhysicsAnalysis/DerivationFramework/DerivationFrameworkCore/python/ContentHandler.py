@@ -1,18 +1,16 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 from AthenaCommon.AlgSequence import AlgSequence
 import PyUtils.Logging as L
 msg = L.logging.getLogger('DerivationFramework__ContentHandler')
 msg.setLevel(L.logging.INFO)
-from DerivationFrameworkCore.ContainersForExpansion import ContainersForExpansion
 
 class ContentHandler:
 	def __init__(self,inputName,namesAndTypes):
 		self.name = inputName
 		self.AppendToDictionary = {}
 		self.NamesAndTypes = namesAndTypes
-		self.ContainersForExpansion = ContainersForExpansion
 	
 	def mainContainerLine(self,containerName):
 		theDictionary = self.NamesAndTypes.copy()
@@ -24,25 +22,6 @@ class ContentHandler:
 			msg.warning('Collection with name %s not found in input file or in definitions from user. No action will be taken for this collection.', containerName)
 		return line
 		
-
-	def expandAuxStore(self,auxContainerName):
-		# Expand to dynamic variables via the AuxStoreWrapper
-		# Since the transition to the component accumulator this code is no longer active.
-		# In addition the remaining containers are no longer needed. To be cleaned up in a
-		# future MR 
-		wrapperName = auxContainerName+"Wrapper"
-		if wrapperName.startswith( "HLT_xAOD__" ):
-			wrapperName = wrapperName[ len( "HLT_xAOD__" ) : ]
-			pass
-		seq = AlgSequence()
-		for item in seq:
-			if item.name() == "AuxStoreWrapperSequence":
-				if not hasattr( item, wrapperName ):
-					alg = CfgMgr.xAODMaker__AuxStoreWrapper( wrapperName, SGKeys = [ auxContainerName+"." ] )
-					#seq.insert( 0, alg )
-					item += alg
-					pass
-				break
 
 	def GetContent(self,contentList,wholeContentList):
 		mainOutput = []
@@ -59,11 +38,6 @@ class ContentHandler:
 				if (mainItem not in mainOutput):
 					mainOutput.append(mainItem)
 			if len(components)>1:
-				# Deal with the (few) containers that still need expanding
-				# As of October 2022 ContainersForExpansion is empty so this is dead code
-				# Also doesn't work with component accumulator. To be removed in a future MR.
-				if (mainItem.split('#')[0] in self.ContainersForExpansion):
-					self.expandAuxStore(components[0])
 				# All variables needed
 				if (components[0]+"." in wholeContentList):
 					if (components[0] not in auxOutput.keys()):
