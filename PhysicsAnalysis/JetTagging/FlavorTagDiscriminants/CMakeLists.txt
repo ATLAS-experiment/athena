@@ -79,6 +79,7 @@ atlas_add_library( FlavorTagDiscriminants
     ElectronPhotonSelectorToolsLib
     MuonAnalysisInterfacesLib
     EgammaAnalysisInterfacesLib
+    TruthClassificationLib
   )
 
 

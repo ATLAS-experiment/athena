@@ -183,7 +183,8 @@ def trackTruthDecorator(cfgFlags) -> ComponentAccumulator:
     acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
         'TrackTruthDecoratorAlg',
         trackContainer=_getTrackCollection(cfgFlags),
-        trackTruthOriginTool=trackTruthOriginTool
+        trackTruthOriginTool=trackTruthOriginTool,
+        truthLeptonTool=CompFactory.TruthClassificationTool("TruthClassificationTool")
     ))
 
     return acc
