@@ -5,6 +5,7 @@
 # art-include: main/Athena
 # art-architecture: '#&nvidia'
 
+# Print out some environment
 echo "----- nvidia-smi -----"
 nvidia-smi
 echo "----- lscpu -----"
@@ -13,6 +14,12 @@ echo "----- PATH -----"
 echo $PATH
 echo "----- LD_LIBRARY_PATH -----"
 echo $LD_LIBRARY_PATH
+
+# Choose GPU with lowest utilization
+export CUDA_VISIBLE_DEVICES=$(nvidia-smi --query-gpu=memory.free,index --format=csv,nounits,noheader | sort -nr | head -1 | awk '{ print $NF }')
+echo "GPU with lowest utilization: $CUDA_VISIBLE_DEVICES"
+
+# Run athena
 echo "----- athena -----"
 athena --CA AthExCUDA/TrackParticleCalibratorExampleConfig.py
 rc1=$?
