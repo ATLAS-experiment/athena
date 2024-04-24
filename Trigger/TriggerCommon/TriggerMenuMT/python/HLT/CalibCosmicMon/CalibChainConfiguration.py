@@ -33,7 +33,7 @@ def getLArNoiseBurstRecoCfg(flags):
 # LArNoiseBurst configuration
 # --------------------
 @AccumulatorCache
-def getLArNoiseBurstSequenceCfg(flags):
+def getLArNoiseBurstSequenceGenCfg(flags):
 
     hypoAlg = CompFactory.TrigLArNoiseBurstAlg("NoiseBurstAlg")
     InEventReco = InEventRecoCA("LArNoiseBurstRecoSequence", inputMaker=clusterFSInputMaker())
@@ -52,7 +52,7 @@ def getLArNoiseBurstSequenceCfg(flags):
 # LArPS Noise Detection EM configuration
 # --------------------
 @AccumulatorCache
-def getCaloAllEMLayersPSSequenceCfg(flags,doAllorAllEM=False):
+def getCaloAllEMLayersPSSequenceGenCfg(flags,doAllorAllEM=False):
 
     from TrigT2CaloCommon.CaloDef import fastCaloVDVCfg
     nameselAcc = "LArPSSequence_All"
@@ -129,25 +129,25 @@ class CalibChainConfiguration(ChainConfigurationBase):
 
 
     def getAcceptedEventsStep(self, flags, i):
-        return self.getStep(flags,1, 'AcceptedEvents', [acceptedEventsCfg])
+        return self.getStep(flags,1, 'AcceptedEvents', [acceptedEventsSequenceGenCfg])
 
     def getAllTEStep(self, flags, i):
-        return self.getStep(flags,1, 'LArNoiseBurst', [getLArNoiseBurstSequenceCfg])
+        return self.getStep(flags,1, 'LArNoiseBurst', [getLArNoiseBurstSequenceGenCfg])
 
     def getCaloAllEMStep(self, flags, i):
-        return self.getStep(flags,1, 'LArPSALLEM', [getCaloAllEMLayersPSSequenceCfg], doAllorAllEM=False)
+        return self.getStep(flags,1, 'LArPSALLEM', [getCaloAllEMLayersPSSequenceGenCfg], doAllorAllEM=False)
 
     def getCaloAllStep(self, flags, i):
-        return self.getStep(flags,1, 'LArPSALL', [getCaloAllEMLayersPSSequenceCfg], doAllorAllEM=True)
+        return self.getStep(flags,1, 'LArPSALL', [getCaloAllEMLayersPSSequenceGenCfg], doAllorAllEM=True)
 
     def getIDCalibEmpty(self, flags, i):
         return self.getEmptyStep(1, 'IDCalibEmptyStep')
 
     def getIDCalibFTFReco(self, flags, i):
-        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFCfg])
+        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFSequenceGenCfg])
 
     def getIDCalibTrigger(self, flags, i):
-        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerCfg])
+        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerSequenceGenCfg])
 
 #----------------------------------------------------------------
 
@@ -156,7 +156,7 @@ class CalibChainConfiguration(ChainConfigurationBase):
 # --------------------
 
 @AccumulatorCache
-def IDCalibTriggerCfg(flags):
+def IDCalibTriggerSequenceGenCfg(flags):
     DummyInputMakerAlg = CompFactory.InputMakerForRoI( "IM_IDCalib_HypoOnlyStep" )
     DummyInputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
 
@@ -179,7 +179,7 @@ def IDCalibTriggerCfg(flags):
 # --------------------
 
 @AccumulatorCache
-def IDCalibFTFCfg(flags):
+def IDCalibFTFSequenceGenCfg(flags):
     reco = InEventRecoCA('IDCalibTrkrecoSeq_reco',inputMaker=getTrackingInputMaker(flags, "ftf"))
     reco.mergeReco(commonInDetFullScanCfg(flags))
 
@@ -200,7 +200,7 @@ def IDCalibFTFCfg(flags):
 # HLT step for the AcceptedEvents chains
 # --------------------
 @AccumulatorCache
-def acceptedEventsCfg(flags):
+def acceptedEventsSequenceGenCfg(flags):
     '''
     Return MenuSequenceCA for an HLT step used by the AcceptedEvents chains. This step is a trivial
     always-reject hypo with no reco. The step itself should be noop as only the HLTSeeding and the

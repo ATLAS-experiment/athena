@@ -1484,7 +1484,7 @@ def setupMenu(menu_name):
 
 
         # ATR-28563
-        ChainProp(name='HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE27-jJ27', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
 
     ]
 
@@ -3270,7 +3270,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_noalg_L12MU5VF',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+SupportGroup+MuonXStreamersGroup),
         
         # ATR-28563 
-        ChainProp(name='HLT_noalg_L1LLPDPHI-jXE27-jJ27', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_noalg_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
 
     ]
 

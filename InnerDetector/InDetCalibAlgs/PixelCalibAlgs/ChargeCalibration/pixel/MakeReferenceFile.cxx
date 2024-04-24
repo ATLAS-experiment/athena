@@ -36,6 +36,8 @@
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #endif
 
+using iovNamePair= std::pair<std::string, std::string >;
+
 class DbConnection
 {
 public:
@@ -294,26 +296,36 @@ int main(int argc, char *argv[])
     
     bool useLastIOV = true;
     cool::IObjectIteratorPtr objectsIterator = f.objectIterator(useLastIOV); // True to use the last IOV
-    std::vector<std::string> myIOVs;
+    std::vector< iovNamePair > myIOVs;
     while (objectsIterator->goToNext())
     {
         const cool::IObject &thisObject = objectsIterator->currentRef();
+        std::size_t posPar = iovToString(thisObject).find("]");
+        std::size_t posCom = iovToString(thisObject).find(",");
+        std::string name = iovToString(thisObject).substr(1,posPar-1).replace(posCom-1,1,"_");
         std::string display = iovToString(thisObject) + " (" + std::to_string(thisObject.channelId()) + ")\n";
         display += payloadToString(thisObject);
-        myIOVs.push_back(display);
+        myIOVs.push_back(std::make_pair(name,display));
     }
 
-    const std::string fileName = tagName + ".log";
-    std::ofstream opFile(fileName);
     if(!useLastIOV){
-        // Saving in file the previous to last IOV - testing only so far.
-        opFile << myIOVs.at(myIOVs.size()-2);
+        // Saving all the IOVs in different files, just used for experts - Evolution monitoring
+        for(const auto & [IOVname,iov]:myIOVs){
+            std::cout<<IOVname<<"\n";
+            const std::string filename= IOVname +"_"+tagName+".log";
+            std::ofstream opFile(filename);
+            opFile <<iov<<"\n";
+            opFile.close();
+        }
     }
-    else{
-        opFile << myIOVs.back();
+    else{    
+        const std::string fileName = tagName + ".log";
+        std::ofstream opFile(fileName);
+        opFile << myIOVs.back().second << "\n";
+        opFile << std::endl;
+        opFile.close();
     }
 
-    opFile << std::endl;
-    opFile.close();
+
     return returnCode;
 }

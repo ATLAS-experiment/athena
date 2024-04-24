@@ -17,7 +17,7 @@ class CaloMenuDefs_FWD(object):
 #
 
 @AccumulatorCache
-def fastCaloMenuSequence_FWDCfg(flags,name,doRinger=True, is_probe_leg=False):
+def fastCalo_FWDSequenceGenCfg(flags,name,doRinger=True, is_probe_leg=False):
    """ Creates Egamma Fast Calo FWD MENU sequence (Reco and Hypo)
    The Hypo name changes depending on name, so for different implementations (Electron, Gamma,....)
    """

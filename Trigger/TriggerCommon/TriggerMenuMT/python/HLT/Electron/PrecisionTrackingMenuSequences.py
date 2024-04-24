@@ -12,7 +12,7 @@ def tag(ion):
 
 
 @AccumulatorCache
-def precisionTrackingSequenceCfg(flags, ion=False, variant='', is_probe_leg = False):
+def precisionTrackingSequenceGenCfg(flags, ion=False, variant='', is_probe_leg = False):
     """ fourth step:  precision electron....."""
 
     inViewRoIs = "precisionTracking" + variant
@@ -45,5 +45,5 @@ def precisionTrackingSequenceCfg(flags, ion=False, variant='', is_probe_leg = Fa
     return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
 
-def precisionTrackingSequence_LRTCfg(flags, is_probe_leg=False):
-    return precisionTrackingSequenceCfg(flags, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
+def precisionTracking_LRTSequenceGenCfg(flags, is_probe_leg=False):
+    return precisionTrackingSequenceGenCfg(flags, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')

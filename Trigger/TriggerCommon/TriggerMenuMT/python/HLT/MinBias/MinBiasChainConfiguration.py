@@ -6,11 +6,11 @@ log = logging.getLogger( __name__ )
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 
-from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceCfg, 
-                                                            MinBiasTrkSequenceCfg,
-                                                            MinBiasMbtsSequenceCfg,
-                                                            MinBiasZVertexFinderSequenceCfg)
-from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg, AFPToFDeltaZSequenceCfg
+from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceGenCfg, 
+                                                            MinBiasTrkSequenceGenCfg,
+                                                            MinBiasMbtsSequenceGenCfg,
+                                                            MinBiasZVertexFinderSequenceGenCfg)
+from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceGenCfg, AFPGlobalSequenceGenCfg, AFPToFDeltaZSequenceGenCfg
 
 class MinBiasChainConfig(ChainConfigurationBase):
 
@@ -47,25 +47,25 @@ class MinBiasChainConfig(ChainConfigurationBase):
         return self.buildChain(steps)
 
     def getMinBiasMbtsStep(self, flags):
-        return self.getStep(flags,1,'Mbts', [MinBiasMbtsSequenceCfg])
+        return self.getStep(flags,1,'Mbts', [MinBiasMbtsSequenceGenCfg])
 
     def getMinBiasEmptyMbtsStep(self, flags):
         return self.getEmptyStep(1,'EmptyMbts')
 
     def getMinBiasSpStep(self, flags):
-        return self.getStep(flags,2,'SPCount', [MinBiasSPSequenceCfg])
+        return self.getStep(flags,2,'SPCount', [MinBiasSPSequenceGenCfg])
 
     def getMinBiasZFindStep(self, flags):
-        return self.getStep(flags,3,'ZFind', [MinBiasZVertexFinderSequenceCfg])
+        return self.getStep(flags,3,'ZFind', [MinBiasZVertexFinderSequenceGenCfg])
 
     def getMinBiasTrkStep(self, flags):
-        return self.getStep(flags,4,'TrkCount', [MinBiasTrkSequenceCfg])
+        return self.getStep(flags,4,'TrkCount', [MinBiasTrkSequenceGenCfg])
 
     def getAFPTrkStep(self, flags):
-        return self.getStep(flags,1,'AFPTrk', [AFPTrkSequenceCfg])
+        return self.getStep(flags,1,'AFPTrk', [AFPTrkSequenceGenCfg])
 
     def getAFPGlobalStep(self, flags):
-        return self.getStep(flags,2,'AFPGlobal', [AFPGlobalSequenceCfg])
+        return self.getStep(flags,2,'AFPGlobal', [AFPGlobalSequenceGenCfg])
     
     def getAFPToFDeltaZStep(self, flags):
-        return self.getStep(flags,2,'AFPToFDeltaZ', [AFPToFDeltaZSequenceCfg])
+        return self.getStep(flags,2,'AFPToFDeltaZ', [AFPToFDeltaZSequenceGenCfg])

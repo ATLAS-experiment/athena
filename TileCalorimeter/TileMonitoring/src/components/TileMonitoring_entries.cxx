@@ -7,7 +7,6 @@
 #include "../TileDigitsMonTool.h"
 #include "../TileRawChannelMonTool.h"
 #include "../TileCellNoiseMonTool.h"
-#include "../TileTBCellMonTool.h"
 #include "../TileJetMonitorAlgorithm.h"
 #include "../TileDigitsFlxMonitorAlgorithm.h"
 #include "../TileDQFragMonitorAlgorithm.h"
@@ -37,7 +36,6 @@ DECLARE_COMPONENT( TilePaterMonTool )
 DECLARE_COMPONENT( TileDigitsMonTool )
 DECLARE_COMPONENT( TileRawChannelMonTool )
 DECLARE_COMPONENT( TileCellNoiseMonTool )
-DECLARE_COMPONENT( TileTBCellMonTool )
 DECLARE_COMPONENT( TileJetMonitorAlgorithm )
 DECLARE_COMPONENT( TileDigitsFlxMonitorAlgorithm )
 DECLARE_COMPONENT( TileDQFragMonitorAlgorithm )

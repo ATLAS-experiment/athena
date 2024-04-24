@@ -12,11 +12,12 @@ if __name__=="__main__":
     parser.add_argument('--thr'       , required=True, help="Threshold file, format must be \"SCAN_SXXXXXXXXX\" ")
     parser.add_argument('--thr_intime', required=True, help="Threshold intime file, format must be \"SCAN_SXXXXXXXXX\" ")
     parser.add_argument('--tot'       , required=True, help="Time over threshold file, format must be \"SCAN_SXXXXXXXXX\" ")
-    parser.add_argument('--layers'    , required=True, nargs='+', choices={"Blayer","L1","L2","disk"}, help="What layers we should run to update the calibration.")
+    parser.add_argument('--layers'    , required=True, nargs='+', choices={"Blayer","L1","L2","disk"}, help="Layers we should run to update the calibration.")
+    parser.add_argument('--tag'       , type=str, default="PixelChargeCalibration-DATA-RUN2-UPD4-26", help="Tag in order to read the DB")
     parser.add_argument('--saveInfo'  , action='store_true', help="Creates a root file with the fitting plots - Slower running time")
     parser.add_argument('--runCal'    , action='store_true', help="Runs only the Pixel Calibration layers")
-    parser.add_argument('--skipPlots' , action='store_true', help="Skips the plotting step. Takes less time")
-    parser.add_argument('--tag'       , type=str, default="PixelChargeCalibration-DATA-RUN2-UPD4-26", help="Tag in order to read the DB")
+    parser.add_argument('--skipPlots' , action='store_true', help="Skips the plotting step - Slower running time")
+    
     
     
     args = parser.parse_args()
