@@ -33,9 +33,23 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834)")
+        self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the MuonCalibTool needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS)')
 
     def makeAlgs (self, config) :
 
+        #make sure that this is sync with
+        #PhysicsAnalysis/MuonID/MuonIDAnalysis/MuonMomentumCorrections/MuonMomentumCorrections/MuonCalibTool.h#L31-37
+        if self.calibMode == 'correctData_CB':
+            calibMode = 0
+        elif self.calibMode == 'correctData_IDMS':
+            calibMode = 1
+        elif self.calibMode == 'notCorrectData_IDMS':
+            calibMode = 2
+        elif self.calibMode == 'notCorrectData_CB':
+            calibMode = 3
+        else :
+            raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB")
+        
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisMuons")
         else :
@@ -73,8 +87,9 @@ class MuonCalibrationConfig (ConfigBlock):
                                'MuonCalibrationAndSmearingAlg' + self.postfix )
         config.addPrivateTool( 'calibrationAndSmearingTool',
                         'CP::MuonCalibTool' )
+
         alg.calibrationAndSmearingTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
-        alg.calibrationAndSmearingTool.calibMode = 2 # choose ID+MS with no sagitta bias
+        alg.calibrationAndSmearingTool.calibMode = calibMode
         # To be used in MetAnalysisConfig
         config._muonCalibMode = alg.calibrationAndSmearingTool.calibMode
         alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
