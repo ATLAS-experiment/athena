@@ -8,7 +8,7 @@
 
 from JetRecConfig.JetDefinition import JetDefinition
 from JetRecConfig.JetGrooming import GroomingDefinition
-from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut
+from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track
 from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop
 from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDependencies
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -16,12 +16,17 @@ from AthenaConfiguration.Enums import BeamType, LHCPeriod
 import unittest
 from copy import copy, deepcopy
 
-# Start with a basic constituent and print some information
+def compareProperties(a,b):
+    print(f"Comparing {a} with {b}")
+    for k,v in a.__dict__.items():
+        if v != b.__dict__[k]:
+            print(f"Mismatch for {k}: {v} --> {b.__dict__[k]}")
+            print(f"Hash for {k}: {hash(v)} --> {hash(b.__dict__[k])}")
 
 class TestJetDef(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.smallRdefs = [AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut]
+        cls.smallRdefs = [AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track]
         cls.largeRdefs = [AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop]
         cls.flags = initConfigFlags()
         cls.flags.Input.Files=[]
@@ -32,29 +37,65 @@ class TestJetDef(unittest.TestCase):
 
     def test_0_copy_smallRJets(self):
         for jetdef in self.smallRdefs:
-            self.assertEqual(jetdef, copy(jetdef))
+            jetdef_copy = copy(jetdef)
+            try:
+                self.assertEqual(jetdef, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef,jetdef_copy)
+                raise e
 
     def test_1_deepcopy_smallRJets(self):
         for jetdef in self.smallRdefs:
-            self.assertEqual(jetdef, deepcopy(jetdef))
+            jetdef_copy = deepcopy(jetdef)
+            try:
+                self.assertEqual(jetdef, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef,jetdef_copy)
+                raise e
 
     def test_2_copy_largeRJets(self):
         for jetdef in self.largeRdefs:
-            self.assertEqual(jetdef, copy(jetdef))
+            jetdef_copy = copy(jetdef)
+            try:
+                self.assertEqual(jetdef, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef,jetdef_copy)
+                raise e
 
     def test_3_deepcopy_largeRJets(self):
         for jetdef in self.largeRdefs:
-            self.assertEqual(jetdef, deepcopy(jetdef))
+            jetdef_copy = deepcopy(jetdef)
+            try:
+                self.assertEqual(jetdef, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef,jetdef_copy)
+                raise e
 
-    def test_4_copy_smallRJets(self):
+    def test_4_copy_smallRJets_solved(self):
         for jetdef in self.smallRdefs:
             jetdef_solved = solveDependencies(jetdef,self.flags)
             jetdef_copy = copy(jetdef_solved)
-            self.assertEqual(jetdef_solved, jetdef_copy)
+            try:
+                self.assertEqual(jetdef, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef,jetdef_copy)
+                raise e
+
+    def test_5_deepcopy_smallRJets_solved(self):
+        for jetdef in self.smallRdefs:
+            jetdef_solved = solveDependencies(jetdef,self.flags)
+            jetdef_copy = copy(jetdef_solved)
+
+            try:
+                self.assertEqual(jetdef, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef,jetdef_copy)
+                raise e
+
             self.assertEqual(jetdef_solved._cflags, jetdef_copy._cflags)
             self.assertTrue(jetdef_copy._cflags.locked())
 
-    def test_5_deepcopy_largeRJets(self):
+    def test_4_copy_largeRJets_solved(self):
         for jetdef in self.largeRdefs:
             if isinstance(jetdef, JetDefinition):
                 jetdef_solved = solveDependencies(jetdef,self.flags)
@@ -64,7 +105,30 @@ class TestJetDef(unittest.TestCase):
                 jetdef_copy = copy(jetdef_solved)
             else:
                 raise TypeError(f'Invalid definition type {type(jetdef)} for {jetdef}')
-            self.assertEqual(jetdef_solved, jetdef_copy)
+
+            try:
+                self.assertEqual(jetdef_solved, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef_solved,jetdef_copy)
+                raise e
+
+    def test_5_deepcopy_largeRJets_solved(self):
+        for jetdef in self.largeRdefs:
+            if isinstance(jetdef, JetDefinition):
+                jetdef_solved = solveDependencies(jetdef,self.flags)
+                jetdef_copy = deepcopy(jetdef_solved)
+            elif isinstance(jetdef, GroomingDefinition):
+                jetdef_solved = solveGroomingDependencies(jetdef,self.flags)
+                jetdef_copy = deepcopy(jetdef_solved)
+            else:
+                raise TypeError(f'Invalid definition type {type(jetdef)} for {jetdef}')
+
+            try:
+                self.assertEqual(jetdef_solved, jetdef_copy)
+            except AssertionError as e:
+                compareProperties(jetdef_solved,jetdef_copy)
+                raise e
+
             self.assertEqual(jetdef_solved._cflags, jetdef_copy._cflags)
             self.assertTrue(jetdef_copy._cflags.locked())
 
