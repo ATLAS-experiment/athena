@@ -1378,6 +1378,10 @@ HLT_2j45_2j45_3timeSig_L14jJ40:
     0: 2
   stepFeatures:
     0: 27
+HLT_2j45_2j55_3timeSig_L14jJ40:
+  eventCount: 0
+HLT_2j45_2j75_3timeSig_L14jJ40:
+  eventCount: 0
 HLT_2j45c_2j35c_85bdips_roiftf_presel4c45_L14jJ40p0ETA25:
   eventCount: 6
   stepCounts:
@@ -1502,6 +1506,24 @@ HLT_2j55_0eta290_020jvt_bgn160_2j55_pf_ftf_presel2j25XX2j25b85_L14jJ40p0ETA25:
     1: 18
     2: 33
     3: 5
+HLT_2j55_2j45_3timeSig_L14jJ40:
+  eventCount: 2
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 20
+HLT_2j55_2j55_3timeSig_L14jJ40:
+  eventCount: 0
+HLT_2j75_2j45_3timeSig_L14jJ40:
+  eventCount: 2
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 13
+HLT_2j75_2j75_3timeSig_L14jJ40:
+  eventCount: 0
+HLT_2j90_2j90_3timeSig_L14jJ40:
+  eventCount: 0
 HLT_2mu10_PhysicsTLA_L12MU8F:
   eventCount: 0
 HLT_2mu10_bJpsimumu_L12MU8F:
