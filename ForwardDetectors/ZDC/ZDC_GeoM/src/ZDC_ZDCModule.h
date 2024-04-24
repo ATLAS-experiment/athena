@@ -10,7 +10,7 @@
 class ZDC_ZDCModule : public ZDC_ModuleBase{
   public:
     ZDC_ZDCModule();
-    ZDC_ZDCModule(StoreGateSvc *detStore, int side, int module, const ZdcID *zdcID, int pixelStart, int pixelStop);
+    ZDC_ZDCModule(StoreGateSvc *detStore, int side, int module, const ZdcID *zdcID, int modType);
     ZDC_ZDCModule(ZDC_ZDCModule *right, int side, int module);
 
     virtual ~ZDC_ZDCModule() = default;
@@ -18,8 +18,7 @@ class ZDC_ZDCModule : public ZDC_ModuleBase{
     virtual void create(GeoFullPhysVol* mother, GeoAlignableTransform* trf) override;
 
   protected:
-    int m_pixelStart;
-    int m_pixelStop;
+    int m_modType;
 
 };
 

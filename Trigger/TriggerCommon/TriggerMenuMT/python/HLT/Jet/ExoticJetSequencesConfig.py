@@ -8,7 +8,7 @@ from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 import functools
 
-def jetEJsMenuSequence(flags, jetsIn):
+def jetEJsMenuSequenceGenCfg(flags, jetsIn):
     
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetEJsHypoToolFromDict
 
@@ -40,7 +40,7 @@ def jetEJsMenuSequence(flags, jetsIn):
         return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetEJsHypoToolFromDict)
     return functools.partial(makejetEJsMenuSequence)
 
-def jetCRVARMenuSequence(flags, jetsIn):
+def jetCRVARMenuSequenceGenCfg(flags, jetsIn):
 
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetCRVARHypoToolFromDict
     # Get track sequence name
@@ -69,7 +69,7 @@ def jetCRVARMenuSequence(flags, jetsIn):
     return functools.partial(makejetCRVARMenuSequence)
 
 
-def jetCRMenuSequence(flags, jetsIn):
+def jetCRMenuSequenceGenCfg(flags, jetsIn):
 
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetCRHypoToolFromDict
 
@@ -95,8 +95,8 @@ def jetCRMenuSequence(flags, jetsIn):
         )
     )
     
-    def makejetCRMenuSequence():
+    def makejetCRMenuSequenceGenCfg():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRHypoToolFromDict)
     
-    return functools.partial(makejetCRMenuSequence)
+    return functools.partial(makejetCRMenuSequenceGenCfg)
 

@@ -16,7 +16,7 @@ class CaloMenuDefs(object):
 #
 
 @AccumulatorCache
-def fastCaloMenuSequenceCfg(flags, name, doRinger=True, is_probe_leg=False):
+def fastCaloSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False):
     """ Creates Egamma Fast Calo  MENU sequence
     The Hypo name changes depending on name, so for different implementations (Electron, Gamma,....)
     """

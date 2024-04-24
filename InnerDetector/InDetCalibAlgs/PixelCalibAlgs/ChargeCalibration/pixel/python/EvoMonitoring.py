@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-#   This script is used to make plots comparing the lastes IOV in the DB with the new calibration.
+#   This script is used to make plots comparing the latest IOV in the DB with the new calibration.
 #   In order to run it standalone you need to setup Athena and call setupRunning(path_newCalib, path_oldCalib)
 #   oldCalib file has the structure of the Recobery.py (after running the calibration)
 #   newCalib file has the structure of the MakeReferenceFile (It is on IOV from the central DB)
@@ -14,8 +14,15 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 
 
-def arrayCharge(parameters):
-    m_array = [charge(parameters, 5*(1+i)) for i in range(10)]
+def arrayCharge(parameters, layer):
+    
+    if layer == "Blayer":
+        # Range [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42] (includes the ToT tuning point: 18)
+        m_array = [charge(parameters, 3*(1+i)) for i in range(14)]
+    else:
+        # Range [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] (includes the ToT tuning point: 30)
+        m_array = [charge(parameters, 5*(1+i)) for i in range(8)]
+        
     return ar.array('d',m_array)
 
 def charge(parameters, tot):
@@ -25,13 +32,38 @@ def charge(parameters, tot):
 
 def percent( a,b):
     return a/(a+b)*100 if (a+b) != 0 else 999.99
+
+
+def failsCheckTuning(parameters, layer):
+    tot    = 30
+    error  = 5 # percentage
+    expected_charge = 20000 # electrons
+    
+    if layer == "Blayer":
+        tot = 18
+        
+    if layer == "IBL":
+        tot = 10
+        expected_charge = 16000 # electrons
+        
+        if abs(parameters[9]-expected_charge)/expected_charge*100 > 5:
+            return True, [parameters[9], abs(parameters[9]-expected_charge)/expected_charge*100, expected_charge]
+        return False, [0,0,0]
+    
+    low   = expected_charge*(1-error/100)
+    high  = expected_charge*(1+error/100)
+    realQ = charge(parameters, tot)
+    
+    if realQ < low or realQ > high:
+        return True, [charge(parameters, tot), abs(charge(parameters, tot)-expected_charge)/expected_charge*100,expected_charge]
+    return False, [0,0,0] 
  
 
 def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
     
     save = 1
     log_info = {}
-    plot_range = [0,75000]
+    plot_range = np.array([0,75000])
     
     slopes = []
     information = {"Total_mods": 0, 
@@ -53,12 +85,16 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
             mod_layer = "Blayer"
         elif mod_str.startswith("L1"): 
             mod_layer = "L1"
+            continue
         elif mod_str.startswith("L2"): 
             mod_layer = "L2"
+            continue
         elif mod_str.startswith("D"): 
             mod_layer = "Disk"
+            continue
         else:
             mod_layer = "IBL"
+            continue
             if mod_str.startswith("LI_S15"): 
                 continue
         
@@ -71,33 +107,49 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
             information["Total_FE"] += 1
             newQ = []
             oldQ = []
+            boolTOT = False
+            realQ = []
             
             if mod_layer != "IBL":
                 newCal_normal_pix = new_calib[str(mod)][fe][12:15]
                 oldCal_normal_pix = old_calib[str(mod)][fe][12:15]
+                boolTOT, realQ = failsCheckTuning(newCal_normal_pix, mod_layer)
             
-                # We just fet the first point since we loose linearity afetrwards
-                newQ = arrayCharge(newCal_normal_pix)[:8]
-                oldQ = arrayCharge(oldCal_normal_pix)[:8]
+                # We just fet the first point since we loose linearity afterwards
+                newQ = arrayCharge(newCal_normal_pix,mod_layer)
+                oldQ = arrayCharge(oldCal_normal_pix,mod_layer)
             else:
                 # For IBL we dont need to convert TOT into charge, DB already in charge
                 newQ = new_calib[str(mod)][fe][4:20]
                 oldQ = old_calib[str(mod)][fe][4:20]
-                plot_range = [0,35000]
-            
-            
+                plot_range = np.array([0,35000])
+                boolTOT, realQ = failsCheckTuning(newQ, mod_layer)
+                
             m,b = np.polyfit(newQ ,oldQ,1)
             slopes.append(m)
+            boolFit = (abs((1-m)/m)*100) > 5
             
-            if (abs((1-m)/m)*100) > 5:
+            if boolFit or boolTOT:
                 key = "%-18s - %i" % (mod_str, mod)
-                if key not in log_info:
-                    log_info[key] = "\tFE%02i ---> slope: %5.2f -  deviation: %5.1f%%\n" % (fe,m, abs((1-m)/m)*100)
-                else:
-                    log_info[key] += "\tFE%02i ---> slope: %5.2f -  deviation: %5.1f%%\n" % (fe,m, abs((1-m)/m)*100)
+                if boolFit:
+                    if key not in log_info:
+                        log_info[key] = "\tFE%02i ---> slope: %5.2f -  dev: %5.1f%%\n" % (fe,m, abs((1-m)/m)*100)
+                    else:
+                        log_info[key] += "\tFE%02i ---> slope: %5.2f -  dev: %5.1f%%\n" % (fe,m, abs((1-m)/m)*100)
+                if boolTOT:
+                    if key not in log_info:
+                        log_info[key]  = "\tFE%02i ---> Charge= %5ie (dev %6.2f%%) out of error bars. Expected: %5ie\n" % (fe, realQ[0], realQ[1], realQ[2])
+                    else:
+                        log_info[key] += "\tFE%02i ---> Charge= %5ie (dev %6.2f%%) out of error bars. Expected: %5ie\n" % (fe, realQ[0], realQ[1], realQ[2])                    
                     
                 information[mod_layer]["bad"] += 1
-                status = "_BAD"
+                status = "_BAD" 
+                if boolTOT:
+                    # Fails charge tuning
+                    status += "_Q"
+                if boolFit:
+                    # Fails the slope at y = x (old vs. new calib)
+                    status += "_Slope"
             else:
                 information[mod_layer]["ok"] += 1
                 status = "_OK"
@@ -129,14 +181,13 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
             storage = "plots/" + mod_layer + "/"
             
             canvas = FigureCanvasAgg(fig)
-            canvas.print_figure(storage+mod_str+"_id"+str(mod)+status+".png", dpi=150)            
+            canvas.print_figure(storage+"Id"+str(mod)+ "_" +mod_str+status+".png", dpi=150)
     
     if(save):
         fig = Figure(figsize=(13,10))
         fig.suptitle("All modules")
         axs = fig.add_subplot(1,1,1)
         axs.hist(np.clip(slopes, -1, 1.49), bins=100)
-        axs.set_yscale("log")
         axs.set_xlabel("Fit slope")
         axs.set_ylabel("Counts")
         FigureCanvasAgg(fig).print_figure("plots/slopes.png", dpi=150)
@@ -161,6 +212,10 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
     
     
     print("+"*20+" List of bad FE "+"+"*20 )
+    print("Expected TOT vs. charge for the different layers:")
+    print("%-10s: TOT@%2i = %2ike"   % ("IBL"       , 10, 16))
+    print("%-10s: TOT@%2i = %2ike"   % ("Blayer"    , 18, 20))
+    print("%-10s: TOT@%2i = %2ike\n" % ("L1/L2/Disk", 30, 20))
     for key, val in log_info.items():
         print(key)
         print(val)
@@ -224,8 +279,8 @@ if __name__ == "__main__":
                             description="""Compares two IOV and plots the results.\n\n
                             Example: python -m PixelCalibAlgs.EvoMonitoring --new "path/to/file" --old "path/to/file" """)
     
-    parser.add_argument('--new', required=True, default="FINAL_calibration_candidate.txt", help="New calibration file (output format from the Recovery.py)")
-    parser.add_argument('--old', required=True, default="PixelChargeCalibration-DATA-RUN2-UPD4-26.log", help="Old DB IOV calibration")
+    parser.add_argument('--new', default="FINAL_calibration_candidate.txt", help="New calibration file (output format from the Recovery.py)")
+    parser.add_argument('--old', default="PixelChargeCalibration-DATA-RUN2-UPD4-26.log", help="Old DB IOV calibration")
     
     args = parser.parse_args()
     setupRunEvo(args.new, args.old)

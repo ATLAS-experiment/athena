@@ -7,7 +7,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def DisTrkTriggerHypoSequence(flags):
+def DisTrkTriggerHypoSequenceGenCfg(flags):
 
         from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import TrigDisappearingTrackHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigDisappearingTrackHypoConfig import createTrigDisappearingTrackHypoAlgCfg

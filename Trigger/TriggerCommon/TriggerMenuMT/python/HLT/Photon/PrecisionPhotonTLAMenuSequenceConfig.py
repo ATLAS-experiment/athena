@@ -23,7 +23,7 @@ def PhotonTLASequenceCfg(flags, photonsIn):
     return recoAcc, sequenceOut
 
 @AccumulatorCache
-def PhotonTLAMenuSequenceCfg( flags, photonsIn ):
+def PhotonTLAMenuSequenceGenCfg( flags, photonsIn ):
     
     # retrieves the "reco" sequence which only consists of the InputMaker
     (recoAcc, sequenceOut) = PhotonTLASequenceCfg(flags, photonsIn=photonsIn)

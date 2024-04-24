@@ -5,9 +5,9 @@ import functools
 from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep
 from AthenaCommon.Logging import logging
 from ..Jet.JetChainConfiguration import JetChainConfiguration
-from ..Photon.PrecisionPhotonTLAMenuSequenceConfig import PhotonTLAMenuSequenceCfg
-from ..Jet.JetTLASequenceConfig import JetTLAMenuSequenceCfg
-from ..Muon.MuonTLASequenceConfig import MuonTLAMenuSequenceCfg
+from ..Photon.PrecisionPhotonTLAMenuSequenceConfig import PhotonTLAMenuSequenceGenCfg
+from ..Jet.JetTLASequenceConfig import JetTLAMenuSequenceGenCfg
+from ..Muon.MuonTLASequenceConfig import MuonTLAMenuSequenceGenCfg
 log = logging.getLogger(__name__)
 
 
@@ -24,7 +24,7 @@ def addTLAStep(flags, chain, chainDict):
         
         log.debug("addTLAStep: processing signature: %s", cPart['signature'] )
         # call the sequence from their respective signatures
-        tlaSequencesList.append(functools.partial(getTLASignatureSequence, flags, chainDict=chainDict, chainPart=cPart))
+        tlaSequencesList.append(functools.partial(getTLASignatureSequenceGenCfg, flags, chainDict=chainDict, chainPart=cPart))
             
     log.debug("addTLAStep: About to add a step with: %d parallel sequences.", len(tlaSequencesList))            
     
@@ -42,16 +42,16 @@ def addTLAStep(flags, chain, chainDict):
 
 
 
-def getTLASignatureSequence(flags, chainDict, chainPart):
+def getTLASignatureSequenceGenCfg(flags, chainDict, chainPart):
     # Here we simply retrieve the TLA sequence from the existing signature code 
     signature= chainPart['signature']
     
     if signature == 'Photon':    
         photonOutCollectionName = "HLT_egamma_Photons"
-        return PhotonTLAMenuSequenceCfg(flags, photonsIn=photonOutCollectionName)
+        return PhotonTLAMenuSequenceGenCfg(flags, photonsIn=photonOutCollectionName)
 
     elif signature == 'Muon':    
-        return MuonTLAMenuSequenceCfg(flags, muChainPart=chainPart)
+        return MuonTLAMenuSequenceGenCfg(flags, muChainPart=chainPart)
 
     elif signature  == 'Jet' or signature  == 'Bjet':   
         jetDef = JetChainConfiguration(chainDict)
@@ -64,7 +64,7 @@ def getTLASignatureSequence(flags, chainDict, chainPart):
         # Thus, BTag recording will always run for PFlow jets, creating an empty container if no btagging exists. 
         attachBtag = True
         if jetDef.recoDict["trkopt"] == "notrk": attachBtag = False
-        return JetTLAMenuSequenceCfg(flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
+        return JetTLAMenuSequenceGenCfg(flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
 
 
 def findTLAStep(chainConfig):

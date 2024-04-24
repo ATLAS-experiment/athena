@@ -7,7 +7,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
     
 @AccumulatorCache
-def fastPhotonSequenceCfg(flags,is_probe_leg=False):
+def fastPhotonSequenceGenCfg(flags,is_probe_leg=False):
     """Creates secpond step photon sequence"""
     
     TrigEgammaKeys = getTrigEgammaKeys()

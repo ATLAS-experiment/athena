@@ -12,7 +12,7 @@ def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloElectron'
 
 @AccumulatorCache
-def precisionCaloSequenceCfg(flags, ion=False, is_probe_leg=False, variant=''):
+def precisionCaloSequenceGenCfg(flags, ion=False, is_probe_leg=False, variant=''):
     """ Creates PrecisionCalo sequence """
     TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
     hiInfo = 'HI' if ion else ''
@@ -56,5 +56,5 @@ def precisionCaloSequenceCfg(flags, ion=False, is_probe_leg=False, variant=''):
     return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict, isProbe=is_probe_leg)
 
 
-def precisionCaloSequence_LRTCfg(flags, ion=False, is_probe_leg=False):
-    return precisionCaloSequenceCfg(flags, ion=ion, is_probe_leg=is_probe_leg, variant='_LRT')
+def precisionCalo_LRTSequenceGenCfg(flags, ion=False, is_probe_leg=False):
+    return precisionCaloSequenceGenCfg(flags, ion=ion, is_probe_leg=is_probe_leg, variant='_LRT')

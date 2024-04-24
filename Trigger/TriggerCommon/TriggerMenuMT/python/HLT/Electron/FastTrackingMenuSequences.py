@@ -9,7 +9,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 @AccumulatorCache
-def fastTrackingSequenceCfg(flags, variant='', is_probe_leg = False):
+def fastTrackingSequenceGenCfg(flags, variant='', is_probe_leg = False):
     """ second step:  tracking....."""
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys(variant)
@@ -49,6 +49,6 @@ def fastTrackingSequenceCfg(flags, variant='', is_probe_leg = False):
     return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
 
-def fastTrackingSequence_LRTCfg(flags, is_probe_leg=False):
+def fastTracking_LRTSequenceGenCfg(flags, is_probe_leg=False):
     # This is to call fastElectronMenuSequence for the _LRT variant
-    return fastTrackingSequenceCfg(flags, variant='_LRT', is_probe_leg=is_probe_leg)
+    return fastTrackingSequenceGenCfg(flags, variant='_LRT', is_probe_leg=is_probe_leg)

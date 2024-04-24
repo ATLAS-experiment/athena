@@ -4,7 +4,7 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info('Importing %s', __name__)
 log = logging.getLogger(__name__)
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from ..HeavyIon.HeavyIonMenuSequences import HIFwdGapMenuSequenceCfg
+from ..HeavyIon.HeavyIonMenuSequences import HIFwdGapMenuSequenceGenCfg
 
 
 class HeavyIonChainConfig(ChainConfigurationBase):
@@ -19,5 +19,5 @@ class HeavyIonChainConfig(ChainConfigurationBase):
     log.debug('Assembling chain for %s', self.chainName)
     steps = []
     if 'Fgap' in self.chainPart['hypoFgapInfo'][0]:
-        steps.append(self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequenceCfg]))
+        steps.append(self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequenceGenCfg]))
     return self.buildChain(steps)

@@ -214,13 +214,13 @@ namespace Muon {
             // Dont make RIO On tracks for sTGC wires in inner Q1
             if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && 
                 MClus->detectorElement()->isEtaZero(MClus->identify(), lp)) {
-              ATH_MSG_WARNING("sTgcReadoutElement with isEtaZero() ?! "<<m_idHelperSvc->toString(MClus->identify()));
+              ATH_MSG_DEBUG("sTgcReadoutElement with isEtaZero() ?! "<<m_idHelperSvc->toString(MClus->identify()));
               return nullptr;
             }
             // Wires are already considered in the above check. Dont remove them here
             if (!rio_surface.insideBounds(localPos) && 
                  m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) != sTgcIdHelper::Wire) {
-              ATH_MSG_WARNING("sTgc measurement "<<m_idHelperSvc->toString(MClus->identify())<<" out of bounds. "
+              ATH_MSG_DEBUG("sTgc measurement "<<m_idHelperSvc->toString(MClus->identify())<<" out of bounds. "
                              <<Amg::toString(localPos));
               return nullptr;
         }
@@ -233,7 +233,7 @@ namespace Muon {
             //***************************
 
             const MMPrepData* mmPRD = static_cast<const MMPrepData*>(&RIO);
-            return new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), positionAlongStrip, {}, {});
+            MClT = new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), positionAlongStrip, {}, {});
         }
 
         return MClT;
@@ -390,7 +390,7 @@ namespace Muon {
         //   estimate than that; not used in the track fits anyway)
         locpar[Trk::locX] = x_projected;
 
-	const sTgcPrepData* stgPRD = static_cast<const sTgcPrepData*>(&RIO);
+        const sTgcPrepData* stgPRD = static_cast<const sTgcPrepData*>(&RIO);
         ATH_MSG_VERBOSE("generating sTgcClusterOnTrack in MuonClusterBuilder");
         MuonClusterOnTrack* cluster = new sTgcClusterOnTrack(stgPRD, std::move(locpar), std::move(loce), lp[Trk::locY]);
 

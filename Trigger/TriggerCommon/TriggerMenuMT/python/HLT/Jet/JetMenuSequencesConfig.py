@@ -171,7 +171,7 @@ def jetCaloPreselSelCfg(flags, **jetRecoDict):
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetRecoDict['jetDefStr'], jetsIn=jetDef.fullname(), hypoType=JetHypoAlgType.CALOPRESEL))
     return selAcc, jetDef, clustersKey
 
-def jetCaloPreselMenuSequence(flags, **jetRecoDict):
+def jetCaloPreselMenuSequenceGenCfg(flags, **jetRecoDict):
     selAcc, jetDef, clustersKey = jetCaloPreselSelCfg(flags, **jetRecoDict)
     def makejetCaloPreselMenuSequence():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.CALOPRESEL))
@@ -196,7 +196,7 @@ def jetCaloSelCfg(flags, clusterCalib):
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr="caloreco", jetsIn=None, hypoType=JetHypoAlgType.PASSTHROUGH))
     return selAcc, clustersKey
 
-def jetCaloRecoMenuSequence(flags, clusterCalib):
+def jetCaloRecoMenuSequenceGenCfg(flags, clusterCalib):
     selAcc, clusterKey = jetCaloSelCfg(flags, clusterCalib)
     def makejetCaloRecoMenuSequence():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.PASSTHROUGH))
@@ -233,7 +233,7 @@ def jetCaloHypoSelCfg(flags, isPerf, **jetRecoDict):
     return selAcc, jetDef, hypoType
     
 
-def jetCaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
+def jetCaloHypoMenuSequenceGenCfg(flags, isPerf, **jetRecoDict):
     selAcc, jetDef, hypoType = jetCaloHypoSelCfg(flags, isPerf, **jetRecoDict)
     def makejetCaloHypoMenuSequence():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
@@ -259,7 +259,7 @@ def jetHICaloSelCfg(flags, isPerf, **jetRecoDict):
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetRecoDict['jetDefStr'], jetsIn=jetDef.fullname(), hypoType=hypoType))
     return selAcc, jetDef, hypoType
 
-def jetHICaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
+def jetHICaloHypoMenuSequenceGenCfg(flags, isPerf, **jetRecoDict):
     selAcc, jetDef, hypoType = jetHICaloSelCfg(flags, isPerf, **jetRecoDict)
     def makejetHICaloHypoMenuSequence():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
@@ -308,7 +308,7 @@ def jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict):
     return selAcc, jetDef, hypoType
 
 
-def jetFSTrackingHypoMenuSequence(flags, clustersKey, isPerf, **jetRecoDict):
+def jetFSTrackingHypoMenuSequenceGenCfg(flags, clustersKey, isPerf, **jetRecoDict):
     selAcc, jetDef, hypoType = jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict)
     def makejetFSTrackingHypoMenuSequence():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
@@ -362,7 +362,7 @@ def jetRoITrackJetTagSelCfg(flags, jetsIn, isPresel=True, **jetRecoDict):
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetRecoDict['jetDefStr'], jetsIn=filtered_jetsIn, hypoType=hypoType))
     return selAcc, hypoType
 
-def jetRoITrackJetTagHypoMenuSequence(flags, jetsIn, isPresel=True, **jetRecoDict):
+def jetRoITrackJetTagHypoMenuSequenceGenCfg(flags, jetsIn, isPresel=True, **jetRecoDict):
     selAcc, hypoType = jetRoITrackJetTagSelCfg(flags, jetsIn, isPresel, **jetRecoDict)
     def makejetRoITrackJetTagHypoMenuSequence():
         return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))

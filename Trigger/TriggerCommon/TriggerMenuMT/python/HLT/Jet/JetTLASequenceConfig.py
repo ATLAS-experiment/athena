@@ -29,7 +29,7 @@ def JetTLASequenceCfg(flags, jetsIn):
     return recoAcc
 
 @AccumulatorCache
-def JetTLAMenuSequenceCfg( flags, jetsIn, attachBtag=True ):
+def JetTLAMenuSequenceGenCfg( flags, jetsIn, attachBtag=True ):
     
     jetsOut = recordable(jetsIn+"_TLA")
     # retrieves the sequence

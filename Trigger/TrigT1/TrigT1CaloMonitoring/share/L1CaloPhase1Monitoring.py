@@ -60,7 +60,7 @@ parser = flags.getArgumentParser()
 parser.add_argument('--runNumber',default=None,help="specify to select a run number")
 parser.add_argument('--lumiBlock',default=None,help="specify to select a lumiBlock")
 parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
-parser.add_argument('--stream',default="physics_L1Calo",help="stream to lookup files in")
+parser.add_argument('--stream',default="*",help="stream to lookup files in")
 parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
 parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath>, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
@@ -347,10 +347,11 @@ for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
   applied = False
-  for comp in cfg._allComponents():
+  for comp in cfg._allComponents()+cfg.getServices():
     if comp.name==compName:
       applied = True
       exec(f"comp.{propNameAndVal}")
+      break
   if not applied:
     raise ValueError(f"postConfig {conf} had no effect ... typo?")
 
