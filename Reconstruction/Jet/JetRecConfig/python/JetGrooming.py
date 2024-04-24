@@ -9,6 +9,7 @@ __all__ =  ["GroomingDefinition","JetTrimming","JetSoftDrop"]
 
 from AthenaCommon import Logging
 from .Utilities import make_lproperty, onlyAttributesAreProperties, clonable, ldict
+from copy import deepcopy
 jetlog = Logging.logging.getLogger('JetGrooming')
 
 @clonable
@@ -64,6 +65,20 @@ class GroomingDefinition(object):
     def lock(self):
         if not self._locked:
             self._locked = True
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        nocopy = ['_cflags']
+        for k, v in self.__dict__.items():
+            if k in nocopy:
+                if v:
+                    assert(v.locked())
+                setattr(result, k, v)
+            else:
+                setattr(result, k, deepcopy(v, memo))
+        return result
 
     # Define core attributes as properties, with
     # custom setter/getter such that if changed, these
