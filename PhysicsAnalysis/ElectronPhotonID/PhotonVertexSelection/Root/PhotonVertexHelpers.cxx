@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -11,6 +11,7 @@
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexContainer.h"
+#include "CxxUtils/trapping_fp.h"
 
 // Asg tools
 #include "egammaUtils/ShowerDepthTool.h"
@@ -94,8 +95,14 @@ getZCommonAndError(const xAOD::EventInfo* eventInfo,
   }
 
   // Normalize by error (weighted average)
-  zCommon /= zCommonError;
-  zCommonError = 1.0 / sqrt(zCommonError);
+  {
+    // Tell clang to optimize assuming that FP exceptions can trap.
+    // Otherwise, it can vectorize these divisions, which can lead to
+    // spurious division-by-zero traps from unused vector lanes.
+    CXXUTILS_TRAPPING_FP;
+    zCommon /= zCommonError;
+    zCommonError = 1.0 / sqrt(zCommonError);
+  }
 
   return std::make_pair(zCommon, zCommonError);
 }
