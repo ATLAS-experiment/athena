@@ -242,9 +242,13 @@ StripClusteringTool::makeCluster(const Cluster &cluster,
     IdentifierHash idHash = element->identifyHash();
     auto [pos, localPos, localCov, globalPos]
 	= computePosition(cluster, lorentzShift, stripID, element);
-    
+
+    // For Strip Clusters the identifier is taken from the front rod list object
+    // This is the same strategy used in Athena:
+    // Since clusterId is arbitary (it only needs to be unique) just use ID of first strip
+    // For strip Cluster it has been found that "identifierOfPosition" does not produces unique values
     cl.setMeasurement<1>(idHash, localPos, localCov);
-    cl.setIdentifier( element->identifierOfPosition(pos).get_compact() );
+    cl.setIdentifier( cluster.ids.front().get_compact() );
     cl.globalPosition() = globalPos;
     cl.setRDOlist(cluster.ids);
     cl.setChannelsInPhi(cluster.ids.size());
