@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 """Functionality core of the Gen_tf transform"""
 
@@ -8,11 +8,6 @@
 
 ## Create sequences for generators, clean-up algs, filters and analyses
 ## and import standard framework objects with standard local scope names
-from __future__ import print_function
-from __future__ import division
-
-from future import standard_library
-standard_library.install_aliases()
 
 import os, re, string
 import AthenaCommon.AlgSequence as acas
@@ -536,32 +531,32 @@ if _checkattr("description", required=True):
     msg = evgenConfig.description
     if _checkattr("notes"):
         msg += " " + evgenConfig.notes
-    printfunc ("MetaData: %s = %s" % ("physicsComment", msg))
+    print ("MetaData: %s = %s" % ("physicsComment", msg))
 if _checkattr("generators", required=True):
-    printfunc ("MetaData: %s = %s" % ("generatorName", "+".join(gennames)))
+    print ("MetaData: %s = %s" % ("generatorName", "+".join(gennames)))
 if _checkattr("process"):
-    printfunc ("MetaData: %s = %s" % ("physicsProcess", evgenConfig.process))
+    print ("MetaData: %s = %s" % ("physicsProcess", evgenConfig.process))
 if _checkattr("tune"):
-    printfunc ("MetaData: %s = %s" % ("generatorTune", evgenConfig.tune))
+    print ("MetaData: %s = %s" % ("generatorTune", evgenConfig.tune))
 if _checkattr("hardPDF"):
-    printfunc ("MetaData: %s = %s" % ("hardPDF", evgenConfig.hardPDF))
+    print ("MetaData: %s = %s" % ("hardPDF", evgenConfig.hardPDF))
 if _checkattr("softPDF"):
-    printfunc ("MetaData: %s = %s" % ("softPDF", evgenConfig.softPDF))
+    print ("MetaData: %s = %s" % ("softPDF", evgenConfig.softPDF))
 if _checkattr("nEventsPerJob"):
-    printfunc ("MetaData: %s = %s" % ("nEventsPerJob", evgenConfig.nEventsPerJob))
+    print ("MetaData: %s = %s" % ("nEventsPerJob", evgenConfig.nEventsPerJob))
 if _checkattr("keywords"):
-    printfunc ("MetaData: %s = %s" % ("keywords", ", ".join(evgenConfig.keywords).lower()))
+    print ("MetaData: %s = %s" % ("keywords", ", ".join(evgenConfig.keywords).lower()))
 if _checkattr("specialConfig"):
-    printfunc ("MetaData: %s = %s" % ("specialConfig", evgenConfig.specialConfig))
+    print ("MetaData: %s = %s" % ("specialConfig", evgenConfig.specialConfig))
 # TODO: Require that a contact / JO author is always set
 if _checkattr("contact"):
-    printfunc ("MetaData: %s = %s" % ("contactPhysicist", ", ".join(evgenConfig.contact)))
+    print ("MetaData: %s = %s" % ("contactPhysicist", ", ".join(evgenConfig.contact)))
 
 # Output list of generator filters used
 filterNames = [alg.getType() for alg in acas.iter_algseq(filtSeq)]
 excludedNames = ['AthSequencer', 'PyAthena::Alg', 'TestHepMC']
 filterNames = list(set(filterNames) - set(excludedNames))
-printfunc ("MetaData: %s = %s" % ("genFilterNames", ", ".join(filterNames)))
+print ("MetaData: %s = %s" % ("genFilterNames", ", ".join(filterNames)))
 
 
 ##==============================================================

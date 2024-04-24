@@ -1,10 +1,7 @@
-
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 ## Set random seeds depending on used generators
-from __future__ import print_function
-from __future__ import division
 
 genseeds = {
     'Pythia'            : ["PYTHIA OFFSET {rnd} 47898993 {rnd}", "PYTHIA_INIT 820021 2347532"],
@@ -51,7 +48,7 @@ genseeds = {
 assert evgenConfig.generators
 atRndmGenSvc = svcMgr.AtRndmGenSvc
 atRndmGenSvc.EventReseeding = False
-printfunc("Events will not be reseeded (RndmGenSvc) ")
+print("Events will not be reseeded (RndmGenSvc) ")
 
 ## Pass the random seed from the transform command line into each used generator's seed config string
 seedstrs = []

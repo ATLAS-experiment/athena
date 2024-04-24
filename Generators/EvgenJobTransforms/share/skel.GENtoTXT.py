@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 """Functionality core of the Generate_tf transform"""
 
@@ -8,11 +8,6 @@
 
 ## Create sequences for generators, clean-up algs, filters and analyses
 ## and import standard framework objects with standard local scope names
-from __future__ import print_function
-from __future__ import division
-
-from future import standard_library
-standard_library.install_aliases()
 
 import ast
 import os, re, string, subprocess
@@ -151,7 +146,7 @@ if len(runArgs.jobConfig) != 1:
     evgenLog.error("You must supply one and only one jobConfig file argument. It has to start from mc. and end with .py")
     sys.exit(1)
 
-printfunc ("Using JOBOPTSEARCHPATH (as seen in skeleton) = '%s'" % (os.environ["JOBOPTSEARCHPATH"]))
+print ("Using JOBOPTSEARCHPATH (as seen in skeleton) = '%s'" % (os.environ["JOBOPTSEARCHPATH"]))
 FIRST_DIR = (os.environ['JOBOPTSEARCHPATH']).split(":")[0]
 
 dsid_param = runArgs.jobConfig[0]
@@ -355,7 +350,7 @@ if evgenConfig.categories:
            l2 = next(it)
            if "L1:" in l2 and "L2:" in l1:
                l1, l2 = l2, l1
-           printfunc("first",l1,"second",l2)
+           print("first",l1,"second",l2)
            bad_cat.extend([l1, l2])
            for a1,a2 in allowed_cat:
                if l1.strip().lower()==a1.strip().lower() and l2.strip().lower()==a2.strip().lower():
@@ -509,7 +504,7 @@ acas.dumpMasterSequence()
 
 ## Announce start of input file handling
 evgenLog.debug("****************** HANDLING EVGEN INPUT FILES *****************")
-printfunc("****************** HANDLING EVGEN INPUT FILES *****************")
+print("****************** HANDLING EVGEN INPUT FILES *****************")
 ## Dat files
 datFile = None
 if "McAtNlo" in evgenConfig.generators and "Herwig" in evgenConfig.generators:
@@ -559,7 +554,7 @@ def find_unique_file(pattern):
 # file, but the number of events is updated to equal the total number of events in all the input files
 def merge_lhe_files(listOfFiles,outputFile):
     if(os.path.exists(outputFile)):
-      printfunc ("outputFile ",outputFile," already exists.  Will rename to ",outputFile,".OLD")
+      print ("outputFile ",outputFile," already exists.  Will rename to ",outputFile,".OLD")
       os.rename(outputFile,outputFile+".OLD")
     output = open(outputFile,'w')
     holdHeader = ""
@@ -571,7 +566,7 @@ def merge_lhe_files(listOfFiles,outputFile):
     for file in listOfFiles:
        inHeader = True
        header = ""
-       printfunc ("*** Starting file ",file)
+       print ("*** Starting file ",file)
        for line in open(file,"r"):
 ##        Reading first event signals that we are done with all the header information
 ##        Using this approach means the script will properly handle any metadata stored
@@ -695,41 +690,41 @@ with open(eventsFile) as f:
        count_ev += line.count('/event')
     
 evgenLog.info('Requested output events = '+str(count_ev))
-printfunc("MetaData: %s = %s" % ("Number of produced LHE events ", count_ev))
+print("MetaData: %s = %s" % ("Number of produced LHE events ", count_ev))
 
 if _checkattr("description", required=True):
     msg = evgenConfig.description
     if _checkattr("notes"):
         msg += " " + evgenConfig.notes
-    printfunc("MetaData: %s = %s" % ("physicsComment", msg))
+    print("MetaData: %s = %s" % ("physicsComment", msg))
 if _checkattr("generators", required=True):
-    printfunc ("MetaData: %s = %s" % ("generatorName", "+".join(gennamesvers)))    
+    print ("MetaData: %s = %s" % ("generatorName", "+".join(gennamesvers)))
 if _checkattr("process"):
-    printfunc ("MetaData: %s = %s" % ("physicsProcess", evgenConfig.process))
+    print ("MetaData: %s = %s" % ("physicsProcess", evgenConfig.process))
 if _checkattr("tune"):
-    printfunc ("MetaData: %s = %s" % ("generatorTune", evgenConfig.tune))
+    print ("MetaData: %s = %s" % ("generatorTune", evgenConfig.tune))
 if _checkattr("hardPDF"):
-    printfunc ("MetaData: %s = %s" % ("hardPDF", evgenConfig.hardPDF))
+    print ("MetaData: %s = %s" % ("hardPDF", evgenConfig.hardPDF))
 if _checkattr("softPDF"):
-    printfunc ("MetaData: %s = %s" % ("softPDF", evgenConfig.softPDF))
+    print ("MetaData: %s = %s" % ("softPDF", evgenConfig.softPDF))
 if _checkattr("nEventsPerJob"):
-    printfunc ("MetaData: %s = %s" % ("nEventsPerJob", evgenConfig.nEventsPerJob))
+    print ("MetaData: %s = %s" % ("nEventsPerJob", evgenConfig.nEventsPerJob))
 if _checkattr("keywords"):
-    printfunc ("MetaData: %s = %s" % ("keywords", ", ".join(evgenConfig.keywords).lower() ))
+    print ("MetaData: %s = %s" % ("keywords", ", ".join(evgenConfig.keywords).lower() ))
 if _checkattr("categories"):
-    printfunc ( ", " + ", ".join(evgenConfig.categories))
+    print ( ", " + ", ".join(evgenConfig.categories))
 else:
-    printfunc (" ")
+    print (" ")
 
 #if _checkattr("categories"):  # will be uncommented when categories included into metadata
-#    printfunc "MetaData: %s = %s" % ("categories", ", ".join(evgenConfig.categories))
+#    print "MetaData: %s = %s" % ("categories", ", ".join(evgenConfig.categories))
 if _checkattr("specialConfig"):
-    printfunc ("MetaData: %s = %s" % ("specialConfig", evgenConfig.specialConfig))
+    print ("MetaData: %s = %s" % ("specialConfig", evgenConfig.specialConfig))
 # TODO: Require that a contact / JO author is always set
 if _checkattr("contact"):
-    printfunc ("MetaData: %s = %s" % ("contactPhysicist", ", ".join(evgenConfig.contact)))
+    print ("MetaData: %s = %s" % ("contactPhysicist", ", ".join(evgenConfig.contact)))
 #if _checkattr( "randomSeed") :    # comment out for the time being
-printfunc ("MetaData: %s = %s" % ("randomSeed", str(runArgs.randomSeed)))
+print ("MetaData: %s = %s" % ("randomSeed", str(runArgs.randomSeed)))
 
     
     
@@ -738,7 +733,7 @@ printfunc ("MetaData: %s = %s" % ("randomSeed", str(runArgs.randomSeed)))
 filterNames = [alg.getType() for alg in acas.iter_algseq(filtSeq)]
 excludedNames = ['AthSequencer', 'PyAthena::Alg', 'TestHepMC']
 filterNames = list(set(filterNames) - set(excludedNames))
-printfunc ("MetaData: %s = %s" % ("genFilterNames", ", ".join(filterNames)))
+print ("MetaData: %s = %s" % ("genFilterNames", ", ".join(filterNames)))
 
 
 ##==============================================================
@@ -759,11 +754,10 @@ with open("config.pickle", "wb") as f:
 ##==============================================================
  
 evgenLog.debug("****************** STARTING EVENT GENERATION *****************")
-printfunc ("****************** STARTING EVENT GENERATION *****************")
-printfunc ("**************************************************************")
-printfunc ("****************** PLEASE IGNORE THE LOG FROM PYTHIA ************")
-printfunc ("****************** GENERATION OF ONE PYTHIA EVENT ***************")
-printfunc ("******************** IS NEEDED TO MAKE *************")
-printfunc ("****************** THE TRANSFORM WORK ***************************")
-printfunc ("**************************************************************")
-
+print ("****************** STARTING EVENT GENERATION *****************")
+print ("**************************************************************")
+print ("****************** PLEASE IGNORE THE LOG FROM PYTHIA ************")
+print ("****************** GENERATION OF ONE PYTHIA EVENT ***************")
+print ("******************** IS NEEDED TO MAKE *************")
+print ("****************** THE TRANSFORM WORK ***************************")
+print ("**************************************************************")
