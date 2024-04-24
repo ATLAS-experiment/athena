@@ -271,30 +271,65 @@ payloadToString(const cool::IObject &obj)
     return result;
 }
 
-// defaults
-namespace
-{
-    const std::string defaultTagName{"PixelChargeCalibration-DATA-RUN2-UPD4-26"};
-    const std::string folderName{"/PIXEL/ChargeCalibration"};
-    const std::string outputFileName{"PixelChargeCalibration-DATA-RUN2-UPD4-26.log"};
-    const std::string dbName{"COOLOFL_PIXEL/CONDBR2"};
-}
-
 int main(int argc, char *argv[])
 {
-    std::string tagName = defaultTagName;
-    if (argc == 2)
-    {
-        tagName = std::string(argv[1]);
-        std::cout << "Using command line tag name" << std::endl;
+
+    std::string tagName{"PixelChargeCalibration-DATA-RUN2-UPD4-26"};
+    std::string folderName{"/PIXEL/ChargeCalibration"};
+    std::string outputFileName{"test"};
+    std::string dbName{"COOLOFL_PIXEL/CONDBR2"};
+    std::string useIOV{"latest"};
+    bool useLastIOV{true};
+
+    for(int i=1; i<argc; i++){
+        std::string aux(argv[i]);
+        std::string variable(aux.substr(0,aux.find("=")));
+        std::string value(aux.substr(aux.find("=")+1));
+        if     (variable.compare("tagName")    == 0) {
+            tagName = value;
+        }
+        else if(variable.compare("folder")     == 0) folderName = value;
+        else if(variable.compare("outputFile") == 0) outputFileName = value;       
+        else if(variable.compare("dbName")     == 0) dbName = value;
+        else if(variable.compare("IOV")        == 0){
+            // By selecting an IOV is understood you dont want to use the last one 
+            // hence use the "IOV=runNumber_LB" (it should exist in the DB)
+            // if you want to print all of them use "IOV=all"
+            useIOV = value;
+            useLastIOV = false;
+        } 
+        else{
+            std::cout<< "ERROR - Option not found:"<< aux <<"\n";
+            return 1;
+        } 
+        
     }
-    std::cout << "Using tag selection: " << tagName << std::endl;
+
+    if (outputFileName.compare("test") == 0){
+        if(useLastIOV){
+            outputFileName = tagName+".log";
+        }
+        else if (useIOV.compare("all") == 0){
+            outputFileName = "XXXXXX_"+tagName+".log";
+        }
+        else{
+            outputFileName = useIOV+"_"+tagName+".log";
+        }
+    }
+
+    printf("%-11s: %s\n", "Tag Name"   ,tagName.c_str());
+    printf("%-11s: %s\n", "Folder Name",folderName.c_str())  ;
+    printf("%-11s: %s\n", "DB Name"    ,dbName.c_str()) ; 
+    printf("%-11s: %s\n", "Output File",outputFileName.c_str()) ; 
+    printf("%-11s: %s\n", "Last IOV"   ,useLastIOV ? "True" : "False");  
+    printf("%-11s: %s\n", "IOV used"   ,useIOV.c_str()) ; 
+
     int returnCode = 0;
     DbConnection connection(dbName);
     FolderSpec fs(folderName, tagName);
     Folder f(connection, fs);
     
-    bool useLastIOV = true;
+    // bool useLastIOV = true;
     cool::IObjectIteratorPtr objectsIterator = f.objectIterator(useLastIOV); // True to use the last IOV
     std::vector< iovNamePair > myIOVs;
     while (objectsIterator->goToNext())
@@ -309,14 +344,27 @@ int main(int argc, char *argv[])
     }
 
     if(!useLastIOV){
+        bool found = false;
         // Saving all the IOVs in different files, just used for experts - Evolution monitoring
         for(const auto & [IOVname,iov]:myIOVs){
+            if(IOVname.compare(useIOV)!=0 && useIOV.compare("all") != 0){
+                continue;
+            }
+            found = true;
             std::cout<<IOVname<<"\n";
             const std::string filename= IOVname +"_"+tagName+".log";
             std::ofstream opFile(filename);
             opFile <<iov<<"\n";
             opFile.close();
         }
+        if(!found){
+            std::cout<< "IOV not found - Choose between one of the following:\n";
+            for(const auto & [IOVname,iov]:myIOVs){
+                std::cout<<IOVname<<"  ";
+            }
+            std::cout << "\n";
+        }
+
     }
     else{    
         const std::string fileName = tagName + ".log";
