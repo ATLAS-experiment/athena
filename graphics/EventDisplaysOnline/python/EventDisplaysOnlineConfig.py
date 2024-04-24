@@ -10,7 +10,7 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     flags.OnlineEventDisplays.CosmicMode = False
     flags.OnlineEventDisplays.HIMode = False
     flags.OnlineEventDisplays.BeamSplashMode = False
-    flags.OnlineEventDisplays.OfflineTest = False
+    flags.OnlineEventDisplays.OfflineTest = True
 
     # An explicit list for nominal data taking to exclude some high rate streams
     # Empty list to read all
@@ -81,7 +81,7 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     jobId = GetUniqueJobID()
     # Test wth a small amount of events and write out to e.g. a tmp dir
     if flags.OnlineEventDisplays.PartitionName != 'ATLAS' or flags.OnlineEventDisplays.OfflineTest:
-        flags.Exec.MaxEvents = 3
+        flags.Exec.MaxEvents = 20
         flags.Output.ESDFileName = flags.OnlineEventDisplays.OutputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
     else:
         flags.Exec.MaxEvents = 20000 # hack until we find a way to fix the memory fragmentation ATEAM-896, this resets the memory after 20k events
@@ -178,7 +178,8 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     # dir in the VP1 Event Prod alg
     from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
     cfg.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
-    streamESD = cfg.getEventAlgo("OutputStreamESD")
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+    streamESD = cfg.getEventAlgo(outputStreamName("ESD"))
 
     from VP1AlgsEventProd.VP1AlgsEventProdConfig import VP1AlgsEventProdCfg
     cfg.merge(VP1AlgsEventProdCfg(flags, streamESD, **kwargs))
