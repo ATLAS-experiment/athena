@@ -66,13 +66,19 @@ class GroomingDefinition(object):
         if not self._locked:
             self._locked = True
 
+    # After dependency solving, we hold a reference to the AthConfigFlags,
+    # which if unmodified is meant to function as a singleton throughout the
+    # configuration. A full deep copy of this is expensive, and slows down
+    # the HLT menu generation a lot due to copies in caches.
+    # So we explicitly avoid the deepcopy of the flags here, and further
+    # check that the flags are locked, to prevent accidental unlocking
     def __deepcopy__(self, memo):
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
-        nocopy = ['_cflags']
+        set_without_deepcopy = ['_cflags']
         for k, v in self.__dict__.items():
-            if k in nocopy:
+            if k in set_without_deepcopy:
                 if v:
                     assert(v.locked())
                 setattr(result, k, v)
