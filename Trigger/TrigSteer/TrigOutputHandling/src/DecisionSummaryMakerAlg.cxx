@@ -236,8 +236,8 @@ void DecisionSummaryMakerAlg::monitorRoIs(const TrigCompositeUtils::Decision* te
     }
     const TrigRoiDescriptor& finalRoI = **(finalRoILink.link);
 
-    // Skip full-scan
-    if (finalRoI.isFullscan()) {continue;}
+    // Skip full-scan and SuperRoI
+    if (finalRoI.isFullscan() || finalRoI.composite()) {continue;}
 
     // Get all initial RoIs associated with this final RoI (should be exactly one)
     const RoILinkVec initialRoIs = findLinks<TrigRoiDescriptorCollection>(finalRoILink.source, initialRoIString(), TrigDefs::lastFeatureOfType);
