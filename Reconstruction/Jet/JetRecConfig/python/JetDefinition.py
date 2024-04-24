@@ -379,8 +379,6 @@ class JetInputExternal(object):
         self.filterfn = filterfn 
         self.prereqs = prereqs
 
-        
-
     @make_lproperty
     def name(self): pass
     @make_lproperty
@@ -412,6 +410,9 @@ class JetInputExternal(object):
             self.filterfn == other.filterfn,
             self.specs == other.specs
         ])
+
+    def __ne__(self,rhs):
+        return (not self.__eq__(rhs))
 
 
 ########################################################################    
@@ -518,6 +519,15 @@ class JetInputConstit(object):
         self.jetinputtype = jetinputtype
         self.byVertex = byVertex
         self._locked = lock
+
+    def __hash__(self):
+        return hash((self.name,self.containername,self.label,str(self.basetype),str(self.filterfn),str(self.jetinputtype),str(self.byVertex)))
+
+    def __eq__(self,rhs):
+        return self.__hash__() == rhs.__hash__()
+
+    def __ne__(self,rhs):
+        return (not self.__eq__(rhs))
 
     @make_lproperty
     def basetype(self): pass
