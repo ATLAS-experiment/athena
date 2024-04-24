@@ -9,6 +9,7 @@
 // Core include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "AthContainers/ConstAccessor.h"
 
 // Local include(s):
 #include "xAODMetaData/versions/FileMetaData_v1.h"
@@ -76,8 +77,9 @@ namespace xAOD {
          if( *ti == typeid( std::string ) ) {
 
             // Retrieve the values:
-            const std::string& value1 = this->auxdata< std::string >( name );
-            const std::string& value2 = rhs.auxdata< std::string >( name );
+            SG::ConstAccessor< std::string >acc( name );
+            const std::string& value1 = acc( *this );
+            const std::string& value2 = acc( rhs );
             // And simply compare them:
             if( value1 != value2 ) {
                return false;
@@ -86,8 +88,9 @@ namespace xAOD {
          } else if( *ti == typeid( uint32_t ) ) {
 
             // Retrieve the values:
-            const uint32_t& value1 = this->auxdata< uint32_t >( name );
-            const uint32_t& value2 = rhs.auxdata< uint32_t >( name );
+            SG::ConstAccessor< uint32_t >acc( name );
+            const uint32_t& value1 = acc( *this );
+            const uint32_t& value2 = acc( rhs );
             // And simply compare them:
             if( value1 != value2 ) {
                return false;
@@ -96,8 +99,9 @@ namespace xAOD {
          } else if( *ti == typeid( float ) ) {
 
             // Retrieve the values:
-            const float& value1 = this->auxdata< float >( name );
-            const float& value2 = rhs.auxdata< float >( name );
+            SG::ConstAccessor< float >acc( name );
+            const float& value1 = acc( *this );
+            const float& value2 = acc( rhs );
             // And (not so simply) compare them:
             if( std::abs( value1 - value2 ) > 0.001 ) {
                return false;
@@ -106,18 +110,18 @@ namespace xAOD {
          } else if( *ti == typeid( char ) ) {
 
             // Retrieve the values:
-            const char& value1 = this->auxdata< char >( name );
-            const char& value2 = rhs.auxdata< char >( name );
+            SG::ConstAccessor< char >acc( name );
+            const char& value1 = acc( *this );
+            const char& value2 = acc( rhs );
             // And (not so simply) compare them:
             if( value1 != value2 ) {
                return false;
             }
          } else if ( *ti == typeid( std::vector<uint32_t> ) ) {
             // One code to retrieve them
-            const std::vector<uint32_t>& value1 =
-               this->auxdata< std::vector<uint32_t> >(name);
-            const std::vector<uint32_t>& value2 =
-               rhs.auxdata< std::vector<uint32_t> >(name);
+            SG::ConstAccessor< std::vector<uint32_t> >acc( name );
+            const std::vector<uint32_t>& value1 = acc( *this );
+            const std::vector<uint32_t>& value2 = acc( rhs );
             // and in simplicity compare them
             if( value1 != value2 ) {
                return false;
