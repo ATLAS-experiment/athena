@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkVertexSeedFinderUtils )
@@ -35,6 +35,9 @@ atlas_add_test( NewtonTrkDistanceFinder_test
    TrkEventPrimitives TrkVertexSeedFinderUtilsLib
    LOG_IGNORE_PATTERN "reading the map|field map" )
 
+# Needed in order to properly load Gaudi components from a standalone binary.
+set_target_properties( TrkVertexSeedFinderUtils_NewtonTrkDistanceFinder_test PROPERTIES ENABLE_EXPORTS True )
+
 atlas_add_test( Trk2dDistanceSeeder_test
    SOURCES test/Trk2dDistanceSeeder_test.cxx
            src/Trk2dDistanceSeeder.cxx
@@ -45,6 +48,9 @@ atlas_add_test( Trk2dDistanceSeeder_test
    SGTools StoreGateLib MagFieldConditions MagFieldElements TrkParameters
    TrkVertexSeedFinderUtilsLib
    LOG_IGNORE_PATTERN "reading the map|field map" )
+
+# Needed in order to properly load Gaudi components from a standalone binary.
+set_target_properties( TrkVertexSeedFinderUtils_Trk2dDistanceSeeder_test PROPERTIES ENABLE_EXPORTS True )
 
 
 atlas_add_test( SeedNewtonTrkDistanceFinder_test
@@ -89,6 +95,9 @@ atlas_add_test( Mode3dTo1dFinder_test
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools CxxUtils GaudiKernel TrkParameters
    TrkVertexSeedFinderUtilsLib )
+
+# Needed in order to properly load Gaudi components from a standalone binary.
+set_target_properties( TrkVertexSeedFinderUtils_Mode3dTo1dFinder_test PROPERTIES ENABLE_EXPORTS True )
 
 # Install files from the package.
 atlas_install_joboptions( share/*.py share/*.txt )
