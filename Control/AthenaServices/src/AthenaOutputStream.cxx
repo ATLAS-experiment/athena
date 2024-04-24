@@ -315,6 +315,7 @@ StatusCode AthenaOutputStream::initialize() {
          ATH_MSG_FATAL("Cannot get IncidentSvc.");
          return(StatusCode::FAILURE);
       }
+      // use priority 95 to make sure the Output Sequencer goes first (it has priority 100)
       incsvc->addListener(this, IncidentType::BeginProcessing, 95);
       incsvc->addListener(this, IncidentType::EndProcessing, 95);
    }
@@ -373,19 +374,22 @@ StatusCode AthenaOutputStream::stop()
 void AthenaOutputStream::handle(const Incident& inc)
 {
    EventContext::ContextID_t slot = inc.context().slot();
-   ATH_MSG_DEBUG("slot " << slot << "  handle() incident type: " << inc.type());
+   ATH_MSG_DEBUG("handle() incident type: " << inc.type());
    // mutex shared with write() which is called from writeMetaData
    std::unique_lock<mutex_t>  lock(m_mutex);
 
    if( inc.type() == "MetaDataStop" )  {
       if( m_outSeqSvc->inUse() ) {
          if( m_outSeqSvc->inConcurrentEventsMode() ) {
-            // EventService MT - all substreams should be closed by this point
-            ATH_MSG_DEBUG("Ignoring MetaDataStop incident in ES/MT mode");
+            // EventService MT - write metadata and close all remaining substreams 
+            while( m_streamerMap.size() > 0 ) {
+               finalizeRange( m_streamerMap.begin()->first );
+            }
             return;
          }
          if( m_outSeqSvc->lastIncident() == "EndEvent" ) {
-            // in r22 EndEvent comes before output writing - queue metadata writing and disconnect for after Event write
+            // in r22 EndEvent comes before output writing
+            // - queue metadata writing and disconnect for after Event write
             m_writeMetadataAndDisconnect = true;
             return;
          }
@@ -398,15 +402,24 @@ void AthenaOutputStream::handle(const Incident& inc)
       if( slot == EventContext::INVALID_CONTEXT_ID ) {
          throw GaudiException("Received Incident with invalid slot in ES mode", name(), StatusCode::FAILURE);
       }
+      auto count_events_in_range = [&](const std::string& range) {
+         return std::count_if(m_slotRangeMap.cbegin(), m_slotRangeMap.cend(),
+                              [&](auto& el){return el.second == range;} );
+      };
       if( inc.type() == IncidentType::BeginProcessing ) {
          // get the current/old range filename for this slot
          const std::string rangeFN = m_slotRangeMap[ slot ];
          // build the new range filename for this slot
          const std::string newRangeFN = m_outSeqSvc->buildSequenceFileName( m_outputName );
          if( !rangeFN.empty() and rangeFN != newRangeFN ) {
-            ATH_MSG_INFO("Range change: '" << rangeFN << "' -> '" << newRangeFN << "'");
+            ATH_MSG_INFO("Slot range change: '" << rangeFN << "' -> '" << newRangeFN << "'");
             ATH_MSG_DEBUG("There are " << m_slotRangeMap.size() << " slots in use");
-            finalizeRange( rangeFN );
+            for(auto range : m_slotRangeMap ) {
+               ATH_MSG_DEBUG("Slot: " << range.first << "  FN=" << range.second);
+            }
+            if( count_events_in_range(rangeFN) == 1 ) {
+               finalizeRange( rangeFN );
+            }
          }
          ATH_MSG_INFO("slot " << slot << " processing event in range: " << newRangeFN);
          m_slotRangeMap[ slot ] = newRangeFN;
@@ -414,13 +427,17 @@ void AthenaOutputStream::handle(const Incident& inc)
          m_rangeIDforRangeFN[ newRangeFN ] = m_outSeqSvc->currentRangeID();
       }
       else if( inc.type() == IncidentType::EndProcessing ) {
+         ATH_MSG_DEBUG("There are " << m_slotRangeMap.size() << " slots in use");
+         for(auto range : m_slotRangeMap ) {
+            ATH_MSG_DEBUG("Slot: " << range.first << "  FN=" << range.second);
+         }
          if( m_slotRangeMap.size() > 1 ) {
             // if there are multiple slots, we can detect if the range ended with this event
+            // - except the last range, because there is no next range to clear the slot map
             const std::string rangeFN = m_slotRangeMap[ slot ];
-            if( 1 == std::count_if(m_slotRangeMap.cbegin(), m_slotRangeMap.cend(),
-                                   [&](auto& el){return el.second == rangeFN;} ) ) {
+            if( count_events_in_range(rangeFN) == 1 ) {
                finalizeRange( rangeFN );
-               m_slotRangeMap[ slot ] = "";
+               m_slotRangeMap[ slot ].clear();
             }
          }
       }
@@ -512,10 +529,6 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
 // terminate data writer
 StatusCode AthenaOutputStream::finalize()
 {
-   // cloase all remaining substreams
-   while( m_streamerMap.size() > 0 ) {
-      finalizeRange( m_streamerMap.begin()->first );
-   }
    bool failed = false;
    ATH_MSG_DEBUG("finalize: Optimize output");
    // Connect the output file to the service
