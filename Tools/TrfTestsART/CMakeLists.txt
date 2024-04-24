@@ -1,10 +1,7 @@
-################################################################################
-# Package: TrfTestsART
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrfTestsART )
 
 # Install files from the package:
-atlas_install_runtime( test/*.sh )
-atlas_install_scripts( test/*.sh test/*.py )
+atlas_install_scripts( test/*.sh )
