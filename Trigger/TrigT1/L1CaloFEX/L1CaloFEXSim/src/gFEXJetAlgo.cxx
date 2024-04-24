@@ -305,9 +305,9 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   BTOB1_dat[0]  = 0;
   CTOB1_dat[0]  = 0;
   
-  ATOB2_dat[0]  =  (( pucA & 0x00000FFF ) << 8);
-  BTOB2_dat[0]  =  (( pucB & 0x00000FFF ) << 8);
-  CTOB2_dat[0]  =  (( pucC & 0x00000FFF ) << 8);
+  ATOB2_dat[0]  =  (( pucA & 0x0000FFFF ) << 8);
+  BTOB2_dat[0]  =  (( pucB & 0x0000FFFF ) << 8);
+  CTOB2_dat[0]  =  (( pucC & 0x0000FFFF ) << 8);
 
   // //First available TOBs are the gRho for each central FPGA
   tobs_v[0] = std::make_unique<gFEXJetTOB>();
