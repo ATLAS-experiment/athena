@@ -1,4 +1,4 @@
-#Copyright (C) 2020, 2021, 2022 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2020, 2021, 2022, 2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloUtils )
@@ -49,4 +49,4 @@ atlas_add_test( exceptions_test
 
 
 # Install files from the package:
-atlas_install_joboptions( share/*.txt share/*.py )
+atlas_install_joboptions( share/*.txt )
