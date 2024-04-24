@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -33,6 +33,7 @@
 #include "VP1TrackSystems/AscObj_TSOS.h"
 #include <Inventor/nodes/SoSeparator.h>
 #include <Inventor/nodes/SoNode.h>
+
 
 
 //____________________________________________________________________
@@ -113,9 +114,13 @@ void TrackHandle_TrkTrack::ensureTouchedMuonChambersInitialiasedFromMeas( const 
         VP1Msg::messageVerbose("TrackHandle_TrkTrack WARNING: Skipping unsafe TSOS for touched muon chamber determination.");
       return;
     }
-    const MuonGM::MuonReadoutElement* muonDetEl = dynamic_cast<const MuonGM::MuonReadoutElement*>(meas->associatedSurface().associatedDetectorElement() );
-    if (muonDetEl)
-      registerTouchedMuonChamber(muonDetEl->parentStationPV());
+
+    const Trk::RIO_OnTrack* rio = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
+    if (rio) {
+      const MuonGM::MuonReadoutElement* muonDetEl = getMuonReadoutElement(*rio);
+      if (muonDetEl)
+        registerTouchedMuonChamber(muonDetEl->parentStationPV());
+    }
   }
 }
 

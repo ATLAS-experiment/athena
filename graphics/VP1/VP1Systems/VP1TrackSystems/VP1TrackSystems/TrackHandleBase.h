@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,6 +46,11 @@ class TrackLODHandle;
 namespace Trk {
   class Track;
   class FitQuality;
+  class RIO_OnTrack;
+}
+
+namespace MuonGM {   
+  class MuonReadoutElement;
 }
 
 class TrackHandleBase {
@@ -110,7 +115,8 @@ public:
   virtual unsigned getNMMHits() const { return 0; }
   virtual unsigned getNsTGCHits() const { return 0; }
   virtual unsigned getNMuonPrecisionHits() const { return getNMDTHits() + getNCSCHits(); } // This should really only count eta csc hits. 
-  virtual const Trk::FitQuality* getFitQuality() const {return 0;}
+  virtual const Trk::FitQuality* getFitQuality() const {return nullptr;}
+  virtual const MuonGM::MuonReadoutElement* getMuonReadoutElement(const Trk::RIO_OnTrack& mb) const;
 
   QList<AssociatedObjectHandleBase*>  getVisibleMeasurements() const;
   TrackCommonFlags::TSOSPartsFlags shownTSOSParts() const;
@@ -139,9 +145,9 @@ protected:
   //provide path information. It will be called exactly once and the
   //derived class destructor will be responsible of any necessary
   //memory cleanup of the returned objects:
-  virtual const Trk::Track *              provide_pathInfoTrkTrack() const { return 0; };
+  virtual const Trk::Track *              provide_pathInfoTrkTrack() const { return nullptr; };
   //  virtual const std::vector< HepGeom::Point3D<double> > * provide_pathInfoPoints() const { return 0; }
-  virtual const std::vector< Amg::Vector3D > * provide_pathInfoPoints() const { return 0; }
+  virtual const std::vector< Amg::Vector3D > * provide_pathInfoPoints() const { return nullptr; }
 
   /** Default implementation of this next method bases hypothesis on pdgCode() and charge():*/
   virtual Trk::ParticleHypothesis extrapolationParticleHypothesis() const;
