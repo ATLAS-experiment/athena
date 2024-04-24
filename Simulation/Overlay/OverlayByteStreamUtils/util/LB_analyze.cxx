@@ -43,12 +43,16 @@ int readeventcounts(int run,
     int s = sscanf(&line[0], " ... Run %d, LB %d has %d events, %d RAW files and %f MB", &runn, &lbn, &ne, &nf, &mb);
     if (s > 4) {
       if (run != runn) {
+        delete[] line;
+        fclose(fp);
         return 20;
       }
       printf("run %d lbn %d has %d events\n", run, lbn, ne);
       eventcounts[lbn] = ne;
     } else {
       fprintf(stderr, "s=%d, bad read?\n", s);
+      delete[] line;
+      fclose(fp);
       return 20;
     }
   }
@@ -65,7 +69,7 @@ int lbn_analyze(int stream,
                 FILE *outfile)
 {
   FILE *fp = fopen("lbn", "r");
-    if (!fp) {
+  if (!fp) {
     fprintf(stderr, "Failed to open lbn input file!!!\n");
     return 1;
   }
@@ -115,6 +119,8 @@ int lbn_analyze(int stream,
 	      // read in event counts from runquery file for run
 	      int status = readeventcounts(run, eventcounts);
         if (status != 0) {
+          delete[] line;
+          fclose(fp);
           return status;
         }
       } //new run
