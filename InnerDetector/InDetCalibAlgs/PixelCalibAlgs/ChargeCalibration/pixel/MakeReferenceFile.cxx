@@ -329,7 +329,6 @@ int main(int argc, char *argv[])
     FolderSpec fs(folderName, tagName);
     Folder f(connection, fs);
     
-    // bool useLastIOV = true;
     cool::IObjectIteratorPtr objectsIterator = f.objectIterator(useLastIOV); // True to use the last IOV
     std::vector< iovNamePair > myIOVs;
     while (objectsIterator->goToNext())
