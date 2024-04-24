@@ -1,7 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon import CfgMgr
-from AthenaCommon.AlgSequence import AlgSequence
 import PyUtils.Logging as L
 msg = L.logging.getLogger('DerivationFramework__ContentHandler')
 msg.setLevel(L.logging.INFO)
