@@ -159,10 +159,7 @@ def AthenaMonitoringCfg(flags):
     return result
 
 def AthenaMonitoringPostprocessingCfg(flags):
-    from AthenaConfiguration.ComponentFactory import CompFactory
     result = ComponentAccumulator()
-    asq = CompFactory.AthSequencer("AthEndSeq")
-    result.addSequence(asq)
     from DataQualityUtils.DQPostProcessingAlg import DQPostProcessingAlg
     ppa = DQPostProcessingAlg("DQPostProcessingAlg")
     ppa.ExtraInputs = {( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )}
@@ -170,5 +167,5 @@ def AthenaMonitoringPostprocessingCfg(flags):
     if flags.Common.isOnline:
         ppa.FileKey = ((flags.DQ.FileKey + '/') if not flags.DQ.FileKey.endswith('/')
                     else flags.DQ.FileKey)
-    result.addEventAlgo(ppa, "AthEndSeq")
+    result.addEventAlgo(ppa)
     return result
