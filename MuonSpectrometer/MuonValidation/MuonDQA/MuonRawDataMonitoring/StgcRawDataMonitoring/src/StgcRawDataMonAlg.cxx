@@ -446,7 +446,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
       std::array<float, 8> zPosMultiplet{};
     };
 
-    std::array<std::array<sTGCeff, 16>, 2> effPlots;
+    std::array<std::array<sTGCeff, 16>, 2> effPlots; // Store active layers per side (2) and sectors (16) 
         
     const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     if(meTP == nullptr) continue;
