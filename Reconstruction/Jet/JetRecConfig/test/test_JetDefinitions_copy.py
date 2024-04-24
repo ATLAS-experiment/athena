@@ -6,15 +6,18 @@
 # Also specially test that if the dependencies have been solved, we
 # 
 
-from JetRecConfig.JetDefinition import JetDefinition
-from JetRecConfig.JetGrooming import GroomingDefinition
-from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track
-from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop
-from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDependencies
-from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.Enums import BeamType, LHCPeriod
 import unittest
 from copy import copy, deepcopy
+from PyUtils.moduleExists import moduleExists
+
+from JetRecConfig.JetDefinition import JetDefinition
+from JetRecConfig.JetGrooming import GroomingDefinition
+from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track, AntiKt4TruthGENWZ
+from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop
+from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDependencies
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
 def compareProperties(a,b):
     print(f"Comparing {a} with {b}")
@@ -26,8 +29,15 @@ def compareProperties(a,b):
 class TestJetDef(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.smallRdefs = [AntiKt4EMPFlow, AntiKt4TruthDressedWZ, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track]
-        cls.largeRdefs = [AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop, AntiKt10TruthDressedWZSoftDrop]
+        
+        # Start with specific truth jet configs only for AthGeneration
+        cls.smallRdefs = [AntiKt4TruthGENWZ]
+        cls.largeRdefs = [AntiKt10TruthDressedWZSoftDrop]
+        # If in a release that supports reco, add the reco collections
+        if moduleExists('JetMomentTools'):
+            cls.smallRdefs += [AntiKt4EMPFlow, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4PV0Track, AntiKtVR30Rmax4Rmin02PV0Track, AntiKt4TruthDressedWZ]
+            cls.largeRdefs += [AntiKt10LCTopo_withmoms, AntiKt10LCTopoTrimmed, AntiKt10UFOCSSK, AntiKt10UFOCSSKSoftDrop]
+
         cls.flags = initConfigFlags()
         cls.flags.Input.Files=[]
         # Set flags in lieu of getting them from the file
