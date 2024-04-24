@@ -26,8 +26,6 @@ if( NOT IS_DIRECTORY ${xmldoc_dir} )
    return()
 endif()
 atlas_install_generic( ${xmldoc_dir}/*.xml ${xmldoc_dir}/*.dat
-   ${xmldoc_dir}/*.data ${xmldoc_dir}/*.pds ${xmldoc_dir}/*.tex
-   ${xmldoc_dir}/*.tbl ${xmldoc_dir}/*.eps
    DESTINATION share/Pythia8/xmldoc
    TYPENAME XmlDoc )
 
