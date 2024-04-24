@@ -369,7 +369,6 @@ int main(int argc, char *argv[])
         const std::string fileName = tagName + ".log";
         std::ofstream opFile(fileName);
         opFile << myIOVs.back().second << "\n";
-        opFile << std::endl;
         opFile.close();
     }
 
