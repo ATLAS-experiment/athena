@@ -435,18 +435,19 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContain
 
 void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*  muonContainer, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
   for (const xAOD::Muon* mu : *muonContainer) {
+    if (mu -> pt() < m_cutPt) continue;
     if (!(mu -> author() == xAOD::Muon::Author::MuidCo || mu -> author() == xAOD::Muon::Author::MuidSA)) continue;
-    
+   
     struct sTGCeff {
-      std::array<int, 8> quadMultiplet = {0};
-      std::array<int, 8> layerMultiplet = {0};
-      std::array<float, 8> xPosMultiplet = {0};
-      std::array<float, 8> yPosMultiplet = {0};
-      std::array<float, 8> zPosMultiplet = {0};
+      std::array<int, 8> quadMultiplet{};
+      std::array<int, 8> layerMultiplet{};
+      std::array<float, 8> xPosMultiplet{};
+      std::array<float, 8> yPosMultiplet{};
+      std::array<float, 8> zPosMultiplet{};
     };
-    
-    sTGCeff effPlots[2][16];
-    
+
+    std::array<std::array<sTGCeff, 16>, 2> effPlots;
+        
     const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     if(meTP == nullptr) continue;
 
@@ -474,7 +475,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
       float yPosStripInMultipletLocal = positionsMultiplet.y();
 
       Amg::Vector2D localPos(xPosStripInMultipletLocal, yPosStripInMultipletLocal);
-      Amg::Vector3D globalPos(0, 0, 0);
+      Amg::Vector3D globalPos(Amg::Vector3D::Zero());
       const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStrip = muonDetectorManagerObject -> getsTgcReadoutElement(rot_id);
       sTgcReadoutObjectStrip -> surface(rot_id).localToGlobal(localPos, Amg::Vector3D::Zero(), globalPos);
       float xPosStripInMultiplet = globalPos.x();
@@ -508,7 +509,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
             float rPos = std::hypot(xPos, yPos);
             
             std::string side = GeometricSectors::sTgcSide[isideIndex];
-        
+            
             auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", true);
             
             auto rPosStripMon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerIndex), rPos);
@@ -517,7 +518,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
             auto xPosStripmon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerIndex), xPos);
             auto yPosStripmon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerIndex), yPos);
             fill("sTgcOverview", xPosStripmon, yPosStripmon, effQuestionMon);
-            } // End of loop over efficient layers
+          } // End of loop over efficient layers
         } // End of efficient case
         
         else if (!fourOutEight && oneRefLayer) {
