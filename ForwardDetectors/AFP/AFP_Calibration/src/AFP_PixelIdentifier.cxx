@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Calibration/AFP_PixelIdentifier.h"
@@ -10,7 +10,7 @@ AFP_PixelIdentifier::AFP_PixelIdentifier(const std::string& input_name, const st
   m_output_file (std::make_unique<TFile>(output_name.c_str(),"recreate")),
   m_pixelTools_names(pixelTools)
 {
-	for(auto pixel_name: m_pixelTools_names)
+	for(const std::string& pixel_name: m_pixelTools_names)
 	{
 		if(pixel_name=="AFP_DeadPixel")
 		{
