@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -1001,42 +1001,18 @@ def expandStringToList( valIn, ensureExistence = None ):
     return all
 
 def getCachedFileInfo( filename, infoKey ):
-    # try extract information from AthFile cache.
-    if isinstance( filename, list ):
-        fList = filename
-    else:
-        fList = [ filename ]
-    cmdSnippet = os.linesep.join( [ \
-        "from __future__ import print_function",
-        "from PyUtils import AthFile",
-        "from sys import exit",
-        "import pickle",
-        "infoVal = None",
-        "fileList = %s" % fList,
-        "infoKey = '%s'" % infoKey,
-        "try:",
-        "    athFileObjList = AthFile.fopen( fileList )",
-        "except Exception as e:",
-        "    exit( 'AthFile access failed: %s' % e )",
-        "try:",
-        "    infoVal = [ athFileObj.fileinfos[ infoKey ] for athFileObj in athFileObjList ]",
-        "except KeyError as e:",
-        "    exit( 'Requested infoKey %s missing.' % infoKey )",
-        "print ('<infoVal>%s</infoVal>' % pickle.dumps( infoVal ))",
-        "exit( 0 )" ] ) + os.linesep
-    rc, stdout = timelimited_exec1( 'python -c "%s"' % cmdSnippet, tl_timeout = TRF_SETTING[ 'TRFTimeout' ] * len( fList ) )
-    if rc == 0:
-        found = re.search( "<infoVal>(.*?)</infoVal>", stdout, re.DOTALL )
-        if found:
-            resultList = pickle.loads( found.group( 1 ) )
-            if isinstance( filename, list ):
-                return resultList
-            try:
-                return resultList[0]
-            except Exception:
-                pass
-    print (stdout)
-    return None
+    from PyUtils.MetaReader import read_metadata
+    meta = read_metadata(filename,None,'lite')
+    try:
+        if isinstance(filename,list):
+            metalist = []
+            for fname in filename:
+                metalist.append(meta[fname][infoKey])
+            return metalist
+        else:
+            return meta[fname][infoKey]
+    except KeyError:
+        return None
 
 def corruptionTestROOT( filename, file_type ):
     if isinstance( filename, list ):
@@ -1214,7 +1190,7 @@ class BSFile( FileType ):
             print ("Event count failed for %s: %s" % ( arg, e ))
             return None
         if TRF_SETTING[ 'testrun' ] and ( VALIDATION_DICT[ 'ALL' ] is False or VALIDATION_DICT[ 'testCountEvents' ] is False ):
-            logger.info( 'Test run in progress. Event count (AthFile-based) disabled.' )
+            logger.info( 'Test run in progress. Event count disabled.' )
             return None
         resultList = getCachedFileInfo( fileList, 'nentries' )
         if resultList is None or not isinstance( resultList, list ):
@@ -1558,7 +1534,7 @@ class PoolDataFile( RootTTreeFile ):
             print ("Event count failed for %s: %s" % ( arg, e ))
             return None
         if TRF_SETTING[ 'testrun' ] and ( VALIDATION_DICT[ 'ALL' ] is False or VALIDATION_DICT[ 'testCountEvents' ] is False ):
-            logger.info( 'Test run in progress. Event count (AthFile-based) disabled.' )
+            logger.info( 'Test run in progress. Event count disabled.' )
             return None
         resultList = getCachedFileInfo( fileList, 'nentries' )
         if resultList is None or not isinstance( resultList, list ):
