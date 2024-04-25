@@ -13,6 +13,10 @@ atlas_add_test( JetDefUTest
    SCRIPT test_JetDefinitions_properties.py
    POST_EXEC_SCRIPT nopost.sh )
 
+atlas_add_test( JetDefCopyTest
+   SCRIPT test_JetDefinitions_copy.py
+   POST_EXEC_SCRIPT nopost.sh )
+
 if( NOT GENERATIONBASE  ) 
   # argument '-n 0' prevent a full run and performs only the jet config
   atlas_add_test( JetStandarSmallRConfig

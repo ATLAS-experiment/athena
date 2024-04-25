@@ -115,8 +115,10 @@ def clonable(cls):
     """Transforms the input class cls by adding a clone() method. 
     This clone() method returns a clone instance with a _locked attribute set to False by default (so the clone is modifiable) """
 
+    # Only unlock other instances of clonable
+    # This can otherwise do nasty things like unlocking AthConfigFlags!
     def recc_lock(o, lock):
-        if hasattr(o,"_locked"):
+        if hasattr(type(o),'isClonable') and type(o).isClonable and hasattr(o,"_locked"):
             o._locked = lock
             for k,v in o.__dict__.items():
                 recc_lock(v,lock)
@@ -130,6 +132,7 @@ def clonable(cls):
         recc_lock(o,lock) # make sure lock is propagated to all lockable sub-object
         return o
     cls.clone = clone
+    cls.isClonable = True
     return cls
 
 
