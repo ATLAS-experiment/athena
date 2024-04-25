@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
@@ -8,8 +8,11 @@
 namespace ActsTrk{
     template <> inline Amg::Transform3D 
         TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
-            const unsigned int tubeNum = m_parent->tubeNumber(hash()) + 1;
-            if (tubeNum == 0) {
+            using RE = MuonGMR4::MdtReadoutElement;
+            static const unsigned int layerTube = RE::tubeNumber(RE::measurementHash(0,0));
+            /// Check whether the hash represents a tube or the central layer
+            const unsigned int tubeNum = m_parent->tubeNumber(hash());
+            if (tubeNum == layerTube) {
                 const Amg::Translation3D toCenter{0.5*m_parent->moduleHeight() * Amg::Vector3D::UnitY()};
                 return m_parent->toStation(store) * m_parent->toChamberLayer(hash()) *
                         toCenter * Amg::getRotateY3D(90*Gaudi::Units::deg); 

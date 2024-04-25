@@ -51,7 +51,7 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometr
     return dummyTrans;
 }
 
-Amg::Transform3D MuonReadoutElement::toStation(const DetectorAlignStore* alignStore) const {
+const Amg::Transform3D& MuonReadoutElement::toStation(const DetectorAlignStore* alignStore) const {
    return getMaterialGeom()->getAbsoluteTransform(alignStore ? alignStore->geoModelAlignment.get() : nullptr);
 }
 void MuonReadoutElement::releaseUnAlignedTrfs() const {
