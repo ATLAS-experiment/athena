@@ -4,7 +4,6 @@ makeDataDAODs=True
 makeMCDAODs=True
 makeTruthDAODs=True
 makeTrains=True
-useLegacy=False
 
 formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "LLP1","HIGG1D1",
@@ -35,15 +34,9 @@ data18File = com_dir+"data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r1
 data22File = com_dir+"data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"
 data23CosFile = com_dir+"data23_cos/AOD/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195._lb0124-lb0126._0001.1"
 
-# pre/postExec
-preExec = "\'from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff(); DetFlags.detdescr.Muon_setOn();\'"
-preExecLLP = preExec[:-1]+" DetFlags.detdescr.pixel_setOn(); DetFlags.detdescr.SCT_setOn(); from InDetRecExample.InDetJobProperties import InDetFlags; InDetFlags.doR3LargeD0.set_Value_and_Lock(True);\'"
-postExec = "\'from DerivationFrameworkJetEtMiss.JetCommon import swapAlgsInSequence; swapAlgsInSequence(topSequence,\"jetalg_ConstitModCorrectPFOCSSKCHS_GPFlowCSSK\", \"UFOInfoAlgCSSK\" );\'"
 
-def generateText(formatName,label,inputFile,isTruth,isMC,nEvents,useLegacy):
+def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
    add_str = ""
-   if (useLegacy):
-      add_str += "_legacy"
    outputFileName = "test_"+label+formatName+add_str+".sh"
    outputFile = open(outputFileName,"w")
    outputFile.write("#!/bin/sh"+"\n")
@@ -61,25 +54,13 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents,useLegacy):
    outputFile.write("set -e"+"\n")
    outputFile.write("\n")
    if (not isTruth):
-      if useLegacy:
-         outputFile.write('Reco_tf.py \\\n')
-      else:
-         outputFile.write("Derivation_tf.py \\\n")
-         outputFile.write("--CA True \\\n")
+      outputFile.write("Derivation_tf.py \\\n")
+      outputFile.write("--CA True \\\n")
       outputFile.write("--inputAODFile "+inputFile+" \\\n")
       outputFile.write("--outputDAODFile art.pool.root \\\n")
-      if useLegacy:
-         outputFile.write("--reductionConf "+formatName+" \\\n")
-      else:
-         outputFile.write("--formats "+formatName+" \\\n")
+      outputFile.write("--formats "+formatName+" \\\n")
       outputFile.write("--maxEvents "+nEvents+" \\\n")
-      if useLegacy:
-         if (formatName in ["LLP1","IDTR2"]):
-            outputFile.write("--preExec "+preExecLLP+" \\\n")
-         else:
-            outputFile.write("--preExec "+preExec+" \\\n")
-            outputFile.write("--postExec "+postExec+" \\\n")
-   if isTruth: 
+   if isTruth:
       outputFile.write("Derivation_tf.py \\\n")
       outputFile.write("--CA True \\\n") 
       outputFile.write("--inputEVNTFile "+inputFile+" \\\n")
@@ -103,10 +84,8 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents,useLegacy):
    outputFile.close()
    os.system("chmod +x "+outputFileName)
 
-def generateTrains(formatList,label,inputFile,isMC,nEvents,useLegacy):
+def generateTrains(formatList,label,inputFile,isMC,nEvents):
    add_str = ""
-   if (useLegacy):
-      add_str = "_legacy"
    outputFileName = "test_"+label+"_".join(formatList)+add_str+".sh"
    outputFile = open(outputFileName,"w")
    outputFile.write("#!/bin/sh"+"\n")
@@ -121,21 +100,12 @@ def generateTrains(formatList,label,inputFile,isMC,nEvents,useLegacy):
    outputFile.write("\n")
    outputFile.write("set -e"+"\n")
    outputFile.write("\n")
-   if useLegacy:
-      outputFile.write("Reco_tf.py \\\n")
-   else:
-      outputFile.write("Derivation_tf.py \\\n")
-      outputFile.write("--CA True \\\n")
+   outputFile.write("Derivation_tf.py \\\n")
+   outputFile.write("--CA True \\\n")
    outputFile.write("--inputAODFile "+inputFile+" \\\n") 
    outputFile.write("--outputDAODFile art.pool.root \\\n")
-   if useLegacy: 
-      outputFile.write("--reductionConf "+" ".join(formatList)+" \\\n")
-   else:
-      outputFile.write("--formats "+" ".join(formatList)+" \\\n")
+   outputFile.write("--formats "+" ".join(formatList)+" \\\n")
    outputFile.write("--maxEvents "+nEvents+" \\\n")
-   if useLegacy:
-      outputFile.write("--preExec "+preExec+" \\\n")
-      outputFile.write("--postExec "+postExec+"\n")
    outputFile.write("\n")
    outputFile.write("echo \"art-result: $? reco\""+"\n")
    for formatname in formatList:
@@ -157,21 +127,21 @@ def generateTrains(formatList,label,inputFile,isMC,nEvents,useLegacy):
 if (makeDataDAODs or makeMCDAODs):
    for formatName in formatList:
       if makeDataDAODs: 
-         generateText(formatName,"data18",data18File,False,False,"-1",useLegacy)
-         generateText(formatName,"data22",data22File,False,False,"-1",useLegacy)
+         generateText(formatName,"data18",data18File,False,False,"-1")
+         generateText(formatName,"data22",data22File,False,False,"-1")
       if makeMCDAODs:
-         generateText(formatName,"mc20",mc20File,False,True,"-1",useLegacy)
-         generateText(formatName,"mc21",mc21File,False,True,"-1",useLegacy)
-      generateText("NCB1","data23cos",data23CosFile,False,False,"-1",useLegacy)
+         generateText(formatName,"mc20",mc20File,False,True,"-1")
+         generateText(formatName,"mc21",mc21File,False,True,"-1")
+      generateText("NCB1","data23cos",data23CosFile,False,False,"-1")
 if makeTruthDAODs:
    for formatName in truthFormatList:
-      generateText(formatName,"mc21",truthFile,True,False,"1000",useLegacy)
+      generateText(formatName,"mc21",truthFile,True,False,"1000")
 
 if makeTrains:
    for train in trainList:
       if makeDataDAODs: 
-         generateTrains(train,"data18",data18File,False,"-1",useLegacy)
-         generateTrains(train,"data22",data22File,False,"-1",useLegacy)
+         generateTrains(train,"data18",data18File,False,"-1")
+         generateTrains(train,"data22",data22File,False,"-1")
       if makeMCDAODs:
-         generateTrains(train,"mc20",mc20File,True,"-1",useLegacy)
-         generateTrains(train,"mc21",mc21File,True,"-1",useLegacy)
+         generateTrains(train,"mc20",mc20File,True,"-1")
+         generateTrains(train,"mc21",mc21File,True,"-1")
