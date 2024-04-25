@@ -45,6 +45,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "AtlasHepMC/Operators.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // STL includes
 #include <cstdlib> // quick_exit
@@ -225,7 +226,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
                             1, ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
-                            genPart->id(), // id
+                            HepMC::uniqueID(genPart), // id
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink);
@@ -280,7 +281,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
                             1,  ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
-                            genPart->id(), // id
+                            HepMC::uniqueID(genPart), // id
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink
@@ -335,7 +336,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
                             1, ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
-                            genPart->id(), // id
+                            HepMC::uniqueID(genPart), // id
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink

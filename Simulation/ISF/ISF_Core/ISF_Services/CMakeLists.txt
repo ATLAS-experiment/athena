@@ -44,6 +44,7 @@ atlas_add_test( InputConverter_test
                 AthenaBaseComps
                 BarcodeInterfacesLib
                 GeneratorObjects
+                TruthUtils
                 # Must consume the object library directly
                 MCTruth
                 ${GTEST_LIBRARIES}
