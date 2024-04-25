@@ -123,7 +123,7 @@ class JetDefinition(object):
 
             
     def __hash__(self):
-        return hash((self._radius,self._inputdef,self.ptmin,str(self.ghostdefs),str(self.modifiers),str(self.extrainputs)))
+        return hash((self.basename,self._inputdef,self.ptmin,str(self.ghostdefs),str(self.modifiers),str(self.extrainputs),self.byVertex))
 
     def __eq__(self,rhs):
         return self.__hash__() == rhs.__hash__()
