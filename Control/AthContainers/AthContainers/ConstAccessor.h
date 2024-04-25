@@ -145,13 +145,13 @@ protected:
    * @brief Constructor.
    * @param name Name of this aux variable.
    * @param clsname The name of its associated class.  May be blank.
-   * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+   * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
    *
    * The name -> auxid lookup is done here.
    */
   ConstAccessor (const std::string& name,
                  const std::string& clsname,
-                 const SG::AuxTypeRegistry::Flags flags);
+                 const SG::AuxVarFlags flags);
 
 
   /// The cached @c auxid.

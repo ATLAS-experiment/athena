@@ -162,7 +162,7 @@ bool AuxVectorData::isAvailableWritableAsDecoration (auxid_t id) const
  * Errors are signaled by raising an exception.
  *
  * Warning: no type checking is done.  You should usually access
- * the data via @c AuxElement::Accessor.
+ * the data via @c Accessor.
  */
 template <class T>
 inline
@@ -183,7 +183,7 @@ AuxVectorData::getData (SG::auxid_t auxid, size_t ndx)
  * Errors are signaled by raising an exception.
  *
  * Warning: no type checking is done.  You should usually access
- * the data via @c AuxElement::Accessor.
+ * the data via @c Accessor.
  */
 template <class T>
 inline
@@ -205,7 +205,7 @@ AuxVectorData::getData (SG::auxid_t auxid, size_t ndx) const
  * Errors are signaled by raising an exception.
  *
  * Warning: no type checking is done.  You should usually access
- * the data via @c AuxElement::Decorator.
+ * the data via @c Decorator.
  *
  * The difference between @c getDecoration and @c getData is that
  * @c getDecoration takes a const container as input, but returns

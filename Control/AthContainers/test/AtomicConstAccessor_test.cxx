@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file AthContainers/test/AtomicConstAccessor_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -15,6 +13,7 @@
 #include "AthContainers/tools/AtomicConstAccessor.h"
 #include "AthContainers/tools/AtomicDecorator.h"
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/Accessor.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "TestTools/expect_exception.h"
 #include <iostream>
@@ -102,7 +101,7 @@ void test1()
                               const std::atomic<int>*>::value, "test");
 
   EXPECT_EXCEPTION (SG::ExcAtomicMismatch,
-                    SG::AuxElement::Accessor<int> ityp3a ("anInt3"));
+                    SG::Accessor<int> ityp3a ("anInt3"));
 }
 
 
