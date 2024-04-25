@@ -168,7 +168,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
    protected:
      /// Returns the transformation into the center of the readout volume
-     Amg::Transform3D toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
+     const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
       
      /// Inserts a transfomration for caching
      template <class MuonDetImpl> StatusCode insertTransform(const IdentifierHash& hash);
