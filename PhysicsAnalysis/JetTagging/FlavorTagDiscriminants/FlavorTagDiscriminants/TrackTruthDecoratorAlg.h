@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_TRUTH_DECORATOR_ALG_HH
@@ -95,7 +95,6 @@ namespace FlavorTagDiscriminants {
       // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool 
       {Truth::Type::LightFlavorDecay, 6}, //From light muon
       {Truth::Type::TauDecay, 7}, //From tau muon
-      {Truth::Type::PromptMuonLike, 8}, //4-like muons
       {Truth::Type::TauDecayLike, 8}, //4-like muons
       {Truth::Type::BHadronDecayLike, 8}, //4-like muons
       {Truth::Type::CHadronDecayLike, 8}, //4-like muons
