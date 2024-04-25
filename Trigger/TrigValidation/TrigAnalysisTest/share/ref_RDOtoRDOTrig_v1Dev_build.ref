@@ -21616,6 +21616,8 @@ HLT_j95_0eta290_020jvt_bgn260_pf_ftf_xe50_cell_xe85_tcpufit_L1jXE110:
     0: 20
     1: 6
     2: 1
+HLT_l1topoPh1debug_L1All:
+  eventCount: 0
 HLT_larnoiseburst_L1J40_XE50:
   eventCount: 8
   stepCounts:
