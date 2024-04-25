@@ -889,7 +889,7 @@ StorageSvc          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F
 RootDatabase.close  DEBUG Closing DB SimplePoolFile1.root
 AthenaEventLoopMgr   INFO No more events in event selection 
 Stream1             DEBUG AthenaOutputStream Stream1 ::stop()
-Stream1             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream1             DEBUG handle() incident type: MetaDataStop
 Stream1.FileMet...  DEBUG Could not get mcProcID
 Stream1.FileMet...  DEBUG FileMetaData payload replaced in store with content created for this stream
 Stream1             DEBUG addItemObjects(73252552,"FileMetaDataAux.") called

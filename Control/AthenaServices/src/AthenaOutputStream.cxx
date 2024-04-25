@@ -373,7 +373,6 @@ StatusCode AthenaOutputStream::stop()
 
 void AthenaOutputStream::handle(const Incident& inc)
 {
-   EventContext::ContextID_t slot = inc.context().slot();
    ATH_MSG_DEBUG("handle() incident type: " << inc.type());
    // mutex shared with write() which is called from writeMetaData
    std::unique_lock<mutex_t>  lock(m_mutex);
@@ -399,6 +398,7 @@ void AthenaOutputStream::handle(const Incident& inc)
    }
    else if( m_outSeqSvc->inUse() ) {
       // Handle Event Ranges for Event Service
+      EventContext::ContextID_t slot = inc.context().slot();
       if( slot == EventContext::INVALID_CONTEXT_ID ) {
          throw GaudiException("Received Incident with invalid slot in ES mode", name(), StatusCode::FAILURE);
       }
