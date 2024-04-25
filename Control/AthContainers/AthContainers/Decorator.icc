@@ -25,7 +25,7 @@ namespace SG {
 template <class T, class ALLOC>
 inline
 Decorator<T, ALLOC>::Decorator (const std::string& name)
-  : Decorator (name, "", SG::AuxTypeRegistry::Flags::None)
+  : Decorator (name, "", SG::AuxVarFlags::None)
 {
 }
 
@@ -41,7 +41,7 @@ template <class T, class ALLOC>
 inline
 Decorator<T, ALLOC>::Decorator (const std::string& name,
                                 const std::string& clsname)
-  : Decorator (name, clsname, SG::AuxTypeRegistry::Flags::None)
+  : Decorator (name, clsname, SG::AuxVarFlags::None)
 {
 }
 
@@ -59,7 +59,7 @@ inline
 Decorator<T, ALLOC>::Decorator
   (const std::string& name,
    const std::string& clsname,
-   const SG::AuxTypeRegistry::Flags flags)
+   const SG::AuxVarFlags flags)
   : m_auxid (SG::AuxTypeRegistry::instance().getAuxID<T, ALLOC> (name, clsname, flags))
 {
 }

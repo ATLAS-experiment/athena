@@ -25,7 +25,7 @@ namespace SG {
 template <class T, class ALLOC>
 inline
 ConstAccessor<T, ALLOC>::ConstAccessor (const std::string& name)
-  : ConstAccessor (name, "", SG::AuxTypeRegistry::Flags::None)
+  : ConstAccessor (name, "", SG::AuxVarFlags::None)
 {
 }
 
@@ -41,7 +41,7 @@ template <class T, class ALLOC>
 inline
 ConstAccessor<T, ALLOC>::ConstAccessor
   (const std::string& name, const std::string& clsname)
-  : ConstAccessor (name, clsname, SG::AuxTypeRegistry::Flags::None)
+  : ConstAccessor (name, clsname, SG::AuxVarFlags::None)
 {
   // cppcheck-suppress missingReturn; false positive
 }
@@ -51,7 +51,7 @@ ConstAccessor<T, ALLOC>::ConstAccessor
  * @brief Constructor.
  * @param name Name of this aux variable.
  * @param clsname The name of its associated class.  May be blank.
- * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
  *
  * The name -> auxid lookup is done here.
  */
@@ -60,7 +60,7 @@ inline
 ConstAccessor<T, ALLOC>::ConstAccessor
   (const std::string& name,
    const std::string& clsname,
-   const SG::AuxTypeRegistry::Flags flags)
+   const SG::AuxVarFlags flags)
     : m_auxid (SG::AuxTypeRegistry::instance().getAuxID<T, ALLOC> (name, clsname, flags))
 {
 }

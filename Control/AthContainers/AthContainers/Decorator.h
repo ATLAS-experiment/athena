@@ -206,7 +206,7 @@ protected:
    */
   Decorator (const std::string& name,
              const std::string& clsname,
-             const SG::AuxTypeRegistry::Flags flags);
+             const SG::AuxVarFlags flags);
 
 
 private:
