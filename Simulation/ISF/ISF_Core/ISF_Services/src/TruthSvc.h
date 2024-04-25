@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SERVICES_TRUTHSVC_H
@@ -79,23 +79,16 @@ namespace ISF {
     /** Record the given truth incident to the MC Truth */
     void recordIncidentToMCTruth( ITruthIncident& truthincident, bool passWholeVertex) const;
     /** Record and end vertex to the MC Truth for the parent particle */
-    HepMC::GenVertexPtr  createGenVertexFromTruthIncident( ITruthIncident& truthincident,
-                                                           bool replaceExistingGenVertex=false) const;
+    HepMC::GenVertexPtr  createGenVertexFromTruthIncident( ITruthIncident& truthincident) const;
 
     /** Set shared barcode for child particles */
     void setSharedChildParticleBarcode( ITruthIncident& truthincident) const;
-
-    /** Delete child vertex */
-    void deleteChildVertex(HepMC::GenVertexPtr  vertex) const;
 
     /** Helper function to determine the largest particle barcode set by the generator */
     int maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) const;
 
     /** Helper function to determine the largest vertex barcode set by the generator */
     int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) const;
-
-    /** Helper function to classify existing GenVertex objects */
-    ISF::InteractionClass_t interactionClassification(HepMC::GenVertexPtr& vtx) const;
 
     ServiceHandle<Barcode::IBarcodeSvc> m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc", ""};           //!< The Barcode service
 

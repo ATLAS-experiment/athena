@@ -223,11 +223,6 @@ namespace ISFTesting {
       return m_svc->registerTruthIncident(std::forward<Args>(args)...);
     }
 
-    template<typename... Args>
-    void deleteChildVertex(Args&&... args) const {
-      return m_svc->deleteChildVertex(std::forward<Args>(args)...);
-    }
-
     ISF::ITruthStrategy** getIDTruthStrategies(unsigned int& nStrategies) const {
       nStrategies = static_cast<unsigned int>(m_svc->m_numStrategies[AtlasDetDescr::fAtlasID]);
       return m_svc->m_geoStrategies[AtlasDetDescr::fAtlasID];
