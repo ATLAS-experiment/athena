@@ -17,7 +17,7 @@ struct RangeOfHist {
   float LowerValue;
 };
 
-RangeOfHist getRange(std::vector<float>, float gapfactor = 0.05);
+RangeOfHist getRange(const std::vector<float>&, float gapfactor = 0.05);
 //
 //-------------------------------------------------
 //
@@ -190,7 +190,7 @@ void IBLvTemp()
 //
 //-------------------------------------------------
 //
-RangeOfHist getRange(std::vector<float> ListOfValues, float gapfactor)
+RangeOfHist getRange(const std::vector<float>& ListOfValues, float gapfactor)
 {
   RangeOfHist myRange;
   

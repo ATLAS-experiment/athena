@@ -35,7 +35,7 @@ int padding = 0;
 
 // function prototypes
 
-int updateHists(std::string inFileName, std::string inStem, std::string outFileName = "", std::string outStem = "");
+int updateHists(std::string inFileName, const std::string& inStem, std::string outFileName = "", std::string outStem = "");
 bool makeDirectories(const std::string & dirName);
 bool makeDir(const std::string & dirName);
 void Copy(const std::string & inDir, const std::string & outDir, const std::string & inHist = "", const td::string & outHist = "");
@@ -44,7 +44,7 @@ void CopyHist(const std::string & inDir, const std::string & outDir, const std::
 //----------------------------------------
 // main macro
 //----------------------------------------
-int updateHists(std::string inFileName, std::string inStem, std::string outFileName, std::string outStem)
+int updateHists(std::string inFileName, const std::string& inStem, std::string outFileName, std::string outStem)
 {
     //open original file
     source = TFile::Open(inFileName.c_str());

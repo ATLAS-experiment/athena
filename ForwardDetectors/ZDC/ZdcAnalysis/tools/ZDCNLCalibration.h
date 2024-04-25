@@ -133,10 +133,10 @@ public:
 
   void Calibrate(size_t side, const std::string & calibInput, const std::string & calibOutput, 
 		 size_t LBLow, size_t LBHigh, std::array<int, 4> maxPowerModule,
-		 std::vector<std::pair<double, double> >  nNeutERange, 
+		 const std::vector<std::pair<double, double> >&  nNeutERange, 
 		 bool excludeHE, float heSumThresh, float HEDeweight);
   
-  void TestCalibration(int side, std::string calibName);
+  void TestCalibration(int side, const std::string& calibName);
 
   TH1* GetTestSNHist() {return (m_haveTest ? m_testCalibSNHist : 0);}
   TH1* GetTestFracHist(size_t module) {return (m_haveTest ? m_testCalibHEFracHist.at(module) : 0);}
