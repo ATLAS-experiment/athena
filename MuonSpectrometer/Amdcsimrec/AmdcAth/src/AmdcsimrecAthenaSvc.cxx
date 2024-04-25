@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/StoreGateSvc.h"
@@ -299,7 +299,7 @@ StatusCode AmdcsimrecAthenaSvc::initializeAscii()
   int  Istate = 0;
   for (int i= 0; i <SizeName; i++){FileName[i]=m_LocationOfTheFile[i];}
   int IFLAG = 100 + m_PrintLevel ;
-  amdcreadnn_(FileName,SizeName,Istate,IFLAG);
+  amdcreadnn_(FileName,SizeName,Istate,IFLAG,SizeName);
   delete [] FileName ;
   if (Istate == 0) {
     ATH_MSG_FATAL( "amdcreadn failed " ) ;
