@@ -2332,8 +2332,8 @@ namespace top {
   }
 
   void TopConfig::parse_bTagWPs(const std::string& btagWPsettingString,
-      std::vector<std::pair<std::string, std::string>>& btagWPlist,
-      const std::string& jetCollectionName) {
+				std::vector<bTagWP_t>& btagWPlist,
+				const std::string& jetCollectionName) {
     std::istringstream str_btagging_WP(btagWPsettingString);
     std::vector<std::string> all_btagging_WP;
     std::copy(std::istream_iterator<std::string>(str_btagging_WP),
@@ -2359,7 +2359,7 @@ namespace top {
 
       ATH_MSG_INFO("BTagging algorithm: " << alg << "_" << tag << " for collection: " << jetCollectionName);
       std::string formatedWP = FormatedWP(tag);
-      std::pair<std::string, std::string> alg_tag = std::make_pair(alg, tag);
+      bTagWP_t alg_tag = std::make_pair(alg, tag);
       // take care that no WP is taken twice
       if (std::find(btagWPlist.begin(), btagWPlist.end(), alg_tag) == btagWPlist.end()) {
         btagWPlist.push_back(alg_tag);
@@ -2370,8 +2370,8 @@ namespace top {
   }
 
   void TopConfig::parse_bTagWPs_pair(const std::string& btagWPsettingString,
-				     std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& btagWPlist,
-      const std::string& jetCollectionName) {
+				     std::vector<bTagWP_pair_t>& btagWPlist,
+				     const std::string& jetCollectionName) {
     std::istringstream str_btagging_WP(btagWPsettingString);
     std::vector<std::string> all_btagging_WP;
     std::copy(std::istream_iterator<std::string>(str_btagging_WP),
@@ -2408,9 +2408,8 @@ namespace top {
       for(unsigned int j=0;j<2;++j) {
 	formatedWP[j] = FormatedWP(alg_tag[j][1]);
       }
-      std::pair<std::pair<std::string, std::string>,
-	        std::pair<std::string, std::string>> off1_off2 = std::make_pair(std::make_pair(alg_tag[0][0],alg_tag[0][1]),
-										std::make_pair(alg_tag[1][0],alg_tag[1][1]));
+      bTagWP_pair_t off1_off2 = std::make_pair(std::make_pair(alg_tag[0][0],alg_tag[0][1]),
+					       std::make_pair(alg_tag[1][0],alg_tag[1][1]));
 
       // take care that no b-tagging triplet is taken twice
       if (std::find(btagWPlist.begin(), btagWPlist.end(), off1_off2) == btagWPlist.end()) {
@@ -2422,8 +2421,8 @@ namespace top {
   }
 
   void TopConfig::parse_bTagWPs_triplet(const std::string& btagWPsettingString,
-					std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>>& btagWPlist,
-      const std::string& jetCollectionName) {
+					std::vector<bTagWP_triplet_t>& btagWPlist,
+					const std::string& jetCollectionName) {
     std::istringstream str_btagging_WP(btagWPsettingString);
     std::vector<std::string> all_btagging_WP;
     std::copy(std::istream_iterator<std::string>(str_btagging_WP),
@@ -2461,11 +2460,9 @@ namespace top {
       for(unsigned int j=0;j<3;++j) {
 	formatedWP[j] = FormatedWP(alg_tag[j][1]);
       }
-      std::pair<std::pair<std::string, std::string>,
-	        std::pair<std::pair<std::string, std::string>,
-			  std::pair<std::string, std::string>>> offl_onl_cond = std::make_pair(std::make_pair(alg_tag[0][0],alg_tag[0][1]),
-											       std::make_pair(std::make_pair(alg_tag[1][0],alg_tag[1][1]),
-													      std::make_pair(alg_tag[2][0],alg_tag[2][1])));
+      bTagWP_triplet_t offl_onl_cond = std::make_pair(std::make_pair(alg_tag[0][0],alg_tag[0][1]),
+						      std::make_pair(std::make_pair(alg_tag[1][0],alg_tag[1][1]),
+								     std::make_pair(alg_tag[2][0],alg_tag[2][1])));
       // take care that no b-tagging triplet is taken twice
       if (std::find(btagWPlist.begin(), btagWPlist.end(), offl_onl_cond) == btagWPlist.end()) {
         btagWPlist.push_back(offl_onl_cond);
@@ -3816,7 +3813,7 @@ namespace top {
 
     typedef std::unordered_map<std::size_t, std::string>::const_iterator Itr;
 
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator i = m_chosen_btaggingWP.begin();
+    for (std::vector<bTagWP_t>::const_iterator i = m_chosen_btaggingWP.begin();
          i != m_chosen_btaggingWP.end(); ++i)
       out->m_chosen_btaggingWP.push_back(*i);
 
@@ -3978,7 +3975,7 @@ namespace top {
 
     m_softmuonQuality = settings->m_softmuonQuality;
 
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator i = settings->m_chosen_btaggingWP.begin();
+    for (std::vector<bTagWP_t>::const_iterator i = settings->m_chosen_btaggingWP.begin();
          i != settings->m_chosen_btaggingWP.end(); ++i)
       m_chosen_btaggingWP.push_back(*i);
 

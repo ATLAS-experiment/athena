@@ -34,7 +34,7 @@ namespace top {
 
     // for calo jets
     std::vector<std::string> availableWPs = m_config->bTagWP_available();
-    for (auto& WP : availableWPs) {
+    for (const auto& WP : availableWPs) {
       m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_" + m_config->sgKeyJets();
       top::check(m_btagSelTools[WP].retrieve(), "Failed to retrieve b-tagging Selection tool");
       if (std::find(m_config->bTagWP_calibrated().begin(),
@@ -51,7 +51,7 @@ namespace top {
     }
     // for calo jets -- online and conditional WP (these have no btagsel tool)
     availableWPs = m_config->bTagWP_available_onlCond();
-    for (auto& WP : availableWPs) {
+    for (const auto& WP : availableWPs) {
       if(WP.find("Conditional") == std::string::npos) {
 	m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_" + m_config->sgKeyJets();
 	top::check(m_btagSelTools[WP].retrieve(), "Failed to retrieve ONLINE b-tagging Selection tool");
@@ -76,15 +76,15 @@ namespace top {
     if(m_onlineJets.size()>0) {   
       //check for b-jet triggers
       std::shared_ptr<std::vector<std::string> > selectors = m_config->allSelectionNames();
-      for (std::string selPtr : *selectors) {
-	for (auto& trigger : m_config->allTriggers_Tight(selPtr)) {
+      for (const std::string selPtr : *selectors) {
+	for (const auto& trigger : m_config->allTriggers_Tight(selPtr)) {
 	  std::string trigger_name=trigger.first;
 	  if(trigger_name.find("bmv2c") != std::string::npos) {
 	    
 	    std::string sub = "bmv2c";
 	    uint pos=trigger_name.find(sub)+sub.length()+2;
 	    std::string the_wp = ((std::string)"FixedCutBEff_")+trigger_name.substr(pos,2);
-	    for(auto& a_wp : m_onlineJets) {
+	    for(const auto& a_wp : m_onlineJets) {
 	      if(a_wp.first.find(the_wp)!=std::string::npos) {
 		m_onlineJets[a_wp.first][trigger_name] = std::vector<TLorentzVector>(0);
 		m_onlineBtagging[a_wp.first][trigger_name]=std::vector<float>(0);
@@ -94,7 +94,7 @@ namespace top {
 	  }
 	}
       }
-      for(auto& a_wp : m_onlineJets) {
+      for(const auto& a_wp : m_onlineJets) {
 	if(a_wp.second.size()==0) ATH_MSG_WARNING("No b-jet triggers triggers match the Online WP" + a_wp.first);
       }
       //get the tool
@@ -103,7 +103,7 @@ namespace top {
     
     // for track jets
     availableWPs = m_config->bTagWP_available_trkJet();
-    for (auto& WP : availableWPs) {
+    for (const auto& WP : availableWPs) {
       m_trkjet_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_" + m_config->sgKeyTrackJets();
       top::check(m_trkjet_btagSelTools[WP].retrieve(), "Failed to retrieve b-tagging Selection tool");
       if (std::find(m_config->bTagWP_calibrated_trkJet().begin(),
@@ -138,7 +138,7 @@ namespace top {
                                               bool use_trackjets) {
     ///-- Loop over all jet collections --///
     ///-- Lets assume that we're not doing ElectronInJet subtraction --///
-    for (auto currentSystematic : *jet_syst_collections) {
+    for (const auto currentSystematic : *jet_syst_collections) {
       const xAOD::JetContainer* jets(nullptr);
       top::check(evtStore()->retrieve(jets, currentSystematic.second), "failed to retrieve jets");
 
@@ -149,9 +149,13 @@ namespace top {
       ///-- If needed, prepare the trigger information --//
       if(m_onlineJets.size()!=0) {
       	top::check(retrieveTriggerJets(),"Failed to retrieve trigger jets");
-      	for(auto& a_wp : m_onlineJets) {
-      	  matchedtrigjets[a_wp.first]=std::map<std::string,std::vector<uint>>();
-      	  for(auto& trig : a_wp.second) matchedtrigjets[a_wp.first][trig.first]=std::vector<uint>(0);
+	for (const auto& tagWP : (use_trackjets ? m_config->bTagWP_available_trkJet() : m_config->bTagWP_available())) {
+	  for(const auto& a_wp : m_onlineJets) {
+	    matchedtrigjets[tagWP + "_" + a_wp.first]=std::map<std::string,std::vector<uint>>();
+	    for(const auto& trig : a_wp.second) {
+	      matchedtrigjets[tagWP + "_" + a_wp.first][trig.first]=std::vector<uint>(0);
+	    }
+	  }
       	}
       }
 
@@ -171,7 +175,7 @@ namespace top {
         if (passSelection) {
           // now loop over all available WPs
 
-          for (auto& tagWP : (use_trackjets ? m_config->bTagWP_available_trkJet() : m_config->bTagWP_available())) {
+          for (const auto& tagWP : (use_trackjets ? m_config->bTagWP_available_trkJet() : m_config->bTagWP_available())) {
 
             // skip uncalibrated though available WPs
             if (use_trackjets &&
@@ -213,19 +217,9 @@ namespace top {
 
             float btag_SF(1.0);
             float btag_MCeff(-1.0);
-	    float btag_SF_onl(1.0);
-	    float btag_MCeff_onl(-1.0);
-	    float btag_SF_cond(1.0);
-	    float btag_MCeff_cond(-1.0);
             bool isTagged = false;//unused in case of Continuous
-	    int flavour_label=-1;
-	    bool jetMatchesTrigger=false;
-	    bool isTaggedOnline=false;
-	    float online_pt(-10), online_eta(-10), online_phi(-10), online_E(-10);
-	    std::map<std::string,float> onlinemv2;
-	    Analysis::CalibrationDataVariables vars_jet;
-	      
-	    if (std::fabs(jetPtr->eta()) <= 2.5) {
+
+	    if (std::abs(jetPtr->eta()) <= 2.5) {
 
 	      top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
 			 "Failed to get nominal b-tagging MC efficiency");
@@ -245,7 +239,9 @@ namespace top {
 	    jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_nom") = btag_MCeff;
 	    jetPtr->auxdecor<char>("btag_isTagged_" + tagWP + "_nom") = isTagged;
 
-	    for (auto OfflOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	    int flavour_label=-1;
+	    jetPtr->getAttribute("HadronConeExclTruthLabelID",flavour_label); // get the jet truth flavour
+	    for (const auto& OfflOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
 	      // check if this offline WP has a triplet (offl_onl_cond)
 	      std::string offlWP = OfflOnlCondBtagWP.first.first + "_" + OfflOnlCondBtagWP.first.second; 
 	      if(tagWP == offlWP) {
@@ -282,13 +278,20 @@ namespace top {
 			     "Failed to set new Conditional b-tagging SF to nominal");
 		}
 
-		jetPtr->getAttribute("HadronConeExclTruthLabelID",flavour_label); // get the jet truth flavour
+		float btag_SF_onl(1.0);
+		float btag_MCeff_onl(-1.0);
+		float btag_SF_cond(1.0);
+		float btag_MCeff_cond(-1.0);
+		float onlinemv2(-2);
+		bool jetMatchesTrigger=false;
+		bool isTaggedOnline=false;
+		float online_pt(-10), online_eta(-10), online_phi(-10), online_E(-10);
+		Analysis::CalibrationDataVariables vars_jet;
+	      
 		vars_jet.jetPt = jetPtr->pt();
 		vars_jet.jetEta = jetPtr->eta();
 
-		onlinemv2.clear();
-
-		for(auto& trig_item : m_onlineJets[onlWP]) {
+		for(const auto& trig_item : m_onlineJets[onlWP]) {
 		  std::string TriggerChain = trig_item.first;
 
 		  btag_SF_onl = 1.0;
@@ -299,12 +302,12 @@ namespace top {
 		  online_eta=-10; 
 		  online_phi=-10; 
 		  online_E=-10;
-		  onlinemv2[onlWP] = getOnlineWeight(jetPtr,onlWP,TriggerChain,matchedtrigjets[onlWP][TriggerChain],online_pt,online_eta,online_phi,online_E);
-		  isTaggedOnline = btagsel_onl->accept(online_pt,online_eta,onlinemv2[onlWP]);
-		  jetMatchesTrigger = (onlinemv2[onlWP]>-1.5);
-		  vars_jet.jetTagWeight = onlinemv2[onlWP];
+		  onlinemv2 = getOnlineWeight(jetPtr,onlWP,TriggerChain,matchedtrigjets[offlWP+onlWP][TriggerChain],online_pt,online_eta,online_phi,online_E);
+		  isTaggedOnline = btagsel_onl->accept(online_pt,online_eta,onlinemv2);
+		  jetMatchesTrigger = (onlinemv2>-1.5);
+		  vars_jet.jetTagWeight = onlinemv2;
 		  
-		  if(std::fabs(jetPtr->eta()) <= 2.5 && abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger) { 
+		  if(std::abs(jetPtr->eta()) <= 2.5 && std::abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger) { 
 		    top::check(btageff_onl->getScaleFactor(flavour_label, vars_jet, btag_SF_onl), //is flavour_label the correct thing?
 			       "Failed to get nominal ONLINE b-tagging SF for trigger " + TriggerChain);
 		    top::check(btageff_onl->getMCEfficiency(flavour_label, vars_jet, btag_MCeff_onl), //is flavour_label the correct thing? 
@@ -319,13 +322,13 @@ namespace top {
 		    break;
 		  }
 		}
-		jetPtr->auxdecor<char>("btag_isTagged_" + tagWP + "_onl_" + "_nom") = isTaggedOnline;
-		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_onl_" + "_nom") = btag_SF_onl;
-		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_onl_" + "_nom") = btag_MCeff_onl;
-		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_cond_" + "_nom") = btag_SF_cond;
-		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_cond_" + "_nom") = btag_MCeff_cond;
+		jetPtr->auxdecor<char>("btag_isTagged_" + tagWP + "_onl" + "_nom") = isTaggedOnline;
+		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_onl" + "_nom") = btag_SF_onl;
+		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_onl" + "_nom") = btag_MCeff_onl;
+		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_cond" + "_nom") = btag_SF_cond;
+		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_cond" + "_nom") = btag_MCeff_cond;
 		  
-		jetPtr->auxdecor<float>("trigMatch_taggerWeight_" + tagWP + "_nom") = onlinemv2[onlWP];
+		jetPtr->auxdecor<float>("trigMatch_taggerWeight_" + tagWP + "_nom") = onlinemv2;
 		jetPtr->auxdecor<float>("trigMatch_pt_" + tagWP + "_nom") =  online_pt;
 		jetPtr->auxdecor<float>("trigMatch_eta_" + tagWP + "_nom") =  online_eta;
 		jetPtr->auxdecor<float>("trigMatch_phi_" + tagWP + "_nom") =  online_phi;
@@ -338,7 +341,7 @@ namespace top {
 		    btag_MCeff_onl = -1.;
 		    btag_SF_cond = 1.;
 		    btag_MCeff_cond = -1.;
-		    if ( std::fabs(jetPtr->eta()) <= 2.5 && abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger ) { // can be applied to matched b-jets only
+		    if ( std::abs(jetPtr->eta()) <= 2.5 && std::abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger ) { // can be applied to matched b-jets only
 		      // check if variation is available for onl and cond tools
 		      if ( m_systs[onlWP].find(variation) != m_systs[onlWP].end() &&
 			   m_systs[condWP].find(variation) != m_systs[condWP].end() ) {
@@ -384,7 +387,7 @@ namespace top {
                 syst_set.insert(variation);
                 top::check(btageff->applySystematicVariation(syst_set),
                            "Failed to set new b-tagging systematic variation " + syst_set.name());
-		if (std::fabs(jetPtr->eta()) <= 2.5) {
+		if (std::abs(jetPtr->eta()) <= 2.5) {
 		  
 		  top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
 			     "Failed to get b-tagging MC efficiency for variation " + syst_set.name());
@@ -413,7 +416,7 @@ namespace top {
 
   //helper function for trigger navigation, from https://twiki.cern.ch/twiki/bin/view/Atlas/TrigBjetCalibration2016Rel21#Retrieving_online_btagging
   template<class Object, class Collection>
-  const Object* getTrigObject(Trig::Feature<Collection>& feature){
+  const Object* getTrigObject(const Trig::Feature<Collection>& feature){
 
     const Collection* trigCol = feature.cptr();
     if ( !trigCol ) {
@@ -430,25 +433,23 @@ namespace top {
 
   StatusCode BTagScaleFactorCalculator::retrieveTriggerJets() {
 
-    for(auto& a_wp : m_onlineJets) {
-      for(auto& trig_item : a_wp.second) {
+    for(const auto& a_wp : m_onlineJets) {
+      for(const auto& trig_item : a_wp.second) {
 	std::string TriggerChain = trig_item.first;
 	// retrive online jets and btagging (from https://twiki.cern.ch/twiki/bin/view/Atlas/TrigBjetCalibration2016Rel21#Retrieving_online_btagging )
 	m_onlineJets[a_wp.first][TriggerChain] = std::vector<TLorentzVector>(0);
 	m_onlineBtagging[a_wp.first][TriggerChain]=std::vector<float>(0);
 	Trig::FeatureContainer fc = m_trigDecisionTool->features(TriggerChain);
-	Trig::FeatureContainer::combination_const_iterator comb   (fc.getCombinations().begin());
-	Trig::FeatureContainer::combination_const_iterator combEnd(fc.getCombinations().end());
-	for( ; comb!=combEnd ; ++comb) {
-	  std::vector< Trig::Feature<xAOD::JetContainer> >  jetCollections  = comb->containerFeature<xAOD::JetContainer>("SplitJet");
-	  std::vector< Trig::Feature<xAOD::BTaggingContainer> > bjetCollections = comb->containerFeature<xAOD::BTaggingContainer>("HLTBjetFex");
+	for(const auto& comb : fc.getCombinations()) {
+	  std::vector< Trig::Feature<xAOD::JetContainer> >  jetCollections  = comb.containerFeature<xAOD::JetContainer>("SplitJet");
+	  std::vector< Trig::Feature<xAOD::BTaggingContainer> > bjetCollections = comb.containerFeature<xAOD::BTaggingContainer>("HLTBjetFex");
 	  for ( unsigned ifeat=0 ; ifeat<jetCollections.size() ; ifeat++ ) {
 	    const xAOD::Jet* hlt_jet = getTrigObject<xAOD::Jet, xAOD::JetContainer>(jetCollections.at(ifeat));
 	    // online jet already in?       
 	    bool notsaved = true;
 	    TLorentzVector vtemp;
 	    vtemp.SetPtEtaPhiM(hlt_jet->pt(), hlt_jet->eta(), hlt_jet->phi(), hlt_jet->m());
-	    for (auto vsaved : m_onlineJets[a_wp.first][TriggerChain]) if (vsaved.DeltaR(vtemp) == 0) notsaved = false;
+	    for (const auto& vsaved : m_onlineJets[a_wp.first][TriggerChain]) if (vsaved.DeltaR(vtemp) == 0) notsaved = false;
 	    // if not, add it
 	    if (notsaved) {
 	      m_onlineJets[a_wp.first][TriggerChain].push_back(vtemp);

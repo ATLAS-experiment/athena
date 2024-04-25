@@ -221,7 +221,7 @@ namespace top {
 
     // online and conditional b-tag WP
 
-    for (auto TaggerBtagWP : m_config->bTagWP_onlCond()) {
+    for (const auto& TaggerBtagWP : m_config->bTagWP_onlCond()) {
       m_tagger = TaggerBtagWP.first;
       std::string btagWP = TaggerBtagWP.second;
       std::string bTagWPName = m_tagger + "_" + btagWP;
@@ -285,8 +285,6 @@ namespace top {
           top::check(btageff->setProperty("ScaleFactorBCalibration", m_config->bTaggingCalibration_B()),
                      "Failed to set b-tagging calibration (B): " + m_config->bTaggingCalibration_B());
           for (auto jet_flav : m_jet_flavors) {
-            // 09/02/18 IC: The pseudo-continuous does not have MC/MC SF so we need to only apply default for this case
-            // 08/05/18 Francesco La Ruffa: The pseudo-continuous has now its own MC/MC SFs, no needed to set default
             top::check(btageff->setProperty("Efficiency" + jet_flav + "Calibrations", m_efficiency_maps),
                        "Failed to set " + jet_flav + "-calibrations efficiency maps");
           }

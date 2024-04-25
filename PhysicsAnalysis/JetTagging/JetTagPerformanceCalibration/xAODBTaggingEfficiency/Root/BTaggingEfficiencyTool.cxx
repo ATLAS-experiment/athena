@@ -1052,8 +1052,7 @@ BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVar
     const xAOD::BTagging* tagInfo = jet.btagging();
     if (!tagInfo) return false;
     // For now, we defer the tag weight computation to the selection tool only in the case of DL1* (this is likely to be revisited)
-    // but don't do this for online tools
-    if (m_taggerName.find("DL1") != std::string::npos && m_taggerName.find("Online") == std::string::npos) {
+    if (m_taggerName.find("DL1") != std::string::npos) {
       return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight, m_useCTag) == CP::CorrectionCode::Ok);
     } else {
       return tagInfo->MVx_discriminant(m_taggerName, x.jetTagWeight);

@@ -1524,17 +1524,17 @@ namespace top {
 
     // tagger decision
     std::string decoration_tag_off = decoration_tag + "_nom"; // offline tag
-    std::string decoration_tag_onl = decoration_tag + "_onl_" + "_nom"; // online tag
+    std::string decoration_tag_onl = decoration_tag + "_onl" + "_nom"; // online tag
 
     // MC efficiency Scale Factor
     std::string decoration_SF_off = decoration_SF + "_nom"; // this is either eff SF or ineff SF 
-    std::string decoration_SF_onl = decoration_SF + "_onl_" + "_nom"; // this is always eff SF
-    std::string decoration_SF_cond = decoration_SF + "_cond_" + "_nom"; // this is always eff SF
+    std::string decoration_SF_onl = decoration_SF + "_onl" + "_nom"; // this is always eff SF
+    std::string decoration_SF_cond = decoration_SF + "_cond" + "_nom"; // this is always eff SF
 
     // MC efficiency
     std::string decoration_MCeff_off = decoration_MCeff + "_nom";
-    std::string decoration_MCeff_onl = decoration_MCeff + "_onl_" + "_nom"; 
-    std::string decoration_MCeff_cond = decoration_MCeff + "_cond_" + "_nom";
+    std::string decoration_MCeff_onl = decoration_MCeff + "_onl" + "_nom"; 
+    std::string decoration_MCeff_cond = decoration_MCeff + "_cond" + "_nom";
     
     std::string systematicName, bTagSystName;
     switch (SFSyst) {
@@ -1613,7 +1613,6 @@ namespace top {
     xAOD::JetContainer jets = event.m_jets;
     if (do_trackjets) jets = event.m_trackJets;
     for (auto jetPtr : jets) {
-      double weight = 1.0;
       bool isTagged_off = false;
       bool isTagged_onl = false;
       double sf_off     = 1;
@@ -1655,7 +1654,7 @@ namespace top {
 	sf_cond = 1;
       }
 
-      weight = btagSF_off_onl_weight(isTagged_off,isTagged_onl,mceff_off,sf_off,mceff_onl,sf_onl,mceff_cond,sf_cond);
+      double weight = btagSF_off_onl_weight(isTagged_off,isTagged_onl,mceff_off,sf_off,mceff_onl,sf_onl,mceff_cond,sf_cond);
       if ( weight > 0 ) {
 	sf *= weight;
       }
@@ -1757,21 +1756,21 @@ namespace top {
     // tagger decision
     std::string decoration_tag_off1 = decoration_tag1 + "_nom"; // offline1 tag
     std::string decoration_tag_off2 = decoration_tag2 + "_nom"; // offline2 tag
-    std::string decoration_tag_onl = decoration_tag1 + "_onl_" + "_nom"; // online tag based on WP1
+    std::string decoration_tag_onl = decoration_tag1 + "_onl" + "_nom"; // online tag based on WP1
 
     // MC efficiency Scale Factor
     std::string decoration_SF_off1 = decoration_SF1 + "_nom"; // this is either eff SF or ineff SF 
     std::string decoration_SF_off2 = decoration_SF2 + "_nom"; // this is either eff SF or ineff SF 
-    std::string decoration_SF_onl = decoration_SF1 + "_onl_" + "_nom"; // this is always eff SF
-    std::string decoration_SF_cond1 = decoration_SF1 + "_cond_" + "_nom"; // this is always eff SF
-    std::string decoration_SF_cond2 = decoration_SF2 + "_cond_" + "_nom"; // this is always eff SF
+    std::string decoration_SF_onl = decoration_SF1 + "_onl" + "_nom"; // this is always eff SF
+    std::string decoration_SF_cond1 = decoration_SF1 + "_cond" + "_nom"; // this is always eff SF
+    std::string decoration_SF_cond2 = decoration_SF2 + "_cond" + "_nom"; // this is always eff SF
 
     // MC efficiency
     std::string decoration_MCeff_off1 = decoration_MCeff1 + "_nom";
     std::string decoration_MCeff_off2 = decoration_MCeff2 + "_nom";
-    std::string decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + "_nom"; 
-    std::string decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + "_nom";
-    std::string decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + "_nom";
+    std::string decoration_MCeff_onl = decoration_MCeff1 + "_onl" + "_nom"; 
+    std::string decoration_MCeff_cond1 = decoration_MCeff1 + "_cond" + "_nom";
+    std::string decoration_MCeff_cond2 = decoration_MCeff2 + "_cond" + "_nom";
     
     std::string systematicName, bTagSystName;
     switch (SFSyst) {
@@ -2164,7 +2163,7 @@ namespace top {
 
       // tagger decision
       std::string decoration_tag_off = decoration_tag + "_nom"; // offline tag
-      std::string decoration_tag_onl = decoration_tag + "_onl_" + "_nom"; // online tag
+      std::string decoration_tag_onl = decoration_tag + "_onl" + "_nom"; // online tag
 
       // MC efficiency Scale Factor
       std::string decoration_SF_off_up = decoration_SF + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
@@ -2178,10 +2177,10 @@ namespace top {
       // MC efficiency
       std::string decoration_MCeff_off_up = decoration_MCeff + "_FT_EFF_EIGEN_" + flav + num + "__1up";
       std::string decoration_MCeff_off_down = decoration_MCeff + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_onl_up = decoration_MCeff + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_onl_down = decoration_MCeff + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_cond_up = decoration_MCeff + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_cond_down = decoration_MCeff + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_onl_up = decoration_MCeff + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_onl_down = decoration_MCeff + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_cond_up = decoration_MCeff + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_cond_down = decoration_MCeff + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
     
       xAOD::JetContainer jets = event.m_jets;
       if (do_trackjets) jets = event.m_trackJets;
@@ -2329,7 +2328,7 @@ namespace top {
       // tagger decision
       std::string decoration_tag_off1 = decoration_tag1 + "_nom"; // offline tag
       std::string decoration_tag_off2 = decoration_tag2 + "_nom"; // offline tag
-      std::string decoration_tag_onl = decoration_tag1 + "_onl_" + "_nom"; // online tag
+      std::string decoration_tag_onl = decoration_tag1 + "_onl" + "_nom"; // online tag
 
       // MC efficiency Scale Factor
       std::string decoration_SF_off1_up = decoration_SF1 + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
@@ -2349,12 +2348,12 @@ namespace top {
       std::string decoration_MCeff_off1_down = decoration_MCeff1 + "_FT_EFF_EIGEN_" + flav + num + "__1down";
       std::string decoration_MCeff_off2_up = decoration_MCeff2 + "_FT_EFF_EIGEN_" + flav + num + "__1up";
       std::string decoration_MCeff_off2_down = decoration_MCeff2 + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_onl_up = decoration_MCeff1 + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_onl_down = decoration_MCeff1 + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_cond1_up = decoration_MCeff1 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_cond1_down = decoration_MCeff1 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
-      std::string decoration_MCeff_cond2_up = decoration_MCeff2 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
-      std::string decoration_MCeff_cond2_down = decoration_MCeff2 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_onl_up = decoration_MCeff1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_onl_down = decoration_MCeff1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_cond1_up = decoration_MCeff1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_cond1_down = decoration_MCeff1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_cond2_up = decoration_MCeff2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_cond2_down = decoration_MCeff2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
     
       xAOD::JetContainer jets = event.m_jets;
       if (do_trackjets) jets = event.m_trackJets;
