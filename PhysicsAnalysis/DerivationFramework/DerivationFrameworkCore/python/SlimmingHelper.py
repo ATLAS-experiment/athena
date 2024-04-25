@@ -36,7 +36,6 @@
 
 from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, CompulsoryTriggerNavigation, CompulsoryDynamicContent
 from DerivationFrameworkCore.ContentHandler import ContentHandler
-from DerivationFrameworkCore.ContainersForExpansion import ContainersForExpansion
 from DerivationFrameworkCore.ContainersOnTheFly import ContainersOnTheFly
 from DerivationFrameworkCore.FullListOfSmartContainers import FullListOfSmartContainers
 import PyUtils.Logging as L
@@ -263,11 +262,6 @@ class SlimmingHelper:
                                         entry = "xAOD::JetTrigAuxContainer#"+item+"."
                                 elif ("AuxInfo" in theDictionary[item]):
                                         entry = "xAOD::AuxInfoBase!#"+item+"."
-                                # Next elif - remaining containers
-                                # that still need to be expanded with AuxStoreWrapper
-                                # In the run 3 trigger EDM there are no such containers so this is dead code
-                                elif (theDictionary[item] in ContainersForExpansion):
-                                        entry = "xAOD::AuxContainerBase#"+item+"."
                                 else:
                                         entry = "xAOD::AuxContainerBase!#"+item+"."
                                 for element in auxEntries[item]:

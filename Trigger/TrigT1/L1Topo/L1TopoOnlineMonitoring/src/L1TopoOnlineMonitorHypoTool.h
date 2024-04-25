@@ -38,28 +38,16 @@ private:
   // ------------------------- Private members ---------------------------------
   /// The decision id of the tool instance
   HLT::Identifier m_decisionId;
+  
   /// The input ErrorFlags
   SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_errorFlagsKey {
     this, "ErrorFlagsKey", "L1TopoErrorFlags",
     "Key of the input TrigCompositeContainer with L1Topo error flags"};
   
   // ------------------------- Accept properties -------------------------------
-  Gaudi::Property<bool> m_acceptGenericRoiError {
-    this, "AcceptOnGenericRoiError", false, "Accept events with the hasGenericRoiError flag set"};
-  Gaudi::Property<bool> m_acceptGenericDaqError {
-    this, "AcceptOnGenericDaqError", false, "Accept events with the hasGenericDaqError flag set"};
-  Gaudi::Property<bool> m_acceptCrcTobError {
-    this, "AcceptOnCrcTobError", false, "Accept events with the hasCrcTobError flag set"};
-  Gaudi::Property<bool> m_acceptCrcFibreError {
-    this, "AcceptOnCrcFibreError", false, "Accept events with the hasCrcFibreError flag set"};
-  Gaudi::Property<bool> m_acceptCrcDaqError {
-    this, "AcceptOnCrcDaqError", false, "Accept events with the hasCrcDaqError flag set"};
-  Gaudi::Property<bool> m_acceptRoibDaqDifference {
-    this, "AcceptOnRoibDaqDifference", false, "Accept events with the hasRoibDaqDifference flag set"};
-  Gaudi::Property<bool> m_acceptRoibCtpDifference {
-    this, "AcceptOnRoibCtpDifference", false, "Accept events with the hasRoibCtpDifference flag set"};
-  Gaudi::Property<bool> m_acceptDaqCtpDifference {
-    this, "AcceptOnDaqCtpDifference", false, "Accept events with the hasDaqCtpDifference flag set"};
+  Gaudi::Property<bool> m_acceptTrivialFlag {
+    this, "AcceptTrivialFlag", false, "Accept events with the trivial flag set"};
+  
 };
 
 #endif // L1TOPOONLINEMONITORING_L1TopoOnlineMonitorHypoTool_h

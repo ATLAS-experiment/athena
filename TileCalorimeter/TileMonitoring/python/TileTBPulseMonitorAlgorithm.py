@@ -79,6 +79,7 @@ def TileTBPulseMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x
 
     tileTBPulseMonAlg.TileFragIDs = fragIDs
 
+    kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
     for k, v in kwargs.items():
         setattr(tileTBPulseMonAlg, k, v)
 

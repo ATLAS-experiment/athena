@@ -1092,7 +1092,7 @@ CalibChainParts_Default = {
 #==========================================================
 AllowedMonitorChainIdentifiers = ['robrequest', 'timeburner',
                                   'idmon',
-                                  'l1calooverflow', 'l1topodebug',
+                                  'l1calooverflow', 'l1topoPh1debug',
                                   'mistimemonl1bccorr','mistimemonl1bccorrnomu',
                                   'mistimemoncaltimenomu','mistimemoncaltime',
                                   'mistimemonj400',]

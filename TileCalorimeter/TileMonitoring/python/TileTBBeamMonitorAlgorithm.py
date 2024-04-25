@@ -33,7 +33,7 @@ def TileTBBeamMonitoringConfig(flags, fragIDs=[0x100,0x101,0x200,0x201,0x402], *
     kwargs.setdefault('CaloCellContainer', 'AllCalo')
     cellContainer = kwargs['CaloCellContainer']
 
-    kwargs.setdefault('TBperiod', 2022)
+    kwargs.setdefault('TBperiod', 2023)
     kwargs.setdefault('MaskMuonPMTs', [7])
     kwargs.setdefault('TOFDifferencePairs', [[2, 1], [2, 3], [3, 1]])
 
@@ -55,6 +55,9 @@ def TileTBBeamMonitoringConfig(flags, fragIDs=[0x100,0x101,0x200,0x201,0x402], *
 
     for k, v in kwargs.items():
         setattr(tileTBBeamMonAlg, k, v)
+
+    from TileMonitoring.TileTBBeamChambersCalibration import updateBeamChambersCalibrations
+    updateBeamChambersCalibrations(tileTBBeamMonAlg, flags.Input.RunNumbers[0])
 
     run = str(flags.Input.RunNumbers[0])
 
@@ -227,7 +230,7 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
 
     flags = initConfigFlags()
     parser = flags.getArgumentParser()
@@ -248,6 +251,7 @@ if __name__=='__main__':
     fragIDs = [int(fragID, base=16) for fragID in args.fragIDs]
 
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Output.HISTFileName = 'TileTBBeamMonitorOutput.root'
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
@@ -281,7 +285,8 @@ if __name__=='__main__':
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
         cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False,
                                          readDigits=(not readDigitsFlx),
-                                         readDigitsFlx=readDigitsFlx) )
+                                         readDigitsFlx=readDigitsFlx,
+                                         readBeamElem=True) )
     else:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))

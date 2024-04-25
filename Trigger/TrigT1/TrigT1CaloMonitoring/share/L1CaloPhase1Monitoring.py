@@ -347,7 +347,7 @@ for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
   applied = False
-  for comp in cfg._allComponents()+cfg.getServices():
+  for comp in [c for c in cfg._allComponents()]+cfg.getServices():
     if comp.name==compName:
       applied = True
       exec(f"comp.{propNameAndVal}")

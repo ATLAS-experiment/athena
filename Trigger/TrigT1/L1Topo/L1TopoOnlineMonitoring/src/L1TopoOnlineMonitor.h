@@ -93,6 +93,9 @@ private:
   ToolHandle<GenericMonitoringTool> m_monTool {
     this, "MonTool", "" ,
     "Monitoring tool to create online histograms"};
+  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_errorFlagsKey {
+    this, "ErrorFlagsKey", "L1TopoErrorFlags",
+    "Key of the output TrigCompositeContainer with L1Topo error flags"};
   Gaudi::Property<bool> m_doSimMon {
     this, "doSimMon", true, "Enable L1Topo simulation decision monitoring"};
   Gaudi::Property<bool> m_doHwMonCTP {
@@ -141,6 +144,9 @@ private:
   std::vector<unsigned> getCtpIds(const TrigConf::L1Menu& l1menu);
 
   std::vector<std::vector<std::pair<unsigned,unsigned>>> getStartBits(const TrigConf::L1Menu& l1menu);
+
+  // Define and set all error flags to false (Now only TrivialFlag set to true)
+  void resetFlags(xAOD::TrigComposite& errorFlags) const;
 
 };
 

@@ -44,7 +44,7 @@ def L1LegacyTopoSimulationCfg(flags):
     acc.addEventAlgo(topoSimAlg)
     return acc
 
-def L1TopoSimulationCfg(flags, doMonitoring=True):
+def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False):
 
     acc = ComponentAccumulator()
 
@@ -57,9 +57,16 @@ def L1TopoSimulationCfg(flags, doMonitoring=True):
     So here we should be adding proper flag for P1, and when input file is RAW
     Simply, if muons are simulated, we will use MuCTPIL1Topo, if decoded MuonRoI
     """
-    muProvider.locationMuonRoI = ""
-    muProvider.locationMuonRoI1 = ""
-                                                    
+
+    
+    #if flags.Trigger.L1.doMuonTopoInputs:
+    if readMuCTPI:
+        muProvider.locationMuCTPItoL1Topo = ""
+        muProvider.locationMuCTPItoL1Topo1 = ""
+    else:
+        muProvider.locationMuonRoI = ""
+        muProvider.locationMuonRoI1 = ""
+        
     #Configure the MuonRoiTools for the MIP
     from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
     muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
@@ -93,7 +100,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True):
                                                     EMTAUInputProvider = emtauProvider,
                                                     JetInputProvider = jetProvider,
                                                     EnergyInputProvider = energyProvider,
-                                                    ControlHistSvc = controlHistSvc if doMonitoring else "",
+                                                    ControlHistSvc = controlHistSvc, # if doMonitoring else "",
                                                     IsLegacyTopo = False,
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation
