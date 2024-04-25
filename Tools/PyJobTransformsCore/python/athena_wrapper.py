@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package athena_wrapper
 #
@@ -138,11 +138,6 @@ fi
 """           # python execution starts here, the shell never reaches this
 #"""  # extra line to fool emacs
 
-# Don't want to use from __future__ import print_function here: that would
-# then apply to everything that we read with include().
-import builtins
-printfunc = getattr(builtins,'print')
-
 import sys
 from past.builtins import execfile
 from AthenaCommon.Include import IncludeError
@@ -152,7 +147,7 @@ from PyJobTransformsCore import AtlasErrorCodes
 
 # flake8: noqa
 
-## The err variable will be used to contain an ErrorInfo instance 
+## The err variable will be used to contain an ErrorInfo instance
 #  after the trferr.errorHandler handles an exception.
 err = None
 
@@ -173,7 +168,7 @@ try:
     ## The athena executable is expected to be the first argument
     athena_exe = sys.argv[ 1 ]
     sys.argv.pop( 0 ) # remove first argument (i.e. athena full path)    
-    printfunc (' '.join( sys.argv ) )
+    print (' '.join( sys.argv ) )
     execfile( athena_exe )
 
 # Known exceptions not deriving from exceptions.Exception
@@ -195,7 +190,7 @@ except SystemExit as e:
         if rc == 0:
             raise Exception
     except Exception: # successful athena job
-        printfunc ('%s - exit code 0.' % ' '.join( sys.argv ))
+        print ('%s - exit code 0.' % ' '.join( sys.argv ))
         sys.exit( 0 )
     else: # unsuccessful athena job
         ## Create a blank JobReport instance and populate it with the error detected.
@@ -203,7 +198,7 @@ except SystemExit as e:
         jobReport.setProducer( 'athena' )
         jobReport.addError( err )
         jobReport.write()
-        printfunc ('%s - exit code %s' % ( ' '.join( sys.argv ), rc ))
+        print ('%s - exit code %s' % ( ' '.join( sys.argv ), rc ))
         sys.exit( rc )
 
 # Exceptions derived from exceptions.Exception

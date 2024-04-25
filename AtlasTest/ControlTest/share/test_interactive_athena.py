@@ -34,7 +34,7 @@ class TestAlg(PyAthena.Alg):
     pass # class TestAlg
 
 def test_lock():
-    printfunc ('test lock')
+    print ('test lock')
     sg = PyAthena.py_svc('StoreGateSvc')
     ei = PyAthena.EventInfo()
     sg.record (ei, 'EventInfo')
@@ -46,7 +46,7 @@ def test_lock():
     assert (not ll.m_locked)
     sg.setConst (ll).ignore()
     assert (ll.m_locked)
-    printfunc ('done test lock')
+    print ('done test lock')
     import sys
     sys.stdout.flush()
     return
@@ -62,9 +62,9 @@ for _ in range(10):
 test_lock()
 
 theApp.finalize().ignore()
-printfunc ("="*80)
-printfunc ("test [OK]")
-printfunc ("="*80)
+print ("="*80)
+print ("test [OK]")
+print ("="*80)
 theApp.exit()
 
     
