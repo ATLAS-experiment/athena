@@ -5,7 +5,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType, LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, Format
 from IOVDbSvc.IOVDbSvcConfig import addFolders,addFoldersSplitOnline
 
 def PixelConfigCondAlgCfg(flags, name="PixelConfigCondAlg", **kwargs):
@@ -392,6 +392,12 @@ def PixelDetectorElementStatusAlgCfg(flags, name = "PixelDetectorElementStatusAl
                           acc.popToolsAndMerge(PixelByteStreamErrorDetectorElementStatusToolActiveOnlyCfg(flags, PixelDetElStatusCondDataBaseKey="PixelDetectorElementStatusNoByteStreamActiveOnly")))
 
     kwargs.setdefault("WriteKey","PixelDetectorElementStatus")
+
+    # This requires PixelByteStreamErrs provided by PixelRawDataProviderAlg
+    if flags.Input.Format is Format.BS:
+        from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import (
+                PixelRawDataProviderAlgCfg)
+        acc.merge(PixelRawDataProviderAlgCfg(flags))
 
     acc.addEventAlgo( CompFactory.InDet.SiDetectorElementStatusAlg(name, **kwargs) )
     return acc
