@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfReports
 #
@@ -391,7 +391,7 @@ class trfExecutorReport(object):
 
 ## @brief Class to contain metadata for file types
 class trfFileReport(object):
-    # Class variable with the mapping from internal (usually = AthFile key) metadata keys to classic keys
+    # Class variable with the mapping from internal metadata keys to classic keys
     # In the case of 'size' it's the same, but it's convenient to list it here to be able to just loop over dictionary
     _internalToClassicMap = {'conditions_tag' : 'conditionsTag',
                              'beam_type' : 'beamType',

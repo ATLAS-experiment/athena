@@ -678,8 +678,8 @@ class argFile(argList):
             try:
                 if value.lower().startswith('lfn'):
                     # Resolve physical filename using pool file catalog.
-                    import PyUtils.AthFile as af
-                    protocol, pfn = af.fname(value)
+                    from PyUtils.PoolFile import file_name
+                    protocol, pfn = file_name(value)
                     self._value = [pfn]
                     self._getDatasetFromFilename(reset = False)
                     self._resetMetadata()
@@ -1325,22 +1325,18 @@ class argAthenaFile(argFile):
         for key in athFileInterestingKeys:
             self._metadataKeys[key] = self._getAthInfo
             
-    ## @brief Workhorse which actually calls AthFile 
+    ## @brief Workhorse which actually calls Meta Reader
     def _callAthInfo(self, files, doAllFiles, retrieveKeys):
         if doAllFiles:
             myFiles = self._value
         else:
             myFiles = files
-        msg.debug('Will retrieve AthFile info for {0!s}'.format(myFiles))
+        msg.debug('Will retrieve metadata info for {0!s}'.format(myFiles))
         aftype = 'POOL'
         if self._type.upper() in ('BS', 'RAW'):
             aftype = 'BS'
         elif self._type.upper() in ('TAG'):
             aftype = 'TAG'
-
-        # get G4Version for HITSFiles
-#         if self._type.upper() in ('HITS'):
-#             retrieveKeys.append('G4Version')
 
         # N.B. Could parallelise here            
         for fname in myFiles:

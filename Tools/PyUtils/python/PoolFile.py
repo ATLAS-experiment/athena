@@ -311,7 +311,7 @@ def _get_total_size (branch):
        brSize += basket.GetObjlen() - 8
    return brSize
 
-def _fname(fname):
+def file_name(fname):
     """take a file name, return the pair (protocol, 'real' file name)
     """
     fname = os.path.expanduser(os.path.expandvars(fname))
@@ -397,7 +397,7 @@ def _root_open(fname):
 
         # we need to get back the protocol b/c of the special
         # case of secure-http which needs to open TFiles as TWebFiles...
-        protocol, _ = _fname(fname)
+        protocol, _ = file_name(fname)
         if protocol == 'https':
             _setup_ssl(root)
             root_open = root.TWebFile.Open
@@ -533,7 +533,7 @@ class PoolFile(object):
 
         # get the "final" file name (handles all kind of protocols)
         try:
-            protocol, fileName = _fname(fileName)
+            protocol, fileName = file_name(fileName)
         except Exception as err:
             print("## warning: problem opening PoolFileCatalog:\n%s"%err)
             import traceback
