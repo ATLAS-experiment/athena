@@ -274,9 +274,6 @@ void BeamBackgroundFiller::SegmentMethod(Cache& cache) const {
 
     
     double tSeg = GetSegmentTime(*seg);
-    ATH_MSG_ALWAYS("Lieber Stonjeeeek.... Frecher Stonjeeeeeeek "<<tSeg<<" "
-            <<m_idHelperSvc->toString(m_edmHelperSvc->chamberId(*seg)));
-
     cache.m_numSegment++;
     cache.m_resultSeg[segIndex] |= BeamBackgroundData::Segment;
 
