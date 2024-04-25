@@ -91,4 +91,4 @@ atlas_add_test( Mode3dTo1dFinder_test
    TrkVertexSeedFinderUtilsLib )
 
 # Install files from the package.
-atlas_install_joboptions( share/*.py share/*.txt )
+atlas_install_joboptions( share/*.txt )
