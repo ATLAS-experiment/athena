@@ -1753,7 +1753,7 @@ Stream2.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 20 events processed so far  <<<===
 Stream1             DEBUG AthenaOutputStream Stream1 ::stop()
 Stream2             DEBUG AthenaOutputStream Stream2 ::stop()
-Stream1             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream1             DEBUG handle() incident type: MetaDataStop
 Stream1.FileMet...  DEBUG Could not get mcProcID
 Stream1.FileMet...  DEBUG FileMetaData payload replaced in store with content created for this stream
 Stream1             DEBUG addItemObjects(73252552,"FileMetaDataAux.") called
@@ -1859,7 +1859,7 @@ SimplePoolFile1...  DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile1...  DEBUG DB Action Commit
 Stream1              INFO Metadata records written: 21
 Stream1             DEBUG Leaving incident handler for MetaDataStop
-Stream2             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream2             DEBUG handle() incident type: MetaDataStop
 Stream2.FileMet...  DEBUG FileMetaData payload replaced in store with content created for this stream
 Stream2             DEBUG addItemObjects(73252552,"FileMetaDataAux.") called
 Stream2             DEBUG            Key:FileMetaDataAux.

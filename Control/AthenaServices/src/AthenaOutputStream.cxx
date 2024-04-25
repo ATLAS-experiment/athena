@@ -315,8 +315,9 @@ StatusCode AthenaOutputStream::initialize() {
          ATH_MSG_FATAL("Cannot get IncidentSvc.");
          return(StatusCode::FAILURE);
       }
-      incsvc->addListener(this, IncidentType::BeginProcessing, 100);
-      incsvc->addListener(this, IncidentType::EndProcessing, 100);
+      // use priority 95 to make sure the Output Sequencer goes first (it has priority 100)
+      incsvc->addListener(this, IncidentType::BeginProcessing, 95);
+      incsvc->addListener(this, IncidentType::EndProcessing, 95);
    }
 
    // Check compression settings and print some information about the configuration
@@ -372,20 +373,22 @@ StatusCode AthenaOutputStream::stop()
 
 void AthenaOutputStream::handle(const Incident& inc)
 {
-   EventContext::ContextID_t slot = inc.context().slot();
-   ATH_MSG_DEBUG("slot " << slot << "  handle() incident type: " << inc.type());
+   ATH_MSG_DEBUG("handle() incident type: " << inc.type());
    // mutex shared with write() which is called from writeMetaData
    std::unique_lock<mutex_t>  lock(m_mutex);
 
    if( inc.type() == "MetaDataStop" )  {
       if( m_outSeqSvc->inUse() ) {
          if( m_outSeqSvc->inConcurrentEventsMode() ) {
-            // EventService MT - all substreams should be closed by this point
-            ATH_MSG_DEBUG("Ignoring MetaDataStop incident in ES/MT mode");
+            // EventService MT - write metadata and close all remaining substreams 
+            while( m_streamerMap.size() > 0 ) {
+               finalizeRange( m_streamerMap.begin()->first );
+            }
             return;
          }
          if( m_outSeqSvc->lastIncident() == "EndEvent" ) {
-            // in r22 EndEvent comes before output writing - queue metadata writing and disconnect for after Event write
+            // in r22 EndEvent comes before output writing
+            // - queue metadata writing and disconnect for after Event write
             m_writeMetadataAndDisconnect = true;
             return;
          }
@@ -395,44 +398,72 @@ void AthenaOutputStream::handle(const Incident& inc)
    }
    else if( m_outSeqSvc->inUse() ) {
       // Handle Event Ranges for Event Service
+      EventContext::ContextID_t slot = inc.context().slot();
       if( slot == EventContext::INVALID_CONTEXT_ID ) {
          throw GaudiException("Received Incident with invalid slot in ES mode", name(), StatusCode::FAILURE);
       }
+      auto count_events_in_range = [&](const std::string& range) {
+         return std::count_if(m_slotRangeMap.cbegin(), m_slotRangeMap.cend(),
+                              [&](auto& el){return el.second == range;} );
+      };
       if( inc.type() == IncidentType::BeginProcessing ) {
-         // remember in which output filename this event should be stored
-         m_slotRangeMap[ slot ] = m_outSeqSvc->buildSequenceFileName(m_outputName);
-         ATH_MSG_DEBUG("slot " << slot << " assigned filename: " << m_slotRangeMap[ slot ] );
-      } else if( inc.type() == IncidentType::EndProcessing ) {
-         std::string rangeFN = m_slotRangeMap[ slot ];
-         if( !rangeFN.empty() ) {
-            // check how many events there are still for the given range
-            int n = 0;
-            for( auto& elem : m_slotRangeMap ) {
-               if( elem.second == rangeFN ) n++;
+         // get the current/old range filename for this slot
+         const std::string rangeFN = m_slotRangeMap[ slot ];
+         // build the new range filename for this slot
+         const std::string newRangeFN = m_outSeqSvc->buildSequenceFileName( m_outputName );
+         if( !rangeFN.empty() and rangeFN != newRangeFN ) {
+            ATH_MSG_INFO("Slot range change: '" << rangeFN << "' -> '" << newRangeFN << "'");
+            ATH_MSG_DEBUG("There are " << m_slotRangeMap.size() << " slots in use");
+            for(auto range : m_slotRangeMap ) {
+               ATH_MSG_DEBUG("Slot: " << range.first << "  FN=" << range.second);
             }
-            if( n == 1 ) {
-               // this was the last event in this range, finalize it
-               ATH_MSG_DEBUG("slot " << slot << " writing MetaData to " << rangeFN);
-               // MN: not calling StopMetaDataIncident here - OK for Sim, check others
-               // metadata tools like CutFlowSvc are not able to handle this yet
-               writeMetaData( rangeFN );
-               ATH_MSG_INFO("Finished writing Event Sequence to " << rangeFN );
-               auto strm_iter = m_streamerMap.find( rangeFN );
-               strm_iter->second->finalizeOutput().ignore();
-               strm_iter->second->finalize().ignore();
-               m_streamerMap.erase(strm_iter);
-	       m_outSeqSvc->publishRangeReport(rangeFN);            
+            if( count_events_in_range(rangeFN) == 1 ) {
+               finalizeRange( rangeFN );
             }
-            m_slotRangeMap[ slot ].clear();
-         } else {
-            throw GaudiException("Failed to handle EndProcessing incident - range filename not found",
-                                 name(), StatusCode::FAILURE);
+         }
+         ATH_MSG_INFO("slot " << slot << " processing event in range: " << newRangeFN);
+         m_slotRangeMap[ slot ] = newRangeFN;
+         // remember the RangeID for this slot so we can write metadata *after* a range change
+         m_rangeIDforRangeFN[ newRangeFN ] = m_outSeqSvc->currentRangeID();
+      }
+      else if( inc.type() == IncidentType::EndProcessing ) {
+         ATH_MSG_DEBUG("There are " << m_slotRangeMap.size() << " slots in use");
+         for(auto range : m_slotRangeMap ) {
+            ATH_MSG_DEBUG("Slot: " << range.first << "  FN=" << range.second);
+         }
+         if( m_slotRangeMap.size() > 1 ) {
+            // if there are multiple slots, we can detect if the range ended with this event
+            // - except the last range, because there is no next range to clear the slot map
+            const std::string rangeFN = m_slotRangeMap[ slot ];
+            if( count_events_in_range(rangeFN) == 1 ) {
+               finalizeRange( rangeFN );
+               m_slotRangeMap[ slot ].clear();
+            }
          }
       }
-   } 
-   
+   }
    ATH_MSG_DEBUG("Leaving incident handler for " << inc.type());
 }
+
+
+// note - this method works in any slot - MetaCont uses the filenames to find objects
+void AthenaOutputStream::finalizeRange( const std::string rangeFN )
+{
+   ATH_MSG_DEBUG("Writing MetaData to " << rangeFN);
+   // MN: not calling StopMetaDataIncident here but directly writeMetaData() - OK for Sim, check others
+   // metadata tools like CutFlowSvc are not able to handle this yet
+   const std::string rememberID = m_outSeqSvc->setRangeID( m_rangeIDforRangeFN[ rangeFN ] );
+   writeMetaData( rangeFN );
+   m_outSeqSvc->setRangeID( rememberID );
+
+   ATH_MSG_INFO("Finished writing Event Sequence to " << rangeFN);
+   auto strm_iter = m_streamerMap.find( rangeFN );
+   strm_iter->second->finalizeOutput().ignore();
+   strm_iter->second->finalize().ignore();
+   m_streamerMap.erase( strm_iter );
+   m_outSeqSvc->publishRangeReport( rangeFN );
+}
+
 
 // method to write MetaData for this stream
 // in ES mode the range substream is determined by the current Event slot
@@ -496,7 +527,8 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
 }
 
 // terminate data writer
-StatusCode AthenaOutputStream::finalize() {
+StatusCode AthenaOutputStream::finalize()
+{
    bool failed = false;
    ATH_MSG_DEBUG("finalize: Optimize output");
    // Connect the output file to the service
@@ -519,6 +551,7 @@ StatusCode AthenaOutputStream::finalize() {
    m_altObjects.clear();
    return(StatusCode::SUCCESS);
 }
+
 
 StatusCode AthenaOutputStream::execute() {
    bool failed = false;
@@ -555,7 +588,6 @@ StatusCode AthenaOutputStream::execute() {
 // Work entry point
 StatusCode AthenaOutputStream::write() {
    bool failed = false;
-   EventContext::ContextID_t slot = Gaudi::Hive::currentContext().slot();
    IAthenaOutputStreamTool* streamer = &*m_streamer;
    std::string outputFN;
 
@@ -563,7 +595,7 @@ StatusCode AthenaOutputStream::write() {
 
    // Handle Event Ranges
    if( m_outSeqSvc->inUse() and m_outSeqSvc->inConcurrentEventsMode() ) {
-      outputFN = m_slotRangeMap[ slot ];
+      outputFN = m_outSeqSvc->buildSequenceFileName( m_outputName );
       ATH_MSG_DEBUG( "Writing event sequence to " << outputFN );
 
       streamer = m_streamerMap[ outputFN ].get();

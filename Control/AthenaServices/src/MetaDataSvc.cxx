@@ -181,19 +181,16 @@ StatusCode MetaDataSvc::finalize() {
    }
    return(StatusCode::SUCCESS);
 }
+
 //__________________________________________________________________________
 StatusCode MetaDataSvc::stop() {
    ATH_MSG_DEBUG("MetaDataSvc::stop()");
-
-   if( m_outSeqSvc.isValid() and m_outSeqSvc->inUse() ) {
-      ATH_MSG_INFO("stop(): OutputSequencer in use, not firing MetaDataStop incident");
-   } else {
-      // Fire metaDataStopIncident
-      Incident metaDataStopIncident(name(), "MetaDataStop");
-      m_incSvc->fireIncident(metaDataStopIncident);
-   }
+   // Fire metaDataStopIncident
+   Incident metaDataStopIncident(name(), "MetaDataStop");
+   m_incSvc->fireIncident(metaDataStopIncident);
    return(StatusCode::SUCCESS);
 }
+
 //_______________________________________________________________________
 StatusCode MetaDataSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
    if (riid == this->interfaceID()) {
