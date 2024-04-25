@@ -30,7 +30,9 @@ namespace FlavorTagDiscriminants {
     // Initialize Container keys
     ATH_MSG_DEBUG( "Inizializing containers:"            );
     ATH_MSG_DEBUG( "    ** " << m_TrackContainerKey      );
+    ATH_MSG_DEBUG( "    ** " << m_MuonContainerKey       );
     ATH_CHECK( m_TrackContainerKey.initialize() );
+    ATH_CHECK( m_MuonContainerKey.initialize() );
 
     // Initialize accessors
     m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
@@ -49,15 +51,18 @@ namespace FlavorTagDiscriminants {
     m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
     m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key();
     m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key();
+    m_dec_muon_origin_label = m_TrackContainerKey.key() + "." + m_dec_muon_origin_label.key();
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
     CHECK( m_dec_barcode.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
+    CHECK( m_dec_muon_origin_label.initialize() );
     
     // Retrieve tools
     ATH_CHECK( m_trackTruthOriginTool.retrieve() );
+    ATH_CHECK( m_truthLeptonTool.retrieve() );
 
     return StatusCode::SUCCESS;
   }
@@ -70,6 +75,9 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandle<TPC> tracks(m_TrackContainerKey, ctx);
     CHECK( tracks.isValid() );
     ATH_MSG_DEBUG( "Retrieved " << tracks->size() << " tracks..." );
+    SG::ReadHandle<xAOD::MuonContainer> muons(m_MuonContainerKey,ctx);
+    CHECK( tracks.isValid() );
+    ATH_MSG_DEBUG( "Retrieved " << muons->size() << " muons..." );
 
     // instantiate accessors
     using RDH = SG::ReadDecorHandle<xAOD::TruthParticleContainer, int>;
@@ -86,6 +94,7 @@ namespace FlavorTagDiscriminants {
     WDH dec_vertex_index(m_dec_vertex_index, ctx);
     WDH dec_barcode(m_dec_barcode, ctx);
     WDH dec_parent_barcode(m_dec_parent_barcode, ctx);
+    WDH dec_muon_origin_label(m_dec_muon_origin_label, ctx);
 
     // decorate loop
     std::vector<const xAOD::TrackParticle*> tracks_vector(tracks->begin(), tracks->end());
@@ -102,7 +111,54 @@ namespace FlavorTagDiscriminants {
       dec_type_label(*track) = truth ? acc_type_label(*truth) : TruthDecoratorHelpers::TruthType::Label::NoTruth;
       dec_source_label(*track) = truth ? acc_source_label(*truth) : TruthDecoratorHelpers::TruthSource::Label::NoTruth;
       dec_vertex_index(*track) = truth ? acc_vertex_index(*truth) : -2;
+      dec_muon_origin_label(*track) = -2;
 
+    }
+    if ( !m_truthLeptonTool.empty() ) {
+
+      // decorate muon tracks with truth origin
+      for ( const auto muon : *muons ) {
+
+        // Check if the muon is a combined muon
+        if (muon->muonType() != xAOD::Muon::MuonType::Combined) { continue; }
+
+        // Classify muon truth origin (https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/AnalysisCommon/TruthClassification)
+        unsigned int muTruthOrigin = 0;
+        ATH_CHECK(m_truthLeptonTool->classify(*muon, muTruthOrigin));
+        Truth::Type muTruthOriginType = static_cast<Truth::Type>(muTruthOrigin);
+
+        // Get the track associated to the muon
+        auto track_link = muon->inDetTrackParticleLink();
+        if ( !track_link.isValid() ) { continue; }
+        auto track = *track_link;
+
+        // Get the track truth origin
+        int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
+
+        if ( muTruthOriginType == Truth::Type::CHadronDecay && InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
+          // Check if a muon is FromC and the associated track is FromBC
+          muTruthOrigin = 4;
+        }
+        else if ( muTruthOriginType == Truth::Type::CHadronDecay && !InDet::TrkOrigin::isFromDfromB(trackTruthOrigin) ) {
+          // Check if a muon is FromC and the associated track is not FromBC
+          muTruthOrigin = 5;
+        }
+        else {
+          // any alternative truth origin label are taken from TruthClassificationTool and mapped
+          auto it = m_muTruthMap.find(muTruthOriginType);
+          if ( it != m_muTruthMap.end() ){
+            muTruthOrigin = it->second;
+          }
+          else {
+            // raise an error if the muon truth origin label is not found in the map
+            ATH_MSG_ERROR("Muon truth origin not found in the map: " << static_cast<int>(muTruthOriginType));
+            return StatusCode::FAILURE;
+          }
+        }
+
+        // decorate the muon track
+        dec_muon_origin_label(*track) = muTruthOrigin;
+      }
     }
     return StatusCode::SUCCESS;
   }

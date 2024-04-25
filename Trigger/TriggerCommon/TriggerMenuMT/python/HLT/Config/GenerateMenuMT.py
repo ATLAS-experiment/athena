@@ -183,8 +183,12 @@ class GenerateMenuMT(metaclass=Singleton):
         alignmentGroups_to_align = set()
         length_of_configs = {}
         
-        for chainDict in self.chainDicts:
+        nchainDicts = len(self.chainDicts)
+        notify_increment = int(nchainDicts / 10)
+        for ichainDict, chainDict in enumerate(self.chainDicts):
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
+            if ichainDict % notify_increment==0:
+                log.info("Generating HLT chain %d / %d", ichainDict, nchainDicts)
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
             all_chains += [(chainDict,chainConfig,lengthOfChainConfigs)]
             

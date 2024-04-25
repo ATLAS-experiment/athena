@@ -29,6 +29,8 @@ jetlog = Logging.logging.getLogger('JetDefinition')
 from xAODBase.xAODType import xAODType
 from .Utilities import make_lproperty, onlyAttributesAreProperties, clonable, make_alias
 
+from copy import deepcopy
+
 def formatRvalue(parameter):
     """Define the convention that we write R truncating the decimal point
     if R>=1, then we write R*10.
@@ -130,6 +132,30 @@ class JetDefinition(object):
 
     def __ne__(self,rhs):
         return (not self.__eq__(rhs))
+
+    def lock(self):
+        if not self._locked:
+            self._locked = True
+
+    # After dependency solving, we hold a reference to the AthConfigFlags,
+    # which if unmodified is meant to function as a singleton throughout the
+    # configuration. A full deep copy of this is expensive, and slows down
+    # the HLT menu generation a lot due to copies in caches.
+    # So we explicitly avoid the deepcopy of the flags here, and further
+    # check that the flags are locked, to prevent accidental unlocking
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        set_without_deepcopy = ['_cflags']
+        for k, v in self.__dict__.items():
+            if k in set_without_deepcopy:
+                if v:
+                    assert(v.locked())
+                setattr(result, k, v)
+            else:
+                setattr(result, k, deepcopy(v, memo))
+        return result
 
     # Define core attributes as properties, with
     # custom setter/getter such that if changed, these
@@ -359,8 +385,6 @@ class JetInputExternal(object):
         self.filterfn = filterfn 
         self.prereqs = prereqs
 
-        
-
     @make_lproperty
     def name(self): pass
     @make_lproperty
@@ -392,6 +416,9 @@ class JetInputExternal(object):
             self.filterfn == other.filterfn,
             self.specs == other.specs
         ])
+
+    def __ne__(self,rhs):
+        return (not self.__eq__(rhs))
 
 
 ########################################################################    
@@ -498,6 +525,15 @@ class JetInputConstit(object):
         self.jetinputtype = jetinputtype
         self.byVertex = byVertex
         self._locked = lock
+
+    def __hash__(self):
+        return hash((self.name,self.containername,self.label,str(self.basetype),str(self.filterfn),str(self.jetinputtype),str(self.byVertex)))
+
+    def __eq__(self,rhs):
+        return self.__hash__() == rhs.__hash__()
+
+    def __ne__(self,rhs):
+        return (not self.__eq__(rhs))
 
     @make_lproperty
     def basetype(self): pass

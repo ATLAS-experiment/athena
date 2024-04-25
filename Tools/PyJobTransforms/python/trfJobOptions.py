@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfJobOptions
 #
@@ -176,7 +176,7 @@ class JobOptionsTemplate(object):
                         print(os.linesep.join(('try:',
                                                '    {0}.{1!s} = {2!s}'.format(self._runArgsName, k, v),
                                                'except AttributeError:',
-                                               '    printfunc ("WARNING - AttributeError for {0}")'.format(k))), file=runargsFile)
+                                               '    print ("WARNING - AttributeError for {0}")'.format(k))), file=runargsFile)
                 ## @note Now write the literals into the runargs file
                 if self._exe._literalRunargs is not None:
                     print(os.linesep, '# Literal runargs snippets', file=runargsFile)

@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os
 from AthenaCommon.Utils import unixtools
 
-if not 'FNAMES' in dir():
+if 'FNAMES' not in dir():
     paths = os.getenv('DATAPATH').split(os.pathsep) + [os.getenv('ATLAS_REFERENCE_DATA','')]
     testdir = unixtools.find_datafile(os.getenv('ATLAS_REFERENCE_TAG'), paths)
     FNAMES = [os.path.join(testdir, f) for f in ('ntuple.0.root', 'ntuple.1.root')]
@@ -52,16 +52,16 @@ class MyAlg( PyAthena.Alg ):
             keys.append(p.name())
         for br in self.activeBranches:
             try:
-                if not br in keys:
+                if br not in keys:
                     raise KeyError("no such object [%s] in store" % br)
                 o = self.evtstore[br]
                 if hasattr(o, 'at'):
                     o = list(o)
                     for i,v in enumerate(o):
-                        if hasattr(v, 'at') and not isinstance(v, (basestring,)):
+                        if hasattr(v, 'at') and not isinstance(v, str):
                             o[i] = list(v)
                 self.msg.info('%s: %r', br, o)
-                printfunc ("%s: %r" % (br, o), file=self.fd)
+                print ("%s: %r" % (br, o), file=self.fd)
             except Exception as err:
                 self.msg.info(' --> err for [%s]: %s' % (br, err))
                 pass
@@ -93,7 +93,7 @@ if DOWRITE:
     svcMgr += CfgMgr.DecisionSvc()
     import AthenaRootComps.WriteAthenaRoot as arcw
     out = arcw.createNtupleOutputStream("StreamD3PD", "d3pd.root", "egamma")
-    if not 'OUTBRANCHES' in dir():
+    if 'OUTBRANCHES' not in dir():
         OUTBRANCHES=[
             "el_n",
             "el_eta",
