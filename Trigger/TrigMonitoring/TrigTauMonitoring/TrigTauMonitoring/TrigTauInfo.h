@@ -68,7 +68,7 @@ public:
 
 private:
     std::string m_trigger; // Full trigger name (e.g. HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20)
-    bool m_isStreamer; // Is a streamer HLT trigger
+    bool m_isStreamer = false; // Is a streamer HLT trigger
     std::vector<float> m_HLTThr; // List of all tau thresholds
     std::vector<std::string> m_HLTTauTypes; // Type for each tau leg (e.g. tracktwoMVA, trackwoLLP, etc...)
 
