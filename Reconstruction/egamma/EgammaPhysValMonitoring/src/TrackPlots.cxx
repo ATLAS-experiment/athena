@@ -51,8 +51,8 @@ void TrackPlots::initializePlots(){
   trt_total    = Book1D("trt_total", "#total trt hits of "+m_sParticleType+";# total trt hits;Electrons", 50, 0, 50);
   trt_ht       = Book1D("trt_ht", "#HT trt hits of "+m_sParticleType+";# HT trt hits;Electrons", 50, 0, 50);
   trt_ht_total = Book1D("trt_ht_total", "#HT total trt hits of "+m_sParticleType+";# total HT trt hits;Electrons", 50, 0, 50);
-  eProbHT      = Book1D("eProbabilityHT", "#eProbablity HT of "+m_sParticleType+";#eProbablity HT;Electrons", 20, 0, 1);
-  deltaPoverP  = Book1D("deltaPoverP", "#DeltaP/P of "+m_sParticleType+";#DeltaP/P;Electrons", 100,-1.1, 1.1);           
+  eProbHT      = Book1D("eProbabilityHT", "#eProbablity HT of "+m_sParticleType+";#eProbablity HT;Electrons", 204, -0.01, 1.01);
+  deltaPoverP  = Book1D("deltaPoverP", "#DeltaP/P of "+m_sParticleType+";#DeltaP/P;Electrons", 100,-1.1, 1.1);
   EoverP       = Book1D("EoverP", "E/P of "+m_sParticleType+";E/P;Electrons", 100, 0, 10);
   trtratio = Book2D("trtratio", "TRT ratio vs eta of"+m_sParticleType+";#eta; TRT ratio", 50, -2.5, 2.5,100,0.,1.);
   trtvseta = Book2D("trtvseta", "#trt hits vs eta of"+m_sParticleType+";#eta; #trt hits", 50, -2.5, 2.5,50,0.,50.);
@@ -137,8 +137,9 @@ void TrackPlots::initializePlots(){
   sct->Fill(RetrieveHitInfo(electron, xAOD::numberOfSCTHits), weight);
   si->Fill(RetrieveHitInfo(electron, xAOD::numberOfPixelHits) + RetrieveHitInfo(electron, xAOD::numberOfSCTHits), weight);
 
-  eprobht=electron.trackParticleSummaryValue(eprobht,xAOD::eProbabilityHT);
+  if(electron.trackParticleSummaryValue(eprobht,xAOD::eProbabilityHT)){
   eProbHT->Fill(eprobht, weight);
+  }
 
   uint8_t numTotalTRTHits = RetrieveHitInfo(electron, xAOD::numberOfTRTHits) + RetrieveHitInfo(electron, xAOD::numberOfTRTOutliers);
   uint8_t numTotalTRTHighThresholdHits = RetrieveHitInfo(electron, xAOD::numberOfTRTHighThresholdHits) + RetrieveHitInfo(electron, xAOD::numberOfTRTHighThresholdOutliers);
