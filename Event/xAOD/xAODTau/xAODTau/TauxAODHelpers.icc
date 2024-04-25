@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "AthContainers/ConstAccessor.h"
 
 template<class T>
 const T* xAOD::TauHelpers::getLink(const xAOD::IParticle* particle, std::string name, bool debug)
@@ -8,12 +10,13 @@ const T* xAOD::TauHelpers::getLink(const xAOD::IParticle* particle, std::string 
   if (!particle) return 0;
   typedef ElementLink< DataVector<T> > Link_t;
   
-  if (!particle->isAvailable< Link_t >(name) ) 
+  static const SG::ConstAccessor< Link_t > acc( name );
+  if (!acc.isAvailable( *particle ) )
   { 
     if (debug) std::cerr<< "Link not available" << std::endl; 
     return 0; 
   }  
-  const Link_t link = particle->auxdata<Link_t>(name);
+  const Link_t link = acc( *particle );
   if (!link.isValid()) 
   { 
     if (debug) std::cerr << "Invalid link" << std::endl; 
