@@ -134,15 +134,15 @@ class JSSTaggerBase :   public asg::AsgTool ,
     bool m_useLSeries = false;
 
     /// WriteDecorHandle keys for JSS moments
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTau21WTAKey{this, "Tau21WTAName", "Tau21_wta", "SG key for Tau21_wta"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTau32WTAKey{this, "Tau32WTAName", "Tau32_wta", "SG key for Tau32_wta"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTau42WTAKey{this, "Tau42WTAName", "Tau42_wta", "SG key for Tau42_wta"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTau21WTAKey{this, "Tau21WTANameOut", "Tau21_wta", "SG key for Tau21_wta"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTau32WTAKey{this, "Tau32WTANameOut", "Tau32_wta", "SG key for Tau32_wta"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTau42WTAKey{this, "Tau42WTANameOut", "Tau42_wta", "SG key for Tau42_wta"};
 
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decC2Key{this, "C2Name", "C2", "SG key for C2"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decD2Key{this, "D2Name", "D2", "SG key for D2"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decE3Key{this, "e3Name", "e3", "SG key for e3"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decL2Key{this, "L2Name", "L2", "SG key for L2"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decL3Key{this, "L3Name", "L3", "SG key for L3"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decC2Key{this, "C2NameOut", "C2", "SG key for C2"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decD2Key{this, "D2NameOut", "D2", "SG key for D2"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decE3Key{this, "e3NameOut", "e3", "SG key for e3"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decL2Key{this, "L2NameOut", "L2", "SG key for L2"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decL3Key{this, "L3NameOut", "L3", "SG key for L3"};
 
     /// ReadDecorHandle keys for JSS moments
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau1WTAKey{this, "Tau1WTAName", "Tau1_wta", "SG key for Tau1_wta"};
@@ -178,7 +178,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECFG212Key{this, "ECFG212Name", "ECFG_2_1_2", "SG key for ECFG_2_1_2"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readParentKey{this, "ParentName", "Parent", "SG key for Parent"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNtrk500Key{this, "Ntrk500NameOut", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
 
     bool m_suppressOutputDependence;
