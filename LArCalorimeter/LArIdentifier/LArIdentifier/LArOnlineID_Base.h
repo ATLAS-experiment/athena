@@ -329,10 +329,10 @@ class LArOnlineID_Base : public AtlasDetectorID
   /* recommended methods */
   bool  isEMBchannel             (const HWIdentifier id) const;
   bool  isEMECchannel            (const HWIdentifier id) const;
-  virtual bool  isHECchannel     (const HWIdentifier id) const = 0; // differs for Maini and DT
+  virtual bool  isHECchannel     (const HWIdentifier id) const = 0; // differs for Main and DT
   bool  isFCALchannel            (const HWIdentifier id) const;
-  bool  isEMECIW                 (const HWIdentifier id) const;
-  bool  isEMECOW                 (const HWIdentifier id) const;
+  virtual bool  isEMECIW         (const HWIdentifier id) const = 0; // differs for Main and DT
+  virtual bool  isEMECOW         (const HWIdentifier id) const = 0; // differs for Main and DT
   bool  isEMBPS                  (const HWIdentifier id) const;
   bool  isEMECPS                 (const HWIdentifier id) const;
   bool  isPS                     (const HWIdentifier id) const;
