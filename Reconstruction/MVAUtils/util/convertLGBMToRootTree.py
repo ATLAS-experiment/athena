@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Convert LightGBM model to TTree to be used with MVAUtils."
 __author__ = "Ruggero Turra"
@@ -154,7 +154,7 @@ def dump2ROOT(model, output_filename, output_treename="lgbm"):
             simple = False
             node_type = "node_type=lgbm"
 
-    infos = ";".join(["%s=%s" % (k, str(v)) for k, v in model.items() if type(v) != list])
+    infos = ";".join(["%s=%s" % (k, str(v)) for k, v in model.items() if type(v) is not list])
     title = ";".join(("creator=lgbm", node_type, infos))
     root_tree = ROOT.TTree(output_treename, title)
     root_tree.Branch("vars", "vector<int>", ROOT.AddressOf(features_array))
@@ -538,7 +538,7 @@ def check_file(fn):
         logging.info("file %s is empty", fn)
         return False
     tree = f.Get(keys[0].GetName())
-    if type(tree) != ROOT.TTree:
+    if type(tree) is not ROOT.TTree:
         logging.info("cannot find TTree in file %s", fn)
         return False
     if not tree.GetEntries():
