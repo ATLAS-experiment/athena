@@ -1221,6 +1221,11 @@ def getDevSignatures():
         ChainProp(name='HLT_noalg_L1jXEPerf100',     l1SeedThresholds=['FSNOSEED'], groups=['PS:NoBulkMCProd']+METPhaseIStreamersGroup),
 
     ]
+    
+    chains['Monitor'] = [
+        #ATR-27211, ATR-27203
+        ChainProp(name='HLT_l1topoPh1debug_L1All', l1SeedThresholds=['FSNOSEED'], stream=['L1TopoMismatches'], groups=['PS:Online', 'PS:NoHLTRepro', 'RATE:Monitoring', 'BW:Other']),
+    ]
 
     chains['UnconventionalTracking'] = [
         #Isolated High Pt Trigger Test chain for optimisation studies
