@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CompositeParticle_v1.h 696023 2015-09-21 17:09:08Z kkoeneke $
@@ -13,6 +13,7 @@
 
 // xAOD include(s):
 #include "AthContainers/ConstDataVector.h"
+#include "AthContainers/ConstAccessor.h"
 #include "xAODBase/IParticle.h"
 #include "xAODBase/IParticleContainer.h"
 #include "AthLinks/ElementLink.h"
@@ -586,27 +587,27 @@ namespace xAOD {
 
     /// Access to get a variable of type bool (actually, it is stored using type char)
     inline bool getBool( const std::string& varName ) const {
-      return static_cast<bool>( this->auxdata<char>(varName) );
+      return SG::ConstAccessor<bool>(varName)(*this);
     }
 
     /// Access to get a variable of type int
     inline int getInt( const std::string& varName ) const {
-      return this->auxdata<int>(varName);
+      return SG::ConstAccessor<int>(varName)(*this);
     }
 
     /// Access to get a variable of type unsigned int
     inline unsigned int getUInt( const std::string& varName ) const {
-      return this->auxdata<unsigned int>(varName);
+      return SG::ConstAccessor<unsigned int>(varName)(*this);
     }
 
     /// Access to get a variable of type float
     inline float getFloat( const std::string& varName ) const {
-      return this->auxdata<float>(varName);
+      return SG::ConstAccessor<float>(varName)(*this);
     }
 
     /// Access to get a variable of type double
     inline double getDouble( const std::string& varName ) const {
-      return this->auxdata<double>(varName);
+      return SG::ConstAccessor<double>(varName)(*this);
     }
 
 
