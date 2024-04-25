@@ -15,28 +15,28 @@ def jetEJsMenuSequenceGenCfg(flags, jetsIn):
     # Get track sequence name
     sequenceOut  = flags.Trigger.InDetTracking.fullScan.tracks_FTF
     vertices     = flags.Trigger.InDetTracking.fullScan.vertex_jet
-    
-    reco = InEventRecoCA(
-        f"EmergingJets_{jetsIn}Reco",
-        inputMaker=CompFactory.InputMakerForRoI(
-            "IM_EmergingJets",
-            RoITool = CompFactory.ViewCreatorInitialROITool(),
-            mergeUsingFeature = True
-        )
-    )
-
-    selAcc = SelectionCA(f"EmergingJets_{jetsIn}")
-    selAcc.mergeReco(reco)
-
-    selAcc.addHypoAlgo(
-        CompFactory.TrigJetEJsHypoAlg(
-            "L2EmergingJets",
-            Tracks = sequenceOut,
-            PV     = vertices
-        )
-    )
 
     def makejetEJsMenuSequence():
+
+        reco = InEventRecoCA(
+            f"EmergingJets_{jetsIn}Reco",
+            inputMaker=CompFactory.InputMakerForRoI(
+                "IM_EmergingJets",
+                RoITool = CompFactory.ViewCreatorInitialROITool(),
+                mergeUsingFeature = True
+            )
+        )
+
+        selAcc = SelectionCA(f"EmergingJets_{jetsIn}")
+        selAcc.mergeReco(reco)
+
+        selAcc.addHypoAlgo(
+            CompFactory.TrigJetEJsHypoAlg(
+                "L2EmergingJets",
+                Tracks = sequenceOut,
+                PV     = vertices
+            )
+        )
         return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetEJsHypoToolFromDict)
     return functools.partial(makejetEJsMenuSequence)
 
@@ -47,24 +47,24 @@ def jetCRVARMenuSequenceGenCfg(flags, jetsIn):
     from ..CommonSequences.FullScanDefs import fs_cells
     cellsin=fs_cells
 
-    reco = InEventRecoCA( 
-        f"CalRatioVar_{jetsIn}_RecoSequence",
-        inputMaker=CompFactory.InputMakerForRoI(
-            "IM_CalRatio_HypoOnlyStep",
-            RoITool = CompFactory.ViewCreatorInitialROITool(),
-            mergeUsingFeature = True
-        )
-    )
-
-    selAcc = SelectionCA(f"CalRatioVar_{jetsIn}")
-    selAcc.mergeReco(reco)
-    selAcc.addHypoAlgo(
-        CompFactory.TrigJetCRVARHypoAlg(
-            "L2CalRatioVar", 
-            Cells  = cellsin
-        )
-    )
     def makejetCRVARMenuSequence():
+        reco = InEventRecoCA( 
+            f"CalRatioVar_{jetsIn}_RecoSequence",
+            inputMaker=CompFactory.InputMakerForRoI(
+                "IM_CalRatio_HypoOnlyStep",
+                RoITool = CompFactory.ViewCreatorInitialROITool(),
+                mergeUsingFeature = True
+            )
+        )
+
+        selAcc = SelectionCA(f"CalRatioVar_{jetsIn}")
+        selAcc.mergeReco(reco)
+        selAcc.addHypoAlgo(
+            CompFactory.TrigJetCRVARHypoAlg(
+                "L2CalRatioVar", 
+                Cells  = cellsin
+            )
+        )
         return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRVARHypoToolFromDict)
     return functools.partial(makejetCRVARMenuSequence)
 
@@ -77,26 +77,25 @@ def jetCRMenuSequenceGenCfg(flags, jetsIn):
     from ..CommonSequences.FullScanDefs import fs_cells, trkFSRoI
     sequenceOut  = flags.Trigger.InDetTracking.fullScan.tracks_FTF
     cellsin=fs_cells
-
-    from .JetMenuSequencesConfig import getTrackingInputMaker
-    from .JetTrackingConfig import JetFSTrackingCfg
-    trk_acc = JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI)
-
-    reco = InEventRecoCA(f"CalRatio_{jetsIn}Reco", inputMaker=getTrackingInputMaker(flags,'ftf'))
-    reco.mergeReco(trk_acc)
-
-    selAcc = SelectionCA(f"CalRatio_{jetsIn}")
-    selAcc.mergeReco(reco)
-    selAcc.addHypoAlgo(
-        CompFactory.TrigJetCRHypoAlg(
-            "L2CalRatio",
-            Tracks = sequenceOut,
-            Cells  = cellsin
-        )
-    )
     
-    def makejetCRMenuSequenceGenCfg():
+    def makejetCRMenuSequence():
+        from .JetMenuSequencesConfig import getTrackingInputMaker
+        from .JetTrackingConfig import JetFSTrackingCfg
+        trk_acc = JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI)
+
+        reco = InEventRecoCA(f"CalRatio_{jetsIn}Reco", inputMaker=getTrackingInputMaker(flags,'ftf'))
+        reco.mergeReco(trk_acc)
+
+        selAcc = SelectionCA(f"CalRatio_{jetsIn}")
+        selAcc.mergeReco(reco)
+        selAcc.addHypoAlgo(
+            CompFactory.TrigJetCRHypoAlg(
+                "L2CalRatio",
+                Tracks = sequenceOut,
+                Cells  = cellsin
+            )
+        )
         return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRHypoToolFromDict)
     
-    return functools.partial(makejetCRMenuSequenceGenCfg)
+    return functools.partial(makejetCRMenuSequence)
 
