@@ -237,7 +237,6 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     newPrimBC = parentBC + HepMC::SIM_REGENERATION_INCREMENT;
   }
 
-  HepMC::GenParticlePtr  parentBeforeIncident = ti.parentParticle();
   HepMC::GenParticlePtr  parentAfterIncident = ti.parentParticleAfterIncident( newPrimBC ); // This call changes ti.parentParticle() output
   if(parentAfterIncident) {
     if (classification==ISF::QS_SURV_VTX) {
