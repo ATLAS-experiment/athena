@@ -35,11 +35,7 @@ class argFileEOSTests(unittest.TestCase):
 
 class argPOOLFiles(unittest.TestCase):
     def tearDown(self):
-        for f in 'athfile-cache.ascii.gz', 'athfile-infos.ascii':
-            try:
-                os.unlink(f)
-            except OSError:
-                pass
+        return
 
     def test_argPOOLFileMetadata_ESD(self):
         try:
@@ -73,11 +69,7 @@ class argPOOLFiles(unittest.TestCase):
 
 class argBSFiles(unittest.TestCase):
     def tearDown(self):
-        for f in 'athfile-cache.ascii.gz', 'athfile-infos.ascii':
-            try:
-                os.unlink(f)
-            except OSError:
-                pass
+        return
     
     def test_argBSFileMetadata(self):
         try:

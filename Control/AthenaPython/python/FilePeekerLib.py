@@ -32,15 +32,9 @@ def toiter(beg,end):
     return
 
 def _create_file_infos():
-    """simple helper function to create consistent dicts for the
-    fileinfos attribute of AthFile
+    """simple helper function to create consistent dicts for in-file metadata
     """
     d = {
-        #'file_md5sum': None,  # provided by AthFile.impl
-        #'file_name': None,    # ditto
-        #'file_type': None,    # ditto
-        #'file_guid': None,    # ditto
-        
         'nentries' : 0, # to handle empty files
         'run_number': [],
         'run_type': ['N/A'],

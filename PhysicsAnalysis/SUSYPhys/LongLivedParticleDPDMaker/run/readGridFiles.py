@@ -37,9 +37,6 @@ for x in tarballs:
         if "log.RAWtoALL" in f:
             openFile = open(x+'/'+f)
             for line in openFile:
-                # find input data file for lumiblock info
-                if re.match('.*Py:AthFile\s*INFO opening \[\S*\]...',line):
-                    data_file = line[line.index("[")+1:line.rindex("]")]
                 # find RPVLL filter information
                 if re.match('.*RPVLL.*Events',line) or re.match('.*BSESOutputSvcStreamDRAW_RPVLL.*events',line):
                     # write input data file + RPVLL info to output file

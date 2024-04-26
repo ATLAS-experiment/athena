@@ -765,7 +765,6 @@ def default_check_steps(test):
         if not get_step_from_list('LogMerge', check_steps):
             for step in reco_tf_steps:
                 reco_tf_logmerge.log_files.append(step.get_log_file_name())
-        reco_tf_logmerge.extra_log_regex = r'athfile-.*\.log\.txt'
         reco_tf_logmerge.merged_name = 'athena.merged.log'
         log_to_zip = reco_tf_logmerge.merged_name
         if log_to_check is not None:
