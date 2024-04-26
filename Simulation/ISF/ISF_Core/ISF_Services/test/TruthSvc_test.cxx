@@ -346,8 +346,7 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
-      .Times(3)
-      .WillOnce(::testing::Return(inParticle3))
+      .Times(2)
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
 #ifdef HEPMC3
@@ -626,8 +625,7 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
-      .Times(3)
-      .WillOnce(::testing::Return(inParticle3))
+      .Times(2)
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
 #ifdef HEPMC3
