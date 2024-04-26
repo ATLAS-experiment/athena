@@ -97,14 +97,14 @@ StatusCode GfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     compareJetRoI("gLJ",m_data_gFexJet,m_simu_gFexJet,ctx,true);
     compareJetRoI("gJ",m_data_gFexBlock,m_simu_gFexBlock,ctx,true);
     compareJetRoI("gLJRho",m_data_gFexRho,m_simu_gFexRho,ctx);
-    compareGlobalRoI("gTEJWOJ",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx);
+    compareGlobalRoI("gTEJWOJ",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx,0xff000fff); // wont compare MET value in scalarE tob
     compareGlobalRoI("gXEJWOJ",m_data_gMETComponentsJwoj,m_simu_gMETComponentsJwoj,ctx);
     compareGlobalRoI("gXEJWOJ",m_data_gMHTComponentsJwoj,m_simu_gMHTComponentsJwoj,ctx);
     compareGlobalRoI("gXEJWOJ",m_data_gMSTComponentsJwoj,m_simu_gMSTComponentsJwoj,ctx);
     compareGlobalRoI("gXENC",m_data_gMETComponentsNoiseCut,m_simu_gMETComponentsNoiseCut,ctx);
     compareGlobalRoI("gXERHO",m_data_gMETComponentsRms,m_simu_gMETComponentsRms,ctx);
-    compareGlobalRoI("gTENC",m_data_gScalarENoiseCut,m_simu_gScalarENoiseCut,ctx);
-    compareGlobalRoI("gTERHO",m_data_gScalarERms,m_simu_gScalarERms,ctx);
+    compareGlobalRoI("gTENC",m_data_gScalarENoiseCut,m_simu_gScalarENoiseCut,ctx,0xff000fff);
+    compareGlobalRoI("gTERHO",m_data_gScalarERms,m_simu_gScalarERms,ctx,0xff000fff);
 
     return StatusCode::SUCCESS;
 }
@@ -199,7 +199,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
                                             const SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer>& tobs1Key,
                                             const SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer>& tobs2Key,
-                                            const EventContext& ctx) const {
+                                            const EventContext& ctx, uint32_t tobMask) const {
     SG::ReadHandle<xAOD::gFexGlobalRoIContainer> tobs1Cont{tobs1Key, ctx};
     if(!tobs1Cont.isValid()) {
         return false;
@@ -215,30 +215,22 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 
 
     bool mismatches = (tobs1Cont->size()!=tobs2Cont->size());
-    //bool mismatchesExlStatusAndSat = mismatches;
 
     for(const auto tob1 : *tobs1Cont) {
         bool isMatched = false;
-        bool isPartMatched = false;
-        auto word1 = tob1->word();
+        uint32_t word1 = tob1->word()&tobMask;
         auto gfex1 = tob1->globalType();
         for (auto tob2 : *tobs2Cont) {
             if(gfex1 == tob2->globalType()) {
-                if(word1 == tob2->word()) {
+                if(word1 == (tob2->word()&tobMask)) {
                     isMatched = true;
                     break;
-                } else if( (word1&0x7CFFFFFF) == (tob2->word()&0x7CFFFFFF) ) {
-                    // matches after ignore saturation bit (31st bit) and status bits (24th and 25 bit)
-                    isPartMatched=true;
                 }
             }
 
         }
         if(!isMatched) {
             mismatches = true;
-            if(!isPartMatched) {
-                //mismatchesExlStatusAndSat = true;
-            }
         }
         tobMismatched = (isMatched) ? 0 : 100; //100*(!isMatched && !isPartMatched); - commented out. Is from when was treating part-matches as matches
         fill("mismatches",eventType,Signature,tobMismatched);
