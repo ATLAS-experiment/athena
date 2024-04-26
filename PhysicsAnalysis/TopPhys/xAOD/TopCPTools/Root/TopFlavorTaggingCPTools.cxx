@@ -84,12 +84,17 @@ namespace top {
     //Online tagging for EMPflow jets
     top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "OnlineMV2", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Online WP");
 
-    //Conditional tagging for EMPflow jets
-    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r60", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP");
+    //Conditional tagging for EMPflow jets for offline DL1r60
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r60", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r60");
     
+    //Conditional tagging for EMPflow jets for offline DL1r70
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r70", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r70");
 
-    //Conditional tagging for EMPflow jets
-    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r85", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP");
+    //Conditional tagging for EMPflow jets for offline DL1r77
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r77", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r77");
+    
+    //Conditional tagging for EMPflow jets for offline DL1r85
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r85", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r85");
     
 
     // Calibrated and uncalibrated working points for R=0.2 track jets for all algorithms
