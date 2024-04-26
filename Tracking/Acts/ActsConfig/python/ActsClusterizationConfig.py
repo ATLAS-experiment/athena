@@ -40,10 +40,6 @@ def ActsStripClusteringToolCfg(flags,
                                **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if 'StripConditionsTool' not in kwargs:
-        from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripConditionsSummaryToolCfg
-        kwargs.setdefault("StripConditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
-
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
