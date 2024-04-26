@@ -10,7 +10,7 @@
 #include "PathResolver/PathResolver.h"
 
 // ONNX Library
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 
 class ONNXWrapper {
@@ -24,10 +24,10 @@ class ONNXWrapper {
     // Features of the network structure
 
     // input and output nodes
-    size_t m_nr_inputs; 
+    size_t m_nr_inputs;
     size_t m_nr_output;
 
-    // dimensions of the input and output 
+    // dimensions of the input and output
     std::map<std::string, std::vector<int64_t>> m_input_dims;
     std::map<std::string, std::vector<int64_t>> m_output_dims;
 
@@ -51,7 +51,7 @@ class ONNXWrapper {
     // Constructor with parameters
 
     ONNXWrapper(const std::string model_path);
-    
+
     std::map<std::string, std::vector<float>> Run(
       std::map<std::string,
       std::vector<float>> inputs,
@@ -59,7 +59,7 @@ class ONNXWrapper {
 
     const std::map<std::string, std::vector<int64_t>> GetModelInputs();
     const std::map<std::string, std::vector<int64_t>> GetModelOutputs();
-    
+
     const std::map<std::string, std::string> GetMETAData();
     std::string GetMETADataByKey(const char * key);
     const std::vector<int64_t>& getInputShape(int input_nr);

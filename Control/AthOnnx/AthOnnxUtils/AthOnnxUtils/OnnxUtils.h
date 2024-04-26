@@ -7,7 +7,7 @@
 #include <vector>
 
 // Onnx Runtime include(s).
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 namespace AthOnnx {
 
@@ -21,7 +21,7 @@ inline std::vector<T> flattenNestedVectors( const std::vector<std::vector<T>>& f
   // 1. Compute the total size required.
   int total_size = 0;
   for (const auto& feature : features) total_size += feature.size();
-  
+
   std::vector<T> flatten1D;
   flatten1D.reserve(total_size);
 
@@ -39,7 +39,7 @@ inline std::vector<T> flattenNestedVectors( const std::vector<std::vector<T>>& f
 // the dataShape and nodeNames will be updated.
 void getInputNodeInfo(
     const Ort::Session& session,
-    std::vector<std::vector<int64_t> >& dataShape, 
+    std::vector<std::vector<int64_t> >& dataShape,
     std::vector<std::string>& nodeNames);
 
 // @brief Get the output data shape and node names (in the computational graph) from the onnx model
@@ -49,13 +49,13 @@ void getInputNodeInfo(
 // the dataShape and nodeNames will be updated.
 void getOutputNodeInfo(
     const Ort::Session& session,
-    std::vector<std::vector<int64_t> >& dataShape, 
+    std::vector<std::vector<int64_t> >& dataShape,
     std::vector<std::string>& nodeNames);
 
 // Heleper function to get node info
 void getNodeInfo(
     const Ort::Session& session,
-    std::vector<std::vector<int64_t> >& dataShape, 
+    std::vector<std::vector<int64_t> >& dataShape,
     std::vector<std::string>& nodeNames,
     bool isInput
 );
@@ -66,12 +66,12 @@ int64_t getTensorSize(const std::vector<int64_t>& dataShape);
 
 // Inference with IO binding. Better for performance, particularly for GPUs.
 // See https://onnxruntime.ai/docs/performance/tune-performance/iobinding.html
-void inferenceWithIOBinding(Ort::Session& session, 
+void inferenceWithIOBinding(Ort::Session& session,
     const std::vector<std::string>& inputNames,
     const std::vector<Ort::Value>& inputData,
     const std::vector<std::string>& outputNames,
     const std::vector<Ort::Value>& outputData
-); 
+);
 
 // @brief Create a tensor from a vector of data and its shape.
 Ort::Value createTensor(std::vector<float>& data, const std::vector<int64_t>& dataShape);

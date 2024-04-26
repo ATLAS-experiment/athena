@@ -7,7 +7,7 @@
 #include <AsgServices/IAsgService.h>
 
 // Onnx include(s).
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 
 
 /// Namespace holding all of the Onnx Runtime example code

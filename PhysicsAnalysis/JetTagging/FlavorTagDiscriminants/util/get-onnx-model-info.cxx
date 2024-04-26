@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 #include <iostream>
 #include <iomanip>
 #include <unordered_map>
@@ -52,7 +52,7 @@ void pretty_print_table(
 
   int line_length = max_length_name + 4 + 10 + 3 + max_length_shape;
   std::string h_line(line_length, '-');
-  std::cout << h_line << std::endl; 
+  std::cout << h_line << std::endl;
 
   // header
   std::ios_base::fmtflags f( std::cout.flags() ); //save cout format flags
@@ -60,14 +60,14 @@ void pretty_print_table(
   std::cout << std::setw(10) << "type";
   std::cout << "shape" << std::endl;
 
-  std::cout << h_line << std::endl; 
+  std::cout << h_line << std::endl;
 
   for (size_t i = 0; i < names.size(); i++) {
     std::cout << std::left << std::setw(max_length_name + 4) << " " + names.at(i);
     std::cout << std::setw(10) << typeMap.at(types.at(i));
     std::cout << shape_strs.at(i) << std::endl;
-  }   
-  std::cout << h_line << std::endl; 
+  }
+  std::cout << h_line << std::endl;
   std::cout.flags( f );//restore format
 }
 

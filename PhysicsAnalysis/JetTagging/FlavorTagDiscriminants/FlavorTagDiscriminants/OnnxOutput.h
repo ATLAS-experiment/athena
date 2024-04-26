@@ -7,7 +7,7 @@ This class is used to store the configuration for a ONNX output node.
 #ifndef OUTPUTNODE_H
 #define OUTPUTNODE_H
 
-#include <core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 #include "nlohmann/json.hpp"
 #include <string>
 
