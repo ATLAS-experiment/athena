@@ -437,22 +437,16 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
 
             try:
                 # get the number of events from EventStreamInfo
-                esi_dict = next(key for key in meta_dict[filename].keys() if "EventStreamInfo" in key)
+                esi_dict = next(key for key, value in meta_dict[filename].items()
+                                if isinstance(value, dict) and "numberOfEvents" in value and
+                                meta_dict[filename]["metadata_items"][key] == "EventStreamInfo")
+                msg.debug(f"{esi_dict=}")
                 meta_dict[filename]["nentries"] = meta_dict[filename][esi_dict]["numberOfEvents"]
-            except (KeyError, StopIteration):
-                # fallback to opening the DataHeader Container to read the number of entries
-                dataHeaderTree = current_file.Get(PoolOpts.TTreeNames.DataHeader)
-                if isinstance(dataHeaderTree, ROOT.TTree):
-                    meta_dict[filename]['nentries'] = dataHeaderTree.GetEntriesFast()
-                else:
-                    # check early to avoid scary ROOT read errors
-                    if current_file.GetListOfKeys().Contains(PoolOpts.RNTupleNames.DataHeader) and ROOT.gROOT.GetVersionInt() < 63100:
-                        raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
-                    dataHeaderRNT = current_file.Get(PoolOpts.RNTupleNames.DataHeader)
-                    if isinstance(dataHeaderRNT, ROOT.Experimental.RNTuple):
-                        meta_dict[filename]['nentries'] = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
-                    else:
-                        meta_dict[filename]['nentries'] = None
+            except StopIteration as err:
+                msg.debug(f"Caught {err=}, {type(err)=}, falling back on opening the DataHeader"
+                          " Container to read the number of entries")
+                meta_dict[filename]['nentries'] = dataheader_nentries(current_file)
+                msg.debug(f"{meta_dict[filename]['nentries']=}")
 
             if unique_tag_info_values and mode=='iov':
                 unique_tag_info_values = False
@@ -1438,3 +1432,32 @@ def convert_itemList(metadata, layout):
                 dic[k].append(v)
 
             return dict(dic)
+
+
+def dataheader_nentries(infile):
+    """Extract number of entries from DataHeader.
+
+    infile  ROOT TFile object or filename string
+    return  Number of entries as returned by DataHeader object in infile,
+            None in absence of DataHeader object
+    """
+    import ROOT
+    from PyUtils.PoolFile import PoolOpts
+    if not isinstance(infile, ROOT.TFile):
+        infile = ROOT.TFile.Open(infile)
+
+    for name in {PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader}:
+        obj = infile.Get(name)
+        msg.debug(f"dataheader_nentries: {name=}, {obj=}, {type(obj)=}")
+        if not obj:
+            continue
+        if isinstance(obj, ROOT.TTree):
+            return obj.GetEntriesFast()
+        else:
+            # check early to avoid scary ROOT read errors
+            if ROOT.gROOT.GetVersionInt() < 63100:
+                raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
+            if isinstance(obj, ROOT.Experimental.RNTuple):
+                return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+            else:
+                raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
