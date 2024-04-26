@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,11 +14,6 @@ The EventSelectorAthenaPool package reimplements the Gaudi IEvtSelector interfac
 The package also contains equivalent support (via CondProxyProvider) for
 conditions data input from POOL.
 
-@section EventSelectorAthenaPool_Properties Settable EventSelectorAthenaPool Properties (Job Options)
-
-@include EventSelectorAthenaPool_jobOptions.py
-
-
 @section EventSelectorAthenaPool_Documentation Additional Documentation
 
 See the ATLAS User/Developer HowTo document for additional information.
@@ -30,11 +25,6 @@ The code can be browsed using LXR
 @section EventSelectorAthenaPool_Examples Examples
 The package Database/AthenaPOOL/AthenaPoolExample contains running examples of algorithms writing and
 reading Data Objects using AthenaPool.
-
-
-
-
-
 
 
 
