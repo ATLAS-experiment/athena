@@ -440,8 +440,18 @@ namespace top {
 	m_onlineJets[a_wp.first][TriggerChain] = std::vector<TLorentzVector>(0);
 	m_onlineBtagging[a_wp.first][TriggerChain]=std::vector<float>(0);
 	Trig::FeatureContainer fc = m_trigDecisionTool->features(TriggerChain);
+	std::string jetCollectionName;
+        if ( TriggerChain.find("gsc") != std::string::npos ){
+	  jetCollectionName = "GSCJet";
+        }
+        else if ( TriggerChain.find("split") != std::string::npos ){
+	  jetCollectionName = "SplitJet";
+        }
+	else {
+	  jetCollectionName = "EFJet";
+        }
 	for(const auto& comb : fc.getCombinations()) {
-	  std::vector< Trig::Feature<xAOD::JetContainer> >  jetCollections  = comb.containerFeature<xAOD::JetContainer>("SplitJet");
+	  std::vector< Trig::Feature<xAOD::JetContainer> >  jetCollections  = comb.containerFeature<xAOD::JetContainer>(jetCollectionName);
 	  std::vector< Trig::Feature<xAOD::BTaggingContainer> > bjetCollections = comb.containerFeature<xAOD::BTaggingContainer>("HLTBjetFex");
 	  for ( unsigned ifeat=0 ; ifeat<jetCollections.size() ; ifeat++ ) {
 	    const xAOD::Jet* hlt_jet = getTrigObject<xAOD::Jet, xAOD::JetContainer>(jetCollections.at(ifeat));
