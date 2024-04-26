@@ -18,21 +18,41 @@ ignore=(
 
 usage() {
     cat <<EOF
-Usage: atlas_git_merge.sh source [target]
+Usage: atlas_git_merge.sh [--all] source [target]
 Merge git source branch into target applying a standard ignore list.
 Run this within a full athena repository checkout.
 
   source  git source branch (e.g. 24.0)
   target  git target branch [${target}]
 
-The following directories/files are ignored in merges:
+The following directories/files are ignored in merges (unless --all):
 EOF
     for files in "${ignore[@]}"; do
         echo "  - ${files}"
     done
 }
 
-if [[ $# -eq 0 ]] || [[ $# -gt 2 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --all)
+            ignore=()
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 1
+            ;;
+        -*|--*)
+            echo "Unknown option $1"
+            usage
+            exit 1
+            ;;
+        *)  # only positional args left
+            break
+    esac
+done
+
+if [[ $# -eq 0 ]] || [[ $# -gt 2 ]]; then
     usage
     exit 1
 fi
