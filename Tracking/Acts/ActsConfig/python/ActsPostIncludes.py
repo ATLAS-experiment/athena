@@ -53,7 +53,10 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                   'xAOD::SpacePointAuxContainer#ITkStripOverlapSpacePointsAux.' + strip_spacepoint_variables]
 
     if flags.Acts.EDM.PersistifyTracks:
-        trackPrefixes = ['Acts', 'ActsResolved', 'ActsConversion', 'ActsConversionResolved', 'ActsCombined']
+        trackPrefixes = ['Acts', 'ActsResolved',
+                         'ActsConversion', 'ActsConversionResolved',
+                         'ActsHeavyIon', 'ActsHeavyIonResolved',
+                         'ActsCombined']
         for prefix in trackPrefixes:
             toAOD +=  [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
                        f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
