@@ -16,7 +16,7 @@ atlas_add_component( PerfMonGPerfTools
 
 if( NOT XAOD_ANALYSIS )
     atlas_add_test( GPerfToolsCfg
-        SCRIPT python -m PerfMonGPerfTools.GPT_ProfilerServiceCfg
+        SCRIPT python -m PerfMonGPerfTools.GPT_ProfilerServiceConfig
         PRIVATE_WORKING_DIRECTORY
         PROPERTIES TIMEOUT 600
         POST_EXEC_SCRIPT nopost.sh )

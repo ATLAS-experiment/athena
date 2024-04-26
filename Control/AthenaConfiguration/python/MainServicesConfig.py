@@ -313,6 +313,10 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         cfg.merge(PerfMonMTSvcCfg(flags))
 
+    if flags.PerfMon.doGPerfProf:
+        from PerfMonGPerfTools.GPT_ProfilerServiceConfig import GPT_ProfilerServiceCfg
+        cfg.merge(GPT_ProfilerServiceCfg(flags))
+
     if len(flags.PerfMon.Valgrind.ProfiledAlgs)>0:
         from Valkyrie.ValkyrieConfig import ValgrindServiceCfg
         cfg.merge(ValgrindServiceCfg(flags))
