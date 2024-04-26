@@ -84,55 +84,25 @@ private:
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 
-    ToolHandle<IInDetConditionsTool> m_conditionsTool{
-	this,
-	"StripConditionsTool",
-	"",
-	"Tool to retrieve Strip Conditions summary"
-    };
-
-    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{
-	this,
-	"LorentzAngleTool",
-	"",
-	"Tool to retreive Lorentz angle of Si detector module"
+    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool {this, "LorentzAngleTool", "",
+      "Tool to retreive Lorentz angle of Si detector module"
     };
 
     // TODO this one should be removed?
-    SG::ReadHandleKey<InDet::SiDetectorElementStatus> m_stripDetElStatus {
-	this,
-	"StripDetElStatus",
-	"",
-	"SiDetectorElementStatus for strip"
-    };
+    SG::ReadHandleKey<InDet::SiDetectorElementStatus> m_stripDetElStatus {this, "StripDetElStatus", "",
+      "SiDetectorElementStatus for strip"};
 
-    ToolHandle<IInDetConditionsTool> m_summaryTool{
-	this,
-	"conditionsTool",
-	"",
-	"Conditions summary tool"
-    };
+    ToolHandle<IInDetConditionsTool> m_conditionsTool {this, "conditionsTool", "",
+      "Conditions summary tool"};
 
-    Gaudi::Property<bool> m_checkBadModules {
-        this,
-	"checkBadModules",
-	true,
-	"Check bad modules using the conditions summary tool"
-    };
+    Gaudi::Property<bool> m_checkBadModules {this, "checkBadModules", true,
+      "Check bad modules using the conditions summary tool"};
 
-    Gaudi::Property<unsigned int> m_maxFiredStrips {
-        this, 
-	"maxFiredStrips", 
-	384u, 
-	"Threshold of number of fired strips per wafer. 0 disables the per-wafer cut."
-    };
+    Gaudi::Property<unsigned int> m_maxFiredStrips {this, "maxFiredStrips", 384u,
+      "Threshold of number of fired strips per wafer. 0 disables the per-wafer cut."};
 
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {
-	this,
-	"StripDetEleCollKey",
-	"ITkStripDetectorElementCollection",
-	"SiDetectorElementCollection key for strip"
-    };
+    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "StripDetEleCollKey", "ITkStripDetectorElementCollection",
+      "SiDetectorElementCollection key for strip"};
 
     int m_timeBinBits[3]{-1, -1, -1};
 

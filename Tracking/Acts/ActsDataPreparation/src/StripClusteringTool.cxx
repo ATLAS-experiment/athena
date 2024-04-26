@@ -52,12 +52,9 @@ StatusCode StripClusteringTool::initialize()
 
     ATH_CHECK(m_conditionsTool.retrieve());
     ATH_CHECK(m_lorentzAngleTool.retrieve());
-    ATH_CHECK(decodeTimeBins());
+    ATH_CHECK(decodeTimeBins());    
 
-    bool disableSmry =
-	!m_stripDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED;
-    ATH_CHECK(m_summaryTool.retrieve(DisableTool{disableSmry}));
-    ATH_CHECK(m_stripDetElStatus.initialize(!m_stripDetElStatus.empty()));
+    ATH_CHECK(m_stripDetElStatus.initialize(not m_stripDetElStatus.empty()));
     ATH_CHECK(m_stripDetEleCollKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -104,12 +101,12 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 	if (!m_stripDetElStatus.empty()) {
 	    goodModule = status->isGood(idHash);
 	} else {
-	    goodModule = m_summaryTool->isGood(idHash, ctx);
+	    goodModule = m_conditionsTool->isGood(idHash, ctx);
 	}
     }
     VALIDATE_STATUS_ARRAY(
 	m_checkBadModules.value() && !m_stripDetElStatus.empty(),
-	status->isGood(idHash), m_summaryTool->isGood(idHash));
+	status->isGood(idHash), m_conditionsTool->isGood(idHash));
       
     if (!goodModule) {
 	ATH_MSG_DEBUG("Strip module failed status check");
