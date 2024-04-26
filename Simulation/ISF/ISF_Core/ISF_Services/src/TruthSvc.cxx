@@ -143,17 +143,17 @@ void ISF::TruthSvc::registerTruthIncident( ISF::ITruthIncident& ti, bool saveAll
                    << AtlasDetDescr::AtlasRegionHelper::getName(geoID) );
 
   // number of child particles
-  unsigned short numSec = ti.numberOfChildren();
+  const unsigned short numSec = ti.numberOfChildren();
   if ( m_skipIfNoChildren && (numSec==0) ) {
     ATH_MSG_VERBOSE( "No child particles present in the TruthIncident,"
                      << " will not record this TruthIncident.");
     return;
   }
 
-  // the parent particle -> get its barcode
-  Barcode::ParticleBarcode parentBC = ti.parentBarcode(); // FIXME barcode-based
-  if ( m_skipIfNoParentBarcode && (parentBC==Barcode::fUndefinedBarcode) ) {  // TODO switch to using ti.parentUniqueID()
-    ATH_MSG_VERBOSE( "Parent particle in TruthIncident does not have a barcode,"
+  // the parent particle -> get its id
+  const int parentID = ti.parentUniqueID();
+  if ( m_skipIfNoParentId && (parentID == HepMC::UNDEFINED_ID) ) {
+    ATH_MSG_VERBOSE( "Parent particle in TruthIncident does not have an id,"
                      << " will not record this TruthIncident.");
     return;
   }

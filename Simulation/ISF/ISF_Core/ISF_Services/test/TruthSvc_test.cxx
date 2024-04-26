@@ -413,8 +413,7 @@ namespace ISFTesting {
       .Times(1)
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(2)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(1)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
 
     registerTruthIncident(ti);
@@ -462,8 +461,7 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(21))
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(3)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(2)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
@@ -539,8 +537,7 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(21))
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(3)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(2)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
@@ -620,8 +617,7 @@ namespace ISFTesting {
       .WillOnce(::testing::Return(21))
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(3)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(2)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())

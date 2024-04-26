@@ -100,7 +100,7 @@ namespace ISF {
 
     /** MCTruth steering */
     Gaudi::Property<bool>   m_skipIfNoChildren{this, "SkipIfNoChildren", true, ""};       //!< do not record incident if numChildren==0
-    Gaudi::Property<bool>   m_skipIfNoParentBarcode{this, "SkipIfNoParentBarcode", true, ""};  //!< do not record if parentBarcode==fUndefinedBarcode
+    Gaudi::Property<bool>   m_skipIfNoParentId{this, "SkipIfNoParentId", true, ""};  //!< do not record if parentId == HepMC::UNDEFINED_ID
     Gaudi::Property<bool>   m_ignoreUndefinedBarcodes{this, "IgnoreUndefinedBarcodes",  false, ""};//!< do/don't abort if retrieve an undefined barcode
 
     Gaudi::Property<bool>   m_passWholeVertex{this, "PassWholeVertices", true, ""};

@@ -105,7 +105,7 @@ def GenericTruthServiceCfg(flags, name="ISF_TruthService", **kwargs):
     kwargs.setdefault("BarcodeSvc", result.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
 
     kwargs.setdefault("SkipIfNoChildren", True)
-    kwargs.setdefault("SkipIfNoParentBarcode", True)
+    kwargs.setdefault("SkipIfNoParentId", True)
     kwargs.setdefault("ForceEndVtxInRegions", [])
 
     if flags.Sim.ISF.Simulator.isQuasiStable():
