@@ -22,13 +22,6 @@ lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_lrt=IDPVMPlots_lrt.xml
 dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r24.root"
-if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
-  dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r23.root"
-fi
-dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r24.root"
-if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
-  dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r23.root"
-fi
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_lrt -print -quit 2>/dev/null)
@@ -64,7 +57,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
   run ls -la "$lastref_dir"
 
-  echo "compare with R23.0.23 or 24.0.1"
+  echo "compare with 24.0.1"
 
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_lrt \

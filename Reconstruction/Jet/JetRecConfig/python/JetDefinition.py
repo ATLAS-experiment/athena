@@ -125,7 +125,7 @@ class JetDefinition(object):
 
             
     def __hash__(self):
-        return hash((self._radius,self._inputdef,self.ptmin,str(self.ghostdefs),str(self.modifiers),str(self.extrainputs)))
+        return hash((self.basename,self._inputdef,self.ptmin,str(self.ghostdefs),str(self.modifiers),str(self.extrainputs),self.byVertex))
 
     def __eq__(self,rhs):
         return self.__hash__() == rhs.__hash__()
@@ -404,7 +404,9 @@ class JetInputExternal(object):
     # Define a string conversion for printing
     def __str__(self):
         return f"JetInputExternal({self.name},type={str(self.basetype)})"
-    
+    # Need to override __repr__ for printing in lists etc
+    __repr__ = __str__
+
     def __eq__(self,other):
         return all([
             self.name == other.name,
@@ -559,6 +561,8 @@ class JetInputConstit(object):
     # Define a string conversion for printing
     def __str__(self):
         return f"JetInputConstit({self.name},type={str(self.basetype)})"
+    # Need to override __repr__ for printing in lists etc
+    __repr__ = __str__
 
 
     

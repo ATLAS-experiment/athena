@@ -1659,33 +1659,7 @@ bool LArOnlineID_Base::isFCALchannel(const HWIdentifier id) const
 {
   return ( barrel_ec(id)==1 && feedthrough(id) == 6  );
 }
-bool LArOnlineID_Base::isEMECIW(const HWIdentifier id) const {
-  /*======================================================*/
-  // 
-  int bec= barrel_ec(id);
-  int ft = feedthrough(id);
-  int sl = slot(id);
-  return (bec==1 && sl<3 && (ft==3  || ft==10 || 
-			     ft==16 || ft==22)); 
-}
-bool LArOnlineID_Base::isEMECOW(const HWIdentifier id) const {
-  /*======================================================*/
-  // 
-  int bec= barrel_ec(id);
-  int ft = feedthrough(id);
-  return (bec==1 && 
-	  (ft==0 || ft==1 ||
-	   ft==2 || ft==4 ||
-	   ft==5 || ft==7 ||
-	   ft==8 || ft==9 ||
-	   ft==11|| ft==12||
-	   ft==13|| ft==14||
-	   ft==15|| ft==17||
-	   ft==18|| ft==19||
-	   ft==20|| ft==21||
-	   ft==23|| ft==24 )
-	  );
-}
+
 bool LArOnlineID_Base::isEMECchannel(const HWIdentifier id) const
 /*========================================================*/
 {/* redefinition with isEMECIW and isEMECOW */

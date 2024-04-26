@@ -10,6 +10,7 @@ def OnlineEventDisplaysSvcCfg(flags, name = "OnlineEventDisplaysSvc", **kwargs):
     kwargs.setdefault("MaxEvents", flags.OnlineEventDisplays.MaxEvents)
     kwargs.setdefault("OutputDirectory", flags.OnlineEventDisplays.OutputDirectory)
     kwargs.setdefault("ProjectTag", flags.OnlineEventDisplays.ProjectTag)
+    kwargs.setdefault("PublicStreams", flags.OnlineEventDisplays.PublicStreams)
     kwargs.setdefault("StreamsWanted", flags.OnlineEventDisplays.TriggerStreams)
     kwargs.setdefault("BeamSplash", flags.OnlineEventDisplays.BeamSplashMode)
     kwargs.setdefault("CheckPair", False)

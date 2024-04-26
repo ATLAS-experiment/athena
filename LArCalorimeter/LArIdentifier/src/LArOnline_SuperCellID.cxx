@@ -369,3 +369,36 @@ bool LArOnline_SuperCellID::isHECchannel(const HWIdentifier id) const
         ( ft==3 || ft==10 || ft==16 || ft==22 )
         );
 }
+
+
+//pos_neg :     0 = negative eta side (C side)
+//              1 = positive eta side (A side)
+
+bool LArOnline_SuperCellID::isEMECIW(const HWIdentifier id) const {
+  /*======================================================*/
+  // 
+  int bec= barrel_ec(id);
+  int ft = feedthrough(id);
+  int sl = slot(id);
+  int ch = channel(id);
+  bool sideCondition= (pos_neg(id)==1 && ch>95) || (pos_neg(id)==0 && ch<64);
+ 
+  return (bec==1 && sl==2 && sideCondition && (ft==2  || ft==9 || 
+			     ft==15 || ft==21)); 
+}
+
+bool LArOnline_SuperCellID::isEMECOW(const HWIdentifier id) const {
+  /*======================================================*/
+  // 
+  int bec= barrel_ec(id);
+  int ft = feedthrough(id);
+  int sl = slot(id);
+  int ch = channel(id);
+  bool sideCondition=(pos_neg(id)==1 && ch<=95) || (pos_neg(id)==0 && ch>=64);
+ 
+  return (bec == 1 && 
+          ((sl == 1 &&  
+              (ft == 0 || ft == 1 || ft == 2 || ft == 4 || ft == 5 || ft == 7 || ft == 8 || ft == 9 || ft == 11 || ft == 12 || ft == 13 || ft == 14 || ft == 15 ||
+	       ft == 17 || ft == 18 || ft == 19 || ft == 20 || ft == 21 || ft == 23 || ft == 24)) || 
+           (sl==2 && sideCondition && (ft==2 ||ft==9 || ft==15 || ft==21))));
+}

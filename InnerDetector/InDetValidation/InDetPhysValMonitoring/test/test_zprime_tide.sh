@@ -22,9 +22,6 @@ lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_idtide.xml"
 dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_zprime_idtide_r24.root"
-if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
-  dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_zprime_idtide_r23.root"
-fi
 
 export ATHENA_PROC_NUMBER=1
 export ATHENA_CORE_NUMBER=1
@@ -54,7 +51,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
   run ls -la "$lastref_dir"
 
-  echo "compare with R23.0.23 or 24.0.1"
+  echo "compare with 24.0.1"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide \
     -c ${dcubeXml_idtide} \
