@@ -30,7 +30,6 @@ args = parser.parse_args()
 # imports
 import ROOT
 import time
-import sys
 import glob
 import os
 from collections import defaultdict
@@ -120,7 +119,7 @@ hists={}
 
 #easy hist booking
 def getHist(name,makehist):
-    if not name in hists:
+    if name not in hists:
         hists[name]=makehist(name)
     return hists[name]
 
@@ -190,7 +189,7 @@ def getRow(trk,hit_idx): # returns localrow,globalrow
     # calculate row from strip
     if trk.SensitiveIsPixel[hit_idx] == 0:
 
-        if not "strip_number" in hists:
+        if "strip_number" not in hists:
             hists["strip_number"]=ROOT.TH2D("strip_number_hist",";module;strip",500,0,500,800,0,8000)
         hists["strip_number"].Fill(reg2int[bec]*100+layer*10+etamod,strip)    
 
@@ -205,7 +204,7 @@ def getRow(trk,hit_idx): # returns localrow,globalrow
 
 
         if globalrow==6:
-            if not "z_mod6" in hists:
+            if "z_mod6" not in hists:
                 hists["z_mod6"]=ROOT.TH2D("z_mod6",";z;lyr",2500,0,500,10,0,10)
             hists["z_mod6"].Fill(z,layer)
         
@@ -258,10 +257,10 @@ def trackToModules(trk):
         r=trk.SensitivePosR[hit_idx]
         z=trk.SensitivePosZ[hit_idx]
         if reg==reg2int['barrel']:
-            if not lyr in modules[det][reg] or r < modules[det][reg][lyr][3]:
+            if lyr not in modules[det][reg] or r < modules[det][reg][lyr][3]:
                 modules[det][reg][lyr]=(row,phimod,hit_idx,r,z)
         else:
-            if not lyr in modules[det][reg] or z < modules[det][reg][lyr][4]:
+            if lyr not in modules[det][reg] or z < modules[det][reg][lyr][4]:
                 modules[det][reg][lyr]=(row,phimod,hit_idx,r,z)
 
     for reg in modules[det2int['strip']]:
@@ -314,7 +313,7 @@ def parseGeometry():
         
     msg.info("%d eta rows:",len(eta_vals_for_key_layer))
     msg.info(sorted(eta_vals_for_key_layer))
-    msg.info("Tracks Used = %d", %(tracks_used))
+    msg.info("Tracks Used = %d", tracks_used)
     return eta_vals_for_key_layer
 
 
@@ -331,7 +330,7 @@ def divideKeyLayerModulesIntoSlices(eta_vals_for_key_layer):
             key_modules_for_slices.append([])
         key_modules_for_slices[-1].append(row)
 
-    msg.info("Modules in slices %d",%(key_modules_for_slices))
+    msg.info("Modules in slices %d", key_modules_for_slices)
 
 
     
@@ -349,7 +348,7 @@ def getModuleToSliceMap(mod_slice_map):
                               { det:{
                                   reg:{
                                       lyr:{
-                                          dir:defaultdict(lambda:0) for dir in dirs}
+                                          d:defaultdict(lambda:0) for d in dirs}
                                       for lyr in range(layers[det][reg]) }
                                   for reg in regs }
                                 for det in dets })
@@ -399,13 +398,13 @@ def getModuleToSliceMap(mod_slice_map):
 
                     hit_idx = modidxs[2]
 
-                    if not slicenum in slice_hists:
+                    if slicenum not in slice_hists:
                         sliceid2int[slicenum]=len(slice_modules)-1
                         slice_hists[slicenum]=ROOT.TH2D("rz"+str(sliceid2int[slicenum]),"rz"+str(slicenum)+"; z[mm]; r[mm]",800,-200,+600,1000,0,1000)
                     slice_hists[slicenum].Fill(trk.SensitivePosZ[hit_idx],trk.SensitivePosR[hit_idx])
 
                     hname=int2det[det]+"_"+int2reg[reg]+"_"+str(lyr)+"_"+str(modidxs[0])
-                    if not hname in slice_hists:
+                    if hname not in slice_hists:
                         slice_hists[hname]=ROOT.TH1D(hname,hname+"; z[mm]",800,-200,+600)
                     slice_hists[hname].Fill(trk.SensitivePosZ[hit_idx])
 
@@ -462,7 +461,6 @@ def writeRMap(slice_modules,sliceid2int):
         for det in dets:
             for reg in regs:
                 for lyr in range(layers[det][reg]):
-                    mlen = slice_modules[sliceid][det][reg][lyr]["phi"] # just need if non-zero
                     rmap.write("%d %d %d %d %d %d %d %d %d\n" % (
                         1 if det=="pixel" else 0,
                         1 if reg=="endcap" else 0,
