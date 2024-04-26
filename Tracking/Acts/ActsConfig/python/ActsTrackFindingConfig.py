@@ -170,6 +170,14 @@ def ActsTrackFindingCfg(flags,
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",
                                          **kwargs))
+
+    # Analysis extensions
+    if flags.Acts.doAnalysis:
+        from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
+        acc.merge(ActsTrackAnalysisAlgCfg(flags,
+                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackAnalysisAlg",
+                                          TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
+    
     return acc
 
 def ActsMainAmbiguityResolutionAlgCfg(flags,
@@ -201,6 +209,13 @@ def ActsAmbiguityResolutionCfg(flags,
     acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
                                                 name=f"{flags.Tracking.ActiveConfig.extension}AmbiguityResolutionAlg",
                                                 **kwargs))
+
+    # Analysis extensions
+    if flags.Acts.doAnalysis:
+        from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
+        acc.merge(ActsTrackAnalysisAlgCfg(flags,
+                                          name=f"{flags.Tracking.ActiveConfig.extension}ResolvedTrackAnalysisAlg",
+                                          TracksLocation=f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"))
     return acc
 
 def ActsTrackToTrackParticleCnvAlgCfg(flags,

@@ -12,7 +12,7 @@ def ActsTrackAnalysisAlgCfg(flags,
     kwargs.setdefault("MonGroupName", kwargs['TracksLocation'])
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, 'ActsTrackAnalysisAlgCfg')
+    helper = AthMonitorCfgHelper(flags, kwargs['TracksLocation'] + 'AnalysisAlgCfg')
 
     monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.TrackAnalysisAlg, name, **kwargs)
     monitoringGroup = helper.addGroup(monitoringAlgorithm, kwargs['MonGroupName'], '/ActsAnalysis/')
