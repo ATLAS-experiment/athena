@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Utility module for things not specific to DQ
@@ -125,14 +125,14 @@ def all_permutations(input_list):
 # http://caolanmcmahon.com/flatten_for_python
 def flattened(l):
     result = _flatten(l, lambda x: x)
-    while type(result) == list and len(result) and callable(result[0]):
+    while type(result) is list and len(result) and callable(result[0]):
         if result[1] != []:
             yield result[1]
         result = result[0]([])
     yield result
 
 def _flatten(l, fn, val=[]):
-    if type(l) != list:
+    if type(l) is not list:
         return fn(l)
     if len(l) == 0:
         return fn(val)
