@@ -63,7 +63,8 @@ def createDQConfigFlags():
             arg = lambda x: x.DQ.DataType is not DQDataType.Cosmics # noqa: E731
         if flag == 'doHLTMon':
             # new HLT monitoring not yet compatible with pre-Run 3 data
-            arg = lambda x: x.Trigger.EDMVersion == 3 # noqa: E731
+            # disable HLT monitoring if input is data AOD as not all HLT collections in AOD - ATR-28781
+            arg = lambda x: x.Trigger.EDMVersion == 3 and x.DQ.Environment != 'AOD' # noqa: E731
         if flag == 'LVL1Calo.doValidation':
             arg = False
             
