@@ -246,7 +246,7 @@ def ActsPixelSeedingAlgCfg(flags,
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags)))
 
     kwargs.setdefault("useFastTracking", flags.Tracking.doITkFastTracking)
-    kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
+    kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ActsPixelSeeds')
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ActsPixelEstimatedTrackParams')
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
@@ -288,7 +288,7 @@ def ActsStripSeedingAlgCfg(flags,
         else:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags)))
 
-    kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
+    kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ActsStripSeeds')
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ActsStripEstimatedTrackParams')
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
@@ -329,7 +329,7 @@ def ActsConversionSeedingCfg(flags) -> ComponentAccumulator:
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripSeedingAlgCfg(flags,
                                          name="ActsConversionStripSeedingAlg",
-                                         InputSpacePoints=["ITkConversionStripSpacePoints"],
+                                         InputSpacePoints=["ITkConversionStripSpacePoints_Cached" if flags.Acts.useCache else "ITkConversionStripSpacePoints"],
                                          OutputSeeds="ActsConversionStripSeeds",
                                          OutputEstimatedTrackParameters="ActsConversionStripEstimatedTrackParams"))
 

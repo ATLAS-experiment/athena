@@ -160,12 +160,12 @@ def ActsTrackFindingCfg(flags,
         kwargs.setdefault('SeedLabels', isdet(flags, strip=["SSS"]))
         kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, strip=["ActsConversionStripEstimatedTrackParams"]))
         kwargs.setdefault('SeedContainerKeys', isdet(flags, strip=["ActsConversionStripSeeds"]))
-        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_InView"], strip=["ITkConversionStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkConversionStripClusters"]))
+        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_Cached"], strip=["ITkConversionStripClusters_Cached"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkConversionStripClusters"]))
     else:
         kwargs.setdefault('SeedLabels', isdet(flags, pixel=["PPP"], strip=["SSS"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["PPP"]))
         kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["ActsPixelEstimatedTrackParams"]))
         kwargs.setdefault('SeedContainerKeys', isdet(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["ActsPixelSeeds"]))
-        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_InView"], strip=["ITkStripClusters_InView"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkStripClusters"]))
+        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_Cached"], strip=["ITkStripClusters_Cached"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkStripClusters"]))
         
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",

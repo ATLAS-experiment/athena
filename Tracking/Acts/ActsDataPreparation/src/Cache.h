@@ -28,10 +28,10 @@ namespace ActsTrk::Cache {
     class CacheEntry : public DataObject {
         public:
         CacheEntry(){}
-        CacheEntry(DataVector<OT>* dv, unsigned int s, unsigned int e): container(dv), range_start(s), range_end(e){}
+        CacheEntry(DataVector<OT>* dv, unsigned int s, unsigned int e): container(dv){ranges.emplace_back(std::move(s),std::move(e));}
+        CacheEntry(DataVector<OT>* dv, std::vector<std::pair<unsigned int, unsigned int>>& r): container(dv), ranges(std::move(r)) {}
         DataVector<OT>* container;
-        unsigned int range_start;
-        unsigned int range_end;
+        std::vector<std::pair<unsigned int, unsigned int>> ranges;
     };
 
     template<typename OT>

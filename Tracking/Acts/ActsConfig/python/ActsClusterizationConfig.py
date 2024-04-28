@@ -203,7 +203,7 @@ def ActsMainClusterizationCfg(flags,
                                                         name="ActsPixelClusterPreparationAlg",
                                                         RoIs=RoIs,
                                                         useCache=True,
-                                                        OutputCollection="ITkPixelClusters_InView",
+                                                        OutputCollection="ITkPixelClusters_Cached",
                                                         InputIDC="ActsPixelClustersCache"))
             
         if flags.Detector.EnableITkStrip:
@@ -211,7 +211,7 @@ def ActsMainClusterizationCfg(flags,
                                                         name="ActsStripClusterCachePreparationAlg",
                                                         RoIs=RoIs,
                                                         useCache=True,
-                                                        OutputCollection="ITkStripClusters_InView",
+                                                        OutputCollection="ITkStripClusters_Cached",
                                                         InputIDC="ActsStripClustersCache"))
             
     # Analysis extensions
@@ -231,8 +231,9 @@ def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
     if flags.Acts.useCache:
         acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                 name="ActsConversionStripClusterizationAlg",
+                                                useCache=True,
                                                 ClustersKey="ITkConversionStripClusters",
-                                                useCache=False,
+                                                ClusterCache="ActsConversionStripClustersCache",
                                                 RoIs="ActsConversionRegionOfInterest"))
         
     if flags.Detector.EnableITkStrip:
@@ -241,8 +242,8 @@ def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
                                                     RoIs="ActsConversionRegionOfInterest",
                                                     useCache=flags.Acts.useCache,
                                                     InputCollection="ITkStripClusters",
-                                                    OutputCollection="ITkConversionStripClusters" if not flags.Acts.useCache else "ITkConversionStripClusters_InView",
-                                                    InputIDC="ActsStripClustersCache"))
+                                                    OutputCollection="ITkConversionStripClusters" if not flags.Acts.useCache else "ITkConversionStripClusters_Cached",
+                                                    InputIDC="ActsStripClustersCache" if not flags.Acts.useCache else "ActsConversionStripClustersCache"))
 
     # Analysis extensions
     if flags.Acts.doAnalysis:

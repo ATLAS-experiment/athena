@@ -101,7 +101,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
         }
       } // loop on ids
     } // loop on rois
-    
+ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());    
     return StatusCode::SUCCESS;
 }
 

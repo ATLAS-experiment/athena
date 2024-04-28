@@ -44,14 +44,16 @@ namespace ActsTrk {
 
         /// @name Production of space points
         //@{
-      virtual StatusCode produceSpacePoints(const EventContext& ctx,
+        virtual StatusCode produceSpacePoints(const EventContext& ctx,
 					    const xAOD::StripClusterContainer& clusterContainer,
 					    const InDet::SiElementPropertiesTable& properties,
 					    const InDetDD::SiDetectorElementCollection& elements,
 					    const Amg::Vector3D& beamSpotVertex,
 					    std::vector<StripSP>& spacePoints,
 					    std::vector<StripSP>& overlapSpacePoints,
-					    bool processOverlaps) const override;
+					    bool processOverlaps,
+					    const std::vector<IdentifierHash>& hashesToProcess,
+					    ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor ) const override;
         //@}
 
     private:
