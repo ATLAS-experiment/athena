@@ -12,8 +12,6 @@ def actsAloneWorkflowFlags(flags) -> None:
     
 def actsHeavyIonFlags(flags) -> None:
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
-    flags.Tracking.doTruth = False
-    flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = False
 
 def actsWorkflowFlags(flags) -> None:
