@@ -10,8 +10,9 @@
 
 #include <InDetIdentifier/PixelID.h>
 #include <InDetIdentifier/SCT_ID.h>
-#include "xAODInDetMeasurement/PixelCluster.h"
-#include "xAODInDetMeasurement/StripCluster.h"
+#include "details/PixelClusterCacheId.h"
+#include "details/StripClusterCacheId.h"
+#include "details/SPCacheId.h"
 
 namespace ActsTrk::Cache{
     class CreatorAlg: public IDCCacheCreatorBase{
@@ -24,6 +25,10 @@ namespace ActsTrk::Cache{
         SG::WriteHandleKey<Handles<xAOD::PixelCluster>::IDCBackend> m_pixelClusterCacheKey{this, "PixelClustersCacheKey", ""};
         SG::WriteHandleKey<Handles<xAOD::StripCluster>::IDCBackend> m_stripClusterCacheKey{this, "StripClustersCacheKey", ""};
 
+        SG::WriteHandleKey<Handles<xAOD::SpacePoint>::IDCBackend> m_pixelSPCacheKey{this, "PixelSPCacheKey", ""};
+        SG::WriteHandleKey<Handles<xAOD::SpacePoint>::IDCBackend> m_stripSPCacheKey{this, "StripSPCacheKey", ""};
+        SG::WriteHandleKey<Handles<xAOD::SpacePoint>::IDCBackend> m_stripOSPCacheKey{this, "StripOSPCacheKey", ""};
+
         const PixelID* m_pix_idHelper{};
         const SCT_ID*  m_strip_idHelper{};
 
@@ -34,7 +39,4 @@ namespace ActsTrk::Cache{
         bool m_do_stripClusters{false};
     };
 }
-
-CLASS_DEF(ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend, 70424203, 1);
-CLASS_DEF(ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend, 202232989, 1);
 #endif

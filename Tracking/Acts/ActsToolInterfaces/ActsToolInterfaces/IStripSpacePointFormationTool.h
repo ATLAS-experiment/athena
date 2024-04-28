@@ -12,6 +12,7 @@
 #include "SiSpacePointFormation/SiElementPropertiesTable.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/ContainerAccessor.h"
 
 namespace ActsTrk {
   struct StripSP {
@@ -45,7 +46,9 @@ namespace ActsTrk {
 					    const Amg::Vector3D& beamSpotVertex,
 					    std::vector<StripSP>& spacePoints,
 					    std::vector<StripSP>& overlapSpacePoints,
-					    bool processOverlaps) const = 0;
+					    bool processOverlaps,
+					    const std::vector<IdentifierHash>& hashesToProcess,
+					    ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const = 0;
 
     };
 

@@ -35,7 +35,9 @@ namespace ActsTrk {
 							      const Amg::Vector3D& beamSpotVertex,
 							      std::vector<StripSP>& spacePoints,
 							      std::vector<StripSP>& overlapSpacePoints,
-							      bool processOverlaps) const
+							      bool processOverlaps,
+							      const std::vector<IdentifierHash>& hashesToProcess,
+							      ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const
     {
         /// Production of StripSP from strip clusters
         /// Strip space points involves a more complex logic since
@@ -79,13 +81,8 @@ namespace ActsTrk {
         /// Access to the cluster from a given detector element is possible
         /// via the ContainerAccessor.
 
-        ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>
-            stripAccessor ( clusterContainer,
-                            [](const xAOD::StripCluster& cl) { return cl.identifierHash();},
-                            elements.size());
-
-        const auto& allIdHashes = stripAccessor.allIdentifiers();
-        for (auto& idHash : allIdHashes) {
+        const auto hashesProc = (hashesToProcess.size() > 0 ? hashesToProcess : stripAccessor.allIdentifiers());
+        for (auto& idHash : hashesProc) {
             const InDetDD::SiDetectorElement* thisElement = elements.getDetectorElement(idHash);
             if ( not thisElement->isStereo() ) {
                 // Retrieve the neighbours of the detector element

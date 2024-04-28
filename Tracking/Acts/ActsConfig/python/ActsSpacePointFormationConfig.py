@@ -3,6 +3,17 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def ActsSpacePointCacheCreatorCfg(flags, name: str = "ActsSPCacheCreator", **kwargs):
+    kwargs.setdefault("PixelSPCacheKey", "ActsPixelSPCache_Back")
+    kwargs.setdefault("StripSPCacheKey", "ActsStripSPCache_Back")
+    kwargs.setdefault("StripOSPCacheKey", "ActsStripOSPCache_Back")
+
+    acc = ComponentAccumulator()
+
+    acc.addEventAlgo(CompFactory.ActsTrk.Cache.CreatorAlg(name, **kwargs))
+
+    return acc
+
 def ActsPixelSpacePointToolCfg(flags,
                                name: str = "ActsPixelSpacePointTool",
                                **kwargs) -> ComponentAccumulator:
@@ -98,7 +109,14 @@ def ActsPixelSpacePointFormationAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsPixelSpacePointFormationMonitoringToolCfg
         kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsPixelSpacePointFormationMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
+
+    if flags.Acts.useCache:
+        kwargs.setdefault('SPCacheBackend', 'ActsPixelSPCache_Back')
+        kwargs.setdefault('SPCache', 'ActsPixelSPCache')
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheSpacePointFormationAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
+    
     return acc
 
 def ActsStripSpacePointFormationAlgCfg(flags,
@@ -124,15 +142,69 @@ def ActsStripSpacePointFormationAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsStripSpacePointFormationMonitoringToolCfg
         kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsStripSpacePointFormationMonitoringToolCfg(flags)))
 
-    acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
+
+
+    if flags.Acts.useCache:
+        kwargs.setdefault('SPCacheBackend', 'ActsStripSPCache_Back')
+        kwargs.setdefault('SPCache', 'ActsStripSPCache')
+        kwargs.setdefault('OSPCacheBackend', 'ActsStripOSPCache_Back')
+        kwargs.setdefault('OSPCache', 'ActsStripOSPCache')
+        acc.addEventAlgo(CompFactory.ActsTrk.StripCacheSpacePointFormationAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
     return acc
 
-def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
+def ActsPixelSpacePointCacheDataPreparationAlgCfg(flags,name: str="ActsPixelSpacePointCacheDataPreparationAlg", **kwargs):
+    kwargs.setdefault("InputIDC", "ActsPixelSPCache")
+    kwargs.setdefault("OutputCollection", "ITkPixelSpacePoints_Cached")
+
     acc = ComponentAccumulator()
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.SpacePointCacheDataPreparationAlg(name, **kwargs))
+
+    return acc
+
+def ActsStripSpacePointCacheDataPreparationAlgCfg(flags,name: str="ActsStripSpacePointCacheDataPreparationAlg", **kwargs):
+    kwargs.setdefault("InputIDC", "ActsStripSPCache")
+    kwargs.setdefault("OutputCollection", "ITkStripSpacePoints_Cached")
+
+    acc = ComponentAccumulator()
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.SpacePointCacheDataPreparationAlg(name, **kwargs))
+
+    return acc
+
+def ActsStripOverlapSpacePointCacheDataPreparationAlgCfg(flags,name: str="ActsStripOverlapSpacePointCacheDataPreparationAlg", **kwargs):
+    kwargs.setdefault("InputIDC", "ActsStripOSPCache")
+    kwargs.setdefault("OutputCollection", "ITkStripOverlapSpacePoints_Cached")
+
+    acc = ComponentAccumulator()
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.SpacePointCacheDataPreparationAlg(name, **kwargs))
+
+    return acc
+
+def ActsMainSpacePointFormationCfg(flags, RoIs: str = "ActsRegionOfInterest") -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.Acts.useCache:
+        acc.merge(ActsSpacePointCacheCreatorCfg(flags))
 
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,
-                                                     PixelClusters = "ITkPixelClusters_InView" if flags.Acts.useCache else "ITkPixelClusters"))
+                                                     PixelClusters = "ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"))
     if flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking:
         # Need to schedule this here in case the Athena space point formation is not schedule
         # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
@@ -148,8 +220,16 @@ def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
         acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
         
         acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
-                                                     StripClusters = "ITkStripClusters_InView" if flags.Acts.useCache else "ITkStripClusters"))
+                                                     StripClusters = "ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"))
 
+    if flags.Acts.useCache:
+        if flags.Detector.EnableITkPixel:
+            acc.merge(ActsPixelSpacePointCacheDataPreparationAlgCfg(flags, RoIs=RoIs))
+        if flags.Detector.EnableITkStrip:
+            acc.merge(ActsStripSpacePointCacheDataPreparationAlgCfg(flags, RoIs=RoIs))
+            acc.merge(ActsStripOverlapSpacePointCacheDataPreparationAlgCfg(flags, RoIs=RoIs))
+
+            
     # Analysis extensions
     if flags.Acts.doAnalysis:
         if flags.Detector.EnableITkPixel:
@@ -177,7 +257,6 @@ def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
                                                            RoIs = "ActsConversionRegionOfInterest",
                                                            InputCollection = "ITkStripSpacePoints",
                                                            OutputCollection = "ITkConversionStripSpacePoints"))
-            
         else:            
             # Need to schedule this here in case the Athena space point formation is not schedule
             # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
@@ -194,9 +273,16 @@ def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
             
             acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
                                                          name="ActsConversionStripSpacePointFormation",
-                                                         StripClusters="ITkConversionStripClusters_InView",
+                                                         StripClusters="ITkConversionStripClusters_Cached",
                                                          StripSpacePoints="ITkConversionStripSpacePoints",
+                                                         SPCache = "ActsStripConvSPCache",
+                                                         OSPCache = "ActsStripConvOSPCache",
                                                          ProcessOverlapForStrip=False))
+            
+            acc.merge(ActsStripSpacePointCacheDataPreparationAlgCfg(flags, "StripSPConvCacheDataPrepAlg",
+                                                                    InputIDC="ActsStripConvSPCache",
+                                                                    OutputCollection="ITkConversionStripSpacePoints_Cached",
+                                                                    RoIs = "ActsConversionRegionOfInterest"))
             
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -220,6 +306,6 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsConversionSpacePointFormationCfg(flags))
     # Any other pass -> Validation mainly
     else:
-        acc.merge(ActsMainSpacePointFormationCfg(flags))
+        acc.merge(ActsMainSpacePointFormationCfg(flags, RoIs = f"{flags.Tracking.ActiveConfig.extension}RegionOfInterest"))
 
     return acc
