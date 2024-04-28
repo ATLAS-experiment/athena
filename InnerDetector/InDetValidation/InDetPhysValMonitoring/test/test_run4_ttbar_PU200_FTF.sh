@@ -33,7 +33,7 @@ run () {
 run "Reconstruction" \
     Reco_tf.py \
     --CA \
-    --inputRDOFile ${rdo_23p0} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \

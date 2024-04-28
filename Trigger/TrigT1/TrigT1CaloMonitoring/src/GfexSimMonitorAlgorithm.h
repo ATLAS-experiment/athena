@@ -89,7 +89,7 @@ class GfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
             for(auto tob : *tobs) {
                 sortedTobs.emplace_back(SortableTob{tob->word(),tob->eta(),tob->phi()});
             }
-            std::sort(sortedTobs.begin(),sortedTobs.end(),[](const SortableTob& lhs, const SortableTob& rhs) { return lhs.word0<rhs.word0; });
+            std::sort(sortedTobs.begin(),sortedTobs.end(),[](const SortableTob& lhs, const SortableTob& rhs) { return lhs.eta<rhs.eta; });
             for(auto& tob : sortedTobs) {
                 etas.push_back(tob.eta);
                 phis.push_back(tob.phi);

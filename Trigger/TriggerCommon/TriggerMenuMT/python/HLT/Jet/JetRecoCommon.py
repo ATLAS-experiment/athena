@@ -247,7 +247,7 @@ def getPrefilterCleaningString(prefilters_list):
 
 # Translate calib specification into something understood by
 # the calibration config helper
-def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
+def getCalibMods(flags,jetRecoDict,rhoKey="auto"):
 
     # Minimum modifier set for calibration w/o track GSC
     # Should eventually build in more mods, depend on track info etc
@@ -299,10 +299,10 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
                   ("a4","subresjesgscIS"): (calibKey,"JetArea_Residual_EtaJES_GSC"), # pu residual + calo+trk GSC
                   }[(jetRecoDict["recoAlg"],jetRecoDict["jetCalib"])]
             pvname = flags.Trigger.InDetTracking.fullScan.vertex_jet
-
-        if jetRecoDict["jetCalib"].endswith("IS") and (dataSource=="data"):
+        if jetRecoDict["jetCalib"].endswith("IS") and (not flags.Input.isMC):
             calibSeq += "_Insitu"
 
+        dataSource = "mc" if flags.Input.isMC else "data"
         calibSpec = ":".join( [calibContext, dataSource, calibSeq, rhoKey, pvname, gscDepth] )
 
         if jetalg=="a4":
@@ -441,7 +441,7 @@ def defineJets(flags,jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=
     return jetDef
 
 def defineReclusteredJets(jetRecoDict,smallRjets,inputlabel,prefix,suffix):
-    rcJetConstit = JetInputConstit("RCJet", xAODType.Jet, smallRjets, label=inputlabel+'RC')
+    rcJetConstit = JetInputConstit("RCJet", xAODType.Jet, smallRjets, label=inputlabel+'RC', lock=True)
     rcJetDef = JetDefinition( "AntiKt", 1.0, rcJetConstit, prefix=prefix, suffix=suffix)
     return rcJetDef
 

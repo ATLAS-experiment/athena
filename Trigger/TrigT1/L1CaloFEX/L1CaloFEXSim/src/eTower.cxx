@@ -19,7 +19,8 @@ namespace LVL1 {
   const size_t s_nLayers = 5;
   const int s_cells[s_nLayers] = {1,4,4,1,4};
   const int s_offsets[s_nLayers] = {0,1,5,9,10};
-  
+  const int s_eFEXOverflow = 0xffff;
+
   // default constructor
   eTower::eTower():
     m_eta(0.),
@@ -195,9 +196,8 @@ namespace LVL1 {
     for (unsigned int i=0; i<m_et.size(); i++){
       tmp += m_et[i];
     }
-
-    return tmp;
-    
+    // Sum saturates at 16 bits
+    return std::min(tmp,s_eFEXOverflow);
   }
 
   /** Return ET of all supercells together FLOAT VERSION */

@@ -169,6 +169,7 @@ def TileAlgoJiveXMLCfg(flags, TileDigitsContainer=None, TileRawChannelContainer=
     kwargs.setdefault("AtlasRelease", os.environ.get("AtlasVersion", "Unknown"))
     kwargs.setdefault("WriteToFile", True)
     kwargs.setdefault("OnlineMode", False)
+    kwargs.setdefault("StreamToServerTool", None)
     ### Enable this to recreate the geometry XML files for Atlantis
     kwargs.setdefault("WriteGeometry", False)
     kwargs.setdefault("DataTypes", data_types)

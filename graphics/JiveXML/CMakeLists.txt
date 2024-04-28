@@ -31,5 +31,5 @@ atlas_add_component( JiveXML
                      LINK_LIBRARIES JiveXMLLib)
 
 # Install files from the package:
-atlas_install_runtime( test/*.xml test/*.xsl )
+atlas_install_runtime( test/*.xsl )
 atlas_install_python_modules( python/*.py)

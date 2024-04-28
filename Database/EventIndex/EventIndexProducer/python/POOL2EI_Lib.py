@@ -485,9 +485,9 @@ class POOL2EI(PyAthena.Alg):
         if self._eif_spb is not None:
             beginGUID = self.eipbof.BeginGUID()
             beginGUID.startProcTime = int(time.time() * 1000)
-            beginGUID.AMITag = amitag
-            beginGUID.trigStream = trigStream
-            beginGUID.projName = projName
+            beginGUID.AMITag = str(amitag)
+            beginGUID.trigStream = str(trigStream)
+            beginGUID.projName = str(projName)
             beginGUID.guid = self.guid
 
             spb = beginGUID.SerializeToString()

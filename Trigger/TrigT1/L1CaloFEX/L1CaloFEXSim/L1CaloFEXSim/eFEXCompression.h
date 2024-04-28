@@ -43,8 +43,6 @@ public:
   static unsigned int threshold(unsigned int code, int threshold = -800);
   /** Apply supercell noise cut **/
   static bool noiseCut(unsigned int code, int layer, bool ignoreDisable = false);
-  /** Linearize LAr code to eFEX internal format */
-  static unsigned int linearize(unsigned int code, int threshold = 0);
   /** Full sequence **/
   static int decode(int EtVal, int layer, bool ignoreDisable = false);
 

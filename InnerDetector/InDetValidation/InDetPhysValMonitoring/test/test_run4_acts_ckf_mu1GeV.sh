@@ -9,7 +9,7 @@
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
-rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900492.PG_single_muonpm_Pt1_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33645151._000047.pool.root.1
+rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900492.PG_single_muonpm_Pt1_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33645151._000047.pool.root.1
 nEvents=1000
 
 # search in $DATAPATH for matching file
@@ -39,7 +39,7 @@ run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-    --inputRDOFile ${rdo_23p0} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.ckf.root \
     --maxEvents ${nEvents}
 
@@ -66,7 +66,7 @@ run "Reconstruction-ambi" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
-    --inputRDOFile ${rdo_23p0} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.ambi.root \
     --perfmon fullmonmt \
     --maxEvents ${nEvents}

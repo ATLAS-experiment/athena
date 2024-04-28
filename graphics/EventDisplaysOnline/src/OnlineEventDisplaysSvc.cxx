@@ -42,8 +42,9 @@ void OnlineEventDisplaysSvc::beginEvent(){
       if(std::find(m_streamsWanted.begin(), m_streamsWanted.end(), tag.name()) != m_streamsWanted.end()){
         streams.emplace_back(stream_fullname);
       }
-
       bool isPublic = false;
+      //if the stream is not in the list of public streams wanted, continue
+      if(std::find(m_publicStreams.begin(), m_publicStreams.end(), tag.name()) == m_publicStreams.end()) continue;
       // Acquire the Global Interpreter Lock (GIL) to ensure thread safety when interacting with Python objects
       RootUtils::PyGILStateEnsure ensure;
       // Convert the project tag string to a Python Unicode object

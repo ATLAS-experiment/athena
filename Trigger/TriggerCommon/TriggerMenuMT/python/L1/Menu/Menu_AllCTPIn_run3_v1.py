@@ -52,8 +52,6 @@ def defineMenu():
         'L1_EN1_Thresholds',
         'L1_EN2_Thresholds',
 
-        # Require ZeroBiasA/B threshold
-        'L1_ZeroBias',
     ]
 
     # CTP ID 509-511 are reserved for CALREQ

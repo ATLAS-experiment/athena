@@ -81,4 +81,4 @@ if( XAOD_STANDALONE )
 endif()
 
 # Install files from the package:
-atlas_install_runtime( share/*.root share/*.xml share/*.env )
+atlas_install_runtime( share/*.root )

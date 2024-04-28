@@ -31,9 +31,7 @@ dcube_rec_expert_lastref="dcube_expert_last"
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 name="run2"
 relname="r24"
-if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
-  relname="r23"
-fi
+
 script="`basename \"$0\"`"
 hits=physval.HITS.root
 dcubemon_sim=SiHitValid.root

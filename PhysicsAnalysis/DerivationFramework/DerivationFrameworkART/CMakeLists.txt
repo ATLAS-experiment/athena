@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DerivationFrameworkART  )
 
 # Install files from the package:
-atlas_install_scripts( */test/*.sh */test/*.py )
+atlas_install_scripts( */test/*.sh )

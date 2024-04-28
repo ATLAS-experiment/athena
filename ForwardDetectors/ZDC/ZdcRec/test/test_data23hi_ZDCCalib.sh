@@ -2,7 +2,7 @@
 #
 # art-description: Runs ZDC reconstruction, including time and energy calibration, on ZDCCalib stream, using 2023 HI data.
 # art-athena-mt: 8
-# art-type: local
+# art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
 

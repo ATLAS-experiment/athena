@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -76,11 +76,11 @@ class RefComparisonStep(Step):
             test.package_name, branch, self.ref_test_name)
         ref_eos = art_input_eos + sub_path + self.input_file
         ref_cvmfs = art_input_cvmfs + sub_path + self.input_file
-        if os.path.isfile(ref_eos):
+        if os.path.isfile(ref_eos) and os.access(ref_eos, os.R_OK):
             self.log.debug('%s using reference from EOS: %s',
                            self.name, ref_eos)
             self.reference = ref_eos
-        elif os.path.isfile(ref_cvmfs):
+        elif os.path.isfile(ref_cvmfs) and os.access(ref_cvmfs, os.R_OK):
             self.log.debug('%s using reference from CVMFS: %s',
                            self.name, ref_cvmfs)
             self.reference = ref_cvmfs

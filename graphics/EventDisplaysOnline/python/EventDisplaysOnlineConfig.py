@@ -178,7 +178,8 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     # dir in the VP1 Event Prod alg
     from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
     cfg.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
-    streamESD = cfg.getEventAlgo("OutputStreamESD")
+    from OutputStreamAthenaPool.OutputStreamConfig import outputStreamName
+    streamESD = cfg.getEventAlgo(outputStreamName("ESD"))
 
     from VP1AlgsEventProd.VP1AlgsEventProdConfig import VP1AlgsEventProdCfg
     cfg.merge(VP1AlgsEventProdCfg(flags, streamESD, **kwargs))

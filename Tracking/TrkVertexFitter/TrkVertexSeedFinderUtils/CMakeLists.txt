@@ -100,4 +100,4 @@ atlas_add_test( Mode3dTo1dFinder_test
 set_target_properties( TrkVertexSeedFinderUtils_Mode3dTo1dFinder_test PROPERTIES ENABLE_EXPORTS True )
 
 # Install files from the package.
-atlas_install_joboptions( share/*.py share/*.txt )
+atlas_install_joboptions( share/*.txt )

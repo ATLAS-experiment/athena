@@ -93,7 +93,7 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetHIEvtShapeSequence, eventShapeKey, eventShapeMapTool = jetHIEventShapeSequenceCA(configFlags, clustersKey=clustersKey, towerKey=towerKey)
     acc.merge(jetHIEvtShapeSequence)
 
-    jetNamePrefix = "HLT_"
+    jetNamePrefix = JetRecoCommon.getHLTPrefix()
     jetDef = JetRecoCommon.defineHIJets(jetRecoDict,clustersKey=clustersKey,prefix=jetNamePrefix,suffix="_Unsubtracted")
     jetsFullName_Unsub = jetDef.fullname()
 

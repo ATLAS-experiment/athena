@@ -97,14 +97,14 @@ StatusCode GfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     compareJetRoI("gLJ",m_data_gFexJet,m_simu_gFexJet,ctx,true);
     compareJetRoI("gJ",m_data_gFexBlock,m_simu_gFexBlock,ctx,true);
     compareJetRoI("gLJRho",m_data_gFexRho,m_simu_gFexRho,ctx);
-    compareGlobalRoI("gXEJWOJ",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx);
+    compareGlobalRoI("gTEJWOJ",m_data_gScalarEJwoj,m_simu_gScalarEJwoj,ctx);
     compareGlobalRoI("gXEJWOJ",m_data_gMETComponentsJwoj,m_simu_gMETComponentsJwoj,ctx);
     compareGlobalRoI("gXEJWOJ",m_data_gMHTComponentsJwoj,m_simu_gMHTComponentsJwoj,ctx);
     compareGlobalRoI("gXEJWOJ",m_data_gMSTComponentsJwoj,m_simu_gMSTComponentsJwoj,ctx);
     compareGlobalRoI("gXENC",m_data_gMETComponentsNoiseCut,m_simu_gMETComponentsNoiseCut,ctx);
     compareGlobalRoI("gXERHO",m_data_gMETComponentsRms,m_simu_gMETComponentsRms,ctx);
-    compareGlobalRoI("gXENC",m_data_gScalarENoiseCut,m_simu_gScalarENoiseCut,ctx);
-    compareGlobalRoI("gXERHO",m_data_gScalarERms,m_simu_gScalarERms,ctx);
+    compareGlobalRoI("gTENC",m_data_gScalarENoiseCut,m_simu_gScalarENoiseCut,ctx);
+    compareGlobalRoI("gTERHO",m_data_gScalarERms,m_simu_gScalarERms,ctx);
 
     return StatusCode::SUCCESS;
 }
@@ -181,7 +181,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
         fillVectors(tobs1Key,ctx,detas,dphis,dword0s);
         fillVectors(tobs2Key,ctx,setas,sphis,sword0s);
         if(msgLvl(MSG::DEBUG)) {
-            std::cout << "LBN: " << std::string(lbnString) << " EventNumber: " << ULong64_t(evtNumber) << " signature: " << label << std::endl;
+            std::cout << "LBN: " << ULong64_t(lbn) << " EventNumber: " << ULong64_t(evtNumber) << " L1ID: " << GetEventInfo(ctx)->extendedLevel1ID() << " signature: " << label << std::endl;
             std::cout << "  data : " << std::hex;
             for (const auto w: dword0s) std::cout << w << " ";
             std::cout << std::endl << "  sim  : ";
@@ -274,7 +274,7 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
         auto stobPhis = Monitored::Collection("simPhis", sphis);
         auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
         if(msgLvl(MSG::DEBUG)) {
-            std::cout << "LBN: " << std::string(lbnString) << " EventNumber: " << ULong64_t(evtNumber) << " signature: " << label << std::endl;
+            std::cout << "LBN: " << ULong64_t(lbn) << " EventNumber: " << ULong64_t(evtNumber) << " L1ID: " << GetEventInfo(ctx)->extendedLevel1ID() << " signature: " << label << std::endl;
             std::cout << "  data : " << std::hex;
             for (const auto w: dword0s) std::cout << w << " ";
             std::cout << std::endl << "  sim  : ";
