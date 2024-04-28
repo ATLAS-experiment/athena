@@ -18,10 +18,6 @@ def mongroupsCfg(moniAccess, data_type):
         # need request new mongroup in the future for bootstrap photon (like "shifter_bsphoton")
         monitoring_photon = list(filter(lambda x: ('HLT_g' in x), shifter_eg))
         monitoring_bootstrap = {
-                'HLT_g25_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
-                'HLT_g35_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
-                'HLT_g22_tight_L1EM15VHI' : 'HLT_g20_tight_L1EM15VHI',
-                'HLT_g50_loose_L1EM20VH'  : 'HLT_g25_loose_L1EM20VH',
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
                 'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
                 'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
@@ -34,16 +30,16 @@ def mongroupsCfg(moniAccess, data_type):
 
         t0_tp = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["t0_tp"])
         validationTP_electron_eEM = list(filter(lambda x: ('L1eEM' in x), t0_tp ))
-        validation_electron = [ 'HLT_e5_etcut_L1EM3', 'HLT_e5_lhtight_noringer_L1EM3', 'HLT_e60_etcut_L1EM22VHI', 'HLT_e26_etcut_L1EM22VHI','HLT_e300_etcut_L1EM22VHI']
+        validation_electron = ['HLT_e25_etcut_L1eEM18M','HLT_e60_etcut_L1eEM26M','HLT_e100_etcut_L1eEM26M']
         validation_jpsi = list(filter(lambda x: ('_L1JPSI' in x), shifter_topo ))
-        validationTP_jpsiee = ['HLT_e5_lhtight_L1EM3']
+        validationTP_jpsiee = ['HLT_e10_lhvloose_L1eEM9']
 
         monitoring_topo = []
         mongroups = { 
                 'monitoring_electron'           : monitoring_electron,
                 'monitoring_photon'             : monitoring_photon,
                 'monitoring_bootstrap'          : monitoring_bootstrap,
-                'monitoringTP_electron'         : monitoringTP_electron,
+                'monitoringTP_electron'         : monitoringTP_electron + ['HLT_e26_lhtight_L1eEM26M','HLT_e28_lhtight_L1eEM26M','HLT_e30_lhvloose_L1eEM26M','HLT_e60_lhvloose_L1eEM26M'],
                 'monitoring_tags'               : monitoring_tags,
                 'monitoring_topo'               : monitoring_topo,
                 'validationTP_electron_eEM'     : validationTP_electron_eEM,
@@ -67,9 +63,9 @@ def mongroupsCfg(moniAccess, data_type):
                 mongroups['monitoring_bootstrap_hi']    = monitoring_bootstrap_hi
 
         elif data_type is DQDataType.Cosmics:
-                monitoring_electron_cosmic=['HLT_e5_etcut_L1EM3']
-                monitoring_photon_cosmic=['HLT_g3_etcut_LArPEB_L1EM3']
-                monitoring_bootstrap_cosmic = {'HLT_g3_etcut_LArPEB_L1EM3' : 'HLT_g3_etcut_LArPEB_L1EM3'}
+                monitoring_electron_cosmic=['HLT_e5_etcut_L1eEM5']
+                monitoring_photon_cosmic=['HLT_g3_etcut_LArPEB_L1eEM5']
+                monitoring_bootstrap_cosmic = {'HLT_g3_etcut_LArPEB_L1eEM5' : 'HLT_g3_etcut_LArPEB_L1eEM5'}
 
                 mongroups['monitoring_electron_cosmic']  = monitoring_electron_cosmic
                 mongroups['monitoring_photon_cosmic']    = monitoring_photon_cosmic
