@@ -155,9 +155,10 @@ atlas_add_library( AtlasGeant4Lib
                    SHARED
                    NO_PUBLIC_HEADERS
                    LINK_LIBRARIES ${AtlasGeant4_TARGET_OBJECTS} )
-
+set_target_properties( AtlasGeant4Lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Primary "big" component composed of all library/component OBJECT libs
 atlas_add_component( AtlasGeant4
                      dummy.cc
                      LINK_LIBRARIES "-Wl,--exclude-libs,ALL" ${AtlasGeant4Component_TARGET_OBJECTS} ${AtlasGeant4_TARGET_OBJECTS} )
+set_target_properties( AtlasGeant4 PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

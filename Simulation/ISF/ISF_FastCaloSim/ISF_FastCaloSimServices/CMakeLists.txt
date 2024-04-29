@@ -30,6 +30,7 @@ atlas_add_library( ISF_FastCaloSimServices
   GeneratorObjects ISF_Event ISF_FastCaloSimEvent
   ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib PathResolver
   ${_linkLibraries} )
+set_target_properties( ISF_FastCaloSimServices PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

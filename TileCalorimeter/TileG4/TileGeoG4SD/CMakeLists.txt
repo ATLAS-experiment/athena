@@ -20,6 +20,7 @@ atlas_add_library( TileGeoG4SDLib
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} G4AtlasToolsLib TileDetDescr TileSimEvent TileG4InterfacesLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloIdentifier CxxUtils GeoModelInterfaces GeoModelUtilities GaudiKernel PathResolver StoreGateLib CaloDetDescrLib TileGeoModelLib )
+set_target_properties( TileGeoG4SDLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( TileGeoG4SD
                    src/components/*.cxx
@@ -27,6 +28,7 @@ atlas_add_library( TileGeoG4SD
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES TileGeoG4SDLib )
+set_target_properties( TileGeoG4SD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -14,12 +14,14 @@ atlas_add_library( TRT_G4_SDLib
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} AthenaKernel CxxUtils G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib TRT_G4Utilities )
+set_target_properties( TRT_G4_SDLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( TRT_G4_SD
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_LINK_LIBRARIES TRT_G4_SDLib )
+set_target_properties( TRT_G4_SD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Test(s) in the package:
 atlas_add_test( TRT_G4_SDToolConfig_test

@@ -21,5 +21,6 @@ atlas_add_library( LArG4EC
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    PRIVATE_LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} GeoSpecialShapes LArG4Code LArGeoCode CaloG4SimLib StoreGateLib
                    ${CORAL_LIBRARIES} ${CLHEP_LIBRARIES} GeoModelUtilities GaudiKernel LArG4RunControl LArHV PathResolver GeoModelInterfaces RDBAccessSvcLib )
+set_target_properties( LArG4EC PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_install_python_modules( python/*.py )

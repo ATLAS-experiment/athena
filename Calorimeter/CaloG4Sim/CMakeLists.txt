@@ -21,6 +21,7 @@ atlas_add_library( CaloG4SimLib
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasInterfaces G4AtlasToolsLib
                    PRIVATE_LINK_LIBRARIES CxxUtils MCTruth )
+set_target_properties( CaloG4SimLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( CaloG4Sim
                    src/components/*.cxx
@@ -28,6 +29,7 @@ atlas_add_library( CaloG4Sim
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasInterfaces G4AtlasToolsLib CxxUtils CaloG4SimLib )
+set_target_properties( CaloG4Sim PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

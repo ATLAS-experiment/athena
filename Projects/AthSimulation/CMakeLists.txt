@@ -18,6 +18,9 @@ set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,F,E101,E7,E9,W6
 set( ATLAS_PYTHON_CHECKER ${ATLAS_FLAKE8}
    CACHE STRING "Python checker command to run during Python module compilation" )
 
+# Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
+option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4" OFF )
+
 # Find the ATLAS CMake code:
 find_package( AtlasCMake QUIET )
 

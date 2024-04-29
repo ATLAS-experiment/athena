@@ -15,3 +15,4 @@ atlas_add_library( G4HiveEx
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} AthenaKernel AthenaBaseComps CxxUtils GeneratorObjects )
+set_target_properties( G4HiveEx PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
