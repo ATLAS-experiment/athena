@@ -4,7 +4,17 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from enum import Enum
 
+class SystematicsCategories(Enum):
+    JETS = ['JET_']
+    ELECTRONS = ['EG_', 'EL_']
+    MUONS = ['MUON_']
+    PHOTONS = ['EG_', 'PH_']
+    TAUS = ['TAUS_']
+    MET = ['MET_']
+    EVENT = ['GEN_', 'PRW_']
+    FTAG = ['FT_']
 
 class CommonServicesConfig (ConfigBlock) :
     """the ConfigBlock for common services
@@ -23,6 +33,11 @@ class CommonServicesConfig (ConfigBlock) :
             info="a regexp string against which the systematics names will be "
             "matched. Only positive matches are retained and used in the evaluation "
             "of the various algorithms.")
+        self.addOption ('onlySystematicsCategories', None, type=list,
+            info="a list of strings defining categories of systematics to enable "
+            "(only recommended for studies / partial ntuple productions). Choose amongst: "
+            "jets, electrons, muons, photons, taus, met, ftag, event. This option is overridden "
+            "by 'filterSystematics'.")
         self.addOption ('systematicsHistogram', None , type=str,
             info="the name (string) of the histogram to which a list of executed "
             "systematics will be printed. The default is None (don't write out "
@@ -46,6 +61,18 @@ class CommonServicesConfig (ConfigBlock) :
             runSystematics = False
         if runSystematics :
             sysService.sigmaRecommended = 1
+            if self.onlySystematicsCategories is not None:
+                # Convert strings to enums and validate
+                requested_categories = []
+                for category_str in self.onlySystematicsCategories:
+                    try:
+                        category_enum = SystematicsCategories[category_str.upper()]
+                        requested_categories += category_enum.value
+                    except KeyError:
+                        raise ValueError(f"Invalid systematics category passed to option 'onlySystematicsCategories': {category_str}. Must be one of {', '.join(category.name for category in SystematicsCategories)}")
+                # Construct regex pattern as logical-OR of category names
+                if len(requested_categories):
+                    sysService.systematicsRegex = "^(?=.*(" + "|".join(requested_categories) + ")|$).*"
             if self.filterSystematics is not None:
                 sysService.systematicsRegex = self.filterSystematics
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
