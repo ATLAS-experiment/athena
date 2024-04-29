@@ -688,6 +688,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         toolName = "MuonLRTOverlapRemovalTool";
         m_muonLRTORTool.setTypeAndName("CP::MuonLRTOverlapRemovalTool/"+toolName);
         ATH_CHECK( m_muonLRTORTool.setProperty("overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy) );
+        if (m_isRun3) ATH_CHECK( m_muonLRTORTool.setProperty("UseRun3WP", true ));
         ATH_CHECK( m_muonLRTORTool.retrieve() );
     } else ATH_CHECK( m_muonLRTORTool.retrieve() );
 
