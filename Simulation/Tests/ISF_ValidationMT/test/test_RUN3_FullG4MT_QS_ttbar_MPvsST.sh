@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: Run MP and ST simulation, reading ttbar events, writing HITS, using MC23a geometry and conditions
+# art-description: Run MP and ST simulation, reading ttbar events, writing HITS, using MC23e geometry and conditions
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
 # art-include: 24.0/Athena
@@ -24,7 +24,7 @@ Sim_tf.py \
     --outputHITSFile "test.MP.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-04' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
@@ -44,7 +44,7 @@ Sim_tf.py \
     --outputHITSFile "temp.ST.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-04' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
