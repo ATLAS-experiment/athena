@@ -20,12 +20,14 @@ atlas_add_library( MCTruthBaseLib
                    G4AtlasInterfaces MCTruth SimHelpers ISF_InterfacesLib
                    AtlasDetDescr ISF_Geant4Event
                  )
+set_target_properties( MCTruthBaseLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library(MCTruthBase
                   src/components/*.cxx
                   OBJECT
                   NO_PUBLIC_HEADERS
                   PRIVATE_LINK_LIBRARIES MCTruthBaseLib)
+set_target_properties( MCTruthBase PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

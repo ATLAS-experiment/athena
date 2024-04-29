@@ -25,6 +25,7 @@ atlas_add_library( ISF_Geant4Event
                    ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib
                    ${GEANT4_LIBRARIES} ${EIGEN_LIBRARIES} ISF_Event
                    ISF_InterfacesLib SimHelpers GeoPrimitives MCTruth TruthUtils )
+set_target_properties( ISF_Geant4Event PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 #atlas_add_test(SOURCES
 #               INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}

@@ -15,9 +15,11 @@ atlas_add_library( G4ProfilingToolsLib
                    LINK_LIBRARIES G4AtlasToolsLib
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib )
+set_target_properties( G4ProfilingToolsLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( G4ProfilingTools
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_LINK_LIBRARIES G4ProfilingToolsLib )
+set_target_properties( G4ProfilingTools PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
