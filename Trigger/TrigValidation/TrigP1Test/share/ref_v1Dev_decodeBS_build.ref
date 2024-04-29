@@ -7130,7 +7130,11 @@ HLT_j45f_L1J15p31ETA49:
   stepFeatures:
     0: 1
 HLT_j45f_L1jJ40p30ETA49:
-  eventCount: 0
+  eventCount: 1
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
 HLT_j460_L1J100:
   eventCount: 0
 HLT_j460_L1jJ160:
@@ -10298,17 +10302,17 @@ HLT_noalg_L1jJ30:
 HLT_noalg_L1jJ40:
   eventCount: 15
 HLT_noalg_L1jJ40p30ETA49:
-  eventCount: 2
+  eventCount: 6
 HLT_noalg_L1jJ50:
   eventCount: 13
 HLT_noalg_L1jJ500:
   eventCount: 0
 HLT_noalg_L1jJ50p30ETA49:
-  eventCount: 3
+  eventCount: 5
 HLT_noalg_L1jJ60:
   eventCount: 5
 HLT_noalg_L1jJ60p30ETA49:
-  eventCount: 2
+  eventCount: 3
 HLT_noalg_L1jJ90:
   eventCount: 3
 HLT_noalg_L1jJ90p30ETA49:

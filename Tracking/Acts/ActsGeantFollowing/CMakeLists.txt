@@ -34,6 +34,7 @@ atlas_add_library( ActsGeantFollowing
                      TrkExInterfaces
                      TrkParameters
                      TrkSurfaces)       
+set_target_properties( ActsGeantFollowing PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
