@@ -18,4 +18,3 @@ atlas_add_library( G4HitFilter
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel CaloSimEvent AthenaBaseComps StoreGateLib LUCID_SimEvent InDetSimEvent LArSimEvent MuonSimEvent G4AtlasInterfaces G4AtlasToolsLib TileSimEvent )
-set_target_properties( G4HitFilter PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

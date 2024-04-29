@@ -16,4 +16,3 @@ atlas_add_library( MagFieldUtils
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps GaudiKernel MagFieldConditions MagFieldInterfaces StoreGateLib )
-set_target_properties( MagFieldUtils PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

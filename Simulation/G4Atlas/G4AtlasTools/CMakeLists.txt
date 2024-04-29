@@ -22,15 +22,12 @@ atlas_add_library( G4AtlasToolsLib
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${TBB_LIBRARIES} AthenaBaseComps G4AtlasInterfaces SubDetectorEnvelopesLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CxxUtils GaudiKernel )
-set_target_properties( G4AtlasToolsLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
-
 
 atlas_add_library( G4AtlasTools
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_LINK_LIBRARIES G4AtlasToolsLib)
-set_target_properties( G4AtlasTools PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 #testing just the simulation parts, no forward detectors or region
 atlas_add_test( G4GeometryToolConfig_Simtest

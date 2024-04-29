@@ -21,7 +21,6 @@ atlas_add_library( G4AtlasServices
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} ${ROOT_LIBRARIES}
 		     GaudiKernel AthenaBaseComps 
 		     G4AtlasInterfaces G4AtlasToolsLib G4PhysicsLists PathResolver MagFieldElements MagFieldInterfaces)
-set_target_properties( G4AtlasServices PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 #test G4AtlasFieldServices
 atlas_add_test( G4AtlasFieldServices_test

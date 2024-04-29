@@ -16,7 +16,6 @@ atlas_add_library( TrkG4UserActions
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib TrkDetDescrInterfaces TrkGeometry TrkMaterialOnTrack TrkParameters CxxUtils StoreGateLib GeoPrimitives SimHelpers TrkSurfaces TrkExInterfaces TrkExUtils TrkValInterfaces )
-set_target_properties( TrkG4UserActions PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

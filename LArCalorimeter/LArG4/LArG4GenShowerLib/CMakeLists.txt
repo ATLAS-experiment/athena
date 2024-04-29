@@ -20,7 +20,6 @@ atlas_add_library( LArG4GenShowerLibLib
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES AthenaBaseComps AthContainers AtlasHepMCLib GaudiKernel G4AtlasToolsLib LArG4Code
                    PRIVATE_LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} GeneratorObjects GeoModelInterfaces LArG4ShowerLib )
-set_target_properties( LArG4GenShowerLibLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( LArG4GenShowerLib
                    src/components/*.cxx
@@ -28,7 +27,6 @@ atlas_add_library( LArG4GenShowerLib
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES LArG4GenShowerLibLib )
-set_target_properties( LArG4GenShowerLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_dictionary( LArG4GenShowerLibDict
                       LArG4GenShowerLib/LArG4GenShowerLibDict.h

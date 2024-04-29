@@ -18,7 +18,6 @@ atlas_add_library( TRT_G4Utilities
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaKernel CxxUtils
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} PathResolver )
-set_target_properties( TRT_G4Utilities PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_runtime( share/TRT_G4Utilities_management.txt share/TRT_G4Utilities_geometry.txt )

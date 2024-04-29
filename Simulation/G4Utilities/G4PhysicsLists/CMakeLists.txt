@@ -21,7 +21,6 @@ atlas_add_library( G4PhysicsLists
   ${CMAKE_CURRENT_SOURCE_DIR}/src/hadronicVariations
   LINK_LIBRARIES ${GEANT4_LIBRARIES}
   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GaudiKernel )
-set_target_properties( G4PhysicsLists PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_runtime( share/biasValues.txt )

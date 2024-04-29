@@ -16,7 +16,6 @@ atlas_add_library( LArG4FastSimulation
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib ${GEOMODEL_LIBRARIES} GaudiKernel StoreGateLib GeoSpecialShapes LArG4Code LArReadoutGeometry LArSimEvent G4AtlasToolsLib GeoPrimitives LArG4ShowerLibSvcLib RDBAccessSvcLib GeoModelInterfaces GeoModelUtilities)
-set_target_properties( LArG4FastSimulation PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

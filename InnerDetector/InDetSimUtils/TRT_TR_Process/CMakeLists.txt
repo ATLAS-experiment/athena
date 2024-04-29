@@ -19,7 +19,6 @@ atlas_add_library( TRT_TR_Process
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib IdDictDetDescr G4AtlasInterfaces GeoMaterial2G4 GeoModelInterfaces PathResolver RDBAccessSvcLib )
-set_target_properties( TRT_TR_Process PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

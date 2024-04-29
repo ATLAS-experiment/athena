@@ -23,7 +23,6 @@ atlas_add_library( LArG4Code
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasDetDescr CaloSimEvent LArGeoCode LArSimEvent CaloG4SimLib G4AtlasToolsLib StoreGateLib GaudiKernel
                    PRIVATE_LINK_LIBRARIES CaloIdentifier AthenaKernel CxxUtils MCTruth )
-set_target_properties( LArG4Code PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_dictionary( LArG4CodeEnums
                       LArG4Code/LArG4EnumDefs.h

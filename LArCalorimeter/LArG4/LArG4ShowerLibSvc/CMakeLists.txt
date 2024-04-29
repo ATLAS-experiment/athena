@@ -12,7 +12,6 @@ atlas_add_library( LArG4ShowerLibSvcLib
                    INTERFACE
                    PUBLIC_HEADERS LArG4ShowerLibSvc
                    LINK_LIBRARIES GaudiKernel LArG4Code AthenaBaseComps )
-set_target_properties( LArG4ShowerLibSvcLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Component(s) in the package:
 atlas_add_library( LArG4ShowerLibSvc
@@ -22,4 +21,3 @@ atlas_add_library( LArG4ShowerLibSvc
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} LArG4ShowerLibSvcLib AthenaKernel LArG4ShowerLib PathResolver )
-set_target_properties( LArG4ShowerLibSvc PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

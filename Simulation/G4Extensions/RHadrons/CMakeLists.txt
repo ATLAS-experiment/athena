@@ -17,7 +17,6 @@ if( NOT GENERATIONBASE )
                        NO_PUBLIC_HEADERS
                        PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                        PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps CxxUtils G4AtlasInterfaces G4AtlasToolsLib G4ExternalDecay SimHelpers TruthUtils)
-    set_target_properties( RHadrons PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 endif()
 
 # Install files from the package:

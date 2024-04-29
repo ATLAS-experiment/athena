@@ -18,7 +18,6 @@ atlas_add_library( G4DebuggingHelperLib
                    PUBLIC_HEADERS G4DebuggingTools
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} )
-set_target_properties( G4DebuggingHelperLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( G4DebuggingTools
                    src/*.cxx
@@ -29,7 +28,6 @@ atlas_add_library( G4DebuggingTools
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} 
                                           GaudiKernel AthenaBaseComps StoreGateLib xAODEventInfo G4AtlasInterfaces GeoPrimitives
                                           G4AtlasToolsLib MCTruth MCTruthBaseLib SimHelpers G4DebuggingHelperLib )
-set_target_properties( G4DebuggingTools PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

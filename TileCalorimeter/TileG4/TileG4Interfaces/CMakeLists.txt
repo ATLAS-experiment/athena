@@ -12,4 +12,3 @@ atlas_add_library( TileG4InterfacesLib
                    PUBLIC_HEADERS TileG4Interfaces
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} GaudiKernel Identifier )
-set_target_properties( TileG4InterfacesLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
