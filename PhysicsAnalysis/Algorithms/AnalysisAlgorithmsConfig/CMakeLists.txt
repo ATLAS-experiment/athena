@@ -58,12 +58,22 @@ endif()
 
 
 
+# This runs test jobs for both sequences and block configs.  Currently
+# (26 Apr 24) we are running both, but the tests that compare their
+# output are disabled (i.e. commented out).  The comparisons had
+# regularly caused problems in CI, and some core variables had gotten
+# out of sync and been excluded, so we decided to disable those tests
+# completely.  The sequences are meant to be completely removed June
+# 2024.  Once that happens, remove these tests, including the commented
+# out comparison tests.
+
+
 add_test_job( TestJobDataSequence data --for-compare --no-systematics )
 add_test_job( TestJobDataConfig data --for-compare --block-config --no-systematics )
 add_test_job( TestJobDataTextConfig data --for-compare --text-config ${CONFIG_PATH} --no-systematics )
 add_test_job( TestJobDataFull data --block-config --no-systematics )
 add_test_job( TestJobDataNominalOR data --block-config --no-systematics --only-nominal-or )
-add_test_compare( TestJobDataCompare data TestJobDataSequence TestJobDataConfig )
+#add_test_compare( TestJobDataCompare data TestJobDataSequence TestJobDataConfig )
 add_test_compare( TestJobDataCompareConfig data TestJobDataConfig TestJobDataTextConfig )
 
 add_test_job( TestJobFullSimSequence fullsim --for-compare )
@@ -71,7 +81,7 @@ add_test_job( TestJobFullSimConfig fullsim --for-compare --block-config )
 add_test_job( TestJobFullSimTextConfig fullsim --for-compare --text-config ${CONFIG_PATH} )
 add_test_job( TestJobFullSimFull fullsim --block-config )
 add_test_job( TestJobFullSimNominalOR fullsim --block-config --only-nominal-or )
-add_test_compare( TestJobFullSimCompare fullsim TestJobFullSimSequence TestJobFullSimConfig )
+#add_test_compare( TestJobFullSimCompare fullsim TestJobFullSimSequence TestJobFullSimConfig )
 add_test_compare( TestJobFullSimCompareConfig fullsim TestJobFullSimConfig TestJobFullSimTextConfig )
 
 add_test_job( TestJobFastSimSequence fastsim --for-compare )
@@ -79,7 +89,7 @@ add_test_job( TestJobFastSimConfig fastsim --for-compare --block-config )
 add_test_job( TestJobFastSimTextConfig fastsim --for-compare --text-config ${CONFIG_PATH} )
 add_test_job( TestJobFastSimFull fastsim --block-config )
 add_test_job( TestJobFastSimNominalOR fastsim --block-config --only-nominal-or )
-add_test_compare( TestJobFastSimCompare fastsim TestJobFastSimSequence TestJobFastSimConfig )
+#add_test_compare( TestJobFastSimCompare fastsim TestJobFastSimSequence TestJobFastSimConfig )
 # add_test_compare( TestJobFastSimCompareConfig fastsim TestJobFastSimConfig TestJobFastSimTextConfig )
 
 # FIX ME: There are some issues with the PHYSLITE tests that need to
@@ -102,14 +112,14 @@ if( XAOD_STANDALONE )
    add_test_job( TestJobFullSimTextConfigLite fullsim --for-compare --text-config ${CONFIG_PATH} --physlite )
    add_test_job( TestJobFullSimFullLite fullsim --block-config --physlite )
    add_test_job( TestJobFullSimNominalORLite fullsim --block-config --only-nominal-or --physlite )
-   add_test_compare( TestJobFullSimCompareLite fullsim TestJobFullSimSequenceLite TestJobFullSimConfigLite )
+   #add_test_compare( TestJobFullSimCompareLite fullsim TestJobFullSimSequenceLite TestJobFullSimConfigLite )
 
    add_test_job( TestJobFastSimSequenceLite fastsim --for-compare --physlite )
    add_test_job( TestJobFastSimConfigLite fastsim --for-compare --block-config --physlite )
    add_test_job( TestJobFastSimTextConfigLite fastsim --for-compare --text-config ${CONFIG_PATH} --physlite )
    add_test_job( TestJobFastSimFullLite fastsim --block-config --physlite )
    add_test_job( TestJobFastSimNominalORLite fastsim --block-config --only-nominal-or --physlite )
-   add_test_compare( TestJobFastSimCompareLite fastsim TestJobFastSimSequenceLite TestJobFastSimConfigLite )
+   #add_test_compare( TestJobFastSimCompareLite fastsim TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 
    # this test is for testing that the algorithm monitors defined in EventLoop
    # don't break a job of reasonable complexity.  they are tested here instead of
