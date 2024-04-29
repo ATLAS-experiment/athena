@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Convert XGBoost model to TTree to be used with MVAUtils."
 __author__ = "Yuan-Tang Chou"
@@ -49,9 +49,9 @@ class XBGoostTextNode(dict):
         else:  # XGBoost "NO" is right branch in MVAUtils
             return XBGoostTextNode(self['children'][self.get_nodeid('no')])
 
-    def get_nodeid(self, type):
+    def get_nodeid(self, node_type):
         for idx, children in enumerate(self['children']):
-            if children['nodeid'] == self[type]:
+            if children['nodeid'] == self[node_type]:
                 return idx
 
     def get_default_left(self):
@@ -283,7 +283,7 @@ def check_file(fn):
         logging.info("file %s is empty", fn)
         return False
     tree = f.Get(keys[0].GetName())
-    if type(tree) != ROOT.TTree:
+    if type(tree) is not ROOT.TTree:
         logging.info("cannot find TTree in file %s", fn)
         return False
     if not tree.GetEntries():
