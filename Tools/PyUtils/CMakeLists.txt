@@ -33,7 +33,7 @@ else()
     find_package( six )
     
     # Install files from the package:
-    atlas_install_python_modules( python/*.py python/scripts python/AthFile POST_BUILD_CMD ${ATLAS_FLAKE8} )
+    atlas_install_python_modules( python/*.py python/scripts POST_BUILD_CMD ${ATLAS_FLAKE8} )
     atlas_install_scripts( bin/acmd.py bin/checkFile.py bin/checkPlugins.py
        bin/checkSG.py bin/checkMetaSG.py bin/checkTP.py bin/checkxAOD.py
        bin/diff-jobo-cfg.py bin/diffConfigs.py
