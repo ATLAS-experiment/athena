@@ -20,7 +20,7 @@ __log = logging.getLogger('TriggerEDMRun3Config')
 # ------------------------------------------------------------
 # Additional properties for EDM collections
 # ------------------------------------------------------------
-from TrigEDMConfig.TriggerEDMDefs import Alias, InViews
+from TrigEDMConfig.TriggerEDMDefs import Alias, InViews, allowTruncation
 
 # ------------------------------------------------------------
 # Lists of variables to be kept in the collections 
@@ -849,8 +849,8 @@ TriggerHLTListRun3 = [
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.',                                'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
 
     # FS tracks
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_FS_FTF',                 'BS PhysicsTLA ESD AODFULL', 'Jet'),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FS_FTFAux.passPFTrackPresel.muonCaloTag.muonScore.ptCone20.etConeCore.trackIso.RErr.EOverP.caloIso.trkPtFraction.tagFakeTrack.tagMuonTrack.tagIsoTrack',          'BS PhysicsTLA ESD AODFULL', 'Jet'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_FS_FTF',                 'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FS_FTFAux.passPFTrackPresel.muonCaloTag.muonScore.ptCone20.etConeCore.trackIso.RErr.EOverP.caloIso.trkPtFraction.tagFakeTrack.tagMuonTrack.tagIsoTrack',          'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
 
     # FS vertices
     ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA ESD AODFULL AODSLIM', 'Jet'),
@@ -993,8 +993,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_LRTAux.',              'BS ESD AODFULL AODSLIM', 'Tau'),
 
     # tau calo clusters
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews')]),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau'),
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), allowTruncation]),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau', [allowTruncation]),
 
     # tau tracks
     ('xAOD::TauTrackContainer#HLT_tautrack_MVA',                           'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precMVATauViews')]),
