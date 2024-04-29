@@ -1522,20 +1522,7 @@ namespace top {
     std::string decoration_SF = "btag_SF_" + WP;
     std::string decoration_MCeff = "btag_MCeff_" + WP;
 
-    // tagger decision
-    std::string decoration_tag_off = decoration_tag + "_nom"; // offline tag
-    std::string decoration_tag_onl = decoration_tag + "_onl" + "_nom"; // online tag
-
-    // MC efficiency Scale Factor
-    std::string decoration_SF_off = decoration_SF + "_nom"; // this is either eff SF or ineff SF 
-    std::string decoration_SF_onl = decoration_SF + "_onl" + "_nom"; // this is always eff SF
-    std::string decoration_SF_cond = decoration_SF + "_cond" + "_nom"; // this is always eff SF
-
-    // MC efficiency
-    std::string decoration_MCeff_off = decoration_MCeff + "_nom";
-    std::string decoration_MCeff_onl = decoration_MCeff + "_onl" + "_nom"; 
-    std::string decoration_MCeff_cond = decoration_MCeff + "_cond" + "_nom";
-    
+    std::string decoration_systSuffix;
     std::string systematicName, bTagSystName;
     switch (SFSyst) {
     case top::topSFSyst::nominal:
@@ -1546,18 +1533,12 @@ namespace top {
       bTagSystName = top::bTagNamedSystCheck(m_config, systematicName, WP, do_trackjets, false);
       if (bTagSystName != "") {
 	// Only change decorations if found,
-	decoration_tag_off = decoration_tag + "_" + bTagSystName;
-	decoration_tag_onl = decoration_tag + "_onl_" + bTagSystName;
-
-	decoration_SF_off = decoration_SF + "_" + bTagSystName;
-	decoration_SF_onl = decoration_SF + "_onl_" + bTagSystName;
-	decoration_SF_cond = decoration_SF + "_cond_" + bTagSystName;
-
-	decoration_MCeff_off = decoration_MCeff + "_" + bTagSystName;
-	decoration_MCeff_onl = decoration_MCeff + "_onl_" + bTagSystName;
-	decoration_MCeff_cond = decoration_MCeff + "_cond_" + bTagSystName;
+	decoration_systSuffix = "_" + bTagSystName;
       }
-                                                                                 // otherwise we will use the nominal
+      else {
+	// otherwise we will use the nominal
+	decoration_systSuffix = "_nom";
+      }  
       break;
 
     case top::topSFSyst::BTAG_SF_NAMED_UP:
@@ -1565,16 +1546,7 @@ namespace top {
         ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
         return 0;
       }
-      decoration_tag_off = decoration_tag + "_" + uncert_name + "__1up";
-      decoration_tag_onl = decoration_tag + "_onl_" + uncert_name + "__1up";
-      
-      decoration_SF_off = decoration_SF + "_" + uncert_name + "__1up";
-      decoration_SF_onl = decoration_SF + "_onl_" + uncert_name + "__1up";
-      decoration_SF_cond = decoration_SF + "_cond_" + uncert_name + "__1up";
-      
-      decoration_MCeff_off = decoration_MCeff + "_" + uncert_name + "__1up";
-      decoration_MCeff_onl = decoration_MCeff + "_onl_" + uncert_name + "__1up";
-      decoration_MCeff_cond = decoration_MCeff + "_cond_" + uncert_name + "__1up";
+      decoration_systSuffix = "_" + uncert_name + "__1up";
       break;
 
     case top::topSFSyst::BTAG_SF_NAMED_DOWN:
@@ -1582,16 +1554,7 @@ namespace top {
         ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
         return 0;
       }
-      decoration_tag_off = decoration_tag + "_" + uncert_name + "__1down";
-      decoration_tag_onl = decoration_tag + "_onl_" + uncert_name + "__1down";
-      
-      decoration_SF_off = decoration_SF + "_" + uncert_name + "__1down";
-      decoration_SF_onl = decoration_SF + "_onl_" + uncert_name + "__1down";
-      decoration_SF_cond = decoration_SF + "_cond_" + uncert_name + "__1down";
-      
-      decoration_MCeff_off = decoration_MCeff + "_" + uncert_name + "__1down";
-      decoration_MCeff_onl = decoration_MCeff + "_onl_" + uncert_name + "__1down";
-      decoration_MCeff_cond = decoration_MCeff + "_cond_" + uncert_name + "__1down";
+      decoration_systSuffix = "_" + uncert_name + "__1down";
       break;
 
     case top::topSFSyst::BTAG_SF_EIGEN_B:
@@ -1608,11 +1571,24 @@ namespace top {
 
       break;
     }
+    
+    // tagger decision
+    std::string decoration_tag_off = decoration_tag + decoration_systSuffix;          // offline tag
+    std::string decoration_tag_onl = decoration_tag + "_onl" + decoration_systSuffix; // online tag
 
-    // I'm testing!
+    // MC efficiency Scale Factor
+    std::string decoration_SF_off = decoration_SF + decoration_systSuffix;            // this is either eff SF or ineff SF 
+    std::string decoration_SF_onl = decoration_SF + "_onl" + decoration_systSuffix;   // this is always eff SF
+    std::string decoration_SF_cond = decoration_SF + "_cond" + decoration_systSuffix; // this is always eff SF
+
+    // MC efficiency
+    std::string decoration_MCeff_off = decoration_MCeff + decoration_systSuffix;
+    std::string decoration_MCeff_onl = decoration_MCeff + "_onl" + decoration_systSuffix;
+    std::string decoration_MCeff_cond = decoration_MCeff + "_cond" + decoration_systSuffix;
+
     xAOD::JetContainer jets = event.m_jets;
     if (do_trackjets) jets = event.m_trackJets;
-    for (auto jetPtr : jets) {
+    for (const auto& jetPtr : jets) {
       bool isTagged_off = false;
       bool isTagged_onl = false;
       double sf_off     = 1;
@@ -1753,25 +1729,7 @@ namespace top {
     std::string decoration_SF2 = "btag_SF_" + WP2;
     std::string decoration_MCeff2 = "btag_MCeff_" + WP2;
 
-    // tagger decision
-    std::string decoration_tag_off1 = decoration_tag1 + "_nom"; // offline1 tag
-    std::string decoration_tag_off2 = decoration_tag2 + "_nom"; // offline2 tag
-    std::string decoration_tag_onl = decoration_tag1 + "_onl" + "_nom"; // online tag based on WP1
-
-    // MC efficiency Scale Factor
-    std::string decoration_SF_off1 = decoration_SF1 + "_nom"; // this is either eff SF or ineff SF 
-    std::string decoration_SF_off2 = decoration_SF2 + "_nom"; // this is either eff SF or ineff SF 
-    std::string decoration_SF_onl = decoration_SF1 + "_onl" + "_nom"; // this is always eff SF
-    std::string decoration_SF_cond1 = decoration_SF1 + "_cond" + "_nom"; // this is always eff SF
-    std::string decoration_SF_cond2 = decoration_SF2 + "_cond" + "_nom"; // this is always eff SF
-
-    // MC efficiency
-    std::string decoration_MCeff_off1 = decoration_MCeff1 + "_nom";
-    std::string decoration_MCeff_off2 = decoration_MCeff2 + "_nom";
-    std::string decoration_MCeff_onl = decoration_MCeff1 + "_onl" + "_nom"; 
-    std::string decoration_MCeff_cond1 = decoration_MCeff1 + "_cond" + "_nom";
-    std::string decoration_MCeff_cond2 = decoration_MCeff2 + "_cond" + "_nom";
-    
+    std::string decoration_systSuffix;
     std::string systematicName, bTagSystName;
     switch (SFSyst) {
     case top::topSFSyst::nominal:
@@ -1782,23 +1740,12 @@ namespace top {
       bTagSystName = top::bTagNamedSystCheck(m_config, systematicName, WP1, do_trackjets, false);
       if (bTagSystName != "") {
 	// Only change decorations if found,
-	decoration_tag_off1 = decoration_tag1 + "_" + bTagSystName;
-	decoration_tag_off2 = decoration_tag2 + "_" + bTagSystName;
-	decoration_tag_onl = decoration_tag1 + "_onl_" + bTagSystName;
-
-	decoration_SF_off1 = decoration_SF1 + "_" + bTagSystName;
-	decoration_SF_off2 = decoration_SF2 + "_" + bTagSystName;
-	decoration_SF_onl = decoration_SF1 + "_onl_" + bTagSystName;
-	decoration_SF_cond1 = decoration_SF1 + "_cond_" + bTagSystName;
-	decoration_SF_cond2 = decoration_SF2 + "_cond_" + bTagSystName;
-
-	decoration_MCeff_off1 = decoration_MCeff1 + "_" + bTagSystName;
-	decoration_MCeff_off2 = decoration_MCeff2 + "_" + bTagSystName;
-	decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + bTagSystName;
-	decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + bTagSystName;
-	decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + bTagSystName;
+	decoration_systSuffix = "_" + bTagSystName;
       }
-                                                                                 // otherwise we will use the nominal
+      else {
+	// otherwise we will use the nominal
+	decoration_systSuffix = "_nom";
+      }
       break;
 
     case top::topSFSyst::BTAG_SF_NAMED_UP:
@@ -1806,21 +1753,7 @@ namespace top {
         ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
         return 0;
       }
-      decoration_tag_off1 = decoration_tag1 + "_" + uncert_name + "__1up";
-      decoration_tag_off2 = decoration_tag2 + "_" + uncert_name + "__1up";
-      decoration_tag_onl = decoration_tag1 + "_onl_" + uncert_name + "__1up";
-      
-      decoration_SF_off1 = decoration_SF1 + "_" + uncert_name + "__1up";
-      decoration_SF_off2 = decoration_SF2 + "_" + uncert_name + "__1up";
-      decoration_SF_onl = decoration_SF1 + "_onl_" + uncert_name + "__1up";
-      decoration_SF_cond1 = decoration_SF1 + "_cond_" + uncert_name + "__1up";
-      decoration_SF_cond2 = decoration_SF2 + "_cond_" + uncert_name + "__1up";
-      
-      decoration_MCeff_off1 = decoration_MCeff1 + "_" + uncert_name + "__1up";
-      decoration_MCeff_off2 = decoration_MCeff2 + "_" + uncert_name + "__1up";
-      decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + uncert_name + "__1up";
-      decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + uncert_name + "__1up";
-      decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + uncert_name + "__1up";
+      decoration_systSuffix = "_" + uncert_name + "__1up";
       break;
 
     case top::topSFSyst::BTAG_SF_NAMED_DOWN:
@@ -1828,21 +1761,7 @@ namespace top {
         ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
         return 0;
       }
-      decoration_tag_off1 = decoration_tag1 + "_" + uncert_name + "__1down";
-      decoration_tag_off2 = decoration_tag2 + "_" + uncert_name + "__1down";
-      decoration_tag_onl = decoration_tag1 + "_onl_" + uncert_name + "__1down";
-      
-      decoration_SF_off1 = decoration_SF1 + "_" + uncert_name + "__1down";
-      decoration_SF_off2 = decoration_SF2 + "_" + uncert_name + "__1down";
-      decoration_SF_onl = decoration_SF1 + "_onl_" + uncert_name + "__1down";
-      decoration_SF_cond1 = decoration_SF1 + "_cond_" + uncert_name + "__1down";
-      decoration_SF_cond2 = decoration_SF2 + "_cond_" + uncert_name + "__1down";
-      
-      decoration_MCeff_off1 = decoration_MCeff1 + "_" + uncert_name + "__1down";
-      decoration_MCeff_off2 = decoration_MCeff2 + "_" + uncert_name + "__1down";
-      decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + uncert_name + "__1down";
-      decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + uncert_name + "__1down";
-      decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + uncert_name + "__1down";
+      decoration_systSuffix = "_" + uncert_name + "__1down";
       break;
 
     case top::topSFSyst::BTAG_SF_EIGEN_B:
@@ -1859,11 +1778,28 @@ namespace top {
 
       break;
     }
+    // tagger decision
+    std::string decoration_tag_off1 = decoration_tag1 + decoration_systSuffix;          // offline1 tag
+    std::string decoration_tag_off2 = decoration_tag2 + decoration_systSuffix;          // offline2 tag
+    std::string decoration_tag_onl = decoration_tag1 + "_onl" + decoration_systSuffix;  // online tag based on WP1
 
-    // I'm testing!
+    // MC efficiency Scale Factor
+    std::string decoration_SF_off1 = decoration_SF1 + decoration_systSuffix;            // this is either eff SF or ineff SF 
+    std::string decoration_SF_off2 = decoration_SF2 + decoration_systSuffix;            // this is either eff SF or ineff SF 
+    std::string decoration_SF_onl = decoration_SF1 + "_onl" + decoration_systSuffix;    // this is always eff SF
+    std::string decoration_SF_cond1 = decoration_SF1 + "_cond" + decoration_systSuffix; // this is always eff SF
+    std::string decoration_SF_cond2 = decoration_SF2 + "_cond" + decoration_systSuffix; // this is always eff SF
+
+    // MC efficiency
+    std::string decoration_MCeff_off1 = decoration_MCeff1 + decoration_systSuffix;
+    std::string decoration_MCeff_off2 = decoration_MCeff2 + decoration_systSuffix;
+    std::string decoration_MCeff_onl = decoration_MCeff1 + "_onl" + decoration_systSuffix; 
+    std::string decoration_MCeff_cond1 = decoration_MCeff1 + "_cond" + decoration_systSuffix;
+    std::string decoration_MCeff_cond2 = decoration_MCeff2 + "_cond" + decoration_systSuffix;
+    
     xAOD::JetContainer jets = event.m_jets;
     if (do_trackjets) jets = event.m_trackJets;
-    for (auto jetPtr : jets) {
+    for (const auto& jetPtr : jets) {
       double weight = 1.0;
       bool isTagged_off1 = false;
       bool isTagged_off2 = false;
