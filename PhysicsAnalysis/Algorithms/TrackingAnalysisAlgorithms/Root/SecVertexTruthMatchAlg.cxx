@@ -31,7 +31,7 @@ namespace CP {
       std::vector<std::string> recoTypes{"All", "Matched", "Merged", "Fake", "Split", "Other"};
       std::vector<std::string> truthTypes{"Inclusive", "Reconstructable", "Accepted", "Seeded", "Reconstructed", "ReconstructedSplit"};
 
-      ANA_CHECK (book(TH1F("RecoVertex/matchType", "Vertex Match Type", 8, -0.5, 7.5)));
+      ANA_CHECK (book(TH1F("RecoVertex/matchType", "Vertex Match Type", 65, -0.5, 64.5)));
 
       for(const auto& recoType : recoTypes) {
         ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_x").c_str(), "Reco vertex x [mm]", 1000, -500, 500)));
@@ -75,7 +75,7 @@ namespace CP {
         ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_charge").c_str(), "Reco track charge ", 3, -1.5, 1.5)));
 
         // truth matching -- don't book for non-matched vertices
-        if ( recoType != "Inclusive" and recoType != "Fake" ) {
+        if ( recoType != "All" and recoType != "Fake" ) {
           ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_positionRes_R").c_str(), "Position resolution for vertices matched to truth decays", 400, -20, 20)));
           ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_positionRes_Z").c_str(), "Position resolution for vertices matched to truth decays", 400, -20, 20)));
           ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_matchScore_weight").c_str(), "Vertex Match Score (weight)", 101, 0, 1.01)));
@@ -343,19 +343,21 @@ namespace CP {
     truthmatchinfo = matchInfoDecor(*secVtx);
 
     // This includes all matched vertices, including splits
-    if(not truthmatchinfo.empty()){
-      float matchScore_weight = std::get<1>(truthmatchinfo.at(0));
-      float matchScore_pt     = std::get<2>(truthmatchinfo.at(0));
+    if (matchType != "All" and matchType != "Fake") {
+      if(not truthmatchinfo.empty()){
+        float matchScore_weight = std::get<1>(truthmatchinfo.at(0));
+        float matchScore_pt     = std::get<2>(truthmatchinfo.at(0));
 
-      ATH_MSG_DEBUG("Match Score and probability: " << matchScore_weight << " " << matchScore_pt/0.01);
+        ATH_MSG_DEBUG("Match Score and probability: " << matchScore_weight << " " << matchScore_pt/0.01);
 
-      const ElementLink<xAOD::TruthVertexContainer>& truthVertexLink = std::get<0>(truthmatchinfo.at(0));
-      const xAOD::TruthVertex& truthVtx = **truthVertexLink ;
+        const ElementLink<xAOD::TruthVertexContainer>& truthVertexLink = std::get<0>(truthmatchinfo.at(0));
+        const xAOD::TruthVertex& truthVtx = **truthVertexLink ;
 
-      hist("RecoVertex/" + matchType + "_positionRes_R")->Fill(Lxy - truthVtx.perp());
-      hist("RecoVertex/" + matchType + "_positionRes_Z")->Fill(secVtx->z() - truthVtx.z());
-      hist("RecoVertex/" + matchType + "_matchScore_weight")->Fill(matchScore_weight);
-      hist("RecoVertex/" + matchType + "_matchScore_pt")->Fill(matchScore_pt);
+        hist("RecoVertex/" + matchType + "_positionRes_R")->Fill(Lxy - truthVtx.perp());
+        hist("RecoVertex/" + matchType + "_positionRes_Z")->Fill(secVtx->z() - truthVtx.z());
+        hist("RecoVertex/" + matchType + "_matchScore_weight")->Fill(matchScore_weight);
+        hist("RecoVertex/" + matchType + "_matchScore_pt")->Fill(matchScore_pt);
+      }
     }
   }
 
