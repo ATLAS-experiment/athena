@@ -61,12 +61,12 @@ protected:
         std::vector<std::vector<int>> m_FPGA;
         std::vector<std::vector<int>> m_FPGA_phi02;
         std::vector<std::vector<int>> m_FPGA_fcal;
-        std::vector<int> m_met;
+        std::vector<long long> m_met;
         std::vector<float> m_met_angle;
-        std::vector<int> m_met_Xcoord;
-        std::vector<int> m_met_Ycoord;
-        int m_Totalmet_Xcoord = 0;
-        int m_Totalmet_Ycoord = 0;
+        std::vector<long long> m_met_Xcoord;
+        std::vector<long long> m_met_Ycoord;
+        long long m_Totalmet_Xcoord = 0;
+        long long m_Totalmet_Ycoord = 0;
         
         bool getTTowerSat(unsigned int TTID );
         bool m_saturation = false;
@@ -76,6 +76,7 @@ protected:
         
         // To avoid using floats in the firmware.
         static constexpr unsigned int m_firmware_scale = (1 << 9);
+        static constexpr unsigned int m_firmware_bit_offset = 9;
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
         

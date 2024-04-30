@@ -78,6 +78,14 @@ int   LVL1::jFEXForwardElecInfo::getCoreTTEtEM(){
   return m_coreTTEtEM;
 }
 
+void   LVL1::jFEXForwardElecInfo::setCoreTTSatEM(bool sat ){
+   m_coreTTsatEM  = sat;
+}
+
+bool   LVL1::jFEXForwardElecInfo::getCoreTTSatEM(){
+  return m_coreTTsatEM;
+}
+
 void   LVL1::jFEXForwardElecInfo::setNextTTID(uint TTID ){
   m_nextTTID = TTID;
 }
@@ -94,6 +102,14 @@ int   LVL1::jFEXForwardElecInfo::getNextTTEtEM(){
   return m_nextTTEtEM;
 }
 
+void   LVL1::jFEXForwardElecInfo::setNextTTSatEM(bool sat){
+  m_nextTTsatEM = sat;
+}
+
+bool   LVL1::jFEXForwardElecInfo::getNextTTSatEM(){
+  return m_nextTTsatEM;
+}
+
 void   LVL1::jFEXForwardElecInfo::setTTEtEMiso(int iso_ET){
   m_TTEtEMiso  = iso_ET;
 }
@@ -108,10 +124,15 @@ int   LVL1::jFEXForwardElecInfo::getTTEtEMiso(){
 
 void   LVL1::jFEXForwardElecInfo::calcTTClusEtEM(){
   m_TTClusEtEM   = m_coreTTEtEM + m_nextTTEtEM;
+  m_TTClusSatEM = m_coreTTsatEM || m_nextTTsatEM;
 }
 
 int   LVL1::jFEXForwardElecInfo::getTTClusEtEM(){
   return m_TTClusEtEM ;
+}
+
+bool  LVL1::jFEXForwardElecInfo::getTTClusSatEM(){
+  return m_TTClusSatEM ;
 }
 
 void   LVL1::jFEXForwardElecInfo::setTTEtHad1(int ET_HAD){
@@ -224,11 +245,13 @@ void LVL1::jFEXForwardElecInfo::calcFwdElEDM() {
     m_EtHad2  =  m_TTEtHad2/m_reso;
     m_EtEM    =  m_coreTTEtEM/m_reso;   
  }
+  
   if (m_et > 0x7ff) { //0x7ff is 11 bits
     m_et = 0x7ff;
-    m_sat=1;
+    //current FW convention is to NOT set the saturation bit on value overflow, but only to propagate cell saturation information from LAr
+    //m_sat=1;
   }
-
+  m_sat = m_TTClusSatEM;
 
 
   // jFEX internal values are at higher granularity (25MeV), not output granularity (200MeV).
@@ -258,7 +281,6 @@ void LVL1::jFEXForwardElecInfo::calcFwdElEDM() {
   }
 
   m_tob = m_tob + (m_res <<  FEXAlgoSpaceDefs::jEM_resBit) +  (m_emfr2 <<  FEXAlgoSpaceDefs::jEM_emf2Bit) +  (m_emfr1 <<  FEXAlgoSpaceDefs::jEM_emf1Bit) + ( m_emiso << FEXAlgoSpaceDefs::jEM_isoBit) + (m_et << FEXAlgoSpaceDefs::jEM_etBit) + (m_eta << FEXAlgoSpaceDefs::jEM_etaBit) + (m_phi << FEXAlgoSpaceDefs::jEM_phiBit) + m_sat;
-
 }
 
 
