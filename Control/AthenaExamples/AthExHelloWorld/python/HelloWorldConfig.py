@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#!/usr/bin/env athena.py
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -69,4 +70,6 @@ if __name__ == "__main__":
 
     cfg = MainServicesCfg(flags)
     cfg.merge(HelloWorldCfg(flags))
-    cfg.run()
+
+    import sys
+    sys.exit(cfg.run().isFailure())

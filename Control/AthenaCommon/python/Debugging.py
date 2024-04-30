@@ -108,3 +108,35 @@ def dumpPythonProfile(filename):
     else:
         profiler.dump_stats(filename)
         log.info("Python profile stored in %s", filename)
+
+
+def traceExecution(script, level):
+    """Run script with the given trace level"""
+    import sys
+    import trace
+    ignore_dirs = []
+    ignore_mods = []
+
+    # exclude system and root libraries
+    if level > 0:
+        ignore_dirs = [x for x in sys.path if x.find("ROOT")!=-1]
+        ignore_dirs.append(sys.prefix)
+    if level > 1:
+        ignore_mods += ['_db', '__init__', '_configurables', 'GaudiHandles', 'six']
+    if level > 2:
+        ignore_mods += [
+            # Legacy stuff we pull in b/c PythonAlgorithms and such still derive from old-style configurables
+            'Configurable','Configurables','PropertyProxy','DataHandle','ConfigurableDb',
+            'ConfigurableMeta', 'CfgMgr',
+            # Internals of the ComponentAccumulator
+            'ComponentAccumulator','Logging','AthConfigFlags','AllConfigFlags','Deduplication',
+            'semantics','AccumulatorCache','DebuggingContext','AtlasSemantics','ComponentFactory',
+            'LegacySupport','ItemListSemantics'
+        ]
+
+    # taken from cpython/Lib/trace.py
+    tracer = trace.Trace(ignoredirs=ignore_dirs, ignoremods=ignore_mods)
+
+    with io.open_code(script) as f:
+        code = compile(f.read(), script, 'exec')
+    tracer.run(code)
