@@ -84,7 +84,7 @@ namespace InDet
     //@{
     PublicToolHandle<Trk::IExtrapolator> m_extrapolator
       {this, "Extrapolator","Trk::Extrapolator", "extrapolator"};
-    PublicToolHandle<Trk::IRIO_OnTrackCreator > m_rotcreator
+    ToolHandle<Trk::IRIO_OnTrackCreator > m_rotcreator
       {this, "RIO_OnTrackCreator", "Trk::RIO_OnTrackCreator/InDetRotCreator", "Creator ROT"};
     //@}
 

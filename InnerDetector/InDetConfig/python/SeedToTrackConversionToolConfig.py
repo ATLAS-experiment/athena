@@ -43,9 +43,7 @@ def ITkSeedToTrackConversionToolCfg(
 
     if "RIO_OnTrackCreator" not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-        RotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(flags))
-        acc.addPublicTool(RotCreator)
-        kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
+        kwargs.setdefault("RIO_OnTrackCreator", acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
 
     extension = flags.Tracking.ActiveConfig.extension
     if extension == flags.Tracking.PrimaryPassConfig.value:
