@@ -282,26 +282,6 @@ def FPGATrackSimReadInputCfg(flags):
     result.addPublicTool(InputTool, primary=True)
     return result
 
-def FPGATrackSimSGInputToolCfg(flags):
-    """In this cotext the tool is configured to only read RDO hits"""
-    result = ComponentAccumulator()
-    tool = CompFactory.FPGATrackSimSGToRawHitsTool(                       
-        TruthToTrackTool=None,
-        Extrapolator=None,
-        pixelClustersName="",
-        SCT_ClustersName="",
-        OfflineTracks="",
-        McTruth="",
-        dumpHitsOnTracks=False,
-        dumpTruthIntersections=False,
-        ReadOfflineClusters=False,
-        ReadTruthTracks=False,
-        ReadOfflineTracks=False
-    )
-
-    result.addPublicTool(tool, primary=True)
-    return result
-
 
 def prepareFlagsForFPGATrackSimLogicalHistProcessAlg(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
@@ -342,6 +322,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
         result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
         theFPGATrackSimLogicalHistProcessAlg.InputTool = ""
         theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
+        from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
         theFPGATrackSimLogicalHistProcessAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
 
     # TODO, will need also the alternative TOOL implementation
