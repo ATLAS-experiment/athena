@@ -17,16 +17,16 @@
 export ATHENA_PROC_NUMBER=8
 export ATHENA_CORE_NUMBER=8
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-04
 Sim_tf.py \
     --CA \
     --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.temp.DisplacedSmuonPairProduction.10events.pool.root" \
     --maxEvents="10" \
     --multithreaded="True" \
-    --preInclude "EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV,G4DebuggingTools.DebugSleptonsLLP" \
+    --preInclude "EVNTtoHITS:Campaigns.MC23eSimulationMultipleIoV,G4DebuggingTools.DebugSleptonsLLP" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
+    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-04" \
     --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \

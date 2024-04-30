@@ -37,7 +37,7 @@ def mongroupsCfg(moniAccess, data_type):
         monitoring_topo = []
         mongroups = { 
                 'monitoring_electron'           : monitoring_electron,
-                'monitoring_photon'             : monitoring_photon,
+                'monitoring_photon'             : monitoring_photon + ['HLT_g140_loose_L1eEM26M','HLT_g300_etcut_L1eEM26M'],
                 'monitoring_bootstrap'          : monitoring_bootstrap,
                 'monitoringTP_electron'         : monitoringTP_electron + ['HLT_e26_lhtight_L1eEM26M','HLT_e28_lhtight_L1eEM26M','HLT_e30_lhvloose_L1eEM26M','HLT_e60_lhvloose_L1eEM26M'],
                 'monitoring_tags'               : monitoring_tags,

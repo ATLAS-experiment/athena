@@ -65,9 +65,6 @@ def AthenaMonitoringCfg(flags):
         info('Set up HLT monitoring')
         if flags.DQ.Environment == 'AOD':
             warning("HLT Monitoring enabled on AOD: this might cause issues as not all HLT collections are written to standard AOD!")
-            if not flags.Input.isMC:
-                error("HLT monitoring on data AOD input is not allowed - not all HLT collections are recorded to AOD!")
-                raise ValueError("HLT monitoring enabled on data AOD input.")
         from TrigHLTMonitoring.TrigHLTMonitorAlgorithm import TrigHLTMonTopConfig
         result.merge(TrigHLTMonTopConfig(flags))
 

@@ -23,10 +23,10 @@ Sim_tf.py \
     --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
     --maxEvents="100" \
     --multithreaded="True" \
-    --preInclude "EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV,G4DebuggingTools.DebugMonopole" \
+    --preInclude "EVNTtoHITS:Campaigns.MC23eSimulationMultipleIoV,G4DebuggingTools.DebugMonopole" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
+    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-04" \
     --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \
