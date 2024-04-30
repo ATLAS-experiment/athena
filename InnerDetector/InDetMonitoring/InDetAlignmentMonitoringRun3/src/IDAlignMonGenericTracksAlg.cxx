@@ -219,7 +219,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   int event    = GetEventInfo(ctx)->eventNumber();
   auto event_m = Monitored::Scalar<int>( "m_event", event );
   float mu     = lbAverageInteractionsPerCrossing(ctx);
-  auto mu_m    = Monitored::Scalar<float>("mu_m", mu);
+  auto mu_m    = Monitored::Scalar<float>("m_mu", mu);
 
   if (m_extendedPlots) {
     //Fill BeamSpot Position histos
@@ -483,13 +483,14 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto ntrthits_per_track_ecc_m = Monitored::Scalar<float>( "m_ntrthits_per_track_ecc", nhtrtECC );
     fill(genericTrackGroup, ntrthits_per_track_ecc_m);
 
+    //chi2
     auto chi2oDoF_m = Monitored::Scalar<float>( "m_chi2oDoF", chi2oDoF );
     fill(genericTrackGroup, chi2oDoF_m);
+    // eta
     auto eta_m = Monitored::Scalar<float>( "m_eta", trketa );
     fill(genericTrackGroup, eta_m);
     auto errEta_m = Monitored::Scalar<float>( "m_errEta", Err_eta );
     fill(genericTrackGroup, errEta_m);
-
 
     // pixel hits vs eta
     auto eta_2fillpix_m = Monitored::Scalar<float>( "m_eta_2fillpix", trketa );
@@ -535,6 +536,12 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, errD0_m);
     auto d0_bscorr_m = Monitored::Scalar<float>( "m_d0_bscorr", d0bscorr );
     fill(genericTrackGroup, d0_bscorr_m);
+
+    //d0 vs Eta
+    auto eta_2filld0bscorr_m = Monitored::Scalar<float>( "m_eta_2filld0bscorr", trketa );
+    auto d0_bscorr_2filleta_m = Monitored::Scalar<float>( "m_d0_bscorr_2filleta", d0bscorr );
+    fill(genericTrackGroup, eta_2filld0bscorr_m, d0_bscorr_2filleta_m); 
+   
     //d0 vs phi 
     auto phi_2filld0bscorr_m = Monitored::Scalar<float>( "m_phi_2filld0bscorr", trkphi );
     auto d0_bscorr_2fillphi_m = Monitored::Scalar<float>( "m_d0_bscorr_2fillphi", d0bscorr );
@@ -577,6 +584,11 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto pT_2fillpTRes_m = Monitored::Scalar<float>( "m_pT_2fillpTRes", pT );
     fill(genericTrackGroup, pT_2fillpTRes_m, pTRes_2fillpT_m);
 
+     //d0 vs pT
+    auto pT_2filld0bscorr_m = Monitored::Scalar<float>( "m_pT_2filld0bscorr", pT );
+    auto d0_bscorr_2fillpT_m = Monitored::Scalar<float>( "m_d0_bscorr_2fillpT", d0bscorr );
+    fill(genericTrackGroup, pT_2filld0bscorr_m, d0_bscorr_2fillpT_m); 
+
   } //
   // end of loop on trks
   //
@@ -584,7 +596,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   // histo with the count of used(good) tracks
   auto ngTracks_m = Monitored::Scalar<float>( "m_ngTracks", ngTracks );
   fill(genericTrackGroup, ngTracks_m);
-  
+    
   ATH_MSG_DEBUG("Histogram filling completed for #good_tracks: " << ngTracks);
 
   return StatusCode::SUCCESS;
