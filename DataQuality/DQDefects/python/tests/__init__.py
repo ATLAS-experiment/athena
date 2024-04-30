@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # -*- coding: utf-8 -*-
 # flake8: noqa
 #  unicode characters embedded below confuse flake8
@@ -1027,3 +1027,34 @@ def test_return_types():
     assert type(ddb2.logics_tag) == str
     assert type(ddb2.tag.defects) == str
     assert type(ddb2.tag.logic) == str
+
+
+# nose 1.6.3 is missing a few fixes that were in nose 1.3.7...
+import nose
+if nose.__versioninfo__ > (1,3,7):
+    # nose.util.func_lineno is looking in the python2 func.func_code rather than
+    # the python3 func.__code__.  (This is correct in nose 1.3.7 but
+    # incorrect in 1.6.3.)  Add func_code attributes to the test_ functions
+    # in this module so that nose 1.6.3 will sort them correctly.
+    class xcode:
+        def __init__(self, f):
+            self.co_firstlineno = f.__code__.co_firstlineno
+    def mungline (f):
+        f.func_code = xcode(f)
+    g = list(globals().keys())
+    for k in g:
+        if k.startswith('test_'):
+            mungline (globals()[k])
+
+    # nose 1.3.7 will use information from a docstring to form the test
+    # description, but 1.6.3 is missing the piece of code that does that.
+    # Patch nose to reinstate that functionality.
+    from nose.case import Test
+    def shortDescription (self):
+        desc = self._shortDescription()
+        if desc is None:
+            desc = self.test.shortDescription()
+        return desc
+    Test._shortDescription = Test.shortDescription
+    Test.shortDescription = shortDescription
+
