@@ -3,14 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
-
-def extractChildKwargs(kwargs: dict,
-                       prefix: str) -> dict:
-    args={}
-    for k,v in kwargs.items() :
-        if len(k)>len(prefix) and k[0:len(prefix)]==prefix :
-           args[k[len(prefix)]:]=v
-    return args
+from ActsConfig.ActsUtilities import extractChildKwargs
 
 def MapToInDetSimDataWrapCfg(flags,
                              collection_name: str) -> ComponentAccumulator:
@@ -83,9 +76,9 @@ def ITkTruthAssociationCfg(flags,
                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     if flags.Detector.EnableITkPixel :
-        acc.merge(PixelClusterToTruthAssociationCfg(flags, **extractChildKwargs(kwargs,"PixelClusterToTruthAssociation.") ))
+        acc.merge(PixelClusterToTruthAssociationCfg(flags, **extractChildKwargs(prefix="PixelClusterToTruthAssociation.", **kwargs) ))
     if flags.Detector.EnableITkStrip :
-        acc.merge(StripClusterToTruthAssociationCfg(flags, **extractChildKwargs(kwargs,"StripClusterToTruthAssociation.") ))
+        acc.merge(StripClusterToTruthAssociationCfg(flags, **extractChildKwargs(prefix="StripClusterToTruthAssociation.", **kwargs) ))
     return acc
 
 
