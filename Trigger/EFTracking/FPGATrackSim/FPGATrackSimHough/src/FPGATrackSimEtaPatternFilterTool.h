@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATRACKSIMETAPATTERNFILTERTOOL_H
 #define FPGATRACKSIMETAPATTERNFILTERTOOL_H
@@ -14,24 +14,23 @@
  *
  */
 
-#include "GaudiKernel/ServiceHandle.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 
-#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
-#include "FPGATrackSimObjects/FPGATrackSimVectors.h"
-#include "FPGATrackSimObjects/FPGATrackSimRoad.h"
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
-#include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"
-#include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
-#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
+#include "AthenaBaseComps/AthAlgTool.h" //inheritance
+#include "FPGATrackSimHough/IFPGATrackSimRoadFilterTool.h"//inheritance
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h" //SiliconTech, DetectorZone
+#include "GaudiKernel/ServiceHandle.h" //member
+#include "FPGATrackSimObjects/FPGATrackSimRoad.h" //template param for vector member
 
-#include "TFile.h"
+#include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h" //ServiceHandle template param
+#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h" //ServiceHandle template param
+
+
 
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/dynamic_bitset_fwd.hpp>
+
+class FPGATrackSimHit;
 
 class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSimRoadFilterTool>
 {
@@ -109,7 +108,7 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
         ///////////////////////////////////////////////////////////////////////
         // Convenience
 
-        unsigned m_nLayers; // alias to m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
+        unsigned m_nLayers{}; // alias to m_FPGATrackSimMapping->PlaneMap1stStage()->getNLogiLayers();
 
         // The below maps are created in initialize, with fixed keys. But the counters (values)
         // are reset every input road.
@@ -132,9 +131,9 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
         void addHitsToMap(FPGATrackSimRoad* r);
         void addRedundantPatterns(std::set<EtaPattern> & usedPatterns, EtaPattern const & currPatt, unsigned nExtra);
         FPGATrackSimRoad buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, FPGATrackSimRoad* origr, int etaPatternID) const;
-        std::string to_string(const EtaPattern patt) const;
-        std::string to_string(const FPGATrackSimRoad road) const;
-        std::string to_string(const std::vector<unsigned> v) const;
+        std::string to_string(const EtaPattern & patt) const;
+        std::string to_string(const FPGATrackSimRoad & road) const;
+        std::string to_string(const std::vector<unsigned> &v) const;
 };
 
 
