@@ -97,7 +97,7 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
         kwargs.setdefault("TRT_ToT_dEdx", acc.addPublicTool(acc.popToolsAndMerge(TRT_dEdxToolCfg(flags))))
 
     kwargs.setdefault("DecorationPrefix", "")
-    kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapCombinedInDetTracks")
+    kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapMerge_CombinedInDetTracks")
 
     acc.addPublicTool(
         CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator(
@@ -268,7 +268,7 @@ def ITkTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("SctMapName", "ITkStripClustersOffsets")
     kwargs.setdefault("PixelClustersName", "ITkPixelClusters")
     kwargs.setdefault("SctClustersName", "ITkStripClusters")
-    kwargs.setdefault("PRDtoTrackMap", "ITkPRDToTrackMapCombinedITkTracks")
+    kwargs.setdefault("PRDtoTrackMap", "ITkPRDtoTrackMapMerge_CombinedITkTracks")
     kwargs.setdefault("PixelMsosName", "ITkPixelMSOSs")
     kwargs.setdefault("SctMsosName", "ITkStripMSOSs")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
