@@ -68,6 +68,10 @@ private:
       "MaxConvRadius", 800.0,
       "The maximum conversion radius for a photon to be considered converted"};
 
+  Gaudi::Property<bool> m_removeTRTConvBarrel {this,
+      "RemoveTRTConvBarrel", false,
+      "Remove TRT converted photons in the barrel"};
+
 };
 
 #endif
