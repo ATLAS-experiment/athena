@@ -89,6 +89,15 @@ public:
 
 
   /**
+   * @brief Constructor taking an auxid directly.
+   * @param auxid ID for this auxiliary variable.
+   *
+   * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+   */
+  AtomicConstAccessor (const SG::auxid_t auxid);
+
+
+  /**
    * @brief Fetch the variable for one element, as a const reference.
    * @param e The element for which to fetch the variable.
    *
