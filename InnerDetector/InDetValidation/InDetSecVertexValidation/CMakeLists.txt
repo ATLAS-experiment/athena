@@ -14,30 +14,11 @@ endif()
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
 
-# Generate a CINT dictionary source file:
-atlas_add_root_dictionary( InDetSecVertexValidationLib _cintDictSource
-   ROOT_HEADERS InDetSecVertexValidation/InDetSecVertexTruthMatchTool.h Root/LinkDef.h
-   EXTERNAL_PACKAGES ROOT )
-
-# Component(s) in the package:
-atlas_add_library( InDetSecVertexValidationLib
-                   Root/*.cxx ${_cintDictSource}
-                   PUBLIC_HEADERS InDetSecVertexValidation
-                   PRIVATE_LINK_LIBRARIES ${extra_libs}
-                   LINK_LIBRARIES AsgTools xAODTracking xAODTruth )
-
 if( NOT XAOD_STANDALONE )
     atlas_add_component( InDetSecVertexValidation
                          src/*.cxx src/*.h
                          src/components/*.cxx
-                         LINK_LIBRARIES ${extra_libs} GaudiKernel xAODTracking AthenaBaseComps AsgTools InDetSecVertexValidationLib AthenaMonitoringLib TrkValHistUtils )
-endif()
-
-if( XAOD_STANDALONE )
-    atlas_add_executable( SecVertexTruthMatchTest
-                      util/SecVertexTruthMatchTest.cxx
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES InDetSecVertexValidationLib xAODTracking xAODEventInfo xAODRootAccess AthenaMonitoringLib TrkValHistUtils ${ROOT_LIBRARIES} ${extra_libs} )
+                         LINK_LIBRARIES ${extra_libs} GaudiKernel xAODTracking AthenaBaseComps AsgTools AthenaMonitoringLib TrkValHistUtils )
 endif()
 
 atlas_install_python_modules(python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})

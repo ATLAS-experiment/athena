@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef IInDetSecVertexTruthMatchTool_h
-#define IInDetSecVertexTruthMatchTool_h
+#ifndef IInDetSecVtxTruthMatchTool_h
+#define IInDetSecVtxTruthMatchTool_h
 
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
@@ -19,17 +19,16 @@
  * Categorize reconstructed vertices depending on their composition.
  */
 
-class IInDetSecVertexTruthMatchTool : public virtual asg::IAsgTool {
+class IInDetSecVtxTruthMatchTool : public virtual asg::IAsgTool {
 
-ASG_TOOL_INTERFACE( IInDetSecVertexTruthMatchTool )
+ASG_TOOL_INTERFACE( IInDetSecVtxTruthMatchTool )
 
 public:
 
 //take const collection of vertices, match them, and decorate with matching info
- virtual StatusCode matchVertices( const xAOD::VertexContainer & vtxContainer,
-                                   const xAOD::TruthVertexContainer & truthVtxContainer ) = 0;
-
- virtual StatusCode labelTruthVertices( const xAOD::TruthVertexContainer & truthVtxContainer ) = 0;
+ virtual StatusCode matchVertices(  std::vector<const xAOD::Vertex*> recoVerticesToMatch, 
+                                    std::vector<const xAOD::TruthVertex*> truthVerticesToMatch, 
+                                    const xAOD::TrackParticleContainer* trackParticles ) = 0;
 
 };
 

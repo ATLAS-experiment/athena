@@ -7,7 +7,7 @@ atlas_subdir( TrackingAnalysisAlgorithms )
 atlas_add_library( TrackingAnalysisAlgorithmsLib
    TrackingAnalysisAlgorithms/*.h Root/*.cxx
    PUBLIC_HEADERS TrackingAnalysisAlgorithms
-   LINK_LIBRARIES AnaAlgorithmLib EventBookkeeperToolsLib xAODTracking
+   LINK_LIBRARIES AnaAlgorithmLib EventBookkeeperToolsLib xAODTracking InDetSecVtxTruthMatchToolLib
    AsgDataHandlesLib AsgTools AthContainers )
 
 atlas_add_dictionary( TrackingAnalysisAlgorithmsDict
@@ -20,3 +20,6 @@ if( NOT XAOD_STANDALONE )
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES GaudiKernel TrackingAnalysisAlgorithmsLib )
 endif()
+
+atlas_install_python_modules( python/*.py )
+atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
