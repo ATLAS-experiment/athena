@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#Categories currently used by offline Egamma TO monitoringMT tool
+# Categories currently used by offline Egamma TO monitoringMT tool
 # Mechanism to read mongroups directly from trigger menu
 
 from AthenaMonitoring.DQConfigFlags import DQDataType
@@ -15,7 +15,6 @@ def mongroupsCfg(moniAccess, data_type):
         monitoring_tags = []
         monitoringTP_electron = shifter_tp
         
-        # need request new mongroup in the future for bootstrap photon (like "shifter_bsphoton")
         monitoring_photon = list(filter(lambda x: ('HLT_g' in x), shifter_eg))
         monitoring_bootstrap = {
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
@@ -23,10 +22,6 @@ def mongroupsCfg(moniAccess, data_type):
                 'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
                 'HLT_g50_loose_L1eEM24L'  : 'HLT_g25_loose_L1eEM24L'
         }
-        # removing duplicate chains
-        for bsphchain in monitoring_bootstrap:
-                if bsphchain in monitoring_photon:
-                        monitoring_photon.remove(bsphchain)
 
         t0_tp = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["t0_tp"])
         validationTP_electron_eEM = list(filter(lambda x: ('L1eEM' in x), t0_tp ))
@@ -53,7 +48,6 @@ def mongroupsCfg(moniAccess, data_type):
                 mongroups['validationTP_jpsiee']        = validationTP_jpsiee
 
         elif data_type is DQDataType.HeavyIon:
-                # Using hard-code lists until fix for _ion chains in the eg monitoring 
                 monitoring_electron_hi=['HLT_e13_etcut_ion_L1eEM12L','HLT_e15_lhmedium_nogsf_ion_L1eEM15']
                 monitoring_photon_hi=['HLT_g13_etcut_ion_L1eEM12L','HLT_g15_loose_ion_L1eEM15']
                 monitoring_bootstrap_hi = {'HLT_g18_etcut_L1EM10' : 'HLT_g18_etcut_L1EM10'}
