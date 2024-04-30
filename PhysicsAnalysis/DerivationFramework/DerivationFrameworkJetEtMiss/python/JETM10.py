@@ -9,14 +9,41 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
 # Main algorithm config
-def JETM10SkimmingToolCfg(flags):
+def JETM10MetTrigSkimmingToolCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
 
-    JETM10TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name                   = "JETM10TrigSkimmingTool1",
-                                                                                  TriggerListOR          = ["HLT_noalg_L1XE.*"] )
+    JETM10MetTrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name           = "JETM10MetTrigSkimmingTool1",
+                                                                                  TriggerListOR     = ["HLT_noalg_L1XE.*"] )
+    acc.addPublicTool(JETM10MetTrigSkimmingTool, primary = True)
 
-    acc.addPublicTool(JETM10TrigSkimmingTool, primary = True)
+    return(acc)
+
+def JETM10MuTrigSkimmingToolCfg(flags):
+    """Configure the trigger skimming tool"""
+    acc = ComponentAccumulator()
+
+    from DerivationFrameworkJetEtMiss import TriggerLists
+    singleMuTriggers = TriggerLists.single_mu_Trig(flags)
+
+    JETM10MuTrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool( name         = "JETM10MuTrigSkimmingTool1",
+                                                                                  TriggerListOR  = singleMuTriggers)
+
+    acc.addPublicTool(JETM10MuTrigSkimmingTool, primary = True)
+
+    return acc
+
+def JETM10StringSkimmingToolCfg(flags):
+    """Configure the string skimming tool"""
+
+    acc = ComponentAccumulator()
+
+    cutExpression = "(count(Muons.DFCommonMuonPassPreselection && Muons.pt > (20*GeV) && abs(Muons.eta) < 2.7) ) >= 2"
+
+    JETM10StringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "JETM10StringSkimmingTool",
+                                                                                      expression = cutExpression)
+
+    acc.addPublicTool(JETM10StringSkimmingTool, primary = True)
 
     return(acc)
 
@@ -27,7 +54,15 @@ def JETM10KernelCfg(flags, name='JETM10Kernel', **kwargs):
     acc = ComponentAccumulator()
 
     # Skimming
-    skimmingTool = acc.getPrimaryAndMerge(JETM10SkimmingToolCfg(flags))
+    JETM10MetTrigSkimmingTool = acc.getPrimaryAndMerge(JETM10MetTrigSkimmingToolCfg(flags))
+    JETM10MuTrigSkimmingTool  = acc.getPrimaryAndMerge(JETM10MuTrigSkimmingToolCfg(flags))
+    JETM10StringSkimmingTool  = acc.getPrimaryAndMerge(JETM10StringSkimmingToolCfg(flags))
+
+    JETM10MuTrigStringSkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM10MuTrigStringSkimmingTool", FilterList=[JETM10MuTrigSkimmingTool,   JETM10StringSkimmingTool] )
+    acc.addPublicTool(JETM10MuTrigStringSkimmingTool)
+    JETM10SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM10SkimmingTool",
+                        FilterList=[JETM10MuTrigStringSkimmingTool, JETM10MetTrigSkimmingTool])
+    acc.addPublicTool(JETM10SkimmingTool, primary = True)
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
@@ -35,7 +70,7 @@ def JETM10KernelCfg(flags, name='JETM10Kernel', **kwargs):
 
     # Derivation kernel:
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import LooseMETTriggerDerivationKernelCfg
-    acc.merge(LooseMETTriggerDerivationKernelCfg(flags, name="JETM10Kernel", skimmingTools = [skimmingTool], StreamName = 'StreamDAOD_JETM10'))
+    acc.merge(LooseMETTriggerDerivationKernelCfg(flags, name="JETM10Kernel", skimmingTools = [JETM10SkimmingTool], StreamName = 'StreamDAOD_JETM10'))
 
     return acc
 
@@ -77,6 +112,8 @@ def JETM10Cfg(flags):
     JETM10SlimmingHelper.IncludeBJetTriggerContent = False
     JETM10SlimmingHelper.IncludeBPhysTriggerContent = False
     JETM10SlimmingHelper.IncludeMinBiasTriggerContent = False
+
+    JETM10SlimmingHelper.AllVariables += ['HLT_MET_tcpufit','HLT_MET_cell','HLT_MET_trkmht','HLT_MET_cvfpufit','HLT_MET_pfopufit','HLT_MET_mhtpufit_em','HLT_MET_mhtpufit_pf','HLT_MET_pfsum','HLT_MET_pfsum_vssk','HLT_MET_pfsum_cssk','HLT_MET_nn']
 
     # Output stream    
     JETM10ItemList = JETM10SlimmingHelper.GetItemList()
