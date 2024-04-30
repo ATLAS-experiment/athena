@@ -44,8 +44,7 @@ atlas_add_executable( AtlListBSEvents test/AtlListBSEvents.cxx
 # Test(s) in the package:
 atlas_add_test( AtlCopyBSEvent1
    PRE_EXEC_SCRIPT "rm -f test.data*"
-   SCRIPT "AtlCopyBSEvent -e 186882810,187403142,187404922,187419528 -o test.data /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"
-   DEPENDS BSEventSelector )
+   SCRIPT "AtlCopyBSEvent -e 186882810,187403142,187404922,187419528 -o test.data /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1" )
 
 atlas_add_test( AtlFindBSEvent2
    SCRIPT "AtlFindBSEvent -e 187403142 test.data"
