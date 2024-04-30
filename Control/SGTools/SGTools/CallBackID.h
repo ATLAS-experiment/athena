@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_CALLBACKID_H
@@ -33,8 +33,8 @@ public:
   template<typename T>
   void set(StatusCode (T::*updF)(IOVSVC_CALLBACK_ARGS), const T *obj);
 
-  std::string name() const { return m_name; }
-  std::string objName() const { return m_objName; }
+  const std::string& name() const { return m_name; }
+  const std::string& objName() const { return m_objName; }
   int offset() const { return m_offset; }
   const void* ptr() const { return p_obj; }
 

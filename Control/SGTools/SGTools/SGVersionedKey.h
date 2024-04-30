@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SGVersionedKey.h
@@ -66,6 +66,7 @@ namespace SG {
 
     /// sets outKey to point to base key, and version to encoded version (0 is taken to mean default version). 
     void decode(std::string& outKey, unsigned char& version) const;
+    // cppcheck-suppress returnByReference
     operator std::string() const { return m_versionKey; }
     /// @returns version number
     unsigned char version() const;

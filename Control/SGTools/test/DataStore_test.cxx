@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataStore_test.cxx
@@ -553,7 +553,7 @@ void test_t2p()
   SG::DataProxy* dp1 = make_proxy (123, "dp1");
   assert (store.addToStore (123, dp1).isSuccess());
 
-  int trans1;
+  int trans1 = 0;
   assert (store.locatePersistent (&trans1) == 0);
   assert (store.t2pRegister (&trans1, dp1).isSuccess());
   assert (store.locatePersistent (&trans1) == dp1);
