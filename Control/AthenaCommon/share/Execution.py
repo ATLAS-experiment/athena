@@ -1,6 +1,3 @@
-import builtins
-printfunc = getattr(builtins,'print')
-
 ### execution of user script and drop into batch or interactive mode ---------
 for script in opts.scripts:
    try:
@@ -22,9 +19,9 @@ for script in opts.scripts:
             if not 'AthenaCommon' in frame_info[0]:
                short_tb.append( frame_info )
 
-         printfunc ('Shortened traceback (most recent user call last):')
-         printfunc (''.join( traceback.format_list( short_tb ) ),)
-         printfunc (''.join( traceback.format_exception_only( exc_info[0], exc_info[1] ) ),)
+         print ('Shortened traceback (most recent user call last):')
+         print (''.join( traceback.format_list( short_tb ) ),)
+         print (''.join( traceback.format_exception_only( exc_info[0], exc_info[1] ) ),)
       else:
          traceback.print_exc()
 
