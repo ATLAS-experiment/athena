@@ -1610,7 +1610,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     else{
       MCshowerID= "default";                              // Powheg+Pythia8 (601229)  - PhPy8EG_A14
       if (m_showerType == 2)      MCshowerID = "601414";  // POWHEG+Herwig721         - PhH7EG_A14
-      else if (m_showerType == 7) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
+      else if (m_showerType == 6) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
     }
 
     // btagEfficiencyTool
