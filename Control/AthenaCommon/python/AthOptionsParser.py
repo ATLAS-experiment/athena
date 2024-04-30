@@ -241,9 +241,6 @@ def getArgumentParser(legacy_args=False, **kwargs):
         g.add_argument('-s', '--showincludes', action='store_true',
                        help='show printout of included files')
 
-        g.add_argument('--trace', metavar='PATTERN', dest='trace_pattern',
-                       help='also show files that match %(metavar)s')
-
     # --------------------------------------------------------------------------
     if __athenaCLI:
         g = parser.add_argument_group('System options')
