@@ -109,7 +109,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
         # schedule merger to combine signal and background tracks
         InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
                        flags.Overlay.BkgPrefix+TrackContainer]
-        AssociationMapName = ("PRDtoTrackMapResolved" +
+        AssociationMapName = ("PRDtoTrackMapMerge_Resolved" +
                               extension + "Tracks")
         MergerOutputTracks = TrackContainer
 
@@ -305,7 +305,7 @@ def ITkTrackFinalCfg(flags,
         OutputCombinedTracks=TrackContainer,
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
-            f"PRDtoTrackMap{TrackContainer}")))
+            f"PRDtoTrackMapMerge_{TrackContainer}")))
 
     if flags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
@@ -335,7 +335,7 @@ def ITkTrackFinalCfg(flags,
             splitProbName),
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
-            f"PRDtoTrackMap{TrackContainer}"),
+            f"PRDtoTrackMapMerge_{TrackContainer}"),
         isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
         'ActsValidateAmbiguityResolution' in splitProbName or \
         'ActsConversion' in splitProbName or \
@@ -386,7 +386,7 @@ def ITkSiSPSeededTracksFinalCfg(flags):
         if (e=='' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks) ]
 
     for extension in listOfExtensionsRequesting:
-        AssociationMapNameKey="PRDtoTrackMapCombinedITkTracks"
+        AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
         if not (extension == ''):
             AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
 

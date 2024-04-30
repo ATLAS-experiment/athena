@@ -272,7 +272,7 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
                           acc.popToolsAndMerge(PRDtoTrackMapToolCfg(flags)))
 
     kwargs.setdefault("AssociationMapName", (
-        f"PRDToTrackMap{flags.Tracking.ActiveConfig.extension}"))
+        "PRDtoTrackMapAmbi_"+flags.Tracking.ActiveConfig.extension))
 
     if flags.Tracking.ActiveConfig.useTIDE_Ambi:
         kwargs.setdefault("sharedProbCut",
@@ -358,7 +358,7 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
         'SplitClusterAmbiguityMap' + extension))
 
     kwargs.setdefault("AssociationMapName", (
-        'ITkPRDToTrackMap' + flags.Tracking.ActiveConfig.extension))
+        'ITkPRDtoTrackMapAmbi_' + flags.Tracking.ActiveConfig.extension))
     kwargs.setdefault("InputClusterSplitProbabilityName", (
         ClusterSplitProbContainer))
     kwargs.setdefault("OutputClusterSplitProbabilityName", (
@@ -440,7 +440,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
             InDetAmbiTrackSelectionToolCfg(flags)))
 
     kwargs.setdefault("AssociationMapName", (
-        'PRDToTrackMap' + flags.Tracking.ActiveConfig.extension))
+        'PRDtoTrackMapAmbi_' + flags.Tracking.ActiveConfig.extension))
     kwargs.setdefault("InputClusterSplitProbabilityName", (
         'SplitProb'+flags.Tracking.ActiveConfig.extension))
     kwargs.setdefault("OutputClusterSplitProbabilityName", (
@@ -530,7 +530,7 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
             ITkAmbiTrackSelectionToolCfg(flags)))
 
     kwargs.setdefault("AssociationMapName", (
-        'ITkPRDToTrackMap' + flags.Tracking.ActiveConfig.extension))
+        'ITkPRDtoTrackMapAmbi_' + flags.Tracking.ActiveConfig.extension))
     kwargs.setdefault("InputClusterSplitProbabilityName", (
         'SplitProb'+flags.Tracking.ActiveConfig.extension))
     kwargs.setdefault("OutputClusterSplitProbabilityName", (
@@ -554,4 +554,4 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
         CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
             name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
-    
+

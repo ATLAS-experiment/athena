@@ -313,13 +313,13 @@ def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
                 InputTracks += [flags.Overlay.BkgPrefix +
                                 extension + "Tracks"]
             TrackContainer = extension+"Tracks"
-            AssociationMapName = "PRDtoTrackMap" + TrackContainer
+            AssociationMapName = "PRDtoTrackMapMerge_" + TrackContainer
             MergerOutputTracks = TrackContainer
         elif doTrackOverlay:
             # schedule merger to combine signal and background tracks
             InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
                            flags.Overlay.BkgPrefix+TrackContainer]
-            AssociationMapName = ("PRDtoTrackMapResolved" +
+            AssociationMapName = ("PRDtoTrackMapMerge_Resolved" +
                                   extension + "Tracks")
             MergerOutputTracks = TrackContainer
 
@@ -534,7 +534,7 @@ def TrackFinalCfg(flags,
         flags,
         InputCombinedTracks=InputCombinedInDetTracks,
         OutputCombinedTracks=TrackContainer,
-        AssociationMapName=f"PRDtoTrackMap{TrackContainer}"))
+        AssociationMapName=f"PRDtoTrackMapMerge_{TrackContainer}"))
 
     if flags.Tracking.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
@@ -559,7 +559,7 @@ def TrackFinalCfg(flags,
             flags,
             ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
                 flags),
-            AssociationMapName=f"PRDtoTrackMap{TrackContainer}"))
+            AssociationMapName=f"PRDtoTrackMapMerge_{TrackContainer}"))
 
     return result
 
@@ -584,7 +584,7 @@ def PseudoTrackFinalCfg(flags):
         xAODTrackParticlesFromTracksContainerName=(
             "InDetPseudoTrackParticles"),
         AssociationMapName=(
-            "PRDtoTrackMapCombinedInDetTracks")))
+            "PRDtoTrackMapMerge_CombinedInDetTracks")))
 
     return result
 
@@ -606,7 +606,7 @@ def ObserverTrackFinalCfg(flags):
     result.merge(ObserverTrackParticleCnvAlgCfg(
         flags,
         AssociationMapName = (
-            "PRDtoTrackMapCombinedInDetTracks")))
+            "PRDtoTrackMapMerge_CombinedInDetTracks")))
 
     return result
 
@@ -653,9 +653,9 @@ def SiSPSeededTracksFinalCfg(flags):
         if (e=='' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
 
     for extension in listOfExtensionsRequesting:
-        AssociationMapNameKey="PRDtoTrackMapCombinedInDetTracks"
+        AssociationMapNameKey="PRDtoTrackMapMerge_CombinedInDetTracks"
         if extension=='Disappearing':
-            AssociationMapNameKey = "PRDtoTrackMapDisappearingTracks"
+            AssociationMapNameKey = "PRDtoTrackMapMerge_DisappearingTracks"
         elif not (extension == ''):
             AssociationMapNameKey = f"InDetPRDtoTrackMap{extension}"
 
