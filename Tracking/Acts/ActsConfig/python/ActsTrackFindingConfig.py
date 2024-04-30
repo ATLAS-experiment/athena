@@ -165,8 +165,8 @@ def ActsTrackFindingCfg(flags,
         kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_Cached"], strip=["ITkConversionStripClusters_Cached"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkConversionStripClusters"]))
     else:
         kwargs.setdefault('SeedLabels', isdet(flags, pixel=["PPP"], strip=["SSS"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["PPP"]))
-        kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["ActsPixelEstimatedTrackParams"]))
-        kwargs.setdefault('SeedContainerKeys', isdet(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["ActsPixelSeeds"]))
+        kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"], strip=[f"{flags.Tracking.ActiveConfig.extension}StripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"]))
+        kwargs.setdefault('SeedContainerKeys', isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelSeeds"], strip=[f"{flags.Tracking.ActiveConfig.extension}StripSeeds"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelSeeds"]))
         kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_Cached"], strip=["ITkStripClusters_Cached"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkStripClusters"]))
         
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
