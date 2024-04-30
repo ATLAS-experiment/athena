@@ -21,6 +21,7 @@ atlas_add_library( CombinedScintillator
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} CaloIdentifier StoreGateLib GaudiKernel G4AtlasToolsLib GeoMaterial2G4 GeoModelInterfaces TileSimEvent )
+set_target_properties( CombinedScintillator PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_runtime( share/combinedscintillator.dtd share/combinedscintillator.xml )

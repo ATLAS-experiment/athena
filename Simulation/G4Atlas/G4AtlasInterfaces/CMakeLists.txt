@@ -17,3 +17,4 @@ atlas_add_library( G4AtlasInterfaces
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel )
 
+set_target_properties( G4AtlasInterfaces PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

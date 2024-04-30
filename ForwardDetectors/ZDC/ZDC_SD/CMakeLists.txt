@@ -15,12 +15,14 @@ atlas_add_library( ZDC_SDLib
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} G4AtlasToolsLib StoreGateLib ZDC_SimEvent ZdcIdentifier CaloG4SimLib CaloSimEvent CaloIdentifier MCTruth )
+set_target_properties( ZDC_SDLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( ZDC_SD
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_LINK_LIBRARIES ZDC_SDLib )
+set_target_properties( ZDC_SD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
