@@ -6,6 +6,6 @@
 //#include "GaudiKernel/DeclareFactoryEntries.h"
 
 // Local include(s):
-#include "../PhysValSecVtx.h"
+#include "InDetSecVtxTruthMatchTool/InDetSecVtxTruthMatchTool.h"
 
-DECLARE_COMPONENT( PhysValSecVtx )
+DECLARE_COMPONENT( InDetSecVtxTruthMatchTool )

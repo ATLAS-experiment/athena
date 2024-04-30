@@ -5,9 +5,11 @@
 // Local include(s):
 #include "TrackingAnalysisAlgorithms/VertexSelectionAlg.h"
 #include "TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h"
+#include "TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h"
 
 
 // Declare the component(s) of the package:
 DECLARE_COMPONENT( CP::VertexSelectionAlg )
 DECLARE_COMPONENT( CP::TrackParticleMergerAlg )
+DECLARE_COMPONENT( CP::SecVertexTruthMatchAlg )
 
