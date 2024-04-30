@@ -26,3 +26,4 @@ atlas_add_library( G4ExternalDecay
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${PYTHIA8_LIBRARIES} ${LHAPDF_LIBRARIES} ${GEANT4_LIBRARIES} Pythia8_iLib ${extra_libs}
                    PRIVATE_LINK_LIBRARIES AtlasHepMCLib )
+set_target_properties( G4ExternalDecay PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
