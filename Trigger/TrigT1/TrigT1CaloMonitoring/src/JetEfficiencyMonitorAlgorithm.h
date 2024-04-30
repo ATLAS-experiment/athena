@@ -43,7 +43,7 @@ private:
   
   // container keys including steering parameter and description
   SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4EMPFlowJets", ""}; //offline jets
-  SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "HLT_AntiKt10EMPFlowJets_nojcalib_ftf", ""}; //offline LR jets  
+  SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", ""}; //offline LR jets  
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexSRJetContainerKey{ this, "mygFexSRJetRoIContainer" , "L1_gFexSRJetRoI" , ""}; //gfex SR jets
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexLRJetContainerKey{ this, "mygFexLRJetRoIContainer" , "L1_gFexLRJetRoI" , ""}; //gfex LR jets
 };
