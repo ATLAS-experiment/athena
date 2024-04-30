@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -47,6 +47,7 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
         flags.Detector.GeometryLAr = doLAr
         flags.Detector.GeometryTile = doTile
         flags.Detector.GeometryMuon = doMuon
+    flags.fillFromArgs()
     flags.lock()
 
     # Construct ComponentAccumulator
