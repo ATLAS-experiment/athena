@@ -304,7 +304,6 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
     return acc
 
 
-@AccumulatorCache
 def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwargs):
     """ Create the LC calibrator """
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -356,7 +355,7 @@ def prepareFlagsGPUHLT(flags):
     # NOTE: "HLT" flag subdomain defaults moved to CaloRecGPUFlags
     return
 
-@AccumulatorCache
+
 def hltCaloTopoClusteringCfg(
     flags, namePrefix=None,nameSuffix=None, CellsName=None, monitorCells=False, roisKey="UNSPECIFIED",clustersKey=None, doLCFS=False, doTau = False):
     if doTau:
