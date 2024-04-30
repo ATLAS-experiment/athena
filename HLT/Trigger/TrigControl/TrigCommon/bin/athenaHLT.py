@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- mode: python -*-
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This is a script that is born as shell to setup the preloading and then
 # resurrected as python script for the actual athenaHLT.py application.
@@ -489,7 +489,6 @@ def main():
          flags.fillFromString(flag_arg)
 
    PscConfig.interactive = args.interactive
-   PscConfig.dumpJobProperties = args.dump_config or args.dump_config_exit or args.dump_config_reload
    PscConfig.exitAfterDump = args.dump_config_exit
    PscConfig.reloadAfterDump = args.dump_config_reload
 

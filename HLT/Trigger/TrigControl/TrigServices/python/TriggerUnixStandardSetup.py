@@ -1,14 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @file TriggerUnixStandardSetup.py
 ## @brief py-module to configure the Athena AppMgr for trigger
 ## @author Werner Wiedenmann <Werner.Wiedenmann@cern.ch>
 ###############################################################
-
-
-def setupCommonServices(flags):
-    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-    CAtoGlobalWrapper(commonServicesCfg, flags)
 
 
 def commonServicesCfg(flags):

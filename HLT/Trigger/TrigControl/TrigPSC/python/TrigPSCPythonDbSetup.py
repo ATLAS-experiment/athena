@@ -11,8 +11,6 @@
 ## Besides providing basic python bindings it also takes care of
 ## switching the OutputLevel in case the "-l" option was used.
 
-## !!! Do NOT import theApp. It will screw up the configuration !!!
-
 from GaudiPython import InterfaceCast, gbl
 from GaudiPython.Bindings import iProperty
 from TrigCommon.TrigPyHelper import trigApp

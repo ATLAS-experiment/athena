@@ -5,16 +5,8 @@
 
 _flags = None
 
-def setDefaultOnlineFlagsOldStyle():
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
-    from AthenaCommon.GlobalFlags import globalflags as gf
-    acf.isOnline.set_Value_and_Lock(True)
-    acf.FilesInput.set_Value_and_Lock([])
-    gf.InputFormat.set_Value_and_Lock('bytestream')
-    gf.DataSource.set_Value_and_Lock('data')
 
-
-def setDefaultOnlineFlagsNewStyle(flags):
+def setDefaultOnlineFlags(flags):
     from AthenaConfiguration.Enums import Format
     flags.Common.isOnline = True
     flags.Input.Files = []
@@ -38,8 +30,7 @@ def defaultOnlineFlags():
     TrigPSC/TrigServices/athenaHLT as we cannot explicitly pass flags everywhere."""
     global _flags
     if _flags is None:
-        setDefaultOnlineFlagsOldStyle()
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         _flags = initConfigFlags()
-        setDefaultOnlineFlagsNewStyle(_flags)
+        setDefaultOnlineFlags(_flags)
     return _flags
