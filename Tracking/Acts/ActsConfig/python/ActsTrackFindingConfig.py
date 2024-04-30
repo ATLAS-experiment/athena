@@ -76,7 +76,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         def tolist(c):
             return c if isinstance(c, list) else [c]
         # Use settings from flags.Tracking.ActiveConfig, initialised in createITkTrackingPassFlags() at
-        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L376
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L249
         kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
         kwargs.setdefault("ptMin",
                           [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
@@ -89,6 +89,8 @@ def ActsMainTrackFindingAlgCfg(flags,
         elif flags.Acts.doTrackFindingTrackSelector != 3:
             # include hole/shared hit cuts - disable for comparison with previous behaviour
             kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
+            if flags.Acts.doTrackFindingTrackSelector != 5:
+                kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))
             kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
             if flags.Acts.doTrackFindingTrackSelector == 4:
                 # don't use branch stopper - for comparison with previous behaviour

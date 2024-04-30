@@ -401,7 +401,11 @@ namespace ActsTrk
       double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
       const auto &cutSet = getCuts(alg.trackFinder().trackSelector, eta);
 
-      if (!(tipState.nHoles > cutSet.maxHoles &&
+      // https://github.com/acts-project/acts/blob/v34.0.0/Core/include/Acts/TrackFinding/MeasurementSelector.ipp#L99
+      // counts any other measurement anywhere on the surface as an outlier, so does not register as a hole.
+      // We really want to count them as holes.
+      if (!((tipState.nHoles > cutSet.maxHoles ||
+             tipState.nOutliers > cutSet.maxOutliers) &&
             (trackState.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ||
              tipState.nMeasurements < cutSet.minMeasurements)))
         return false;
