@@ -86,6 +86,10 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                             fillGroup = baseGroupName + "_" + containerKey,
                                type="TProfile2D",
                                xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
+        helper.defineHistogram(f"LBN,{containerKey}_nEMTOBs_nocut;h_"+containerKey+"_nTOBs", title = "Average # of " + containerKey + " TOBs;LBN",
+                               fillGroup = baseGroupName,
+                               type="TH2I",
+                               xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
 
     for containerKey in EfexMonAlg.eFexTauTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
@@ -103,10 +107,14 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                fillGroup = baseGroupName + "_" + containerKey,
                                type="TProfile2D",
                                xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
+        helper.defineHistogram(f"LBN,{containerKey}_nTauTOBs_nocut;h_"+containerKey+"_nTOBs", title = "Average # of " + containerKey + " TOBs;LBN",
+                               fillGroup = baseGroupName,
+                               type="TH2I",
+                               xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
 
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):
-        cut_title_addition = '' if (cut_val == 0.0) else ' (Et>' + '%.1f'%(cut_val/1000) + 'GeV cut)'
+        cut_title_addition = '' if (cut_val == 0.0) else ' (Et>=' + '%.1f'%(cut_val/1000) + 'GeV cut)'
         # Em first
         for containerKey in EfexMonAlg.eFexEMTobKeyList:
             fillGroup = baseGroupName+'_'+containerKey+'_'+cut_name
