@@ -6,7 +6,8 @@
 #define ITKPIXEL_ENCODINGALG_Hi
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-
+#include "InDetRawData/PixelRDO_Container.h"
+#include "StoreGate/ReadHandleKey.h"
 
 namespace InDetDD {
   class PixelDetectorManager;
@@ -30,13 +31,13 @@ class ITkPixelEncodingAlg : public AthReentrantAlgorithm
       INVALID_REGION=-1, BARREL, ENDCAP, N_REGIONS
     };
 
-
+    SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this,"PixelRDOKey","ITkPixelRDOs","StoreGate Key of Pixel RDOs"};
     const InDetDD::PixelDetectorManager*           m_pixelManager;                   //!< the Si Detector Manager
     const PixelID*                                 m_pixIdHelper;  
 
     static constexpr float s_pitch50x50=0.050;
 
-    void fillChipMaps() const;
+    void fillChipMaps(const EventContext& ctx) const;
 };
 #endif
 
