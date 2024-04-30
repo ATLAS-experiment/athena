@@ -47,6 +47,20 @@ Decorator<T, ALLOC>::Decorator (const std::string& name,
 
 
 /**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class T, class ALLOC>
+inline
+Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid)
+  : Decorator (auxid, SG::AuxVarFlags::None)
+{
+}
+
+
+/**
  * @brief Constructor.
  * @param name Name of this aux variable.
  * @param clsname The name of its associated class.  May be blank.
@@ -62,6 +76,23 @@ Decorator<T, ALLOC>::Decorator
    const SG::AuxVarFlags flags)
   : m_auxid (SG::AuxTypeRegistry::instance().getAuxID<T, ALLOC> (name, clsname, flags))
 {
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class T, class ALLOC>
+inline
+Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid,
+                                const SG::AuxVarFlags flags)
+  : m_auxid (auxid)
+{
+  SG::AuxTypeRegistry::instance().checkAuxID<T, ALLOC> (auxid, flags);
 }
 
 

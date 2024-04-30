@@ -85,6 +85,13 @@ void test1()
   static_assert (std::is_same<decltype(ityp2(b)),
                               int>::value, "test");
 
+  {
+    SG::AtomicConstAccessor<int> i2 (ityp2_id);
+    assert (i2.auxid() == ityp2_id);
+    EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, (SG::AtomicConstAccessor<float> (ityp2_id)));
+    EXPECT_EXCEPTION (SG::ExcAtomicMismatch, (SG::Accessor<int> (ityp2_id)));
+  }
+
   SG::AtomicDecorator<int> ityp2_d ("anInt2");
   ityp2_d(b) = 11;
   assert (11 == ityp2(b));
