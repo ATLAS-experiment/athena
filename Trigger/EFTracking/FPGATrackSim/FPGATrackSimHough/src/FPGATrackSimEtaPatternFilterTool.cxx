@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimEtaPatternFilterTool.cxx
@@ -7,12 +7,9 @@
  * @brief Implements road filtering using eta module patterns
  */
 
-#include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
-#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
-#include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
 #include "FPGATrackSimEtaPatternFilterTool.h"
 
@@ -22,7 +19,6 @@
 #include <fstream>
 #include <cmath>
 #include <algorithm>
-#include <boost/dynamic_bitset.hpp>
 #include <iostream>
 
 
@@ -306,7 +302,7 @@ FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPatter
 ///////////////////////////////////////////////////////////////////////////////
 // Prints
 
-std::string FPGATrackSimEtaPatternFilterTool::to_string(const std::vector<unsigned> v) const
+std::string FPGATrackSimEtaPatternFilterTool::to_string(const std::vector<unsigned> & v) const
 {
     std::ostringstream oss;
     oss << "[";
@@ -319,7 +315,7 @@ std::string FPGATrackSimEtaPatternFilterTool::to_string(const std::vector<unsign
     return oss.str();
 }
 
-std::string FPGATrackSimEtaPatternFilterTool::to_string(const EtaPattern patt) const
+std::string FPGATrackSimEtaPatternFilterTool::to_string(const EtaPattern & patt) const
 {
     std::ostringstream oss;
     oss << "[";
@@ -332,7 +328,7 @@ std::string FPGATrackSimEtaPatternFilterTool::to_string(const EtaPattern patt) c
     return oss.str();
 }
 
-std::string FPGATrackSimEtaPatternFilterTool::to_string(const FPGATrackSimRoad road) const
+std::string FPGATrackSimEtaPatternFilterTool::to_string(const FPGATrackSimRoad & road) const
 {
     std::ostringstream oss;
     oss << road.getNHits()  << " : [";

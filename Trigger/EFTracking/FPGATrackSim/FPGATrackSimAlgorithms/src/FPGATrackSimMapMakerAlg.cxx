@@ -4,7 +4,10 @@
 
 #include "FPGATrackSimMapMakerAlg.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventOutputHeaderTool.h"
+#include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
+
 #include "TH2.h"
+#include "TFile.h"
 
 #include "GaudiKernel/IEventProcessor.h"
 
@@ -690,7 +693,10 @@ StatusCode FPGATrackSimMapMakerAlg::finalize()
     ATH_CHECK(writeEtaPatterns());
     ATH_CHECK(writeRadiiFile(m_allHits));
     ATH_CHECK(writeMedianZFile(m_allHits));
-    if (m_monitorFile) delete m_monitorFile;
+    delete m_monitorFile;
+    m_monitorFile = nullptr;
+    delete m_moduleRelabel;
+    m_moduleRelabel = nullptr;
     return StatusCode::SUCCESS;
 }
 
