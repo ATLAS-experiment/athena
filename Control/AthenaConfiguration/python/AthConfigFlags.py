@@ -616,25 +616,10 @@ class AthConfigFlags(object):
         Scripts calling AthConfigFlags.fillFromArgs can extend this parser, and pass their version to fillFromArgs
         """
         import argparse
-        parser= argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter, **kwargs )
-        parser.add_argument("-d","--debug", default=None, choices=["init", "exec", "fini"], help="attach debugger (gdb) before run, <stage>")
-        parser.add_argument("-i","--interactive", default=None, choices=["init","run"], help="Drop into interactive mode at <stage>")
-        parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
-        parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
-        parser.add_argument("--filesInput", type=str, default=None, help="Input file(s), comma-separated list with wildcards")
-        parser.add_argument("-l", "--loglevel", default=None, choices=["ALL","VERBOSE","DEBUG","INFO","WARNING","ERROR","FATAL"], help="logging level")
-        parser.add_argument("--config-only", metavar='FILE', type=str, default=None, const=True, nargs='?', help="Stop after configuration and optionally pickle configuration to FILE (may not be respected by all diver scripts)")
-        parser.add_argument("--threads", type=int, default=None, help="Run with given number of threads (use 0 for serial execution)")
-        parser.add_argument('--concurrent-events', type=int, default=None, help='number of concurrent events for AthenaMT')
-        parser.add_argument("--nprocs", type=int, default=None, help="Run AthenaMP with given number of worker processes")
-        parser.add_argument("--mtes", type=bool, default=None, help="Run multi-threaded event service")
-        parser.add_argument("--mtes-channel", type=str, default=None, help="For multi-threaded event service: the name of communication channel between athena and pilot")
+        from AthenaCommon.AthOptionsParser import getArgumentParser
+        parser = getArgumentParser(**kwargs)
         parser.add_argument("---",dest="terminator",action='store_true', help=argparse.SUPPRESS) # special hidden option required to convert option terminator -- for --help calls
-        parser.add_argument("--perfmon", type=str.lower, nargs='?', const='fastmonmt', choices=['fastmonmt','fullmonmt'], help="Performance monitoring")
-        parser.add_argument("--profile-python", type=str, default=None, metavar='FILE', help='profile python code, dump in %(metavar)s. End filename with .txt for quick summary only')
-        parser.add_argument("--tracelevel", type=int, default=None, help='Trace python configuration code as it is executed. Verbosity is reduced according to the paramter.'\
-                            ' 0: print everying, 1: exclude System and ROOT libraries, 2: exclude also GaudConfig2, 3: exclude ComponentAccumulator internals.'\
-                            ' Works only when called via athena.py or ThinCAWrapper.py') #Not used here at all, just to get the help-text
+
         return parser
 
     def parser(self):
@@ -748,7 +733,7 @@ class AthConfigFlags(object):
             from AthenaCommon import Constants
             self.Exec.OutputLevel = getattr(Constants, args.loglevel)
 
-        if arg_set('config_only'):
+        if arg_set('config_only') and args.config_only is not False:
             from os import environ
             environ["PICKLECAFILE"] = "" if args.config_only is True else args.config_only
 

@@ -7,6 +7,12 @@ if opts.trace_pattern:
    AthCIncMod.tracePattern = opts.trace_pattern
 
 
+### setup interactive prompt
+if opts.interactive:
+   from AthenaCommon.Interactive import configureInteractivePrompt
+   configureInteractivePrompt()
+   del configureInteractivePrompt
+
 ### debugging helper, hooks debugger to running interpreter process ----------
 from AthenaCommon.Debugging import hookDebugger, allowPtrace
 allowPtrace()
@@ -101,17 +107,17 @@ if opts.nprocs and (opts.nprocs >= 1 or opts.nprocs==-1):
    _msg.info ("configuring AthenaMP with [%s] sub-workers", 
               jps.ConcurrencyFlags.NumProcs())
 
-   if (opts.debug_worker == True) :
+   if (opts.debug_worker is True) :
       jps.ConcurrencyFlags.DebugWorkers = True
       _msg.info ("   Workers will pause after fork until SIGUSR1 signal received")
 
-if ( (opts.threads and (opts.threads != 0)) or (opts.concurrent_events and (opts.concurrent_events != 0)) ):
+if (opts.threads or opts.concurrent_events) :
 
-   if (opts.threads == 0 and opts.concurrent_events > 0) :
+   if (opts.threads is None and opts.concurrent_events is not None) :
       ## num threads = num concurrent evts
       jps.ConcurrencyFlags.NumThreads = opts.concurrent_events
       jps.ConcurrencyFlags.NumConcurrentEvents = opts.concurrent_events
-   elif ( opts.threads > 0 and opts.concurrent_events == 0) :
+   elif (opts.threads is not None and opts.concurrent_events is None) :
       ## num concurrent evts = num threads
       jps.ConcurrencyFlags.NumThreads = opts.threads
       jps.ConcurrencyFlags.NumConcurrentEvents = opts.threads

@@ -7,7 +7,8 @@ if (XAOD_STANDALONE)
     # Install files from the package:
     atlas_install_python_modules( python/SystemOfUnits.py
                                   python/Logging.py
-                                  python/Constants.py )
+                                  python/Constants.py
+                                  python/AthOptionsParser.py )
 else()
     # Set up specific Athena runtime environment:
     set( AthenaCommonEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
@@ -23,8 +24,7 @@ else()
                               share/Atlas_Gen.UnixStandardJob.py
                               share/runbatch.py )
     
-    atlas_install_scripts( share/athena_preload.sh
-                           share/ThinCAWrapper.sh )
+    atlas_install_scripts( share/athena_preload.sh )
 
     # Python scripts checked by flake8:
     atlas_install_scripts( share/athena.py
@@ -54,4 +54,24 @@ else()
        atlas_add_test( JobOptionsUnitTests SCRIPT test/JobOptionsUnitTests.py
           POST_EXEC_SCRIPT noerror.sh )
     endif()
+
+    # Command line testing:
+    atlas_add_test( athenaCA_config
+       SCRIPT athena.py --config-only=ca.pkl AthExHelloWorld/HelloWorldConfig.py Exec.MaxEvents=1
+       POST_EXEC_SCRIPT noerror.sh )
+
+    atlas_add_test( athenaCA_run
+       SCRIPT athena.py --stdcmalloc ca.pkl
+       LOG_SELECT_PATTERN "Preloading|processing event #"
+       DEPENDS athenaCA_config )
+
+    atlas_add_test( athenaLegacy_config
+       SCRIPT athena.py --config-only=legacy.pkl --evtMax=1 AthExHelloWorld/HelloWorldOptions.py
+       POST_EXEC_SCRIPT noerror.sh )
+
+    atlas_add_test( athenaLegacy_run
+       SCRIPT athena.py --stdcmalloc legacy.pkl
+       LOG_SELECT_PATTERN "Preloading|processing event #"
+       DEPENDS athenaLegacy_config )
+
 endif()

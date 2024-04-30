@@ -1,0 +1,4 @@
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+HelloWorld                                          ERROR An ERROR message
+HelloWorld                                          FATAL A FATAL error message
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
