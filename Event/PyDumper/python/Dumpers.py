@@ -2643,7 +2643,12 @@ def dump_MVFVxTrackAtVertex (t, f):
     
 def dump_VxCandidate1 (v, f):
     dump_RecVertex (v.recVertex(), f)
-    for t in v.vxTrackAtVertex():
+    # Use this rather than iterating over the tav vector directly.
+    # With recent pyroot versions, the object doesn't get converted
+    # to the dynamic type.
+    tav = v.vxTrackAtVertex()
+    for i in range(tav.size()):
+        t = tav[i]
         fprint (f, '\n    ', typename(t.__class__))
         if isinstance (t, PyAthena.Trk.MVFVxTrackAtVertex):
             dump_MVFVxTrackAtVertex (t, f)
