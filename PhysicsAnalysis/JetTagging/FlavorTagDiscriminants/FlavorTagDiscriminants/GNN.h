@@ -44,8 +44,7 @@ namespace FlavorTagDiscriminants {
         const FlipTagConfig& flip_config = FlipTagConfig::STANDARD,
         const std::map<std::string, std::string>& variableRemapping = {},
         const TrackLinkType trackLinkType = TrackLinkType::TRACK_PARTICLE,
-        float defaultOutputValue = NAN,
-        bool decorate_tracks = false);
+        float defaultOutputValue = NAN);
     GNN(GNN&&);
     GNN(const GNN&);
     virtual ~GNN();
@@ -92,7 +91,6 @@ namespace FlavorTagDiscriminants {
 
     Decorators m_decorators;
     float m_defaultValue;
-    bool m_decorate_tracks;
     FTagDataDependencyNames m_dataDependencyNames;
   };
 } // end namespace FlavorTagDiscriminants
