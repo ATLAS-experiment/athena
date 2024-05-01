@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOTOPOTOWERCONTAINER_H
@@ -105,7 +105,7 @@ public:
 
   // List of calorimeters from which to use cells
   // ??? Redundant with regions in base class?
-  std::vector<CaloCell_ID::SUBCALO> GetCaloIndices() const;
+  const std::vector<CaloCell_ID::SUBCALO>& GetCaloIndices() const;
   bool GetCaloSelection() const;
 
   void SetClusters(const CaloClusterContainer* c);
@@ -180,7 +180,7 @@ inline float CaloTopoTowerContainer::GetCellESignificanceThreshold() const
 {return m_cellESignificanceThreshold;}
 
 // List of calorimeters from which to use cells
-inline std::vector<CaloCell_ID::SUBCALO>  CaloTopoTowerContainer::GetCaloIndices() const
+inline const std::vector<CaloCell_ID::SUBCALO>&  CaloTopoTowerContainer::GetCaloIndices() const
 { return m_caloIndices;}
 inline bool CaloTopoTowerContainer::GetCaloSelection() const
 {return m_caloSelection;}
