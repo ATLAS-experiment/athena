@@ -108,9 +108,9 @@ namespace MuonGM {
         inline unsigned int nTgcDE() const;  //!< Number of Tgc DetectorElements
 
         // Geometry versioning
-        inline std::string geometryVersion() const;  //!< it can be Rome-Initial or P03, or ... it's the name of the layout
+        inline const std::string& geometryVersion() const;  //!< it can be Rome-Initial or P03, or ... it's the name of the layout
         void setGeometryVersion(const std::string& version);
-        inline std::string get_DBMuonVersion() const;  //!< the name of the MuonSpectrometer tag (in the geometry DB) actually accessed
+        inline const std::string& get_DBMuonVersion() const;  //!< the name of the MuonSpectrometer tag (in the geometry DB) actually accessed
         void set_DBMuonVersion(const std::string& version);
 
         // Access to identifier helpers
@@ -243,8 +243,8 @@ namespace MuonGM {
     int MuonDetectorManager::IncludeCutoutsFlag() const { return m_includeCutouts; }
     int MuonDetectorManager::IncludeCutoutsBogFlag() const { return m_includeCutoutsBog; }
 
-    std::string MuonDetectorManager::geometryVersion() const { return m_geometryVersion; }
-    std::string MuonDetectorManager::get_DBMuonVersion() const { return m_DBMuonVersion; }
+    const std::string& MuonDetectorManager::geometryVersion() const { return m_geometryVersion; }
+    const std::string& MuonDetectorManager::get_DBMuonVersion() const { return m_DBMuonVersion; }
 
     
     unsigned int MuonDetectorManager::nMuonStation() const { return m_MuonStationMap.size(); }
