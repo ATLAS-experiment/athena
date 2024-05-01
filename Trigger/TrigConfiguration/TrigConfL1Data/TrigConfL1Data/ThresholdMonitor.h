@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_ThresholdMonitor
@@ -28,8 +28,8 @@ namespace TrigConf
       int multiplicity() const { return m_Multiplicity; }
       int internalCounter() const { return m_InternalCounter; }
       int bunchGroupId() const { return m_BunchGroupId; }
-      std::string counterType() const { return m_CounterType; }
-      std::string thresholdName() const { return m_ThresholdName; }
+      const std::string& counterType() const { return m_CounterType; }
+      const std::string& thresholdName() const { return m_ThresholdName; }
       uint16_t ctpinSlot() const { return m_CtpinSlot; }
       uint16_t ctpinConnector() const { return m_CtpinConnector; }
       int thresholdStartBit() const { return m_ThresholdStartBit; }
