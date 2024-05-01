@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCABLINGTOOLS_LVL1OBJECT_H
@@ -20,7 +20,7 @@ public:
     virtual ~BaseObject() = default;
 
     ObjectType tag() const { return m_tag; }
-    std::string name() const { return m_name; }
+    const std::string& name() const { return m_name; }
 
     virtual void Print(std::ostream&, bool) const {}
 };
