@@ -38,7 +38,8 @@ public:
     virtual ~ClusterizationAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    
+    virtual StatusCode finalize() override;
+  
 private:
     ToolHandle<IClusteringTool> m_clusteringTool {this, "ClusteringTool", "",
       "Clustering Tool"};
@@ -73,6 +74,15 @@ private:
       "Name of ID helper to fetch from detstore" };
 
     const IDHelper* m_idHelper = nullptr;
+
+private:
+  enum EStat {
+    kNRdo,
+    kNClusters,
+    kNStat
+  };
+
+  mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE {};  
 };
 
 } // namespace ActsTrk
