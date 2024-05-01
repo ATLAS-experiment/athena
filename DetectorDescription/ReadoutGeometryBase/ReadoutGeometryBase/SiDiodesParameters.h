@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,10 +52,10 @@ namespace InDetDD {
       ///////////////////////////////////////////////////////////////////
 
       /** position of the diodes centre: */
-      SiLocalPosition centre() const;
+      const SiLocalPosition& centre() const;
 
       /** width of the diodes: */
-      SiLocalPosition width() const;
+      const SiLocalPosition& width() const;
       SiLocalPosition halfWidth() const;
 
       /** boundaries of the diodes: */
@@ -88,12 +88,12 @@ namespace InDetDD {
 inline SiDiodesParameters::~SiDiodesParameters()
 {}
 
-inline SiLocalPosition SiDiodesParameters::centre() const
+inline const SiLocalPosition& SiDiodesParameters::centre() const
 {
   return m_centre;
 }
 
-inline SiLocalPosition SiDiodesParameters::width() const
+inline const SiLocalPosition& SiDiodesParameters::width() const
 {
   return m_width;
 }
