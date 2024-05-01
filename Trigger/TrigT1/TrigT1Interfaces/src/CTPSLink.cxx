@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1Interfaces/CTPSLink.h"
@@ -92,7 +92,7 @@ namespace LVL1CTP {
     return result;
   }
 
-  const std::vector< uint32_t > CTPSLink::getCTPToRoIBWords() const {
+  const std::vector< uint32_t >& CTPSLink::getCTPToRoIBWords() const {
 
     return m_CTPSLinkVector;
 
