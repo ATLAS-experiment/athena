@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODJET_JETACCESSORS_H
@@ -40,7 +40,7 @@ namespace xAOD {
 
     struct Named {
       Named(const std::string & n) : m_name(n){}
-      std::string name() const {return m_name;}
+      const std::string& name() const {return m_name;}
     protected:
       std::string m_name;
     };
