@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/GNNToolifiers.h"
@@ -17,7 +17,6 @@ namespace FlavorTagDiscriminants {
     t.declareProperty("trackLinkType", props->trackLinkType,
       "access tracks as IParticleContainer or as TrackParticleContainer");
     t.declareProperty("defaultOutputValue", props->default_output_value);
-    t.declareProperty("decorateTracks", props->decorate_tracks);
   }
 
   GNNOptions getOptions(const GNNToolProperties& props) {
@@ -30,7 +29,6 @@ namespace FlavorTagDiscriminants {
       opts.track_link_type = trackLinkTypeFromString(props.trackLinkType);
     }
     opts.default_output_value = props.default_output_value;
-    opts.decorate_tracks = props.decorate_tracks;
     return opts;
   }
 

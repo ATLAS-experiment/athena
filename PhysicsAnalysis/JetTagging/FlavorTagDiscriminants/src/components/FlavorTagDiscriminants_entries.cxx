@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/VRJetOverlapDecoratorTool.h"
@@ -22,7 +22,8 @@
 #include "FlavorTagDiscriminants/TrackTruthDecoratorAlg.h"
 #include "FlavorTagDiscriminants/SoftElectronDecoratorAlg.h"
 #include "FlavorTagDiscriminants/SoftElectronTruthDecoratorAlg.h"
-#include <FlavorTagDiscriminants/TrackClassifier.h>
+#include "FlavorTagDiscriminants/TrackClassifier.h"
+#include "FlavorTagDiscriminants/GNNAuxTaskDecoratorAlg.h"
 
 #include "src/FoldDecoratorAlg.h"
 
@@ -50,3 +51,4 @@ DECLARE_COMPONENT(SoftElectronDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronTruthDecoratorAlg)
 DECLARE_COMPONENT(TrackClassifier)
 DECLARE_COMPONENT(FoldDecoratorAlg)
+DECLARE_COMPONENT(GNNAuxTaskDecoratorAlg)

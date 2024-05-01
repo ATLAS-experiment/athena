@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // here lives some common stuff between GNNTool and MultifoldGNNTool
@@ -24,7 +24,6 @@ namespace FlavorTagDiscriminants {
     std::map<std::string,std::string> variableRemapping;
     std::string trackLinkType;
     float default_output_value = NAN;
-    bool decorate_tracks = false;
   };
 
   void propify(asg::AsgTool& tool, GNNToolProperties* props);
