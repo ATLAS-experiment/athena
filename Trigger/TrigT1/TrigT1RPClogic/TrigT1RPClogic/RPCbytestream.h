@@ -58,10 +58,10 @@ class RPCbytestream : public RPCtrigDataObject
     debu rx_rostruct_debug(void)  const {return m_rx_rostruct_debug;}
     debu sl_rostruct_debug(void)  const {return m_sl_rostruct_debug;}
 
-    std::string filename(void) const {return m_filename;}
+    const std::string& filename(void) const {return m_filename;}
 
-    CMA_Readout cma_readout(void) const {return m_cma_readout;}
-    PAD_Readout pad_readout(void) const {return m_pad_readout;}
+    const CMA_Readout& cma_readout(void) const {return m_cma_readout;}
+    const PAD_Readout& pad_readout(void) const {return m_pad_readout;}
 };
 
 #endif

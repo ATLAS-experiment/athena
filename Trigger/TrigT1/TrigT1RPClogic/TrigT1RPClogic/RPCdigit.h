@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCDIGIT_H
@@ -47,7 +47,7 @@ class RPCdigit : public RPCtrigDataObject
 
     const RPCdecoder& decoding(void) const {return m_coding;}
     //const RPCGeometry* rpcgeo(void) const {return m_rpcgeo;}
-    const std::list<unsigned int> codes(void) const {return m_codes;}
+    const std::list<unsigned int>& codes(void) const {return m_codes;}
 
     float time (void)      const {return m_time;}
     float x(void)          const {return m_x;}

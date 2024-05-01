@@ -45,7 +45,7 @@ class SLpatterns : public RPCtrigDataObject
 
     unsigned long int debug(void) const {return m_debug;}
 
-    const PADdata::PatternsList pad_patterns(void) const 
+    const PADdata::PatternsList& pad_patterns(void) const 
                                       {return m_pad_patterns;}
 
   SectorLogic* give_SectorL(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO);
