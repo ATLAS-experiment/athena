@@ -1,7 +1,7 @@
 // This file is really -*- C++ -*-.
 
 /*                                                                                                                      
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration                                               
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1MUCTPIPHASE1_L1TOPOLUT_H
@@ -52,7 +52,7 @@ namespace LVL1MUCTPIPHASE1
     
     unsigned short getBarrelROI(unsigned short side, unsigned short sector, unsigned short ieta, unsigned short iphi) const;
     
-    std::vector<std::string> getErrors() const {return m_errors;}
+    const std::vector<std::string>& getErrors() const {return m_errors;}
     
     float getCompactedValue_eta(unsigned short subsystem, unsigned short side, unsigned short sectorID, unsigned short roi);
     float getCompactedValue_phi(unsigned short subsystem, unsigned short side, unsigned short sectorID, unsigned short roi);
