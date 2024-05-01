@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Muon_ROI.h,v 1.6 2008-05-08 15:00:11 krasznaa Exp $
@@ -68,7 +68,7 @@ public:
    /// Legacy function returning the phi coordinate of the RoI
    float       getPhi()       const { return m_phi; }
    /// Return the name of the highest threshold this RoI passed
-   std::string getThrName()   const { return m_thrName; }
+   const std::string& getThrName()   const { return m_thrName; }
    /// Return the value of the highest threshold this RoI passed
    float       getThrValue()  const { return m_thrValue; }
 
