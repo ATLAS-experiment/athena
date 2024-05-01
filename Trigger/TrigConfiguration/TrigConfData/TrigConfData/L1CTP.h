@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1CTP_H
@@ -47,13 +47,13 @@ namespace TrigConf {
        * @brief CTP monitors
        * @return map from monitor name to pair<multiplicity, threshold>
        */
-      const std::map<std::string, std::pair<size_t,std::string>> ctpMon() const { return m_ctpmon; }
+      const std::map<std::string, std::pair<size_t,std::string>>& ctpMon() const { return m_ctpmon; }
 
       /**
        * @brief CTPIN monitors
        * @return map from monitor name to pair<multiplicity, threshold>
        */
-      const std::map<std::string, std::pair<size_t,std::string>> ctpinMon() const { return m_ctpinMon; }
+      const std::map<std::string, std::pair<size_t,std::string>>& ctpinMon() const { return m_ctpinMon; }
 
       /** Clearing the configuration data */
       virtual void clear() override;
