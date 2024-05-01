@@ -51,7 +51,7 @@ public:
       tileName_t  get_tileName() const;                            //
       float       x() const;                                       //
       float       y() const;                                       //
-      std::string getHVft() const;                                 //Gabe
+      const std::string& getHVft() const;                          //Gabe
     private:                                                       //
       tileName_t  m_tileName;                                      //
       float       m_x;                                             //
@@ -215,7 +215,7 @@ FCAL_ChannelMap::TubePosition::y() const
 }
 
 
-inline std::string
+inline const std::string&
 FCAL_ChannelMap::TubePosition::getHVft() const
 {
   return m_hvFT;
