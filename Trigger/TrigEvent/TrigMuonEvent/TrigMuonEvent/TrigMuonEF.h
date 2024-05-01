@@ -57,7 +57,7 @@ public:
    int  MuonCode() const { return m_muonCode; }
 
    /** Seeding algorithm RoI number */
-   std::string  RoINum() const { return m_roi; }
+   const std::string&  RoINum() const { return m_roi; }
    
    /** Charge */
    double Charge() const { return m_charge; }
