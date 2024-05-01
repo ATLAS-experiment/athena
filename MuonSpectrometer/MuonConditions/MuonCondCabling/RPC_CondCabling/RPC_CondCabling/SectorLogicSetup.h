@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SECTORLOGICSETUP_H
@@ -74,10 +74,10 @@ namespace RPC_CondCabling {
         SectorLogicSetup(SectorLogicSetup&&) = default;
         SectorLogicSetup& operator=(SectorLogicSetup&&) = default;
 
-        std::string positive_sector() const { return m_positive_sector; }
-        std::string negative_sector() const { return m_negative_sector; }
-        std::string online_database() const { return m_online_database; }
-        std::string layout() const { return m_layout; }
+        const std::string& positive_sector() const { return m_positive_sector; }
+        const std::string& negative_sector() const { return m_negative_sector; }
+        const std::string& online_database() const { return m_online_database; }
+        const std::string& layout() const { return m_layout; }
         int sector_type() const { return m_sector_type; }
         bool cosmic() const { return m_cosmic; }
         const SECTORlist& sectors() const { return m_sectors; }
