@@ -1,3 +1,13 @@
+ActsPixelClusterizationAlg                                        INFO Clusterization statistics
+|----------|------------|
+| RDOs     |    3423993 |
+| Clusters |    1165578 |
+|----------|------------|
+ActsStripClusterizationAlg                                        INFO Clusterization statistics
+|----------|------------|
+| RDOs     |    1345365 |
+| Clusters |    1081478 |
+|----------|------------|
 ActsPixelSeedingAlg                                               INFO Seed statistics
 |---------------------|------------|
 | Spacepoints         |    1165578 |
