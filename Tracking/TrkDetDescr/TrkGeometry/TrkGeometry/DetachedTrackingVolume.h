@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ class DetachedTrackingVolume {
   TrackingVolume* trackingVolume();
 
   /** returns the Name */
-  std::string name() const;
+  const std::string& name() const;
 
   /** moving object around */
   void move (Amg::Transform3D& shift);
@@ -131,7 +131,7 @@ inline TrackingVolume* DetachedTrackingVolume::trackingVolume(){
 }
 
 
-inline std::string DetachedTrackingVolume::name() const { return (m_name); }
+inline const std::string& DetachedTrackingVolume::name() const { return (m_name); }
 
 inline const Layer* DetachedTrackingVolume::layerRepresentation() const {
   return (m_layerRepresentation);
