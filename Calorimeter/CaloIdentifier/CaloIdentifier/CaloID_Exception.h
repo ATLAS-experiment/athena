@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* date of creation : 10/X/2002 */
@@ -38,7 +38,7 @@ public:
     /**
      * return error message <br> 
      */
-    std::string message() const ;
+    const std::string& message() const ;
 
     /**
      * set error code number<br> 

@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdentifier/CaloIDHelper.h
  * @author scott snyder <snyder@bnl.gov>
@@ -277,7 +274,7 @@ public:
 
 
   /// Return the name for this helper.
-  std::string name() const;
+  const std::string& name() const;
 
   /// Return the message service for this helper (may be null).
   IMessageSvc* msgSvc();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEID_EXCEPTION_H
@@ -34,7 +34,7 @@ public:
     /**
      * return error message  
      */
-    std::string message() const { return m_message;}
+    const std::string& message() const { return m_message;}
 
     /**
      * set error code number 
