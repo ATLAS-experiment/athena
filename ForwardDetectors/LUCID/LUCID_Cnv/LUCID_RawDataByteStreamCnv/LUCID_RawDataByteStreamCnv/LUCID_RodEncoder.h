@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_RODENCODER_H
@@ -40,7 +40,7 @@ public:
               Cache& cache,
               MsgStream& log) const;
 
-  VDIGIT getDigits(Cache& cache) const { return cache.Digits; }
+  const VDIGIT& getDigits(Cache& cache) const { return cache.Digits; }
 
 private:
 };
