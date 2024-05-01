@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IDDICTDEFS_H
@@ -268,10 +268,10 @@ public:
     void                set_do_neighbours       (bool do_neighbours);
 
     /// Access to file name
-    std::string         file_name        (void) const;
+    const std::string&  file_name        (void) const;
     
     /// Access to the dictionary tag
-    std::string         dict_tag         (void) const; 
+    const std::string&  dict_tag         (void) const; 
 
     /// Set file name
     void                set_file_name    (const std::string& name);
@@ -358,7 +358,7 @@ public:
     IdDictGroup (const std::string& name); 
     virtual ~IdDictGroup (); 
 
-    std::string  name();
+    const std::string&  name();
     const std::vector<IdDictDictEntry*>& entries();
     const std::vector<IdDictRegion*>&    regions();
 
@@ -688,7 +688,7 @@ private:
 //-------------------
  
 /// Access to file name
-inline std::string         
+inline const std::string&
 IdDictDictionary::file_name        (void) const
 {
     return (m_file_name);
@@ -696,7 +696,7 @@ IdDictDictionary::file_name        (void) const
 
     
 /// Access to the dictionary tag
-inline std::string         
+inline const std::string&
 IdDictDictionary::dict_tag         (void) const
 {
     return (m_dict_tag);

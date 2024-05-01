@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDict/src/IdDictMgr.cxx,v 1.43 2008-12-09 09:49:43 dquarrie Exp $  
@@ -2257,7 +2257,7 @@ IdDictGroup::~IdDictGroup ()
 {
 }
 
-std::string  IdDictGroup::name()
+const std::string&  IdDictGroup::name()
 {
     return (m_name);
 }
