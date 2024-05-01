@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_LogicExpression
@@ -58,7 +58,7 @@ namespace TrigConf {
       }
 
       char                    state()         const { return m_State; }
-      std::string             element()       const { return m_Element; }
+      const std::string&      element()       const { return m_Element; }
       const LogicV_t &        subLogics()     const { return m_SubLogics; }
       const std::shared_ptr<LogicExpression> subLogic(int i) const { return subLogics()[i]; }
       bool                    isPlaceHolder() const { return (m_State==kOPEN && m_SubLogics.size()==1); }
