@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConfigCondAlg.h"
@@ -74,6 +74,9 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   // Year-dependent conditions
   int currentRunNumber = ctx.eventID().run_number();
   std::string filename = getFileName(currentRunNumber);
+  if (filename.empty()) {
+    return StatusCode::FAILURE;
+  }
   std::ifstream indata(filename.c_str());
   SoshiFormat formatter(currentRunNumber < m_Run1IOV);
   //stream through Soshi format to writeCdo
@@ -99,7 +102,11 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
 std::string 
 PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
   if (m_usePrivateFileName.empty()) {
-    std::ifstream indata(PathResolverFindCalibFile(static_cast<std::string>(m_conditionsFolder)+m_conditionsFileName));
+    std::string fname = PathResolverFindCalibFile(static_cast<std::string>(m_conditionsFolder)+m_conditionsFileName);
+    if (fname.empty()) {
+      return fname;
+    }
+    std::ifstream indata(fname);
     int runNumber = 0;
     std::string subfilename;
     indata >> runNumber;
