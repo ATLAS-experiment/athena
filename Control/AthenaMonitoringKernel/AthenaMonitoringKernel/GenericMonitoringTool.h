@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_GenericMonitoringTool_h
@@ -67,7 +67,7 @@ public:
   StatusCode book();
   /// Overrride configured booking path
   void setPath( const std::string& newPath ) { m_histoPath = newPath; }
-  const std::string getPath() const          { return m_histoPath; }
+  const std::string& getPath() const         { return m_histoPath; }
 
   virtual const ServiceHandle<ITHistSvc>& histogramService() const { return m_histSvc; }
   virtual uint32_t runNumber();
