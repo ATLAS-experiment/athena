@@ -114,7 +114,6 @@ def generate_config_steps():
     ex.threads = 1
     ex.max_events = 100
     ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"']
-    ex.args = '--CA'
     ex.perfmon = False
     # Make a copy of the default prescales file
     copy_ps = CopyStep('CopyPrescales.Default', 'HLTPrescalesSet*.json', 'prescales_Default.json')
@@ -136,7 +135,6 @@ def generate_exec_steps(slice_name = None):
     ex.input = ''
     ex.use_pickle = True
     ex.job_options = 'athena.ConfigOnly.pkl'
-    ex.args = '--CA'
     ex.fpe_auditor = False # included in pickle
     ex.max_events = 100
     ex.depends_on_previous = False if slice_name else True

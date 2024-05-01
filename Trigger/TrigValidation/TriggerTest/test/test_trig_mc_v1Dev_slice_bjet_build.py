@@ -17,7 +17,6 @@ ex.input = 'ttbar'
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.enabledSignatures=[\\\"Bjet\\\"]']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

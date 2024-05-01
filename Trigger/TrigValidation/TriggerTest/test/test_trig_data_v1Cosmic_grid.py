@@ -31,7 +31,6 @@ ex.concurrent_events = 4
 ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
             'Beam.Type=BeamType.Cosmics',
             'Trigger.forceEnableAllChains=True']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'
