@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
 
 #ifndef EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
 #define EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
@@ -8,12 +8,7 @@
  *         ByteStreamEventStorageOutputSvc class.
  *
  *  Writes out BS events to a file, the most obvious thing to do. Used to test 
- *  running trigger code in offline athena and to write DRAW output, for example
- *    * Trigger test:    test_trig_data_v1Dev_writeBS_build.py.
- *    * DRAW production:
- *        from ByteStreamCnvSvc import WriteByteStream
- *        StreamBSFileOutput = WriteByteStream.getStream("EventStorage",
- *                                                       "StreamBSFileOutput")
+ *  running trigger code in offline athena and to write DRAW output.
  *
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  *  @author Frank Berghaus <fberghaus@anl.gov>
