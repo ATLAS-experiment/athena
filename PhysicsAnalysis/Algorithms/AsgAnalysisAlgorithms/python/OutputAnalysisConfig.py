@@ -129,13 +129,21 @@ class OutputAnalysisConfig (ConfigBlock):
         if len (self.vars) + len (autoVars) :
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
-            ntupleMaker.Branches = list( self.vars | set(autoVars) )
+            branchList = list(self.vars | set(autoVars))
+            branchList.sort()
+            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+            ntupleMaker.Branches = branchList_nosys + branchList_sys
             # ntupleMaker.OutputLevel = 2  # For output validation
 
         if len (self.metVars) + len (autoMetVars) > 0:
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
-            ntupleMaker.Branches = self.metVars + autoMetVars
+            branchList = self.metVars + autoMetVars
+            branchList.sort()
+            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+            ntupleMaker.Branches = branchList_nosys + branchList_sys
             ntupleMaker.termName = self.metTermName
             #ntupleMaker.OutputLevel = 2  # For output validation
 
