@@ -42,7 +42,6 @@ class ExecStep(Step):
         self.auto_report_result = True
         self.required = True
         self.depends_on_previous = True
-        self._isCA = False   # pure CA job ('athena --CA' or 'athenaHLT')
 
     def construct_name(self):
         if self.name and self.type == 'other':
@@ -104,10 +103,6 @@ class ExecStep(Step):
             # instead we pass our parameters of choice to athenaopts
             del_env('ATHENA_NPROC_NUM')
             del_env('ATHENA_CORE_NUMBER')
-
-        # Note that Reco_tf is not considered "CA" as flags are set via the usual preExec
-        self._isCA = (self.type in ['athena', 'Reco_tf'] and '--CA' in self.args or
-                      self.type=='athenaHLT' and not self.job_options.endswith('.py'))
 
     def configure_input(self):
         self.log.debug('Configuring input for step %s', self.name)
@@ -211,8 +206,7 @@ class ExecStep(Step):
             if self.costmon:
                 self.flags.append('Trigger.CostMonitoring.monitorAllEvents=True')
             if self.fpe_auditor:
-                if self._isCA:  # FIXME: this prevents flags breaking _tf command line (ATR-28872)
-                    self.flags.append('Exec.FPE=1')
+                self.flags.append('Exec.FPE=1')
 
         # Run config-only if requested
         if self.config_only :
@@ -321,17 +315,11 @@ class ExecStep(Step):
                 self.misconfig_abort('Wrong type for flags. Expected list or tuple.')
 
             if self.type.endswith('_tf'):  # for transform, set flags as pre-exec
-                if self.type == 'Trig_reco_tf':
-                    # No 'flags.' prefix for the trigger transform
-                    self.add_trf_precommand(';'.join(f'{flag}' for flag in self.flags))
-                else:
-                    self.add_trf_precommand(';'.join(f'flags.{flag}' for flag in self.flags))
+                # No 'flags.' prefix for the trigger transform
+                prefix = '' if self.type == 'Trig_reco_tf' else 'flags.'
+                self.add_trf_precommand(';'.join(f'{prefix}{flag}' for flag in self.flags))
             else:  # athena(HLT)
-                if self._isCA:
-                    self.args += ' ' + ' '.join(self.flags)
-                else:
-                    self.log.warning('Setting flags in legacy job options is no longer supported. Ignoring: '
-                                     + ' '.join(self.flags))
+                self.args += ' ' + ' '.join(self.flags)
 
         # Strip extra whitespace
         self.args = self.args.strip()
