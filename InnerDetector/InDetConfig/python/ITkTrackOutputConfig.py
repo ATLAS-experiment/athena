@@ -12,7 +12,7 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
     toESD = []
 
     # excluded track aux data
-    excludedAuxData = ('-clusterAssociation.-TTVA_AMVFVertices_forReco'
+    excludedAuxData = ('-clusterAssociation.-TTVA_AMVFVertices_forReco.-AssoClustersUFO'
                        '.-TTVA_AMVFWeights_forReco')
     # remove track decorations used internally by FTAG software
     excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
