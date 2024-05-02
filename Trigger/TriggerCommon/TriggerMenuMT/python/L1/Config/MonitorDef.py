@@ -129,7 +129,7 @@ class MonitorDef:
                 "L1_eEM26", "L1_eEM26L", "L1_eEM26M", "L1_eEM26T",
                 "L1_eEM28M",
                 "L1_2eEM18M", "L1_2eEM24L",
-                "L1_eEM24L_3eEM12L",
+                "L1_eEM24L_3eEM12L", "L1_eEM40L_2eEM18L",
                 "L1_eTAU20M", "L1_eTAU30",
                 "L1_eTAU60", "L1_eTAU80", "L1_eTAU140",
                 "L1_jTAU20", "L1_jTAU30", "L1_jTAU30M",

@@ -11967,6 +11967,8 @@ HLT_g45_medium_g20_medium_L12eEM18L:
   eventCount: 0
 HLT_g45_medium_g20_medium_L12eEM18M:
   eventCount: 0
+HLT_g45_medium_g20_medium_L1eEM40L_2eEM18L:
+  eventCount: 0
 HLT_g45_tight_2j50_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1eEM26M:
   eventCount: 0
   stepCounts:

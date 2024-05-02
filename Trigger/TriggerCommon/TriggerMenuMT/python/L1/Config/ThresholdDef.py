@@ -132,7 +132,7 @@ class ThresholdDef:
             eEMThreshold('eEMSPARE%i' % thrV, 'eEM').addThrValue(thrVal_SPARE)
 
         # L section (used to be VH in Run2)
-        eEM_cuts = [9, 10, 12, 18, 24, 26]
+        eEM_cuts = [9, 10, 12, 18, 24, 26, 40]
         for thrV in eEM_cuts:
             eEMThreshold('eEM%iL' % thrV, 'eEM').addThrValue(get_threshold_cut('eEM',thrV)).setIsolation( reta = "Loose", wstot = "Loose", rhad = "Loose" )
 

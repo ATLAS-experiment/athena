@@ -554,6 +554,7 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_2g20_tight_icaloloose_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g22_tight_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_g35_medium_g25_medium_L12eEM24L', l1SeedThresholds=['eEM24L','eEM24L'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_g45_medium_g20_medium_L1eEM40L_2eEM18L', l1SeedThresholds=['eEM40L', 'eEM18L'], stream=[PhysicsStream], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g50_loose_L12eEM24L', groups=PrimaryPhIGroup+MultiPhotonGroup),
 
         # low-mass diphoton ATR-21637
