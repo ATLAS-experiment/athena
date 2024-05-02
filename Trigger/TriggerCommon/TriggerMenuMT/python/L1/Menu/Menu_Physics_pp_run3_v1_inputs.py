@@ -97,12 +97,12 @@ def defineInputsMenu():
             #ATR-26333, adding eEM12, potentially more efficient than eEM12L in central HI collisions
             'eEM12',
             # variable eEM  thresholds
-            'eEM24VM', 'eEM26', 'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M', 
+            'eEM24VM', 'eEM26', 'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M', 'eEM40L',
             #ATR-26979, eEMSPARE1 was replaced by eEM1, eEMSPARE2 was replaced by eEM2, decrement other eEMSPARE thresholds
             'eEM1', 'eEM2',
             
             # eEM thresholds for production      
-            'eEMSPARE1', 'eEMSPARE2', 
+            'eEMSPARE1', 
             
             ('ZeroBiasA', 1)
         ],
