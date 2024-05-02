@@ -37,7 +37,7 @@ def main():
 def getTransform():
     executorSet = set()
     print(type(executorSet))
-    executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonFile = 'PyJobTransforms/skeleton.EVNTMerge.py',inData = ['EVNT'], outData = ['EVNT_MRG']))
+    executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonFile = 'PyJobTransforms/skeleton.EVNTMerge.py', skeletonCA = 'EvgenJobTransforms.EVNTMerge_Skeleton', inData = ['EVNT'], outData = ['EVNT_MRG']))
 
     trf = transform(executor = executorSet)
     

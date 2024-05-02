@@ -1629,7 +1629,7 @@ class argEVNTFile(argPOOLFile):
                             'EVNT_MRG' : argEVNTFile(output, type=self.type, io='output')}
         myMergeConf = executorConfig(myargdict, myDataDictionary)
         myMerger = athenaExecutor(name = mySubstepName, skeletonFile = 'PyJobTransforms/skeleton.EVNTMerge.py',
-                                  conf=myMergeConf, 
+                                  skeletonCA = 'EvgenJobTransforms.EVNTMerge_Skeleton', conf=myMergeConf,
                                   inData=set(['EVNT']), outData=set(['EVNT_MRG']),
                                   disableMT=True, disableMP=True)
         myMerger.doAll(input=set(['EVNT']), output=set(['EVNT_MRG']))
