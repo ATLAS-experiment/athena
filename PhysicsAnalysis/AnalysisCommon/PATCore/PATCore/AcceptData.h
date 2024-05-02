@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -109,7 +109,7 @@ namespace asg {
 
 
     /** Get the cut result bitset */
-    inline std::bitset<NBITS> getCutResultBitSet() const
+    inline const std::bitset<NBITS>& getCutResultBitSet() const
     {
       return m_accept;
     }
