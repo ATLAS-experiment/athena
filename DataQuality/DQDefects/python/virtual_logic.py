@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from __future__ import annotations
 
 from DQDefects import DEFECT_IOV
@@ -18,7 +18,7 @@ class DefectLogic(object):
         self.evaluate = self.bad_evaluator
         
     def bad_evaluator(self, states) -> DEFECT_IOV:
-        assert False, "bad_evaluation should never be called"
+        raise RuntimeError("bad_evaluator should never be called")
     
     def set_evaluation(self, full: bool) -> None:
         if full:

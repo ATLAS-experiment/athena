@@ -1,7 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-
-
-from __future__ import with_statement, division, print_function
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from DQUtils import process_iovs
 from DQUtils.sugar import IOVSet, define_iov_type
@@ -225,9 +222,7 @@ class DCSC_Subdetector(object):
             if not iovs: continue # Can this happen?
             input_channel = iovs[0].channel
             if input_channel not in mapping: 
-                # TODO: This could be an error.
-                assert False, "channel not found in mapping: " + str(input_channel)
-                continue
+                raise RuntimeError("channel not found in mapping: " + str(input_channel))
             seen_channels.add(input_channel)
             output_channel = mapping[input_channel]
             result.setdefault(output_channel, []).append(iovs)

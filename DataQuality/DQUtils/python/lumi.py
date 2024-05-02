@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from DQUtils import fetch_iovs, process_iovs, IOVSet
 
@@ -25,7 +25,7 @@ def get_trigger_channel(trigger, iovrange):
     
     channel = result[0].channel
     
-    iovs = fetch_iovs(LVL1_MENU, channels=[channel], what=["ItemName"], *iovrange)
+    iovs = fetch_iovs(LVL1_MENU, *iovrange, channels=[channel], what=["ItemName"])
     
     return iovs.select(ItemName = trigger)
 
@@ -126,13 +126,13 @@ def fetch_lumi_inputs(range_iov, tag="OflLumi-7TeV-002"):
     """
     Retrieve information required to calculate the luminosity from the database
     """
-    lbs = fetch_iovs("LBLB", with_channel=False, #loud=True,
-                     *range_iov)
-    
+    lbs = fetch_iovs("LBLB", *range_iov, with_channel=False)
+
     if tag == "ONLINE":
         lumis = fetch_iovs("COOLONL_TRIGGER::/TRIGGER/LUMI/OnlPrefLumi",
-                           channels=[0], #loud=True,
-                           *range_iov)
+                           *range_iov,
+                           channels=[0])
+
         # Select valid
         lumis = IOVSet(l for l in lumis if (l.Valid & 0xFFFF) % 10 == 0)
     else:
@@ -140,8 +140,9 @@ def fetch_lumi_inputs(range_iov, tag="OflLumi-7TeV-002"):
         lumi_folder = "COOLOFL_TRIGGER::/TRIGGER/OFLLUMI/OflPrefLumi" # Run-2
         #lumi_folder = "COOLOFL_TRIGGER::/TRIGGER/OFLLUMI/LBLESTOFL" # Run-1
         lumis = fetch_iovs(lumi_folder,
+                           *range_iov,
                            tag=tag,
-                           channels=[0], #loud=True,
-                           *range_iov)
+                           channels=[0])
 
-    return lbs, lumis    
+
+    return lbs, lumis
