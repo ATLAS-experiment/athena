@@ -220,7 +220,7 @@ xAOD::TauJetParameters::DecayMode TauAnalysisTools::getTruthDecayMode(const xAOD
 {
   if (!(xTruthTau.isAvailable<size_t>("numCharged")))
   {
-    Warning("TauAnalysisTools::getTruthDecayMode", "passed truth particle is not a truth tau, return Mode_Error");
+    // passed truth particle is not a truth tau
     return xAOD::TauJetParameters::Mode_Error;
   }
 
@@ -323,7 +323,7 @@ void TauAnalysisTools::createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TL
 
   if (!(xTau->panTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_DecayMode, iDecayMode)))
   {
-    std::cerr <<"Failed to retrieve panTauDetail decay mode\n";
+    Error("TauAnalysisTools::createPi0Vectors", "Failed to retrieve panTauDetail decay mode.");
     return;
   }
 
@@ -379,7 +379,7 @@ void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector
 
   if (!(xTau->panTauDetail(xAOD::TauJetParameters::PanTauDetails::PanTau_DecayMode, iDecayMode)))
   {
-    std::cerr <<"Failed to retrieve panTauDetail decay mode\n";
+    Error("TauAnalysisTools::correctedPi0Vectors", "Failed to retrieve panTauDetail decay mode.");
     return;
   }
 
