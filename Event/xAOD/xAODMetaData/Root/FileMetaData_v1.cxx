@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -28,7 +28,7 @@ namespace xAOD {
       SG::auxid_set_t auxids1 = this->getAuxIDs();
       SG::auxid_set_t auxids2 = rhs.getAuxIDs();
       SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
-      for( auto var : ignore ) {
+      for( const std::string& var : ignore ) {
          SG::auxid_t varid = reg.findAuxID(var);
          auxids1.erase(varid);
          auxids2.erase(varid);
