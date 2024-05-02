@@ -1,6 +1,3 @@
-import builtins
-printfunc = getattr(builtins,'print')
-
 ### execution of user script and drop into batch or interactive mode ---------
 for script in opts.scripts:
    try:
