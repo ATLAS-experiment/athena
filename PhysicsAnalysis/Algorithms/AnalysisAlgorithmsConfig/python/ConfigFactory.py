@@ -224,6 +224,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.EventCleaningConfig import EventCleaningBlock
         self.addAlgConfigBlock(algName="EventCleaning", alg=EventCleaningBlock)
 
+        # trigger
+        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import Trigger
+        self.addAlgConfigBlock(algName="Trigger", alg=Trigger)
+
         # jets
         from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
         self.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
@@ -300,11 +304,6 @@ class ConfigFactory():
         # object-based cutflow
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import ObjectCutFlowBlock
         self.addAlgConfigBlock(algName='ObjectCutFlow', alg=ObjectCutFlowBlock)
-
-        # trigger
-        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
-        self.addAlgConfigBlock(algName="Trigger", alg=TriggerAnalysisBlock,
-            defaults={'configName': 'Trigger'})
 
         # event selection
         from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
