@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************************************
@@ -33,14 +33,14 @@
 
 class Calib {
     public:
-        Calib (int whichPart, bool saveFile, std::string moduleName = "") {
+        Calib (int whichPart, bool saveFile, const std::string & moduleName = "") {
             m_whichPart = whichPart;
             
             if(saveFile){
                 m_savefile = saveFile;
                 m_wFile = std::make_unique<TFile>(m_layers.at(whichPart)+".HIST.root","RECREATE");
             }
-            if( std::strcmp(moduleName.c_str(), "") != 0 ){
+            if( not moduleName.empty() ){
                 m_runOneMOD = true;
                 m_testMOD = moduleName;
             }
