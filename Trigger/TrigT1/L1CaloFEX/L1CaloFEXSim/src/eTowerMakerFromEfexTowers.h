@@ -43,6 +43,8 @@ class eTowerMakerFromEfexTowers : public AthReentrantAlgorithm
 
     mutable std::atomic<bool> m_printedNoiseCuts = false;
 
+    mutable std::mutex m_debugMutex;
+
 };
 
 } // end of LVL1 namespace

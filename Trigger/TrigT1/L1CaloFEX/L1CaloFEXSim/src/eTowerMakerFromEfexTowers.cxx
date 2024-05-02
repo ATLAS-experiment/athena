@@ -14,6 +14,16 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
 
+#undef R__HAS_VDT
+#include "ROOT/RVec.hxx"
+
+#include "TFile.h"
+#include "TTree.h"
+#include "PathResolver/PathResolver.h"
+#include "TH2D.h"
+#include "TROOT.h"
+#include "TCanvas.h"
+#include "TBox.h"
 
 namespace LVL1 {
 
@@ -97,6 +107,8 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
       auto tower = local_eTowerContainerRaw->findTower(eFexTower->eFEXtowerID());
       auto counts = eFexTower->et_count();
       for(size_t i=0;i<counts.size();i++) {
+          if(i<10 && eFexTower->em_status()) continue; // bad status bits have their energy zerod by the firmware
+          if(i==10 && eFexTower->had_status()) continue;
           if (eFexTower->disconnectedCount(i)) continue;
           if (counts.at(i)==0 || (counts.at(i)>1020 && counts.at(i)!=1023)) continue; // absent (1025 from BS decoder), invalid (1022), empty (0) or masked (0) channel
           // special case logic for reordering |eta|=2.5 and overlap
@@ -122,6 +134,82 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
           }
       }
   }
+
+    if(msgLvl(MSG::DEBUG)) {
+        std::scoped_lock lock(m_debugMutex);
+        // dump towers to histograms
+        // counts are the "codes" of multi-scale latome, or tile count
+
+        TFile *debugFile = dynamic_cast<TFile *>(gROOT->GetListOfFiles()->FindObject("debug_eFexTowerMakerFromEfexTowers.root"));
+        if (!debugFile) debugFile = TFile::Open("debug_eFexTowerMakerFromEfexTowers.root", "RECREATE");
+        if (debugFile->GetListOfKeys()->GetEntries() < 20) {
+            TDirectory *dir = gDirectory;
+            debugFile->cd();
+            TH2D ps("ps", "ps [code];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D l1("l1", "l1 [code];#eta;#phi", 200, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D l2("l2", "l2 [code];#eta;#phi", 200, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D l3("l3", "l3 [code];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D had("had", "had [code~25MeV or 500MeV for tile];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            std::vector < TH1 * > hists{&ps, &l1, &l2, &l3, &had};
+            for(auto eFexTower : *eFexTowers) {
+                auto counts = eFexTower->et_count();
+                if (counts.empty()) continue;
+                int etaIndex = int( (eFexTower->eta()+0.025)*10 ) + (((eFexTower->eta()+0.025)<0) ? -1 : 1); // runs from -25 to 25 (excluding 0)
+                int phiIndex = int( (eFexTower->phi()+0.025)*32./M_PI ) + ((eFexTower->phi()+0.025)<0 ? -1 : 1); // runs from -32 to 32 (excluding 0)
+                double tEta = ((etaIndex < 0 ? 0.5 : -0.5) + etaIndex - 0.5) * 0.1; // left edge
+                double tPhi = ((phiIndex < 0 ? 0.5 : -0.5) + phiIndex) * M_PI / 32; // centre
+                for(size_t i=0;i<counts.size();i++) {
+                    if(i<10 && eFexTower->em_status()) continue; // bad status bits have their energy zerod by the firmware
+                    if(i==10 && eFexTower->had_status()) continue;
+                    if (eFexTower->disconnectedCount(i)) continue;
+                    int layer; int cell=i;
+                    if(i<1 || (i==4 && std::abs(eFexTower->eta()+0.025)>2.4)) {layer = 0;cell=0;}
+                    else if(i<5) {layer = 1;cell = i-1;}
+                    else if(i<9) {layer = 2;cell = i-5;}
+                    else if(i<10) {layer = 3;cell=0;}
+                    else {layer = 4;cell=0;}
+                    if(!useHardcodedCuts && counts.at(i) <= noiseCutsMap[std::pair( int( (eFexTower->eta() + 2.525)/0.1 ), layer)]) continue;
+                    hists.at(layer)->SetBinContent(hists.at(layer)->FindFixBin(tEta + 0.025 * cell + 0.0125, tPhi),counts.at(i));
+
+                }
+            }
+
+            TCanvas c;
+            c.SetName(TString::Format("evt%lu", ctx.eventID().event_number()));
+            c.SetTitle(TString::Format("Run %u LB %u Event %lu", ctx.eventID().run_number(), ctx.eventID().lumi_block(),
+                                       ctx.eventID().event_number()));
+            c.Divide(2, 3);
+            TH2D tobs("tobs", "Sum [MeV];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            for (size_t i = 0; i < hists.size(); i++) {
+                c.GetPad(i + 1)->cd();gPad->SetGrid(1,1);
+                hists[i]->SetStats(false);
+                hists[i]->SetMarkerSize(2); // controls text size
+                hists[i]->GetXaxis()->SetRangeUser(-0.3, 0.3);
+                hists[i]->GetYaxis()->SetRangeUser(-0.3, 0.3);
+                hists[i]->Draw((hists[i]->GetNbinsX() > 50) ? "coltext89" : "coltext");
+                for (int ii = 1; ii <= hists[i]->GetNbinsX(); ii++) {
+                    bool isTile = (i==4 && std::abs(hists[i]->GetXaxis()->GetBinCenter(ii))<1.5);
+                    for (int jj = 1; jj <= hists[i]->GetNbinsY(); jj++)
+                        tobs.Fill(hists[i]->GetXaxis()->GetBinCenter(ii), hists[i]->GetYaxis()->GetBinCenter(jj),
+                                  isTile ? (hists[i]->GetBinContent(ii, jj)*500.) : eFEXCompression::expand(hists[i]->GetBinContent(ii, jj)));
+                }
+            }
+            c.GetPad(hists.size() + 1)->cd();
+            tobs.SetStats(false);
+            tobs.Draw("col");
+            TBox b(-0.3, -0.3, 0.3, 0.3);
+            b.SetLineColor(kRed);
+            b.SetFillStyle(0);
+            b.SetLineWidth(1);
+            b.SetBit(TBox::kCannotMove);
+            tobs.GetListOfFunctions()->Add(b.Clone());
+            gPad->AddExec("onClick", TString::Format(
+                    "{ auto pad = gPad->GetCanvas()->GetPad(%lu); if( pad->GetEvent()==kButton1Down ) { double x = pad->PadtoX(pad->AbsPixeltoX(pad->GetEventX())); double y = pad->PadtoY(pad->AbsPixeltoY(pad->GetEventY())); for(int i=1;i<%lu;i++) {auto h = dynamic_cast<TH1*>(gPad->GetCanvas()->GetPad(i)->GetListOfPrimitives()->At(1)); if(h) {h->GetXaxis()->SetRangeUser(x-0.3,x+0.3);h->GetYaxis()->SetRangeUser(y-0.3,y+0.3); } } if(auto b = dynamic_cast<TBox*>(pad->FindObject(\"tobs\")->FindObject(\"TBox\"))) {b->SetX1(x-0.3);b->SetX2(x+0.3);b->SetY1(y-0.3);b->SetY2(y+0.3);} gPad->GetCanvas()->Paint(); gPad->GetCanvas()->Update(); } }",
+                    hists.size() + 1, hists.size() + 1));
+            c.Write();
+            gDirectory = dir;
+        }
+    }
 
 
 
