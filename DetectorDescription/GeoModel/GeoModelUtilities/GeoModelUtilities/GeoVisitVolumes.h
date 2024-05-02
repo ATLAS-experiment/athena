@@ -38,7 +38,8 @@ class IGeoVisitVolumesAction
 {
 public:
   virtual ~IGeoVisitVolumesAction() = default;
-  virtual void operator() (int id,
+  virtual void operator() (GeoNodeAction& action,
+                           int id,
                            const std::string& name,
                            const GeoVPhysVol* volume,
                            const GeoTrf::Transform3D& transform,
@@ -56,7 +57,8 @@ class IGeoVisitVolumesNoXformAction
 {
 public:
   virtual ~IGeoVisitVolumesNoXformAction() = default;
-  virtual void operator() (int id,
+  virtual void operator() (GeoNodeAction& action,
+                           int id,
                            const std::string& name,
                            const GeoVPhysVol* volume) = 0;
 };
@@ -140,7 +142,8 @@ class GeoVisitVolumesAction
 {
 public:
   GeoVisitVolumesAction (FUNCTION f) : m_f (f) {}
-  virtual void operator() (int id,
+  virtual void operator() (GeoNodeAction& /*action*/,
+                           int id,
                            const std::string& name,
                            const GeoVPhysVol* volume,
                            const GeoTrf::Transform3D& transform,
@@ -163,7 +166,8 @@ class GeoVisitVolumesNoXformAction
 {
 public:
   GeoVisitVolumesNoXformAction (FUNCTION f) : m_f (f) {}
-  virtual void operator() (int id,
+  virtual void operator() (GeoNodeAction& /*action*/,
+                           int id,
                            const std::string& name,
                            const GeoVPhysVol* volume) override
   {

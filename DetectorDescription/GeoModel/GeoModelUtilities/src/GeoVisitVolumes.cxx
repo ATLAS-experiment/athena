@@ -83,11 +83,11 @@ void GeoVisitVolumes::handleVol (const GeoVPhysVol *vol)
       }
     }
 
-    (*std::get<0>(m_action)) (id, name, vol, transform, defTransform);
+    (*std::get<0>(m_action)) (*this, id, name, vol, transform, defTransform);
     m_pendingTransformList.clear();
   }
   else {
-    (*std::get<1>(m_action)) (id, name, vol);
+    (*std::get<1>(m_action)) (*this, id, name, vol);
   }
 
   m_idTag   = nullptr;
@@ -169,12 +169,12 @@ void GeoVisitVolumes::handleSerialTransformer (const GeoSerialTransformer  *sT)
     }
 
     if (m_action.index() == 0) {
-      (*std::get<0>(m_action)) (id, name, vol,
+      (*std::get<0>(m_action)) (*this, id, name, vol,
                                 transform * sT->getTransform (i),
                                 defTransform * sT->getTransform (i));
     }
     else {
-      (*std::get<1>(m_action)) (id, name, vol);
+      (*std::get<1>(m_action)) (*this, id, name, vol);
     }
   }
 
