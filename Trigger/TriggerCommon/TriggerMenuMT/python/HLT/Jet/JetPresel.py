@@ -30,7 +30,10 @@ def getPreselRecoDict(reco,roiftf=False):
     if preselRecoDict['recoAlg']=='a10': #Setting LC calibrations for large-R jets
         preselRecoDict['clusterCalib']='lcw'
     '''
-    preselRecoDict.update({'jetCalib':getJetCalibDefaultString(preselRecoDict) if preselRecoDict['recoAlg']=='a4' else 'nojcalib'}) #Adding default calibration for corresponding chain
+    preselRecoDict.update({
+        'jetCalib':getJetCalibDefaultString(preselRecoDict['recoAlg'],preselRecoDict['constitType'],preselRecoDict['clusterCalib'])
+        if preselRecoDict['recoAlg']=='a4' else 'nojcalib'
+    }) #Adding default calibration for corresponding chain
     
     # Overwriting tracking option to roiftf tracking
     if roiftf: preselRecoDict['trkopt'] = 'roiftf'
