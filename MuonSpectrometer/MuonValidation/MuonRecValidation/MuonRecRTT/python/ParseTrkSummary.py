@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -35,11 +35,11 @@ def parseSummaryFile(filename='trkSummary.txt', makePlots=False):
                 continue
 
             if line[0:2]=="||":
-                firstline=line.strip().strip("||")
+                firstline=line.strip().removeprefix("||")
                 # get rid of spaces around each 'key', where we get the keys by splitting the line at the '||' boundaries
                 keys = [key.strip() for key in firstline.split("||")]
                 nextLine = lineIt.next()
-                secondline=nextLine.strip().strip("||")
+                secondline=nextLine.strip().removeprefix("||")
                 # get rid of spaces around each 'value', where we get the values by splitting the line at the '||' boundaries
                 values = [float(value.strip()) for value in secondline.split("||")]
                 info = dict(zip(keys,values))
