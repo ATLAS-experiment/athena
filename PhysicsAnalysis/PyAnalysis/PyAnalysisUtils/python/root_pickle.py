@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: root_pickle.py
@@ -6,8 +6,6 @@
 # Purpose: Pickle python data into a root file, preserving references
 #          to root objects.
 #
-
-from __future__ import print_function
 
 """Pickle python data into a root file, preserving references to root objects.
 
@@ -117,7 +115,7 @@ if six.PY2:
 
     class Write_Wrapper:
         def __init__ (self):
-            return self.reopen()
+            self.reopen()
 
         def write (self, s):
             return self.__s.write (_protect (s))
@@ -132,7 +130,7 @@ if six.PY2:
 
     class Read_Wrapper:
         def __init__ (self):
-            return self.reopen()
+            self.reopen()
 
         def read (self, i):
             return self.__s.read (i)
@@ -152,7 +150,7 @@ if six.PY2:
 else:
     class Write_Wrapper:
         def __init__ (self):
-            return self.reopen()
+            self.reopen()
 
         def write (self, s):
             ss = self._str
@@ -185,7 +183,7 @@ else:
 
     class Read_Wrapper:
         def __init__ (self):
-            return self.reopen()
+            self.reopen()
 
 
         def read (self, i):
@@ -262,7 +260,7 @@ Root objects.
         """Write a pickled representation of o to the open TFile."""
         if key is None:
             key = '_pickle'
-        dir = _getdir()
+        directory = _getdir()
         try:
             self.__file.cd()
             self.__pickle.dump (o)
@@ -272,7 +270,7 @@ Root objects.
             self.__file.Flush()
             self.__pmap.clear()
         finally:
-            _setdir (dir)
+            _setdir (directory)
         return
 
 
