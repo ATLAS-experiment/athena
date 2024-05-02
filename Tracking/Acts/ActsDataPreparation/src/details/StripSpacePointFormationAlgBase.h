@@ -52,6 +52,7 @@ namespace ActsTrk {
         virtual ~StripSpacePointFormationAlgBase() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute (const EventContext& ctx) const override;
+        virtual StatusCode finalize() override;
         //@}
 
     private:
@@ -111,7 +112,17 @@ namespace ActsTrk {
         Cache_BackendUpdateHandleKey m_OSPCacheBackend{this,"OSPCacheBackend",""};
 
         void fillSpacepoints(xAOD::SpacePointContainer* cont, std::vector<StripSP>& input, const xAOD::StripClusterContainer* inputClusters, unsigned int indexBase=0) const;
-  };
+
+    private:
+      enum EStat {
+        kNClusters,
+        kNSpacePoints,
+	kNOverlapSpacePoints,
+        kNStat
+      };
+
+      mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE {};
+    };
 
 }
 

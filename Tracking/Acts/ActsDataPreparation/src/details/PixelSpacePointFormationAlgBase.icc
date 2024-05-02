@@ -8,6 +8,7 @@
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "ActsInterop/TableUtils.h"
 
 #include <optional>
 
@@ -41,6 +42,18 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
+  template <bool useCache>
+  StatusCode PixelSpacePointFormationAlgBase<useCache>::finalize()
+  {
+    ATH_MSG_INFO("Space Point Formation statistics" << std::endl << makeTable(m_stat,
+								       std::array<std::string, kNStat>{
+									 "Clusters",
+									 "Space Points"
+								       }).columnWidth(10));
+    
+    return StatusCode::SUCCESS;
+  }
+  
   //-------------------------------------------------------------------------
   template <bool useCache>
   StatusCode PixelSpacePointFormationAlgBase<useCache>::execute (const EventContext& ctx) const
@@ -56,6 +69,7 @@ namespace ActsTrk {
     }
     const xAOD::PixelClusterContainer *pixelClusters = inputPixelClusterContainer.cptr();
     ATH_MSG_DEBUG("Retrieved " << pixelClusters->size() << " clusters from container " << m_pixelClusterContainerKey.key());
+    m_stat[kNClusters] += pixelClusters->size();
     
     auto pixelSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_pixelSpacePointContainerKey, ctx );
     ATH_MSG_DEBUG( "--- Pixel Space Point Container `" << m_pixelSpacePointContainerKey.key() << "` created ..." );
@@ -144,7 +158,7 @@ namespace ActsTrk {
     }
 
     nReceivedSPsPixel = pixelSpacePointContainer->size();
-
+    m_stat[kNSpacePoints] += nReceivedSPsPixel;
     return StatusCode::SUCCESS;
   }
 

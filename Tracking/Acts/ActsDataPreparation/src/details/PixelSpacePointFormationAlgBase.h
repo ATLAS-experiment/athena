@@ -44,7 +44,8 @@ namespace ActsTrk {
         virtual ~PixelSpacePointFormationAlgBase() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute (const EventContext& ctx) const override;
-        //@}
+        virtual StatusCode finalize() override;
+      //@}
 
     private:
         /// @name Disallow constructor without parameters, copy constructor, assignment operator
@@ -86,7 +87,16 @@ namespace ActsTrk {
 
         Cache_WriteHandleKey m_SPCache{this,"SPCache",""};
         Cache_BackendUpdateHandleKey m_SPCacheBackend{this,"SPCacheBackend",""};
-  };
+
+    private:
+      enum EStat {
+	kNClusters,
+	kNSpacePoints,
+	kNStat
+      };
+      
+      mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE {}; 
+    };
 
 }
 

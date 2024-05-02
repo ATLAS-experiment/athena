@@ -44,6 +44,19 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
+  template <bool useCache>
+  StatusCode StripSpacePointFormationAlgBase<useCache>::finalize()
+  {
+    ATH_MSG_INFO("Space Point Formation statistics" << std::endl << makeTable(m_stat,
+									      std::array<std::string, kNStat>{
+										"Clusters",
+										"Space Points",
+										"Overlap Space Points"
+									      }).columnWidth(10));
+    
+    return StatusCode::SUCCESS;
+  }
+  
   //-------------------------------------------------------------------------
   template <bool useCache>
   StatusCode StripSpacePointFormationAlgBase<useCache>::execute (const EventContext& ctx) const
@@ -60,7 +73,7 @@ namespace ActsTrk {
     }
     const xAOD::StripClusterContainer* inputClusters = inputStripClusterContainer.cptr();
     ATH_MSG_DEBUG("Retrieved " << inputClusters->size() << " clusters from container " << m_stripClusterContainerKey.key());
-
+    m_stat[kNClusters] += inputClusters->size();
     
     auto stripSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_stripSpacePointContainerKey, ctx );
     ATH_MSG_DEBUG( "--- Strip Space Point Container `" << m_stripSpacePointContainerKey.key() << "` created ..." );
@@ -203,10 +216,12 @@ namespace ActsTrk {
       }
     }
 
-    nReceivedSPsStrip = stripSpacePointContainer->size();
-    
+    nReceivedSPsStrip = stripSpacePointContainer->size();    
     nReceivedSPsStripOverlap = overlapSpacePoints->size();
 
+    m_stat[kNSpacePoints] += nReceivedSPsStrip;
+    m_stat[kNOverlapSpacePoints] += nReceivedSPsStripOverlap;
+    
     return StatusCode::SUCCESS;
   }
 
