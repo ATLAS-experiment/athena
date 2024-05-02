@@ -273,8 +273,6 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
     auto MuonEtaHi = Monitored::Scalar<float>((sIdentifier+"MuonEtaHi").c_str(), 0);
     auto MuonPhiHi = Monitored::Scalar<float>((sIdentifier+"MuonPhiHi").c_str(), 0);
     auto MuonPtHi = Monitored::Scalar<float>((sIdentifier+"MuonPtHi").c_str(), 0);
-    auto LumiBlockNumberOfMuonTracks = Monitored::Scalar<float>((sIdentifier+"MuonLumiBlockNumberOfMuonTracks").c_str(), 0);
-    auto LumiBlockNumberOfSegments = Monitored::Scalar<float>((sIdentifier+"MuonLumiBlockNumberOfSegments").c_str(), 0);
     auto MuonSector = Monitored::Scalar<float>((sIdentifier+"MuonSector").c_str(), 0);  
     auto MuonCIndex = Monitored::Scalar<float>((sIdentifier+"MuonCIndex").c_str(), 0);  
     auto MuonEta1 = Monitored::Scalar<float>((sIdentifier+"MuonEta1All").c_str(), 0);   
@@ -296,8 +294,7 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
         MuonEta = muon->eta();
         MuonPhi = muon->phi();
         MuonPt = muon->pt() * MeVtoGeV;
-        LumiBlockNumberOfMuonTracks  = lumiBlockID;
-        fill(tool, MuonAuthor, MuonQuality, MuonType, MuonEta, MuonPhi, MuonPt, LumiBlockNumberOfMuonTracks);
+        fill(tool, MuonAuthor, MuonQuality, MuonType, MuonEta, MuonPhi, MuonPt);
 
         // Fill high pT plots
         if (muon->pt() > m_CBmuons_minPt) {
@@ -309,8 +306,6 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
             
         /// Do Muon Segments and Sector Plots
         for (size_t nSeg=0; nSeg < muon->nMuonSegments(); nSeg++) {
-            LumiBlockNumberOfSegments = lumiBlockID;
-            fill(tool, LumiBlockNumberOfSegments);
             const xAOD::MuonSegment* muonSegment = muon->muonSegment(nSeg);
                         if (!muonSegment) {
                            continue;
@@ -346,6 +341,8 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseCombinedTracks(const xAOD::MuonCon
     auto NMuonsTrigNonCB = Monitored::Scalar<int>("NMuonsTrigNonCB", 0);
     auto NMuonsNoTrigCB = Monitored::Scalar<int>("NMuonsNoTrigCB", 0);
     auto NMuonsNoTrigNonCB = Monitored::Scalar<int>("NMuonsNoTrigNonCB", 0);
+    auto LumiBlockNumberOfMuonTracks = Monitored::Scalar<float>("MSLumiBlockNumberOfMuonTracks", 0);
+    auto LumiBlockNumberOfSegments = Monitored::Scalar<float>("MSLumiBlockNumberOfSegments", 0);
 
     /// Select Combined Muons
     std::vector<const xAOD::Muon*>  vecAllCombinedMuons;
@@ -410,6 +407,10 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseCombinedTracks(const xAOD::MuonCon
             }
         }
         fill(tool, MuonPrefix);
+        for (size_t nSeg=0; nSeg < muon->nMuonSegments(); nSeg++) {
+            LumiBlockNumberOfSegments = evt.lumiBlock();
+            fill(tool, LumiBlockNumberOfSegments);
+        }
     }
     NMuons = n_muons;
     NMuonsTrig = n_muons_trig;
@@ -418,6 +419,9 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseCombinedTracks(const xAOD::MuonCon
     NMuonsNoTrigCB = n_muons_no_trig_cb;
     NMuonsNoTrigNonCB = n_muons_no_trig_noncb;
     fill(tool, NMuons, NMuonsTrig, NMuonsTrigCB, NMuonsTrigNonCB, NMuonsNoTrigCB, NMuonsNoTrigNonCB);
+
+    LumiBlockNumberOfMuonTracks = evt.lumiBlock();
+    fill(tool, LumiBlockNumberOfMuonTracks);
 
     /// Fill low level Muon Information for each Muon
     ATH_CHECK (analyseLowLevelMuonFeatures("AllCB", vecAllCombinedMuons, evt) );
