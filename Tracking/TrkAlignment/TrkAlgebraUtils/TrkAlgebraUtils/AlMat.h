@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALGS_ALMAT_H
@@ -98,8 +98,8 @@ class AlMat {
   inline const double* ptrData() const;
   inline double* ptrData();
 
-  inline std::string pathBin() const;
-  inline std::string pathTxt() const;
+  inline const std::string& pathBin() const;
+  inline const std::string& pathTxt() const;
 
  private:
   void copy(const AlMat&  m);
@@ -172,11 +172,11 @@ inline double* AlMat::ptrData() {
   return m_ptr_data;
 }
 
-inline std::string AlMat::pathBin() const {
+inline const std::string& AlMat::pathBin() const {
   return m_pathbin;
 }
 
-inline std::string AlMat::pathTxt() const {
+inline const std::string& AlMat::pathTxt() const {
   return m_pathtxt;
 }
 

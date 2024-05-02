@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALGS_ALSYMMAT_H
@@ -71,8 +71,8 @@ class AlSymMat : public AlSymMatBase {
   inline const double* ptrData() const;
   inline double* ptrData();
 
-  inline std::string pathBin() const;
-  inline std::string pathTxt() const;
+  inline const std::string& pathBin() const;
+  inline const std::string& pathTxt() const;
 
   virtual TMatrixDSparse* makeTMatrix() override final;
 
@@ -116,11 +116,11 @@ inline double* AlSymMat::ptrData() {
   return m_ptr_data;
 }
 
-inline std::string AlSymMat::pathBin() const {
+inline const std::string& AlSymMat::pathBin() const {
   return m_pathbin;
 }
 
-inline std::string AlSymMat::pathTxt() const {
+inline const std::string& AlSymMat::pathTxt() const {
   return m_pathtxt;
 }
 
