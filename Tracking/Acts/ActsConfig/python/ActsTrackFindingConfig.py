@@ -47,6 +47,9 @@ def ActsTrackStatePrinterCfg(flags,
 def ActsMainTrackFindingAlgCfg(flags,
                                name: str = "ActsTrackFindingAlg",
                                **kwargs) -> ComponentAccumulator:
+    def tolist(c):
+        return c if isinstance(c, list) else [c]
+
     acc = ComponentAccumulator()
 
     # Seed labels and collections. These 3 lists must match element for element.
@@ -65,7 +68,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
-    kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
+    kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
     kwargs.setdefault("numMeasurementsCutOff", [1])
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
@@ -73,10 +76,8 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
 
     if flags.Acts.doTrackFindingTrackSelector:
-        def tolist(c):
-            return c if isinstance(c, list) else [c]
         # Use settings from flags.Tracking.ActiveConfig, initialised in createITkTrackingPassFlags() at
-        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L249
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L215
         kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
         kwargs.setdefault("ptMin",
                           [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
@@ -87,9 +88,10 @@ def ActsMainTrackFindingAlgCfg(flags,
             kwargs["ptMin"] = [min(kwargs["ptMin"])]
             kwargs["minMeasurements"] = [min(kwargs["minMeasurements"])]
         elif flags.Acts.doTrackFindingTrackSelector != 3:
-            # include hole/shared hit cuts - disable for comparison with previous behaviour
+            # include hole/shared hit cuts
             kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
             if flags.Acts.doTrackFindingTrackSelector != 5:
+                # Acts counts many holes as outliers, so use the same cut for maxOutliers
                 kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))
             kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
             if flags.Acts.doTrackFindingTrackSelector == 4:
