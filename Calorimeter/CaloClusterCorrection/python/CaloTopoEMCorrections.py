@@ -141,7 +141,7 @@ def moments (flags, cells_name, *args, **kw):
     return make_CaloTopoEMmoments (flags, None, *args, **kw)
 
 def layers (flags, cells_name, *args, **kw):
-    return make_CaloTopoEMlayers (flags, None, cells_name=cells_name, *args, **kw)
+    return make_CaloTopoEMlayers (flags, None, *args, cells_name=cells_name, **kw)
 
 def etaoff_sw_b1 (flags, cells_name, *args, **kw):
     return make_CaloTopoEMetaoffSW (flags, EMB1, None, *args, **kw)
