@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
@@ -183,7 +183,7 @@ def getLCNeutralFlowElementCreatorAlgorithm(inputFlags,neutralFlowElementOutputN
     LCFlowElementNeutralCreatorAlgorithmFactory = CompFactory.PFLCNeutralFlowElementCreatorAlgorithm
     LCFlowElementNeutralCreatorAlgorithm = LCFlowElementNeutralCreatorAlgorithmFactory("PFLCNeutralFlowElementCreatorAlgorithm")
     if neutralFlowElementOutputName:
-      LCFlowElementNeutralCreatorAlgorithm.FELCOutputName==neutralFlowElementOutputName
+      LCFlowElementNeutralCreatorAlgorithm.FELCOutputName=neutralFlowElementOutputName
     if(inputFlags.PF.EOverPMode):
       LCFlowElementNeutralCreatorAlgorithm.FEInputContainerName="EOverPNeutralParticleFlowObjects"
       LCFlowElementNeutralCreatorAlgorithm.FELCOutputName="EOverPLCNeutralParticleFlowObjects"
