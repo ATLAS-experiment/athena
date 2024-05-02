@@ -56,7 +56,10 @@ else()
 
 endif()
 
-
+atlas_add_test( ConfigTextUnitTest
+   SCRIPT python/ConfigText_unitTest.py --text-config ${CONFIG_PATH}
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 30 )
 
 add_test_job( TestJobDataSequence data --for-compare --no-systematics )
 add_test_job( TestJobDataConfig data --for-compare --block-config --no-systematics )

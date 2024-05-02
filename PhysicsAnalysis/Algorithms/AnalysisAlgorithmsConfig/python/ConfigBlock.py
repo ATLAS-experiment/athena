@@ -162,6 +162,14 @@ class ConfigBlock:
             raise KeyError (f'unknown option "{name}" in block "{self.__class__.__name__}"')
         noneAction = self._options[name].noneAction
         if value is not None or noneAction == 'set' :
+            # check type if specified
+            optType = self._options[name].type
+            # convert int to float to prevent crash
+            if optType is float and type(value) is int:
+                value = float(value)
+            if optType is not None and optType != type(value):
+                raise ValueError(f'{name} for block {self.__class__.__name__} should '
+                    f'be of type {optType} not {type(value)}')
             setattr (self, name, value)
         elif noneAction == 'ignore' :
             pass

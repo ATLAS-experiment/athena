@@ -178,10 +178,13 @@ class ConfigSequence:
         options = []
         for name, o in self._blocks[-1].getOptions().items():
             val = getattr(self._blocks[-1], name)
+            valDefault = o.default
             valType = o.type
             valRequired = o.required 
-            options.append({'name':name, 'defaultValue':val, 'type': valType, 
-                'required': valRequired})
+            noneAction = o.noneAction
+            options.append({'name': name, 'defaultValue': valDefault,
+                'type': valType, 'required': valRequired,
+                'noneAction': noneAction, 'value': val})
         return options
 
     
@@ -190,24 +193,16 @@ class ConfigSequence:
         algOptions = self.getOptions()
         for opt in algOptions:
             name = opt['name']
-            valType = opt['type']
-            valDefault = opt['defaultValue']
-            valRequired = opt['required']
-
-            if valRequired and name not in options:
-                raise ValueError(f'{name} is required but not included in config')
-
             if name in options:
-                opt_type = type(options[name])
-                # does not check type if expected type is None
-                if valType is not None and opt_type != valType:
-                    raise ValueError(f'{name} should be of type {valType} not {opt_type}')
                 self.setOptionValue (f'.{name}', options[name])
                 logCPAlgCfgSeq.info(f"    {name}: {options[name]}")
             else:
+                if opt['required']:
+                    raise ValueError(f'{name} is required but not included in config')
                 # add default used to config
-                options[name] = valDefault
-                logCPAlgCfgSeq.info(f"    {name}: {valDefault}")
+                defaultVal = opt['defaultValue']
+                options[name] = defaultVal
+                logCPAlgCfgSeq.info(f"    {name}: {defaultVal}")
         return algOptions
 
 

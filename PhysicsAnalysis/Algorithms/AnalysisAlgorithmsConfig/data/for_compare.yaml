@@ -1,4 +1,5 @@
 CommonServices:
+    systematicsHistogram: 'systematicsList'
     filterSystematics: '^(?:(?!PseudoData).)*$'
 
 PileupReweighting: {}
