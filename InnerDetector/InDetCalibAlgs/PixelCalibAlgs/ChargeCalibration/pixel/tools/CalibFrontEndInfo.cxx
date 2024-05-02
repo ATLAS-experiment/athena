@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************************************
@@ -28,6 +28,7 @@ std::stringstream CalibFrontEndInfo::printDBformat()    const {
                     << " " << m_SigFitParams.at(0)    << " " << m_SigFitParams.at(1) ;          
     }
     else{
+        //cppcheck-suppress invalidPrintfArgType_uint
         printf( " ERROR - Is the module disabled for TOT Scan? - m_NormalFitParams.size = %2lu , m_LongFitParams.size = %2lu, m_SigFitParams.size = %2lu \n",m_NormalFitParams.size() ,m_LongFitParams.size(),m_SigFitParams.size());
         mytext  << "I" << m_FEid
                     << " " << m_NormalThreshold << " " << m_NormalRms << " " << m_NormalNoise << " " << m_NormalIntime 
