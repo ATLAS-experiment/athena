@@ -463,7 +463,8 @@ void FPGATrackSimHoughTransformTool::addRoad(std::vector<std::vector<const FPGAT
   r.setHitLayers(hitLayers);
   r.setSubRegion(m_subRegion);
 
-  matchIdealGeoSector(r);
+  if (m_useSectors) r.setSector(m_FPGATrackSimBankSvc->SectorBank_1st()->findSector(hits));
+  else if (m_idealGeoRoads) matchIdealGeoSector(r);
 }
 
 
