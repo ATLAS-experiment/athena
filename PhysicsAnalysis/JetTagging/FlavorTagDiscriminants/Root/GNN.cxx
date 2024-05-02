@@ -13,8 +13,6 @@
 
 #include "PathResolver/PathResolver.h"
 
-#include <fstream>
-
 namespace {
   const std::string jetLinkName = "jetLink";
 }
@@ -37,12 +35,10 @@ namespace FlavorTagDiscriminants {
     auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
     
-    int n_track_sequences = 0;
     for (auto config : constituents_configs){
       switch (config.type){
       case ConstituentsType::TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
-        n_track_sequences++;
         break;
       case ConstituentsType::IPARTICLE:
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
