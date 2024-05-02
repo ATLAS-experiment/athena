@@ -394,23 +394,40 @@ bool Trk::GMTreeBrowser::findNamePattern(const GeoVPhysVol* gv,
     return false;
 }
 
+namespace {
+
+class GeoFindTopName : public GeoNodeAction
+{
+public:
+  GeoFindTopName (const std::string_view name) : m_name (name)
+  {
+  }
+  virtual void handlePhysVol (const GeoPhysVol* v) override
+  { handleVol (v); }
+  virtual void handleFullPhysVol (const GeoFullPhysVol* v) override
+  { handleVol (v); }
+  const GeoVPhysVol* topName() const { return m_topName; }
+private:
+  void handleVol (const GeoVPhysVol* v)
+  {
+    const GeoLogVol* clv = v->getLogVol();
+    if (clv && clv->getName().find(m_name) != std::string::npos) {
+      m_topName = v->getParent();
+      this->terminate();
+    }
+  }
+  const std::string_view m_name;
+  const GeoVPhysVol* m_topName = nullptr;
+};
+
+}
+
 const GeoVPhysVol* Trk::GMTreeBrowser::findTopBranch(
     const GeoVPhysVol* gv, std::string_view name) const {
 
-    const GeoVPhysVol* topName = nullptr;
-
-    for (unsigned int ic = 0; ic < gv->getNChildVols(); ic++) {
-
-        const GeoVPhysVol* cv = &(*(gv->getChildVol(ic)));
-        const GeoLogVol* clv = cv->getLogVol();
-        if (clv && clv->getName().find(name) != std::string::npos)
-            return gv;
-        topName = this->findTopBranch(cv, name);
-        if (topName)
-            return topName;
-    }
-
-    return topName;
+    GeoFindTopName topName (name);
+    gv->exec (&topName);
+    return topName.topName();
 }
 
 bool Trk::GMTreeBrowser::identity_check(GeoTrf::RotationMatrix3D rotation,
