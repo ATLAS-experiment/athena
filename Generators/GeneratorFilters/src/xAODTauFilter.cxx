@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 */
 #include "GeneratorFilters/xAODTauFilter.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "TMath.h"
 #include <vector>
@@ -150,14 +151,16 @@ StatusCode xAODTauFilter::filterEvent() {
 // 11 - decaus into tauon
 // 0 - unset
 
-       int tauType = tau ->auxdata<int>("tauType");
+        static const SG::ConstAccessor<int> tauTypeAcc ("tauType");
+        int tauType = tauTypeAcc (*tau);
 
-       if (tauType == 11) {
+        if (tauType == 11) {
           ATH_MSG_DEBUG("tau has a tau as daughter - skipping");
           continue;
         }
 
-        nutau = tau->auxdata<CLHEP::HepLorentzVector>("nuVector");
+        static const SG::ConstAccessor<CLHEP::HepLorentzVector> nuVectorAcc ("nuVector");
+        nutau = nuVectorAcc (*tau);
         ATH_MSG_DEBUG("pT\t\teta\tphi\tlh");
         ATH_MSG_DEBUG(nutau.perp() << " nutau \t" << nutau.eta() << "\t" << nutau.phi() << "\t" << tauType);
 

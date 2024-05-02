@@ -12,6 +12,7 @@
 #include "ZdcUtils/ZDCWaveformLTLinStep.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "AthContainers/Accessor.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -162,11 +163,12 @@ StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
   std::unique_ptr<xAOD::ZdcModuleAuxContainer> sumsAuxContainer( new xAOD::ZdcModuleAuxContainer() );
   sumsContainer->setStore( sumsAuxContainer.get() );
 
+  static const SG::Accessor<uint16_t> LucrodTriggerSideAmpAcc ("LucrodTriggerSideAmp");
   for (int iside : {-1, 1}){
     xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
     sumsContainer->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
     new_sum->setZdcSide(iside);
-    new_sum->auxdata<uint16_t>("LucrodTriggerSideAmp") = 42;
+    LucrodTriggerSideAmpAcc (*new_sum) = 42;
   }
 
   /******************************************
