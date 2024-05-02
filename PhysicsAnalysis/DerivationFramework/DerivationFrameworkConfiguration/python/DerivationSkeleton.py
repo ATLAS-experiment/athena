@@ -44,7 +44,7 @@ def fromRunArgs(runArgs):
     # For the time being one parent (primary stream) can have multiple children (augmentations)
     # However, an augmentation cannot have multiple parents, which will be supported in the future
     if hasattr(runArgs, 'augmentations'):
-        for val in getattr(runArgs, 'augmentations'):
+        for val in runArgs.augmentations:
             if ':' not in val or len(val.split(':')) != 2:
                 logDerivation.error('Derivation job started, but with wrong augmentation syntax - aborting')
                 raise ValueError('Invalid augmentation argument: {0}'.format(val))
@@ -71,7 +71,7 @@ def fromRunArgs(runArgs):
     for runArg in dir(runArgs):
         if 'output' in runArg and 'File' in runArg and 'Type' not in runArg and 'NTUP_PHYSVAL' not in runArg:
             outputFileName = getattr(runArgs, runArg)
-            flagString = f'Output.{runArg.strip("output")}Name'
+            flagString = f'Output.{runArg.removeprefix("output")}Name'
             flags.addFlag(flagString, outputFileName)
             flags.addFlag(f'Output.doWrite{runArg.removeprefix("output").removesuffix("File")}', True)
             flags.Output.doWriteDAOD = True
