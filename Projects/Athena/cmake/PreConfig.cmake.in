@@ -29,6 +29,10 @@ set( ATLAS_FLAKE8 @ATLAS_FLAKE8@
 set( ATLAS_PYTHON_CHECKER @ATLAS_PYTHON_CHECKER@
    CACHE STRING "Python checker command to run during Python module compilation" )
 
+# Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
+set( ATLAS_GEANT4_USE_LTO @ATLAS_GEANT4_USE_LTO@ CACHE BOOL
+   "Use link-time-optimization in building AtlasGeant4" )
+
 # Figure out whether to use QUIET in the following calls.
 set( _quietFlag )
 if( Athena_FIND_QUIETLY )
