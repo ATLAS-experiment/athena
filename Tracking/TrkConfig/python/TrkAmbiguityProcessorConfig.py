@@ -554,4 +554,3 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
         CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
             name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
-

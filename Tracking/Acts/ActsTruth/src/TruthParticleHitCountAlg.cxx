@@ -152,8 +152,8 @@ namespace ActsTrk
 
     m_nTruthParticlesWithHits += truth_particle_hit_counts->size();
 
-    ATH_MSG_INFO("Truth particles with hits:" << truth_particle_hit_counts->size()
-                 << ", without enough hits: " << truth_particles_without_enough_measurements);
+    ATH_MSG_DEBUG("Truth particles with hits:" << truth_particle_hit_counts->size()
+                  << ", without enough hits: " << truth_particles_without_enough_measurements);
 
     SG::WriteHandle<TruthParticleHitCounts> truth_particle_hit_counts_out_handle(m_truthHitCountsOut, ctx);
     if (truth_particle_hit_counts_out_handle.record( std::move(truth_particle_hit_counts)).isFailure()) {

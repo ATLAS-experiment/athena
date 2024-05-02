@@ -324,12 +324,21 @@ def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("StoreHoles", False)
     return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
-def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel"):
+def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel",
+                                listOfExtensions=[]):
     acc = ComponentAccumulator()
-    ITkSiSPTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
-        ITkSiSPTrackStateOnSurfaceDecoratorCfg(flags))
+    listOfAugmTools = []
+    for extension in listOfExtensions:
+        ITkSiSPTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+            ITkSiSPTrackStateOnSurfaceDecoratorCfg(
+                flags, name = f"SiSP{extension}TrackStateOnSurfaceDecorator",
+                ContainerName = f"SiSPSeededTracks{extension}TrackParticles",
+                PixelMsosName = f"SiSP{extension}_ITkPixel_MSOSs",
+                SctMsosName = f"SiSP{extension}_ITkStrip_MSOSs"))
+        listOfAugmTools.append(ITkSiSPTrackStateOnSurfaceDecorator)
+
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[ITkSiSPTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=listOfAugmTools))
     return acc
 
 def ITkGSFTrackStateOnSurfaceDecoratorCfg(
