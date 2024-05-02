@@ -25,7 +25,7 @@ from ..CommonSequences.FullScanDefs import em_clusters, lc_clusters, trkFSRoI
 from ..Jet.JetRecoCommon import (
     defineJetConstit,
 )
-from ..Jet.JetRecoSequencesConfig import JetRecoCfg
+from ..Jet.JetRecoSequencesConfig import JetRecoDataDeps, JetRecoCfg
 from ..Jet.JetTrackingConfig import JetFSTrackingCfg
 from .StepOutput import StepOutput
 from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
@@ -50,7 +50,7 @@ def jetRecoDictForMET(**recoDict) -> dict[str, Any]:
         jrd["clusterCalib"] = "em"
     # Interpret jet calibration
     if jrd["jetCalib"] == "default":
-        jrd["jetCalib"] = getJetCalibDefaultString(jrd)
+        jrd["jetCalib"] = getJetCalibDefaultString(jrd['recoAlg'],jrd['constitType'],jrd['trkopt'])
     if jrd["constitType"] != "tc" or "gsc" in jrd["jetCalib"]:
         jrd["trkopt"] = "ftf"
     jrd["jetDefStr"] = jetRecoDictToString(jrd)
@@ -232,7 +232,9 @@ def jetInputCfg(flags, force_tracks: bool = False, **recoDict) -> StepOutput:
         inputs.merge_other(clusterInputCfg(flags, calib="em"))
 
     acc = ComponentAccumulator()
-    jet_acc, jetName, jetDef = JetRecoCfg(flags, clustersKey=inputs["Clusters"], **jrd)
+    jetDefDict = JetRecoDataDeps(flags, clustersKey=inputs["Clusters"], **jrd)
+    jetName, jetDef = jetDefDict['final']
+    jet_acc = JetRecoCfg(flags, **jetDefDict)
     acc.merge(jet_acc)
     return StepOutput.create(
         acc, inputs, Jets=jetName, JetDef=jetDef, **flags.Jet.Context[jrd["trkopt"]] 
