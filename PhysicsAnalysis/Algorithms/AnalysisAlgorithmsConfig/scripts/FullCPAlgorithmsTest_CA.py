@@ -82,7 +82,8 @@ cfg.merge(PoolReadCfg(flags))
 cfg.merge(CutFlowSvcCfg(flags))
 
 # Setup the configuration
-cp_cfg = makeSequence(dataType, blockConfig, textConfig, forCompare=forCompare,
+cp_cfg = makeSequence(dataType, blockConfig, textConfig,
+                      forCompare=forCompare,
                       noSystematics=athArgs.no_systematics,
                       isPhyslite=athArgs.physlite,
                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR,

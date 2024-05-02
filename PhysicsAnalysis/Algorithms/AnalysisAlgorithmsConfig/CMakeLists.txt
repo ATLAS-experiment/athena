@@ -56,7 +56,10 @@ else()
 
 endif()
 
-
+atlas_add_test( ConfigTextUnitTest
+   SCRIPT python/ConfigText_unitTest.py --text-config ${CONFIG_PATH}
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 30 )
 
 # This runs test jobs for both sequences and block configs.  Currently
 # (26 Apr 24) we are running both, but the tests that compare their

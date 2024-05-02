@@ -649,8 +649,6 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, fo
     return ca
 
 
-
-
 def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
                         geometry=None, autoconfigFromFlags=None, noSystematics=None, onlyNominalOR=False,  forceEGammaFullSimConfig=False) :
 
@@ -1045,9 +1043,10 @@ def printSequenceAlgs (sequence) :
         print (sequence)
 
 
-def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hardCuts = False,
-                  isPhyslite = False, geometry = None, autoconfigFromFlags = None, onlyNominalOR = False,
-                  forceEGammaFullSimConfig = False) :
+def makeSequence (dataType, useBlocks, yamlPath, forCompare,
+        noSystematics, hardCuts = False, isPhyslite = False, geometry = None,
+        autoconfigFromFlags = None, onlyNominalOR = False,
+        forceEGammaFullSimConfig = False) :
 
     # do some harder cuts on all object types, this is mostly used for
     # benchmarking
@@ -1070,13 +1069,15 @@ def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hard
         ca = makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                                  isPhyslite=isPhyslite,
                                  geometry=geometry, onlyNominalOR=onlyNominalOR,
-                                 autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics,
+                                 autoconfigFromFlags=autoconfigFromFlags,
+                                 noSystematics=noSystematics,
                                  forceEGammaFullSimConfig=forceEGammaFullSimConfig)
     elif yamlPath :
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText
         ca = makeSequenceText(yamlPath, dataType, algSeq, geometry=geometry,
                               isPhyslite=isPhyslite,
-                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
+                              autoconfigFromFlags=autoconfigFromFlags,
+                              noSystematics=noSystematics)
     else :
         ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
                               isPhyslite=isPhyslite,
