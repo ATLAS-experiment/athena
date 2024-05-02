@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # -*- coding: utf-8 -*-
-
-from __future__ import print_function
 
 import os, shutil
 import time
@@ -342,14 +340,14 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
                         print('handi("Run '+rN+ ', '+sp[1]+', ' + stream + '",' + sp[0] + ','+rundir+sp[3]+')')
                         _local_apply(handiWithComparisons, ( ('Run '+rN+ ', '+sp[1]+', ' + stream), sp[0], (rundir+sp[3]), runlistLoc, compare, browserMenu, allDirsScriptLoc) )
                         print("")
-                        mN = sp[1].lstrip("lowStat_")
+                        mN = sp[1].removeprefix("lowStat_")
                         min10List.append( (sp[3], mN) )
                     elif sp[1].find("medStat")!=-1: # medium statistics interval
                         print("Running handi on " + sp[0] + ":")
                         print('handi("Run '+rN+ ', '+sp[1]+', ' + stream + '",' + sp[0] + ','+rundir+sp[3]+')')
                         _local_apply(handiWithComparisons, (('Run '+rN+ ', '+sp[1]+', ' + stream), sp[0], (rundir+sp[3]), runlistLoc, compare, browserMenu, allDirsScriptLoc))
                         print("")
-                        mN = sp[1].lstrip("medStat_")
+                        mN = sp[1].removeprefix("medStat_")
                         min30List.append( (sp[3], mN) )
 
             #min10List.sort(key=lambda x: int(x[1]))
