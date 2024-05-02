@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # lumiCalculator.py
 # utilities for calculation of integrated luminosity from information in COOL
 # main class coolLumiCalc
 # Richard Hawkings, started May 2007
-
-from __future__ import print_function
 
 import sys
 from PyCool import cool
@@ -185,7 +183,7 @@ class coolLumiCalc:
                         l2countitr.goToNext()
                         l2countobj=l2countitr.currentRef()
                         if (l2countobj.since()!=l1countobj.since()):
-                            raise "L2/L1 counter synchronisation error"
+                            raise RuntimeError("L2/L1 counter synchronisation error")
                         l2payload=l2countobj.payload()
                         l2acc=l2payload['HLTAccept']
                     else:
@@ -195,7 +193,7 @@ class coolLumiCalc:
                         l3countitr.goToNext()
                         l3countobj=l3countitr.currentRef()
                         if (l3countobj.since()!=l1countobj.since()):
-                            raise "L3/L1 counter synchronisation error"
+                            raise RuntimeError("L3/L1 counter synchronisation error")
                         l3payload=l3countobj.payload()
                         l3acc=l3payload['HLTAccept']
                     else:
