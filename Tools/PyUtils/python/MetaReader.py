@@ -628,16 +628,13 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     meta_dict[filename]['runNumbers'].append(bs_metadata.get('run_number', 0))
                     meta_dict[filename]['lumiBlockNumbers'].append(bs_metadata.get('LumiBlock', 0))
 
-                ievt = iter(bs)
-                try:
-                    evt = next(ievt)
-                except StopIteration:
-                    msg.warn("Event-less BS file, will not read metadata information from the first event")
-                else:
+                msg.debug(f"{meta_dict[filename]=}")
+                msg.debug(f"{len(bs)=}")
+                if len(bs):
+                    evt = bs[0]
                     try:
                         evt.check()
-                        processing_tags = [dict(stream_type = tag.type, stream_name = tag.name, obeys_lbk = bool(tag.obeys_lumiblock)) for tag in evt.stream_tag()]
-                        meta_dict[filename]['processingTags'] = [x['stream_name'] for x in processing_tags]
+                        meta_dict[filename]['processingTags'] = [tag.name for tag in evt.stream_tag()]
                         meta_dict[filename]['evt_number'] = [evt.global_id()]
                         meta_dict[filename]['run_type'] = [eformat.helper.run_type2string(evt.run_type())]
                         # ATLASRECTS-7126: If there is no valid lumiblock information
@@ -651,7 +648,11 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                             msg.debug('Taking the run number info from the first event (%i)', evt.run_no())
                             meta_dict[filename]['runNumbers'] = [evt.run_no()]
                     except RuntimeError as err:
-                        msg.error("Issue while reading a bs-file:\n",err)
+                        msg.error("Issue while reading the first event of BS file %r: %r", filename, err)
+                    else:
+                        msg.debug(f"{meta_dict[filename]=}")
+                else:
+                    msg.warn(f"Event-less BS {filename=}, will not read metadata information from the first event")
 
                 # fix for ATEAM-122
                 if len(bs_metadata.get('eventTypes', '')) == 0:  # see: ATMETADATA-6
