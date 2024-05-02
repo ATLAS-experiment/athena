@@ -159,7 +159,7 @@ def excludeIncludeComps(dic, args, depth, compsToFollow=[]) -> Dict:
 
     def eligible(component):
         exclude = any(re.match(s, component) for s in compsToExclude)
-        if (component in compsToFollow or component.lstrip("ToolSvc.") in compsToFollow) and not (exclude or component in args.ignore):
+        if (component in compsToFollow or component.removeprefix("ToolSvc.") in compsToFollow) and not (exclude or component in args.ignore):
             logger.debug("Considering this component: %s because some other one depends on it", component)
             return True
         include = any(re.match(s, component) for s in compsToInclude)
