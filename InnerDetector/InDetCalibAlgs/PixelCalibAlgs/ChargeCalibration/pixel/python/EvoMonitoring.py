@@ -85,23 +85,19 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
             mod_layer = "Blayer"
         elif mod_str.startswith("L1"): 
             mod_layer = "L1"
-            continue
         elif mod_str.startswith("L2"): 
             mod_layer = "L2"
-            continue
         elif mod_str.startswith("D"): 
             mod_layer = "Disk"
-            continue
         else:
             mod_layer = "IBL"
-            continue
             if mod_str.startswith("LI_S15"): 
                 continue
         
         information["Total_mods"] += 1
         fig = Figure(figsize=(13,10))
         axs = fig.add_subplot(1,1,1)
-        status = ""
+        status = "_OK"
         
         for fe in range(len(new_calib[str(mod)])):
             information["Total_FE"] += 1
@@ -152,7 +148,6 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
                     status += "_Slope"
             else:
                 information[mod_layer]["ok"] += 1
-                status = "_OK"
                 
             
             if save:
@@ -256,6 +251,7 @@ def setupRunEvo(path_newCalib, path_oldCalib):
     
     print("New calibration: '%s'" % path_newCalib)
     new_calib, new_iov = ReadCalibOutput(path_newCalib)
+
     print("Old calibration: '%s'" % path_oldCalib)
     old_calib, old_iov = ReadDbFile(path_oldCalib)
 
