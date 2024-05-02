@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 Test statistic functions.
 """
@@ -531,7 +531,7 @@ def anderson_ksamp(data1, data2, binned=False, midrank=True):
     critical = b0 + b1 / np.sqrt(m) + b2 / m
     pf = np.polyfit(critical, np.log(np.array([0.25, 0.1, 0.05, 0.025, 0.01])), 2)
     if A2 < critical.min() or A2 > critical.max():
-        warnings.warn("approximate p-value will be computed by extrapolation")
+        warnings.warn("approximate p-value will be computed by extrapolation")  # noqa: B028 (no stacklevel needed)
 
     p = np.exp(np.polyval(pf, A2))
     return Anderson_ksampResult(A2, p, float('nan'))
