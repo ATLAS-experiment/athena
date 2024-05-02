@@ -21,7 +21,6 @@ __all__ = [
 import sys
 import os
 import shelve
-from builtins import range
 
 from dbm import whichdb
 
@@ -999,16 +998,11 @@ class DiffFiles(object):
             print("## What:",err)
             print(sys.exc_info()[0])
             print(sys.exc_info()[1])
-            raise(err)
-        except Exception:
-            print("## Caught something !! (don't know what)")
-            print(sys.exc_info()[0])
-            print(sys.exc_info()[1])
             err  = "Error while opening POOL files !"
             err += " chk : %s%s" % ( chkFileName, os.linesep )
             err += " ref : %s%s" % ( refFileName, os.linesep )
             raise Exception(err)
-        
+
         self.allGood = True
         self.summary = []
         
