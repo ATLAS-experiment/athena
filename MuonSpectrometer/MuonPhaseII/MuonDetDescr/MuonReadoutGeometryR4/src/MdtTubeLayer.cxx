@@ -12,11 +12,18 @@ namespace MuonGMR4{
 
  
     bool MdtTubeLayerSorter::operator()(const MdtTubeLayer& a, const MdtTubeLayer& b) const{
-        static const GeoTrf::TransformSorter trfSort{};
-        const int trfCmp = trfSort.compare(a.layerTransform(), b.layerTransform());
-        if (trfCmp) return trfCmp < 0;
-        static const GeoPhysVolSorter physSort{};
-        return physSort(a.m_layerNode, b.m_layerNode);
+        // Don't bother calling the underlying comparisons
+        // if the objects are the same.  This saves a lot of time.
+        if (&a.layerTransform() != &b.layerTransform()) {
+          static const GeoTrf::TransformSorter trfSort{};
+          const int trfCmp = trfSort.compare(a.layerTransform(), b.layerTransform());
+          if (trfCmp) return trfCmp < 0;
+        }
+        if (a.m_layerNode != b.m_layerNode) {
+          static const GeoPhysVolSorter physSort{};
+          return physSort(a.m_layerNode, b.m_layerNode);
+        }
+        return false;
     }
     bool MdtTubeLayerSorter::operator()(const MdtTubeLayerPtr&a, const MdtTubeLayerPtr& b) const{
         return (*this)(*a, *b); 
