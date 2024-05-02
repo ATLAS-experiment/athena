@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILE_OFC_H
@@ -19,7 +19,7 @@ void Double2Int_calib( double calib_constant,
 		       bool verbose=false );
 
 void Double2Int_ofc( int w_off_size, 
-		     std::vector<double> w_off,
+		     const std::vector<double>& w_off,
 		     std::vector<int> &w_dsp, 
 		     int &w_sum_dsp, 
 		     int &scale, 

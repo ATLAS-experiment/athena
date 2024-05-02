@@ -43,7 +43,7 @@ class RPCbytestream : public RPCtrigDataObject
     void dump_rpc_bytestream(void);
 
     public:
-    RPCbytestream(CMAdata&,std::string,MsgStream&,
+    RPCbytestream(CMAdata&,const std::string&,MsgStream&,
                   debu,debu,debu,debu,debu,debu,debu,debu, uint, uint);
     RPCbytestream(const RPCbytestream&);
     ~RPCbytestream();
