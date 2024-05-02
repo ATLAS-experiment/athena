@@ -20,7 +20,9 @@ namespace InDet {
       Pileup,
       // secondaries
       KshortDecay,
+      StrangeMesonDecay,
       LambdaDecay,
+      StrangeBaryonDecay,
       TauDecay,
       GammaConversion,
       OtherDecay,
@@ -56,7 +58,7 @@ namespace InDet {
       return false;
     }
 
-    /** from Kshort decay */
+    /** from Kshort decay*/
     inline bool isKshortDecay(int origin) {
       if (origin & (0x1 << KshortDecay)) return true;
       return false;
@@ -65,6 +67,18 @@ namespace InDet {
     /** from Lambda decay */
     inline bool isLambdaDecay(int origin) {
       if (origin & (0x1 << LambdaDecay)) return true;
+      return false;
+    }
+
+    /** from strange meson decay*/
+    inline bool isStrangeMesonDecay(int origin) {
+      if (origin & (0x1 << StrangeMesonDecay)) return true;
+      return false;
+    }
+
+    /** from strange baryon decay*/
+    inline bool isStrangeBaryonDecay(int origin) {
+      if (origin & (0x1 << StrangeBaryonDecay)) return true;
       return false;
     }
 
@@ -88,13 +102,9 @@ namespace InDet {
 
     /** from long living particle decays or gamma conversions or hadronic interactions and anything else with barcode > 200000 */
     inline bool isSecondary(int origin) {
-      if (origin & (0x1 << KshortDecay)) return true;
-      if (origin & (0x1 << LambdaDecay)) return true;
-      if (origin & (0x1 << GammaConversion)) return true;
-      if (origin & (0x1 << HadronicInteraction)) return true;
-      if (origin & (0x1 << OtherDecay)) return true;
-      if (origin & (0x1 << OtherSecondary)) return true;
-      return false;
+      static constexpr auto bit=[](int bitpos){return 0x1<<bitpos;};
+      static constexpr int isSecondaryMask=bit(StrangeMesonDecay)|bit(StrangeBaryonDecay)|bit(GammaConversion)|bit(HadronicInteraction)|bit(OtherDecay);
+      return (origin & isSecondaryMask);
     }
 
     /** from B decay chain including B-->D */

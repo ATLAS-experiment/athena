@@ -41,7 +41,7 @@ dcubecfg_rdo=$artdata/InDetPhysValMonitoring/dcube/config/run2_RDOAnalysis.xml
 dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/RDOAnalysis_piplus_1GeV_simreco_${relnam}.root
 dcubecfgshifter_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
 dcubecfgexpert_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml
-dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/physval_piplus_1GeV_simreco_${relname}.root
+dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/physval_test_piplus1GeV_simreco_r24.0.39.root
 art_dcube=$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py
 
 lastref_dir=last_results

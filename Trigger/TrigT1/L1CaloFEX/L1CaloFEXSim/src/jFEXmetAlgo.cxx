@@ -123,7 +123,6 @@ void LVL1::jFEXmetAlgo::buildBarrelmet()
         const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(m_FPGA[iphi][0]);
         m_met_angle[iphi]=tmpTower->centrephi_toPI();
     }
-    
     buildMetXComponent();
     buildMetYComponent();
 }
@@ -135,7 +134,6 @@ void LVL1::jFEXmetAlgo::buildFWDmet()
     
     m_Totalmet_Xcoord=0;
     m_Totalmet_Ycoord=0;
-    
     
     //Granularity of phi = 0.1
     m_met.clear();
@@ -184,6 +182,7 @@ void LVL1::jFEXmetAlgo::buildFWDmet()
     }
     buildMetXComponent();
     buildMetYComponent();
+    
 }
 
 //build Met X component for the central barrels
@@ -208,7 +207,7 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
 //return the X component of the Met
 int LVL1::jFEXmetAlgo::GetMetXComponent()
 {
-    return std::floor(1.0*m_Totalmet_Xcoord/m_firmware_scale);
+    return m_Totalmet_Xcoord >> m_firmware_bit_offset;
 }
 
 //build Met Y component for the central barrels
@@ -232,7 +231,7 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
 //return the Y component of the Met
 int LVL1::jFEXmetAlgo::GetMetYComponent()
 {
-    return std::floor(1.0*m_Totalmet_Ycoord/m_firmware_scale);
+    return m_Totalmet_Ycoord >> m_firmware_bit_offset;
 }
 
 //Gets the ET for the TT. This ET is EM + HAD

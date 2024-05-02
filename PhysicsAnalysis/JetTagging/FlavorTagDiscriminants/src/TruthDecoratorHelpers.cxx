@@ -115,11 +115,11 @@ namespace FlavorTagDiscriminants {
             else if ( InDet::TrkOrigin::isHadronicInteraction(origin) ) {
                 return TruthSource::Label::HadronicInteraction;
             }
-            else if ( InDet::TrkOrigin::isKshortDecay(origin) ) {
-                return TruthSource::Label::KshortDecay;
+            else if ( InDet::TrkOrigin::isStrangeMesonDecay(origin) ) {
+                return TruthSource::Label::StrangeMesonDecay;
             }
-            else if ( InDet::TrkOrigin::isLambdaDecay(origin) ) {
-                return TruthSource::Label::LambdaDecay;
+            else if ( InDet::TrkOrigin::isStrangeBaryonDecay(origin) ) {
+                return TruthSource::Label::StrangeBaryonDecay;
             }
             else if ( InDet::TrkOrigin::isGammaConversion(origin) ) {
                 return TruthSource::Label::GammaConversion;

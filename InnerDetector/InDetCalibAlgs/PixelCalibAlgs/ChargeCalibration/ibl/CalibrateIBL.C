@@ -93,11 +93,11 @@ int main() {
   PixelMapping pixmap("../common/mapping.csv");
 
   // specify the input from calibration scans, please update accordingly
-  TString InDir = "/eos/atlas/atlascerngroupdisk/det-ibl/charge-calibration/202211_IBL/";
+  TString InDir = "/eos/atlas/atlascerngroupdisk/det-pix/p1/charge-calibration/20240430_IBL/";
 
-  TString scan = "S000088522" ;              // ToT HitDisConfig
-  TString scanLowCharge = "S000088521" ;
-  TString THRscan = "S000088526" ;   // charge Threshold 
+  TString scan = "S000090750" ;              // TOT_CALIB (0Preset_lowcharge_HisDisConfig)
+  TString scanLowCharge = "S000090749" ;     // TOT_CALIB (0Preset_lowcharge)
+  TString THRscan = "S000090748" ;           // THRESHOLD_SCAN (0Preset_full)
 
   const int doRef = 3 ;  // read then write a reference TXT for later citation instead of an input for dataBase 
   const bool run3 = true ;  // new series of injection charges (22) and new format

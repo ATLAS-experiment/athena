@@ -137,28 +137,53 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   int MST_y = 0x0;
   int MET_x = 0x0;
   int MET_y = 0x0;
+ 
+  int ETH =  0x0; 
+  int ETS =  0x0;
+  int ETW =  0x0;
 
-  int total_sumEt = 0x0; //currently only placeholder
+  int total_sumEt = 0x0;
   int MET = 0x0; 
 
+
+  // will need to hard code etFPGA ,a's and b's 
+ 
   metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
-  etFPGA (Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_eth, A_ets, A_etw); 
+  etFPGA (0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_eth, A_ets, A_etw); 
 
   metFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
-  etFPGA (Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_eth, B_ets, B_etw); 
+  etFPGA (1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_eth, B_ets, B_etw); 
 
   metFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
-  etFPGA (Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_eth, C_ets, C_etw); 
+  etFPGA (2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_eth, C_ets, C_etw); 
 
   metTotal(A_MHT_x, A_MHT_y, B_MHT_x, B_MHT_y, C_MHT_x, C_MHT_y, MHT_x, MHT_y);
   metTotal(A_MST_x, A_MST_y, B_MST_x, B_MST_y, C_MST_x, C_MST_y, MST_x, MST_y);
   metTotal(A_MET_x, A_MET_y, B_MET_x, B_MET_y, C_MET_x, C_MET_y, MET_x, MET_y);
-      
 
+  etTotal(A_eth, B_eth, C_eth, ETH);
+  etTotal(A_ets, B_ets, C_ets, ETS);
+  etTotal(A_etw, B_etw, C_etw, ETW);
+
+  total_sumEt = ETW;	  
+
+  // components should all be less than 12 bits at this point with 200 MeV LSB
   int MET2 = MET_x * MET_x + MET_y * MET_y;
 
-  if (MET2 > 0x000FFF) MET = 0x000FFF;
-  else MET = std::sqrt(MET2);
+  if (MET2 > 0x0FFFFFF) {
+	  MET = 0x000FFF;
+  } else {
+	  // repeat the byte stream converter calculation here -- not what the hardware actually does
+	  MET = std::sqrt(MET2); 
+
+	  
+          // best guess at current hardware.  Note that this is computed in the bytestream converter	  
+	  // take most signficant 12 bits 
+	  //int MET12 = MET2 >> 12; 
+	  // simulate the look up -- only 6 most signficant bits currently set -- to be checked 
+	  //MET = ( (int)(std::sqrt(MET12)) << 6) &  0x00000FC0   ;
+  }
+
 
   //Define a vector to be filled with all the TOBs of one event
   std::vector<std::unique_ptr<gFEXJwoJTOB>> tobs_v;
@@ -174,6 +199,8 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   if (total_sumEt != 0) outTOB[0] = outTOB[0] | 0x00000001 << 24;//Status bit for Quantity 2 (0 if quantity is null)
   if (MET != 0) outTOB[0] = outTOB[0] | 0x00000001 << 25;//Status bit for Quantity 1 (0 if quantity is null)
   outTOB[0] = outTOB[0] | (1  &  0x0000001F) << 26;//TOB ID is 1 for scalar values (5 bits starting at 26)
+
+  // std::cout << "DMS MET " << std::hex << MET  << " total_sumEt "  << total_sumEt <<  std::endl << std::dec;
 
 // Second TOB is (MET_x, MET_y)
   outTOB[1] = (MET_y &  0x00000FFF) << 0; //set the Quantity2 to the corresponding slot (LSB)
@@ -390,25 +417,71 @@ void gFEXJwoJAlgo::metFPGA(int FPGAnum, const gTowersType& twrs,
     
 }
 
-void gFEXJwoJAlgo::etFPGA(const gTowersType& twrs, gTowersType &gBlkSum,
+void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBlkSum,
                           int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const {
 
 
-  int ethard = 0.0;
-  int etsoft = 0.0; 
+
+  int64_t ethard_hi = 0;
+  int64_t etsoft_hi = 0;
+  int64_t ethard_lo = 0;
+  int64_t etsoft_lo = 0;
+
+  int64_t ethard = 0.0;
+  int64_t etsoft = 0.0; 
+ 
+  int multiplicitiveFactor = 0;
+
+  if(FPGAnum < 2 ) {
+   multiplicitiveFactor = cosLUT(0, 5);
+  } else{
+    multiplicitiveFactor = cosLUT(1, 5);
+  }
+
+// firmware treats upper and lower columns differnetly 
+
   for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
-    for(int jcolumn = 0; jcolumn<12; jcolumn++){
-        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
-          ethard = ethard + twrs[irow][jcolumn]*0x1F; 
-        } else {
-          etsoft = etsoft + twrs[irow][jcolumn]*0x1F; 
-      }
+    for(int jcolumn = 0; jcolumn<6; jcolumn++){
+      	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+	  ethard_lo = ethard_lo + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	} else {
+	  etsoft_lo = etsoft_lo + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	}
     }
-  } 
- eth  = ethard;
- ets  = etsoft;
- etw  = ethard*A + etsoft*B;
-  if( etw < 0 )  etw  = 0; 
+  }
+
+  for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(int jcolumn = 6; jcolumn<12; jcolumn++){
+      	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+	  ethard_hi = ethard_hi + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	} else {
+	  etsoft_hi = etsoft_hi + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	}
+    }
+  }
+
+  ethard = ethard_hi + ethard_lo;
+  
+  etsoft = etsoft_hi + etsoft_lo;
+
+
+  int64_t etsum_hi = ethard_hi*A  + etsoft_hi*B  ;
+  if ( etsum_hi < 0 ) etsum_hi = 0; 
+
+  int64_t etsum_lo = ethard_lo*A  + etsoft_lo*B  ;
+  if ( etsum_lo < 0 ) etsum_lo = 0; 
+  
+  int64_t etsum = etsum_hi + etsum_lo; 
+
+
+  // convert 200 MeV LSB here 
+  eth  = ethard>>3;
+  ets  = etsoft>>3;
+  etw  = (etsum  >>13 ) ;
+
+  if(msgLvl(MSG::DEBUG)) { 
+    std::cout << "DMS FPGA gTEJWOJ " << std::hex <<  FPGAnum << "et sum hard " << eth << "etsum soft" << ets << " A " << A << " B " << B << " weighted term " << etw << std::endl << std::dec; 
+  }
 }
 
 
@@ -425,16 +498,27 @@ void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
   // MET_x = MET_x >> 4;
   // MET_y = MET_y >> 4;
 
-  if (MET_x < -0x0007FF) MET_x = -0x0007FF;
-  if (MET_y < -0x0007FF) MET_y = -0x0007FF;
+  if (MET_x < -0x008000) MET_x = -0x08000;
+  if (MET_y < -0x008000) MET_y = -0x00800;
 
   if (MET_x > 0x0007FF) MET_x  = 0x0007FF;
   if (MET_y > 0x0007FF) MET_y  = 0x0007FF;
 
 }
 
+void gFEXJwoJAlgo::etTotal(int A_ET, 
+                            int B_ET, 
+                            int C_ET, 
+                            int & ET ) const {
+
+  //  leave at 200 MeV scale 	
+  ET = (A_ET + B_ET + C_ET) ; 
 
 
+  // main vlaue of ET is always positive 
+  if( ET > 0x0000FFF) ET =  0x0000FFF; 
+
+}
 //----------------------------------------------------------------------------------
 // bitwise simulation of sine LUT in firmware
 //----------------------------------------------------------------------------------

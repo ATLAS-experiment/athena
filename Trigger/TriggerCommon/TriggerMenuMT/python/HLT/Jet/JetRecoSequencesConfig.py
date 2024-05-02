@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 """ ComponentAccumulator equivalents for the functions in JetRecoSequences """
@@ -383,7 +383,6 @@ def StandardJetBuildCfg(flags, clustersKey, **jetRecoDict):
     return acc, jetsOut, jetDef
 
 
-@AccumulatorCache
 def StandardJetRecoCfg(flags, clustersKey, **jetRecoDict):
     """ Full reconstruction for 'simple' (ungroomed, not reclustered) jets
 
@@ -522,7 +521,6 @@ def StandardJetRecoCfg(flags, clustersKey, **jetRecoDict):
     return acc, jetsOut, jetDef
 
 
-@AccumulatorCache
 def GroomedJetRecoCfg(flags, clustersKey, **jetRecoDict):
     """ Create the groomed jets
 
@@ -592,7 +590,6 @@ def GroomedJetRecoCfg(flags, clustersKey, **jetRecoDict):
     return acc, jetsOut, groomDef
 
 
-@AccumulatorCache
 def ReclusteredJetRecoCfg(flags, clustersKey, **jetRecoDict):
     """ Create the reclustered jets
 

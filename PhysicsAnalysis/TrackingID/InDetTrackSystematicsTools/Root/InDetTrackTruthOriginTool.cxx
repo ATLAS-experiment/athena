@@ -87,44 +87,64 @@ namespace InDet {
 
     // Secondary? 
     if (HepMC::is_simulation_particle(truth)) {
-      // sub-categorize secondaries...
-      int parentID = getParentID(truth);
 
-      // photon conversions
-      if(parentID == 22) {
-        origin = origin | (0x1 << InDet::TrkOrigin::GammaConversion);
-      }
-
-      // K-short
-      else if(parentID == 310) {
-        origin = origin | (0x1 << InDet::TrkOrigin::KshortDecay);
-      }
-
-      // Lambda
-      else if(std::abs(parentID) == 3122){
-        origin = origin | (0x1 << InDet::TrkOrigin::LambdaDecay);
-      }
-
-      // other long living particle decays
-      else if(std::abs(parentID) > 3) {
-        origin = origin | (0x1 << InDet::TrkOrigin::OtherDecay);
-      }
-
-      // hadronic interactions
-      else if(parentID == -1) {
-        origin = origin | (0x1 << InDet::TrkOrigin::HadronicInteraction);
-      }
-
-      // other secondaries? 
-      //  ---> Not sure what if anything should be here...
-      else if(parentID == -2) {
-        origin = origin | (0x1 << InDet::TrkOrigin::OtherSecondary);
-      }
-
-      // other unknown origin (e.g. parent not in the record:) 
-      //  ---> Not sure what if anything should be here...
-      else{
+      // unknown origin (e.g. parent not in the record)
+      if(truth->nParents() != 1) {
         origin = origin | (0x1 << InDet::TrkOrigin::OtherOrigin);
+      }
+
+      else {
+        const xAOD::TruthParticle *parent = truth->parent(0);
+
+        // in some cases particle has a parent, but that parent's barcode is zero
+        if(parent == nullptr) {
+          origin = origin | (0x1 << InDet::TrkOrigin::OtherOrigin);
+        }
+        
+        // sub-categorize secondaries which have one valid parent
+        else {
+
+          int pdgId = truth->pdgId();
+          int parentId = parent->pdgId();
+
+          // photon conversion
+          if(parent->isPhoton() && truth->isElectron()) {
+            origin = origin | (0x1 << InDet::TrkOrigin::GammaConversion);
+          }
+
+          // Strange Mesons
+          else if(parent->isStrangeMeson() && parent->nChildren() == 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::StrangeMesonDecay);
+            // specifically Kshort
+            if (abs(pdgId) == 211 && parentId == 310) {
+              origin = origin | (0x1 << InDet::TrkOrigin::KshortDecay);
+            }
+          }
+
+          // Strange Baryons
+          else if(parent->isStrangeBaryon() && parent->nChildren() == 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::StrangeBaryonDecay);
+            // specifically Lambdas
+            if ((abs(pdgId) == 211 || abs(pdgId) == 2212) && abs(parentId) == 3122) {
+              origin = origin | (0x1 << InDet::TrkOrigin::LambdaDecay);
+            }
+          }
+
+          // other long living particle decays
+          else if(parent->isHadron() && parent->nChildren() == 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::OtherDecay);
+          }
+
+          // hadronic interactions
+          else if(parent->nChildren() > 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::HadronicInteraction);
+          }
+
+          // other secondaries
+          else {
+            origin = origin | (0x1 << InDet::TrkOrigin::OtherSecondary);
+          }
+        }
       }
 
       isFragmentation = false;
@@ -218,6 +238,7 @@ namespace InDet {
     return false;
   }
 
+  // Not used in getTruthOrigin anymore, kept for backwards compatibility
   int InDetTrackTruthOriginTool::getParentID(const xAOD::TruthParticle* truth) const {
 
     // no parents? is anything even there?

@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- mode: python -*-
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This is a script that is born as shell to setup the preloading and then
 # resurrected as python script for the actual athenaHLT.py application.
@@ -16,7 +16,6 @@ export USEIMF=1
 for a in ${@}
 do
     case "$a" in
-        --leak-check*)   USETCMALLOC=0;;
         --stdcmalloc)    USETCMALLOC=0;;
         --tcmalloc)      USETCMALLOC=1;;
         --stdcmath)      USEIMF=0;;
@@ -122,14 +121,6 @@ def update_pcommands(args, cdict):
       cdict['trigger']['precommand'].append('_run_number=%d' % args.run_number)
    if args.lb_number is not None:
       cdict['trigger']['precommand'].append('_lb_number=%d' % args.lb_number)
-
-   if args.leak_check:
-      doLeakCheck = [] if args.leak_check=='all' else [args.leak_check]
-
-      #early import is needed for proper offloading later
-      import Hephaestus.MemoryTracker as memtrack  # noqa
-      cdict['trigger']['precommand'].insert(0, "memChkMode='leak-check';doLeakCheck=%s;"
-                                            "include('TrigCommon/LeakTracer.py')" % doLeakCheck)
 
 def update_run_params(args):
    """Update run parameters from file/COOL"""
@@ -369,9 +360,6 @@ def main():
                   ' form "whichProc:cmd" where whichProc is one of [mother,firstFork,allForks] and cmd can contain a format'
                   ' string {pid} which will be replaced with the PID of the corresponding process (mother or fork).')
    g.add_argument('--perfmon', action='store_true', help='enable PerfMon')
-   g.add_argument('--leak-check', metavar='<stage>', nargs='?', const='execute',
-                  choices=['all','initialize','start','beginrun','execute','finalize','endrun','stop'],
-                  help='Perform leak checking during <stage>')
    g.add_argument('--tcmalloc', action='store_true', default=True, help='use tcmalloc')
    g.add_argument('--stdcmalloc', action='store_true', help='use stdcmalloc')
    g.add_argument('--stdcmath', action='store_true', help='use stdcmath library')

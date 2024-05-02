@@ -82,6 +82,7 @@ namespace LVL1 {
     
     virtual std::array<float,2> getEtaPhi(uint) override;
     virtual std::array<int,2> getEtEmHad(uint) override;
+    bool getEMSat(unsigned int ttID);
     
     bool isValidSeed(uint seedTTID);
     void findAndFillNextTT(jFEXForwardElecInfo& elCluster, int neta, int nphi);

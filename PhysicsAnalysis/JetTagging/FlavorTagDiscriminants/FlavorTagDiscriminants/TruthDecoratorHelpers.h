@@ -29,8 +29,8 @@ namespace FlavorTagDiscriminants {
                 NoTruth             = 0,
                 NotSecondary        = 1,
                 HadronicInteraction = 2,
-                KshortDecay         = 3,
-                LambdaDecay         = 4,
+                StrangeMesonDecay   = 3,
+                StrangeBaryonDecay  = 4,
                 GammaConversion     = 5,
                 Other               = 6
             };

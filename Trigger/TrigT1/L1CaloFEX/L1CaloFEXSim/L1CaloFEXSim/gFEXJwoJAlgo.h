@@ -64,7 +64,7 @@ namespace LVL1 {
                  int & MST_x, int & MST_y,
                  int & MET_x, int & MET_y) const;
 
-    void etFPGA(const gTowersType& twrs, gTowersType &gBlkSum,
+    void etFPGA(int FPGAnum,const gTowersType& twrs, gTowersType &gBlkSum,
                 int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const;
 
     void metTotal(int A_MET_x, int A_MET_y,
@@ -72,7 +72,12 @@ namespace LVL1 {
                   int C_MET_x, int C_MET_y,
                   int & MET_x, int & MET_y) const;
 
-   
+    void etTotal(int A_ET, 
+                 int B_ET, 
+                 int C_ET, 
+                 int & ET ) const;  
+
+
     float sinLUT(unsigned int phiIDX, unsigned int aw) const;
 
     float cosLUT(unsigned int phiIDX, unsigned int aw) const;
