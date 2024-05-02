@@ -340,32 +340,32 @@ jobOptions like this:
     if os.access(madspin_card,os.R_OK):
         os.unlink(madspin_card)
     mscard = open(madspin_card,'w')                                                                                                                                      
-    mscard.write("""#************************************************************                                                                                          
-    #*                        MadSpin                           *                                                                                                              
-    #*                                                          *                                                                                                              
-    #*    P. Artoisenet, R. Frederix, R. Rietkerk, O. Mattelaer *                                                                                                              
-    #*                                                          *                                                                                                              
-    #*    Part of the MadGraph5_aMC@NLO Framework:              *                                                                                                              
-    #*    The MadGraph5_aMC@NLO Development Team - Find us at   *                                                                                                              
-    #*    https://server06.fynu.ucl.ac.be/projects/madgraph     *                                                                                                              
-    #*                                                          *                                                                                                              
-    #************************************************************                                                                                                              
-    #Some options (uncomment to apply)                                                                                                                                         
-    #                                                                                                                                                                          
-    # set seed 1                                                                                                                                                               
-    # set Nevents_for_max_weigth 75 # number of events for the estimate of the max. weight                                                                                     
-    # set BW_cut 15                # cut on how far the particle can be off-shell                                                                                              
-     set max_weight_ps_point 400  # number of PS to estimate the maximum for each event                                                                                        
-    #                                                                                                                                                                          
-    set seed %i                                                                                                                                                                
-    # specify the decay for the final state particles                                                                                                                          
-    decay t > w+ b, w+ > all all                                                                                                                                               
-    decay t~ > w- b~, w- > all all                                                                                                                                             
-    decay w+ > all all                                                                                                                                                         
-    decay w- > all all                                                                                                                                                         
-    decay z > all all                                                                                                                                                          
-    # running the actual code                                                                                                                                                  
-    launch"""%runArgs.randomSeed)                                                                                                                                              
+    mscard.write("""#************************************************************
+    #*                        MadSpin                           *
+    #*                                                          *
+    #*    P. Artoisenet, R. Frederix, R. Rietkerk, O. Mattelaer *
+    #*                                                          *
+    #*    Part of the MadGraph5_aMC@NLO Framework:              *
+    #*    The MadGraph5_aMC@NLO Development Team - Find us at   *
+    #*    https://server06.fynu.ucl.ac.be/projects/madgraph     *
+    #*                                                          *
+    #************************************************************
+    #Some options (uncomment to apply)
+    #
+    # set seed 1
+    # set Nevents_for_max_weigth 75 # number of events for the estimate of the max. weight
+    # set BW_cut 15                # cut on how far the particle can be off-shell
+     set max_weight_ps_point 400  # number of PS to estimate the maximum for each event
+    #
+    set seed %i
+    # specify the decay for the final state particles
+    decay t > w+ b, w+ > all all
+    decay t~ > w- b~, w- > all all
+    decay w+ > all all
+    decay w- > all all
+    decay z > all all
+    # running the actual code
+    launch"""%runArgs.randomSeed)
     mscard.close()
 
 
@@ -578,7 +578,7 @@ To generate the gridpack execute the following command:
 
 At the end of the the gridpack generation you will see:
 
-     
+
     "RuntimeError: Gridpack sucessfully created, exiting the transform. IGNORE ERRORS if running gridpack generation!"
 
 This is just because it's hard to exit the Generate_tf.py quietly
@@ -661,7 +661,7 @@ For an LO example see the jobOptions
 [mc.MG_ttbar_ReweightTest_valid.py](https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions/blob/master/950xxx/950113/mc.MG_ttbar_ReweightTest_valid.py)
 and run:
 
-     
+
     Gen_tf.py --ecmEnergy=13000. --maxEvents=-1 --firstEvent=1 --randomSeed=123456 --outputTXTFile=test_lhe_events --jobConfig=950113
 
 #### NLO example
@@ -722,7 +722,7 @@ move the MadGraph output into the right naming convention and format
 metadata and configuration and then finally including the relevant
 Pythia8 shower jobOption fragments:
 
-                                                                                                                                                                           
+
     #### Shower                                                                                                                                                             
     include("Pythia8_i/Pythia8_A14_NNPDF23LO_EvtGen_Common.py")
     include("Pythia8_i/Pythia8_MadGraph.py")
@@ -785,11 +785,11 @@ e.g.:
 
 and adding a number of arguments to the Pythia8 command:
 
-    PYTHIA8_nJetMax=nJetMax                                                                                                                                                       
-    PYTHIA8_Dparameter=dparameter                                                                                                                                                 
-    PYTHIA8_Process=process                                                                                                                                                       
-    PYTHIA8_TMS=ktdurham                                                                                                                                                          
-    PYTHIA8_nQuarksMerge=4                                                                                                                                                        
+    PYTHIA8_nJetMax=nJetMax
+    PYTHIA8_Dparameter=dparameter
+    PYTHIA8_Process=process
+    PYTHIA8_TMS=ktdurham
+    PYTHIA8_nQuarksMerge=4
     include("Pythia8_i/Pythia8_CKKWL_kTMerge.py")
 
 Where `nJetMax` is the maximum number of jets in the matrix element (= 2
@@ -802,8 +802,6 @@ Run with the usual Gen_tf.py command:
 
     Gen_tf.py --ecmEnergy=13000. --maxEvents=-1 --firstEvent=1 --randomSeed=123456 --outputEVNTFile=EVNT.root --jobConfig=950117
 
-  
-  
 
 ### NLO Pythia8 Showering
 
@@ -1265,8 +1263,8 @@ used and how. Please see below some advices and answers.
 
 -   Q: aMC@NLO+Pythia8: can we use it?  A: **yes, with caution.** The
     main open question is at the moment related to few remaining
-    discrepancies for ttbar processes using the recommended ‘global
-    recoil’ (as opposed to local recoil) for the interface between
+    discrepancies for ttbar processes using the recommended ``global
+    recoil'' (as opposed to local recoil) for the interface between
     aMC@NLO and Pythia8.
     **Tuning**: in the context of the MG5_aMC@NLO tuning effort, small
     differences have been found between the parameter settings and the
@@ -1281,6 +1279,27 @@ used and how. Please see below some advices and answers.
 -   MG5 LO + Herwig++: can we use it? **A: only with extreme caution**
     The Herwig expertise in ATLAS is limited.
 
+## Debugging outside of Athena<a name="write_test_script"></a>
+
+Frequently we want to see if an issue can be reproduced in stand-alone
+MadGraph5_aMC@NLO. In those sorts of cases, we have a helper function
+that you can call from your job options, [write_test_script()](https://gitlab.cern.ch/atlas/athena/-/blob/master/Generators/MadGraphControl/python/MadGraphUtils.py#L198).
+Just add to the relevant point in your job options:
+
+    write_test_script()
+
+and we will attempt to write a shell script into the log, as well as a
+local copy (without the usual log decorations like times) for you to 
+try to run. Sometimes this takes a little bit of attention (e.g. 
+checking paths, or ensuring that changes you make in your job options
+are being propagated to the script), but it should be a good starting
+point for checking if things run outside of Athena.
+
+Note that MadGraph5_aMC@NLO authors generally do not understand our
+job options commands, so if you do need to open a ticket this is the
+kind of script that you'll need to provide (along with the cards and so
+on that you used). Sometimes the Athena log is sufficient for them
+because we print all your cards and configuration there.
 
 ## I'm Really Stuck!
 
@@ -1298,13 +1317,11 @@ help. The mailing list should be able to help identify whether you're
 struggling with a MadGraph5_aMC@NLO issue or an "ATLAS issue" (or Athena
 issue), and if it's really a MadGraph5_aMC@NLO issue the list can help
 give you instructions to extract your job from Athena. The
-[write_test_script()](https://gitlab.cern.ch/atlas/athena/-/blob/master/Generators/MadGraphControl/python/MadGraphUtils.py#L193)
+[write_test_script()](#write_test_script)
 function can be extremely helpful for creating a stand-alone bash script
 that can be run to reproduce your issue without any ATLAS or job
 transform wrappers.
 
-  
-  
 -------
 
 # **Release history**

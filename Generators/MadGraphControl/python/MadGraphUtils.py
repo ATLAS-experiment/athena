@@ -196,12 +196,14 @@ def error_check(errors_a, return_code):
 
 # Write a short test script for standalone debugging
 def write_test_script():
-    mglog.info('Beta feature: Stand-alone debugging script')
+    mglog.info('Will write a stand-alone debugging script.')
     mglog.info('This is an attempt to provide you commands that you can use')
-    mglog.info('to reproduce the error locally\n\n')
+    mglog.info('to reproduce the error locally. If you make additional')
+    mglog.info('modifications by hand (not using MadGraphControl) in your JO,')
+    mglog.info('make sure that you check and modify the script as needed.\n\n')
     global MADGRAPH_COMMAND_STACK
     mglog.info('# Script start; trim off columns left of the "#"')
-    # Beta feature: offline stand-alone reproduction script
+    # Write offline stand-alone reproduction script
     with open('standalone_script.sh','w') as standalone_script:
         for command in MADGRAPH_COMMAND_STACK:
             for line in command.split('\n'):
