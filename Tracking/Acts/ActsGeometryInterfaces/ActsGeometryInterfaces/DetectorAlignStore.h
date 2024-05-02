@@ -52,10 +52,12 @@ namespace ActsTrk {
         
                static constexpr unsigned s_techs{static_cast<unsigned>(DetectorType::UnDefined)};
                using TicketCounterArr =  std::array<std::atomic<unsigned>, s_techs>;
-               using ReturnedTicketArr = std::array<std::vector<unsigned>, s_techs>;
+               using ReturnedTicketArr = std::array<std::vector<bool>, s_techs>;
+               using ReturnedHintArr = std::array<int, s_techs>;
             private:
                 static TicketCounterArr s_clientCounter ATLAS_THREAD_SAFE;
                 static ReturnedTicketArr s_returnedTickets ATLAS_THREAD_SAFE;
+                static ReturnedHintArr s_returnedHints ATLAS_THREAD_SAFE;
                 std::vector<CxxUtils::CachedUniquePtr<Amg::Transform3D>> m_transforms{};
         };
         /// @brief The aligned detector element type
