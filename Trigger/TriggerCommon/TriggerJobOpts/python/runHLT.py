@@ -1,3 +1,4 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 CA module to configure the (standalone) HLT for athena and athenaHLT.
@@ -5,7 +6,7 @@ There is a separate entry point for each application to tailor some
 flags and services. All common code should go to runLTCfg(flags).
 
 Usage:
-  athena --CA [options] TriggerJobOpts/runHLT.py [flags]
+  athena [options] TriggerJobOpts/runHLT.py [flags]
   athenaHLT [options] TriggerJobOpts.runHLT [flags]
 
   python -m TriggerJobOpts.runHLT  # not recommended (due to missing LD_PRELOADs)
