@@ -10,7 +10,7 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="VP1LightExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
-                        -DLCG_VERSION_POSTFIX="d_ATLAS_13"
+                        -DLCG_VERSION_POSTFIX="d_ATLAS_15"
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/5.4.0/GeoModel-5.4.0.tar.bz2;URL_MD5;c06fe74de34e6f89e527d83b366f7e03"
 			-DATLAS_GEOMODEL_PATCH=""
                         -DATLAS_GEOMODEL_FORCEDOWNLOAD_MESSAGE="Forcing_the_re-download_of_GeoModel_(2024.01.27.)")
