@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
+from ActsConfig.ActsUtilities import extractChildKwargs
 
 def ActsPixelClusteringToolCfg(flags,
                                name: str = "ActsPixelClusteringTool",
@@ -60,6 +61,7 @@ def ActsStripClusteringToolCfg(flags,
 
 def ActsPixelClusterizationAlgCfg(flags,
                                   name: str = 'ActsPixelClusterizationAlg',
+                                  *,
                                   useCache: bool = False,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -182,93 +184,182 @@ def ActsStripClusterPreparationAlgCfg(flags,
     return acc
 
 def ActsMainClusterizationCfg(flags,
-                              RoIs: str = "ActsRegionOfInterest") -> ComponentAccumulator:
+                              *,
+                              RoIs: str = "ActsRegionOfInterest",
+                              **kwargs: dict) -> ComponentAccumulator:
+    assert isinstance(RoIs, str)
+    assert isinstance(kwargs, dict)
+    
     acc = ComponentAccumulator()
 
-    if flags.Acts.useCache:
-        acc.merge(ActsClusterCacheCreatorAlgCfg(flags))
+    # Clusterization is a three step process at maximum:
+    #   (1) Cache Creation
+    #   (2) Clusterization algorithm (reconstruction of clusters)
+    #   (3) Preparation of collection for downstream algorithms
+    # What step is scheduled depends on the tracking pass and the activation
+    # or de-activation of caching mechanism
+    
+    kwargs.setdefault('processPixels', flags.Detector.EnableITkPixel)
+    kwargs.setdefault('processStrips', flags.Detector.EnableITkStrip)
+    kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
+    kwargs.setdefault('runReconstruction', True)
+    kwargs.setdefault('runPreparation', flags.Acts.useCache)    
 
-    if flags.Detector.EnableITkPixel:
-        acc.merge(ActsPixelClusterizationAlgCfg(flags,
-                                                RoIs=RoIs,
-                                                useCache=flags.Acts.useCache))
-    if flags.Detector.EnableITkStrip:
-        acc.merge(ActsStripClusterizationAlgCfg(flags,
-                                                RoIs=RoIs,
-                                                useCache=flags.Acts.useCache))
-        
-    if flags.Acts.useCache:
-        if flags.Detector.EnableITkPixel:
+    # Step (1)
+    if kwargs['runCacheCreation']:
+        acc.merge(ActsClusterCacheCreatorAlgCfg(flags,
+                                                **extractChildKwargs(prefix='ClusterCacheCreatorAlg.', **kwargs)))
+
+    # Step (2)
+    if kwargs['runReconstruction']:
+        if kwargs['processPixels']:
+            acc.merge(ActsPixelClusterizationAlgCfg(flags,
+                                                    RoIs=RoIs,
+                                                    **extractChildKwargs(prefix='PixelClusterizationAlg.', **kwargs)))
+        if kwargs['processStrips']:
+            acc.merge(ActsStripClusterizationAlgCfg(flags,
+                                                    RoIs=RoIs,
+                                                    **extractChildKwargs(prefix='StripClusterizationAlg.', **kwargs)))
+    # Step (3)
+    if kwargs['runPreparation']:
+        if kwargs['processPixels']:
             acc.merge(ActsPixelClusterPreparationAlgCfg(flags,
-                                                        name="ActsPixelClusterPreparationAlg",
                                                         RoIs=RoIs,
-                                                        useCache=True,
-                                                        OutputCollection="ITkPixelClusters_Cached",
-                                                        InputIDC="ActsPixelClustersCache"))
+                                                        **extractChildKwargs(prefix='PixelClusterPreparationAlg.', **kwargs)))
             
-        if flags.Detector.EnableITkStrip:
+        if kwargs['processStrips']:
             acc.merge(ActsStripClusterPreparationAlgCfg(flags,
-                                                        name="ActsStripClusterCachePreparationAlg",
                                                         RoIs=RoIs,
-                                                        useCache=True,
-                                                        OutputCollection="ITkStripClusters_Cached",
-                                                        InputIDC="ActsStripClustersCache"))
+                                                        **extractChildKwargs(prefix='StripClusterPreparationAlg.', **kwargs)))
             
     # Analysis extensions
     if flags.Acts.doAnalysis:
-        if flags.Detector.EnableITkPixel:
+        if kwargs['processPixels']:
             from ActsConfig.ActsAnalysisConfig import ActsPixelClusterAnalysisAlgCfg
-            acc.merge(ActsPixelClusterAnalysisAlgCfg(flags))
-        if flags.Detector.EnableITkStrip:
+            acc.merge(ActsPixelClusterAnalysisAlgCfg(flags, **extractChildKwargs(prefix='PixelClusterAnalysisAlg.', **kwargs)))
+            
+        if kwargs['processStrips']:
             from ActsConfig.ActsAnalysisConfig import ActsStripClusterAnalysisAlgCfg
-            acc.merge(ActsStripClusterAnalysisAlgCfg(flags))
-
-    return acc
-
-def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    if flags.Acts.useCache:
-        acc.merge(ActsStripClusterizationAlgCfg(flags,
-                                                name="ActsConversionStripClusterizationAlg",
-                                                useCache=True,
-                                                ClustersKey="ITkConversionStripClusters",
-                                                ClusterCache="ActsConversionStripClustersCache",
-                                                RoIs="ActsConversionRegionOfInterest"))
-        
-    if flags.Detector.EnableITkStrip:
-        acc.merge(ActsStripClusterPreparationAlgCfg(flags,
-                                                    name="ActsConversionStripClusterPreparationAlg" if not flags.Acts.useCache else "ActsConversionStripClusterCachePreparationAlg",
-                                                    RoIs="ActsConversionRegionOfInterest",
-                                                    useCache=flags.Acts.useCache,
-                                                    InputCollection="ITkStripClusters",
-                                                    OutputCollection="ITkConversionStripClusters" if not flags.Acts.useCache else "ITkConversionStripClusters_Cached",
-                                                    InputIDC="ActsStripClustersCache" if not flags.Acts.useCache else "ActsConversionStripClustersCache"))
-
-    # Analysis extensions
-    if flags.Acts.doAnalysis:
-        if flags.Detector.EnableITkStrip:
-            from ActsConfig.ActsAnalysisConfig import ActsStripClusterAnalysisAlgCfg
-            acc.merge(ActsStripClusterAnalysisAlgCfg(flags,
-                                                     name="ActsConversionStripClusterAnalysisAlg",
-                                                     extension="ActsConversion",
-                                                     ClusterContainerKey="ITkConversionStripClusters",
-                                                     MonGroupName="ActsConversionClusterAnalysisAlg"))
+            acc.merge(ActsStripClusterAnalysisAlgCfg(flags, **extractChildKwargs(prefix='StripClusterAnalysisAlg.', **kwargs)))
 
     return acc
 
 def ActsClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+                      
+    processPixels = flags.Detector.EnableITkPixel
+    processStrips = flags.Detector.EnableITkStrip
 
-    # Acts Main pass
-    if flags.Tracking.ActiveConfig.extension == "Acts":
-        acc.merge(ActsMainClusterizationCfg(flags))
-    # Acts Conversion pass
-    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        acc.merge(ActsConversionClusterizationCfg(flags))
-    # Any other pass -> Validation mainly
+    # For conversion pass we do not process pixels since we assume
+    # they have been processed on the primary pass.
+    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
+        processPixels = False
+
+    kwargs = dict()
+    kwargs.setdefault('processPixels', processPixels)
+    kwargs.setdefault('processStrips', processStrips)
+                      
+    # Clusterization is a three step process at maximum:
+    #   (1) Cache Creation
+    #   (2) Clusterization algorithm (reconstruction of clusters)
+    #   (3) Preparation of collection for downstream algorithms
+    # What step is scheduled depends on the tracking pass and the activation
+    # or de-activation of caching mechanism.
+    
+    # Secondary passes do not need cache creation, that has to be performed
+    # on the primary pass, and only if the caching is enabled.
+    # Reconstruction can run on secondary passes only if the caching is enabled,
+    # this is because we may need to process detector elements not processed
+    # on the primary pass.
+    # Preparation has to be performed on secondary passes always, and on primary
+    # pass only if cache is enabled. In the latter case it is useed to collect all
+    # the clusters from all views before passing them to the downstream algorithms
+
+    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+        # Secondary passes
+        kwargs.setdefault('runCacheCreation', False)
+        kwargs.setdefault('runReconstruction', flags.Acts.useCache)
+        kwargs.setdefault('runPreparation', True)
     else:
-        acc.merge(ActsMainClusterizationCfg(flags,
-                                            RoIs = f"{flags.Tracking.ActiveConfig.extension}RegionOfInterest"))
+        # Primary pass
+        kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
+        kwargs.setdefault('runReconstruction', True)
+        kwargs.setdefault('runPreparation', flags.Acts.useCache)
 
+    # Name of the RoI to be used
+    roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
+    # Name of the Cluster container -> ITk + extension without "Acts" + Pixel or Strip + Clusters
+    # We also define the same collection from the main ACTS pass (primary)
+    primaryPixelClustersName = 'ITkPixelClusters'
+    primaryStripClustersName = 'ITkStripClusters'
+    pixelClustersName = primaryPixelClustersName
+    stripClustersName = primaryStripClustersName
+
+    # If the workflow is not a primary pass, then change the name of the cluster collections adding that information
+    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+        pixelClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelClusters'
+        stripClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}StripClusters'
+    
+    # Configuration for (1)
+    if kwargs['runCacheCreation']:
+        kwargs.setdefault('ClusterCacheCreatorAlg.name', f'{flags.Tracking.ActiveConfig.extension}ClusterCacheCreatorAlg')
+
+    # Configuration for (2)
+    if kwargs['runReconstruction']:
+        if kwargs['processPixels']:
+            kwargs.setdefault('PixelClusterizationAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelClusterizationAlg')
+            kwargs.setdefault('PixelClusterizationAlg.useCache', flags.Acts.useCache)
+            kwargs.setdefault('PixelClusterizationAlg.ClustersKey', pixelClustersName)
+            kwargs.setdefault('PixelClusterizationAlg.ClusterCache', f'{flags.Tracking.ActiveConfig.extension}PixelClustersCache')
+
+        if kwargs['processStrips']:
+            kwargs.setdefault('StripClusterizationAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripClusterizationAlg')
+            kwargs.setdefault('StripClusterizationAlg.useCache', flags.Acts.useCache)
+            kwargs.setdefault('StripClusterizationAlg.ClustersKey', stripClustersName)
+            kwargs.setdefault('StripClusterizationAlg.ClusterCache', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
+
+    # Configuration for (3)
+    if kwargs['runPreparation']:
+        if kwargs['processPixels']:
+            kwargs.setdefault('PixelClusterPreparationAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelClusterPreparationAlg')
+            kwargs.setdefault('PixelClusterPreparationAlg.useCache', flags.Acts.useCache)
+            kwargs.setdefault('PixelClusterPreparationAlg.OutputCollection', f'{pixelClustersName}_Cached' if kwargs['runReconstruction'] else pixelClustersName)
+            # The input is one between the collection (w/o cache) and the IDC (w/ cache)
+            if not flags.Acts.useCache:
+                # Take the collection from the reconstruction step. If not available take the collection from the primary pass
+                kwargs.setdefault('PixelClusterPreparationAlg.InputCollection', pixelClustersName if kwargs['runReconstruction'] else primaryPixelClustersName)
+                kwargs.setdefault('PixelClusterPreparationAlg.InputIDC', '')
+            else:
+                kwargs.setdefault('PixelClusterPreparationAlg.InputCollection', '')
+                kwargs.setdefault('PixelClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}PixelClustersCache')
+                
+        if kwargs['processStrips']:
+            kwargs.setdefault('StripClusterPreparationAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripClusterPreparationAlg')
+            kwargs.setdefault('StripClusterPreparationAlg.useCache', flags.Acts.useCache)
+            kwargs.setdefault('StripClusterPreparationAlg.OutputCollection', f'{stripClustersName}_Cached' if kwargs['runReconstruction'] else stripClustersName)
+            if not flags.Acts.useCache:
+                kwargs.setdefault('StripClusterPreparationAlg.InputCollection', stripClustersName if kwargs['runReconstruction'] else primaryStripClustersName)
+                kwargs.setdefault('StripClusterPreparationAlg.InputIDC', '')
+            else:
+                kwargs.setdefault('StripClusterPreparationAlg.InputCollection', '')
+                kwargs.setdefault('StripClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
+
+    # Analysis algo(s)
+    if flags.Acts.doAnalysis:
+        # Run analysis code on the resulting cluster collection produced by this tracking pass
+        # This collection is the result of (3) if it ran, else the result of (2). We are sure at least one of them run
+        if kwargs['processPixels']:
+            kwargs.setdefault('PixelClusterAnalysisAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelClusterAnalysisAlg')
+            kwargs.setdefault('PixelClusterAnalysisAlg.extension', flags.Tracking.ActiveConfig.extension)
+            kwargs.setdefault('PixelClusterAnalysisAlg.MonGroupName', f'{flags.Tracking.ActiveConfig.extension}ClusterAnalysisAlg')
+            kwargs.setdefault('PixelClusterAnalysisAlg.ClusterContainerKey', kwargs['PixelClusterPreparationAlg.OutputCollection'] if kwargs['runPreparation'] else kwargs['PixelClusterizationAlg.ClustersKey'])
+
+        if kwargs['processStrips']:
+            kwargs.setdefault('StripClusterAnalysisAlg.name', f'{flags.Tracking.ActiveConfig.extension}StripClusterAnalysisAlg')
+            kwargs.setdefault('StripClusterAnalysisAlg.extension', flags.Tracking.ActiveConfig.extension)
+            kwargs.setdefault('StripClusterAnalysisAlg.MonGroupName', f'{flags.Tracking.ActiveConfig.extension}ClusterAnalysisAlg')
+            kwargs.setdefault('StripClusterAnalysisAlg.ClusterContainerKey', kwargs['StripClusterPreparationAlg.OutputCollection'] if kwargs['runPreparation'] else kwargs['StripClusterizationAlg.ClustersKey'])
+                
+    acc.merge(ActsMainClusterizationCfg(flags, RoIs=roisName, **kwargs))
     return acc
+
