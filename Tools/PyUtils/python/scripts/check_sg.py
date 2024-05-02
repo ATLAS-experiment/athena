@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.check_sg
 # @purpose read a POOL file and dump the DataHeader's content
 # @author Sebastien Binet
 # @date February 2010
-
-from __future__ import print_function
 
 __doc__ = "read a POOL file and dump the DataHeader's content"
 __author__ = "Sebastien Binet"
@@ -87,12 +85,6 @@ def main(args):
             exitcode = 1
             pass
 
-        except Exception:
-            print ("## Caught something !! (don't know what)")
-            print (sys.exc_info()[0])
-            print (sys.exc_info()[1])
-            exitcode = 10
-            pass
         if len(files) > 1:
             print ("")
         pass # loop over fileNames
