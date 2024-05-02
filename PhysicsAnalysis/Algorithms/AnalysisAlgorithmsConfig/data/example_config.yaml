@@ -129,6 +129,7 @@ Trigger:
     photons: 'AnaPhotons'
     muons: 'AnaMuons'
 
+
 # After configuring each container, many variables will be saved automatically.
 Output:
     treeName: 'analysis'
