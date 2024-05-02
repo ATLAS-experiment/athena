@@ -448,14 +448,25 @@ def ITkExtendedPRDInfoCfg(flags):
     result.merge(ITkTSOS_CommonKernelCfg(flags))
 
     if flags.Tracking.doStoreSiSPSeededTracks:
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list if (e=='') or
+            flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks ]
         from DerivationFrameworkInDet.InDetToolsConfig import (
             ITkSiSPTSOS_CommonKernelCfg)
-        result.merge(ITkSiSPTSOS_CommonKernelCfg(flags))
+        result.merge(ITkSiSPTSOS_CommonKernelCfg(flags, listOfExtensions = listOfExtensionsRequesting))
 
     if flags.Input.isMC:
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list if (e=='') or
+            (flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks and
+             flags.Tracking.__getattr__(f"ITk{e}Pass").storeSeparateContainer) ]
         from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
             ITkPhysHitDecoratorAlgCfg)
-        result.merge(ITkPhysHitDecoratorAlgCfg(flags))
+        for extension in listOfExtensionsRequesting:
+            result.merge(ITkPhysHitDecoratorAlgCfg(
+                flags,
+                name=f"ITkPhysHit{extension}DecoratorAlg",
+                TrackParticleContainerName=f"ITk{extension}TrackParticles"))
 
     return result
 
