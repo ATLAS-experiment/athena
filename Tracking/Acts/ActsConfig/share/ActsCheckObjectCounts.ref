@@ -8,6 +8,17 @@ ActsStripClusterizationAlg                                        INFO Clusteriz
 | RDOs     |    1345365 |
 | Clusters |    1081478 |
 |----------|------------|
+ActsPixelSpacePointFormationAlg                                   INFO Space Point Formation statistics
+|--------------|------------|
+| Clusters     |    1165578 |
+| Space Points |    1165578 |
+|--------------|------------|
+ActsStripSpacePointFormationAlg                                   INFO Space Point Formation statistics
+|----------------------|------------|
+| Clusters             |    1081478 |
+| Space Points         |     325456 |
+| Overlap Space Points |      94491 |
+|----------------------|------------|
 ActsPixelSeedingAlg                                               INFO Seed statistics
 |---------------------|------------|
 | Spacepoints         |    1165578 |
