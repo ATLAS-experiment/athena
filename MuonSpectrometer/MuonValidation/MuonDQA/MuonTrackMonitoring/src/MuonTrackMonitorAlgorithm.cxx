@@ -278,6 +278,10 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
     auto MuonEta1 = Monitored::Scalar<float>((sIdentifier+"MuonEta1All").c_str(), 0);   
     auto MuonPhi1 = Monitored::Scalar<float>((sIdentifier+"MuonPhi1All").c_str(), 0);   
     auto MuonLumiBlock = Monitored::Scalar<float>((sIdentifier+"MuonLumiBlock").c_str(), 0);    
+    auto SegmentXPosBarrel = Monitored::Scalar<float>((sIdentifier+"SegmentXPosBarrel").c_str(), 0);
+    auto SegmentYPosBarrel = Monitored::Scalar<float>((sIdentifier+"SegmentYPosBarrel").c_str(), 0);
+    auto SegmentXPosEndcap = Monitored::Scalar<float>((sIdentifier+"SegmentXPosEndcap").c_str(), 0);
+    auto SegmentYPosEndcap = Monitored::Scalar<float>((sIdentifier+"SegmentYPosEndcap").c_str(), 0);
 
     /// Loop over all muons
     for(const auto muon : Muons) {
@@ -307,9 +311,9 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
         /// Do Muon Segments and Sector Plots
         for (size_t nSeg=0; nSeg < muon->nMuonSegments(); nSeg++) {
             const xAOD::MuonSegment* muonSegment = muon->muonSegment(nSeg);
-                        if (!muonSegment) {
-                           continue;
-                        }
+            if (!muonSegment) {
+                continue;
+            }
             MuonSmallSectorR = MuonLargeSectorR = std::hypot(muonSegment->x(), muonSegment->y());
             MuonSmallSectorZ = MuonLargeSectorZ = muonSegment->z();
             MuonSector = muonSegment->sector();
@@ -320,6 +324,11 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
             } else {
                 fill(tool, MuonSmallSectorZ, MuonSmallSectorR, MuonSector, MuonCIndex);
             }
+            SegmentXPosBarrel = muonSegment->x();
+            SegmentYPosBarrel = muonSegment->y();
+            SegmentXPosEndcap = muonSegment->x();
+            SegmentYPosEndcap = muonSegment->y();
+            fill(tool, SegmentXPosBarrel, SegmentYPosBarrel, SegmentXPosEndcap, SegmentYPosEndcap);
         }
     }
 
