@@ -32,12 +32,11 @@ class ITkPixelEncodingAlg : public AthReentrantAlgorithm
     };
 
     SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this,"PixelRDOKey","ITkPixelRDOs","StoreGate Key of Pixel RDOs"};
-    const InDetDD::PixelDetectorManager*           m_pixelManager;                   //!< the Si Detector Manager
+    const InDetDD::PixelDetectorManager*           m_pixelManager;    
     const PixelID*                                 m_pixIdHelper;  
 
     static constexpr float s_pitch50x50=0.050;
-
-    void fillChipMaps(const EventContext& ctx) const;
+    
 };
 #endif
 
