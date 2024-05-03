@@ -111,7 +111,7 @@ parser.add_option('', '--srcdbname', dest='srcdbname', default='BEAMSPOT', help=
 parser.add_option('', '--srctag', dest='srctag', default='nominal', help='source tag (default: nominal)')
 parser.add_option('-r', '--runjoboptions', dest='runjoboptions', default='InDetBeamSpotExample/VertexTemplate.py', help='template to run beam spot jobs')
 parser.add_option('', '--runtaskname', dest='runtaskname', default='VTX', help='task name')
-parser.add_option('-m', '--monjoboptions', dest='monjoboptions', default='InDetBeamSpotExample/MonitoringTemplate.py', help='template to run monitoring jobs')
+parser.add_option('-m', '--monjoboptions', dest='monjoboptions', default='runBeamSpotMonitor.py', help='template to run monitoring jobs')
 parser.add_option('', '--bcidjoboptions', dest='bcidjoboptions', default='InDetBeamSpotExample/VertexTemplate.py', help='template to run BCID jobs')
 parser.add_option('', '--montaskname', dest='montaskname', default='MON', help='task name')
 parser.add_option('', '--bcidtaskname', dest='bcidtaskname', default='BCID', help='BCID task name')

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -16,7 +16,7 @@ def ebComputingAlg(flags, itemsMap = {}):
 
     ebAlg = CompFactory.EnhancedBiasWeightCompAlg()
     ebAlg.ChainToItemMap = itemsMap
-    ebAlg.OutputLevel = ConfigFlags.Exec.OutputLevel
+    ebAlg.OutputLevel = flags.Exec.OutputLevel
     acc.addEventAlgo(ebAlg)
 
     return acc
@@ -58,28 +58,33 @@ if __name__=='__main__':
 
     log.setLevel(args.loglevel)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.fillFromArgs(args.flags)
-    ConfigFlags.Trigger.triggerConfig = 'DB'
-    ConfigFlags.Exec.OutputLevel = args.loglevel
-    ConfigFlags.Trigger.doNavigationSlimming = False
-    ConfigFlags.lock()
+   # Set the Athena configuration flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    # verbosity defined in Control/AthenaCommon/python/Constants.py
+    flags = initConfigFlags()
+    flags.fillFromArgs(args.flags)
+    flags.Trigger.triggerConfig = 'DB'
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.Exec.OutputLevel = args.loglevel
+    flags.Trigger.doNavigationSlimming = False
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
-    isRunningFromAOD = True if len(ConfigFlags.Input.Collections) else False
+    isRunningFromAOD = True if len(flags.Input.Collections) else False
     if isRunningFromAOD:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        cfg.merge(PoolReadCfg(ConfigFlags))
+        cfg.merge(PoolReadCfg(flags))
     else:
         from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfg
-        cfg.merge(TriggerRecoCfg(ConfigFlags))
+        cfg.merge(TriggerRecoCfg(flags))
 
-    configKeys = getConfigKeys(ConfigFlags.Input.Files)
+    configKeys = getConfigKeys(flags.Input.Files)
     itemsMap = {} if args.skipHLTSeeds else readHLTSeeds(smk = configKeys["SMK"], db = configKeys["DB"]) 
-    cfg.merge(ebComputingAlg(ConfigFlags, itemsMap))
+    cfg.merge(ebComputingAlg(flags, itemsMap))
 
     eventLoop = CompFactory.AthenaEventLoopMgr()
     eventLoop.EventPrintoutInterval = 1000

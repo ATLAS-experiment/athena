@@ -9,7 +9,7 @@ def TRT_StandaloneTrackFinderCfg(
     acc = ComponentAccumulator()
 
     kwargs.setdefault("MinNumDriftCircles", flags.Tracking.TRTStandalone.minTRT)
-    kwargs.setdefault("MinPt", flags.Tracking.ActiveConfig.minTRTonlyPt)
+    kwargs.setdefault("MinPt", flags.Tracking.TRTStandalone.minPt)
     kwargs.setdefault("OldTransitionLogic", (
         flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.MinBias))
 

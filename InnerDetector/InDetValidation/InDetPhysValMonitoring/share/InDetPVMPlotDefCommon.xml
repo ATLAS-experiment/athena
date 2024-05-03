@@ -1072,6 +1072,31 @@
   <x title="#mu" n="300" lo="0" hi="300"/>
   <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
 </h>
+<!-- Duplicate plots -->
+<h id="duplicate_rate_vs_eta" type="TEfficiency" title="Fraction of particles with more than one track matched">
+  <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Fraction" lo="0.0" hi="2.0"/>
+</h>
+<h id="duplicate_rate_vs_pt" type="TEfficiency" title="Fraction of particles with more than one track matched">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Fraction" lo="0.0" hi="2.0"/>
+</h>
+<h id="duplicate_number_vs_eta" type="TProfile" title="Average number of tracks associated with a particle">
+  <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Number of tracks"/>
+</h>
+<h id="duplicate_number_vs_pt" type="TProfile" title="Average number of tracks associated with a particle">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Number of tracks"/>
+</h>
+<h id="duplicate_number_nonzero_vs_eta" type="TProfile" title="Average number of tracks associated with a reconstructed particle">
+  <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Number of tracks"/>
+</h>
+<h id="duplicate_number_nonzero_vs_pt" type="TProfile" title="Average number of reco-tracks associated with a reconstructed particle">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Number of tracks"/>
+</h>
 <!-- Fake rate plots -->
 <h id="fakerate_vs_eta" type="TEfficiency" title="Fractions of reco-tracks with matching probability &lt; 50%">
   <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>

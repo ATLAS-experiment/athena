@@ -9,6 +9,7 @@ def AthenaMonitoringCfg(flags):
     local_logger = logging.getLogger('AthenaMonitoringCfg')
     info = local_logger.info
     debug = local_logger.debug
+    warning = local_logger.warning
     error = local_logger.error
     result = ComponentAccumulator()
 
@@ -62,6 +63,8 @@ def AthenaMonitoringCfg(flags):
 
     if flags.DQ.Steering.doHLTMon:
         info('Set up HLT monitoring')
+        if flags.DQ.Environment == 'AOD':
+            warning("HLT Monitoring enabled on AOD: this might cause issues as not all HLT collections are written to standard AOD!")
         from TrigHLTMonitoring.TrigHLTMonitorAlgorithm import TrigHLTMonTopConfig
         result.merge(TrigHLTMonTopConfig(flags))
 
@@ -159,10 +162,7 @@ def AthenaMonitoringCfg(flags):
     return result
 
 def AthenaMonitoringPostprocessingCfg(flags):
-    from AthenaConfiguration.ComponentFactory import CompFactory
     result = ComponentAccumulator()
-    asq = CompFactory.AthSequencer("AthEndSeq")
-    result.addSequence(asq)
     from DataQualityUtils.DQPostProcessingAlg import DQPostProcessingAlg
     ppa = DQPostProcessingAlg("DQPostProcessingAlg")
     ppa.ExtraInputs = {( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )}
@@ -170,5 +170,5 @@ def AthenaMonitoringPostprocessingCfg(flags):
     if flags.Common.isOnline:
         ppa.FileKey = ((flags.DQ.FileKey + '/') if not flags.DQ.FileKey.endswith('/')
                     else flags.DQ.FileKey)
-    result.addEventAlgo(ppa, "AthEndSeq")
+    result.addEventAlgo(ppa)
     return result

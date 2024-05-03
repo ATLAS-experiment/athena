@@ -62,33 +62,47 @@ def ROBPrefetchingAlgCfg_Calo(flags, nameSuffix, **kwargs):
 
 def ROBPrefetchingAlgCfg_Muon(flags, nameSuffix, **kwargs):
     return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Muon_'+nameSuffix, ['MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'], **kwargs)
-
-def getChainsForPrefetching(chains):
-    from AthenaCommon.Configurable import Configurable
+   
+def getChainsForPrefetching(CF_list):
     from TrigConfHLTUtils.HLTUtils import string2hash
     from AthenaCommon.CFElements import getSequenceChildren, isSequence
     from collections import defaultdict
     def sequenceAlgs(seq):
         algs = []        
-        for alg in getSequenceChildren(seq):
-            conf = Configurable.allConfigurables[alg] if type(alg)==str else alg
-            if isSequence(conf):
-                algs.extend(sequenceAlgs(conf))
-            elif conf.getName().startswith('IMEmpty'):
+        for alg in getSequenceChildren(seq):            
+            if isSequence(alg):
+                algs.extend(sequenceAlgs(alg))
+            elif alg.getName().startswith('IMEmpty'):
                 # skip empty probe step in tag&probe chains
                 continue
             else:
-                algs.append(conf.getName())
+                algs.append(alg.getName())
+      
         return algs
 
-    def firstNonEmptyStepAlgs(chainConfig):
+    def firstNonEmptyStepAlgs(CF_list): 
         algsMap = defaultdict(list) # {chainLegName, algsInFirstNonEmptyStep}
-        for step in chainConfig.steps:
-            for legName,menuSeq in zip(step.getChainLegs(), step.sequences):
-                algsMap[legName] = sequenceAlgs(menuSeq.sequence.Alg)
-                if algsMap[legName]:
-                    # only consider the first non-empty sequence across all legs - once found, break the loop
-                    return algsMap
+        firstSequence = []
+
+        for cfseq_per_step in CF_list:
+            for cfseq in cfseq_per_step: # all the steps with same step number
+                step = cfseq.sequenceCA.step                
+                foundFirstSequence = False
+                for ileg, menuSeq in enumerate(step.sequences): 
+                    seqA = sequenceAlgs(menuSeq.sequence.Alg)                  
+                    if seqA: # found not empty sequence in this step
+                        for stepD, chain in zip(cfseq.stepDicts, cfseq.chains): # loop over chains
+                            if chain in firstSequence:
+                                continue                            
+                            legName = stepD[ileg]['chainName']
+                            if legName not in algsMap: # add only the first time
+                                algsMap[legName] = seqA                               
+                                firstSequence.append(chain)
+                                foundFirstSequence = True
+
+                    if foundFirstSequence:
+                        break
+                                    
         return algsMap
 
     detGroupIdentifierAlgs = {
@@ -99,7 +113,7 @@ def getChainsForPrefetching(chains):
 
     def algsToDetGroup(algs):
         groups = []
-        for group,idAlgs in detGroupIdentifierAlgs.items():
+        for group,idAlgs in detGroupIdentifierAlgs.items():            
             if any([ida in algName for algName in algs for ida in idAlgs]):
                 groups.append(group)
         if len(groups)>1:
@@ -111,17 +125,16 @@ def getChainsForPrefetching(chains):
         'Calo': [],
         'Muon': []
     }
-
-    for chain in chains:
-        algsMap = firstNonEmptyStepAlgs(chain)
-        for legName,algs in algsMap.items():
-            det = algsToDetGroup(algs)
-            if not det:
-                continue
-            _log.debug("%s initialRoI will prefetch %s", legName, det)
-            chainFilterMap[det].append(string2hash(legName))
+    
+    
+    algsMap = firstNonEmptyStepAlgs(CF_list)
+    for legName,algs in algsMap.items():
+        det = algsToDetGroup(algs)
+        if not det:
+            continue
+        _log.debug("%s initialRoI will prefetch %s", legName, det)
+        chainFilterMap[det].append(string2hash(legName))
     return chainFilterMap
-
 
 # Legacy searches for the algs through the top level sequence
 def configurePrefetchingInitialRoI(flags, chains):
@@ -140,12 +153,11 @@ def configurePrefetchingInitialRoI(flags, chains):
 
         prefetchAlg.ChainFilter = chainFilter
 
-
 # In CA we have no access to the HLTBeginSeq in here
 # Instead generate the prefetching alg configs and append the ChainFilter,
 # to be merged into the global config.
-def prefetchingInitialRoIConfig(flags, chains):
-    chainFilterMap = getChainsForPrefetching(chains)
+def prefetchingInitialRoIConfig(flags, CFseq_list):
+    chainFilterMap = getChainsForPrefetching(CFseq_list)
     configurators = {
         'Si':   ROBPrefetchingAlgCfg_Si,
         'Calo': ROBPrefetchingAlgCfg_Calo,
@@ -164,3 +176,5 @@ def prefetchingInitialRoIConfig(flags, chains):
         prefetchCfg.merge(prefetchAlg)
 
     return prefetchCfg
+
+

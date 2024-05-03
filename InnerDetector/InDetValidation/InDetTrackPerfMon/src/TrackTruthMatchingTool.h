@@ -37,13 +37,36 @@ namespace IDTPM {
     /// General matching method, via TrackAnalysisCollections
     virtual StatusCode match( 
         TrackAnalysisCollections& trkAnaColls,
-        const std::string& chainRoIName ) const override;
+        const std::string& chainRoIName,
+        const std::string& roiStr ) const override;
 
-    /// Specific matching method, via test/reference vectors
+    /// Specific matching methods, via test/reference vectors
+
+    /// track -> track matching (disabled)
+    virtual StatusCode match(
+        const std::vector< const xAOD::TrackParticle* >&,
+        const std::vector< const xAOD::TrackParticle* >&,
+        ITrackMatchingLookup& ) const override
+    {
+      ATH_MSG_DEBUG( "track -> track matching disabled" );
+      return StatusCode::SUCCESS;
+    }
+
+    /// track -> truth matching
     virtual StatusCode match(
         const std::vector< const xAOD::TrackParticle* >& vTest,
         const std::vector< const xAOD::TruthParticle* >& vRef,
         ITrackMatchingLookup& matches ) const override;
+
+    /// truth -> track matching (disabled)
+    virtual StatusCode match(
+        const std::vector< const xAOD::TruthParticle* >&,
+        const std::vector< const xAOD::TrackParticle* >&,
+        ITrackMatchingLookup& ) const override
+    {
+      ATH_MSG_DEBUG( "truth -> track matching disabled" );
+      return StatusCode::SUCCESS;
+    }
 
   private:
 

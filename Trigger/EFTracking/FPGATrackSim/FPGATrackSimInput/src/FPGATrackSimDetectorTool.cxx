@@ -109,11 +109,11 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
           if (m_FPGATrackSimMapping->RegionMap_2nd()->isInRegion(ireg,curmodrawhit)) {
               hasOneRegion = true;
               // the module is compatible with the current
-              grouped_modules[ireg][curmodrawhit.getLayer()].insert(curmodrawhit.getFPGATrackSimIdentifierHash());
+              grouped_modules[ireg][curmodrawhit.getLayer()].insert(curmodrawhit.getIdentifierHash());
           }
       } // end loop over the regions
 
-      if (!hasOneRegion) ATH_MSG_WARNING ( "The module with hash " << curmodrawhit.getFPGATrackSimIdentifierHash() << " and FPGATrackSim ID (" << curmodrawhit.getLayer() << "," << curmodrawhit.getSection() << ") is not associated to a tower");
+      if (!hasOneRegion) ATH_MSG_WARNING ( "The module with hash " << curmodrawhit.getIdentifierHash() << " and FPGATrackSim ID (" << curmodrawhit.getLayer() << "," << curmodrawhit.getSection() << ") is not associated to a tower");
   } // end loop over the modules
 
   // Save the map into the output file and print at screen a small message

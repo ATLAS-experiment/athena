@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
@@ -17,11 +17,11 @@ def CombinedTrackingPassFlagSets(flags):
     # Primary Pass(es)
     from TrkConfig.TrkConfigFlags import TrackingComponent
     validation_configurations = {
-        TrackingComponent.ValidateActsClusters : "ValidateActsClusters",
-        TrackingComponent.ValidateActsSpacePoints : "ValidateActsSpacePoints",
-        TrackingComponent.ValidateActsSeeds : "ValidateActsSeeds",
-        TrackingComponent.ValidateActsTracks : "ValidateActsTracks",
-        TrackingComponent.ValidateActsAmbiguityResolution : "ValidateActsAmbiguityResolution",
+        TrackingComponent.ActsValidateClusters : "ActsValidateClusters",
+        TrackingComponent.ActsValidateSpacePoints : "ActsValidateSpacePoints",
+        TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
+        TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
+        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
         TrackingComponent.BenchmarkSpot : "ActsBenchmarkSpot"
     }
     
@@ -36,6 +36,12 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
+
+    # Acts Heavy Ion Pass
+    if TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsHeavyIonPass")]
         
     # GNN pass
     if TrackingComponent.GNNChain in flags.Tracking.recoChain:
@@ -103,7 +109,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
         # schedule merger to combine signal and background tracks
         InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
                        flags.Overlay.BkgPrefix+TrackContainer]
-        AssociationMapName = ("PRDtoTrackMapResolved" +
+        AssociationMapName = ("PRDtoTrackMapMerge_Resolved" +
                               extension + "Tracks")
         MergerOutputTracks = TrackContainer
 
@@ -299,7 +305,7 @@ def ITkTrackFinalCfg(flags,
         OutputCombinedTracks=TrackContainer,
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
-            f"PRDtoTrackMap{TrackContainer}")))
+            f"PRDtoTrackMapMerge_{TrackContainer}")))
 
     if flags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
@@ -329,9 +335,9 @@ def ITkTrackFinalCfg(flags,
             splitProbName),
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
-            f"PRDtoTrackMap{TrackContainer}"),
-        isActsAmbi = 'ValidateActsResolvedTracks' in splitProbName or \
-        'ValidateActsAmbiguityResolution' in splitProbName or \
+            f"PRDtoTrackMapMerge_{TrackContainer}"),
+        isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
+        'ActsValidateAmbiguityResolution' in splitProbName or \
         'ActsConversion' in splitProbName or \
         ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
@@ -380,7 +386,7 @@ def ITkSiSPSeededTracksFinalCfg(flags):
         if (e=='' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks) ]
 
     for extension in listOfExtensionsRequesting:
-        AssociationMapNameKey="PRDtoTrackMapCombinedITkTracks"
+        AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
         if not (extension == ''):
             AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
 
@@ -442,14 +448,25 @@ def ITkExtendedPRDInfoCfg(flags):
     result.merge(ITkTSOS_CommonKernelCfg(flags))
 
     if flags.Tracking.doStoreSiSPSeededTracks:
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list if (e=='') or
+            flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks ]
         from DerivationFrameworkInDet.InDetToolsConfig import (
             ITkSiSPTSOS_CommonKernelCfg)
-        result.merge(ITkSiSPTSOS_CommonKernelCfg(flags))
+        result.merge(ITkSiSPTSOS_CommonKernelCfg(flags, listOfExtensions = listOfExtensionsRequesting))
 
     if flags.Input.isMC:
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list if (e=='') or
+            (flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks and
+             flags.Tracking.__getattr__(f"ITk{e}Pass").storeSeparateContainer) ]
         from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
             ITkPhysHitDecoratorAlgCfg)
-        result.merge(ITkPhysHitDecoratorAlgCfg(flags))
+        for extension in listOfExtensionsRequesting:
+            result.merge(ITkPhysHitDecoratorAlgCfg(
+                flags,
+                name=f"ITkPhysHit{extension}DecoratorAlg",
+                TrackParticleContainerName=f"ITk{extension}TrackParticles"))
 
     return result
 

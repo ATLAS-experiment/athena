@@ -34,11 +34,11 @@ class SurfaceBounds;
 }
 
 class ActsTrackingGeometrySvc;
-
 class IdentityHelper;
 
 /// @class ActsDetectorElement
 ///
+
 class ActsDetectorElement : public ActsTrk::IDetectorElement, public GeoVDetectorElement {
 public:
   using DetectorType = ActsTrk::DetectorType;
@@ -98,10 +98,11 @@ public:
   /// is based on.
   const GeoVDetectorElement *upstreamDetectorElement() const;
 
+  Amg::Transform3D transform(const ActsTrk::DetectorAlignStore* store) const;
 private:
   DetectorType m_type{DetectorType::UnDefined};
 
-  ActsTrk::TransformCache m_trfCache;
+  ActsTrk::TransformCacheDetEle<ActsDetectorElement> m_trfCache{0, this};
   /// Detector element as variant
   const GeoVDetectorElement *m_detElement{nullptr};
   /// Boundaries of the detector element
@@ -112,9 +113,16 @@ private:
   std::shared_ptr<Acts::Surface> m_surface{};
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces{};
 
-
+  std::unique_ptr<const Amg::Transform3D> m_trtTrf{};
 
   Identifier m_explicitIdentifier{};
 };
+
+namespace ActsTrk{
+    template <> inline Amg::Transform3D 
+        TransformCacheDetEle<ActsDetectorElement>::fetchTransform(const DetectorAlignStore* store) const{
+        return m_parent->transform(store);
+   }
+}
 
 #endif

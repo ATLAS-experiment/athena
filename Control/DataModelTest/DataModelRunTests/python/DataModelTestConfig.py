@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 #
 # File: DataModelRunTests/python/DataModelTestConfig.py
@@ -145,7 +145,7 @@ def TestOutputCfg (flags, stream, itemList, typeNames = [], metaItemList = []):
 # can cause component loading to fail.
 class LoadWriteDicts (Alg):
     def __init__ (self, name = 'LoadWriteDicts', **kw):
-        return super(LoadWriteDicts, self).__init__ (name=name, **kw)
+        super(LoadWriteDicts, self).__init__ (name=name, **kw)
     def initialize (self):
         import ROOT
         ROOT.gROOT.SetBatch(True)
@@ -171,7 +171,7 @@ def LoadWriteDictsCfg (flags):
 # can cause component loading to fail.
 class LoadReadDicts (Alg):
     def __init__ (self, name = 'LoadReadDicts', **kw):
-        return super(LoadReadDicts, self).__init__ (name=name, **kw)
+        super(LoadReadDicts, self).__init__ (name=name, **kw)
     def initialize (self):
         import ROOT
         ROOT.gROOT.SetBatch(True)

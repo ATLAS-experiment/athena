@@ -57,6 +57,6 @@ def makeChain( flags, name, L1Thresholds, ChainSteps, Streams="physics:Main", Gr
                                 comboToolConfs=step.comboToolConfs)]
 
     chainConfig = Chain( name=name, L1decisions=L1decisions, ChainSteps=StepConfig )
-    HLTMenuConfig.registerChain( chainDict, chainConfig )
+    HLTMenuConfig.registerChain( chainDict )
 
     return chainConfig

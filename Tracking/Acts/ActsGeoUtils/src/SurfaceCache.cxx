@@ -13,9 +13,7 @@ namespace ActsTrk{
 
   const TransformCache* SurfaceCache::transformCache() const { return m_transformCache; }
   const Acts::Transform3& SurfaceCache::transform(const Acts::GeometryContext& anygctx) const  {
-    const ActsGeometryContext* gctx = anygctx.get<const ActsGeometryContext*>();    
-    // unpack the alignment store from the context
-    return m_transformCache->getTransform(gctx->getStore(m_transformCache->parent()->detectorType()).get());
+    return m_transformCache->transform(anygctx);
   }
   const Acts::Surface& SurfaceCache::surface() const  { 
     if (!m_surface) THROW_EXCEPTION("Surface has not been set before");

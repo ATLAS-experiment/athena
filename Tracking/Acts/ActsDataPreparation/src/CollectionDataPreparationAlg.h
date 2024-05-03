@@ -60,6 +60,12 @@ namespace ActsTrk {
     virtual xAOD::DetectorIDHashType retrieveDetectorIDHash(const xAOD::SpacePoint& obj) const;
   };
 
+  class SpacePointCacheDataPreparationAlg
+    : public DataPreparationAlg< xAOD::SpacePointContainer, true > {
+  public:
+    using DataPreparationAlg<xAOD::SpacePointContainer, true>::DataPreparationAlg;
+  };
+
 } // namespace
 
 #include "CollectionDataPreparationAlg.icc"

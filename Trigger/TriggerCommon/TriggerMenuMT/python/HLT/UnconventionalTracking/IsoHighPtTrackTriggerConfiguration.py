@@ -7,7 +7,7 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-def IsoHPtTrackTriggerHypoSequence(flags):
+def IsoHPtTrackTriggerHypoSequenceGenCfg(flags):
         from TrigLongLivedParticlesHypo.TrigIsoHPtTrackTriggerHypoTool import TrigIsoHPtTrackTriggerHypoToolFromDict
 
         # Setup the hypothesis algorithm

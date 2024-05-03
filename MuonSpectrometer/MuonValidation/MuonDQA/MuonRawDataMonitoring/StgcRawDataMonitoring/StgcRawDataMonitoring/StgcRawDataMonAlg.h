@@ -50,16 +50,6 @@ namespace GeometricSectors {
   static const std::array<std::string, 2> sTgcSize = {"S", "L"};
 }
 
-namespace {
-  struct sTGCeff {
-    std::vector<int>   layerMultiplet;
-    std::vector<float> xPosMultiplet;
-    std::vector<float> yPosMultiplet;
-    std::vector<float> zPosMultiplet;
-  };
-}
-
-
 class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   using decoder = Muon::nsw::NSWPadTriggerL1a;
   using mapper  = Muon::nsw::MapperSTG;

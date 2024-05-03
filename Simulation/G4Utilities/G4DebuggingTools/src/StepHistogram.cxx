@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StepHistogram.h"
@@ -223,11 +223,8 @@ namespace G4UA{
                                                 int nbinsy, double ymin, double ymax, 
                                                 double valuex, double valuey, double weight)
   {
-    if ( hMapMap.find(vol) == hMapMap.end() ) {
-      // initialize HistoMap_t if not yet exist
-      hMapMap.emplace(vol,HistoMap_t());
-    }
-    HistoMap_t &hMap = hMapMap[vol];
+    const auto& [pStringMapPair, inserted] = hMapMap.try_emplace(vol,HistoMap_t());
+    HistoMap_t &hMap = pStringMapPair->second;
     if ( hMap.find(particleName) == hMap.end() ) {
       // initialize histogram if not yet exist
       std::ostringstream stringStream;
@@ -241,11 +238,8 @@ namespace G4UA{
                                               const G4String& particleName, const G4String& vol,
                                               int nbins, double xmin, double xmax, double value, double weight)
   {
-    if ( hMapMap.find(vol) == hMapMap.end() ) {
-      // initialize HistoMap_t if not yet exist
-      hMapMap.emplace(vol,HistoMap_t());
-    }
-    HistoMap_t &hMap = hMapMap[vol];
+    const auto& [pStringMapPair, inserted] = hMapMap.try_emplace(vol,HistoMap_t());
+    HistoMap_t &hMap = pStringMapPair->second;
     if ( hMap.find(particleName) == hMap.end() ) {
       // initialize histogram if not yet exist
       std::ostringstream stringStream;
@@ -259,11 +253,8 @@ namespace G4UA{
                                               const G4String& particleName, const G4String& vol,
                                               int nbins, double *edges, double value, double weight)
   {
-    if ( hMapMap.find(vol) == hMapMap.end() ) {
-      // initialize HistoMap_t if not yet exist
-      hMapMap.emplace(vol,HistoMap_t());
-    }
-    HistoMap_t &hMap = hMapMap[vol];
+    const auto& [pStringMapPair, inserted] = hMapMap.try_emplace(vol,HistoMap_t());
+    HistoMap_t &hMap = pStringMapPair->second;
     if ( hMap.find(particleName) == hMap.end() ) {
       // initialize histogram if not yet exist
       std::ostringstream stringStream;
@@ -274,16 +265,11 @@ namespace G4UA{
   }
 
   void StepHistogram::Report::mergeMaps(HistoMapMap_t &selfMap, const HistoMapMap_t& refMap) {
-    for (auto const& ref : refMap)
-    {
-      if ( selfMap.find(ref.first) == selfMap.end() ) {
-        // HistoMap_t does not yet exist
-        selfMap.emplace(ref.first, ref.second);
-      }
-      else {
-        HistoMap_t &target = selfMap[ref.first];
-        for (auto const& hm : ref.second)
-        {
+    for (auto const& [g4String, histoMap] : refMap){
+      const auto& [pStringMapPair, inserted] = selfMap.try_emplace(g4String, histoMap);
+      if (not inserted){
+        HistoMap_t &target = pStringMapPair->second;
+        for (auto const& hm : histoMap){
           if ( target.find(hm.first) == target.end() ) {
             // histogram does not yet exist
             target.emplace(hm.first, hm.second);

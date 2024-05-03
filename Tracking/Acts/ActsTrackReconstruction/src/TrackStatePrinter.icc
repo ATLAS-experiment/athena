@@ -1,0 +1,157 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC
+#define ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC 1
+
+// ATHENA
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "ActsGeometry/ATLASSourceLink.h"
+
+// ACTS CORE
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
+
+// Other
+#include <iostream>
+#include <sstream>
+
+namespace ActsTrk
+{
+  /// format all arguments and return as a string.
+  /// Used here to apply std::setw() to the combination of values.
+  template <typename... Types>
+  static std::string to_string(Types &&...values)
+  {
+    std::ostringstream os;
+    (os << ... << values);
+    return os.str();
+  }
+
+  template <typename track_container_t>
+  void
+  TrackStatePrinter::printTrack(const Acts::GeometryContext &tgContext,
+                                const track_container_t &tracks,
+                                const typename track_container_t::TrackProxy &track,
+                                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset) const
+  {
+    const auto lastMeasurementIndex = track.tipIndex();
+    // to print track states from inside outward, we need to reverse the order of visitBackwards().
+    using PrintTrackStateContainer = std::decay_t<decltype(tracks.trackStateContainer())>;
+    std::vector<typename PrintTrackStateContainer::ConstTrackStateProxy> states;
+    states.reserve(lastMeasurementIndex + 1); // could be an overestimate
+    size_t npixel = 0, nstrip = 0;
+    tracks.trackStateContainer().visitBackwards(
+        lastMeasurementIndex,
+        [&states, &npixel, &nstrip](const PrintTrackStateContainer::ConstTrackStateProxy &state) -> void
+        {
+          if (state.hasCalibrated())
+          {
+            if (state.calibratedSize() == 1)
+              ++nstrip;
+            else if (state.calibratedSize() == 2)
+              ++npixel;
+          }
+          states.push_back(state);
+        });
+
+    if (track.nMeasurements() + track.nOutliers() != npixel + nstrip)
+    {
+      ATH_MSG_WARNING("Track has " << track.nMeasurements() + track.nOutliers() << " measurements + outliers, but "
+                                    << npixel + nstrip << " pixel + strip hits");
+    }
+
+    const Acts::BoundTrackParameters per(track.referenceSurface().getSharedPtr(),
+                                          track.parameters(),
+                                          track.covariance(),
+                                          track.particleHypothesis());
+    std::cout << std::setw(5) << lastMeasurementIndex << ' '
+              << std::left
+              << std::setw(4) << "parm" << ' '
+              << std::setw(21) << actsSurfaceName(per.referenceSurface()) << ' '
+              << std::setw(22) << to_string("#hit=", npixel, '/', nstrip, ", #hole=", track.nHoles()) << ' '
+              << std::right;
+    printParameters(per.referenceSurface(), tgContext, per.parameters());
+    std::cout << std::fixed << std::setw(8) << ' '
+              << std::setw(7) << std::setprecision(1) << track.chi2() << ' '
+              << std::left
+              << "#out=" << track.nOutliers()
+              << ", #sh=" << track.nSharedHits()
+              << std::right << std::defaultfloat << std::setprecision(-1) << '\n';
+
+    for (auto i = states.size(); i > 0;)
+    {
+      printTrackState(tgContext, states[--i], container_offset);
+    }
+  }
+
+  template <typename track_state_proxy_t>
+  void
+  TrackStatePrinter::printTrackState(const Acts::GeometryContext &tgContext,
+                                     const track_state_proxy_t &state,
+                                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
+                                     bool useFiltered) const
+  {
+    if (!m_printFilteredStates && useFiltered)
+      return;
+
+    ptrdiff_t index = -1;
+
+    if (state.hasUncalibratedSourceLink())
+    {
+      ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+      index = (*sl)->index();
+      for (const auto &[container, offset] : container_offset)
+      {
+        if ((*sl)->container() == container)
+        {
+          index += offset;
+          break;
+        }
+      }
+    }
+
+    std::cout << std::setw(5) << state.index() << ' ';
+    char ptype = !m_printFilteredStates ? ' '
+                 : useFiltered          ? 'F'
+                                        : 'S';
+    if (state.hasCalibrated())
+    {
+      std::cout << ptype << std::setw(2) << state.calibratedSize() << 'D';
+    }
+    else if (state.typeFlags().test(Acts::TrackStateFlag::HoleFlag))
+    {
+      std::cout << std::setw(4) << "hole";
+    }
+    else
+    {
+      std::cout << ptype << std::setw(3) << " ";
+    }
+    std::cout << ' '
+              << std::left
+              << std::setw(21) << actsSurfaceName(state.referenceSurface()) << ' ';
+    if (index >= 0)
+    {
+      std::cout << std::setw(22) << index << ' ';
+    }
+    else
+    {
+      std::cout << std::setw(22) << to_string(state.referenceSurface().geometryId()) << ' ';
+    }
+    std::cout << std::right;
+    const auto &parameters = !useFiltered          ? state.parameters()
+                             : state.hasFiltered() ? state.filtered()
+                                                   : state.predicted();
+    printParameters(state.referenceSurface(), tgContext, parameters);
+    std::cout << ' '
+              << std::fixed
+              << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
+              << std::setw(7) << std::setprecision(1) << state.chi2() << ' '
+              << std::defaultfloat << std::setprecision(-1)
+              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags()) << '\n';
+  }
+
+}  // namespace ActsTrk
+
+#endif

@@ -62,7 +62,7 @@ namespace CaloRecGPU
   {
     if (code != cudaSuccess)
       {
-        printf("GPU Error: %s (%s %d)\n", cudaGetErrorString(code), file, line);
+        printf("CUDA error: %s (%s %d)\n", cudaGetErrorString(code), file, line);
         if (abort)
           {
 #ifdef __CUDA_ARCH__

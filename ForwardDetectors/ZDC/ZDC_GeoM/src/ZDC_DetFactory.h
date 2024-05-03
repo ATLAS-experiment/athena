@@ -44,7 +44,7 @@ private:
   bool m_BRANs_On{}; //Flag for both BRAN modules
   std::vector< std::vector< bool > > m_zdcOn;
   std::vector< std::vector< float > > m_zdcPos; //Positions of the ZDC modules
-  std::vector< std::vector< std::pair<int,int> > > m_zdcPixelStart_Stop; //Start and stop layers of the pixels for a given ZDC module
+  std::vector< std::vector< int > > m_zdcModType; //Module types of the ZDC modules
   std::vector< GeoAlignableTransform* > m_rpdPos; //Positions of the RPD modules
   std::vector< float > m_branPos; //Positions of the BRAN modules
 };

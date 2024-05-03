@@ -93,8 +93,8 @@ class MissingMassProb {
     std::list<std::function<double(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2)>> m_probListTwoTau;
   private:
     //SpeedUp static array for efficient access
-    static double s_fit_param[2][3][6][5];
-    static double s_ter_sigma_par[2][10][3];
+    thread_local static double s_fit_param[2][3][6][5];
+    thread_local static double s_ter_sigma_par[2][10][3];
     //cache quantities for efficient NuPSolution calculation
 
     TF1 *m_formulaAngle1 = new TF1("formulaAngle1", "[0]*exp(-[2]*(log((x+[3])/[1]))**2)");

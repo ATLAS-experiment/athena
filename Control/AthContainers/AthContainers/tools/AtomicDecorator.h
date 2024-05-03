@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AtomicDecorator.h
@@ -8,7 +8,7 @@
  * @date Mar, 2018
  * @brief Access an auxiliary variable atomically.
  *
- * This is like SG::AuxElement::Decorator, except that accesses to the
+ * This is like SG::Decorator, except that accesses to the
  * underlying @c T variable are cast to @c std::atomic<T>.
  * This will generally work only for fundamental integer types
  * or for pointers.
@@ -40,11 +40,11 @@ namespace SG {
  */
 template <class T>
 class AtomicDecorator
-  : public AuxElement::Decorator<T>
+  : public Decorator<T>
 {
 public:
   /// Base class.
-  typedef AuxElement::Decorator<T> Base;
+  typedef Decorator<T> Base;
 
   /// Type referencing an item.
   typedef std::atomic<T>& reference_type;
@@ -89,6 +89,15 @@ public:
    * The name -> auxid lookup is done here.
    */
   AtomicDecorator (const std::string& name, const std::string& clsname);
+
+
+  /**
+   * @brief Constructor taking an auxid directly.
+   * @param auxid ID for this auxiliary variable.
+   *
+   * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+   */
+  AtomicDecorator (const SG::auxid_t auxid);
 
 
   /**

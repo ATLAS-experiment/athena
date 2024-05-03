@@ -1,3 +1,4 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "JiveXML/AlgoJiveXML.h"
 #include "JiveXML/StreamToFileTool.h"
 #include "JiveXML/StreamToServerTool.h"

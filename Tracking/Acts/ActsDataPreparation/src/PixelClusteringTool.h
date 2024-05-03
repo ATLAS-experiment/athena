@@ -15,7 +15,6 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
-#include "PixelConditionsData/PixelOfflineCalibData.h"
 
 namespace InDet {
 
@@ -94,11 +93,10 @@ private:
   
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "ITkPixelChargeCalibCondData",
     "Pixel charge calibration data"};
-  SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_offlineCalibDataKey {this, "PixelOfflineCalibData", "ITkPixelOfflineCalibData",
-    "Pixel offline calibration data"};
   
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
-  Gaudi::Property<int> m_errorStrategy {this, "ErrorStrategy", 1};
+  Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", true};
+  Gaudi::Property<bool> m_broadErrors {this, "UseBroadErrors", false};
 };
   
 } // namespace ActsTrk 

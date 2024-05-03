@@ -188,7 +188,7 @@ ISF::EntryLayer ISF::EntryLayerTool::registerParticle(const ISF::ISFParticle& pa
     auto                truthBinding = particle.getTruthBinding();
     auto generationZeroTruthParticle = truthBinding ? truthBinding->getGenerationZeroTruthParticle() : nullptr;
     const int barcode = generationZeroTruthParticle ? HepMC::barcode(generationZeroTruthParticle) : particle.barcode(); // FIXME barcode-based
-    const int id = generationZeroTruthParticle ? HepMC::uniqueID(generationZeroTruthParticle) : HepMC::UNDEFINED_ID; //particle.id(); // FIXME uncomment when ISFParticle has an id() method.
+    const int id = generationZeroTruthParticle ? HepMC::uniqueID(generationZeroTruthParticle) : particle.id();
     const int status = generationZeroTruthParticle ? generationZeroTruthParticle->status() : particle.status();
 
     m_collection[layerHit]->Emplace(particle.pdgCode(),
@@ -197,7 +197,7 @@ ISF::EntryLayer ISF::EntryLayerTool::registerParticle(const ISF::ISFParticle& pa
                                     hepMom,
                                     hepPos,
                                     particle.timeStamp(),
-                                    barcode,
+                                    barcode, // FIXME barcode-based
                                     id,
                                     m_volumeName[layerHit] );
   }

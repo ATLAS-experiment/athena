@@ -23,6 +23,3 @@ atlas_add_dictionary( ZdcByteStreamDict
                       ZdcByteStream/selection.xml
                       LINK_LIBRARIES ZdcByteStreamLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-

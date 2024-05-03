@@ -77,9 +77,10 @@ def main():
         choices=["tiny", "lite", "full", "peeker"],
         help="""\
              This flag provides the user capability to select the amount of
-             metadata retrieved. There three options:
+             metadata retrieved. There are four options:
                          tiny (only those values used in PyJobTransforms),
-                         lite (same output as dump-athfile)
+                         lite
+                         peeker
                          and full ( all  available data found)
              """,
     )

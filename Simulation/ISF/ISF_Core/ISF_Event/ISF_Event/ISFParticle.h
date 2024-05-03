@@ -54,6 +54,7 @@ namespace ISF {
                 int status,
                 double time,
                 const ISFParticle &parent,
+                int id,
                 Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
@@ -67,6 +68,7 @@ namespace ISF {
                 int status,
                 double time,
                 const ISFParticle &parent,
+                int id,
                 Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
@@ -77,9 +79,10 @@ namespace ISF {
                 double mass,
                 double charge,
                 int pdgCode,
-                int status,                
+                int status,
                 double time,
                 const DetRegionSvcIDPair &origin,
+                int id,
                 Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
@@ -151,12 +154,16 @@ namespace ISF {
     void                        setNextSimID(SimSvcID simID);
 
     /** the barcode */
-    Barcode::ParticleBarcode barcode() const;
-
+    Barcode::ParticleBarcode barcode() const; // FIXME barcode-based
     /** set a new barcode */
-    void setBarcode(Barcode::ParticleBarcode bc);
+    void setBarcode(Barcode::ParticleBarcode bc); // FIXME barcode-based
     /** set a new barcode and update the HepMcParticleLink  */
-    void setBarcodeAndUpdateHepMcParticleLink(Barcode::ParticleBarcode bc);
+    void setBarcodeAndUpdateHepMcParticleLink(Barcode::ParticleBarcode bc); // FIXME barcode-based TODO Update this method to use the unique ID rather than the barcode.
+
+    /** unique ID */
+    int id() const;
+    /** set a new unique ID */
+    void setId(int id);
 
     /** pointer to the simulation truth - optional, can be 0 */
     const TruthBinding* getTruthBinding() const;
@@ -192,7 +199,8 @@ namespace ISF {
     int                          m_status;
     double                       m_tstamp;
     ParticleHistory              m_history;
-    Barcode::ParticleBarcode     m_barcode;
+    Barcode::ParticleBarcode     m_barcode; //!< barcode TODO remove in favour of m_status + m_uid
+    int m_uid; //! < unique ID
     TruthBinding*                m_truth;
     ParticleOrder                m_order;                 //!< particle simulation order
     ParticleUserInformation*     m_userInfo;              //!< user information stored with the ISFParticle

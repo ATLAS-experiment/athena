@@ -11,8 +11,8 @@ namespace Trk
 {
  StatusCode KalmanVertexTrackUpdator::initialize()
  {
-//uploading the corresponding tools
-//updator 
+   //uploading the corresponding tools
+   //updator 
   if ( m_Updator.retrieve().isFailure() ) 
   {
     ATH_MSG_FATAL("Failed to retrieve tool " << m_Updator);
@@ -25,18 +25,10 @@ namespace Trk
  }
  
  KalmanVertexTrackUpdator::KalmanVertexTrackUpdator(const std::string& t, const std::string& n, const IInterface*  p):
- AthAlgTool(t,n,p),m_Updator("Trk::KalmanVertexUpdator", this),m_maxWeight(0.001)
+   AthAlgTool(t,n,p)
  { 
-  declareProperty("MaximalWeight",m_maxWeight);
-
-//updator-related stuff  
-  declareProperty("VertexUpdator",m_Updator);
-
   declareInterface<IVertexTrackUpdator>(this);
  }
- 
- KalmanVertexTrackUpdator::~KalmanVertexTrackUpdator()
- = default;
  
  void KalmanVertexTrackUpdator::update(VxTrackAtVertex& trk, const xAOD::Vertex& vtx) const
  {
@@ -155,7 +147,11 @@ namespace Trk
    }
    AmgSymMatrix(3)   vrt_weight;
    bool invertible;
-   vtx.covariancePosition().computeInverseWithCheck(vrt_weight,invertible);
+   if(m_skipInvertibleCheck) {
+     vrt_weight = vtx.covariancePosition().inverse();
+     invertible = true;
+   } else
+     vtx.covariancePosition().computeInverseWithCheck(vrt_weight,invertible);
 
    if(!invertible) {
      ATH_MSG_VERBOSE ("The vertex's cov is not invertible, quit updating the track.");
@@ -171,7 +167,10 @@ namespace Trk
    const IVertexUpdator::positionUpdateOutcome & reducedVrt = m_Updator->positionUpdate( vtx, linTrack, trk.weight(), IVertexUpdator::removeTrack );
 
    AmgSymMatrix(3)   reduced_vrt_weight;
-   reducedVrt.covariancePosition.computeInverseWithCheck(reduced_vrt_weight,invertible);
+   if(m_skipInvertibleCheck) {
+     reduced_vrt_weight = reducedVrt.covariancePosition.inverse();
+   } else
+     reducedVrt.covariancePosition.computeInverseWithCheck(reduced_vrt_weight,invertible);
    if(!invertible) {
      ATH_MSG_VERBOSE ("The vertex's cov is not invertible, quit updating the track.");
      return;

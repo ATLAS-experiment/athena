@@ -70,6 +70,9 @@ set( CxxUtilsSettings_DIR
    "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils/cmake" )
 find_package( CxxUtilsSettings )
 
+# Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
+option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4" OFF )
+
 # Find the ATLAS CMake code:
 find_package( AtlasCMake QUIET )
 

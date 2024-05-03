@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Authors: Peter Waller <peter.waller@cern.ch> and "Peter Onyisi" <peter.onyisi@cern.ch>
@@ -184,7 +184,7 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
                               Causes a ~0.6x slowdown
         """
         if ignore is not None and not isinstance(ignore, set):
-            assert False, "ignore parameter should be set type"
+            raise RuntimeError("ignore parameter should be set type")
         
         desired_channels = None
         # Figure out the IDs of channels to query and their virtuality

@@ -139,8 +139,6 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                                        'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
 
     # Append to dictionary
-
-
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
     # Static content
@@ -166,10 +164,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             StaticContent += ["xAOD::VertexContainer#%s"   %     cascades]
             StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
 
-
-    
     FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper, StaticContent)
-
 
     if flags.BTagging.RunNewVrtSecInclusive:
         excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
@@ -177,6 +172,10 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
         FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_LooseAux."+excludedVertexAuxData]
         FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_MediumAux."+excludedVertexAuxData ]
         FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]
+
+    excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+    FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexContainer#GNNVertices"]
+    FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#GNNVerticesAux."+excludedVertexAuxData]
 
     # Add truth containers
     if flags.Input.isMC:
@@ -188,6 +187,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     # Add ExtraVariables
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper)
+    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GNNVerticesLink"]
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)

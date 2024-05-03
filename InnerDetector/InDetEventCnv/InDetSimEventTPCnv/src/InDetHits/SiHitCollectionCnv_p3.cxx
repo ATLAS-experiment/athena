@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/SiHit.h"
@@ -82,7 +82,8 @@ void SiHitCollectionCnv_p3::transToPers(const SiHitCollection* transCont, SiHitC
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   const IProxyDict* proxy = Atlas::getExtendedEventContext(ctx).proxy();
-  const HepMcParticleLink * lastLink=nullptr;
+  int lastIndex{-1};
+  int lastBarcode{-1};
   int lastId = -1;
   double stringFirstTheta = 0.0;
   double stringFirstPhi = 0.0;
@@ -99,25 +100,25 @@ void SiHitCollectionCnv_p3::transToPers(const SiHitCollection* transCont, SiHitC
   for (SiHitCollection::const_iterator it = transCont->begin(); it != transCont->end(); ++it) {
 
     SiHitCollection::const_iterator siHit = it;
+    const HepMcParticleLink * currentLink = &(siHit->particleLink());
+    const int barcode = currentLink->barcode();
+    int index{0};
+    if (HepMcParticleLink::getEventPositionInCollection(currentLink->eventIndex(),
+                                                        proxy).at(0) != 0) {
+      index = currentLink->eventIndex();
+    }
 
-
-    if ( !lastLink || (siHit->particleLink() != *lastLink) || (idx-endBC)==USHRT_MAX ) {
-
-      // store barcode, eventIndex and McEventCollection once for set of consecutive hits with same barcode
-
-      lastLink = &(siHit->particleLink());
-      persCont->m_barcode.push_back(lastLink->barcode());
-      unsigned short index{0};
-      const HepMcParticleLink::index_type position =
-        HepMcParticleLink::getEventPositionInCollection(lastLink->eventIndex(),
-                                                        proxy).at(0);
-      if (position!=0) {
-        index = lastLink->eventIndex();
-        if(lastLink->eventIndex()!=static_cast<HepMcParticleLink::index_type>(index)) {
-          log << MSG::WARNING << "Attempting to persistify an eventIndex larger than max unsigned short!" << endmsg;
-        }
+    if ( lastBarcode != barcode || lastIndex != index || (idx-endBC)==USHRT_MAX ) {
+      lastBarcode = barcode;
+      lastIndex = index;
+      const unsigned short persIndex = static_cast<unsigned short>(index);
+      if (static_cast<HepMcParticleLink::index_type>(lastIndex) != static_cast<HepMcParticleLink::index_type>(persIndex)) {
+        log << MSG::WARNING << "Attempting to persistify an eventIndex larger than max unsigned short!" << endmsg;
       }
-      persCont->m_mcEvtIndex.push_back(index);
+      // store barcode, eventIndex and McEventCollection once for set
+      // of consecutive hits with the same barcode and eventIndex
+      persCont->m_barcode.push_back(static_cast<unsigned long>(lastBarcode));
+      persCont->m_mcEvtIndex.push_back(persIndex);
       persCont->m_evtColl.push_back('a'); // Hard-coding as this only ever had a single value in production
 
       if (idx > 0) {
@@ -128,7 +129,8 @@ void SiHitCollectionCnv_p3::transToPers(const SiHitCollection* transCont, SiHitC
 
     if ( ( (int)siHit->identify() != lastId ) || (idx-endId)==USHRT_MAX) {
 
-      // store id once for set of consecutive hits with same barcode
+      // store SiHitIdentifier once for set of consecutive hits with
+      // the same SiHitIdentifier
 
       lastId = siHit->identify();
       persCont->m_id.push_back(lastId);

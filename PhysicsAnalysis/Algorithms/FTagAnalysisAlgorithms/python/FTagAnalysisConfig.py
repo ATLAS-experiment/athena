@@ -26,35 +26,57 @@ def parseTDPdatabase(tdpFile, dsid):
 class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (FTagConfig, self).__init__ ()
-        self.containerName = containerName
-        self.postfix = selectionName
-        self.addOption ('btagWP', "FixedCutBEff_77", type=str)
-        self.addOption ('btagger', "DL1r", type=str)
-        self.addOption ('generator', "autoconfig", type=str)
-        self.addOption ('noEffSF', False, type=bool)
-        self.addOption ('minPt', None, type=float)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as internally the string "
+            "f'{btagger}_{btagWP}' is used.")
+        self.addOption ('btagWP', "FixedCutBEff_77", type=str,
+            info="the flavour tagging WP. The default is FixedCutBEff_77.")
+        self.addOption ('btagger', "DL1r", type=str,
+            info="the flavour tagging algorithm: DL1dv01, GN2v00. The default "
+            "is DL1r.")
+        self.addOption ('generator', "autoconfig", type=str,
+            info="MC generator setup, for MC/MC SFs. The default is 'autoconfig'"
+            " (relies on the sample metadata).")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale factors "
+            "are not available. The default is False.")
         self.addOption ('bTagCalibFile', None, type=str,
-                        info='calibration file for CDI')
+            info="calibration file for CDI")
         self.addOption ('systematicsStrategy', 'SFEigen', type=str,
-                        info="name of systematics model; presently choose between 'SFEigen' and 'Envelope'")
+            info="name of systematics model; presently choose between 'SFEigen' "
+            "and 'Envelope'")
         self.addOption ('eigenvectorReductionB', 'Loose', type=str,
-                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor Eigenvector reduction strategy; choose between "
+            "'Loose', 'Medium', 'Tight'")
         self.addOption ('eigenvectorReductionC', 'Loose', type=str,
-                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor Eigenvector reduction strategy; choose between "
+            "'Loose', 'Medium', 'Tight'")
         self.addOption ('eigenvectorReductionLight', 'Loose', type=str,
-                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor Eigenvector reduction strategy; choose between "
+            "'Loose', 'Medium', 'Tight'")
         self.addOption ('excludeFromEigenVectorTreatment', '', type=str,
-                        info="(semicolon-separated) names of uncertainties to be excluded from all eigenvector decompositions (if used)")
+            info="(semicolon-separated) names of uncertainties to be excluded from "
+            "all eigenvector decompositions (if used)")
         self.addOption ('excludeFromEigenVectorBTreatment', '', type=str,
-                        info="(semicolon-separated) names of uncertainties to be excluded from b-jet eigenvector decompositions (if used)")
+            info="(semicolon-separated) names of uncertainties to be excluded from "
+            "b-jet eigenvector decompositions (if used)")
         self.addOption ('excludeFromEigenVectorCTreatment', '', type=str,
-                        info="(semicolon-separated) names of uncertainties to be excluded from c-jet eigenvector decompositions (if used)")
+            info="(semicolon-separated) names of uncertainties to be excluded from "
+            "c-jet eigenvector decompositions (if used)")
         self.addOption ('excludeFromEigenVectorLightTreatment', '', type=str,
-                        info="(semicolon-separated) names of uncertainties to be excluded from light-flavour-jet eigenvector decompositions (if used)")
+            info="(semicolon-separated) names of uncertainties to be excluded from "
+            "light-flavour-jet eigenvector decompositions (if used)")
         self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
-                        info="whether or not to add recommended lists to the user specified eigenvector decomposition exclusion lists")
+            info="whether or not to add recommended lists to the user specified "
+            "eigenvector decomposition exclusion lists")
 
     def resolveMCMCgenerator(self, config, generatorDict):
         """use either the metadata (generatorDict) or TopDataPreparation
@@ -144,24 +166,13 @@ class FTagConfig (ConfigBlock):
 
         jetCollection = config.originalName (self.containerName)
 
-        selectionName = self.postfix
+        selectionName = self.selectionName
         if selectionName is None or selectionName == '' :
             selectionName = self.btagger + '_' + self.btagWP
 
         postfix = selectionName
         if postfix != "" and postfix[0] != '_' :
             postfix = '_' + postfix
-
-        # Kinematic selection depending on validity of the calibration
-        # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22
-        minPt = self.minPt
-        if minPt is None:
-            if "EMPFlow" in jetCollection:
-                minPt = 20e3
-            elif "EMTopo" in jetCollection:
-                minPt = 20e3
-            elif "VR" in jetCollection:
-                minPt = 10e3
 
         # MC/MC scale factors defined only for Run 2 and Run 3
         if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
@@ -270,8 +281,7 @@ def makeFTagAnalysisConfig( seq, containerName,
                             btagWP = None,
                             btagger = None,
                             generator = None,
-                            noEffSF = None,
-                            minPt = None ):
+                            noEffSF = None ):
     """Create a ftag analysis algorithm config
 
     Keyword arguments:
@@ -279,7 +289,6 @@ def makeFTagAnalysisConfig( seq, containerName,
       btagger -- Flavour tagger
       generator -- Generator for MC/MC scale factors
       noEffSF -- Disables efficiency and scale factor calculations
-      minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
 
     config = FTagConfig (containerName, selectionName)
@@ -287,5 +296,4 @@ def makeFTagAnalysisConfig( seq, containerName,
     config.setOptionValue ('btagger', btagger)
     config.setOptionValue ('generator', generator)
     config.setOptionValue ('noEffSF', noEffSF)
-    config.setOptionValue ('minPt', minPt)
     seq.append (config)

@@ -5,6 +5,9 @@
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H 1
 
 // ACTS
+#include "Acts/EventData/VectorTrackContainer.hpp"
+#include "Acts/EventData/TrackContainer.hpp"
+#include "Acts/EventData/TrackProxy.hpp"
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
@@ -23,10 +26,9 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
-#include "src/ITrackStatePrinter.h"
+#include "src/TrackStatePrinter.h"
 
-#include <boost/container/flat_set.hpp>
-#include <boost/container/flat_map.hpp>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 #include <variant>
@@ -38,28 +40,22 @@ namespace
   /// This is only required by code in TrackFindingAlg.cxx, so we keep it in the anonymous namespace.
   /// =========================================================================
 
+  // containers used during the reconstruction
+  using RecoTrackStateContainer = ActsTrk::TrackFindingAlg::RecoTrackStateContainer;
+  using RecoTrackStateContainerProxy = ActsTrk::TrackFindingAlg::RecoTrackStateContainerProxy;
+
   /// Borrowed from Athena Tracking/Acts/ActsTrkTools/ActsTrkFittingTools/src/ActsKalmanFitter.ipp
   /// We could also access them directly from there, but that would pull inline a lot of other stuff we
   /// don't need.
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-                   typename ActsTrk::MutableTrackStateBackend::TrackStateProxy trackState,
+                   RecoTrackStateContainerProxy trackState,
                    Acts::Direction direction,
                    const Acts::Logger &logger)
   {
     Acts::GainMatrixUpdater updater;
-    return updater.template operator()<ActsTrk::MutableTrackStateBackend>(gctx, trackState, direction, logger);
-  }
-
-  static Acts::Result<void>
-  gainMatrixSmoother(const Acts::GeometryContext &gctx,
-                     ActsTrk::MutableTrackStateBackend &trajectory,
-                     size_t entryIndex,
-                     const Acts::Logger &logger)
-  {
-    Acts::GainMatrixSmoother smoother;
-    return smoother.template operator()<ActsTrk::MutableTrackStateBackend>(gctx, trajectory, entryIndex, logger);
+    return updater.template operator()<RecoTrackStateContainer>(gctx, trackState, direction, logger);
   }
 
   // Helper class to describe ranges of measurements
@@ -218,7 +214,8 @@ namespace
   using Stepper = Acts::EigenStepper<>;
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
-  using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::MutableTrackStateBackend>;
+  using CKF = Acts::CombinatorialKalmanFilter<Propagator, RecoTrackStateContainer>;
+  using Extrapolator = Propagator;
 
   // Small holder class to keep CKF and related objects.
   // Keep a unique_ptr<CKF_pimpl> in TrackFindingAlg, so we don't have to expose the
@@ -226,13 +223,15 @@ namespace
   // ActsTrk::TrackFindingAlg::CKF_pimpl inherits from CKF_config to prevent -Wsubobject-linkage warning.
   struct CKF_config
   {
+    // Extrapolator
+    Extrapolator extrapolator;
     // CKF algorithm
     CKF ckf;
     // CKF configuration
     Acts::MeasurementSelector measurementSelector;
     Acts::PropagatorPlainOptions pOptions;
     Acts::PropagatorPlainOptions pSecondOptions;
-    Acts::CombinatorialKalmanFilterExtensions<ActsTrk::MutableTrackStateBackend> ckfExtensions;
+    Acts::CombinatorialKalmanFilterExtensions<RecoTrackStateContainer> ckfExtensions;
     // Track selection
     Acts::TrackSelector trackSelector;
   };
@@ -331,7 +330,7 @@ namespace
 
   private:
     bool m_disabled = false;
-    boost::container::flat_multimap<const xAOD::UncalibratedMeasurement *, size_t> m_seedIndex;
+    std::unordered_multimap<const xAOD::UncalibratedMeasurement *, size_t> m_seedIndex;
     std::vector<size_t> m_nUsedMeasurements;
     std::vector<size_t> m_nSeedMeasurements;
     std::vector<bool> m_isDuplicateSeed;

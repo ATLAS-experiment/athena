@@ -130,6 +130,9 @@ void test_type(const std::string& typname,
 
   EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, r.getAuxID<char> (name, clsname));
 
+  r.checkAuxID<T> (auxid);
+  EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, r.checkAuxID<char> (auxid));
+
   r.getAuxID<char> (name, "otherclass");
 
   assert (r.getName (auxid) == name);
@@ -489,6 +492,7 @@ void test_atomic()
   assert (r.getFlags (auxid2) == SG::AuxVarFlags::Atomic);
   
   EXPECT_EXCEPTION (SG::ExcAtomicMismatch, r.getAuxID<int> ("atest2"));
+  EXPECT_EXCEPTION (SG::ExcAtomicMismatch, r.checkAuxID<int> (auxid2));
 }
 
 

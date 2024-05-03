@@ -42,11 +42,13 @@ class FPGATrackSimBankSvc : public extends< AthService, IFPGATrackSimBankSvc >
 	Gaudi::Property<std::string> m_path_sectorbank_2nd {this, "sectorBank_2nd", "", "Path of the 2nd stage sectorbank"};
 	Gaudi::Property<std::string> m_path_sectorslices {this, "sectorSlices", "", "Path of the sector slices"};
 	Gaudi::Property<std::string> m_bankTypes {this, "BankType", "FILE", "FILE or COOL (COOL/DB to be implemented)"};
-	Gaudi::Property<int> m_ncoords_1st {this, "NCoords_1st", 9, "Number of 1st stage coordinates"};
+	Gaudi::Property<int> m_ncoords_1st {this, "NCoords_1st", 10, "Number of 1st stage coordinates"};
 	Gaudi::Property<int> m_ncoords_2nd {this, "NCoords_2nd", 18, "Number of 2nd stage coordinates"};
 	Gaudi::Property<std::string> m_path_NNconstants {this, "m_path_NNconstants", "", "Path for NN constants"};
 	Gaudi::Property<std::vector<std::string> > m_path_constants_1st_noguess {this, "constantsNoGuess_1st", {}, "Path of the 1st stage constants without guessing"};
 	Gaudi::Property<std::vector<std::string> > m_path_constants_2nd_noguess {this, "constantsNoGuess_2nd", {}, "Path of the 2nd stage constants without guessing"};
+	Gaudi::Property<bool> m_absQOverPtBinning { this, "qptAbsBinning", false, "Controls whether or not to interpret the bins as q/pt or |q/pt|"};
+	Gaudi::Property<std::vector<double> > m_qOverPtBins { this, "sectorQPtBins", {}, "q/pt bins for sector definition"};
 
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping;
 

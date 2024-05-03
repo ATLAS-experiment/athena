@@ -719,7 +719,12 @@ def triggerRunCfg( flags, menu=None ):
             onlineSlimAlg = getTrigNavSlimmingMTOnlineConfig(flags)
             acc.addEventAlgo( onlineSlimAlg, sequenceName="HLTFinalizeSeq" )
 
+    # Cleanup menu config to allow garbage collection (ATR-28855)
+    from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
+    HLTMenuConfig.destroy()
+
     return acc
+
 
 def triggerIDCCacheCreatorsCfg(flags, seqName = None):
     """

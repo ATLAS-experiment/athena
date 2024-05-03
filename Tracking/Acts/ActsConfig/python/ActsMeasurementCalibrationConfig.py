@@ -17,7 +17,6 @@ def ActsAnalogueClusteringToolCfg(flags,
 
     kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("PixelOfflineCalibData", "ITkPixelOfflineCalibData")
-    kwargs.setdefault("CalibrateErrors", not flags.Tracking.useBroadPixClusterErrors)
         
     if 'PixelLorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg

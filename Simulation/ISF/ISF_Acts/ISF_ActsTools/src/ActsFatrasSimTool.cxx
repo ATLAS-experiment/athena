@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <algorithm>
 #include <random>
@@ -8,6 +8,8 @@
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandomEngine.h"
+
+#include "TruthUtils/MagicNumbers.h"
 
 using namespace Acts::UnitLiterals;
 
@@ -164,7 +166,9 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
                                                           pdgid,
                                                           1, //status
                                                           properTime,
-                                                          *isfp);
+                                                          *isfp,
+                                                          HepMC::UNDEFINED_ID // id
+                                                          );
         secondaries.push_back(secisfp.release());
 
       }

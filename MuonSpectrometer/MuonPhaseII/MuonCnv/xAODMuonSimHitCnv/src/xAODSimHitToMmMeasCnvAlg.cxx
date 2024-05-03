@@ -49,7 +49,6 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     
-    const ActsGeometryContext gctx{};
     SG::WriteHandle<xAOD::MMClusterContainer> prdContainer{m_writeKey, ctx};
     ATH_CHECK(prdContainer.record(std::make_unique<xAOD::MMClusterContainer>(),
                                   std::make_unique<xAOD::MMClusterAuxContainer>()));
@@ -105,10 +104,6 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         xAOD::MeasVector<1> lClusterPos{newLocalX};
         xAOD::MeasMatrix<1> lCov{uncert*uncert}; 
         prd->setMeasurement(m_idHelperSvc->detElementHash(clusId) ,lClusterPos, lCov);
-        const Amg::Vector3D strip3D = lClusterPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D& globToCenter{readOutEle->getChamber()->localToGlobalTrans(gctx)};
-        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx, prd->layerHash()) * strip3D)); 
-
     }
 
     return StatusCode::SUCCESS;

@@ -29,3 +29,14 @@ int TSU::toTopoEta(float eta) {
 }
    
 
+int TSU::toSigned(unsigned bits, unsigned length) {
+    if ( ((bits >> (length-1)) & 1) == 0) { //sign bit not set
+        return bits & ((1<<length)-1);
+    }
+    //sign bit set, convert assuming twos complement
+    return (bits & ((1<<length)-1)) - (1<<length);
+}
+
+int TSU::toSigned(const std::string& bits) {
+    return TSU::toSigned(std::stoi(bits, nullptr, 2), bits.length());    
+}

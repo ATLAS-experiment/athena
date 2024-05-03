@@ -48,6 +48,7 @@ public:
     void setRoadID(int roadID) { m_roadID = roadID; }
     void setPID(pid_t pid) { m_pid = pid; }
     void setSector(sector_t sector) { m_sector = sector; }
+    void setSectorBin(int sectorbin) { m_sectorbin = sectorbin; }
 
     void setHitLayers(layer_bitmask_t hit_layers) { m_hit_layers = hit_layers; }
     void setWCLayers(layer_bitmask_t wc_layers) { m_wildcard_layers = wc_layers; }
@@ -55,16 +56,33 @@ public:
     void setNLayers(unsigned layers) { m_hits.resize(layers); }
     void setHits(std::vector<std::vector<const FPGATrackSimHit*>> const& hits) { m_hits = hits; }
     void setHits(unsigned layer, std::vector<const FPGATrackSimHit*> const& hits) { m_hits.at(layer) = hits; } // ensure setNLayers is called first
+    void setEtaPatternID(int patternID) { m_etaPatternID = patternID; }
+
+    void setSubRegion(int v) { m_subRegion = v; }
+    void setXBin(unsigned v) { m_xBin = v; }
+    void setYBin(unsigned v) { m_yBin = v; }
+    void setX(float v) { m_x = v; }
+    void setY(float v) { m_y = v; }
+
 
     ///////////////////////////////////////////////////////////////////////
     // Getters
 
+    int getSubRegion() const { return m_subRegion; }
+    unsigned getXBin() const { return m_xBin; }
+    unsigned getYBin() const { return m_yBin; }
+    float getX() const { return m_x; }
+    float getY() const { return m_y; }
+
     int getRoadID() const { return m_roadID; }
     pid_t getPID() const { return m_pid; }
     sector_t getSector() const { return m_sector; }
+    int getSectorBin() const { return m_sectorbin; }
 
     layer_bitmask_t getHitLayers() const { return m_hit_layers; }
     layer_bitmask_t getWCLayers() const { return m_wildcard_layers; }
+
+    int getEtaPatternID() const { return m_etaPatternID; }
 
     std::vector<const FPGATrackSimHit*> const& getHits(size_t layer) const { return m_hits.at(layer); }
     std::unordered_set<const FPGATrackSimHit*> getHits_flat() const
@@ -85,7 +103,6 @@ public:
     std::vector<size_t> getNHits_layer() const;
     size_t getNHitCombos() const;
 
-
     // Weight of each barcode is the fraction of layers with corresponding hits
     // where pixels are weighted twice as much
     FPGATrackSimMultiTruth getTruth() const;
@@ -95,41 +112,13 @@ private:
     int m_roadID = 0;       // Currently just a count set by RoadFinder.
     pid_t m_pid = 0;        // the pattern ID that fired this road
     sector_t m_sector = 0;  // Sector this road belongs to / should be fitted with
+    int m_sectorbin = -1;   // The bin/ID of the sector that this road belongs to.
 
     layer_bitmask_t m_hit_layers = 0;       // Layers that had hits match the pattern, not including wildcards
     layer_bitmask_t m_wildcard_layers = 0;  // Layers that matched because of a wildcard in the pattern
 
-    std::vector<std::vector<const FPGATrackSimHit*>> m_hits; // [layer, hit#]
-        // A list of hits in the road for each layer.
-        // These pointers are not owned by the road.
-
-
-    ///////////////////////////////////////////////////////////////////////
-    // Misc
-
-    friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDef(FPGATrackSimRoad, 2);
-};
-
-
-
-class FPGATrackSimRoad_Hough : public FPGATrackSimRoad
-{
-public:
-
-    int getSubRegion() const { return m_subRegion; }
-    unsigned getXBin() const { return m_xBin; }
-    unsigned getYBin() const { return m_yBin; }
-    float getX() const { return m_x; }
-    float getY() const { return m_y; }
-
-    void setSubRegion(int v) { m_subRegion = v; }
-    void setXBin(unsigned v) { m_xBin = v; }
-    void setYBin(unsigned v) { m_yBin = v; }
-    void setX(float v) { m_x = v; }
-    void setY(float v) { m_y = v; }
-
-private:
+    // Eta pattern associated with the road.
+    int m_etaPatternID = -1;
 
     int m_subRegion = 0; // slice that the road came from
     unsigned m_xBin = 0;
@@ -137,6 +126,15 @@ private:
     float m_x = 0; // x value of Hough bin
     float m_y = 0; // y value of Hough bin
 
+    std::vector<std::vector<const FPGATrackSimHit*>> m_hits; // [layer, hit#]
+        // A list of hits in the road for each layer.
+        // These pointers are not owned by the road.
+
+    ///////////////////////////////////////////////////////////////////////
+    // Misc
+
+    friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
+    ClassDef(FPGATrackSimRoad, 2);
 };
 
 #endif // FPGATrackSimROAD_H

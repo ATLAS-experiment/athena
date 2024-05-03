@@ -10,18 +10,43 @@ class OutputAnalysisConfig (ConfigBlock):
 
     def __init__ (self) :
         super (OutputAnalysisConfig, self).__init__ ()
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('vars', [], type=None)
-        self.addOption ('varsOnlyForMC', [], type=None)
-        self.addOption ('metVars', [], type=None)
-        self.addOption ('containers', {}, type=None)
-        self.addOption ('containersOnlyForMC', [], type=None)
-        self.addOption ('treeName', 'analysis', type=str)
-        self.addOption ('metTermName', 'Final', type=str)
-        self.addOption ('storeSelectionFlags', True, type=bool)
-        self.addOption ('selectionFlagPrefix', 'select', type=str)
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here.")
+        self.addOption ('vars', [], type=None,
+            info="a list of mappings (list of strings) between containers and "
+            "decorations to output branches. The default is [] (empty list).")
+        self.addOption ('varsOnlyForMC', [], type=None,
+            info="same as vars, but for MC-only variables so as to avoid a "
+            "crash when running on data. The default is [] (empty list).")
+        self.addOption ('metVars', [], type=None,
+            info="a list of mappings (list of strings) between containers "
+            "and decorations to output branches. Specficially for MET "
+            "variables, where only the final MET term is retained. "
+            "The default is [] (empty list).")
+        self.addOption ('containers', {}, type=None,
+            info="a dictionary mapping prefixes (key) to container names "
+            "(values) to be used when saving to the output tree. Branches "
+            "are then of the form prefix_decoration.")
+        # TODO: add info string
+        self.addOption ('containersOnlyForMC', [], type=None,
+            info="")
+        self.addOption ('treeName', 'analysis', type=str,
+            info="name of the output TTree to save. The default is analysis.")
+        self.addOption ('metTermName', 'Final', type=str,
+            info="the name (string) of the MET term to save, turning the MET "
+            "container into a single object. The default is 'Final'.")
+        # TODO: add info strng
+        self.addOption ('storeSelectionFlags', True, type=bool,
+            info="")
+        # TODO: add info strng
+        self.addOption ('selectionFlagPrefix', 'select', type=str,
+            info="")
         self.addOption ('commands', [], type=None,
-                        info="a list of commands for branch selection/configuration")
+            info="a list of strings containing commands (regexp strings "
+            "prefaced by the keywords enable or disable) to turn on/off the "
+            "writing of branches to the output ntuple. The default is None "
+            "(no modification to the scheduled output branches).")
 
 
     def makeAlgs (self, config) :
@@ -104,13 +129,21 @@ class OutputAnalysisConfig (ConfigBlock):
         if len (self.vars) + len (autoVars) :
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
-            ntupleMaker.Branches = list( self.vars | set(autoVars) )
+            branchList = list(self.vars | set(autoVars))
+            branchList.sort()
+            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+            ntupleMaker.Branches = branchList_nosys + branchList_sys
             # ntupleMaker.OutputLevel = 2  # For output validation
 
         if len (self.metVars) + len (autoMetVars) > 0:
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
-            ntupleMaker.Branches = self.metVars + autoMetVars
+            branchList = self.metVars + autoMetVars
+            branchList.sort()
+            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+            ntupleMaker.Branches = branchList_nosys + branchList_sys
             ntupleMaker.termName = self.metTermName
             #ntupleMaker.OutputLevel = 2  # For output validation
 

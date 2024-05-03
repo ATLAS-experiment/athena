@@ -15,7 +15,8 @@ ISF::ISFParticle::ISFParticle(
                               int status,
                               double time,
                               const ISFParticle &parent,
-                              Barcode::ParticleBarcode barcode,
+                              int id,
+                             Barcode::ParticleBarcode barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position(pos),
@@ -26,7 +27,8 @@ ISF::ISFParticle::ISFParticle(
   m_status(status),
   m_tstamp(time),
   m_history(parent.history()),
-  m_barcode(barcode),
+  m_barcode(barcode), // TODO drop this soon
+  m_uid(id),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr),
@@ -44,6 +46,7 @@ ISF::ISFParticle::ISFParticle(
                               int status,
                               double time,
                               const ISFParticle &parent,
+                              int id,
                               Barcode::ParticleBarcode barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
@@ -55,7 +58,8 @@ ISF::ISFParticle::ISFParticle(
   m_status(status),
   m_tstamp(time),
   m_history(parent.history()),
-  m_barcode(barcode),
+  m_barcode(barcode), // TODO drop this soon
+  m_uid(id),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr),
@@ -73,6 +77,7 @@ ISF::ISFParticle::ISFParticle(
                               int status,
                               double time,
                               const DetRegionSvcIDPair &origin,
+                              int id,
                               Barcode::ParticleBarcode barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
@@ -84,7 +89,8 @@ ISF::ISFParticle::ISFParticle(
   m_status(status),
   m_tstamp(time),
   m_history(1, origin),
-  m_barcode(barcode),
+  m_barcode(barcode), // TODO drop this soon
+  m_uid(id),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr),
@@ -102,7 +108,8 @@ ISF::ISFParticle::ISFParticle(const ISFParticle& isfp):
   m_status(isfp.status()),
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
-  m_barcode(isfp.barcode()),
+  m_barcode(isfp.barcode()), // TODO drop this soon
+  m_uid(isfp.id()),
   m_truth(nullptr),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr)
@@ -123,7 +130,8 @@ ISF::ISFParticle::ISFParticle(ISFParticle&& isfp):
   m_status(isfp.status()),
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
-  m_barcode(isfp.barcode()),
+  m_barcode(isfp.barcode()), // TODO drop this soon
+  m_uid(isfp.id()),
   m_truth(isfp.getTruthBinding()),
   m_order(isfp.getOrder()),
   m_userInfo(isfp.getUserInformation()),
@@ -150,7 +158,8 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(const ISF::ISFParticle& rhs)
     m_status       = rhs.status();
     m_tstamp       = rhs.timeStamp();
     m_history      = rhs.history();
-    m_barcode      = rhs.barcode();
+    m_barcode      = rhs.barcode(); // TODO drop this soon
+    m_uid           = rhs.id();
 
     delete m_truth;
     m_truth = nullptr;
@@ -179,7 +188,8 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(ISF::ISFParticle&& rhs)
   m_status       = rhs.status();
   m_tstamp       = rhs.timeStamp();
   m_history      = rhs.history();
-  m_barcode      = rhs.barcode();
+  m_barcode      = rhs.barcode(); // TODO drop this soon
+  m_uid           = rhs.id();
   delete m_truth;
   m_truth        = rhs.getTruthBinding();
   delete m_userInfo;
@@ -208,7 +218,8 @@ bool ISF::ISFParticle::isEqual(const ISF::ISFParticle& rhs) const
   pass &= m_status == rhs.status();
   pass &= std::fabs(m_tstamp-rhs.timeStamp()) < epsilon;
   pass &= m_history == rhs.history();
-  pass &= m_barcode == rhs.barcode();
+  pass &= m_barcode == rhs.barcode(); // TODO drop this soon
+  pass &= m_uid == rhs.id();
   {
     const auto rhsTruthPtr = rhs.getTruthBinding();
     if (m_truth && rhsTruthPtr) {
@@ -249,7 +260,8 @@ bool ISF::ISFParticle::isIdent(const ISF::ISFParticle& rhs) const
   pass &= m_status == rhs.status();
   pass &= m_tstamp == rhs.timeStamp();
   pass &= m_history == rhs.history();
-  pass &= m_barcode == rhs.barcode();
+  pass &= m_barcode == rhs.barcode(); // TODO drop this soon
+  pass &= m_uid == rhs.id();
   pass &= m_truth && rhs.getTruthBinding();
   pass &= m_userInfo == rhs.getUserInformation();
   pass &= m_partLink == rhs.getParticleLink();

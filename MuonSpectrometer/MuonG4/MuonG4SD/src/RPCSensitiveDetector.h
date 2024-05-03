@@ -109,8 +109,7 @@ public:
 private:
     /** member data */
     SG::WriteHandle<RPCSimHitCollection> m_myRPCHitColl;
-    const RpcHitIdHelper* m_muonHelper;
-    bool m_isGeoModel;
+    const RpcHitIdHelper* m_muonHelper{nullptr};
 };
 
 #endif

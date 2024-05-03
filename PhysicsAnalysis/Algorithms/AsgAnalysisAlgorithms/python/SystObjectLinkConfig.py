@@ -7,9 +7,11 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 class SystObjectLinkBlock (ConfigBlock):
     """the ConfigBlock for linking systematic variation and nominal objects"""
 
-    def __init__ (self, containerName) :
+    def __init__ (self, containerName='') :
         super (SystObjectLinkBlock, self).__init__ ()
-        self.containerName = containerName
+        self.addOption('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
 
     def makeAlgs (self, config) :
 

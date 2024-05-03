@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CavernBkgGenerator/GenerateCavernBkg.h"
@@ -9,6 +9,7 @@
 #include "AthenaKernel/RNGWrapper.h"
 
 #include <cassert>
+#include <cstdint>
 
 
 // Random number generator stream name and static pointer to the RNG engine
@@ -18,8 +19,8 @@ extern "C" float cav_rndm_( int* /*idummy*/ ) {
   return CLHEP::RandFlat::shoot(GenerateCavernBkg::CAVBKG_RANDOM_ENGINE);
 }
 extern "C" {
-  void cavbkg_(const char*, int);
-  void* getaddr_(void* arg) { return(arg); }
+  void cavbkg_(const char*, long);
+  uintptr_t getaddr_(void* arg) { return reinterpret_cast<uintptr_t>(arg); }
 }
 
 

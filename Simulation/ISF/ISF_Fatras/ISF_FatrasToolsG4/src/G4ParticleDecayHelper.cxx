@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// G4ParticleDecayHelper.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 // iFatras
@@ -386,6 +382,7 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
                                                             1 + HepMC::SIM_STATUS_THRESHOLD, //status
                                                             timeStamp, 
                                                             parent,
+                                                            0, // undefined id
 							    Barcode::fUndefinedBarcode,
 							    truthBinding );
 

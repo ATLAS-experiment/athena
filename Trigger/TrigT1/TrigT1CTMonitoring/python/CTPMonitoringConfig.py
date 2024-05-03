@@ -55,3 +55,51 @@ def CTPMonitoringConfig(flags):
         info('CTPMonitoringConfig: requested: result.merge(BSMonitoringConfig(flags))')
     info('after results_merge CTPMonitoringConfig')
     return result
+
+if __name__=='__main__':
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+
+    flags = initConfigFlags()
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.EnableVerboseViews = True
+    flags.Detector.GeometryZDC=False
+    flags.Detector.GeometryAFP=False
+    flags.Detector.GeometryALFA=False
+    flags.Detector.GeometryLucid=False
+    flags.Detector.GeometryMDT=False
+    flags.Detector.GeometryMM=False
+    flags.Detector.GeometryMuon=False
+    flags.Trigger.decodeHLT=False
+    flags.Trigger.enableL1MuonPhase1=False
+    flags.Trigger.L1.doMuon=True
+    flags.Trigger.L1.doCalo=False
+    flags.Trigger.L1.doTopo=True
+    flags.Trigger.L1.doCTP=True
+    flags.Reco.EnableCombinedMuon=True   
+    #flags.Reco.EnableTrigger = False
+    # This does not work in this context
+    # run = flags.GeoModel.Run
+    # The EDM Version should be auto configured, but is not working at the moment, so is set by hand
+
+    flags.Output.AODFileName="AOD.pool.root"
+    flags.Output.HISTFileName="HIST.root"
+    flags.Output.doWriteAOD=True
+
+    flags.fillFromArgs()
+    flags.lock()
+    # Next line is for debugging
+#    flags.dump()
+
+    acc=MainServicesCfg(flags)
+    acc.merge( CTPMonitoringConfig(flags) )
+
+    status = acc.run()
+    if status.isFailure():
+        import sys
+        sys.exit(-1)

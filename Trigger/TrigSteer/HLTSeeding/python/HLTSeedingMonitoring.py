@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 import math
@@ -9,7 +9,7 @@ def CTPUnpackingMonitoring(flags, maxItems, maxChains):
     tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath="HLTFramework/HLTSeeding"
     tool.defineHistogram('TAVItems', path='EXPERT', type='TH1F', title='Number of active L1 TAV items;N Items;N Events',
-                         xbins=maxItems, xmin=0, xmax=maxItems),
+                         xbins=maxItems, xmin=0, xmax=maxItems)
     tool.defineHistogram('Chains', path='EXPERT', type='TH1F', title='Number of activated Chains;N Chains;N Events',
                          xbins=(maxChains//4 if maxChains>100 else maxChains), xmin=0, xmax=maxChains)
     return tool
@@ -19,11 +19,11 @@ def RoIsUnpackingMonitoring(flags, prefix, maxCount, maxEta=3., phiOffset=0.,eta
     tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath = f'HLTFramework/HLTSeeding/RoIs_{prefix}'
     tool.defineHistogram('count', path='EXPERT', type='TH1F', title=f'Number of {prefix} RoIs;N RoIs;N Events',
-                         xbins=maxCount, xmin=0, xmax=maxCount),
+                         xbins=maxCount, xmin=0, xmax=maxCount)
     tool.defineHistogram('eta', path='EXPERT', type='TH1F', title=f'{prefix} RoIs eta;eta;N RoIs',
-                         xbins=int(20*maxEta), xmin=-(maxEta-etaOffset), xmax=(maxEta+etaOffset)),
+                         xbins=int(20*maxEta), xmin=-(maxEta-etaOffset), xmax=(maxEta+etaOffset))
     tool.defineHistogram('phi', path='EXPERT', type='TH1F', title=f'{prefix} RoIs phi;phi;N RoIs',
-                         xbins=64, xmin=-(math.pi-phiOffset), xmax=(math.pi+phiOffset)),
+                         xbins=64, xmin=-(math.pi-phiOffset), xmax=(math.pi+phiOffset))
     tool.defineHistogram('eta,phi', path='EXPERT', type='TH2F', title=f'{prefix} RoIs eta-phi;eta;phi;N RoIs',
                          xbins=int(20*maxEta), xmin=-(maxEta-etaOffset), xmax=(maxEta+etaOffset),
                          ybins=64, ymin=-(math.pi-phiOffset), ymax=(math.pi+phiOffset))

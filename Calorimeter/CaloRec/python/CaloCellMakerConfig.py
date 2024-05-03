@@ -86,7 +86,8 @@ if __name__=="__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg=MainServicesCfg(flags)
     cfg.merge(PoolReadCfg(flags))
-    cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(),sequenceName="AthAlgSeq")
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+    cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True),sequenceName="AthAlgSeq")
 
 
     acc=CaloCellMakerCfg(flags)

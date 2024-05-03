@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -7,7 +7,7 @@ from TrigEDMConfig.TriggerEDM import recordable
 from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
 from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetTLAHypoToolFromDict
 
-@AccumulatorCache
+
 def JetTLASequenceCfg(flags, jetsIn):
 
     ## add the InputMaker (event context)    
@@ -29,7 +29,7 @@ def JetTLASequenceCfg(flags, jetsIn):
     return recoAcc
 
 @AccumulatorCache
-def JetTLAMenuSequenceCfg( flags, jetsIn, attachBtag=True ):
+def JetTLAMenuSequenceGenCfg( flags, jetsIn, attachBtag=True ):
     
     jetsOut = recordable(jetsIn+"_TLA")
     # retrieves the sequence

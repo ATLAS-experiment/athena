@@ -57,10 +57,7 @@ StatusCode TgcReadoutElement::initElement() {
     for (unsigned int gap = 1; gap <= nGasGaps(); ++gap) {
          if (numWireGangs(gap)) {
             const IdentifierHash layHash{constructHash(0, gap, false)}; 
-            ATH_CHECK(insertTransform(layHash, 
-                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
-                                    return toStation(store) * fromGapToChamOrigin(hash); 
-                                 }));
+            ATH_CHECK(insertTransform<TgcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
             const StripDesign& layout{wireGangLayout(gap)};
             ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(layout.shortHalfHeight(),
@@ -70,10 +67,7 @@ StatusCode TgcReadoutElement::initElement() {
          }
          if (numStrips(gap)) {
             const IdentifierHash layHash{constructHash(0, gap, true)}; 
-            ATH_CHECK(insertTransform(layHash, 
-                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
-                                    return toStation(store) * fromGapToChamOrigin(hash); 
-                                 }));
+            ATH_CHECK(insertTransform<TgcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
             const StripDesign& layout{stripLayout(gap)};
             /// We probably need a rotated version of these bounds. However, that's not part

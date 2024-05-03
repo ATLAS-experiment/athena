@@ -9,9 +9,15 @@ class BootstrapGeneratorConfig(ConfigBlock):
 
     def __init__(self):
         super(BootstrapGeneratorConfig, self).__init__()
-        self.addOption ('nReplicas', 1000, type=int)
-        self.addOption ('decoration', None, type=str)
-        self.addOption ('runOnMC', False, type=bool)
+        self.addOption ('nReplicas', 1000, type=int,
+            info="the number (int) of bootstrap replicas to generate. "
+            "The default is 1000.")
+        self.addOption ('decoration', None, type=str,
+            info="the name of the output vector branch containing the "
+            "bootstrapped weights. The default is bootstrapWeights.")
+        self.addOption ('runOnMC', False, type=bool,
+            info="toggle to force running on MC samples. The default is "
+            "False, i.e. run only on data.")
     
     def makeAlgs(self, config):
         if config.dataType() is not DataType.Data and not self.runOnMC:

@@ -1482,7 +1482,7 @@ namespace CP {
             (!summary.isSmallGoodSectors && summary.outerLargeHits < 3 && summary.extendedLargeHits < 3))
             category = ResolutionCategory::missingOuter;  // missing-outer
 
-        if ((std::abs(etaMS) > 2.0 || std::abs(etaCB) > 2.0) && summary.cscUnspoiledEtaHits == 0)
+        if (!isRun3() && (std::abs(etaMS) > 2.0 || std::abs(etaCB) > 2.0) && summary.cscUnspoiledEtaHits == 0)
             category = ResolutionCategory::spoiledCSC;  // spoiled CSC
 
         if ((1.01 < std::abs(etaMS) && std::abs(etaMS) < 1.1) || (1.01 < std::abs(etaCB) && std::abs(etaCB) < 1.1))

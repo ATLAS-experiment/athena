@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ public:
   //    * Writing: maximum number of files to keep in 'inputDirectory'
   //    * Reading: maximum number of files to keep in 'copyDirectory' (see below)
   VP1FileUtilities(const std::string& inputDirectory,
-		   unsigned int fileLimit, const std::string& outputDir = "", bool forceMakeOutputDir = false, bool removeInputFile = true);
+                   unsigned int fileLimit, const std::string& outputDir = "", bool forceMakeOutputDir = false, bool removeInputFile = true);
   virtual ~VP1FileUtilities();
 
   //
@@ -48,9 +48,9 @@ public:
   // After that, if the total number of files in the 'inputDirectory' is > fileLimit then the oldest
   // vp1 event file is deleted.
   void produceNewFile(const std::string& sourceFile,
-		      unsigned int runNumber,
-		      unsigned long long eventNumber,
-		      unsigned int timeStamp,
+                      unsigned int runNumber,
+                      unsigned long long eventNumber,
+                      unsigned int timeStamp,
               const std::string& textLabel = "");
 
   // **** Check if file exists ****

@@ -73,7 +73,7 @@ def HICaloJetDef(flags, jetradius, **kwargs):
     kwargs.setdefault("prefix", "")
     kwargs.setdefault("suffix", "")
 
-    return solveDependencies(JetDefinition(**kwargs))
+    return solveDependencies(JetDefinition(**kwargs), flags)
 
 
 def HITrackJetInputConstit(flags, name="HITrack", **kwargs):
@@ -92,7 +92,7 @@ def HITrackJetDef(flags, jetradius, **kwargs):
                      xAODType.TrackParticle,
                      # in std context, this is InDetTrackParticles (see StandardJetContext)
                      prereqs=["InDetTrackParticles"],
-                     algoBuilder=lambda jdef, _: jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False))
+                     algoBuilder=lambda jdef, _: jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False))
     kwargs.setdefault("ptmin", 5000)
     kwargs.setdefault("inputdef", HITrackJetInputConstit(flags))
 
@@ -306,7 +306,7 @@ def HIJetDefCloner(flags, jetDef_in, **kwargs):
             updateStdJetModifier(flags, modifier, jetDef=jetDef_new)
             jetDef_new.modifiers.append(modifier)
 
-    return solveDependencies(jetDef_new)
+    return solveDependencies(jetDef_new,flags)
 
 
 def NullModulatorCfg():

@@ -93,103 +93,44 @@ class CFSequence(object):
     A Filter can have more than one input/output if used in different chains, so this class stores and manages all of them (when doing the connect)
     """
     def __init__(self, ChainStep, FilterAlg):
-        self.empty= ChainStep.isEmpty
-        self.filter = FilterAlg
+        self.filterNode = FilterAlg
         self.step = ChainStep
-        self.combo = ChainStep.combo  #copy this instance
         self.connectCombo()
-        self.setDecisions()                
-        log.debug("CFSequence.__init: created %s ",self)
+        self.setDecisions()              
+        log.debug("CFSequence.__init: created %s ",self)    
 
     def setDecisions(self):
         """ Set the output decision of this CFSequence as the hypo outputdecision; In case of combo, takes the Combo outputs"""
         self.decisions=[]
         # empty steps:
-        if self.combo is None:
-            self.decisions.extend(self.filter.getOutputList())
+        if self.step.combo is None:
+            self.decisions.extend(self.filterNode.getOutputList())
         else:
-            self.decisions.extend(self.combo.getOutputList())            
+            self.decisions.extend(self.step.combo.getOutputList())   
         log.debug("CFSequence: set out decisions: %s", self.decisions)
-
-
-    def connect(self, connections):
-        """Connect filter to ChainStep (and all its sequences) through these connections (which are sets of filter outputs)
-        if a ChainStep contains the same sequence multiple times (for multi-object chains),
-        the filter is connected only once (to avoid multiple DH links)
-        """
-        if log.isEnabledFor(logging.DEBUG):
-            log.debug("CFSequence: connect Filter %s with %d menuSequences of step %s, using %d connections", self.filter.Alg.name, len(self.step.sequences), self.step.name, len(connections))
-            log.debug("   --- sequences: ")
-            for seq in self.step.sequences:
-                log.debug(seq)
-
-        if len(connections) == 0:
-            log.error("No filter outputs are set!")
-
-        if len(self.step.sequences):
-            # check whether the number of filter outputs are the same as the number of sequences in the step
-            if len(connections) != len(self.step.sequences):
-                log.error("Found %d connections and %d MenuSequences in Step %s", len(connections), len(self.step.sequences), self.step.name)
-                raise Exception("[CFSequence] Connections and sequences do not match, this must be fixed!")
-            nseq=0
-            for seq in self.step.sequences:
-                filter_out = connections[nseq]
-                log.debug("CFSequence: Found input %s to sequence::%s from Filter::%s", filter_out, seq.name, self.filter.Alg.name)
-                seq.connectToFilter( filter_out )
-                nseq+=1
-        else:
-          log.debug("This CFSequence has no sequences: outputs are the Filter outputs, which are %d", len(self.decisions))
-
+    
 
     def connectCombo(self):
         """ connect Combo to Hypos"""
-        if self.combo is None:
+        if self.step.combo is None:
+            log.debug("CFSequence.connectCombo: no Combo found")
             return
 
         for seq in self.step.sequences:            
             combo_input=seq.getOutputList()[0]
-            self.combo.addInput(combo_input)
-            inputs = self.combo.readInputList()
+            self.step.combo.addInput(combo_input)
+            inputs = self.step.combo.readInputList()
             legindex = inputs.index(combo_input)
-            log.debug("CFSequence.connectCombo: adding input to  %s: %s",  self.combo.Alg.getName(), combo_input)
+            log.debug("CFSequence.connectCombo: adding input to  %s: %s",  self.step.combo.Alg.getName(), combo_input)
             # inputs are the output decisions of the hypos of the sequences
-            combo_output=CFNaming.comboHypoOutputName (self.combo.Alg.getName(), legindex)            
-            self.combo.addOutput(combo_output)
-            log.debug("CFSequence.connectCombo: adding output to  %s: %s",  self.combo.Alg.getName(), combo_output)
-
+            combo_output=CFNaming.comboHypoOutputName (self.step.combo.Alg.getName(), legindex)            
+            self.step.combo.addOutput(combo_output)
+            log.debug("CFSequence.connectCombo: adding output to  %s: %s",  self.step.combo.Alg.getName(), combo_output)
     
-    def createHypoTools(self, flags, chain, newstep):
-        """ set and create HypoTools accumulated on the self.step from an input step configuration
-        """
-        if self.combo is None:
-            return
         
-        acc = ComponentAccumulator()
-
-        assert len(newstep.sequences) == len(self.step.sequences), f'Trying to add HypoTools from new step {newstep.name}, which differ in number of sequences'
-        assert len(self.step.sequences) == len(newstep.stepDicts), f'The number of sequences of step {self.step.name} ({len(self.step.sequences)}) differ from the number of dictionaries in the chain {len(newstep.stepDicts)}'
- 
-        log.debug("createHypoTools for Step %s", newstep.name)
-        log.debug('from chain %s with step mult= %d', chain, sum(newstep.multiplicity))
-        log.debug("N(seq)=%d, N(chainDicts)=%d", len(newstep.sequences), len(newstep.stepDicts))
-        
-        for seq, myseq, onePartChainDict in zip(newstep.sequences, self.step.sequences, newstep.stepDicts):
-            log.debug('    seq: %s, onePartChainDict:', seq.name)
-            log.debug('    %s', onePartChainDict)
-            hypoToolConf=seq.getHypoToolConf()
-            if hypoToolConf is not None: # avoid empty sequences
-                hypoToolConf.setConf( onePartChainDict )
-                hypoAcc = myseq.hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
-                if isinstance(hypoAcc, ComponentAccumulator):
-                    acc.merge(hypoAcc)
-
-        chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
-        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
-        return acc
-    
     def __repr__(self):
         return "--- CFSequence ---\n + Filter: %s \n + decisions: %s\n +  %s \n"%(\
-                    self.filter.Alg.name, self.decisions, self.step)
+                    self.filterNode.Alg.name, self.decisions, self.step)
 
 
 class CFSequenceCA(CFSequence):
@@ -197,15 +138,13 @@ class CFSequenceCA(CFSequence):
     A Filter can have more than one input/output if used in different chains, so this class stores and manages all of them (when doing the connect)
     """
     def __init__(self, chainStep, filterAlg):
-        log.debug(" *** Create CFSequence %s with Filter %s", chainStep.name, filterAlg.Alg.getName())
-        
-        self.empty= chainStep.isEmpty
+        log.debug(" *** Create CFSequenceCA %s with Filter %s", chainStep.name, filterAlg.Alg.getName())        
         self.ca = ComponentAccumulator()
         #empty step: add the PassSequence, one instance only is appended to the tree
-        seqAndWithFilter = filterAlg.Alg if self.empty else seqAND(chainStep.name)        
+        seqAndWithFilter = filterAlg.Alg if chainStep.isEmpty else seqAND(chainStep.name)        
         self.ca.addSequence(seqAndWithFilter)
         self.seq = seqAndWithFilter
-        if not self.empty: 
+        if not chainStep.isEmpty: 
             self.ca.addEventAlgo(filterAlg.Alg, sequenceName=seqAndWithFilter.getName())
             self.stepReco = parOR(chainStep.name + CFNaming.RECO_POSTFIX)  # all reco algorithms from all the sequences in a parallel sequence                            
             self.ca.addSequence(self.stepReco, parentName=seqAndWithFilter.getName())
@@ -214,13 +153,13 @@ class CFSequenceCA(CFSequence):
             
             
         CFSequence.__init__(self, chainStep, filterAlg)
-        if not self.empty: 
+        if not chainStep.isEmpty: 
         # merge the Hypoalg (before the Combo)
             for menuseq in chainStep.sequences:
                 if not isinstance(menuseq, EmptyMenuSequence):
                     self.ca.merge(menuseq.hypoAcc, sequenceName=seqAndWithFilter.getName())   
 
-        if self.combo is not None:    
+        if self.step.combo is not None:   
             self.ca.merge(self.step.combo.acc, sequenceName=seqAndWithFilter.getName())          
 
     def mergeStepSequences(self, chainStep):
@@ -238,31 +177,78 @@ class CFSequenceCA(CFSequence):
         return findAlgorithmByPredicate(self.seq, lambda alg: alg.name == self.step.Alg.name and isComboHypoAlg(alg))
 
 
-    def createHypoTools(self, flags, chain, newstep):
-        """ set and create HypoTools accumulated on the self.step from an input step configuration
+
+class CFGroup(object):
+    """Class to store the Step + its Filter (CFSequence) plus the chains and dictionaries of the legs using that step   """
+    def __init__(self, ChainStep, FilterAlg):#, fastMenu):
+        self.stepDicts = []  # will become a list of lists
+        self.multiplicity = []
+        self.chains = []
+        self.comboToolConfs = []
+        self.createCFSequenceCA(ChainStep, FilterAlg)
+        log.debug("CFGroup.__init: created for %s ",ChainStep.name)
+    
+    def createCFSequenceCA(self, ChainStep, FilterAlg):
+        '''This creates the CAs for the menu sequences, if fastMenu style, and the CFSequenceCA'''
+        log.debug("CFGroup.creating CFSEquenceCA")
+        self.sequenceCA = CFSequenceCA(ChainStep, FilterAlg)
+        return self.sequenceCA
+    
+    def addStepLeg(self, newstep, chainName):
+        self.stepDicts.append(newstep.stepDicts) # one dict per leg
+        self.chains.append(chainName)
+        self.comboToolConfs.append(newstep.comboToolConfs)
+        self.multiplicity.append(newstep.multiplicity)   
+    
+
+    def connect(self, connections):
+        """Connect filter to ChainStep (and all its sequences) through these connections (which are sets of filter outputs)
+        if a ChainStep contains the same sequence multiple times (for multi-object chains),
+        the filter is connected only once (to avoid multiple DH links)
         """
-        
-        if self.step.combo is None:
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug("CFGroup: connect Filter %s with %d menuSequences of step %s, using %d connections", self.sequenceCA.filterNode.Alg.name, len(self.sequenceCA.step.sequences), self.sequenceCA.step.name, len(connections))
+            log.debug("   --- sequences: ")
+            for seq in self.sequenceCA.step.sequences:
+                log.debug(seq)
+
+        if len(connections) == 0:
+            log.error("No filter outputs are set!")
+
+        if len(self.sequenceCA.step.sequences):
+            # check whether the number of filter outputs are the same as the number of sequences in the step
+            if len(connections) != len(self.sequenceCA.step.sequences):
+                log.error("CFGroup: Found %d connections and %d MenuSequences in Step %s", len(connections), len(self.sequenceCA.step.sequences), self.sequenceCA.step.name)
+                raise Exception("[CFGroup] Connections and sequences do not match, this must be fixed!")
+            
+            for nseq, seq in enumerate(self.sequenceCA.step.sequences):
+                filter_out = connections[nseq]
+                log.debug("CFGroup: Found input %s to sequence::%s from Filter::%s", filter_out, seq.name, self.sequenceCA.filterNode.Alg.name)
+                seq.connectToFilter( filter_out )               
+        else:
+          log.debug("This CFGroup has no sequences: outputs are the Filter outputs, which are %d", len(self.sequenceCA.decisions))
+
+    def createHypoTools(self, flags):
+        """ set and create HypoTools accumulated on the self.step from an input step configuration
+        """        
+        if self.sequenceCA.step.combo is None:
             return
 
-        assert len(newstep.sequences) == len(self.step.sequences), f'Trying to add HypoTools from new step {newstep.name}, which differ in number of sequences'
-        assert len(self.step.sequences) == len(newstep.stepDicts), f'The number of sequences of step {self.step.name} ({len(self.step.sequences)}) differ from the number of dictionaries in the chain {len(newstep.stepDicts)}'
- 
-        log.debug("createHypoTools for Step %s", newstep.name)
-        log.debug('from chain %s with step mult= %d', chain, sum(newstep.multiplicity))
-        log.debug("N(seq)=%d, N(chainDicts)=%d", len(newstep.sequences), len(newstep.stepDicts))
-        
-        for seq, myseq, onePartChainDict in zip(newstep.sequences, self.step.sequences, newstep.stepDicts):
-            log.debug('    seq: %s, onePartChainDict:', seq.name)
-            log.debug('    %s', onePartChainDict)
-            hypoToolConf=seq.getHypoToolConf()
-            if hypoToolConf is not None: # avoid empty sequences
-                hypoToolConf.setConf( onePartChainDict )
-                hypo = HypoAlgNode(Alg = self.ca.getEventAlgo(myseq.hypo.Alg.getName()))
-                hypoToolAcc = hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
-                if isinstance(hypoToolAcc, ComponentAccumulator):                   
-                    self.ca.merge(hypoToolAcc)
+        log.debug("CFGroup.createHypoTools for Step %s", self.sequenceCA.step.name)
+        for sdict in self.stepDicts:
+            for seq, onePartChainDict in zip(self.sequenceCA.step.sequences, sdict):
+                log.debug('    seq: %s, onePartChainDict:', seq.name)
+                log.debug('    %s', onePartChainDict)
+                if not isinstance(seq, EmptyMenuSequence):
+                    hypoToolConf=seq.getHypoToolConf()
+                    if hypoToolConf is None: # avoid empty sequences
+                        log.error("HypoToolConf not found ", seq.name)
+                    hypoToolConf.setConf( onePartChainDict )
+                    hypo = HypoAlgNode(Alg = self.sequenceCA.ca.getEventAlgo(seq.hypo.Alg.getName()))
+                    hypoToolAcc = hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
+                    if isinstance(hypoToolAcc, ComponentAccumulator):                   
+                        self.sequenceCA.ca.merge(hypoToolAcc)
                    
-
-        chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
-        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)      
+        for chain,conf in zip(self.chains, self.comboToolConfs):
+            chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
+            self.sequenceCA.step.combo.createComboHypoTools(flags, chainDict, conf)

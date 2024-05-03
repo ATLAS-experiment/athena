@@ -12,8 +12,7 @@
 #include "StoreGate/StoreGateSvc.h"
 
 namespace {
-    static const std::string preFixStr{"Mdt_"};
-    static const xAOD::PosAccessor<3> accTubePos{preFixStr + "tubePosInStation"};
+    static const std::string preFixStr{"Mdt_"};    
 }
 
 namespace xAOD {
@@ -46,13 +45,6 @@ void MdtDriftCircle_v1::setDriftRadius(float r) {
 }
 void MdtDriftCircle_v1::setDriftRadCov(float cov) {
     localCovariance<1>()(Trk::locR, Trk::locR) = cov;
-}
-void MdtDriftCircle_v1::setTubePosInStation(const MeasVector<3>& pos){
-    VectorMap<3> v{accTubePos(*this).data()};
-    v = pos;
-}
-ConstVectorMap<3> MdtDriftCircle_v1::tubePosInStation() const {
-    return ConstVectorMap<3>{accTubePos(*this).data()};
 }
 
 }  // namespace xAOD

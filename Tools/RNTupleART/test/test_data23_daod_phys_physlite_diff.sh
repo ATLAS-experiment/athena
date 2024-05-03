@@ -3,6 +3,7 @@
 # art-description: Derivation_tf.py data23 w/ PHYS and PHYSLITE in TTree/RNTuple Formats w/ a diff at the end
 # art-type: grid
 # art-include: main--dev3LCG/Athena
+# art-include: main--dev4LCG/Athena
 # art-output: *.root
 # art-output: log.*
 # art-athena-mt: 8
@@ -62,6 +63,7 @@ echo "art-result: $? conversion (PHYSLITE)";
 acmd diff-root \
   --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
+  --exact-branches \
   --order-trees DAOD_PHYS.ttree.pool.root DAOD_PHYS.rntuple-to-ttree.pool.root;
 
 echo "art-result: $? diff (PHYS)";
@@ -69,6 +71,7 @@ echo "art-result: $? diff (PHYS)";
 acmd diff-root \
   --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
+  --exact-branches \
   --order-trees DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.rntuple-to-ttree.pool.root;
 
 echo "art-result: $? diff (PHYSLITE)";

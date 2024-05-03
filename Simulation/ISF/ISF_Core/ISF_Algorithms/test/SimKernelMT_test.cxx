@@ -37,6 +37,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "gmock/gmock.h"
 
 #include "AtlasHepMC/Operators.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #if __GNUC__ >= 12
 // gcc12 gives maybe-uninitialized warnings about uses of testing::_.
@@ -703,7 +704,8 @@ protected:
                                     11,  // PDG code
                                     1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin
+                                    particleOrigin, // parent
+                                    HepMC::UNDEFINED_ID // id
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -736,7 +738,8 @@ protected:
                                     11,  // PDG code
                                     1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin
+                                    particleOrigin, // parent
+                                    HepMC::UNDEFINED_ID // id
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -766,7 +769,8 @@ protected:
                                     11,  // PDG code
                                     1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin
+                                    particleOrigin, // parent
+                                    HepMC::UNDEFINED_ID // id
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -796,7 +800,8 @@ protected:
                                     11,  // PDG code
                                     1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin
+                                    particleOrigin, // parent
+                                    HepMC::UNDEFINED_ID // id
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -856,7 +861,8 @@ protected:
                                        11,  // e- PDG code
                                        1, ///status
                                        678.9/Gaudi::Units::c_light*Gaudi::Units::ns,  // time
-                                       particleOrigin,
+                                       particleOrigin, // parent
+                                       HepMC::UNDEFINED_ID, // id
                                        10001,  // barcode
                                        truthBinding
                                        );

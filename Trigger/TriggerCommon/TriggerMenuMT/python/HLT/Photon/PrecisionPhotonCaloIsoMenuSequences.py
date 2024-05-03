@@ -13,7 +13,7 @@ def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'PhotonCaloIso'
 
 @AccumulatorCache
-def precisionPhotonCaloIsoSequenceCfg(flags, name, ion=False, is_probe_leg=False):
+def precisionPhotonCaloIsoSequenceGenCfg(flags, name, ion=False, is_probe_leg=False):
     """Creates secpond step photon sequence"""
     
     InViewRoIs = "PrecisionPhotonCaloIsoRoIs"

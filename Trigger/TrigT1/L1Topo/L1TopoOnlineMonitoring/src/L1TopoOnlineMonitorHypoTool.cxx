@@ -32,6 +32,7 @@ StatusCode L1TopoOnlineMonitorHypoTool::initialize() {
 
 StatusCode L1TopoOnlineMonitorHypoTool::decide(const InputVector& input,
                                                const EventContext& eventContext) const {
+
   // Retrieve the error flags
   SG::ReadHandle<xAOD::TrigCompositeContainer> errorFlagsCont(m_errorFlagsKey, eventContext);
   ATH_CHECK(errorFlagsCont.isValid());
@@ -39,6 +40,7 @@ StatusCode L1TopoOnlineMonitorHypoTool::decide(const InputVector& input,
   const xAOD::TrigComposite* errorFlags = errorFlagsCont->at(0);
 
   for (const auto& [decision, previousDecision] : input) {
+
     // Set a feature link
     ElementLink<xAOD::TrigCompositeContainer> featureLink(*errorFlagsCont, 0, eventContext);
     decision->setObjectLink(featureString(), featureLink);
@@ -51,6 +53,7 @@ StatusCode L1TopoOnlineMonitorHypoTool::decide(const InputVector& input,
       continue;
     }
 
+    
     // Check error flags
     auto getFlag = [&errorFlags, this](const std::string& name){
       if (!errorFlags->hasDetail<bool>(name)) {
@@ -63,31 +66,10 @@ StatusCode L1TopoOnlineMonitorHypoTool::decide(const InputVector& input,
     };
 
     bool accept{false};
-    if (m_acceptGenericRoiError.value()) {
-      accept |= getFlag("hasGenericRoiError");
-    }
-    if (m_acceptGenericDaqError.value()) {
-      accept |= getFlag("hasGenericDaqError");
-    }
-    if (m_acceptCrcTobError.value()) {
-      accept |= getFlag("hasCrcTobError");
-    }
-    if (m_acceptCrcFibreError.value()) {
-      accept |= getFlag("hasCrcFibreError");
-    }
-    if (m_acceptCrcDaqError.value()) {
-      accept |= getFlag("hasCrcDaqError");
-    }
-    if (m_acceptRoibDaqDifference.value()) {
-      accept |= getFlag("hasRoibDaqDifference");
-    }
-    if (m_acceptRoibCtpDifference.value()) {
-      accept |= getFlag("hasRoibCtpDifference");
-    }
-    if (m_acceptDaqCtpDifference.value()) {
-      accept |= getFlag("hasDaqCtpDifference");
-    }
-
+    
+    if (m_acceptTrivialFlag.value()) {
+      accept |= getFlag("hasTrivialFlag");
+      }
     ATH_MSG_DEBUG("The accept decision is: " << (accept ? "true" : "false"));
     if (accept) {
       addDecisionID(m_decisionId, decision);

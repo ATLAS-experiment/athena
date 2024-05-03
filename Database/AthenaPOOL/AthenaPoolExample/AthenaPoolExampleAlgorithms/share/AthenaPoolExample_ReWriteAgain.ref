@@ -1989,7 +1989,7 @@ RootDatabase.close  DEBUG Closing DB SimplePoolReplica1.root
 AthenaEventLoopMgr   INFO No more events in event selection 
 Stream1             DEBUG AthenaOutputStream Stream1 ::stop()
 MetaDataSvc         DEBUG MetaDataSvc::stop()
-Stream1             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream1             DEBUG handle() incident type: MetaDataStop
 MetaDataSvc         DEBUG MetaDataSvc will handle xAOD::FileMetaData_v1 ClassID: 178309087
 MetaDataSvc         DEBUG MetaDataSvc will handle xAOD::FileMetaDataAuxInfo_v1 ClassID: 73252552
 Stream1.FileMet...  DEBUG Could not get mcProcID

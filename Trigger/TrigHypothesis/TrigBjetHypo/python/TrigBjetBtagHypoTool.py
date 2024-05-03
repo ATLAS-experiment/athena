@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 from TrigBjetHypo.TrigBjetMonitoringConfig import TrigBjetBtagHypoToolMonitoring
@@ -106,17 +106,19 @@ def decodeThreshold( threshold_btag ):
     allowedTaggers = ["offperf", "dl1d", "gn182bb", "gn177bb", "gn175bb", "gn1","gn2"]
     if tagger not in allowedTaggers:
         log.debug("tagger = %s not amidst allowed taggers ",threshold_btag)
-        assert False, "Can't recognize tagger during TrigBjetHypoTool configuration. Tagger = "+threshold_btag
-        return None
+        raise RuntimeError("Can't recognize tagger during TrigBjetHypoTool configuration. Tagger = "+threshold_btag)
 
-
-    btagger = "DL1d20211216"
+    btagger = "GN120220813" # default tagger for boffperf chain monitoring
     bbtagger = "dl1dbb20230314"
 
     bbcut = bbTaggingWP.get(threshold_btag)
 
     # remove the bb part to get the b-only cut
     threshold_btag = threshold_btag.split("bb", maxsplit=1)[0]
+
+    # for chains wanting to use DL1d
+    if "dl1d" in threshold_btag:
+        btagger = "DL1d20211216"
 
     # for chains wanting to use GN1
     if "gn1" in threshold_btag:

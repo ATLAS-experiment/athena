@@ -30,7 +30,6 @@ class RpcStripAuxContainer_v1 : public AuxContainerBase {
     std::vector<uint32_t> triggerInfo{}; // FIXME - how big do we need this to be?
     std::vector<uint8_t> ambiguityFlag{};
     std::vector<float> timeOverThreshold{};
-    std::vector<PosAccessor<3>::element_type> stripPosInStation{};
 
     std::vector<uint16_t> stripNumber{};
     std::vector<uint8_t> gasGap{};

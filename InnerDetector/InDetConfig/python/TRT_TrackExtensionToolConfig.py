@@ -108,7 +108,7 @@ def TRT_TrackExtensionTool_xkCfg(
 
     if flags.Tracking.BackTracking.doRoISeeded:
         kwargs.setdefault("minTRTSegmentpT",
-                          flags.Tracking.ActiveConfig.minSecondaryPt)
+                          flags.Tracking.BackTracking.minPt)
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         TRT_TrackExtensionTool_xk_BaseCfg(flags, name, **kwargs)))

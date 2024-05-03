@@ -12,6 +12,8 @@ Py:Athena            INFO including file "EventAthenaPool/EventAthenaPoolTestDum
 Py:ConfigurableDb    INFO Read module info for 419 configurables from 2 genConfDb files
 Py:ConfigurableDb    INFO No duplicates have been found: that's good !
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
+Py:MetaReader     WARNING Found multiple values for AtlasRelease: ['AtlasProduction-20.1.7.2', 'AtlasProduction-17.0.6.4']. Looking for possible duplicates.
+Py:MetaReader     WARNING Multiple values for AtlasRelease may mean the same, or the input file was produced in multi-step job. Ignoring all but the first entry: AtlasRelease = AtlasProduction-20.1.7.2
 ApplicationMgr       INFO Updating Gaudi::PluginService::SetDebug(level) to level= 'PluginDebugLevel':0
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================

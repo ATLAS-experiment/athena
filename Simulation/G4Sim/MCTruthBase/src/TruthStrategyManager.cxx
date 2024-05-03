@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -7,6 +7,8 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+
+#include "TruthUtils/MagicNumbers.h"
 
 // Geant4 Includes
 #include "G4Event.hh"
@@ -70,13 +72,14 @@ bool TruthStrategyManager::CreateTruthIncident(const G4Step* aStep, int subDetVo
   // TODO: cleanup Geant4TruthIncident to not require an ISFParticle instance any longer
   const Amg::Vector3D myPos(0,0,0);
   const Amg::Vector3D myMom(0,0,0);
-  double myMass = 0.0;
-  double myCharge = 0.0;
-  int    myPdgCode = 0;
-  int    mystatus = 3333;
-  double myTime =0.;
+  const double myMass = 0.0;
+  const double myCharge = 0.0;
+  const int myPdgCode = 0;
+  const int mystatus = 3333;
+  const double myTime =0.;
+  const int myID = HepMC::UNDEFINED_ID;
   const ISF::DetRegionSvcIDPair origin(geoID, ISF::fUndefinedSimID);
-  ISF::ISFParticle myISFParticle(myPos, myMom, myMass, myCharge, myPdgCode, mystatus, myTime, origin);
+  ISF::ISFParticle myISFParticle(myPos, myMom, myMass, myCharge, myPdgCode, mystatus, myTime, origin, myID);
 
   iGeant4::Geant4TruthIncident truth(aStep, myISFParticle, geoID, atlasG4EvtUserInfo);
 

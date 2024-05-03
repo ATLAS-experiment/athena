@@ -179,7 +179,7 @@ def JETM3ExtraContentCfg(flags):
     #=======================================
     # Schedule additional jet decorations
     #=======================================
-    bJVTTool = getModifier(AntiKt4EMPFlow, stdJetModifiers['bJVT'], stdJetModifiers['bJVT'].modspec)
+    bJVTTool = getModifier(AntiKt4EMPFlow, stdJetModifiers['bJVT'], stdJetModifiers['bJVT'].modspec, flags=flags)
     acc.addEventAlgo(CompFactory.JetDecorationAlg(name='bJVTAlg',
                                                   JetContainer='AntiKt4EMPFlowJets', 
                                                   Decorators=[bJVTTool]))

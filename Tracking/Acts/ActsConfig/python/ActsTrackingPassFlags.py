@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -24,6 +24,29 @@ def createActsTrackingPassFlags():
 
     return icf
 
+def createActsHeavyIonTrackingPassFlags():
+    icf = createITkHeavyIonTrackingPassFlags()
+    icf.extension = "ActsHeavyIon"
+    deactivateAthenaComponents(icf)
+    icf.doAthenaCluster = True
+    icf.doAthenaToActsCluster = True
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    # If we do not want acts ambi resolution, first do the track convertion
+    # and then the Athena ambi
+    icf.doActsToAthenaTrack = lambda pcf : not pcf.Acts.doAmbiguityResolution
+    icf.doAthenaAmbiguityResolution = lambda pcf : not pcf.Acts.doAmbiguityResolution
+    # If we want acts ambi, first do the ambi and then convert the tracks
+    # without Athena ambi
+    icf.doActsAmbiguityResolution = lambda pcf : pcf.Acts.doAmbiguityResolution
+    icf.doActsToAthenaResolvedTrack = lambda pcf : pcf.Acts.doAmbiguityResolution
+
+    # Deactivate CTIDE processor fit
+    icf.doAmbiguityProcessorTrackFit = False
+
+    return icf
+
 def createActsConversionTrackingPassFlags():
     icf = createITkConversionTrackingPassFlags()
     icf.extension = "ActsConversion"
@@ -38,9 +61,9 @@ def createActsConversionTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
     return icf
     
-def createValidateActsClustersTrackingPassFlags():
+def createActsValidateClustersTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = "ValidateActsClusters"
+    icf.extension = "ActsValidateClusters"
     deactivateAthenaComponents(icf)
     icf.doActsCluster = True
     icf.doActsToAthenaCluster = True
@@ -50,9 +73,9 @@ def createValidateActsClustersTrackingPassFlags():
     icf.doAthenaAmbiguityResolution = True
     return icf
 
-def createValidateActsSpacePointsTrackingPassFlags():
+def createActsValidateSpacePointsTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = "ValidateActsSpacePoints"
+    icf.extension = "ActsValidateSpacePoints"
     deactivateAthenaComponents(icf)
     icf.doAthenaCluster = True
     icf.doAthenaToActsCluster = True
@@ -64,9 +87,9 @@ def createValidateActsSpacePointsTrackingPassFlags():
     icf.doAthenaAmbiguityResolution = True
     return icf
 
-def createValidateActsSeedsTrackingPassFlags():
+def createActsValidateSeedsTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = "ValidateActsSeeds"
+    icf.extension = "ActsValidateSeeds"
     deactivateAthenaComponents(icf)
     icf.doAthenaCluster = True
     icf.doAthenaSpacePoint = True
@@ -76,9 +99,9 @@ def createValidateActsSeedsTrackingPassFlags():
     icf.doAthenaAmbiguityResolution = True
     return icf
 
-def createValidateActsTracksTrackingPassFlags():
+def createActsValidateTracksTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = lambda pcf : "ValidateActsTracks" if not pcf.Acts.doAmbiguityResolution else "ValidateActsResolvedTracks"
+    icf.extension = lambda pcf : "ActsValidateTracks" if not pcf.Acts.doAmbiguityResolution else "ActsValidateResolvedTracks"
     deactivateAthenaComponents(icf)
     # sequence is still a work in progress
     # Requires Athena cluster and cluster EDM converter 
@@ -102,9 +125,9 @@ def createValidateActsTracksTrackingPassFlags():
     icf.doAmbiguityProcessorTrackFit = False
     return icf
 
-def createValidateActsAmbiguityResolutionTrackingPassFlags():
+def createActsValidateAmbiguityResolutionTrackingPassFlags():
     icf = createITkTrackingPassFlags()
-    icf.extension = "ValidateActsAmbiguityResolution"
+    icf.extension = "ActsValidateAmbiguityResolution"
     deactivateAthenaComponents(icf)
     # The sequence will schedule Athena algorithms from clustering to 
     # track reconstruction, but not the ambi. resolution

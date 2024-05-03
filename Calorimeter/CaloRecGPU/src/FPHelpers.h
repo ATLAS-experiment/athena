@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -850,7 +850,7 @@ namespace FloatingPointHelpers
     const double double_a = BitCastHelper::bitcast<double, T>(a);
     const double double_b = BitCastHelper::bitcast<double, T>(b);
 
-    double double_ret = double_a + double_a;
+    double double_ret = double_a + double_b;
 
     return BitCastHelper::bitcast<uint64_t, double>(double_ret);
   }
@@ -872,7 +872,7 @@ namespace FloatingPointHelpers
     const double double_a = BitCastHelper::bitcast<double, T>(a);
     const double double_b = BitCastHelper::bitcast<double, T>(b);
 
-    double double_ret = double_a - double_a;
+    double double_ret = double_a - double_b;
 
     return BitCastHelper::bitcast<uint64_t, double>(double_ret);
   }
@@ -881,14 +881,14 @@ namespace FloatingPointHelpers
   struct ConversionHelper<StandardDouble, StandardFloat>
   {
     template <class T>
-    constexpr inline static T up_convert(const T pattern, const RoundingModes rt = RoundingModes::Default)
+    constexpr inline static T up_convert(const T pattern, [[maybe_unused]] const RoundingModes rt = RoundingModes::Default)
     {
       const float f = BitCastHelper::bitcast<float, uint32_t>(pattern);
       const double d = f;
       return BitCastHelper::bitcast<T, double>(d);
     }
     template <class T>
-    constexpr inline static T down_convert(const T pattern, const RoundingModes rt = RoundingModes::Default)
+    constexpr inline static T down_convert(const T pattern, [[maybe_unused]] const RoundingModes rt = RoundingModes::Default)
     {
       const double d = BitCastHelper::bitcast<double, uint64_t>(pattern);
       const float f = d;

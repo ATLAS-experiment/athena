@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
@@ -14,9 +14,13 @@
 // Tools
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
-#include "src/ITrackStatePrinter.h"
+#include "src/TrackStatePrinter.h"
 
 // ACTS
+#include "Acts/EventData/VectorTrackContainer.hpp"
+#include "Acts/EventData/TrackContainer.hpp"
+#include "Acts/EventData/TrackProxy.hpp"
+
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
@@ -60,6 +64,11 @@ namespace ActsTrk
   class TrackFindingAlg : public AthReentrantAlgorithm
   {
   public:
+    using RecoTrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer,
+                                                    Acts::VectorMultiTrajectory>;
+    using RecoTrackContainerProxy = RecoTrackContainer::TrackProxy;
+    using RecoTrackStateContainer = Acts::VectorMultiTrajectory;
+    using RecoTrackStateContainerProxy = RecoTrackStateContainer::TrackStateProxy;
 
     TrackFindingAlg(const std::string &name,
                     ISvcLocator *pSvcLocator);
@@ -70,16 +79,18 @@ namespace ActsTrk
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
+
+
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
-    ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
+    ToolHandle<ActsTrk::TrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
-    ToolHandle<ActsTrk::IOnTrackCalibratorTool<ActsTrk::MutableTrackStateBackend>> m_pixelCalibTool{
+    ToolHandle<ActsTrk::IOnTrackCalibratorTool<RecoTrackStateContainer>> m_pixelCalibTool{
       this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
-    ToolHandle<ActsTrk::IOnTrackCalibratorTool<ActsTrk::MutableTrackStateBackend>> m_stripCalibTool{
+    ToolHandle<ActsTrk::IOnTrackCalibratorTool<RecoTrackStateContainer>> m_stripCalibTool{
       this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
 
     // Handle Keys
@@ -166,8 +177,9 @@ namespace ActsTrk
                EventStats &event_stat) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
-    void storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
-                       const ActsTrk::MutableTrackContainer::TrackProxy &track,
+
+    void storeSeedInfo(const RecoTrackContainer &tracksContainer,
+                       const RecoTrackContainerProxy &track,
                        DuplicateSeedDetector &duplicateSeedDetector) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"

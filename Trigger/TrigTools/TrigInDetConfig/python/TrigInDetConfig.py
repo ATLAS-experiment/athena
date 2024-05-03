@@ -132,6 +132,13 @@ def trigInDetVertexingCfg(flags, inputTracks, outputVtx):
   
   acc = ComponentAccumulator()
 
+  acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
+    name = "VtxVDV_" + flags.Tracking.ActiveConfig.input_name,
+    DataObjects = {
+      ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ) 
+    } 
+  ))
+                
   from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
   acc.merge(InDetTrigPriVxFinderCfg(flags, inputTracks = inputTracks, outputVtx =outputVtx))
 

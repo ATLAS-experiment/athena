@@ -12,7 +12,7 @@ def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloPhoton'
 
 @AccumulatorCache
-def precisionCaloSequenceCfg(flags, ion=False, is_probe_leg=False):
+def precisionCaloSequenceGenCfg(flags, ion=False, is_probe_leg=False):
     """ Creates PrecisionCalo sequence """
     TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
     

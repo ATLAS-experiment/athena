@@ -171,6 +171,10 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)  
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
+
+    cfg.getService("MessageSvc").setVerbose = []
+    cfg.getService("MessageSvc").warningLimit = 1000000
+    cfg.getService("MessageSvc").verboseLimit = 1000000
     
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 

@@ -5,7 +5,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from .BjetMenuSequences import getBJetSequenceCfg
+from .BjetMenuSequences import getBJetSequenceGenCfg
 
 
 #----------------------------------------------------------------
@@ -25,7 +25,7 @@ class BjetChainConfiguration(ChainConfigurationBase):
         log.debug("Assembling chain for %s", self.chainName)
 
         stepName = f"Step2_{self.jc_name}_bjet"
-        chainSteps = [self.getStep(flags,2, stepName, [getBJetSequenceCfg], jc_name=self.jc_name)]
+        chainSteps = [self.getStep(flags,2, stepName, [getBJetSequenceGenCfg], jc_name=self.jc_name)]
 
         myChain = self.buildChain(chainSteps)
         return myChain

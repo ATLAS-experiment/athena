@@ -166,7 +166,7 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<co
   }
 
   roads.reserve(m_roads.size());
-  for (FPGATrackSimRoad_Hough & r : m_roads) roads.push_back(&r);
+  for (FPGATrackSimRoad & r : m_roads) roads.push_back(&r);
 
   if (roads.empty() && m_event >= 5 && m_event < 200)
     drawImage(image, m_name + "_" + std::to_string(m_event));
@@ -375,15 +375,15 @@ std::pair<unsigned, unsigned> FPGATrackSimHoughTransform_d0phi0_Tool::yToXBins(s
   return { x_bin_min, x_bin_max };
 }
 
-void FPGATrackSimHoughTransform_d0phi0_Tool::matchIdealGeoSector(FPGATrackSimRoad_Hough & r) const
+void FPGATrackSimHoughTransform_d0phi0_Tool::matchIdealGeoSector(FPGATrackSimRoad & r) const
 {
   float pt = r.getY()*0.001; // convert to MeV
-  auto bounds = std::equal_range(htt::QOVERPT_BINS.begin(),htt::QOVERPT_BINS.end(),pt);
-  int sectorbin = bounds.first-htt::QOVERPT_BINS.begin()-1;
+  auto bounds = std::equal_range(fpgatracksim::QOVERPT_BINS.begin(),fpgatracksim::QOVERPT_BINS.end(),pt);
+  int sectorbin = bounds.first-fpgatracksim::QOVERPT_BINS.begin()-1;
 
   // those bins are for tracks between the values, can't be below first value or more than the last value
   if (sectorbin < 0) sectorbin = 0;
-  if (sectorbin > static_cast<int>(htt::QOVERPT_BINS.size()-2)) sectorbin =  htt::QOVERPT_BINS.size()-2;
+  if (sectorbin > static_cast<int>(fpgatracksim::QOVERPT_BINS.size()-2)) sectorbin =  fpgatracksim::QOVERPT_BINS.size()-2;
   std::vector<module_t> modules;
 
   for (unsigned int il = 0; il < r.getNLayers(); il++) {
@@ -408,7 +408,7 @@ void FPGATrackSimHoughTransform_d0phi0_Tool::matchIdealGeoSector(FPGATrackSimRoa
 }
 
 // Create road via hits only
-FPGATrackSimRoad_Hough FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const {
+FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::unordered_set<const FPGATrackSimHit*> const & hits, unsigned x, unsigned y) const {
   // Get the road hits
   std::vector<const FPGATrackSimHit*> road_hits;
   layer_bitmask_t hitLayers = 0;
@@ -420,7 +420,7 @@ FPGATrackSimRoad_Hough FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::u
   auto sorted_hits = ::sortByLayer(road_hits);
   sorted_hits.resize(m_nLayers); // If no hits in last layer, return from sortByLayer will be too short
 
-  FPGATrackSimRoad_Hough r;
+  FPGATrackSimRoad r;
   r.setRoadID(m_roads.size());
   r.setPID(y * m_imageSize_y + x);
   if (m_idealGeoRoads) matchIdealGeoSector(r);
@@ -433,9 +433,9 @@ FPGATrackSimRoad_Hough FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::u
 }
 
 // Creates a road from hits that pass through the given bin (x, y), and pushes it onto m_roads
-FPGATrackSimRoad_Hough FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const
+FPGATrackSimRoad FPGATrackSimHoughTransform_d0phi0_Tool::createRoad(std::vector<std::vector<const FPGATrackSimHit*>> const & hits, layer_bitmask_t hitLayers, unsigned x, unsigned y) const
 {
-  FPGATrackSimRoad_Hough r;
+  FPGATrackSimRoad r;
   r.setRoadID(m_roads.size());
   r.setPID(y * m_imageSize_y + x);
   if (m_useSectors) r.setSector(m_FPGATrackSimBankSvc->SectorBank_1st()->findSector(hits));

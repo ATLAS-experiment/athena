@@ -21,8 +21,8 @@ def generateEmuMenu(flags):
 
     # Generate the menu
     menu = GenerateMenuMT()
-    menu.generateAllChainConfigs(flags)
-
+    chains = menu.generateAllChainConfigs(flags)
+    return chains
 
 
 ###########################################################################    
@@ -292,6 +292,7 @@ def generateChainsManually(flags, maskbit=0x7):
 
         HLTChains += CombChains
 
+    return HLTChains
 
 
 ########################## L1 #################################################        

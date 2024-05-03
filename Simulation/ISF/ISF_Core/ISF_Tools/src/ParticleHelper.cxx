@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ParticleHelper.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "ParticleHelper.h"
@@ -41,8 +37,9 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle(double x, double y, double
                                                       double pTime,
                                                       const ISFParticle &parent,
                                                       Barcode::ParticleBarcode bc,
+                                                      int id,
                                                       TruthBinding* tBinding,
-						      const HepMcParticleLink * partLink) const {
+                                                      const HepMcParticleLink * partLink) const {
   return new ISF::ISFParticle( Amg::Vector3D(x,y,z),
                                Amg::Vector3D(px,py,pz),
                                pMass,
@@ -52,8 +49,9 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle(double x, double y, double
                                pTime,
                                parent,
                                bc,
+                               id,
                                tBinding,
-			       partLink);
+                               partLink);
 }
 
 
@@ -67,8 +65,9 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const Amg::Vector3D& x,
                                                        double pTime,
                                                        const ISFParticle &parent,
                                                        Barcode::ParticleBarcode bc,
+                                                       int id,
                                                        TruthBinding* tBinding,
-						       const HepMcParticleLink * partLink) const {
+                                                       const HepMcParticleLink * partLink) const {
   return new ISF::ISFParticle( x,
                                p,
                                pMass,
@@ -77,9 +76,10 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const Amg::Vector3D& x,
                                status,
                                pTime,
                                parent,
+                               id,
                                bc,
                                tBinding,
-			       partLink);
+                               partLink);
 }
 
 /** Create a new particle */
@@ -92,8 +92,9 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const HepGeom::Point3D<do
                                                        double pTime,
                                                        const ISFParticle &parent,
                                                        Barcode::ParticleBarcode bc,
+                                                       int id,
                                                        TruthBinding* tBinding,
-						       const HepMcParticleLink * partLink) const {
+                                                       const HepMcParticleLink * partLink) const {
   return createParticle( pos.x(), pos.y(), pos.z(),
                          mom.x(), mom.y(), mom.z(),
                          pMass,
@@ -102,9 +103,10 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const HepGeom::Point3D<do
                          status,
                          pTime,
                          parent,
+                         id,
                          bc,
                          tBinding,
-			 partLink);
+                         partLink);
 }
 
 /** Returns the Particle Stack, should register truth */
@@ -121,9 +123,10 @@ ISF::ISFParticle* ISF::ParticleHelper::updatedParticle(const ISFParticle& origIs
                                origIsp.status(),
                                origIsp.timeStamp()+deltaTime,
                                origIsp,
+                               origIsp.id(),
                                origIsp.barcode(),
                                origIsp.getTruthBinding() ? new TruthBinding(*origIsp.getTruthBinding()) : nullptr,
-			       origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
+                               origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
 }
 
 /** Returns the Particle Stack, should register truth */
@@ -140,9 +143,10 @@ ISF::ISFParticle* ISF::ParticleHelper::updatedParticle(const ISFParticle& origIs
                                origIsp.status(),
                                origIsp.timeStamp()+deltaTime,
                                origIsp,
+                               origIsp.id(),
                                origIsp.barcode(),
                                origIsp.getTruthBinding() ? new TruthBinding(*origIsp.getTruthBinding()) : nullptr,
-			       origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
+                               origIsp.getParticleLink() ? new HepMcParticleLink(*origIsp.getParticleLink()) : nullptr);
 }
 
 

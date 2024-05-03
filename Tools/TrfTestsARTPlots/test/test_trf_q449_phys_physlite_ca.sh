@@ -7,6 +7,7 @@
 # art-output: dcube*
 # art-output: ecube*
 # art-output: hist_physlite_latest.root
+# art-output: generated_csv_files.tar.gz
 # art-html: ecube
 
 export ATHENA_CORE_NUMBER=8
@@ -105,3 +106,14 @@ get_files trf_stylesheet.css
 mv index.php ecube
 mv trf_stylesheet.css ecube
 echo "============ done "
+
+# Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
+echo "============ trf_getVariables.py"
+get_files trf_getVariables.py
+export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
+source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
+lsetup "root recommended"
+trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
+rccsv=$?
+tar czf generated_csv_files.tar.gz generated_csv_files/
+echo "art-result: ${rccsv} trf_getVariables.py"

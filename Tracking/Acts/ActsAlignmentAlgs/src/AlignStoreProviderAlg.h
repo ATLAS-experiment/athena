@@ -44,6 +44,8 @@ namespace ActsTrk{
       /// Flag toggling whether the full GeoAlignmentStore shall be written to store gate or whether the
       /// absolute transforms are split into two different stores
       Gaudi::Property<bool> m_splitPhysVolCache{this, "SplitPhysVolCache", false};
+      /// Flag toggline whether the final transforms of the ActsDet volumes shall be split per event
+      Gaudi::Property<bool> m_splitActsTrfCache{this, "SplitActsTrfCache", false};
       /// Flag toggling whether the alignment store shall be filled with the transforms or not
       Gaudi::Property<bool> m_fillAlignStoreCache{this, "FillAlignCache", true};
       /// Static cast of >DetectorType< property

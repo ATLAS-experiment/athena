@@ -87,44 +87,64 @@ namespace InDet {
 
     // Secondary? 
     if (HepMC::is_simulation_particle(truth)) {
-      // sub-categorize secondaries...
-      int parentID = getParentID(truth);
 
-      // photon conversions
-      if(parentID == 22) {
-        origin = origin | (0x1 << InDet::TrkOrigin::GammaConversion);
-      }
-
-      // K-short
-      else if(parentID == 310) {
-        origin = origin | (0x1 << InDet::TrkOrigin::KshortDecay);
-      }
-
-      // Lambda
-      else if(std::abs(parentID) == 3122){
-        origin = origin | (0x1 << InDet::TrkOrigin::LambdaDecay);
-      }
-
-      // other long living particle decays
-      else if(std::abs(parentID) > 3) {
-        origin = origin | (0x1 << InDet::TrkOrigin::OtherDecay);
-      }
-
-      // hadronic interactions
-      else if(parentID == -1) {
-        origin = origin | (0x1 << InDet::TrkOrigin::HadronicInteraction);
-      }
-
-      // other secondaries? 
-      //  ---> Not sure what if anything should be here...
-      else if(parentID == -2) {
-        origin = origin | (0x1 << InDet::TrkOrigin::OtherSecondary);
-      }
-
-      // other unknown origin (e.g. parent not in the record:) 
-      //  ---> Not sure what if anything should be here...
-      else{
+      // unknown origin (e.g. parent not in the record)
+      if(truth->nParents() != 1) {
         origin = origin | (0x1 << InDet::TrkOrigin::OtherOrigin);
+      }
+
+      else {
+        const xAOD::TruthParticle *parent = truth->parent(0);
+
+        // in some cases particle has a parent, but that parent's barcode is zero
+        if(parent == nullptr) {
+          origin = origin | (0x1 << InDet::TrkOrigin::OtherOrigin);
+        }
+        
+        // sub-categorize secondaries which have one valid parent
+        else {
+
+          int pdgId = truth->pdgId();
+          int parentId = parent->pdgId();
+
+          // photon conversion
+          if(parent->isPhoton() && truth->isElectron()) {
+            origin = origin | (0x1 << InDet::TrkOrigin::GammaConversion);
+          }
+
+          // Strange Mesons
+          else if(parent->isStrangeMeson() && parent->nChildren() == 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::StrangeMesonDecay);
+            // specifically Kshort
+            if (abs(pdgId) == 211 && parentId == 310) {
+              origin = origin | (0x1 << InDet::TrkOrigin::KshortDecay);
+            }
+          }
+
+          // Strange Baryons
+          else if(parent->isStrangeBaryon() && parent->nChildren() == 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::StrangeBaryonDecay);
+            // specifically Lambdas
+            if ((abs(pdgId) == 211 || abs(pdgId) == 2212) && abs(parentId) == 3122) {
+              origin = origin | (0x1 << InDet::TrkOrigin::LambdaDecay);
+            }
+          }
+
+          // other long living particle decays
+          else if(parent->isHadron() && parent->nChildren() == 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::OtherDecay);
+          }
+
+          // hadronic interactions
+          else if(parent->nChildren() > 2) {
+            origin = origin | (0x1 << InDet::TrkOrigin::HadronicInteraction);
+          }
+
+          // other secondaries
+          else {
+            origin = origin | (0x1 << InDet::TrkOrigin::OtherSecondary);
+          }
+        }
       }
 
       isFragmentation = false;
@@ -158,22 +178,22 @@ namespace InDet {
     else if(m_isFullPileupTruth){
       const xAOD::TruthEventContainer* truthEventContainer(nullptr);
       if(evtStore()->retrieve(truthEventContainer, "TruthEvents").isFailure()){
-	ATH_MSG_ERROR("InDetTrackTruthOriginTool configured for full pile-up truth but could not retrieve TruthEvents container");
+        ATH_MSG_ERROR("InDetTrackTruthOriginTool configured for full pile-up truth but could not retrieve TruthEvents container");
       }
       const xAOD::TruthEvent* event = truthEventContainer ? truthEventContainer->at(0) : nullptr;
 
       if(event){
-	const auto& links = event->truthParticleLinks();
+        const auto& links = event->truthParticleLinks();
 
-	bool isFromHSProdVtx = false;
-	for (const auto& link : links){
-	  if(link.isValid() && truth == *link){
-	    isFromHSProdVtx = true;
-	    break;
-	  }
-	}
+        bool isFromHSProdVtx = false;
+        for (const auto& link : links){
+          if(link.isValid() && truth == *link){
+            isFromHSProdVtx = true;
+            break;
+          }
+        }
 
-	if(!isFromHSProdVtx) origin = origin | (0x1 << InDet::TrkOrigin::Pileup);
+        if(!isFromHSProdVtx) origin = origin | (0x1 << InDet::TrkOrigin::Pileup);
       }
     }
 
@@ -191,8 +211,14 @@ namespace InDet {
   }
 
   bool InDetTrackTruthOriginTool::isFrom(const xAOD::TruthParticle* truth, int flav) const {
+    return isFromRec( truth, flav, 0 );
+  }
+
+  bool InDetTrackTruthOriginTool::isFromRec(const xAOD::TruthParticle* truth, int flav, int depth) const {
 
     if ( truth == nullptr ) return false;
+
+    if ( depth > 30 ) return false;
 
     if( flav != 5 && flav != 4 && flav != 15 ) return false;
 
@@ -206,12 +232,13 @@ namespace InDet {
     for(unsigned int p=0; p<truth->nParents(); p++) {
       const xAOD::TruthParticle* parent = truth->parent(p);
       if(parent == truth ) continue ; // avoid infinite recursion
-      if( isFrom(parent, flav) ) return true;
+      if( isFromRec(parent, flav, depth+1) ) return true;
     }
 
     return false;
   }
 
+  // Not used in getTruthOrigin anymore, kept for backwards compatibility
   int InDetTrackTruthOriginTool::getParentID(const xAOD::TruthParticle* truth) const {
 
     // no parents? is anything even there?

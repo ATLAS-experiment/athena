@@ -56,7 +56,12 @@ StatusCode AlignStoreProviderAlg::execute(const EventContext& ctx) const {
         newAlignment = std::make_unique<DetectorAlignStore>(**readHandle);
         /// Setup a separate cache for the full physical volume transfomrations
         if (m_splitPhysVolCache) {
-            if (newAlignment->geoModelAlignment) newAlignment->geoModelAlignment->clearPosCache();
+            if (newAlignment->geoModelAlignment) {
+                newAlignment->geoModelAlignment = std::make_unique<GeoAlignmentStore>(*newAlignment->geoModelAlignment);
+                newAlignment->geoModelAlignment->clearPosCache();
+            }
+        }
+        if (m_splitActsTrfCache) {
             using TrackingStore = DetectorAlignStore::TrackingAlignStore;
             newAlignment->trackingAlignment = std::make_unique<TrackingStore>(newAlignment->detType);
         }

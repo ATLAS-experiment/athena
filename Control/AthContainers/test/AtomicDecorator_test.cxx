@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file AthContainers/test/AtomicDecorator_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -14,6 +12,7 @@
 #undef NDEBUG
 #include "AthContainers/tools/AtomicDecorator.h"
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/Decorator.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "TestTools/expect_exception.h"
 #include <iostream>
@@ -92,6 +91,13 @@ void test1()
   const SG::AuxElement& cb = b;
   EXPECT_EXCEPTION (SG::ExcStoreLocked, ityp2(cb) = 14);
 
+  {
+    SG::AtomicDecorator<int> i2 (ityp2_id);
+    assert (i2.auxid() == ityp2_id);
+    EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, (SG::AtomicDecorator<float> (ityp2_id)));
+    EXPECT_EXCEPTION (SG::ExcAtomicMismatch, (SG::Decorator<int> (ityp2_id)));
+  }
+
   SG::AtomicDecorator<int> ityp3 ("anInt3");
 
   ityp3(cb) = 12;
@@ -109,7 +115,7 @@ void test1()
   ityp3(cb) = 12 + 128;
 
   EXPECT_EXCEPTION (SG::ExcAtomicMismatch,
-                    SG::AuxElement::Decorator<int> ityp3a ("anInt3"));
+                    SG::Decorator<int> ityp3a ("anInt3"));
 }
 
 

@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, EmptyMenuSequenceCfg, isEmptySequenceCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequenceCfg, isEmptySequenceCfg
 
 from AthenaCommon.Logging import logging
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
@@ -254,30 +254,8 @@ def isFullScanRoI(inputL1Nav):
     else:
         return False
 
-def noPrecedingStepsPreMerge(newsteps,chain_index,ileg):
-    for step in newsteps:
-        seq = step[chain_index].sequences[ileg]
-        if isinstance(seq, EmptyMenuSequence):
-            continue
-        else:
-            #if there's a non-empty sequence in a step before, there is clearly a
-            #preceding step in this chain.
-            return False
-    return True
-
-def noPrecedingStepsPostMerge(newsteps, ileg):
-    for step in newsteps:
-        seq = step.sequences[ileg]
-        if isinstance(seq, EmptyMenuSequence):
-            continue
-        else:
-            #if there's a non-empty sequence in a step before, there is clearly a
-            #preceding step in this chain.
-            return False
-    return True
         
 def getCurrentAG(chainStep):
-    
     filled_seq_ag = []
     for iseq,seq in enumerate(chainStep.sequenceFunctions):
         # In the case of dummy configs, they are all empty
@@ -647,8 +625,8 @@ def zip_longest_parallel(AllSteps, multiplicity, fillvalue=None):
                 value = fillvalue
             values.append(value)
             if int(multiplicity[i]) > 1 and value == fillvalue:
-                for i in range(int(multiplicity[i]-1)):
-                   values.append(value) 
+                values.extend([fillvalue]*int(multiplicity[i]-1))
+
         yield tuple(values)
 
 

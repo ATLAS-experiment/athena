@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@ namespace InDet
 	continue;
 
       if (not idset.insert(rdoID).second) {
-	ATH_MSG_WARNING("Discarded a duplicated RDO");
+	if (m_printDuplicate) ATH_MSG_WARNING("Discarded a duplicated RDO");
 	continue;
       }
 

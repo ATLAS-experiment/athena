@@ -86,7 +86,7 @@ def InDetTRT_SeededScoringToolCfg(
     kwargs.setdefault("minTRTonTrk", flags.Tracking.BackTracking.minTRT)
     kwargs.setdefault("minTRTPrecisionFraction",
                       flags.Tracking.BackTracking.minTRTPrecFrac)
-    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minSecondaryPt)
+    kwargs.setdefault("minPt", flags.Tracking.BackTracking.minPt)
     kwargs.setdefault("maxRPhiImp", flags.Tracking.BackTracking.maxSecondaryImpact)
     kwargs.setdefault("minSiClusters", flags.Tracking.BackTracking.minClusters)
     kwargs.setdefault("maxSiHoles", flags.Tracking.BackTracking.maxHoles)
@@ -251,7 +251,7 @@ def InDetTRT_StandaloneScoringToolCfg(flags, name='InDetTRT_StandaloneScoringToo
 
     kwargs.setdefault("useAmbigFcn", True)
     kwargs.setdefault("useSigmaChi2", False)
-    kwargs.setdefault("PtMin", flags.Tracking.ActiveConfig.minTRTonlyPt)
+    kwargs.setdefault("PtMin", flags.Tracking.TRTStandalone.minPt)
     kwargs.setdefault("minTRTonTrk", flags.Tracking.TRTStandalone.minTRT)
     kwargs.setdefault("maxEta", 2.1)
     kwargs.setdefault("OldTransitionLogic", (

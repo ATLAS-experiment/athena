@@ -9,6 +9,7 @@ def createPerfMonConfigFlags():
     pcf.addFlag('PerfMon.doFastMonMT', False)
     pcf.addFlag('PerfMon.doFullMonMT', False)
     pcf.addFlag('PerfMon.OutputJSON', 'perfmonmt.json')
+    pcf.addFlag('PerfMon.doGPerfProf', False)
     # List of algorithms to profile e.g from
     # callgrind/valkyrie or Vtune
     pcf.addFlag('PerfMon.VTune.ProfiledAlgs', [])

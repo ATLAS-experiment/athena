@@ -2,6 +2,9 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "xAODInDetMeasurement/ContainerAccessor.h"
+#include "AthenaMonitoringKernel/MonitoredTimer.h"
+
 namespace ActsTrk {
 
   template <typename external_collection_t, bool useCache>
@@ -130,9 +133,11 @@ namespace ActsTrk {
       //this function will wait if an item is not available
       auto ce = cacheHandle->indexFindPtr(idHash);
       if(ce == nullptr) continue;
-      
-      for(unsigned int i = ce->range_start; i < ce->range_end; i++){
-	outputCollection.push_back(ce->container->at(i));
+
+      for(auto rng: ce->ranges){
+        for(unsigned int i = rng.first; i < rng.second; i++){
+          outputCollection.push_back(ce->container->at(i));
+        }
       }
     }
     

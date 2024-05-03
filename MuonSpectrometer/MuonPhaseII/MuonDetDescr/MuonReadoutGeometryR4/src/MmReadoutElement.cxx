@@ -48,10 +48,7 @@ StatusCode MmReadoutElement::initElement() {
          ATH_MSG_FATAL("Layer "<<m_pars.layers[layer]<<" has a very strange hash. Expect "<<layer);
          return StatusCode::FAILURE;
       }
-      ATH_CHECK(insertTransform(layHash, 
-                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
-                                    return toStation(store) * fromGapToChamOrigin(hash); 
-                                 }));
+      ATH_CHECK(insertTransform<MmReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
       const StripDesign& design{m_pars.layers[layer].design()};
       ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.shortHalfHeight(),

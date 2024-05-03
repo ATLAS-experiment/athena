@@ -97,7 +97,7 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
         kwargs.setdefault("TRT_ToT_dEdx", acc.addPublicTool(acc.popToolsAndMerge(TRT_dEdxToolCfg(flags))))
 
     kwargs.setdefault("DecorationPrefix", "")
-    kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapCombinedInDetTracks")
+    kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapMerge_CombinedInDetTracks")
 
     acc.addPublicTool(
         CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator(
@@ -268,7 +268,7 @@ def ITkTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("SctMapName", "ITkStripClustersOffsets")
     kwargs.setdefault("PixelClustersName", "ITkPixelClusters")
     kwargs.setdefault("SctClustersName", "ITkStripClusters")
-    kwargs.setdefault("PRDtoTrackMap", "ITkPRDToTrackMapCombinedITkTracks")
+    kwargs.setdefault("PRDtoTrackMap", "ITkPRDtoTrackMapMerge_CombinedITkTracks")
     kwargs.setdefault("PixelMsosName", "ITkPixelMSOSs")
     kwargs.setdefault("SctMsosName", "ITkStripMSOSs")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
@@ -324,12 +324,21 @@ def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("StoreHoles", False)
     return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
-def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel"):
+def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel",
+                                listOfExtensions=[]):
     acc = ComponentAccumulator()
-    ITkSiSPTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
-        ITkSiSPTrackStateOnSurfaceDecoratorCfg(flags))
+    listOfAugmTools = []
+    for extension in listOfExtensions:
+        ITkSiSPTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+            ITkSiSPTrackStateOnSurfaceDecoratorCfg(
+                flags, name = f"SiSP{extension}TrackStateOnSurfaceDecorator",
+                ContainerName = f"SiSPSeededTracks{extension}TrackParticles",
+                PixelMsosName = f"SiSP{extension}_ITkPixel_MSOSs",
+                SctMsosName = f"SiSP{extension}_ITkStrip_MSOSs"))
+        listOfAugmTools.append(ITkSiSPTrackStateOnSurfaceDecorator)
+
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[ITkSiSPTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=listOfAugmTools))
     return acc
 
 def ITkGSFTrackStateOnSurfaceDecoratorCfg(
@@ -396,6 +405,17 @@ def InDetTrackSelectionToolWrapperCfg(
     acc.addPublicTool(
         CompFactory.DerivationFramework.InDetTrackSelectionToolWrapper(
             name, **kwargs), primary=True)
+    return acc
+
+# Tool for decorating the track and calo isolation
+
+
+def IsolationTrackDecoratorCfg(flags, name, **kwargs):
+    """Confiure the isolation track decorator tool"""
+    acc = ComponentAccumulator()
+    IsolationTrackDecorator = CompFactory.DerivationFramework.IsolationTrackDecorator
+    acc.addPublicTool(IsolationTrackDecorator(name, **kwargs),
+                      primary = True)
     return acc
 
 # Tool for thinning TrackParticle containers via string selection

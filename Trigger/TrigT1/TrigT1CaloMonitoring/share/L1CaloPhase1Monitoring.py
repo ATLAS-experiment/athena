@@ -60,7 +60,7 @@ parser = flags.getArgumentParser()
 parser.add_argument('--runNumber',default=None,help="specify to select a run number")
 parser.add_argument('--lumiBlock',default=None,help="specify to select a lumiBlock")
 parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
-parser.add_argument('--stream',default="physics_L1Calo",help="stream to lookup files in")
+parser.add_argument('--stream',default="*",help="stream to lookup files in")
 parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
 parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath>, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
@@ -91,6 +91,9 @@ if len(flags.Input.Files)>0:
   flags.DQ.Environment = "user"
   # triggerConfig should default to DB which is appropriate if running on data
   if flags.Input.isMC: flags.Trigger.triggerConfig='FILE' # uses the generated L1Menu (see below)
+  elif flags.Trigger.triggerConfig=='INFILE':
+    # this happens with AOD data files, but this is incompatible with the setup of the LVL1ConfigSvc
+    flags.Trigger.triggerConfig="DB" # so force onto DB usage
 
 # due to https://gitlab.cern.ch/atlas/athena/-/merge_requests/65253 must now specify geomodel explicitly if cant take from input file, but can autoconfigure it based on LHCPeriod set above
 if flags.GeoModel.AtlasVersion is None:
@@ -241,9 +244,11 @@ if flags.DQ.doMonitoring:
     cfg.merge(GfexMonitoringConfig(flags))
     from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
     cfg.merge(GfexSimMonitoringConfig(flags))
-    # can't include efficiency monitoring because requires too many things we don't have
-    # from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
-    # cfg.merge(JetEfficiencyMonitoringConfig(flags))
+    # generally can't include efficiency monitoring because requires too many things we don't have
+    # but b.c. alg requires TrigDecisionTool, we activate it if DQ.useTrigger explicitly set
+    if flags.DQ.useTrigger:
+      from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
+      cfg.merge(JetEfficiencyMonitoringConfig(flags))
 
   # input data monitoring
   if flags.Trigger.L1.doCaloInputs and not flags.Input.isMC:
@@ -342,10 +347,11 @@ for conf in args.postConfig:
   compName,propNameAndVal=conf.split(".",1)
   propName,propVal=propNameAndVal.split("=",1)
   applied = False
-  for comp in cfg._allComponents():
+  for comp in [c for c in cfg._allComponents()]+cfg.getServices():
     if comp.name==compName:
       applied = True
       exec(f"comp.{propNameAndVal}")
+      break
   if not applied:
     raise ValueError(f"postConfig {conf} had no effect ... typo?")
 

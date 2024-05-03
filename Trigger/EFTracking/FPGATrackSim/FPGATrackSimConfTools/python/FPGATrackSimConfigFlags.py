@@ -53,7 +53,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('firstInputToolN', 1)
     cf.addFlag('realHitsOverlay', False)
     cf.addFlag('hitFiltering', False)
-    cf.addFlag('spacePoints', False)
+    cf.addFlag('spacePoints', True)
     cf.addFlag('spacePointFiltering', False)
     cf.addFlag('writeOutputData', True)
 
@@ -84,7 +84,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('yBins', 216)
     cf.addFlag('xBufferBins', 6)
     cf.addFlag('yBufferBins', 2)
-    cf.addFlag('threshold', [7])
+    cf.addFlag('threshold', [8])
     cf.addFlag('IdealGeoRoads', True)
     cf.addFlag('convolution', [])
     cf.addFlag('convSizeX', 0)
@@ -147,7 +147,7 @@ def createHough1dFPGATrackSimConfigFlags():
 
     cf.phiMax = 0.8
     cf.xBins = 200
-    cf.hitExtendX = [1] * 8
+    cf.hitExtendX = [1] * 9
 
     cf.addFlag('phiRangeCut', True)
     cf.addFlag('splitpt', 1)
@@ -171,7 +171,8 @@ def createHoughFPGATrackSimConfigFlags():
     cf.yBufferBins = 2
     cf.addFlag('combineLayers', [])
     cf.addFlag('scale', [])
-    cf.hitExtendX = [2,1,0,0,0,0,0,0]
+    # Default to 9 layers.
+    cf.hitExtendX = [2,1,1,0,0,0,0,0,0]
 
     cf.addFlag('lrtSkipHitFiltering', False)
     cf.addFlag('lrtPtmin', 5)

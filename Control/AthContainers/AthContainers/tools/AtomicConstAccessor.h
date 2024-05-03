@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AtomicConstAccessor.h
@@ -8,7 +8,7 @@
  * @date Apr, 2018
  * @brief Access an auxiliary variable atomically.
  *
- * This is like SG::AuxElement::ConstAccessor, except that accesses to the
+ * This is like SG::ConstAccessor, except that accesses to the
  * underlying @c T variable are cast to @c std::atomic<T>.
  * This will generally work only for fundamental integer types
  * or for pointers.
@@ -27,6 +27,7 @@
 
 
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/ConstAccessor.h"
 #include "AthContainers/tools/AuxDataTraits.h"
 #include <atomic>
 #include <type_traits>
@@ -40,11 +41,11 @@ namespace SG {
  */
 template <class T>
 class AtomicConstAccessor
-  : public AuxElement::ConstAccessor<T>
+  : public ConstAccessor<T>
 {
 public:
   /// Base class.
-  typedef AuxElement::ConstAccessor<T> Base;
+  typedef ConstAccessor<T> Base;
 
   /// Type referencing an item.
   typedef const std::atomic<T>& const_reference_type;
@@ -85,6 +86,15 @@ public:
    * The name -> auxid lookup is done here.
    */
   AtomicConstAccessor (const std::string& name, const std::string& clsname);
+
+
+  /**
+   * @brief Constructor taking an auxid directly.
+   * @param auxid ID for this auxiliary variable.
+   *
+   * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+   */
+  AtomicConstAccessor (const SG::auxid_t auxid);
 
 
   /**

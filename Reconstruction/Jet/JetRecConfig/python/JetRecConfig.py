@@ -138,7 +138,6 @@ def getJetDefAlgs(flags, jetdef ,  returnConfiguredDef=False, monTool=None):
     # into config objects and returning a fully configured copy.
 
     jetdef_i = solveDependencies(jetdef, flags=flags)
-    jetdef_i._cflags = flags
 
 
     # check if the conditions are compatible with the inputs & modifiers of this jetdef_i.
@@ -181,7 +180,7 @@ def getJetGroomAlgs(flags, groomdef, returnConfiguredDef=False, monTool=None):
     
     # Find dependencies from modifier aliases and get a fully configured groomdef 
     #  ( This also detects input dependencies, see below)
-    groomdef_i = solveGroomingDependencies(groomdef)
+    groomdef_i = solveGroomingDependencies(groomdef, flags)
     
     # Transfer the input & ghost dependencies onto the parent jet alg,
     # so they are handled when instatiating the parent jet algs
@@ -278,7 +277,7 @@ def mergedPJId(pjList):
     return str(_mergedPJContainers.setdefault(t, currentSize))
 
 
-def getInputAlgs(jetOrConstitdef, flags=None, context="default", monTool=None):
+def getInputAlgs(jetOrConstitdef, flags, context="default", monTool=None):
     """Returns the list of configured algs needed to build inputs to jet finding as defined by jetOrConstitdef
     
     jetOrConstitdef can either be 
@@ -297,8 +296,7 @@ def getInputAlgs(jetOrConstitdef, flags=None, context="default", monTool=None):
     if isinstance(jetOrConstitdef, JetInputConstit):
         # technically we need a JetDefinition, so just build an empty one only containing our JetInputConstit
         jetlog.info("Setting up jet inputs from JetInputConstit : "+jetOrConstitdef.name)
-        jetdef = solveDependencies( JetDefinition('Kt', 0., jetOrConstitdef, context=context) )
-        jetdef._cflags = flags
+        jetdef = solveDependencies( JetDefinition('Kt', 0., jetOrConstitdef, context=context), flags )
         canrun = removeComponentFailingConditions(jetdef, raiseOnFailure = not jetInternalFlags.isRecoJob)
         if not canrun:
             return []
@@ -629,13 +627,13 @@ def getConstitModAlg(parentjetdef, constitSeq, monTool=None):
 
     return constitmodalg
 
-def getConstitModAlg_nojetdef( constitSeq, context="default", monTool=None):
+def getConstitModAlg_nojetdef( constitSeq, flags,context="default", monTool=None):
     """Same as getConstitModAlg. 
     This is a convenient function to obtain a JetConstituentModSequence when it is certain, no JetDef is needed.
     This function just builds a dummy JetDefinition then calls getConstitModAlg
     Needed in the trigger config.
     """
-    jetdef = solveDependencies( JetDefinition('Kt', 0., constitSeq, context=context) )
+    jetdef = solveDependencies( JetDefinition('Kt', 0., constitSeq, context=context) , flags)
     constitSeq = jetdef._prereqDic['input:'+constitSeq.name] # retrieve the fully configured version of constitSeq
     return getConstitModAlg(jetdef, constitSeq, monTool=monTool)
 
@@ -657,18 +655,24 @@ def getJetModifierTools( jetdef ):
     return mods
 
 
-def getModifier(jetdef, moddef, modspec):
+def getModifier(jetdef, moddef, modspec, flags=None):
     """Translate JetModifier into a concrete tool"""
     jetlog.verbose("Retrieving modifier {0}".format(str(moddef)))
+
+    if flags is not None:
+        # then we are called from non JetRecConfig functions: we must update the context according to flags
+        jetdef = jetdef.clone()
+        jetdef._cflags = flags
+        jetdef._contextDic = flags.Jet.Context[jetdef.context]
 
     # Get the modifier tool
     try:
         modtool = moddef.createfn(jetdef, modspec)
     except Exception as e:
-        jetlog.error( "Unhandled modifier specification {0} for mod {1} acting on jet def {2}!".format(modspec,moddef,jetdef.basename) )
-        jetlog.error( "Received exception \"{0}\"".format(e) )
-        jetlog.error( "Helper function is \"{0}\"".format(moddef.createfn) )
-        raise ValueError( "JetModConfig unable to handle mod {0} with spec \"{1}\"".format(moddef,modspec) )
+        jetlog.error( f"Unhandled modifier specification {modspec} for mod {moddef} acting on jet def {jetdef.basetype}!")
+        jetlog.error( f"Received exception \"{e}\"" )
+        jetlog.error( f"Helper function is \"{moddef.createfn}\"" )
+        raise ValueError( f"JetModConfig unable to handle mod {moddef} with spec \"{modspec}\"")
 
 
     # now we overwrite the default properties of the tool, by those

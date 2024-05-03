@@ -36,7 +36,6 @@
 
 from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, CompulsoryTriggerNavigation, CompulsoryDynamicContent
 from DerivationFrameworkCore.ContentHandler import ContentHandler
-from DerivationFrameworkCore.ContainersForExpansion import ContainersForExpansion
 from DerivationFrameworkCore.ContainersOnTheFly import ContainersOnTheFly
 from DerivationFrameworkCore.FullListOfSmartContainers import FullListOfSmartContainers
 import PyUtils.Logging as L
@@ -263,11 +262,6 @@ class SlimmingHelper:
                                         entry = "xAOD::JetTrigAuxContainer#"+item+"."
                                 elif ("AuxInfo" in theDictionary[item]):
                                         entry = "xAOD::AuxInfoBase!#"+item+"."
-                                # Next elif - remaining containers
-                                # that still need to be expanded with AuxStoreWrapper
-                                # In the run 3 trigger EDM there are no such containers so this is dead code
-                                elif (theDictionary[item] in ContainersForExpansion):
-                                        entry = "xAOD::AuxContainerBase#"+item+"."
                                 else:
                                         entry = "xAOD::AuxContainerBase!#"+item+"."
                                 for element in auxEntries[item]:
@@ -303,8 +297,16 @@ class SlimmingHelper:
                                 self.FinalItemList.append(item)
 
                 if (triggerContent and self.IncludeTriggerNavigation):
+                        # Run2
                         for item in CompulsoryTriggerNavigation:
                                 self.FinalItemList.append(item)
+                        # Run3
+                        from TrigDecisionTool.TrigDecisionToolConfig import possible_keys
+                        for item in possible_keys:
+                                if item == "HLTNav_Summary": # This is not a compact navigation summary collection, unlike the others in this list
+                                        continue
+                                self.FinalItemList.append('xAOD::TrigCompositeContainer#'+item)
+                                self.FinalItemList.append('xAOD::TrigCompositeAuxContainer#'+item+'Aux.')
 
                 # Add non-xAOD and on-the-fly content (not covered by smart slimming so no expansion)
                 badItemsWildcards = []

@@ -236,7 +236,7 @@ class AlgConfig(ABC):
                     Sequences=[]
                     if sel_acc is None
                     else [
-                        functools.partial(make_MET_menu_sequence, flags, sel_acc, hypo_tool)                                                
+                        functools.partial(make_MET_menu_sequenceGenCfg, flags, sel_acc, hypo_tool)                                                
                     ],
                     comboHypoCfg=ComboHypoCfg
                 )
@@ -295,7 +295,7 @@ class AlgConfig(ABC):
 
         raise ValueError("Unknown EFrecoAlg '{}' requested".format(EFrecoAlg))
 
-def make_MET_menu_sequence(flags, sel_acc, hypo_tool):
+def make_MET_menu_sequenceGenCfg(flags, sel_acc, hypo_tool):
     return MenuSequenceCA(flags, selectionCA=sel_acc, HypoToolGen=hypo_tool)
 
 # Load all the defined configurations

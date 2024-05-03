@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -82,19 +82,19 @@ def getHltROBDataProviderSvc(flags, name='ROBDataProviderSvc'):
    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
    svc.MonTool.defineHistogram('TIME_ROBReserveData', path='EXPERT', type='TH1F',
                                title='Time to reserve ROBs for later retrieval;time [mu s]',
-                               xbins=100, xmin=0, xmax=1000),
+                               xbins=100, xmin=0, xmax=1000)
    svc.MonTool.defineHistogram('NUMBER_ROBReserveData', path='EXPERT', type='TH1F',
                                title='Number of reserved ROBs for later retrieval;number',
-                               xbins=100, xmin=0, xmax=500),
+                               xbins=100, xmin=0, xmax=500)
    svc.MonTool.defineHistogram('TIME_ROBRequest', path='EXPERT', type='TH1F',
                                title='Time for ROB retrievals;time [mu s]',
-                               xbins=400, xmin=0, xmax=200000),
+                               xbins=400, xmin=0, xmax=200000)
    svc.MonTool.defineHistogram('NUMBER_ROBRequest', path='EXPERT', type='TH1F',
                                title='Number of retrieved ROBs;number',
-                               xbins=100, xmin=0, xmax=1000),
+                               xbins=100, xmin=0, xmax=1000)
    svc.MonTool.defineHistogram('TIME_CollectAllROBs', path='EXPERT', type='TH1F',
                                title='Time for retrieving complete event data;time [mu s]',
-                               xbins=400, xmin=0, xmax=200000),
+                               xbins=400, xmin=0, xmax=200000)
    svc.MonTool.defineHistogram('NUMBER_CollectAllROBs', path='EXPERT', type='TH1F',
                                title='Number of received ROBs for collect call;number',
                                xbins=100, xmin=0, xmax=2500)

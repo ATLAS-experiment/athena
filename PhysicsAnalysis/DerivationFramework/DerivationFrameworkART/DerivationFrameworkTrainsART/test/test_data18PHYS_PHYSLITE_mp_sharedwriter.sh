@@ -8,6 +8,7 @@
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
 # art-output: readDataHeader*.txt
+# art-output: checkMetadata*.txt
 # art-athena-mt: 4
 
 ATHENA_CORE_NUMBER=4 Derivation_tf.py \
@@ -54,3 +55,11 @@ readDataHeader.py --filesInput=DAOD_PHYSLITE.art.pool.root > readDataHeader_PHYS
 tail readDataHeader_PHYSLITE.txt | grep -q "Application Manager Terminated successfully"
 
 echo "art-result: $? readDataHeader PHYSLITE"
+
+checkMetadata.py --filesInput=DAOD_PHYS.art.pool.root > checkMetadata_PHYS.txt 2>&1
+
+echo "art-result: $? checkMetadata PHYS"
+
+checkMetadata.py --filesInput=DAOD_PHYSLITE.art.pool.root > checkMetadata_PHYSLITE.txt 2>&1
+
+echo "art-result: $? checkMetadata PHYSLITE"

@@ -380,8 +380,8 @@ public:
    * @param sg Optional specification of a specific store to reference.
    */
   HepMcParticleLink (const HepMC::ConstGenParticlePtr& p,
-                     uint32_t eventIndex = 0,
-                     PositionFlag positionFlag = IS_EVENTNUM,
+                     uint32_t eventIndex /*= 0 */,
+                     PositionFlag positionFlag /*= IS_EVENTNUM */,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
 

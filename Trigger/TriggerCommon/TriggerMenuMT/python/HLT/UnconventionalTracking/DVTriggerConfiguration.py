@@ -76,7 +76,7 @@ def DVRecoFragment(flags):
 
 
 
-def DVRecoSequence(flags):
+def DVRecoSequenceGenCfg(flags):
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
     selAcc = DVRecoFragment(flags)
@@ -93,7 +93,7 @@ def DVRecoSequence(flags):
 
 
 
-def DVTriggerEDSequence(flags):
+def DVTriggerEDSequenceGenCfg(flags):
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import TrigVSIHypoToolFromDict
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlgCfg
 

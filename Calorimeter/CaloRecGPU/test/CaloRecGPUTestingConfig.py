@@ -735,7 +735,8 @@ def RunFullTestConfiguration(flags, testoptions, PlotterConfigurator = None, cel
        cfg.merge(PerfMonMTSvcCfg(flags))
             
     if 'StreamRDO' in flags.Input.ProcessingTags:
-        cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(),sequenceName="AthAlgSeq")
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+        cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True),sequenceName="AthAlgSeq")
         
     cfg.merge(MainTestConfiguration(flags, testoptions, PlotterConfigurator, cellsname, clustersname))
     

@@ -118,6 +118,15 @@ class MdtReadoutElement : public MuonReadoutElement {
     double innerTubeRadius() const;
     /// Adds the thickness of the tube wall onto the radius
     double tubeRadius() const;
+    /// Returns the length of the bottom edge of the chamber (short width)
+    double moduleWidthS() const;
+    /// Returns the length of the top edge of the chamber (top width)
+    double moduleWidthL() const;
+    /// Returns the height of the chamber (Distance bottom - topWidth)
+    double moduleHeight() const;
+    /// Returns the thickness of the chamber
+    double moduleThickness() const;
+
     
     /// Returns the global position of the tube center. 
     Amg::Vector3D globalTubePos(const ActsGeometryContext& ctx, 
@@ -153,7 +162,7 @@ class MdtReadoutElement : public MuonReadoutElement {
     double wireLength(const IdentifierHash& hash) const;
 
 
-
+        friend ActsTrk::TransformCacheDetEle<MdtReadoutElement>;
    private:
         /// Returns the tube position in the chamber coordinate frame
         Amg::Vector3D localTubePos(const IdentifierHash& hash) const;
@@ -168,6 +177,7 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// z-axis: Pointing along the wire
         Amg::Transform3D toTubeFrame(const IdentifierHash& hash) const;
 
+
         parameterBook m_pars{};
         const MdtIdHelper& m_idHelper{idHelperSvc()->mdtIdHelper()};
         /// Identifier index of the multilayer (1-2)
@@ -178,6 +188,11 @@ class MdtReadoutElement : public MuonReadoutElement {
 
 std::ostream& operator<<(std::ostream& ostr, const MdtReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4
+
+namespace ActsTrk{
+    template <> Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+}
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.icc>
 #endif

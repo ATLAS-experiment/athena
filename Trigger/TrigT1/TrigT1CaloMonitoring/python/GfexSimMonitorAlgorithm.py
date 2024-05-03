@@ -10,14 +10,14 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.GfexSimMonitorAlgorithm,'GfexSimMonAlg')
 
 
-    helper.defineHistogram('LBNString,Signature;h_mismatched_DataTowerEvts',
+    helper.defineHistogram('LBNString,Signature;h_mismatched_SimReady',
                            fillGroup="mismatches",
                            paths=['Shifter/Sim','Expert/Sim'],
                            hanConfig={"algorithm":"Histogram_Empty"},
-                           type='TH2I', cutmask='SimulationReady', # not all of gfex simulation is considered ready at this time
-                           title='Mismatched DataTower Events;LB:FirstEvtNum;Signature;Events',
-                           xlabels=[""],
-                           ybins=1,ymin=0,ymax=1,
+                           type='TH2I', cutmask='SimulationReady',
+                           title='Mismatched Simulation-Ready Events;LB:FirstEvtNum;Signature;Events',
+                           xbins=1,xmin=0,xmax=1,
+                           ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
                            opt=['kCanRebin','kAlwaysCreate'],merge='merge')
     helper.defineHistogram('EventType,Signature,tobMismatched;h_simSummary',title='Sim-HW Mismatches (percentage);Event Type;Signature',
                            fillGroup="mismatches",

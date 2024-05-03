@@ -1,11 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
-@AccumulatorCache
 def tauCaloRoiUpdaterCfg(flags, inputRoIs, clusters):
     acc = ComponentAccumulator()
     newflags = flags.Trigger.InDetTracking.tauCore
@@ -19,7 +17,7 @@ def tauCaloRoiUpdaterCfg(flags, inputRoIs, clusters):
     acc.addEventAlgo(alg)
     return acc
 
-@AccumulatorCache
+
 def tauTrackRoiUpdaterCfg(flags, inputRoIs, tracks):
     acc = ComponentAccumulator()
     newflags = flags.Trigger.InDetTracking.tauIso
@@ -35,7 +33,6 @@ def tauTrackRoiUpdaterCfg(flags, inputRoIs, tracks):
     return acc
 
 
-@AccumulatorCache
 def tauLRTRoiUpdaterCfg(flags, inputRoIs, tracks):
     acc                               = ComponentAccumulator()
     newflags = flags.Tracking.ActiveConfig

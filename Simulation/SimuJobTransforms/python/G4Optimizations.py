@@ -32,6 +32,12 @@ def enableG4Optimizations(flags):
     flags.Sim.G4Commands+=["/process/em/UseGeneralProcess true"]
     flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FixG4CreatorProcessToolCfg']
 
+    # Energy Loss fluctuation OFF
+    # Switch off the Energy loss fluctuation process
+    # More info: https://its.cern.ch/jira/browse/ATLASSIM-6995
+    flags.Sim.G4Commands+=["/process/eLoss/fluct false"]
+
+
     # Activate the Woodcock Tracking in the EMEC
     # Please note that the Woodcock tracking enables
     # the G4GammaGeneralProcess therefore the FixG4CreatorProcessTool

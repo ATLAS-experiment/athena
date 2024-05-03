@@ -95,7 +95,6 @@ namespace ActsTrk
         "Radius and half length of extrapoltion target when searching for expected pixel layers." };
 
      std::shared_ptr<Acts::CylinderSurface> m_innerExtrapolationVolume;
-     //    std::array<unsigned short, xAOD::UncalibMeasType::sTgcStripType+1 > m_measurementTypeToSiDetEleColl;
      std::unique_ptr<Propagator> m_propagator;
 
      static std::vector<std::pair<Acts::PdgParticle, xAOD::ParticleHypothesis> > s_actsHypothesisToxAOD ATLAS_THREAD_SAFE;

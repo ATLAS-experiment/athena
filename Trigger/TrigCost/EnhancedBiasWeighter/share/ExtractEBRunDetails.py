@@ -86,7 +86,7 @@ def getPhysicsDeadtimePerLB(startOfRun, endOfRun, lbRangesDict, itemName="L1_TAU
             avgDt = 0
             counter = 0
             while physicsDT[entryCounter].ts > lbRangesDict[lbRange]["start"] and physicsDT[entryCounter].ts < lbRangesDict[lbRange]["end"]:
-                if type(physicsDT[entryCounter].value) != float: # None type
+                if type(physicsDT[entryCounter].value) is not float: # None type
                     entryCounter += 1
                     continue
                 avgDt += physicsDT[entryCounter].value

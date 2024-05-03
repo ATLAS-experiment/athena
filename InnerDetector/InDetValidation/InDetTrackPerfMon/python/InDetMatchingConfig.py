@@ -13,34 +13,49 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
 
-## TODO - to be included in later MRs
-#def DeltaRtrackMatchingTool_trkTruthCfg(
-#        flags, name="DeltaRtrackMatchingTool_trkTruth", **kwargs ):
-#    acc = ComponentAccumulator()
-#
-#    kwargs.setdefault( "dRmax",    flags.PhysVal.IDTPM.currentTrkAna.dRmax    )
-#    kwargs.setdefault( "pTResMax", flags.PhysVal.IDTPM.currentTrkAna.pTResMax )
-#
-#    acc.setPrivateTools(
-#        CompFactory.IDTPM.DeltaRtrackMatchingTool_trkTruth(name, **kwargs))
-#    return acc
+def DeltaRMatchingTool_trkTruthCfg( flags, name="DeltaRMatchingTool_trkTruth", **kwargs ):
+    '''
+    Tool for Track->Truth matching via DeltaR (and/or pT resolution)
+    '''
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault( "dRmax",    flags.PhysVal.IDTPM.currentTrkAna.dRmax    )
+    kwargs.setdefault( "pTResMax", flags.PhysVal.IDTPM.currentTrkAna.pTResMax )
+
+    acc.setPrivateTools(
+        CompFactory.IDTPM.DeltaRMatchingTool_trkTruth( name, **kwargs ) )
+    return acc
 
 
-## TODO - to be included in later MRs
-#def DeltaRtrackMatchingTool_trkCfg(
-#        flags, name="DeltaRtrackMatchingTool_trk", **kwargs ):
-#    acc = ComponentAccumulator()
-#
-#    kwargs.setdefault("dRmax",    flags.PhysVal.IDTPM.currentTrkAna.dRmax)
-#    kwargs.setdefault("pTResMax", flags.PhysVal.IDTPM.currentTrkAna.pTResMax)
-#
-#    acc.setPrivateTools(
-#        CompFactory.IDTPM.DeltaRtrackMatchingTool_trk(name, **kwargs))
-#    return acc
+def DeltaRMatchingTool_truthTrkCfg( flags, name="DeltaRMatchingTool_truthTrk", **kwargs ):
+    '''
+    Tool for Truth->Track matching via DeltaR (and/or pT resolution)
+    '''
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault( "dRmax",    flags.PhysVal.IDTPM.currentTrkAna.dRmax    )
+    kwargs.setdefault( "pTResMax", flags.PhysVal.IDTPM.currentTrkAna.pTResMax )
+
+    acc.setPrivateTools(
+        CompFactory.IDTPM.DeltaRMatchingTool_truthTrk( name, **kwargs ) )
+    return acc
 
 
-def TrackTruthMatchingToolCfg(
-        flags, name="TrackTruthMatchingTool", **kwargs ):
+def DeltaRMatchingTool_trkCfg( flags, name="DeltaRMatchingTool_trk", **kwargs ):
+    '''
+    Tool for Track->Track matching via DeltaR (and/or pT resolution)
+    '''
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault( "dRmax",    flags.PhysVal.IDTPM.currentTrkAna.dRmax    )
+    kwargs.setdefault( "pTResMax", flags.PhysVal.IDTPM.currentTrkAna.pTResMax )
+
+    acc.setPrivateTools(
+        CompFactory.IDTPM.DeltaRMatchingTool_trk( name, **kwargs ) )
+    return acc
+
+
+def TrackTruthMatchingToolCfg( flags, name="TrackTruthMatchingTool", **kwargs ):
     '''
     Tool for Track->Truth matching via 'truthParticleLink' decorations
     '''
@@ -53,25 +68,46 @@ def TrackTruthMatchingToolCfg(
     return acc
 
 
+def TruthTrackMatchingToolCfg( flags, name="TruthTrackMatchingTool", **kwargs ):
+    '''
+    Tool for Truth->Track matching via 'truthParticleLink' decorations
+    '''
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
+
+    acc.setPrivateTools(
+        CompFactory.IDTPM.TruthTrackMatchingTool( name, **kwargs ) )
+    return acc
+
+
 def TrackMatchingToolCfg( flags, **kwargs ):
     '''
     CA-based configuration for the test-reference matching Tool 
     '''
     log = logging.getLogger( "TrackMatchingToolCfg" )
 
-## TODO - to be included in later MRs
-#    if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "DeltaRMatch":
-# 
-#        if "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType :
-#            return DeltaRtrackMatchingTool_trkTruthCfg(
-#                flags, name = "DeltaRtrackMatchingTool_trkTruth" + 
-#                    flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs)
-#
-#        else:
-#            return DeltaRtrackMatchingTool_trkCfg(
-#                flags, name="DeltaRtrackMatchingTool_trk" + 
-#                    flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs)
+    ## DeltaR matching
+    if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "DeltaRMatch":
 
+        ## Track->Truth via DeltaR
+        if "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType :
+            return DeltaRMatchingTool_trkTruthCfg(
+                flags, name = "DeltaRMatchingTool_trkTruth" +
+                    flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
+
+        ## Truth->Track via DeltaR
+        if "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType :
+            return DeltaRMatchingTool_truthTrkCfg(
+                flags, name = "DeltaRMatchingTool_truthTrk" +
+                    flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
+
+        ## Track->Track via DeltaR
+        return DeltaRMatchingTool_trkCfg(
+            flags, name="DeltaRMatchingTool_trk" +
+                flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
+
+    ## Matching via truthParticleLink decorations
     if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "TruthMatch":
 
         ## Track->Truth via truthParticleLink decorations
@@ -80,10 +116,11 @@ def TrackMatchingToolCfg( flags, **kwargs ):
                 flags, name="TrackTruthMatchingTool" +
                     flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
 
-        ## TODO - to be included in later MRs
         ## Truth->Track via truthParticleLink decorations
-        #if "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType :
-        #    return TruthTrackMatchingToolCfg( flags, **kwargs )
+        if "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType :
+            return TruthTrackMatchingToolCfg(
+                flags, name="TruthTrackMatchingTool" +
+                    flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
 
         log.warning( "TruthMatch via decorations not configurable if Test or Ref isn't Truth" )
         log.warning( "Matching will not be executed for TrkAnalysis %s",

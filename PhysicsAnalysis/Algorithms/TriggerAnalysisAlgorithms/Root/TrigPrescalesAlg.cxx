@@ -49,6 +49,7 @@ namespace CP
       m_prescaleAccessors.emplace_back(m_prescaleDecoration);
       m_prescaleFunctions.emplace_back([this](const xAOD::EventInfo *evtInfo, const std::string &trigger)
       {
+        if(m_prescaleMC) return m_pileupReweightingTool->getPrescaleWeight(*evtInfo, trigger, true);
         return m_pileupReweightingTool->getDataWeight (*evtInfo, trigger, true);
       });
       // By putting the formula into` m_trigListAll` 
@@ -73,6 +74,7 @@ namespace CP
       {
         m_prescaleFunctions.emplace_back([this](const xAOD::EventInfo *evtInfo, const std::string &trigger)
         {
+          if(m_prescaleMC) return m_pileupReweightingTool->getPrescaleWeight(*evtInfo, trigger, true);
           return m_pileupReweightingTool->getDataWeight (*evtInfo, trigger, true);
         });
       }

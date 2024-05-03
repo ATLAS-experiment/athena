@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 @AccumulatorCache
-def fastElectronSequenceCfg(flags, name='FastElectron', variant='', is_probe_leg = False):
+def fastElectronSequenceGenCfg(flags, name='FastElectron', variant='', is_probe_leg = False):
     """ second step:  tracking....."""
 
     InViewRoIs = "EMFastElectronRoIs"+variant
@@ -40,6 +40,6 @@ def fastElectronSequenceCfg(flags, name='FastElectron', variant='', is_probe_leg
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict,isProbe=is_probe_leg)
 
 
-def fastElectronSequence_LRTCfg(flags, name='FastElectron', is_probe_leg=False):
+def fastElectron_LRTSequenceGenCfg(flags, name='FastElectron', is_probe_leg=False):
     # This is to call fastElectronMenuSequence for the _LRT variant
-    return fastElectronSequenceCfg(flags, name, is_probe_leg=is_probe_leg, variant='_LRT')
+    return fastElectronSequenceGenCfg(flags, name, is_probe_leg=is_probe_leg, variant='_LRT')

@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from ROOT import xAOD, TFile
 import os
 import csv
 from argparse import ArgumentParser
-from numpy import asarray, array
+import numpy as np
+from numpy import array
 from InDetMeasurementUtilities.CSV_InDetImporter import getCSVFilename
 class CSVDumper:
 
@@ -42,7 +43,10 @@ class CSVDumper:
         print(f"New file saved: {filename}")
 
     def ArrayFloat3_to_CppArray(self, ArrayFloat3): # Check ArrayFloat3 in https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODInDetMeasurement/xAODInDetMeasurement/versions/SpacePoint_v1.h
-        arr = ArrayFloat3.data()
+        try:
+            arr = ArrayFloat3.data()
+        except Exception:
+            arr = ArrayFloat3    
         arr.reshape((3,))
         return list(arr)
 
@@ -54,6 +58,7 @@ class CSVDumper:
         self.tree.GetEntry(evt)
         EventNumber = self.tree.EventInfo.mcEventNumber()
 
+        # Check whether the container exists
         for container in self.dict_variables_types.keys():
             dict_lists = {}
             dict_container = self.dict_variables_types[container]
@@ -65,13 +70,31 @@ class CSVDumper:
 
             for var,fmt in dict_container.items():
                 try:
-                    sp  = asarray(  tp.getConstDataSpan[ fmt ]( var ) )
+                    sp  = tp.getConstDataSpan[ fmt ]( var) 
                 except Exception:
                     # This is for the case arrays are either empty or have some trouble when accessed via getConstDataSpan. Used in excepction as makes the code slower
-                    sp  = asarray( [ getattr(element, var)() for element in tp ] )
+                    print("getConstDataSpan failed for variable ",var,fmt)
+                    sp  = [ getattr(element, var)() for element in tp ]
+
+                try:
+                    # Convert list of std::vector<double> to the list of lists
+                    list_of_lists = [list(std_vector) for std_vector in sp] 
+                    # Find the length of the longest vector
+                    max_len = max(len(ll) for ll in list_of_lists)
+                    # extend lists to the length of max_len
+                    for ll in list_of_lists:
+                        ll.extend([np.nan] * (max_len - len(ll)))
+                except Exception:
+                    list_of_lists = sp  # the sp is not iterable        
+
+                # Convert the list of lists to a NumPy array
+                sp = np.array(list_of_lists)
 
                 if "ArrayFloat3" in fmt and len(sp) > 0:  # Needs extra coding when dealing with xAOD::ArrayFloat3 instead of standard C++ array
                     sp = array( list( map(self.ArrayFloat3_to_CppArray, sp) ) )
+
+                if ("unsigned char" in fmt or "uint8" in fmt) and len(sp) > 0:
+                    sp = sp.view(np.int32)
 
                 if sp.ndim == 1:
                     dict_lists[var] = sp
@@ -79,7 +102,7 @@ class CSVDumper:
                     # Then we have an array. Each element of the array will be a column in the csv file. [We want things flat]
                     for column in range(sp.shape[1]):
                         dict_lists[var+f"_at{column}"] = sp.T[column]
-
+            
             self.WriteCSV( filename=getCSVFilename(self.outputDir, container, EventNumber), dictionary=dict_lists )
 
 
@@ -91,16 +114,21 @@ class CSVDumper:
 
 if __name__ == "__main__":
 
-    from InDetMeasurementUtilities.CSV_DictFormats import CSV_DictFormats
 
     parser = ArgumentParser()
-    parser.add_argument('--inputAOD', type=str, default="")
-    parser.add_argument('--outputDir', type=str, default="")
+    parser.add_argument('--inputAOD', type=str, default="", help="Input AOD.root file")
+    parser.add_argument('--outputDir', type=str, default="", help="Output directory")
     parser.add_argument('--treename', type=str, default="CollectionTree")
-    parser.add_argument('--nEvents', type=int, default=-1)
+    parser.add_argument('--nEvents', type=int, default=-1, help="Number of events")
+    parser.add_argument('--CSV_DictFormats', type=str, default="InDetMeasurementUtilities.CSV_DictFormats", 
+                        help="Name of the python file (ex. local CSV_DictFormats) with variable list. Default: InDetMeasurementUtilities.CSV_DictFormats" )
     parser.add_argument('--renames', type=str, default="", help="Names of collections other than default eg. InDetTrackParticles=NewColl,ITkPixelClusters=NewClusters,...")
 
     args = parser.parse_args()
+
+    import importlib
+    module = importlib.import_module(args.CSV_DictFormats)
+    CSV_DictFormats = module.CSV_DictFormats
 
     if args.inputAOD == "":
         raise Exception("No inputAOD was provided!")

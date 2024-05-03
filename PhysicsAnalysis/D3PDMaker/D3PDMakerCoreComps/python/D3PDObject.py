@@ -395,13 +395,14 @@ class D3PDObject:
         # Call the maker function.
         try:
             c = self._maker (name=name, prefix=prefix, object_name=object_name,
-                             *args, **kw2)
+                             *args, **kw2)  # noqa: B026 (star-arg unpacking after keyword OK here
+                                            #             because we are handling failures below)
         except TypeError as exc:
             if (len(exc.args) > 0 and
                 exc.args[0].find ("unexpected keyword argument 'object_name'") >= 0):
                 log = logging.getLogger ('D3PDObject')
                 log.warn ("Maker function missing `object_name' formal arg: %s", self._maker)
-                c = self._maker (name=name, prefix=prefix, *args, **kw2)
+                c = self._maker (name=name, prefix=prefix, *args, **kw2)  # noqa: B026 (see above)
             else:
                 raise
 

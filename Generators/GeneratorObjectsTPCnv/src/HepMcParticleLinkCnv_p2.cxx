@@ -53,6 +53,6 @@ void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
   }
   persObj->m_mcEvtIndex = index;
   persObj->m_barcode   = transObj->barcode();
-  persObj->m_evtColl    = 'a';
+  persObj->m_evtColl    = 'a'; // Hard-coding as this only ever had a single value in production
 }
 

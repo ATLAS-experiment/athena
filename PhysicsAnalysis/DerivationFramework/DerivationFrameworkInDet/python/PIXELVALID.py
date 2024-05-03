@@ -212,6 +212,10 @@ def PixelVALIDCfg(flags):
     if flags.InDet.PixelDumpMode==3:
         PixelStoreMode = 1
 
+    if flags.InDet.PixelDumpMode == 4:
+        PixelStoreMode = 3
+
+
     if PixelStoreMode==1:
         PIXELVALIDSlimmingHelper.AppendToDictionary.update({
             "EventInfo": "xAOD::EventInfo", "EventInfoAux": "xAOD::EventAuxInfo",
@@ -377,6 +381,53 @@ def PixelVALIDCfg(flags):
                 AllVariables += [label]
         # End of isMC block
 
+    ## for ID lumi usage
+    if PixelStoreMode == 3:
+        PIXELVALIDSlimmingHelper.AppendToDictionary.update({
+            "EventInfo": "xAOD::EventInfo", "EventInfoAux": "xAOD::EventAuxInfo",
+            "InDetTrackParticles": "xAOD::TrackParticleContainer",
+            "InDetTrackParticlesAux": "xAOD::TrackParticleAuxContainer"})
+
+        AllVariables += ["EventInfo",
+                         "InDetTrackParticles"]
+
+        PIXELVALIDSlimmingHelper.AppendToDictionary.update({
+            "PrimaryVertices": "xAOD::VertexContainer",
+            "PrimaryVerticesAux": "xAOD::VertexAuxContainer"})
+
+        ExtraVariables += ["PrimaryVertices.sumPt2.x.y.z"]
+
+        if flags.Input.isMC:
+            PIXELVALIDSlimmingHelper.AppendToDictionary.update({
+                "TruthEvents": "xAOD::TruthEventContainer",
+                "TruthEventsAux": "xAOD::TruthEventAuxContainer",
+                "TruthParticles": "xAOD::TruthParticleContainer",
+                "TruthParticlesAux": "xAOD::TruthParticleAuxContainer",
+                "TruthVertices": "xAOD::TruthVertexContainer",
+                "TruthVerticesAux": "xAOD::TruthVertexAuxContainer"})
+
+            AllVariables += ["TruthEvents",
+                             "TruthParticles",
+                             "TruthVertices"]
+
+            list_aux = ["BHadronsFinal", "BHadronsInitial", "BQuarksFinal",
+                        "CHadronsFinal", "CHadronsInitial", "CQuarksFinal",
+                        "HBosons", "Partons", "TQuarksFinal", "TausFinal",
+                        "WBosons", "ZBosons"]
+            for item in list_aux:
+                label = "TruthLabel"+item
+                labelAux = label+"Aux"
+                PIXELVALIDSlimmingHelper.AppendToDictionary.update(
+                    {label: "xAOD::TruthParticleContainer",
+                     labelAux: "xAOD::TruthParticleAuxContainer"})
+                AllVariables += [label]
+        # End of isMC block
+
+        # Trigger info is actually stored only when running on data...
+        PIXELVALIDSlimmingHelper.IncludeTriggerNavigation = True
+        PIXELVALIDSlimmingHelper.IncludeAdditionalTriggerContent = True
+    
+
     PIXELVALIDSlimmingHelper.AllVariables = AllVariables
     PIXELVALIDSlimmingHelper.StaticContent = StaticContent
     PIXELVALIDSlimmingHelper.SmartCollections = SmartCollections
@@ -387,8 +438,13 @@ def PixelVALIDCfg(flags):
     acc.merge(OutputStreamCfg(flags, "DAOD_PIXELVALID",
         ItemList=PIXELVALIDItemList, AcceptAlgs=["PIXELVALIDKernel"]))
 
-    acc.merge(SetupMetaDataForStreamCfg(
-        flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernel"],
-        createMetadata=[MetadataCategory.CutFlowMetaData]))
+    if flags.InDet.PixelDumpMode == 4:
+        acc.merge(SetupMetaDataForStreamCfg(
+            flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernel"],
+            createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TriggerMenuMetaData]))
+    else:
+        acc.merge(SetupMetaDataForStreamCfg(
+            flags, "DAOD_PIXELVALID", AcceptAlgs=["PIXELVALIDKernel"],
+            createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc

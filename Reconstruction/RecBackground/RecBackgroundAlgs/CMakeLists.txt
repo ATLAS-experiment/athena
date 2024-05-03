@@ -7,7 +7,11 @@ atlas_subdir( RecBackgroundAlgs )
 atlas_add_component( RecBackgroundAlgs
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthLinks AthenaBaseComps xAODCaloEvent xAODEventInfo xAODJet GaudiKernel MuonIdHelpersLib MuonSegment MuonRecHelperToolsLib RecBackgroundEvent TrkSegment CaloGeoHelpers AthenaKernel GeoPrimitives LUCID_RawEvent LArRecEvent MuonPrepRawData TrkSpacePoint TileEvent BCM_CollisionTimeLib )
+                     LINK_LIBRARIES AthLinks AthenaBaseComps xAODCaloEvent xAODEventInfo xAODJet GaudiKernel 
+                                    MuonIdHelpersLib MuonSegment MuonRecHelperToolsLib FourMomUtils RecBackgroundEvent 
+                                    TrkSegment CaloGeoHelpers AthenaKernel GeoPrimitives LUCID_RawEvent LArRecEvent
+                                    MuonPrepRawData TrkSpacePoint TileEvent BCM_CollisionTimeLib MuonRIO_OnTrack
+                                    MuonSegmentMakerToolInterfaces )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

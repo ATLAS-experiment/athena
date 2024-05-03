@@ -326,6 +326,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       auto& lvaluemap_digi = digiMonValueVec[iLyr];
       auto& lvaluemap_digi_ALL = digiMonValueVec.back();
 
+
       // Determine to which partition this channel belongs to
       const int ThisPartition=whatPartition(id,side);
       Digi_partition = ThisPartition; // Fill the monitored variable

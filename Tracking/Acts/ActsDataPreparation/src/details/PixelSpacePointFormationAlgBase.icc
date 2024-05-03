@@ -1,0 +1,165 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+
+#include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
+
+#include "AthenaMonitoringKernel/Monitored.h"
+#include "ActsInterop/TableUtils.h"
+
+#include <optional>
+
+namespace ActsTrk {
+
+  //------------------------------------------------------------------------
+  template <bool useCache>
+  PixelSpacePointFormationAlgBase<useCache>::PixelSpacePointFormationAlgBase(const std::string& name,
+							   ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
+    {}
+
+  //-----------------------------------------------------------------------
+  template <bool useCache>
+  StatusCode PixelSpacePointFormationAlgBase<useCache>::initialize()
+  {
+    ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
+
+    ATH_CHECK( m_pixelClusterContainerKey.initialize() );
+    ATH_CHECK( m_pixelSpacePointContainerKey.initialize() );
+    ATH_CHECK( m_pixelDetEleCollKey.initialize() );
+    ATH_CHECK( m_spacePointMakerTool.retrieve() );
+
+    if ( not m_monTool.empty() )
+      ATH_CHECK( m_monTool.retrieve() );
+
+      //caching
+    ATH_CHECK(m_SPCache.initialize(useCache));
+    ATH_CHECK(m_SPCacheBackend.initialize(useCache));
+
+    return StatusCode::SUCCESS;
+  }
+
+  template <bool useCache>
+  StatusCode PixelSpacePointFormationAlgBase<useCache>::finalize()
+  {
+    ATH_MSG_INFO("Space Point Formation statistics" << std::endl << makeTable(m_stat,
+								       std::array<std::string, kNStat>{
+									 "Clusters",
+									 "Space Points"
+								       }).columnWidth(10));
+    
+    return StatusCode::SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+  template <bool useCache>
+  StatusCode PixelSpacePointFormationAlgBase<useCache>::execute (const EventContext& ctx) const
+  {
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto nReceivedSPsPixel = Monitored::Scalar<int>( "numPixSpacePoints" , 0 );
+    auto mon = Monitored::Group( m_monTool, timer, nReceivedSPsPixel );
+
+    SG::ReadHandle<xAOD::PixelClusterContainer> inputPixelClusterContainer( m_pixelClusterContainerKey, ctx );
+    if (!inputPixelClusterContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
+      return StatusCode::FAILURE;
+    }
+    const xAOD::PixelClusterContainer *pixelClusters = inputPixelClusterContainer.cptr();
+    ATH_MSG_DEBUG("Retrieved " << pixelClusters->size() << " clusters from container " << m_pixelClusterContainerKey.key());
+    m_stat[kNClusters] += pixelClusters->size();
+    
+    auto pixelSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_pixelSpacePointContainerKey, ctx );
+    ATH_MSG_DEBUG( "--- Pixel Space Point Container `" << m_pixelSpacePointContainerKey.key() << "` created ..." );
+    ATH_CHECK(pixelSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
+					       std::make_unique<xAOD::SpacePointAuxContainer>() ));
+    xAOD::SpacePointContainer *pixelSpacePoints = pixelSpacePointContainer.ptr();
+
+    Cache_WriteHandle cacheHandle;
+    if constexpr (useCache) {
+      cacheHandle = Cache_WriteHandle(m_SPCache, ctx);
+      auto updateHandle = Cache_BackendUpdateHandle(m_SPCacheBackend, ctx);
+      ATH_CHECK(updateHandle.isValid());
+      ATH_CHECK(cacheHandle.record(std::make_unique<Cache_IDC>(updateHandle.ptr())));
+      ATH_CHECK(cacheHandle.isValid());
+    }
+
+    // Reserve space
+    pixelSpacePoints->reserve(pixelClusters->size());
+
+    // Early exit in case we have no clusters
+    // We still are saving an empty space point container in SG
+    if (pixelClusters->empty()) {
+      ATH_MSG_DEBUG("No input clusters found, we stop space point formation");
+      return StatusCode::SUCCESS;
+    }
+    
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
+    const InDetDD::SiDetectorElementCollection* pixelElements(*pixelDetEleHandle);
+    if (not pixelDetEleHandle.isValid() or pixelElements==nullptr) {
+      ATH_MSG_FATAL(m_pixelDetEleCollKey.fullKey() << " is not available.");
+      return StatusCode::FAILURE;
+    }
+
+    
+
+    // using trick for fast insertion
+    std::vector< xAOD::SpacePoint* > preCollection;
+    preCollection.reserve(pixelClusters->size());
+    for ( std::size_t i(0); i<inputPixelClusterContainer->size(); ++i)
+      preCollection.push_back( new xAOD::SpacePoint() );
+    pixelSpacePoints->insert(pixelSpacePoints->end(), preCollection.begin(), preCollection.end());
+
+
+    std::map<IdentifierHash, std::vector<std::pair<unsigned int, unsigned int>>> cache_ranges;
+    int groupStartIdx = 0;
+    std::optional<IdentifierHash> groupIdHash = std::nullopt;
+    
+
+    for(unsigned int idx=0; idx<pixelClusters->size(); idx++){
+      const xAOD::PixelCluster* cluster = pixelClusters->at(idx);
+      IdentifierHash idHash = cluster->identifierHash();
+      if constexpr(useCache){
+        //check if the idHash is already in the cache
+        if(cacheHandle->tryAddFromCache(idHash)) continue;
+      }
+
+      const InDetDD::SiDetectorElement* pixelElement = pixelElements->getDetectorElement(idHash);
+      if (pixelElement == nullptr) {
+        ATH_MSG_FATAL("Element pointer is nullptr");
+        return StatusCode::FAILURE;
+      }
+
+      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*cluster,
+                                *pixelSpacePoints->at(idx),
+                                *pixelElement ) );
+
+      if constexpr(useCache){
+        //check if the groupIdHash is defined if so and if it has changed then insert the range into the map
+        if(groupIdHash && ((*groupIdHash) != idHash)){
+          cache_ranges[idHash].emplace_back(groupStartIdx, idx);
+          groupStartIdx = idx;
+        }
+
+        groupIdHash = idHash;
+      }
+    }
+
+
+    if constexpr(useCache){
+      //add the ranges to the cache
+      for(auto idr: cache_ranges){
+        auto wh = cacheHandle->getWriteHandle(idr.first);
+        auto ce = std::make_unique<Cache::CacheEntry<xAOD::SpacePoint>>(pixelSpacePoints, idr.second);
+        ATH_CHECK(wh.addOrDelete(std::move(ce))); 
+      }
+    }
+
+    nReceivedSPsPixel = pixelSpacePointContainer->size();
+    m_stat[kNSpacePoints] += nReceivedSPsPixel;
+    return StatusCode::SUCCESS;
+  }
+
+} //namespace

@@ -14,8 +14,7 @@ OnnxOutput::OnnxOutput(const std::string& name,
                        int rank) 
                        : name(name),
                          name_in_model(name),
-                         type(getOutputType(type, rank)),
-                         target(getOutputTarget(rank)) {}
+                         type(getOutputType(type, rank)){}
 
 /* constructor for OnnxModelVersion::V0 */
 OnnxOutput::OnnxOutput(const std::string& name,
@@ -23,8 +22,7 @@ OnnxOutput::OnnxOutput(const std::string& name,
                        const std::string& model_name) 
                        : name(getName(name, model_name)),
                          name_in_model(name),
-                         type(getOutputType(type, 0)),
-                         target(getOutputTarget(0)) {}
+                         type(getOutputType(type, 0)){}
 
 const std::string OnnxOutput::getName(const std::string& name, const std::string& model_name) const {
   // unfortunately, this is block is needed to support some taggers that we schedule that don't have
@@ -48,20 +46,6 @@ OnnxOutput::OutputType OnnxOutput::getOutputType(ONNXTensorElementDataType type,
     return OutputType::VECCHAR;
   }
   return OutputType::UNKNOWN;
-}
-
-OnnxOutput::OutputTarget OnnxOutput::getOutputTarget(int rank) const {
-  /* Currently the location of where an output is decorated to is
-  determined based on the rank of the output tensor. In the future 
-  this should be replaced with a better implementation, where the
-  `target` can be obtained from the model metadata. */
-  if (rank == 0) {
-    return OutputTarget::JET;
-  }
-  else if (rank == 1) {
-    return OutputTarget::TRACK;
-  }
-  return OutputTarget::UNKNOWN;
 }
 
 } // namespace FlavorTagDiscriminants

@@ -132,7 +132,6 @@ PP="$PP"'|//GP: '
 #ignore which malloc we are using
 PP="$PP"'|^Preloading tcmalloc'
 PP="$PP"'|^WARNING: TCMALLOCDIR not defined'
-PP="$PP"'|^Py:AthFile .*shutting down athfile-server'
 PP="$PP"'|^HistogramPersis...   INFO *.CnvServices.:'
 PP="$PP"'|^HistogramPersis.*Histograms saving not required.'
 PP="$PP"'|^StatusCodeSvc'

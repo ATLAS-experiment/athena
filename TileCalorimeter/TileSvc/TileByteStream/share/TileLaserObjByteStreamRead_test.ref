@@ -1,4 +1,3 @@
-Py:ComponentAccumulator    INFO Event Inputs
 Py:ComponentAccumulator    INFO Event Algorithm Sequences
 Py:ComponentAccumulator    INFO Top sequence 0
 Py:ComponentAccumulator    INFO \__ AthMasterSeq (seq: SEQ AND)
@@ -144,7 +143,6 @@ FPEAuditor                                           INFO  FPE INVALIDs   : 0
 FPEAuditor                                           INFO  FPE DIVBYZEROs : 0
 ApplicationMgr                                       INFO Application Manager Finalized successfully
 ApplicationMgr                                       INFO Application Manager Terminated successfully
-Py:ComponentAccumulator    INFO Event Inputs
 Py:ComponentAccumulator    INFO Event Algorithm Sequences
 Py:ComponentAccumulator    INFO Top sequence 0
 Py:ComponentAccumulator    INFO \__ AthMasterSeq (seq: SEQ AND)

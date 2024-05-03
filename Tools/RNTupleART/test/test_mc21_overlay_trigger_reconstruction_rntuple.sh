@@ -3,6 +3,7 @@
 # art-description: Reco_tf.py MC21 Overlay+Trigger+Reconstruction in RNTuple Format
 # art-type: grid
 # art-include: main--dev3LCG/Athena
+# art-include: main--dev4LCG/Athena
 # art-output: *.root
 # art-output: log.*
 # art-athena-mt: 8

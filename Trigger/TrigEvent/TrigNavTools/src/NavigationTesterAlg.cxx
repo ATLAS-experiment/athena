@@ -77,11 +77,9 @@ namespace Trig {
     {
         for (const std::string &chain : m_chains)
         {
-            ATH_MSG_DEBUG("Begin testing chain " << chain);
+            ATH_MSG_DEBUG("Begin testing chain " << chain << (m_tdt->isPassed(chain) ? " and will dive into details as the chain passed " : " but will not do anything as the chain did not pass"));
             if (!m_tdt->isPassed(chain)) continue;
 
-            const auto &featuresRun3 = m_tdtRun3->features<xAOD::IParticleContainer>(chain);
-            const auto &featuresRun2 = m_tdtRun2->features<xAOD::IParticleContainer>(chain);    
 
             // We assume that the navigation is ultimately a set of element links
             // We're comparing two types of navigation but they should both point to the same
@@ -111,8 +109,8 @@ namespace Trig {
             for (auto& c : combsRun3 ) {
                 ATH_MSG_DEBUG(c);
             }
-            if ( std::regex_match(chain, SpecialCases::gammaXeChain) ) {
-                ATH_CHECK(verifyFlatContent(featuresRun2, featuresRun3, chain));
+            if ( std::regex_match(chain, SpecialCases::gammaXeChain) ) {  
+                ATH_CHECK(verifyFlatContent(chain));
             } else {
                 if ( m_verifyCombinationsSize ) {
                     ATH_CHECK(verifyCombinationsSize(vecCombinationsRun2, vecCombinationsRun3, chain));
@@ -127,16 +125,32 @@ namespace Trig {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode NavigationTesterAlg::verifyFlatContent(std::vector<TrigCompositeUtils::LinkInfo<DataVector<xAOD::IParticle> > > run2, std::vector<TrigCompositeUtils::LinkInfo<DataVector<xAOD::IParticle> > > run3, const std::string& chain) const {
-        for ( auto f2: run2 ) {
+    StatusCode NavigationTesterAlg::verifyFlatContent(const std::string& chain) const {
+        const auto &run3 = m_tdtRun3->features<xAOD::IParticleContainer>(chain);
+        std::set<const xAOD::IParticle*> particlesRun3;
+        for ( auto l: run3) {
+            if (  l.link.isValid() )
+                particlesRun3.insert(*(l.link));
+        }
+
+        CombinationsVector vecCombinationsRun2;
+        ATH_CHECK(m_toolRun2->retrieveParticles(vecCombinationsRun2, chain));
+        std::set<const xAOD::IParticle*> particlesRun2;
+        for ( auto& comb: vecCombinationsRun2) {
+            for ( auto el: comb) {
+                particlesRun2.insert(el);
+            }
+        }
+
+        for ( auto f2: particlesRun2 ) {
             bool found=false;
-            for ( auto f3: run3 ) {
-                ATH_MSG_DEBUG("Serial set of features " << *(f3.link) );
-                if ( *(f2.link) == *(f3.link))
+            for ( auto f3: particlesRun3 ) {
+                ATH_MSG_DEBUG("Serial set of features " << f3 );
+                if ( f2 == f3)
                     found = true;
             }
             if ( not found ) {
-                ATH_MSG_ERROR("Missing feature in Run 3 that is present in Run 2 " <<  *(f2.link) << " chain " << chain << " enable DEBUG to see more details" );
+                ATH_MSG_ERROR("Missing feature in Run 3 that is present in Run 2 " <<  f2 << " chain " << chain << " enable DEBUG to see more details" );
                 if ( m_failOnDifference ) {
                     return StatusCode::FAILURE;
                 } 

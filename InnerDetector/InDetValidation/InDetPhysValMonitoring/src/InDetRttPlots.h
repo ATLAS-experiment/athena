@@ -34,6 +34,7 @@
 #include "InDetPerfPlot_VerticesVsMu.h"
 #include "InDetPerfPlot_TrkInJet.h"
 #include "InDetPerfPlot_TRTExtension.h"
+#include "InDetPerfPlot_Duplicate.h"
 
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
@@ -62,9 +63,10 @@ struct InDetRttPlotConfig{
   bool doHitsFakeTracksPlots{true};
   bool doHitsUnlinkedTracksPlots{true};
 
-  /// Efficiency plots - require truth, optionally
+  /// Efficiency and duplicate plots - require truth, optionally
   /// matching reco 
-  bool doEffPlots{true}; 
+  bool doEffPlots{true};
+  bool doDuplicatePlots{false};
 
   /// Resolution and "matched track" plots - 
   /// filled if both reco and truth exist
@@ -118,13 +120,18 @@ public:
   void fill(const xAOD::TrackParticle& particle, float weight=1.0);
   void fill(const xAOD::TrackParticle& particle, const float mu, const unsigned int nVtx, float weight=1.0); //mu dependent plots
   void fill(const unsigned int nTracks, const unsigned int truthMu, const float actualMu, const unsigned nVtx, const float weight=1.0);
+
   ///fill for things needing truth only
   void fill(const xAOD::TruthParticle& particle, float weight);
+
   ///Fill for efficiency plots
   void fillEfficiency(const xAOD::TruthParticle& truth, const xAOD::TrackParticle* track, const bool isGood, const unsigned int truthMu, const float actualMu, float weight);
   void fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, const unsigned int truthMu, const float actualMu, float weight);
 
-  ///fill for things needing all truth - not just the ones from the reco tracks
+  ///fill for duplicate plots
+  void fillDuplicate(const xAOD::TruthParticle& truth,
+		     const std::vector<const xAOD::TrackParticle*>& tracks,
+		     float weight);
   
   ///fill reco-vertex related plots
   void fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Vertex* recoHardScatter, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float weight=1.0); 
@@ -169,6 +176,7 @@ private:
   std::unique_ptr<InDetPerfPlot_Resolution> m_resolutionPlotPrim_truthFromB;
   std::unique_ptr<InDetPerfPlot_Hits> m_hitsRecoTracksPlots;
   std::unique_ptr<InDetPerfPlot_Efficiency> m_effPlots;
+  std::unique_ptr<InDetPerfPlot_Duplicate> m_duplicatePlots;
   std::unique_ptr<InDetPerfPlot_VerticesVsMu> m_verticesVsMuPlots;
   std::unique_ptr<InDetPerfPlot_Vertex> m_vertexPlots;
   std::unique_ptr<InDetPerfPlot_Vertex> m_hardScatterVertexPlots;

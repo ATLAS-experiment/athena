@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -22,22 +22,9 @@ InDetSimData::InDetSimData() :
 
 InDetSimData::InDetSimData (const std::vector<Deposit>& deposits, 
 			    int simDataWord)
-  : m_word((deposits.size()<<29 & 0xe0000000) | (simDataWord & 0x1fffffff))
+  : m_word((deposits.size()<<29 & 0xe0000000) | (simDataWord & 0x1fffffff)),
+    m_deposits (deposits)
 {
-  //above we pack deposits.size() and the simDataWord into a single unsigned int (m_word).
-  //The first 3 bits are used for deposits.size() and the last 29 are used for the simDataWord.
-
-  /*
-    
-  m_p_deposits = new Deposit[deposits.size()];
-  
-  for (unsigned int i = 0; i!= deposits.size(); i++)
-  {
-  m_p_deposits[i] = deposits[i];
-  }
-  */
-  
-  m_deposits = deposits;
 }
 
 InDetSimData::InDetSimData (std::vector<Deposit>&& deposits, 

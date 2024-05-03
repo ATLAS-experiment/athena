@@ -3,6 +3,7 @@
 */
 
 #include <ActsToolInterfaces/IPixelClusteringTool.h>
+#include "details/PixelClusterCacheId.h"
 #include "details/ClusterizationAlg.h"
 
 namespace ActsTrk {

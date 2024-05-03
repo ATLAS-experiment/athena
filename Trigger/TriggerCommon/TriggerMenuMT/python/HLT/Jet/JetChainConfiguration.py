@@ -9,13 +9,13 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from ..Config.MenuComponents import ChainStep
 
 from .JetMenuSequencesConfig import (
-    jetCaloHypoMenuSequence,
-    jetRoITrackJetTagHypoMenuSequence,
-    jetFSTrackingHypoMenuSequence,
-    jetCaloRecoMenuSequence, 
-    jetCaloPreselMenuSequence,
+    jetCaloHypoMenuSequenceGenCfg,
+    jetRoITrackJetTagHypoMenuSequenceGenCfg,
+    jetFSTrackingHypoMenuSequenceGenCfg,
+    jetCaloRecoMenuSequenceGenCfg, 
+    jetCaloPreselMenuSequenceGenCfg,
 )
-from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRVARMenuSequence,jetCRMenuSequence
+from .ExoticJetSequencesConfig import jetEJsMenuSequenceGenCfg, jetCRVARMenuSequenceGenCfg,jetCRMenuSequenceGenCfg
 
 from . import JetRecoCommon
 from . import JetPresel
@@ -193,7 +193,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         stepName = f"MainStep_jet_{self.recoDict['jetDefStr']}"
         if self.isPerf:
             stepName += '_perf'
-        jetSeq, jetDef = jetCaloHypoMenuSequence(
+        jetSeq, jetDef = jetCaloHypoMenuSequenceGenCfg(
             flags, isPerf=self.isPerf, **self.recoDict
         )
         jetCollectionName = jetDef.fullname()
@@ -206,8 +206,8 @@ class JetChainConfiguration(ChainConfigurationBase):
             stepName += '_perf'
 
 
-        from .JetMenuSequencesConfig import jetHICaloHypoMenuSequence
-        jetSeq, jetDef = jetHICaloHypoMenuSequence(
+        from .JetMenuSequencesConfig import jetHICaloHypoMenuSequenceGenCfg
+        jetSeq, jetDef = jetHICaloHypoMenuSequenceGenCfg(
             flags, isPerf=self.isPerf, **self.recoDict
         )
 
@@ -218,7 +218,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
     def getJetRoITrackJetTagHypoChainStep(self, flags, jetsInKey):
         stepName = "RoIFTFStep_jet_sel_"+self.recoDict['jetDefStr']
-        jetSeq = jetRoITrackJetTagHypoMenuSequence(
+        jetSeq = jetRoITrackJetTagHypoMenuSequenceGenCfg(
             flags, jetsIn=jetsInKey, isPresel=False, **self.recoDict
         )
         return ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
@@ -227,7 +227,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         stepName = "MainStep_jet_"+self.recoDict['jetDefStr']
         if self.isPerf:
             stepName += '_perf'
-        jetSeq, jetDef = jetFSTrackingHypoMenuSequence(
+        jetSeq, jetDef = jetFSTrackingHypoMenuSequenceGenCfg(
             flags, clustersKey=clustersKey,
             isPerf=self.isPerf,
             **self.recoDict
@@ -237,7 +237,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
     def getJetCaloRecoChainStep(self, flags):
         stepName = "CaloRecoPTStep_jet_"+self.recoDict["clusterCalib"]
-        jetSeq, clustersKey = jetCaloRecoMenuSequence(
+        jetSeq, clustersKey = jetCaloRecoMenuSequenceGenCfg(
             flags, clusterCalib=self.recoDict["clusterCalib"]
         )
 
@@ -255,7 +255,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         preselRecoDict = JetPresel.getPreselRecoDict(matched_reco.group())
 
         stepName = "PreselStep_jet_"+preselRecoDict['jetDefStr']
-        jetSeq, jetDef, clustersKey = jetCaloPreselMenuSequence( flags, **preselRecoDict )
+        jetSeq, jetDef, clustersKey = jetCaloPreselMenuSequenceGenCfg( flags, **preselRecoDict )
 
         return str(clustersKey), jetDef, ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
@@ -275,7 +275,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         assert preselRecoDict['trkopt'] == 'roiftf', 'getJetRoITrackJetTagPreselChainStep: you requested a RoI tracking preselection but the reco dictionary has \'trkopt\' set to {0}'.format(preselRecoDict['trkopt'])
 
         stepName = "RoIFTFStep_jet_"+self.recoDict['jetDefStr']
-        jetSeq = jetRoITrackJetTagHypoMenuSequence(flags, jetsIn=jetsInKey, isPresel=True, **preselRecoDict)
+        jetSeq = jetRoITrackJetTagHypoMenuSequenceGenCfg(flags, jetsIn=jetsInKey, isPresel=True, **preselRecoDict)
 
         return ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
@@ -305,7 +305,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         log.debug("Running exotic jets with ptf: " + str(ptf) + "\tdR: " + str(dr) + "\ttrackless: " + str(trackless) + "\thypo: " + exotdictstring)
 
         stepName = "EJsStep_"
-        jetSeq = jetEJsMenuSequence(flags, jetsIn=jetCollectionName)
+        jetSeq = jetEJsMenuSequenceGenCfg(flags, jetsIn=jetCollectionName)
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
         return chainStep
@@ -325,7 +325,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
 
         stepName = "CRVARStep_"
-        jetSeq = jetCRVARMenuSequence(flags, jetsIn=jetCollectionName)
+        jetSeq = jetCRVARMenuSequenceGenCfg(flags, jetsIn=jetCollectionName)
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
         return chainStep
@@ -345,7 +345,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
 
         stepName = "CRStep_"
-        jetSeq = jetCRMenuSequence(flags, jetsIn=jetCollectionName)
+        jetSeq = jetCRMenuSequenceGenCfg(flags, jetsIn=jetCollectionName)
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
         return chainStep

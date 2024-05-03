@@ -117,7 +117,7 @@ namespace ActsTrk
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
-               static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::sTgcStripType)+1u>
+               static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
        measurement_to_truth_association_maps{};
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
@@ -152,8 +152,8 @@ namespace ActsTrk
 
     m_nTruthParticlesWithHits += truth_particle_hit_counts->size();
 
-    ATH_MSG_INFO("Truth particles with hits:" << truth_particle_hit_counts->size()
-                 << ", without enough hits: " << truth_particles_without_enough_measurements);
+    ATH_MSG_DEBUG("Truth particles with hits:" << truth_particle_hit_counts->size()
+                  << ", without enough hits: " << truth_particles_without_enough_measurements);
 
     SG::WriteHandle<TruthParticleHitCounts> truth_particle_hit_counts_out_handle(m_truthHitCountsOut, ctx);
     if (truth_particle_hit_counts_out_handle.record( std::move(truth_particle_hit_counts)).isFailure()) {

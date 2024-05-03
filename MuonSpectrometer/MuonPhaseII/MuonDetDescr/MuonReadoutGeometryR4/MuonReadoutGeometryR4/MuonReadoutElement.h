@@ -164,19 +164,16 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     void releaseUnAlignedTrfs() const;
 
     unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const override final;
+
+     friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
    protected:
-     using TransformMaker = ActsTrk::TransformCache::TransformMaker;
+     /// Returns the transformation into the center of the readout volume
+     const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
       
      /// Inserts a transfomration for caching
-     StatusCode insertTransform(const IdentifierHash& hash,
-                                 TransformMaker make);
-
-     StatusCode insertTransform(const IdentifierHash& hash,
-                                std::shared_ptr<const TransformMaker> make);
+     template <class MuonDetImpl> StatusCode insertTransform(const IdentifierHash& hash);
 
      StatusCode createGeoTransform();
-     /// Returns the transformation into the center of the readout volume
-     Amg::Transform3D toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
 #ifndef SIMULATIONBASE
      //Creates a MuonSurfaceCache for straw surfaces using the given Bounds and Identifier Hash
      StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::LineBounds> lBounds);
@@ -214,5 +211,11 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 #endif
 };
 }  // namespace MuonGMR4
+
+namespace ActsTrk{
+    template <> Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::MuonReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+}
+
 #include <MuonReadoutGeometryR4/MuonReadoutElement.icc>
 #endif

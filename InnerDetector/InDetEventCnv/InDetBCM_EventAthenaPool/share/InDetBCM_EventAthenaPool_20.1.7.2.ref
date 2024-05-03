@@ -20,6 +20,8 @@ EventInfoMgtInit: Got release version  AtlasOffline-rel_4
 Py:IOVDbSvc.CondDB    INFO Setting up conditions DB access to instance OFLP200
 Data source lookup using /afs/cern.ch/atlas/software/builds/nightlies/devval/AtlasCore/rel_4/InstallArea/XML/AtlasAuthentication/dblookup.xml file
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
+Py:MetaReader     WARNING Found multiple values for AtlasRelease: ['AtlasProduction-20.1.7.2', 'AtlasProduction-17.0.6.4']. Looking for possible duplicates.
+Py:MetaReader     WARNING Multiple values for AtlasRelease may mean the same, or the input file was produced in multi-step job. Ignoring all but the first entry: AtlasRelease = AtlasProduction-20.1.7.2
 ApplicationMgr       INFO Updating Gaudi::PluginService::SetDebug(level) to level=0
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================

@@ -5,7 +5,9 @@
 
 namespace APRDefaults {
 
-    // using a struct so PyROOT can autoload
+   // using a struct so PyROOT can autoload
+   // as per the discussion in ATEAM-973 these are replicated in PyUtils/PoolFile.py
+   // the definitions here should be kept in sync with those!
    struct TTreeNames {
       static constexpr const char* EventData  {"CollectionTree"};
       static constexpr const char* EventTag   {"POOLCollectionTree"};

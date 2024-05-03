@@ -75,12 +75,21 @@ G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
 
   // Barcode
   TrackHelper trHelp(track);
-  const int barcode = trHelp.GetBarcode();
+  const int barcode = trHelp.GetBarcode(); // FIXME barcode based
   const int id = trHelp.GetUniqueID();
   const int status = trHelp.GetStatus();
 
   //create the TimedTrackRecord
-  m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,barcode,id,preVol->GetName());
+  m_trackRecordCollection->Emplace(
+                                   pdgcode,
+                                   status,
+                                   ener,
+                                   mom,
+                                   pos,
+                                   time,
+                                   barcode, // FIXME barcode based
+                                   id,
+                                   preVol->GetName());
 
   return true;
 }
@@ -103,11 +112,20 @@ void TrackFastSimSD::WriteTrack(const G4Track* track, const bool originPos, cons
 
   const double time=track->GetGlobalTime();
   TrackHelper trHelp(track);
-  const int barcode = trHelp.GetBarcode();
+  const int barcode = trHelp.GetBarcode(); // FIXME barcode based
   const int id = trHelp.GetUniqueID();
   const int status = trHelp.GetStatus();
 
   //create the TimedTrackRecord
-  m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,barcode,id,preVol?preVol->GetName():"Unknown");
+  m_trackRecordCollection->Emplace(
+                                   pdgcode,
+                                   status,
+                                   ener,
+                                   mom,
+                                   pos,
+                                   time,
+                                   barcode, // FIXME barcode based
+                                   id,
+                                   preVol?preVol->GetName():"Unknown");
 }
 

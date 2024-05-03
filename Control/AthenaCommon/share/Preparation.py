@@ -7,6 +7,12 @@ if opts.trace_pattern:
    AthCIncMod.tracePattern = opts.trace_pattern
 
 
+### setup interactive prompt
+if opts.interactive:
+   from AthenaCommon.Interactive import configureInteractivePrompt
+   configureInteractivePrompt()
+   del configureInteractivePrompt
+
 ### debugging helper, hooks debugger to running interpreter process ----------
 from AthenaCommon.Debugging import hookDebugger, allowPtrace
 allowPtrace()

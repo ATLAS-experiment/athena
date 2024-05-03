@@ -13,7 +13,7 @@ from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
 from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
 
 
-def allTE_trkfast( flags, signature="FS" ):
+def allTE_trkfastSequenceGenCfg( flags, signature="FS" ):
 
 
 
@@ -52,7 +52,7 @@ def allTE_trkfast( flags, signature="FS" ):
                                 HypoToolGen = beamspotHypoToolGen )
 
 
-def getBeamspotVtx(flags):
+def getBeamspotVtxSequenceGenCfg(flags):
         signature = "BeamspotJet"
 
         # run at event level
@@ -102,7 +102,7 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
 
                 if self.chainPart['beamspotChain'] != '':
                         stepName = f"Step4_{self.jc_name}_beamspotJet"
-                        chainSteps = [self.getStep(flags, 4, stepName, [getBeamspotVtx])]
+                        chainSteps = [self.getStep(flags, 4, stepName, [getBeamspotVtxSequenceGenCfg])]
 
                 else:
                         key = self.chainPart['addInfo'][0] + "_" + self.chainPart['l2IDAlg'][0] #TODO: hardcoded index
@@ -129,10 +129,10 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
         # Configuration TrkFS step
         # --------------------
         def getTrkFSStep(self, flags):
-                return self.getStep(flags,1,"trkFS_trkfast",[allTE_trkfast],signature="FS")
+                return self.getStep(flags,1,"trkFS_trkfast",[allTE_trkfastSequenceGenCfg],signature="FS")
 
         # --------------------
         # Configuration of costmonitor (costmonitor ?? but isn't this is the actua chain configuration ??)
         # --------------------
         def getAllTEStep(self, flags):
-                return self.getStep(flags,1,"allTE_trkfast",[allTE_trkfast],signature="beamSpot")
+                return self.getStep(flags,1,"allTE_trkfast",[allTE_trkfastSequenceGenCfg],signature="beamSpot")

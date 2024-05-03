@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -25,23 +25,12 @@ AthenaPoolTestMapData::AthenaPoolTestMapData() :
 
 AthenaPoolTestMapData::AthenaPoolTestMapData (const std::vector<Deposit>& deposits, 
 			    int simDataWord)
-    : m_word( ((deposits.size() << 29) & 0xe0000000) | (simDataWord & 0x1fffffff))
+    : m_word( ((deposits.size() << 29) & 0xe0000000) | (simDataWord & 0x1fffffff)),
+      m_deposits (deposits)
 {
-    /*
-    
-    m_p_deposits = new Deposit[deposits.size()];
-    
-    for (unsigned int i = 0; i!= deposits.size(); i++)
-    {
-	m_p_deposits[i] = deposits[i];
-    }
-    */
-
-    m_deposits = deposits;
 }
 
 AthenaPoolTestMapData::~AthenaPoolTestMapData()
 {
-    //    delete[] m_p_deposits;
 }
 

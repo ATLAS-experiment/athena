@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/ConfigurableMeta.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -69,7 +69,7 @@ class ConfigurableMeta( type ):
          propDict = dct.get('_propertyDocDct')
          for prop in props:
             docString = propDict and propDict.get(prop)
-            if type(slots) == dict:
+            if type(slots) is dict:
                default = slots[prop]
             else:
                default = None

@@ -14,14 +14,27 @@ import re
 class PreJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the common preprocessing of jet sequences"""
 
-    def __init__ (self, containerName, jetCollection) :
+    def __init__ (self, containerName='', jetCollection='') :
         super (PreJetAnalysisConfig, self).__init__ ()
-        self.containerName = containerName
-        self.jetCollection = jetCollection
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('runOriginalObjectLink', False, type=bool)
-        self.addOption ('runGhostMuonAssociation', None, type=bool)
-        self.addOption ('runTruthJetTagging', None, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('jetCollection', jetCollection, type=str,
+            noneAction='error',
+            info="the jet container to run on. It is interpreted to determine "
+            "the correct config blocks to call for small- or large-R jets.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Useful "
+            "here to distinguish between different jet definitions.")
+        # TODO: add info string
+        self.addOption ('runOriginalObjectLink', False, type=bool,
+            info="")
+        self.addOption ('runGhostMuonAssociation', None, type=bool,
+            info="whether to set up the jet-ghost-muon association algorithm "
+            "CP::JetGhostMuonAssociationAlg. The default is False.")
+        self.addOption ('runTruthJetTagging', None, type=bool,
+            info="whether to set up the jet truth tagging algorithm "
+            "CP::JetTruthTagAlg. The default is True.")
 
 
     def makeAlgs (self, config) :
@@ -88,30 +101,71 @@ class PreJetAnalysisConfig (ConfigBlock) :
 class SmallRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the small-r jet sequence"""
 
-    def __init__ (self, containerName, jetCollection, jetInput) :
+    def __init__ (self, containerName='', jetCollection='', jetInput='') :
         super (SmallRJetAnalysisConfig, self).__init__ ()
-        self.containerName = containerName
-        self.jetCollection = jetCollection
-        self.jetInput = jetInput
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('runJvtUpdate', False, type=bool)
-        self.addOption ('runNNJvtUpdate', False, type=bool)
-        self.addOption ('runFJvtUpdate', False, type=bool)
-        self.addOption ('runJvtSelection', True, type=bool)
-        self.addOption ('runFJvtSelection', False, type=bool)
-        self.addOption ('runJvtEfficiency', True, type=bool)
-        self.addOption ('runFJvtEfficiency', False, type=bool)
-        self.addOption ('systematicsModelJES', "Category", type=str)
-        self.addOption ('systematicsModelJER', "Full", type=str)
-        self.addOption ('recalibratePhyslite', True, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('jetCollection', jetCollection, type=str,
+            noneAction='error',
+            info="the jet container to run on. It is interpreted to determine "
+            "the correct config blocks to call for small- or large-R jets.")
+        # TODO: add info string
+        self.addOption ('jetInput', jetInput, type=str,
+            noneAction='error',
+            info="")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Useful "
+            "here to distinguish between different jet definitions.")
+        self.addOption ('runJvtUpdate', False, type=bool,
+            info="whether to update the JVT. The default is False.")
+        self.addOption ('runNNJvtUpdate', False, type=bool,
+            info="whether to update the NN-JVT. The default is False.")
+        self.addOption ('runFJvtUpdate', False, type=bool,
+            info="whether to update the forward JVT. The default is False.")
+        self.addOption ('runJvtSelection', True, type=bool,
+            info="whether to run JVT selection. The default is True.")
+        self.addOption ('runFJvtSelection', False, type=bool,
+            info="whether to run forward JVT selection. The default is False.")
+        self.addOption ('runJvtEfficiency', True, type=bool,
+            info="whether to calculate the JVT efficiency. The default is True.")
+        self.addOption ('runFJvtEfficiency', False, type=bool,
+            info="whether to calculate the forward JVT efficiency. The default is False.")
+        self.addOption ('systematicsModelJES', "Category", type=str,
+            info="the NP reduction scheme to use for JES: All, Global, Category, "
+            "Scenario. The default is Category.")
+        self.addOption ('systematicsModelJER', "Full", type=str,
+            info="the NP reduction scheme to use for JER: All, Full, Simple. The "
+            "default is Full.")
+        self.addOption ('recalibratePhyslite', True, type=bool,
+            info="whether to run the CP::JetCalibrationAlg on PHYSLITE derivations. "
+            "The default is True.")
         # Calibration tool options
-        self.addOption ('calibToolConfigFile', None, type=str)
-        self.addOption ('calibToolCalibArea', None, type=str)
-        self.addOption ('calibToolCalibSeq', None, type=str)
+        self.addOption ('calibToolConfigFile', None, type=str,
+            info="name (str) of the config file to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('calibToolCalibArea', None, type=str,
+            info="name (str) of the CVMFS area to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('calibToolCalibSeq', None, type=str,
+            info="name (str) of the sequence to use for the jet calibration "
+            "tool (e.g. 'JetArea_Residual_EtaJES_GSC'). Expert option to override "
+            "JetETmiss recommendations. The default is None.")
         # Uncertainties tool options
-        self.addOption ('uncertToolConfigPath', None, type=str)
-        self.addOption ('uncertToolCalibArea', None, type=str)
-        self.addOption ('uncertToolMCType', None, type=str)
+        self.addOption ('uncertToolConfigPath', None, type=str,
+            info="name (str) of the config file to use for the jet uncertainty "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('uncertToolCalibArea', None, type=str,
+            info="name (str) of the CVMFS area to use for the jet uncertainty "
+            "tool. Expert option to override JetETmiss recommendations. The "
+            "default is None.")
+        self.addOption ('uncertToolMCType', None, type=str,
+            info="data type (str) to use for the jet uncertainty tool (e.g. "
+            "'AFII' or 'MC16'). Expert option to override JetETmiss "
+            "recommendations. The default is None.")
 
 
     def getUncertaintyToolSettings(self, config):
@@ -342,14 +396,29 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 class RScanJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the r-scan jet sequence"""
 
-    def __init__ (self, containerName, jetCollection, jetInput, radius) :
+    def __init__ (self, containerName='', jetCollection='', jetInput='', radius=None) :
         super (RScanJetAnalysisConfig, self).__init__ ()
-        self.containerName = containerName
-        self.jetCollection = jetCollection
-        self.jetInput = jetInput
-        self.radius = radius
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('recalibratePhyslite', True, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('jetCollection', jetCollection, type=str,
+            noneAction='error',
+            info="the jet container to run on. It is interpreted to determine "
+            "the correct config blocks to call for small- or large-R jets.")
+        # TODO: add info string
+        self.addOption ('jetInput', jetInput, type=str,
+            noneAction='error',
+            info="")
+        # TODO: add info string
+        self.addOption (radius, radius, type=int,
+            noneAction='error',
+            info="")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Useful "
+            "here to distinguish between different jet definitions.")
+        self.addOption ('recalibratePhyslite', True, type=bool,
+            info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
+            "derivations. The default is True.")
 
 
     def makeAlgs (self, config) :
@@ -407,15 +476,31 @@ def _largeLCTopoConfigFile(config, self):
 class LargeRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the large-r jet sequence"""
 
-    def __init__ (self, containerName, jetCollection, jetInput) :
+    def __init__ (self, containerName='', jetCollection='', jetInput='') :
         super (LargeRJetAnalysisConfig, self).__init__ ()
-        self.containerName = containerName
-        self.jetCollection = jetCollection
-        self.jetInput = jetInput
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('largeRMass', "Comb", type=str)
-        self.addOption ('recalibratePhyslite', True, type=bool)
-        self.addOption ('configFileOverride', None, type=str)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('jetCollection', jetCollection, type=str,
+            noneAction='error',
+            info="the jet container to run on. It is interpreted to determine "
+            "the correct config blocks to call for small- or large-R jets.")
+        # TODO: add info string
+        self.addOption ('jetInput', jetInput, type=str,
+            noneAction='error',
+            info="")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Useful "
+            "here to distinguish between different jet definitions.")
+        # TODO: add info string
+        self.addOption ('largeRMass', "Comb", type=str,
+            info="")
+        self.addOption ('recalibratePhyslite', True, type=bool,
+            info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
+            "derivations. The default is True.")
+        # TODO: add info string
+        self.addOption ('configFileOverride', None, type=str,
+            info="")
 
 
     def makeAlgs (self, config) :

@@ -239,7 +239,6 @@ if __name__ == '__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    from AthenaCommon.AppMgr import ServiceMgr
     cfg = MainServicesCfg(flags)
     cfg.merge(PoolReadCfg(flags))
 
@@ -249,7 +248,6 @@ if __name__ == '__main__':
     cfg.merge (TrackCollectionReadCfg (flags, 'Tracks'))
 
     TRTMonitoringRun3Acc = TRTMonitoringRun3ESD_AlgConfig(flags)
-    ServiceMgr.Dump = False
 
     cfg.merge(TRTMonitoringRun3Acc)
     cfg.run(200)

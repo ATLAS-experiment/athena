@@ -444,7 +444,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
     }
     else if (iEfficiencyCorrectionType == SFRecoHadTau)
     {
-      if (m_sInputFilePathRecoHadTau.empty()) m_sInputFilePathRecoHadTau = sDirectory + "Reco_TrueHadTau_2019-summer.root";
+      if (m_sInputFilePathRecoHadTau.empty()) m_sInputFilePathRecoHadTau = sDirectory + "Reco_TrueHadTau_2019-summer_v2.root";
       if (m_sVarNameRecoHadTau.empty()) m_sVarNameRecoHadTau = "TauScaleFactorReconstructionHadTau";
 
       asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool", this);

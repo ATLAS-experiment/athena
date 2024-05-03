@@ -27,7 +27,6 @@ TgcStripAuxContainer_v1::TgcStripAuxContainer_v1()
     PRD_AUXVARIABLE(channelNumber);
     PRD_AUXVARIABLE(gasGap);
     PRD_AUXVARIABLE(measuresPhi);
-    PRD_AUXVARIABLE(stripPosInStation);
 }
 }  // namespace xAOD
 #undef PRD_AUXVARIABLE

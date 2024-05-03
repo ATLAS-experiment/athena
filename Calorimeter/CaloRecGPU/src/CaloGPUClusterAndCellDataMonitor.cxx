@@ -681,11 +681,6 @@ namespace
     return std::forward<Arg>(a);
   }
 
-  static constexpr void suppress_warning()
-  {
-    return;
-  }
-
   template <class F, class ... Types, class ... Args>
   void apply_to_multi_class(F && f, const multi_class_holder<Types...> &, Args && ... args)
   {

@@ -21,6 +21,20 @@
 
 #include <set>
 
+namespace MuonGMR4{
+    class MuonChamber;
+}
+namespace ActsTrk {
+    template<> TransformCacheDetEle<MuonGMR4::MuonChamber>::TransformCacheDetEle(const IdentifierHash& hash, 
+                                                                                 const MuonGMR4::MuonChamber* chamber);
+    
+    template <> Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::MuonChamber>::fetchTransform(const DetectorAlignStore* store) const;
+    template <> const IDetectorElement*
+        TransformCacheDetEle<MuonGMR4::MuonChamber>::parent() const;
+
+}
+
 namespace MuonGMR4 {
     class MuonChamber {
         public:
@@ -75,12 +89,7 @@ namespace MuonGMR4 {
         private:
            defineArgs m_args{};
            using AlignmentStore = ActsGeometryContext::AlignmentStore;
-           Amg::Transform3D fromLayerToGlobal(const AlignmentStore* store) const;
-
-           ActsTrk::TransformCache m_localToGlobal{IdentifierHash{0},
-                    [this](const AlignmentStore* store, const IdentifierHash&){
-                        return fromLayerToGlobal(store);
-                    },readOutElements()[0]};
+           ActsTrk::TransformCacheDetEle<MuonChamber> m_localToGlobal{IdentifierHash{0}, this};
     };
     
     std::ostream& operator<<(std::ostream& ostr,
@@ -90,5 +99,7 @@ namespace MuonGMR4 {
                              const MuonChamber& chamber);
 
 }
+
+
 #endif
 #endif

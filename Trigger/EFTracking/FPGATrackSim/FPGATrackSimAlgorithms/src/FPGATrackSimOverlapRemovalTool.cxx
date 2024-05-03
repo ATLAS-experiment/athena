@@ -74,7 +74,7 @@ bool isLocalMax(vector2D<FPGATrackSimRoad*> const & acc, unsigned x, unsigned y,
 StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATrackSimRoad*>& roads)
 {
     if (roads.empty()) return StatusCode::SUCCESS;
-    if (!dynamic_cast<FPGATrackSimRoad_Hough*>(roads.front())) return StatusCode::SUCCESS;
+
     if (!m_roadSliceOR) return StatusCode::SUCCESS;
     size_t in = roads.size();
 
@@ -84,10 +84,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATra
     // Slice-wise duplicate removal: accept only one road (with most hits) per bin
     for (FPGATrackSimRoad* r: roads)
     {
-        FPGATrackSimRoad_Hough* hough = dynamic_cast<FPGATrackSimRoad_Hough*>(r);
-        if (!hough) return StatusCode::FAILURE; // mixed hough non-hough roads not allowed!
-
-        FPGATrackSimRoad* & old = acc(hough->getYBin(), hough->getXBin());
+        FPGATrackSimRoad* & old = acc(r->getYBin(), r->getXBin());
         if (!old) old = r;
         else if (r->getNHitLayers() > old->getNHitLayers()) old = r;
         else if (r->getNHitLayers() == old->getNHitLayers() && r->getNHits() > old->getNHits()) old = r;
@@ -237,31 +234,40 @@ void FPGATrackSimOverlapRemovalTool::findMinChi2MaxHit(const std::vector<int>& d
 int FPGATrackSimOverlapRemovalTool::findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
 {
   int nCommHits=0;
-  const std::vector <FPGATrackSimHit> hits1 = Track1.getFPGATrackSimHits();
-  const std::vector <FPGATrackSimHit> hits2 = Track2.getFPGATrackSimHits();
 
   // Loop through all layers
-  for(unsigned int i = 0; i < hits1.size(); ++i)
+  for(unsigned int i = 0; i < Track1.getFPGATrackSimHits().size(); ++i)
   {
+    const FPGATrackSimHit& hit1 = Track1.getFPGATrackSimHits().at(i);
+    const FPGATrackSimHit& hit2 = Track2.getFPGATrackSimHits().at(i);
+
     // Check if hit is missing
-    if(!hits1.at(i).isReal() || !hits2.at(i).isReal())
+    if(!hit1.isReal() || !hit2.isReal())
     {
       continue;
     }
     // Check if hit on the same plane
-    else if(hits1.at(i).getLayer() != hits2.at(i).getLayer())
+    else if(hit1.getLayer() != hit2.getLayer())
     {
       continue;
     }
     // Check if two hits have the same hashID
-    else if(hits1.at(i).getFPGATrackSimIdentifierHash() != hits2.at(i).getFPGATrackSimIdentifierHash())
+    else if(hit1.getIdentifierHash() != hit2.getIdentifierHash())
     {
       continue;
     }
-    // Check if two hits have same coordinate
-    else if(hits1.at(i).getPhiCoord() == hits2.at(i).getPhiCoord()
-            && hits1.at(i).getEtaCoord() == hits2.at(i).getEtaCoord())
-    {
+    // Check if two hits have same coordinate. this is difficult due to spacepoints,
+    // since the same hit can be used to make multiple spacepoints.
+    else if (hit1.getHitType() == HitType::spacepoint && hit2.getHitType() == HitType::spacepoint) {
+      if ((hit1.getX() == hit2.getX()) && (hit1.getY() == hit2.getY()) && (hit1.getZ() == hit2.getZ())) {
+        nCommHits++;
+      } else {
+        continue;
+      }
+    }
+    // If both hits aren't spacepoints, we should be able to do this comparison.
+    else if (hit1.getPhiCoord() == hit2.getPhiCoord()
+          && hit1.getEtaCoord() == hit2.getEtaCoord()) {
       nCommHits++;
     }
     else
@@ -275,29 +281,38 @@ int FPGATrackSimOverlapRemovalTool::findNCommonHits(const FPGATrackSimTrack& Tra
 int FPGATrackSimOverlapRemovalTool::findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
 {
   int nonOverlapHits=0;
-  const std::vector <FPGATrackSimHit> hits1 = Track1.getFPGATrackSimHits();
-  const std::vector <FPGATrackSimHit> hits2 = Track2.getFPGATrackSimHits();
 
-  //  Loop through all layers
-  for(unsigned int i=0; i<hits1.size(); i++)
+  // Loop through all layers
+  for(unsigned int i = 0; i < Track1.getFPGATrackSimHits().size(); ++i)
   {
+    const FPGATrackSimHit& hit1 = Track1.getFPGATrackSimHits().at(i);
+    const FPGATrackSimHit& hit2 = Track2.getFPGATrackSimHits().at(i);
     //  First make sure we are looking at real hits
-    if(!hits1.at(i).isReal() || !hits2.at(i).isReal())
+    if(!hit1.isReal() || !hit2.isReal())
     {
       continue;
     }
     //  Check if two hits are on the same plane
-    else if(hits1.at(i).getLayer() != hits2.at(i).getLayer())
+    else if(hit1.getLayer() != hit2.getLayer())
     {
       nonOverlapHits++;
     }
     // Check if two hits have the same hashID
-    else if(hits1.at(i).getFPGATrackSimIdentifierHash() != hits2.at(i).getFPGATrackSimIdentifierHash())
+    else if(hit1.getIdentifierHash() != hit2.getIdentifierHash())
     {
       nonOverlapHits++;
     }
-    else if(hits1.at(i).getPhiCoord() != hits2.at(i).getPhiCoord()
-            || hits1.at(i).getEtaCoord() != hits2.at(i).getEtaCoord())
+    // Check if two hits have same coordinate. this is difficult due to spacepoints,
+    // since the same hit can be used to make multiple spacepoints.
+    else if (hit1.getHitType() == HitType::spacepoint && hit2.getHitType() == HitType::spacepoint) {
+      if ((hit1.getX() != hit2.getX()) || (hit1.getY() == hit2.getY()) || (hit1.getZ() == hit2.getZ())) {
+        nonOverlapHits++;
+      } else {
+        continue;
+      }
+    }
+    else if(hit1.getPhiCoord() != hit1.getPhiCoord()
+            || hit1.getEtaCoord() != hit1.getEtaCoord())
     {
       nonOverlapHits++;
     }

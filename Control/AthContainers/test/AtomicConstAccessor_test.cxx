@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file AthContainers/test/AtomicConstAccessor_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -15,6 +13,7 @@
 #include "AthContainers/tools/AtomicConstAccessor.h"
 #include "AthContainers/tools/AtomicDecorator.h"
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/Accessor.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "TestTools/expect_exception.h"
 #include <iostream>
@@ -86,6 +85,13 @@ void test1()
   static_assert (std::is_same<decltype(ityp2(b)),
                               int>::value, "test");
 
+  {
+    SG::AtomicConstAccessor<int> i2 (ityp2_id);
+    assert (i2.auxid() == ityp2_id);
+    EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, (SG::AtomicConstAccessor<float> (ityp2_id)));
+    EXPECT_EXCEPTION (SG::ExcAtomicMismatch, (SG::Accessor<int> (ityp2_id)));
+  }
+
   SG::AtomicDecorator<int> ityp2_d ("anInt2");
   ityp2_d(b) = 11;
   assert (11 == ityp2(b));
@@ -102,7 +108,7 @@ void test1()
                               const std::atomic<int>*>::value, "test");
 
   EXPECT_EXCEPTION (SG::ExcAtomicMismatch,
-                    SG::AuxElement::Accessor<int> ityp3a ("anInt3"));
+                    SG::Accessor<int> ityp3a ("anInt3"));
 }
 
 

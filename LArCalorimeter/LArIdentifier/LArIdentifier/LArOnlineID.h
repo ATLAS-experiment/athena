@@ -33,7 +33,9 @@ class LArOnlineID : public LArOnlineID_Base
   
   int initialize_from_dictionary(const IdDictMgr&) override final;
   
-  bool  isHECchannel     (const HWIdentifier id) const override final; // differs for Maini and DT
+  bool  isHECchannel     (const HWIdentifier id) const override final; // differs for Main and DT
+  bool  isEMECIW         (const HWIdentifier id) const override final; // differs for Main and DT
+  bool  isEMECOW         (const HWIdentifier id) const override final; // differs for Main and DT
 
   /* Test beam disctionaries */
   bool  is_H8                    (const HWIdentifier channelId) const;

@@ -49,7 +49,7 @@ trigger_keys = [
 ]
 
 
-def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = [],
+def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = None,
                   unique_tag_info_values = True, ignoreNonExistingLocalFiles=False):
     """
     This tool is independent of Athena framework and returns the metadata from a given file.
@@ -80,6 +80,9 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
     # Check the value of mode parameter
     if mode not in ('tiny', 'lite', 'full', 'peeker', 'iov'):
         raise NameError('Allowed values for "mode" parameter are: "tiny", "lite", "peeker", "iov" or "full"')
+
+    if meta_key_filter is None:
+        meta_key_filter = []
 
     # Disable 'full' and 'iov' in non-Gaudi environments
     if not isGaudiEnv():
@@ -374,7 +377,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 for name, content in persistent_instances.items():
                     key = name
                     if hasattr(content, 'm_folderName'):
-                        key = getattr(content, 'm_folderName')
+                        key = content.m_folderName
 
                     # Some transition AODs contain both the Run2 and Run3 metadata formats. We only wish to read the Run3 format if such a file is encountered.
                     has_r3_trig_meta = ('TriggerMenuJson_HLT' in persistent_instances or 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT' in persistent_instances)
@@ -434,22 +437,16 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
 
             try:
                 # get the number of events from EventStreamInfo
-                esi_dict = next(key for key in meta_dict[filename].keys() if "EventStreamInfo" in key)
+                esi_dict = next(key for key, value in meta_dict[filename].items()
+                                if isinstance(value, dict) and "numberOfEvents" in value and
+                                meta_dict[filename]["metadata_items"][key] == "EventStreamInfo")
+                msg.debug(f"{esi_dict=}")
                 meta_dict[filename]["nentries"] = meta_dict[filename][esi_dict]["numberOfEvents"]
-            except (KeyError, StopIteration):
-                # fallback to opening the DataHeader Container to read the number of entries
-                dataHeaderTree = current_file.Get(PoolOpts.TTreeNames.DataHeader)
-                if isinstance(dataHeaderTree, ROOT.TTree):
-                    meta_dict[filename]['nentries'] = dataHeaderTree.GetEntriesFast()
-                else:
-                    # check early to avoid scary ROOT read errors
-                    if current_file.GetListOfKeys().Contains(PoolOpts.RNTupleNames.DataHeader) and ROOT.gROOT.GetVersionInt() < 63100:
-                        raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
-                    dataHeaderRNT = current_file.Get(PoolOpts.RNTupleNames.DataHeader)
-                    if isinstance(dataHeaderRNT, ROOT.Experimental.RNTuple):
-                        meta_dict[filename]['nentries'] = ROOT.Experimental.RNTupleReader.Open(dataHeaderRNT).GetNEntries()
-                    else:
-                        meta_dict[filename]['nentries'] = None
+            except StopIteration as err:
+                msg.debug(f"Caught {err=}, {type(err)=}, falling back on opening the DataHeader"
+                          " Container to read the number of entries")
+                meta_dict[filename]['nentries'] = dataheader_nentries(current_file)
+                msg.debug(f"{meta_dict[filename]['nentries']=}")
 
             if unique_tag_info_values and mode=='iov':
                 unique_tag_info_values = False
@@ -466,6 +463,48 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 if '/TagInfo' in meta_dict[filename]:
                     for key, value in meta_dict[filename]['/TagInfo'].items():
                         if isinstance(value, list) and value:
+                            if len(unique_values := set(value)) > 1:
+                                msg.warn(
+                                    f"Found multiple values for {key}: {value}. "
+                                    "Looking for possible duplicates."
+                                )
+                                maybe_ok = False
+                                if key == "AMITag":
+                                    # curate duplicates like: ['s3681_q453', 's3681_q453_'] or ["s3681_q453", "q453_s3681"]
+                                    unique_amitags = set()
+                                    for amitags in unique_values:
+                                        unique_amitags.add(
+                                            "_".join({tag for tag in amitags.split("_") if tag})
+                                        )
+                                    if len(unique_amitags) == 1:
+                                        maybe_ok = True
+                                elif key == "beam_energy":
+                                    # handle duplicates like: ['6500000', '6500000.0'] or [3, "3"]
+                                    unique_energies = set()
+                                    for energy in unique_values:
+                                        try:
+                                            energy = int(energy)
+                                        except ValueError:
+                                            try:
+                                                energy = float(energy)
+                                            except ValueError:
+                                                pass
+                                        unique_energies.add(energy)
+                                    if len(unique_energies) == 1:
+                                        maybe_ok = True
+                                elif key in ["AtlasRelease", "IOVDbGlobalTag", "AODFixVersion"]:
+                                    maybe_ok = True
+                                if maybe_ok:
+                                    msg.warn(
+                                        f"Multiple values for {key} may mean the same, or "
+                                        "the input file was produced in multi-step job. "
+                                        f"Ignoring all but the first entry: {key} = {value[0]}"
+                                    )
+                                else:
+                                    raise ValueError(
+                                        f"{key} from /TagInfo contains more than 1 unique value: {value}"
+                                    )
+
                             meta_dict[filename]['/TagInfo'][key] = value[0]
 
             if promote is None:
@@ -507,7 +546,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             meta_dict[filename]['auto_flush'] = 1
 
             if hasattr(data_reader, 'GUID'):
-                meta_dict[filename]['file_guid'] = getattr(data_reader, 'GUID')()
+                meta_dict[filename]['file_guid'] = data_reader.GUID()
 
             # compression level and algorithm, for BS always ZLIB
             meta_dict[filename]['file_comp_alg'] = 1
@@ -554,13 +593,13 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         k, v = md.split('=')
                         bs_metadata[k] = v
 
-                bs_metadata['detectorMask'] = getattr(data_reader, 'detectorMask')()
-                bs_metadata['runNumbers'] = getattr(data_reader, 'runNumber')()
-                bs_metadata['lumiBlockNumbers'] = getattr(data_reader, 'lumiblockNumber')()
-                bs_metadata['projectTag'] = getattr(data_reader, 'projectTag')()
-                bs_metadata['stream'] = getattr(data_reader, 'stream')()
+                bs_metadata['detectorMask'] = data_reader.detectorMask()
+                bs_metadata['runNumbers'] = data_reader.runNumber()
+                bs_metadata['lumiBlockNumbers'] = data_reader.lumiblockNumber()
+                bs_metadata['projectTag'] = data_reader.projectTag()
+                bs_metadata['stream'] = data_reader.stream()
                 #bs_metadata['beamType'] = getattr(data_reader, 'beamType')()
-                beamTypeNbr= getattr(data_reader, 'beamType')()
+                beamTypeNbr= data_reader.beamType()
                 #According to info from Rainer and Guiseppe the beam type is
                 #O: no beam
                 #1: protons
@@ -569,7 +608,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 elif (beamTypeNbr==1 or beamTypeNbr==2):  bs_metadata['beamType'] = 'collisions'
                 else: bs_metadata['beamType'] = 'unknown'
 
-                bs_metadata['beamEnergy'] = getattr(data_reader, 'beamEnergy')()
+                bs_metadata['beamEnergy'] = data_reader.beamEnergy()
 
                 meta_dict[filename]['eventTypes'] = bs_metadata.get('eventTypes', [])
                 meta_dict[filename]['GeoAtlas'] = bs_metadata.get('geometry', None)
@@ -589,25 +628,31 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     meta_dict[filename]['runNumbers'].append(bs_metadata.get('run_number', 0))
                     meta_dict[filename]['lumiBlockNumbers'].append(bs_metadata.get('LumiBlock', 0))
 
-                ievt = iter(bs)
-                evt = next(ievt)
-                evt.check()  # may raise a RuntimeError
-                processing_tags = [dict(stream_type = tag.type, stream_name = tag.name, obeys_lbk = bool(tag.obeys_lumiblock)) for tag in evt.stream_tag()]
-                meta_dict[filename]['processingTags'] = [x['stream_name'] for x in processing_tags]
-                meta_dict[filename]['evt_number'] = [evt.global_id()]
-                meta_dict[filename]['run_type'] = [eformat.helper.run_type2string(evt.run_type())]
-                # ATLASRECTS-7126: If there is no valid lumiblock information
-                # in the ByteStream header, get the info from the first event.
-                if meta_dict[filename]['lumiBlockNumbers'] == [0]:
-                    msg.debug('Taking the luminosity block info from the first event (%i)', evt.lumi_block())
-                    meta_dict[filename]['lumiBlockNumbers'] = [evt.lumi_block()]
-                    pass
-                # ATLASRECTS-7126: If there is no valid run number information
-                # in the ByteStream header, get the info from the first event.
-                if meta_dict[filename]['runNumbers'] == [0]:
-                    msg.debug('Taking the run number info from the first event (%i)', evt.run_no())
-                    meta_dict[filename]['runNumbers'] = [evt.run_no()]
-                    pass
+                msg.debug(f"{meta_dict[filename]=}")
+                msg.debug(f"{len(bs)=}")
+                if len(bs):
+                    evt = bs[0]
+                    try:
+                        evt.check()
+                        meta_dict[filename]['processingTags'] = [tag.name for tag in evt.stream_tag()]
+                        meta_dict[filename]['evt_number'] = [evt.global_id()]
+                        meta_dict[filename]['run_type'] = [eformat.helper.run_type2string(evt.run_type())]
+                        # ATLASRECTS-7126: If there is no valid lumiblock information
+                        # in the ByteStream header, get the info from the first event.
+                        if meta_dict[filename]['lumiBlockNumbers'] == [0]:
+                            msg.debug('Taking the luminosity block info from the first event (%i)', evt.lumi_block())
+                            meta_dict[filename]['lumiBlockNumbers'] = [evt.lumi_block()]
+                        # ATLASRECTS-7126: If there is no valid run number information
+                        # in the ByteStream header, get the info from the first event.
+                        if meta_dict[filename]['runNumbers'] == [0]:
+                            msg.debug('Taking the run number info from the first event (%i)', evt.run_no())
+                            meta_dict[filename]['runNumbers'] = [evt.run_no()]
+                    except RuntimeError as err:
+                        msg.error("Issue while reading the first event of BS file %r: %r", filename, err)
+                    else:
+                        msg.debug(f"{meta_dict[filename]=}")
+                else:
+                    msg.warn(f"Event-less BS {filename=}, will not read metadata information from the first event")
 
                 # fix for ATEAM-122
                 if len(bs_metadata.get('eventTypes', '')) == 0:  # see: ATMETADATA-6
@@ -837,7 +882,7 @@ def _extract_fields_iov( iov_container, idx_range ):
              result[attr_name].append(attr_value)
 
      max_element_count = 0
-     for name, content in result.items():
+     for content in result.values():
          if len(content) > max_element_count:
              max_element_count = len(content)
 
@@ -1393,3 +1438,32 @@ def convert_itemList(metadata, layout):
                 dic[k].append(v)
 
             return dict(dic)
+
+
+def dataheader_nentries(infile):
+    """Extract number of entries from DataHeader.
+
+    infile  ROOT TFile object or filename string
+    return  Number of entries as returned by DataHeader object in infile,
+            None in absence of DataHeader object
+    """
+    import ROOT
+    from PyUtils.PoolFile import PoolOpts
+    if not isinstance(infile, ROOT.TFile):
+        infile = ROOT.TFile.Open(infile)
+
+    for name in {PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader}:
+        obj = infile.Get(name)
+        msg.debug(f"dataheader_nentries: {name=}, {obj=}, {type(obj)=}")
+        if not obj:
+            continue
+        if isinstance(obj, ROOT.TTree):
+            return obj.GetEntriesFast()
+        else:
+            # check early to avoid scary ROOT read errors
+            if ROOT.gROOT.GetVersionInt() < 63100:
+                raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
+            if isinstance(obj, ROOT.Experimental.RNTuple):
+                return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+            else:
+                raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")

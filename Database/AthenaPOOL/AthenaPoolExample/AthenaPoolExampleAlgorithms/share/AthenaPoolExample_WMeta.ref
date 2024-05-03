@@ -916,7 +916,7 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events 
 WriteCond            INFO in finalize()
 WriteCond            INFO Pedestal x = 213136 y = -5580.21 z = -195208 string = <..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o>
 Stream1             DEBUG AthenaOutputStream Stream1 ::stop()
-Stream1             DEBUG slot 0  handle() incident type: MetaDataStop
+Stream1             DEBUG handle() incident type: MetaDataStop
 Stream1.FileMet...  DEBUG Could not get mcProcID
 Stream1.FileMet...  DEBUG FileMetaData payload replaced in store with content created for this stream
 Stream1             DEBUG addItemObjects(9102,"PedestalWriteData") called

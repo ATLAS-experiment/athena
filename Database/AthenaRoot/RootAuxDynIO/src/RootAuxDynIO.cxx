@@ -96,9 +96,8 @@ namespace RootAuxDynIO
       return std::make_unique<TBranchAuxDynWriter>(tree, bufferSize, splitLevel, offsettab_len, do_branch_fill);
    }
 
-   std::unique_ptr<RootAuxDynIO::IRNTupleWriter>
-   getNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics) {
-      return std::make_unique<RNTupleAuxDynWriter>(file, ntupleName, enableBufferedWrite, enableMetrics);
+   std::unique_ptr<RootAuxDynIO::IRNTupleAuxDynWriter>
+   getNTupleAuxDynWriter() {
+      return std::make_unique<RNTupleAuxDynWriter>();
    }
-
 }

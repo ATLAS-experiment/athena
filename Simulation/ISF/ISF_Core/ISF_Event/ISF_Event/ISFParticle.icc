@@ -34,8 +34,13 @@ namespace ISF {
 
   // barcode methods
   //
-  inline Barcode::ParticleBarcode ISFParticle::barcode() const { return m_barcode; }
-  inline void            ISFParticle::setBarcode(Barcode::ParticleBarcode bc) { m_barcode = bc; }
+  inline Barcode::ParticleBarcode ISFParticle::barcode() const { return m_barcode; } // FIXME barcode-based
+  inline void            ISFParticle::setBarcode(Barcode::ParticleBarcode bc) { m_barcode = bc; } // FIXME-barcode-based
+
+  // id methods
+  //
+  inline int ISFParticle::id() const { return m_uid; }
+  inline void ISFParticle::setId(int id) { m_uid = id; }
 
   // truth methods
   //

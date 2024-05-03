@@ -6,11 +6,13 @@
 #include <GaudiKernel/StatusCode.h>
 #include "AthLinks/ElementLinkVector.h"
 #include "TrigConfHLTUtils/HLTUtils.h"
+#include "TrigNavStructure/Types.h"
 #include "xAODTrigger/TrigPassBitsContainer.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
 #include "Run2ToRun3TrigNavConverterV2.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
+#include "TrigConfHLTData/HLTSequenceList.h"
 #include "SpecialCases.h"
 
 namespace TCU = TrigCompositeUtils;
@@ -278,6 +280,8 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
     ATH_CHECK(allProxiesConnected(convProxies));
 
   ATH_CHECK(associateChainsToProxies(convProxies, m_allTEIdsToChains));
+  // printProxies(convProxies, [](auto ){ return true;},
+  //             {m_chainIdsPrinter});
 
   ATH_CHECK(cureUnassociatedProxies(convProxies));
   ATH_MSG_DEBUG("Proxies to chains mapping done");
@@ -287,6 +291,8 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   if (not m_chainsToSave.empty())
   {
     ATH_CHECK(removeUnassociatedProxies(convProxies));
+    printProxies(convProxies, [](auto ){ return true;},
+            {m_chainIdsPrinter});
     ATH_MSG_DEBUG("Removed proxies to chains that are not converted, remaining number of elements " << convProxies.size());
   }
   if (m_doSelfValidation)
@@ -296,6 +302,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   if (m_doCompression)
   {
     ATH_CHECK(doCompression(convProxies, *run2NavigationPtr));
+    // printProxies(convProxies, [](auto ){ return true;},
+    //         {m_chainIdsPrinter});
+
   }
 
   SG::WriteHandle<TrigCompositeUtils::DecisionContainer> outputNavigation = TrigCompositeUtils::createAndStore(m_trigOutputNavKey, context);
@@ -324,8 +333,14 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   ATH_CHECK(updateTerminusNode(*decisionOutput, context));
   ATH_MSG_DEBUG("Conversion done, from " << convProxies.size() << " elements to " << decisionOutput->size() << " elements");
 
-  // printProxies(convProxies, [](auto ){ return true;},
-  //             {m_chainIdsPrinter, m_teIDPrinter});
+  printProxies(convProxies, [](auto ){ return true;},
+              {m_chainIdsPrinter, m_teIDPrinter});
+  ATH_MSG_DEBUG("Resulting nodes");
+  size_t index = 0;
+  for ( auto o: *decisionOutput) {
+    ATH_MSG_DEBUG("Index: " << index << " " << *o);
+    index++;
+  }
 
   // dispose temporaries
   for (auto proxy : convProxies)
@@ -336,10 +351,56 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   return StatusCode::SUCCESS;
 }
 
+size_t Run2ToRun3TrigNavConverterV2::is2LegTopoChain(const TrigConf::HLTChain* ptrChain) const {
+  // chains of configs structure
+  // A  B
+  //  \/
+  //  C
+  // where C is the output TE of sequence consuming A & B
+  // sometimes there are an additional leafs
+  //  C
+  //  |
+  //  D
+  if ( not std::regex_match(ptrChain->name(), SpecialCases::isTopo) ) return 0;
+  size_t stepToConsider = 0;
+  const size_t sigsSize = ptrChain->signatures().size();
+  if ( sigsSize < 2 ) return 0;
+  for ( size_t step = sigsSize-1; step > 1; step --) {
+    if ( (ptrChain->signatures()[step-1])->outputTEs().size() == 2 and (ptrChain->signatures()[step])->outputTEs().size() == 1 )  {
+      stepToConsider = step;
+      break;
+    }
+  }
+  if ( stepToConsider == 0 ) return 0; // not a topo
+
+  //counting is right, need to see now if TEs are connected
+  auto finalTE = (ptrChain->signatures()[stepToConsider])->outputTEs()[0];
+  auto preFinalTEs = (ptrChain->signatures()[stepToConsider-1])->outputTEs();
+
+  auto finalSeq =  m_configSvc->sequences().getSequence(finalTE->id());
+  std::set<HLT::te_id_type> tesInSeq;
+  std::set<HLT::te_id_type> tesInChain;
+
+  for ( auto te: finalSeq->inputTEs()) {
+     tesInSeq.insert(te->id()); 
+  }
+
+  for ( auto te: preFinalTEs) {
+     tesInChain.insert(te->id()); 
+  }
+
+  if (tesInSeq == tesInChain)  {
+    return stepToConsider;
+  }
+  return 0;
+}
+
 StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMap_t &allTEs, TEIdToChainsMap_t &finalTEs) const
 {
-  // port chains iteration code from previous version
+
   ATH_CHECK(not m_configSvc->chains().empty());
+
+  // obtain map output TE -> input TE via sequences
   for (auto ptrChain : m_configSvc->chains())
   {
     std::string chainName = ptrChain->name();    
@@ -351,31 +412,65 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
         continue;
       }
     }
+    // hack for etcut chains
+    // if we ever need to generalise that it should be moved to separate function
+    std::map<HLT::te_id_type, HLT::te_id_type> etcutReplacementTEs;
+    auto etcutReplacement = [&etcutReplacementTEs](HLT::te_id_type in) { auto out = etcutReplacementTEs.find(in);  return (out == etcutReplacementTEs.end() ? in : out->second ); };
+    if ( chainName.find("etcut") != std::string::npos ) {
+      std::set<size_t> positionsOfEtCutLegs;
+      // use heuristics to mention 
+      if( std::regex_match(chainName, SpecialCases::egammaDiEtcut) ) {
+         ATH_MSG_DEBUG("EtCut chains hack, chain with two etcut legs ");
+         positionsOfEtCutLegs.insert({0, 1});
+      } else if ( std::regex_match(chainName, SpecialCases::egammaCombinedWithEtcut) ) {
+         ATH_MSG_DEBUG("EtCut chains hack, egamma chain with second etcut leg ");
+         positionsOfEtCutLegs.insert({1});
+      } else if ( std::regex_match(chainName, SpecialCases::egammaEtcut) ) {
+         ATH_MSG_DEBUG("EtCut chains hack, single leg egamma chain");
+         positionsOfEtCutLegs.insert({0});
+      }
+      
+      // pilot pass to fill the replacement map
+      std::map<size_t, HLT::te_id_type> positionToDesiredIDmap;
+      for (auto ptrHLTSignature : ptrChain->signatures()) {
+        size_t position = 0;        
+        for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
+          if (positionsOfEtCutLegs.count(position) and positionToDesiredIDmap.find(position) != positionToDesiredIDmap.end() ) {
+            etcutReplacementTEs[ptrHLTTE->id()] = positionToDesiredIDmap[position];
+            ATH_MSG_DEBUG("EtCut chains hack, TE " << ptrHLTTE->name() << " will be replaced by: " << TrigConf::HLTUtils::hash2string(positionToDesiredIDmap[position]));
+          } else {
+            if ( ptrHLTTE->name().find("calocalib") != std::string::npos and positionsOfEtCutLegs.count(position) ) { // we have final TE for this leg
+              positionToDesiredIDmap[position] =  ptrHLTTE->id();
+            }
+          }
+          position++;
+        }
+      }
+    }
+
     // chains with a single leg
     HLT::Identifier chainId = HLT::Identifier(chainName);
     ATH_MSG_DEBUG(" CHAIN name " << chainName << " CHAIN Id " << chainId);
-    for (auto ptrHLTSignature : ptrChain->signatures())
-    {
-      for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
-      {
-        unsigned int teId = ptrHLTTE->id();
+    for (auto ptrHLTSignature : ptrChain->signatures()) {
+      for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
+        unsigned int teId = etcutReplacement(ptrHLTTE->id());
         allTEs[teId].insert(chainId);  
-
-        if (ptrHLTSignature == ptrChain->signatures().back())
-        {
-          finalTEs[teId].insert(chainId);
-          ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
+        if (ptrHLTSignature == ptrChain->signatures().back()) {
+            finalTEs[teId].insert(chainId);
+            ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
         }
       }
     }
     // chains with a multiple legs
     std::vector<int> multiplicities = ChainNameParser::multiplicities(chainName);
+
     // dirty hacks for failing chains parsing    
     if(std::regex_match(chainName, SpecialCases::gammaXeChain))
       multiplicities={1,1};
 
     
     if ( multiplicities.size() > 1 ) {
+      ATH_MSG_DEBUG(" this " << (is2LegTopoChain(ptrChain) ? "is": "is not") << " topological chain");
       // the chain structure (in terms of multiplicities) may change along the way
       // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
       // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
@@ -405,15 +500,15 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
             ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts << " " << teIds);
             for ( size_t legNumber = 0; legNumber < teIds.size(); ++ legNumber){
               HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
-              allTEs[teIds[legNumber]].insert(chainLegId);
+              allTEs[etcutReplacement(teIds[legNumber])].insert(chainLegId);
             }
           } 
         }
         for ( size_t legNumber = 0; legNumber < teIdsLastHealthyStepIds.size(); ++ legNumber ) {
           HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
 
-          ATH_MSG_DEBUG("created leg id " << chainLegId << " that will replace TE ID " << teIdsLastHealthyStepIds[legNumber]);
-          finalTEs[teIdsLastHealthyStepIds[legNumber]].insert(chainLegId);
+          ATH_MSG_DEBUG("created leg id " << chainLegId << " that will replace TE ID " << etcutReplacement(teIdsLastHealthyStepIds[legNumber]));
+          finalTEs[etcutReplacement(teIdsLastHealthyStepIds[legNumber])].insert(chainLegId);
         }
     }
 

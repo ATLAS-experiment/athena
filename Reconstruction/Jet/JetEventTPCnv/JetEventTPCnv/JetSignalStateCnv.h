@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETEVENTTPCNV_SIGNALSTATESTORE_H 
@@ -391,7 +391,7 @@ class SignalStateCnv {
       return ps;
     };
   
-  JetConverterTypes::momentum decompress( JetConverterTypes::signalState_pers_t ps,
+  JetConverterTypes::momentum decompress( const JetConverterTypes::signalState_pers_t& ps,
 					  JetConverterTypes::momentum momCal,
 					  MsgStream& msg ) const
     {

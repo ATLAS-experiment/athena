@@ -22,16 +22,17 @@
 #include <vector>
 
 
-class ITrackAnalysisDefinitionSvc : virtual public asg::IAsgService {
+class ITrackAnalysisDefinitionSvc :
+    virtual public asg::IAsgService {
 
 public:
 
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID( ITrackAnalysisDefinitionSvc, 1, 0 );
 
-  virtual std::vector<std::string> configuredChains() const = 0;
-  virtual std::string subFolder() const = 0;
-  virtual std::string anaTag() const = 0;
+  virtual const std::vector< std::string >& configuredChains() const = 0;
+  virtual const std::string& subFolder() const = 0;
+  virtual const std::string& anaTag() const = 0;
 
   virtual bool useTrigger() const = 0;
   virtual bool useTruth() const = 0;
@@ -44,14 +45,11 @@ public:
   virtual bool isReferenceTruth() const = 0;
   virtual bool isReferenceOffline() const = 0;
 
-  virtual std::string testType() const = 0;
-  virtual std::string referenceType() const = 0;
-  virtual std::string testTag() const = 0;
-  virtual std::string referenceTag() const = 0;
-
-  virtual std::string matchingType() const = 0;
-  virtual std::string testToRefDecoName() const = 0;
-  virtual std::string refToTestDecoName() const = 0;
+  virtual const std::string& testType() const = 0;
+  virtual const std::string& referenceType() const = 0;
+  virtual const std::string& testTag() const = 0;
+  virtual const std::string& referenceTag() const = 0;
+  virtual const std::string& matchingType() const = 0;
 
   /// histogram properties
   virtual bool doTrackParameters() const = 0;

@@ -29,6 +29,7 @@
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
 #include "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimClusteringToolI.h"
+#include "FPGATrackSimMaps/FPGATrackSimSpacePointsToolI.h"
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
 #include "FPGATrackSimHough/IFPGATrackSimRoadFinderTool.h"
@@ -76,6 +77,7 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
         ToolHandle<IFPGATrackSimInputTool>       m_hitInputTool {this, "FPGATrackSimSGToRawHitsTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimSGToRawHits", "input handler"};
 	ToolHandle<FPGATrackSimRawToLogicalHitsTool> m_hitMapTool {this, "FPGATrackSimRawToLogicalHitsTool", "FPGATrackSimRawToLogicalHitsTool/FPGATrackSim_RawToLogicalHitsTool", "FPGATrackSim_RawToLogicalHitsTool"};
         ToolHandle<FPGATrackSimClusteringToolI>       m_clusteringTool { this, "FPGATrackSimClusteringFTKTool", "FPGATrackSimClusteringFTKTool/FPGATrackSimClusteringFTKTool", "FPGATrackSimClusteringFTKTool" };
+        ToolHandle<FPGATrackSimSpacePointsToolI>       m_spacePointsTool { this, "SpacePointTool", "FPGATrackSimSpacePointsTool/FPGATrackSimSpacePointsTool", "FPGATrackSimSpacePointsTool" };
 	ToolHandle<IFPGATrackSimRoadFinderTool>       m_roadFinderTool {this, "RoadFinder", "RoadFinder"};
 	const FPGATrackSimPlaneMap* m_pmap = nullptr; // alias to m_FPGATrackSimMapping->PlaneMap();
 
@@ -84,11 +86,13 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
         // Configuration
 	Gaudi::Property<int> m_nRegions {this, "NBanks", 0, "Number of banks to make"};
 	Gaudi::Property<bool> m_doClustering {this, "Clustering", true, "Do cluster?"};
+	Gaudi::Property<bool> m_doSpacePoints {this, "SpacePoints", true, "Do spacepoints?"};
 	Gaudi::Property<int> m_ideal_geom {this, "IdealiseGeometry", 0, "Ideal geo flag, 0 is non, 1 is 1st order, 2 is 2nd order"};
 	Gaudi::Property<bool> m_single {this, "SingleSector", false, "Run single sector"};
 	Gaudi::Property<bool> m_doHoughConstants {this, "HoughConstants", true, "If true will run Hough Transform to set q/pt and phi0"};
 	Gaudi::Property<bool> m_doDeltaPhiConsts {this, "DeltaPhiConstants", false, "If true will generate delta phi constants"};
 	Gaudi::Property<int> m_MaxWC {this, "WCmax", 0, "Max number of WCs"};
+        Gaudi::Property<int> m_minSpacePlusPixel {this, "minSpacePlusPixel", 4, "Require that tracks in training have a certain number of pixel hits + spacepoints" };
 	Gaudi::Property<float> m_PT_THRESHOLD {this, "PT_THRESHOLD", 0., "Min pt"};
 	Gaudi::Property<float> m_D0_THRESHOLD {this, "D0_THRESHOLD", 1., "Max d0"};
 	Gaudi::Property<int> m_TRAIN_PDG {this, "TRAIN_PDG", 0, "PDG of particles to train on"};
@@ -107,6 +111,8 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
 	Gaudi::Property<int> m_temp_d0_slices {this, "par_d0_slices", 100, "Number of d0 slices"};
 	Gaudi::Property<int> m_temp_z0_slices {this, "par_z0_slices", 100, "Number of z0 slices"};
 	Gaudi::Property<int> m_temp_eta_slices {this, "par_eta_slices", 100, "Number of eta slices"};
+	Gaudi::Property<bool> m_absQOverPtBinning{this, "qptAbsBinning", false, "This property controls whether or not to interpret the bins as q/pt or |q/pt|"};
+	Gaudi::Property<std::vector<double> > m_qOverPtBins{this, "sectorQPtBins", {}, "q/pt bins for sector definition"};
 	
 	int m_nLayers = 0;
 	int m_nDim = 0;

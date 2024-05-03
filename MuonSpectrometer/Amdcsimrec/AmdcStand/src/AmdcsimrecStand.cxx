@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmdcStand/AmdcsimrecStand.h"
@@ -35,7 +35,7 @@ int AmdcsimrecStand::initFromAscii (const std::string& fileName)
   for (int i= 0; i <SizeName; i++) { FileName[i] = fileName[i]; }
 
   int Iflag = 100 ;
-  amdcreadnn_(FileName,SizeName,Istate,Iflag);
+  amdcreadnn_(FileName,SizeName,Istate,Iflag,SizeName);
   delete [] FileName ;
 
   return Istate;
@@ -206,7 +206,7 @@ std::string AmdcsimrecStand::GetAmdcString() {
    fgetamdccharnumber_(Namdc);
    if (Namdc!=0){
      char* Camdc = new char[Namdc];
-     fgetamdccharstring_(Namdc,Camdc);
+     fgetamdccharstring_(Namdc,Camdc,Namdc);
      ToBeReturned.resize(Namdc);
      for (int i= 0; i <Namdc; i++){ToBeReturned[i]=Camdc[i];}
      delete [] Camdc ;
@@ -219,7 +219,7 @@ std::string AmdcsimrecStand::GetAgddString(){
    fgetagddcharnumber_(Nagdd);
    if (Nagdd!=0){
      char* Cagdd = new char[Nagdd];
-     fgetagddcharstring_(Nagdd,Cagdd);
+     fgetagddcharstring_(Nagdd,Cagdd,Nagdd);
      ToBeReturned.resize(Nagdd);
      for (int i= 0; i <Nagdd; i++){ToBeReturned[i]=Cagdd[i];}
      delete [] Cagdd ;
@@ -304,8 +304,10 @@ void AmdcsimrecStand::GetStationDisplacementFromAMDC(
      STANAME[0] = StationName[0];
      STANAME[1] = StationName[1];
      STANAME[2] = StationName[2];
-     getdisplacementfromamdcjobn_(STANAME,Jff,Jzz,
-     TranslatS,TranslatZ,TranslatT,RotatS,RotatZ,RotatT);
+     int Job = 0;
+     getdisplacementfromamdcjobn_(STANAME,Jff,Jzz,Job,
+                                  TranslatS,TranslatZ,TranslatT,RotatS,RotatZ,RotatT,
+                                  3);
 }
 void AmdcsimrecStand::GetStationDisplacementFromAMDC(
    std::string& StationName, int& Jff, int& Jzz,int& Job,
@@ -316,7 +318,8 @@ void AmdcsimrecStand::GetStationDisplacementFromAMDC(
      STANAME[1] = StationName[1];
      STANAME[2] = StationName[2];
      getdisplacementfromamdc_(STANAME,Jff,Jzz,Job,
-     TranslatS,TranslatZ,TranslatT,RotatS,RotatZ,RotatT);
+                              TranslatS,TranslatZ,TranslatT,RotatS,RotatZ,RotatT,
+                              3);
 }
 
 void AmdcsimrecStand::GetStationDisplacementFromAMDCJadjust(
@@ -337,7 +340,7 @@ void AmdcsimrecStand::GetStationDeformationFromAMDC(
      STANAME[1] = StationName[1];
      STANAME[2] = StationName[2];
      getdeformationfromamdcjobn_(STANAME,Jff,Jzz,
-			     bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en);
+                                 bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en,3);
 }
 void AmdcsimrecStand::GetStationDeformationFromAMDC(
    std::string& StationName, int& Jff, int& Jzz,int& Job,
@@ -348,7 +351,7 @@ void AmdcsimrecStand::GetStationDeformationFromAMDC(
      STANAME[1] = StationName[1];
      STANAME[2] = StationName[2];
      getdeformationfromamdc_(STANAME,Jff,Jzz,Job,
-			     bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en);
+			     bz,bp,bn,sp,sn,tw,pg,tr,eg,ep,en,3);
 }
 void AmdcsimrecStand::GetStationDeformationFromAMDCJdeform(
                int& Jdeform,
@@ -381,7 +384,7 @@ void AmdcsimrecStand::GetMDTindexFromAMDC( std::string& StationName,
      STANAME[2] = StationName[2];
      getmdtindfromamdc_(STANAME,
      Jff,Jzz,Job,Jsl,Jtube,
-     StationEta,StationPhi,Multilayer,TubeLayer,Tube);
+     StationEta,StationPhi,Multilayer,TubeLayer,Tube,3);
 }
 //                  ***
 void AmdcsimrecStand::GetCSCindexFromAMDC( std::string& StationName,
@@ -394,7 +397,7 @@ void AmdcsimrecStand::GetCSCindexFromAMDC( std::string& StationName,
      STANAME[2] = StationName[2];
      getcscindfromamdc_(STANAME,
      Jff,Jzz,Job,Jsl,Jtube,SZflag,
-     StationEta,StationPhi,ChamberLayer,WireLayer,MeasuresPhi,Strip );
+     StationEta,StationPhi,ChamberLayer,WireLayer,MeasuresPhi,Strip,3 );
 }
 //                  ***
 void AmdcsimrecStand::GetRPCindexFromAMDC( std::string& StationName,
@@ -407,7 +410,7 @@ void AmdcsimrecStand::GetRPCindexFromAMDC( std::string& StationName,
      STANAME[2] = StationName[2];
      getrpcindfromamdc_(STANAME,
      Jff,Jzz,Job,Jspli,Jsl,Jsz,Jstri,
-     StationEta,StationPhi,DoubletR,DoubletZ,DoubletPhi,GasGap,MeasuresPhi,Strip );
+     StationEta,StationPhi,DoubletR,DoubletZ,DoubletPhi,GasGap,MeasuresPhi,Strip,3 );
 }
 //                  ***
 void AmdcsimrecStand::GetTGCindexFromAMDC( std::string& StationName,
@@ -419,7 +422,7 @@ void AmdcsimrecStand::GetTGCindexFromAMDC( std::string& StationName,
      STANAME[2] = StationName[2];
      gettgcindfromamdc_(STANAME,
      Jff,Jzz,Job,Jspli,Jsl,Jsz,Jstri,
-     StationEta,StationPhi,GasGap,IsStrip,Channel );
+     StationEta,StationPhi,GasGap,IsStrip,Channel,3 );
 }
 
 
@@ -433,7 +436,7 @@ void AmdcsimrecStand::GetAMDCindexFromMDT( std::string& StationName,
      STANAME[2] = StationName[2];
      getamdcindfrommdt_(STANAME,
      StationEta,StationPhi,Multilayer,TubeLayer,Tube,
-     Jff,Jzz,Job,Jsl,Jtube );
+     Jff,Jzz,Job,Jsl,Jtube,3 );
 }
 //                               ***
 void AmdcsimrecStand::GetAMDCindexFromCSC( std::string& StationName,
@@ -446,7 +449,7 @@ void AmdcsimrecStand::GetAMDCindexFromCSC( std::string& StationName,
      STANAME[2] = StationName[2];
      getamdcindfromcsc_(STANAME,
      StationEta,StationPhi,ChamberLayer,WireLayer,MeasuresPhi,Strip,
-     Jff,Jzz,Job,Jsl,Jtube,SZflag );
+     Jff,Jzz,Job,Jsl,Jtube,SZflag,3 );
 }
 //                               ***
 void AmdcsimrecStand::GetAMDCindexFromRPC( std::string& StationName,
@@ -459,7 +462,7 @@ void AmdcsimrecStand::GetAMDCindexFromRPC( std::string& StationName,
      STANAME[2] = StationName[2];
      getamdcindfromrpc_(STANAME,
      StationEta,StationPhi,DoubletR,DoubletZ,DoubletPhi,GasGap,MeasuresPhi,Strip,
-     Jff,Jzz,Job,Jspli,Jsl,Jsz,Jstri );
+     Jff,Jzz,Job,Jspli,Jsl,Jsz,Jstri,3 );
 }
 //                               ***
 void AmdcsimrecStand::GetAMDCindexFromTGC( std::string& StationName,
@@ -471,7 +474,7 @@ void AmdcsimrecStand::GetAMDCindexFromTGC( std::string& StationName,
      STANAME[2] = StationName[2];
      getamdcindfromtgc_(STANAME,
      StationEta,StationPhi,GasGap,IsStrip,Channel,
-     Jff,Jzz,Job,Jspli,Jsl,Jsz,Jstri );
+     Jff,Jzz,Job,Jspli,Jsl,Jsz,Jstri,3 );
 }
 
 
@@ -486,7 +489,7 @@ void AmdcsimrecStand::GetTubePositionFromMDTindex( std::string& StationName,
      STANAME[2] = StationName[2];
      f1gettubepositionfrommdtindex_(STANAME,
      StationEta,StationPhi,Multilayer,TubeLayer,Tube,
-     XYZ1,XYZ2, SZT1,SZT2, Radius );
+     XYZ1,XYZ2, SZT1,SZT2, Radius,3 );
 }
 //                  *****            ***
 void AmdcsimrecStand::GetStripPositionFromCSCindex( std::string& StationName,
@@ -500,7 +503,7 @@ void AmdcsimrecStand::GetStripPositionFromCSCindex( std::string& StationName,
      STANAME[2] = StationName[2];
      f1getstrippositionfromcscindex_(STANAME,
      StationEta,StationPhi,ChamberLayer,WireLayer,MeasuresPhi,Strip,
-     XYZ1,XYZ2,XYZ3,XYZ4, XYZCenter, SZT1,SZT2,SZT3,SZT4, SZTCenter );
+     XYZ1,XYZ2,XYZ3,XYZ4, XYZCenter, SZT1,SZT2,SZT3,SZT4, SZTCenter, 3 );
 }
 //                  *****            ***
 void AmdcsimrecStand::GetStripPositionFromRPCindex( std::string& StationName,
@@ -514,7 +517,7 @@ void AmdcsimrecStand::GetStripPositionFromRPCindex( std::string& StationName,
      STANAME[2] = StationName[2];
      f1getstrippositionfromrpcindex_(STANAME,
      StationEta,StationPhi,DoubletR,DoubletZ,DoubletPhi,GasGap,MeasuresPhi,Strip,
-     XYZ1,XYZ2,XYZ3,XYZ4, SZT1,SZT2,SZT3,SZT4 );
+     XYZ1,XYZ2,XYZ3,XYZ4, SZT1,SZT2,SZT3,SZT4,3 );
 }
 //                  *******            ***
 void AmdcsimrecStand::GetChannelPositionFromTGCindex( std::string& StationName,
@@ -527,7 +530,7 @@ void AmdcsimrecStand::GetChannelPositionFromTGCindex( std::string& StationName,
      STANAME[2] = StationName[2];
      f1getchannelpositionfromtgcind_(STANAME,
      StationEta,StationPhi,GasGap,IsStrip,Channel,
-     XYZ1,XYZ2,XYZ3,XYZ4, SZT1,SZT2,SZT3,SZT4 );
+     XYZ1,XYZ2,XYZ3,XYZ4, SZT1,SZT2,SZT3,SZT4,3 );
 }
 
 
@@ -541,7 +544,7 @@ void AmdcsimrecStand::GetMDTindexFromTubePosition( std::string& StationName,
      STANAME[2] = StationName[2];
      f1getmdtindexfromtubeposition_(STANAME,
      StationEta,StationPhi,Multilayer,TubeLayer,
-     XYZ, Tube );
+     XYZ, Tube, 3 );
 }
 //                  ***         *****
 void AmdcsimrecStand::GetCSCindexFromStripPosition( std::string& StationName,
@@ -554,7 +557,7 @@ void AmdcsimrecStand::GetCSCindexFromStripPosition( std::string& StationName,
      STANAME[2] = StationName[2];
      f1getcscindexfromstripposition_(STANAME,
      StationEta,StationPhi,ChamberLayer,WireLayer,MeasuresPhi,
-     XYZ, Strip );
+     XYZ, Strip, 3 );
 }
 //                  ***         *****
 void AmdcsimrecStand::GetRPCindexFromStripPosition( std::string& StationName,
@@ -567,7 +570,7 @@ void AmdcsimrecStand::GetRPCindexFromStripPosition( std::string& StationName,
      STANAME[2] = StationName[2];
      f1getrpcindexfromstripposition_(STANAME,
      StationEta,StationPhi,DoubletR,DoubletZ,DoubletPhi,GasGap,MeasuresPhi,
-     XYZ, Strip );
+     XYZ, Strip, 3 );
 }
 //                  ***         *******
 void AmdcsimrecStand::GetTGCindexFromChannelPosition( std::string& StationName,
@@ -579,7 +582,7 @@ void AmdcsimrecStand::GetTGCindexFromChannelPosition( std::string& StationName,
      STANAME[2] = StationName[2];
      f1gettgcindexfromchannelpos_(STANAME,
      StationEta,StationPhi,GasGap,IsStrip,
-     XYZ, Channel );
+     XYZ, Channel, 3 );
 }
 
 
@@ -600,7 +603,7 @@ int         AmdcsimrecStand::StationTypeEnd(){
 }
 std::string AmdcsimrecStand::GetStationType( int& Jtyp ){
      char STANAME[3];
-     f1getstationtype_( Jtyp, STANAME );
+     f1getstationtype_( Jtyp, STANAME, 3 );
      std::string Ctyp = "???";
      Ctyp[0] = STANAME[0];
      Ctyp[1] = STANAME[1];
@@ -627,7 +630,7 @@ void        AmdcsimrecStand::GetStationDimensions( std::string& StationType, int
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
      f1getstationdimensions_( STANAME,Jgeo,Jcut, IsValid,
-     DimLocX,DimLocY,DimLocZ, CenterLocX,CenterLocY,CenterLocZ );
+     DimLocX,DimLocY,DimLocZ, CenterLocX,CenterLocY,CenterLocZ,3 );
 }
 int         AmdcsimrecStand::GetNumberOfStationObjects( std::string& StationType, int& Jgeo ){
      char STANAME[3];
@@ -635,7 +638,7 @@ int         AmdcsimrecStand::GetNumberOfStationObjects( std::string& StationType
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
      int NbObj = 0;
-     f1getnumberofstationobjects_( STANAME,Jgeo, NbObj );
+     f1getnumberofstationobjects_( STANAME,Jgeo, NbObj,3 );
      return NbObj;
 }
 void        AmdcsimrecStand::GetStationObjectParam( std::string& StationType, int& Jgeo, int& Job,
@@ -651,7 +654,7 @@ void        AmdcsimrecStand::GetStationObjectParam( std::string& StationType, in
      f1getstationobjectparam_( STANAME,Jgeo,Job,
      GeomIsValid, TECNAME, GeomTechnoIndex, GeomSplitX, GeomSplitY, GeomShapeIndex,
      GeomDx, GeomDy, GeomDz, GeomWs, GeomWl,
-     GeomLe, GeomEx, GeomD1, GeomD2, GeomD3 );
+     GeomLe, GeomEx, GeomD1, GeomD2, GeomD3, 3, 3 );
      GeomTechnoName.resize(3);
      GeomTechnoName[0] = TECNAME[0];
      GeomTechnoName[1] = TECNAME[1];
@@ -691,7 +694,7 @@ void        AmdcsimrecStand::GetStationPositionParam( std::string& StationType, 
      STANAME[2] = StationType[2];
      f1getstationpositionparam_( STANAME,Jff,Jzz,
      PosiIsValid, PosiJgeo,PosiJcut,PosiIsBarrel,
-     PosiPhi,PosiZ,PosiR,PosiS,PosiAlfa,PosiBeta,PosiGamma );
+     PosiPhi,PosiZ,PosiR,PosiS,PosiAlfa,PosiBeta,PosiGamma,3 );
 }
 int         AmdcsimrecStand::StationCutOutBegin(){
      int JcutBeg = 0;
@@ -711,7 +714,7 @@ int         AmdcsimrecStand::GetNumberOfCutOutObjects( std::string& StationType,
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
      int NbObjCut = 0;
-     f1getnumberofcutoutobjects_( STANAME,Jgeo,Jcut, NbObjCut );
+     f1getnumberofcutoutobjects_( STANAME,Jgeo,Jcut, NbObjCut,3 );
      return NbObjCut;
 }
 void        AmdcsimrecStand::GetStationCutOutObjParam( std::string& StationType, int& Jgeo, int& Jcut, int& JcutObj,
@@ -722,7 +725,7 @@ void        AmdcsimrecStand::GetStationCutOutObjParam( std::string& StationType,
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
      f1getstationcutoutobjparam_( STANAME,Jgeo,Jcut,JcutObj,
-     CutJob,CutDx,CutDy,CutWs,CutWl,CutLe,CutEx,CutAn );
+     CutJob,CutDx,CutDy,CutWs,CutWl,CutLe,CutEx,CutAn,3 );
 }
 void        AmdcsimrecStand::PerformDirectDisplacAndDeform( std::string& StationType, int& Jff, int& Jzz,
      double& Xin, double& Yin, double& Zin, double& Xout, double& Yout, double& Zout ){
@@ -730,7 +733,7 @@ void        AmdcsimrecStand::PerformDirectDisplacAndDeform( std::string& Station
      STANAME[0] = StationType[0];
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
-     f1performdirectdisplacanddeform_( STANAME,Jff,Jzz, Xin,Yin,Zin, Xout,Yout,Zout );
+     f1performdirectdisplacanddeform_( STANAME,Jff,Jzz, Xin,Yin,Zin, Xout,Yout,Zout, 3 );
 }
 void        AmdcsimrecStand::PerformDirectDisplacAndDeform( std::string& StationType, int& Jff, int& Jzz, int& Job,
      double& Xin, double& Yin, double& Zin, double& Xout, double& Yout, double& Zout ){
@@ -738,7 +741,7 @@ void        AmdcsimrecStand::PerformDirectDisplacAndDeform( std::string& Station
      STANAME[0] = StationType[0];
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
-     f1performdirectdisplacanddeformbase_( STANAME,Jff,Jzz, Job, Xin,Yin,Zin, Xout,Yout,Zout );
+     f1performdirectdisplacanddeformbase_( STANAME,Jff,Jzz, Job, Xin,Yin,Zin, Xout,Yout,Zout,3 );
 }
 void        AmdcsimrecStand::PerformBackDisplacAndDeform( std::string& StationType, int& Jff, int& Jzz,
      double& Xin, double& Yin, double& Zin, double& Xout, double& Yout, double& Zout ){
@@ -746,7 +749,7 @@ void        AmdcsimrecStand::PerformBackDisplacAndDeform( std::string& StationTy
      STANAME[0] = StationType[0];
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
-     f1performbackdisplacanddeform_( STANAME,Jff,Jzz, Xin,Yin,Zin, Xout,Yout,Zout );
+     f1performbackdisplacanddeform_( STANAME,Jff,Jzz, Xin,Yin,Zin, Xout,Yout,Zout,3 );
 }
 void        AmdcsimrecStand::PerformBackDisplacAndDeform( std::string& StationType, int& Jff, int& Jzz, int& Job,
      double& Xin, double& Yin, double& Zin, double& Xout, double& Yout, double& Zout ){
@@ -754,7 +757,7 @@ void        AmdcsimrecStand::PerformBackDisplacAndDeform( std::string& StationTy
      STANAME[0] = StationType[0];
      STANAME[1] = StationType[1];
      STANAME[2] = StationType[2];
-     f1performbackdisplacanddeformbase_( STANAME,Jff,Jzz, Job, Xin,Yin,Zin, Xout,Yout,Zout );
+     f1performbackdisplacanddeformbase_( STANAME,Jff,Jzz, Job, Xin,Yin,Zin, Xout,Yout,Zout,3 );
 }
 
 // amdchardsoft
@@ -1884,7 +1887,7 @@ int     AmdcsimrecStand::NberOfMDTMultiLayers  (std::string& StationName,int jph
      STANAME[1] = StationName[1];
      STANAME[2] = StationName[2];
      int ToBeReturned = -1 ;
-     getnberofmdtmultilayers_( STANAME,jphi,jzz, ToBeReturned );
+     getnberofmdtmultilayers_( STANAME,jphi,jzz, ToBeReturned, 3 );
      return ToBeReturned;
 }
 int     AmdcsimrecStand::NberOfMDTLayers       (std::string& StationName,int jphi,int jzz,int jMuLay         )
@@ -1894,7 +1897,7 @@ int     AmdcsimrecStand::NberOfMDTLayers       (std::string& StationName,int jph
      STANAME[1] = StationName[1];
      STANAME[2] = StationName[2];
      int ToBeReturned = -1 ;
-     getnberofmdtlayers_( STANAME,jphi,jzz, jMuLay, ToBeReturned );
+     getnberofmdtlayers_( STANAME,jphi,jzz, jMuLay, ToBeReturned, 3 );
      return ToBeReturned;
 }
 int     AmdcsimrecStand::NberOfMDTTubes        (std::string& StationName,int jphi,int jzz,int jMuLay,int jLay)
@@ -1904,6 +1907,6 @@ int     AmdcsimrecStand::NberOfMDTTubes        (std::string& StationName,int jph
      STANAME[1] = StationName[1];
      STANAME[2] = StationName[2];
      int ToBeReturned = -1 ;
-     getnberofmdttubes_( STANAME,jphi,jzz, jMuLay, jLay, ToBeReturned );
+     getnberofmdttubes_( STANAME,jphi,jzz, jMuLay, jLay, ToBeReturned, 3 );
      return ToBeReturned;
 }

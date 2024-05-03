@@ -247,8 +247,6 @@ def defineMenu():
         # MU non-FILLED
         'L1_MU3V_FIRSTEMPTY':'', 
         'L1_MU8VF_EMPTY':'',
-        'L1_MU14FCH_EMPTY':'',
-        'L1_MU14FCH_UNPAIRED_ISO':'',
 
         # EM non-FILLED
 

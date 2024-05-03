@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,6 +26,7 @@
 #include "VP1TrackSystems/TrkObjToString.h"
 #include "VP1Utils/VP1ParticleData.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
+#include "VP1Utils/VP1DetInfo.h"
 
 #include "VP1PRDSystems/MuonChamberProjectionHelper.h"
 #include "VP1PRDSystems/TouchedMuonChamberHelper.h"
@@ -39,6 +40,7 @@
 
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "VP1Utils/SurfaceToSoNode.h"
 
 #include <Inventor/C/errors/debugerror.h>
@@ -58,7 +60,13 @@
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "GeoPrimitives/AmgStringHelpers.h"
 #include "GeoPrimitives/GeoPrimitives.h"
-
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometry/MdtReadoutElement.h"
+#include "MuonReadoutGeometry/RpcReadoutElement.h"
+#include "MuonReadoutGeometry/TgcReadoutElement.h"
+#include "MuonReadoutGeometry/CscReadoutElement.h"
+#include "MuonReadoutGeometry/MMReadoutElement.h"
+#include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include <cassert>
 
 
@@ -1937,6 +1945,35 @@ void AssocObjAttachmentHandle::detachNodes( SoNode*simple, SoNode*detailed )
   if (m_d->trackhandle->visible() && m_d->septrack_simple->getNumChildren() == 1 + (m_d->pickStyleChildIdx==-1?0:1))
     m_d->ensureDetached();
 }
+
+  const MuonGM::MuonReadoutElement* TrackHandleBase::getMuonReadoutElement(const Trk::RIO_OnTrack& mb) const {
+    const MuonGM::MuonReadoutElement* re = nullptr;
+    switch (TrkObjToString::type(&mb)){
+      case TrkObjToString::MDT:
+        re = VP1DetInfo::muonDetMgr()->getMdtReadoutElement(mb.identify());
+        break;
+      case TrkObjToString::CSC:
+        re = VP1DetInfo::muonDetMgr()->getCscReadoutElement(mb.identify());
+        break;
+      case TrkObjToString::RPC:
+        re = VP1DetInfo::muonDetMgr()->getRpcReadoutElement(mb.identify());
+        break;
+      case TrkObjToString::TGC:
+        re = VP1DetInfo::muonDetMgr()->getTgcReadoutElement(mb.identify());
+        break;
+      case TrkObjToString::sTGC:
+        re = VP1DetInfo::muonDetMgr()->getsTgcReadoutElement(mb.identify());
+        break;
+      case TrkObjToString::MM:
+        re = VP1DetInfo::muonDetMgr()->getMMReadoutElement(mb.identify());
+        break;
+      default:
+        VP1Msg::message("TrackHandleBase::getReadoutElement:: Unable to find matching readoutElement");
+    }
+    return re;
+  }
+
+
 
 //____________________________________________________________________
 QList<AssociatedObjectHandleBase*> TrackHandleBase::getVisibleMeasurements() const

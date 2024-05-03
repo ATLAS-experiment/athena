@@ -23,6 +23,7 @@
 #include "StoreGate/UpdateHandle.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "CxxUtils/CachedValue.h"
+#include "xAODMuonPrepData/TgcStripContainer.h"
 
 #include <string>
 #include <vector>
@@ -89,6 +90,9 @@ namespace Muon
         /** TgcCoinData (coincidence PRD) containers */ 
         TgcCoinDataContainer* m_tgcCoinDataContainer[NBC_TRIG] = {};
         std::unordered_map<Identifier, TgcCoinDataCollection*> m_tgcCoinDataCollections[NBC_TRIG];
+
+        /// Handle for the xAOD container 
+        SG::WriteHandle<xAOD::TgcStripContainer>    m_xaodHandle;
       };
       StatusCode setupState(const EventContext& ctx, State& state) const;
 
@@ -413,7 +417,10 @@ namespace Muon
       SG::WriteHandleKeyArray<Muon::TgcCoinDataContainer> m_outputCoinKeys{this, "outputCoinKey", {}};
       // Write handle keys for PrepDataContainers, need 4, for current, previous, next and all BC
       SG::WriteHandleKeyArray<Muon::TgcPrepDataContainer> m_outputprepdataKeys{this, "prepDataKeys", {}};
-        
+
+      SG::WriteHandleKey<xAOD::TgcStripContainer>   m_xAODKey  {this, "xAODKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+
+
       /// Keys for the PRD cache containers, 4 needed for different BC
       TgcPrdUpdateHandles m_prdContainerCacheKeys{this, "UpdateKeysPrd", {}};
       /// Keys for the Coin cache containers, 3 needed for different BC

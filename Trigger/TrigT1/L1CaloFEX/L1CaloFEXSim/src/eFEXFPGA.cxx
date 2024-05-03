@@ -307,6 +307,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       // BDT-based tau algorithm outputs (both 0 for heuristic algorithm)
       unsigned int bdtScore = 0;
       unsigned int bdtCondition = 0;
+      unsigned int bdtRHadWP = 0;
 
       // Set isolation WP
       unsigned int rCoreWP = 0;
@@ -339,6 +340,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       eTauBDTTobEt = m_eFEXtauBDTAlgoTool->getEt();
       bdtScore = m_eFEXtauBDTAlgoTool->getBDTScore();
       bdtCondition = m_eFEXtauBDTAlgoTool->getBDTCondition();
+      bdtRHadWP = m_eFEXtauBDTAlgoTool->getBDTHadFracCondition();
 
       unsigned int seed = m_eFEXtauAlgoTool->getSeed();
       // Heuristic seed as returned is supercell value within 3x3 area, here want it within central cell
@@ -359,10 +361,10 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
 		      << phi_ind << ", eTauBDTTobEt: " << eTauBDTTobEt
 		      << ", eTauTobEt: " << eTauTobEt << ", ptTauMinToTopoCounts: "
 		      << ptTauMinToTopoCounts << ", maxEtCountsTau: " << maxEtCountsTau
-		      << ", bdtScore: " << bdtScore << "bdtMinEtCounts: " << bdtMinEtCounts);
+		      << ", bdtScore: " << bdtScore << " bdtMinEtCounts: " << bdtMinEtCounts << " bdtRHadWP " << bdtRHadWP);
 
-      uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts);
-      xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts, bdtScore);
+      uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, bdtRHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts);
+      xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, bdtRHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts, bdtScore);
       uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
       xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
 
@@ -549,6 +551,12 @@ void eFEXFPGA::SetIsoWP(const std::vector<unsigned int>& CoreEnv, const std::vec
   // Working point evaluted by Core * 2^bitshift > Threshold * Environment conditions
   std::unordered_map<unsigned int, unsigned int> bsmap { {3, 8}, {5, 32}};
 
+  // if core (denom) has overflowed, automatically pass all thresholds
+  if (CoreEnv[0] > 0xffff) {
+      workingPoint = 3;
+      return;
+  }
+
   unsigned int large = CoreEnv[0]*bsmap[bitshift]; // core
   unsigned int small = CoreEnv[1]; // env
   
@@ -556,13 +564,8 @@ void eFEXFPGA::SetIsoWP(const std::vector<unsigned int>& CoreEnv, const std::vec
   if (large > 0xffff ) large = 0xffff;
   if (small > 0xffff ) small = 0xffff;
 
-  // Pass all if shifted core sum overflows
-  if (large == 0xffff) {
-    workingPoint = 3;
-    return;
-  }
   // Fail all if env sum overflows
-  else if (small == 0xffff) {
+  if (small == 0xffff) {
     workingPoint = 0;
     return;
   }

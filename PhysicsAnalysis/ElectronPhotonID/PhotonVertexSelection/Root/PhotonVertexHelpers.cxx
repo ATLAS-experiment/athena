@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -11,9 +11,11 @@
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexContainer.h"
+#include "CxxUtils/trapping_fp.h"
 
 // Asg tools
 #include "egammaUtils/ShowerDepthTool.h"
+#include <AsgMessaging/MessageCheck.h>
 
 // ROOT include(s).
 #include <TString.h>
@@ -93,8 +95,14 @@ getZCommonAndError(const xAOD::EventInfo* eventInfo,
   }
 
   // Normalize by error (weighted average)
-  zCommon /= zCommonError;
-  zCommonError = 1.0 / sqrt(zCommonError);
+  {
+    // Tell clang to optimize assuming that FP exceptions can trap.
+    // Otherwise, it can vectorize these divisions, which can lead to
+    // spurious division-by-zero traps from unused vector lanes.
+    CXXUTILS_TRAPPING_FP;
+    zCommon /= zCommonError;
+    zCommonError = 1.0 / sqrt(zCommonError);
+  }
 
   return std::make_pair(zCommon, zCommonError);
 }
@@ -173,10 +181,20 @@ getVertexMomentum(const xAOD::Vertex* vertex,
   SG::AuxElement::ConstAccessor<float> eta(derivationPrefix + "eta");
   SG::AuxElement::ConstAccessor<float> phi(derivationPrefix + "phi");
 
-  if (useAux and pt.isAvailable(*vertex) and eta.isAvailable(*vertex) and
-      phi.isAvailable(*vertex)) {
-    v.SetPtEtaPhiM(pt(*vertex), eta(*vertex), phi(*vertex), 0.0);
-    return v;
+  if (useAux and pt.isAvailable(*vertex) and eta.isAvailable(*vertex) and phi.isAvailable(*vertex)) {
+    // protect against decoreated nan values (from Rel24 on?) 
+    if(!std::isnan(pt(*vertex)) and !std::isnan(eta(*vertex)) and !std::isnan(phi(*vertex))){ 
+      v.SetPtEtaPhiM(pt(*vertex), eta(*vertex), phi(*vertex), 0.0);
+      return v;
+    }
+    else{
+      using namespace asg::msgUserCode;
+      ANA_MSG_WARNING("PhotonVertexHelpers::getVertexMomentum : "
+                      << "NaN detected in Vertex decorations (pt, eta, phi) = "
+                      << " (" <<  pt(*vertex) <<  ", " << eta(*vertex) << ", " << phi(*vertex) << ")");
+      ANA_MSG_WARNING("PhotonVertexHelpers::getVertexMomentum : "
+                      << "Recompute sum tracks 4-momenta from associated TrackParticles");
+    }
   }
 
   // Sum the 4-momenta of all track particles at the vertex

@@ -437,8 +437,7 @@ def MUON5Cfg(flags):
                                               "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
                                               "TauJets.jetLink",
                                            ]
-    from LeptonTaggers.LeptonTaggersConfig import GetExtraPromptVariablesForDxAOD, GetExtraImprovedPromptVariablesForDxAOD
-    MUON5SlimmingHelper.ExtraVariables += GetExtraPromptVariablesForDxAOD(onlyBDT=False)
+    from LeptonTaggers.LeptonTaggersConfig import GetExtraImprovedPromptVariablesForDxAOD
     MUON5SlimmingHelper.ExtraVariables += GetExtraImprovedPromptVariablesForDxAOD()
     
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent

@@ -13,7 +13,17 @@
  **********************************/
 
 #include "L1TopoSimulationUtils/Trigo.h"
+#include "L1TopoSimulationUtils/Conversions.h"
 #include <cmath>
+
+//helper to convert entire vectors
+std::vector<int> convertVector(const std::vector<std::string>& stringVector) {
+    std::vector<int> values;
+    for (const std::string& binStr: stringVector) {
+        values.push_back( TSU::toSigned(binStr) );
+    }
+    return values;
+}
 
 const std::vector<std::string> TSU::Trigo::Cosleg=
   {
@@ -83,6 +93,8 @@ const std::vector<std::string> TSU::Trigo::Cosleg=
    "001111110",  // 0.9807852804032303
    "001111111"  // 0.9951847266721969
   };
+
+const std::vector<int> TSU::Trigo::CoslegInt = convertVector(TSU::Trigo::Cosleg);
 
 //phase1
 const std::vector<std::string> TSU::Trigo::Cos=
@@ -217,6 +229,7 @@ const std::vector<std::string> TSU::Trigo::Cos=
    "001111111111" // value = 0.9987954562051724(0.9990234375)		 argument value = 6.234097921967246
   };
 
+const std::vector<int> TSU::Trigo::CosInt = convertVector(TSU::Trigo::Cos);
 
 const std::vector<std::string> TSU::Trigo::Sinleg =
   {
@@ -285,6 +298,8 @@ const std::vector<std::string> TSU::Trigo::Sinleg =
    "111100111", // -0.19509032201612872
    "111110011" // -0.0980171403295605  // 63
   };
+
+const std::vector<int> TSU::Trigo::SinlegInt = convertVector(TSU::Trigo::Sinleg);
 
 //phase1
 const std::vector<std::string> TSU::Trigo::Sin=
@@ -418,6 +433,9 @@ const std::vector<std::string> TSU::Trigo::Sin=
    "111110011100",	 // -0.0980171403295605
    "111111001110"          // -0.04906767432741809	
   };
+
+const std::vector<int> TSU::Trigo::SinInt = convertVector(TSU::Trigo::Sin);
+
 
 int TSU::Trigo::atan2leg(TSU::L1TopoDataTypes<16,0> x, TSU::L1TopoDataTypes<16,0> y){
   short int octant=0;

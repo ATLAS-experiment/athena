@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/StorableConversions.h"
@@ -404,13 +404,13 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
         ATH_CHECK( key.find('.') == key.size()-1 );
         ATH_CHECK( currentAuxStore == nullptr and xAODInterfaceContainer != nullptr );
         const SG::BaseInfoBase* bib = getBaseInfo(clid);
-        xAOD::AuxContainerBase* auxHolder =
-            reinterpret_cast<xAOD::AuxContainerBase*>(
+        SG::IAuxStore* auxHolder =
+            reinterpret_cast<SG::IAuxStore*>(
                 bib->cast(dataBucket->object(), ClassID_traits<SG::IAuxStore>::ID()));
         ATH_CHECK(auxHolder != nullptr);
         xAODInterfaceContainer->setStore(auxHolder);
         currentAuxStore = new WritableAuxStore();
-        auxHolder->setStore( currentAuxStore );
+        dynamic_cast<SG::IAuxStoreHolder*>(auxHolder)->setStore( currentAuxStore );
       } else {
         currentAuxStore = nullptr;
         xAODInterfaceContainer = nullptr; // invalidate xAOD related pointers

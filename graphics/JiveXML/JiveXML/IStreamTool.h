@@ -6,6 +6,7 @@
 #define JIVEXML__ISTREAMTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/IProperty.h"
 
 namespace JiveXML {
 
@@ -18,7 +19,9 @@ namespace JiveXML {
    *
    * @author Sebastian Boeser
    */
-  class IStreamTool : virtual public IAlgTool {
+  class IStreamTool : virtual public IAlgTool,
+		      virtual public IProperty
+  {
 
     public:
       /** The interface identifier */

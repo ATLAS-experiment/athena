@@ -83,16 +83,14 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrac
     return StatusCode::SUCCESS;
 }
 
-
-FPGATrackSimRoad_Hough  FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoad* origr) const
+FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoad* origr) const
 {
   ATH_MSG_DEBUG("PhiRoad Build Road");
-  FPGATrackSimRoad_Hough& origr_hough = static_cast<FPGATrackSimRoad_Hough&>(*origr);
-  float phi = origr_hough.getX();
-  float qPt  = origr_hough.getY();
+  float phi = origr->getX();
+  float qPt  = origr->getY();
 
   // make new road -- main alg doesn't keep it if not needed
-  FPGATrackSimRoad_Hough r(origr_hough); // only works with Hough roads!
+  FPGATrackSimRoad r(*origr); // only works with Hough roads!
   r.setNLayers(m_nLayers);
   layer_bitmask_t hitLayers = 0;
   
@@ -100,7 +98,7 @@ FPGATrackSimRoad_Hough  FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoa
   for (unsigned lyr = 0; lyr < m_nLayers; lyr++) {
     std::vector<const FPGATrackSimHit*> road_hits;
     for (auto hit : origr->getHits(lyr)) {
-      float phi_expected = -1.0*asin(htt::A * hit->getR() * qPt) + phi;
+      float phi_expected = -1.0*asin(fpgatracksim::A * hit->getR() * qPt) + phi;
       if (abs(hit->getGPhi()-phi_expected)< (m_window.value()[lyr]+qPt*m_ptscaling)) {
 	road_hits.push_back(hit);
 	hitLayers |= 1 << hit->getLayer();

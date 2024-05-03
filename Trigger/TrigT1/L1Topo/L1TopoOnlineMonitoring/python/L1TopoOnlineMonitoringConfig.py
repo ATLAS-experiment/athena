@@ -17,14 +17,7 @@ def L1TopoOnlineMonitorHypoToolGen(chainDict):
         chainDict['chainName'],
         # Select error flags to accept events
         ErrorFlagsKey = 'L1TopoErrorFlags',
-        AcceptOnGenericRoiError = True,
-        AcceptOnGenericDaqError = True,
-        AcceptOnCrcTobError = True,
-        AcceptOnCrcFibreError = True,
-        AcceptOnCrcDaqError = True,
-        AcceptOnRoibDaqDifference = True,
-        AcceptOnRoibCtpDifference = True,
-        AcceptOnDaqCtpDifference = True)
+        AcceptTrivialFlag = True)
 
     return tool
 

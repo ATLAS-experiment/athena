@@ -9,7 +9,6 @@
 
 from JetRecConfig.JetDefinition import JetInputConstitSeq,JetInputConstit, xAODType, JetDefinition
 from ..Menu.SignatureDicts import JetRecoKeys as recoKeys
-from JetRecConfig import StandardJetContext
 # this is to define trigger specific JetModifiers (ex: ConstitFourMom_copy) : 
 from . import TriggerJetMods
 
@@ -145,11 +144,53 @@ def isPFlow(jetRecoDict):
 def getFilterCut(recoAlg):
     return {"a4":4000, "a10":50000, "a10r": 50000, "a10t":50000, "a10sd":50000}[recoAlg]
 
-def getJetContext(jetRecoDict):
-    context = StandardJetContext.jetContextDic.get(jetRecoDict["trkopt"],None) 
-    if doTracking(jetRecoDict) and not context:
-        raise ValueError("Tracking option provided but no jet context returned!")
-    return context
+
+def addJetContextFlags(flags):
+
+    flags.addFlag("Jet.Context.notrk", lambda prevFlags : prevFlags.Jet.Context.default )
+
+    
+    def _buildContextDic(prevFlags, trkopt):
+        # *****************
+        idFlags = prevFlags.Trigger.InDetTracking
+        (tracksname,verticesname) = {
+            'ftf':    (idFlags.fullScan.tracks_FTF,
+                       idFlags.fullScan.vertex),
+            'roiftf': (idFlags.jetSuper.tracks_FTF,
+                       idFlags.jetSuper.vertex),
+        }[trkopt]
+
+        tvaname = f"JetTrackVtxAssoc_{trkopt}"
+        label = f"GhostTrack_{trkopt}"
+        ghosttracksname = f"PseudoJet{label}"
+        
+        contextDic = prevFlags.Jet.Context.default.clone(
+            Tracks           = tracksname,
+            Vertices         = verticesname,
+            TVA              = tvaname,
+            GhostTracks      = ghosttracksname,
+            GhostTracksLabel = label ,
+            JetTracks        = f'JetSelectedTracks_{trkopt}',
+        )
+        # also declare some JetInputExternal corresponding to trkopt
+        # This ensures the JetRecConfig helpers know about them.
+        # We declare simplistic JetInputExternal, without algoBuilder, because the rest of the trigger config is in charge of producing these containers.
+        from JetRecConfig.StandardJetConstits import stdInputExtDic
+        if tracksname not in stdInputExtDic:
+            from JetRecConfig.JetDefinition import JetInputExternal
+            from xAODBase.xAODType import xAODType
+            stdInputExtDic[tracksname] = JetInputExternal( tracksname, xAODType.TrackParticle )
+            stdInputExtDic[verticesname] = JetInputExternal( verticesname, xAODType.Vertex )
+
+        
+        return contextDic
+
+    
+    
+    flags.addFlag("Jet.Context.ftf", lambda prevFlags : _buildContextDic(prevFlags,"ftf") )
+    flags.addFlag("Jet.Context.roiftf", lambda prevFlags : _buildContextDic(prevFlags,"roiftf") )
+
+    
 
 
 ##########################################################################################
@@ -206,7 +247,7 @@ def getPrefilterCleaningString(prefilters_list):
 
 # Translate calib specification into something understood by
 # the calibration config helper
-def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
+def getCalibMods(flags,jetRecoDict,rhoKey="auto"):
 
     # Minimum modifier set for calibration w/o track GSC
     # Should eventually build in more mods, depend on track info etc
@@ -258,10 +299,10 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
                   ("a4","subresjesgscIS"): (calibKey,"JetArea_Residual_EtaJES_GSC"), # pu residual + calo+trk GSC
                   }[(jetRecoDict["recoAlg"],jetRecoDict["jetCalib"])]
             pvname = flags.Trigger.InDetTracking.fullScan.vertex_jet
-
-        if jetRecoDict["jetCalib"].endswith("IS") and (dataSource=="data"):
+        if jetRecoDict["jetCalib"].endswith("IS") and (not flags.Input.isMC):
             calibSeq += "_Insitu"
 
+        dataSource = "mc" if flags.Input.isMC else "data"
         calibSpec = ":".join( [calibContext, dataSource, calibSeq, rhoKey, pvname, gscDepth] )
 
         if jetalg=="a4":
@@ -400,7 +441,7 @@ def defineJets(flags,jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=
     return jetDef
 
 def defineReclusteredJets(jetRecoDict,smallRjets,inputlabel,prefix,suffix):
-    rcJetConstit = JetInputConstit("RCJet", xAODType.Jet, smallRjets, label=inputlabel+'RC')
+    rcJetConstit = JetInputConstit("RCJet", xAODType.Jet, smallRjets, label=inputlabel+'RC', lock=True)
     rcJetDef = JetDefinition( "AntiKt", 1.0, rcJetConstit, prefix=prefix, suffix=suffix)
     return rcJetDef
 

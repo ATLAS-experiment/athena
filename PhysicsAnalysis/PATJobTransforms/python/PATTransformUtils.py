@@ -2,8 +2,6 @@
 
 ## @brief Module with PAT transform options and substeps
 
-from builtins import zip
-
 # Get the base logger for the transforms and extend it for us
 from PyJobTransforms.trfLogger import msg
 msg = msg.getChild(__name__)
@@ -74,7 +72,7 @@ def addDAODArguments(parser, mergerTrf=True):
 def addDAODMergerSubsteps(executorSet):
     DAODTypes = knownDAODTypes()
     for DAOD in DAODTypes:
-        executorSet.add(hybridPOOLMergeExecutor(name = DAOD.lstrip("DAOD_") + 'Merge', inData = [DAOD], outData = [DAOD+'_MRG']))
+        executorSet.add(hybridPOOLMergeExecutor(name = DAOD.removeprefix("DAOD_") + 'Merge', inData = [DAOD], outData = [DAOD+'_MRG']))
 
 def knownDAODTypes():
     DAODTypes = []

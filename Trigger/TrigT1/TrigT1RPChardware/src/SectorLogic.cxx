@@ -61,7 +61,7 @@ ostream &dfpa(ostream &stream, int indent, int whitesp, int ntimes) {
 }
 //****************************************************************************//
 // overload of the << operator for DataFromPad
-ostream &operator<<(ostream &stream, DataFromPad o) {
+ostream &operator<<(ostream &stream, const DataFromPad& o) {
     stream.width(3);
     stream.fill('x');
     stream << o.bcid << " ";

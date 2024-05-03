@@ -17,11 +17,13 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   , m_pdg0Killed(0)
   , m_decayCleaned(0)
   , m_totalSeen(0)
+  , m_replacedPIDs(0)
 {
   declareProperty("KillLoops", m_killLoops = true, "Remove particles in loops?");
   declareProperty("KillPDG0", m_killPDG0 = true, "Remove particles with PDG ID 0?");
   declareProperty("CleanDecays", m_cleanDecays = true, "Clean decay chains from non-propagating particles?");
   declareProperty("LoopsByBarcode", m_loopByBC = false, "Detect loops based on barcodes as well as vertices?");
+  declareProperty("PIDmap", m_pidmap = std::map<int,int>(), "Map of PDG IDs to replace");
 }
 #ifndef HEPMC3
 //---->//This is copied from MCUtils
@@ -91,6 +93,15 @@ StatusCode FixHepMC::execute() {
   for (McEventCollection::const_iterator ievt = events()->begin(); ievt != events()->end(); ++ievt) {
     // FIXME: const_cast
     HepMC::GenEvent* evt = const_cast<HepMC::GenEvent*>(*ievt);
+    if (!m_pidmap.empty()) {
+      for (auto ip: *evt) {
+        // Skip this particle if (somehow) its pointer is null
+         if (!ip) continue;
+         auto newpid = m_pidmap.find(ip->pdg_id());
+         if (newpid == m_pidmap.end()) continue;
+         ip->set_pdg_id(newpid->second);
+      }
+    }
 #ifdef HEPMC3
     // Add a unit entry to the event weight vector if it's currently empty
     if (evt->weights().empty()) {
@@ -467,6 +478,7 @@ StatusCode FixHepMC::finalize() {
   if (m_killLoops  ) ATH_MSG_INFO( "Removed " <<   m_loopKilled << " of " << m_totalSeen << " particles because of loops." );
   if (m_killPDG0   ) ATH_MSG_INFO( "Removed " <<   m_pdg0Killed << " of " << m_totalSeen << " particles because of PDG ID 0." );
   if (m_cleanDecays) ATH_MSG_INFO( "Removed " << m_decayCleaned << " of " << m_totalSeen << " particles while cleaning decay chains." );
+  if (!m_pidmap.empty()) ATH_MSG_INFO( "Replaced " << m_replacedPIDs << "PIDs of particles." );
   return StatusCode::SUCCESS;
 }
 

@@ -14,7 +14,7 @@ class L1CaloMonitorCfgHelper(object):
     from collections import defaultdict
     hanConfigs = {} # nested structure as required, keys will be either "dir XXX" or "hist YYY"
 
-    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gXENC","gXERHO","jJ","jLJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
+    SIGNATURES = ["gJ","gLJ","gLJRho","gXEJWOJ","gTEJWOJ","gXENC","gTENC","gXERHO","gTERHO","jJ","jLJ","jEM","jTAU","jXE","jTE","eTAU","eEM"]
 
     @staticmethod
     def printHanConfig(filename="collisions_run.config"):

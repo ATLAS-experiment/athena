@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// PhotonConversionTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_FATRASTOOLS_PHOTONCONVERSIONTOOL_H
 #define ISF_FATRASTOOLS_PHOTONCONVERSIONTOOL_H
@@ -18,9 +14,7 @@
 // Trk
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExUtils/MaterialUpdateMode.h"
-#include "TrkDetDescrUtils/GeometrySignature.h" 
-// ISF
-#include "ISF_Event/ITruthIncident.h"
+#include "TrkDetDescrUtils/GeometrySignature.h"
 // Fatras
 #include "ISF_FatrasInterfaces/IPhotonConversionTool.h"
 // Barcode

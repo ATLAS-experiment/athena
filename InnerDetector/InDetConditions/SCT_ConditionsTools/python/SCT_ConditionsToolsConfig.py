@@ -12,6 +12,13 @@ from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
 def SCT_ByteStreamErrorsToolCfg(flags, name="SCT_ByteStreamErrorsTool", **kwargs):
     acc = SCT_ConfigurationConditionsToolCfg(flags)
     kwargs.setdefault("ConfigTool", acc.popPrivateTools())
+
+    if flags.Input.Format is Format.BS and not flags.Trigger.doHLT:
+        # Missing dependency on SCT_ByteStreamErrs
+        from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import (
+                SCTRawDataProviderCfg)
+        acc.merge(SCTRawDataProviderCfg(flags))
+
     acc.setPrivateTools(CompFactory.SCT_ByteStreamErrorsTool(name, **kwargs))
     return acc
 
@@ -227,6 +234,9 @@ def SCT_DCSConditionsCfg(flags, name="InDetSCT_DCSConditions", **kwargs):
 def SCT_FlaggedConditionToolCfg(flags, name="InDetSCT_FlaggedConditionTool", **kwargs):
     # For SCT_ID and SCT_DetectorElementCollection used in SCT_FlaggedConditionTool
     acc = SCT_ReadoutGeometryCfg(flags)
+
+    # This tool needs SCT_FlaggedCondData which is produced by SCT_Clusterization
+
     acc.setPrivateTools(CompFactory.SCT_FlaggedConditionTool(name, **kwargs))
     return acc
 

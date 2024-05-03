@@ -161,7 +161,7 @@ namespace LVL1 {
     
     constexpr static bool ENABLE_INTER_AB = true;
     constexpr static bool ENABLE_INTER_C = true;
-    constexpr static bool ENABLE_INTER_ABC = true;
+    constexpr static bool ENABLE_INTER_ABC = false;
     constexpr static int gJetTOBfib = 6;
     constexpr static int BTOBFIB = 6;
     constexpr static bool ENABLE_PUC = true;

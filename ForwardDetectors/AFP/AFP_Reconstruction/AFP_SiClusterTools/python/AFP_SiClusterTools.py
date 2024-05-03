@@ -22,9 +22,7 @@ def AFP_SiClusterTools_Cfg(flags, kwargs={}):
         
         acc = ComponentAccumulator()                                              
         if flags.Input.isMC:
-                # if other tags are desired, they can be set also in postExec, e.g.
-                # --postExec 'from IOVDbSvc.CondDB import conddb; conddb.addOverride("/FWD/AFP/Align/Local","AFPMCAlignLoc-329484-02"); conddb.addOverride("/FWD/AFP/Align/Global","AFPMCAlignGlob-331020-01");'
-
+                # if other tags are desired, they can be set also in postExec
                 acc.merge(addFolders(flags, "/FWD/AFP/Align/Local<tag>AFPMCAlignLoc-ideal-01</tag>",  'FWD_OFL', className='CondAttrListCollection', db='OFLP200'))
                 acc.merge(addFolders(flags, "/FWD/AFP/Align/Global<tag>AFPMCAlignGlob-ideal-01</tag>",'FWD_OFL', className='CondAttrListCollection', db='OFLP200'))
                 

@@ -11,7 +11,7 @@ def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Tracking_GSFRefitted'
 
 @AccumulatorCache
-def precisionTracks_GSFRefittedSequenceCfg(flags, name='Electron', ion=False, variant='_GSF', is_probe_leg = False):
+def precisionTracks_GSFRefittedSequenceGenCfg(flags, name='Electron', ion=False, variant='_GSF', is_probe_leg = False):
     """ sixth step:  GSF refitting of precision track....."""
 
     inViewRoIs = "precisionTracks_GSFRefitted"+variant
@@ -42,5 +42,5 @@ def precisionTracks_GSFRefittedSequenceCfg(flags, name='Electron', ion=False, va
     return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
 
-def precisionTracks_GSFRefittedSequence_LRTCfg(flags, name='Electron', is_probe_leg=False):
-    return precisionTracks_GSFRefittedSequenceCfg(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRTGSF')
+def precisionTracks_GSFRefitted_LRTSequenceGenCfg(flags, name='Electron', is_probe_leg=False):
+    return precisionTracks_GSFRefittedSequenceGenCfg(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRTGSF')

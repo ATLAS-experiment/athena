@@ -221,7 +221,7 @@ void LVL1::eFEXegAlgo::getWstot(std::vector<unsigned int> & output){
   }
 
   // Overflow handling
-  if (den > 0xffff)     den = 0xffff;
+  //if (den > 0xffff)     den = 0xffff; - commented out so that denom can overflow, will then automatically pass all thresholds (see eFEXFPGA::SetIsoWP)
   if (numer > 0xffff) numer = 0xffff;
   
   // Return results

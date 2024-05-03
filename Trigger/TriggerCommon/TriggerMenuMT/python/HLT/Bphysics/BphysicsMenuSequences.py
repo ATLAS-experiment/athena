@@ -10,7 +10,7 @@ from TrigEDMConfig.TriggerEDM import recordable
 
 
 @AccumulatorCache
-def bmumuxSequence(flags):
+def bmumuxSequenceGenCfg(flags):
 
     RoIToolCreator = CompFactory.ViewCreatorMuonSuperROITool if flags.Trigger.InDetTracking.bmumux.SuperRoI else CompFactory.ViewCreatorCentredOnIParticleROITool
 
@@ -43,7 +43,7 @@ def bmumuxSequence(flags):
     return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
 
 
-def dimuL2Sequence(flags):
+def dimuL2SequenceGenCfg(flags):
     from ..Muon.MuonMenuSequences import muCombAlgSequenceCfg
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
 
@@ -58,7 +58,7 @@ def dimuL2Sequence(flags):
 
 
 @AccumulatorCache
-def dimuEFSequence(flags):
+def dimuEFSequenceGenCfg(flags):
     selAcc = SelectionCA('dimuSequence')
 
     inputMakerAlg = CompFactory.InputMakerForRoI('IM_bphysStreamerDimuEF',

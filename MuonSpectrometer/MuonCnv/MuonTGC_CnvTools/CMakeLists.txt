@@ -19,6 +19,6 @@ atlas_add_component( MuonTGC_CnvTools
                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ByteStreamCnvSvcBaseLib ByteStreamData ByteStreamData_test GaudiKernel AthenaBaseComps Identifier FourMomUtils
                                                               EventPrimitives TGCcablingInterfaceLib MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonRDO 
-                                                              MuonPrepRawData MuonTrigCoinData TrkSurfaces MuonCnvToolInterfacesLib MuonTGC_CnvToolsLib ByteStreamCnvSvcLib CxxUtils )
+                                                              MuonPrepRawData MuonTrigCoinData TrkSurfaces MuonCnvToolInterfacesLib MuonTGC_CnvToolsLib ByteStreamCnvSvcLib CxxUtils xAODMuonPrepData)
 
 

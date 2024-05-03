@@ -238,7 +238,7 @@ StatusCode MuDstarFilter::filterEvent() {
 
           ATH_MSG_DEBUG("MuDstarFilter: NumPis = " << NumPis );
 
-          if (NumPis == 0) continue;
+          if (NumPis != 1) continue;
 
           HepMC::ConstGenParticlePtr D0Child1 = 0;
           HepMC::ConstGenParticlePtr D0Child2 = 0;

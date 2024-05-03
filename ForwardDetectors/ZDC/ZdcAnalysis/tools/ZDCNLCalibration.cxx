@@ -196,7 +196,7 @@ ZDCNLCalibration::FindSNTwoNRanges(size_t LBLow, size_t LBHigh, size_t side)
 
 void ZDCNLCalibration::Calibrate(size_t side, const std::string & calibInput, const std::string & calibOutput, 
 				 size_t LBLow, size_t LBHigh, std::array<int, 4> maxPowerModule,
-				 std::vector<std::pair<double, double> >  nNeutERange, 
+				 const std::vector<std::pair<double, double> >&  nNeutERange, 
 				 bool excludeHE, float heSumThresh, float HEDeweight)
 {
   std::for_each(maxPowerModule.begin(), maxPowerModule.end(), 
@@ -369,7 +369,7 @@ void ZDCNLCalibration::Calibrate(size_t side, const std::string & calibInput, co
   }
 }
 
-void ZDCNLCalibration::TestCalibration(int side, std::string name)
+void ZDCNLCalibration::TestCalibration(int side, const std::string& name)
 {
   std::string calibName = (name != "" ? name : "default");
   CalibData calib = GetCalibration(side, calibName);

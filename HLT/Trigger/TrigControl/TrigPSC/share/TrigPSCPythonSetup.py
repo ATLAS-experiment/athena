@@ -5,8 +5,6 @@
 ## @brief  Python setup for online running (similar to athena.py)
 ## @author Werner Wiedenmann <Werner.Wiedenmann@cern.ch>
 ###############################################################
-import builtins
-printfunc = getattr(builtins,'print')
 
 ### setup from a .pkl file
 from TrigPSC import PscConfig

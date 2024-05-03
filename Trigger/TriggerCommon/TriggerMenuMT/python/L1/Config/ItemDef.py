@@ -369,7 +369,7 @@ class ItemDef:
 
         MenuItem('L1_2MU14FCH_OVERLAY').setLogic( d.MU14FCH.x(2)       & physcond).setTriggerType(TT.zerobs)
 
-        MenuItem('L1_LLPDPHI-jXE27-jJ27').setLogic( d.TOPO_0DPHI15_jXE27delay_jJ27s & physcond)
+        MenuItem('L1_LLPDPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI10_jXE40delay_jJ40s & physcond)
         
         # HI
         MenuItem('L1_MU3V_VTE10' ).setLogic( d.MU3V      & Not(d.TE10) & physcond).setTriggerType(TT.muon)
@@ -557,16 +557,20 @@ class ItemDef:
         #Phase-I mixed tau
         MenuItem('L1_eEM18M_2eTAU20M'             ).setLogic( d.eEM18M & d.eTAU20M.x(2)	& physcond).setTriggerType( TT.calo )
         MenuItem('L1_MU8F_eTAU20M'                ).setLogic( d.MU8F   & d.eTAU20M	& physcond).setTriggerType( TT.calo )
+        MenuItem('L1_MU8F_cTAU20M'                ).setLogic( d.MU8F   & d.cTAU20M	& physcond).setTriggerType( TT.calo )
         MenuItem('L1_MU8F_eTAU20M_jJ55_2jJ30'     ).setLogic( d.MU8F   & d.eTAU20M      & d.jJ55      & d.jJ30.x(2) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_MU8F_eTAU20M_3jJ30'          ).setLogic( d.MU8F   & d.eTAU20M	& d.jJ30.x(3) & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_MU8F_cTAU20M_3jJ30'          ).setLogic( d.MU8F   & d.eTAU20M	& d.jJ30.x(3) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM18M_2eTAU20M_jJ55_3jJ30'  ).setLogic( d.eEM18M & d.eTAU20M.x(2) & d.jJ55      & d.jJ30.x(3) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_MU8F_eTAU30M'                ).setLogic( d.MU8F   & d.eTAU30M      & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_MU8F_cTAU30M'                ).setLogic( d.MU8F   & d.cTAU30M	& physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30').setLogic( d.eTAU30M & d.eTAU20M.x(2) & d.jJ55 & d.jJ50.x(2) & d.jJ30.x(3) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU35M_2eTAU30M'            ).setLogic( d.eTAU35M & d.eTAU30M.x(2) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU30M_2jJ50_jXE90'         ).setLogic( d.eTAU30M & d.jJ50.x(2)    & d.jXE90     &  physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM18M_2eTAU20M_jXE70'       ).setLogic( d.eEM18M  & d.eTAU20M.x(2) & d.jXE70     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM18M_2eTAU20M_4jJ30'       ).setLogic( d.eEM18M  & d.eTAU20M.x(2) & d.jJ30.x(4) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_MU8F_eTAU20M_jXE70'          ).setLogic( d.MU8F    & d.eTAU20M      & d.jXE70     & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_MU8F_cTAU20M_jXE70'          ).setLogic( d.MU8F    & d.cTAU20M	 & d.jXE70     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU30M_2eTAU20M_jXE70'      ).setLogic( d.eTAU30M & d.eTAU20M.x(2) & d.jXE70     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU60_2eTAU20M_jXE80'       ).setLogic( d.eTAU60  & d.eTAU20M.x(2) & d.jXE80     & physcond).setTriggerType( TT.calo )
         

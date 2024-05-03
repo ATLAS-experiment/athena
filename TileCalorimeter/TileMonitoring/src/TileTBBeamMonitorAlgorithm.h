@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILETBBEAMMONITORALGORITHM_H
@@ -7,11 +7,15 @@
 
 #include "TileEvent/TileBeamElemContainer.h"
 #include "TileConditions/TileCablingSvc.h"
+#include "TileCalibBlobObjs/TileCalibUtils.h"
+
+#include "CaloEvent/CaloCellContainer.h"
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
 
+class TileID;
 class TileHWID;
 
 /** @class TileTBBeamMonitorAlgorithm
@@ -77,16 +81,36 @@ class TileTBBeamMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<double> m_beamBC2Z{this,
         "BC2Z", 2600.0, "BC2 z position."};
 
+    SG::ReadHandleKey<CaloCellContainer> m_caloCellContainerKey{this,
+        "CaloCellContainer", "AllCalo", "Calo cell container name"};
+
+    Gaudi::Property<std::vector<std::string>> m_masked{this,
+        "Masked", {}, "Masked channels: 'module gain channel,channel' (channels are separated by comma)"};
+
+    Gaudi::Property<std::vector<unsigned int>> m_maskMuonPMTs {this,
+        "MaskMuonPMTs", {}, "Masked muon wall PMTs"};
+
+    Gaudi::Property<std::vector<std::pair<int, int>>> m_tofPairs{this,
+         "TOFDifferencePairs", {}, "TOF pairs to monitor time differnce"};
 
     std::vector<int> m_tofGroups;
+    std::vector<int> m_tofDiffGroups;
     std::vector<int> m_sCounterGroups;
     std::vector<int> m_cherenkovGroups;
+    std::vector<int> m_scalerGroups;
     std::vector<int> m_muonWallGroups;
+    std::vector<int> m_cherenkovVsEnergyGroups;
     std::map<std::string, int> m_beamChamberGroups;
+    std::vector<std::vector<int>> m_cherenkovVsTOFGroups;
 
-    enum BEAM_ELEMENTS_NUMBER {N_S_COUNTER = 3, N_CHERENKOV = 3, N_TOF = 3, N_MUON_WALL_PMT = 12};
+    enum BEAM_ELEMENTS_NUMBER {N_S_COUNTER = 3, N_CHERENKOV = 3, N_TOF = 3, N_SCALER = 3, N_MUON_WALL_PMT = 12};
 
+    const TileHWID* m_tileID{nullptr};
     const TileHWID* m_tileHWID{nullptr};
+
+    std::array<bool, TileCalibUtils::MAX_DRAWERIDX> m_monitoredDrawerIdx{};
+    std::array<bool, N_MUON_WALL_PMT> m_maskedMuPMTs = {};
+    std::array<std::array<unsigned char, TileCalibUtils::MAX_CHAN>, TileCalibUtils::MAX_DRAWERIDX> m_maskedChannels = {{}};
 };
 
 

@@ -54,7 +54,8 @@ void TRT_HitCollectionCnv_p4::transToPers(const TRTUncompressedHitCollection* tr
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   const IProxyDict* proxy = Atlas::getExtendedEventContext(ctx).proxy();
-  const HepMcParticleLink * lastLink=nullptr;
+  int lastIndex{-1};
+  int lastBarcode{-1};
   int lastId = -1;
   double lastT = 0.0*CLHEP::ns;
   unsigned int idx = 0;
@@ -66,22 +67,25 @@ void TRT_HitCollectionCnv_p4::transToPers(const TRTUncompressedHitCollection* tr
   for (TRTUncompressedHitCollection::const_iterator it = transCont->begin(); it != transCont->end(); ++it) {
 
     TRTUncompressedHitCollection::const_iterator trtHit = it;
+    const HepMcParticleLink * currentLink = &(trtHit->particleLink());
+    const int barcode = currentLink->barcode();
+    int index{0};
+    if (HepMcParticleLink::getEventPositionInCollection(currentLink->eventIndex(),
+                                                        proxy).at(0) != 0) {
+      index = currentLink->eventIndex();
+    }
 
-    if ( !lastLink || (trtHit->particleLink() != *lastLink)  ||  (idx - endBC > 65500)) {   // max unsigned short =  65535;
-      // store barcode once for set of consecutive hits with same barcode
-      lastLink = &(trtHit->particleLink());
-      persCont->m_barcode.push_back(lastLink->barcode());
-      unsigned short index{0};
-      const HepMcParticleLink::index_type position =
-        HepMcParticleLink::getEventPositionInCollection(lastLink->eventIndex(),
-                                                        proxy).at(0);
-      if (position!=0) {
-        index = lastLink->eventIndex();
-        if(lastLink->eventIndex()!=static_cast<HepMcParticleLink::index_type>(index)) {
-          log << MSG::WARNING << "Attempting to persistify an eventIndex larger than max unsigned short!" << endmsg;
-        }
+    if ( lastBarcode != barcode || lastIndex != index || (idx - endBC > 65500) ) {   // max unsigned short =  65535;
+      lastBarcode = barcode;
+      lastIndex = index;
+      const unsigned short persIndex = static_cast<unsigned short>(index);
+      if (static_cast<HepMcParticleLink::index_type>(lastIndex) != static_cast<HepMcParticleLink::index_type>(persIndex)) {
+        log << MSG::WARNING << "Attempting to persistify an eventIndex larger than max unsigned short!" << endmsg;
       }
-      persCont->m_mcEvtIndex.push_back(index);
+      // store barcode, eventIndex and McEventCollection once for set
+      // of consecutive hits with the same barcode and eventIndex
+      persCont->m_barcode.push_back(static_cast<unsigned int>(lastBarcode));
+      persCont->m_mcEvtIndex.push_back(persIndex);
       persCont->m_evtColl.push_back('a'); // Hard-coding as this only ever had a single value in production
 
       if ( idx > 0 ) {

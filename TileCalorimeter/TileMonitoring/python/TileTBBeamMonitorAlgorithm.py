@@ -33,7 +33,9 @@ def TileTBBeamMonitoringConfig(flags, fragIDs=[0x100,0x101,0x200,0x201,0x402], *
     kwargs.setdefault('CaloCellContainer', 'AllCalo')
     cellContainer = kwargs['CaloCellContainer']
 
+    kwargs.setdefault('TBperiod', 2023)
     kwargs.setdefault('MaskMuonPMTs', [7])
+    kwargs.setdefault('TOFDifferencePairs', [[2, 1], [2, 3], [3, 1]])
 
     from TileCalibBlobObjs.Classes import TileCalibUtils as Tile
 
@@ -53,6 +55,9 @@ def TileTBBeamMonitoringConfig(flags, fragIDs=[0x100,0x101,0x200,0x201,0x402], *
 
     for k, v in kwargs.items():
         setattr(tileTBBeamMonAlg, k, v)
+
+    from TileMonitoring.TileTBBeamChambersCalibration import updateBeamChambersCalibrations
+    updateBeamChambersCalibrations(tileTBBeamMonAlg, flags.Input.RunNumbers[0])
 
     run = str(flags.Input.RunNumbers[0])
 
@@ -109,12 +114,14 @@ def TileTBBeamMonitoringConfig(flags, fragIDs=[0x100,0x101,0x200,0x201,0x402], *
         tool.defineHistogram(name, title=title, path='BeamElements', type='TH1F',
                              xbins=4096, xmin=-0.5, xmax=4095.5)
 
-    tofDiffGroup = helper.addGroup(tileTBBeamMonAlg, 'TOFDiff', 'TestBeam')
-    for tofs in [[2, 1], [2, 3], [3, 1]]:
-        title = f'Run {run}: TOF{tofs[0]} - TOF{tofs[1]} Amplitude difference;[ADC];Counts'
-        tofDiffGroup.defineHistogram(f'TOFDiff{tofs[0]}{tofs[1]}', title=title, path='BeamElements',
-                                     type='TH1F', xbins=4096, xmin=-0.5, xmax=4095.5)
-
+    tofDiffPairs = kwargs['TOFDifferencePairs']
+    tofDiffArray = helper.addArray([len(tofDiffPairs)], tileTBBeamMonAlg, 'TOFDiff', topPath='TestBeam')
+    for postfix, tool in tofDiffArray.Tools.items():
+        pairIdx = int(postfix.split('_').pop())
+        tof1,tof2 = tofDiffPairs[pairIdx]
+        title = f'Run {run}: TOF{tof1} - TOF{tof2} Amplitude difference;[ADC];Counts'
+        tool.defineHistogram(f'TOFDiff;TOFDiff{tof1}{tof2}', title=title, path='BeamElements',
+                             type='TH1F', xbins=4096, xmin=-0.5, xmax=4095.5)
 
     cherenkovVsTOFArray = helper.addArray([nCherenkov, nTOF], tileTBBeamMonAlg, 'CherenkovVsTOF', topPath='TestBeam')
     for postfix, tool in cherenkovVsTOFArray.Tools.items():
@@ -136,7 +143,7 @@ def TileTBBeamMonitoringConfig(flags, fragIDs=[0x100,0x101,0x200,0x201,0x402], *
     scalerArray = helper.addArray([nScaler], tileTBBeamMonAlg, 'Scaler', topPath='TestBeam')
     for postfix, tool in scalerArray.Tools.items():
         scaler = int(postfix[1:]) + 1
-        title = f'Run {run}: Scaler S{tof};Counts;# Events'
+        title = f'Run {run}: Scaler S{scaler};Counts;# Events'
         name = f'counts;Scaler{scaler}'
         tool.defineHistogram(name, title=title, path='BeamElements', type='TH1F',
                              xbins=20000, xmin=-0.5, xmax=19999.5)
@@ -223,7 +230,7 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
 
     flags = initConfigFlags()
     parser = flags.getArgumentParser()
@@ -244,6 +251,7 @@ if __name__=='__main__':
     fragIDs = [int(fragID, base=16) for fragID in args.fragIDs]
 
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Output.HISTFileName = 'TileTBBeamMonitorOutput.root'
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
@@ -277,7 +285,8 @@ if __name__=='__main__':
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
         cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False,
                                          readDigits=(not readDigitsFlx),
-                                         readDigitsFlx=readDigitsFlx) )
+                                         readDigitsFlx=readDigitsFlx,
+                                         readBeamElem=True) )
     else:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))

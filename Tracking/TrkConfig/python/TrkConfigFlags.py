@@ -44,12 +44,13 @@ class PixelClusterSplittingType(FlagEnum):
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
     ActsChain = "ActsChain"  # full Acts Chain
+    ActsHeavyIon = "ActsHeavyIon"
     # Validation options
-    ValidateActsClusters = "ValidateActsClusters"
-    ValidateActsSpacePoints = "ValidateActsSpacePoints"
-    ValidateActsSeeds = "ValidateActsSeeds"
-    ValidateActsTracks = "ValidateActsTracks"
-    ValidateActsAmbiguityResolution = "ValidateActsAmbiguityResolution"
+    ActsValidateClusters = "ActsValidateClusters"
+    ActsValidateSpacePoints = "ActsValidateSpacePoints"
+    ActsValidateSeeds = "ActsValidateSeeds"
+    ActsValidateTracks = "ActsValidateTracks"
+    ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
     # Benchmarking
     BenchmarkSpot = "BenchmarkSpot"
     # GNN
@@ -207,6 +208,16 @@ def createTrackingConfigFlags():
                 prevFlags.Detector.EnableCalo)
     
     # --- defaults for backtracking
+    def BackTrackingMinPt(flags):
+        if flags.Tracking.cutLevel <= 1 or flags.Tracking.doMinBias:
+            return 0.4 * Units.GeV
+        elif flags.Tracking.cutLevel <= 18:
+            return 1.0 * Units.GeV
+        else:
+            return 3.0 * Units.GeV
+    icf.addFlag("Tracking.BackTracking.minPt", BackTrackingMinPt)
+    icf.addFlag("Tracking.BackTracking.TRTSegFinderPtBins", lambda prevFlags:
+                70 if prevFlags.Tracking.cutLevel<=1 else 50)
     icf.addFlag("Tracking.BackTracking.maxTRTSharedFrac", 0.7)
     icf.addFlag("Tracking.BackTracking.maxSecondaryImpact", 100.0 * Units.mm)
     icf.addFlag("Tracking.BackTracking.minClusters", 4)
@@ -240,6 +251,14 @@ def createTrackingConfigFlags():
                 6.*Units.GeV if prevFlags.Tracking.cutLevel>=19 else 0.)
 
     # TRT standalone configuration
+    def TRTStandaloneMinPt(flags):
+        if flags.Tracking.cutLevel <= 1 or flags.Tracking.doMinBias:
+            return 0.4 * Units.GeV
+        elif flags.Tracking.cutLevel <= 5:
+            return 1.0 * Units.GeV
+        else:
+            return 2.0 * Units.GeV
+    icf.addFlag("Tracking.TRTStandalone.minPt", TRTStandaloneMinPt)
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
     icf.addFlag("Tracking.TRTStandalone.minTRT", 15)
 
@@ -492,30 +511,33 @@ def createTrackingConfigFlags():
     from ActsConfig.ActsTrackingPassFlags import (
         createActsTrackingPassFlags,
         createActsConversionTrackingPassFlags,
-        createValidateActsClustersTrackingPassFlags,
-        createValidateActsSpacePointsTrackingPassFlags,
-        createValidateActsSeedsTrackingPassFlags,
-        createValidateActsTracksTrackingPassFlags,
-        createValidateActsAmbiguityResolutionTrackingPassFlags,
-        createActsBenchmarkSpotTrackingPassFlags
+        createActsValidateClustersTrackingPassFlags,
+        createActsValidateSpacePointsTrackingPassFlags,
+        createActsValidateSeedsTrackingPassFlags,
+        createActsValidateTracksTrackingPassFlags,
+        createActsValidateAmbiguityResolutionTrackingPassFlags,
+        createActsBenchmarkSpotTrackingPassFlags,
+        createActsHeavyIonTrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ('Tracking.ITkActsConversionPass',
                           createActsConversionTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsClustersPass",
-                          createValidateActsClustersTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsSpacePointsPass",
-                          createValidateActsSpacePointsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsSeedsPass",
-                          createValidateActsSeedsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsTracksPass",
-                          createValidateActsTracksTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkValidateActsAmbiguityResolutionPass",
-                          createValidateActsAmbiguityResolutionTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateClustersPass",
+                          createActsValidateClustersTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateSpacePointsPass",
+                          createActsValidateSpacePointsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateSeedsPass",
+                          createActsValidateSeedsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",
+                          createActsValidateTracksTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
+                          createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
                           createActsBenchmarkSpotTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
+                          createActsHeavyIonTrackingPassFlags, prefix=True)
 
     # GNN
     from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags

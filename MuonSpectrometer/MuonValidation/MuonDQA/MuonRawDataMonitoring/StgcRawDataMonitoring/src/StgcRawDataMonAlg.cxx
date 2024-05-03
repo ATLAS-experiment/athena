@@ -435,16 +435,24 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContain
 
 void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*  muonContainer, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
   for (const xAOD::Muon* mu : *muonContainer) {
-    if(mu -> pt() < m_cutPt) continue;
-    if(!(mu -> author() == xAOD::Muon::Author::MuidCo || mu -> author() == xAOD::Muon::Author::MuidSA)) continue;
+    if (mu -> pt() < m_cutPt) continue;
+    if (!(mu -> author() == xAOD::Muon::Author::MuidCo || mu -> author() == xAOD::Muon::Author::MuidSA)) continue;
+   
+    struct sTGCeff {
+      std::array<int, 8> quadMultiplet{};
+      std::array<int, 8> layerMultiplet{};
+      std::array<float, 8> xPosMultiplet{};
+      std::array<float, 8> yPosMultiplet{};
+      std::array<float, 8> zPosMultiplet{};
+    };
 
+    std::array<std::array<sTGCeff, 16>, 2> effPlots; // Store active layers per side (2) and sectors (16) 
+        
     const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     if(meTP == nullptr) continue;
 
     const Trk::Track* meTrack = meTP -> track();
     if(!meTrack) continue;
-
-    sTGCeff effPlots[2][3][16][2];
 
     for(const Trk::TrackStateOnSurface* trkState : *meTrack->trackStateOnSurfaces()) {
       std::optional<Identifier> status = getRotId(trkState);
@@ -460,217 +468,101 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
       int sector = m_idHelperSvc -> sector(rot_id);
       int multi  = m_idHelperSvc -> stgcIdHelper().multilayer(rot_id);
       int gap    = m_idHelperSvc -> stgcIdHelper().gasGap(rot_id);
-
+      int layer  = getLayer(multi, gap);
+            
       const Amg::Vector2D& positionsMultiplet = (trkState) -> trackParameters() -> localPosition();
-      float xPosStripInMultiplet = positionsMultiplet.x();
-      float yPosStripInMultiplet = positionsMultiplet.y();
+      float xPosStripInMultipletLocal = positionsMultiplet.x();
+      float yPosStripInMultipletLocal = positionsMultiplet.y();
 
+      Amg::Vector2D localPos(xPosStripInMultipletLocal, yPosStripInMultipletLocal);
+      Amg::Vector3D globalPos(Amg::Vector3D::Zero());
+      const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStrip = muonDetectorManagerObject -> getsTgcReadoutElement(rot_id);
+      sTgcReadoutObjectStrip -> surface(rot_id).localToGlobal(localPos, Amg::Vector3D::Zero(), globalPos);
+      float xPosStripInMultiplet = globalPos.x();
+      float yPosStripInMultiplet = globalPos.y();
+      
       Amg::Vector3D posStripGlobal{Amg::Vector3D::Zero()};
       (muonDetectorManagerObject -> getsTgcReadoutElement(rot_id)) -> stripGlobalPosition(rot_id, posStripGlobal);
       float zPosStripInMultiplet = posStripGlobal.z();
 
-      if( ! (std::find(effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.begin(), effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.end(), gap) != effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.end()) ) {
-	effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].layerMultiplet.push_back(gap);
-	effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].xPosMultiplet.push_back(xPosStripInMultiplet);
-	effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].yPosMultiplet.push_back(yPosStripInMultiplet);
-	effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].zPosMultiplet.push_back(zPosStripInMultiplet);
-      }
+      auto&	sTGCelements = effPlots[iside][sector - 1];
+
+      sTGCelements.quadMultiplet.at(layer - 1) = stEta;
+      sTGCelements.layerMultiplet.at(layer - 1) = layer;
+      sTGCelements.xPosMultiplet.at(layer - 1) = xPosStripInMultiplet;
+      sTGCelements.yPosMultiplet.at(layer - 1) = yPosStripInMultiplet;
+      sTGCelements.zPosMultiplet.at(layer - 1) = zPosStripInMultiplet;      
     } // end track state loop
 
     for (unsigned int isideIndex = 0; isideIndex <= 1; ++isideIndex) {
-      for (unsigned int stEtaIndex = 1; stEtaIndex <= 3; ++stEtaIndex) {
-	for (unsigned int sectorIndex = 1; sectorIndex <= 16; ++sectorIndex) {
-	  for (unsigned int multiIndex = 1; multiIndex <= 2; ++multiIndex) {
-	    if (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size() == 4) {
-	      for (unsigned int gapIndex = 1; gapIndex <= effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size(); ++gapIndex) {
-		float xPos = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(gapIndex - 1);
-		float yPos = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(gapIndex - 1);
+      for (unsigned int sectorIndex = 1; sectorIndex <= 16; ++sectorIndex) {
+        auto& sTGCelements = effPlots[isideIndex][sectorIndex - 1];
+        bool fourOutEight = std::count_if(sTGCelements.layerMultiplet.begin(), sTGCelements.layerMultiplet.end(), [](int i) { return i != 0; }) >= 4;
+        bool oneRefLayer = std::count_if(sTGCelements.layerMultiplet.begin(), sTGCelements.layerMultiplet.end(), [](int i) { return i != 0; }) >= 1;
+        
+        if (fourOutEight) {
+          for (auto layerIndex = static_cast<std::array<int, 8>::size_type>(1); layerIndex <= sTGCelements.layerMultiplet.size(); ++layerIndex) {
+            if (sTGCelements.layerMultiplet.at(layerIndex - 1) == 0) continue;
+            
+            float xPos = sTGCelements.xPosMultiplet.at(layerIndex - 1);
+            float yPos = sTGCelements.yPosMultiplet.at(layerIndex - 1);
+            float rPos = std::hypot(xPos, yPos);
+            
+            std::string side = GeometricSectors::sTgcSide[isideIndex];
+            
+            auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", true);
+            
+            auto rPosStripMon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerIndex), rPos);
+            fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripMon, effQuestionMon);
+            
+            auto xPosStripmon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerIndex), xPos);
+            auto yPosStripmon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerIndex), yPos);
+            fill("sTgcOverview", xPosStripmon, yPosStripmon, effQuestionMon);
+          } // End of loop over efficient layers
+        } // End of efficient case
+        
+        else if (!fourOutEight && oneRefLayer) {
+          auto refLayerIndex = std::distance(sTGCelements.layerMultiplet.begin(), std::find_if(sTGCelements.layerMultiplet.begin(), sTGCelements.layerMultiplet.end(), [](int i) {return i != 0;}));
 
-		std::string side = GeometricSectors::sTgcSide[isideIndex];
-		int quad = (side == "A") ? stEtaIndex : -stEtaIndex;
+          for (auto layerIndex = static_cast<std::array<int, 8>::size_type>(1); layerIndex <= sTGCelements.layerMultiplet.size(); ++layerIndex) {
+            if (sTGCelements.layerMultiplet.at(layerIndex - 1) != 0) continue;
+            int quad = sTGCelements.quadMultiplet.at(refLayerIndex);
+            int multi = (layerIndex <= static_cast<std::array<int, 8>::size_type>(m_idHelperSvc->stgcIdHelper().gasGapMax())) ? m_idHelperSvc->stgcIdHelper().multilayerMin() : m_idHelperSvc->stgcIdHelper().multilayerMax();
+            int gap = (layerIndex <= static_cast<std::array<int, 8>::size_type>(m_idHelperSvc->stgcIdHelper().gasGapMax())) ? layerIndex : layerIndex - static_cast<std::array<int, 8>::size_type>(m_idHelperSvc->stgcIdHelper().gasGapMax()); 
+                        
+            bool isValid = false;
+            const Identifier idProbe = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2, multi, gap, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
+            
+            if (!isValid) {
+              ATH_MSG_WARNING("Identifier of probe layer is invalid");
+              continue;
+            }
+            
+            Amg::Vector3D posProbe{Amg::Vector3D::Zero()};
+            (muonDetectorManagerObject -> getsTgcReadoutElement(idProbe)) -> stripGlobalPosition(idProbe, posProbe);
+            float posZprobe = posProbe.z();
+              
+            float xSlope = sTGCelements.xPosMultiplet.at(refLayerIndex)/sTGCelements.zPosMultiplet.at(refLayerIndex);
+            float ySlope = sTGCelements.yPosMultiplet.at(refLayerIndex)/sTGCelements.zPosMultiplet.at(refLayerIndex);
+            
+            float xPos = sTGCelements.xPosMultiplet.at(refLayerIndex) + xSlope*(posZprobe - sTGCelements.zPosMultiplet.at(refLayerIndex));
+            float yPos = sTGCelements.yPosMultiplet.at(refLayerIndex) + ySlope*(posZprobe - sTGCelements.zPosMultiplet.at(refLayerIndex));
+            float rPos = std::hypot(xPos, yPos);
 
-		bool isValid = false;
-		const Identifier IDeffLayerStrip = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2,  multiIndex, gapIndex, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
-
-		if (!isValid) {
-		  ATH_MSG_WARNING("Identifier of eff layer isn't valid");
-		  continue;
-		}
-
-		int gasGapEff = m_idHelperSvc -> stgcIdHelper().gasGap(IDeffLayerStrip);
-		int layerEff  = getLayer(multiIndex, gasGapEff);
-
-		Amg::Vector2D localPos(xPos, yPos);
-		Amg::Vector3D globalPos(0, 0, 0);
-		const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStrip = muonDetectorManagerObject -> getsTgcReadoutElement(IDeffLayerStrip);
-		sTgcReadoutObjectStrip -> surface(IDeffLayerStrip).localToGlobal(localPos, Amg::Vector3D::Zero(), globalPos);
-
-		float xPosGlobal = globalPos.x();
-		float yPosGlobal = globalPos.y();
-		float rPosGlobal = std::hypot(xPosGlobal, yPosGlobal);
-
-		auto effQuestion = true;
-		auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", effQuestion);
-
-		auto rPosStripMon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerEff), rPosGlobal);
-		fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripMon, effQuestionMon);
-
-		auto xPosStripmon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerEff), xPosGlobal);
-		auto yPosStripmon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerEff), yPosGlobal);
-		fill("sTgcOverview", xPosStripmon, yPosStripmon, effQuestionMon);
-	      } // close gap loop
-	    } // close 4 out 4 if case
-
-	    else if (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size() == 3) {
-	      std::vector<int> refLayers(4, 0);
-
-	      refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0);
-	      refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1);
-	      refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(2) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(2);
-
-	      int probeL1 = -999;
-
-	      for (long unsigned int layerIt = 0; layerIt < refLayers.size(); ++layerIt) {
-		if (refLayers.at(layerIt) == 0) {probeL1 = layerIt + 1;}
-	      }
-
-	      std::string side = GeometricSectors::sTgcSide[isideIndex];
-	      int quad = (side == "A") ? stEtaIndex : -stEtaIndex;
-
-	      bool isValid = false;
-	      const Identifier idProbeL1 = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2, multiIndex, probeL1, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
-
-	      if (!isValid) {
-		ATH_MSG_WARNING("Identifier of probe L1 is invalid");
-		continue;
-	      }
-
-	      Amg::Vector3D posProbeL1{Amg::Vector3D::Zero()};
-	      (muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL1)) -> stripGlobalPosition(idProbeL1, posProbeL1);
-	      float posZprobeL1 = posProbeL1.z();
-
-	      float xSlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
-	      float ySlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
-
-	      float xPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) + xSlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
-	      float yPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) + ySlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
-
-	      int layerProbeL1 = getLayer(multiIndex, probeL1);
-
-	      Amg::Vector2D localPosProbeLayer1(xPosProbeLayer1, yPosProbeLayer1);
-	      Amg::Vector3D globalPosProbeLayer1(0, 0, 0);
-	      const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStrip = muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL1);
-	      sTgcReadoutObjectStrip -> surface(idProbeL1).localToGlobal(localPosProbeLayer1, Amg::Vector3D::Zero(), globalPosProbeLayer1);
-
-	      float xPosGlobalProbeLayer1 = globalPosProbeLayer1.x();
-	      float yPosGlobalProbeLayer1 = globalPosProbeLayer1.y();
-	      float rPosGlobalProbeLayer1 = std::hypot(xPosGlobalProbeLayer1, yPosGlobalProbeLayer1);
-
-	      auto effQuestion = false;
-	      auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", effQuestion);
-
-	      auto rPosStripProbeL1mon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerProbeL1), rPosGlobalProbeLayer1);
-	      fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripProbeL1mon, effQuestionMon);
-
-	      auto xPosStripProbeL1mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), xPosGlobalProbeLayer1);
-	      auto yPosStripProbeL1mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), yPosGlobalProbeLayer1);
-	      fill("sTgcOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
-	    } // close 3 out 4 if case
-
-
-	    else if (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.size() == 2) {
-	      std::vector<int> refLayers(4, 0);
-
-	      refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(0);
-	      refLayers.at(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1) - 1) = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].layerMultiplet.at(1);
-
-	      std::vector<int> probeLayers;
-
-	      for (long unsigned int layerIt = 0; layerIt < refLayers.size(); ++layerIt) {
-		if (refLayers.at(layerIt) == 0) {probeLayers.push_back(layerIt + 1);}
-	      }
-
-	      int probeL1 = probeLayers.at(0);
-	      int probeL2 = probeLayers.at(1);
-
-	      std::string side = GeometricSectors::sTgcSide[isideIndex];
-	      int quad = (side == "A") ? stEtaIndex : -stEtaIndex;
-
-	      bool isValid = false;
-
-	      const Identifier idProbeL1 = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2, multiIndex, probeL1, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
-
-	      if (!isValid) {
-		ATH_MSG_WARNING("Identifier of probe L1 is invalid");
-		continue;
-	      }
-
-	      const Identifier idProbeL2 = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2, multiIndex, probeL2, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
-
-	      if (!isValid) {
-		ATH_MSG_WARNING("Identifier of probe L2 is invalid");
-		continue;
-	      }
-
-	      Amg::Vector3D posProbeL1{Amg::Vector3D::Zero()};
-	      (muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL1)) -> stripGlobalPosition(idProbeL1, posProbeL1);
-	      float posZprobeL1 = posProbeL1.z();
-
-	      Amg::Vector3D posProbeL2{Amg::Vector3D::Zero()};
-	      (muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL2)) -> stripGlobalPosition(idProbeL2, posProbeL2);
-	      float posZprobeL2 = posProbeL2.z();
-
-	      float xSlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
-	      float ySlope = (effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(1))/(effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0) - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(1));
-
-	      float xPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) + xSlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
-	      float yPosProbeLayer1 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) + ySlope*(posZprobeL1 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
-
-	      float xPosProbeLayer2 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].xPosMultiplet.at(0) + xSlope*(posZprobeL2 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
-	      float yPosProbeLayer2 = effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].yPosMultiplet.at(0) + ySlope*(posZprobeL2 - effPlots[isideIndex][stEtaIndex - 1][sectorIndex - 1][multiIndex - 1].zPosMultiplet.at(0));
-
-	      int layerProbeL1   = getLayer(multiIndex, probeL1);
-	      int layerProbeL2   = getLayer(multiIndex, probeL2);
-
-	      Amg::Vector2D localPosProbeLayer1(xPosProbeLayer1, yPosProbeLayer1);
-	      Amg::Vector3D globalPosProbeLayer1(0, 0, 0);
-	      const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStripProbeLayer1 = muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL1);
-	      sTgcReadoutObjectStripProbeLayer1 -> surface(idProbeL1).localToGlobal(localPosProbeLayer1, Amg::Vector3D::Zero(), globalPosProbeLayer1);
-
-	      float xPosGlobalProbeLayer1 = globalPosProbeLayer1.x();
-	      float yPosGlobalProbeLayer1 = globalPosProbeLayer1.y();
-	      float rPosGlobalProbeLayer1 = std::hypot(xPosGlobalProbeLayer1, yPosGlobalProbeLayer1);
-
-	      Amg::Vector2D localPosProbeLayer2(xPosProbeLayer2, yPosProbeLayer2);
-	      Amg::Vector3D globalPosProbeLayer2(0, 0, 0);
-	      const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStripProbeLayer2 = muonDetectorManagerObject -> getsTgcReadoutElement(idProbeL2);
-	      sTgcReadoutObjectStripProbeLayer2 -> surface(idProbeL2).localToGlobal(localPosProbeLayer2, Amg::Vector3D::Zero(), globalPosProbeLayer2);
-
-	      float xPosGlobalProbeLayer2 = globalPosProbeLayer2.x();
-	      float yPosGlobalProbeLayer2 = globalPosProbeLayer2.y();
-	      float rPosGlobalProbeLayer2 = std::hypot(xPosGlobalProbeLayer2, yPosGlobalProbeLayer2);
-
-	      auto effQuestion = false;
-	      auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", effQuestion);
-
-	      auto rPosStripProbeL1mon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerProbeL1), rPosGlobalProbeLayer1);
-	      fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripProbeL1mon, effQuestionMon);
-
-	      auto rPosStripProbeL2mon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerProbeL2), rPosGlobalProbeLayer2);
-	      fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripProbeL2mon, effQuestionMon);
-
-	      auto xPosStripProbeL1mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), xPosGlobalProbeLayer1);
-	      auto yPosStripProbeL1mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), yPosGlobalProbeLayer1);
-	      fill("sTgcOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
-
-	      auto xPosStripProbeL2mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL2), xPosGlobalProbeLayer2);
-	      auto yPosStripProbeL2mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL2), yPosGlobalProbeLayer2);
-	      fill("sTgcOverview", xPosStripProbeL2mon, yPosStripProbeL2mon, effQuestionMon);
-	    } // close 2 out 4 if case
-	  } // multiIndex loop end
-	} // sectorIndex loop end
-      } // stEtaIndex loop end
-    } // isideIndex loop end
+            std::string side = GeometricSectors::sTgcSide[isideIndex];
+           
+            auto effQuestionMon = Monitored::Scalar<bool>("hitLayer", false);
+            
+            auto rPosStripProbemon = Monitored::Scalar<float>("rPosStrip_" + side + "_sector_" + std::to_string(sectorIndex)  + "_layer_" + std::to_string(layerIndex), rPos);
+            fill("rPosStrip_" + side + std::to_string(sectorIndex), rPosStripProbemon, effQuestionMon);
+              
+            auto xPosStripProbemon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerIndex), xPos);
+            auto yPosStripProbemon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerIndex), yPos);
+            fill("sTgcOverview", xPosStripProbemon, yPosStripProbemon, effQuestionMon);
+          } // End of loop over probe layers
+        } // End of non-efficient case
+      } // End of sector loop
+    } // End of iside loop
   } // End muon container loop
 } // end stgc strip function
 

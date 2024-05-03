@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfFileUtils
 # @brief Transform utilities to deal with files.
@@ -22,40 +22,22 @@ athFileInterestingKeys = ['file_size', 'file_guid', 'file_type', 'nentries']
 ## @brief New lightweight interface to getting a single file's metadata
 def AthenaLiteFileInfo(filename, filetype, retrieveKeys = athFileInterestingKeys):
     msg.debug('Calling AthenaLiteFileInfo for {0} (type {1})'.format(filename, filetype))
-    from subprocess import CalledProcessError 
+    from PyUtils.MetaReader import read_metadata
 
-    if filetype == 'POOL':
-        # retrieve GUID and nentries without runMiniAthena subprocess
-        from PyUtils.AthFileLite import AthInpFile as AthFileLite
-    elif filetype == 'BS':
-        from PyUtils.AthFileLite import AthBSFile as AthFileLite
-    elif filetype == 'TAG':
-        from PyUtils.AthFileLite import AthTagFile as AthFileLite
-    else:
-        msg.error('Unknown filetype for {0} - no lightweight metadata interface for type {1}'.format(filename, filetype))
-        return None
-    
     metaDict = {}
     try:
-        meta = AthFileLite(filename).fileinfo
-        msg.debug('AthFileLite came back for {0}'.format(filename))
+        meta = read_metadata(filename,None,'lite')[filename]
+        msg.debug('read_metadata came back for {0}'.format(filename))
         metaDict[filename] = {}
         for key in retrieveKeys:
             msg.debug('Looking for key {0}'.format(key))
             try:
-                if key == 'G4Version':
-                    msg.debug('Searching for G4Version in metadata')
-                    try: 
-                        metaDict[filename][key] = meta['metadata']['/Simulation/Parameters']['G4Version']
-                        msg.debug('Setting G4Version to {0}'.format(meta['metadata']['/Simulation/Parameters']['G4Version']))
-                    except (KeyError, TypeError):
-                        msg.debug('Could not find G4Version information in metadata for file {0}'.format(filename))
-                else:
-                    metaDict[filename][key] = meta[key]
+                metaval = meta[key]
+                metaDict[filename][key] = metaval.lower() if key == 'file_type' else metaval
             except KeyError:
                 msg.warning('Missing key in athFile info: {0}'.format(key))
-    except (CalledProcessError, ValueError, AssertionError, ReferenceError):
-        msg.error('Problem in getting AthFile metadata for {0}'.format(filename))
+    except (ValueError, AssertionError, ReferenceError):
+        msg.error('Problem in getting metadata for {0}'.format(filename))
         return None
     msg.debug('Returning {0}'.format(metaDict))
     return metaDict    

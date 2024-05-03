@@ -2,10 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// G4HadIntProcessor.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 // Class Header
 #include "ISF_FatrasToolsG4/G4HadIntProcessor.h"
 
@@ -512,6 +508,7 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
                                                           1, //status
                                                           time,
                                                           *parent,
+                                                          0, // undefined id
                                                           Barcode::fUndefinedBarcode,
                                                           truthBinding );
       cParticle->setNextGeoID( parent->nextGeoID() );

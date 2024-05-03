@@ -5,7 +5,7 @@ from TrigConfigSvc.TrigConfigSvcCfg import getHLTPrescalesSetFileName
 from AthenaCommon.Logging import logging
 __log = logging.getLogger( __name__ )
 
-def generatePrescaleJSON(flags, chainDicts, chainConfigs):
+def generatePrescaleJSON(flags, chainDicts):
     """ Generates JSON given the ChainProps and sequences
     """
     # Prescale dictionary that is used to create the JSON content

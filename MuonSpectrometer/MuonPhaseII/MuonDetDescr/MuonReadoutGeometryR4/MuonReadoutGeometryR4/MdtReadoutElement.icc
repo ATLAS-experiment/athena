@@ -1,8 +1,25 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
+
+#include <GaudiKernel/SystemOfUnits.h>
+namespace ActsTrk{
+    template <> inline Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
+            using RE = MuonGMR4::MdtReadoutElement;
+            static const unsigned int layerTube = RE::tubeNumber(RE::measurementHash(0,0));
+            /// Check whether the hash represents a tube or the central layer
+            const unsigned int tubeNum = m_parent->tubeNumber(hash());
+            if (tubeNum == layerTube) {
+                const Amg::Translation3D toCenter{0.5*m_parent->moduleHeight() * Amg::Vector3D::UnitY()};
+                return m_parent->toStation(store) * m_parent->toChamberLayer(hash()) *
+                        toCenter * Amg::getRotateY3D(90*Gaudi::Units::deg); 
+            }
+            return m_parent->toStation(store) * m_parent->toTubeFrame(hash());
+        }
+}
 
 namespace MuonGMR4 {
 inline unsigned int MdtReadoutElement::multilayer() const { return m_stML; }
@@ -12,7 +29,11 @@ inline double MdtReadoutElement::innerTubeRadius() const {return m_pars.tubeInne
 inline double MdtReadoutElement::tubeRadius() const {return innerTubeRadius() + m_pars.tubeWall;}
 inline double MdtReadoutElement::tubePitch() const { return m_pars.tubePitch;}
 inline double MdtReadoutElement::thickness() const {return 2.* m_pars.halfHeight;}
-    
+inline double MdtReadoutElement::moduleWidthS() const{ return 2.*m_pars.shortHalfX; }
+inline double MdtReadoutElement::moduleWidthL() const{ return 2.*m_pars.longHalfX; }
+inline double MdtReadoutElement::moduleHeight() const{ return 2.*m_pars.halfY; }
+inline double MdtReadoutElement::moduleThickness() const{ return 2.*m_pars.halfHeight; }
+  
 inline bool MdtReadoutElement::isValid(const IdentifierHash& measHash) const {
     return  layerNumber(measHash) < numLayers() && 
             tubeNumber(measHash) < numTubesInLay() && 

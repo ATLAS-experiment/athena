@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <memory>
+#include "xAODMuonPrepData/TgcStripAuxContainer.h"
 
 //================ Constructor =================================================
 namespace{
@@ -100,7 +101,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::initialize()
   ATH_CHECK( m_prdContainerCacheKeys.initialize( not m_prdContainerCacheKeyStr.empty() ) );
   ATH_CHECK( m_coinContainerCacheKeys.initialize( not m_coinContainerCacheKeyStr.empty() ) );
   
-  ATH_MSG_INFO("initialize() successful in " << name());
+  ATH_CHECK(m_xAODKey.initialize(!m_xAODKey.empty()));
   return StatusCode::SUCCESS;
 }
 
@@ -128,6 +129,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::provideEmptyContainer(const EventContex
    State state{};   
    return setupState(ctx, state);
 }
+
 StatusCode Muon::TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx, State& state) const{
      /// clean up containers for Hits
   for(unsigned int ibc=0; ibc < NBC_HIT+1; ibc++) {   //  +1 for AllBCs
@@ -163,6 +165,12 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx, Sta
       ATH_MSG_DEBUG("Created container using cache for " << m_prdContainerCacheKeys[ibc].key());
     }
    }
+
+  if (!m_xAODKey.empty()){
+    state.m_xaodHandle = SG::WriteHandle<xAOD::TgcStripContainer>(m_xAODKey, ctx);
+    ATH_CHECK(state.m_xaodHandle.record(std::make_unique<xAOD::TgcStripContainer>(), std::make_unique<xAOD::TgcStripAuxContainer>()));
+  }
+
    return StatusCode::SUCCESS;
 }
 StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx, std::vector<IdentifierHash>& requestedIdHashVect, 
@@ -918,6 +926,22 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(State& state,
     collection->push_back(newPrepData);
     isConverted = true; // This RDO is converted to at least one PRD.  
    
+    if (!m_xAODKey.empty()){
+      const TgcIdHelper& id_helper = m_idHelperSvc->tgcIdHelper();
+      xAOD::TgcStrip* xprd = new xAOD::TgcStrip();
+      state.m_xaodHandle->push_back(xprd);
+      xprd->setIdentifier(channelId.get_identifier32().get_compact());
+      xprd->setMeasurement(collection->identifyHash(), xAOD::MeasVector<1>{hitPos.x()},
+                          xAOD::MeasMatrix<1>{errHitPos(0, 0)});
+      // xprd->setBcBitMap(uint16_t); // Not sure how to do this?
+      xprd->setChannelNumber(id_helper.channel(channelId));
+      xprd->setGasGap(id_helper.gasGap(channelId));
+      xprd->setMeasuresPhi(id_helper.measuresPhi(channelId));
+    // xprd->setReadoutElement(const MuonGMR4::TgcReadoutElement* readoutEle);
+    // xprd->setStripPosInStation(const MeasVector<3>& pos);
+    // TODO once we can get the readout element. Placeholder for the moment, so we don't forget.=
+  }
+
   }
 
   if(isConverted) m_nHitPRDs++; // Count the number of output Hit PRDs.

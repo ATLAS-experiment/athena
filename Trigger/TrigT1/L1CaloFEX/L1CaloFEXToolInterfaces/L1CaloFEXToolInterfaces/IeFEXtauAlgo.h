@@ -50,6 +50,7 @@ Interface definition for eFEXtauAlgo
                          std::vector<unsigned int> & RemSums) = 0;
     virtual unsigned int getBDTScore() const = 0;
     virtual unsigned int getBDTCondition() const = 0;
+    virtual unsigned int getBDTHadFracCondition() const = 0;
     virtual bool isBDT() const = 0;
 
     virtual void setThresholds(const std::vector<unsigned int>& rHadThreshold,

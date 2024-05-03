@@ -16,7 +16,7 @@ atlas_install_python_modules( python/*.py python/html python/selector
 
 # Declare the files from the package's html/ subdirectory:
 atlas_install_xmls( html/*.html html/*.dtd )
-atlas_install_docs( html/*.html html/*.dtd html/*.css )
+atlas_install_docs( html/*.html html/*.dtd )
 
 # Declare the scripts of the package:
 atlas_install_scripts( share/*.py )

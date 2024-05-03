@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
@@ -8,7 +8,7 @@ def TrigBmumuxComboHypoMonitoring(flags, name):
     montool.defineHistogram('nDimuon', type='TH1F', path='EXPERT', title="number of fitted dimuon vertices", xbins=10, xmin=0, xmax=10)
     montool.defineHistogram('nTrk', type='TH1F', path='EXPERT', title="number of merged tracks in extended RoIs", xbins=200, xmin=0, xmax=200)
     montool.defineHistogram('nSelectedTrk', type='TH1F', path='EXPERT', title="number of tracks in vicinity of dimuon vertex", xbins=200, xmin=0, xmax=200)
-    montool.defineHistogram('nBPhysObject', type='TH1F', path='EXPERT', title="number of fitted BPhysObjects", xbins=100, xmin=0, xmax=100),
+    montool.defineHistogram('nBPhysObject', type='TH1F', path='EXPERT', title="number of fitted BPhysObjects", xbins=100, xmin=0, xmax=100)
 
     return montool
 

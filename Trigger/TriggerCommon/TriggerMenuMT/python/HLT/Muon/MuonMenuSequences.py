@@ -102,7 +102,7 @@ def muFastCalibAlgSequenceCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muFastSequence(flags, is_probe_leg=False):
+def muFastSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, "", is_probe_leg)
 
@@ -121,7 +121,7 @@ def muFastSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muFastCalibSequence(flags, is_probe_leg=False):
+def muFastCalibSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muFastCalibAlgSequenceCfg(flags, is_probe_leg)
 
@@ -140,7 +140,7 @@ def muFastCalibSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def mul2mtSAOvlpRmSequence(flags, is_probe_leg=False):
+def mul2mtSAOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muFastAlgSequenceCfg(flags, "mt", is_probe_leg)
 
@@ -256,7 +256,7 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
 
 
 @AccumulatorCache
-def muCombSequence(flags, is_probe_leg=False):
+def muCombSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg)
 
@@ -275,7 +275,7 @@ def muCombSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def mul2IOOvlpRmSequence(flags, is_probe_leg=False):
+def mul2IOOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
 
     (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "IO", is_probe_leg)
@@ -328,7 +328,7 @@ def muCombLRTAlgSequenceCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muCombLRTSequence(flags, is_probe_leg=False):
+def muCombLRTSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombLRTAlgSequenceCfg(flags, is_probe_leg)
 
@@ -348,7 +348,7 @@ def muCombLRTSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muCombOvlpRmSequence(flags, is_probe_leg=False):
+def muCombOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg)
 
@@ -366,7 +366,7 @@ def muCombOvlpRmSequence(flags, is_probe_leg=False):
  
 
 @AccumulatorCache
-def mul2mtCBOvlpRmSequence(flags, is_probe_leg=False):
+def mul2mtCBOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "mt", is_probe_leg)
 
@@ -417,7 +417,7 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFSASequence(flags, is_probe_leg=False):
+def muEFSASequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, is_probe_leg)
 
@@ -498,7 +498,7 @@ def muEFCBAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFCBSequence(flags, is_probe_leg=False):
+def muEFCBSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, '', is_probe_leg)
 
@@ -517,7 +517,7 @@ def muEFCBSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFCBIDperfSequence(flags, is_probe_leg=False):
+def muEFCBIDperfSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, 'idperf', is_probe_leg)
 
@@ -537,7 +537,7 @@ def muEFCBIDperfSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFIDtpSequence(flags, is_probe_leg=False):
+def muEFIDtpSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBAlgSequenceCfg(flags, 'idtp', is_probe_leg)
 
@@ -577,7 +577,7 @@ def muEFCBLRTAlgSequenceCfg(flags, selCAName='', is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFCBLRTSequence(flags, is_probe_leg=False):
+def muEFCBLRTSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBLRTAlgSequenceCfg(flags, '', is_probe_leg)
 
@@ -597,7 +597,7 @@ def muEFCBLRTSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFCBLRTIDperfSequence(flags, is_probe_leg=False):
+def muEFCBLRTIDperfSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBLRTAlgSequenceCfg(flags, 'idperf', is_probe_leg)
 
@@ -647,7 +647,7 @@ def muEFSAFSAlgSequenceCfg(flags):
 
 
 @AccumulatorCache
-def muEFSAFSSequence(flags, is_probe_leg=False):
+def muEFSAFSSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFSAFSAlgSequenceCfg(flags)
 
@@ -732,7 +732,7 @@ def muEFCBFSAlgSequenceCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFCBFSSequence(flags, is_probe_leg=False):
+def muEFCBFSSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFCBFSAlgSequenceCfg(flags, is_probe_leg)
 
@@ -771,7 +771,7 @@ def efLateMuRoIAlgSequenceCfg(flags):
 
 
 @AccumulatorCache
-def efLateMuRoISequence(flags):
+def efLateMuRoISequenceGenCfg(flags):
 
     (selAcc, sequenceOut) = efLateMuRoIAlgSequenceCfg(flags)
 
@@ -822,7 +822,7 @@ def efLateMuAlgSequenceCfg(flags):
 
 
 @AccumulatorCache
-def efLateMuSequence(flags):
+def efLateMuSequenceGenCfg(flags):
 
     (selAcc, sequenceOut) = efLateMuAlgSequenceCfg(flags)
 
@@ -879,7 +879,7 @@ def muEFIsoAlgSequenceCfg(flags, doMSiso=False, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFIsoSequence(flags, is_probe_leg=False):
+def muEFIsoSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFIsoAlgSequenceCfg(flags, False, is_probe_leg)
 
@@ -897,7 +897,7 @@ def muEFIsoSequence(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFMSIsoSequence(flags, is_probe_leg=False):
+def muEFMSIsoSequenceGenCfg(flags, is_probe_leg=False):
 
     (selAcc, sequenceOut) = muEFIsoAlgSequenceCfg(flags, True, is_probe_leg)
 
@@ -918,7 +918,7 @@ def muEFMSIsoSequence(flags, is_probe_leg=False):
 ##  Muon RoI Cluster Trigger for MS LLP Searches  ##
 ####################################################
 
-def muRoiClusterSequence(flags):
+def muRoiClusterSequenceGenCfg(flags):
 
     from TrigLongLivedParticles.TrigLongLivedParticlesConfig import MuonClusterConfig
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConfig import MuonClusterHypoAlgConfig, TrigLongLivedParticlesHypoToolFromDict

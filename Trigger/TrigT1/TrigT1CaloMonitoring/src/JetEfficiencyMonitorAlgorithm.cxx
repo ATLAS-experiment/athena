@@ -39,7 +39,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::initialize() {
 StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
   ATH_MSG_DEBUG("JetEfficiencyMonitorAlgorithm::fillHistograms");
   std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> variables;
-  
+
   //  Retrieve Offline Jets from SG
   SG::ReadHandle<xAOD::JetContainer> jets(m_jetKey,ctx);
   if(!jets.isValid()){
@@ -64,6 +64,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     ATH_MSG_WARNING("No gFex Large Radius Jet container found in storegate  "<< m_gFexLRJetContainerKey);
     return StatusCode::SUCCESS;
   }
+  
   
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

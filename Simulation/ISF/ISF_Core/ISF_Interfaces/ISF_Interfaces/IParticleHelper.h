@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// IParticleHelper.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_INTERFACES_IPARTICLEHELPER_H
 #define ISF_INTERFACES_IPARTICLEHELPER_H 1
@@ -32,7 +28,7 @@ namespace ISF {
 
   class ISFParticle;
   class TruthBinding;
- 
+
   /**
      @class IParticleHelper
 
@@ -45,64 +41,67 @@ namespace ISF {
   */
 
   class IParticleHelper : virtual public IAlgTool {
-     public:
-     
-       /** Virtual destructor */
-       virtual ~IParticleHelper(){}
+  public:
 
-       /// Creates the InterfaceID and interfaceID() method
-       DeclareInterfaceID(IParticleHelper, 1, 0);
+    /** Virtual destructor */
+    virtual ~IParticleHelper(){}
 
-       /** Create a new particle */
-       virtual ISFParticle* createParticle(double x, double y, double z,
-                                              double px, double py, double pz,
-                                              double pMass,
-                                              double pCharge,
-                                              int pPdgId,
-                                              int status,
-                                              double pTime,
-                                              const ISFParticle &parent,
-                                              Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
-                                              TruthBinding* tBinding = nullptr,
-                                           const HepMcParticleLink * partLink = nullptr) const = 0;
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IParticleHelper, 1, 0);
 
-       /** Create a new particle */
-       virtual ISFParticle* createParticle( const Amg::Vector3D& x,
-                                            const Amg::Vector3D& p,
-                                            double pMass,
-                                            double pCharge,
-                                            int pPdgId,
-                                            int status,
-                                            double pTime,
-                                            const ISFParticle &parent,
-                                            Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
-                                            TruthBinding* tBinding = nullptr,
+    /** Create a new particle */
+    virtual ISFParticle* createParticle(double x, double y, double z,
+                                        double px, double py, double pz,
+                                        double pMass,
+                                        double pCharge,
+                                        int pPdgId,
+                                        int status,
+                                        double pTime,
+                                        const ISFParticle &parent,
+                                        Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
+                                        int id = 0,
+                                        TruthBinding* tBinding = nullptr,
+                                        const HepMcParticleLink * partLink = nullptr) const = 0;
+
+    /** Create a new particle */
+    virtual ISFParticle* createParticle( const Amg::Vector3D& x,
+                                         const Amg::Vector3D& p,
+                                         double pMass,
+                                         double pCharge,
+                                         int pPdgId,
+                                         int status,
+                                         double pTime,
+                                         const ISFParticle &parent,
+                                         Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
+                                         int id = 0,
+                                         TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;
 
-       /** Create a new particle */
-       virtual ISFParticle* createParticle( const HepGeom::Point3D<double>& x,
-                                            const HepGeom::Vector3D<double>& p,
-                                            double pMass,
-                                            double pCharge,
-                                            int pPdgId,
-                                            int status,
-                                            double pTime,
-                                            const ISFParticle &parent,
-                                            Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
-                                            TruthBinding* tBinding = nullptr,
+    /** Create a new particle */
+    virtual ISFParticle* createParticle( const HepGeom::Point3D<double>& x,
+                                         const HepGeom::Vector3D<double>& p,
+                                         double pMass,
+                                         double pCharge,
+                                         int pPdgId,
+                                         int status,
+                                         double pTime,
+                                         const ISFParticle &parent,
+                                         Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode,
+                                         int id = 0,
+                                         TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const = 0;
 
-       /** An updated particle (e.g. after transport) */
-       virtual ISFParticle* updatedParticle( const ISFParticle& origIsp,
-                                             const Amg::Vector3D& updatedPos,
-                                             const Amg::Vector3D& updatedMom,
-                                             double deltaTime = 0.) const = 0;
+    /** An updated particle (e.g. after transport) */
+    virtual ISFParticle* updatedParticle( const ISFParticle& origIsp,
+                                          const Amg::Vector3D& updatedPos,
+                                          const Amg::Vector3D& updatedMom,
+                                          double deltaTime = 0.) const = 0;
 
-       /** An updated particle (e.g. after transport) */
-       virtual ISFParticle* updatedParticle( const ISFParticle& origIsp,
-                                             const HepGeom::Point3D<double>&  updatedPos,
-                                             const HepGeom::Vector3D<double>& updatedMom,
-                                             double deltaTime = 0.) const = 0;
+    /** An updated particle (e.g. after transport) */
+    virtual ISFParticle* updatedParticle( const ISFParticle& origIsp,
+                                          const HepGeom::Point3D<double>&  updatedPos,
+                                          const HepGeom::Vector3D<double>& updatedMom,
+                                          double deltaTime = 0.) const = 0;
 
   };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -12,6 +12,7 @@
 #include "G4Event.hh"
 
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // G4Atlas includes
 #include "MCTruth/AtlasG4EventUserInfo.h"
@@ -33,16 +34,17 @@ iGeant4::ISFG4Helper::convertG4TrackToISFParticle(const G4Track& aTrack,
   const G4ThreeVector& g4pos = aTrack.GetPosition();
   const double         gTime = aTrack.GetGlobalTime();
   const Amg::Vector3D  position(g4pos.x(),g4pos.y(),g4pos.z());
-  
+
   const G4ThreeVector& g4mom = aTrack.GetMomentum();
   const Amg::Vector3D  momentum(g4mom.x(),g4mom.y(),g4mom.z());
-  
+
   const G4ParticleDefinition &particleDefinition = *aTrack.GetDefinition();
   double mass    = particleDefinition.GetPDGMass();
   double charge  = particleDefinition.GetPDGCharge();
   int    pdgID   = particleDefinition.GetPDGEncoding();
 
-  Barcode::ParticleBarcode barcode = (truth && truth->getTruthParticle() ) ?  HepMC::barcode(truth->getTruthParticle()) : Barcode::fUndefinedBarcode;
+  Barcode::ParticleBarcode barcode = (truth && truth->getTruthParticle() ) ?  HepMC::barcode(truth->getTruthParticle()) : Barcode::fUndefinedBarcode; // FIXME barcode-based
+  const int id = (truth && truth->getTruthParticle() ) ? HepMC::uniqueID(truth->getTruthParticle()) : HepMC::UNDEFINED_ID;
 
   ISF::ISFParticle *isp = new ISF::ISFParticle( position,
                                                 momentum,
@@ -52,7 +54,8 @@ iGeant4::ISFG4Helper::convertG4TrackToISFParticle(const G4Track& aTrack,
                                                 1,
                                                 gTime,
                                                 parent,
-                                                barcode,
+                                                id,
+                                                barcode, // FIXME barcode-based
                                                 truth
                                                );
 
@@ -62,7 +65,7 @@ iGeant4::ISFG4Helper::convertG4TrackToISFParticle(const G4Track& aTrack,
 
 /** return a valid UserInformation object of the G4Track for use within the ISF */
 VTrackInformation *
-iGeant4::ISFG4Helper::getISFTrackInfo(const G4Track& aTrack) 
+iGeant4::ISFG4Helper::getISFTrackInfo(const G4Track& aTrack)
 {
   VTrackInformation* trackInfo = static_cast<VTrackInformation*>(aTrack.GetUserInformation());
   return trackInfo;
@@ -113,4 +116,3 @@ iGeant4::ISFG4Helper::getAtlasG4EventUserInfo()
 {
   return ( static_cast<AtlasG4EventUserInfo*> (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation()) );
 }
-

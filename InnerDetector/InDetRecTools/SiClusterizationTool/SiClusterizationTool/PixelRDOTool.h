@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -129,6 +129,13 @@ private:
 	"CheckDuplicatedRDO",
 	false,
 	"Check duplicated RDOs using isDuplicated method"
+    };
+
+    BooleanProperty m_printDuplicate {
+        this,
+	"PrintDuplicate",
+	true,
+	"Print duplicate RDO warning"
     };
 
     BooleanProperty m_checkGanged {

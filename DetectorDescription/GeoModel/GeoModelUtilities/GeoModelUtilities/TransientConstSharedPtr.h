@@ -81,6 +81,8 @@ namespace GeoModel {
         /// Is the pointer defined
         operator bool() const { return m_ptr.get() != nullptr; }
         bool operator!() const { return !m_ptr; }
+        /// How many clients does the pointer have
+        size_t use_count() const { return m_ptr.use_count(); }
 
         /// Smaller operator to insert the pointer into sets
         bool operator<(const TransientConstSharedPtr& other) const { return m_ptr.get() < other.m_ptr.get(); }

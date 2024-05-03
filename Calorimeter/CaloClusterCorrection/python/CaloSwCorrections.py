@@ -174,7 +174,7 @@ from CaloClusterCorrection.CaloClusterRemoveBad import make_CaloClusterRemoveBad
 #
 
 def layers (flags, cells_name, *args, **kw):
-    return make_CaloSwLayers (flags, None, cells_name=cells_name, *args, **kw)
+    return make_CaloSwLayers (flags, None, *args, cells_name=cells_name, **kw)
 
 def weight (flags, cells_name, *args, **kw):
     return make_CaloComputeSWcellWeights (flags, None, *args, **kw)
@@ -210,7 +210,7 @@ def update (flags, cells_name, *args, **kw):
     return make_CaloSwClusterUpdate (flags, None, *args, **kw)
 
 def gap (flags, cells_name, *args, **kw):
-    return make_CaloSwGap (flags, None, cells_name=cells_name, *args, **kw)
+    return make_CaloSwGap (flags, None, *args, cells_name=cells_name, **kw)
 
 def lwc (flags, cells_name, *args, **kw):
     return make_CaloSwLongWeights (flags, None, *args, **kw)

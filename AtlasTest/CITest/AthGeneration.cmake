@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # CI test definitions for the AthGeneration project
 # --> README.md before you modify this file
@@ -22,6 +22,9 @@ atlas_add_citest( Generation_Sherpa_13p6TeV
 
 atlas_add_citest( Generation_ParticleGun_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421119 )
+
+atlas_add_citest( Generation_JetFilter_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421114 )
 
 atlas_add_citest( Generation_PhPy8_13TeV
    SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid 421356 )

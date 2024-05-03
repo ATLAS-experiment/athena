@@ -49,6 +49,7 @@ public:
   virtual unsigned int getBitwiseEt() const override;
   virtual unsigned int getBDTScore() const override;
   virtual unsigned int getBDTCondition() const override;
+  virtual unsigned int getBDTHadFracCondition() const override;
   virtual bool isBDT() const override;
   virtual void setThresholds(const std::vector<unsigned int> &rHadThreshold,
                              const std::vector<unsigned int> &bdtThreshold,

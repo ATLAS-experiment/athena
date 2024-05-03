@@ -44,7 +44,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_TRTEC_nPhiBins = 8
      
     # Set a folder name from the user options
-    folderName = "ExtendedTracks_NoTriggerSelection"
+    folderName = "ExtendedTracks"
     if "TrackName" in kwargs:
         folderName = kwargs["TrackName"]
     

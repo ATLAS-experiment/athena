@@ -49,6 +49,7 @@
 #include "ActsGeometry/ActsHGTDLayerBuilder.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/LoggerUtils.h"
 
 #include <limits>
 #include <random>
@@ -74,7 +75,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
         return StatusCode::FAILURE;
     }
 }
-
 
   // FIXME: ActsCaloTrackingVolumeBuilder holds ReadHandle to
   // CaloDetDescrManager. Hopefully this service is never called before that
@@ -159,7 +159,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
       Acts::MaterialMapJsonConverter::Config jsonGeoConvConfig;
       // Set up the json-based decorator
       matDeco = std::make_shared<const Acts::JsonMaterialDecorator>(
-          jsonGeoConvConfig, matFileFullPath, Acts::Logging::INFO);
+	   jsonGeoConvConfig, matFileFullPath, ActsTrk::actsLevelVector(msg().level()));
     }
     tgbConfig.materialDecorator = matDeco;
   }

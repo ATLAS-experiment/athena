@@ -44,7 +44,16 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
   // and then 2*rho =  0.33 m * (pT / GeV)
   // but distances for us are in mm, so 2*rho = 330 * (pT / GeV)
   // and 1/(2*rho) = (1 / (pT in GeV)) / 330
-  double target_r = (m_trackStage == TrackStage::SECOND) ? htt::TARGET_R_2STAGE[ilayer] : htt::TARGET_R_1STAGE[ilayer];
+
+  // TODO this needs updating to use spacepoint radii, which we need to compute somwhere.
+  // In HTTSim it was done in TrigHTTMaps.
+  double target_r = (m_trackStage == TrackStage::SECOND) ? fpgatracksim::TARGET_R_2STAGE[ilayer] : fpgatracksim::TARGET_R_1STAGE[ilayer];
+
+  if (m_hits[ilayer].getHitType() == HitType::spacepoint) {
+    unsigned other_layer = (m_hits[ilayer].getSide() == 0) ? ilayer + 1 : ilayer - 1;
+    target_r = (target_r + ((m_trackStage == TrackStage::SECOND) ? fpgatracksim::TARGET_R_2STAGE[other_layer] : fpgatracksim::TARGET_R_1STAGE[other_layer])) / 2.;
+  }
+
   double hitGPhi = m_hits[ilayer].getGPhi();
   double houghRho = 0.0003 * getHoughY(); //A*q/pT
 
@@ -61,7 +70,7 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
 
     double hitZ = m_hits[ilayer].getZ();
     if (m_hits[ilayer].getR() > 1e-8) {
-      hitZ -= m_hits[ilayer].getGCotTheta() * (m_hits[ilayer].getR() - htt::TARGET_R_1STAGE[ilayer]); //first order
+      hitZ -= m_hits[ilayer].getGCotTheta() * (m_hits[ilayer].getR() - target_r); //first order
       if (m_trackCorrType == TrackCorrType::Second)
         hitZ -= (m_hits[ilayer].getGCotTheta() * std::pow(m_hits[ilayer].getR(), 3.0) * houghRho * houghRho) / 6.0; //higher order
     }
@@ -103,8 +112,21 @@ float FPGATrackSimTrack::getEtaCoord(int ilayer) const {
 
 float FPGATrackSimTrack::getPhiCoord(int ilayer) const {
   auto coords = getCoords(ilayer);
-  if (coords.size() > 1) {
-    return coords.at(1);
+
+  // If this is a spacepoint, and if this is the "outer" hit on a strip module
+  // (side = 1) then we actually return the z/eta coord.
+  // Since spacepoints are duplicated, this avoids using the same phi coord
+  // twice and alsp avoids having to teach the code that strip spacepoints are
+  // "2D" hits despite being in the strips, which everything assumes is 1D.
+  // This makes it easy to mix and match spacepoints with strip hits that aren't
+  // spacepoints (since the number of strip layers is held fixed).
+  unsigned target_coord = 1;
+  if (m_hits[ilayer].getHitType() == HitType::spacepoint && (m_hits[ilayer].getPhysLayer() % 2) == 1) {
+    target_coord = 0;
+  }
+
+  if (coords.size() > target_coord) {
+    return coords.at(target_coord);
   }
   else {
     throw std::range_error("FPGATrackSimTrack::getCoord(layer,coord) out of bounds");

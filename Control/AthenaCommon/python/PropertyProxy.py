@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/PropertyProxy.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -48,10 +48,10 @@ def _isCompatible( tp, value, context = "" ):
  # compatibility check that relies on conversion (which will always fail
  # for configurables) is acceptable.
 
-   if ( tp == str or type(value) == str ) and not isinstance( value, tp ):
+   if ( tp == str or type(value) is str ) and not isinstance( value, tp ):
     # special case, insist on exact match for str (no conversions allowed)
       raise ValueError( "received an instance of %s, but %s expected, context: %s" % (type(value),tp, context) )
-   elif ( tp == int ) and type(value) == float:
+   elif ( tp == int ) and type(value) is float:
     # special case, insist on strict match for integer types
       raise ValueError( "received an instance of %s, but %s expected, context: %s" % (type(value),tp, context) )
    else:
@@ -290,7 +290,7 @@ class GaudiHandlePropertyProxyBase(PropertyProxy):
 
    def convertDefaultToBeSet( self, obj, default ):
       # turn string into handle
-      isString = type(default) == str
+      isString = type(default) is str
       if not isString and self.isConfig(default):
 #         print self.fullPropertyName(obj) + ": Setting default configurable: %r" % default
          return default
@@ -321,7 +321,7 @@ class GaudiHandlePropertyProxyBase(PropertyProxy):
 
    def convertValueToBeSet( self, obj, value ):
       if value is None: value = ''
-      isString = type(value) == str
+      isString = type(value) is str
       if isString:
        # create an new handle
          return self._handleType(value)
@@ -433,7 +433,7 @@ class DataHandlePropertyProxy(PropertyProxy):
 
         mode = obj.__class__.getDefaultProperty(self.descr.__name__).mode()
         _type = obj.__class__.getDefaultProperty(self.descr.__name__).type()
-        if type(value) == str:
+        if type(value) is str:
             return DataHandle(value, mode, _type)
         elif isinstance(value, DataHandle):
             return DataHandle(value.__str__(), mode, _type)

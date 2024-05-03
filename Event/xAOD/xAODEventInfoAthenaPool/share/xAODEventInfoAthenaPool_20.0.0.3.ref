@@ -19,6 +19,8 @@ Py:Athena            INFO including file "IdDictDetDescrCnv/IdDictDetDescrCnv_jo
 Py:ConfiguredFactory    INFO imported 15 confDb modules in 0.01 seconds
 Py:Athena            INFO SetGeometryVersion.py obtained major release version 22
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
+Py:MetaReader     WARNING Found multiple values for AtlasRelease: ['AtlasProduction-20.0.0.3', 'AtlasProduction-17.0.6.4']. Looking for possible duplicates.
+Py:MetaReader     WARNING Multiple values for AtlasRelease may mean the same, or the input file was produced in multi-step job. Ignoring all but the first entry: AtlasRelease = AtlasProduction-20.0.0.3
 # setting LC_ALL to "C"
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================

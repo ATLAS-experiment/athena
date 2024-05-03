@@ -41,11 +41,9 @@ case $ArtProcess in
 
       dcubeShifterXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml"
       dcubeExpertXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml"
-      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_mu1GeV_reco_r24.root"
-      if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
-        dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_mu1GeV_reco_r23.root"
-      fi
-      echo "compare with R23.0.23 or 24.0.1"
+      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_test_mu1GeV_reco_r24.0.39.root"
+
+      echo "compare with 24.0.1"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
 	   -p -x dcube_shifter \
 	   -c ${dcubeShifterXml} \

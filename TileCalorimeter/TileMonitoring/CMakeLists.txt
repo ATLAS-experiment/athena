@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileMonitoring )
@@ -131,5 +131,15 @@ atlas_add_test( TileTBMonitorAlgorithm_test
 
 atlas_add_test( TileJiveXMLConfig_test
                 SCRIPT python -m TileMonitoring.TileJiveXMLConfig
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileTBCellMonitorAlgorithm_test
+                SCRIPT python -m TileMonitoring.TileTBCellMonitorAlgorithm
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( RunTileTBMonitoring_test
+                SCRIPT python -m TileMonitoring.RunTileTBMonitoring --use-sqlite ''
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)

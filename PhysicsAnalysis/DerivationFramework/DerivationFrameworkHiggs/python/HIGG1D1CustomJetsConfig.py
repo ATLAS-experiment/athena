@@ -8,6 +8,22 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def addJetContextFlags(flags):
+    jetContextName = 'CustomVtx'
+    PrefixForHggCollection   = "Hgg"
+    HggVertexContainerName   = PrefixForHggCollection+"PrimaryVertices"
+    def customVtxContext(prevflags):
+        context = prevflags.Jet.Context.default.clone(
+            Vertices         = HggVertexContainerName,
+            GhostTracks      = "PseudoJetGhostTrack"+jetContextName, 
+            GhostTracksLabel = "GhostTrack"+jetContextName,
+            TVA              = "JetTrackVtxAssoc"+jetContextName,
+            JetTracks        = "JetSelectedTracks"+jetContextName,
+            JetTracksQualityCuts = "JetSelectedTracks"+jetContextName+"_trackSelOpt"
+          )
+        return context
+    flags.addFlag(f"Jet.Context.{jetContextName}", customVtxContext)
+    
 def HIGG1D1CustomJetsCfg(ConfigFlags):
     """Jet reconstruction needed for HIGG1D1"""
 
@@ -28,20 +44,10 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
     from JetRecConfig.StandardJetContext import propFromContext, inputsFromContext
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
 
-    # Create new jet context
-    from JetRecConfig.StandardJetContext import jetContextDic
+    #  Get custom jet context
     jetContextName = 'CustomVtx'
-    if jetContextName not in jetContextDic:
-      jetContextDic[jetContextName] = jetContextDic['default'].clone(
-        Vertices         = HggVertexContainerName,
-        GhostTracks      = "PseudoJetGhostTrack"+jetContextName, 
-        GhostTracksLabel = "GhostTrack"+jetContextName,
-        TVA              = "JetTrackVtxAssoc"+jetContextName,
-        JetTracks        = "JetSelectedTracks"+jetContextName,
-        JetTracksQualityCuts = "JetSelectedTracks"+jetContextName+"_trackSelOpt"
-      )
-    context =  jetContextDic[jetContextName] 
-
+    context = ConfigFlags.Jet.Context[jetContextName]
+    
     def replaceItems(tup,orgName,newName):
         newList = list(tup)
         for i, item in enumerate(newList):
@@ -116,8 +122,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
 
     def getUsedInVertexFitTrackDecoratorAlgCustomVtx(jetdef, jetmod):
         """ Create the alg  to decorate the used-in-fit information for AMVF """
-        from JetRecConfig.StandardJetContext import jetContextDic
-        context  = jetContextDic[jetdef.context]
+        context  = jetdef._contextDic
 
         from InDetConfig.UsedInVertexFitTrackDecoratorConfig import getUsedInVertexFitTrackDecoratorAlg
         alg = getUsedInVertexFitTrackDecoratorAlg(context['Tracks'], context['Vertices'],
@@ -131,7 +136,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
 
     stdInputExtDic["JetSelectedTracksCustomVtx"] = JetInputExternal("JetSelectedTracksCustomVtx",     xAODType.TrackParticle,
                                                                                     prereqs= [ f"input:{context['Tracks']}" ], # in std context, this is InDetTrackParticles (see StandardJetContext)
-                                                                                    algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
+                                                                                    algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
                                                                                  )
 
     stdInputExtDic["JetTrackUsedInFitDecoCustomVtx"] = JetInputExternal("JetTrackUsedInFitDecoCustomVtx", xAODType.TrackParticle,
@@ -141,7 +146,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                                                         )
 
     stdInputExtDic["JetTrackVtxAssocCustomVtx"] = JetInputExternal("JetTrackVtxAssocCustomVtx",  xAODType.TrackParticle,
-                                              algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef.context, algname="jetTVACustomVtx", WorkingPoint="Nonprompt_All_MaxWeight"),
+                                              algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVACustomVtx", WorkingPoint="Nonprompt_All_MaxWeight"),
                                               prereqs = [ "input:JetTrackUsedInFitDecoCustomVtx", f"input:{context['Vertices']}" ] )
 
     stdInputExtDic["EventDensityCustomVtx"] =     JetInputExternal("EventDensityCustomVtx", "EventShape", algoBuilder = buildEventShapeAlg,

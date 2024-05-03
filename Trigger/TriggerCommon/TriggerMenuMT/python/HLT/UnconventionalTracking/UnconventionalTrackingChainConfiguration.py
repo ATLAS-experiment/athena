@@ -7,15 +7,15 @@ log = logging.getLogger(__name__)
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJComboHypoToolFromDict
 
-from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getFullScanRecoOnlySequence
-from TriggerMenuMT.HLT.UnconventionalTracking.DJTriggerConfiguration import DJPromptStep, DJDispStep
-from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVRecoSequence, DVTriggerEDSequence
-from TriggerMenuMT.HLT.UnconventionalTracking.DisTrkTriggerConfiguration import DisTrkTriggerHypoSequence
-from TriggerMenuMT.HLT.UnconventionalTracking.FullScanLRTTrackingConfiguration import FullScanLRTMenuSequence
-from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import HitDVHypoSequence, UTTJetRecoSequence
-from TriggerMenuMT.HLT.UnconventionalTracking.IsoHighPtTrackTriggerConfiguration import IsoHPtTrackTriggerHypoSequence
-from TriggerMenuMT.HLT.UnconventionalTracking.VrtSecInclusiveConfiguration import VrtSecInclusiveMenuSequence
-from TriggerMenuMT.HLT.UnconventionalTracking.dEdxTriggerConfiguration import dEdxTriggerHypoSequence
+from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getFullScanRecoOnlySequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.DJTriggerConfiguration import DJPromptStepSequenceGenCfg, DJDispStepSequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVRecoSequenceGenCfg, DVTriggerEDSequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.DisTrkTriggerConfiguration import DisTrkTriggerHypoSequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.FullScanLRTTrackingConfiguration import FullScanLRTMenuSequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import HitDVHypoSequenceGenCfg, UTTJetRecoSequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.IsoHighPtTrackTriggerConfiguration import IsoHPtTrackTriggerHypoSequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.VrtSecInclusiveConfiguration import VrtSecInclusiveMenuSequenceGenCfg
+from TriggerMenuMT.HLT.UnconventionalTracking.dEdxTriggerConfiguration import dEdxTriggerHypoSequenceGenCfg
 
 #----------------------------------------------------------------
 # Class to configure chain
@@ -68,7 +68,7 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
     # Step definitions in alignment order
     # Step 1
     def getJetReco(self, flags):
-        return self.getStep(flags,1,'JetRecoOnlyCfg',[UTTJetRecoSequence])
+        return self.getStep(flags,1,'JetRecoOnlyCfg',[UTTJetRecoSequenceGenCfg])
     # Empty for alignment
     def getIsoHPtTrackEmpty(self, flags):
         return  self.getEmptyStep(1,'EmptyUncTrk')
@@ -83,31 +83,31 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
 
     # Step 2
     def getFSLRTTrigger(self, flags):
-        return self.getStep(flags,2,'FSLRT',[FullScanLRTMenuSequence])
+        return self.getStep(flags,2,'FSLRT',[FullScanLRTMenuSequenceGenCfg])
     # Empty for alignment with jets
     def getRoITrkEmpty(self, flags):
         return self.getEmptyStep(2, 'RoITrkEmptyStep')
 
     # Step 3 -- all FTF tracking here
     def getFTFTrackReco(self, flags):
-        return self.getStep(flags,3,'FTFRecoOnly',[getFullScanRecoOnlySequence])
+        return self.getStep(flags,3,'FTFRecoOnly',[getFullScanRecoOnlySequenceGenCfg])
 
     # Step 4+ -- everything post FTF tracking
     def getIsoHPtTrackTrigger(self, flags):
-        return self.getStep(flags,4,'IsoHPtTrack',[IsoHPtTrackTriggerHypoSequence])
+        return self.getStep(flags,4,'IsoHPtTrack',[IsoHPtTrackTriggerHypoSequenceGenCfg])
     def getdEdxTrigger(self, flags):
-        return self.getStep(flags,4,'dEdx',[dEdxTriggerHypoSequence])
+        return self.getStep(flags,4,'dEdx',[dEdxTriggerHypoSequenceGenCfg])
     def getHitDVTrigger(self, flags):
-        return self.getStep(flags,4,'HitDV',[HitDVHypoSequence])
+        return self.getStep(flags,4,'HitDV',[HitDVHypoSequenceGenCfg])
     def getDisTrkTrigger(self, flags):
-        return self.getStep(flags,4,'DisTrk',[DisTrkTriggerHypoSequence])
+        return self.getStep(flags,4,'DisTrk',[DisTrkTriggerHypoSequenceGenCfg])
     def getVSITrigger(self, flags):
-        return self.getStep(flags,4,'LRTVSI',[VrtSecInclusiveMenuSequence])
+        return self.getStep(flags,4,'LRTVSI',[VrtSecInclusiveMenuSequenceGenCfg])
     def getDJPromptStep(self, flags):
-        return self.getStep(flags,3,'DJPromptStep',[DJPromptStep], comboTools = [TrigDJComboHypoToolFromDict])
+        return self.getStep(flags,3,'DJPromptStep',[DJPromptStepSequenceGenCfg], comboTools = [TrigDJComboHypoToolFromDict])
     def getDJDispStep(self, flags):
-        return self.getStep(flags,4,'DJDispStep',[DJDispStep])
+        return self.getStep(flags,4,'DJDispStep',[DJDispStepSequenceGenCfg])
     def getDVRecoStep(self, flags):
-        return self.getStep(flags,5,'DVRecoStep',[DVRecoSequence])
+        return self.getStep(flags,5,'DVRecoStep',[DVRecoSequenceGenCfg])
     def getDVEDStep(self, flags):
-        return self.getStep(flags,6,'DVEDStep',[DVTriggerEDSequence])
+        return self.getStep(flags,6,'DVEDStep',[DVTriggerEDSequenceGenCfg])

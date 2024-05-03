@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASTOOLS_TRACKONLAYERUPDATOR_H
@@ -26,7 +26,6 @@
 
 // ISF
 #include "ISF_Event/ISFParticleContainer.h"
-#include "ISF_Event/ITruthIncident.h"
 
 // Barcode
 #include "BarcodeEvent/PhysicsProcessCode.h"

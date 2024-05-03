@@ -3,10 +3,7 @@
 */
 
 #include "MuonStripCsvDumperAlg.h"
-#include "MuonReadoutGeometryR4/MuonChamber.h"
-#include "xAODMuonPrepData/RpcStrip.h"
-#include "xAODMuonPrepData/TgcStrip.h"
-#include "xAODMuonPrepData/MMCluster.h"
+#include "MuonSpacePoint/MuonSpacePoint.h"
 #include "StoreGate/ReadHandle.h"
 #include <fstream>
 #include <TString.h>
@@ -17,6 +14,7 @@ MuonStripCsvDumperAlg::MuonStripCsvDumperAlg(const std::string& name, ISvcLocato
 
  StatusCode MuonStripCsvDumperAlg::initialize() {
    ATH_CHECK(m_stripContainerKey.initialize());
+   ATH_CHECK(m_geoCtxKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
    return StatusCode::SUCCESS;
  }
@@ -24,7 +22,11 @@ MuonStripCsvDumperAlg::MuonStripCsvDumperAlg(const std::string& name, ISvcLocato
  StatusCode MuonStripCsvDumperAlg::execute(){
 
    const EventContext& ctx{Gaudi::Hive::currentContext()};
-   const ActsGeometryContext gctx{};
+   
+   SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
+   ATH_CHECK(gctxHandle.isPresent());
+   const ActsGeometryContext& gctx{*gctxHandle};
+
    const std::string delim = ",";
    std::ofstream file{std::string(Form("event%09zu-",++m_event))+
                       m_preFix+"Strips.csv"};
@@ -45,24 +47,10 @@ MuonStripCsvDumperAlg::MuonStripCsvDumperAlg(const std::string& name, ISvcLocato
    ATH_CHECK(readHandle.isPresent());
 
    for(const xAOD::UncalibratedMeasurement* strip : *readHandle){
-      Amg::Vector3D stripPos{Amg::Vector3D::Zero()};      
-      const Identifier measId{(Identifier::value_type)strip->identifier()};
-      // const Amg::Transform toChambFrame
-      if (strip->type() == xAOD::UncalibMeasType::RpcStripType) {
-         const xAOD::RpcStrip* rpcStrip{static_cast<const xAOD::RpcStrip*>(strip)};
-         const IdentifierHash hash{rpcStrip->measurementHash()};
-         stripPos = rpcStrip->readoutElement()->getChamber()->globalToLocalTrans(gctx) * 
-                    rpcStrip->readoutElement()->stripPosition(gctx, hash);
-      } else if (strip->type() == xAOD::UncalibMeasType::TgcStripType) {
-        const xAOD::TgcStrip* tgcStrip{static_cast<const xAOD::TgcStrip*>(strip)};
-        const IdentifierHash hash{tgcStrip->measurementHash()};
-        stripPos = tgcStrip->readoutElement()->getChamber()->globalToLocalTrans(gctx) * 
-                   tgcStrip->readoutElement()->channelPosition(gctx, hash);                
-      } else {
-        ATH_MSG_FATAL("Readout type "<<m_idHelperSvc->toString(measId)
-                <<" not implemented in "<<__FILE__);
-        return StatusCode::FAILURE;
-      }
+      const MuonR4::MuonSpacePoint spacePoint{gctx, strip};
+      const Amg::Vector3D& stripPos{spacePoint.positionInChamber()};
+      const Identifier& measId{spacePoint.identify()};
+
       file<<strip->localPosition<1>().x()<<delim;
       file<<strip->localCovariance<1>().x()<<delim;
       

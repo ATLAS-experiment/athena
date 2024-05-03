@@ -28,10 +28,11 @@ class ChamberAssembleTool : public AthAlgTool,
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "IdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     PublicToolHandle<IMuonGeoUtilityTool> m_geoUtilTool{this,"GeoUtilTool", "" };
+    
 };
 
 }
 
+#endif
+#endif
 
-#endif
-#endif

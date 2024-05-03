@@ -21,6 +21,7 @@ void testConstructors() {
     double time    = 923.;
     const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
     Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode;
+    int id = 0;
     ISF::TruthBinding *truth = 0;
 
     //
@@ -35,6 +36,7 @@ void testConstructors() {
                            time,
                            origin,
                            bc,
+                           id,
                            truth );
 
     assert( pos     == isp1.position()     );
@@ -48,6 +50,7 @@ void testConstructors() {
     assert( 1       == history1.size()     );
     assert( origin  == history1[0]         );
     assert( bc      == isp1.barcode()      );
+    assert( id == isp1.id() );
     assert( truth   == isp1.getTruthBinding() );
 
     //
@@ -62,6 +65,7 @@ void testConstructors() {
                            time,
                            isp1, // parent
                            bc,
+                           id,
                            truth );
 
     assert( pos     == isp2.position()     );
@@ -75,6 +79,7 @@ void testConstructors() {
     assert( 1       == history2.size()     );
     assert( origin  == history2[0]         );
     assert( bc      == isp2.barcode()      );
+    assert( id      == isp2.id()      );
     assert( truth   == isp2.getTruthBinding() );
 
     //
@@ -91,6 +96,7 @@ void testConstructors() {
                            time,
                            isp2, // parent
                            bc,
+                           id,
                            truth );
 
     assert( pos     == isp3.position()     );
@@ -104,6 +110,7 @@ void testConstructors() {
     assert( 1       == history3.size()     );
     assert( origin  == history3[0]         );
     assert( bc      == isp3.barcode()      );
+    assert( id      == isp3.id()      );
     assert( truth   == isp3.getTruthBinding() );
 }
 

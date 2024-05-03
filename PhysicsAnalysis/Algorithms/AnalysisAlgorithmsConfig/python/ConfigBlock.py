@@ -1,13 +1,21 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+import textwrap
+
+from AnaAlgorithm.Logging import logging
+logCPAlgCfgBlock = logging.getLogger('CPAlgCfgBlock')
+
+
 class ConfigBlockOption:
     """the information for a single option on a configuration block"""
 
-    def __init__ (self, type=None, info='', noneAction='ignore', required=False) :
+    def __init__ (self, type=None, info='', noneAction='ignore', required=False,
+            default=None) :
         self.type = type
         self.info = info
         self.required = required
         self.noneAction = noneAction
+        self.default = default
 
 
 
@@ -139,7 +147,7 @@ class ConfigBlock:
             raise ValueError (f'invalid noneAction: {noneAction} [allowed values: {noneActions}]')
         setattr (self, name, defaultValue)
         self._options[name] = ConfigBlockOption(type=type, info=info,
-            noneAction=noneAction, required=required)
+            noneAction=noneAction, required=required, default=defaultValue)
 
 
     def setOptionValue (self, name, value) :
@@ -154,6 +162,14 @@ class ConfigBlock:
             raise KeyError (f'unknown option "{name}" in block "{self.__class__.__name__}"')
         noneAction = self._options[name].noneAction
         if value is not None or noneAction == 'set' :
+            # check type if specified
+            optType = self._options[name].type
+            # convert int to float to prevent crash
+            if optType is float and type(value) is int:
+                value = float(value)
+            if optType is not None and optType != type(value):
+                raise ValueError(f'{name} for block {self.__class__.__name__} should '
+                    f'be of type {optType} not {type(value)}')
             setattr (self, name, value)
         elif noneAction == 'ignore' :
             pass
@@ -170,6 +186,28 @@ class ConfigBlock:
     def getOptions(self):
         """Return a copy of the options associated with the block"""
         return self._options.copy()
+
+
+    def printOptions(self, verbose=False, width=60, indent="    "):
+        """
+        Prints options and their values
+        """
+        def printWrap(text, width=60, indent="    "):
+            wrapper = textwrap.TextWrapper(width=width, initial_indent=indent,
+                subsequent_indent=indent)
+            for line in wrapper.wrap(text=text):
+                logCPAlgCfgBlock.info(line)
+
+        for opt, vals in self.getOptions().items():
+            if verbose:
+                logCPAlgCfgBlock.info(indent + f"\033[4m{opt}\033[0m: {self.getOptionValue(opt)}")
+                logCPAlgCfgBlock.info(indent*2 + f"\033[4mtype\033[0m: {vals.type}")
+                logCPAlgCfgBlock.info(indent*2 + f"\033[4mdefault\033[0m: {vals.default}")
+                logCPAlgCfgBlock.info(indent*2 + f"\033[4mrequired\033[0m: {vals.required}")
+                logCPAlgCfgBlock.info(indent*2 + f"\033[4mnoneAction\033[0m: {vals.noneAction}")
+                printWrap(f"\033[4minfo\033[0m: {vals.info}", indent=indent*2)
+            else:
+                logCPAlgCfgBlock.info(indent + f"{ opt}: {self.getOptionValue(opt)}")
 
 
     def hasOption (self, name) :

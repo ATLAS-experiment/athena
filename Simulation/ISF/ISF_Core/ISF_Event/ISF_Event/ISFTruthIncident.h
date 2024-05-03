@@ -2,10 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// ISFTruthIncident.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef ISF_ISFEVENT_ISFTRUTHINCIDENT_H
 #define ISF_ISFEVENT_ISFTRUTHINCIDENT_H
 
@@ -48,7 +44,7 @@ namespace ISF {
                       AtlasDetDescr::AtlasRegion geoID,
                       ISF::KillPrimary killsPrimary = ISF::fPrimarySurvives,
                       const HepMC::FourVector *position = 0);
-    ~ISFTruthIncident();
+    virtual ~ISFTruthIncident();
 
     ISFTruthIncident( const ISFTruthIncident& ) = delete;
     ISFTruthIncident& operator= ( const ISFTruthIncident& ) = delete;
@@ -73,7 +69,9 @@ namespace ISF {
     HepMC::GenParticlePtr      parentParticle() override final;
     int      parentStatus() override final;
     /** Return the barcode of the parent particle */
-    Barcode::ParticleBarcode  parentBarcode() override final;
+    Barcode::ParticleBarcode  parentBarcode() override final; // TODO Remove this method
+    /** Return the unique ID of the parent particle */
+    int  parentUniqueID() override final;
     /** Return a boolean whether or not the parent particle survives the incident */
     bool                      parentSurvivesIncident() const override final;
     /** Return the parent particle after the TruthIncident vertex (and give

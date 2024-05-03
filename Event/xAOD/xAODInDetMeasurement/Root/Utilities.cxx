@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "xAODInDetMeasurement/Utilities.h"
@@ -8,7 +8,7 @@ namespace xAOD::xAODInDetMeasurement::Utilities {
 
   float computeTotalCharge( const SG::AuxElement& cluster) {
     static const SG::AuxElement::Accessor<std::vector<float> > chargesAcc("chargeList");
-    assert( cluster.isAvailable< std::vector<float> >("chargeList") );
+    assert( chargesAcc.isAvailable( cluster ) );
     return xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge( chargesAcc(cluster) );
   }
 
@@ -21,7 +21,7 @@ namespace xAOD::xAODInDetMeasurement::Utilities {
 
   int computeTotalToT( const SG::AuxElement& cluster) {
     static const SG::AuxElement::Accessor< std::vector<int> > totsAcc("totList");
-    assert( cluster.isAvailable< std::vector<int> >("totList") );
+    assert( totsAcc.isAvailable( cluster ) );
     return xAOD::xAODInDetMeasurement::Utilities::computeTotalToT( totsAcc(cluster) );
   }
 

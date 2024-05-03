@@ -16,9 +16,12 @@
 #include "AsgMessaging/MessageCheck.h"
 
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
+#include "xAODRootAccess/tools/TFileAccessTracer.h"
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
+   xAOD::TFileAccessTracer::enableDataSubmission(false); // disable file reporting in unittest 
+  
    ANA_CHECK_SET_TYPE (int);
    using namespace asg::msgUserCode;
    
@@ -37,7 +40,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    xAOD::TEvent evt2;
    ANA_CHECK (evt2.readFrom(c));
 
-   int maxEvt2 = evt2.getEntries(); 
+   int maxEvt2 = std::min(Long64_t(1000),evt2.getEntries());  // read up to 1k events
    TStopwatch st2;
    st2.Start();
    for(int i=0; i< maxEvt2; i++) {
@@ -50,12 +53,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    std::cout << "xAODRootAccess Event rate = " << double(maxEvt2)/st2.RealTime() << " Hz " << std::endl;
 
 
-   POOL::TEvent evt(POOL::TEvent::kPOOLAccess);
+   POOL::TEvent evt(POOL::TEvent::kPOOLAccess); // note: POOLAccess is robust but much slower than ClassAccess
    evt.readFrom(whatToRead.c_str()).ignore();
    //evt.setEvtSelProperty("CollectionTree","POOLContainer/basic");
    //evt.setEvtSelProperty( "OutputLevel" , 3 );
 
-   int maxEvt = evt.getEntries(); evt.getEntry(0);
+   int maxEvt = std::min(1000L,evt.getEntries());
+
+   evt.getEntry(0);
 
    //just a quick example of retrieving metadata
    float beam_energy(0);
@@ -73,6 +78,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    st.Print();
    std::cout << "POOLRootAccess Event rate = " << double(maxEvt)/st.RealTime() << " Hz" << std::endl;
 
+   xAOD::TFileAccessTracer::enableDataSubmission(false);
 
 
    return 0;

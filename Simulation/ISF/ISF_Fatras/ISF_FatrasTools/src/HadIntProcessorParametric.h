@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// HadIntProcessorParametric.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_FATRASTOOLS_HadIntProcessorParametric_H
 #define ISF_FATRASTOOLS_HadIntProcessorParametric_H
@@ -23,7 +19,6 @@
 #include "TrkEventPrimitives/PropDirection.h"
 
 // ISF
-#include "ISF_Event/ITruthIncident.h"
 #include "ISF_Event/ISFParticleContainer.h"
 
 // Barcode

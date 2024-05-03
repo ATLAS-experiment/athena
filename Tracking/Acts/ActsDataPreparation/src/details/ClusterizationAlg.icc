@@ -4,6 +4,7 @@
 
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
+#include "ActsInterop/TableUtils.h"
 
 namespace ActsTrk {
 
@@ -37,6 +38,18 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::initialize()
     return StatusCode::SUCCESS;
 }
 
+template <typename IClusteringTool, bool useCache>
+StatusCode ClusterizationAlg<IClusteringTool, useCache>::finalize()
+{
+  ATH_MSG_INFO("Clusterization statistics" << std::endl << makeTable(m_stat,
+								     std::array<std::string, kNStat>{
+								       "RDOs",
+								       "Clusters"
+								     }).columnWidth(10));
+  
+  return StatusCode::SUCCESS;
+}
+  
 template <typename IClusteringTool, bool useCache>
 StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventContext& ctx) const
 {
@@ -91,6 +104,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
         // If not already processed, do it now
         const RawDataCollection* rdos = rdoContainer->indexFindPtr(id);
         if (rdos != nullptr && !rdos->empty()) {
+	  m_stat[kNRdo] += rdos->size();
           auto prev_len = clusterContainer->size();
           ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx,*clusterContainer));
 
@@ -101,7 +115,9 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
         }
       } // loop on ids
     } // loop on rois
-    
+
+    m_stat[kNClusters] += clusterContainer->size();
+    ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());    
     return StatusCode::SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -8,6 +8,8 @@
 
 
 #include "xAODTruthCnv/TruthMetaDataTool.h"
+#include "AthContainers/ConstAccessor.h"
+
 
 namespace xAODMaker {
 
@@ -67,9 +69,9 @@ namespace xAODMaker {
          bool exists = false;
          for( const xAOD::TruthMetaData* existing : *m_truthMeta ) {
             if( existing->mcChannelNumber() == meta->mcChannelNumber() ){
-               const std::string generators{"generators"};
-               if (!existing->isAvailable<std::string>(generators) ||
-                   !meta->isAvailable<std::string>(generators) ||
+               static const SG::ConstAccessor<std::string> generatorsAcc ("generators");
+               if (!generatorsAcc.isAvailable (*existing) ||
+                   !generatorsAcc.isAvailable (*meta) ||
                    existing->generators() == meta->generators() ) {
                      exists = true;
                      break;

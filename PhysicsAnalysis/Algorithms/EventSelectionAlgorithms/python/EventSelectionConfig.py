@@ -8,8 +8,13 @@ class EventSelectionMergerConfig(ConfigBlock):
 
     def __init__(self):
         super(EventSelectionMergerConfig, self).__init__()
-        self.addOption('selections', [], type=list)
-        self.addOption('noFilter', False, type=bool)
+        self.addOption('selections', [], type=list,
+            info="the selection decisions (list of strings) to unify into a "
+            "final decision (internally: selection_1 || selection_2 || ...). "
+            "The default is [] (empty list).")
+        self.addOption('noFilter', False, type=bool,
+            info="do not apply an event filter. The default is False, i.e. "
+            "remove events not passing the full list of selection cuts.")
 
     def makeAlgs(self, config):
         alg = config.createAlgorithm('CP::SaveFilterAlg', 'EventSelectionMerger')
@@ -23,21 +28,57 @@ class EventSelectionMergerConfig(ConfigBlock):
 class EventSelectionConfig(ConfigBlock):
     """ConfigBlock for interpreting text-based event selections"""
 
-    def __init__(self, name):
+    def __init__(self, name=''):
         super(EventSelectionConfig, self).__init__()
-        self.addOption('electrons', "", type=str)
-        self.addOption('muons', "", type=str)
-        self.addOption('jets', "", type=str)
-        self.addOption('largeRjets', "", type=str)
-        self.addOption('photons', "", type=str)
-        self.addOption('taus', "", type=str)
-        self.addOption('met', "", type=str)
-        self.addOption('metTerm', "Final", type=str)
-        self.addOption('btagDecoration', "", type=str)
-        self.addOption('preselection', "", type=str)
-        self.addOption('selectionCuts', "", type=str, noneAction='error')
-        self.addOption('noFilter', False, type=bool)
-        self.addOption('debugMode', False, type=bool)
+        self.addOption('name', name, type=str,
+            noneAction='error',
+            info="the name of the event selection, used to uniquely identify "
+            "the EventSelectionConfig block.")
+        self.addOption('electrons', "", type=str,
+            info="the input electron container, with a possible selection, in "
+            "the format container or container.selection. The default is '' "
+            "(empty string).")
+        self.addOption('muons', "", type=str,
+            info="the input muon container, with a possible selection, in the "
+            "format container or container.selection. The default is '' "
+            "(empty string).")
+        self.addOption('jets', "", type=str,
+            info="the input jet container, with a possible selection, in the "
+            "format container or container.selection. The default is '' "
+            "(empty string).")
+        self.addOption('largeRjets', "", type=str,
+            info="the large-R jet container, with a possible selection, in "
+            "the format container or container.selection. The default is '' "
+            "(empty string).")
+        self.addOption('photons', "", type=str,
+            info="the input photon container, with a possible selection, in "
+            "the format container or container.selection. The default is '' "
+            "(empty string).")
+        self.addOption('taus', "", type=str,
+            info="the input tau-jet container, with a possible selection, in "
+            "the format container or container.selection. The default is '' "
+            "(empty string).")
+        self.addOption('met', "", type=str,
+            info="he input MET container. The default is '' (empty string).")
+        #TODO: add info string
+        self.addOption('metTerm', "Final", type=str,
+            info="")
+        self.addOption('btagDecoration', "", type=str,
+            info="the b-tagging decoration to use when defining b-jets. "
+            "The default is '' (empty string).")
+        self.addOption('preselection', "", type=str,
+            info="the event-wise selection flag to start this event selection "
+            "from. The default is '' (empty string).")
+        self.addOption('selectionCuts', "", type=str,
+            noneAction='error',
+            info="a single string listing one selection cut per line.")
+        self.addOption('noFilter', False, type=bool,
+            info="do not apply an event filter. The default is False, i.e. "
+            "remove events not passing the full list of selection cuts.")
+        self.addOption('debugMode', False, type=bool,
+            info="whether to create an output branch for every single line "
+            "of the selection cuts. The default is False (only saves the"
+            " final decision).")
         self.step = 0
         self.currentDecoration = ''
         self.cutflow = []

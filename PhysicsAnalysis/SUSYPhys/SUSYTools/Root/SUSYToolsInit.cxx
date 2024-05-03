@@ -73,6 +73,10 @@
 
 #include "InDetTrackSystematicsTools/IInclusiveTrackFilterTool.h"
 
+#ifndef XAOD_STANDALONE
+#include "AthAnalysisBaseComps/AthAnalysisHelper.h"
+#endif
+
 using namespace ST;
 
 
@@ -89,7 +93,7 @@ using namespace ST;
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
   } else ATH_CHECK(TOOLHANDLE.retrieve());
 
-#define CONFIG_EG_EFF_TOOL_KEY( TOOLHANDLE, TOOLNAME, KEYNAME, KEY )        \
+#define CONFIG_EG_EFF_TOOL_KEY( TOOLHANDLE, TOOLNAME, KEYNAME, KEY, MAP )   \
   if( !TOOLHANDLE.isUserConfigured() ) {                                \
     TOOLHANDLE.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+TOOLNAME); \
     ATH_MSG_INFO( "Will now set key \"" << KEYNAME << "\" to value \"" << KEY << "\" when configuring an AsgElectronEfficiencyCorrectionTool" ); \
@@ -98,6 +102,7 @@ using namespace ST;
       ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", static_cast<int>(data_type))); \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrelationModel", m_EG_corrModel) ); \
     ATH_CHECK( TOOLHANDLE.setProperty("OutputLevel", this->msg().level()) ); \
+    ATH_CHECK( TOOLHANDLE.setProperty("MapFilePath", MAP) ); \
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
   } else if (!isData()) ATH_CHECK(TOOLHANDLE.retrieve());
 
@@ -592,6 +597,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon calibration tool
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MuonMomentumCorrectionsSubgroup#CP_MuonCalibrationAndSmearingToo
+    // Please not that for AthAnalysis we need to configure the MuonCalibTool within METSignificance manually and just can't pass the handle
+    // Hence, any changes here should also be propagated to the METSignificance setup further below
 
     if (!m_muonCalibTool.isUserConfigured()) {
       m_muonCalibTool.setTypeAndName("CP::MuonCalibTool/ST_MuonCalibrationTool");
@@ -687,6 +694,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         toolName = "MuonLRTOverlapRemovalTool";
         m_muonLRTORTool.setTypeAndName("CP::MuonLRTOverlapRemovalTool/"+toolName);
         ATH_CHECK( m_muonLRTORTool.setProperty("overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy) );
+        if (m_isRun3) ATH_CHECK( m_muonLRTORTool.setProperty("UseRun3WP", true ));
         ATH_CHECK( m_muonLRTORTool.retrieve() );
     } else ATH_CHECK( m_muonLRTORTool.retrieve() );
 
@@ -936,17 +944,17 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_MSG_DEBUG( "Setting data type to " << data_type);
     }
 
-    toolName = "AsgElectronEfficiencyCorrectionTool_reco";
-    CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_reco, toolName, "RecoKey", "Reconstruction");
-
-    //-- get KEYS supported by egamma SF tools
     m_eleEffMapFilePathRun2 = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt";
-    
+
     if(!m_isRun3) {
       ATH_MSG_INFO( "Running on Run2 samples; Using egamma SF tools from R21 map ");
       ATH_MSG_INFO( m_eleEffMapFilePathRun2);
     }
-    
+
+    toolName = "AsgElectronEfficiencyCorrectionTool_reco";
+    CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_reco, toolName, "RecoKey", "Reconstruction", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
+
+    //-- get KEYS supported by egamma SF tools
     std::vector<std::string> eSF_keys = getElSFkeys( m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
 
     if (m_eleId.find("NoPix") != std::string::npos || m_eleId == "VeryLooseLLH" || m_eleId == "LooseLLH" || m_eleId == "Medium") {
@@ -958,7 +966,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       // electron id
       toolName = "AsgElectronEfficiencyCorrectionTool_id_" + m_eleId;
-      CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_id, toolName, "IdKey", eleId);
+      CONFIG_EG_EFF_TOOL_KEY(m_elecEfficiencySFTool_id, toolName, "IdKey", eleId, m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2);
 
       // override map file use if correction file list is set for WP
       std::map<std::string,std::string> corrFNList;
@@ -1351,7 +1359,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_egammaCalibTool.isUserConfigured()) {
       m_egammaCalibTool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool");
       ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", "es2018_R21_v0") ); //used for analysis using data processed with 21.0
+      ATH_CHECK( m_egammaCalibTool.setProperty("ESModel", m_isRun3 ? "es2022_R22_PRE" : "es2018_R21_v0") ); //Fallback to R21 egamma model for Run 2
       ATH_CHECK( m_egammaCalibTool.setProperty("decorrelationModel", "1NP_v1") );
       ATH_CHECK( m_egammaCalibTool.setProperty("useFastSim", isAtlfast()?1:0) );
       ATH_CHECK( m_egammaCalibTool.setProperty("OutputLevel", this->msg().level()) );
@@ -1608,7 +1616,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     else{
       MCshowerID= "default";                              // Powheg+Pythia8 (601229)  - PhPy8EG_A14
       if (m_showerType == 2)      MCshowerID = "601414";  // POWHEG+Herwig721         - PhH7EG_A14
-      else if (m_showerType == 7) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
+      else if (m_showerType == 6) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
     }
 
     // btagEfficiencyTool
@@ -1731,7 +1739,20 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
         ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMTopo") );
       }
+#ifndef XAOD_STANDALONE // Athena and AthAnalysis; need to take into account that MuonCalibTool is private tool
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "MuonCalibTool", "CP::MuonCalibTool/calibTool"));
+      if (m_isRun3)
+        ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.IsRun3Geo", true));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.calibMode", m_muCalibrationMode));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.OutputLevel",this->msg().level()));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2023_08_28_Run2Run3"));
+      int IdBaselineInt = m_muIdBaseline;
+      if (IdBaselineInt == 4)
+        ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.doExtraSmearing", m_muHighPtExtraSmear));
+#else // AnalysisBase; can just pass the muon calib tool above
       ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));
+#endif
       ATH_CHECK( m_metSignif.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_metSignif.retrieve() );
     } else ATH_CHECK( m_metSignif.retrieve() );

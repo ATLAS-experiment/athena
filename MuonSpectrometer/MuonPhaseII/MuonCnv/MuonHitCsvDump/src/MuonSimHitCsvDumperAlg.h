@@ -28,6 +28,7 @@ class MuonSimHitCsvDumperAlg: public AthAlgorithm {
 
    private:
 
+    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     
     SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKey{
     this, "MuonSimHitKey",{}, "List of sim hit containers"};
@@ -36,7 +37,7 @@ class MuonSimHitCsvDumperAlg: public AthAlgorithm {
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     /// Access to the readout geometry
-   const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
+    const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
 
    size_t m_event{0};
 };

@@ -64,8 +64,11 @@ public: // Non-static members
    /// The name of the incident that starts a new event sequence
    std::string  incidentName() const            { return m_incidentName.value(); }
 
-   /// The current Event Range ID (only one range is 
+   /// The current Event Range ID (only one range is returned)
    std::string  currentRangeID() const;
+
+   /// set the RangeID (possibly temporarily) so the right Range Filename may be generated
+   std::string  setRangeID(const std::string rangeID);
 
    /// Is the service in active use? (true after the first range incident is handled)
    bool         inUse() const;

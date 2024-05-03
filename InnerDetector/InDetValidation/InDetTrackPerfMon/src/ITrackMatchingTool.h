@@ -38,14 +38,29 @@ namespace IDTPM {
     /// General matching method, via TrackAnalysisCollections
     virtual StatusCode match(
         TrackAnalysisCollections& trkAnaColls,
-        const std::string& chainRoIName ) const = 0;
+        const std::string& chainRoIName,
+        const std::string& roiStr ) const = 0;
 
-    /// Specific matching method, via test/reference vectors
+    /// Specific matching methods, via test/reference vectors
     /// -> Could be used independently of the
     ///    TrackAnalysis infrastructure
+
+    /// track -> track matching
+    virtual StatusCode match(
+        const std::vector< const xAOD::TrackParticle* >& vTest,
+        const std::vector< const xAOD::TrackParticle* >& vRef,
+        ITrackMatchingLookup& matches ) const = 0;
+
+    /// track -> truth matching
     virtual StatusCode match(
         const std::vector< const xAOD::TrackParticle* >& vTest,
         const std::vector< const xAOD::TruthParticle* >& vRef,
+        ITrackMatchingLookup& matches ) const = 0;
+
+    /// truth -> track matching
+    virtual StatusCode match(
+        const std::vector< const xAOD::TruthParticle* >& vTest,
+        const std::vector< const xAOD::TrackParticle* >& vRef,
         ITrackMatchingLookup& matches ) const = 0;
 
   };

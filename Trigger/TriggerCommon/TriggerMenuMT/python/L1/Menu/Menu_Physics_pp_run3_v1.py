@@ -78,10 +78,13 @@ def defineMenu():
         #Phase-I
         'L1_eEM18M_2eTAU20M',
         'L1_MU8F_eTAU20M',
+        'L1_MU8F_cTAU20M',
         'L1_MU8F_eTAU20M_jJ55_2jJ30',
         'L1_MU8F_eTAU20M_3jJ30',
+        'L1_MU8F_cTAU20M_3jJ30',
         'L1_eEM18M_2eTAU20M_jJ55_3jJ30',
         'L1_MU8F_eTAU30M',
+        'L1_MU8F_cTAU30M',
         'L1_eEM18M_2eTAU20M_4jJ30',
         
         # combined tau - jet
@@ -91,6 +94,7 @@ def defineMenu():
         'L1_eEM18M_2eTAU20M_jXE70',
         'L1_eTAU30M_2jJ50_jXE90',
         'L1_MU8F_eTAU20M_jXE70',
+        'L1_MU8F_cTAU20M_jXE70',
         'L1_eTAU30M_2eTAU20M_jXE70',
         'L1_eTAU60_2eTAU20M_jXE80',
 
@@ -356,7 +360,7 @@ def defineMenu():
         'L1_AFP_A_AND_C_TOF_CEP-CjJ100','L1_AFP_A_AND_C_TOF_T0T1_CEP-CjJ100',
 
         #ATR-28563
-        'L1_LLPDPHI-jXE27-jJ27',
+        'L1_LLPDPHI-jXE40-jJ40',
         
         ]
 

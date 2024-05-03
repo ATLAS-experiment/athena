@@ -53,7 +53,7 @@ namespace MuonR4{
             }
             uvcov(1,1) = std::pow(uvcov(1,1), 2);
         }
-        Jac = Jac.inverse();
+        Jac = Jac.inverse().eval();
         AmgSymMatrix(2) cov = Jac * uvcov * Jac.transpose();
         m_measUncerts =  Amg::Vector2D(std::sqrt(cov(0,0)), std::sqrt(cov(1,1)));
     }

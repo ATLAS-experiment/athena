@@ -88,6 +88,15 @@ public:
 
 
   /**
+   * @brief Constructor taking an auxid directly.
+   * @param auxid ID for this auxiliary variable.
+   *
+   * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+   */
+  ConstAccessor (const SG::auxid_t auxid);
+
+
+  /**
    * @brief Fetch the variable for one element, as a const reference.
    * @param e The element for which to fetch the variable.
    */
@@ -145,13 +154,24 @@ protected:
    * @brief Constructor.
    * @param name Name of this aux variable.
    * @param clsname The name of its associated class.  May be blank.
-   * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+   * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
    *
    * The name -> auxid lookup is done here.
    */
   ConstAccessor (const std::string& name,
                  const std::string& clsname,
-                 const SG::AuxTypeRegistry::Flags flags);
+                 const SG::AuxVarFlags flags);
+
+
+  /**
+   * @brief Constructor taking an auxid directly.
+   * @param auxid ID for this auxiliary variable.
+   * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
+   *
+   * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+   */
+  ConstAccessor (const SG::auxid_t auxid,
+                 const SG::AuxVarFlags flags);
 
 
   /// The cached @c auxid.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdio>
@@ -38,7 +38,7 @@ void Double2Int_calib( double calib, unsigned int &scale, unsigned int &offset, 
 
 
 
-void Double2Int_ofc( int w_off_size, vector<double> w_off, vector<int> &w_dsp, int &w_sum_dsp, int &scale, bool verbose )
+void Double2Int_ofc( int w_off_size, const vector<double>& w_off, vector<int> &w_dsp, int &w_sum_dsp, int &scale, bool verbose )
 {
   // Number of bits of the integer word (signed -1 )
   int NumberBits = 16;

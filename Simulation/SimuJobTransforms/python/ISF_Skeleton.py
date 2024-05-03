@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import sys
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -147,6 +147,9 @@ def fromRunArgs(runArgs):
 
     # Post-exec
     processPostExec(runArgs, flags, cfg)
+
+    from AthenaConfiguration.Utils import setupLoggingLevels
+    setupLoggingLevels(flags, cfg)
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg

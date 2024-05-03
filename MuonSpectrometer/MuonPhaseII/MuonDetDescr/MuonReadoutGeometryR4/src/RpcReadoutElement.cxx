@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
@@ -48,10 +48,7 @@ StatusCode RpcReadoutElement::initElement() {
          ATH_MSG_VERBOSE("Layer "<<layer <<" has not sensor layout associated.");
          continue;
       }
-      ATH_CHECK(insertTransform(layHash, 
-                                 [this](const DetectorAlignStore* store, const IdentifierHash& hash){
-                                    return toStation(store) * fromGapToChamOrigin(hash); 
-                                 }));
+      ATH_CHECK(insertTransform<RpcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
       const StripDesign& design{sensorLayout(layHash).design()};
       ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.halfWidth(),

@@ -14,9 +14,11 @@ namespace Egamma{
 PhotonPlots::PhotonPlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType):PlotBase(pParent, sDir), 
 											 m_oKinAllPlots(this, "All/KinPlots/", "Reco " + sParticleType +" Photon"), 
 											 m_oShowerShapesAllPlots(this, "All/ShowerShapesPlots/", sParticleType  +" Photon"),
+                       m_oPhotonConversionAllPlots(this, "All/PhotonConversionPlots/", sParticleType  +" Photon"),
 //
 											 m_oKinIsoPlots(this, "Iso/KinPlots/", "Reco " + sParticleType +" Photon"),
 											 m_oShowerShapesIsoPlots(this, "Iso/ShowerShapesPlots/", sParticleType  +" Photon"),
+                       m_oPhotonConversionIsoPlots(this, "Iso/PhotonConversionPlots/", sParticleType  +" Photon"),
 											 m_oKinIsoUncPlots(this, "Iso/KinPlotsUnc/", "Reco " + sParticleType +" Photon"),
 											 m_oKinIsoConvPlots(this, "Iso/KinPlotsConv/", "Reco " + sParticleType +" Photon"),
 											 //
@@ -30,7 +32,7 @@ PhotonPlots::PhotonPlots(PlotBase* pParent, const std::string& sDir, const std::
 											 m_sParticleType(sParticleType),
 											 m_nParticles(nullptr),
 											 m_nParticles_weighted(nullptr)
-{}	
+{}
 
 void PhotonPlots::initializePlots(){
   m_nParticles = Book1D("n", "Number of "+ m_sParticleType + "s;#" + m_sParticleType + "s;Events", 15, 0., 15.);
@@ -40,11 +42,13 @@ void PhotonPlots::initializePlots(){
   void PhotonPlots::fill(const xAOD::Photon& photon, const xAOD::EventInfo& eventInfo, bool isPrompt) {
   m_oKinAllPlots.fill(photon,eventInfo);
   m_oShowerShapesAllPlots.fill(photon,eventInfo);
+  m_oPhotonConversionAllPlots.fill(photon,eventInfo);
   
   if(!isPrompt) return;
 
   m_oKinIsoPlots.fill(photon,eventInfo);
   m_oShowerShapesIsoPlots.fill(photon,eventInfo);
+  m_oPhotonConversionIsoPlots.fill(photon,eventInfo);
   if (!xAOD::EgammaHelpers::isConvertedPhoton(&photon)) m_oKinIsoUncPlots.fill(photon,eventInfo);
   else m_oKinIsoConvPlots.fill(photon,eventInfo);
   

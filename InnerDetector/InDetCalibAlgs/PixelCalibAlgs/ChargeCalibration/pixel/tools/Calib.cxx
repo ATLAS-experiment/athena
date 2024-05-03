@@ -588,11 +588,11 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                 continue;
             } 
             
+            // pixel discriminator threshold
             std::unique_ptr<TH2F> h2dThr(get2DHistogramFromPath(rodDir,modName, "SCURVE_MEAN"));
             h2dThr->SetDirectory(0);
             
-            
-            // Gettting histogram for noise
+            // Getting histogram for noise
             std::unique_ptr<TH2F>h2dSig(get2DHistogramFromPath(rodDir,modName, "SCURVE_SIGMA"));
             h2dSig->SetDirectory(0);
             

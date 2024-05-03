@@ -92,6 +92,7 @@ StatusCode L1TopoOnlineMonitor::initialize() {
   ATH_CHECK(m_ctpRdoKey.initialize(m_doHwMonCTP));
   ATH_CHECK(m_l1topoRawDataKey.initialize(m_doHwMon));
   ATH_CHECK(m_monTool.retrieve(DisableTool{m_monTool.name().empty()}));
+  ATH_CHECK(m_errorFlagsKey.initialize());
 
   return AthMonitorAlgorithm::initialize();
 }
@@ -111,6 +112,18 @@ StatusCode L1TopoOnlineMonitor::start() {
 
 StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const {
   
+  // Create and record the ErrorFlags container
+  SG::WriteHandle<xAOD::TrigCompositeContainer> errorFlagsCont(m_errorFlagsKey, ctx);
+  ATH_CHECK(errorFlagsCont.record(std::make_unique<xAOD::TrigCompositeContainer>(),
+                              std::make_unique<xAOD::TrigCompositeAuxContainer>()));
+  ATH_MSG_DEBUG("Recorded TrigCompositeContainer with key " << m_errorFlagsKey.key());
+
+  // Create the ErrorFlags object
+  errorFlagsCont->push_back(new xAOD::TrigComposite);
+  xAOD::TrigComposite& errorFlags = *(errorFlagsCont->back());
+  resetFlags(errorFlags);
+
+
   DecisionBits decisionBits{};
   enum class MonFunction : uint8_t {doSimMon=0, doHwMonCTP, doHwMon, doComp, doMultComp};
   std::vector<uint8_t> failedMonFunctions;
@@ -660,4 +673,8 @@ std::vector<unsigned> L1TopoOnlineMonitor::getCtpIds( const TrigConf::L1Menu& l1
   }
 
   return ctpIds;
+}
+
+void L1TopoOnlineMonitor::resetFlags(xAOD::TrigComposite& errorFlags) const {
+  errorFlags.setDetail("hasTrivialFlag", true);
 }

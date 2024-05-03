@@ -1,9 +1,16 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_ICC
 
+
+namespace ActsTrk{
+    template <> inline Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::RpcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const{
+            return m_parent->toStation(store) * m_parent->fromGapToChamOrigin(hash());
+        }
+}
 
 namespace MuonGMR4 {
     namespace RpcIdMeasHashFields{

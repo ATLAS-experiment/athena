@@ -42,6 +42,7 @@ namespace TrackingUtilities {
     localCovariance(2, 2) = timeResolution;
 
     xaodCluster.setMeasurement<3>(idHash, localPosition, localCovariance);
+    xaodCluster.setIdentifier( indetCluster.identify().get_compact() );
     xaodCluster.setRDOlist(RDOs);
     xaodCluster.setToTlist(ToTs);
     
@@ -78,6 +79,7 @@ namespace TrackingUtilities {
     auto splitProbability2 = indetCluster.splitProbability2();
 
     xaodCluster.setMeasurement<2>(idHash, localPosition, localCovariance);
+    xaodCluster.setIdentifier( indetCluster.identify().get_compact() );
     xaodCluster.setRDOlist(RDOs);
     xaodCluster.globalPosition() = globalPosition;
     xaodCluster.setToTlist(ToTs);
@@ -129,6 +131,7 @@ namespace TrackingUtilities {
     const auto& width = indetCluster.width();
 
     xaodCluster.setMeasurement<1>(idHash, localPosition, localCovariance);
+    xaodCluster.setIdentifier( indetCluster.identify().get_compact() );
     xaodCluster.setRDOlist(RDOs);
     xaodCluster.globalPosition() = globalPosition;
     xaodCluster.setChannelsInPhi(width.colRow()[0]);

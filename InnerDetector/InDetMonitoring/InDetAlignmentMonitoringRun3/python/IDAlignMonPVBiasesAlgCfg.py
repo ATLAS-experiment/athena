@@ -23,7 +23,7 @@ def IDAlignMonPVBiasesAlgCfg(helper, alg, **kwargs):
     
     # this creates a "pvGroup" called "alg" which will put its histograms into the subdirectory "PVBiases"
     pvGroup = helper.addGroup(alg, 'PVBiases')
-    pathPVBiases = '/IDAlignMon/ExtendedTracks_NoTriggerSelection/PVBiases'
+    pathPVBiases = '/IDAlignMon/ExtendedTracks/PVBiases'
 
     # Histograms for the Alignment PVBiases monitoring:    
     #400-600MeV

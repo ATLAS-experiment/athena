@@ -19,7 +19,6 @@ This directory contains a large number of python scripts, in particular defining
 
 * `SlimmingHelper` and `ContentHandler`: the main python scripts defining the slimming mechanism. Users interact with the SlimmingHelper in their format configuration, indicating which CP variables should be included and which individual branches should be retained. Using information from the user and the smart slimming lists (some of which are in this directory and others which are in the CP group packages) the SlimmingHelper builds the full list of variables that need to be kept, and applies them to the relevant output stream. The ContentHandler is used to format the strings which define the output lists.
 * Smart slimming lists for the triggers (several files), event info (`EventInfoContent`), compulsory content needed for all formats (`CompulsoryContent`)
-* `ContainersForExpansion`: list of containers that can't be converted into AuxDyn variables in the release 22 way but must be explicitly expanded via the legacy mechanism
 * `ContainersOnTheFly`: list of containers that are added via common augmentation and which are listed centrally to avoid users having to write them explicitly into their format definitions
 * `FullListOfSmartContainers`: list of all of the containers with smart slimming lists. **Obsolete?**
 * `StaticNamesAndTypes`: fall-back dictionary of container names and their types, to be used in case the job can't automatically generate the dictionary as it reads in the file metadata. **Obsolete?**

@@ -8,8 +8,11 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen, L1CorrelationAlgCfg
+from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
+from L1TopoSimulation import L1TopoSimulationConfig as TopoSimConfig
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
 from TrigEDMConfig.TriggerEDM import recordable
+from AthenaConfiguration.Enums import Format
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO, 
@@ -35,6 +38,33 @@ def timeBurnerCfg(flags):
     msca = MenuSequenceCA(flags, selAcc,
                           HypoToolGen=TimeBurnerHypoToolGen)
     return msca
+
+def L1TopoOnlineMonitorSequenceCfg(flags):
+
+        # Input maker for FS initial RoI
+        inputMaker = CompFactory.InputMakerForRoI("IM_L1TopoOnlineMonitor")
+        inputMaker.RoITool = CompFactory.ViewCreatorInitialROITool()
+        inputMaker.RoIs="L1TopoOnlineMonitorInputRoIs"
+
+        reco = InEventRecoCA('L1TopoPhase1OnlineMonitor_reco',inputMaker=inputMaker)
+
+        # if running on data without L1Sim, need to add L1TopoSim
+        if flags.Input.Format is Format.BS and not flags.Trigger.doLVL1:
+            topoSimCA = TopoSimConfig.L1TopoSimulationCfg(flags,doMonitoring=True,readMuCTPI=True)
+            reco.mergeReco(topoSimCA)
+        # in other hand, we only need to add the L1TopoPhase1OnlineMonitor
+        else:
+            recoAlg= TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions')
+            reco.addEventAlgo(recoAlg)
+    
+        selAcc =  SelectionCA("L1TopoOnlineMonitorSequence")
+        selAcc.mergeReco(reco)
+
+        hypoAlg = TopoMonConfig.getL1TopoOnlineMonitorHypo(flags)
+        selAcc.addHypoAlgo(hypoAlg)
+
+        return MenuSequenceCA(flags, selAcc,
+                              HypoToolGen = TopoMonConfig.L1TopoOnlineMonitorHypoToolGen)
 
 
 def MistimeMonSequenceCfg(flags):
@@ -85,6 +115,10 @@ class MonitorChainConfiguration(ChainConfigurationBase):
 
         if monType == 'timeburner':
             chainSteps.append(self.getTimeBurnerStep(flags))
+        elif monType == 'l1topoPh1debug':
+            #Deactivated by default at the moment
+            if False and not flags.Trigger.doLVL1 and flags.Input.Format is Format.BS and flags.Trigger.L1.doMuonTopoInputs and flags.Trigger.L1.doMuon and flags.enableL1MuonPhase1 and flags.enableL1TopoBWSimulation and flags.enableL1CaloPhase1:
+                chainSteps.append(self.getL1TopoOnlineMonitorStep(flags))
         elif monType == 'mistimemonj400':
             chainSteps.append(self.getMistimeMonStep(flags))
         else:
@@ -97,6 +131,14 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getTimeBurnerStep(self, flags):
         return self.getStep(flags,1,'TimeBurner',[timeBurnerCfg])
+
+    # --------------------
+    # L1TopoOnlineMonitor configuration
+    # --------------------
+    def getL1TopoOnlineMonitorStep(self, flags):
+
+        sequenceCfg = L1TopoOnlineMonitorSequenceCfg
+        return self.getStep(flags,1,'L1TopoOnlineMonitor',[sequenceCfg])
 
     # --------------------
     # MistTimeMon configuration

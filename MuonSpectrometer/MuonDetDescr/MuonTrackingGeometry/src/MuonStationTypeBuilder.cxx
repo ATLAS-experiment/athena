@@ -2473,8 +2473,11 @@ void Muon::MuonStationTypeBuilder::printVolumeBounds(std::string comment, const 
 
     const Trk::SimplePolygonBrepVolumeBounds* spb =
         dynamic_cast<const Trk::SimplePolygonBrepVolumeBounds*>(&volBounds);
-    ATH_MSG_DEBUG("SimplePolygonBrep bounds: number of vertices:"
-                  << spb->xyVertices().size());
+    if (spb){
+      ATH_MSG_DEBUG("SimplePolygonBrep bounds: number of vertices:"
+		    << spb->xyVertices().size());
+      return;
+    }
 }
 
 double Muon::MuonStationTypeBuilder::envelopeThickness(const Trk::VolumeBounds& volBounds) const {

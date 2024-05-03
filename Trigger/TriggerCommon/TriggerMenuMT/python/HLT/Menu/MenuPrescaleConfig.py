@@ -39,7 +39,8 @@ def MenuPrescaleConfig(hltMenuConfig, flags):
     #    disabled triggers (else they will be overwritten)
     if 'Primary_prescale' in menu_name:
         filterChains(chains, Prescales.HLTPrescales_primary_prescale,
-                        ['Primary:L1Muon','Primary:Legacy','Primary:PhaseI','Primary:CostAndRate'],
+                        ['Primary:L1Muon','Primary:Legacy','Primary:PhaseI','Primary:CostAndRate',
+                         'Support:TagAndProbe','Support:LegacyTagAndProbe','Support:PhaseITagAndProbe'],
                         invert = True)  # enable these groups
         L1Prescales = Prescales.L1Prescales_primary_prescale
         HLTPrescales = Prescales.HLTPrescales_primary_prescale

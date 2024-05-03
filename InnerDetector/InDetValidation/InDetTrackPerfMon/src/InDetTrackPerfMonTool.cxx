@@ -214,7 +214,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   //for( size_t iAna=0 ; iAna<m_trkAnaPlotsMgrVec.size() ; iAna++ ) {
     //std::string thisChain = m_trkAnaPlotsMgrVec.at(iAna)->chain();
 
-  for( std::string& thisChain : m_trkAnaDefSvc->configuredChains() ) {
+  for( const std::string& thisChain : m_trkAnaDefSvc->configuredChains() ) {
 
     ATH_MSG_DEBUG( "Processing chain = " << thisChain );
 
@@ -255,13 +255,15 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       if( m_trkAnaDefSvc->useTrigger() ) thisRoiLink = selectedRois.at(ir).link;
       const TrigRoiDescriptor* const* thisRoi = m_trkAnaDefSvc->useTrigger() ? 
                                                 thisRoiLink.cptr() : nullptr;
+      std::string thisRoiStr = m_trkAnaDefSvc->useTrigger() ?
+                               std::string( **thisRoi ) : "Full Scan";
+
+      ATH_MSG_DEBUG( "Processing selected RoI : " << thisRoiStr );
 
       /// ----------------------------------
       /// --- Track selection within RoI ---
       /// ----------------------------------
       if( m_trkAnaDefSvc->useTrigger() ) {
-        ATH_MSG_DEBUG( "Processing selected RoI : " << **thisRoi );
-
         /// Tracks in RoI selection
         ATH_CHECK( m_trackRoiSelectionTool->selectTracksInRoI(
                                 thisTrkAnaCollections, thisRoiLink ) );
@@ -284,7 +286,8 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
       if( m_doMatch.value() ) {
         ATH_MSG_DEBUG( "Doing Test-Reference matching..." );
-        ATH_CHECK( m_trackMatchingTool->match( thisTrkAnaCollections, chainRoIName ) );
+        ATH_CHECK( m_trackMatchingTool->match( thisTrkAnaCollections,
+                                               chainRoIName, thisRoiStr ) );
       }
 
       /// --------------------------
@@ -327,7 +330,7 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
 StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_INFO( "Loading collections" );
-  ATH_CHECK( trkAnaColls.fillTruthTrackContainer( m_truthParticleName ) );
+  ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_truthParticleName ) );
   ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );
   ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );
 

@@ -8,8 +8,6 @@
 # object/container.
 #
 
-from __future__ import print_function
-
 __author__  = "Sebastien Binet <binet@cern.ch>, " \
     "Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>, " \
     "RD Schaffer R.D.Schaffer@cern.ch"
@@ -35,6 +33,12 @@ if __name__ == "__main__":
        help = "Output CSV file name, to use with spreadsheets" )
     ( options, args ) = parser.parse_args()
 
+    # Ideally, pattern lists ought to be defined such that categories do NOT overlap.
+    # Should they overlap, the last, i.e., lower on this list, matched category, if any, wins.
+    # The following categories currently overlap:
+    # "PFO" and "Jet", "Muon" and "LRT",
+    # "Trig" and "LRT", "Trig" and "PFO",
+    # "Trig" and "caloringer", "InDet" and "LRT"
     # Set up categorization matching strings:
     categoryStrings = {
         "MetaData" : ["^DataHeader", "(.*)_mems$", "(.*)_timings$", "^Token$", "^RawInfoSummaryForTag$", "^index_ref$"],
@@ -89,6 +93,8 @@ if __name__ == "__main__":
                "input file" )
         pass
 
+    # Pattern for a static/dynamic auxiliary variable identification
+    auxvarptn = re.compile( r"Aux(?:Dyn)?(?:\.|:)" )
     # Loop over the specified file(s):
     for fileName in fileNames:
 
@@ -105,19 +111,11 @@ if __name__ == "__main__":
             # if d.dirType != "B": continue
             # The name of this branch:
             brName = d.name
-            # Check if this is a static auxiliary store:
-            m = re.match( r"(.*)Aux\..*", d.name )
+            # Check if this is a static/dynamic auxiliary variable:
+            m = auxvarptn.search( d.name )
             if m:
                 # Yes, it is. And the name of the main object/container is:
-                brName = m.group( 1 )
-                pass
-            # Check if this is a dynamic auxiliary variable:
-            m = re.match( r"(.*)AuxDyn\..*", d.name )
-            if m:
-                # Oh yes, it is. Let's construct the name of the main
-                # object/container:
-                brName = m.group( 1 )
-                pass
+                brName = d.name[:m.start()]
             # Check if we already know this container:
             if brName in summedData.keys():
                 summedData[ brName ].memSize  += d.memSize
@@ -130,21 +128,19 @@ if __name__ == "__main__":
                                    d.memSizeNoZip,
                                    d.nEntries,
                                    d.dirType )
-                pass
+            # Set the C++ type name of the main object/container
+            if brName == d.name:
+                if summedData[ brName ].typeName and \
+                   summedData[ brName ].typeName != d.typeName:
+                    print(f"WARNING: Reset typeName {summedData[ brName ].typeName!r}"
+                          f" -> {d.typeName!r} for {brName}", file=sys.stderr)
+                summedData[ brName ].typeName = d.typeName
             pass
 
         # Order the records by size:
-        orderedData = []
-        for br in summedData.keys():
-            orderedData += [ summedData[ br ] ]
-            pass
+        orderedData = [rec for rec in summedData.values()]
         sorter = PF.PoolRecord.Sorter.DiskSize
         orderedData.sort( key = operator.attrgetter( sorter ) )
-
-        # Access the CollectionTree directly:
-        import ROOT
-        tfile = ROOT.TFile.Open( fileName )
-        ttree = tfile.Get( "CollectionTree" )
 
         # Print a header:
         print( "" )
@@ -162,73 +158,50 @@ if __name__ == "__main__":
         for d in orderedData:
             # keep branches with either the same number of entries as the number of events, or the
             # special tlp branches with extra event information
-            mtlp = re.match( "(.*)_tlp.$", d.name ) or re.match( "(.*)DataHeader(.*)", d.name )
+            mtlp = re.search( "_tlp.$", d.name ) or "DataHeader" in d.name
             if d.nEntries != poolFile.dataHeader.nEntries and not mtlp: continue
-            # print d.name
 
-            br = ttree.GetBranch( d.name )
-            d_name = d.name
-            if br:
-                m = re.match( "(.*)_[pv]._", d.name )
-                m1 = re.match( "(.*)_tlp._", d.name )
-                m2 = re.match( "(.*)_v.>_", d.name )
-                m3 = re.match( "([a-zA-Z]+)_(.*_[lL]inks?)", d.name )
-                if m:
-                    nameType = "%s (%s)" % ( d.name[m.end():], br.GetClassName() )
-                    d_name   = d.name[m.end():]
-                elif m1:
-                    nameType = "%s (%s)" % ( d.name[m1.end():], br.GetClassName() )
-                    d_name   = d.name[m1.end():]
-                elif m2:
-                    nameType = "%s (%s)" % ( d.name[m2.end():], br.GetClassName() )
-                    d_name   = d.name[m2.end():]
-                elif m3:
-                    nameType = "%s (%s)" % ( m3.group(2), br.GetClassName() )
-                    d_name   = m3.group(2)
+            colTypeName = d.typeName
+            if colTypeName:
+                for ptn in ("(?:_[pv]._|_tlp._|_v.>_)(.*)", "^[a-zA-Z]+_(.*_[lL]inks?)"):
+                    m = re.search(ptn, d.name)
+                    if m:
+                        d_name   = m.group(1)
+                        break
                 else:
-                    nameType = "%s (%s)" % ( d.name, br.GetClassName() )
+                    m = re.search("_tlp.$", d.name)
+                    if m:
+                        d_name = d.name[:m.start()].replace("_",":")
+                    else:
+                        d_name   = d.name
+                nameType = "%s (%s)" % (d_name, colTypeName)
             else:
-                m = re.match( "(.*)_v._", d.name )
-                m1 = re.match( "(.*)(_tlp.$)", d.name )
-                # print "match",m,m1
+                m = re.search( "_v._", d.name )
                 if m:
-                    nameType = "%s (%s)" % ( d.name[m.end():], (d.name[:m.end()-1]) )
                     d_name   = d.name[m.end():]
-                elif m1:
-                    # print "m1:",m1.group(),m1.group(1)
-                    nt = m1.group(1).replace("_",":") + m1.group(2)
-                    n  = m1.group(1).replace("_",":")
-                    nameType = "%s (%s)" % ( n, nt )
-                    d_name   = n
+                    nameType = "%s (%s)" % ( d_name, (d.name[:m.end()-1]) )
                 else:
-                    nameType = "%s (%s)" % ( d.name, "()" )
+                    m = re.search("_tlp.$", d.name)
+                    if m:
+                        d_name = d.name[:m.start()].replace("_",":")
+                        nameType = "%s (%s)" % (d_name, d_name + m.group())
+                    else:
+                        d_name = d.name
+                        nameType = "%s (%s)" % ( d.name, "()" )
 
             # Find category:
-            found = False
-            catName = '*Unknown*'
-            for categ in categoryStrings:
+            for categ in reversed(categoryStrings.keys()):
                 for pattern in categoryStrings[ categ ]:
-                    # print d.name, d_name, pair, type(d.name), type(d_name), type(pair[0])
-                    m = None
-                    d_name_c=d_name
-                    mbkg = re.match("(.*)Bkg_",d_name)
-                    if mbkg:
-                       d_name_c   = re.sub("Bkg_","",d_name)
-                    try:
-                        m = re.match(pattern, d_name_c)
-                    except TypeError:
-                        pass
-                    if m:
-                        found = True
+                    if re.match(pattern, d_name.replace("Bkg_","")):
                         catName = categ
+                        # Stop searching since category found
                         break
-                        # print d.name, categ
-                        pass
-                    pass
-                if not found:
-                    # print "Did not find category for:", d.name, d_name, br
-                    pass
-                pass
+                else:
+                    continue
+                # Stop searching since category found
+                break
+            else:
+                catName = '*Unknown*'
             # Add on category to name/type
             nameType += ' [' + catName + ']'
 
@@ -270,10 +243,7 @@ if __name__ == "__main__":
 
         # Now print out the categorized information
         # Order the records by size:
-        categorizedData = []
-        for br in categData.keys():
-            categorizedData += [ categData[ br ] ]
-            pass
+        categorizedData = list(categData.values())
         sorter = PF.PoolRecord.Sorter.DiskSize
         categorizedData.sort( key = operator.attrgetter( sorter ) )
 
@@ -306,10 +276,10 @@ if __name__ == "__main__":
         print( "=" * 80 )
         print( "CSV for categories disk size/evt and fraction:" )
         # print out comment separated list in descending order
-        print (",".join(dsName[::-1]))
-        b = ['{:<0.3f}'.format(i)  for i in ds[::-1]]
+        print (",".join(reversed(dsName)))
+        b = ['{:.3f}'.format(i)  for i in reversed(ds)]
         print (",".join(b))
-        b = ['{:<0.3f}'.format(i)  for i in dsFrac[::-1]]
+        b = ['{:.3f}'.format(i)  for i in reversed(dsFrac)]
         print (",".join(b))
         print( "=" * 80 )
         print( "" )
@@ -325,7 +295,7 @@ if __name__ == "__main__":
         memSize = 0.0
         diskSize = 0.0
         for d in orderedData:
-            mtlp = re.match( "(.*)_tlp.$", d.name ) or re.match( "(.*)DataHeader(.*)", d.name )
+            mtlp = re.search( "_tlp.$", d.name ) or "DataHeader" in d.name
             if d.nEntries == poolFile.dataHeader.nEntries or mtlp: continue
             print( "%12.3f kb %12.3f kb       %s" %
                    ( d.memSize, d.diskSize, d.name ) )
@@ -351,10 +321,10 @@ if __name__ == "__main__":
                     # Skip metadata items:
                     if d.nEntries != poolFile.dataHeader.nEntries: continue
                     # Construct the name of the entry:
-                    br = ttree.GetBranch(d.name)
-                    if not br: continue
+                    colTypeName = d.typeName
+                    if not colTypeName: continue
                     nameType = "%s (%s)" % \
-                        ( d.name, br.GetClassName() )
+                        ( d.name, colTypeName )
                     # Write the entry:
                     writer.writerow( [ nameType, d.diskSize / d.nEntries ] )
                     pass

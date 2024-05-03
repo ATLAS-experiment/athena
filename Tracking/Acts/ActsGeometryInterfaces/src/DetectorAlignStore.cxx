@@ -13,8 +13,10 @@ namespace ActsTrk{
     
     using TicketCounterArr = DetectorAlignStore::TrackingAlignStore::TicketCounterArr; 
     using ReturnedTicketArr = DetectorAlignStore::TrackingAlignStore::ReturnedTicketArr;
+    using ReturnedHintArr = DetectorAlignStore::TrackingAlignStore::ReturnedHintArr;
     TicketCounterArr DetectorAlignStore::TrackingAlignStore::s_clientCounter{};
     ReturnedTicketArr DetectorAlignStore::TrackingAlignStore::s_returnedTickets{};
+    ReturnedHintArr DetectorAlignStore::TrackingAlignStore::s_returnedHints{};
 
     DetectorAlignStore::TrackingAlignStore::TrackingAlignStore(const DetectorType type) {
         m_transforms.resize(distributedTickets(type));
@@ -22,10 +24,33 @@ namespace ActsTrk{
     unsigned int DetectorAlignStore::TrackingAlignStore::drawTicket(const DetectorType type) { 
         std::lock_guard guard{s_ticketMutex};
         const unsigned int idx = static_cast<unsigned>(type);
-        if (s_returnedTickets[idx].size()) {
-            unsigned int distTicket = (*s_returnedTickets[idx].begin());
-            s_returnedTickets[idx].erase(s_returnedTickets[idx].begin());
-            return distTicket;
+        std::vector<bool>& returnedPool = s_returnedTickets[idx];
+        int& returnedHint = s_returnedHints[idx];
+        if (returnedPool.size() && returnedHint >= 0) {
+            for (size_t i = returnedHint; i < returnedPool.size(); i++) {
+              if (returnedPool[i]) {
+                returnedPool[i] = false;
+
+                returnedHint = i+1;
+                if (static_cast<size_t>(returnedHint) >= returnedPool.size()) {
+                  returnedHint = 0;
+                }
+                return i;
+              }
+            }
+
+            for (size_t i = 0; i < static_cast<size_t>(returnedHint); i++) {
+              if (returnedPool[i]) {
+                returnedPool[i] = false;
+                returnedHint = i+1;
+                return i;
+              }
+            }
+
+            returnedHint = -1;
+        }
+        else {
+          returnedHint = -1;
         }
         return s_clientCounter[idx]++;
     }            
@@ -35,26 +60,29 @@ namespace ActsTrk{
     void DetectorAlignStore::TrackingAlignStore::giveBackTicket(const DetectorType type, unsigned int ticketNo) {
         std::lock_guard guard{s_ticketMutex};
         const unsigned int idx = static_cast<unsigned int>(type);
-        std::vector<unsigned int>& returnedPool = s_returnedTickets[idx];
+        std::vector<bool>& returnedPool = s_returnedTickets[idx];
+        int& returnedHint = s_returnedHints[idx];
         /// The ticket which was handed out at the very latest is returned. Remove all returned tickets from before
         if (ticketNo == distributedTickets(type) -1) {
-           
-           std::vector<unsigned int>::reverse_iterator itr = returnedPool.rbegin();
-           for ( ; itr != returnedPool.rend(); ++itr) {
-                if ( (*itr) +1 == ticketNo) {
-                    ticketNo = (*itr);
-                } else break;
+
+           if (ticketNo > 0 && ticketNo-1 < returnedPool.size()) {
+             for (; ticketNo > 0 && returnedPool[ticketNo-1]; --ticketNo)
+               ;
+             returnedPool.resize (ticketNo);
            }
-           size_t remove_begin = returnedPool.size() - std::distance(returnedPool.rbegin(), itr);
-           returnedPool.erase(returnedPool.begin() + remove_begin, returnedPool.end());
            /// Remove all trailing ticket numbers
            s_clientCounter[idx] = ticketNo;
+           if (returnedHint >= static_cast<int>(ticketNo)) {
+             returnedHint = 0;
+           }
         } else {
-            std::vector<unsigned int>::iterator insert_itr = returnedPool.begin();
-            for (; insert_itr != returnedPool.end(); ++insert_itr) {
-                if (ticketNo < (*insert_itr)) break;
+            if (returnedPool.size() <= ticketNo) {
+              returnedPool.resize (ticketNo+1);
             }
-            returnedPool.insert(insert_itr, ticketNo);
+            returnedPool[ticketNo] = true;
+            if (returnedHint < 0 || static_cast<int>(ticketNo) < returnedHint) {
+              returnedHint = ticketNo;
+            }
         }
     }
    

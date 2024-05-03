@@ -104,6 +104,15 @@ class MutableMultiTrajectory final
                                         ActsTrk::IndexType iprevious);
 
   /**
+   * @brief Add state components for the given mask
+   *
+   * @param istate - state index
+   * @param mask - bitmask deciding which backends are extended
+   */
+  void addTrackStateComponents_impl(ActsTrk::IndexType istate,
+                                    Acts::TrackStatePropMask mask);
+
+  /**
    * @brief Access component by key
    *
    * @param key

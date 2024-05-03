@@ -152,6 +152,7 @@ JetChainParts = {
        'preselj20emf60',
        'preselj20emf48',
        'preselj20emf24',
+       'preselj20emf18',
        'preselj20emf12',
        'preselj20emf6', 
        'preselj20',
@@ -366,7 +367,7 @@ JetChainParts = {
                   'emergingPTF0p2dR0p4', 'emergingPTF0p1dR0p4', 'emergingPTF0p09dR0p4', 'emergingPTF0p08dR0p4', 'emergingPTF0p075dR0p4', 'emergingPTF0p07dR0p4', 'emergingPTF0p0dR0p4',
                   'tracklessdR1p2',      'tracklessdR0p4',
                   'calratio','calratiormbib','calratiovar','calratiovarrmbib',  # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
-                  'calratiovar103','calratiovar82','calratiovar59' # Exotics CalRatio Jets ( requested by DPJ Team for alternative cut on ratio )
+                  'calratiovar103','calratiovar82','calratiovar59', 'calratiovar186', 'calratiovar150', 'calratiovar165' # Exotics CalRatio Jets ( requested by DPJ Team for alternative cut on ratio )
               ],
 
     # Simple hypo configuration. Single property cuts defined as MINvarMAX
@@ -1091,7 +1092,7 @@ CalibChainParts_Default = {
 #==========================================================
 AllowedMonitorChainIdentifiers = ['robrequest', 'timeburner',
                                   'idmon',
-                                  'l1calooverflow', 'l1topodebug',
+                                  'l1calooverflow', 'l1topoPh1debug',
                                   'mistimemonl1bccorr','mistimemonl1bccorrnomu',
                                   'mistimemoncaltimenomu','mistimemoncaltime',
                                   'mistimemonj400',]

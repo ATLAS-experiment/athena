@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML__STREAMTOSERVERTOOL_H
@@ -11,9 +11,10 @@
 #include "JiveXML/EventStream.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "EventDisplaysOnline/IOnlineEventDisplaysSvc.h"
 
 namespace JiveXML {
-  
+
   /**
    * Stream event to an IServerSvc, which typically is a network server run from
    * and controlled by the Athena application.  A stream name is attached to the
@@ -23,29 +24,29 @@ namespace JiveXML {
    */
   class StreamToServerTool : virtual public IStreamTool, public AthAlgTool{
 
-    public:
-      
-      /// Constructor
-      StreamToServerTool( const std::string&, const std::string&, const IInterface*);
+  public:
 
-      /// Initialize
-      virtual StatusCode initialize();
-      
-      /// Finalize
-      virtual StatusCode finalize();
+    /// Constructor
+    StreamToServerTool( const std::string&, const std::string&, const IInterface*);
 
-      /// Stream one event
-      virtual StatusCode StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* const EventBuffer ) ;
+    /// Initialize
+    virtual StatusCode initialize();
 
-    protected:
+    /// Finalize
+    virtual StatusCode finalize();
 
-      /// Handle to the server that this tools shall stream events to
-      ServiceHandle<IServerSvc> m_ServerSvc;
+    /// Stream one event
+    virtual StatusCode StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* const EventBuffer ) ;
 
-    private:
+  protected:
 
-      /** Stream name under which these events shall appear */
-      std::string m_StreamName;
+    /// Handle to the server that this tools shall stream events to
+    ServiceHandle<IServerSvc> m_ServerSvc;
+    ServiceHandle<IOnlineEventDisplaysSvc> m_onlineEDsvc{this, "OnlineEventDisplaysSvc", "Online Event Displays Service"};
+  private:
+
+    /** Stream name under which these events shall appear */
+    std::string m_StreamName;
 
   };
 

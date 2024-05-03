@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -500,7 +500,9 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                       isp->status(),
                                                       isp->timeStamp(),
                                                       *m_isp,
-                                                      isp->barcode());
+                                                      isp->id(),
+                                                      isp->barcode() // FIXME barcode-based
+                                                      );
       // add presampled process info
       if (isp->getUserInformation() && isp->getUserInformation()->materialLimit()) {
         const ISF::MaterialPathInfo* matLim = isp->getUserInformation()->materialLimit();
@@ -689,7 +691,9 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
                                                     isp->status(),
                                                     isp->timeStamp(),
                                                     *m_isp,
-                                                    isp->barcode());
+                                                    isp->id(),
+                                                    isp->barcode() // FIXME barcode-based
+                                                    );
     // add presampled process info
     if (isp->getUserInformation() && isp->getUserInformation()->materialLimit()) {
       const ISF::MaterialPathInfo* matLim = isp->getUserInformation()->materialLimit();
@@ -1289,7 +1293,9 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
                                                          22,  //!< pdg code
                                                          1 + HepMC::SIM_STATUS_THRESHOLD,   //!< status
                                                          time,  //!< time
-                                                         *parent );
+                                                         *parent,
+                                                         0 // FIXME hard-coded id
+                                                         );
 
     // in the validation mode, add process info
     if (m_validationMode) {
@@ -1417,7 +1423,9 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
                                                          22,  //!< pdg code
                                                          1,   //!< status
                                                          timeLim.time,  //!< time
-                                                         *parent );
+                                                         *parent,
+                                                         0 // FIXME hard-coded id
+                                                         );
 
 
     // in the validation mode, add process info
@@ -1594,7 +1602,9 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
                                         22,
                                         1,
                                         time,
-                                        *parent );
+                                        *parent,
+                                        0 // FIXME hard-coded id
+                                        );
 
     children[1] = new ISF::ISFParticle( position,
                                         (1-fr)*momentum,
@@ -1603,7 +1613,9 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
                                         22,
                                         1,
                                         time,
-                                        *parent );
+                                        *parent,
+                                        0 // FIXME hard-coded id
+                                        );
 
     // in the validation mode, add process info
     if (m_validationMode) {
@@ -1709,7 +1721,9 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
                                         22,
                                         1,
                                         time,
-                                        *parent );
+                                        *parent,
+                                        0 // FIXME hard-coded id
+                                        );
 
     children[1] = new ISF::ISFParticle( position,
                                         (1-fr)*momentum,
@@ -1718,7 +1732,9 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
                                         22,
                                         1,
                                         time,
-                                        *parent );
+                                        *parent,
+                                        0 // FIXME hard-coded id
+                                        );
 
     // in the validation mode, add process info
     if (m_validationMode) {

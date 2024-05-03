@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///
@@ -16,6 +16,7 @@
 
 // Local include(s):
 #include "xAODMetaData/FileMetaData.h"
+#include "AthContainers/ConstAccessor.h"
 
 /// Helper macro for evaluating logical tests
 #define SIMPLE_ASSERT( EXP )                                        \
@@ -142,8 +143,9 @@ int main() {
    // the code complains about them. But still lets the equivalence stand.
    SIMPLE_ASSERT( meta2.setValue( "AnalysisValue", 1.2f ) == true );
    SIMPLE_ASSERT( meta1 == meta2 );
-   meta1.auxdata< int >( "IntValue" ) = 1;
-   meta2.auxdata< int >( "IntValue" ) = 2;
+   SG::Accessor< int >IntValue( "IntValue" );
+   IntValue( meta1 ) = 1;
+   IntValue( meta2 ) = 2;
    SIMPLE_ASSERT( meta1 == meta2 );
 
    // Tell the user that everything went successfully:

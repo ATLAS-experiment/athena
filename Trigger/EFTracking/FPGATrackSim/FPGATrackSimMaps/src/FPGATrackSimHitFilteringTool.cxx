@@ -517,7 +517,7 @@ void printHitsFromHeader(FPGATrackSimLogicalEventInputHeader &header)
         std::vector<FPGATrackSimHit>  hits = tower.hits();
         ANA_MSG_DEBUG("tower " << i << " with " << hits.size() << " hits:");
         for(const auto& hit : hits) {
-          ANA_MSG_DEBUG("  isStrip, side, x, y, z, rho, phi, physLayer, layer, section, phiM, etaM = " << hit.isStrip() << ", " << hit.getPhysLayer()%2 << ", " << hit.getX() << ", " << hit.getY() << ", " << hit.getZ() << ", " << hit.getR() << ", " << hit.getGPhi() << ", " << hit.getPhysLayer() << ", " << hit.getLayer() << ", " << hit.getSection() << ", " << hit.getPhiModule() << ", " << hit.getFPGATrackSimEtaModule());
+          ANA_MSG_DEBUG("  isStrip, side, x, y, z, rho, phi, physLayer, layer, section, phiM, etaM = " << hit.isStrip() << ", " << hit.getPhysLayer()%2 << ", " << hit.getX() << ", " << hit.getY() << ", " << hit.getZ() << ", " << hit.getR() << ", " << hit.getGPhi() << ", " << hit.getPhysLayer() << ", " << hit.getLayer() << ", " << hit.getSection() << ", " << hit.getPhiModule() << ", " << hit.getEtaModule());
         }
     }
 }

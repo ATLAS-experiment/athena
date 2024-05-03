@@ -8,7 +8,7 @@ from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def TRTHitGeneratorSequenceCfg(flags, is_probe_leg = False):
+def TRTHitGeneratorSequenceGenCfg(flags, is_probe_leg = False):
 
     recAcc = ComponentAccumulator()
 

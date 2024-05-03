@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os, re, time, glob, shutil
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
+from AthenaCommon.Logging import logging
 
 # This method reads the files in the given directory, sorts them by run/event number,
 # finds atlantis and vp1 files belonging to the same event and returns a list of events
@@ -10,7 +11,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 # checkpair=True and remove=True, remove the files that do not form an atlanits-vp1 pair
 # checkpair=True and remove=False, generate event list for atlantis-vp1 pairs
 # checkpair=False, generate event list without checking for valid pairs
-def getEventlist(msg, directory, checkpair, remove=True, patternAtlantis='.xml', patternVP1='.pool.root'):
+def getEventlist(directory, checkpair, remove=True, patternAtlantis='.xml', patternVP1='.pool.root'):
+    msg = logging.getLogger( 'EventUtils' )
     msg.verbose('%s begin get event list', time.ctime(time.time()))
     filelist = []
     files = os.listdir(directory)
@@ -61,7 +63,8 @@ def getEventlist(msg, directory, checkpair, remove=True, patternAtlantis='.xml',
     return eventlist
 
 # Prune events in the given directory if the number exceeds the specified number
-def pruneEvents(msg, directory, maxevents, eventlist):
+def pruneEvents(directory, maxevents, eventlist):
+    msg = logging.getLogger( 'EventUtils' )
     msg.verbose('%s begin prune events', time.ctime(time.time()))
     i = 0
     numevents = len(eventlist)
@@ -86,7 +89,8 @@ def pruneEvents(msg, directory, maxevents, eventlist):
     msg.verbose('%s end prune events', time.ctime(time.time()))
 
 # Build the event.list file that is used by atlas-live.cern.ch for synchronizing events
-def writeEventlist(msg, directory, eventlist, listname='event'):
+def writeEventlist(directory, eventlist, listname='event'):
+    msg = logging.getLogger( 'EventUtils' )
     msg.verbose('%s begin write event list', time.ctime(time.time()))
     pid = os.getpid()
     try:
@@ -105,20 +109,32 @@ def writeEventlist(msg, directory, eventlist, listname='event'):
     msg.verbose('%s end write event list', time.ctime(time.time()))
 
 # Perform all of these in one command
-def cleanDirectory(msg, directory, maxevents, checkpair):
+def cleanDirectory(directory, maxevents, checkpair,isBeamSplashMode):
+    msg = logging.getLogger( 'EventUtils' )
+
     msg.verbose('%s begin clean directory', time.ctime(time.time()))
-    eventlist = getEventlist(msg, directory, checkpair)
+    eventlist = getEventlist(directory, checkpair)
     if maxevents>0:
-        pruneEvents(msg, directory, maxevents, eventlist)
-    writeEventlist(msg, directory, eventlist)
+        pruneEvents(directory, maxevents, eventlist)
+    writeEventlist(directory, eventlist)
 
     # disable this for beam splashes. Call zipXMLFile directly in OnlineEventDisplaysSvc.py to transfer every event.
-    if len(eventlist)>0:
-        prepareFilesForTransfer(msg, directory, eventlist, pair=checkpair, timeinterval=60)
+    if len(eventlist)>0 and not isBeamSplashMode:
+        prepareFilesForTransfer(directory, eventlist, pair=checkpair, timeinterval=60)
 
+    if isBeamSplashMode:
+        for filename in os.listdir(directory):
+            if filename.startswith("vp1") and "CEST.pool.root" in filename:
+                orgname = f'{directory}/{filename}'
+                newname = orgname.replace('.pool.root', '.online.pool.root')
+                try:
+                    shutil.copyfile(Path(orgname), Path(newname))
+                except OSError as err:
+                    msg.warning("Could not copy %s to %s: %s", orgname, newname, err)
     msg.verbose('%s end clean directory', time.ctime(time.time()))
 
-def prepareFilesForTransfer(msg, directory, eventlist, pair, timeinterval):
+def prepareFilesForTransfer(directory, eventlist, pair, timeinterval):
+    msg = logging.getLogger( 'EventUtils' )
     """Preparing the list of files for CastorScript to transfer to EOS
 
     CastorScript is configured to look for *.zip and *.online.pool.root files to transfer.
@@ -132,7 +148,7 @@ def prepareFilesForTransfer(msg, directory, eventlist, pair, timeinterval):
     timeinterval: time interval between two events in the transfer list (in seconds).
     """
     msg.verbose('%s begin prepare files for transfer', time.ctime(time.time()))
-    transferlist = getEventlist(msg, directory, checkpair=pair, remove=False, patternAtlantis='.zip', patternVP1='.online.pool.root')
+    transferlist = getEventlist(directory, checkpair=pair, remove=False, patternAtlantis='.zip', patternVP1='.online.pool.root')
     if len(transferlist)>0 and eventlist[-1][0] == transferlist[-1][0] and eventlist[-1][1] == transferlist[-1][1]:
         msg.debug("Last event already in transfer list. No new event to transfer.")
         return
@@ -162,17 +178,18 @@ def prepareFilesForTransfer(msg, directory, eventlist, pair, timeinterval):
 
     # Handle atlantis files
     msg.debug('%s going to zip file %s', time.ctime(time.time()), atlantis)
-    zipXMLFile(msg, directory, atlantis)
+    zipXMLFile(directory, atlantis)
 
     # Handle VP1 files
     if pair:
         msg.debug('%s going to rename ESD file %s', time.ctime(time.time()), vp1)
-        renameESDFile(msg, directory, vp1)
+        renameESDFile(directory, vp1)
 
-    writeEventlist(msg, directory, transferlist, listname='transfer')
+    writeEventlist(directory, transferlist, listname='transfer')
     msg.verbose('%s end prepare files for transfer', time.ctime(time.time()))
 
-def zipXMLFile(msg, directory, filename):
+def zipXMLFile(directory, filename):
+    msg = logging.getLogger( 'EventUtils' )
     """Zip the JiveXML file for the specified event.
 
     Looks for a JiveXML file with the required filename in the given directory,
@@ -201,7 +218,8 @@ def zipXMLFile(msg, directory, filename):
             msg.warning("Could not zip %s: %s", filename, err)
     msg.verbose('%s end of zipXMLFile', time.ctime(time.time()))
 
-def renameESDFile(msg, directory, filename):
+def renameESDFile(directory, filename):
+    msg = logging.getLogger( 'EventUtils' )
     """Rename the ESD for the specified event.
 
     Looks for an ESD file with the required filename in the given directory,

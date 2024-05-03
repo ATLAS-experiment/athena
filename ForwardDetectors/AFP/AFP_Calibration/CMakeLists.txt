@@ -17,8 +17,6 @@ atlas_add_component( AFP_Calibration
                      LINK_LIBRARIES AFP_CalibrationLib )
 
 # Install files from the package:
-atlas_install_joboptions( scripts/*.py )
-
 atlas_add_executable( run_AFP_PixelIdentifier
    scripts/run_AFP_PixelIdentifier.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}

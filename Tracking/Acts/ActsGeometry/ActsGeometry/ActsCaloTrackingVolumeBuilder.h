@@ -17,7 +17,6 @@
 
 // ACTS
 #include "Acts/Geometry/Volume.hpp"
-#include "Acts/Geometry/AbstractVolume.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 
 class CaloDetDescrManager;
@@ -45,16 +44,16 @@ public:
 
 private:
 
-  Acts::AbstractVolume
+  Acts::Volume
   build_endcap(double z, double dz, double eta, double deta, double phi, double dphi) const;
 
-  Acts::AbstractVolume
+  Acts::Volume
   build_barrel(double r, double dr, double eta, double deta, double phi, double dphi) const;
 
-  Acts::AbstractVolume
+  Acts::Volume
   build_box(double x, double dx, double y, double dy, double z, double dz) const;
 
-  std::vector<std::unique_ptr<Acts::AbstractVolume>>
+  std::vector<std::unique_ptr<Acts::Volume>>
   cellFactory() const;
 
   std::shared_ptr<Acts::CutoutCylinderVolumeBounds>

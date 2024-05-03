@@ -93,13 +93,14 @@ def ITkTrackingSiPatternCfg(flags,
         if flags.Tracking.ActiveConfig.doActsToAthenaTrack:
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
+                                               ACTSTracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks",
                                                TracksLocation=SiSPSeededTrackCollectionKey))
 
         # Convert tracks Athena -> Acts (before ambi)
         if flags.Tracking.ActiveConfig.doAthenaToActsTrack:
             from ActsConfig.ActsEventCnvConfig import TrkToActsConvertorAlgCfg
             acc.merge(TrkToActsConvertorAlgCfg(flags,
-                                               TrackContainerLocation="ActsTracks",
+                                               TrackContainerLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks",
                                                TrackCollectionKeys=[SiSPSeededTrackCollectionKey]))
 
             
@@ -155,6 +156,7 @@ def ITkTrackingSiPatternCfg(flags,
         if flags.Tracking.ActiveConfig.doActsToAthenaResolvedTrack:
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
+                                               ACTSTracksLocation=f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks",
                                                TracksLocation=ResolvedTrackCollectionKey))
             runTruth = False
 
@@ -167,10 +169,7 @@ def ITkTrackingSiPatternCfg(flags,
 
     if runActsTrackTruth :
         from ActsConfig.ActsTruthConfig import TrackToTruthAssociationCfg, TrackFindingValidationAlgCfg
-        prefix = "Acts"
-        if 'Validate' not in flags.Tracking.ActiveConfig.extension and 'BenchmarkSpot' not in flags.Tracking.ActiveConfig.extension:
-            prefix = flags.Tracking.ActiveConfig.extension
-        acts_tracks=f"{prefix}Tracks" if not flags.Acts.doAmbiguityResolution else f"{prefix}ResolvedTracks"
+        acts_tracks=f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
         acc.merge(TrackToTruthAssociationCfg(flags,
                                              ACTSTracksLocation=acts_tracks,
                                              AssociationMapOut=acts_tracks+"ToTruthParticleAssociation"))

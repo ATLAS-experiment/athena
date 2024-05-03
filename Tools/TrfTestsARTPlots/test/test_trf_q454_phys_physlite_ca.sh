@@ -6,6 +6,7 @@
 # art-athena-mt: 8
 # art-output: dcube*
 # art-output: hist_physlite_latest.root
+# art-output: generated_csv_files.tar.gz
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
@@ -79,3 +80,13 @@ echo "============ dcube"
 $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p --jobId PHYSLITETest -c ${dcubeXML} -r ${dcubeRef} -x dcube_physlite hist_physlite_latest.root
 rc5=$?
 echo "art-result: ${rc5} dcube_physlite" 
+
+# Run trf_getVariables.py to extract variables from DAOD_PHYSLITE.art.pool.root
+echo "============ trf_getVariables.py"
+export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
+source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
+lsetup "root recommended"
+trf_getVariables.py --inputFile DAOD_PHYSLITE.art.pool.root
+rccsv=$?
+tar czf generated_csv_files.tar.gz generated_csv_files/
+echo "art-result: ${rccsv} trf_getVariables.py"

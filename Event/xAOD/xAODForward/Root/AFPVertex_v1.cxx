@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,7 +37,7 @@ namespace xAOD
   void AFPVertex_v1::addProton( const AFPProtonLink_t& link )
   {
 
-    if (not this->isAvailable< std::vector<AFPVertex_v1::AFPProtonLink_t> >("protons") )
+    if (not protonsAcc.isAvailable( *this ) )
         protonsAcc( *this ) = std::vector<AFPVertex_v1::AFPProtonLink_t>();
     protonsAcc( *this ).push_back( link );
     return;
@@ -45,7 +45,7 @@ namespace xAOD
 
   void AFPVertex_v1::addToFTrack( const AFPToFTrackLink_t& link )
   {
-    if (not this->isAvailable< std::vector<AFPVertex_v1::AFPToFTrackLink_t> >("tofTracks") )
+    if (not tofTracksAcc.isAvailable( *this ) )
         tofTracksAcc( *this ) = std::vector<AFPVertex_v1::AFPToFTrackLink_t>();
     tofTracksAcc( *this ).push_back( link );
     return;

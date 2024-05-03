@@ -1155,8 +1155,8 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
   m_iter3 = 0;
   m_iter4 = 0;
 
-  const double m_met_coscovphi = cos(preparedInput.m_METcovphi);
-  const double m_met_sincovphi = sin(preparedInput.m_METcovphi);
+  const double met_coscovphi = cos(preparedInput.m_METcovphi);
+  const double met_sincovphi = sin(preparedInput.m_METcovphi);
 
   m_iang1low = 0;
   m_iang1high = 0;
@@ -1243,8 +1243,8 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
           met_smearP = METresY_binSize * i5 - N_METsigma * METresY;
           if (pow(met_smearL / METresX, 2) + pow(met_smearP / METresY, 2) > pow(N_METsigma, 2))
             continue; // use ellipse instead of square
-          met_smear_x = met_smearL * m_met_coscovphi - met_smearP * m_met_sincovphi;
-          met_smear_y = met_smearL * m_met_sincovphi + met_smearP * m_met_coscovphi;
+          met_smear_x = met_smearL * met_coscovphi - met_smearP * met_sincovphi;
+          met_smear_y = met_smearL * met_sincovphi + met_smearP * met_coscovphi;
           metvec_tmp.Set(input_metX + met_smear_x, input_metY + met_smear_y);
 
           solution = NuPsolutionLFV(metvec_tmp, tau_tmp, M_nu, nu_vec);

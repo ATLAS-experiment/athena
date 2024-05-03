@@ -99,6 +99,8 @@ private:
     Gaudi::Property<bool> m_applyBLines{this, "applyBLines", false};
     /// Flag toggling whether the alignment store shall be filled with the transforms or not
     Gaudi::Property<bool> m_fillAlignStoreCache{this, "FillAlignCache", false};
+    /// Flag toggling whether the GeoAlignmentStore shall be filled
+    Gaudi::Property<bool> m_fillGeoAlignStore{this, "FillGeoAlignStore", true};
 
 };
 

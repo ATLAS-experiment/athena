@@ -275,11 +275,11 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
     auto MuonPtHi = Monitored::Scalar<float>((sIdentifier+"PtHi").c_str(), 0);
     auto LumiBlockNumberOfMuonTracks = Monitored::Scalar<float>((sIdentifier+"LumiBlockNumberOfMuonTracks").c_str(), 0);
     auto LumiBlockNumberOfSegments = Monitored::Scalar<float>((sIdentifier+"LumiBlockNumberOfSegments").c_str(), 0);
-    auto MuonSector = Monitored::Scalar<float>((sIdentifier+"MuonSector").c_str(), 0);  
-    auto MuonCIndex = Monitored::Scalar<float>((sIdentifier+"MuonCIndex").c_str(), 0);  
-    auto MuonEta1 = Monitored::Scalar<float>((sIdentifier+"MuonEta1All").c_str(), 0);   
-    auto MuonPhi1 = Monitored::Scalar<float>((sIdentifier+"MuonPhi1All").c_str(), 0);   
-    auto MuonLumiBlock = Monitored::Scalar<float>((sIdentifier+"MuonLumiBlock").c_str(), 0);    
+    auto MuonSector = Monitored::Scalar<float>((sIdentifier+"Sector").c_str(), 0);  
+    auto MuonCIndex = Monitored::Scalar<float>((sIdentifier+"CIndex").c_str(), 0);  
+    auto MuonEta1 = Monitored::Scalar<float>((sIdentifier+"Eta1All").c_str(), 0);   
+    auto MuonPhi1 = Monitored::Scalar<float>((sIdentifier+"Phi1All").c_str(), 0);   
+    auto MuonLumiBlock = Monitored::Scalar<float>((sIdentifier+"LumiBlock").c_str(), 0);    
 
     /// Loop over all muons
     for(const auto muon : Muons) {
@@ -420,12 +420,12 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseCombinedTracks(const xAOD::MuonCon
     fill(tool, NMuons, NMuonsTrig, NMuonsTrigCB, NMuonsTrigNonCB, NMuonsNoTrigCB, NMuonsNoTrigNonCB);
 
     /// Fill low level Muon Information for each Muon
-    ATH_CHECK (analyseLowLevelMuonFeatures("AllCB", vecAllCombinedMuons, evt) );
-    ATH_CHECK (analyseLowLevelMuonFeatures("AllNonCB", vecAllNonCombinedMuons, evt) );
-    ATH_CHECK (analyseLowLevelMuonFeatures("CB", vecCombinedMuons, evt) );
-    ATH_CHECK (analyseLowLevelMuonFeatures("NonCB", vecNonCombinedMuons, evt) );
-    ATH_CHECK (analyseLowLevelMuonFeatures("NoTrigCB", vecNoTrigCombinedMuons, evt) );
-    ATH_CHECK (analyseLowLevelMuonFeatures("NoTrigNonCB", vecNoTrigNonCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("AllCBMuon", vecAllCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("AllNonCBMuon", vecAllNonCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("CBMuon", vecCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("NonCBMuon", vecNonCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("NoTrigCBMuon", vecNoTrigCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("NoTrigNonCBMuon", vecNoTrigNonCombinedMuons, evt) );
 
     /// Fill the relevant Muon Information for each Muon
     ATH_CHECK (FillMuonInformation("AllCB", vecAllCombinedMuons, pvtx, evt) );

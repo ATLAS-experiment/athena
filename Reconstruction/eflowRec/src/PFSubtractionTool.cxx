@@ -207,7 +207,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
   //For each eflowCaloObject we calculate the expected energy deposit in the calorimeter and cell ordering for subtraction.  
   for (unsigned int iCalo = nCaloObj; iCalo < data.caloObjects->size(); ++iCalo) {  
     eflowCaloObject* thisEflowCaloObject = data.caloObjects->at(iCalo);
-    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), true, m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr);        
+    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), true, m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr, m_useLegacyEBinIndex);        
   }
 
   if (!m_recoverSplitShowers) return nMatches;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -381,7 +381,7 @@ def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_eEM26M--ena
                     # Read only values between timestamps - pbeast returns one timestamp earlier and one later
                     if entry.ts < lbStart or entry.ts > lbEnd:
                         continue
-                    if type(entry.value) != float: # None type
+                    if type(entry.value) is not float: # None type
                         continue
 
                     physicsDeadtimeArray.append(entry.value)
@@ -395,7 +395,7 @@ def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_eEM26M--ena
             for entry in pileupPbeast:
                 if entry.ts < lbStart or entry.ts > lbEnd:
                     continue
-                if type(entry.value) != float: # None type
+                if type(entry.value) is not float: # None type
                     continue
 
                 pileupArr.append(entry.value)

@@ -1,0 +1,259 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+
+#include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+
+#include "AthenaMonitoringKernel/Monitored.h"
+#include "xAODInDetMeasurement/ContainerAccessor.h"
+
+namespace ActsTrk {
+
+  //------------------------------------------------------------------------
+  template <bool useCache>
+  StripSpacePointFormationAlgBase<useCache>::StripSpacePointFormationAlgBase(const std::string& name,
+							   ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
+    {}
+
+  //-----------------------------------------------------------------------
+  template <bool useCache>
+  StatusCode StripSpacePointFormationAlgBase<useCache>::initialize()
+  {
+    ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
+
+    ATH_CHECK( m_stripClusterContainerKey.initialize() );
+    ATH_CHECK( m_stripSpacePointContainerKey.initialize() );
+    ATH_CHECK( m_stripOverlapSpacePointContainerKey.initialize( m_processOverlapForStrip) );
+    ATH_CHECK( m_stripDetEleCollKey.initialize() );
+    ATH_CHECK( m_stripPropertiesKey.initialize() );
+
+    ATH_CHECK( m_beamSpotKey.initialize() );
+
+    if ( not m_monTool.empty() )
+      ATH_CHECK( m_monTool.retrieve() );
+
+    //caching
+    ATH_CHECK(m_SPCache.initialize(useCache));
+    ATH_CHECK(m_SPCacheBackend.initialize(useCache));
+    ATH_CHECK(m_OSPCache.initialize(useCache));
+    ATH_CHECK(m_OSPCacheBackend.initialize(useCache));
+
+    return StatusCode::SUCCESS;
+  }
+
+  template <bool useCache>
+  StatusCode StripSpacePointFormationAlgBase<useCache>::finalize()
+  {
+    ATH_MSG_INFO("Space Point Formation statistics" << std::endl << makeTable(m_stat,
+									      std::array<std::string, kNStat>{
+										"Clusters",
+										"Space Points",
+										"Overlap Space Points"
+									      }).columnWidth(10));
+    
+    return StatusCode::SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+  template <bool useCache>
+  StatusCode StripSpacePointFormationAlgBase<useCache>::execute (const EventContext& ctx) const
+  {
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto nReceivedSPsStrip = Monitored::Scalar<int>( "numStripSpacePoints" , 0 );
+    auto nReceivedSPsStripOverlap = Monitored::Scalar<int>( "numStripOverlapSpacePoints" , 0 );
+    auto mon = Monitored::Group( m_monTool, timer, nReceivedSPsStrip, nReceivedSPsStripOverlap );
+
+    SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusterContainer( m_stripClusterContainerKey, ctx );
+    if (!inputStripClusterContainer.isValid()){
+        ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
+        return StatusCode::FAILURE;
+    }
+    const xAOD::StripClusterContainer* inputClusters = inputStripClusterContainer.cptr();
+    ATH_MSG_DEBUG("Retrieved " << inputClusters->size() << " clusters from container " << m_stripClusterContainerKey.key());
+    m_stat[kNClusters] += inputClusters->size();
+    
+    auto stripSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_stripSpacePointContainerKey, ctx );
+    ATH_MSG_DEBUG( "--- Strip Space Point Container `" << m_stripSpacePointContainerKey.key() << "` created ..." );
+    ATH_CHECK( stripSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
+						std::make_unique<xAOD::SpacePointAuxContainer>() ));
+    xAOD::SpacePointContainer* spacePoints = stripSpacePointContainer.ptr();
+
+    
+    xAOD::SpacePointContainer* overlapSpacePoints = nullptr;
+    SG::WriteHandle<xAOD::SpacePointContainer> stripOverlapSpacePointContainer;
+    if (m_processOverlapForStrip) {
+      stripOverlapSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_stripOverlapSpacePointContainerKey, ctx );
+      ATH_MSG_DEBUG( "--- Strip Overlap Space Point Container `" << m_stripOverlapSpacePointContainerKey.key() << "` created ..." );
+      ATH_CHECK( stripOverlapSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
+							 std::make_unique<xAOD::SpacePointAuxContainer>() ));
+      overlapSpacePoints = stripOverlapSpacePointContainer.ptr();     
+    }
+
+    Cache_WriteHandle cacheHandle;
+    Cache_WriteHandle overlapCacheHandle;
+    if constexpr(useCache){
+      cacheHandle = Cache_WriteHandle(m_SPCache, ctx);
+      auto updateHandle = Cache_BackendUpdateHandle(m_SPCacheBackend, ctx);
+      ATH_CHECK(updateHandle.isValid());
+      ATH_CHECK(cacheHandle.record(std::make_unique<Cache_IDC>(updateHandle.ptr())));
+      ATH_CHECK(cacheHandle.isValid());
+
+      overlapCacheHandle = Cache_WriteHandle(m_OSPCache, ctx);
+      auto overlapUpdateHandle = Cache_BackendUpdateHandle(m_OSPCacheBackend, ctx);
+      ATH_CHECK(overlapUpdateHandle.isValid());
+      ATH_CHECK(overlapCacheHandle.record(std::make_unique<Cache_IDC>(overlapUpdateHandle.ptr())));
+      ATH_CHECK(overlapUpdateHandle.isValid());
+    }
+
+
+    // Early exit in case we have no clusters
+    // We still are saving an empty space point container in SG
+    if (inputClusters->empty()) {
+      ATH_MSG_DEBUG("No input clusters found, we stop space point formation");
+      return StatusCode::SUCCESS;
+    }
+
+    
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
+    const InDet::BeamSpotData* beamSpot = *beamSpotHandle;
+    auto vertex = beamSpot->beamVtx().position();
+
+
+
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle(m_stripDetEleCollKey, ctx);
+    const InDetDD::SiDetectorElementCollection* stripElements(*stripDetEleHandle);
+    if (not stripDetEleHandle.isValid() or stripElements==nullptr) {
+      ATH_MSG_FATAL(m_stripDetEleCollKey.fullKey() << " is not available.");
+      return StatusCode::FAILURE;
+    }
+
+    SG::ReadCondHandle<InDet::SiElementPropertiesTable> stripProperties(m_stripPropertiesKey, ctx);
+    const InDet::SiElementPropertiesTable* properties = stripProperties.retrieve();
+    if (properties==nullptr) {
+      ATH_MSG_FATAL("Pointer of SiElementPropertiesTable (" << m_stripPropertiesKey.fullKey() << ") could not be retrieved");
+      return StatusCode::FAILURE;
+    }
+
+    ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1> clusterAccessor ( *inputClusters, [](const xAOD::StripCluster& cl) { return cl.identifierHash();}, stripElements->size());
+
+    if constexpr(useCache){
+      for(auto idHash: clusterAccessor.allIdentifiers()){
+        //obtain a write handle
+        auto cache_wh = cacheHandle->getWriteHandle(idHash);
+        auto overlap_cache_wh = overlapCacheHandle->getWriteHandle(idHash);
+        //check if already available
+        if(cache_wh.OnlineAndPresentInAnotherView()) continue;
+
+        unsigned int nsp = 0;
+
+        for(auto rng: clusterAccessor.rangesForIdentifierDirect(idHash)){
+          nsp += (rng.second - rng.first);
+        }
+
+        // Produce space points
+        std::vector<StripSP> sps;
+        std::vector<StripSP> osps;
+        //reserve the total number of clusters in the starting block
+        //at most will get one spacepoint for each
+        sps.reserve(nsp);
+        osps.reserve(nsp);
+
+        ATH_CHECK( m_spacePointMakerTool->produceSpacePoints(ctx,
+                  *inputClusters,
+                  *properties,
+                  *stripElements,
+                  vertex,
+                  sps,
+                  osps,
+                  m_processOverlapForStrip, 
+                  std::vector<IdentifierHash>{idHash}, 
+                  clusterAccessor) );
+
+        unsigned int sp_start_idx = spacePoints->size();
+
+        fillSpacepoints(spacePoints, sps, inputClusters, sp_start_idx);
+
+        //add to cache
+        ATH_CHECK(Cache::Helper<xAOD::SpacePoint>::insert(cache_wh, spacePoints, sp_start_idx, spacePoints->size()));
+
+        if(overlapSpacePoints && m_processOverlapForStrip){
+          unsigned int osp_start_idx = overlapSpacePoints->size();
+          fillSpacepoints(overlapSpacePoints, osps, inputClusters, osp_start_idx);
+
+          //add to cache
+          ATH_CHECK(Cache::Helper<xAOD::SpacePoint>::insert(overlap_cache_wh, overlapSpacePoints, osp_start_idx, overlapSpacePoints->size()));
+        }
+      }
+    }else{
+      // Produce space points without caching
+      std::vector<StripSP> sps;
+      std::vector<StripSP> osps;
+      sps.reserve(inputStripClusterContainer->size() * 0.5);
+      osps.reserve(inputStripClusterContainer->size() * 0.5);
+
+      ATH_CHECK( m_spacePointMakerTool->produceSpacePoints(ctx,
+                *inputClusters,
+                *properties,
+                *stripElements,
+                vertex,
+                sps,
+                osps,
+                m_processOverlapForStrip, 
+                clusterAccessor.allIdentifiers(), 
+                clusterAccessor) );
+
+      // using trick for fast insertion
+      spacePoints->reserve(sps.size());
+
+      fillSpacepoints(spacePoints, sps, inputClusters);
+
+      if(overlapSpacePoints && m_processOverlapForStrip){
+          overlapSpacePoints->reserve(osps.size());
+          fillSpacepoints(overlapSpacePoints, osps, inputClusters);
+      }
+    }
+
+    nReceivedSPsStrip = stripSpacePointContainer->size();    
+    nReceivedSPsStripOverlap = overlapSpacePoints->size();
+
+    m_stat[kNSpacePoints] += nReceivedSPsStrip;
+    m_stat[kNOverlapSpacePoints] += nReceivedSPsStripOverlap;
+    
+    return StatusCode::SUCCESS;
+  }
+
+  template <bool useCache>
+  void StripSpacePointFormationAlgBase<useCache>::fillSpacepoints(xAOD::SpacePointContainer* cont, std::vector<StripSP>& input, const xAOD::StripClusterContainer* inputClusters, unsigned int indexBase) const{
+      std::vector<xAOD::SpacePoint*> sp_collection;
+      sp_collection.reserve(input.size());
+      for (std::size_t i(0); i<input.size(); ++i)
+        sp_collection.push_back(new xAOD::SpacePoint());
+      cont->insert(cont->end(), sp_collection.begin(), sp_collection.end());
+
+      // fill
+      for (std::size_t i(0); i<input.size(); ++i) {
+        auto& toAdd = input.at(i);
+
+        // make link to Clusters
+        std::vector< const xAOD::UncalibratedMeasurement* > els(
+                      {inputClusters->at(toAdd.measurementIndexes[0]),
+                      inputClusters->at(toAdd.measurementIndexes[1])}
+                      );
+        cont->at(indexBase+i)->setSpacePoint(toAdd.idHashes, 
+            toAdd.globPos,
+            toAdd.cov_r,
+            toAdd.cov_z,
+            els,
+            toAdd.topHalfStripLength,
+            toAdd.bottomHalfStripLength,
+            toAdd.topStripDirection,
+            toAdd.bottomStripDirection,
+            toAdd.stripCenterDistance,
+            toAdd.topStripCenter);
+      }
+  }
+
+}

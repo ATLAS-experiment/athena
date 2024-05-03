@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MCTruthBase )
@@ -18,14 +18,16 @@ atlas_add_library( MCTruthBaseLib
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel CxxUtils GaudiKernel StoreGateLib G4AtlasToolsLib TrackRecordLib
                    PRIVATE_LINK_LIBRARIES AthenaBaseComps
                    G4AtlasInterfaces MCTruth SimHelpers ISF_InterfacesLib
-                   AtlasDetDescr ISF_Geant4Event
+                   AtlasDetDescr ISF_Geant4Event TruthUtils
                  )
+set_target_properties( MCTruthBaseLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library(MCTruthBase
                   src/components/*.cxx
                   OBJECT
                   NO_PUBLIC_HEADERS
                   PRIVATE_LINK_LIBRARIES MCTruthBaseLib)
+set_target_properties( MCTruthBase PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

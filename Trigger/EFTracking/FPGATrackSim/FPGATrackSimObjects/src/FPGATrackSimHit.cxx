@@ -84,24 +84,62 @@ unsigned FPGATrackSimHit::getSection() const
     throw std::domain_error("FPGATrackSimHit::getSection() called on a hit with invalid type");
 }
 
+void FPGATrackSimHit::makeSpacepoint(float x, float y, float z, float window, FPGATrackSimHit& other, FPGATrackSimMultiTruth& new_truth) {
+  // Update coordinates. This keeps a copy of the old ones.
+  setX(x);
+  setY(y);
+  setZ(z);
 
-unsigned FPGATrackSimHit::getFPGATrackSimIdentifierHash() const
-{
-    return m_identifierHash;
+  // Store the phi window.
+  m_phiWindow = window;
+
+  // Update the truth, so we can do truth matching.
+  setTruth(new_truth);
+
+  // Store the local coordinates of the inner hit.
+  // Having to do it this way is awkward and reinforces the need for a subclass.
+  if ((getPhysLayer() % 2) == 0) {
+    m_pairedEtaModule = getEtaModule();
+    m_pairedPhiModule = getPhiModule();
+    m_pairedSection = getSection();
+    m_pairedLayer = getLayer();
+  } else {
+    m_pairedEtaModule = other.getEtaModule();
+    m_pairedPhiModule = other.getPhiModule();
+    m_pairedSection = other.getSection();
+    m_pairedLayer = other.getLayer();
+  }
+
+  // Update the type.
+  setHitType(HitType::spacepoint);
 }
 
-int FPGATrackSimHit::getFPGATrackSimEtaModule() const
-{
-    return m_etaModule;
-}
+const FPGATrackSimHit FPGATrackSimHit::getOriginalHit() const {
+  // Only works for spacepoints. TODO: subclass...
+  FPGATrackSimHit original = *(this);
+  if (getHitType() != HitType::spacepoint) {
+    return *this;
+  }
 
+  // Restore the x/y/z coordinates. That should be all we have to do!
+  original.setX(m_originalX);
+  original.setY(m_originalY);
+  original.setZ(m_originalZ);
+
+  // Change the type... is "clustered" the right type?
+  original.setHitType(HitType::clustered);
+
+  // Technically, we could also restore the original truth.
+
+  return original;
+}
 
 std::ostream& operator<<(std::ostream& out, const FPGATrackSimHit& hit)
 {
     out << "type=" << hit.m_hitType
         << " tech=" << hit.m_detType
         << " zone=" << hit.m_detectorZone
-        << " etamod=" << hit.getFPGATrackSimEtaModule()
+        << " etamod=" << hit.getEtaModule()
         << " phimod=" << hit.getPhiModule()
         << " physLayer=" << hit.getPhysLayer()
         << " eta=" << hit.getEtaCoord()

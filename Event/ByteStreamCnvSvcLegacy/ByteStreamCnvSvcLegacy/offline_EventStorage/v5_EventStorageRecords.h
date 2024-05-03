@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -178,7 +178,7 @@ namespace offline_EventStorage_v5 {
   };
 
   std::string string_record(void *ri, const void *pi);
-  std::string string_record(file_name_strings nst);
+  std::string string_record(const file_name_strings& nst);
   void reset_record(void *ri, const void *pi);
 
 } // for namespace

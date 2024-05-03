@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ###############################################################
 ## @file   TrigPSCPythonDbSetup.py
@@ -42,4 +42,4 @@ if not flags.Trigger.Online.useOnlineTHistSvc:
    from TriggerJobOpts.TriggerHistSvcConfig import setTHistSvcOutput
    output = []
    setTHistSvcOutput(output)
-   setattr(iProperty("THistSvc"), "Output", output)
+   iProperty("THistSvc").Output = output

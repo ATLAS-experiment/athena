@@ -25,7 +25,7 @@ namespace SG {
 template <class T, class ALLOC>
 inline
 Decorator<T, ALLOC>::Decorator (const std::string& name)
-  : Decorator (name, "", SG::AuxTypeRegistry::Flags::None)
+  : Decorator (name, "", SG::AuxVarFlags::None)
 {
 }
 
@@ -41,7 +41,21 @@ template <class T, class ALLOC>
 inline
 Decorator<T, ALLOC>::Decorator (const std::string& name,
                                 const std::string& clsname)
-  : Decorator (name, clsname, SG::AuxTypeRegistry::Flags::None)
+  : Decorator (name, clsname, SG::AuxVarFlags::None)
+{
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class T, class ALLOC>
+inline
+Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid)
+  : Decorator (auxid, SG::AuxVarFlags::None)
 {
 }
 
@@ -59,9 +73,26 @@ inline
 Decorator<T, ALLOC>::Decorator
   (const std::string& name,
    const std::string& clsname,
-   const SG::AuxTypeRegistry::Flags flags)
+   const SG::AuxVarFlags flags)
   : m_auxid (SG::AuxTypeRegistry::instance().getAuxID<T, ALLOC> (name, clsname, flags))
 {
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class T, class ALLOC>
+inline
+Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid,
+                                const SG::AuxVarFlags flags)
+  : m_auxid (auxid)
+{
+  SG::AuxTypeRegistry::instance().checkAuxID<T, ALLOC> (auxid, flags);
 }
 
 

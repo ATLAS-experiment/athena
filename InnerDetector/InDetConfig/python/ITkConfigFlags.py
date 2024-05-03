@@ -22,7 +22,7 @@ def createITkConfigFlags():
     itkcf.addFlag("ITk.Geometry.BCMPrimeLocal",
                   lambda prevFlags: prevFlags.ITk.Geometry.AllLocal)
     itkcf.addFlag("ITk.Geometry.BCMPrimeFilename",
-                  "ITKLayouts/Pixel/BCMPrime.gmx")
+                  "ITKLayouts/BCM/BCMPrime.gmx")
     itkcf.addFlag("ITk.Geometry.BCMPrimeClobOutputName", "")
     itkcf.addFlag("ITk.Geometry.PLRLocal",
                   lambda prevFlags: prevFlags.ITk.Geometry.AllLocal)

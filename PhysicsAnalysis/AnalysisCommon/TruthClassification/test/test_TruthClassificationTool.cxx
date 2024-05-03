@@ -72,7 +72,6 @@ int main(int argc, char* argv[])
     {10, "LightFlavorDecay"},
     {11, "ChargeFlipMuon"}, 
     {12, "NonMuonlike"},
-    {40, "PromptMuonLike"},
     {70, "TauDecayLike"},
     {80, "BHadronDecayLike"},
     {90, "CHadronDecayLike"},

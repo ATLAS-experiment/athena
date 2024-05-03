@@ -37,6 +37,11 @@ def DESDM_ALLCELLSCfg(configFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 
     items = ['xAOD::EventInfo#*', 'xAOD::EventAuxInfo#*',
+             # trigger content
+             'xAOD::TrigDecision#xTrigDecision', 'xAOD::TrigDecisionAuxInfo#xTrigDecisionAux.',
+             'xAOD::TrigCompositeContainer#HLTNav_Summary_AODSlimmed', 'xAOD::TrigCompositeAuxContainer#HLTNav_Summary_AODSlimmedAux.',
+             'xAOD::TrigConfKeys#TrigConfKeys', 
+             'xAOD::BunchConfKey#BunchConfKey',
              # Standard CP objects
              'xAOD::ElectronContainer#Electrons','xAOD::ElectronAuxContainer#ElectronsAux.',
              'xAOD::PhotonContainer#Photons','xAOD::PhotonAuxContainer#PhotonsAux.',

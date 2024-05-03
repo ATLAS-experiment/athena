@@ -4,7 +4,13 @@
 #ifndef MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
 
+namespace ActsTrk{
+    template <>  inline Amg::Transform3D 
+        TransformCacheDetEle<MuonGMR4::MmReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
+            return m_parent->toStation(store) * m_parent->fromGapToChamOrigin(hash());
+        }
 
+}
 namespace MuonGMR4 {
 
 inline double MmReadoutElement::thickness() const { return 2.* m_pars.halfThickness; }

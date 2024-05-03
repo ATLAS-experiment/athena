@@ -14,6 +14,8 @@ Py:IOVDbSvc.CondDB    INFO Setting up conditions DB access to instance OFLP200
 Py:ConfiguredFactory    INFO imported 96 confDb modules in 0.03 seconds
 SetGeometryVersion.py obtained major release version 21
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
+Py:MetaReader     WARNING Found multiple values for AtlasRelease: ['AtlasProduction-20.7.2.2', 'AtlasProduction-17.0.6.4']. Looking for possible duplicates.
+Py:MetaReader     WARNING Multiple values for AtlasRelease may mean the same, or the input file was produced in multi-step job. Ignoring all but the first entry: AtlasRelease = AtlasProduction-20.7.2.2
 # setting LC_ALL to "C"
 ApplicationMgr       INFO Updating Gaudi::PluginService::SetDebug(level) to level= 'PluginDebugLevel':0
 ApplicationMgr       INFO Updating Gaudi::PluginService::SetDebug(level) to level= 'PluginDebugLevel':0

@@ -14,6 +14,8 @@ def FPGATrackSimMapMakerCfg(flags):
         nSlices=flags.nSlices,
         region=flags.region,
         trim=flags.trim,
+        globalTrim=flags.globalTrim,
+        doSpacePoints=flags.doSpacePoints,
         InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))        
         )
 
@@ -29,7 +31,9 @@ if __name__ == "__main__":
     flags.addFlag("KeyString", "strip,barrel,0")
     flags.addFlag("nSlices", 10)
     flags.addFlag("trim", 0.1)
+    flags.addFlag("globalTrim", 0)
     flags.addFlag("region", 0)
+    flags.addFlag("doSpacePoints", True)
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
 

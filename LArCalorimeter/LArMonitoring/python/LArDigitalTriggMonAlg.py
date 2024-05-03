@@ -442,6 +442,16 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                          ybins=partybins,
                                          pattern=[(part)])
 
+
+            partGroup_sc.defineHistogram('SC_part_time;OfflineLATOMEtime_'+thisSel, 
+                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+';#tau [ns]; Evts;',
+                                         type='TH1F',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath,
+                                         xbins=100,xmin=-25,xmax=25,
+                                         pattern=[(part)])
+
+            
             if not flags.Common.isOnline: continue   # Skip the remaining histos if we are running offline
             #### HERE - plots which should only be booked for the nominal selection
             if thisSel !=  "passSCNom": continue
@@ -481,13 +491,6 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                          xbins=200,xmin=-10,xmax=10,
                                          pattern=[(part)])
 
-            partGroup_sc.defineHistogram('SC_part_time;OfflineLATOMEtime_'+thisSel, 
-                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+';#tau [ns]; Evts;',
-                                         type='TH1F',
-                                         cutmask='SC_part_'+thisSel,
-                                         path=thisTopPath,
-                                         xbins=100,xmin=-25,xmax=25,
-                                         pattern=[(part)])
                         
             partGroup_sc.defineHistogram('SC_part_et_onl;SC_ET_Onl_'+thisSel, 
                                          title='SC eT [GeV] '+selStrPart[thisSel],
@@ -553,8 +556,6 @@ if __name__=='__main__':
    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
    cfg.merge(LArBadChannelCfg(flags, isSC=True))
 
-
-   #from AthenaCommon.AppMgr import (ServiceMgr as svcMgr,ToolSvc)
    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
    SCData_acc =  LArRawSCDataReadingCfg(flags)
    SCData_acc.OutputLevel=WARNING

@@ -95,6 +95,15 @@ namespace LVL1 {
     return {TT_EtEM, TT_EtHad};
   }
 
+  bool LVL1::jFEXForwardElecAlgo::getEMSat(unsigned int ttID ) {
+    if(ttID == 0) {
+        return false;
+    } 
+    
+    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(ttID);
+    return tmpTower->getEMSat();
+  }
+
   void LVL1::jFEXForwardElecAlgo::setFPGAEnergy(
     std::unordered_map<int,std::vector<int> > etmapEM,
     std::unordered_map<int,std::vector<int> > etmapHAD) {
@@ -129,7 +138,7 @@ namespace LVL1 {
       }
       for (const auto& gtt : it_seed_map->second ){
         auto [tmp_EtEM,tmp_EtHad] = getEtEmHad(gtt);
-        if( tmp_EtEM>=centreTT_EtEM) {
+        if( tmp_EtEM>centreTT_EtEM) {
           return false;
         }
       }
@@ -217,6 +226,7 @@ namespace LVL1 {
       if (candTT_EtEM > elCluster.getNextTTEtEM()) {
         elCluster.setNextTTEtEM(candTT_EtEM);
         elCluster.setNextTTID(candID);
+        elCluster.setNextTTSatEM(getEMSat(candID));
       }
     }
     
@@ -278,7 +288,8 @@ namespace LVL1 {
           const auto [centreTT_EtEM, centreTT_EtHad] = getEtEmHad(ttID);
           elCluster.setCoreTTfPhi(centreTT_phi);
           elCluster.setCoreTTfEta(centreTT_eta);
-          elCluster.setCoreTTEtEM(centreTT_EtEM);                  
+          elCluster.setCoreTTEtEM(centreTT_EtEM);  
+          elCluster.setCoreTTSatEM(getEMSat(ttID));                
           elCluster.setNextTTEtEM(0);
           elCluster.setNextTTID(0);
           elCluster.setTTEtEMiso(0);

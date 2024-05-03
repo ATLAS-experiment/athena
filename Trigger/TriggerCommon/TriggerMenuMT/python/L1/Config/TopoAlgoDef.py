@@ -533,15 +533,15 @@ class TopoAlgoDef:
             
         # (ATR-8194) L1Topo HT Trigger
         algoList = [
-            {"minHT": 150, "otype" : "jJ", "ocut" : 50, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 32}, #HT150-jJ50s5pETA32
-            {"minHT": 190, "otype" : "jJ", "ocut" : 40, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 21}, #HT190-jJ40s5pETA21
+            {"itemNameMinHT": 150, "minHT": 240, "otype" : "jJ", "ocut" : 50, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 32}, #HT150-jJ50s5pETA32
+            {"itemNameMinHT": 190, "minHT": 300, "otype" : "jJ", "ocut" : 40, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 21}, #HT190-jJ40s5pETA21
         ]
         for x in algoList:
             class d:
                 pass
             for k in x:
                 setattr (d, k, x[k])
-            toponame = "HT%d-%s%s%s%spETA%s" % (d.minHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))
+            toponame = "HT%d-%s%s%s%spETA%s" % (d.itemNameMinHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))
             log.debug("Define %s", toponame)
             inputList = d.otype + d.olist
             alg = AlgConf.JetHT( name = toponame, inputs = inputList, outputs = [toponame] )
@@ -1216,22 +1216,22 @@ class TopoAlgoDef:
 
         # (ATR-12748) fat jet trigger with Simple Cone algo
         algoList = [
-            {"minHT": 111, "otype" : "CjJ", "ocut" : 40, "olist" : "ab", "nleading" : HW.jJetOutputWidthSelect, "inputwidth": HW.jJetOutputWidthSelect, "oeta" : 26}, #SC111-CjJ40abpETA26
+            {"itemNameMinHT": 111, "minHT": 166, "otype" : "CjJ", "ocut" : 40, "olist" : "ab", "nleading" : HW.jJetOutputWidthSelect, "inputwidth": HW.jJetOutputWidthSelect, "oeta" : 26}, #SC111-CjJ40abpETA26
         ]
         for x in algoList:
             class d:
                 pass
             for k in x:
                 setattr (d, k, x[k])
-            toponame = "SC%d-%s%s%s%spETA%s" % (d.minHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))
+            toponame = "SC%d-%s%s%s%spETA%s" % (d.itemNameMinHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))
             log.debug("Define %s", toponame)
             inputList = d.otype + d.olist
             alg = AlgConf.SimpleCone( name = toponame, inputs = inputList, outputs = [toponame] )
             alg.addgeneric('InputWidth', d.inputwidth)
             alg.addgeneric('NumResultBits', 1)
-            alg.addvariable('MinET',     get_threshold_cut(d.otype, d.ocut)*_et_conversion)
+            alg.addvariable('MinET', d.ocut*_et_conversion)
             alg.addvariable('MinSumET', d.minHT*_et_conversion)
-            alg.addvariable('MaxRSqr',    10*10*_dr_conversion*_dr_conversion)                        
+            alg.addvariable('MaxRSqr', 10*10*_dr_conversion*_dr_conversion)                        
             tm.registerTopoAlgo(alg)  
  
         #  0INVM9-eEM9ab-eEMab 
@@ -1534,7 +1534,7 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
         #LLPDPHI - ATR-28563
-        toponame = "0DPHI15-jXE27delay-jJ27s"
+        toponame = "0DPHI10-jXE40delay-jJ40s"
         alg = AlgConf.DeltaPhiIncl2( name = toponame, inputs = ['jXEs', 'jJs'], outputs = [ toponame ])
         alg.addgeneric('NumResultBits', 1)            
         alg.addgeneric('Delay1', 1)
@@ -1543,10 +1543,10 @@ class TopoAlgoDef:
         alg.addgeneric('InputWidth2', HW.jJetOutputWidthSort)
         alg.addgeneric('MaxTob1', 1)
         alg.addgeneric('MaxTob2', 6)
-        alg.addvariable('MinET1', 27*_et_conversion)
-        alg.addvariable('MinET2', 27*_et_conversion)
+        alg.addvariable('MinET1', 40*_et_conversion)
+        alg.addvariable('MinET2', 40*_et_conversion)
         alg.addvariable('MinDeltaPhi', 0*_phi_conversion)
-        alg.addvariable('MaxDeltaPhi', 15*_phi_conversion)
+        alg.addvariable('MaxDeltaPhi', 10*_phi_conversion)
         tm.registerTopoAlgo(alg)
 
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
@@ -1583,9 +1583,10 @@ class TopoAlgoDef:
             alg.addvariable('DisambDRSqrMax', d.drcutmax*d.drcutmax*_dr_conversion*_dr_conversion, 0)
             alg.addvariable('DisambDRSqr', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
             tm.registerTopoAlgo(alg)
+
         # jINVM + DPHI
         NFFDphimap = [
-            { "minInvm": 400 , "minDphi": 0, "maxDphiList": [26, 24, 22, 20],
+            { "itemNameMinInvm": 400, "minInvm": 640 , "minDphi": 0, "maxDphiList": [26, 24, 22, 20],
                          "otype1" : "AjJ", "ocut1" : 60, "olist1" : "s", "nleading1" : 6, "inputwidth": HW.jJetOutputWidthSort,
                          "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
         ]
@@ -1597,7 +1598,7 @@ class TopoAlgoDef:
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
             toponames=[]
             for maxDphi in d.maxDphiList:
-                toponames.append ("%iINVM-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm, d.minDphi, maxDphi,
+                toponames.append ("%iINVM-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.itemNameMinInvm, d.minDphi, maxDphi,
                                                                  d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
                                                                  d.otype2, str(d.ocut2) , d.olist2, str(d.nleading2) if d.olist2=="s" else ""))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'jINVM_DPHI', inputs = inputList, outputs = toponames)
@@ -1618,7 +1619,7 @@ class TopoAlgoDef:
 
         # jINVM_NFF + DPHI
         NFFDphimap = [
-            { "minInvm": 400 , "minDphi": 0, "maxDphiList": [26, 24, 22, 20],
+            { "itemNameMinInvm": 400, "minInvm": 640 , "minDphi": 0, "maxDphiList": [26, 24, 22, 20],
                          "otype1" : "jJ", "ocut1" : 60, "olist1" : "s", "nleading1" : 6, "inputwidth": HW.jJetOutputWidthSort,
                          "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
         ]
@@ -1630,7 +1631,7 @@ class TopoAlgoDef:
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
             toponames=[]
             for maxDphi in d.maxDphiList:
-                toponames.append ("%iINVM-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm, d.minDphi, maxDphi,
+                toponames.append ("%iINVM-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.itemNameMinInvm, d.minDphi, maxDphi,
                                                                  d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
                                                                  d.otype2, str(d.ocut2) , d.olist2, str(d.nleading2) if d.olist2=="s" else ""))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = 'jINVM_DPHI_NFF', inputs = inputList, outputs = toponames)
@@ -1651,7 +1652,7 @@ class TopoAlgoDef:
 
         # CF
         algoList = [
-            {  "minInvm": 400, "otype1" : "AjJ", "ocut1": 60, "olist1" : "s", "nleading1" : 6, "inputwidth1": HW.jJetOutputWidthSort,
+            {  "itemNameMinInvm": 400, "minInvm": 640, "otype1" : "AjJ", "ocut1": 60, "olist1" : "s", "nleading1" : 6, "inputwidth1": HW.jJetOutputWidthSort,
                "otype2" : "AjJ", "ocut2": 50, "olist2" : "s", "nleading2" : 6, "inputwidth2": HW.jJetOutputWidthSort, "applyEtaCut":1,
                "minEta1": 0 ,"maxEta1": 32 , "minEta2": 30 ,"maxEta2": 49 , }, #400INVM-AjJ60s6pETA32-AjJ50s6p30ETA49
         ]
@@ -1663,7 +1664,7 @@ class TopoAlgoDef:
             obj1 = "%s%s%sp%sETA%i"  % (d.otype1, str(d.ocut1), d.olist1 + (str(d.nleading1) if d.olist1.find('s')>=0 else ""),str(d.minEta1) if d.minEta1>0 else "", d.maxEta1)
             obj2 = "-%s%s%sp%sETA%i"  % (d.otype2, str(d.ocut2), d.olist2 + (str(d.nleading2) if d.olist2.find('s')>=0 else ""),str(d.minEta2) if d.minEta2>0 else "", d.maxEta2)
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2]
-            toponame = "%iINVM-%s%s"   % (d.minInvm, obj1, obj2)
+            toponame = "%iINVM-%s%s"   % (d.itemNameMinInvm, obj1, obj2)
             alg = AlgConf.InvariantMassInclusive2( name = toponame, inputs = inputList, outputs = toponame)
             alg.addgeneric('InputWidth1', d.inputwidth1)
             alg.addgeneric('InputWidth2', d.inputwidth2)
@@ -1685,7 +1686,7 @@ class TopoAlgoDef:
 
         # jINVM
         NFFmap = [
-            { "minInvmList": [300,400,500,700] ,
+            { "itemNameMinInvmList": [300, 400, 500, 700], "minInvmList": [480, 640, 800, 1100] ,
                          "otype1" : "AjJ", "ocut1" : 60, "olist1" : "s", "nleading1" : 6, "inputwidth": HW.jJetOutputWidthSort,
                          "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
         ]
@@ -1696,7 +1697,7 @@ class TopoAlgoDef:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
             toponames=[]
-            for minInvm in d.minInvmList:
+            for minInvm in d.itemNameMinInvmList:
                 toponames.append ("%iINVM-%s%s%s%s-%s%s%s%s"  % (minInvm,
                                                                  d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
                                                                  d.otype2, str(d.ocut2) , d.olist2, str(d.nleading2) if d.olist2=="s" else ""))
@@ -1715,7 +1716,7 @@ class TopoAlgoDef:
 
         # jINVM_NFF
         NFFmap = [
-            { "minInvmList": [300,400,500,700] ,
+            { "itemNameMinInvmList": [300, 400, 500, 700], "minInvmList": [480, 640, 800, 1100] ,
                          "otype1" : "jJ", "ocut1" : 60, "olist1" : "s", "nleading1" : 6, "inputwidth": HW.jJetOutputWidthSort,
                          "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
         ]
@@ -1726,7 +1727,7 @@ class TopoAlgoDef:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
             toponames=[]
-            for minInvm in d.minInvmList:
+            for minInvm in d.itemNameMinInvmList:
                 toponames.append ("%iINVM-%s%s%s%s-%s%s%s%s"  % (minInvm, 
                                                                  d.otype1, str(d.ocut1) , d.olist1, str(d.nleading1) if d.olist1=="s" else "",
                                                                  d.otype2, str(d.ocut2) , d.olist2, str(d.nleading2) if d.olist2=="s" else ""))

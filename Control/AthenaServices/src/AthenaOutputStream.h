@@ -154,6 +154,10 @@ protected:
    // ------- Event Ranges handling in MT -------
    /// map of filenames assigned to active slots
    std::map< unsigned, std::string >  m_slotRangeMap;
+
+   /// map of RangeIDs (as used by the Sequencer) for each Range filename generated
+   std::map< std::string, std::string > m_rangeIDforRangeFN;
+
    /// map of streamerTools handling event ranges in MT
    std::map< std::string, std::unique_ptr<IAthenaOutputStreamTool> > m_streamerMap;
    /// mutex for this Stream write() and handle() methods
@@ -235,6 +239,9 @@ private:
    std::set<std::string> buildCompressionSet (const ToolHandle<SG::IFolder>& handle,
                                               const CLID& item_id,
                                               const std::string& item_key) const;
+
+   // close an EventService substream that was writing to 'rangeFN' output
+   void finalizeRange( const std::string rangeFN );
 
   /// Helper function to load dictionaries (both transient and persistent)
   /// for a given type.

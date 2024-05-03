@@ -13,9 +13,6 @@ CompulsoryContent = [
 CompulsoryTriggerNavigation = [
 'xAOD::TrigNavigation#*',
 'xAOD::TrigNavigationAuxInfo#*',
-# Run 3 navigation:
-'xAOD::TrigCompositeContainer#HLTNav*',
-'xAOD::TrigCompositeAuxContainer#HLTNav*'
 ]
 
 # This accounts for AOD content that must be kept but which is partially expressed

@@ -4,17 +4,6 @@ import AnaAlgorithm.DualUseConfig as DualUseConfig
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
 import re
 
-
-def mapUserName (name, *, noSysSuffix) :
-    """map an internal name to a name for systematics data handles
-
-    Right now this just means appending a _%SYS% to the name."""
-    if not noSysSuffix :
-        return name + "_%SYS%"
-    else :
-        return name
-
-
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
     Data = 'data'
@@ -79,9 +68,18 @@ class ContainerConfig :
                 raise Exception ("should not get here, reading container name before created: " + self.name)
             return self.sourceName
         if self.maxIndex and self.index == self.maxIndex :
-            return mapUserName(self.name, noSysSuffix = self.noSysSuffix)
-        return mapUserName(self.name + "_STEP" + str(self.index), noSysSuffix = self.noSysSuffix)
+            return self.systematicsName(self.name, noSysSuffix=self.noSysSuffix)
+        return self.systematicsName(f"{self.name}_STEP{self.index}", noSysSuffix=self.noSysSuffix)
 
+    @staticmethod
+    def systematicsName (name, *, noSysSuffix) :
+        """map an internal name to a name for systematics data handles
+
+        Right now this just means appending a _%SYS% to the name."""
+        if not noSysSuffix :
+            return name + "_%SYS%"
+        else :
+            return name
 
     def nextPass (self) :
         self.maxIndex = self.index

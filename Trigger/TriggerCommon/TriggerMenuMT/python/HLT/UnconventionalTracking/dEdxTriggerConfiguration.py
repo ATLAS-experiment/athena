@@ -6,7 +6,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def dEdxTriggerHypoSequence(flags):
+def dEdxTriggerHypoSequenceGenCfg(flags):
         from TrigLongLivedParticlesHypo.TrigdEdxTrackHypoConfig import TrigdEdxTrackHypoToolFromDict
         from TrigLongLivedParticlesHypo.TrigdEdxTrackHypoConfig import TrigdEdxTrackHypoAlgCfg
 

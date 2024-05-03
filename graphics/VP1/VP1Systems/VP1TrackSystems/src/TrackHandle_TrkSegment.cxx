@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -77,9 +77,12 @@ void TrackHandle_TrkSegment::ensureTouchedMuonChambersInitialised() const
   std::vector < const Trk::MeasurementBase * >::const_iterator tsos_iter, tsos_end(m_segment->containedMeasurements().end());
   for (tsos_iter = m_segment->containedMeasurements().begin(); tsos_iter != tsos_end; ++tsos_iter) {
     meas = *tsos_iter;
-    muonDetEl = meas ? dynamic_cast<const MuonGM::MuonReadoutElement*>(meas->associatedSurface().associatedDetectorElement() ) : nullptr;
-    if (muonDetEl)
-      registerTouchedMuonChamber(muonDetEl->parentStationPV());
+    const Trk::RIO_OnTrack* rio = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
+    if (rio) {
+      muonDetEl = getMuonReadoutElement(*rio);
+      if (muonDetEl)
+        registerTouchedMuonChamber(muonDetEl->parentStationPV());
+    }
   }
 }
 

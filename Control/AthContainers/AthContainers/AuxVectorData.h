@@ -466,7 +466,7 @@ public:
    * Errors are signaled by raising an exception.
    *
    * Warning: no type checking is done.  You should usually access
-   * the data via @c AuxElement::Accessor or @c AuxElement::ConstAccessor.
+   * the data via @c Accessor or @c ConstAccessor.
    */
   template <class T>
   typename AuxDataTraits<T>::reference_type
@@ -482,7 +482,7 @@ public:
    * Errors are signaled by raising an exception.
    *
    * Warning: no type checking is done.  You should usually access
-   * the data via @c AuxElement::Accessor or @c AuxElement::ConstAccessor.
+   * the data via @c Accessor or @c ConstAccessor.
    */
   template <class T>
   typename AuxDataTraits<T>::const_reference_type
@@ -500,7 +500,7 @@ public:
    * Errors are signaled by raising an exception.
    *
    * Warning: no type checking is done.  You should usually access
-   * the data via @c AuxElement::Decorator.
+   * the data via @c Decorator.
    *
    * The difference between @c getDecoration and @c getData is that
    * @c getDecoration takes a const container as input, but returns

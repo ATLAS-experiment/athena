@@ -43,10 +43,11 @@ StatusCode IDTPM::TrackTruthMatchingTool::initialize()
 ///---------------------------
 StatusCode IDTPM::TrackTruthMatchingTool::match(
     TrackAnalysisCollections& trkAnaColls,
-    const std::string& chainRoIName ) const
+    const std::string& chainRoIName,
+    const std::string& roiStr ) const
 {
   /// Inserting new chainRoIName
-  bool doMatch = trkAnaColls.updateChainRois( chainRoIName );
+  bool doMatch = trkAnaColls.updateChainRois( chainRoIName, roiStr );
 
   /// checking if matching for chainRoIName has already been processed
   if( not doMatch ) {
@@ -57,8 +58,8 @@ StatusCode IDTPM::TrackTruthMatchingTool::match(
 
   /// New test-reference matching
   ATH_CHECK( match(
-      trkAnaColls.testTrackVec( IDTPM::TrackAnalysisCollections::InRoI ),
-      trkAnaColls.refTruthVec( IDTPM::TrackAnalysisCollections::InRoI ),
+      trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
+      trkAnaColls.refTruthVec( TrackAnalysisCollections::InRoI ),
       trkAnaColls.matches() ) );
 
   ATH_MSG_DEBUG( trkAnaColls.printMatchInfo() );

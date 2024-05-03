@@ -33,7 +33,7 @@ def TEST2KernelCfg(flags, name='TEST2Kernel', **kwargs):
     acc.getSequence("TEST2Sequence").ProcessDynamicDataDependencies = True
     skimmingTool = acc.getPrimaryAndMerge(TEST2SkimmingToolCfg(flags))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = [skimmingTool]), sequenceName="TEST2Sequence")       
+    acc.addEventAlgo(DerivationKernel(name, SkimmingTools = [skimmingTool]), sequenceName="TEST2Sequence")
     return acc
 
 

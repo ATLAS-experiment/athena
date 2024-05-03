@@ -172,13 +172,14 @@ private:
     /// Properties to fine-tune the tool behaviour
     BooleanProperty m_useTrackSelection {this, "useTrackSelection", false, "plot only tracks accepted by selection tool"};
     BooleanProperty m_doTruthOriginPlots {this, "doTruthOriginPlots", false, "do plots split by track truth origin"};
+    BooleanProperty m_doDuplicatePlots {this, "doDuplicatePlots", false, "Fill duplicate=multi-track per particle plots"};
     BooleanProperty m_doPerAuthorPlots {this, "doPerAuthorPlots", false, "do plots split by track author"};
     BooleanProperty m_doTrackInJetPlots {this, "FillTrackInJetPlots", true, "Fill plots for tracks in jets"}; 
     BooleanProperty m_doHitLevelPlots {this, "doHitLevelPlots", false, "Fill hit efficiency and residual plots"}; 
     BooleanProperty m_doBjetPlots {this, "FillTrackInBJetPlots", false, "Fill plots for tracks in truth-b-tagged jets"}; 
     BooleanProperty m_fillTruthToRecoNtuple {this, "FillTruthToRecoNtuple", false, "Fill an ntuple with truth and matching reco info for more detailed stuidies"}; 
     BooleanProperty m_useVertexTruthMatchTool {this, "useVertexTruthMatchTool", false, "Use the vertex truth matching tool"}; 
-    BooleanProperty m_onlyFillMatched {this, "onlyFillTruthMatched", false, "Only fill truth-to-reco (eff, reso, matched hit) plots"}; 
+    BooleanProperty m_onlyFillMatched {this, "onlyFillTruthMatched", false, "Only fill truth-to-reco (eff, reso, matched hit) plots"};
     BooleanProperty m_doTRTExtensionPlots {this, "doTRTExtensionPlots", true, "do TRT extension plots"};
     BooleanProperty m_useGRL {this, "useGRL", false, "Apply GRL selection or not when running on data"};
     BooleanProperty m_doIDTIDEPlots{this, "doIDTIDEPlots", false, "do ID TIDE derivation plots"};

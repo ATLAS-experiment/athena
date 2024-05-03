@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import ROOT, math, random
 from ParticleGun.histsampling import TH1
@@ -260,26 +260,21 @@ def mksampler(x):
      - otherwise a ConstSampler will be created from x, so that x is
        returned when the sampler is called.
     """
-    if hasattr(x, "__call__"):
+    if callable(x):
         return x
     elif type(x) is list:
         # NB: disjoint ranges can be given as nested lists, e.g. [(1,2), (4,5)]
         if len(x) == 2 and type(x[0]) in (int,float) and type(x[1]) in (int,float):
-            #print "MKSAMPLER: Casting %s to UniformSampler" % str(x)
             return UniformSampler(*x)
         elif len(x) > 2 or (len(x) > 0 and type(x[0]) not in (int,float)):
-            #print "MKSAMPLER: Casting %s to DisjointUniformSampler" % str(x)
             return DisjointUniformSampler(x)
         if len(x) < 2:
             raise Exception("Supplied list could not be converted to a continuous sampler")
     elif type(x) is tuple:
-        #print "MKSAMPLER: Casting %s to CyclicSeqSampler" % str(x)
         return CyclicSeqSampler(*x)
     elif type(x) is set:
-        #print "MKSAMPLER: Casting %s to RandomSeqSampler" % str(x)
         return RandomSeqSampler(*x)
     else:
-        #print "MKSAMPLER: Casting %s to ConstSampler" % str(x)
         return ConstSampler(x)
 
 

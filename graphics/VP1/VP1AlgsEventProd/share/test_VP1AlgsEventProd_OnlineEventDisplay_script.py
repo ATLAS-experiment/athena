@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## Job options file for testing VP1AlgsEventProd 
 ## as part of the OnlineEventDisplays machinery
@@ -24,8 +24,8 @@ svcMgr += outputStreamSequencerSvc
 from VP1AlgsEventProd.VP1AlgsEventProdConf import VP1EventProd
 VP1EventProducer = VP1EventProd(InputPoolFile = StreamESD.OutputFile)
 ## =================== Added 09/03/15 by sjiggins ================= 
-printfunc ("<<<<<<< VP1 Output File >>>>>>>")
-printfunc ("OutputFile: %s" % StreamESD.OutputFile)
+print ("<<<<<<< VP1 Output File >>>>>>>")
+print ("OutputFile: %s" % StreamESD.OutputFile)
 ## ================================================================
 
 #Write out files in the directory given by the stream name
@@ -45,4 +45,4 @@ topSequence += VP1EventProducer
 
 ### Finally print setup in debug mode
 if VP1MsgLvl <= DEBUG:
-  printfunc ("\n\n\t VP1 setup\n",VP1EventProducer,"\n\n")
+  print ("\n\n\t VP1 setup\n",VP1EventProducer,"\n\n")

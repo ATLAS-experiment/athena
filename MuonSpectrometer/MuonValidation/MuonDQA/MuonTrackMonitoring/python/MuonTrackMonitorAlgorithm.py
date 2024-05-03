@@ -1591,11 +1591,11 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_AllCBMuons_etaphidir;#eta_{dir};#varphi_{dir}', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllCBLargeSectorZ,AllCBLargeSectorR;Segments_AllCBMuons_rzpos_sectorLarge', 
+    myGroup.defineHistogram('AllCBMuonLargeSectorZ,AllCBMuonLargeSectorR;Segments_AllCBMuons_rzpos_sectorLarge', 
             title='Segments_AllCBMuons_rzpos_sectorLarge;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllCBSmallSectorZ,AllCBSmallSectorR;Segments_AllCBMuons_rzpos_sectorSmall', 
+    myGroup.defineHistogram('AllCBMuonSmallSectorZ,AllCBMuonSmallSectorR;Segments_AllCBMuons_rzpos_sectorSmall', 
             title='Segments_AllCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
@@ -1629,11 +1629,11 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_AllNonCBMuons_etaphidir;#eta_{dir};#varphi_{dir}', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBLargeSectorZ,AllNonCBLargeSectorR;Segments_AllNonCBMuons_rzpos_sectorLarge', 
+    myGroup.defineHistogram('AllNonCBMuonLargeSectorZ,AllNonCBMuonLargeSectorR;Segments_AllNonCBMuons_rzpos_sectorLarge', 
             title='Segments_AllNonCBMuons_rzpos_sectorLarge;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBSmallSectorZ,AllNonCBSmallSectorR;Segments_AllNonCBMuons_rzpos_sectorSmall', 
+    myGroup.defineHistogram('AllNonCBMuonSmallSectorZ,AllNonCBMuonSmallSectorR;Segments_AllNonCBMuons_rzpos_sectorSmall', 
             title='Segments_AllNonCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
@@ -1667,11 +1667,11 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_CBMuons_etaphidir;#eta_{dir};#varphi_{dir}', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('CBLargeSectorZ,CBLargeSectorR;Segments_CBMuons_rzpos_sectorLarge', 
+    myGroup.defineHistogram('CBMuonLargeSectorZ,CBMuonLargeSectorR;Segments_CBMuons_rzpos_sectorLarge', 
             title='Segments_CBMuons_rzpos_sectorLarge;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('CBSmallSectorZ,CBSmallSectorR;Segments_CBMuons_rzpos_sectorSmall', 
+    myGroup.defineHistogram('CBMuonSmallSectorZ,CBMuonSmallSectorR;Segments_CBMuons_rzpos_sectorSmall', 
             title='Segments_CBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
@@ -1705,11 +1705,11 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_NonCBMuons_etaphidir;#eta_{dir};#varphi_{dir}', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NonCBLargeSectorZ,NonCBLargeSectorR;Segments_NonCBMuons_rzpos_sectorLarge', 
+    myGroup.defineHistogram('NonCBMuonLargeSectorZ,NonCBMuonLargeSectorR;Segments_NonCBMuons_rzpos_sectorLarge', 
             title='Segments_NonCBMuons_rzpos_sectorLarge;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NonCBSmallSectorZ,NonCBSmallSectorR;Segments_NonCBMuons_rzpos_sectorSmall', 
+    myGroup.defineHistogram('NonCBMuonSmallSectorZ,NonCBMuonSmallSectorR;Segments_NonCBMuons_rzpos_sectorSmall', 
             title='Segments_NonCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
@@ -1743,11 +1743,11 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_NoTrig_CBMuons_etaphidir;#eta_{dir};#varphi_{dir}', 
             type='TH2F', path='Segments/NoTrigCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBLargeSectorZ,NoTrigCBLargeSectorR;Segments_NoTrig_CBMuons_rzpos_sectorLarge', 
+    myGroup.defineHistogram('NoTrigCBMuonLargeSectorZ,NoTrigCBMuonLargeSectorR;Segments_NoTrig_CBMuons_rzpos_sectorLarge', 
             title='Segments_NoTrig_CBMuons_rzpos_sectorLarge;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NoTrigCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBSmallSectorZ,NoTrigCBSmallSectorR;Segments_NoTrig_CBMuons_rzpos_sectorSmall', 
+    myGroup.defineHistogram('NoTrigCBMuonSmallSectorZ,NoTrigCBMuonSmallSectorR;Segments_NoTrig_CBMuons_rzpos_sectorSmall', 
             title='Segments_NoTrig_CBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NoTrigCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
@@ -1781,11 +1781,11 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_NoTrig_NonCBMuons_etaphidir;#eta_{dir};#varphi_{dir}', 
             type='TH2F', path='Segments/NoTrigNonCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBLargeSectorZ,NoTrigNonCBLargeSectorR;Segments_NoTrig_NonCBMuons_rzpos_sectorLarge', 
+    myGroup.defineHistogram('NoTrigNonCBMuonLargeSectorZ,NoTrigNonCBMuonLargeSectorR;Segments_NoTrig_NonCBMuons_rzpos_sectorLarge', 
             title='Segments_NoTrig_NonCBMuons_rzpos_sectorLarge;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NoTrigNonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBSmallSectorZ,NoTrigNonCBSmallSectorR;Segments_NoTrig_NonCBMuons_rzpos_sectorSmall', 
+    myGroup.defineHistogram('NoTrigNonCBMuonSmallSectorZ,NoTrigNonCBMuonSmallSectorR;Segments_NoTrig_NonCBMuons_rzpos_sectorSmall', 
             title='Segments_NoTrig_NonCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NoTrigNonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')

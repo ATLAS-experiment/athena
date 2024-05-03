@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -257,8 +257,6 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
 
   cell_links.reserve(ed.m_clusters->number);
 
-  size_t valid_clusters = 0;
-
   CaloRecGPU::CUDA_Helpers::GPU_synchronize();
 
   const auto clusters = clock_type::now();
@@ -272,7 +270,6 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
           cell_links.emplace_back(std::make_unique<CaloClusterCellLink>(cell_collection_link));
           cell_links.back()->reserve(256);
           //To be adjusted.
-          ++valid_clusters;
         }
       else
         {

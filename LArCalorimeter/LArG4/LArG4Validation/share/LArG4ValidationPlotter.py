@@ -78,25 +78,25 @@ from LArG4Validation.LArG4PlottingScript import parseRoots, defaultRoots, \
 	createPlots
 
 if (len(split_canv) != 2) :
-	printfunc ("ERROR: wrong split parameter")
+	print ("ERROR: wrong split parameter")
 	sys.exit(1)
 
 if (options.divide and len(args) < 2) :
-	printfunc ("ERROR: must be at least two input files for ratio calculation")
+	print ("ERROR: must be at least two input files for ratio calculation")
 	sys.exit(1)
 
 if isfile(options.files) :
-	printfunc ("Parsing file with root parameters:",options.files)
+	print ("Parsing file with root parameters:",options.files)
 	parsedRoots = parseRoots(options.files)
 else :
-	printfunc ("No root parameters provided, using default")
+	print ("No root parameters provided, using default")
 	parsedRoots = defaultRoots(args)
 
 if isfile(options.plots) :
-	printfunc ("Parsing file with plots parameters:",options.plots)
+	print ("Parsing file with plots parameters:",options.plots)
 	parsedPlots = parsePlots(options.plots,varname)
 else :
-	printfunc ("No plots parameters provided, using default")
+	print ("No plots parameters provided, using default")
 	parsedPlots = []
 	parsedRestricts = []
 	for var in ["erec","cpu"] :
@@ -129,7 +129,7 @@ maxperlist = split_canv[0]*split_canv[1]
 numplots = len(parsedPlots)
 
 if (options.outputfile == "DISPLAY") and (numplots > maxperlist) :
-	printfunc ("ERROR: too many hists to print to display")
+	print ("ERROR: too many hists to print to display")
 	sys.exit(1)
 
 from ROOT import TFile
@@ -137,29 +137,29 @@ from ROOT import TFile
 #opening root files
 for rootopt in parsedRoots :
 	if not isfile(rootopt.filename) :
-		printfunc ("ERROR: unexistent file:",rootopt.filename)
+		print ("ERROR: unexistent file:",rootopt.filename)
 		sys.exit(1)
 	root = TFile(rootopt.filename,"read")
 	if root.IsOpen() == 0 :
-		printfunc ("ERROR: can't open the file:",rootopt.filename)
+		print ("ERROR: can't open the file:",rootopt.filename)
 		sys.exit(1)
 	rootopt.rootfile = root
 	rootopt.tree = root.Get("COL/1")
 
-printfunc ("Creating plots...")
+print ("Creating plots...")
 plots = createPlots(parsedPlots,parsedRoots)
 
-printfunc ("Filling plots...")
+print ("Filling plots...")
 fillPlots(plots,parsedPlots,parsedRoots,eventext)
 
 if (options.divide) :
-	printfunc ("Calculating ratio")
+	print ("Calculating ratio")
 	rootopt1 = parsedRoots.pop(0)
 	dividePlots(plots,rootopt1)
 	for rootopt in parsedRoots :
 		rootopt.legendname += " / " + rootopt1.legendname
 
-printfunc ("Done!")
+print ("Done!")
 
 if options.outputfile.endswith(".root") :
 	savePlots(plots,options.outputfile)

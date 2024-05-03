@@ -120,6 +120,7 @@ void GeoModelXmlTool::createVolume(GeoPhysVol* world, GmxInterface& gmxInterface
   } else {
     flags = 0;
     gmxInput = PathResolver::find_file(m_gmxFilename, "DATAPATH");
+    ATH_MSG_INFO("Getting " << m_detectorName.value() << " GeoModelXml description from file "<<gmxInput);
     if (gmxInput.empty()) { // File not found
       std::string errMessage("GeoModelXmlTool::createTopVolume: Unable to find file " + m_gmxFilename +
                              " with PathResolver; check filename and DATAPATH environment variable");

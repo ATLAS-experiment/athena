@@ -257,9 +257,9 @@ int Prompt::VarHolder::registerAllVars()
   result += registerVar( RawPt,                                                   "RawPt");
   result += registerVar( PromptLeptonRNN_prompt,                                  "PromptLeptonRNN_prompt");
   result += registerVar( CaloClusterERel,                                         "CaloClusterERel");
-  result += registerVar( Topoetcone30rel,                                         "Topoetcone30rel");
-  result += registerVar( Ptvarcone30rel,                                          "Ptvarcone30rel");
-  result += registerVar( Ptvarcone30_TightTTVA_pt500rel,                          "Ptvarcone30_TightTTVA_pt500rel");
+  result += registerVar( Topoetcone30rel,                                         "topoetcone30rel");
+  result += registerVar( Ptvarcone30rel,                                          "ptvarcone30rel");
+  result += registerVar( Ptvarcone30_TightTTVA_pt500rel,                          "ptvarcone30_TightTTVA_pt500rel");
   result += registerVar( CaloClusterSumEtRel,                                     "CaloClusterSumEtRel");
   result += registerVar( CandVertex_normDistToPriVtxLongitudinalBest,             "CandVertex_normDistToPriVtxLongitudinalBest");
   result += registerVar( CandVertex_normDistToPriVtxLongitudinalBest_ThetaCutVtx, "CandVertex_normDistToPriVtxLongitudinalBest_ThetaCutVtx");

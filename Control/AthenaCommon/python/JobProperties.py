@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #=======================================================================
 # File: JobProperties/python/JobProperties.py
@@ -49,10 +49,10 @@ def _isCompatible( allowedTypes, value ):
         if ( tp == str and len(allowedTypes) == 1 ) and not isinstance( value, tp ):
          # special case, insist on exact match for str (no conversions allowed)
             return False
-        elif type(value) == str and not isinstance( value, tp ):
+        elif type(value) is str and not isinstance( value, tp ):
          # similarly, insist on exact match for str (no conversions allowed)
             pass # offcount will cause a failure, unless another type matches
-        elif tp == int  and type(value) == float:
+        elif tp == int  and type(value) is float:
          # special case, insist on strict match for integer types
             pass # id. as for strings above
         elif ( tp == bool ) and not (type(value) in [bool, int]):

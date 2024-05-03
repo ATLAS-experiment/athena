@@ -32,7 +32,7 @@ def InDetPriVxFinderCfg(flags,
             flags,
             ClusterSplitProbabilityName = \
             ClusterSplitProbabilityContainerName(flags),
-            AssociationMapName = "PRDtoTrackMapCombinedInDetTracks",
+            AssociationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks",
             xAODTrackParticlesFromTracksContainerName = \
             "InDetTrackParticlesTemporary"))
         kwargs["TracksName"]="InDetTrackParticlesTemporary"
@@ -93,7 +93,7 @@ def primaryVertexFindingCfg(flags,
             flags,
             ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
                 flags),
-            AssociationMapName="PRDtoTrackMapCombinedInDetTracks"))
+            AssociationMapName="PRDtoTrackMapMerge_CombinedInDetTracks"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 

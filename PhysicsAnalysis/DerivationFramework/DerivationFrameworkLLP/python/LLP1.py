@@ -64,7 +64,157 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         SGKey_photons = ''))
     acc.addPublicTool(LLP1LRTMaxCellDecoratorTool)
 
-    augmentationTools = [ LLP1LRTMaxCellDecoratorTool ]
+    # Vertex constraint tools
+    from TrkConfig.TrkVertexFitterUtilsConfig import AtlasFullLinearizedTrackFactoryCfg
+    AtlasFullLinearizedTrackFactoryTool = acc.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags,
+                                                                                                  name = "LLP1AtlasFullLinearizedTrackFactory"))
+    acc.addPublicTool(AtlasFullLinearizedTrackFactoryTool)
+
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    ExtrapolatorTool = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags,
+                                                                 name = "LLP1ExtrapolatorTool"))
+    acc.addPublicTool(ExtrapolatorTool)
+
+
+    from DerivationFrameworkLLP.LLPToolsConfig import TrackParametersKVUCfg
+    LLP1TrackParametersKVUTool = acc.getPrimaryAndMerge(TrackParametersKVUCfg(flags,
+                                                                              name                       = "LLP1TrackParametersKVU",
+                                                                              TrackParticleContainerName = "InDetDisappearingTrackParticles",
+                                                                              VertexContainerName        = "PrimaryVertices",
+                                                                              LinearizedTrackFactory     = AtlasFullLinearizedTrackFactoryTool,
+                                                                              TrackExtrapolator          = ExtrapolatorTool))
+    acc.addPublicTool(LLP1TrackParametersKVUTool)
+
+    # Track isolation tools
+    import ROOT
+    isoPar = ROOT.xAOD.Iso.IsolationType
+    deco_ptcones = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20]
+    deco_ptcones_suffix = ["ptcone40", "ptcone30", "ptcone20"]
+    deco_prefix = ''
+
+    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    TrackSelectionToolStd = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
+                                                                                   name = "TrackSelectionToolStd",
+                                                                                   maxZ0SinTheta = 3.0,
+                                                                                   minPt = 1000.))
+
+    TrackSelectionToolPdEdx = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
+                                                                                     name = "TrackSelectionToolPdEdx",
+                                                                                     maxD0 = 0.5,
+                                                                                     maxZ0SinTheta = 3.0,
+                                                                                     minPt = 1000.))
+
+    TrackSelectionToolPdEdxTight = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
+                                                                                          name = "TrackSelectionToolPdEdxTight",
+                                                                                          maxD0 = 0.5,
+                                                                                          maxZ0SinTheta = 0.5,
+                                                                                          minPt = 1000.))
+
+    from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg, CaloIsolationToolCfg
+    TrackIsoToolStd = acc.popToolsAndMerge(TrackIsolationToolCfg(flags,
+                                                                 name = "TrackIsoToolStd",
+                                                                 TrackSelectionTool = TrackSelectionToolStd))
+    acc.addPublicTool(TrackIsoToolStd)
+
+    TrackIsoToolPdEdx = acc.popToolsAndMerge(TrackIsolationToolCfg(flags,
+                                                                   name = "TrackIsoToolPdEdx",
+                                                                   TrackSelectionTool = TrackSelectionToolPdEdx))
+    acc.addPublicTool(TrackIsoToolPdEdx)
+
+    TrackIsoToolPdEdxTight = acc.popToolsAndMerge(TrackIsolationToolCfg(flags,
+                                                                        name = "TrackIsoToolPdEdxTight",
+                                                                        TrackSelectionTool = TrackSelectionToolPdEdxTight))
+    acc.addPublicTool(TrackIsoToolPdEdxTight)
+
+    from CaloIdentifier import SUBCALO
+    CaloIsoTool = acc.popToolsAndMerge(CaloIsolationToolCfg(flags,
+                                                            name = "CaloIsoTool",
+                                                            EMCaloNums = [SUBCALO.LAREM],
+                                                            HadCaloNums = [SUBCALO.LARHEC, SUBCALO.TILE],
+                                                            UseEMScale  = True,
+                                                            UseCaloExtensionCaching = False,
+                                                            saveOnlyRequestedCorrections = True))
+    acc.addPublicTool(CaloIsoTool)
+
+    from DerivationFrameworkInDet.InDetToolsConfig import IsolationTrackDecoratorCfg
+    LLP1IsolationTrackDecoratorTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                        name               = "LLP1IsolationTrackDecorator",
+                                                                                        TrackIsolationTool = TrackIsoToolStd,
+                                                                                        CaloIsolationTool  = CaloIsoTool,
+                                                                                        TargetContainer    = "InDetTrackParticles",
+                                                                                        SelectionString    = "InDetTrackParticles.pt>10*GeV",
+                                                                                        iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20, isoPar.ptvarcone40, isoPar.ptvarcone30, isoPar.ptvarcone20, isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
+                                                                                        isoSuffix          = ["ptcone40", "ptcone30", "ptcone20", "ptvarcone40", "ptvarcone30", "ptvarcone20", "topoetcone40", "topoetcone30", "topoetcone20"],
+                                                                                        Prefix             = deco_prefix))
+    acc.addPublicTool(LLP1IsolationTrackDecoratorTool)
+
+    LLP1IsolationTrackDecoratorDTTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                          name               = "LLP1IsolationTrackDecoratorDT",
+                                                                                          TrackIsolationTool = TrackIsoToolStd,
+                                                                                          CaloIsolationTool  = CaloIsoTool,
+                                                                                          TargetContainer    = "InDetDisappearingTrackParticles",
+                                                                                          SelectionString    = "InDetDisappearingTrackParticles.pt>10*GeV",
+                                                                                          iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20, isoPar.ptvarcone40, isoPar.ptvarcone30, isoPar.ptvarcone20, isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
+                                                                                          isoSuffix          = ["ptcone40", "ptcone30", "ptcone20", "ptvarcone40", "ptvarcone30", "ptvarcone20", "topoetcone40", "topoetcone30", "topoetcone20"],
+                                                                                          Prefix             = deco_prefix))
+    acc.addPublicTool(LLP1IsolationTrackDecoratorDTTool)
+
+    LLP1IsolationTrackDecoratorPdEdxTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                             name               = "LLP1IsolationTrackDecoratorPdEdx",
+                                                                                             TrackIsolationTool = TrackIsoToolPdEdx,
+                                                                                             CaloIsolationTool  = CaloIsoTool,
+                                                                                             TargetContainer    = "InDetTrackParticles",
+                                                                                             iso                = deco_ptcones,
+                                                                                             Prefix             = 'TrkIsoPtPdEdx_',
+                                                                                             isoSuffix          = deco_ptcones_suffix))
+    acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxTool)
+
+    LLP1IsolationTrackDecoratorPdEdxDTTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                               name               = "LLP1IsolationTrackDecoratorPdEdxDT",
+                                                                                               TrackIsolationTool = TrackIsoToolPdEdx,
+                                                                                               CaloIsolationTool  = CaloIsoTool,
+                                                                                               TargetContainer    = "InDetDisappearingTrackParticles",
+                                                                                               iso                = deco_ptcones,
+                                                                                               Prefix             = 'TrkIsoPtPdEdx_',
+                                                                                               isoSuffix          = deco_ptcones_suffix))
+    acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxDTTool)
+
+    LLP1IsolationTrackDecoratorPdEdxTightTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                                  name               = "LLP1IsolationTrackDecoratorPdEdxTight",
+                                                                                                  TrackIsolationTool = TrackIsoToolPdEdxTight,
+                                                                                                  CaloIsolationTool  = CaloIsoTool,
+                                                                                                  TargetContainer    = "InDetTrackParticles",
+                                                                                                  iso                = deco_ptcones,
+                                                                                                  Prefix             = 'TrkIsoPtTightPdEdx_',
+                                                                                                  isoSuffix          = deco_ptcones_suffix))
+    acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxTightTool)
+
+    LLP1IsolationTrackDecoratorPdEdxTightDTTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                                    name               = "LLP1IsolationTrackDecoratorPdEdxTightDT",
+                                                                                                    TrackIsolationTool = TrackIsoToolPdEdxTight,
+                                                                                                    CaloIsolationTool  = CaloIsoTool,
+                                                                                                    TargetContainer    = "InDetDisappearingTrackParticles",
+                                                                                                    iso                = deco_ptcones,
+                                                                                                    Prefix             = 'TrkIsoPtTightPdEdx_',
+                                                                                                    isoSuffix          = deco_ptcones_suffix))
+    acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxTightDTTool)
+
+    from DerivationFrameworkLLP.LLPToolsConfig import TrackParticleCaloCellDecoratorCfg
+    LLP1TrackParticleCaloCellDecoratorTool = acc.getPrimaryAndMerge(TrackParticleCaloCellDecoratorCfg(flags,
+                                                                                                      name               = "LLP1TrackParticleCaloCellDecorator",
+                                                                                                      DecorationPrefix   = "LLP1",
+                                                                                                      ContainerName      = "InDetTrackParticles"))
+    acc.addPublicTool(LLP1TrackParticleCaloCellDecoratorTool)
+
+    augmentationTools = [ LLP1LRTMaxCellDecoratorTool,
+                          LLP1TrackParametersKVUTool,
+                          LLP1IsolationTrackDecoratorTool,
+                          LLP1IsolationTrackDecoratorDTTool,
+                          LLP1IsolationTrackDecoratorPdEdxTool,
+                          LLP1IsolationTrackDecoratorPdEdxDTTool,
+                          LLP1IsolationTrackDecoratorPdEdxTightTool,
+                          LLP1IsolationTrackDecoratorPdEdxTightDTTool,
+                          LLP1TrackParticleCaloCellDecoratorTool ]
 
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
@@ -179,18 +329,61 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  doAssociateNonSelectedTracks= False))
     LLP1VrtSecInclusiveSuffixes.append(LepTrackSuffix)
 
+    # bad jet cleaning
+    jet_clean_prefix="DFCommonJets_"
+    jet_clean_container="AntiKt4EMTopoJets"
+    jet_clean_level="SuperLooseBadLLP"
+    from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg, JetCleaningToolCfg
+    LLP1JetCleanSuperLLPTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,
+                                                                       "LLP1JetCleanSuperLLP",
+                                                                       jet_clean_container,
+                                                                       jet_clean_level,
+                                                                       False))
+    acc.addPublicTool(LLP1JetCleanSuperLLPTool)
+
+    LLP1EventCleanSuperLLPTool = acc.popToolsAndMerge(EventCleaningToolCfg(flags,
+                                                                           "LLP1EventCleanSuperLLP",
+                                                                           jet_clean_level))
+    LLP1EventCleanSuperLLPTool.JetCleanPrefix = jet_clean_prefix
+    LLP1EventCleanSuperLLPTool.JetContainer = jet_clean_container
+    LLP1EventCleanSuperLLPTool.JetCleaningTool = LLP1JetCleanSuperLLPTool
+    acc.addPublicTool(LLP1EventCleanSuperLLPTool)
+
+    LLP1EventCleanAlg = CompFactory.EventCleaningTestAlg(
+        "LLP1JetCleanDecoratorSuperLLP",
+        EventCleaningTool = LLP1EventCleanSuperLLPTool,
+        JetCollectionName = jet_clean_container,
+        EventCleanPrefix  = jet_clean_prefix,
+        CleaningLevel     = jet_clean_level,
+        doEvent           = True)
+    acc.addEventAlgo(LLP1EventCleanAlg)
+
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, EgammaTrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
 
-    # Inner detector group recommendations for indet tracks in analysis
-    # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    LLP1_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
+    # Inner detector tracks need to have greater than 10 GeV of pT
     LLP1TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "LLP1TrackParticleThinningTool",
         StreamName              = kwargs['StreamName'],
-        SelectionString         = LLP1_thinning_expression,
+        SelectionString         = "InDetTrackParticles.pt>10*GeV",
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
+
+    # Pixel tracklets need to have greater than 5 GeV of pT
+    LLP1DTTrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1DTTrackParticleThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SelectionString         = "InDetDisappearingTrackParticles.pt>5*GeV",
+        InDetTrackParticlesKey  = "InDetDisappearingTrackParticles"))
+
+    # Include inner detector tracks associated with electrons
+    LLP1ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1ElectronTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     # Include inner detector tracks associated with muons
@@ -312,8 +505,25 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                                 InDetTrackParticlesKey  = "InDetLargeD0TrackParticles",
                                                                                                 ))
 
+    # high dE/dx and low pT tracks
+    from DerivationFrameworkLLP.LLPToolsConfig import PixeldEdxTrackParticleThinningCfg
+    LLP1PixeldEdxTrackParticleThinningTool = acc.getPrimaryAndMerge(PixeldEdxTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1PixeldEdxTrackParticleThinningTool",
+        StreamName              = kwargs['StreamName'],
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
+
+    LLP1PixeldEdxDTTrackParticleThinningTool = acc.getPrimaryAndMerge(PixeldEdxTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1PixeldEdxDTTrackParticleThinningTool",
+        StreamName              = kwargs['StreamName'],
+        InDetTrackParticlesKey  = "InDetDisappearingTrackParticles"))
+
+
     # Finally the kernel itself
     thinningTools = [LLP1TrackParticleThinningTool,
+                     LLP1DTTrackParticleThinningTool,
+                     LLP1ElectronTPThinningTool,
                      LLP1MuonTPThinningTool,
                      LLP1LRTMuonTPThinningTool,
                      LLP1TauJetsThinningTool,
@@ -325,7 +535,9 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1VSITPThinningTool,
                      LLP1LRTVSITPThinningTool,
                      LLP1JetTPThinningTool,
-                     LLP1FatJetTPThinningTool]
+                     LLP1FatJetTPThinningTool,
+                     LLP1PixeldEdxTrackParticleThinningTool,
+                     LLP1PixeldEdxDTTrackParticleThinningTool]
 
     if flags.Tracking.doLargeD0:
         thinningTools.append(LLP1LRTJetTPThinningTool)
@@ -466,7 +678,8 @@ def LLP1Cfg(flags):
                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
 
-    LLP1SlimmingHelper.AllVariables =  ["MSDisplacedVertex",
+    LLP1SlimmingHelper.AllVariables =  ["InDetDisappearingTrackParticles",
+                                        "MSDisplacedVertex",
                                         "MuonSpectrometerTrackParticles",
                                         "UnAssocMuonSegments",
                                         "MuonSegments",
@@ -477,6 +690,13 @@ def LLP1Cfg(flags):
                                         "CombinedMuonsLRTTrackParticles",
                                         "ExtraPolatedMuonsLRTTrackParticles",
                                         "MSOnlyExtraPolatedMuonsLRTTrackParticles",
+                                        "CombinedStauTrackParticles",
+                                        "SlowMuons",
+                                        "Staus"
+                                        "METAssoc_AntiKt4EMTopo",
+                                        "MET_Core_AntiKt4EMTopo",
+                                        "METAssoc_AntiKt4EMPFlow",
+                                        "MET_Core_AntiKt4EMPFlow",
                                         ]
 
 
@@ -507,10 +727,24 @@ def LLP1Cfg(flags):
                                           "TruthPrimaryVertices.t.x.y.z.sumPt2",
                                           "PrimaryVertices.t.x.y.z.sumPt2.covariance",
                                           "InDetTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.patternRecoInfo",
+                                          "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
+                                          "InDetTrackParticles.numberOfIBLOverflowsdEdx.numberOfUsedHitsdEdx.pixeldEdx",
+                                          "InDetTrackParticles.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberOfNextToInnermostPixelLayerHits.numberOfContribPixelLayers.numberOfGangedFlaggedFakes.numberOfPixelOutliers.numberOfPixelSplitHits.numberOfPixelSpoiltHits",
+                                          "InDetTrackParticles.numberOfSCTOutliers.numberOfSCTSpoiltHits",
+                                          "InDetTrackParticles.numberOfTRTHoles.numberOfTRTDeadStraws.numberOfTRTSharedHits.numberOfTRTHighThresholdHits.numberOfTRTHighThresholdHitsTotal.numberOfTRTHighThresholdOutliers.TRTdEdx.TRTdEdxUsedHits.hitPattern",
+                                          "InDetTrackParticles.truthMatchProbability.truthOrigin.truthType",
+                                          "InDetTrackParticles.TrkIsoPtPdEdx_ptcone20.TrkIsoPtPdEdx_ptcone30.TrkIsoPtPdEdx_ptcone40.TrkIsoPtTightPdEdx_ptcone20.TrkIsoPtTightPdEdx_ptcone30.TrkIsoPtTightPdEdx_ptcone40",
+                                          "InDetTrackParticles.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
+                                          "InDetTrackParticles.topoetcone20.topoetcone30.topoetcone40.topoetcone20NonCoreCone.topoetcone30NonCoreCone.topoetcone40NonCoreCone",
+                                          "InDetTrackParticles.LLP1_CaloCelldEta.LLP1_CaloCelldPhi.LLP1_CaloCelldR.LLP1_CaloCelldX.LLP1_CaloCelldY.LLP1_CaloCelldZ.LLP1_CaloCellE.LLP1_CaloCellEta.LLP1_CaloCellGain.LLP1_CaloCellID.LLP1_CaloCellPhi.LLP1_CaloCellProvenance.LLP1_CaloCellQuality.LLP1_CaloCellR.LLP1_CaloCellSampling.LLP1_CaloCellTime.LLP1_CaloCellX.LLP1_CaloCellY.LLP1_CaloCellZ.LLP1_CaloCellEneDiff.LLP1_CaloCellTimeDiff",
+
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.patternRecoInfo",
                                           "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
                                           "LRTGSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
                                           "EventInfo.hardScatterVertexLink.timeStampNSOffset",
+                                          "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
+                                          "EventInfo.hardScatterVertexLink.timeStampNSOffset",
+                                          "EventInfo.DFCommonJets_eventClean_SuperLooseBadLLP.DFCommonJets_eventClean_SuperLooseBadLLP_EMTopo.DFCommonJets_eventClean_LooseBadLLP_EMTopo",
                                           "TauJets.dRmax.etOverPtLeadTrk",
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]

@@ -24,6 +24,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("doTruthOriginPlots", False )
     icf.addFlag("doPerAuthorPlots", False )
     icf.addFlag("doHitLevelPlots", False )
+    icf.addFlag("doDuplicatePlots", False )
     icf.addFlag("runDecoration", True )
     icf.addFlag("setTruthStrategy", "HardScatter" )
     icf.addFlag("jetsNameForHardScatter", 'AntiKt4EMTopoJets' ) # when building jets, what types of jets are built (used for hardScatterStrategy == 2)
@@ -42,6 +43,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("doHGTD", False)
     icf.addFlag("maxTrkJetDR", 0.4)
     icf.addFlag('JetAbsEtaMax', lambda pcf: 2.5 if pcf.Detector.GeometryID else 4.0)
+    icf.addFlag('PrimaryVertexContainer', 'PrimaryVertices')
     
     return icf
 

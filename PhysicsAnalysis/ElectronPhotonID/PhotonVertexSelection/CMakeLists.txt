@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PhotonVertexSelection )
@@ -13,7 +13,7 @@ atlas_add_library( PhotonVertexSelectionLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools xAODEgamma xAODEventInfo xAODMetaData AnaAlgorithmLib PATCoreLib
    xAODTracking
-   PRIVATE_LINK_LIBRARIES PathResolver egammaUtils)
+   PRIVATE_LINK_LIBRARIES PathResolver egammaUtils CxxUtils)
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( PhotonVertexSelection

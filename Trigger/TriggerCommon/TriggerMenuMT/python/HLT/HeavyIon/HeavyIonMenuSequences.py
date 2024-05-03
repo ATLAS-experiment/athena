@@ -30,7 +30,7 @@ def egammaFSHIEventShapeMakerCfg(flags):
 
 
 
-def HIFwdGapMenuSequenceCfg(flags):
+def HIFwdGapMenuSequenceGenCfg(flags):
   from ..Config.MenuComponents import InEventRecoCA, SelectionCA, MenuSequenceCA
   from AthenaConfiguration.ComponentFactory import CompFactory
   from TrigHIHypo.TrigHIFwdGapHypoConfig import TrigHIFwdGapHypoToolFromDict

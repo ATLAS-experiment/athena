@@ -84,7 +84,7 @@ const void* AuxStoreInternal::getData (auxid_t auxid) const
 {
   guard_t guard (m_mutex);
   if (auxid >= m_vecs.size() || !m_vecs[auxid]) {
-    // With the new behavior of SG::AuxElement::Accessor::isAvailable,
+    // With the new behavior of SG::Accessor::isAvailable,
     // we shouldn't print an error message here. Asking the store whether
     // it has an element using this function is not necessarily an
     // error condition by now. In any case, the DataVector code will

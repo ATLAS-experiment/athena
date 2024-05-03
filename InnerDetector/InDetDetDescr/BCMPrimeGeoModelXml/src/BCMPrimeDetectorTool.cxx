@@ -48,18 +48,17 @@ StatusCode BCMPrimeDetectorTool::create()
   // The & takes the address of the GeoVPhysVol
   GeoPhysVol *world = &*theExpt->getPhysVol();
   auto *manager = new InDetDD::BCMPrimeDetectorManager(m_detectorName);
-
   InDetDD::BCMPrimeGmxInterface gmxInterface(manager);
 
   // Load the geometry, create the volume, 
   // node,table are the location in the DB to look for the clob
   // empty strings are the (optional) containing detector and envelope names
   // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
-  const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"","",sqlreader);
+  const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"ITkPixel","ITkPixelDetector",sqlreader);
   if (topVolume) { //see that a valid pointer is returned
     manager->addTreeTop(topVolume);
   } else {
-    ATH_MSG_FATAL("Could not find the Top Volume!!!");
+    ATH_MSG_FATAL("Could not find the BCMPrime Top Volume!!!");
     return StatusCode::FAILURE;
   }
 

@@ -103,33 +103,33 @@ def all_DataFlow_to_dot(name, step_list):
             # reset the last step
             last_step_hypoNodes =[]
             for cfseq in cfseq_list:
-                file.write("  %s[fillcolor=%s style=filled]\n"%(cfseq.filter.Alg.name,algColor(cfseq.filter.Alg)))
-                step_connections.append(cfseq.filter)                      
-                file.write(  '\n  subgraph cluster_%s {\n'%(cfseq.step.name)\
+                file.write("  %s[fillcolor=%s style=filled]\n"%(cfseq.sequenceCA.filterNode.Alg.name,algColor(cfseq.sequenceCA.filterNode.Alg)))
+                step_connections.append(cfseq.sequenceCA.filterNode)                      
+                file.write(  '\n  subgraph cluster_%s {\n'%(cfseq.sequenceCA.step.name)\
                             +'     concentrate=true;\n'
                             +'     node [color=white style=filled]\n'\
                             +'     style=filled\n'\
                             +'     color=lightgrey\n'\
                             +'     fontname=Helvetica\n'\
-                            +'     label = %s\n'%(cfseq.step.name))
+                            +'     label = %s\n'%(cfseq.sequenceCA.step.name))
 
                 cfseq_algs = []
-                cfseq_algs.append(cfseq.filter)
+                cfseq_algs.append(cfseq.sequenceCA.filterNode)
 
-                if len(cfseq.step.sequences)==0:
-                    last_step_hypoNodes.append(cfseq.filter)
+                if len(cfseq.sequenceCA.step.sequences)==0:
+                    last_step_hypoNodes.append(cfseq.sequenceCA.filterNode)
 
-                for menuseq in cfseq.step.sequences:
+                for menuseq in cfseq.sequenceCA.step.sequences:
                     cfseq_algs, all_hypos, last_step_hypoNodes = menuseq.buildDFDot(cfseq_algs,
                                                                                     all_hypos,                                                                                    
                                                                                     last_step_hypoNodes,
                                                                                     file)
 
                                                                                      
-                if cfseq.step.combo is not None:
-                    file.write("    %s[color=%s]\n"%(cfseq.step.combo.Alg.name, algColor(cfseq.step.combo.Alg)))
-                    cfseq_algs.append(cfseq.step.combo)
-                    last_step_hypoNodes.append(cfseq.step.combo)
+                if cfseq.sequenceCA.step.combo is not None:
+                    file.write("    %s[color=%s]\n"%(cfseq.sequenceCA.step.combo.Alg.name, algColor(cfseq.sequenceCA.step.combo.Alg)))
+                    cfseq_algs.append(cfseq.sequenceCA.step.combo)
+                    last_step_hypoNodes.append(cfseq.sequenceCA.step.combo)
                 file.write('  }\n')              
                 file.write(findConnections(cfseq_algs))
                 file.write('\n')
@@ -156,29 +156,29 @@ def stepCF_DataFlow_to_dot(name, cfseq_list):
 
         all_hypos = []
         for cfseq in cfseq_list:
-            file.write("  %s[fillcolor=%s style=filled]\n"%(cfseq.filter.Alg.name,algColor(cfseq.filter.Alg)))
-            for inp in cfseq.filter.getInputList():
-                file.write(addConnection(name, cfseq.filter.Alg.name, inp))
+            file.write("  %s[fillcolor=%s style=filled]\n"%(cfseq.sequenceCA.filterNode.Alg.name,algColor(cfseq.sequenceCA.filterNode.Alg)))
+            for inp in cfseq.sequenceCA.filterNode.getInputList():
+                file.write(addConnection(name, cfseq.sequenceCA.filterNode.Alg.name, inp))
 
-            file.write(  '\n  subgraph cluster_%s {\n'%(cfseq.step.name)\
+            file.write(  '\n  subgraph cluster_%s {\n'%(cfseq.sequenceCA.step.name)\
                         +'     concentrate=true;\n'
                         +'     node [color=white style=filled]\n'\
                         +'     style=filled\n'\
                         +'     color=lightgrey\n'\
                         +'     fontname=Helvetica\n'\
-                        +'     label = %s\n'%(cfseq.step.name))
+                        +'     label = %s\n'%(cfseq.sequenceCA.step.name))
 
             cfseq_algs = []
-            cfseq_algs.append(cfseq.filter)
+            cfseq_algs.append(cfseq.sequenceCA.filterNode)
 
-            for menuseq in cfseq.step.sequences:
+            for menuseq in cfseq.sequenceCA.step.sequences:
                     cfseq_algs, all_hypos, _ = menuseq.buildDFDot(cfseq_algs,
                                                                   all_hypos,                                                                 
                                                                   None,
                                                                   file)
-            if cfseq.step.combo is not None:
-                file.write("    %s[color=%s]\n"%(cfseq.step.combo.Alg.name, algColor(cfseq.step.combo.Alg)))
-                cfseq_algs.append(cfseq.step.combo)
+            if cfseq.sequenceCA.step.combo is not None:
+                file.write("    %s[color=%s]\n"%(cfseq.sequenceCA.step.combo.Alg.name, algColor(cfseq.sequenceCA.step.combo.Alg)))
+                cfseq_algs.append(cfseq.sequenceCA.step.combo)
             file.write('  }\n')              
 
             file.write(findConnections(cfseq_algs))

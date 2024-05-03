@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -23,15 +23,17 @@ MuonSimData::MuonSimData() :
 
 MuonSimData::MuonSimData (const std::vector<Deposit>& deposits, 
 			    int simDataWord)
-    : m_word((deposits.size()<<29 & 0xe0000000) | (simDataWord & 0x1fffffff)), m_x(0.0),m_y(0.0),m_z(0.0),m_t(0.0)
+    : m_word((deposits.size()<<29 & 0xe0000000) | (simDataWord & 0x1fffffff)),
+      m_deposits (deposits),
+      m_x(0.0),m_y(0.0),m_z(0.0),m_t(0.0)
 {
-    m_deposits = deposits;
 }
 
 MuonSimData::MuonSimData (std::vector<Deposit>&& deposits, 
                           int simDataWord)
-    : m_word((deposits.size()<<29 & 0xe0000000) | (simDataWord & 0x1fffffff)), m_x(0.0),m_y(0.0),m_z(0.0),m_t(0.0)
+    : m_word((deposits.size()<<29 & 0xe0000000) | (simDataWord & 0x1fffffff)),
+      m_deposits (std::move(deposits)),
+      m_x(0.0),m_y(0.0),m_z(0.0),m_t(0.0)
 {
-  m_deposits = std::move(deposits);
 }
 

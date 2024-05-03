@@ -57,6 +57,10 @@ namespace CP
   private:
     Gaudi::Property<std::string> m_prescaleDecoration {this, "prescaleDecoration", "", "decoration to store prescales"};
 
+    /// \brief whether to prescale MC instead of unprescale dat 
+  private:
+    Gaudi::Property<bool> m_prescaleMC {this, "prescaleMC", false, "whether to do prescaling of MC instead of unprescaling of data"};
+
     /// \brief the accessors for \ref m_prescaleDecoration and \ref m_trigList combination
   private:
     std::vector<SG::AuxElement::Decorator<float>> m_prescaleAccessors;

@@ -113,10 +113,18 @@ namespace G4UA
 
     // Create the TimedTrackRecord
     TrackHelper trHelp(aStep->GetTrack());
-    int barcode = trHelp.GetBarcode();
-    int id = trHelp.GetUniqueID();
+    const int barcode = trHelp.GetBarcode(); // FIXME barcode based
+    const int id = trHelp.GetUniqueID();
     const int status = trHelp.GetStatus();
-    m_trackRecordCollection->Emplace(pdgcode, status, ener, mom, pos, time, barcode, id,
+    m_trackRecordCollection->Emplace(
+                                     pdgcode,
+                                     status,
+                                     ener,
+                                     mom,
+                                     pos,
+                                     time,
+                                     barcode, // FIXME barcode based
+                                     id,
                                      preVol->GetName());
   }
 

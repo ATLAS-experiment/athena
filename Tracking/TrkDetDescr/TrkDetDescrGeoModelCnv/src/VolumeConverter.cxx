@@ -23,6 +23,7 @@
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GeoModelKernel/GeoShapeUnion.h"
 #include "GeoModelKernel/GeoTrd.h"
+#include "GeoModelUtilities/GeoVisitVolumes.h"
 
 // STL
 #include <algorithm>
@@ -1097,13 +1098,12 @@ void VolumeConverter::collectMaterialContent(
             motherVolume = lv->getShape()->volume();
     }
 
-    unsigned int nc = gv->getNChildVols();
     double childVol = 0;
     std::string cPrevious = " ";
     size_t nIdentical = 0;
-    std::vector<MaterialComponent> childMat;
-    for (unsigned int ic = 0; ic < nc; ic++) {
-        const GeoVPhysVol* cv = &(*(gv->getChildVol(ic)));
+    std::vector<Trk::MaterialComponent> childMat;
+    std::vector<const GeoVPhysVol*> children = geoGetVolumesNoXform (gv);
+    for (const GeoVPhysVol* cv : children) {
         std::string cname = cv->getLogVol()->getName();
         if (cname == cPrevious)
             nIdentical++;  // assuming identity for identical name and branching

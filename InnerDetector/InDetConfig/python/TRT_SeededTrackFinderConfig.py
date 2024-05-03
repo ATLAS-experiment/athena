@@ -58,7 +58,7 @@ def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder',
     kwargs.setdefault("MinTRTonly", flags.Tracking.BackTracking.minTRT)
     kwargs.setdefault("TrtExtension", True)
     kwargs.setdefault("SiExtensionCuts", flags.Tracking.BackTracking.SiExtensionCuts)
-    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minSecondaryPt)
+    kwargs.setdefault("minPt", flags.Tracking.BackTracking.minPt)
     kwargs.setdefault("maxRPhiImp", flags.Tracking.BackTracking.maxSecondaryImpact)
     kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)

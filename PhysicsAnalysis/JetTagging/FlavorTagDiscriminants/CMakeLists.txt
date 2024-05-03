@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'duel-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -79,6 +79,7 @@ atlas_add_library( FlavorTagDiscriminants
     ElectronPhotonSelectorToolsLib
     MuonAnalysisInterfacesLib
     EgammaAnalysisInterfacesLib
+    TruthClassificationLib
   )
 
 
@@ -99,6 +100,7 @@ if (NOT XAOD_STANDALONE)
     src/SoftElectronDecoratorAlg.cxx
     src/SoftElectronTruthDecoratorAlg.cxx
     src/FoldDecoratorAlg.cxx
+    src/GNNAuxTaskDecoratorAlg.cxx
     src/components/FlavorTagDiscriminants_entries.cxx
     LINK_LIBRARIES FlavorTagDiscriminants
     )

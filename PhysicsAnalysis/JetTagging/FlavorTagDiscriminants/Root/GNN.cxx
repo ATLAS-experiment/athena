@@ -13,12 +13,8 @@
 
 #include "PathResolver/PathResolver.h"
 
-#include <fstream>
-
 namespace {
   const std::string jetLinkName = "jetLink";
-  const std::string unsafeEnvVar = "ALLOW_FTAG_TO_BREAK_THE_EDM";
-  const std::string envVarTrue = "Yes please.";
 }
 
 namespace FlavorTagDiscriminants {
@@ -26,22 +22,8 @@ namespace FlavorTagDiscriminants {
   GNN::GNN(const std::string& nn_file, const GNNOptions& o):
     m_onnxUtil(nullptr),
     m_jetLink(jetLinkName),
-    m_defaultValue(o.default_output_value),
-    m_decorate_tracks(o.decorate_tracks)
+    m_defaultValue(o.default_output_value)
   {
-    // track decoration is allowed only for non-production builds
-    if (m_decorate_tracks) {
-      const char* break_edm = std::getenv(unsafeEnvVar.c_str());
-      if (break_edm == nullptr || std::string(break_edm) != envVarTrue) {
-        throw std::runtime_error(
-          "Flavor tagging is trying to break the EDM!\n\n"
-          "You are trying to break the EDM!!! "
-          "We'll let you do this, if you set an environement variable. "
-          "Which one? Not telling. "
-          "Now go think about what you just did.\n\n");
-      }
-    }
-
     // Load and initialize the neural network model from the given file path.
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
     m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
@@ -53,12 +35,10 @@ namespace FlavorTagDiscriminants {
     auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
     
-    int n_track_sequences = 0;
     for (auto config : constituents_configs){
       switch (config.type){
       case ConstituentsType::TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
-        n_track_sequences++;
         break;
       case ConstituentsType::IPARTICLE:
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
@@ -66,9 +46,6 @@ namespace FlavorTagDiscriminants {
       }
     }
 
-    if ((n_track_sequences != 1) && m_decorate_tracks){
-      throw std::runtime_error("Only one track sequence is supported when decorating tracks.");
-    }
     
     // Initialize jet and b-tagging input getters.
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
@@ -95,9 +72,8 @@ namespace FlavorTagDiscriminants {
            const FlipTagConfig& flip,
            const std::map<std::string, std::string>& remap,
            const TrackLinkType link_type,
-           float def_out_val,
-           bool dt):
-    GNN( file, GNNOptions { flip, remap, link_type, def_out_val, dt} )
+           float def_out_val):
+    GNN( file, GNNOptions { flip, remap, link_type, def_out_val} )
   {}
 
   GNN::GNN(GNN&&) = default;
@@ -151,7 +127,7 @@ namespace FlavorTagDiscriminants {
       auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(jet, btag);
       gnn_input.insert({sequence_name, sequence_data});
       // collect tracks for decoration
-      if ((loader->getType() == ConstituentsType::TRACK) && m_decorate_tracks){
+      if (loader->getType() == ConstituentsType::TRACK){
         for (auto constituent : sequence_constituents){
           input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
         }
@@ -199,33 +175,6 @@ namespace FlavorTagDiscriminants {
           links.push_back(link);
         }
         dec.second(btag) = links;
-      }
-
-      // decorate tracks directly
-      if (m_decorate_tracks) {
-        for (const auto& dec: m_decorators.trackChar) {
-          std::vector<char>& values = out_vc.at(dec.first);
-          if (values.size() != input_tracks.size()) {
-            throw std::logic_error("Track aux task output size doesn't match the size of track list");
-          }
-          Tracks::const_iterator it = input_tracks.begin();
-          std::vector<char>::const_iterator ival = values.begin();
-          for (; it != input_tracks.end() && ival != values.end(); ++it, ++ival) {
-            dec.second(**it) = *ival;
-          }
-        }
-
-        for (const auto& dec: m_decorators.trackFloat) {
-          std::vector<float>& values = out_vf.at(dec.first);
-          if (values.size() != input_tracks.size()) {
-            throw std::logic_error("Track aux task output size doesn't match the size of track list");
-          }
-          Tracks::const_iterator it = input_tracks.begin();
-          std::vector<float>::const_iterator ival = values.begin();
-          for (; it != input_tracks.end() && ival != values.end(); ++it, ++ival) {
-            dec.second(**it) = *ival;
-          }
-        }
       }
     }
     else {
@@ -277,25 +226,13 @@ namespace FlavorTagDiscriminants {
           m_decorators.jetFloat.emplace_back(outNode.name, Dec<float>(dec_name));
           break;
         case OnnxOutput::OutputType::VECCHAR:
-          if (!m_decorate_tracks or outNode.target == OnnxOutput::OutputTarget::JET) {
-            m_decorators.jetVecChar.emplace_back(outNode.name, Dec<std::vector<char>>(dec_name));
-          } else if (outNode.target == OnnxOutput::OutputTarget::TRACK) {
-            m_decorators.trackChar.emplace_back(outNode.name, Dec<char>(dec_name));
-          } else {
-            throw std::logic_error("Unknown VECCHAR output node target");
-          }
+          m_decorators.jetVecChar.emplace_back(outNode.name, Dec<std::vector<char>>(dec_name));
           break;
         case OnnxOutput::OutputType::VECFLOAT:
-          if (!m_decorate_tracks or outNode.target == OnnxOutput::OutputTarget::JET) {
-            m_decorators.jetVecFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
-          } else if (outNode.target == OnnxOutput::OutputTarget::TRACK) {
-            m_decorators.trackFloat.emplace_back(outNode.name, Dec<float>(dec_name));
-          } else {
-            throw std::logic_error("Unknown VECFLOAT output node target");
-          }
+          m_decorators.jetVecFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
           break;
         default:
-          throw std::logic_error("Unknown output node type");
+          throw std::logic_error("Unknown output data type");
       }
     }
 

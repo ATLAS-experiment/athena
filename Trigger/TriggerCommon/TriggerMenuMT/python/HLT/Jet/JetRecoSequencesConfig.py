@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 """ ComponentAccumulator equivalents for the functions in JetRecoSequences """
@@ -14,7 +14,6 @@ from .JetRecoCommon import (
     getCalibMods,
     getClustersKey,
     getDecorList,
-    getJetContext,
     getHLTPrefix,
     isPFlow,
     doTracking,
@@ -36,9 +35,198 @@ from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDepend
 from JetRecTools import OnlineMon
 from JetRec import JetOnlineMon
 
+from EventShapeTools.EventDensityConfig import getEventShapeName
+
 from TrigEDMConfig.TriggerEDM import recordable
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+
+from typing import Final
+
+# Default threshold for filtering jets for input to hypo
+JET_DEFAULT_VIEW_PT_MIN_GEV : Final[int] = 10
+
+def formatFilteredJetsName(jetsIn, jetPtMinGeV):
+    return f"{jetsIn}_pt{int(jetPtMinGeV)}"
+
+# Prototype data dependency generation for the stages of jet reconstruction
+def JetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+    jetalg, jetradius, extra = interpretRecoAlg(jetRecoDict["recoAlg"])
+
+    if extra == "r":
+        jetOutputDict = ReclusteredJetRecoDataDeps(
+            flags, clustersKey, **jetRecoDict
+        )
+        return jetOutputDict['reclustered']
+    elif extra in ["t", "sd"]:
+        jetOutputDict = GroomedJetRecoDataDeps(
+            flags, clustersKey, **jetRecoDict
+        )
+        return jetOutputDict['groomed']
+    else:
+        jetOutputDict = StandardJetRecoDataDeps(
+            flags, clustersKey, **jetRecoDict
+        )
+        return jetOutputDict['calib']
+
+
+def StandardJetBuildDataDeps(flags, clustersKey, **jetRecoDict):
+    use_FS_tracking = doFSTracking(jetRecoDict)
+    trkopt = jetRecoDict['trkopt']
+    
+    is_pflow = isPFlow(jetRecoDict)
+    if is_pflow:
+        jetDef = defineJets(
+            flags,
+            jetRecoDict,
+            pfoPrefix=f"HLT_{trkopt}",
+            prefix=getHLTPrefix(),
+        )
+    else:
+        jetDef = defineJets(
+            flags,
+            jetRecoDict,
+            clustersKey=clustersKey,
+            prefix=getHLTPrefix(),
+        )
+    # Sort and filter
+    jetDef.modifiers = [
+        "Sort",
+        "Filter:{}".format(getFilterCut(jetRecoDict["recoAlg"])),
+        "ConstitFourMom_copy",
+    ]
+    if jetRecoDict["recoAlg"] == "a4":
+        jetDef.modifiers += ["CaloEnergies"]  # needed for GSC
+        if is_pflow:
+            jetDef.modifiers += ["CaloEnergiesClus"] # Needed for FlowElement GSC
+    if use_FS_tracking:
+        jetDef.modifiers += ["TrackMoments", "JVF", "JVT"]
+    
+    pj_name = JetRecConfig.getPJContName(jetDef.inputdef)
+    if use_FS_tracking:
+        pj_name = f"{pj_name}MergedWithGhostTracks"
+    jetDef._internalAtt["finalPJContainer"] = pj_name
+
+    jetsOut = recordable(jetDef.fullname())
+    jetDef = solveDependencies(jetDef,flags)
+    jetDef.lock()
+
+    return {'build': (jetsOut, jetDef)}
+
+def StandardJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+    if jetRecoDict["jetCalib"] == "nojcalib":
+        # If we don't calibrate, we need to return the clustered jets with filter
+        jetOutputDict = StandardJetBuildDataDeps(
+            flags, clustersKey, **jetRecoDict
+        )
+        jetsNoCalib, jetDef = jetOutputDict['build']
+        jetDef.lock()
+        jetsNoCalibFiltered = formatFilteredJetsName(jetsNoCalib, jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV)
+        # Inelegantly repeat the values because the requested calibration is null
+        jetOutputDict.update({'nojcalib': (jetsNoCalibFiltered, jetDef), 'calib': (jetsNoCalibFiltered, jetDef)})
+        return jetOutputDict
+    else:
+        # If we do calibrate, then the process is to copy+calibrate, and return those jets
+        jrdNoJCalib = cloneAndUpdateJetRecoDict(
+            jetRecoDict,
+            jetCalib="nojcalib"
+        )
+        jetOutputDict = StandardJetBuildDataDeps(
+            flags, clustersKey, **jrdNoJCalib
+        )
+        jetsNoCalib, jetDefNoCalib = jetOutputDict['build']
+        jetsViewNoCalib = formatFilteredJetsName(jetsNoCalib, jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV)
+
+        jetDef = jetDefNoCalib.clone()
+        jetDef.suffix = jetDefNoCalib.suffix.replace("nojcalib", jetRecoDict["jetCalib"])
+
+        if "sub" in jetRecoDict["jetCalib"]:
+            rhoKey = getEventShapeName(jetDef, nameprefix=getHLTPrefix())
+        else:
+            rhoKey = "auto"
+
+        # If we need JVT rerun the JVT modifier
+        use_FS_tracking = doFSTracking(jetRecoDict)
+        is_pflow = isPFlow(jetRecoDict)
+        
+        jetDef.modifiers = getCalibMods(flags, jetRecoDict, rhoKey)
+        if use_FS_tracking:
+            jetDef.modifiers += ["JVT"]
+
+        if jetRecoDict["recoAlg"] == "a4":
+            jetDef.modifiers += ["CaloQuality"]
+            
+        if not is_pflow and jetRecoDict["recoAlg"] == "a4":
+            from TriggerMenuMT.HLT.Jet.JetRecoCommon import cleaningDict
+            jetDef.modifiers += [f'Cleaning:{clean_wp}' for _,clean_wp in cleaningDict.items()]
+   
+        jetDef = solveDependencies(jetDef,flags)
+        jetDef.lock()
+        jetsOut = formatFilteredJetsName(jetDef.fullname(),jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV)
+        jetOutputDict.update({'nojcalib':(jetsViewNoCalib, jetDefNoCalib), 'calib':(jetsOut, jetDef)})
+        return jetOutputDict
+
+def ReclusteredJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+    basicJetRecoDict = cloneAndUpdateJetRecoDict(
+        jetRecoDict,
+        # Standard size for reclustered inputs
+        recoAlg = "a4",
+    )
+
+    jetOutputDict = StandardJetRecoDataDeps(
+        flags, clustersKey, **basicJetRecoDict
+    )
+    basicJetsName, basicJetDef = jetOutputDict['calib']
+
+    rcJetPtMinGeV = 15 # 15 GeV minimum pt for jets to be reclustered
+    rcInputJetsName = formatFilteredJetsName(basicJetDef.fullname(), rcJetPtMinGeV)
+    rc_suffix = f"_{jetRecoDict['jetCalib']}" + (f"_{jetRecoDict['trkopt']}" if doTracking(jetRecoDict) else "")
+
+    rcJetDef = defineReclusteredJets(
+        jetRecoDict,
+        rcInputJetsName,
+        basicJetDef.inputdef.label,
+        getHLTPrefix(),
+        rc_suffix,
+    )
+
+    rcConstitPJKey = JetRecConfig.getPJContName(rcJetDef.inputdef, suffix=jetRecoDict['jetDefStr'])
+    rcJetDef._internalAtt["finalPJContainer"] = rcConstitPJKey
+    rcJetDef.lock()
+
+    rcJetsOut = recordable(rcJetDef.fullname())
+    jetOutputDict['reclustered'] = (rcJetsOut, rcJetDef)
+    return jetOutputDict
+
+
+def GroomedJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+    ungroomedJRD = cloneAndUpdateJetRecoDict(
+        jetRecoDict,
+        # Drop grooming spec
+        recoAlg=jetRecoDict["recoAlg"].rstrip("tsd"),
+        # No need to calibrate
+        jetCalib = "nojcalib",
+    )
+
+    jetOutputDict = StandardJetBuildDataDeps(
+        flags,
+        clustersKey,
+        **ungroomedJRD,
+    )
+    ungroomedJetsName, ungroomedDef = jetOutputDict['build']
+
+    groomDef = defineGroomedJets(jetRecoDict, ungroomedDef)
+    groomedJetsName = recordable(groomDef.fullname())
+    groomDef.modifiers = getCalibMods(flags,jetRecoDict)
+    groomDef.modifiers += [
+        "Sort",
+        "Filter:{}".format(getFilterCut(jetRecoDict["recoAlg"])),
+    ]
+    groomDef = solveGroomingDependencies(groomDef, flags)
+    groomDef.lock()
+
+    return {'ungroomed':(ungroomedJetsName, ungroomedDef), 'groomed':(groomedJetsName, groomDef)}
+
 
 @AccumulatorCache
 def JetRecoCfg(flags, clustersKey, **jetRecoDict):
@@ -48,36 +236,36 @@ def JetRecoCfg(flags, clustersKey, **jetRecoDict):
     """
 
     jetalg, jetradius, extra = interpretRecoAlg(jetRecoDict["recoAlg"])
-    dataSource = "mc" if flags.Input.isMC else "data"
 
     if extra == "r":
         return ReclusteredJetRecoCfg(
-            flags, dataSource, clustersKey, **jetRecoDict
+            flags, clustersKey, **jetRecoDict
         )
     elif extra in ["t", "sd"]:
         return GroomedJetRecoCfg(
-            flags, dataSource, clustersKey, **jetRecoDict
+            flags, clustersKey, **jetRecoDict
         )
     else:
         return StandardJetRecoCfg(
-            flags, dataSource, clustersKey, **jetRecoDict
+            flags, clustersKey, **jetRecoDict
         )
+
 
 # Get a configured JetViewAlg that creates a VIEW_ELEMENTS container of jets above a minimum jet pT
 # Filtered jets are given to hypo.
-# jetPtMin is minimum jet pt in GeV for jets to be seen by hypo
+# jetPtMinGeV is minimum jet pt in GeV for jets to be seen by hypo
 @AccumulatorCache
-def JetViewAlgCfg(flags,jetsIn,jetPtMin=10,**jetRecoDict):
+def JetViewAlgCfg(flags,jetsIn,jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV,**jetRecoDict):
 
     decorList = getDecorList(jetRecoDict)
-    filteredJetsName = f"{jetsIn}_pt{int(jetPtMin)}"
+    filteredJetsName = f"{jetsIn}_pt{int(jetPtMinGeV)}"
     acc = ComponentAccumulator()
     acc.addEventAlgo(
         CompFactory.JetViewAlg(
             "jetview_"+filteredJetsName,
             InputContainer=jetsIn,
             OutputContainer=filteredJetsName,
-            PtMin=jetPtMin*1e3, #MeV
+            PtMin=jetPtMinGeV*1e3, #MeV
             DecorDeps=decorList
         )
     )
@@ -87,7 +275,7 @@ def JetViewAlgCfg(flags,jetsIn,jetPtMin=10,**jetRecoDict):
 
 
 @AccumulatorCache
-def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
+def StandardJetBuildCfg(flags, clustersKey, **jetRecoDict):
     """ Standard jet reconstruction, no reclustering or grooming 
     
     The clusters (and tracks, if necessary) should be built beforehand and passed into this config,
@@ -102,8 +290,9 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
     acc.addSequence(parOR(seqname),primary=True)
     use_FS_tracking = doFSTracking(jetRecoDict)
 
-    context = getJetContext(jetRecoDict)
-
+    trkopt = jetRecoDict['trkopt']
+    context = flags.Jet.Context[trkopt]
+    
     is_pflow = isPFlow(jetRecoDict)
 
     # Add PFlow reconstruction if necessary
@@ -113,7 +302,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
         acc.merge(
             PFCfg(
                 flags,
-                jetRecoDict["trkopt"],
+                trkopt,
                 clustersin=clustersKey,
                 calclustersin="",
                 tracksin=context["Tracks"],
@@ -125,7 +314,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetDef = defineJets(
             flags,
             jetRecoDict,
-            pfoPrefix=f"HLT_{jetRecoDict['trkopt']}",
+            pfoPrefix=f"HLT_{trkopt}",
             prefix=getHLTPrefix(),
         )
     else:
@@ -150,7 +339,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetDef.modifiers += ["TrackMoments", "JVF", "JVT"]
         
     jetsOut = recordable(jetDef.fullname())
-    jetDef = solveDependencies(jetDef)
+    jetDef = solveDependencies(jetDef,flags)
 
     if not (
         jetRecoDict["constitMod"] == ""
@@ -194,8 +383,7 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
     return acc, jetsOut, jetDef
 
 
-@AccumulatorCache
-def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
+def StandardJetRecoCfg(flags, clustersKey, **jetRecoDict):
     """ Full reconstruction for 'simple' (ungroomed, not reclustered) jets
 
     First the uncalibrated jets are built, then (if necessary) the calibrated jets are provided
@@ -209,7 +397,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         reco_acc.addSequence(parOR(seqname))
 
         build_acc, jetsNoCalib, jetDef = StandardJetBuildCfg(
-            flags, dataSource, clustersKey, **jetRecoDict
+            flags, clustersKey, **jetRecoDict
         )
         reco_acc.merge(build_acc, seqname)
 
@@ -219,7 +407,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetViewAcc, jetsOut = JetViewAlgCfg(
             flags,
             jetDef.fullname(),
-            jetPtMin=10, # GeV converted internally
+            jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV, # GeV converted internally
             **jetRecoDict
         )
         reco_acc.merge(jetViewAcc, seqname)
@@ -235,14 +423,14 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
     acc.addSequence(parOR(seqname))
 
     build_acc, jetsNoCalib, jetDefNoCalib = StandardJetBuildCfg(
-        flags, dataSource, clustersKey, **jrdNoJCalib
+        flags, clustersKey, **jrdNoJCalib
     )
     acc.merge(build_acc,seqname)
 
     jetViewAcc, jetsViewNoCalib = JetViewAlgCfg(
         flags,
         jetDefNoCalib.fullname(),
-        jetPtMin=10, # GeV converted internally
+        jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV, # GeV converted internally
         **jrdNoJCalib
     )
     acc.merge(jetViewAcc, seqname)
@@ -266,7 +454,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
     decorList = getDecorList(jetRecoDict)
     
-    jetDef.modifiers = getCalibMods(flags, jetRecoDict, dataSource, rhoKey)
+    jetDef.modifiers = getCalibMods(flags, jetRecoDict, rhoKey)
     if use_FS_tracking:
         jetDef.modifiers += ["JVT"]
 
@@ -277,8 +465,10 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         from TriggerMenuMT.HLT.Jet.JetRecoCommon import cleaningDict
         jetDef.modifiers += [f'Cleaning:{clean_wp}' for _,clean_wp in cleaningDict.items()]
 
+    # getjet context for our trkopt
+    context = flags.Jet.Context[jetRecoDict['trkopt']]
     # make sure all modifiers info is ready before passing jetDef to JetRecConfig helpers
-    jetDef = solveDependencies(jetDef) 
+    jetDef = solveDependencies(jetDef,flags) 
     # This algorithm creates the shallow copy and then also applies the calibration as part of the
     # modifiers list
     acc.addEventAlgo(
@@ -302,7 +492,6 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         and jetRecoDict['constitMod']==''        # exclude SK and CSSK chains
         and jetRecoDict['jetCalib']==jetCalibDef # exclude jets with not full default calibration
     ):
-        context = getJetContext(jetRecoDict)
 
         ftagseqname = f"jetFtagSeq_{jetRecoDict['trkopt']}"
         acc.addSequence(parOR(ftagseqname),seqname)
@@ -324,7 +513,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
     jetViewAcc, jetsOut = JetViewAlgCfg(
         flags,
         jetDef.fullname(),
-        jetPtMin=10, # GeV converted internally
+        jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV, # GeV converted internally
         **jetRecoDict
     )
     acc.merge(jetViewAcc,seqname)
@@ -332,8 +521,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
     return acc, jetsOut, jetDef
 
 
-@AccumulatorCache
-def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
+def GroomedJetRecoCfg(flags, clustersKey, **jetRecoDict):
     """ Create the groomed jets
 
     First the ungroomed jets are created (using the standard configuration), then the grooming
@@ -356,7 +544,6 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
     build_acc, ungroomedJetsName, ungroomedDef = StandardJetBuildCfg(
         flags,
-        dataSource,
         clustersKey,
         **ungroomedJRD,
     )
@@ -364,12 +551,12 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
     groomDef = defineGroomedJets(jetRecoDict, ungroomedDef)
     jetsOut = recordable(groomDef.fullname())
-    groomDef.modifiers = getCalibMods(flags,jetRecoDict, dataSource)
+    groomDef.modifiers = getCalibMods(flags,jetRecoDict)
     groomDef.modifiers += [
         "Sort",
         "Filter:{}".format(getFilterCut(jetRecoDict["recoAlg"])),
     ]
-    groomDef = solveGroomingDependencies(groomDef)
+    groomDef = solveGroomingDependencies(groomDef, flags)
 
     acc.addEventAlgo( JetRecConfig.getJetRecGroomAlg(
         groomDef,
@@ -384,7 +571,7 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         and jetRecoDict['constitMod']=='cssk'        # include only CSSK chains
         and jetRecoDict['jetCalib']==jetCalibDef # exclude jets without full default calibration
         ):
-        context = getJetContext(jetRecoDict)
+        context = flags.Jet.Context[jetRecoDict['trkopt']]
 
         ftagseqname = f"jetFtagSeq_{jetRecoDict['trkopt']}_largeR"
         acc.addSequence(parOR(ftagseqname), seqname)
@@ -403,8 +590,7 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
     return acc, jetsOut, groomDef
 
 
-@AccumulatorCache
-def ReclusteredJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
+def ReclusteredJetRecoCfg(flags, clustersKey, **jetRecoDict):
     """ Create the reclustered jets
 
     First the input jets are built, then the reclustering algorithm is run
@@ -420,7 +606,7 @@ def ReclusteredJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
     )
 
     basic_acc, basicJetsFiltered, basicJetDef = StandardJetRecoCfg(
-        flags, dataSource, clustersKey, **basicJetRecoDict
+        flags, clustersKey, **basicJetRecoDict
     )
     acc.merge(basic_acc,seqname)
 
@@ -428,7 +614,7 @@ def ReclusteredJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
     jetViewAcc, jetsOut = JetViewAlgCfg(
         flags,
         basicJetDef.fullname(),
-        jetPtMin=rcJetPtMin, # GeV converted internally
+        jetPtMinGeV=rcJetPtMin, # GeV converted internally
         **jetRecoDict
     )
     acc.merge(jetViewAcc,seqname)

@@ -42,6 +42,9 @@ from DerivationFrameworkHiggs.HIGG1D1 import HIGG1D1Cfg
 # LLP derivations
 from DerivationFrameworkLLP.LLP1 import LLP1Cfg
 
+# SUSY derivations
+from DerivationFrameworkSUSY.SUSY20 import SUSY20Cfg
+
 ### LLJ derivations
 from DerivationFrameworkLLJ.LLJ1 import LLJ1Cfg
 
@@ -134,6 +137,10 @@ from DerivationFrameworkMuons.MUON5 import MUON5Cfg
 from DerivationFrameworkTLA.TLA0 import TLA0Cfg
 from DerivationFrameworkTLA.TLA1 import TLA1Cfg
 
+#Heavy Ion group derivations
+from DerivationFrameworkHI.HION4 import HION4Cfg
+from DerivationFrameworkHI.HION7 import HION7Cfg
+
 # NCB derivation running on AODs (for cosmic and BIB studies)
 from DerivationFrameworkNCB.NCB1 import NCB1Cfg
 
@@ -146,6 +153,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg',
            'HIGG1D1Cfg',
            'LLP1Cfg', 'LLJ1Cfg',
+           'SUSY20Cfg',
            'IDTR2Cfg',
            'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg',
            'BPHY6Cfg',
@@ -161,5 +169,6 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TRIG8Cfg','L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg',
+           'HION4Cfg','HION7Cfg',
            'NCB1Cfg'
            ]

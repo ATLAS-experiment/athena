@@ -9,5 +9,3 @@ atlas_add_component( ALFA_CLinkAlg
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel AthLinks xAODForward ALFA_CLinkEv GaudiKernel )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

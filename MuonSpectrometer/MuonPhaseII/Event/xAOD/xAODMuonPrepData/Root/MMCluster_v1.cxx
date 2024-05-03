@@ -13,7 +13,6 @@
 
 namespace {
     static const std::string preFixStr{"Mm_"};
-    static const xAOD::PosAccessor<3> accStripPos{preFixStr + "stripPosInStation"}; 
 }
 
 
@@ -24,13 +23,6 @@ IdentifierHash MMCluster_v1::measurementHash() const {
 }
 IdentifierHash MMCluster_v1::layerHash() const {
     return MuonGMR4::MmReadoutElement::createHash(0, gasGap());
-}
-void MMCluster_v1::setStripPosInStation(const MeasVector<3>& pos){
-    VectorMap<3> v{accStripPos(*this).data()};
-    v = pos;
-}
-ConstVectorMap<3> MMCluster_v1::stripPosInStation() const {
-    return ConstVectorMap<3>{accStripPos(*this).data()};
 }
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, time, setTime)
 IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint32_t, charge, setCharge)

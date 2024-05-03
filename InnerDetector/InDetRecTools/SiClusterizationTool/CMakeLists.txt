@@ -15,13 +15,13 @@ find_package( Boost )
 atlas_add_library( SiClusterizationToolLib
    SiClusterizationTool/*.h src/*.cxx
    PUBLIC_HEADERS SiClusterizationTool
-   INCLUDE_DIRS PixelGeoModelLib ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthAllocators
    BeamSpotConditionsData EventPrimitives GaudiKernel GeoPrimitives Identifier InDetCondTools InDetConditionsSummaryService 
    InDetIdentifier InDetPrepRawData InDetRawData InDetReadoutGeometry SCT_ReadoutGeometry InDetRecToolInterfaces
-   InDetSimData PixelConditionsData PixelReadoutGeometryLib PoolSvcLib StoreGateLib TrkNeuralNetworkUtilsLib TrkParameters LwtnnUtils xAODInDetMeasurement
+   InDetSimData PixelConditionsData PixelGeoModelLib PixelReadoutGeometryLib PoolSvcLib StoreGateLib TrkNeuralNetworkUtilsLib TrkParameters LwtnnUtils xAODInDetMeasurement
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${LWTNN_LIBRARIES} AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib FileCatalog ReadoutGeometryBase TrkEventPrimitives TrkSurfaces VxVertex CxxUtils xAODCore )
 
 atlas_add_component( SiClusterizationTool

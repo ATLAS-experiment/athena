@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "src/TrackFindingAlg.h"
 #include "src/TrackFindingData.h"
@@ -27,6 +27,7 @@
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/Utilities/TrackHelpers.hpp"
 // ACTS glue
 #include "ActsEvent/TrackContainer.h"
 
@@ -142,6 +143,9 @@ namespace ActsTrk
     Navigator navigator(cfg, logger().cloneWithSuffix("Navigator"));
     Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
+    // Using the CKF propagator as extrapolator
+    Extrapolator extrapolator = propagator;
+
     std::vector<double> etaBins;
     // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore
     if (m_etaBins.size() > 2)
@@ -154,6 +158,7 @@ namespace ActsTrk
       measurementSelectorCuts.numMeasurementsCutOff = m_numMeasurementsCutOff;
 
     Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(), std::move(measurementSelectorCuts)}};
+    Acts::MeasurementSelector measurementSelector(measurementSelectorCfg);
 
     std::vector<double> absEtaEdges;
     absEtaEdges.reserve(etaBins.size() + 2);
@@ -202,7 +207,7 @@ namespace ActsTrk
 
     ATH_MSG_INFO(trackSelectorCfg);
 
-    m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}, {}, trackSelectorCfg}});
+    m_trackFinder.reset(new CKF_pimpl{CKF_config{std::move(extrapolator), {std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelector, {}, {}, {}, trackSelectorCfg}});
 
     trackFinder().pOptions.maxSteps = m_maxPropagationStep;
     trackFinder().pSecondOptions.maxSteps = m_maxPropagationStep;
@@ -210,9 +215,7 @@ namespace ActsTrk
     trackFinder().pSecondOptions.direction = trackFinder().pOptions.direction.invert();
 
     trackFinder().ckfExtensions.updater.connect<&gainMatrixUpdate>();
-    trackFinder().ckfExtensions.smoother.connect<&gainMatrixSmoother>();
-    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::MutableTrackStateBackend>>(&trackFinder().measurementSelector);
-
+    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<RecoTrackStateContainer>>(&trackFinder().measurementSelector);
     initStatTables();
 
     return StatusCode::SUCCESS;
@@ -323,18 +326,11 @@ namespace ActsTrk
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, detEleColl, measurements.measurementOffsets());
     }
 
-    // ================================================== //
-    // ===================== OUTPUTS ==================== //
-    // ================================================== //
-    // TODO move closer to the place where it is used
-    auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
-
-    ActsTrk::MutableTrackContainer tracksContainer;
-    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
 
     // ================================================== //
     // ===================== COMPUTATION ================ //
     // ================================================== //
+    ActsTrk::MutableTrackContainer tracksContainer;
     EventStats event_stat;
     event_stat.resize(m_stat.size());
 
@@ -362,6 +358,12 @@ namespace ActsTrk
     copyStats(event_stat);
 
     std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), ctx);
+    // ================================================== //
+    // ===================== OUTPUTS ==================== //
+    // ================================================== //
+    auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
+    ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
+
     ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
     if (!trackContainerHandle.isValid())
     {
@@ -385,7 +387,7 @@ namespace ActsTrk
   struct TrackFindingAlg::CkfBranchStopper
   {
     bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState,
-                    ActsTrk::MutableMultiTrajectory::TrackStateProxy &trackState) const
+                    RecoTrackStateContainer::TrackStateProxy &trackState) const
     {
       if (!alg.m_trackStatePrinter.empty())
       {
@@ -399,7 +401,11 @@ namespace ActsTrk
       double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
       const auto &cutSet = getCuts(alg.trackFinder().trackSelector, eta);
 
-      if (!(tipState.nHoles > cutSet.maxHoles &&
+      // https://github.com/acts-project/acts/blob/v34.0.0/Core/include/Acts/TrackFinding/MeasurementSelector.ipp#L99
+      // counts any other measurement anywhere on the surface as an outlier, so does not register as a hole.
+      // We really want to count them as holes.
+      if (!((tipState.nHoles > cutSet.maxHoles ||
+             tipState.nOutliers > cutSet.maxOutliers) &&
             (trackState.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ||
              tipState.nMeasurements < cutSet.minMeasurements)))
         return false;
@@ -456,45 +462,43 @@ namespace ActsTrk
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, ActsTrk::MutableTrackStateBackend>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, RecoTrackStateContainer>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
                                slAccessorDelegate,
                                trackFinder().ckfExtensions,
                                trackFinder().pOptions,
-                               &(*pSurface));
-    options.smoothing = true;
+                               pSurface.get());
     std::optional<TrackFinderOptions> secondOptions;
     if (m_doTwoWay) {
-      options.smoothingTargetSurfaceStrategy = Acts::CombinatorialKalmanFilterTargetSurfaceStrategy::first;
-
       secondOptions.emplace(tgContext,
                             mfContext,
                             calContext,
                             slAccessorDelegate,
                             trackFinder().ckfExtensions,
                             trackFinder().pSecondOptions,
-                            &(*pSurface));
-      secondOptions->filterTargetSurface = pSurface.get();
-      secondOptions->smoothing = true;
-      secondOptions->smoothingTargetSurfaceStrategy = Acts::CombinatorialKalmanFilterTargetSurfaceStrategy::last;
+                            pSurface.get());
+      secondOptions->targetSurface = pSurface.get();
     }
 
-    ActsTrk::MutableTrackContainer tracksContainerTemp;
+    // ActsTrk::MutableTrackContainer tracksContainerTemp;
+    Acts::VectorTrackContainer trackBackend;
+    Acts::VectorMultiTrajectory trackStateBackend;
+    RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
 
     // Measurement calibration
     // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
     // Therefore, passing them without checking if they are enabled is safe.
-    OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>(
-	*m_ATLASConverterTool,
-	measurements.trackingSurfaceHelper(),
-	m_pixelCalibTool,
-	m_stripCalibTool);
+    auto calibrator = OnTrackCalibrator<RecoTrackStateContainer>(
+      *m_ATLASConverterTool,
+      measurements.trackingSurfaceHelper(),
+      m_pixelCalibTool,
+      m_stripCalibTool);
 
-    options.extensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
+    options.extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
     if (m_doTwoWay)
-      secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
+      secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
 
     std::size_t category_i = 0;
     const auto measurementContainerOffsets = measurements.measurementContainerOffsets();
@@ -502,6 +506,13 @@ namespace ActsTrk
     options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
     if (m_doTwoWay)
       secondOptions->extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
+
+    Acts::PropagatorOptions<Acts::ActionList<Acts::MaterialInteractor>,
+                            Acts::AbortList<Acts::EndOfWorldReached>>
+    extrapolationOptions(tgContext, mfContext);
+
+    Acts::TrackExtrapolationStrategy extrapolationStrategy =
+        Acts::TrackExtrapolationStrategy::firstOrLast;
 
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
@@ -601,7 +612,7 @@ namespace ActsTrk
       size_t ntracks = 0;
 
       // lambda to collect together all the things we do with a viable track.
-      auto addTrack = [&](const ActsTrk::MutableTrackContainer::TrackProxy &track) {
+      auto addTrack = [&](const RecoTrackContainerProxy &track) {
         if (!m_trackStatePrinter.empty()) {
           m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
         }
@@ -628,8 +639,16 @@ namespace ActsTrk
       for (auto &firstTrack : tracksForSeed) {
         std::size_t nsecond = 0;
 
+        auto smoothingResult = Acts::smoothTrack(tgContext, firstTrack, logger());
+        if (!smoothingResult.ok()) {
+          ATH_MSG_DEBUG("Smoothing for seed "
+                     << iseed << " and first track " << firstTrack.index()
+                     << " failed with error " << smoothingResult.error());
+          continue;
+        }
+
         if (m_doTwoWay) {
-          std::optional<ActsTrk::MutableMultiTrajectory::TrackStateProxy> firstState;
+          std::optional<RecoTrackStateContainerProxy> firstState;
           for (auto st : firstTrack.trackStatesReversed()) {
             bool isMeasurement = st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag);
             bool isOutlier = st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag);
@@ -668,7 +687,25 @@ namespace ActsTrk
 
                 Acts::calculateTrackQuantities(secondTrack);
 
+                auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
+                    secondTrack, *pSurface, trackFinder().extrapolator, extrapolationOptions,
+                    extrapolationStrategy, logger());
+                if (!extrapolationResult.ok()) {
+                  ATH_MSG_WARNING("Extrapolation for seed "
+                            << iseed << " and second track " << secondTrack.index()
+                            << " failed with error " << extrapolationResult.error());
+
+                  // restore first track
+                  (*firstFirstState).previous() = Acts::kTrackIndexInvalid;
+
+                  continue;
+                }
+
                 addTrack(secondTrack);
+
+                // restore first track
+                (*firstFirstState).previous() = Acts::kTrackIndexInvalid;
+
                 ++nsecond;
               }
             }
@@ -679,6 +716,17 @@ namespace ActsTrk
             ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
             ++event_stat[category_i][kNoSecond];
           }
+
+          auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
+              firstTrack, *pSurface, trackFinder().extrapolator, extrapolationOptions,
+              extrapolationStrategy, logger());
+          if (!extrapolationResult.ok()) {
+            ATH_MSG_WARNING("Extrapolation for seed "
+                      << iseed << " and first " << firstTrack.index()
+                      << " failed with error " << extrapolationResult.error());
+            continue;
+          }
+
           addTrack(firstTrack);
         }
         nfirst++;
@@ -698,17 +746,17 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
-  void
-  TrackFindingAlg::storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
-                                 const ActsTrk::MutableTrackContainer::TrackProxy &track,
-                                 DuplicateSeedDetector &duplicateSeedDetector) const
-  {
+  void 
+  TrackFindingAlg::storeSeedInfo(const RecoTrackContainer &tracksContainer,
+                                 const RecoTrackContainerProxy &track,
+                                 DuplicateSeedDetector &duplicateSeedDetector) const {
+
       const auto lastMeasurementIndex = track.tipIndex();
       duplicateSeedDetector.newTrajectory();
 
       tracksContainer.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&duplicateSeedDetector](const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state) -> void
+          [&duplicateSeedDetector](const RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
           {
             // Check there is a source link
             if (not state.hasUncalibratedSourceLink())

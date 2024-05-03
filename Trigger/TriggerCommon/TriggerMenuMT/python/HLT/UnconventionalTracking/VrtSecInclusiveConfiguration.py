@@ -6,7 +6,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def VrtSecInclusiveMenuSequence(flags):
+def VrtSecInclusiveMenuSequenceGenCfg(flags):
 
     vsivtxname =  "HLT_TrigVSIVertex"
     # Construct the full reco sequence

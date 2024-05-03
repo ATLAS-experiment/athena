@@ -339,9 +339,10 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
   /// particle origin (TODO: add proper GeoID, collision/cosmics)
   DetRegionSvcIDPair origin(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   const auto pBarcode = HepMC::barcode(genPartPtr);
+  const auto particleID = HepMC::uniqueID(genPartPtr);
   auto tBinding = std::make_unique<ISF::TruthBinding>(genPartPtr);
 
-  auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+  auto hmpl = std::make_unique<HepMcParticleLink>(particleID, parentEvent->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
 
   auto sParticle = std::make_unique<ISF::ISFParticle>( std::move(pos),
                                                        std::move(mom),
@@ -351,6 +352,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
                                                        genPartPtr->status(),
                                                        pTime,
                                                        origin,
+                                                       particleID,
                                                        pBarcode,
                                                        tBinding.release(),
                                                        hmpl.release() );

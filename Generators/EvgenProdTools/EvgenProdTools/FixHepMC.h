@@ -59,7 +59,10 @@ private:
   long m_pdg0Killed;
   long m_decayCleaned;
   long m_totalSeen;
+  long m_replacedPIDs;
   //@}
+   
+  std::map<int,int> m_pidmap; //!< map of pids to change.
 
 };
 

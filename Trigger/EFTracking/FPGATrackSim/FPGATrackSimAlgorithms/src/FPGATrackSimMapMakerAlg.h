@@ -9,25 +9,30 @@
  * Produce Map files from wrappers.
  */
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/MsgStream.h"
-#include "FPGATrackSimObjects/FPGATrackSimTypes.h"
-#include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h"
-#include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
-#include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
-#include "TFile.h"
-#include <fstream>
+#include "AthenaBaseComps/AthAlgorithm.h" //inheritance
+#include "GaudiKernel/ToolHandle.h"  //member
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h" //enum classes (e.g. SiliconTech, DetectorZone) in global namespace :-(
+#include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h" //member
+#include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h" //tool handle template param
 
-class IFPGATrackSimEventInputHeaderTool;
-class FPGATrackSimEventInputHeader;
+#include <fstream> //ofstream members
+#include <tuple> //typedef
+#include <map> //member
+#include <set>  //member
+#include <vector> //member
+
+
+class FPGATrackSimModuleRelabel;
 class FPGATrackSimHit;
+class TFile;
 
-typedef std::tuple<SiliconTech, DetectorZone, int, int, int> FPGATrackSimModuleId;
+
 
 class FPGATrackSimMapMakerAlg : public AthAlgorithm
 {
     public:
+        typedef std::tuple<SiliconTech, DetectorZone, int, int, int> FPGATrackSimModuleId;
+        //
         FPGATrackSimMapMakerAlg(const std::string& name, ISvcLocator* pSvcLocator);
         virtual ~FPGATrackSimMapMakerAlg() = default;
 
@@ -42,15 +47,15 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         FPGATrackSimEventInputHeader         m_eventHeader;
 
         struct Module {
-            SiliconTech det;
-            DetectorZone bec;
-            int lyr;
-            int eta;
-            int phi;
+            SiliconTech det{SiliconTech::strip};
+            DetectorZone bec{DetectorZone::barrel};
+            int lyr{};
+            int eta{};
+            int phi{};
             std::vector<int> numTracks; // used for trimming, indexed by slice
-            int plane;
-            Module() : det(SiliconTech::strip), bec(DetectorZone::barrel), lyr(0), eta(0), phi(0), numTracks(std::vector<int>()), plane(-1) {}
-            Module(SiliconTech det, DetectorZone bec, int lyr, int eta, int phi) : det(det), bec(bec), lyr(lyr), eta(eta), phi(phi), numTracks(std::vector<int>()), plane(-1) {}
+            int plane{-1};
+            Module() = default;
+            Module(SiliconTech det, DetectorZone bec, int lyr, int eta, int phi) : det(det), bec(bec), lyr(lyr), eta(eta), phi(phi) {}
             FPGATrackSimModuleId moduleId() const {
                 return std::tie(det,bec,lyr,eta,phi);
             }
@@ -58,11 +63,11 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
             {
                 return std::tie(det,bec,lyr,eta,phi) == std::tie(m.det,m.bec,m.lyr,m.eta,m.phi);
             }
-            bool operator<(const Module m) const
+            bool operator<(const Module & m) const
             {
                 return std::tie(det,bec,lyr,eta,phi) < std::tie(m.det,m.bec,m.lyr,m.eta,m.phi);
             }
-            bool operator>(const Module m) const
+            bool operator>(const Module & m) const
             {
                 return std::tie(det,bec,lyr,eta,phi) > std::tie(m.det,m.bec,m.lyr,m.eta,m.phi);
             }
@@ -106,7 +111,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         -> -1 means the layer is not used
         -> Example: se67+ = Strip Positve Endcap layer 67
         */
-        const std::vector<std::vector<std::vector<std::string>>>* m_planes;
+        const std::vector<std::vector<std::vector<std::string>>>* m_planes{};
         const std::vector< std::vector< std::vector<std::string> > > m_planes_default = //first stage
         {
             { // region 0
@@ -216,7 +221,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         std::vector <std::vector < std::vector<float> > > m_z; // used to calculate median z per layer for each slice, [slice][plane][hit]
         // output map files and monitoring
         std::ofstream m_pmap, m_rmap, m_subrmap, m_etapat, m_radfile, m_zedfile;
-        TFile *m_monitorFile;
+        TFile *m_monitorFile{};
 
 
         // TODO make automatic

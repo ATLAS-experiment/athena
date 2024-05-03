@@ -42,7 +42,7 @@ class MenuThresholdsCollection( object ):
         return len(self.thresholds)
 
     def __getitem__(self, thrName):
-        if type(thrName) != str:
+        if type(thrName) is not str:
             raise TypeError("Can not access threshold by %r, it is a %s" % (thrName, type(thrName)))
         if thrName not in self:
             raise KeyError("Threshold %s is not in the menu" % thrName)

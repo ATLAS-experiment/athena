@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Based on : https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibConfig.py
 
@@ -72,8 +72,6 @@ def _setupMdtCondDB(flags):
             result.merge(addFoldersSplitOnline(flags, 'MDT', online_folders , offline_folders,
                                                className = 'CondAttrListCollection' ) )
     else:
-        from AthenaCommon.AppMgr import ServiceMgr
-        ServiceMgr.TagInfoMgr.ExtraTagValuePairs.update({"MDTCalibrationSource": flags.Muon.Calib.mdtCalibrationSource}) # TODO Check this.
         result.merge(addFoldersSplitOnline(flags, flags.Muon.Calib.mdtCalibrationSource, online_folders, offline_folders,
                                            className = 'CondAttrListCollection' ) )
         

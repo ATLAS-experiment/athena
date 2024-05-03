@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi/Athena include(s):
@@ -10,6 +10,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "ParticleEvent/TrackParticleAssocs.h"
 #include "AthContainers/ConstDataVector.h"
+#include "AthContainers/Decorator.h"
 // Local include(s):
 #include "GSFTrackParticleMapCnvAlg.h"
 
@@ -106,7 +107,9 @@ namespace xAODMaker {
       // Set new link as a decoration of the new GSF track particle
       if(newLink.isValid()){
         newLink.toPersistent();
-        (*xaod)->auxdecor< ElementLink< xAOD::TrackParticleContainer > >( "originalTrackParticle" ) = newLink;
+        static const SG::Decorator< ElementLink< xAOD::TrackParticleContainer >>
+          originalTrackParticleDec ("originalTrackParticle");
+        originalTrackParticleDec (**xaod) = newLink;
       }
     }
 

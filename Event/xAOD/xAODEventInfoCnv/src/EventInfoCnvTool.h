@@ -61,15 +61,15 @@ namespace xAODMaker {
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
       SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
       Gaudi::Property<bool> m_disableBeamSpot{ this, "DisableBeamSpot", false, "disable beamspot" };
+
+      /// Internal flag for the availability of the beam spot information
+      bool m_beamSpotInformationAvailable{};
 #endif // not XAOD_ANALYSIS or GENERATIONBASE
 
 #if !defined(XAOD_ANALYSIS) && !defined(SIMULATIONBASE) && !defined(GENERATIONBASE)
       SG::ReadCondHandleKey<LuminosityCondData> m_lumiDataKey
       { this, "LumiDataKey", "", "SG key for luminosity data" };
 #endif // not XAOD_ANALYSIS or SIMULATIONBASE or GENERATIONBASE
-
-      /// Internal flag for the availability of the beam spot information
-      bool m_beamSpotInformationAvailable{};
 
    }; // class EventInfoCnvTool
 

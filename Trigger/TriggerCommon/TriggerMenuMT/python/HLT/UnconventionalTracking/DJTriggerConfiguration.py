@@ -14,7 +14,7 @@ from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-def DJPromptStep(flags):
+def DJPromptStepSequenceGenCfg(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoPromptToolFromDict
 
 
@@ -81,7 +81,7 @@ def DJDispFragment(flags):
     selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
     return selAcc
 
-def DJDispStep(flags):
+def DJDispStepSequenceGenCfg(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoDispToolFromDict
 
     hypo_alg = CompFactory.DisplacedJetDispHypoAlg("DJTrigDispHypoAlg",

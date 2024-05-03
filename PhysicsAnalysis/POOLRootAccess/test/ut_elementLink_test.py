@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2014 CERN for the benefit of the ATLAS collaboration
 
 
 #Tests the element links are correctly available
@@ -12,9 +12,9 @@ evt.getEntry(0)
 els = evt.retrieve("xAOD::ElectronContainer","Electrons")
 for el in els:
     if not el.trackParticle():
-        print "ERROR: Element link is invalid for kClassAccess .. exit"
+        print("ERROR: Element link is invalid for kClassAccess .. exit")
         sys.exit(-1)
 
 
-print "Element links were valid. Test passed"
+print("Element links were valid. Test passed")
 

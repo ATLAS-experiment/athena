@@ -42,8 +42,7 @@ def getRegSelTools(flags, detNames):
         if det not in _regSelToDetFlagMap:
             raise RuntimeError('Cannot add detector "' + det + '" because it is not in _regSelToDetFlagMap')
         detFlag = 'Enable'+_regSelToDetFlagMap[det]
-        detFlagCont = getattr(flags, 'Detector')
-        detEnabled = getattr(detFlagCont, detFlag)
+        detEnabled = getattr(flags.Detector, detFlag)
         if not detEnabled:
             _log.debug('addRegSelDets: skip adding detector "%s" because the flag Detector.%s is False', det, detFlag)
             continue

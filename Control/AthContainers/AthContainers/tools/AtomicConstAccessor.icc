@@ -44,6 +44,20 @@ AtomicConstAccessor<T>::AtomicConstAccessor (const std::string& name,
 
 
 /**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class T>
+inline
+AtomicConstAccessor<T>::AtomicConstAccessor (const SG::auxid_t auxid)
+  : Base (auxid, SG::AuxVarFlags::Atomic)
+{
+}
+
+
+/**
  * @brief Fetch the variable for one element, as a const reference.
  * @param e The element for which to fetch the variable.
  *

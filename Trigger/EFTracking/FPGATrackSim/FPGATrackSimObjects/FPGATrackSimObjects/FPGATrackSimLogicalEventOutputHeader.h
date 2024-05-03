@@ -54,7 +54,7 @@ private:
 
     FPGATrackSimDataFlowInfo             m_dataflowInfo;
 
-    ClassDef(FPGATrackSimLogicalEventOutputHeader, 4)
+    ClassDef(FPGATrackSimLogicalEventOutputHeader, 4);
 };
 
 std::ostream& operator<<(std::ostream& s, FPGATrackSimLogicalEventOutputHeader const& h);

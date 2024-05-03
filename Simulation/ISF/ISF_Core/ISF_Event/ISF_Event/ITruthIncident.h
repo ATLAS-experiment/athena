@@ -74,7 +74,9 @@ namespace ISF {
     virtual HepMC::GenParticlePtr      parentParticle() = 0;
     virtual int      parentStatus() = 0;
     /** Return the barcode of the parent particle */
-    virtual Barcode::ParticleBarcode  parentBarcode() = 0;
+    virtual Barcode::ParticleBarcode  parentBarcode() = 0; // TODO Remove this method
+    /** Return the unique ID of the parent particle */
+    virtual int  parentUniqueID() = 0;
     /** Return a boolean whether or not the parent particle survives the incident */
     virtual bool                      parentSurvivesIncident() const = 0;
     /** Return the parent particle after the TruthIncident vertex (and assign

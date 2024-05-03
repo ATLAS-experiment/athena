@@ -27,7 +27,9 @@ checkxAOD.py AOD.pool.root
 ActsReadEDM.py \
    --filesInput AOD.pool.root -- \
    readClusters=True \
-   readSpacePoints=True
+   readSpacePoints=True \
+   readTracks=True \
+   tracks="ActsTracks"
 
 rc=$?
 if [ $rc != 0 ]; then

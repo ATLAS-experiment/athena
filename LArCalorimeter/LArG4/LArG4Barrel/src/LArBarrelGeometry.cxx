@@ -46,6 +46,7 @@ namespace LArG4 {
       , m_rMaxAccordion(0)
       , m_zMinBarrel(0)
       , m_zMaxBarrel(0)
+      , m_zMaxBarrelDMMargin(0)
       , m_etaMaxBarrel(0)
       , m_NCellTot(0)
       , m_NCellMax(0)
@@ -116,6 +117,7 @@ namespace LArG4 {
       m_etaMaxBarrel   =   parameters->GetValue("LArEMBMaxEtaAcceptance");
       m_zMinBarrel     =   parameters->GetValue("LArEMBfiducialMothZmin");
       m_zMaxBarrel     =   parameters->GetValue("LArEMBfiducialMothZmax");
+      m_zMaxBarrelDMMargin = 10.0; // 10 mm margin
       // === GU 11/06/2003   total number of cells in phi
       // to distinguish 1 module (testbeam case) from full Atlas
       m_NCellTot = (int) (parameters->GetValue("LArEMBnoOFPhysPhiCell"));
@@ -1212,7 +1214,7 @@ namespace LArG4 {
           currentCellData.etaBin=0;
           currentCellData.phiBin=phisave;
 
-        } else if (zZpos >= m_zMaxBarrel || abs_eta >= 1.40) { // inactive matter between EMB and scintillator
+        } else if (zZpos >= m_zMaxBarrel - m_zMaxBarrelDMMargin || abs_eta >= 1.40) { // inactive matter between EMB and scintillator including some margin for error
           if (abs_eta >1.0 && abs_eta < 1.5) {
             sampling=2;
             region=2;
@@ -1229,22 +1231,32 @@ namespace LArG4 {
           }
         } else {
           if (!m_testbeam) {
-            ATH_MSG_ERROR("LArBarrelGeometry: cannot find region for DM hit...");
-            ATH_MSG_ERROR("r,z,eta,phi " << radiusZpos << " " << zZpos << " " << etaZpos << " " << phiZpos);
-            ATH_MSG_ERROR("x,y,z (Atlas) " << p.x() << " " << p.y() << " " << p.z());
-            ATH_MSG_ERROR(" inSTAC " << inSTAC);
             const G4double thisStepEnergyDeposit = a_step->GetTotalEnergyDeposit() * a_step->GetTrack()->GetWeight();
-            ATH_MSG_ERROR(" eDeposited " << thisStepEnergyDeposit);
+            std::ostringstream dmLog;
+            dmLog << "LArBarrelGeometry: cannot find region for DM hit..." << std::endl;
+            dmLog << "LArBarrelGeometry: cannot find region for DM hit..." << std::endl;
+            dmLog << "m_zMinBarrel: " << m_zMinBarrel << std::endl;
+            dmLog << "m_zMaxBarrel: " << m_zMaxBarrel << std::endl;
+            dmLog << "m_rMinAccordion: " << m_rMinAccordion << std::endl;
+            dmLog << "m_rMaxAccordion: " << m_rMaxAccordion << std::endl;
+            dmLog << "r,z,eta,phi " << radiusZpos << " " << zZpos << " " << etaZpos << " " << phiZpos << std::endl;
+            dmLog << "x,y,z (Atlas) " << p.x() << " " << p.y() << " " << p.z() << std::endl;
+            dmLog << " inSTAC " << inSTAC << std::endl;
+            dmLog << " eDeposited " << thisStepEnergyDeposit << std::endl;
             const G4VPhysicalVolume* vol = thisStepPoint->GetPhysicalVolume();
             const G4String volName = vol->GetName();
-            ATH_MSG_ERROR(" volName " << volName);
+            dmLog << " volName " << volName << std::endl;
             const G4int ndep = g4navigation->GetDepth();
             for (G4int ii=0;ii<=ndep;ii++) {
               const G4VPhysicalVolume* v1 = g4navigation->GetVolume(ii);
               const G4String vname = v1->GetName();
-              ATH_MSG_ERROR("vname " << vname);
+              dmLog << "vname " << vname << std::endl;
             }
-
+            if (thisStepEnergyDeposit > 1.*CLHEP::MeV) {
+              ATH_MSG_ERROR(dmLog.str());
+            } else {
+              ATH_MSG_WARNING(dmLog.str());
+            }
           }
           // in test beam case, we can get there for leakage on the side (in phi) of the module
           // in this case, we attribute an identifier like inactive material

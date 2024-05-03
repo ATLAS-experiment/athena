@@ -122,6 +122,7 @@ class DBConnectionController:
                 defdb = DQDefects.DefectsDB("COOLOFL_GLOBAL/CONDBR2",tag=db)
                 defdb.closeDatabase = lambda: None
                 self.openConn[(schema,db)] = defdb
+            else:
                 logging=False
                 from CoolConvUtilities.AtlCoolLib  import indirectOpen
                 self.openConn[(schema,db)] = indirectOpen("%s/%s"%(schema,db),True, logging)

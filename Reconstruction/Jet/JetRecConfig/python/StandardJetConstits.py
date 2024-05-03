@@ -142,23 +142,23 @@ _stdInputList = [
     # No quality criteria are applied to the tracks, used for ghosts for example
     JetInputExternal("JetSelectedTracks",     xAODType.TrackParticle,
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
-                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
+                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
                      ),
     # alternative JetSelected tracks for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
     JetInputExternal("JetSelectedTracks_EleRM",     xAODType.TrackParticle,
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
-                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
+                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
                      ),
     # alternative ID tracks for ftf
     JetInputExternal("JetSelectedTracks_ftf",     xAODType.TrackParticle,
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
-                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=False )
+                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
                      ),
     
     # Apply quality criteria defined via trackSelOptions in jdef.context (used e.g. for track-jets)
     JetInputExternal("JetSelectedTracks_trackSelOpt",     xAODType.TrackParticle,
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)  
-                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef.context, trackSelOpt=True )
+                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=True )
                      ),
     JetInputExternal("JetTrackUsedInFitDeco", xAODType.TrackParticle,
                      prereqs= [ inputsFromContext("Tracks") , # in std context, this is InDetTrackParticles (see StandardJetContext)
@@ -168,7 +168,7 @@ _stdInputList = [
     JetInputExternal("JetTrackVtxAssoc", xAODType.TrackParticle,
         algoBuilder = 
         lambda jdef, _ : jrtcfg.getJetTrackVtxAlg(
-            jdef.context, 
+            jdef._contextDic, 
             algname="jetTVA" if jdef.context in ["HL_LHC", "default", "notrk", ""] else f"jetTVA_{jdef.context}", 
             WorkingPoint="Nonprompt_All_MaxWeight"
         ),
@@ -177,12 +177,12 @@ _stdInputList = [
     ),
     # alternative JetTrackVtxAssoc for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
     JetInputExternal("JetTrackVtxAssoc_EleRM",      xAODType.TrackParticle,
-                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef.context, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
+                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
                      # previous default for ttva : WorkingPoint="Custom", d0_cut= 2.0, dzSinTheta_cut= 2.0 
                      prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices") ]
                      ),
     JetInputExternal("JetTrackVtxAssoc_ftf",      xAODType.TrackParticle,
-                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef.context, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
+                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
                      # previous default for ttva : WorkingPoint="Custom", d0_cut= 2.0, dzSinTheta_cut= 2.0 
                      prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices") ]
                      ),

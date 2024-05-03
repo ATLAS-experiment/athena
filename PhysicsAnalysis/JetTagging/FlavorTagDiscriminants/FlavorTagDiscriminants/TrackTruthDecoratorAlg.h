@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_TRUTH_DECORATOR_ALG_HH
@@ -13,7 +13,9 @@
 
 #include "xAODTruth/TruthParticleContainerFwd.h"
 #include "xAODTruth/TruthEventContainer.h"
+#include "xAODMuon/MuonContainer.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
+#include "TruthClassification/TruthClassificationTool.h"
 
 
 namespace FlavorTagDiscriminants {
@@ -31,6 +33,9 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_TrackContainerKey {
       this, "trackContainer", "InDetTrackParticles",
         "Key for the input track collection"};
+    SG::ReadHandleKey< xAOD::MuonContainer > m_MuonContainerKey {
+      this, "muonContainer", "Muons",
+        "Key for the input muon collection"};
 
     // Accessors for truth particles
     using RDHK = SG::ReadDecorHandleKey< xAOD::TruthParticleContainer >;
@@ -67,11 +72,34 @@ namespace FlavorTagDiscriminants {
     WDHK m_dec_parent_barcode {
       this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
         "Barcode of parent of linked truth particle"};
+    WDHK m_dec_muon_origin_label {
+      this, "dec_ftagTruthMuonOriginLabel", "ftagTruthMuonOriginLabel", 
+        "Exclusive origin label of the muon"};
 
     // Truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {
       this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", 
         "track truth origin tool"};
+    // Truth Lepton Origin tool (https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/AnalysisCommon/TruthClassification)
+    ToolHandle<CP::IClassificationTool> m_truthLeptonTool{
+      this, "truthLeptonTool", "",
+        "Lepton truth classification tool"};
+
+    // Defining a map for proper muon origin labels 
+    std::unordered_map<Truth::Type,unsigned int> m_muTruthMap = {
+      {Truth::Type::Unknown, 0}, //Fake(Uknown) muon
+      {Truth::Type::KnownUnknown, 1}, //KnownUknown muon
+      {Truth::Type::PromptMuon, 2}, //Prompt muon
+      {Truth::Type::BHadronDecay, 3}, //From B muon
+      // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool
+      // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool 
+      {Truth::Type::LightFlavorDecay, 6}, //From light muon
+      {Truth::Type::TauDecay, 7}, //From tau muon
+      {Truth::Type::TauDecayLike, 8}, //4-like muons
+      {Truth::Type::BHadronDecayLike, 8}, //4-like muons
+      {Truth::Type::CHadronDecayLike, 8}, //4-like muons
+      {Truth::Type::NonMuonlike, 8}, //Non-muons like muons
+    };
   };
 }
 

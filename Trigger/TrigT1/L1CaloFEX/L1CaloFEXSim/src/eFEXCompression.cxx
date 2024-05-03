@@ -19,6 +19,8 @@ std::atomic<bool> eFEXCompression::s_disableNoiseCuts = false;
 
 unsigned int eFEXCompression::compress(int Et) {
 
+  // check for saturation
+  if (Et == s_eFEXOverflow*s_eFEXstep) return s_LArSaturated;
   // Check for overflow
   if (Et >= s_maxET) return s_LArOverflow;
  
@@ -49,8 +51,9 @@ int eFEXCompression::expand(unsigned int code) {
 
   // Deal with special codes first:
   if (code == s_NoData)  return 0;
-  if (code == s_LArInvalid || code == s_LArReserved || code > s_LArMaxCode) return s_error; 
-  if (code == s_LArOverflow || code == s_LArSaturated) return s_maxET;
+  else if (code == s_LArInvalid || code == s_LArReserved || code > s_LArMaxCode) return s_error;
+  else if (code == s_LArOverflow) return s_maxET;
+  else if (code == s_LArSaturated) return s_eFEXOverflow*s_eFEXstep;
 
   /** Now expand code into an ET value.
       Start by finding what range the code is in */
@@ -105,24 +108,6 @@ unsigned int eFEXCompression::threshold(unsigned int code, int threshold) {
   if (code < cut) code = 0;
 
   return code;
-}
-
-
-unsigned int eFEXCompression::linearize(unsigned int code, int threshold) {
-
-  /// Apply the threshold. Since eFEX ET is positive, minimum threshold is 0.
-  if (threshold < 0) threshold = 0;
-  code = eFEXCompression::threshold(code, threshold);
-
-  /// Expand the ET value
-  int Et = eFEXCompression::expand(code);
-
-  // Check for overflow
-  if (Et >= s_maxET) return s_eFEXOverflow;
-
-  /// Convert to eFEX digit scale: 25 MeV
-  unsigned int eFexET = Et/s_eFEXstep;
-  return eFexET;
 }
 
 int eFEXCompression::decode(int EtVal, int layer, bool ignoreDisable) {

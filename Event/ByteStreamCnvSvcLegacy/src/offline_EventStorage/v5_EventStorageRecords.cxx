@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -30,7 +30,7 @@ std::string offline_EventStorage_v5::string_record(void *ri, const void *pi) {
   return rs;	    
 }
 
-std::string offline_EventStorage_v5::string_record(offline_EventStorage_v5::file_name_strings nst) {
+std::string offline_EventStorage_v5::string_record(const offline_EventStorage_v5::file_name_strings& nst) {
   
   std::ostringstream s;
 

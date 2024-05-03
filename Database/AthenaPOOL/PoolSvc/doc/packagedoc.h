@@ -15,13 +15,6 @@ catalog specification, and querying and control of POOL configuration options.
 PoolSvc is used via its IPoolSvc interface.
 
 
-@section PoolSvc_Properties Settable PoolSvc Properties (Job Options)
-
-Settable PoolSvc properties are in PoolSvc_jobOptions.py:
-
-@include PoolSvc_jobOptions.py
-
-
 @section PoolSvc_Documentation Additional Documentation
 
 See the ATLAS User/Developer HowTo document for additional information.

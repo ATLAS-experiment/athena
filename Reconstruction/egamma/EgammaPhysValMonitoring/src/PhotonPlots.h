@@ -9,6 +9,7 @@
 #include "KinematicsPlots.h"
 #include "ShowerShapesPlots.h"
 #include "IsolationPlots.h"
+#include "PhotonConversionPlots.h"
 
 #include "xAODTruth/TruthParticle.h"
 #include "xAODEgamma/Photon.h"
@@ -22,8 +23,10 @@ class PhotonPlots:public PlotBase {
       // Reco only information
       Egamma::KinematicsPlots         m_oKinAllPlots;
       Egamma::ShowerShapesPlots       m_oShowerShapesAllPlots;
+      Egamma::PhotonConversionPlots   m_oPhotonConversionAllPlots;
       Egamma::KinematicsPlots         m_oKinIsoPlots;
       Egamma::ShowerShapesPlots       m_oShowerShapesIsoPlots;
+      Egamma::PhotonConversionPlots   m_oPhotonConversionIsoPlots;
       Egamma::KinematicsPlots         m_oKinIsoUncPlots;
       Egamma::KinematicsPlots         m_oKinIsoConvPlots;
       Egamma::KinematicsPlots         m_oKinIsoLoosePlots;

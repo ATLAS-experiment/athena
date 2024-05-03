@@ -19,9 +19,9 @@ atlas_add_citest( FastChain
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/FastChain.sh )
 
 atlas_add_citest( SimulationRun3AF3
-   SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --threads 4 -e '--maxEvents 20' --run-only
+   SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --threads 0 -e '--maxEvents 20' --run-only
    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
-   PROPERTIES PROCESSORS 4 )
+   PROPERTIES PROCESSORS 1 )
 
 atlas_add_citest( SimulationRun3AF3Checks
    SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --checks-only --output-path ../SimulationRun3AF3
@@ -160,11 +160,11 @@ atlas_add_citest( RecoRun4MC_DAODPHYS
 #################################################################################
 
 atlas_add_citest( CPAlgorithmsRun2MC_PHYS
-   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --input-file ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type fullsim --input-file ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun2MC_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITE
-   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --physlite --input-file ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type fullsim --physlite --input-file ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun2MC_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun2Data_PHYS
@@ -176,11 +176,11 @@ atlas_add_citest( CPAlgorithmsRun2Data_PHYSLITE
    DEPENDS_SUCCESS DerivationRun2Data_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3MC_PHYS
-   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --input-file ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type fullsim --input-file ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun3MC_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITE
-   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --physlite --input-file ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type fullsim --physlite --input-file ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun3MC_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3Data_PHYS
@@ -238,12 +238,20 @@ atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
 
+atlas_add_citest( ACTS_Workflow_Cached
+   SCRIPT ActsWorkflowCached.sh
+   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
+ 
 atlas_add_citest( ACTS_Workflow_FastTracking
    SCRIPT ActsWorkflowFastTracking.sh
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
  
- atlas_add_citest( Acts_ConversionWorkflow
+atlas_add_citest( Acts_Workflow_Conversion
    SCRIPT ActsConversionWorkflow.sh
+   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
+
+ atlas_add_citest( ACTS_Workflow_HeavyIons
+   SCRIPT ActsWorkflowHeavyIons.sh
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
  
 atlas_add_citest( ACTS_ValidateClusters

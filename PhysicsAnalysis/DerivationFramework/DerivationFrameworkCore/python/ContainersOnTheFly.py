@@ -168,6 +168,9 @@ def ContainersOnTheFly(flags=None):
         ["BTagging_AntiKt4EMPFlowSecVtx","xAOD::VertexContainer"],
         ["BTagging_AntiKt4EMPFlowSecVtxAux","xAOD::VertexAuxContainer"],
 
+        ["GNNVertices", "xAOD::VertexContainer"],
+        ["GNNVerticesAux","xAOD::VertexAuxContainer"],
+
         ["GlobalChargedParticleFlowObjects","xAOD::FlowElementContainer"],
         ["GlobalChargedParticleFlowObjectsAux","xAOD::FlowElementAuxContainer"],
         ["GlobalNeutralParticleFlowObjects","xAOD::FlowElementContainer"],

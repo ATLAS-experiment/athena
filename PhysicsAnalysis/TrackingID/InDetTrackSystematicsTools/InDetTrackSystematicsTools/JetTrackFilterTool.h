@@ -76,7 +76,7 @@ namespace InDet {
     // allow the user to configure which calibration file to use if desired
     std::string m_calibFileNomEff;
 
-    double m_effUncertTIDE = 0.012;
+    double m_effUncertTIDE = 0.24;
     double m_fakeUncertTIDE = 0.35;
 
     ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool;

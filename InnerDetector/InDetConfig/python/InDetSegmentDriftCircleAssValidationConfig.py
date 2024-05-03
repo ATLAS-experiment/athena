@@ -11,7 +11,7 @@ def SegmentDriftCircleAssValidationCfg(
     kwargs.setdefault("Pseudorapidity", 2.1) # end of TRT
     kwargs.setdefault("RadiusMin", 0.)
     kwargs.setdefault("RadiusMax", 600.)
-    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
+    kwargs.setdefault("pTmin", flags.Tracking.BackTracking.minPt)
     kwargs.setdefault("MinNumberDCs", flags.Tracking.BackTracking.minTRT)
 
     acc.addEventAlgo(

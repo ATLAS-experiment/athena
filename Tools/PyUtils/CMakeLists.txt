@@ -33,13 +33,13 @@ else()
     find_package( six )
     
     # Install files from the package:
-    atlas_install_python_modules( python/*.py python/scripts python/AthFile POST_BUILD_CMD ${ATLAS_FLAKE8} )
+    atlas_install_python_modules( python/*.py python/scripts POST_BUILD_CMD ${ATLAS_FLAKE8} )
     atlas_install_scripts( bin/acmd.py bin/checkFile.py bin/checkPlugins.py
        bin/checkSG.py bin/checkMetaSG.py bin/checkTP.py bin/checkxAOD.py
-       bin/diff-athfile bin/diff-jobo-cfg.py bin/diffConfigs.py
-       bin/diffPoolFiles.py bin/dlldep.py bin/dso-stats.py bin/dump-athfile.py
-       bin/dumpAthfilelite.py bin/filter-and-merge-d3pd.py bin/getMetadata.py
-       bin/gprof2dot bin/issues bin/magnifyPoolFile.py bin/merge-poolfiles.py
+       bin/diff-jobo-cfg.py bin/diffConfigs.py
+       bin/diffPoolFiles.py bin/dlldep.py bin/dso-stats.py
+       bin/filter-and-merge-d3pd.py bin/getMetadata.py
+       bin/gprof2dot bin/issues bin/magnifyPoolFile.py
        bin/apydep.py bin/pool_extractFileIdentifier.py
        bin/pool_insertFileToCatalog.py bin/print_auditor_callgraph.py bin/pyroot.py
        bin/vmem-sz.py bin/meta-reader.py bin/meta-diff.py bin/dump-event-from-file.py
@@ -50,12 +50,10 @@ else()
     atlas_add_alias( checkMetaSG "checkMetaSG.py" )
     atlas_add_alias( dso-stats "dso-stats.py" )
     atlas_add_alias( gen_klass "acmd.py" "gen-klass" )
-    atlas_add_alias( merge-poolfiles "merge-poolfiles.py" )
     atlas_add_alias( diffConfigs "diffConfigs.py" )
     atlas_add_alias( filter-and-merge-d3pd "filter-and-merge-d3pd.py" )
     atlas_add_alias( diffPoolFiles "diffPoolFiles.py" )
     atlas_add_alias( print_auditor_callgraph "print_auditor_callgraph.py" )
-    atlas_add_alias( dump-athfile "dump-athfile.py" )
     atlas_add_alias( pyroot "pyroot.py" )
     atlas_add_alias( checkxAOD "checkxAOD.py" )
     atlas_add_alias( checkSG "checkSG.py" )

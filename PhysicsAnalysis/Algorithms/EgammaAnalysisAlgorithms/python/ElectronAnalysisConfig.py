@@ -14,17 +14,39 @@ import PATCore.ParticleDataType
 class ElectronCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the electron four-momentum correction"""
 
-    def __init__ (self, containerName) :
+    def __init__ (self, containerName='') :
         super (ElectronCalibrationConfig, self).__init__ ()
-        self.containerName = containerName
-        self.addOption ('postfix', '', type=str)
-        self.addOption ('crackVeto', False, type=bool)
-        self.addOption ('ptSelectionOutput', False, type=bool)
-        self.addOption ('isolationCorrection', False, type=bool)
-        self.addOption ('trackSelection', True, type=bool)
-        self.addOption ('recalibratePhyslite', True, type=bool)
-        self.addOption ('minPt', 4.5e3, type=float)
-        self.addOption ('forceFullSimConfig', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Typically "
+            "not needed here since the calibration is common to all electrons.")
+        self.addOption ('crackVeto', False, type=bool,
+            info="whether to perform LAr crack veto based on the cluster eta, "
+            "i.e. remove electrons within 1.37<|eta|<1.52. The default "
+            "is False.")
+        self.addOption ('ptSelectionOutput', False, type=bool,
+            info="whether or not to apply a minimum pT cut to "
+            "calibrated electrons. The default is False.")
+        self.addOption ('isolationCorrection', False, type=bool,
+            info="whether or not to perform isolation corrections (leakage "
+            "corrections), i.e. set up an instance of "
+            "CP::EgammaIsolationCorrectionAlg.")
+        self.addOption ('trackSelection', True, type=bool,
+            info="whether or not to set up an instance of "
+            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
+            "z_0 sin(theta) cuts. The default is True.")
+        self.addOption ('recalibratePhyslite', True, type=bool,
+            info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
+            "PHYSLITE derivations. The default is True.")
+        self.addOption ('minPt', 4.5e3, type=float,
+            info="the minimum pT cut to apply to calibrated electrons. "
+            "The default is 4.5 GeV.")
+        self.addOption ('forceFullSimConfig', False, type=bool,
+            info="whether to force the tool to use the configuration meant for "
+            "full simulation samples. Only for testing purposes. The default "
+            "is False.")
 
     def makeAlgs (self, config) :
 
@@ -130,18 +152,43 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
-    def __init__ (self, containerName, selectionName) :
+    def __init__ (self, containerName='', selectionName='') :
         super (ElectronWorkingPointConfig, self).__init__ ()
-        self.containerName = containerName
-        self.selectionName = selectionName
-        self.addOption ('postfix', None, type=str)
-        self.addOption ('likelihoodWP', None, type=str)
-        self.addOption ('isolationWP', None, type=str)
-        self.addOption ('recomputeLikelihood', False, type=bool)
-        self.addOption ('chargeIDSelection', False, type=bool)
-        self.addOption ('doFSRSelection', False, type=bool)
-        self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
-        self.addOption ('forceFullSimConfig', False, type=bool)
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', selectionName, type=str,
+            noneAction='error',
+            info="the name of the electron selection to define (e.g. tight or "
+            "loose).")
+        self.addOption ('postfix', None, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as selectionName is used internally.")
+        self.addOption ('likelihoodWP', None, type=str,
+            info="the ID WP (string) to use. Supported ID WPs: TightLH, "
+            "MediumLH, LooseBLayerLH. ")
+        self.addOption ('isolationWP', None, type=str,
+            info="the isolation WP (string) to use. Supported isolation WPs: "
+            "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
+            "VarRad, TightTrackOnly_FixedRad, NonIso.")
+        self.addOption ('recomputeLikelihood', False, type=bool,
+            info="whether to rerun the LH. The default is False, i.e. to use "
+            "derivation flags.")
+        self.addOption ('chargeIDSelection', False, type=bool,
+            info="whether to run the ECIDS tool. The default is False.")
+        self.addOption ('doFSRSelection', False, type=bool,
+            info="whether to accept additional electrons close to muons for "
+            "the purpose of FSR corrections to these muons. Expert feature "
+            "requested by the H4l analysis running on PHYSLITE. "
+            "The default is False.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available. The default is False.")
+        self.addOption ('forceFullSimConfig', False, type=bool,
+            info="whether to force the tool to use the configuration meant for "
+            "full simulation samples. Only for testing purposes. "
+            "The default is False.")
 
 
     def makeAlgs (self, config) :

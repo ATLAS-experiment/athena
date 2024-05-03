@@ -148,6 +148,8 @@ private:
   std::function<void(const ConvProxy*)> m_chainIdsPrinter = [&](const ConvProxy* p){ for (auto id: p->passChains ) ATH_MSG_DEBUG("chain id " << id); };
   std::function<void(const ConvProxy*)> m_teIDPrinter = [&](const ConvProxy* p){ ATH_MSG_DEBUG("TE id " << TrigConf::HLTUtils::hash2string(p->te->getId())); };
 
+  // return 0 if it is not tpological, else the step before topo merge
+  size_t is2LegTopoChain(const TrigConf::HLTChain* ptrChain ) const;
 
 
   std::size_t getFeaSize(const ConvProxy &) const;

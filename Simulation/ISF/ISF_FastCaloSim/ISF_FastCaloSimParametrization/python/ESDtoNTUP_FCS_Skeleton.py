@@ -35,13 +35,11 @@ def fromRunArgs(runArgs):
     else:
         log.warning('No output file set! Using output.NTUP_FCS.root')
         flags.Output.HISTFileName = 'output.NTUP_FCS.root'
-    #ServiceMgr.THistSvc.Output +=["ISF_HitAnalysis DATAFILE='"+outputFile+"' OPT='RECREATE'"] # FIXME top level directory name
 
     ## Optional output Geometry File
     outputGeoFileName = None
     if hasattr(runArgs,"outputGeoFileName"):
         outputGeoFileName = runArgs.outputGeoFileName
-    #ServiceMgr.THistSvc.Output +=["ISF_Geometry DATAFILE='"+runArgs.outputGeoFileName+"' OPT='RECREATE'"] # FIXME top level directory name
 
     # Autoconfigure enabled subdetectors
     if hasattr(runArgs, 'detectors'):

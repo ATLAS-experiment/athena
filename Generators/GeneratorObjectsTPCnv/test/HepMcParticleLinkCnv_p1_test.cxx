@@ -212,7 +212,7 @@ void test1()
   // HepMcParticleLinks pointing at GenParticles in the first GenEvent in the McEventCollection
   HepMC::ConstGenParticlePtr particle1 = genPartList.at(0);
   // By ConstGenParticlePtr + event_number
-  HepMcParticleLink trans1a(particle1,particle1->parent_event()->event_number());
+  HepMcParticleLink trans1a(particle1,particle1->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
   testit (trans1a);
   // By barcode + event_number
   HepMcParticleLink trans1b(HepMC::barcode(particle1),particle1->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
@@ -233,7 +233,7 @@ void test1()
   // HepMcParticleLinks pointing at GenParticles in other GenEvents in the McEventCollection
   HepMC::ConstGenParticlePtr particle2 = genPartList.at(7);
   // By ConstGenParticlePtr + event_number
-  HepMcParticleLink trans2a(particle2,particle2->parent_event()->event_number());
+  HepMcParticleLink trans2a(particle2,particle2->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
   testit (trans2a);
   // By barcode + event_number
   HepMcParticleLink trans2b(HepMC::barcode(particle2),particle2->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
@@ -253,7 +253,7 @@ void test1()
   //---------------------------------------------
   HepMC::ConstGenParticlePtr particle3 = genPartList.at(8);
   // By ConstGenParticlePtr + event_number
-  HepMcParticleLink trans3a(particle3,particle3->parent_event()->event_number());
+  HepMcParticleLink trans3a(particle3,particle3->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
   testit (trans3a);
   // By barcode + event_number
   HepMcParticleLink trans3b(HepMC::barcode(particle3),particle3->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
@@ -274,7 +274,7 @@ void test1()
   // HepMcParticleLinks pointing at filtered pileup truth
   HepMC::ConstGenParticlePtr particle4 = genPartList.at(12);
   // By ConstGenParticlePtr + event_number
-  HepMcParticleLink trans4a(particle4,particle4->parent_event()->event_number());
+  HepMcParticleLink trans4a(particle4,particle4->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
   testit (trans4a);
   // By barcode + event_number
   HepMcParticleLink trans4b(HepMC::barcode(particle4),particle4->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);

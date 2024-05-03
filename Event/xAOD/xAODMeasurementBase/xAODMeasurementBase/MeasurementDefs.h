@@ -32,7 +32,10 @@ enum class UncalibMeasType {
     TgcStripType = 5,
     MMClusterType = 6,
     sTgcStripType = 7,
+    // HGTD    
     HGTDClusterType = 8,
+    // Do not add anything after nTypes
+    nTypes
 };
 
 /// @ detector ID element hash

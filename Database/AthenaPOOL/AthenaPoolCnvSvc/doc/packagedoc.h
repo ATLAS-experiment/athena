@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -8,12 +8,6 @@
 
 %AthenaPoolCnvSvc is part of a toolkit to implement the POOL persistency into Athena.
 It consists of four packages PoolSvc, %AthenaPoolCnvSvc(this one), EventSelectorAthenaPool and AthenaPoolUtilities.
-
-@section AthenaPoolCnvSvc_Properties Settable AthenaPoolCnvSvc Properties (Job Options)
-
-Settable AthenaPoolCnvSvc properties are in AthenaPoolCnvSvc_jobOptions.py:
-
-\include AthenaPoolCnvSvc_jobOptions.py
 
 @section AthenaPoolCnvSvc_Documentation Additional Documentation
 
@@ -25,8 +19,6 @@ The code can be browsed using LXR
 @section AthenaPoolCnvSvc_Examples Examples
 The package Database/AthenaPOOL/AthenaPoolExample contains running examples of algorithms writing and
 reading Data Objects using AthenaPoolCnvSvc. 
-
-
 
 
 

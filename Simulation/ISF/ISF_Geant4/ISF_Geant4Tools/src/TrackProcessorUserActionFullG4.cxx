@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -148,8 +148,10 @@ namespace G4UA{
           tmpISP->setNextGeoID(nextGeoID);
           tmpISP->setNextSimID(ISF::fUndefinedSimID);
 
-          auto generationZeroBarcode = tHelp.GetBarcode();
-          tmpISP->setBarcode(generationZeroBarcode);
+          auto generationZeroBarcode = tHelp.GetBarcode(); // FIXME barcode-based
+          tmpISP->setBarcode(generationZeroBarcode); // FIXME barcode-based
+          auto generationZeroID = tHelp.GetUniqueID();
+          tmpISP->setId(generationZeroID);
 
           tmpISP->setNextGeoID( nextGeoID );
 

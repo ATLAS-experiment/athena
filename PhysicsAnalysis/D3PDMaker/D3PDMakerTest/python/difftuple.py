@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: D3PDMakerTest/python/difftuple.py
@@ -261,7 +261,7 @@ def compare (o1, o2, thresh = 1e-6, ithresh = None):
         if o1 < 0: o1 = o1 + (1<<32)
         if o2 < 0: o2 = o2 + (1<<32)
         return o1 == o2
-    if type(o1) != type(o2):
+    if type(o1) is not type(o2):
         return False
     if isinstance(o1,list):
         if len(o1) != len(o2):
@@ -383,7 +383,7 @@ def diff_dirs (f1, f2):
         if k not in k2: continue
         o1 = f1.Get(k)
         o2 = f2.Get(k)
-        if type(o1) != type(o2):
+        if type(o1) is not type(o2):
             print ('Type mismatch for ', k)
             print (o1, o2)
         if k == 'Schema':

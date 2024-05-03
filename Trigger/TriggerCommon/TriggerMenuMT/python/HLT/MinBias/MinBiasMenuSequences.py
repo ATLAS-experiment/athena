@@ -25,15 +25,15 @@ def SPCountHypoToolGen(chainDict):
         hypo.pixCLMax = 150 # TODO revisit tightening those
         hypo.sctSPMax = 150 # as above
     if "sp_pix" in chainDict["chainName"]:
-        hypo.pixCL = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("pix"))
+        hypo.pixCL = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("pix"))
     if "sp_vpix" in chainDict["chainName"]:
         hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
         hypo.sctSP = -1
-        hypo.pixCLMax = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("vpix"))
+        hypo.pixCLMax = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("vpix"))
     if "nototpix" in chainDict["chainName"]:
         hypo.pixCL = -1  # Remove any cut on mininum number of Pixel and SCT SpacePoints
         hypo.sctSP = -1
-        hypo.pixCLnoToT = int(chainDict["chainParts"][0]["hypoSPInfo"].strip("nototpix"))
+        hypo.pixCLnoToT = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("nototpix"))
 
     return hypo
 
@@ -89,7 +89,7 @@ def MbtsHypoToolGen(flags, chainDict):
 def TrigZVertexHypoToolGen(chainDict):
     hypo = CompFactory.TrigZVertexHypoTool(chainDict["chainName"])
     if "pusup" in chainDict["chainName"]:
-        hypo.minWeight = int(chainDict["chainParts"][0]["pileupInfo"].strip("pusup"))
+        hypo.minWeight = int(chainDict["chainParts"][0]["pileupInfo"].removeprefix("pusup"))
     else:
         hypo.minWeight = -1 # pass always
 
@@ -125,11 +125,11 @@ def MinBiasSPSel(flags):
     selAcc.addHypoAlgo(spCountHypo)
     return selAcc
 
-def MinBiasSPSequenceCfg(flags):
+def MinBiasSPSequenceGenCfg(flags):
     selAcc = MinBiasSPSel(flags)
     return MenuSequenceCA(flags, selAcc, HypoToolGen = SPCountHypoToolGen)
 
-def MinBiasZVertexFinderSequenceCfg(flags):
+def MinBiasZVertexFinderSequenceGenCfg(flags):
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)
     vdv = CompFactory.AthViews.ViewDataVerifier( "VDVZFinderInputs",
                                                   DataObjects = {( 'SpacePointContainer' , 'StoreGateSvc+PixelTrigSpacePoints'),
@@ -144,7 +144,7 @@ def MinBiasZVertexFinderSequenceCfg(flags):
     return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigZVertexHypoToolGen)
 
 
-def MinBiasTrkSequenceCfg(flags):
+def MinBiasTrkSequenceGenCfg(flags):
     recoAcc = InViewRecoCA(name="MBTrackReco", InViewRoIs="InputRoI", RequireParentView=True)
 
     from TrigInDetConfig.utils import getFlagsForActiveConfig
@@ -164,7 +164,7 @@ def MinBiasTrkSequenceCfg(flags):
     selAcc.mergeHypo(trackCountHypoAlgo)
     return MenuSequenceCA(flagsWithTrk, selAcc, HypoToolGen = TrackCountHypoToolGen)
 
-def MinBiasMbtsSequenceCfg(flags):
+def MinBiasMbtsSequenceGenCfg(flags):
     recoAcc = InEventRecoCA(name="Mbts")
     from TrigMinBias.MbtsConfig import MbtsFexCfg, MbtsSGInputCfg
     fex = MbtsFexCfg(flags, MbtsBitsKey = recordable("HLT_MbtsBitsContainer"))
@@ -184,10 +184,10 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.lock()
-    zf = MinBiasZVertexFinderSequenceCfg(flags)
+    zf = MinBiasZVertexFinderSequenceGenCfg(flags)
     zf.ca.printConfig(withDetails=True)
 
-    mb = MinBiasMbtsSequenceCfg(flags)
+    mb = MinBiasMbtsSequenceGenCfg(flags)
     mb.ca.printConfig()
 
 

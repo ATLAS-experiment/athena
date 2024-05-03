@@ -70,7 +70,7 @@ public:
   double getClusterEnergy() const ;
 
   void simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction,
-  const PFEnergyPredictorTool* energyP);
+  const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing);
 
 private:
 

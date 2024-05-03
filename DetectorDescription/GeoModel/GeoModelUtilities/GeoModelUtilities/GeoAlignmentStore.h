@@ -15,6 +15,9 @@
 
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoVAlignmentStore.h"
+#include "GeoModelKernel/GeoVFullPhysVol.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
+
 #include "GeoModelUtilities/TransformMap.h"
 #include "GeoModelUtilities/TransientConstSharedPtr.h"
 
@@ -86,16 +89,13 @@ public:
     PositioningMapPtr getDefAbsPositions() const;
 };
 
-ATH_ALWAYS_INLINE
-const GeoTrf::Transform3D* GeoAlignmentStore::getDelta(const GeoAlignableTransform* axf) const { 
+inline const GeoTrf::Transform3D* GeoAlignmentStore::getDelta(const GeoAlignableTransform* axf) const { 
     return m_deltas->getTransform(axf); 
 }
-ATH_ALWAYS_INLINE
-const GeoTrf::Transform3D* GeoAlignmentStore::getAbsPosition(const GeoVFullPhysVol* fpv) const {
+inline const GeoTrf::Transform3D* GeoAlignmentStore::getAbsPosition(const GeoVFullPhysVol* fpv) const {
     return m_absPositions->getTransform(fpv); 
 }
-ATH_ALWAYS_INLINE
-const GeoTrf::Transform3D* GeoAlignmentStore::getDefAbsPosition(const GeoVFullPhysVol* fpv) const {
+inline const GeoTrf::Transform3D* GeoAlignmentStore::getDefAbsPosition(const GeoVFullPhysVol* fpv) const {
     return m_defAbsPositions->getTransform(fpv);
 }
 

@@ -17,7 +17,6 @@ class OnnxOutput {
 
   public:
     enum class OutputType {UNKNOWN, FLOAT, VECCHAR, VECFLOAT};
-    enum class OutputTarget {UNKNOWN, JET, TRACK};
 
     /* constructor for OnnxModelVersion::V1 and higher */
     OnnxOutput(const std::string& name,
@@ -32,11 +31,9 @@ class OnnxOutput {
     const std::string name;
     const std::string name_in_model;
     const OutputType type;
-    const OutputTarget target;
 
   private:
     OutputType getOutputType(ONNXTensorElementDataType type, int rank) const;
-    OutputTarget getOutputTarget(int rank) const;
     const std::string getName(const std::string& name, const std::string& model_name) const;
 
 }; // class OnnxOutput

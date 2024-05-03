@@ -4,7 +4,10 @@
 
 #include "FPGATrackSimMapMakerAlg.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventOutputHeaderTool.h"
+#include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
+
 #include "TH2.h"
+#include "TFile.h"
 
 #include "GaudiKernel/IEventProcessor.h"
 
@@ -109,8 +112,8 @@ StatusCode FPGATrackSimMapMakerAlg::readInputs(bool & done)
 
         SiliconTech det = hit.getDetType();
         DetectorZone bec = hit.getDetectorZone();
-        int lyr = hit.getPhysLayer();
-        int eta = hit.getFPGATrackSimEtaModule();
+        int lyr = hit.getPhysLayer(); 
+        int eta = hit.getEtaModule();
         int phi = hit.getPhiModule();
 
         if (hit.isPixel() && hit.isBarrel()) {
@@ -120,7 +123,7 @@ StatusCode FPGATrackSimMapMakerAlg::readInputs(bool & done)
         else if (hit.isPixel() && !hit.isBarrel()) {
             // Perform the layer + module number remapping using our tool.
             m_moduleRelabel->remap(hit);
-            eta = hit.getFPGATrackSimEtaModule();
+            eta = hit.getEtaModule();
             lyr = hit.getPhysLayer();
 
             m_peHits.push_back(hit);
@@ -370,8 +373,8 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
             if (m_usedTracks.find(hit.getEventIndex()) != m_usedTracks.end()) continue; // skip if already done a hit from this track
             if (isOnKeyLayer(1,hit.getDetType(),hit.getDetectorZone(), hit.getPhysLayer()))
             { // if hit is in key layer, add it's barcode to the map
-                if (keymod2slice.count(hit.getFPGATrackSimEtaModule()) > 0) {
-                    int s = keymod2slice[hit.getFPGATrackSimEtaModule()];
+                if (keymod2slice.count(hit.getEtaModule()) > 0) {
+                    int s = keymod2slice[hit.getEtaModule()];
                     m_track2slice[hit.getEventIndex()] = s;
                     m_usedTracks.insert(hit.getEventIndex());
                 }
@@ -690,7 +693,10 @@ StatusCode FPGATrackSimMapMakerAlg::finalize()
     ATH_CHECK(writeEtaPatterns());
     ATH_CHECK(writeRadiiFile(m_allHits));
     ATH_CHECK(writeMedianZFile(m_allHits));
-    if (m_monitorFile) delete m_monitorFile;
+    delete m_monitorFile;
+    m_monitorFile = nullptr;
+    delete m_moduleRelabel;
+    m_moduleRelabel = nullptr;
     return StatusCode::SUCCESS;
 }
 
@@ -767,7 +773,7 @@ std::string FPGATrackSimMapMakerAlg::makeRmapLines(std::vector<FPGATrackSimHit> 
         {
             if(static_cast<int>(hit.getPhysLayer()) == lyr && hit.getDetectorZone() == bec)  // cast from uint to int just to remove Wsign-compare warnings
             {
-                etas.insert(hit.getFPGATrackSimEtaModule());
+                etas.insert(hit.getEtaModule());
                 phis.insert(hit.getPhiModule());
             }
         }

@@ -364,6 +364,25 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
     DNN_inputValues["ZCut12"] = jet.getAttribute<float>("ZCut12");
     DNN_inputValues["KtDR"] = jet.getAttribute<float>("KtDR");
 
+    int pv_location = findPV();
+
+    if(pv_location != -1){
+      if( GetUnGroomTracks(jet, pv_location).isSuccess()){
+        SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
+
+        DNN_inputValues["Ntrk500"] = readNtrk500(jet);
+      }
+      else{
+        ATH_MSG_ERROR("Either the ungroomed parent jet doesn't have 'NumTrkPt500' as an attribute or the parent link is broken");
+        DNN_inputValues["Ntrk500"] = -999;
+      }
+    }
+    else {
+      ATH_MSG_ERROR("Could not find a primary vertex");
+      DNN_inputValues["Ntrk500"] = -999;
+    }
+
+
   }
 
   else if ( m_tagClass == TAGCLASS::TopQuark ) {

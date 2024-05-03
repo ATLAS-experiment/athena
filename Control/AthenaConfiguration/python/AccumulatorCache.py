@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -75,8 +75,8 @@ class AccumulatorDecorator:
     def getInfo(self):
         """Return a dictionary with information about the cache size and cache usage"""
         return {"cache_size" : len(self._cache),
-                "misses" : self._stats[self._func].misses,
-                "hits" : self._stats[self._func].hits,
+                "misses" : self._stats[self].misses,
+                "hits" : self._stats[self].hits,
                 "function" : self._func,
                 "result_cache_size" : len(self._resultCache)}
 
@@ -106,6 +106,16 @@ class AccumulatorDecorator:
         """Resume memoization for all instances of AccumulatorDecorator."""
         cls._memoize = True
 
+    @classmethod
+    def clearCache(cls):
+        """Clear all accumulator caches"""
+        for decor in cls._stats:
+            decor._evictAll()
+            decor._cache.clear()
+            decor._resultCache.clear()
+
+        cls._stats.clear()
+
     def _getHash(x):
         if hasattr(x, "athHash"):
             return x.athHash()
@@ -116,8 +126,16 @@ class AccumulatorDecorator:
         raise NotHashable(x)
 
     def _evict(x):
+        """Called when x is removed from the cache"""
         if isinstance(x, AccumulatorCachable):
             x._cacheEvict()
+        elif isinstance(x, Iterable) and not isinstance(x, str):
+            for el in x:
+                AccumulatorDecorator._evict(el)
+
+    def _evictAll(self):
+        for v in self._cache.values():
+            AccumulatorDecorator._evict(v)
 
     def __get__(self, obj, objtype):
         """Support instance methods."""
@@ -137,11 +155,11 @@ class AccumulatorDecorator:
         finally:
             t1 = time.perf_counter()
             if cacheHit is True:
-                self._stats[self._func].hits += 1
-                self._stats[self._func].t_hits += (t1-t0)
+                self._stats[self].hits += 1
+                self._stats[self].t_hits += (t1-t0)
             elif cacheHit is False:
-                self._stats[self._func].misses += 1
-                self._stats[self._func].t_misses += (t1-t0)
+                self._stats[self].misses += 1
+                self._stats[self].t_misses += (t1-t0)
 
     def _callImpl(self, *args, **kwargs):
         """Implementation of __call__.
@@ -204,12 +222,7 @@ class AccumulatorDecorator:
             return (deepcopy(res) if self._deepcopy else res, False)
 
     def __del__(self):
-        for v in self._cache.values():
-            if isinstance(v, Iterable):
-                for el in v:
-                    AccumulatorDecorator._evict(el)
-            else:
-                AccumulatorDecorator._evict(v)
+        self._evictAll()
 
 
 def AccumulatorCache(func = None, maxSize = 128,

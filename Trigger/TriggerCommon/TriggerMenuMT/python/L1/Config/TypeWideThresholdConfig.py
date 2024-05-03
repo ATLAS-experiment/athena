@@ -362,10 +362,11 @@ class L1Config_eTAU:
     rCore_fw_tight = 32
 
     # BDT eTAU score cuts
-    # 12 bits (0 - 4095), BDT > threshold -> pass
-    BDT_fw_loose = 2
-    BDT_fw_medium = 12
-    BDT_fw_tight = 32
+    # 12 bits (0 - 4095), BDT > 4 * threshold -> pass
+    # CAREFUL!! THE THRESHOLDS HERE ARE MULTIPLIED BY 4 IN THE eFEX FIRMWARE!
+    BDT_fw_loose = 221
+    BDT_fw_medium = 224
+    BDT_fw_tight = 225
 
     # RHad isolation cuts
     # 8 bits (0 - 255), rHad > threshold -> pass
@@ -405,7 +406,7 @@ class L1Config_eTAU:
         ]
         confObj["ptMinToTopo"] = 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
-        confObj["minIsoEt"] = 0.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
+        confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
         confObj["algoVersion"] = int(do_eFex_BDT_Tau)
 
@@ -459,7 +460,7 @@ class L1Config_cTAU:
     eTAU_rCoreMin_WP_fw_loose: eTAUWP = eTAUWP.NoSelection
     eTAU_rHadMin_WP_fw_loose: eTAUWP = eTAUWP.NoSelection
 
-    isolation_fw_medium: int = 410
+    isolation_fw_medium: int = 358
     isolation_jTAUCoreScale_fw_medium: int = 0
     eTAU_rCoreMin_WP_fw_medium: eTAUWP = eTAUWP.NoSelection
     eTAU_rHadMin_WP_fw_medium: eTAUWP = eTAUWP.NoSelection
@@ -471,27 +472,27 @@ class L1Config_cTAU:
 
     # Dedicated M thresholds for the primary items:
     #cTAU12M (Medium12)
-    isolation_fw_medium12: int = 358
+    isolation_fw_medium12: int = 400
     isolation_jTAUCoreScale_fw_medium12: int = 0
-    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
+    eTAU_rCoreMin_WP_fw_medium12: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium12: eTAUWP = eTAUWP.NoSelection
 
     #cTAU20M (Medium20)
-    isolation_fw_medium20: int = 358
-    isolation_jTAUCoreScale_fw_medium20: int = 0
-    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium20: int = 600 + 600
+    isolation_jTAUCoreScale_fw_medium20: int = 600
+    eTAU_rCoreMin_WP_fw_medium20: eTAUWP = eTAUWP.Loose
     eTAU_rHadMin_WP_fw_medium20: eTAUWP = eTAUWP.NoSelection
 
     #cTAU30M (Medium30)
-    isolation_fw_medium30: int = 358
-    isolation_jTAUCoreScale_fw_medium30: int = 0
-    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium30: int = 500 + 600
+    isolation_jTAUCoreScale_fw_medium30: int = 600
+    eTAU_rCoreMin_WP_fw_medium30: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium30: eTAUWP = eTAUWP.NoSelection
 
     #cTAU35M (Medium35)
-    isolation_fw_medium35: int = 358
-    isolation_jTAUCoreScale_fw_medium35: int = 0
-    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
+    isolation_fw_medium35: int = 450 + 450
+    isolation_jTAUCoreScale_fw_medium35: int = 450
+    eTAU_rCoreMin_WP_fw_medium35: eTAUWP = eTAUWP.Medium
     eTAU_rHadMin_WP_fw_medium35: eTAUWP = eTAUWP.NoSelection
 
     def __post_init__(self):
@@ -675,7 +676,7 @@ def getConfig_gXE():
     confObj = odict()
     confObj["seedThrA"] = 16 
     confObj["seedThrB"] = 16 
-    confObj["seedThrC"] = 24 
+    confObj["seedThrC"] = 36 
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
     confObj["XERHO_sigmaPosC"] = 3 

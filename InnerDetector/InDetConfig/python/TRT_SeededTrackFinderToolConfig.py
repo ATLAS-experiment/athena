@@ -48,7 +48,7 @@ def TRT_SeededTrackFinder_ATLCfg(
     acc.addPublicTool(InDetTRT_SeededSpacePointFinder)
     kwargs.setdefault("SeedTool", InDetTRT_SeededSpacePointFinder)
 
-    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)
+    kwargs.setdefault("pTmin", flags.Tracking.BackTracking.minPt)
     kwargs.setdefault("nHolesMax", flags.Tracking.BackTracking.nHolesMax)
     kwargs.setdefault("nHolesGapMax", flags.Tracking.BackTracking.nHolesGapMax)
     kwargs.setdefault("SearchInCaloROI", False)

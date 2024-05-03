@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/////////////////////////////////////////////////////////////////// 
-// G4ParticleDecayHelper.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_FATRASTOOLSG4_G4PARTICLEDECAYHELPER_H
 #define ISF_FATRASTOOLSG4_G4PARTICLEDECAYHELPER_H
@@ -16,7 +12,6 @@
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "CxxUtils/checker_macros.h"
 // ISF
-#include "ISF_Event/ITruthIncident.h"
 #include "ISF_Event/ISFParticleContainer.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IParticleDecayHelper.h"

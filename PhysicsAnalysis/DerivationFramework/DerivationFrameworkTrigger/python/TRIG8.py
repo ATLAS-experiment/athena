@@ -62,11 +62,27 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
     acc.merge(MuonsCommonCfg(flags,
                              suff="LRT"))
+    
+    from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
+    from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod
 
+    allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+    TriggerAPI.setConfigFlags(flags)
+    trig_all = list(TriggerAPI.getAllHLT(allperiods).keys())
+    
+    # Add in Run 3 triggers
+    TriggerListsHelper = kwargs['TriggerListsHelper']
+    trig_all += TriggerListsHelper.Run3TriggerNames
+    
+    #get all displaced jet triggers and all bjet triggers
+    displaced_jet_triggers = [t for t in trig_all if "dispjet" in t]
+    bjet_veto = ["HLT_e26_lhtight_ivarloose_2j20_0eta290_020jvt_boffperf_pf_ftf_L1EM22VHI"]
+    bjet_triggers = [t for t in trig_all if "boffperf" in t and t not in bjet_veto]
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
+    from DerivationFrameworkTrigger.TriggerGenericObjectThinningConfig import TriggerGenericThinningCfg
 
     # Inner detector group recommendations for indet tracks in analysis
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
@@ -91,25 +107,23 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
         StreamName              = kwargs['StreamName'],
         SelectionString         = "InDetLargeD0TrackParticles.pt > 1*GeV",
         InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
+    
+    TRIG8JETThinningTool = acc.getPrimaryAndMerge(TriggerGenericThinningCfg(
+        flags,
+        name = "TRIG8JetThinningTool",
+        StreamName = kwargs['StreamName'],
+        ContainerName   = "HLT_AntiKt4EMTopoJets_subjesIS",
+        TriggerListOR = sorted(list(set(displaced_jet_triggers + bjet_triggers)))
+    ))
 
     # Finally the kernel itself
     thinningTools = [TRIG8PhotonsThinningTool,
                      TRIG8TrackParticleThinningTool,
-                     TRIG8LRTTrackParticleThinningTool]
+                     TRIG8LRTTrackParticleThinningTool,
+                     TRIG8JETThinningTool]
 
     # Skimming
     skimmingTools = []
-
-    from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
-    from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod
-
-    allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
-    TriggerAPI.setConfigFlags(flags)
-    trig_all = list(TriggerAPI.getAllHLT(allperiods).keys())
-    
-    # Add in Run 3 triggers
-    TriggerListsHelper = kwargs['TriggerListsHelper']
-    trig_all += TriggerListsHelper.Run3TriggerNames
 
     # Pieces of trigger names to keep
     idtrig_keys = ['idperf', 'boffperf', 'ivarperf', 'idtp'] 
@@ -118,7 +132,6 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     # Add specific triggers
     additional_triggers = [
         "HLT_mu20_msonly",
-        "HLT_j180_2dispjet_2p_L1J100",
         "HLT_j45_pf_ftf_preselj20_L1J15",
         "HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1XE55",
         "HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1XE55",
@@ -126,9 +139,9 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
         "HLT_xe80_tcpufit_distrk20_medium_L1XE50",
         "HLT_xe80_tcpufit_distrk20_tight_L1XE50",
         "HLT_mu60_L1MU14FCH"
-
-    ]    
+    ]
     idtrig_keys += additional_triggers
+    idtrig_keys += displaced_jet_triggers
 
     triggers = [t for t in trig_all for k in idtrig_keys if k in t]
     for veto in idtrig_veto:
@@ -305,7 +318,8 @@ def TRIG8Cfg(flags):
                         "GSFTrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.trackFitter.patternRecoInfo.hitPattern.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit",
                         "LRTGSFTrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.trackFitter.patternRecoInfo.hitPattern.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit",
                         "EventInfo.hardScatterVertexLink.timeStampNSOffset",
-                        "TauJets.dRmax.etOverPtLeadTrk"]
+                        "TauJets.dRmax.etOverPtLeadTrk",
+                        "HLT_AntiKt4EMTopoJets_subjesIS.m.pt.eta.phi"]
 
 
     # Truth containers

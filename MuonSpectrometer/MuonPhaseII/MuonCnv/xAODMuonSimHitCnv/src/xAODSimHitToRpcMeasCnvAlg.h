@@ -39,6 +39,8 @@ class xAODSimHitToRpcMeasCnvAlg : public AthReentrantAlgorithm {
     private:
         CLHEP::HepRandomEngine* getRandomEngine(const EventContext& ctx) const;
   
+        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+
         SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_readKey{this, "InputCollection", "xRpcSimHits",
                                                               "Name of the new xAOD SimHit collection"};
         

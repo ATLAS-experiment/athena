@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Original Author: Anthony Morley  (15Jan2007)
@@ -222,6 +222,7 @@ indices  AlSpaMat::elem(long int i,long int j)
 }
 
 //______________________________________________________________________________
+// cppcheck-suppress operatorEqVarError; m_ptr_row/col deliberately not copied.
 AlSpaMat&  AlSpaMat::operator=(const AlSpaMat& m)
 {
   

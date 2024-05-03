@@ -16,7 +16,7 @@ def ActsProtoTackCreationAndFitAlgCfg(flags,
                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator() 
     from ActsConfig.ActsTrackFindingConfig import isdet  
-    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, ["ITkPixelDetectorElementCollection"], ["ITkStripDetectorElementCollection"]))
+    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, pixel=["ITkPixelDetectorElementCollection"], strip=["ITkStripDetectorElementCollection"]))
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))

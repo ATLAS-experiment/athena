@@ -64,20 +64,32 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
       ATH_MSG_FATAL("Trying to calibrate an electron, but disabled");
       return StatusCode::FAILURE;
     }
-  } else if (xAOD::EgammaHelpers::isConvertedPhoton(&eg) &&
-             xAOD::EgammaHelpers::conversionRadius(static_cast<const xAOD::Photon*>(&eg)) < m_maxConvR) {
-    if (!m_mvaConvertedPhoton.empty()) {
-      mvaE = m_mvaConvertedPhoton->getEnergy(cluster, &eg);
-    } else {
-      ATH_MSG_FATAL("Trying to calibrate a converted photon, but disabled");
-      return StatusCode::FAILURE;
-    }
   } else if (xAOD::EgammaHelpers::isPhoton(&eg)) {
-    if (!m_mvaUnconvertedPhoton.empty()) {
-      mvaE = m_mvaUnconvertedPhoton->getEnergy(cluster, &eg);
+    const xAOD::Photon* ph = static_cast<const xAOD::Photon*>(&eg);
+    bool isConvCalib = xAOD::EgammaHelpers::isConvertedPhoton(ph) && 
+                       xAOD::EgammaHelpers::conversionRadius(ph) < m_maxConvR;
+    if (m_removeTRTConvBarrel) {
+      // special case in Run3 to avoid TRT converted photons in the barrel
+      using enum xAOD::EgammaParameters::ConversionType;
+      const xAOD::EgammaParameters::ConversionType conversionType = xAOD::EgammaHelpers::conversionType(ph);
+      const bool isTRTConv = (conversionType == singleTRT) || (conversionType == doubleTRT); // 2 or 4
+      const bool isTRTEndcap = std::abs(ph->eta()) > 0.8;
+      isConvCalib = isConvCalib && (isTRTEndcap || !isTRTConv);
+    }
+    if (isConvCalib) {
+      if (!m_mvaConvertedPhoton.empty()) {
+        mvaE = m_mvaConvertedPhoton->getEnergy(cluster, &eg);
+      } else {
+        ATH_MSG_FATAL("Trying to calibrate a converted photon, but disabled");
+        return StatusCode::FAILURE;
+      }
     } else {
-      ATH_MSG_FATAL("Trying to calibrate an unconverted photon, but disabled");
-      return StatusCode::FAILURE;
+      if (!m_mvaUnconvertedPhoton.empty()) {
+        mvaE = m_mvaUnconvertedPhoton->getEnergy(cluster, &eg);
+      } else {
+        ATH_MSG_FATAL("Trying to calibrate an unconverted photon, but disabled");
+        return StatusCode::FAILURE;
+      }
     }
   } else {
     ATH_MSG_FATAL("Egamma object is of unsupported type");

@@ -21,6 +21,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doTracksInJets", help='also run tracks in jets', action='store_true', default=False)
     IDPVMparser.add_argument("--doTracksInBJets", help='also run tracks in jets', action='store_true', default=False)
     IDPVMparser.add_argument("--doTruthOrigin", help='make plots by track origin', action='store_true', default=False)
+    IDPVMparser.add_argument("--doDuplicate", help='make duplicate plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doHitLevelPlots", help='make hit residual / eff plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doPerAuthor", help='make plots by track author', action='store_true', default=False)
     IDPVMparser.add_argument("--doExpertPlots", help='run additional expert-level plots', action='store_true', default=False)
@@ -46,7 +47,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doPRW", help='apply pileup reweight', action='store_true', default=False)
     IDPVMparser.add_argument("--maxTrkJetDR", help='the maximum dR to jets to allow for track-in-jet plots', type=float, default=0.4)
     IDPVMparser.add_argument("--JetAbsEtaMax", help='Maximum Eta value for jet selection', type=float, default=-1)
-
+    IDPVMparser.add_argument("--PrimaryVertexContainer", help='Name of the primary vertex container', choices=['PrimaryVertices', 'ActsPrimaryVertices', 'HggPrimaryVertices'], default='PrimaryVertices')
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -77,6 +78,7 @@ flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
 flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
 flags.PhysVal.IDPVM.doValidateHILoose = MyArgs.doHILoose
 flags.PhysVal.IDPVM.doTruthOriginPlots = MyArgs.doTruthOrigin
+flags.PhysVal.IDPVM.doDuplicatePlots = MyArgs.doDuplicate
 flags.PhysVal.IDPVM.doValidateMuonMatchedTracks = MyArgs.doMuonMatchedTracks
 flags.PhysVal.IDPVM.doValidateElectronMatchedTracks = MyArgs.doElectronMatchedTracks
 flags.PhysVal.IDPVM.doValidateLargeD0Tracks = MyArgs.doLargeD0Tracks
@@ -100,11 +102,16 @@ flags.PhysVal.IDPVM.doPRW = MyArgs.doPRW
 flags.PhysVal.IDPVM.doActs = MyArgs.doActs
 flags.PhysVal.IDPVM.doHGTD = MyArgs.doHGTD
 flags.PhysVal.IDPVM.maxTrkJetDR = MyArgs.maxTrkJetDR
+flags.PhysVal.IDPVM.PrimaryVertexContainer = MyArgs.PrimaryVertexContainer
 if MyArgs.JetAbsEtaMax != -1:
     flags.PhysVal.IDPVM.JetAbsEtaMax = MyArgs.JetAbsEtaMax
 
 flags.Exec.SkipEvents = MyArgs.skipEvents
 flags.Exec.MaxEvents = MyArgs.maxEvents
+
+# force the vertex for hgg case
+if flags.PhysVal.IDPVM.hardScatterStrategy == 3:
+    flags.PhysVal.IDPVM.PrimaryVertexContainer = 'HggPrimaryVertices'
 
 flags.lock()
 

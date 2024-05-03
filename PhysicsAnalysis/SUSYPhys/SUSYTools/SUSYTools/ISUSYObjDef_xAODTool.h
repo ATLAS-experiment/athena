@@ -168,18 +168,18 @@ namespace ST {
   static inline int getMCShowerType(const std::string& sample_name) {
     /** Get MC generator index for the b-tagging efficiency maps*/
     // This needs VERY careful syncing with m_showerType in SUSYToolsInit!  Change with care!
-    const static std::vector<TString> gen_mc_generator_keys = {"PowhegHerwig7","PhH7EG_H7UE", "SHERPA_221_", "SHERPA_2210","SHERPA_2211","SHERPA_2212", "aMcAtNloPy8","aMcAtNloHerwig7"};
+    const static std::vector<TString> gen_mc_generator_keys = {"POWHEGHERWIG7","PHH7EG", "SHERPA_221_", "SHERPA_2210","SHERPA_2211","SHERPA_2212", "AMCATNLOPY8","AMCATNLOHERWIG7"};
 
     //pre-process sample name
     TString tmp_name(sample_name);
-    tmp_name.ReplaceAll("Py8EG","PYTHIA8EVTGEN");
+    if(tmp_name.Contains("Py8EG") && !tmp_name.Contains("aMcAtNloPy8EG")) tmp_name.ReplaceAll("Py8EG","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Pythia") && !tmp_name.Contains("Pythia8") && !tmp_name.Contains("EvtGen")) tmp_name.ReplaceAll("Pythia","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Pythia8") && !tmp_name.Contains("EvtGen")) tmp_name.ReplaceAll("Pythia8","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Py8") && !tmp_name.Contains("EG")) tmp_name.ReplaceAll("Py8","PYTHIA8EVTGEN");
+    if(tmp_name.Contains("Sh_2")) tmp_name.ReplaceAll("Sh_2","SHERPA_2");
     
     //capitalize the entire sample name
     tmp_name.ToUpper();
-
     //find shower type in name
     unsigned int ishower = 0;
     for( const auto & gen : gen_mc_generator_keys ){

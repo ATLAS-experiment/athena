@@ -36,6 +36,7 @@ StatusCode EnhancedBiasWeightCompAlg::start() {
     m_EBChainIds = std::vector<HLT::Identifier>();
     m_EBChainIds = std::vector<HLT::Identifier>();
     for (const TrigConf::Chain& chain : *hltMenuHandle){
+        if (chain.name() == "HLT_noalg_eb_L1All") continue; // this is a special chain
         std::vector<std::string> streams = chain.streams();
         if (std::find(streams.begin(), streams.end(), "EnhancedBias") != streams.end()){
             auto chainId = HLT::Identifier(chain.name());

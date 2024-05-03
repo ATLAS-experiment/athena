@@ -30,12 +30,6 @@ def bphysicsSignatures():
 def allSignatures():
     return set(calibCosmicMonSignatures() + combinedSignatures() + jointSignatures() + bphysicsSignatures() + defaultSignatures() + testSignatures())
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
 class FilterChainsToGenerate(object):
     """
@@ -51,13 +45,19 @@ class FilterChainsToGenerate(object):
             (not self.selectChains or chain in self.selectChains) and chain not in self.disableChains)
   
 
-# for now we make this a singleton because calling menu generation twice leads to problems
-class GenerateMenuMT(object, metaclass=Singleton):
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
-    # Applicable to all menu instances
-    calibCosmicMonSigs = calibCosmicMonSignatures()
-    combinedSigs = combinedSignatures()
-    defaultSigs = defaultSignatures()  # for noalg chains
+    def clear(cls):
+        cls._instances.clear()
+
+
+class GenerateMenuMT(metaclass=Singleton):
+    """Singleton class for trigger menu"""
 
     # Define which signatures (folders) are required for each slice
     def getRequiredSignatures(theslice):
@@ -69,9 +69,9 @@ class GenerateMenuMT(object, metaclass=Singleton):
             'Bjet': ['Bjet','Jet'],
             # Egamma contains two signatures
             'Egamma': ['Electron','Photon'],
-            'Combined': GenerateMenuMT.combinedSigs,
+            'Combined': combinedSignatures(),
         })
-        return set(signatureDeps[theslice]+GenerateMenuMT.defaultSigs) # always allow streamers
+        return set(signatureDeps[theslice]+defaultSignatures()) # always allow streamers
 
     def __init__(self):
         self.chainsInMenu = {}  # signature : [chains]
@@ -183,11 +183,15 @@ class GenerateMenuMT(object, metaclass=Singleton):
         alignmentGroups_to_align = set()
         length_of_configs = {}
         
-        for chainDict in self.chainDicts:
+        nchainDicts = len(self.chainDicts)
+        notify_increment = max(int(nchainDicts / 10),1)
+        for ichainDict, chainDict in enumerate(self.chainDicts):
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
+            if ichainDict % notify_increment==0:
+                log.info("Generating HLT chain %d / %d", ichainDict+1, nchainDicts)
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
             all_chains += [(chainDict,chainConfig,lengthOfChainConfigs)]
-
+            
             #update the alignment group length dictionary if we have a longer number of steps
             #or the signature isn't registered in the dictionary yet
             for config_length, config_grp in lengthOfChainConfigs:
@@ -228,7 +232,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # decoding of the chain name
         log.info("Will now get chain dictionaries for each chain")
         self.getChainDicts(flags)
-        
+
         if flags.Trigger.disableCPS:
             log.warning('Removing all CPS group because the flag Trigger.disableCPS is set')
             for chainDict in self.chainDicts:
@@ -257,6 +261,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         log.info('Aligning the following signatures: %s',sorted(menuAlignment.sets_to_align))
         log.debug('Length of each of the alignment groups: %s',self.configLengthDict)
 
+        chainConfigs = []
 
         for chainDict,chainConfig,lengthOfChainConfigs in self.allChainsForAlignment:
 
@@ -276,12 +281,13 @@ class GenerateMenuMT(object, metaclass=Singleton):
               #parallel-merged single-signature chains or single signature chains. Anything that needs no splitting!
               if len(set(alignmentGroups)) == 1: 
                   alignedChainConfig = menuAlignment.single_align(chainDict, chainConfig)
-                  HLTMenuConfig.registerChain( chainDict, alignedChainConfig )
+                  HLTMenuConfig.registerChain( chainDict )
+                  chainConfigs.append( alignedChainConfig )
 
               elif len(alignmentGroups) >= 2:
                   alignedChainConfig = menuAlignment.multi_align(chainDict, chainConfig, lengthOfChainConfigs)
-
-                  HLTMenuConfig.registerChain( chainDict, alignedChainConfig )              
+                  HLTMenuConfig.registerChain( chainDict )
+                  chainConfigs.append( alignedChainConfig )
 
               else: 
                   log.error("Menu can't deal with combined chains with more than two alignmentGroups at the moment. oops...")
@@ -293,18 +299,15 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 pp = pprint.PrettyPrinter(indent=4, depth=8)
                 log.error('The chain dictionary is: %s', pp.pformat(chainDict))
                 raise Exception("Please fix the menu or the chain.")
-        
-        
-        
+
         # align event building sequences
         log.info("[generateAllChainConfigs] general alignment complete, will now align TLA chains")
-        TLABuildingSequences.alignTLASteps(HLTMenuConfig.configs(), HLTMenuConfig.dicts())    
+        TLABuildingSequences.alignTLASteps(chainConfigs, HLTMenuConfig.dicts())
         log.info("[generateAllChainConfigs] general and TLA alignment complete, will now align PEB chains")
-        EventBuildingSequences.alignEventBuildingSteps(HLTMenuConfig.configs(), HLTMenuConfig.dicts())
-        
-         
+        EventBuildingSequences.alignEventBuildingSteps(chainConfigs, HLTMenuConfig.dicts())
+
         log.info("[generateAllChainConfigs] all chain configurations have been generated.")
-        return HLTMenuConfig.configsList()
+        return chainConfigs
 
 
     def getChainsFromMenu(self, flags):
@@ -521,9 +524,8 @@ def generateMenuMT(flags):
     generateL1Menu(flags)
     createL1PrescalesFileFromMenu(flags)
 
-    # Generate the menu, stolen from HLT_standalone
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
-    menu = GenerateMenuMT() 
+    # generate HLT menu
+    menu = GenerateMenuMT()
 
     chainsToGenerate = FilterChainsToGenerate(flags)
     menu.setChainFilter(chainsToGenerate)
@@ -537,20 +539,19 @@ def generateMenuMT(flags):
     (menu.L1Prescales, menu.HLTPrescales, menu.chainsInMenu) = MenuPrescaleConfig(HLTMenuConfig, flags)
     from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import applyHLTPrescale
     applyHLTPrescale(HLTMenuConfig, menu.HLTPrescales, menu.signaturesOverwritten)
- 
+
     # make sure that we didn't generate any steps that are fully empty in all chains
     # if there are empty steps, remove them
     finalListOfChainConfigs = menu.resolveEmptySteps(finalListOfChainConfigs)
 
     log.debug("finalListOfChainConfig %s", finalListOfChainConfigs)
     log.info("Making the HLT configuration tree")
-    menuAcc=makeHLTTree(flags)
-
+    menuAcc, CFseq_list = makeHLTTree(flags, finalListOfChainConfigs)
     # Configure ChainFilters for ROBPrefetching
     from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
     if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
         from TrigGenericAlgs.TrigGenericAlgsConfig import prefetchingInitialRoIConfig
-        menuAcc.merge( prefetchingInitialRoIConfig(flags, HLTMenuConfig.configsList()), 'HLTBeginSeq')
+        menuAcc.merge( prefetchingInitialRoIConfig(flags, CFseq_list), 'HLTBeginSeq')
 
     log.info("Checking the L1HLTConsistency...")
     from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
@@ -560,11 +561,20 @@ def generateMenuMT(flags):
     from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
     checkCPSGroups(HLTMenuConfig.dictsList())
 
+    # Cleanup menu singletons to allow garbage collection (ATR-28855)
+
+    # Temporary hack for ATR-29211:
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    ComponentAccumulator._checkUnmerged = False
+
+    GenerateMenuMT.clear()
+    from TriggerMenuMT.HLT.Config import MenuComponents
+    MenuComponents._ComboHypoPool.clear()
 
     return menuAcc
     
 
-def makeHLTTree(flags):
+def makeHLTTree(flags, chainConfigs):
     """
     Generate appropriate Control Flow Graph wiht all HLT algorithms
     """
@@ -575,7 +585,7 @@ def makeHLTTree(flags):
 
     acc = ComponentAccumulator()    
     steps = seqAND('HLTAllSteps')
-    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList())
+    finalDecisions, CFseq_list, menuAcc = decisionTreeFromChains(flags, steps, chainConfigs, HLTMenuConfig.dictsList())
     if log.getEffectiveLevel() <= logging.DEBUG:
         menuAcc.printConfig()
 
@@ -602,14 +612,14 @@ def makeHLTTree(flags):
     
     # generate JSON representation of the config
     from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON
-    generateJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
+    generateJSON(flags, HLTMenuConfig.dictsList(), menuAcc.getSequence("HLTAllSteps"))
 
     from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generatePrescaleJSON
-    generatePrescaleJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
+    generatePrescaleJSON(flags, HLTMenuConfig.dictsList())
 
     from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
     generateDefaultMonitoringJSON(flags, HLTMenuConfig.dictsList())
 
     from AthenaCommon.CFElements import checkSequenceConsistency 
     checkSequenceConsistency(steps)
-    return acc
+    return acc, CFseq_list

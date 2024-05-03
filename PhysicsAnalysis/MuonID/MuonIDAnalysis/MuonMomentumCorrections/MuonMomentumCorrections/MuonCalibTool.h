@@ -29,7 +29,8 @@ namespace CP {
                         
     public:
         enum CalibMode {
-            noOption = -1,  // <--- default
+	  //this should be sync with PhysicsAnalysis/Algorithms/MuonAnalysisAlgorithms/python/MuonAnalysisConfig.py
+	    noOption = -1,  // <--- default
             correctData_CB = 0,
             correctData_IDMS = 1,
             notCorrectData_IDMS = 2,

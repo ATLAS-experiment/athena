@@ -135,6 +135,20 @@ def PLR_HitAnalysisCfg(flags, name='PLR_HitAnalysis', **kwargs):
     acc.merge(HitAnalysisOutputCfg(flags))
 
     return acc
+    
+
+def BCMPrimeHitAnalysisCfg(flags, name='BCMPrimeHitAnalysis', **kwargs):
+    from BCMPrimeGeoModelXml.BCMPrimeGeoModelConfig import BCMPrimeGeometryCfg
+    acc = BCMPrimeGeometryCfg(flags)
+
+    kwargs.setdefault('CollectionName', 'BCMPrimeHits')
+    kwargs.setdefault('HistPath', '/SiHitAnalysis/histos/')
+    kwargs.setdefault('NtuplePath', '/SiHitAnalysis/ntuples/')
+    acc.addEventAlgo(CompFactory.SiHitAnalysis(name, **kwargs))
+
+    acc.merge(HitAnalysisOutputCfg(flags))
+
+    return acc
 
 
 def SiHitAnalysisCfg(flags):
@@ -151,6 +165,9 @@ def SiHitAnalysisCfg(flags):
 
     if flags.Detector.EnablePLR:
         acc.merge(PLR_HitAnalysisCfg(flags))
+        
+    if flags.Detector.EnableBCMPrime:
+        acc.merge(BCMPrimeHitAnalysisCfg(flags))
 
     return acc
 

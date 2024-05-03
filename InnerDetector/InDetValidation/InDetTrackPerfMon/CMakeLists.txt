@@ -32,7 +32,7 @@ atlas_add_component( InDetTrackPerfMon
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
-#atlas_install_joboptions( share/*.py share/*.txt )
-#atlas_install_runtime( share/*.xml share/*.xsd)
 atlas_install_data( data/* )
 atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( test/test*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( test/test*.sh )

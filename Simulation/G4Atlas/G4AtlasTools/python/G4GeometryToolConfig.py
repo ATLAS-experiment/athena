@@ -77,6 +77,15 @@ def PLRGeoDetectorToolCfg(flags, name='PLR', **kwargs):
     kwargs.setdefault("DetectorName", "PLR")
     result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
+    
+
+def BCMPrimeGeoDetectorToolCfg(flags, name='BCMPrime', **kwargs):
+    #set up geometry
+    from BCMPrimeGeoModelXml.BCMPrimeGeoModelConfig import BCMPrimeGeometryCfg
+    result = BCMPrimeGeometryCfg(flags)
+    kwargs.setdefault("DetectorName", "BCMPrime")
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
+    return result
 
 
 def ITkPixelGeoDetectorToolCfg(flags, name='ITkPixel', **kwargs):
@@ -237,6 +246,9 @@ def ITKEnvelopeCfg(flags, name="ITK", **kwargs):
     if flags.Detector.GeometryPLR:
         toolPLR = result.popToolsAndMerge(PLRGeoDetectorToolCfg(flags))
         SubDetectorList += [toolPLR]
+    if flags.Detector.GeometryBCMPrime:
+        toolBCMPrime = result.popToolsAndMerge(BCMPrimeGeoDetectorToolCfg(flags))
+        SubDetectorList += [toolBCMPrime]
     # TODO: for now HGTD is also here
     if flags.Detector.GeometryHGTD:
         toolHGTD = result.popToolsAndMerge(HGTDGeoDetectorToolCfg(flags))

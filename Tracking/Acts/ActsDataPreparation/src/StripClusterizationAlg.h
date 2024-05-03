@@ -3,6 +3,7 @@
 */
 
 #include <ActsToolInterfaces/IStripClusteringTool.h>
+#include "details/StripClusterCacheId.h"
 #include "details/ClusterizationAlg.h"
 
 namespace ActsTrk {

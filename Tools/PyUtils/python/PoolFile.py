@@ -4,34 +4,27 @@
 # @date:   March 2007
 #
 #
-from __future__ import with_statement, print_function
 
 __author__  = "Sebastien Binet <binet@cern.ch>"
 
 ### --- data ------------------------------------------------------------------
 __all__ = [
     'PoolFileCatalog',
-    'extract_stream_names',
-    'extract_streams_from_tag',
     'PoolOpts',
     'extract_items',
     'PoolRecord',
     'PoolFile',
     'DiffFiles',
-    
-    'merge_pool_files',
     ]
 
 ### --- imports ---------------------------------------------------------------
 import sys
 import os
 import shelve
-from builtins import range
 
 from dbm import whichdb
 
 from .Helpers import ShutUp
-from .Decorators import forking
 
 ### --- data ------------------------------------------------------------------
 class Units (object):
@@ -249,143 +242,11 @@ class PoolFileCatalog(object):
     
     pass
 
-def extract_stream_names(fname):
-    """find the stream names ('StreamESD', 'StreamAOD',...) contained in a
-       given POOL file
-    @params:
-     `fname`     the filename of the POOL file to inspect (can be LFN or PFN)
-
-    example:
-     >>> import PyUtils.PoolFile as pf
-     >>> streams = pf.extract_stream_names ('ESD.pool.root')
-     >>> print streams
-     ['StreamESD']
-    """
-    import PyUtils.AthFile as af
-    f = af.fopen(fname)
-    return f.fileinfos['stream_names']
-
-@forking
-def extract_streams_from_tag (fname,
-                              tree_name=None,
-                              nentries=-1,
-                              stream_refs=None):
-    """find the GUID(s) of a list of streams which are contained inside a TAG
-       file.
-       @params:
-       `fname`       the filename of the TAG file to inspect
-                     (can be a LFN or FID)
-       `tree_name`   the name of the TTree containing the stream-refs
-                     (ROOT.APRDefaults.TTreeNames.EventTag is the default)
-       `nentries`    the number of entries to inspect, among the ttree entries
-                     (-1: all the entries)
-       `stream_refs` a list of stream names
-                     (ex: ['StreamAOD_ref', 'Stream1_ref'] or,
-                          None - to inspect all the stream refs in the TAG)
-
-    example:
-     >>> streams = extract_streams_from_tag ('tag.pool')
-     >>> from pprint import pprint
-     >>> pprint (streams)
-     {'Stream1_ref': ['BEE16671-B9F6-DA11-8219-00304871B611'],
-      'StreamAOD_ref': ['96F3018E-A0AC-DD11-8115-000423D59D52'],
-      'StreamESD_ref': ['384D0CFC-9FAC-DD11-A905-000423D59D52'],
-      'StreamRDO_ref': ['22C5BD99-3059-DB11-8D44-0030488365E6']}
-     >>> from PoolFile import PoolFileCatalog as pfc
-     >>> pprint (pfc().pfn(streams['StreamAOD_ref'][0]))
-     ['aod.pool']
-    """
-    
-    import PyUtils.RootUtils as ru
-    ROOT = ru.import_root()
-
-    print("::: opening file [%s]..." % fname)
-    # get the "final" file name (handles all kind of protocols)
-    import PyUtils.AthFile as af
-    try:
-        protocol, fname = af.server.fname(fname)
-    except Exception:
-        print("::: warning: problem extracting file name from PoolFileCatalog")
-        print("::: warning: will use [%s]" % fname)
-    
-    f = ROOT.TFile.Open (fname, "read")
-    assert not f.IsZombie() and f.IsOpen(), \
-           "problem opening POOL file [%s]"%fname
-
-    if tree_name is None: tree_name = ROOT.APRDefaults.TTreeNames.EventTag
-    t = f.Get( tree_name )
-    assert isinstance(t, ROOT.TTree), \
-           "could not retrieve tree [%s]" % tree_name
-    
-    # interesting branch names
-    branches = [str(b.GetName()) for b in t.GetListOfBranches()
-                if b.GetName().endswith ("_ref")]
-    if stream_refs is None:
-        stream_refs = branches
-    else:
-        _streams = stream_refs[:]
-        stream_refs = []
-        for ref in _streams:
-            if ref not in branches:
-                print("::: discarding [%s] from file chasing..."%ref)
-            else:
-                stream_refs.append (ref)
-    if nentries <= 0: nentries = t.GetEntries()
-    else:             nentries = min (nentries, t.GetEntries())
-    print("::: chasing streams: %s in tree: [%s]" % (stream_refs, tree_name))
-    print("::: ...over entries: %r" % nentries)
-    
-    # disable everything...
-    t.SetBranchStatus ("*", 0)
-
-    streams = dict()
-    for ref in stream_refs:
-        streams[ref] = list() # list of FileIDs, according to POOL
-                              # ex: 'B2B485E1-BB37-DD11-984C-0030487A17BA'
-        # but (re-)enable the branches we are interested in
-        t.SetBranchStatus (ref, 1)
-    
-    import re
-    # Pool token are of the form:
-    # '[DB=7CCD8D32-BC37-DD11-967E-0030487CD916]\
-    #  [CNT=POOLContainer_DataHeader]\
-    #  [CLID=72FBBC6F-C8BE-4122-8790-DC627696C176]\
-    #  [TECH=00000202]\
-    #  [OID=0000008C-000002BA]'
-    token = re.compile (r'\[DB=(?P<FID>.*?)\]'
-                        r'\[CNT=(?P<CNT>.*?)\]'
-                        r'\[CLID=(?P<CLID>.*?)\]'
-                        r'\[TECH=(?P<TECH>.*?)\]'
-                        r'\[OID=(?P<OID>.*?)\]')
-    for i in range(nentries):
-        t.GetEntry (i)
-        for ref in stream_refs:
-            try:
-                token_str = getattr(t, ref)
-            except (AttributeError, TypeError):
-                # MN: TypeError is a bug in ROOT 5.34.25, fixed in 5.34.30
-                # filthy work-around...
-                try:
-                    token_branch = t.GetBranch (ref)
-                    token_branch.GetEntry(i)
-                    token_str = token_branch.GetLeaf("Token").GetValueString()
-                except Exception:
-                    print("::: could not access stream-ref [%s] (entry #%i)",
-                          (ref, i))
-                    continue
-            tok = token.match (token_str)
-            if not tok:
-                print("::: invalid POOL token: [%s]" % token_str)
-                continue
-            streams[ref].append (tok.group('FID'))
-
-    for ref in stream_refs:
-        streams[ref] = list(set(streams[ref]))
-    return streams
-
 class PoolOpts(object):
     # default names of APR file storage elements
-    # copied here from APRDefaults.h for performance (as the first dictionary access takes 7 sec)
+    # copied here from RootUtils/APRDefaults.h for performance (as the first dictionary access takes 7 sec)
+    # see ATEAM-973 for a more detailed discussion
+    # the definitions here should be kept in sync with those!
     class TTreeNames:
         EventData   = "CollectionTree"
         EventTag    = "POOLCollectionTree"
@@ -408,12 +269,13 @@ class PoolOpts(object):
 
     @classmethod
     def isData(cls, name):
-        return not name.startswith("##") and name != PoolOpts.POOL_HEADER
+        return not name.startswith("##") and not cls.isDataHeader(name)
 
     @classmethod
     def isDataHeader(cls, name):
-        return ( name == PoolOpts.POOL_HEADER ) or \
-               ( name == PoolOpts.POOL_HEADER+"_DataHeader" )
+        return name in {cls.TTreeNames.DataHeader
+                        , cls.TTreeNames.DataHeader+"_DataHeader"
+                        , cls.RNTupleNames.DataHeader}
 
     @classmethod
     def isEventData(cls, name):
@@ -436,7 +298,6 @@ class PoolOpts(object):
 
     pass # class PoolOpts
 
-
 def _get_total_size (branch):
    if PoolOpts.FAST_MODE:
        return -1.
@@ -448,6 +309,105 @@ def _get_total_size (branch):
        basket = branch.GetBasket(bnum)
        brSize += basket.GetObjlen() - 8
    return brSize
+
+def file_name(fname):
+    """take a file name, return the pair (protocol, 'real' file name)
+    """
+    fname = os.path.expanduser(os.path.expandvars(fname))
+
+    def _normalize_uri(uri):
+        if uri.startswith('/'):
+            return 'file:'+uri
+        return uri
+
+    from urllib.parse import urlsplit
+    url = urlsplit(_normalize_uri(fname))
+    protocol = url.scheme
+    def _normalize(fname):
+        from posixpath import normpath
+        fname = normpath(fname)
+        if fname.startswith('//'): fname = fname[1:]
+        return fname
+
+    if protocol in ('', 'file', 'pfn'):
+        protocol = ''
+        fname = _normalize(url.path)
+
+        ## hack for '/castor/cern.ch/...' paths
+        if fname.startswith('/castor/'):
+            protocol = 'rfio'
+            fname = protocol + ':' + fname
+
+    elif protocol in ('rfio', 'castor'):
+        protocol = 'rfio'
+        fname = _normalize(url.path)
+        fname = protocol+':'+fname
+
+    elif protocol in ('root','dcap', 'dcache', 'http', 'https', 'dav', 'davs'):
+        pass
+
+    elif protocol in ('gsidcap',):
+        protocol = 'gfal:gsidcap'
+        pass
+
+    elif protocol in ('lfn','fid',):
+        # percolate through the PoolFileCatalog
+        from PyUtils.PoolFile import PoolFileCatalog as pfc
+        fname = pfc().pfn(protocol+':'+url.path)
+        pass
+
+    elif protocol in ('ami',):
+        # !! keep order of tokens !
+        for token in ('ami:', '//', '/'):
+            if fname.startswith(token):
+                fname = fname[len(token):]
+            fname = 'ami://' + fname
+            pass
+
+    else:
+        print(f'## warning: unknown protocol [{protocol}]. we will just return our input')
+        pass
+
+    return (protocol, fname)
+
+def _setup_ssl(root):
+    x509_proxy = os.environ.get('X509_USER_PROXY', '')
+    if x509_proxy:
+        # setup proper credentials
+        root.TSSLSocket.SetUpSSL(
+            x509_proxy,
+            "/etc/grid-security/certificates",
+            x509_proxy,
+            x509_proxy)
+    else:
+        print("## warning: protocol https is requested but no X509_USER_PROXY was found! (opening the file might fail.)")
+        pass
+    return
+
+def _root_open(fname):
+    import PyUtils.RootUtils as ru
+    root = ru.import_root()
+    import re
+
+    with ShutUp(filters=[
+        re.compile('TClass::TClass:0: RuntimeWarning: no dictionary for class.*') ]):
+        root.gSystem.Load('libRootCollection')
+        root_open = root.TFile.Open
+
+        # we need to get back the protocol b/c of the special
+        # case of secure-http which needs to open TFiles as TWebFiles...
+        protocol, _ = file_name(fname)
+        if protocol == 'https':
+            _setup_ssl(root)
+            root_open = root.TWebFile.Open
+
+        f = root_open(fname, 'READ')
+        if f is None or not f:
+            import errno
+            raise IOError(errno.ENOENT,
+                          'No such file or directory',fname)
+        return f
+    return
 
 def retrieveBranchInfos( branch, poolRecord, ident = "" ):
     fmt = "%s %3i %8.3f %8.3f %8.3f %s"
@@ -475,9 +435,13 @@ def make_pool_record (branch, dirType):
     zipBytes = branch.GetZipBytes()
     memSizeNoZip = memSize if zipBytes < 0.001 else 0.
     diskSize     = branch.GetZipBytes() / Units.kb
+    typeName = branch.GetClassName()
+    if not typeName and (leaf := branch.GetListOfLeaves().At(0)):
+        typeName = leaf.GetTypeName()
     return PoolRecord(branch.GetName(), memSize, diskSize, memSizeNoZip,
                       branch.GetEntries(),
-                      dirType=dirType)
+                      dirType=dirType,
+                      typeName=typeName)
 
 def extract_items(pool_file, verbose=True, items_type='eventdata'):
     """Helper function to read a POOL file and extract the item-list from the
@@ -499,10 +463,13 @@ def extract_items(pool_file, verbose=True, items_type='eventdata'):
             "(allowed values: %r)" % _allowed_values
             ])
         raise ValueError(err)
-    import PyUtils.AthFile as af
-    f = af.fopen(pool_file)
+
     key = '%s_items' % items_type
-    items = f.fileinfos[key]
+    f_root = _root_open(pool_file)
+    import PyUtils.FilePeekerTool as fpt
+    fp = fpt.FilePeekerTool(f_root)
+    items = fp.getPeekedData(key)
+
     if items is None:
         items = []
     return items
@@ -522,7 +489,13 @@ class PoolRecord(object):
                      PoolRecord.Sorter.ContainerName ]
         pass
     def __init__(self, name, memSize, diskSize, memSizeNoZip, nEntries, dirType,
-                 detailedInfos = ""):
+                 detailedInfos = "", typeName = None):
+        """Initialize PoolRecord instance.
+
+        dirType    first letter of object type name that may distinguish the types:
+                   "T" for TTree, "B" for TBranch,
+                   "N" for RNTuple, "F" for RField
+        """
         object.__init__(self)
         self.name          = name
         self.memSize       = memSize
@@ -532,6 +505,7 @@ class PoolRecord(object):
         self.dirType       = dirType
         self.details       = detailedInfos
         self.augName       = ''
+        self.typeName      = typeName
         return
 
 class PoolFile(object):
@@ -558,8 +532,7 @@ class PoolFile(object):
 
         # get the "final" file name (handles all kind of protocols)
         try:
-            import PyUtils.AthFile as af
-            protocol, fileName = af.server.fname(fileName)
+            protocol, fileName = file_name(fileName)
         except Exception as err:
             print("## warning: problem opening PoolFileCatalog:\n%s"%err)
             import traceback
@@ -595,6 +568,7 @@ class PoolFile(object):
             print("## importing ROOT...")
         import PyUtils.RootUtils as ru
         ROOT = ru.import_root()
+        self.ROOT = ROOT
         if self.verbose is True:
             print("## importing ROOT... [DONE]")
         # prevent ROOT from being too verbose
@@ -631,104 +605,147 @@ class PoolFile(object):
 
     def __processFile(self):
         ## first we try to fetch the DataHeader
-        name  = PoolOpts.POOL_HEADER
-        dhKey = self.poolFile.FindKey( name )
-        if dhKey:
-            nEntries = dhKey.ReadObj().GetEntries()
-        else:
-            name  = PoolOpts.POOL_HEADER + "_DataHeader"
+        for name in {PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader}:
             dhKey = self.poolFile.FindKey( name )
             if dhKey:
-                nEntries = dhKey.ReadObj().GetEntries()
-            else:
-                nEntries = 0
+                obj = self.poolFile.Get( name )
+                if isinstance(obj, self.ROOT.TTree):
+                    nEntries = obj.GetEntries()
+                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                    nEntries = self.ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
+                else:
+                    raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
+                break
+        else:
+            nEntries = 0
 
         keys = []
         containers = []
         for k in self.poolFile.GetListOfKeys():
-            treename = k.GetName()
-            containerName = k.ReadObj().GetName()
+            keyname = k.GetName()
+            obj = self.poolFile.Get( keyname )
+            if isinstance(obj, self.ROOT.TTree):
+                containerName = obj.GetName()
+                nEntries = obj.GetEntries()
+                dirType = "T"
+            elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                containerName = reader.GetDescriptor().GetName()
+                nEntries = reader.GetNEntries()
+                dirType = "N"
+            else:
+                raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
             if containerName not in containers:
                 keys.append(k)
                 containers.append(containerName)
                 pass
-            if treename.startswith(PoolOpts.POOL_HEADER) and not treename.endswith('Form'):
-                self.dataHeaderA[PoolOpts.augmentationName(k.GetName())] = \
+            if keyname.startswith(PoolOpts.POOL_HEADER) and not keyname.endswith('Form'):
+                self.dataHeaderA[PoolOpts.augmentationName(keyname)] = \
                     PoolRecord("DataHeader", 0, 0, 0,
-                               nEntries = k.ReadObj().GetEntries(),
-                               dirType = "T")
+                               nEntries = nEntries,
+                               dirType = dirType)
 
         keys.sort (key = lambda x: x.GetName())
         self.keys = keys
         del containers
         
         for k in keys:
-            tree = k.ReadObj()
-            name = tree.GetName()
-
-            if not PoolOpts.isDataHeader(name) and not PoolOpts.isData(name) :
-                continue
+            obj = self.poolFile.Get( k.GetName() )
+            if isinstance(obj, self.ROOT.TTree):
+                name = obj.GetName()
+            elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                name = reader.GetDescriptor().GetName()
 
             if PoolOpts.isDataHeader(name):
-                if name == PoolOpts.POOL_HEADER:
-                    contName     = "DataHeader"
-                else:
-                    contName     = name.replace(PoolOpts.POOL_HEADER+"_", "" )
-                memSize      = tree.GetTotBytes() / Units.kb
-                diskSize     = tree.GetZipBytes() / Units.kb
-                memSizeNoZip = 0.0
-                if diskSize < 0.001:
-                    memSizeNoZip = memSize
-                nEntries     = tree.GetEntries()
-                ## try to also handle non-T/P separated DataHeaders
-                ## (from old files)...
-                dhBranchNames = [
-                    br.GetName() for br in tree.GetListOfBranches()
-                    if br.GetName().count("DataHeader_p") > 0
-                ]
-                if len(dhBranchNames) == 1:
-                    dhBranch = tree.GetBranch(dhBranchNames[0])
-                    poolRecord = retrieveBranchInfos(
-                        dhBranch,
-                        PoolRecord( contName, 0., 0., 0.,
-                                    nEntries,
-                                    dirType = "T" ),
-                        ident = "  "
+                contName     = "DataHeader"
+                if isinstance(obj, self.ROOT.TTree):
+                    memSize      = obj.GetTotBytes() / Units.kb
+                    diskSize     = obj.GetZipBytes() / Units.kb
+                    memSizeNoZip = 0.0
+                    if diskSize < 0.001:
+                        memSizeNoZip = memSize
+                    nEntries     = obj.GetEntries()
+                    ## try to also handle non-T/P separated DataHeaders
+                    ## (from old files)...
+                    dhBranchNames = [
+                        br.GetName() for br in obj.GetListOfBranches()
+                        if br.GetName().count("DataHeader_p") > 0
+                    ]
+                    if len(dhBranchNames) == 1:
+                        dhBranch = obj.GetBranch(dhBranchNames[0])
+                        typeName = dhBranch.GetClassName()
+                        if not typeName and (leaf := dhBranch.GetListOfLeaves().At(0)):
+                            typeName = leaf.GetTypeName()
+                        poolRecord = retrieveBranchInfos(
+                            dhBranch,
+                            PoolRecord( contName, 0., 0., 0.,
+                                        nEntries,
+                                        dirType = "T",
+                                        typeName = typeName ),
+                            ident = "  "
                         )
-                else:
+                    else:
+                        poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
+                                                nEntries,
+                                                dirType = "T")
+
+                    self.dataHeader = poolRecord
+                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                    diskSize = inspector.GetCompressedSize() / Units.kb
+                    memSize = inspector.GetUncompressedSize() / Units.kb
+
+                    memSizeNoZip = 0.0
+                    if diskSize < 0.001:
+                        memSizeNoZip = memSize
+                    nEntries     = reader.GetNEntries()
                     poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
                                             nEntries,
-                                            dirType = "T")
-                    
-                if contName == "DataHeader":
+                                            dirType = "N")
                     self.dataHeader = poolRecord
-                else:
-                    self.data += [ poolRecord ]
             elif PoolOpts.isData(name):
-                if not hasattr(tree, 'GetListOfBranches'):
-                    continue
-                branches = tree.GetListOfBranches()
-                ## print ("=-=->",name,type(tree).__name__)
-                dirType = "T"
-                if name in (PoolOpts.EVENT_DATA, PoolOpts.META_DATA):
-                    dirType = "B"
-                for i,branch in enumerate(branches):
-                    poolRecord = retrieveBranchInfos(
-                        branch,
-                        make_pool_record(branch, dirType),
-                        ident = "  "
+                if isinstance(obj, self.ROOT.TTree):
+                    if not hasattr(obj, 'GetListOfBranches'):
+                        continue
+                    branches = obj.GetListOfBranches()
+                    dirType = "T"
+                    if name in (PoolOpts.EVENT_DATA, PoolOpts.META_DATA):
+                        dirType = "B"
+                    for branch in branches:
+                        poolRecord = retrieveBranchInfos(
+                            branch,
+                            make_pool_record(branch, dirType),
+                            ident = "  "
                         )
-                    ## if dirType == "T":
-                    ##     poolRecord.name = name.replace( PoolOpts.EVENT_DATA,
-                    ##                                     "" )
-                    poolRecord.augName = PoolOpts.augmentationName(name)
-                    self.augNames.add(poolRecord.augName)
-                    self.data += [ poolRecord ]
-            else:
-                print("WARNING: Don't know how to deal with branch [%s]" % \
-                      name)
-
-            pass # loop over keys
+                        poolRecord.augName = PoolOpts.augmentationName(name)
+                        self.augNames.add(poolRecord.augName)
+                        self.data += [ poolRecord ]
+                elif isinstance(obj, self.ROOT.Experimental.RNTuple):
+                    reader = self.ROOT.Experimental.RNTupleReader.Open(obj)
+                    descriptor = reader.GetDescriptor()
+                    inspector = self.ROOT.Experimental.RNTupleInspector.Create(obj)
+                    dirType = "N"
+                    if name in {PoolOpts.RNTupleNames.EventData, PoolOpts.RNTupleNames.MetaData}:
+                        dirType = "F"
+                    fieldZeroId = descriptor.GetFieldZeroId()
+                    for fieldDescriptor in descriptor.GetFieldIterable(fieldZeroId):
+                        fieldId = fieldDescriptor.GetId()
+                        fieldTreeInspector = inspector.GetFieldTreeInspector(fieldId)
+                        diskSize = fieldTreeInspector.GetCompressedSize() / Units.kb
+                        memSize = fieldTreeInspector.GetUncompressedSize() / Units.kb
+                        fieldDescriptor = fieldTreeInspector.GetDescriptor()
+                        typeName = fieldDescriptor.GetTypeName()
+                        fieldName = fieldDescriptor.GetFieldName()
+                        poolRecord = PoolRecord(fieldName, memSize, diskSize, memSize,
+                                                descriptor.GetNEntries(),
+                                                dirType=dirType,
+                                                typeName=typeName)
+                        poolRecord.augName = PoolOpts.augmentationName(name)
+                        self.augNames.add(poolRecord.augName)
+                        self.data += [ poolRecord ]
+        # loop over keys
         
         return
     
@@ -981,16 +998,11 @@ class DiffFiles(object):
             print("## What:",err)
             print(sys.exc_info()[0])
             print(sys.exc_info()[1])
-            raise(err)
-        except Exception:
-            print("## Caught something !! (don't know what)")
-            print(sys.exc_info()[0])
-            print(sys.exc_info()[1])
             err  = "Error while opening POOL files !"
             err += " chk : %s%s" % ( chkFileName, os.linesep )
             err += " ref : %s%s" % ( refFileName, os.linesep )
             raise Exception(err)
-        
+
         self.allGood = True
         self.summary = []
         
@@ -1092,132 +1104,5 @@ class Counter(object):
         self.name = name
         self.itemList = itemList
     pass # Counter
-
-
-### ---------------------------------------------------------------------------
-def merge_pool_files(input_files, output_file,
-                     nevts=-1,
-                     msg=None,
-                     logfile=None,
-                     dump_jobo=None):
-    """take a bunch of input pool files and produce a single one.
-    autoconfiguration (through RecExCommon) is (attempted to be) performed.
-    """
-    if msg is None:
-        from .Logging import logging
-        msg = logging.getLogger('pool-merge')
-        msg.setLevel(logging.INFO)
-
-    import sys
-    if logfile is None:
-        logfile = sys.stdout
-    else:
-        logfile = open(logfile, 'w')
-
-    """
-    # XXX: should we get rid of duplicates ?
-    #input_files = list(set(input_files))
-    if len(input_files) <= 1:
-        msg.error('not enough input files: %s', input_files)
-        return 2
-        
-    import PyUtils.AthFile as af
-    try:
-        af.server
-    except (RuntimeError,) as err:
-        # FIXME: we should not rely on such fragile error detection
-        if err.message == "AthFileServer already shutdown":
-            af.restart_server()
-            
-    # optimization...
-    try:
-        _af_cache_fname = 'recexcommon-afserver-cache.ascii'
-        af.server.load_cache(_af_cache_fname)
-    except (IOError,) as err:
-        msg.info('could not load AthFile.server cache from [%s]:\n%s',
-                 _af_cache_fname, err)
-
-    # another optimization
-    _af_cache_fname = 'merge-poolfiles-afserver-cache.ascii'
-    fi = af.fopen(input_files[0])
-    af.server.save_cache(_af_cache_fname)
-
-    # make sure we do deal with POOL files
-    if fi.infos['file_type'] != 'pool':
-        msg.error('all input files are not POOL ones !')
-        return 3
-
-    # guess input file type...
-    input_type = af._guess_file_type(input_files[0], msg)
-    """
-    
-    import AthenaCommon.ChapPy as api
-    app = api.AthenaApp(dump_jobo = dump_jobo)
-
-    import textwrap
-    app << textwrap.dedent("""\
-    # automatically generated joboptions file
-
-    # input files configuration
-    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags as acf
-    input_files = %(input-files)s
-
-    import AthenaCommon.Logging as _L
-    msg = _L.log
-
-    # events to process
-    acf.EvtMax = EvtMax = theApp.EvtMax = %(evts)s
-
-    # configure the copy job
-    import AthenaPython.ConfigLib as apcl
-    cfg = apcl.AutoCfg(name='merge-files',
-                       input_files=input_files,
-                       output_file='%(output-file)s')
-    cfg.configure_job()
-
-    if cfg.is_rdo() or cfg.is_esd() or cfg.is_aod() or cfg.is_tag():
-        # main jobos
-        from RecExConfig.RecFlags import rec
-        rec.runUnsupportedLegacyReco=True
-        include ('RecExCond/RecExCommon_flags.py')
-        include ('RecExCommon/RecExCommon_topOptions.py')
-    elif cfg.is_hits():
-        import AthenaCommon.DetFlags as acdf
-        acdf.DetFlags.detdescr.all_setOn()
-        import AtlasGeoModel.SetGeometryVersion
-        import AtlasGeoModel.GeoModelInit
-        import AtlasGeoModel.SetupRecoGeometry
-    else:
-        pass
-        
-    # adding the merged output-stream
-    
-    """) % {
-        #'input-type'   : input_type.upper(),
-        'input-files'  : input_files,
-        'output-file'  : output_file,
-        'evts'         : nevts,
-        #'af-cache-name': _af_cache_fname,
-        }
-    
-    msg.info(':'*40)
-    msg.info('input files: %s', input_files)
-    #msg.info('input type:  %s', input_type)
-    msg.info('events:      %s', nevts)
-    msg.info('output file: %s', output_file)
-    msg.info(':'*40)
-    msg.info('running merger...')
-    
-    import AthenaCommon.ExitCodes as ath_codes
-    sc = app.run(stdout=logfile)
-    
-    msg.info('running merger... [done]')
-    msg.info('athena status-code: sc=[%s] (%s)', sc, ath_codes.what(sc))
-
-    if logfile not in (sys.stdout, sys.stderr):
-        logfile.close()
-        pass
-
-    return sc
 
 

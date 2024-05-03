@@ -128,15 +128,15 @@ if __name__ == "__main__":
     mon.defineHistogram("TIME_locking_LAr_RoI",
                         path="EXPERT",
                         title="Time spent in unlocking the LAr collection",
-                        xbins=100, xmin=0, xmax=100 ),
+                        xbins=100, xmin=0, xmax=100 )
     mon.defineHistogram("roiROBs_LAr",
                         path="EXPERT",
                         title="Number of ROBs unpacked in RoI requests",
-                        xbins=20, xmin=0, xmax=20 ),
+                        xbins=20, xmin=0, xmax=20 )
     mon.defineHistogram("TIME_locking_LAr_FullDet",
                         path="EXPERT",
                         title="Time spent in unlocking the LAr collection",
-                        xbins=100, xmin=0, xmax=100 ),
+                        xbins=100, xmin=0, xmax=100 )
     mon.defineHistogram("roiEta_LAr,roiPhi_LAr",
                         type="TH2F",
                         path="EXPERT",

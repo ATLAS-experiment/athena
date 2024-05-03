@@ -500,14 +500,18 @@ float PileupReweightingTool::getDataWeight(const xAOD::EventInfo& eventInfo, con
 
 }
 
+float PileupReweightingTool::getPrescaleWeight( const xAOD::EventInfo& eventInfo , const TString& trigger, bool mu_dependent ) {
+   //need to use the random run number ... only used to pick the subperiod, but in run2 so far we only have one subperiod
+   unsigned int randomRunNum = (eventInfo.isAvailable<unsigned int>(m_prefix+"RandomRunNumber")) ? eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber") : getRandomRunNumber( eventInfo, mu_dependent );
+   if(!mu_dependent) return m_activeTool->GetPrescaleWeight(randomRunNum, trigger);
+   return m_activeTool->GetPrescaleWeight( randomRunNum, trigger, getCorrectedAverageInteractionsPerCrossing(eventInfo,false) /*use the 'correct' mu instead of the one from the file!!*/, m_useRunDependentPrescaleWeight /*run-dependent*/ );
+}
+
 float PileupReweightingTool::getCombinedWeight( const xAOD::EventInfo& eventInfo , const TString& trigger, bool mu_dependent, bool correctUnrepresented ) {
    float out = getCombinedWeight(eventInfo, correctUnrepresented);
    if(!out) return out; //don't try to evaluate DataWeight if our PRW is 0 ... means there is no data available at that mu anyway
 
-   //need to use the random run number ... only used to pick the subperiod, but in run2 so far we only have one subperiod
-   unsigned int randomRunNum = (eventInfo.isAvailable<unsigned int>(m_prefix+"RandomRunNumber")) ? eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber") : getRandomRunNumber( eventInfo, mu_dependent );
-   if(!mu_dependent) out *= m_activeTool->GetPrescaleWeight(randomRunNum, trigger);
-   else out *= m_activeTool->GetPrescaleWeight( randomRunNum, trigger, getCorrectedAverageInteractionsPerCrossing(eventInfo,false) /*use the 'correct' mu instead of the one from the file!!*/, m_useRunDependentPrescaleWeight /*run-dependent*/ );
+   out *= getPrescaleWeight(eventInfo, trigger, mu_dependent);
    return out;
 }
 

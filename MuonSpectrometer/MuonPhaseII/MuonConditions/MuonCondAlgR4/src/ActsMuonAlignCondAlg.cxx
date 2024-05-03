@@ -275,7 +275,19 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
         }
         /// Propagate the cache throughout the geometry
         ATH_CHECK(declareDependencies(ctx, subDet, writeHandle));
-        if (m_fillAlignStoreCache) {
+        if (m_fillGeoAlignStore) {
+            /// Ensure that the rigid transformations of the detector elements are applied 
+            for (const MuonReadoutElement* re : readoutEles) {
+                if (re->detectorType() == subDet) {
+                    const Amg::Transform3D& detTrf{re->getMaterialGeom()->getAbsoluteTransform(writeCdo->geoModelAlignment.get())};
+                    ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toStringDetEl(re->identify())<<" is located at "
+                                    <<Amg::toString(detTrf));
+                }
+            }
+            /// There's no need to cache the delta parameters longer
+            writeCdo->geoModelAlignment->getDeltas()->clear();
+            writeCdo->geoModelAlignment->lockPosCache();
+        } else if (m_fillAlignStoreCache) {
             for (const MuonReadoutElement* re : readoutEles){
                 numAligned+= re->storeAlignedTransforms(*writeCdo);
             }
@@ -284,11 +296,8 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
         }
         ATH_CHECK(writeHandle.record(std::move(writeCdo)));
     }
-    /// Check that all readout elements were properly aligned
-    if (m_fillAlignStoreCache && numAligned != readoutEles.size()){
-        ATH_MSG_FATAL("Only "<<numAligned<<" out of "<<readoutEles.size()<<" were picked up by the alignment cutalg");
-        return StatusCode::FAILURE;
-    }
+
+    ATH_MSG_VERBOSE("Only "<<numAligned<<" out of "<<readoutEles.size()<<" were picked up by the alignment cutalg");
     alignDeltas.clear();
     techTransforms.clear();
     /// Whipe the GeoModelCache

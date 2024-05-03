@@ -13,6 +13,7 @@
 ATHENA_CORE_NUMBER=4 Reco_tf.py \
 --multithreaded \
 --AMIConfig q445 \
+--steering doRAWtoALL \
 --imf False \
 --CA all:True \
 --preExec="all:flags.BTagging.Trackless=True" \

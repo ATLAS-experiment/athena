@@ -6,6 +6,7 @@
 #include "StorageSvc/DbOption.h"
 #include "RootDatabase.h"
 #include "RootTreeIndexContainer.h"
+#include "RootUtils/APRDefaults.h"
 
 // Root include files
 #include "TTree.h"
@@ -59,9 +60,9 @@ DbStatus RootTreeIndexContainer::writeObject(ActionList::value_type& action)
 {
    // Prepare for writing - grab/create the index branch
    if( !m_indexBranch ) {
-      m_indexBranch = m_tree->GetBranch("index_ref");
+      m_indexBranch = m_tree->GetBranch(APRDefaults::IndexColName);
       if( !m_indexBranch ) {
-         m_indexBranch = m_tree->Branch("index_ref", &m_index);
+         m_indexBranch = m_tree->Branch(APRDefaults::IndexColName, &m_index);
       }
    }
    if( m_indexBranch && m_index_entries >= m_rootDb->indexSize(m_indexBranch) ) {
@@ -82,10 +83,10 @@ DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID
    if( (oid.second >> 32) > 0 ) {
       if( m_firstRead ) {
          // on the first read check if the index can and should be rebuilt
-         if( m_tree->GetEntries()>0 and m_tree->GetBranch("index_ref")
+         if( m_tree->GetEntries()>0 and m_tree->GetBranch(APRDefaults::IndexColName)
              and !m_rootDb->wasIndexRebuilt(m_tree->GetName()) ) {
             delete m_tree->GetTreeIndex();
-            m_tree->BuildIndex("index_ref");
+            m_tree->BuildIndex(APRDefaults::IndexColName);
             m_rootDb->markIndexRebuilt(m_tree->GetName());
          }
          m_firstRead = false;
@@ -93,7 +94,7 @@ DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID
       auto evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       if (evt_id == -1) {
          delete m_tree->GetTreeIndex();
-         m_tree->BuildIndex("index_ref");
+         m_tree->BuildIndex(APRDefaults::IndexColName);
          evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       }
       if (evt_id >= 0) {

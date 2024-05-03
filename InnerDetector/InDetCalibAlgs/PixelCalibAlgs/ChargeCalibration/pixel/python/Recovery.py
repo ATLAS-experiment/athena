@@ -164,6 +164,10 @@ def recover_empties(new_calib, ref_calib):
 
 def UpdateAndSave(new_calib, ref_calib):
     
+    # Validation for the new calibration (checks the threshold, RMS, Noise and Intime thresholds)
+    from PixelCalibAlgs.CheckValues import CheckThresholds
+    CheckThresholds(new_calib)
+    
     # Making a copy of the reference calibration
     updated_calib = ref_calib.copy()
     
@@ -207,8 +211,10 @@ def UpdateCalib(tag):
     new_calib, read_report = ReadNewCalib("calibration_merged.txt")
     
     # modifying the new_calib dictionary in order to recover the empty FE 
+    print("Recovering missing information..")
     report, counter_report = recover_empties(new_calib,ref_calib)
     
+    print("Validating and updating reference calibration.. ")
     UpdateAndSave(new_calib,ref_calib)
     
     f = open("log_recovery.txt", "w")

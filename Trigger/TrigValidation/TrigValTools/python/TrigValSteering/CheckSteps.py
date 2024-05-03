@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -76,11 +76,11 @@ class RefComparisonStep(Step):
             test.package_name, branch, self.ref_test_name)
         ref_eos = art_input_eos + sub_path + self.input_file
         ref_cvmfs = art_input_cvmfs + sub_path + self.input_file
-        if os.path.isfile(ref_eos):
+        if os.path.isfile(ref_eos) and os.access(ref_eos, os.R_OK):
             self.log.debug('%s using reference from EOS: %s',
                            self.name, ref_eos)
             self.reference = ref_eos
-        elif os.path.isfile(ref_cvmfs):
+        elif os.path.isfile(ref_cvmfs) and os.access(ref_cvmfs, os.R_OK):
             self.log.debug('%s using reference from CVMFS: %s',
                            self.name, ref_cvmfs)
             self.reference = ref_cvmfs
@@ -765,7 +765,6 @@ def default_check_steps(test):
         if not get_step_from_list('LogMerge', check_steps):
             for step in reco_tf_steps:
                 reco_tf_logmerge.log_files.append(step.get_log_file_name())
-        reco_tf_logmerge.extra_log_regex = r'athfile-.*\.log\.txt'
         reco_tf_logmerge.merged_name = 'athena.merged.log'
         log_to_zip = reco_tf_logmerge.merged_name
         if log_to_check is not None:

@@ -28,8 +28,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "Acts/EventData/detail/TransformationBoundToFree.hpp"
-#include "Acts/EventData/detail/TransformationFreeToBound.hpp"
+#include "Acts/EventData/TransformationHelpers.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Propagator/detail/JacobianEngine.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -290,16 +289,14 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
         auto helperSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(
             planeSurface->transform());
 
-        auto boundToFreeJacobian =
-            actsSurface.boundToFreeJacobian(gctx, actsParameter.parameters());
-
         auto covpc = actsParameter.covariance().value();
+
         Acts::FreeVector freePars =
-            Acts::detail::transformBoundToFreeParameters(
+            Acts::transformBoundToFreeParameters(
                 actsSurface, gctx, actsParameter.parameters());
 
         Acts::BoundVector targetPars =
-            Acts::detail::transformFreeToBoundParameters(freePars,
+            Acts::transformFreeToBoundParameters(freePars,
                                                          *helperSurface, gctx)
                 .value();
         
@@ -307,6 +304,10 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
 
         Acts::FreeVector freeToPathDerivatives = Acts::FreeVector::Zero();
         freeToPathDerivatives.head<3>() = freePars.segment<3>(Acts::eFreeDir0);
+
+	auto boundToFreeJacobian = actsSurface.boundToFreeJacobian(
+	    gctx, freePars.segment<3>(Acts::eFreePos0),
+	    freePars.segment<3>(Acts::eFreeDir0));
 
         Acts::BoundMatrix boundToBoundJac = Acts::detail::boundToBoundTransportJacobian(
             gctx, freePars, boundToFreeJacobian, freeTransportJacobian,
@@ -536,7 +537,6 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
 static void ActsTrk::ActsMeasurementCheck(
     const Acts::GeometryContext &gctx, const Trk::MeasurementBase &measurement,
     const Acts::Surface &surface, const Acts::BoundVector &loc) {
-
   const Trk::Surface &surf = measurement.associatedSurface();
   // only check Annulus for the moment
   if (surf.bounds().type() != Trk::SurfaceBounds::Annulus) {
@@ -570,7 +570,11 @@ static void ActsTrk::ActsMeasurementCheck(
   locxypar[3] = M_PI_2;
   locxypar[4] = 1;
   locxypar[5] = 1;
-  auto boundToFree = planeSurface->boundToFreeJacobian(gctx, locxypar);
+  Acts::FreeVector globalxypar = Acts::transformBoundToFreeParameters(
+	*planeSurface, gctx, locxypar);
+  auto boundToFree = planeSurface->boundToFreeJacobian(
+        gctx, globalxypar.segment<3>(Acts::eFreePos0),
+        globalxypar.segment<3>(Acts::eFreeDir0));
   Acts::ActsSquareMatrix<2> xyToXyzJac = boundToFree.topLeftCorner<2, 2>();
 
   Acts::BoundVector locpcpar;
@@ -579,8 +583,12 @@ static void ActsTrk::ActsMeasurementCheck(
   locpcpar[3] = M_PI_2;
   locpcpar[4] = 1;
   locpcpar[5] = 1;
-
-  boundToFree = surface.boundToFreeJacobian(gctx, locpcpar);
+  Acts::FreeVector globalpcpar = Acts::transformBoundToFreeParameters(
+	surface, gctx, locpcpar);
+ 
+  boundToFree = surface.boundToFreeJacobian(
+        gctx, globalpcpar.segment<3>(Acts::eFreePos0),
+	globalpcpar.segment<3>(Acts::eFreeDir0));
   Acts::ActsSquareMatrix<2> pcToXyzJac = boundToFree.topLeftCorner<2, 2>();
   Acts::ActsSquareMatrix<2> xyzToPcJac = pcToXyzJac.inverse();
 

@@ -153,8 +153,14 @@ def peb_writer():
     # find StreamTags and see if there is a match
     streamTags = e.stream_tag()
     logging.debug(' === New Event nr = %s (Run,Global ID) = (%d,%d) === ', totalEvents_in,e.run_no(),e.global_id())
+    #count accepted streams for each event 
+    streamAccepted = 0
     for tag in streamTags:
       if tag.name in streamNames_out:
+        #avoid duplication of events that have > 1 streamNames_out
+        if streamAccepted : continue
+        streamAccepted += 1
+
         # the event should be written out        
         logging.debug(' Matching event found for stream tag = %s', tag)
         logging.debug('      Stream Tag:Robs = %s', [hex(r) for r in tag.robs])
