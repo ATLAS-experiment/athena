@@ -9,6 +9,9 @@
 #include "AthAnalysisBaseComps/AthAnalysisAlgorithm.h"
 
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODRootAccess/tools/TFileAccessTracer.h"
+
+#include "AsgMessaging/MessageCheck.h"
 
 class MyTestAlg : public AthAnalysisAlgorithm {
 public:
@@ -39,20 +42,24 @@ private:
 
 #include "POOLRootAccess/TEvent.h"
 
-int main() {
+int main ATLAS_NOT_THREAD_SAFE () {
 
+  xAOD::TFileAccessTracer::enableDataSubmission(false); // disable file reporting in unittest
+
+  ANA_CHECK_SET_TYPE (int); // because we are running in a method that returns int
+  using namespace asg::msgUserCode;
+  
   POOL::TEvent evt(POOL::TEvent::kClassAccess);
-  evt.readFrom("$ASG_TEST_FILE_MC");
-
+  ANA_CHECK( evt.readFrom("$ASG_TEST_FILE_MC") );
 
   MyTestAlg* alg = new MyTestAlg("MyAlg");
-  alg->setProperty("MyProperty",4);
+  ANA_CHECK( alg->setProperty("MyProperty",4) );
 
-  alg->sysInitialize(); //calling sysInitialize means incident listening set up  
+  ANA_CHECK( alg->sysInitialize() ); //calling sysInitialize means incident listening set up  
 
   for(int i=0;i<10;i++) {
     evt.getEntry(i);
-    alg->execute();
+    ANA_CHECK(alg->execute());
   }
 
   return 0;

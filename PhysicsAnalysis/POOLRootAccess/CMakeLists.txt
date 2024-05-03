@@ -19,15 +19,32 @@ atlas_add_dictionary( POOLRootAccessDict
                       POOLRootAccess/selection.xml
                       LINK_LIBRARIES POOLRootAccessLib )
 
-atlas_add_executable( ut_basicRead_test
-                      test/ut_basicRead_test.cxx
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AthAnalysisBaseCompsLib POOLRootAccessLib xAODEventInfo xAODRootAccess CxxUtils )
 
-atlas_add_executable( ut_basicxAODRead_test
-                      test/ut_basicxAODRead_test.cxx
+		    
+atlas_add_test( ut_basicRead_test
+                SOURCES test/ut_basicRead_test.cxx
+                INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AthAnalysisBaseCompsLib POOLRootAccessLib xAODEventInfo xAODRootAccess CxxUtils
+                POST_EXEC_SCRIPT noerror.sh
+                PROPERTIES TIMEOUT 30 )
+
+atlas_add_test( ut_basicxAODRead_test
+                 SOURCES test/ut_basicxAODRead_test.cxx
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODBase xAODEventInfo xAODRootAccess CxxUtils )
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODBase xAODEventInfo xAODRootAccess CxxUtils
+                      POST_EXEC_SCRIPT noerror.sh
+                 PROPERTIES TIMEOUT 30 )
+
+atlas_add_test( ut_basicAlg_test
+                SOURCES test/ut_basicAlg_test.cxx
+                INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib AthAnalysisBaseCompsLib xAODEventInfo xAODRootAccess
+                POST_EXEC_SCRIPT noerror.sh
+                PROPERTIES TIMEOUT 30 )
+
+atlas_add_test( basicRead_py
+                SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_basicRead_test.py
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.opts )

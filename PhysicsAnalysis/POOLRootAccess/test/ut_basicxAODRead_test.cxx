@@ -19,9 +19,16 @@
 
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
+#include "xAODRootAccess/tools/TFileAccessTracer.h"
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
+#ifdef GENERATIONBASE
+  return 0; // cannot read reco-level objects in AthGeneration, so just skip this test in that release
+#endif
+
+   xAOD::TFileAccessTracer::enableDataSubmission(false); // disable file reporting in unittest 
+  
    xAOD::TEvent::EAuxMode accessMode2 = xAOD::TEvent::kClassAccess;
    POOL::TEvent::EReadMode accessMode = POOL::TEvent::kClassAccess;
 
@@ -78,7 +85,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    TStopwatch st2;
    st2.Start();
    long val2[4] = {0,0,0,0};
-   for(int i=0; i< maxEvt2; i++) {
+   for(int i=0; i< std::min(maxEvt2,10000); i++) {
       evt2.getEntry(i);
       evt2.retrieve( evtInfo , "EventInfo" ).ignore();
       val2[0] += evtInfo->eventNumber();
@@ -86,7 +93,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
       val2[1] += els->size();
       evt2.retrieve( mus, "Muons" ).ignore();
       val2[2] += mus->size();
-      evt2.retrieve( jets, "AntiKt4LCTopoJets" ).ignore();
+      evt2.retrieve( jets, "AntiKt4EMPFlowJets" ).ignore();
       val2[3] += jets->size();
    }
    st2.Stop();
@@ -98,15 +105,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    evt.getEntry(0);
    TStopwatch st;
    st.Start();
-   for(int i=0; i< maxEvt; i++) {
+   for(int i=0; i< std::min(maxEvt,10000); i++) {
       evt.getEntry(i);
       evt.retrieve( evtInfo , "EventInfo" ).ignore();
       val[0] += evtInfo->eventNumber();
-      evt.retrieve( els, "Electrons" ).ignore().ignore();
+      evt.retrieve( els, "Electrons" ).ignore();
       val[1] += els->size();
       evt.retrieve( mus, "Muons" ).ignore();
       val[2] += mus->size();
-      evt.retrieve( jets, "AntiKt4LCTopoJets" ).ignore();
+      evt.retrieve( jets, "AntiKt4EMPFlowJets" ).ignore();
       val[3] += jets->size();
    }
    st.Stop();
