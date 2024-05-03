@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  Count.h
 //  TopoCore
 //  Created by Carlos Moreno on 15/01/21.
 
-#ifndef __TopoCore__Count__
-#define __TopoCore__Count__
+#ifndef L1TOPOINTERFACES_COUNT_H
+#define L1TOPOINTERFACES_COUNT_H
 
 #include "L1TopoCommon/StatusCode.h"
 
@@ -42,7 +42,7 @@ namespace TCS {
      // TO-DO add function to get count bits for a determined position
      // TO-DO make ready for executing multiple algorithms in one instance
      
-     std::bitset<128> getCountBits() const { return m_count; }
+     const std::bitset<128>& getCountBits() const { return m_count; }
      unsigned int firstBit() const { return m_firstBit; }
      unsigned int lastBit() const { return m_firstBit + m_nBits - 1; }
      unsigned int nBits() const { return m_nBits; }

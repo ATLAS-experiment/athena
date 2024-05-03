@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*  Parameter.h
  *  L1TopoInterfaces
@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef TopoCore__Parameter
-#define TopoCore__Parameter
+#ifndef L1TOPOINTERFACES_PARAMETER_H
+#define L1TOPOINTERFACES_PARAMETER_H
 
 #include <iostream>
 #include <string>
@@ -41,7 +41,7 @@ namespace TCS {
       
       // new accessors
       const std::string & val() const { return m_val; }
-      std::string         defaultVal() const { return m_defaultVal; }
+      const std::string&  defaultVal() const { return m_defaultVal; }
       unsigned int        pos() const { return m_pos; }
       const std::string & sel() const { return m_sel; }
       
@@ -79,4 +79,4 @@ std::ostream & operator<<(std::ostream &, const TCS::Parameter&);
 
 } // end of namespace TCS
 
-#endif /* defined(__TopoCore__Parameter__) */
+#endif /* defined(L1TOPOINTERFACES_PARAMETER_H) */
