@@ -73,6 +73,10 @@
 
 #include "InDetTrackSystematicsTools/IInclusiveTrackFilterTool.h"
 
+#ifndef XAOD_STANDALONE
+#include "AthAnalysisBaseComps/AthAnalysisHelper.h"
+#endif
+
 using namespace ST;
 
 
@@ -593,6 +597,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon calibration tool
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MuonMomentumCorrectionsSubgroup#CP_MuonCalibrationAndSmearingToo
+    // Please not that for AthAnalysis we need to configure the MuonCalibTool within METSignificance manually and just can't pass the handle
+    // Hence, any changes here should also be propagated to the METSignificance setup further below
 
     if (!m_muonCalibTool.isUserConfigured()) {
       m_muonCalibTool.setTypeAndName("CP::MuonCalibTool/ST_MuonCalibrationTool");
@@ -1733,7 +1739,20 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
         ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMTopo") );
       }
+#ifndef XAOD_STANDALONE // Athena and AthAnalysis; need to take into account that MuonCalibTool is private tool
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "MuonCalibTool", "CP::MuonCalibTool/calibTool"));
+      if (m_isRun3)
+        ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.IsRun3Geo", true));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.calibMode", m_muCalibrationMode));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.OutputLevel",this->msg().level()));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2023_08_28_Run2Run3"));
+      int IdBaselineInt = m_muIdBaseline;
+      if (IdBaselineInt == 4)
+        ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.doExtraSmearing", m_muHighPtExtraSmear));
+#else // AnalysisBase; can just pass the muon calib tool above
       ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));
+#endif
       ATH_CHECK( m_metSignif.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_metSignif.retrieve() );
     } else ATH_CHECK( m_metSignif.retrieve() );
