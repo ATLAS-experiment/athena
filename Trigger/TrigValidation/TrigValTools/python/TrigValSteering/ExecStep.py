@@ -163,11 +163,11 @@ class ExecStep(Step):
         # match --preExec, --preExec= ignoring spaces
         m = re.search(r'--preExec\s*=?\s*', self.args)
         if m is None:
-            self.args += f'--preExec "{precommand}" '
+            self.args += f' --preExec "{precommand}" '
         else:
             # Insert new preExec. It is important to not use the '=' sign so we
             # can chain multiple preExecs.
-            self.args = self.args[:m.span()[0]] + f'--preExec "{precommand}" ' + self.args[m.span()[1]:]
+            self.args = self.args[:m.span()[0]] + f' --preExec "{precommand}" ' + self.args[m.span()[1]:]
 
     def configure_args(self, test):
         self.log.debug('Configuring args for step %s', self.name)
@@ -315,9 +315,11 @@ class ExecStep(Step):
                 self.misconfig_abort('Wrong type for flags. Expected list or tuple.')
 
             if self.type.endswith('_tf'):  # for transform, set flags as pre-exec
-                # No 'flags.' prefix for the trigger transform
-                prefix = '' if self.type == 'Trig_reco_tf' else 'flags.'
-                self.add_trf_precommand(';'.join(f'{prefix}{flag}' for flag in self.flags))
+                if self.type == 'Trig_reco_tf':
+                    # No 'flags.' prefix for the trigger transform
+                    self.add_trf_precommand(' '.join(f'{flag}' for flag in self.flags))
+                else:
+                    self.add_trf_precommand(';'.join(f'flags.{flag}' for flag in self.flags))
             else:  # athena(HLT)
                 self.args += ' ' + ' '.join(self.flags)
 
