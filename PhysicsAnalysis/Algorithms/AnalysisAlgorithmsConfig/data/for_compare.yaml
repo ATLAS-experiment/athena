@@ -63,7 +63,29 @@ TauJets:
         quality: 'Tight'
     PtEtaSelection: {}
 
-GeneratorLevelAnalysis: {}
+SystObjectLink:
+  - containerName: 'AnaJets'
+  - containerName: 'AnaElectrons'
+  - containerName: 'AnaPhotons'
+  - containerName: 'AnaMuons'
+  - containerName: 'AnaTauJets'
+
+ObjectCutFlow:
+  - containerName: 'AnaJets'
+    selectionName: 'jvt'
+  - containerName: 'AnaElectrons'
+    selectionName: 'loose'
+  - containerName: 'AnaPhotons'
+    selectionName: 'tight'
+  - containerName: 'AnaMuons'
+    selectionName: 'medium'
+  - containerName: 'AnaTauJets'
+    selectionName: 'tight'
+
+GeneratorLevelAnalysis:
+  - saveCutBookkeepers: True
+    runNumber: 284500
+    cutBookkeepersSystematics: True
 
 # containerName and selectionName must be defined in their respective blocks
 MissingET:
@@ -87,8 +109,6 @@ OverlapRemoval:
     muons: 'AnaMuons.medium'
 
 Thinning:
-  - containerName: 'AnaJets'
-    outputName: 'OutJets'
   - containerName: 'AnaElectrons'
     outputName: 'OutElectrons'
     selectionName: 'loose'
@@ -101,6 +121,8 @@ Thinning:
   - containerName: 'AnaTauJets'
     outputName: 'OutTauJets'
     selectionName: 'tight'
+  - containerName: 'AnaJets'
+    outputName: 'OutJets'
 
 # After configuring each container, many variables will be saved automatically.
 Output:
@@ -118,7 +140,7 @@ Output:
         '': 'EventInfo'
     commands:
       - 'disable jet_select_baselineJvt.*'
-      - 'disable el_select_loose.*'
       - 'disable mu_select_medium.*'
       - 'disable ph_select_tight.*'
       - 'disable tau_select_tight.*'
+      - 'disable el_select_loose.*'

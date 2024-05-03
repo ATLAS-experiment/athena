@@ -4,10 +4,51 @@
 #
 # @author Joseph Lambert
 
-def compareTextBuilder(yamlPath='') :
+def compareConfigSeq(seq1, seq2, *, checkOrder=False):
+    """Compares two ConfigSequences"""
+    blocks1 = seq1._blocks
+    blocks2 = seq2._blocks
+    print("Block order for each config sequence")
+    print("\033[4m{0:<30} {1:<30}\033[0m".format("Sequence1", "Sequence2"))
+    for i in range(max(len(blocks1), len(blocks2))):
+        name1, name2 = '', ''
+        if i < len(blocks1):
+            name1 = blocks1[i].__class__.__name__
+        if i < len(blocks2):
+            name2 = blocks2[i].__class__.__name__
+        print(f"{name1:<30} {name2}")
+    if not checkOrder:
+        print("Sorting blocks by name (will not sort blocks with same name)")
+        blocks1.sort(key=lambda x: x.__class__.__name__)
+        blocks2.sort(key=lambda x: x.__class__.__name__)
+    if len(blocks1) != len(blocks2):
+        raise Exception("Number of blocks are different")
+    for i in range(len(blocks1)):
+        block1 = blocks1[i]
+        block2 = blocks2[i]
+        name1 = block1.__class__.__name__
+        name2 = block2.__class__.__name__
+        if name1 != name2:
+            raise Exception(f"In position {i} "
+                f"the first sequence results in {name1} "
+                f"and the second sequence results in {name2}")
+        for name in block1.getOptions():
+            if name == 'groupName':
+                continue
+            value1 = block1.getOptionValue(name)
+            value2 = block2.getOptionValue(name)
+            if value1 != value2:
+                raise Exception(f"For block {name1}, the block "
+                    f"option {name} the first sequence results in {value1} "
+                    f"and the second sequence results in {value2}")
+
+
+def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     """
-    Return result of comparing a ConfigSequence produced using the provided
-    YAML file and the one produced by the Builder sequence below.
+    Create a configSequence using provided YAML file and a
+    configSequence using ConfigText python commands and compare.
+
+    Will raise an exception if configSequences differ
     """
     # create text config object to build text configurations
     from AnalysisAlgorithmsConfig.ConfigText import TextConfig
@@ -109,8 +150,38 @@ def compareTextBuilder(yamlPath='') :
     config.setOptions (containerName='AnaTauJets')
     config.setOptions (selectionDecoration='selectPtEta')
 
+    config.addBlock ('SystObjectLink')
+    config.setOptions (containerName='AnaJets')
+    config.addBlock ('SystObjectLink')
+    config.setOptions (containerName='AnaElectrons')
+    config.addBlock ('SystObjectLink')
+    config.setOptions (containerName='AnaPhotons')
+    config.addBlock ('SystObjectLink')
+    config.setOptions (containerName='AnaMuons')
+    config.addBlock ('SystObjectLink')
+    config.setOptions (containerName='AnaTauJets')
+
+    config.addBlock ('ObjectCutFlow')
+    config.setOptions (containerName='AnaJets')
+    config.setOptions (selectionName='jvt')
+    config.addBlock ('ObjectCutFlow')
+    config.setOptions (containerName='AnaElectrons')
+    config.setOptions (selectionName='loose')
+    config.addBlock ('ObjectCutFlow')
+    config.setOptions (containerName='AnaPhotons')
+    config.setOptions (selectionName='tight')
+    config.addBlock ('ObjectCutFlow')
+    config.setOptions (containerName='AnaMuons')
+    config.setOptions (selectionName='medium')
+    config.addBlock ('ObjectCutFlow')
+    config.setOptions (containerName='AnaTauJets')
+    config.setOptions (selectionName='tight')
+
     # GeneratorLevelAnalysis
     config.addBlock( 'GeneratorLevelAnalysis')
+    config.setOptions (saveCutBookkeepers=True)
+    config.setOptions (runNumber=284500)
+    config.setOptions (cutBookkeepersSystematics=True)
 
     # MissingET
     config.addBlock ('MissingET')
@@ -133,9 +204,6 @@ def compareTextBuilder(yamlPath='') :
 
     # Thinning
     config.addBlock ('Thinning')
-    config.setOptions (containerName='AnaJets')
-    config.setOptions (outputName='OutJets')
-    config.addBlock ('Thinning')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (selectionName='loose')
     config.setOptions (outputName='OutElectrons')
@@ -151,6 +219,9 @@ def compareTextBuilder(yamlPath='') :
     config.setOptions (containerName='AnaTauJets')
     config.setOptions (selectionName='tight')
     config.setOptions (outputName='OutTauJets')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='AnaJets')
+    config.setOptions (outputName='OutJets')
 
     config.addBlock ('Output')
     config.setOptions (treeName='analysis')
@@ -167,45 +238,45 @@ def compareTextBuilder(yamlPath='') :
     config.setOptions (containers=outputContainers)
     disable_commands = [
         'disable jet_select_baselineJvt.*',
-        'disable el_select_loose.*',
         'disable mu_select_medium.*',
         'disable ph_select_tight.*',
         'disable tau_select_tight.*',
+        'disable el_select_loose.*',
     ]
     config.setOptions (commands=disable_commands)
 
     # configure ConfigSequence
     configSeq = config.configure()
 
-
-    ## produce ConfigSequecne with yaml file
+    # create text config object to build text configurations
     textConfig = TextConfig(yamlPath)
     textConfigSeq = textConfig.configure()
 
-    ## Compare
-    buildBlocks = configSeq._blocks
-    textBlocks = textConfigSeq._blocks 
-    if len(buildBlocks) != len(textBlocks):
-        raise Exception("Number of blocks are different")
-    for i in range(len(buildBlocks)):
-        buildBlock = buildBlocks[i]
-        textBlock = textBlocks[i]
-        buildName = buildBlock.__class__.__name__
-        textName = textBlock.__class__.__name__
-        if buildName != textName:
-            raise Exception(f"In position {i} "
-                f"the yaml file results in {textName} "
-                f"and the builder results in {buildName}")
-        for name in buildBlock.getOptions():
-            if name == 'groupName':
-                continue
-            build = buildBlock.getOptionValue(name)
-            text = textBlock.getOptionValue(name)
-            if build != text:
-                raise Exception(f"For block {buildName}, the block "
-                    f"option {name} the yaml file results in {text} "
-                    f"and the builder results in {build}")
-            
+    # compare - will raise error if False
+    compareConfigSeq(configSeq, textConfigSeq, checkOrder=checkOrder)
+
+
+def compareBlockConfig(yamlPath='', *, checkOrder=False) :
+    """
+    Create a configSequence using provided YAML file and a
+    configSequence using the block configuration and compare.
+
+    Will raise an exception if configSequences differ
+    """
+    # create configSeq for block configuration
+    from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequenceBlocks
+    configSeq = makeSequenceBlocks(dataType='fullsim', algSeq=None,
+            forCompare=True, isPhyslite=False, forceEGammaFullSimConfig=True,
+            returnConfigSeq=True)
+
+    # create text config object to build text configurations
+    from AnalysisAlgorithmsConfig.ConfigText import TextConfig
+    textConfig = TextConfig(yamlPath)
+    textConfigSeq = textConfig.configure()
+
+    # compare - will raise error if False
+    compareConfigSeq(configSeq, textConfigSeq, checkOrder=checkOrder)
+
 
 if __name__ == '__main__':
     import os
@@ -213,12 +284,32 @@ if __name__ == '__main__':
     parser = optparse.OptionParser()
     parser.add_option('--text-config', dest='text_config',
             default='', action='store',
-            help='Perform unit tests using the provided yaml file')
+            help='YAML file used in unit test')
+    parser.add_option('--compare-block', dest='compare_block',
+            default=False, action='store_true',
+            help='Compare config sequence from YAML and block configuration')
+    parser.add_option('--compare-builder', dest='compare_builder',
+            default=False, action='store_true',
+            help='Compare config sequence from YAML and python configuration')
+    parser.add_option('--check-order', dest='check_order',
+            default=False, action='store_true',
+            help='Require blocks to be in the same order')
     (options, args) = parser.parse_args()
     textConfig = options.text_config
+    compareBlock = options.compare_block
+    compareBuilder = options.compare_builder
+    checkOrder = options.check_order
 
     if not os.path.isfile(textConfig):
         raise FileNotFoundError(f"{textConfig} is not a file")
 
-    # compare text and builder
-    compareTextBuilder(textConfig)
+    # compare YAML and builder
+    if compareBuilder:
+        print("Comparing config sequences from the block and text"
+            "configuration methods")
+        compareTextBuilder(textConfig, checkOrder=checkOrder)
+    # compare YAML and block config
+    if compareBlock:
+        print("Comparing config sequences from the block and block"
+            "configuration methods")
+        compareBlockConfig(textConfig, checkOrder=checkOrder)
