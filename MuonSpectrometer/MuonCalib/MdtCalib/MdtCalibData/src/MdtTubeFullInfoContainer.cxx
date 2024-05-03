@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCalibData/MdtTubeFullInfoContainer.h"
 
@@ -20,10 +20,10 @@ bool MdtTubeFullInfoContainer::setFullInfo(const Identifier& tubeId, SingleTubeF
 void MdtTubeFullInfoContainer::setImplementation(const std::string& impl) { 
     m_implementation = impl; 
 }
-std::string MdtTubeFullInfoContainer::name() const { 
+const std::string& MdtTubeFullInfoContainer::name() const { 
     return m_name; 
 }
-std::string MdtTubeFullInfoContainer::implementation() const { 
+const std::string& MdtTubeFullInfoContainer::implementation() const { 
     return m_implementation; 
 }
 const SingleTubeFullInfo* MdtTubeFullInfoContainer::getFullInfo(const Identifier& tubeId) const {

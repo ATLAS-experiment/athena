@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_RTFULLINFO_H
@@ -29,7 +29,7 @@ namespace MuonCalib {
             m_rmsPos(0.0),
             m_convEst(convTest),
             m_qualEst(qualTest) {}
-        std::string implementation() const { return m_implementation; }
+        const std::string& implementation() const { return m_implementation; }
         int numIt() const { return m_numIt; }
         int numSeg() const { return m_numSeg; }
         double meanAng() const { return m_meanAng; }

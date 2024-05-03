@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MdtCalibData/MdtTubeFitContainer.h>
 
@@ -15,11 +15,11 @@ void MdtTubeFitContainer::setImplementation(const std::string& impl) {
     m_implementation = impl; 
 }
 
-std::string MdtTubeFitContainer::name() const { 
+const std::string& MdtTubeFitContainer::name() const { 
     return m_name; 
 }
 
-std::string MdtTubeFitContainer::implementation() const { 
+const std::string& MdtTubeFitContainer::implementation() const { 
     return m_implementation; 
 }
 
