@@ -29,6 +29,7 @@ rdo2rdotrig = ExecStep.ExecStep('RDOtoRDOTrigger')
 rdo2rdotrig.type = 'Reco_tf'
 rdo2rdotrig.input = ''
 rdo2rdotrig.imf = False
+rdo2rdotrig.fpe_auditor = False  # cannot be configured via flags in release 21
 rdo2rdotrig.explicit_input = True
 rdo2rdotrig.args = '--inputRDOFile=RDO.pool.root'
 rdo2rdotrig.args += ' --outputRDO_TRIGFile=RDO_TRIG.pool.root'
