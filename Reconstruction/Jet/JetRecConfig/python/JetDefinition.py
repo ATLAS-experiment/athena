@@ -404,20 +404,18 @@ class JetInputExternal(object):
     # Define a string conversion for printing
     def __str__(self):
         return f"JetInputExternal({self.name},type={str(self.basetype)})"
+    
+    def __hash__(self):
+        return hash((
+            self.name,str(self.basetype),str(self.algoBuilder),
+            self.containername(None,None),str(self.prereqs),
+            str(self.filterfn),str(self.specs)))
+    
     # Need to override __repr__ for printing in lists etc
     __repr__ = __str__
 
     def __eq__(self,other):
-        return all([
-            self.name == other.name,
-            self.basetype == other.basetype,
-            self.algoBuilder == other.algoBuilder,
-            # This needs to be executed
-            self.containername(None,None) == other.containername(None,None),
-            self.prereqs == other.prereqs,
-            self.filterfn == other.filterfn,
-            self.specs == other.specs
-        ])
+        return hash(self) == hash(other)
 
     def __ne__(self,rhs):
         return (not self.__eq__(rhs))
@@ -486,7 +484,8 @@ class JetInputType(IntEnum):
             xAODType.ParticleFlow  : JetInputType.EMPFlow,
             xAODType.FlowElement   : JetInputType.EMPFlow,
             xAODType.TrackParticle : JetInputType.Track,
-            xAODType.TruthParticle : JetInputType.Truth,    
+            xAODType.TruthParticle : JetInputType.Truth,
+            xAODType.Jet : JetInputType.Jet,
         }
         return _xaodTojetinputMap.get(xt, JetInputType.Other) 
         
