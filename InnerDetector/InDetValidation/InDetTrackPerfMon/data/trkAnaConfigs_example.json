@@ -6,8 +6,7 @@
         "TrigTrkKey"    : "HLT_IDTrack_Electron_IDTrig",
         "ChainNames"    : [ "HLT_e26_idperf_loose_L1EM22VHI", 
                             "HLT_e5_idperf_tight_L1EM3" ],
-        "MatchingType"  : "TruthMatch", 
-        "SubFolder"  : "TrkAnaTrig1/"
+        "MatchingType"  : "TruthMatch" 
     },
     "TrkAnaTrig1Purity" : {
         "enabled" : true,
@@ -16,8 +15,7 @@
         "TrigTrkKey"    : "HLT_IDTrack_Electron_IDTrig",
         "ChainNames"    : [ "HLT_e26_idperf_loose_L1EM22VHI", 
                             "HLT_e5_idperf_tight_L1EM3" ],
-        "MatchingType"  : "TruthMatch", 
-        "SubFolder"  : "TrkAnaTrig1/"
+        "MatchingType"  : "TruthMatch" 
     },
     "TrkAnaTrig2" : {
         "enabled" : true,
@@ -28,7 +26,6 @@
         "MatchingType"    : "DeltaRMatch",
         "dRmax"           : 0.05,
         "pTResMax"        : -9.9,
-        "SubFolder"  : "TrkAnaTrig2/",
         "doEfficiencies" : false
     },
     "TrkAnaTrigEle" : {
@@ -40,7 +37,6 @@
         "MatchingType"    : "DeltaRMatch",
         "dRmax"           : 0.05,
         "pTResMax"        : -9.9,
-        "SubFolder"  : "TrkAnaTrigEle/",
         "SelectOfflineObject" : "Electron", 
         "ObjectQuality"       : "Tight",
         "doOfflineElectrons" : true
@@ -49,7 +45,6 @@
         "enabled" : true,
         "TestType"  : "Offline",
         "RefType"   : "Truth", 
-        "MatchingType"  : "TruthMatch", 
-        "SubFolder"  : "TrkAnaOffl1/"
+        "MatchingType"  : "TruthMatch" 
     }
 }

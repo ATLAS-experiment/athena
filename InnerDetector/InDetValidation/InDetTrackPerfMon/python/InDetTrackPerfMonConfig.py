@@ -19,15 +19,17 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     '''
     acc = ComponentAccumulator()
 
+    kwargs.setdefault( "DirName", flags.PhysVal.IDTPM.DirName )
+    kwargs.setdefault( "sortPlotsByChain", flags.PhysVal.IDTPM.sortPlotsByChain )
     kwargs.setdefault( "SubFolder", flags.PhysVal.IDTPM.currentTrkAna.SubFolder )
     kwargs.setdefault( "TrkAnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
     kwargs.setdefault( "TestType", flags.PhysVal.IDTPM.currentTrkAna.TestType )
     kwargs.setdefault( "RefType",  flags.PhysVal.IDTPM.currentTrkAna.RefType )
 
-    ## TODO - to be uncommented in future MRs
-    #kwargs.setdefault( "TestTag", getTrkTag(flags.PhysVal.IDTPM.currentTrkAna.TestType))
-    #kwargs.setdefault( "RefTag",  getTrkTag(flags.PhysVal.IDTPM.currentTrkAna.RefType))
+    from InDetTrackPerfMon.ConfigUtils import getTag
+    kwargs.setdefault( "TestTag", getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType ) )
+    kwargs.setdefault( "RefTag",  getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType ) )
 
     kwargs.setdefault( "MatchingType", flags.PhysVal.IDTPM.currentTrkAna.MatchingType )
 
@@ -35,9 +37,9 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
          ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
         kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
 
-    kwargs.setdefault( "doTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.doTrackParameters )
-    kwargs.setdefault( "doEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.doEfficiencies )
-    kwargs.setdefault( "doOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.doOfflineElectrons )
+    kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
+    kwargs.setdefault( "plotEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotEfficiencies )
+    kwargs.setdefault( "plotOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.plotOfflineElectrons )
 
     trkAnaSvc = CompFactory.TrackAnalysisDefinitionSvc( name, **kwargs )
     acc.addService( trkAnaSvc )
@@ -50,16 +52,11 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     '''
     acc = ComponentAccumulator()
 
-    ## TODO - to be uncommented in future MRs
-    #acc.merge(HistogramDefinitionSvcCfg(flags, name="HistoDefSvc"+
-    #                                flags.PhysVal.IDTPM.currentTrkAna.anaTag))
-
     kwargs.setdefault( "OfflineTrkParticleContainerName",
                        flags.PhysVal.IDTPM.currentTrkAna.OfflineTrkKey )
     kwargs.setdefault( "TruthParticleContainerName",
                        flags.PhysVal.IDTPM.currentTrkAna.TruthPartKey )
 
-    kwargs.setdefault( "DirName", flags.PhysVal.IDTPM.DirName )
     kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
     acc.merge( TrackAnalysisDefinitionSvcCfg( flags,
