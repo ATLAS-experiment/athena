@@ -44,8 +44,7 @@ def getTransform():
     executorSet.add(hybridPOOLMergeExecutor(name = 'AODMerge', inData = ['AOD'], outData = ['AOD_MRG']))
     executorSet.add(DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD', 'HIST_AOD'), 'HIST'], outData = ['HIST_MRG']))
     executorSet.add(bsMergeExecutor(name = 'RAWFileMerge', exe = 'file_merging', inData = set(['BS']), outData = set(['BS_MRG'])))
-    executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonFile = 'PyJobTransforms/skeleton.EVNTMerge.py',
-                                   skeletonCA = 'EvgenJobTransforms.EVNTMerge_Skeleton', inData = ['EVNT'], outData = ['EVNT_MRG']))
+    executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonCA = 'EvgenJobTransforms.EVNTMerge_Skeleton', inData = ['EVNT'], outData = ['EVNT_MRG']))
 
     addDAODMergerSubsteps(executorSet)
     addNTUPMergeSubsteps(executorSet)
