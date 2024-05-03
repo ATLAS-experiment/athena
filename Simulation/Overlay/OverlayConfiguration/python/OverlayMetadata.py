@@ -25,6 +25,23 @@ def _getFileMD(filenames):
     return _fileMetadata[filename]
 
 
+def validateGeometryTag(logger, target, value):
+    """Validate geometry tag so it is the same as target"""
+    target_layout = target.split('-')
+    value_layout = value.split('-')
+    if len(target_layout) != len(value_layout):
+        return False
+
+    for p, s in zip(target_layout[:-1], value_layout[:-1]):
+        if not re.match(p, s):
+            return False
+
+    if not re.match(target_layout[-1], value_layout[-1]):
+        logger.warning("Simulation geometry tag mismatch! %s vs %s", target, value)
+    
+    return True
+
+
 def overlayInputMetadataCheck(flags, simDict, tagInfoDict):
     """Check the metadata for signal HITS or presampled pileup RDO file"""
     logger.info("Checking Overlay configuration against Signal or presampled pileup RDO metadata...")
@@ -46,7 +63,7 @@ def overlayInputMetadataCheck(flags, simDict, tagInfoDict):
 
     # Check the DetDescrVersion set agrees with that used in the simulation
     if "SimLayout" in simKeys:
-        if re.match(simDict["SimLayout"], flags.GeoModel.AtlasVersion):
+        if validateGeometryTag(logger, simDict["SimLayout"], flags.GeoModel.AtlasVersion):
             logger.debug("Overlay configuration matches Signal Simulation metadata. [Geomodel.AtlasVersion = %s]",
                          flags.GeoModel.AtlasVersion)
         else:
@@ -101,7 +118,9 @@ def simulationMetadataCheck(sigdict, pudict):
             logger.error("%s key missing from Signal Simulation metadata!", o)
             raise AssertionError("Signal Simulation metadata key not found")
         try:
-            if not isinstance(pudict[o], type(sigdict[o])):
+            if o == "SimLayout":  # allow last part of the simulation tag to differ
+                assert validateGeometryTag(logger, sigdict[o], pudict[o])
+            elif not isinstance(pudict[o], type(sigdict[o])):
                 assert re.match(str(pudict[o]), str(sigdict[o]))
             else:
                 if isinstance(pudict[o], str):
