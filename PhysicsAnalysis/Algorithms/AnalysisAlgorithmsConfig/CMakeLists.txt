@@ -56,11 +56,6 @@ else()
 
 endif()
 
-atlas_add_test( ConfigTextUnitTest
-   SCRIPT python/ConfigText_unitTest.py --text-config ${CONFIG_PATH}
-   POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 30 )
-
 # This runs test jobs for both sequences and block configs.  Currently
 # (26 Apr 24) we are running both, but the tests that compare their
 # output are disabled (i.e. commented out).  The comparisons had
@@ -70,6 +65,16 @@ atlas_add_test( ConfigTextUnitTest
 # 2024.  Once that happens, remove these tests, including the commented
 # out comparison tests.
 
+
+atlas_add_test( ConfigTextCompareBuilder
+   SCRIPT python/ConfigText_unitTest.py --text-config ${CONFIG_PATH} --compare-builder --check-order
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 30 )
+
+atlas_add_test( ConfigTextCompareBlock
+   SCRIPT python/ConfigText_unitTest.py --text-config ${CONFIG_PATH} --compare-block --check-order
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 30 )
 
 add_test_job( TestJobDataSequence data --for-compare --no-systematics )
 add_test_job( TestJobDataConfig data --for-compare --block-config --no-systematics )
