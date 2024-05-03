@@ -51,7 +51,7 @@ TGCSimHit::TGCSimHit(const int id,
     , m_globalTime(static_cast<float>(time))
     , m_localPosition(position)
     , m_localDireCos(direcos)
-    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_stepLength(static_cast<float>(stepLength))
     , m_particleEncoding(particleEncoding)
