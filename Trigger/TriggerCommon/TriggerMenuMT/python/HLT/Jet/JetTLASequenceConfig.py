@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -7,7 +7,7 @@ from TrigEDMConfig.TriggerEDM import recordable
 from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
 from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetTLAHypoToolFromDict
 
-@AccumulatorCache
+
 def JetTLASequenceCfg(flags, jetsIn):
 
     ## add the InputMaker (event context)    

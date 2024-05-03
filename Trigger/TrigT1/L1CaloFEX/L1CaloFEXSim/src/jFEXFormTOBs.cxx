@@ -292,16 +292,25 @@ uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, bool sat, int Resolution )
     //0x7fff is 15 bits (decimal value 32767), however as MET is a signed value (can be negative) only 14 bits are allowed (16383) the MSB is the sign
     if (std::abs(metX) > 0x3fff) {
         ATH_MSG_DEBUG("sumEtlow saturated: " << metX );
-        metX = 0x3fff;
+        if (metX < 0) {
+            metX = 0x4000; //most negative value for 15b signed two's complement
+        } else {
+            metX = 0x3fff;
+        }
     }
 
     
     if (std::abs(metY) > 0x3fff) { //0x7fff is 15 bits (decimal value 32767), however as MET is a signed value (can be negative) only 14 bits are allowed (16383)
         ATH_MSG_DEBUG("sumEthigh saturated: " << metY );
-        metY = 0x3fff;
+        if (metY < 0) {
+            metY = 0x4000; //most negative value for 15b signed two's complement
+        } else {
+            metY = 0x3fff;
+        }
     }
 
     //create basic tobword with 32 bits
+    //note that the bit-wise and with the 15bit mask (0x7fff) inherently accounts for the conversion of negative values from 32b signed (int) to 15b signed
     tobWord = tobWord + (res << FEXAlgoSpaceDefs::jXE_ResBit) + ((metY & 0x7fff) << FEXAlgoSpaceDefs::jXE_Ey_Bit) + ((metX & 0x7fff) << FEXAlgoSpaceDefs::jXE_Ex_Bit) + (Sat << FEXAlgoSpaceDefs::jXE_SatBit)  ;
     ATH_MSG_DEBUG("tobword MET with Res, MET_Y, MET_X, Sat: " << std::bitset<32>(tobWord) );
 

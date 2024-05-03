@@ -39,11 +39,15 @@ class jFEXForwardElecInfo {
   uint  getCoreIphi();
   uint  getCoreIeta();             //used
   void  setCoreTTEtEM(int ET_EM );//used
-  int  getCoreTTEtEM();           //used 
+  int  getCoreTTEtEM();           //used
+  void  setCoreTTSatEM(bool sat);
+  bool getCoreTTSatEM(); 
   void  setNextTTID(uint TTID );   //used  
   uint  getNextTTID();
   void  setNextTTEtEM(int ET_EM); //used 
   int  getNextTTEtEM();           //used 
+  void  setNextTTSatEM(bool sat);
+  bool getNextTTSatEM();
   void  setTTEtEMiso(int iso_ET); //used     
   void  addTTEtEMiso(int iso_ET);  //used 
   int  getTTEtEMiso();
@@ -54,6 +58,7 @@ class jFEXForwardElecInfo {
   int  getTTEtHad2();
   void  calcTTClusEtEM();          //used
   int  getTTClusEtEM();           //used
+  bool getTTClusSatEM();
   void  includeTTinSearchWindow(uint TT_ID);
   std::vector<uint> getTTinSearchWindow();
   // floating point values
@@ -82,12 +87,15 @@ class jFEXForwardElecInfo {
  private:
 
   int  m_coreTTEtEM = 0;
+  bool m_coreTTsatEM = false;
   uint  m_nextTTID = 0;
   int  m_nextTTEtEM = 0;
+  bool m_nextTTsatEM = false;
   int  m_TTEtEMiso = 0;
   int  m_TTEtHad1 = 0;
   int  m_TTEtHad2 = 0;
   int  m_TTClusEtEM = 0;
+  bool m_TTClusSatEM = false;
   float m_coreTTfEta = 0;
   float m_coreTTfPhi = 0;
   std::vector<uint> m_TTsInSearchWindow = {};

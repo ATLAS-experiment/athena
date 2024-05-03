@@ -7,10 +7,6 @@
 JOBOPTSEARCHPATH envar and globally executed. If requested, files will be
 traced. Note, however, that this option interferes with pdb and trace."""
 
-# Don't want to use from __future__ import print_function here: that would
-# then apply to everything that we read with include().
-import builtins
-printfunc = builtins.print
 import os, sys, re, fnmatch
 from AthenaCommon.Utils.unixtools import FindFile
 
@@ -187,7 +183,7 @@ class Include( object ):
    def block( self, fn ):
       """Disallow the given filename(s) from being included again."""
 
-      if type(fn) is list:
+      if type(fn) == list:
          self._once += fn
       else:
          self._once.append( fn )
@@ -287,13 +283,13 @@ class Include( object ):
 
  # formatted line printer
    def _oneline( self, fid, lineno, detail, buf ):
-      printfunc (marker, fidMarker % fid, lineMarker % lineno, detail,)
+      print (marker, fidMarker % fid, lineMarker % lineno, detail,)
 
       try:
 
        # simple eol case
          if not buf or not buf[ lineno ]:
-            printfunc()
+            print()
             return
 
        # in general, an interpreter "line" may be longer than a file line
@@ -302,18 +298,18 @@ class Include( object ):
           # this line appears to have a continuation ...
             try:
              # output traced line
-               printfunc (line)
+               print (line)
 
              # output continued line
                lineno += 1
-               printfunc (marker, fidMarker % fid, lineMarker % lineno, detail,)
+               print (marker, fidMarker % fid, lineMarker % lineno, detail,)
                line = buf[ lineno ].rstrip()
             except IndexError:
              # shouldn't happen; but must mean that the diagnosis above is
              # wrong and that there is no continuation, keep silent
                break
 
-         printfunc (line)
+         print (line)
 
       except IndexError:
          log.warning( 'index (%d) out of range while scanning include file %d', lineno, fid )
