@@ -183,7 +183,7 @@ class Include( object ):
    def block( self, fn ):
       """Disallow the given filename(s) from being included again."""
 
-      if type(fn) == list:
+      if type(fn) is list:
          self._once += fn
       else:
          self._once.append( fn )
