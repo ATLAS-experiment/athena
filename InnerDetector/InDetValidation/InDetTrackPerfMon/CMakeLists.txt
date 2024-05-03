@@ -6,17 +6,17 @@ atlas_subdir( InDetTrackPerfMon )
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread EG )
 find_package( Boost COMPONENTS unit_test_framework )
+find_package( nlohmann_json )
 ## TODO - To be included in later MRs (if needed)
 #find_package( XercesC )
-#find_package( nlohmann_json )
 
 # Component(s) in the package:
 atlas_add_library( InDetTrackPerfMonLib
                    src/*.cxx
                    PUBLIC_HEADERS InDetTrackPerfMon
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib CxxUtils GaudiKernel InDetIdentifier xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrigDecisionToolLib AsgServicesLib
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack )
+                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib CxxUtils GaudiKernel InDetIdentifier TrkValHistUtils xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrigDecisionToolLib AsgServicesLib 
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack nlohmann_json::nlohmann_json )
 
 ## TODO - To be included in later MRs (if needed)
 #atlas_add_library( InDetTrackPerfMonLib

@@ -3,7 +3,6 @@
         "enabled" : true,
         "TestType"  : "Offline",
         "RefType"   : "Truth", 
-        "MatchingType"  : "TruthMatch", 
-        "SubFolder"  : "TrkAnaOffl1/"
+        "MatchingType"  : "TruthMatch" 
     }
 }

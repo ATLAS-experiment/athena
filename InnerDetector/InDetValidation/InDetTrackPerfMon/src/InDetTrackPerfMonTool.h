@@ -25,12 +25,12 @@
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
-#include "../src/TrackAnalysisCollections.h"
-#include "../src/RoiSelectionTool.h"
+#include "TrackAnalysisCollections.h"
+#include "RoiSelectionTool.h"
 #include "InDetTrackPerfMon/ITrackSelectionTool.h"
-#include "../src/ITrackMatchingTool.h"
+#include "ITrackMatchingTool.h"
 /// TODO - To be included in later MRs
-//#include "InDetTrackPerfMon/TrackAnalysisPlotsMgr.h"
+//#include "TrackAnalysisPlotsMgr.h"
 
 /// STL includes
 #include <string>
@@ -106,10 +106,6 @@ private :
     ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool {
         this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks and viceversa" };
 
-    /// Properties to fine-tune the tool behaviour
-    StringProperty m_dirName{
-        this, "DirName", "InDetTrackPerfMonPlots/", "Top level directory to write histograms into" };
-
     StringProperty m_anaTag{ this, "AnaTag", "", "Track analysis tag" }; 
 
     BooleanProperty m_doMatch{ this, "doMatch", false, "Enable TrackMatchingTool" };
@@ -117,9 +113,9 @@ private :
     /// TrackAnalysisDefinitionSvc
     ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
 
-    /// histograms
     /// TODO - To be included in later MRs
-    //std::vector< std::unique_ptr<TrackAnalysisPlotsMgr> > m_trkAnaPlotsMgrVec;
+    /// plots
+    //std::vector< std::unique_ptr< IDTPM::TrackAnalysisPlotsMgr > >  m_trkAnaPlotsMgrVec;
 };
 
 #endif
