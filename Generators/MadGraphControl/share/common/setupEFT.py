@@ -21,7 +21,7 @@ def parse_SMEFT_JO(physics_short,processes):
             physics_short=physics_short.replace('_'+s,'')
             break
         
-    if reweight_name!=None and param_name!=None:
+    if reweight_name is not None and param_name is not None:
         raise RuntimeError("Can only do either reweighting or use a specific param card")
         
     # find list of non-zero parameters (if not doing reweighting or getting parameters from param card)
@@ -49,7 +49,7 @@ def parse_SMEFT_JO(physics_short,processes):
         eft_order.replace(x,x[0]+' '+x[1])
 
     if not process_token in processes:
-        raise RuntimeError("Unkown process "+process_token)
+        raise RuntimeError("Unknown process "+process_token)
     elif not "EFTORDER" in processes[process_token]:
         raise RuntimeError("No EFTORDER in process")
     else:
@@ -65,43 +65,33 @@ def setup_SMEFT_from_JOname(processes):
     
 def setup_SMEFT(process,model_nick,param_name,reweight_name,eft_params):
   
-    if model_nick=="EFTAaUm":
-        model="SMEFTsim_A_U35_alphaScheme_UFO"
-        eft_parameter_block='frblock'
+    if model_nick=="EFTaTop":
+        model="SMEFTsim_top_alphaScheme_UFO"
+        eft_parameter_block='smeft'
         restriction=None
         sm_restriction='SMlimit'
-    elif model_nick=="EFTAWUm":
-        model="SMEFTsim_A_U35_MwScheme_UFO"
-        eft_parameter_block='frblock'
+    elif model_nick=="EFTWTop":
+        model="SMEFTsim_top_MwScheme_UFO"
+        eft_parameter_block='smeft'
         restriction=None
-        sm_restriction='SMlimit'
-    elif model_nick=="EFTBaUm":
-        model="SMEFT_alpha_FLU_UFO"
-        eft_parameter_block='NEWCOUP'
-        restriction=None
-        sm_restriction='SM'
-    elif model_nick=="EFTBWUm":
-        model="SMEFT_mW_FLU_UFO"
-        eft_parameter_block='NEWCOUP'
-        restriction=None
-        sm_restriction='SM'
+        sm_restriction='SMlimit'        
     elif model_nick=="EFTAaU":
-        model="SMEFTsim_A_U35_alphaScheme_UFO"
-        eft_parameter_block='frblock'
+        model="SMEFTsim_U35_alphaScheme_UFO"
+        eft_parameter_block='smeft'
         restriction='massless'
         sm_restriction='SMlimit_massless'
     elif model_nick=="EFTAWU":
-        model="SMEFTsim_A_U35_MwScheme_UFO"
-        eft_parameter_block='frblock'
+        model="SMEFTsim_U35_MwScheme_UFO"
+        eft_parameter_block='smeft'
         restriction='massless'
         sm_restriction='SMlimit_massless'
 
     else:
-        raise RuntimeError("Unkown model: "+model_nick)
+        raise RuntimeError("Unknown model: "+model_nick)
 
     # get reweight card and param card for reweighting
     reweight_card_loc=None
-    if reweight_name!=None: 
+    if reweight_name is not None: 
         param_card_loc='MadGraph_param_card_'+model_nick+'_reweight'+reweight_name+'.dat'
         restrict_card_loc='MadGraph_restrict_card_'+model_nick+'_reweight'+reweight_name+'.dat'
         reweight_card_loc='MadGraph_reweight_card_'+model_nick+'_'+reweight_name+'.dat'
@@ -121,7 +111,7 @@ def setup_SMEFT(process,model_nick,param_name,reweight_name,eft_params):
         eft_params=None
 
     # get param card and set non-zero parameters
-    elif param_name!=None:
+    elif param_name is not None:
         param_card_loc='MadGraph_param_card_'+model_nick+'_'+param_name+'.dat'
         restrict_card_loc='MadGraph_restrict_card_'+model_nick+'_'+param_name+'.dat'
         get_param_file = subprocess.Popen(['get_files','-data', param_card_loc])
@@ -137,9 +127,10 @@ def setup_SMEFT(process,model_nick,param_name,reweight_name,eft_params):
     # set only one or a few parameter non-zero
     # dynamically create restricted model that only contains the relevant operators
     else:       
-        param_card_default='MadGraph_param_card_'+model_nick+'.dat'
+        shutil.copy('/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/'+model+'/param_card_massless.dat','./my_param_card_massless.dat')
+        param_card_default='my_param_card_massless.dat'
         param_card_loc=param_card_default.replace('.dat','_updated.dat')
-        modify_param_card(param_card_default,output_location=param_card_loc,params={eft_parameter_block:eft_params})
+        modify_param_card(param_card_default,output_location=param_card_loc,params={eft_parameter_block:eft_params}) 
         if os.path.exists('mgmodels_local'):
             shutil.rmtree('mgmodels_local')
         os.mkdir('mgmodels_local')
@@ -152,13 +143,16 @@ def setup_SMEFT(process,model_nick,param_name,reweight_name,eft_params):
             process=process.replace('NP==0','')
         restriction='without_irrelevant_couplings'
         if len(eft_params_to_keep)>0:  
-            modify_param_card(param_card_default,output_location=restricted_model+'/'+'restrict_'+restriction+'.dat',params={eft_parameter_block:eft_params_to_keep})
+            shutil.copy('/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/'+model+'/restrict_massless.dat','./my_restrict_massless.dat')
+            restrict_card_default="my_restrict_massless.dat"
+            output_location=restricted_model+'/'+'restrict_'+restriction+'.dat'
+            modify_param_card(restrict_card_default,output_location=restricted_model+'/'+'restrict_'+restriction+'.dat',params={eft_parameter_block:eft_params_to_keep})
         else:
-            shutil.copy(param_card_default,restricted_model+'/'+'restrict_'+restriction+'.dat')
+            shutil.copy('/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/'+model+'/restrict_SMlimit_massless.dat', restricted_model+'/'+'restrict_'+restriction+'.dat')
         model='./'+restricted_model
         restrict_card_loc=None
 
-    if restrict_card_loc!=None and (reweight_name!=None or param_name!=None):
+    if restrict_card_loc is not None and (reweight_name is not None or param_name is not None):
         if os.path.exists('mgmodels_local'):
             shutil.rmtree('mgmodels_local')
         os.mkdir('mgmodels_local')
@@ -170,18 +164,15 @@ def setup_SMEFT(process,model_nick,param_name,reweight_name,eft_params):
 
     # write process card
     proc_card="import model "+model
-    if restriction!=None:
+    if restriction is not None:
         proc_card+='-'+restriction
     proc_card+="\n"
     proc_card+=process+"\noutput -f\n"
     process_dir=new_process(proc_card)
 
-    if param_card_loc!=None:
+    if param_card_loc is not None:
         shutil.move(param_card_loc,process_dir+'/Cards/param_card.dat')
-    if reweight_card_loc!=None:
+    if reweight_card_loc is not None:
         shutil.move(reweight_card_loc,process_dir+'/Cards/reweight_card.dat')
 
     return process_dir
-
-
-
