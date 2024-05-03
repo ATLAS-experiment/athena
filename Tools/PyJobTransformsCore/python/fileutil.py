@@ -1,7 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
-
 import os, sys, re, time
 from PyJobTransformsCore import dummyaccess, rfio
 import stat as statconsts
