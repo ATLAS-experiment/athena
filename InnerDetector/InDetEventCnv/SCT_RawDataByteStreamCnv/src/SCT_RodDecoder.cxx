@@ -688,9 +688,7 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
        data.setCollection(m_sctID, hash, rdoIDCont, errs);
     }
     else {
-       std::stringstream msg;
-       msg <<std::hex << onlineID;
-       ATH_MSG_ERROR("Rob fragment (rob=" << robID << ") with invalid onlineID  " << msg.str() << " -> " << hash  << ".");
+       ATH_MSG_WARNING("Rob fragment (rob=" << robID << ") with invalid onlineID " << std::hex << onlineID << std::dec << " -> " << hash << ".");
     }
   }
   // Look for masked off links - bit 7
@@ -734,9 +732,7 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
     hasError = true;
   }
   if (!hasError and not hash.is_valid())  {
-    std::stringstream msg;
-    msg <<std::hex << onlineID;
-    ATH_MSG_ERROR("Rob fragment (rob=" << robID << ") with invalid onlineID  " << msg.str() << " -> " << hash  << ".");
+    ATH_MSG_WARNING("Rob fragment (rob=" << robID << ") with invalid onlineID " << std::hex << onlineID << std::dec << " -> " << hash << ".");
     hasError = true;
   }
 
