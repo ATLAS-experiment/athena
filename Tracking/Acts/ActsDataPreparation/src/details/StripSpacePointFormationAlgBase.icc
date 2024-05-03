@@ -216,8 +216,13 @@ namespace ActsTrk {
       }
     }
 
-    nReceivedSPsStrip = stripSpacePointContainer->size();    
-    nReceivedSPsStripOverlap = overlapSpacePoints->size();
+    nReceivedSPsStrip = stripSpacePointContainer->size();
+    
+    if(m_processOverlapForStrip){
+      nReceivedSPsStripOverlap = overlapSpacePoints->size();
+    }else{
+      nReceivedSPsStripOverlap = 0; //avoid undefined value
+    }
 
     m_stat[kNSpacePoints] += nReceivedSPsStrip;
     m_stat[kNOverlapSpacePoints] += nReceivedSPsStripOverlap;
