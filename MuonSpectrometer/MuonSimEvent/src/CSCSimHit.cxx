@@ -51,7 +51,7 @@ CSCSimHit::CSCSimHit(int id,
     , m_hitStart(HitStart)
     , m_hitEnd(HitEnd)
     , m_particleID(particleID)
-    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_kineticEnergy(-1.)
 {
 
@@ -70,7 +70,7 @@ CSCSimHit::CSCSimHit(int id,
     , m_hitStart(HitStart)
     , m_hitEnd(HitEnd)
     , m_particleID(particleID)
-    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+    , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_kineticEnergy(static_cast<float>(kineticEnergy))
 {
 

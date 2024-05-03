@@ -29,7 +29,7 @@ sTGCSimHit::sTGCSimHit(HitID id, double time,
   , m_particleEncoding(particleEncoding)
   , m_globalDirection(direction)
   , m_depositEnergy(depositEnergy)
-  , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
+  , m_partLink(truthBarcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
   , m_kineticEnergy(-1.0)
 {
 }
