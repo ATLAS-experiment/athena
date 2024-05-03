@@ -39,7 +39,7 @@ if __name__=="__main__":
    cfg.merge(PoolReadCfg(flags))
 
    # example runs pixel clusterization
-   from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelEncodingAlgCfg
+   from ITkPixelByteStreamCnv.ITkPixelEncodingAlgConfig import ITkPixelEncodingAlgCfg
    cfg.merge( ITkPixelEncodingAlgCfg(flags) )
    
    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)

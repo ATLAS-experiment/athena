@@ -123,7 +123,7 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
         int pixEta = pixEtaIx - std::ceil(pixEtaIx/columnsPerChip)*columnsPerChip;
         int pixPhi = pixPhiIx - std::ceil(pixPhiIx/rowsPerChip)*rowsPerChip;          
         
-        std::cout << "ToT: " << tot << "  pixEta: " <<  pixEta << "  pixPhi: " << pixPhi << std::endl;
+        std::cout << "nChips: " << chips << "ToT: " << tot << "  pixEta: " <<  pixEta << "  pixPhi: " << pixPhi << std::endl;
         
         // The info is then passed to some sort of chip map -- sroygara
         //chip_maps.at(chip).fillChipMap(pixEta, pixPhi, tot);
