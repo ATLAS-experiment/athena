@@ -387,7 +387,9 @@ def ITkSiSPSeededTracksFinalCfg(flags):
 
     for extension in listOfExtensionsRequesting:
         AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
-        if not (extension == ''):
+        if 'Acts' in extension:
+            AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
+        elif not (extension == ''):
             AssociationMapNameKey = f"ITkPRDtoTrackMap{extension}"
 
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
@@ -466,7 +468,7 @@ def ITkExtendedPRDInfoCfg(flags):
             result.merge(ITkPhysHitDecoratorAlgCfg(
                 flags,
                 name=f"ITkPhysHit{extension}DecoratorAlg",
-                TrackParticleContainerName=f"ITk{extension}TrackParticles"))
+                TrackParticleContainerName=f"InDet{extension}TrackParticles"))
 
     return result
 
