@@ -752,8 +752,7 @@ ExtraContainersElectronTrigger["Run2"] = [
 ExtraContainersTrigger = {}
 ExtraContainersTrigger["Run3"] = [
     # And these are Run3 containers
-    "HLT_eEMRoI",
-    "HLT_eEMRoIAux.",
+    "HLT_eEMRoIs",
     "HLTNav_Summary_AODSlimmed",
     "HLTNav_Summary_AODSlimmedAux.",
 ]
