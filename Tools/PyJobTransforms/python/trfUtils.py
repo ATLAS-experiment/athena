@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfUtils
 # @brief Transform utility functions
@@ -1577,7 +1577,6 @@ def ValgrindCommand(
     defaultOptions                    = True,
     extraOptionsList                  = None,
     AthenaSerialisedConfigurationFile = "athenaConf.pkl",
-    isCAEnabled                       = False,
     returnFormat                      = "string"
     ):
 
@@ -1612,10 +1611,7 @@ def ValgrindCommand(
                 sfile = suppressionFile, path = pathEnvironmentVariable)
             )
     optionsList.append("$(which python)")
-    if not isCAEnabled:
-        optionsList.append("$(which athena.py)")
-    else:
-        optionsList.append("$(which CARunner.py)")
+    optionsList.append("$(which athena.py)")
     optionsList.append(AthenaSerialisedConfigurationFile)
     # Return the command in the requested format, string (by default) or list.
     if returnFormat is None or returnFormat == "string":
@@ -1647,7 +1643,6 @@ def VTuneCommand(
     defaultOptions                    = True,
     extraOptionsList                  = None,
     AthenaSerialisedConfigurationFile = "athenaConf.pkl",
-    isCAEnabled                       = False,
     returnFormat                      = "string"
     ):
 
@@ -1669,10 +1664,7 @@ def VTuneCommand(
     if not isCollectSpecified:
         optionsList.append("-collect=hotspots")
     optionsList.append("-- $(which python)")
-    if not isCAEnabled:
-        optionsList.append("$(which athena.py)")
-    else:
-        optionsList.append("$(which CARunner.py)")
+    optionsList.append("$(which athena.py)")
     optionsList.append(AthenaSerialisedConfigurationFile)
     # Return the command in the requested format, string (by default) or list.
     if returnFormat is None or returnFormat == "string":
