@@ -66,7 +66,7 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     flags = initConfigFlags()
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.merge.RDO.e4993_s3214_r11315/RDO.17533168._000001.pool.root.1']
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171421_00/RDO.34171421._000011.pool.root.1']
     flags.Common.isOnline=False
     flags.Exec.MaxEvents=25
     flags.Concurrency.NumThreads = 1
@@ -76,7 +76,8 @@ if __name__ == '__main__':
     flags.Scheduler.ShowDataFlow=True
     flags.Trigger.enableL1MuonPhase1=True
     flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1'
-    flags.Trigger.enableL1CaloPhase1 = False # FIXME: ATR-27095
+    flags.Trigger.enableL1CaloPhase1 = True
+    flags.Trigger.doHLT= True # this is necessary so that the simulation of L1Calo (if running on MC) gets output with keys that Topo sim expects
     flags.fillFromArgs()
     flags.lock()
 

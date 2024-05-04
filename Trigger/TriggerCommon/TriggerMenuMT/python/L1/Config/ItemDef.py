@@ -183,6 +183,7 @@ class ItemDef:
         MenuItem('L1_eEM26M'    ).setLogic( d.eEM26M     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM26T'    ).setLogic( d.eEM26T     & physcond).setTriggerType( TT.calo ) 
         MenuItem('L1_eEM28M'    ).setLogic( d.eEM28M     & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eEM40L'    ).setLogic( d.eEM40L     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM5_EMPTY'        ).setLogic(d.eEM5 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_EMPTY'        ).setLogic(d.eEM9 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_2eEM9_EMPTY'       ).setLogic(d.eEM9.x(2) & cosmiccond ).setTriggerType( TT.calo )
@@ -201,6 +202,7 @@ class ItemDef:
         MenuItem('L1_2eEM24L').setLogic(d.eEM24L.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_3eEM12L').setLogic(d.eEM12L.x(3) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_eEM24L_3eEM12L').setLogic(d.eEM24L & d.eEM12L.x(3) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_eEM40L_2eEM18L').setLogic(d.eEM40L & d.eEM18L.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM9').setLogic(d.eEM9.x(2) & physcond).setTriggerType(TT.calo)
 
         # EM and jet

@@ -20,7 +20,7 @@ def UTTJetRecoSequenceGenCfg(flags):
  
         from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
-        from ..Jet.JetRecoSequencesConfig  import JetRecoCfg
+        from ..Jet.JetRecoSequencesConfig  import JetRecoDataDeps, JetRecoCfg
         from ..Jet.JetRecoCommon     import extractRecoDict
         from ..Menu.SignatureDicts   import JetChainParts_Default
         
@@ -29,7 +29,8 @@ def UTTJetRecoSequenceGenCfg(flags):
                 {'recoAlg': 'a4', 'constitType': 'tc', 'clusterCalib': 'em', 'constitMod': '', 'trkopt': 'notrk'}
         )
 
-        JetCA, jetName, jetDef = JetRecoCfg(flags, clustersKey, **jetRecoDict)
+        jetDefDict = JetRecoDataDeps(flags, clustersKey, **jetRecoDict)
+        JetCA = JetRecoCfg(flags, **jetDefDict)
         HypoAlg = CompFactory.TrigStreamerHypoAlg("UTTJetRecDummyStream")
 
         from TrigT2CaloCommon.CaloDef import clusterFSInputMaker

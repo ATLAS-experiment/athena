@@ -228,6 +228,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "TauJets":"xAOD::TauJetContainer", "TauJetsAux":"xAOD::TauJetAuxContainer"}
     )
     AllVariables += ["AntiKt4EMPFlowJets","AntiKt10LCTopoJets","Muons","Photons"]
+    AllVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
     # TauJets require smart slimming in order not to cause issues
     SmartCollections += ["TauJets"]
 
