@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/LArHVManager.h"
@@ -72,6 +72,7 @@ FILE * HVHelper::OpenFileAndCheckVersion(const G4String &version)
 
     const size_t buf_size = 80;
     char buf[buf_size] = { 0 };
+    // cppcheck-suppress nullPointerRedundantCheck; false positive: G4Exception doesn't return
     fgets(buf, buf_size, F);
     char *v = buf + 9;
     if(version == "v02" || version == "v99") v ++;
