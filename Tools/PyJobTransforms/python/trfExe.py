@@ -1672,8 +1672,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                         defaultOptions = defaultOptions,
                         extraOptionsList = extraOptionsList,
                         AthenaSerialisedConfigurationFile = \
-                            AthenaSerialisedConfigurationFile,
-                        isCAEnabled = self._isCAEnabled()
+                            AthenaSerialisedConfigurationFile
                     )
                     msg.debug("Valgrind command: {command}".format(command = command))
                     print(command, file=wrapper)
@@ -1706,8 +1705,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                         defaultOptions = defaultOptions,
                         extraOptionsList = extraOptionsList,
                         AthenaSerialisedConfigurationFile = \
-                            AthenaSerialisedConfigurationFile,
-                        isCAEnabled = self._isCAEnabled()
+                            AthenaSerialisedConfigurationFile
                     )
                     msg.debug("VTune command: {command}".format(command = command))
                     print(command, file=wrapper)
