@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -41,7 +41,7 @@ class TrigMissingEtComponent {
 
   // Read access
 /** get component name */
-  std::string name()            const {return m_name;}
+  const std::string& name()     const {return m_name;}
 /** get status flag */
   short status()                const {return m_status;}
 /** get Ex */

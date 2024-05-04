@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,15 +41,15 @@ int TrigPileUpInfo::getPV(unsigned int index) const{
     return 0; //<! safe but silent!
 }
 
-std::vector<int> TrigPileUpInfo::getFJVec() const{
+const std::vector<int>& TrigPileUpInfo::getFJVec() const{
   return m_FJ;
 }
 
-std::vector<int> TrigPileUpInfo::getBJVec() const{
+const std::vector<int>& TrigPileUpInfo::getBJVec() const{
   return m_BJ;
 }
 
-std::vector<int> TrigPileUpInfo::getPVVec() const{
+const std::vector<int>& TrigPileUpInfo::getPVVec() const{
   return m_PV_Track;
 }
 
