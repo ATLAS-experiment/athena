@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_TRIGGERINFO_H
@@ -99,8 +99,8 @@ public:
     const std::string& name() const;
     const std::string& type() const;
     bool obeysLumiblock() const;
-    const std::set<number_type>  robs() const; ///< Optional list of ROBIDs for PEB
-    const std::set<number_type>  dets() const; ///< Optional list of DETIDs for PEB
+    const std::set<number_type>&  robs() const; ///< Optional list of ROBIDs for PEB
+    const std::set<number_type>&  dets() const; ///< Optional list of DETIDs for PEB
   private:
     std::string m_name;
     std::string m_type;
