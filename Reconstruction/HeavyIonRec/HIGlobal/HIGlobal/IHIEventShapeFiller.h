@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __INTERFACE_HIEVENTSHAPEMODIFIER_H__
@@ -34,7 +34,7 @@ public:
 
   virtual StatusCode fillCollectionFromCells(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const SG::ReadHandleKey<CaloCellContainer>& m_cell_container_key, const EventContext& ctx) const = 0;
 
-  inline std::string getContainerName() const { return m_outputContainerName; };
+  inline const std::string& getContainerName() const { return m_outputContainerName; };
   inline void setContainerName(const std::string& cname) { m_outputContainerName = cname; };
 
 private:
