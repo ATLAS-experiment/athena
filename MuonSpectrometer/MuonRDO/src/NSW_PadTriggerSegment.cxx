@@ -12,7 +12,7 @@ uint8_t NSW_PadTriggerSegment::phiID() const noexcept {
     return m_phiID;
 }
 
-std::array<uint8_t, 2> NSW_PadTriggerSegment::activeLayers() const noexcept {
+const std::array<uint8_t, 2>& NSW_PadTriggerSegment::activeLayers() const noexcept {
     return m_activeLayers;
 }
 
