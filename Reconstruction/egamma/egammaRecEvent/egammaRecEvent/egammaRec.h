@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMARECEVENT_EGAMMA_H
@@ -102,13 +102,13 @@ public:
   /// @name matching variables for the best match track
   /// @{
   /** @brief deltaEta at pre sampler(0) -> 3rd sampling(3)*/
-  std::array<double,4>  deltaEta () const; 
+  const std::array<double,4>&  deltaEta () const; 
 
   /** @brief deltaPhi at pre sampler(0) -> 3rd sampling(3)*/
-  std::array<double,4>  deltaPhi () const;
+  const std::array<double,4>&  deltaPhi () const;
 
   /** @brief deltaPhi for rescaled momentum extrapolation from the perigee. */
-  std::array<double,4>  deltaPhiRescaled () const;
+  const std::array<double,4>&  deltaPhiRescaled () const;
 
   /** @brief deltaPhi from Last measurement*/
   double deltaPhiLast () const ;
