@@ -21,12 +21,12 @@
 #include <iostream>
 #include <cmath>
 
-using namespace MuonGMR4;
-using namespace ActsTrk;
-
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>
 #include <TTreeReader.h>
+
+using namespace MuonGMR4;
+using namespace ActsTrk;
 
 constexpr double tolerance = 100.*Gaudi::Units::micrometer;
 
