@@ -30,6 +30,8 @@ atlas_add_test( GenParticleInteractingFilter_test
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS} 
                 LINK_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} AtlasHepMCLib AthenaBaseComps TruthUtils ISF_HepMC_Interfaces CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
+  # Needed for the dynamic_cast to work properly with clang.
+set_target_properties( ISF_HepMC_Tools_GenParticleInteractingFilter_test PROPERTIES ENABLE_EXPORTS True )
 
 # Tests
 atlas_add_test( GenParticleLifetimeFilter_test
