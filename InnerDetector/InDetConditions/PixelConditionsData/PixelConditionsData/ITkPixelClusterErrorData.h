@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITKPIXELCLUSTERERRORDATA_H
@@ -30,7 +30,7 @@ class PixelClusterErrorData
                                       int sizePhi, double angle,
                                       int sizeZ, double eta) const;
     std::pair<double,double> getDeltaError(const Identifier* pixelId) const;
-    std::map< const Identifier, std::vector<double> > getConstMap() const {return m_constmap;}
+    const std::map< const Identifier, std::vector<double> >& getConstMap() const {return m_constmap;}
 
     void setDeltaError(const Identifier* pixelId,
                        double period_phi, double period_sinheta,
