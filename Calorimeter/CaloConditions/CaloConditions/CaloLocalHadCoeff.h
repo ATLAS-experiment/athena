@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCONDITIONS_CALOLOCALHADCOEFF_H
@@ -113,7 +113,7 @@ class CaloLocalHadCoeff {
         int getBinAdjusted(float &x, float &xadj) const;
 
         /// return dimension name
-        std::string getTitle() const {return m_title;}
+        const std::string& getTitle() const {return m_title;}
 
       private:
         /// dimensions title (e.g. "eta", "energy", "lambda", "blabla", etc)
@@ -180,7 +180,7 @@ class CaloLocalHadCoeff {
         /// get dimension locator coefficient
         inline int getDimLoc(int i_dim) const { return m_dims_loc[i_dim]; }
         /// return name
-        std::string getTitle() const {return m_title;}
+        const std::string& getTitle() const {return m_title;}
 
         /// set area offset
         void setOffset(int offset) { m_offset = offset; }
@@ -236,7 +236,7 @@ class CaloLocalHadCoeff {
     //
     // general access methods
     /// return name
-    std::string getTitle() const {return m_title;}
+    const std::string& getTitle() const {return m_title;}
 
     /// set name
     void setTitle(const std::string &title) {m_title = title; }
