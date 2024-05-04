@@ -7,7 +7,7 @@ A C++ commandline parser.
 *  CommandLine.h
 *  Created by John F. Hubbard, on Fri Aug 11 2000, 16:04:24 PST
 *
-*  Copyright (c) 2000, ATD Azad Technology Development Corporation
+*  Copyright (c) 2000, 2024, ATD Azad Technology Development Corporation
 *
 *            The Reliable Software Outsource Resource
 *        You hire us, we do it for you, and we do it right.
@@ -55,7 +55,7 @@ namespace pool
     inline int Count() const;
     virtual std::string Usage();
     void DumpDiagnostics() const;
-    inline std::string GetProgramName() const;
+    inline const std::string& GetProgramName() const;
     virtual void        CheckOptions(const char* opts[]);
     
  private:
@@ -101,7 +101,7 @@ namespace pool
     return( mArgMap.find(strArgName) != mArgMap.end() );
   }
 
-  inline std::string CommandLine::GetProgramName() const
+  inline const std::string& CommandLine::GetProgramName() const
   {
     return mstrProgramName;
   }
