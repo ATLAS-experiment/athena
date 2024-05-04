@@ -92,6 +92,7 @@ def StandardJetBuildDataDeps(flags, clustersKey, **jetRecoDict):
             prefix=getHLTPrefix(),
         )
         # Record which clusters should be used to form PFOs
+        # Purely for trigger usage
         jetDef.inputdef.prereqs = [f'extinput:{clustersKey}']
     else:
         jetDef = defineJets(
@@ -172,7 +173,7 @@ def StandardJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
         if not is_pflow and jetRecoDict["recoAlg"] == "a4":
             from TriggerMenuMT.HLT.Jet.JetRecoCommon import cleaningDict
             jetDef.modifiers += [f'Cleaning:{clean_wp}' for _,clean_wp in cleaningDict.items()]
-   
+
         jetDef = solveDependencies(jetDef,flags)
         jetDef.lock()
         jetsOut = formatFilteredJetsName(jetDef.fullname(),jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV)
