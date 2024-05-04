@@ -17,12 +17,12 @@
 #include <GaudiKernel/SystemOfUnits.h>
 #include "CxxUtils/starts_with.h"
 
-using namespace MuonGMR4;
-using namespace ActsTrk;
-
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>
 #include <TTreeReader.h>
+
+using namespace MuonGMR4;
+using namespace ActsTrk;
 
 
 constexpr double tolerance = 1.*Gaudi::Units::millimeter;
