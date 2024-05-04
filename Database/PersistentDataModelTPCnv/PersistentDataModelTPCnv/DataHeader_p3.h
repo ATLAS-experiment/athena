@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODELTPCNV_DATAHEADER_P3_H
@@ -33,7 +33,7 @@ friend class DataHeaderElementCnv_p3;
    unsigned int pClid() const;
    const std::vector<unsigned int>& clids() const;
    const std::string& token() const;
-   const std::vector<std::string> alias() const;
+   const std::vector<std::string>& alias() const;
    unsigned int oid1() const;
    unsigned int oid2() const;
 
