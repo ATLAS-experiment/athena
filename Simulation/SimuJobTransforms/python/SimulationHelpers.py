@@ -76,6 +76,7 @@ def enableCalHitsZDC(flags):
     flags.Sim.PRRThreshold = False
     flags.Sim.PRRWeight = False
 
+
 def enableCalHitsAll(flags):
     """Turns on calibration hits for LAr, Tile and ZDC"""
     flags.Sim.CalibrationRun = CalibrationRun.LArTileZDC
@@ -96,6 +97,7 @@ def enableVerboseSelector(flags):
     """ """
     flags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfig.VerboseSelectorToolCfg']
 
+
 def enableFastCaloSim(flags):
     # Set LArParametrization to FastCaloSim
     flags.Sim.LArParameterization = LArParameterization.FastCaloSim
@@ -103,3 +105,21 @@ def enableFastCaloSim(flags):
     flags.Sim.CalibrationRun = CalibrationRun.Off
     # Set simulator name as metadata
     flags.Sim.ISF.Simulator = SimulationFlavour.ATLFAST3MT
+
+
+def useVerboseTracking(flags):
+    # Use verbose G4 tracking
+    flags.Sim.G4Commands += ['/tracking/verbose 1']
+
+
+## Change the field stepper
+def useSimpleRungeStepper(flags):
+    flags.Sim.G4Stepper = 'SimpleRunge'
+
+
+def useClassicalRK4Stepper(flags):
+    flags.Sim.G4Stepper = 'ClassicalRK4'
+
+
+def useNystromRK4Stepper(flags):
+    flags.Sim.G4Stepper = 'NystromRK4'
