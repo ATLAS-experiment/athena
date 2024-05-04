@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALORXGAIN_H
@@ -42,7 +42,7 @@ public:
 	//inline unsigned int slot(void) const { return m_recSlot; };
 	//inline unsigned int channel(void) const { return m_recChannel; };
 	inline int gain(void) const { return m_gain; };
-	inline std::string comment(void) const { return m_comment; };
+	inline const std::string& comment(void) const { return m_comment; };
 
 private:
 	L1CaloRxCoolChannelId m_channelId;

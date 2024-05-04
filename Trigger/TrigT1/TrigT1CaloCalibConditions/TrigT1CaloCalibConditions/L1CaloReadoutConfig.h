@@ -1,7 +1,7 @@
 // -*- C++ -*-
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALOREADOUTCONFIG_H
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #define TRIGT1CALOCALIBCONDITIONS_L1CALOREADOUTCONFIG_H
 
@@ -19,7 +19,7 @@ public:
   L1CaloReadoutConfig(unsigned int channelId, const std::string& description, unsigned int baselinePointer, unsigned int numFadcSlices, unsigned int l1aFadcSlice, unsigned int numLutSlices, unsigned int l1aLutSlice, unsigned int numProcSlices, unsigned int l1aProcSlice, unsigned int numTopoSlices, unsigned int l1aTopoSlice, unsigned int latencyPpmFadc, unsigned int latencyPpmLut, unsigned int latencyCpmInput, unsigned int latencyCpmHits, unsigned int latencyCpmRoi, unsigned int latencyJemInput, unsigned int latencyJemRoi, unsigned int latencyCpCmxBackplane, unsigned int latencyCpCmxLocal, unsigned int latencyCpCmxCable, unsigned int latencyCpCmxSystem, unsigned int latencyCpCmxInfo, unsigned int latencyJetCmxBackplane, unsigned int latencyJetCmxLocal, unsigned int latencyJetCmxCable, unsigned int latencyJetCmxSystem, unsigned int latencyJetCmxInfo, unsigned int latencyJetCmxRoi, unsigned int latencyEnergyCmxBackplane, unsigned int latencyEnergyCmxLocal, unsigned int latencyEnergyCmxCable, unsigned int latencyEnergyCmxSystem, unsigned int latencyEnergyCmxInfo, unsigned int latencyEnergyCmxRoi, unsigned int latencyTopo, unsigned int internalLatencyJemJet, unsigned int internalLatencyJemSum, unsigned int bcOffsetJemJet, unsigned int bcOffsetJemSum, int bcOffsetCmx, int bcOffsetTopo, const std::string& formatTypePpm, const std::string& formatTypeCpJep, const std::string& formatTypeTopo, unsigned int compressionThresholdPpm, unsigned int compressionThresholdCpJep, unsigned int compressionThresholdTopo, unsigned int compressionBaselinePpm, unsigned int readout80ModePpm);
 
   unsigned int channelId() const { return m_channelId; }
-  std::string description() const { return m_description; }
+  const std::string& description() const { return m_description; }
   unsigned int baselinePointer() const { return m_baselinePointer; }
   unsigned int numFadcSlices() const { return m_numFadcSlices; }
   unsigned int l1aFadcSlice() const { return m_l1aFadcSlice; }
@@ -60,9 +60,9 @@ public:
   unsigned int bcOffsetJemSum() const { return m_bcOffsetJemSum; }
   int bcOffsetCmx() const { return m_bcOffsetCmx; }
   int bcOffsetTopo() const { return m_bcOffsetTopo; }
-  std::string formatTypePpm() const { return m_formatTypePpm; }
-  std::string formatTypeCpJep() const { return m_formatTypeCpJep; }
-  std::string formatTypeTopo() const { return m_formatTypeTopo; }
+  const std::string& formatTypePpm() const { return m_formatTypePpm; }
+  const std::string& formatTypeCpJep() const { return m_formatTypeCpJep; }
+  const std::string& formatTypeTopo() const { return m_formatTypeTopo; }
   unsigned int compressionThresholdPpm() const { return m_compressionThresholdPpm; }
   unsigned int compressionThresholdCpJep() const { return m_compressionThresholdCpJep; }
   unsigned int compressionThresholdTopo() const { return m_compressionThresholdTopo; }

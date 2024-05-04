@@ -1,7 +1,7 @@
 // -*- C++ -*-
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALORUNPARAMETERS_H
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #define TRIGT1CALOCALIBCONDITIONS_L1CALORUNPARAMETERS_H
 
@@ -22,16 +22,16 @@ public:
   L1CaloRunParameters(unsigned int channelId, const std::string& runType, const std::string& runActionName, unsigned int runActionVersion, const std::string& readoutConfig, unsigned int readoutConfigID, const std::string& ttcConfiguration, unsigned int ttcConfigurationID, const std::string& triggerMenu, const std::string& calibration, const std::string& conditions);
 
   unsigned int channelId() const { return m_channelId; }
-  std::string runType() const { return m_runType; }
-  std::string runActionName() const { return m_runActionName; }
+  const std::string& runType() const { return m_runType; }
+  const std::string& runActionName() const { return m_runActionName; }
   unsigned int runActionVersion() const { return m_runActionVersion; }
-  std::string readoutConfig() const { return m_readoutConfig; }
+  const std::string& readoutConfig() const { return m_readoutConfig; }
   unsigned int readoutConfigID() const { return m_readoutConfigID; }
-  std::string ttcConfiguration() const { return m_ttcConfiguration; }
+  const std::string& ttcConfiguration() const { return m_ttcConfiguration; }
   unsigned int ttcConfigurationID() const { return m_ttcConfigurationID; }
-  std::string triggerMenu() const { return m_triggerMenu; }
-  std::string calibration() const { return m_calibration; }
-  std::string conditions() const { return m_conditions; }
+  const std::string& triggerMenu() const { return m_triggerMenu; }
+  const std::string& calibration() const { return m_calibration; }
+  const std::string& conditions() const { return m_conditions; }
 
   void setChannelId(unsigned int channelId) { m_channelId = channelId; }
   void setrunType(const std::string& runType) { m_runType = runType; }

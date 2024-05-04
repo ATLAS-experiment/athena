@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALORAMPRUNPLAN_H
@@ -32,7 +32,7 @@ public:
 	virtual void makeTransient(const AthenaAttributeList*& attributeList);
 
 	int eventsPerStep() const { return m_nEventsPerStep; };
-	std::vector<double> energySteps() const { return m_vEnergySteps; };
+	const std::vector<double>& energySteps() const { return m_vEnergySteps; };
 
 	void nextEvent();
 	double currentEnergy() { return *m_itCurrentStep; };

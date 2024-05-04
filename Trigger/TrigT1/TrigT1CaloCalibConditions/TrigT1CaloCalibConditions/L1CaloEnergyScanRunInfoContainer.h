@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1CALOENERGYSCANRUNINFOCONTAINER_H
@@ -46,7 +46,7 @@ class L1CaloEnergyScanRunInfoContainer: public DataObject,
 #endif
     
     unsigned int runNumber()   const    { return m_runNumber; }
-    std::string gainStrategy() const    { return m_gainStrategy; }
+    const std::string& gainStrategy() const    { return m_gainStrategy; }
     void setRunNumber(unsigned int run) { m_runNumber = run; }
     void setGainStrategy(const std::string& strategy) { m_gainStrategy = strategy; }
     
