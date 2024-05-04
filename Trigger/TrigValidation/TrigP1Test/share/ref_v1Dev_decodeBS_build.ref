@@ -10056,9 +10056,9 @@ HLT_noalg_L1gXEJWOJ120:
 HLT_noalg_L1gXEJWOJ500:
   eventCount: 0
 HLT_noalg_L1gXEJWOJ60:
-  eventCount: 2
+  eventCount: 3
 HLT_noalg_L1gXEJWOJ70:
-  eventCount: 2
+  eventCount: 3
 HLT_noalg_L1gXEJWOJ80:
   eventCount: 1
 HLT_noalg_L1gXENC100:
@@ -12581,10 +12581,10 @@ HLT_xe30_cvfpufit_L1XE30:
 HLT_xe30_cvfpufit_L1gXEJWOJ60:
   eventCount: 2
   stepCounts:
-    0: 2
+    0: 3
     1: 2
   stepFeatures:
-    0: 2
+    0: 3
     1: 2
 HLT_xe30_cvfpufit_L1jXE60:
   eventCount: 6
@@ -12601,11 +12601,11 @@ HLT_xe30_mht_L1XE30:
   stepFeatures:
     0: 1
 HLT_xe30_mht_L1gXEJWOJ60:
-  eventCount: 2
+  eventCount: 3
   stepCounts:
-    0: 2
+    0: 3
   stepFeatures:
-    0: 2
+    0: 3
 HLT_xe30_mht_L1jXE60:
   eventCount: 6
   stepCounts:
@@ -12621,13 +12621,13 @@ HLT_xe30_mhtpufit_em_L1XE30:
     0: 1
     1: 1
 HLT_xe30_mhtpufit_em_L1gXEJWOJ60:
-  eventCount: 2
+  eventCount: 3
   stepCounts:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
 HLT_xe30_mhtpufit_em_L1jXE60:
   eventCount: 4
   stepCounts:
@@ -12645,13 +12645,13 @@ HLT_xe30_mhtpufit_pf_L1XE30:
     0: 1
     1: 1
 HLT_xe30_mhtpufit_pf_L1gXEJWOJ60:
-  eventCount: 2
+  eventCount: 3
   stepCounts:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
 HLT_xe30_mhtpufit_pf_L1jXE60:
   eventCount: 2
   stepCounts:
@@ -12671,10 +12671,10 @@ HLT_xe30_pfopufit_L1XE30:
 HLT_xe30_pfopufit_L1gXEJWOJ60:
   eventCount: 2
   stepCounts:
-    0: 2
+    0: 3
     1: 2
   stepFeatures:
-    0: 2
+    0: 3
     1: 2
 HLT_xe30_pfopufit_L1jXE60:
   eventCount: 5
@@ -12703,10 +12703,10 @@ HLT_xe30_pfsum_L1XE30:
 HLT_xe30_pfsum_L1gXEJWOJ60:
   eventCount: 1
   stepCounts:
-    0: 2
+    0: 3
     1: 1
   stepFeatures:
-    0: 2
+    0: 3
     1: 1
 HLT_xe30_pfsum_L1jXE60:
   eventCount: 5
@@ -12727,10 +12727,10 @@ HLT_xe30_pfsum_cssk_L1XE30:
 HLT_xe30_pfsum_cssk_L1gXEJWOJ60:
   eventCount: 1
   stepCounts:
-    0: 2
+    0: 3
     1: 1
   stepFeatures:
-    0: 2
+    0: 3
     1: 1
 HLT_xe30_pfsum_cssk_L1jXE60:
   eventCount: 4
@@ -12751,10 +12751,10 @@ HLT_xe30_pfsum_vssk_L1XE30:
 HLT_xe30_pfsum_vssk_L1gXEJWOJ60:
   eventCount: 1
   stepCounts:
-    0: 2
+    0: 3
     1: 1
   stepFeatures:
-    0: 2
+    0: 3
     1: 1
 HLT_xe30_pfsum_vssk_L1jXE60:
   eventCount: 3
@@ -12797,13 +12797,13 @@ HLT_xe30_trkmht_L1XE30:
     0: 1
     1: 1
 HLT_xe30_trkmht_L1gXEJWOJ60:
-  eventCount: 1
+  eventCount: 2
   stepCounts:
-    0: 2
-    1: 1
+    0: 3
+    1: 2
   stepFeatures:
-    0: 2
-    1: 1
+    0: 3
+    1: 2
 HLT_xe30_trkmht_L1jXE60:
   eventCount: 5
   stepCounts:
