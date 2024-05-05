@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -247,7 +247,7 @@ unsigned int TrigInDetTrackTruth::nrMatches() const
 }
 
 /** returns copy of family tree "map" */
-std::vector< std::pair<unsigned int, unsigned int> > TrigInDetTrackTruth::getFamilyTree() const 
+const std::vector< std::pair<unsigned int, unsigned int> >& TrigInDetTrackTruth::getFamilyTree() const 
 {
   return m_family_tree;
 }
