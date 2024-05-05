@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -212,7 +212,7 @@ namespace PMonMT {
     // Convenience methods
     void set_wall_time_offset(const double wall_time_offset) { m_offset_wall = wall_time_offset; }
 
-    EventMeasMap_t getEventLevelData() const {
+    const EventMeasMap_t& getEventLevelData() const {
       return m_eventLevelDeltaMap;
     }
 
