@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -431,7 +431,7 @@ public:
   Folder(const DbConnection & theConnection, const FolderSpec & theFolder);
   bool isValid() const;
   std::string description() const;
-  FolderSpec folderSpec() const;
+  const FolderSpec& folderSpec() const;
   cool::RecordSpecification foreignKeySpec();
   cool::RecordSpecification payloadSpec() const; //!< specification of the payload entries
   bool isSingleVersion() const;
@@ -459,7 +459,7 @@ Folder::Folder(const DbConnection & theConnection, const FolderSpec & theFolder)
   }
 }
 
-FolderSpec
+const FolderSpec&
 Folder::folderSpec() const{
 	return m_folderSpec;
 }
