@@ -102,6 +102,8 @@ _stdInputList = [
     # *****************************
     JetInputExternal("CaloCalTopoClusters", xAODType.CaloCluster, algoBuilder= standardReco("CaloClusters") ),
 
+    JetInputExternal("HLT_TopoCaloClustersFS", xAODType.CaloCluster ),
+
     # *****************************
     JetInputExternal("JetETMissParticleFlowObjects", xAODType.FlowElement, algoBuilder = standardReco("PFlow"),
                      prereqs = [inputsFromContext("Tracks"), "input:CaloCalTopoClusters"],
