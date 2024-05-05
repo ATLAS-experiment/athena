@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -1045,7 +1045,7 @@ double TileDddbManager::SCNTdphi() const
 
 // -------------------- Extended Barrel C U T S ---------------------
 
-int TileDddbManager::SetCurrentCuts(std::string input)
+int TileDddbManager::SetCurrentCuts(const std::string& input)
 {
   if (m_buildCuts)
     {std::string name(input);
