@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_SCT_ID_H
@@ -253,7 +253,7 @@ public:
   /// return functions to give neighbours in order: opposite, eta minus, eta plus,
   /// phi minus, phi plus : in case you dont want to create temporary array of IdentifierHashes
   /// (to be investigated in context of SP formation)
-  std::array<std::function< IdentifierHash(const IdentifierHash &)>, 5 >
+  const std::array<std::function< IdentifierHash(const IdentifierHash &)>, 5 >&
   neighbour_calls_by_eta() const;
   //@}
 

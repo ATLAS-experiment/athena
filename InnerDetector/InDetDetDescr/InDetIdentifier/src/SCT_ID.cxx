@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -385,7 +385,7 @@ SCT_ID::get_other_side(const IdentifierHash& hashId) const{
   return IdentifierHash{};
 }
 //
-std::array<std::function< IdentifierHash(const IdentifierHash &)>, 5 >
+const std::array<std::function< IdentifierHash(const IdentifierHash &)>, 5 >&
 SCT_ID::neighbour_calls_by_eta() const{
   return m_neighboursByEta;
 }
