@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ class EMInsituDatabaseEntry
   /** Setting DatabaseID */
   void	setDatabaseID(std::string dbaseID);
   /** Getting DatabaseID */
-  std::string	getDatabaseID() const;
+  const std::string& getDatabaseID() const;
 
   int		whichTypeAmI()
   {
