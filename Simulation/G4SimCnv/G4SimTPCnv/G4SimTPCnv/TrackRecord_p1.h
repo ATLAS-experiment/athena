@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKRECORD_P1_H
@@ -22,7 +22,7 @@ public:
 	float positionZ() const {return m_positionZ;}
 	float time() const {return m_time;}
 	int barCode() const {return m_barCode;}
-	std::string volName() const {return m_volName;}
+	const std::string& volName() const {return m_volName;}
 	friend class TrackRecordCnv_p1;
 
 private:
