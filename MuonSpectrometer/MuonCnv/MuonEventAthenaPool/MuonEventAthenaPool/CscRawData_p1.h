@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_CSCRAWDATA_P1_H
@@ -23,7 +23,7 @@ public:
     uint16_t dpuID() const          { return m_dpuID; }
     uint16_t identify() const       { return m_id;} 
     uint32_t getAddress() const 	{ return m_address; }
-    const std::vector<uint16_t>  getSamples() const { return m_amps; }
+    const std::vector<uint16_t>&  getSamples() const { return m_amps; }
     
     friend class  CscRawDataCnv_p1;
 //private:
