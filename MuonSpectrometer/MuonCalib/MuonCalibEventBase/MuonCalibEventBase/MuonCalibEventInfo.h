@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*********************************************************//
@@ -53,7 +53,7 @@ namespace MuonCalib {
         unsigned int timeStamp() const;    //!< retrieving timestamp of MuonCalibEvent
         unsigned int lumiBlock() const;    //!< retrieving lumiblock of MuonCalibEvent
         unsigned int bcId() const;         //!< retrieving bcid of MuonCalibEvent
-        std::string tag() const;           //!< retrieving reconstruction tag of MuonCalibEvent
+        const std::string& tag() const;           //!< retrieving reconstruction tag of MuonCalibEvent
         const std::vector<bool>& triggerBits() const;
 
         void setRunNumber(const unsigned int run_number);      //!< sets runnumber
