@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOFEXPERF_JGTOWERHELPER_H
@@ -38,8 +38,8 @@ namespace LVL1
     float dEta() const { return m_deta; };
     float dPhi() const { return m_dphi; };
     float sampling() const { return m_sampling; };
-    std::vector<int> GetSCIndices() const { return m_scellIndices; };
-    std::vector<int> GetTileIndices() const { return m_tileIndices; };
+    const std::vector<int>& GetSCIndices() const { return m_scellIndices; };
+    const std::vector<int>& GetTileIndices() const { return m_tileIndices; };
     void SetSCIndices(int sc_id) { m_scellIndices.push_back(sc_id); };
     void SetTileIndices(int tile_id) { m_tileIndices.push_back(tile_id); };
     void SetSampling(int sampling) { m_sampling = sampling; };
