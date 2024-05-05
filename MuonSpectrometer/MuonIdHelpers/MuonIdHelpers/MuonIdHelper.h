@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DETECTORDESCRIPTION_MUONIDHELPER_H
@@ -179,7 +179,7 @@ public:
     /// id_iterators
     int get_id(const ExpandedIdentifier& old_id, Identifier& new_id) const;
     /// multirange
-    MultiRange multiRange() const;
+    const MultiRange& multiRange() const;
 
     /// the maximum hash value
     size_type module_hash_max() const;
@@ -187,7 +187,7 @@ public:
     size_type channel_hash_max() const;
 
     /// the id's
-    std::vector<Identifier> idVector() const;
+    const std::vector<Identifier>& idVector() const;
 
     ///
     /// Iterators over full set of ids. Module iterator is sorted

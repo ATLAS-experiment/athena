@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MuonIdHelper.h"
@@ -747,13 +747,13 @@ IdContext MuonIdHelper::channel_context(void) const {
     return (IdContext(id, 0, m_CHANNEL_INDEX));
 }
 /*******************************************************************************/
-MultiRange MuonIdHelper::multiRange(void) const { return m_full_module_range; }
+const MultiRange& MuonIdHelper::multiRange(void) const { return m_full_module_range; }
 /*******************************************************************************/
 MuonIdHelper::size_type MuonIdHelper::module_hash_max(void) const { return m_module_hash_max; }
 /*******************************************************************************/
 MuonIdHelper::size_type MuonIdHelper::channel_hash_max(void) const { return m_channel_hash_max; }
 /*******************************************************************************/
-std::vector<Identifier> MuonIdHelper::idVector(void) const { return m_module_vec; }
+const std::vector<Identifier>& MuonIdHelper::idVector(void) const { return m_module_vec; }
 /*******************************************************************************/
 MuonIdHelper::const_id_iterator MuonIdHelper::module_begin(void) const { return (m_module_vec.begin()); }
 /*******************************************************************************/
