@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CalibrationHit.h
@@ -82,7 +82,7 @@ namespace LArG4 {
     // Accessor methods.  Note the lack of "Set" methods.  Once you've
     // defined the position of a hit, you can't change it.
 
-    inline LArG4Identifier identifier() const { return m_identifier; }
+    inline const LArG4Identifier& identifier() const { return m_identifier; }
 
     inline G4double energy(unsigned int i) const
     {
