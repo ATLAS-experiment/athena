@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************
@@ -48,7 +48,7 @@ class SelectorBase : public AthAlgorithm {
     // it should use pt_eta_range(pt,eta)
     // For each object that this method returns true
     // a flag will be set to true in a SelectedParticles branch
-    std::string getInputKey(){return m_inputKey;}
+    const std::string& getInputKey(){return m_inputKey;}
 
  protected:
 
