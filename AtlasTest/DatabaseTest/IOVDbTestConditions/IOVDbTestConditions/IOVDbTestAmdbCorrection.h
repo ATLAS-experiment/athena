@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -24,7 +24,7 @@ class IOVDbTestAmdbCorrection{
 
   ~IOVDbTestAmdbCorrection();
 
-  std::string name() const; // test method
+  const std::string& name() const; // test method
 
   HepGeom::Point3D<double> getTranslation() const;
   HepGeom::Point3D<double> getRotation() const;

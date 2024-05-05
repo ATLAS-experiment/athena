@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -23,7 +23,7 @@ IOVDbTestMDTEleMap::IOVDbTestMDTEleMap()
 IOVDbTestMDTEleMap::~IOVDbTestMDTEleMap() 
 { }
 
-std::string IOVDbTestMDTEleMap::name() const
+const std::string& IOVDbTestMDTEleMap::name() const
 {
     return (m_name);
 }

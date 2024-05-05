@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -32,7 +32,7 @@ class IOVDbTestMDTEleMap{
   int         runNumber() const;
   int         eventNumber() const;
   int         timeStamp() const;
-  std::string name() const;
+  const std::string& name() const;
     
   void set(int runNumber, int eventNumber, const std::string& name); 
   void set(int timeStamp, const std::string& name); 
