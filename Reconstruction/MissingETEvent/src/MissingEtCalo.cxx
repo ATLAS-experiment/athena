@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -235,7 +235,7 @@ unsigned int MissingEtCalo::ncellCalo(MissingEtCalo::CaloIndex theCalo) const
   return m_nCellsCalo[theCalo] ;
 }
 
-std::string MissingEtCalo::calibType() const
+const std::string& MissingEtCalo::calibType() const
 {
 
   return m_calibType ;
