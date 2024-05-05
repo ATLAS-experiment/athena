@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonGeoModel
@@ -62,7 +62,7 @@ StatusCode RegionSelectionSvc ::initialize() {
 
 bool RegionSelectionSvc ::isInRegion(const MuonCalib::MuonFixedId &id) const { return m_master_region->Result(id); }
 
-std::string RegionSelectionSvc ::GetRegionSelection() const { return m_region_string; }
+const std::string& RegionSelectionSvc ::GetRegionSelection() const { return m_region_string; }
 const std::vector<MuonCalib ::NtupleStationId> &RegionSelectionSvc ::GetStationsInRegions() const { return m_stations_in_region; }
 int RegionSelectionSvc ::AddRegionNtuples(const std::string &infile, TChain *chain) {
     std::list<std::string> dirnames;
