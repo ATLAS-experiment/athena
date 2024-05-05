@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_PAI_gasComponent_h
@@ -37,7 +37,7 @@ public:
   /**
    * Get name of gas component (molecule)
    */
-  std::string getName() { return m_name; };
+  const std::string& getName() { return m_name; };
 
   /**
    * Get number of different elements in this gas component (molecule)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_PAI_gasMixture_h
@@ -35,7 +35,7 @@ class TRT_PAI_gasMixture : public AthMessaging {
   /**
    * Get name of gas mixture
    */
-  std::string getName() { return m_name; };
+  const std::string& getName() { return m_name; };
 
   /**
    * Get number of different gas components in this gas mixture
