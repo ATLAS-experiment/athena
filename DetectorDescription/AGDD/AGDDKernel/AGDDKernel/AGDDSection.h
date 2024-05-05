@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDSection_H
@@ -28,11 +28,11 @@ public:
 	void Author(const std::string& n) {m_author=n;}
 	void Date(const std::string& n) {m_date=n;}
 	void TopVolume(const std::string& n) {m_topVolume=n;}
-	std::string Name() const {return m_name;}
-	std::string Version() const {return m_version;}
-	std::string Author() const {return m_author;}
-	std::string Date() const {return m_date;}
-	std::string TopVolume() const {return m_topVolume;}
+	const std::string& Name() const {return m_name;}
+	const std::string& Version() const {return m_version;}
+	const std::string& Author() const {return m_author;}
+	const std::string& Date() const {return m_date;}
+        const std::string& TopVolume() const {return m_topVolume;}
 	bool IsToBeBuilt() const {return m_toBeBuilt;}
 	volumeIterator VolumeBegin() {return m_theVolumes.begin();}
 	volumeIterator VolumeEnd() {return m_theVolumes.end();}

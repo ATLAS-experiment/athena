@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDKernel/AGDDPositioner.h"
@@ -18,7 +18,7 @@ AGDDPositioner::AGDDPositioner(AGDDPositionerStore& ps,
 	m_theVolume=vs.GetVolume(Volume());
 }
 
-std::string AGDDPositioner::Volume() {
+const std::string& AGDDPositioner::Volume() {
 	return m_volume;
 }
 
