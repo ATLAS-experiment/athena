@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -76,10 +76,10 @@ public:
     bool Bound) const override final;
 
   /**This method allows access to the bin utility*/
-  const Trk::BinUtility binUtility() const { return m_etaBin; }
+  const Trk::BinUtility& binUtility() const { return m_etaBin; }
 
   /**This method allows access to the radial offset values*/
-  const std::vector<float> offset() const { return m_depth; }
+  const std::vector<float>& offset() const { return m_depth; }
 
   /** Return properly formatted class name for screen output */
   virtual std::string name() const override
