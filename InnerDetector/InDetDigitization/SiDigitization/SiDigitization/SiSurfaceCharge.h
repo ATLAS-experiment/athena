@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ public:
   ///////////////////////////////////////////////////////////////////
 
   // position at the sensor surface:
-  InDetDD::SiLocalPosition position() const;
+  const InDetDD::SiLocalPosition& position() const;
 
   // charge located at this position:
   const SiCharge& charge() const;
@@ -72,7 +72,7 @@ private:
 inline SiSurfaceCharge::~SiSurfaceCharge() 
 {}
 
-inline InDetDD::SiLocalPosition SiSurfaceCharge::position() const
+inline const InDetDD::SiLocalPosition& SiSurfaceCharge::position() const
 {
   return m_position;
 }
