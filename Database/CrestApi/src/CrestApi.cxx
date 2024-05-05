@@ -2816,7 +2816,7 @@ namespace Crest {
     return version;
   }
 
-  std::string CrestClient::getClientVersion() {
+  const std::string& CrestClient::getClientVersion() {
     return s_CREST_CLIENT_VERSION;
   }
 
