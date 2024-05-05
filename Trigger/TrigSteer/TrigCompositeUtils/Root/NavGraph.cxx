@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -97,7 +97,7 @@ namespace TrigCompositeUtils {
   }
 
 
-  std::vector<NavGraphNode*> NavGraph::finalNodes() const {
+  const std::vector<NavGraphNode*>& NavGraph::finalNodes() const {
     return m_finalNodes;
   }
 
