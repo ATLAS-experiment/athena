@@ -66,7 +66,7 @@ public:
     else               return (x > zMin()-eps && x < zMax()+eps);
   }
 
-  LayerContainer layers() const {return m_layers;}
+  const LayerContainer& layers() const {return m_layers;}
 
   ServiceVolume* next() {return m_next;}
 
