@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MYSQL_H
@@ -58,9 +58,9 @@ namespace MuonGM {
          bool amdb_from_RDB() const;
          void set_amdb_from_RDB(bool);
          void setGeometryVersion(const std::string& s);
-         std::string getGeometryVersion() const;
+         const std::string& getGeometryVersion() const;
          void setLayoutName(const std::string& s);
-         std::string getLayoutName() const;
+         const std::string& getLayoutName() const;
          void setNovaVersion(int i);
          int getNovaVersion() const;
          void setNovaReadVersion(int i);

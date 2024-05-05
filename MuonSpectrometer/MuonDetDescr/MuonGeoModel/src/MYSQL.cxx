@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MYSQL.h"
@@ -255,11 +255,11 @@ namespace MuonGM {
 
     void MYSQL::addallocPos(const std::string& key, int subtype, int cutout) { m_allocPos[key] = allocPosBuildValue(subtype, cutout); }
 
-    std::string MYSQL::getGeometryVersion() const { return m_geometry_version; }
+    const std::string& MYSQL::getGeometryVersion() const { return m_geometry_version; }
 
     int MYSQL::getNovaReadVersion() const { return m_amdb_version; }
 
-    std::string MYSQL::getLayoutName() const { return m_layout_name; }
+    const std::string& MYSQL::getLayoutName() const { return m_layout_name; }
 
     int MYSQL::getNovaVersion() const { return m_nova_version; }
 

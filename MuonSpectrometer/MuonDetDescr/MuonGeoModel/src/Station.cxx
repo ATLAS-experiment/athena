@@ -107,7 +107,7 @@ namespace MuonGM {
 
     PositionIterator Station::end() const { return m_positions.end(); }
 
-    std::string Station::GetName() const { return m_name; }
+    const std::string& Station::GetName() const { return m_name; }
 
     double Station::GetThickness(const MYSQL& mysql) const {
         double thick = 0;
