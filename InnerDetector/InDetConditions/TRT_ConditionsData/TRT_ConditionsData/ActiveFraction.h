@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTIVEFRACTION_H
@@ -19,8 +19,8 @@ namespace TRTCond{
     int findEtaBin( float eta ) const;
     int findPhiBin( float phi ) const;
     float getActiveFraction( float eta, float phi ) const;
-    std::vector<std::pair<float,float>> getEtaBins( ) const;
-    std::vector<std::pair<float,float>> getPhiBins( ) const;
+    const std::vector<std::pair<float,float>>& getEtaBins( ) const;
+    const std::vector<std::pair<float,float>>& getPhiBins( ) const;
     void  setActiveFraction( unsigned int etaBin, unsigned int phiBin, float value);
  
   private:
@@ -89,11 +89,11 @@ namespace TRTCond{
      m_activeFracTable[etaBin][phiBin] = value;
   }
   
-  inline  std::vector<std::pair<float,float>> ActiveFraction::getEtaBins( ) const {
+  inline  const std::vector<std::pair<float,float>>& ActiveFraction::getEtaBins( ) const {
     return m_etaBins;
   }
 
-  inline  std::vector<std::pair<float,float>> ActiveFraction::getPhiBins( ) const {
+  inline  const std::vector<std::pair<float,float>>& ActiveFraction::getPhiBins( ) const {
     return m_phiBins;
   }
 
