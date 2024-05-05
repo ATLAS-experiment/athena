@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  ALFA_RAWDATACOLLECTION_CHARGE_H
@@ -71,7 +71,7 @@ class ALFA_RawDataCollection_charge : public DataVector<ALFA_RawData_charge>
   uint32_t GetTimeStamp_POT() const {return m_TimeStamp_POT;};	
   uint32_t GetBCId_POT() const {return m_BCId_POT;};	
 
-  const std::vector<ALFA_RawData_charge> Get_POT_DATA() const {return m_POT_DATA;};
+  const std::vector<ALFA_RawData_charge>& Get_POT_DATA() const {return m_POT_DATA;};
   ALFA_RawData_charge Get_POT_PMF_DATA(uint32_t Numpmf) const {return m_POT_DATA[Numpmf];};
 
 
