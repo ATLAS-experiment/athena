@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XMLHandler_H
@@ -16,7 +16,7 @@ class XMLHandler {
 public:
 	XMLHandler(const std::string& n, AGDDController& c);
   	virtual ~XMLHandler() {}
-	std::string GetName() const {return m_name;}
+	const std::string& GetName() const {return m_name;}
         virtual void ElementHandle(AGDDController& c,
                                    xercesc::DOMNode *t)=0;
         virtual void Handle(AGDDController& c,
