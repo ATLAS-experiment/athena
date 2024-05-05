@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_MUONALIGNMENTPAR_H
@@ -32,7 +32,7 @@ public:
     /// @brief station phi
     int AmdbPhi() const;
     /// @brief station Name
-    std::string AmdbStation() const;
+    const std::string& AmdbStation() const;
 
 private:
     Identifier m_id{0};

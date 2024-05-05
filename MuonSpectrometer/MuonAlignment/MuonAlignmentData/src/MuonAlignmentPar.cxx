@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonAlignmentData/MuonAlignmentPar.h>
 
@@ -19,4 +19,4 @@ void MuonAlignmentPar::setAmdbId(const std::string& stName, int stEta, int stPhi
 int MuonAlignmentPar::AmdbJob() const { return m_job; }
 int MuonAlignmentPar::AmdbEta() const{ return m_eta; }
 int MuonAlignmentPar::AmdbPhi() const{ return m_phi;}
-std::string MuonAlignmentPar::AmdbStation() const {return m_station;}
+const std::string& MuonAlignmentPar::AmdbStation() const {return m_station;}
