@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedEvent/CombinedFitTag.h"
@@ -41,7 +41,7 @@ namespace MuonCombined {
     int CombinedFitTag::matchDoF() const { return m_matchDoF; }
     double CombinedFitTag::matchProb() const { return m_matchProb; }
     void CombinedFitTag::fieldIntegral(const Rec::FieldIntegral& fieldI) { m_fieldIntegral = fieldI; }
-    Rec::FieldIntegral CombinedFitTag::fieldIntegral() const { return m_fieldIntegral; }
+    const Rec::FieldIntegral& CombinedFitTag::fieldIntegral() const { return m_fieldIntegral; }
     void CombinedFitTag::momentumBalanceSignificance(double m) { m_momentumBalanceSignificance = m; }
     double CombinedFitTag::momentumBalanceSignificance() const { return m_momentumBalanceSignificance; }
     const Trk::TrackScore& CombinedFitTag::trackScore() const { return m_trackScore; }

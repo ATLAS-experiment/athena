@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef REC_MUONOVERLAPDESCRIPTOR_H
@@ -57,7 +57,7 @@ namespace Rec {
         /** Total MS phi hits to compare to */
         unsigned int nTotalSpectroPhiHits() const { return m_totalSpectroPhiHits; }
         /** set of shared identifier, currently for the muon spectrometer */
-        std::set<Identifier> intersectionInSpectro() const { return m_intersection; }
+        const std::set<Identifier>& intersectionInSpectro() const { return m_intersection; }
 
         /** summary method */
         bool hasOverlap(unsigned int tolaratedSharedHits = 0) const;
