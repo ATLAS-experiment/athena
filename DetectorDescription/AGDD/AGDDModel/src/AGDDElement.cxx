@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDModel/AGDDElement.h"
@@ -20,12 +20,12 @@ void AGDDElement::RegisterToStore(AGDDMaterialStore& ms,
         ms.RegisterElement(e);
 }
 
-std::string AGDDElement::GetName() const
+const std::string& AGDDElement::GetName() const
 {
 	return m_name;
 }
 
-std::string AGDDElement::GetSymbol() const
+const std::string& AGDDElement::GetSymbol() const
 {
 	return m_symbol;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDElement_H
@@ -20,8 +20,8 @@ public:
 		RegisterToStore(ms, this);
 	}
         void RegisterToStore(AGDDMaterialStore& ms, AGDDElement*);
-	std::string GetName() const ;
-	std::string GetSymbol() const ;
+	const std::string& GetName() const ;
+        const std::string& GetSymbol() const ;
 	int GetZ() const {return m_z;}
 	double GetA() const {return m_a;}
 	void Created(bool b) {m_created=b;}
