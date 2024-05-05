@@ -227,7 +227,7 @@ namespace InDetDD {
         return m_digvers;
     }
 
-    std::string TRT_DetectorManager::digitizationVersionName() const
+    const std::string& TRT_DetectorManager::digitizationVersionName() const
     {
         return m_digversname;
     }
