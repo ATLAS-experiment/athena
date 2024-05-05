@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TauxAODHelpers.h 740338 2016-04-14 16:03:58Z griffith $
@@ -28,7 +28,7 @@ namespace xAOD {
     
     // @brief Access to element link to object of type T stored in auxdata
     template<class T>
-    const T* getLink(const xAOD::IParticle*, std::string, bool debug = false);
+    const T* getLink(const xAOD::IParticle*, const std::string&, bool debug = false);
     
     ///@brief return the truthParticle associated to the given IParticle (if any)
     const xAOD::TruthParticle* getTruthParticle(const xAOD::IParticle*, bool debug = false);
