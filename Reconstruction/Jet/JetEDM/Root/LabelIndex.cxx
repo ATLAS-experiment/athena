@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LabelIndex.h
@@ -32,7 +32,7 @@ Index LabelIndex::addLabel(const Label& lab) {
 
 //**********************************************************************
 
-Label LabelIndex::name() const {
+const Label& LabelIndex::name() const {
   return m_name;
 }
 
