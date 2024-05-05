@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_LocRecODEvent_h
@@ -24,7 +24,7 @@ public:
 
 	inline float getOverY() const {return m_fOverY;}
 	inline int getNumY() const {return m_iNumY;}
-	inline std::vector<int> getFibSel() const {return m_iFibSel;}
+	inline const std::vector<int>& getFibSel() const {return m_iFibSel;}
 
 	private:
 
