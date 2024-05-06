@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPC_DIGITIZATIONTOOL_H
@@ -18,7 +18,7 @@
     AtRndmSvc, which is also initialized in the initialize() method.
     The execute() has responsibility for steering the digitization/cluster
     simulation process. A loop over the RPCHits is performed, converting each SimID to OID.
-    The method PhysicalClusterSize
+    The method physicalClusterSize
     is hence called, which creates a cluster of size 1 or two according to the impact point
     of the particle along the strip. The final size of the cluster is decided by the
     method TurnOnStrips.
@@ -42,6 +42,7 @@
 #include "HitManagement/TimedHitCollection.h"
 #include "MuonCondData/RpcCondDbData.h"
 #include "MuonSimEvent/RPCSimHit.h"
+
 #include "MuonSimEvent/RPCSimHitCollection.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "PileUpTools/PileUpToolBase.h"
@@ -86,6 +87,7 @@ public:
     virtual StatusCode processAllSubEvents(const EventContext& ctx) override final;
 
 private:
+    
     template <class CondType> StatusCode retrieveCondData(const EventContext& ctx,
                                                           const SG::ReadCondHandleKey<CondType>& key,
                                                           const CondType* & condPtr) const;
@@ -100,27 +102,24 @@ private:
     long long int PackMCTruth(float proptime, float tof, float posx, float posz) const;
     /** */
     static void UnPackMCTruth(double theWord, float& proptime, float& tof, float& posy, float& posz) ;
-    /** Read parameters for cluster simulation.
-        This method reads the file specified by m_paraFile and
-        uses the experimental distributions it contains to
-        reproduce proper cluster sizes. */
-    StatusCode readParameters();
     /** Cluster simulation: first step.
         The impact point of the particle across the strip is used
         to decide whether the cluster size should be 1 or 2 */
-    std::vector<int> PhysicalClusterSize(const EventContext& ctx, const Identifier& id, const RPCSimHit* theHit,
-                                         CLHEP::HepRandomEngine* rndmEngine);
+    std::array<int, 3> physicalClusterSize(const EventContext& ctx,
+                                           const MuonGM::RpcReadoutElement* reEle,
+                                           const Identifier& id, 
+                                           const Amg::Vector3D& posAtCentre,
+                                           CLHEP::HepRandomEngine* rndmEngine) const;
     /** Cluster simulation: second step.
         Additional strips are turned on in order to reproduce the
         observed cluster size distribution */
-    std::vector<int> TurnOnStrips(const EventContext& ctx,
-                                  std::vector<int> pcs, 
-                                  const Identifier& id, 
-                                  CLHEP::HepRandomEngine* rndmEngine);
+    std::array<int, 3> TurnOnStrips(const MuonGM::RpcReadoutElement* reEle,
+                                    std::array<int, 3>&& pcs, 
+                                    const Identifier& id) const;
     /** Calculates the propagation time along the strip */
-    double PropagationTimeNew(const EventContext& ctx,
-                              const Identifier& id, 
-                              const Amg::Vector3D& globPos) const;
+    double PropagationTime(const MuonGM::RpcReadoutElement* reEle,
+                           const Identifier& id, 
+                           const Amg::Vector3D& globPos) const;
     /** Calculates the position of the hit wrt to the strip panel
         this transformation is needed since the impact point comes from the SD
         int he gas gap's reference frame. */
@@ -130,22 +129,11 @@ private:
     Gaudi::Property<double> m_UncorrJitter_BIS78{this, "UncorrJitter_BIS78", 0.3, "jitter uncorrelated between eta and phi BIS78"};
     Gaudi::Property<double> m_CorrJitter_BIS78{this, "CorrJitter_BIS78", 0.0, "jitter correlated between eta and phi BIS78"};
 
-    Amg::Vector3D posInPanel(const EventContext& ctx, 
-                             const Identifier& id, 
-                             const Amg::Vector3D& posInGap) const;
-    /** adjust strip numbering according to standard OIDs **/
-    int adjustStripNumber(const EventContext& ctx, const Identifier& id, int nstrip) const;
-    /** Accounts for rotation of chambers.
-        The impact point's coordinates are given by the RPCSensitiveDetector wrt
-        the gas gap reference system but RPC chambers are placed in the spectrometer
-        after a certain number of rotations. This method applies the necessary
-        modifications to axis orientation, in order to obtain the correct strip number */
-    Amg::Vector3D adjustPosition(const EventContext& ctx, const Identifier& id, const Amg::Vector3D& hitPos) const;
-    /** calculates the strip number and returns the position along the strip*/
-    int findStripNumber(const EventContext& ctx, 
-                        const Amg::Vector3D& gasGapPos, 
-                        const Identifier& stripPanelId, 
-                        double& posinstrip) const;
+    
+    /** Returns the position of the hit expressed in the gasGap coordinate system*/
+    Amg::Transform3D fromSimHitToLayer(const MuonGM::RpcReadoutElement* readOutEle,
+                                       const Identifier& layerId) const;
+
 
     // pile-up
     bool outsideWindow(double time) const;
@@ -153,11 +141,19 @@ private:
     Gaudi::Property<double> m_timeWindowUpperOffset{this, "WindowUpperOffset", +150., "digitization window lower limit"};
 
     /** Evaluate detection efficiency */
-    StatusCode DetectionEfficiency(const EventContext& ctx, const Identifier& ideta, const Identifier& idphi, bool& undefinedPhiStripStatus,
-                                   CLHEP::HepRandomEngine* rndmEngine, const HepMcParticleLink& trkParticle);
-    double FCPEfficiency(const HepMC::ConstGenParticlePtr& genParticle);
+    std::pair<bool, bool> detectionEfficiency(const EventContext& ctx, 
+                                              const Identifier& ideta, 
+                                              const Identifier& idphi, 
+                                              CLHEP::HepRandomEngine* rndmEngine, 
+                                              const HepMcParticleLink& trkParticle) const;
+
+    
+    double FCPEfficiency(const HepMC::ConstGenParticlePtr& genParticle) const;
     /** */
-    int ClusterSizeEvaluation(const EventContext& ctx, const Identifier& id, float xstripnorm, CLHEP::HepRandomEngine* rndmEngine);
+    int determineClusterSize(const EventContext& ctx, 
+                             const Identifier& id, 
+                             double xstripnorm, 
+                             CLHEP::HepRandomEngine* rndmEngine) const;
 
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey {this, "DetectorManagerKey",  "MuonDetectorManager", 
                                                             "Key of input MuonDetectorManager condition data"};
@@ -172,20 +168,13 @@ private:
     Gaudi::Property<double> m_rpc_time_shift{this, "PatchForRpcTimeShift", 12.5,
                                              "shift rpc digit time to match hardware time calibration: Zmumu muons are at the center of "
                                              "BC0, i.e. at 12.5ns+BC0shift w.r.t. RPC readout (BC0shift=2x3.125)"};
-    Gaudi::Property<std::string> m_paraFile{this, "Parameters", "G4RPC_Digitizer.txt", "ascii file with cluster simulation parameters"};
-    std::vector<double> m_csPara;  // cluster simulation parameters
-    std::vector<double> m_rgausPara;
-    std::vector<double> m_fgausPara;
-    std::vector<double> m_constPara;
-    double m_cs3Para{0};
-    std::vector<double> m_cs4Para;
+ 
     Gaudi::Property<bool> m_validationSetup{this, "ValidationSetup", false, ""};
     Gaudi::Property<bool> m_includePileUpTruth{this, "IncludePileUpTruth", true, "pileup truth veto"};
 
     Gaudi::Property<bool> m_turnON_efficiency{this, "turnON_efficiency", true, ""};
     Gaudi::Property<bool> m_kill_deadstrips{this, "KillDeadStrips", false, ""};              // gabriele
     Gaudi::Property<bool> m_turnON_clustersize{this, "turnON_clustersize", true, ""};
-    Gaudi::Property<int> m_testbeam_clustersize{this, "testbeam_clustersize", 1, ""};
     Gaudi::Property<int> m_FirstClusterSizeInTail{this, "FirstClusterSizeInTail", 3, ""};
 
     Gaudi::Property<std::vector<float>> m_PhiAndEtaEff_A{this, "PhiAndEtaEff_A", {}, ""};
@@ -215,11 +204,10 @@ private:
     Gaudi::Property<float> m_MeanClusterSizeTail_BIS78{this, "MeanClusterSizeTail_BIA78", 3.5, ""};
 
 
-    bool m_SetPhiOn{false};
-    bool m_SetEtaOn{false};
+
     Gaudi::Property<bool> m_muonOnlySDOs{this, "MuonOnlySDOs", true, ""};
 
-    static double extract_time_over_threshold_value(CLHEP::HepRandomEngine* rndmEngine) ;
+    static double timeOverThreshold(CLHEP::HepRandomEngine* rndmEngine) ;
     
 protected:
     ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", "Pile up service"};
@@ -232,6 +220,7 @@ protected:
     SG::WriteHandleKey<MuonSimDataCollection> m_outputSDO_CollectionKey{
         this, "OutputSDOName", "RPC_SDO", "WriteHandleKey for Output MuonSimDataCollection"};  // name of the output SDOs
 
+    SG::WriteHandleKey<RPCSimHitCollection> m_simHitValidKey{this, "SimHitValidationKey", "InputRpcHits"};
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  // Random number service
 
     ITagInfoMgr* m_tagInfoMgr{};  // Tag Info Manager
@@ -252,8 +241,6 @@ protected:
     Gaudi::Property<bool> m_Efficiency_BIS78_fromCOOL{this, "Efficiency_BIS78_fromCOOL", false, " read BIS78 Efficiency from COOL DB"};
     Gaudi::Property<bool> m_ClusterSize_BIS78_fromCOOL{this, "ClusterSize_BIS78_fromCOOL", false, " read BIS78 Cluster Size from COOL DB"};
 
-    std::map<Identifier, int> m_DeadPanel_fromlist;
-    std::map<Identifier, int> m_GoodPanel_fromlist;
 
     Gaudi::Property<bool> m_RPCInfoFromDb{this, "RPCInfoFromDb", false, ""};
     Gaudi::Property<float> m_CutMaxClusterSize{this, "CutMaxClusterSize", 5.0, ""};
