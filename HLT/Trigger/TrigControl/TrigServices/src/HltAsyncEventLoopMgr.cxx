@@ -1063,8 +1063,9 @@ void HltAsyncEventLoopMgr::eventTimerCallback()
       if (!Athena::Timeout::instance(ctx).reached()) {
         ATH_MSG_ERROR("Soft timeout in slot " << i << ". Processing time exceeded the limit of " << m_softTimeoutValue.count() << " ms");
         setTimeout(Athena::Timeout::instance(ctx));
-        // Generate a stack trace only once, on the first timeout
+        // Generate stack trace and scheduler dump only once, on the first timeout
         if (m_traceOnTimeout.value() && !m_timeoutTraceGenerated) {
+          m_schedulerSvc->dumpState();
           ATH_MSG_INFO("Generating stack trace due to the soft timeout");
           m_timeoutTraceGenerated = true;
           gSystem->StackTrace();

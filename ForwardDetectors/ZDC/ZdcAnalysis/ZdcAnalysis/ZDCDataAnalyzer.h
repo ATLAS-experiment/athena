@@ -96,6 +96,12 @@ public:
 
   void enableRepass(const ZDCModuleFloatArray& peak2ndDerivMinRepassHG, const ZDCModuleFloatArray& peak2ndDerivMinRepassLG);
 
+  void enablePreExclusion(unsigned int maxSamplesExcl, const ZDCModuleIntArray& HGADCThresh, const ZDCModuleIntArray& LGADCThresh);
+  void enablePreExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh);
+
+  void enablePostExclusion(unsigned int maxSamplesExcl, const ZDCModuleIntArray& HGADCThresh, const ZDCModuleIntArray& LGADCThresh);
+  void enablePostExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh);
+
   bool ModuleDisabled(unsigned int side, unsigned int module) const {return m_moduleDisabled[side][module];}
 
   unsigned int GetModuleMask() const {return m_moduleMask;}
@@ -167,6 +173,11 @@ public:
 			   const std::array<std::array<std::vector<float>, 4>, 2>& LHGNonlinCorrParams);
 
   void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
+
+
+  void enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
+			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr);
 
   void LoadEnergyCalibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& calibSplines)
   {

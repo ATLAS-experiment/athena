@@ -129,15 +129,38 @@ private:
   float m_T0CutLowHG{};  // minimum good corrected time for HG fits
   float m_T0CutHighHG{}; // maximum good corrected time for HG fits
 
+  std::unique_ptr<const TF1> m_timeResFuncHG_p{};
+  std::unique_ptr<const TF1> m_timeResFuncLG_p{};
+  float m_t0CutSig{};
+  unsigned int m_timeCutMode{0}; // 0 - no significance cut, 1 - cut ORed with fixed cut, 2 - cut ANDed with fixed cut
+
   float m_defaultT0Max{};   // Upper limit on pulse t0
   float m_defaultT0Min{};   // Lower limit on pulse t0
 
   float m_fitAmpMinHG{};      // Minimum amplitude in the fit
   float m_fitAmpMinLG{};      // Minimum amplitude in the fit
 
-  float m_fitAmpMaxHG{};      // Minimum amplitude in the fit
+  float m_fitAmpMaxHG{};      // Minimum am`plitude in the fit
   float m_fitAmpMaxLG{};      // Minimum amplitude in the fit
 
+  // Enabling (or not) of exclusion of early or late samples from OOT pileup
+  //
+  bool m_enablePreExcl{false};
+  unsigned int m_maxSamplesPreExcl{0};
+  unsigned int m_preExclHGADCThresh{0};
+  unsigned int m_preExclLGADCThresh{0};
+  
+  bool m_enablePostExcl{false};
+  unsigned int m_postExclHGADCThresh{0};
+  unsigned int m_postExclLGADCThresh{0};
+  unsigned int m_maxSamplesPostExcl{0};
+
+  // Enable of a user-provided filter on the FADC samples
+  //
+  bool m_haveUserFilter{false};
+  void (*m_userFilterHG)(std::vector<float>& FADCSamples, std::vector<bool> useSamples){};
+  void (*m_userFilterLG)(std::vector<float>& FADCSamples, std::vector<bool> useSamples){};
+  
   //
   unsigned int m_timingCorrMode{NoTimingCorr};
   float m_timingCorrRefADC{500};
@@ -162,10 +185,11 @@ private:
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //
+  unsigned int m_NSampleAna{0};
   bool m_adjTimeRangeEvent{}; // indicates whether we adjust the time range for this specific event
 
-  int m_minSampleEvt{};
-  int m_maxSampleEvt{};
+  unsigned int m_minSampleEvt{};
+  unsigned int m_maxSampleEvt{};
 
   // Delayed pulse members
   //
@@ -237,6 +261,10 @@ private:
 
   float m_fitPostT0lo{};      // use to assign lower bound of post pulse T0
 
+  float m_minDeriv2ndSig;
+  float m_preExpSig;
+  float m_prePulseSig;
+  
   float m_initialPrePulseT0{};
   float m_initialPrePulseAmp{};
 
@@ -247,6 +275,7 @@ private:
   float m_fitTime{};
   float m_fitTimeSub{};
   float m_fitTimeCorr{};
+  float m_timeSig{};
   float m_fitTCorr2nd{};
   float m_fitTau1{};
   float m_fitTau2{};
@@ -258,6 +287,7 @@ private:
   float m_fitPostAmp{};
   float m_fitExpAmp{};
   float m_amplitude{};
+  float m_ampNoNonLin{};
   float m_ampError{};
   float m_preSampleAmp{};
   float m_preAmplitude{};
@@ -269,8 +299,14 @@ private:
   int m_lastHGOverFlowSample{};
   int m_firstHGOverFlowSample{};
 
+  unsigned int m_NSamplesAna;
+  std::vector<float> m_ADCSamplesHG;
+  std::vector<float> m_ADCSamplesLG;
   std::vector<float> m_ADCSamplesHGSub;
   std::vector<float> m_ADCSamplesLGSub;
+
+  std::vector<bool> m_useSampleLG;
+  std::vector<bool> m_useSampleHG;
 
   std::vector<float> m_ADCSSampSigHG;
   std::vector<float> m_ADCSSampSigLG;
@@ -294,13 +330,16 @@ private:
 
   bool DoAnalysis(bool repass);
 
+  bool ScanAndSubtractSamples();
+
   bool AnalyzeData(size_t nSamples, size_t preSample,
                    const std::vector<float>& samples,        // The samples used for this event
+		   const std::vector<bool>& useSamples,        // The samples used for this event
+                   float peak2ndDerivMinThresh,
                    float noiseSig,                           // The "resolution" on the ADC value
                    const std::vector<float>& toCorrParams,   // The parameters used to correct the t0
                    float maxChisqDivAmp,                     // The maximum chisq / amplitude ratio
-                   float minT0Corr, float maxT0Corr,          // The minimum and maximum corrected T0 values
-                   float peak2ndDerivMinThresh
+                   float minT0Corr, float maxT0Corr          // The minimum and maximum corrected T0 values
                   );
 
 
@@ -332,8 +371,8 @@ private:
     }
   }
 
-  void DoFit(double maxChisqDivAmp);
-  void DoFitCombined(double maxChisqDivAmp);
+  void DoFit();
+  void DoFitCombined();
 
   static std::unique_ptr<TFitter> MakeCombinedFitter(TF1* func);
 
@@ -358,6 +397,26 @@ public:
   void enableDelayed(float deltaT, float pedestalShift, bool fixedBaseline = false);
 
   void enableRepass(float peak2ndDerivMinRepassHG, float peak2ndDerivMinRepassLG);
+
+  void enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+			const std::vector<double>& parsHG, 
+			const std::vector<double>& parsLG); 
+
+  void enablePreExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh)
+  {
+    m_enablePreExcl = true;
+    m_maxSamplesPreExcl = maxSamplesExcl;
+    m_preExclHGADCThresh = HGADCThresh;
+    m_preExclLGADCThresh = LGADCThresh;
+  }
+
+  void enablePostExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh)
+  {
+    m_enablePostExcl = true;
+    m_maxSamplesPostExcl = maxSamplesExcl;
+    m_postExclHGADCThresh = HGADCThresh;
+    m_postExclLGADCThresh = LGADCThresh;
+  }
 
   void SetPeak2ndDerivMinTolerance(size_t tolerance) {
     m_peak2ndDerivMinTolerance = tolerance;
@@ -467,6 +526,7 @@ public:
   float GetFitT0()        const {return m_fitTime;}
   float GetT0Sub()        const {return m_fitTimeSub;}
   float GetT0Corr()       const {return m_fitTimeCorr;}
+  float getTimeSig()      const {return m_timeSig;}
   float GetChisq()        const {return m_fitChisq;}
   float GetFitTau1()      const {return m_fitTau1;}
   float GetFitTau2()      const {return m_fitTau2;}
@@ -474,11 +534,14 @@ public:
   float GetFitPreAmp()    const {return m_preAmplitude;}
   float GetFitPostT0()    const {return m_fitPostT0;}
   float GetFitPostAmp()   const {return m_postAmplitude;}
-  float GetFitExpAmp()    const {return m_expAmplitude;}
+  float GetFitExpAmp()    const {return m_fitExpAmp;}
   // ---------------------------
 
+  float GetAmpNoNonLin() const {return m_ampNoNonLin;}
   float GetAmplitude() const {return m_amplitude;}
   float GetAmpError() const {return m_ampError;}
+
+  float GetPreExpAmp() const {return m_expAmplitude;}
 
   float GetPresample() const {return m_preSample;}
 
@@ -527,8 +590,9 @@ public:
   std::shared_ptr<TGraphErrors> GetUndelayedGraph() const;
   std::shared_ptr<TGraphErrors> GetDelayedGraph() const;
 
-  void Dump() const;
-  void Dump_setting() const;
+  void dump() const;
+  void dumpSetting() const;
+  void dumpTF1(const TF1*) const;
 
   const std::vector<float>& GetSamplesSub() const {return m_samplesSub;}
   const std::vector<float>& GetSamplesDeriv2nd() const {return m_samplesDeriv2nd;}

@@ -101,7 +101,7 @@ public:
         for (int j = 0; j < 4; j++) {
           ATH_MSG_INFO("-------------------------------------------------------------------------------------------------------------------");
           ATH_MSG_INFO("Side: " << i << ", Module: " << j);
-          m_zdcDataAnalyzer->GetPulseAnalyzer(i, j)->Dump_setting();
+          m_zdcDataAnalyzer->GetPulseAnalyzer(i, j)->dumpSetting();
         }
       }
       ATH_MSG_INFO("========================================================================================================================");

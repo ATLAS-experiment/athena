@@ -12,7 +12,7 @@ outputSqlite="MissingFEBs.db"
 outputSqliteOnl="MissingFEBsOnl.db"
 oldTextFile="mf_previous.txt"
 diffTextFile="mf_diff.txt"
-BaseTagName="LARBadChannelsOflMissingFEBs-RUN2-UPD3-01"
+upd3TagName="RUN2-UPD3-01"
 
 if [ $1 == "-append" ]
 then
@@ -160,13 +160,20 @@ do
 done
 IFS=' ' 
 
+if [[ $online == 1 ]] 
+then
+   mytag=${fldtag}-${upd1TagName}
+   database="LAR_ONL"
+else   
+   mytag=${fldtag}-${upd4TagName}
+   database="LAR_OFL"
+fi
 
 
-echo "Running athena to read current database content..."
-python -m LArBadChannelTool.LArMissingFebs2Ascii  -r ${runnumber} -l ${lbnumber} -o ${oldTextFile} -t ${upd4TagName} -f ${Folder} > oracle2ascii.log 2>&1
-
+echo "Running athena to read current database content...",${database}
+python -m LArBadChannelTool.LArMissingFeb2Ascii -r $runnumber -o $oldTextFile -d ${database} -t ${mytag} -f ${Folder} > oracle2ascii_$mytag.log 2>&1 
 if [ $? -ne 0 ];  then
-    echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii.log!"
+    echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii_${mytag}.log!"
     exit 5
 fi
 
@@ -185,7 +192,6 @@ if [ $? -ne 0 ];  then
     exit 7
 fi
 
-prefix=""
 if [ $lbnumbere -ge 0 ]; then
    endlb=$[ $lbnumbere + 1]
    prefix="IOVEndRun=${runnumber};IOVEndLB=$endlb;"
@@ -193,24 +199,45 @@ elif [ $onerun -eq 1 ]; then
    prefix=$[ $runnumber + 1]
    prefix="IOVEndRun=${prefix};IOVEndLB=0;"
 fi  
+if [[ $onerun == 0 ]]
+then
+    iovEnd=""
+else
+    if  [[ $runnumbere > 0 ]]
+    then
+        iovEnd="--runnumber2  $runnumbere"
+        if [[ $lbnumbere > 0 ]]
+        then
+           iovEnd=${iovEnd}+"  --lbnumber2 $lbnumbere"
+        else
+           iovEnd=${iovEnd}+"  --lbnumber2 0"
+        fi
+    else   
+        iovEnd="--runnumber2  $[ $runnumber + 1] --lbnumber2 0"
+    fi
+fi
 
-echo "TagSuffix: " $upd4TagName
+echo "Tag: " $mytag
 echo "Running athena to build sqlite database file ..."
-python -m LArBadChannelTool.LArMissingFebsDBAlg  -r ${runnumber} -l ${lbnumber} -o ${outputSqlite}.tmp -f ${Folder} -t ${upd4TagName}  $inputTextFile > ascii2sqlite.log 2>&1
+#prefix="${prefix}IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};sqlite=\"${outputSqlite}.tmp\";Folder=\"${Folder}\";GlobalTag=\"${gtag}\";TagPostfix=\"-${upd4TagName}\";"
+#echo "prefix: ${prefix}"
+#athena.py -c $prefix LArBadChannelTool/LArMissingFebDbAlg.py > ascii2sqlite.log 2>&1
+echo "Parameters: -o ${outputSql} -f $Folder -t $mytag -r $runnumber -l $lbnumber ${inputTextFile} $iovEnd"
+python -m LArBadChannelTool.LArMissingFebsDBAlg -o ${outputSqlite}.tmp -t $mytag -r $runnumber -l $lbnumber -f ${Folder} ${inputTextFile} $iovEnd > ascii2sqlite_$mytag.log 2>&1
 
 if [ $? -ne 0 ];  then
-    echo "Athena reported an error! Please check ascii2sqlite.log!"
+    echo "Athena reported an error! Please check ascii2sqlite_${mytag}.log!"
     exit 8
 fi
 
  
-if grep -q ERROR ascii2sqlite.log
+if grep -q ERROR ascii2sqlite_${mytag}.log
 then
-    echo "An error occured during ascii2sqlite job! Please check ascii2sqlite.log!"
+    echo "An error occured during ascii2sqlite job! Please check ascii2sqlite_${mytag}.log!"
     exit 8
 fi
 
-if grep -q "REJECTED" ascii2sqlite.log
+if grep -q "REJECTED" ascii2sqlite_${mytag}.log
 then
     echo "ERROR: At least one line in the input text file could not be read. Syntax Error?"
 fi
@@ -218,39 +245,49 @@ fi
 
 cp ${outputSqlite}.tmp ${outputSqlite}
 
-if [ $onerun -eq 1 ] || [ $lbnumbere -ge 0 ]; then
-   pref="-r ${runnumber} -l=${lbnumber};"
-else   
-   pref=""
-fi
-
+#if [ $onerun -eq 1 ] || [ $lbnumbere -ge 0 ]; then
+#   pref="RunNumber=${runnumber};LBNumber=${lbnumber};"
+#else   
+#   pref=""
+#fi
+#pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";Folder=\"${Folder}\";GlobalTag=\"${gtag}\";tag=\"${fldtag}-${upd4TagName}\";"
 echo "Running athena to test readback of sqlite database file"
-python -m LArBadChannelTool.LArMissingFebs2Ascii  -d ${outputSqlite} -o ${outputTextFile} -t ${upd4TagName} -f ${Folder} $pref > sqlite2ascii.log 2>&1
+#athena.py  -c ${pref} LArBadChannelTool/LArMissingFebs2Ascii.py > sqlite2ascii.log 2>&1
+echo "Parameters....  -o $outputTextFile -d $outputSqlite -t $mytag -f ${Folder} -r $runnumber -l $lbnumber "
+python -m LArBadChannelTool.LArMissingFeb2Ascii -o $outputTextFile -d $outputSqlite -t $mytag -f ${Folder} -r $runnumber -l $lbnumber  > sqlite2ascii_$mytag.log 2>&1
 
 if [ $? -ne 0 ];  then
-    echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii.log!"
+    echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii_${mytag}.log!"
     exit 9
 fi
 
 
-if grep -q ERROR sqlite2ascii.log
+if grep -q ERROR sqlite2ascii_${mytag}.log
 then
-    echo "An error occured during reading back sqlite file ! Please check sqlite2ascii.log!"
+    echo "An error occured during reading back sqlite file ! Please check sqlite2ascii_${mytag}.log!"
     exit 9
 fi
 
 if [ $online -eq 1 ]; then
-   echo "Copying UPD4 to UPD1 tag..."
-   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -ot ${fldtag}-${upd1TagName}  > AtlCoolCopy.upd1.log 2>&1
+   echo "Copying UPD1 to UPD4 tag..."
+   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t $mytag -ot ${fldtag}-${upd4TagName}  > AtlCoolCopy.upd4.log 2>&1
 
    if [ $? -ne 0 ];  then
-       echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd3.log!"
+       echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd4.log!"
+       exit 10
+   fi
+else   
+   echo "Copying UPD4 to UPD1 tag..."
+   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t $mytag -ot ${fldtag}-${upd1TagName}  > AtlCoolCopy.upd1.log 2>&1
+
+   if [ $? -ne 0 ];  then
+       echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd1.log!"
        exit 10
    fi
 fi
 
 echo "Copying UPD4 to UPD3 tag..."
-AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -ot ${BaseTagName}  > AtlCoolCopy.upd3.log 2>&1
+AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t $mytag -ot ${fldtag}-${upd3TagName} > AtlCoolCopy.upd3.log 2>&1
 
 if [ $? -ne 0 ];  then
     echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd3.log!"
@@ -290,9 +327,9 @@ if [ $online -eq 1 ]; then
 
    echo "Copying to the: "${onlfld} " with tag " ${onlfldtag}-${upd1TagName}
    if [ $onerun -eq 1 ]; then
-      AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -c > AtlCoolCopy.onl.log 2>&1
+      AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t $mytag -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -c > AtlCoolCopy.onl.log 2>&1
    else   
-      AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-${upd4TagName} -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -r 2147483647 -a -c > AtlCoolCopy.onl.log 2>&1
+      AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t $mytag -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -r 2147483647 -a -c > AtlCoolCopy.onl.log 2>&1
    fi   
 
 
@@ -332,11 +369,12 @@ echo "$outputTextFile: Text version of the new bad channel list (read back from 
 
 echo "" 
 echo "Upload to OFFLINE oracle server using"
-echo "/afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py --flask ${outputSqlite} CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
+echo "export COOL_FLASK=https://cool-proxy-app.cern.ch"
+echo "/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --flask ${outputSqlite} CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
 echo ""
 if [ $online -eq 1 ]; then
   echo "Upload to ONLINE oracle server using"
-  echo "/afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --online ${outputSqliteOnl} CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
+  echo "/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online ${outputSqliteOnl} CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
 fi
 
 
