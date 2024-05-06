@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file   GsfMeasurementUpdator.cxx
@@ -48,6 +48,20 @@ struct componentsCache
   std::array<element, GSFConstants::maxComponentsAfterConvolution> elements{};
   size_t numElements = 0;
 };
+
+/** Get the Measurememnt Co-ordinate for the 1D case */
+int measurementCoord_1D(int paramKey) {
+  int mk = 0;
+  if (paramKey != 1) {
+    for (int i = 0; i < 5; ++i) {
+      if (paramKey & (1 << i)) {
+        mk = i;
+        break;
+      }
+    }
+  }
+  return mk;
+}
 
 /** Absolute phi values should be in [-pi, pi]
     absolute theta values should be in [0, +pi]
@@ -154,15 +168,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
                        int sign,
                        Trk::FitQualityOnSurface& fitQoS)
 {
-  int mk = 0;
-  if (paramKey != 1) {
-    for (int i = 0; i < 5; ++i) {
-      if (paramKey & (1 << i)) {
-        mk = i;
-        break;
-      }
-    }
-  }
+  int mk = measurementCoord_1D(paramKey);
   // get the parameters from the
   const AmgVector(5)& trkPar = TP.parameters();
   // use measuring coordinate (variable "mk") instead of reduction matrix
@@ -196,7 +202,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   AmgMatrix(5, 5) KtimesH;
   KtimesH.setZero();
   KtimesH.col(mk) = K;
-  AmgMatrix(5, 5) M = s_unitMatrix - KtimesH;
+  const AmgMatrix(5, 5) M = s_unitMatrix - KtimesH;
   AmgSymMatrix(5) newCov =
     M * trkCov * M.transpose() + sign * K * measCov * K.transpose();
 
@@ -268,7 +274,7 @@ calculateFilterStep_T(Trk::TrackParameters& TP,
   // get the parameter vector
   const AmgVector(5)& trkPar = TP.parameters();
   // reduction matrix
-  AmgMatrix(DIM, 5) H =
+  const AmgMatrix(DIM, 5) H =
     s_reMatrices.expansionMatrix(paramKey).topLeftCorner<DIM, 5>();
   // the projected parameters from the TrackParameters
   AmgVector(DIM) projTrkPar;
@@ -391,15 +397,8 @@ makeChi2_1D(Trk::FitQualityOnSurface& updatedFitQoS,
             int paramKey,
             int sign)
 {
-  int mk = 0;
-  if (paramKey != 1) {
-    for (int i = 0; i < 5; ++i) {
-      if (paramKey & (1 << i)) {
-        mk = i;
-        break;
-      }
-    }
-  }
+
+  const int mk = measurementCoord_1D(paramKey);
   // sign: -1 = updated, +1 = predicted parameters.
   double r = valRio - trkPar(mk);
   //  if (mk==3) catchPiPi;
@@ -515,17 +514,7 @@ calculateWeight_1D(const Trk::TrackParameters* componentTrackParameters,
                    const double measCov,
                    int paramKey)
 {
-  // use measuring coordinate (variable "mk") instead of reduction matrix
-  int mk = 0;
-  if (paramKey != 1) {
-    for (int i = 0; i < 5; ++i) {
-      if (paramKey & (1 << i)) {
-        mk = i;
-        break;
-      }
-    }
-  }
-
+  const int mk = measurementCoord_1D(paramKey);
   // Calculate the residual
   const double r = measPar - (componentTrackParameters->parameters())(mk);
   // Residual covariance. Posterior weights is calculated used predicted state
@@ -765,9 +754,8 @@ rebuildState(Trk::MultiComponentState&& stateBeforeUpdate)
  * weights adjustement, filter step,
  * and FitQuality together,
  * so as to update the current
- * multi-component state gives a measurement
+ * multi-component state given a measurement
  */
-
 Trk::MultiComponentState
 calculateFilterStep(Trk::MultiComponentState&& stateBeforeUpdate,
                     const Trk::MeasurementBase& measurement,
