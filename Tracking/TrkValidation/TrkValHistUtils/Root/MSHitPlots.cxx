@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkValHistUtils/MSHitPlots.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Trk {
   MSHitPlots::MSHitPlots(PlotBase *pParent, const std::string& sDir) :
@@ -39,9 +40,10 @@ namespace Trk {
 
   void
   MSHitPlots::fillPlot(HitTypePlots &hitPlots, const std::string &sInfo, const xAOD::TruthParticle &truthprt, float weight) {
-    if (!truthprt.isAvailable<uint8_t>(sInfo)) {
+    SG::ConstAccessor<uint8_t> infoAcc (sInfo);
+    if (!infoAcc.isAvailable (truthprt)) {
       return;
     }
-    hitPlots.fill(truthprt.auxdata<uint8_t>(sInfo), truthprt.eta(), truthprt.phi(), weight);
+    hitPlots.fill(infoAcc(truthprt), truthprt.eta(), truthprt.phi(), weight);
   }
 }

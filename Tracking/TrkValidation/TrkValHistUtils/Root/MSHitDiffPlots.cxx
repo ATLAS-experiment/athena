@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkValHistUtils/MSHitDiffPlots.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 // #include "TrkValHistUtils/TrkValHistUtilities.h"
 
 namespace Trk {
@@ -29,10 +30,11 @@ namespace Trk {
     if (!trkprt.summaryValue(hitval, info)) {
       return;
     }
-    if (!truthprt.isAvailable<uint8_t>(sInfo)) {
+    SG::ConstAccessor<uint8_t> infoAcc (sInfo);
+    if (!infoAcc.isAvailable(truthprt)) {
       return;
     }
-    uint8_t truthhitval = truthprt.auxdata<uint8_t>(sInfo);
+    uint8_t truthhitval = infoAcc(truthprt);
     hitPlots.fill(truthhitval - hitval, trkprt.eta(), trkprt.phi(), weight);
   }
 }
