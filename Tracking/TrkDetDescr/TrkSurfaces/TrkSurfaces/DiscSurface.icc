@@ -15,7 +15,7 @@ inline bool DiscSurface::operator==(const DiscSurface& dsf) const
 }
 
 /** Return the surface type */
-inline SurfaceType
+inline constexpr SurfaceType
 DiscSurface::type() const
 {
   return DiscSurface::staticType;

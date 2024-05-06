@@ -99,11 +99,11 @@ public:
   }
 
   /** Return the ParametersType enum */
-  virtual ParametersType type() const override = 0;
+  constexpr virtual ParametersType type() const override = 0;
 
   /** Returns the Surface Type enum for the surface used
    * to define the derived class*/
-  virtual SurfaceType surfaceType() const override = 0;
+  constexpr virtual SurfaceType surfaceType() const override = 0;
 
   /** Dumps relevant information about the track parameters into the ostream */
   virtual MsgStream& dump(MsgStream& out) const;

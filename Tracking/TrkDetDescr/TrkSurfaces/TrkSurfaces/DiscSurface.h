@@ -192,7 +192,7 @@ public:
     std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
 
   /** Return the surface type */
-  virtual SurfaceType type() const override final;
+  constexpr virtual SurfaceType type() const override final;
 
   /** Returns a global reference point:
     For the Disc this is @f$ (R*cos(\phi), R*sin(\phi),0)*transform() @f$

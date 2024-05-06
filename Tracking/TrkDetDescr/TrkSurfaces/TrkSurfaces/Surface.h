@@ -158,7 +158,7 @@ public:
   std::unique_ptr<Surface> uniqueClone() const;
 
   /** Returns the Surface type to avoid dynamic casts */
-  virtual SurfaceType type() const = 0;
+  constexpr virtual SurfaceType type() const = 0;
 
   /** Return the cached transformation directly.  Don't try to make
       a new transform if it's not here. */

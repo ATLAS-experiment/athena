@@ -158,7 +158,7 @@ public:
     const Amg::Vector3D& glomom) const override final;
 
   /** Return the surface type */
-  virtual SurfaceType type() const override final;
+  constexpr virtual SurfaceType type() const override final;
 
   /** Specified for StraightLineSurface: LocalToGlobal method without dynamic
    * memory allocation */
