@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4FASTSIMULATION_ENDCAPFASTSIMDEDICATEDSD_H
@@ -30,6 +30,9 @@ public:
 
   // Destructor:
   ~EndcapFastSimDedicatedSD() {}
+
+  EndcapFastSimDedicatedSD(const EndcapFastSimDedicatedSD&) = delete;
+  EndcapFastSimDedicatedSD& operator= (const EndcapFastSimDedicatedSD&) = delete;
 
   // ProcessHitsMethod
   void ProcessSpot(const EnergySpot & spot) override final;
