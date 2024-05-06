@@ -28,5 +28,5 @@ class RpcStrip_v1 : public RpcMeasurement_v1 {
 }  // namespace xAOD
 
 #include "AthContainers/DataVector.h"
-DATAVECTOR_BASE_FIN(xAOD::RpcStrip_v1, xAOD::RpcMeasurement_v1);
+DATAVECTOR_BASE(xAOD::RpcStrip_v1, xAOD::RpcMeasurement_v1);
 #endif

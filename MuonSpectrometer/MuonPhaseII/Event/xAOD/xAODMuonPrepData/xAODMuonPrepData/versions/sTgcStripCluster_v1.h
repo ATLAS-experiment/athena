@@ -49,6 +49,6 @@ class sTgcStripCluster_v1 : public sTgcMeasurement_v1 {
 }  // namespace xAOD
 
 #include "AthContainers/DataVector.h"
-DATAVECTOR_BASE_FIN(xAOD::sTgcStripCluster_v1, xAOD::sTgcMeasurement_v1);
+DATAVECTOR_BASE(xAOD::sTgcStripCluster_v1, xAOD::sTgcMeasurement_v1);
 
 #endif
