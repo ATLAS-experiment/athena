@@ -87,18 +87,18 @@ class UserPhotonFlux: public AthAlgTool, virtual public IPythia8Custom {
   virtual ~UserPhotonFlux(){};
   
   /** AlgTool initialize method */
-  StatusCode initialize();
+  StatusCode initialize()  override;
   /** AlgTool finalize method */
-  StatusCode finalize();
+  StatusCode finalize() override;
   
   /** Update the pythia event 
   Probably not used for this application
   */
-  StatusCode ModifyPythiaEvent(Pythia8::Pythia& pythia) const;
+  StatusCode ModifyPythiaEvent(Pythia8::Pythia& pythia) const  override;
 
   /** Return how much the cross section is modified.
    *  Probably not used for this application */
-  virtual double CrossSectionScaleFactor() const;
+  virtual double CrossSectionScaleFactor() const  override;
 
   StatusCode InitializePythiaInfo(Pythia8::Pythia& ) const;
 

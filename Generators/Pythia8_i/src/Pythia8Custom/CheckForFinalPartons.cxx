@@ -10,17 +10,7 @@ AthAlgTool(type, name, parent), m_nFailures(0){
   declareProperty("MaxFailures", m_maxFailures=5);
 }
 
-/*
- StatusCode initialize(){
- 
- return StatusCode::SUCCESS;
- }
- 
- StatusCode finalize(){
- 
- return StatusCode::SUCCESS;
- }
- */
+
 StatusCode CheckForFinalPartons::ModifyPythiaEvent(Pythia8::Pythia &pythia) const {
   
   bool status = true;

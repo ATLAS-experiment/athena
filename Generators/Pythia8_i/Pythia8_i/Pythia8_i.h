@@ -85,7 +85,6 @@ protected:
 
   bool useRndmGenSvc() const { return m_useRndmGenSvc; }
 
-  // make these protected so that Pythia8B can access them
   std::unique_ptr<Pythia8::Pythia> m_pythia{};
   HepMC::Pythia8ToHepMC m_pythiaToHepMC;
   UnsignedIntegerProperty m_maxFailures{this, "MaxFailures", 10};
