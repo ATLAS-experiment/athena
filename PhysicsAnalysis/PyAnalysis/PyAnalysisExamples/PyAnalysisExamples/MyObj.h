@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYANALYSISEXAMPLES_MYOBJ_H
@@ -19,7 +19,7 @@ public:
   MyObj (const std::string &name) : m_name(name), m_a(0) {  }
   virtual ~MyObj () {}
 
-  const std::string name () { return m_name; }
+  const std::string& name () { return m_name; }
   template <class T> void setA(T a)
   {
     std::cout << " C++ setA " << typeid(a).name() << " " << a << std::endl;
