@@ -158,7 +158,7 @@ public:
     std::optional<AmgSymMatrix(DIM)> cov = std::nullopt) const;
 
   /** Return the surface type */
-  virtual SurfaceType type() const override final;
+  constexpr virtual SurfaceType type() const override final;
 
   /** Return the measurement frame - this is needed for alignment, in particular
     for StraightLine and Perigee Surface

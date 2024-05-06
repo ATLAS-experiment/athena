@@ -197,7 +197,7 @@ CurvilinearParametersT<DIM, T, S>::clone() const
 
 /** Return the ParametersType enum */
 template<int DIM, class T, class S>
-inline ParametersType
+inline constexpr ParametersType
 CurvilinearParametersT<DIM, T, S>::type() const
 {
   return Trk::Curvilinear;
@@ -205,7 +205,7 @@ CurvilinearParametersT<DIM, T, S>::type() const
 
 /** Return the Surface Type (check SurfaceType enums)*/
 template<int DIM, class T, class S>
-inline SurfaceType
+inline constexpr SurfaceType
 CurvilinearParametersT<DIM, T, S>::surfaceType() const
 {
   return S::staticType;

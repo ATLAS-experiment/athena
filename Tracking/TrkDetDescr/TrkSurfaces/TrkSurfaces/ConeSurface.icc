@@ -17,7 +17,7 @@ inline bool ConeSurface::operator==(const ConeSurface& csf) const
 }
 
 /** Return the surface type */
-inline SurfaceType
+inline constexpr SurfaceType
 ConeSurface::type() const
 {
   return ConeSurface::staticType;

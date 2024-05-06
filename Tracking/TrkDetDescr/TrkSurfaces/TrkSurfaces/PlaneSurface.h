@@ -137,7 +137,7 @@ public:
   virtual PlaneSurface* clone() const override;
 
   /** Return the surface type */
-  virtual SurfaceType type() const override final;
+  constexpr virtual SurfaceType type() const override final;
 
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * charged */
