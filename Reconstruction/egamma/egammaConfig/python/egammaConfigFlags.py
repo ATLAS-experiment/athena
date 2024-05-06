@@ -134,7 +134,7 @@ def createEgammaConfigFlags():
 
     egcf.addFlag("Egamma.Keys.Output.ForwardClusters",
                  'ForwardElectronClusters')
-    egcf.addFlag("Egamma.Keys.Output.ForwardClustersSuppESD", '-SisterCluster.-sigmaWidth')
+    egcf.addFlag("Egamma.Keys.Output.ForwardClustersSuppESD", '-SisterCluster')
     egcf.addFlag("Egamma.Keys.Output.ForwardClustersSuppAOD",
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.ForwardClustersSuppESD))

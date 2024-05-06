@@ -29,6 +29,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::initialize() {
   ATH_CHECK(m_gFexSRJetContainerKey.initialize()); //initizlize gfex sr jets
 
   // TOBs may come from trigger bytestream - renounce from scheduler
+  renounce(m_LRjetKey);
   renounce(m_gFexLRJetContainerKey);
   renounce(m_gFexSRJetContainerKey);
 
@@ -48,7 +49,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   //  Retrieve Offline LR Jets from SG
   SG::ReadHandle<xAOD::JetContainer> LRjets(m_LRjetKey,ctx);
   if(!LRjets.isValid()){
-    ATH_MSG_WARNING("Failed to retrieve Offline Large Radius Jet Container "<<m_LRjetKey);
+    ATH_MSG_WARNING("Failed to retrieve Offline Large Radius Jet Container");
     return StatusCode::SUCCESS;
   }
   //  Retrieve gfex SR Jets from SG

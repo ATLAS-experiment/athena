@@ -437,7 +437,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
     toESD = [f"xAOD::CaloClusterContainer#{CaloTopoCluster.ClustersOutputName}",
-             f"xAOD::CaloClusterAuxContainer#{CaloTopoCluster.ClustersOutputName}Aux.-sigmaWidth",
+             f"xAOD::CaloClusterAuxContainer#{CaloTopoCluster.ClustersOutputName}Aux.",
              f"CaloClusterCellLinkContainer#{CaloTopoCluster.ClustersOutputName}_links"]
     toAOD = [f"xAOD::CaloClusterContainer#{CaloTopoCluster.ClustersOutputName}",
              f"CaloClusterCellLinkContainer#{CaloTopoCluster.ClustersOutputName}_links"]
