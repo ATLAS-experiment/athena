@@ -20,6 +20,13 @@
 #include "xAODMuonPrepData/versions/RpcStripAuxContainer_v1.h"
 #include "xAODMuonPrepData/versions/RpcStripContainer_v1.h"
 
+#include "xAODMuonPrepData/RpcStrip2D.h"
+#include "xAODMuonPrepData/RpcStrip2DAuxContainer.h"
+#include "xAODMuonPrepData/RpcStrip2DContainer.h"
+#include "xAODMuonPrepData/versions/RpcStrip2D_v1.h"
+#include "xAODMuonPrepData/versions/RpcStrip2DAuxContainer_v1.h"
+#include "xAODMuonPrepData/versions/RpcStrip2DContainer_v1.h"
+
 #include "xAODMuonPrepData/TgcStripAuxContainer.h"
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "xAODMuonPrepData/TgcStrip.h"
@@ -63,6 +70,7 @@ struct GCCXML_DUMMY_INSTANTIATION_XAODMUONPRD {
     // Type(s) needed for the dictionary generation to succeed.
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MdtDriftCircleContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStripContainer_v1);
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStrip2DContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, TgcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MMClusterContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcStripContainer_v1);

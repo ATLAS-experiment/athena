@@ -22,6 +22,18 @@
            id="BF3DD4C7-A81D-44B1-91FB-1FE5C06908D2" />
     <typedef name = "xAOD::RpcStripAuxContainer" />
 
+  <class name="xAOD::RpcStrip2D_v1" />
+    <class name="xAOD::RpcStrip2DContainer_v1"
+           id="4DC6DF3F-36C5-4486-A6DE-06DAF13AB5EA" />
+    <typedef name="xAOD::RpcStrip2D" />
+    <typedef name="xAOD::RpcStrip2DContainer" />
+    
+    <class name="xAOD::RpcStrip2DAuxContainer_v1"
+           id="1EA22CAA-758E-4322-AE51-200CE3225107" />
+    <typedef name = "xAOD::RpcStrip2DAuxContainer" />
+
+   
+
     <!-- Tgc Strip -->
     <class name="xAOD::TgcStrip_v1" />
     <class name="xAOD::TgcStripContainer_v1"
