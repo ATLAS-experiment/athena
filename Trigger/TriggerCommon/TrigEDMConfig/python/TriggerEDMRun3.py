@@ -847,11 +847,7 @@ TriggerHLTListRun3 = [
     # TLA Muons
     ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
     ('xAOD::MuonAuxContainer#HLT_MuonsCB_RoI_TLAAux.',                                'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
-
-    # FS tracks
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_FS_FTF',                 'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FS_FTFAux.passPFTrackPresel.muonCaloTag.muonScore.ptCone20.etConeCore.trackIso.RErr.EOverP.caloIso.trkPtFraction.tagFakeTrack.tagMuonTrack.tagIsoTrack',          'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
-
+    
     # FS vertices
     ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS PhysicsTLA ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.',           'BS PhysicsTLA ESD AODFULL AODSLIM', 'Jet'),
@@ -991,10 +987,6 @@ TriggerHLTListRun3 = [
 
     ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_LRT',                     'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precLRTTauViews')]),
     ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_LRTAux.',              'BS ESD AODFULL AODSLIM', 'Tau'),
-
-    # tau calo clusters
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), allowTruncation]),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau', [allowTruncation]),
 
     # tau tracks
     ('xAOD::TauTrackContainer#HLT_tautrack_MVA',                           'BS ESD AODFULL AODSLIM', 'Tau', [InViews('precMVATauViews')]),
@@ -1138,6 +1130,14 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeContainer#HLT_MuRoICluster_Composites',                      'BS ESD AODFULL AODSLIM', 'Muon'),
     ('xAOD::TrigCompositeAuxContainer#HLT_MuRoICluster_CompositesAux.'+MuRoiVars,     'BS ESD AODFULL AODSLIM', 'Muon'),
 
+     # tau calo clusters (moved as last because of the truncation errors ATR-29142)
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), allowTruncation]),   
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau', [allowTruncation]),
+ 
+    # FS tracks (moved as last because of the truncation errors ATR-29142)
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_FS_FTF',                 'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FS_FTFAux.passPFTrackPresel.muonCaloTag.muonScore.ptCone20.etConeCore.trackIso.RErr.EOverP.caloIso.trkPtFraction.tagFakeTrack.tagMuonTrack.tagIsoTrack',          'BS PhysicsTLA ESD AODFULL', 'Jet', [allowTruncation]),
+ 
 ]
 
 
