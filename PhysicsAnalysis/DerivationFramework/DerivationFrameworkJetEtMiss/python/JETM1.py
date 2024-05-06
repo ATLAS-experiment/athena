@@ -287,7 +287,8 @@ def JETM1ExtraContentCfg(flags):
     #=======================================
 
     if flags.Trigger.EDMVersion == 2:
-        triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_a10tclcwsubjesFS", "JetContainer_GSCJet"]
+        triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_GSCJet",
+                        "JetContainer_a10tclcwsubjesFS", "JetContainer_a10tclcwsubFS", "JetContainer_a10ttclcwjesFS"]
 
         for trigger in triggerNames:
             wrapperName = trigger+'AuxWrapper'
@@ -368,6 +369,11 @@ def JETM1Cfg(flags):
     JETM1SlimmingHelper.IncludeBJetTriggerContent = False
     JETM1SlimmingHelper.IncludeBPhysTriggerContent = False
     JETM1SlimmingHelper.IncludeMinBiasTriggerContent = False
+
+    if flags.Trigger.EDMVersion == 2:
+        triggerNames = ["a4tcemsubjesFS", "a4tcemsubjesISFS", "a10tclcwsubjesFS", "a10tclcwsubFS", "a10ttclcwjesFS", "GSCJet"]
+        for trigger in triggerNames:
+            JETM1SlimmingHelper.FinalItemList.append('xAOD::AuxContainerBase!#HLT_xAOD__JetContainer_'+trigger+'Aux.pt.eta.phi.m')
 
     jetOutputList = ["AntiKt4PV0TrackJets", "AntiKt4UFOCSSKJets"]
     if flags.Input.isMC:
