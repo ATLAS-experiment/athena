@@ -90,7 +90,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     isoPar = ROOT.xAOD.Iso.IsolationType
     deco_ptcones = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20]
     deco_ptcones_suffix = ["ptcone40", "ptcone30", "ptcone20"]
-    deco_prefix = ''
+    deco_prefix = 'LLP1_'
 
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
     TrackSelectionToolStd = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
@@ -734,8 +734,8 @@ def LLP1Cfg(flags):
                                           "InDetTrackParticles.numberOfTRTHoles.numberOfTRTDeadStraws.numberOfTRTSharedHits.numberOfTRTHighThresholdHits.numberOfTRTHighThresholdHitsTotal.numberOfTRTHighThresholdOutliers.TRTdEdx.TRTdEdxUsedHits.hitPattern",
                                           "InDetTrackParticles.truthMatchProbability.truthOrigin.truthType",
                                           "InDetTrackParticles.TrkIsoPtPdEdx_ptcone20.TrkIsoPtPdEdx_ptcone30.TrkIsoPtPdEdx_ptcone40.TrkIsoPtTightPdEdx_ptcone20.TrkIsoPtTightPdEdx_ptcone30.TrkIsoPtTightPdEdx_ptcone40",
-                                          "InDetTrackParticles.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
-                                          "InDetTrackParticles.topoetcone20.topoetcone30.topoetcone40.topoetcone20NonCoreCone.topoetcone30NonCoreCone.topoetcone40NonCoreCone",
+                                          "InDetTrackParticles.LLP1_ptcone20.LLP1_ptcone30.LLP1_ptcone40.LLP1_ptvarcone20.LLP1_ptvarcone30.LLP1_ptvarcone40.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
+                                          "InDetTrackParticles.LLP1_topoetcone20.LLP1_topoetcone30.LLP1_topoetcone40.LLP1_topoetcone20NonCoreCone.LLP1_topoetcone30NonCoreCone.LLP1_topoetcone40NonCoreCone",
                                           "InDetTrackParticles.LLP1_CaloCelldEta.LLP1_CaloCelldPhi.LLP1_CaloCelldR.LLP1_CaloCelldX.LLP1_CaloCelldY.LLP1_CaloCelldZ.LLP1_CaloCellE.LLP1_CaloCellEta.LLP1_CaloCellGain.LLP1_CaloCellID.LLP1_CaloCellPhi.LLP1_CaloCellProvenance.LLP1_CaloCellQuality.LLP1_CaloCellR.LLP1_CaloCellSampling.LLP1_CaloCellTime.LLP1_CaloCellX.LLP1_CaloCellY.LLP1_CaloCellZ.LLP1_CaloCellEneDiff.LLP1_CaloCellTimeDiff",
 
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.patternRecoInfo",
