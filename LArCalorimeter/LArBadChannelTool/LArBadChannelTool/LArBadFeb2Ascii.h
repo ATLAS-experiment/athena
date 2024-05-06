@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArBadFeb2Ascii_H
@@ -15,16 +15,17 @@
 class LArBadFeb2Ascii : public AthAlgorithm 
 {
 public:
-  LArBadFeb2Ascii(const std::string& name, ISvcLocator* pSvcLocator);
-  ~LArBadFeb2Ascii();
+  //Delegate constructor
+  using AthAlgorithm::AthAlgorithm;
+  ~LArBadFeb2Ascii()=default;
 
   StatusCode initialize();
   StatusCode execute();
   StatusCode finalize();
 
 private:
-  SG::ReadCondHandleKey<LArBadFebCont> m_BFKey;
-  std::string m_fileName;
+  SG::ReadCondHandleKey<LArBadFebCont> m_BFKey{this,"BFKey","LArBadFeb"};
+  Gaudi::Property<std::string> m_fileName{this,"FileName",""};
 
 };
 
