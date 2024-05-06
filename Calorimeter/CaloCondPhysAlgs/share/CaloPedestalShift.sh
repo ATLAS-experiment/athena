@@ -154,5 +154,6 @@ done
 
 echo "  "
 echo "  After checking that everything is OK, upload the new sqlite file with:"
-echo "  /afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py --flask caloSqlite.db  CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_CALO_W <password>"
+echo " export COOL_FLASK=https://cool-proxy-app.cern.ch"
+echo "  /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --flask caloSqlite.db  CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_CALO_W <password>"
 exit

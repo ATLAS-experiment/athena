@@ -51,4 +51,5 @@ print ("Default value",defaultvalue)
 createSqlite(sqliteName,folderName,foldertag,iovMin,iovMax,filename,defaultvalue)
 
 print ("To upload:")
-print ("/afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py",sqliteName,"CONDRB2 ATLAS_COOLWRITE ATLAS_COOLOFL_LAR_W <password>")
+print ("export COOL_FLASK=https://cool-proxy-app.cern.ch")
+print ("/afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py",sqliteName,"CONDRB2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>")
