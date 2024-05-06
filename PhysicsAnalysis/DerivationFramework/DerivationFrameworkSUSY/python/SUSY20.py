@@ -63,7 +63,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	from xAODPrimitives.xAODIso import xAODIso as isoPar
 	deco_ptcones        = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20] #, isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20]
 	deco_ptcones_suffix = ["ptcone40", "ptcone30", "ptcone20"]                #, "topoetcone40", "topoetcone30", "topoetcone20"]
-	deco_prefix         = ''
+	deco_prefix         = 'SUSY20_'
 
 	from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg
 	SUSY20TrackIsoTool = acc.popToolsAndMerge(TrackIsolationToolCfg(
@@ -382,8 +382,8 @@ def SUSY20Cfg(flags):
 		"InDetTrackParticles.TRTdEdx.TRTdEdxUsedHits.hitPattern.numberOfContribPixelLayers.numberOfGangedFlaggedFakes.numberOfIBLOverflowsdEdx.numberOfPixelOutliers.numberOfPixelSplitHits.numberOfPixelSpoiltHits.numberOfSCTOutliers.numberOfSCTSpoiltHits.numberOfTRTDeadStraws.numberOfTRTHits.numberOfTRTHoles.numberOfTRTOutliers.numberOfTRTSharedHits.numberOfUsedHitsdEdx.pixeldEdx",
 		"InDetTrackParticles.chiSquared.d0.definingParametersCovMatrix.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberDoF.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.numberOfPixelDeadSensors.numberOfPixelHits.numberOfPixelHoles.numberOfPixelSharedHits.numberOfSCTDeadSensors.numberOfSCTHits.numberOfSCTHoles.numberOfSCTSharedHits.phi.qOverP.theta.z0",
 		"InDetTrackParticles.numberOfInnermostPixelLayerOutliers.numberOfInnermostPixelLayerSharedHits.numberOfInnermostPixelLayerSplitHits.numberOfNextToInnermostPixelLayerOutliers.numberOfNextToInnermostPixelLayerSharedHits.numberOfNextToInnermostPixelLayerSplitHits.numberOfGangedPixels.numberOfSCTDoubleHoles.numberOfTRTHighThresholdHits.numberOfTRTHighThresholdHitsTotal.numberOfTRTHighThresholdOutliers.numberOfTRTTubeHits.numberOfTRTXenonHits.numberOfOutliersOnTrack.standardDeviationOfChi2OS.eProbabilityHT.eProbabilityComb.TRTTrackOccupancy",
-		"InDetTrackParticles.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40",
-		#"InDetTrackParticles.topoetcone20.topoetcone30.topoetcone40.topoetcone20NonCoreCone.topoetcone30NonCoreCone.topoetcone40NonCoreCone",
+		"InDetTrackParticles.SUSY20_ptcone20.SUSY20_ptcone30.SUSY20_ptcone40.SUSY20_ptvarcone20.SUSY20_ptvarcone30.SUSY20_ptvarcone40",
+		#"InDetTrackParticles.SUSY20_topoetcone20.SUSY20_topoetcone30.SUSY20_topoetcone40.SUSY20_topoetcone20NonCoreCone.SUSY20_topoetcone30NonCoreCone.SUSY20_topoetcone40NonCoreCone",
 		"InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights",
 		"InDetTrackParticles.vertexLink.vz",
 		#"InDetTrackParticles.trackCaloClusEta.trackCaloClusPhi.trackCaloSampleE.trackCaloSampleNumber",
