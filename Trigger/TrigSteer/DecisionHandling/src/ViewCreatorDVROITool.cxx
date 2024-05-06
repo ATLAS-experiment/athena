@@ -1,8 +1,9 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+#include "AthContainers/ConstAccessor.h"
 #include "AthViews/ViewHelper.h"
 #include "CxxUtils/phihelper.h"
 #include "ViewCreatorDVROITool.h"
@@ -67,12 +68,14 @@ StatusCode ViewCreatorDVROITool::attachROILinks( TrigCompositeUtils::DecisionCon
          ATH_MSG_DEBUG(" --- Found " << dvCont->size() << " presel DV seeds linked from decision object.");
          ATH_MSG_DEBUG("     ");
 
+         static const SG::ConstAccessor<float> hitDV_seed_etaAcc("hitDV_seed_eta");
+         static const SG::ConstAccessor<float> hitDV_seed_phiAcc("hitDV_seed_phi");
          for(const xAOD::TrigComposite* dv : *dvCont) {
-            if ( !(dv->isAvailable<float>("hitDV_seed_eta")
-                && dv->isAvailable<float>("hitDV_seed_phi")) ) continue;
+            if ( !(hitDV_seed_etaAcc.isAvailable( *dv ) &&
+                   hitDV_seed_etaAcc.isAvailable( *dv ) ) ) continue;
 
-            float dvEta = dv->getDetail<float>("hitDV_seed_eta");
-            float dvPhi = dv->getDetail<float>("hitDV_seed_phi");
+            float dvEta = hitDV_seed_etaAcc( *dv );
+            float dvPhi = hitDV_seed_phiAcc( *dv );
 
             ATH_MSG_DEBUG( "DV seed eta = " << dvEta <<
                            " phi = " << dvPhi );
