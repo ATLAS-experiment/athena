@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArBadChannelTool/LArBadFeb2Ascii.h"
@@ -7,16 +7,6 @@
 #include "LArBadChannelTool/LArBadChannelDBTools.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include <fstream>
-
-LArBadFeb2Ascii::LArBadFeb2Ascii(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm( name, pSvcLocator),
-  m_BFKey("LArBadFeb")
-{
-  declareProperty("BFKey",m_BFKey);
-  declareProperty("FileName",m_fileName="");
-}
-
-LArBadFeb2Ascii::~LArBadFeb2Ascii() = default;
 
 
 StatusCode LArBadFeb2Ascii::initialize() {
@@ -36,7 +26,7 @@ StatusCode LArBadFeb2Ascii::finalize() {
   std::ostream *out = &(std::cout); 
   std::ofstream outfile;
   if (!m_fileName.empty()) {
-    outfile.open(m_fileName.c_str(),std::ios::out);
+    outfile.open(m_fileName.value().c_str(),std::ios::out);
     if (outfile.is_open()) {
       ATH_MSG_INFO ( "Writing to file " << m_fileName );
       out = &outfile;
@@ -61,13 +51,9 @@ StatusCode LArBadFeb2Ascii::finalize() {
     LArBadFeb bf = badfebCont->status(fid);
     if (bf.packedData()) {
       ++count;
-      (*out) << larOnlineID->barrel_ec(fid) << " " 
-	     << larOnlineID->pos_neg(fid) << " "
-	     << larOnlineID->feedthrough(fid) << " "
-	     << larOnlineID->slot(fid) << " ";
-
+      (*out) << std::format("{} {} {} {} ",larOnlineID->barrel_ec(fid),larOnlineID->pos_neg(fid),larOnlineID->feedthrough(fid),larOnlineID->slot(fid));
       (*out) << packing.stringStatus(bf);
-      (*out) << "  # 0x" << std::hex << fid.get_identifier32().get_compact() << std::dec << std::endl;
+      (*out) << std::format("  # {:#x}", fid.get_identifier32().get_compact()) << std::endl;
     }
   }
   ATH_MSG_INFO ( "Found " << count << " entries in the bad-FEB database." );
