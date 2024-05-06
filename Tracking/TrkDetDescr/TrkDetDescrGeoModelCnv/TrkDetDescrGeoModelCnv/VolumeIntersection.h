@@ -55,22 +55,22 @@ struct EdgeCross {
 class VolumeIntersection {
 
    public:
-    std::pair<bool, std::unique_ptr<Trk::Volume>> intersect(
-        const Volume& volA, const Volume& volB) const;
+    static std::pair<bool, std::unique_ptr<Trk::Volume>> intersect(
+        const Volume& volA, const Volume& volB) ;
 
-    std::pair<bool, std::unique_ptr<Trk::Volume>> intersectApproximative(
-        const Volume& volA, const Volume& volB) const;
+    static std::pair<bool, std::unique_ptr<Trk::Volume>> intersectApproximative(
+        const Volume& volA, const Volume& volB) ;
 
    private:
-    PolygonCache polygonXY(const Volume& inVol, int swap = 0) const;
-    Trk::PolygonCache intersectPgon(Trk::PolygonCache&,
-                                    Trk::PolygonCache&) const;
+    static PolygonCache polygonXY(const Volume& inVol, int swap = 0) ;
+    static Trk::PolygonCache intersectPgon(Trk::PolygonCache&,
+                                    Trk::PolygonCache&) ;
 
-    bool inside(const std::pair<double, double>& vtx,
-                const std::vector<std::pair<double, double>>& pgon) const;
+    static bool inside(const std::pair<double, double>& vtx,
+                const std::vector<std::pair<double, double>>& pgon) ;
 
-    double det(const std::pair<double, double>& a,
-               const std::pair<double, double>& b, bool) const;
+    static double det(const std::pair<double, double>& a,
+               const std::pair<double, double>& b, bool) ;
 };
 
 }  // end of namespace Trk
