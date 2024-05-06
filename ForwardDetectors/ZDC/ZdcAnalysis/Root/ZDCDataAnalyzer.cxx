@@ -131,6 +131,43 @@ void ZDCDataAnalyzer::enableDelayed(const ZDCModuleFloatArray& delayDeltaTArray,
   }
 }
 
+void ZDCDataAnalyzer::enablePreExclusion(unsigned int maxSamplesExcl, const ZDCModuleIntArray& HGADCThresh, const ZDCModuleIntArray& LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePreExclusion(maxSamplesExcl, HGADCThresh[side][module], LGADCThresh[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enablePreExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePreExclusion(maxSamplesExcl, HGADCThresh, LGADCThresh);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enablePostExclusion(unsigned int maxSamplesExcl, const ZDCModuleIntArray& HGADCThresh, const ZDCModuleIntArray& LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePostExclusion(maxSamplesExcl, HGADCThresh[side][module], LGADCThresh[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enablePostExclusion(unsigned int maxSamplesExcl, unsigned int HGADCThresh, unsigned int LGADCThresh)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enablePostExclusion(maxSamplesExcl, HGADCThresh, LGADCThresh);
+    }
+  }
+}
+
+
 void ZDCDataAnalyzer::enableRepass(const ZDCModuleFloatArray& peak2ndDerivMinRepassHG, const ZDCModuleFloatArray& peak2ndDerivMinRepassLG)
 {
   m_repassEnabled = true;
@@ -286,6 +323,17 @@ void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, float refScale,
       m_moduleAnalyzers[side][module]->SetNonlinCorrParams(refADC, refScale,
 							   HGNonlinCorrParams[side][module],
 							   LGNonlinCorrParams[side][module]);
+    }
+  }
+}
+
+void ZDCDataAnalyzer::enableTimeSigCut(bool AND, float sigCut, std::string TF1String,
+			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
+			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->enableTimeSigCut(AND, sigCut, TF1String, parsHGArr[side][module], parsLGArr[side][module]);
     }
   }
 }
@@ -517,21 +565,22 @@ bool ZDCDataAnalyzer::FinishEvent()
 	sumCalibAmpTimesBkgdFrac += amplitude*bkgdFraction;
       }
 
-      if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
-      else m_moduleSumBkgdFrac[side] = 0;
-      
-      if (m_calibModuleSum[side] > 1e-6) {
-	m_averageTime[side] /= m_calibModuleSum[side];
-	m_calibModSumBkgdFrac[side] = sumCalibAmpTimesBkgdFrac/m_calibModuleSum[side];
-      }
-      else {
-	m_averageTime[side] = 0;
-	m_calibModSumBkgdFrac[side] = 0;
-      }
-      
       // subtract the fraction of LGOverflow events if we have fraction available (<0 means unavailable)
       if (pulseAna_p->LGOverflow() && m_moduleAmpFractionLG[side][module] > 0) {tempFraction -= m_moduleAmpFractionLG[side][module];}
     }
+    
+    if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
+    else m_moduleSumBkgdFrac[side] = 0;
+    
+    if (m_calibModuleSum[side] > 1e-6) {
+      m_averageTime[side] /= m_calibModuleSum[side];
+      m_calibModSumBkgdFrac[side] = sumCalibAmpTimesBkgdFrac/m_calibModuleSum[side];
+    }
+    else {
+      m_averageTime[side] = 0;
+      m_calibModSumBkgdFrac[side] = 0;
+    }
+    
     if (tempFraction < 1.0) {m_moduleSum[side] /= tempFraction;}
   }
 
