@@ -416,7 +416,7 @@ void iFatras::HitCreatorSilicon::createSimHit(const ISF::ISFParticle& isp, const
   double interX = intersection.x();
   double interY = intersection.y();
   // thickness of the module
-  double thickness = hitSiDetElement.thickness();
+  const double thickness = hitSiDetElement.thickness();
   // get the momentum direction into the local frame
   Amg::Vector3D particleDir = pars.momentum().unit();
   const Amg::Transform3D& sTransform = hitSurface.transform();
@@ -432,7 +432,6 @@ void iFatras::HitCreatorSilicon::createSimHit(const ISF::ISFParticle& isp, const
   double localEntryY = interY-0.5*distY;
   double localExitX  = interX+0.5*distX;
   double localExitY  = interY+0.5*distY;
-  double   energyDeposit=0;
   //!< @todo : fix edge effects
   const Amg::Transform3D &hitTransform = hitSiDetElement.transformHit().inverse();
   // transform into the hit frame
@@ -443,33 +442,34 @@ void iFatras::HitCreatorSilicon::createSimHit(const ISF::ISFParticle& isp, const
   bool isSCT = hitSiDetElement.isSCT();
 
   // Landau approximation
-  double dEdX = m_fastEnergyDepositionModel ?
+  const double dEdX = m_fastEnergyDepositionModel ?
     energyDeposit_fast(isp,isPix,isSCT)
     : energyDeposit_exact(isp,isPix,isSCT);
 
-  energyDeposit = dEdX * (localExit - localEntry).mag();
+  const double energyDeposit = dEdX * (localExit - localEntry).mag();
 
   // create the silicon hit
   const HepGeom::Point3D<double> localEntryHep( localEntry.x(), localEntry.y(), localEntry.z() );
   const HepGeom::Point3D<double> localExitHep( localExit.x(), localExit.y(), localExit.z() );
-
-  SiHit siHit(localEntryHep,
-              localExitHep,
-              energyDeposit,
-              time,
-              isp.barcode(),
-              m_pixIdHelper ? 0 : 1,
-              m_pixIdHelper ? m_pixIdHelper->barrel_ec(hitId)  : m_sctIdHelper->barrel_ec(hitId),
-              m_pixIdHelper ? m_pixIdHelper->layer_disk(hitId) : m_sctIdHelper->layer_disk(hitId),
-              m_pixIdHelper ? m_pixIdHelper->eta_module(hitId) : m_sctIdHelper->eta_module(hitId),
-              m_pixIdHelper ? m_pixIdHelper->phi_module(hitId) : m_sctIdHelper->phi_module(hitId),
-              m_pixIdHelper ? 0 : m_sctIdHelper->side(hitId));
 
   if ( isSiDetElement )
     ATH_MSG_VERBOSE("[ sihit ] Adding an SiHit SiDetElement to the SiHitCollection.");
   else
     ATH_MSG_VERBOSE("[ sihit ] SiHit SiDetElement not found to add to the SiHitCollection.");
 
-  m_hitColl->Insert(siHit);
+  HepMcParticleLink partLink(isp.barcode(), 0,
+                             HepMcParticleLink::IS_EVENTNUM,
+                             HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+  m_hitColl->Emplace(localEntryHep,
+                     localExitHep,
+                     energyDeposit,
+                     time,
+                     partLink,
+                     m_pixIdHelper ? 0 : 1,
+                     m_pixIdHelper ? m_pixIdHelper->barrel_ec(hitId)  : m_sctIdHelper->barrel_ec(hitId),
+                     m_pixIdHelper ? m_pixIdHelper->layer_disk(hitId) : m_sctIdHelper->layer_disk(hitId),
+                     m_pixIdHelper ? m_pixIdHelper->eta_module(hitId) : m_sctIdHelper->eta_module(hitId),
+                     m_pixIdHelper ? m_pixIdHelper->phi_module(hitId) : m_sctIdHelper->phi_module(hitId),
+                     m_pixIdHelper ? 0 : m_sctIdHelper->side(hitId));
 
 }
