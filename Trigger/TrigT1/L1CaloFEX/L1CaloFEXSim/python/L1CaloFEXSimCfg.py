@@ -84,6 +84,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
 
     log = logging.getLogger('L1CaloFEXSimCfg')
 
+    
     # Configure SCell inputs
     sCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
     if flags.Input.Format is Format.POOL:
@@ -149,6 +150,8 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
                                  tag="EfexNoiseCuts-RUN3-MCDEFAULT-TEST-00" if flags.Input.isMC else None,
                                  className="CondAttrListCollection"))
         eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
+        
+        
         acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib",
                              "TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",
                              tag="EfexEnergyCalib-RUN3-MCDEFAULT-TEST-00" if flags.Input.isMC else None,

@@ -331,6 +331,10 @@ unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer
           // replace s_corrections values with values from database ... only try this once
           SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey/*, ctx*/ };
           if (dmCorrections.isValid()) {
+              if(dmCorrections->size()==0 && Gaudi::Hive::currentContext().eventID().time_stamp()>1667602800) { // not an error for data before 2022/11/05
+                ATH_MSG_ERROR("No dead material corrections found in conditions database for this event in folder " << m_dmCorrectionsKey.key());
+                throw std::runtime_error("No dead material corrections found in database for this event");
+              }
               for (auto itr = dmCorrections->begin(); itr != dmCorrections->end(); ++itr) {
                   if (itr->first < 25 || itr->first >= 50) continue;
                   s_corrections[0][itr->first - 25] = itr->second["EmPS"].data<int>();
