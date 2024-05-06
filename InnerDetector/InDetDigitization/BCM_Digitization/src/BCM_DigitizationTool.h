@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCM_DIGITIZATION_BCM_DIGITIZATIONTOOL_H
@@ -59,7 +59,7 @@ class BCM_DigitizationTool : public PileUpToolBase {
   float computeEnergy(float simEner, const HepGeom::Point3D<double>& startPos, const HepGeom::Point3D<double>& endPos);
 
   /** Fill in hit pulses on analog waveform */
-  std::vector<float> createAnalog(int mod, std::vector<float> enerVect, std::vector<float> timeVect);
+  std::vector<float> createAnalog(int mod, const std::vector<float>& enerVect, const std::vector<float>& timeVect);
 
   /** Add noise to analog waveform */
   void addNoise(int mod, std::vector<float> &analog, CLHEP::HepRandomEngine *randomEngine);
