@@ -36,7 +36,6 @@ def generate_exec_steps(slice_name = None):
     ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"']
     if slice_name:
         ex.flags += [f'Trigger.enabledSignatures=[\\\"{slice_name}\\\"]']
-    ex.args = '--CA'
     # rename histogram file
     hist_file_name = 'expert-monitoring_{:s}.root'.format(name)
     mv = ExecStep.ExecStep('RenameHist' + name)

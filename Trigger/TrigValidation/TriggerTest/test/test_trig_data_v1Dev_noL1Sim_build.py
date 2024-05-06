@@ -18,7 +18,6 @@ ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.forceEnableAllChains=True',
             'Trigger.doRuntimeNaviVal=True'] # Perform runtime graph vaidation in this test
-ex.args = '--CA'
 ex.max_events = 15 # nominal is 20, reduce to avoid occasional timeout
 
 test = Test.Test()

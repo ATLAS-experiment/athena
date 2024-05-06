@@ -32,7 +32,6 @@ ex.max_events = 2000
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.forceEnableAllChains=True',
             'Trigger.doRuntimeNaviVal=True']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'
