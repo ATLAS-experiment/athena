@@ -40,7 +40,7 @@ bool Trk::GeoMaterialConverter::dummy_material(const GeoMaterial* mat) {
 
     bool dummyMat = false;
 
-    std::string matName = mat->getName();
+    const std::string& matName = mat->getName();
 
     if (matName == "special::Ether")
         dummyMat = true;

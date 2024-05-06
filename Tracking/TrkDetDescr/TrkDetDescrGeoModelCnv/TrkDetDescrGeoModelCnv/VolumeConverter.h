@@ -71,7 +71,7 @@ class VolumeConverter : public AthMessaging {
     using VolumePairVec = std::vector<VolumePair>;
     /** Decomposition of volume into set of non-overlapping subtractions from
      * analytically calculable volume */
-    VolumePairVec splitComposedVolume(const Volume& trVol) const;
+    static VolumePairVec splitComposedVolume(const Volume& trVol) ;
 
     double resolveBooleanVolume(const Volume& trVol, double tolerance) const;
 
@@ -100,8 +100,6 @@ class VolumeConverter : public AthMessaging {
     double leadingVolume(const GeoShape* sh) const;
 
     Trk::GeoShapeConverter m_geoShapeConverter;     //!< shape converter
-    Trk::GeoMaterialConverter m_materialConverter;  //!< material converter
-    VolumeIntersection m_intersectionHelper;        //!< overlaps
 
     static constexpr double s_precisionInX0 =
         1.e-3;  // tentative required precision of the material thickness
