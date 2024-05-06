@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ public:
     inline int GetMDTHitsPerML_m2_Biny() { return m_mdthitspermultilayerLumi_bin_m2_biny; }
 
     inline int GetCrate() { return m_crate; }
-    inline std::string GetCrate_String() { return m_crate_str; }
+    inline const std::string& GetCrate_String() { return m_crate_str; }
 
     void SetMDTHitsPerChamber_IMO_Bin(TH2F*);
     void SetMDTHitsPerML_byLayer_Bins(TH2F*, TH2F*);
