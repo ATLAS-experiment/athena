@@ -17,7 +17,6 @@ ex.input = 'mc_cosmics'
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
             'Beam.Type=BeamType.Cosmics']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

@@ -30,7 +30,6 @@ ex.threads = 4
 ex.concurrent_events = 4
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.enabledSignatures=[\\\"Tau\\\"]']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'
