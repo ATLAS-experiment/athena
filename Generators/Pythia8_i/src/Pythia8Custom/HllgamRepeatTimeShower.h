@@ -24,16 +24,16 @@ class HllgamRepeatTimeShower: public AthAlgTool, virtual public IPythia8Custom {
   virtual ~HllgamRepeatTimeShower(){};
   
   /** AlgTool initialize method */
-  StatusCode initialize();
+  StatusCode initialize()  override;
   /** AlgTool finalize method */
-  StatusCode finalize();
+  StatusCode finalize()  override;
   
   /** Update the pythia event*/
-  StatusCode ModifyPythiaEvent(Pythia8::Pythia& pythia) const;
+  StatusCode ModifyPythiaEvent(Pythia8::Pythia& pythia) const override;
 
   /** Return how much the cross section is modified.
    *  Should only be called once all events have been processed */
-  virtual double CrossSectionScaleFactor() const;
+  virtual double CrossSectionScaleFactor() const  override;
   
   private:
   
