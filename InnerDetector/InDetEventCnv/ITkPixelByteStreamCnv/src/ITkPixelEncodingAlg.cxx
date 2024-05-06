@@ -70,10 +70,9 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
     bool use50x50 = true;
     if (phiPitch < s_pitch50x50)
       use50x50 = false; 
-    // std::cout << "THIS IS A TEST" << std::endl;
 
-     Region region = (*element)->isBarrel() ? BARREL : ENDCAP;
-      
+
+    Region region = (*element)->isBarrel() ? BARREL : ENDCAP;  
     
     bool doSwapCoordinates = false;
     // takle the case where the chips are rotated. You need to swap the phi/eta indices for the pixel
@@ -100,10 +99,8 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
     if (rdoCont_itr!=p_pixelRDO_cont->end()) {        
       
       // loop though the rdo collection 
-      PixelRDO_Collection::const_iterator rdo_itr((*rdoCont_itr)->begin());
-      const PixelRDO_Collection::const_iterator rdo_end((*rdoCont_itr)->end());
-      for ( ; rdo_itr != rdo_end; ++rdo_itr ) {
-        // std::cout << "loopping through RDO" << std::endl;
+      for (auto rdo_itr = (*rdoCont_itr)->begin() ; rdo_itr != (*rdoCont_itr)->end() ; ++rdo_itr) {
+
         // Get info from RDO          
         const Identifier rdoID((*rdo_itr)->identify());
         int pixPhiIx(m_pixIdHelper->phi_index(rdoID));
@@ -123,7 +120,7 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
         int pixEta = pixEtaIx - std::ceil(pixEtaIx/columnsPerChip)*columnsPerChip;
         int pixPhi = pixPhiIx - std::ceil(pixPhiIx/rowsPerChip)*rowsPerChip;          
         
-        std::cout << "nChips: " << chips << "ToT: " << tot << "  pixEta: " <<  pixEta << "  pixPhi: " << pixPhi << std::endl;
+         ATH_MSG_DEBUG("nChips: " + std::to_string(chips) + "  ToT: " + std::to_string(tot) + " pixEta: " +  std::to_string(pixEta) + "  pixPhi: " + std::to_string(pixPhi));
         
         // The info is then passed to some sort of chip map -- sroygara
         //chip_maps.at(chip).fillChipMap(pixEta, pixPhi, tot);
