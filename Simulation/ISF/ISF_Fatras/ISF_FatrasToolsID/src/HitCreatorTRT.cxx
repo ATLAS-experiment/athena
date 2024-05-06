@@ -183,12 +183,10 @@ void iFatras::HitCreatorTRT::createSimHit(const ISF::ISFParticle& isp, const Trk
       ATH_MSG_VERBOSE("[ trthit ] Entry / exit : " << sol1raw << ", " << sol2raw );
 
       //!< @todo: fill information, decide which one is pre/post step point
-      int trackID              = isp.barcode();
-      int pdgCode              = isp.pdgCode();
-      double mass               = isp.mass();
-      double mom2               = pars.momentum().mag2();
-      float  kineticEnergy      = sqrt(mom2+mass*mass)-mass;
-      float  energyDepositInKeV = 0.; // only used for TRT hits directly created by photons
+      const double mass               = isp.mass();
+      const double mom2               = pars.momentum().mag2();
+      const float  kineticEnergy      = sqrt(mom2+mass*mass)-mass;
+      const float  energyDepositInKeV = 0.; // only used for TRT hits directly created by photons
 
       int barrel_endcap = 0;
       int ispos = 0;
@@ -201,24 +199,26 @@ void iFatras::HitCreatorTRT::createSimHit(const ISF::ISFParticle& isp, const Trk
         ATH_MSG_WARNING("[ trthit ] Problem estimating barrel_endcap and ispos" ); return;
       }
 
-      int ringwheel = m_trtIdHelper->layer_or_wheel(hitId);
-      int phisector = m_trtIdHelper->phi_module(hitId);
-      int layer     = m_trtIdHelper->straw_layer(hitId);
-      int istraw    = m_trtIdHelper->straw(hitId);
+      const int ringwheel = m_trtIdHelper->layer_or_wheel(hitId);
+      const int phisector = m_trtIdHelper->phi_module(hitId);
+      const int layer     = m_trtIdHelper->straw_layer(hitId);
+      const int istraw    = m_trtIdHelper->straw(hitId);
 
       const TRTHitIdHelper* hitid_helper = TRTHitIdHelper::GetHelper();
-      int hitID = hitid_helper->buildHitId( barrel_endcap, ispos, ringwheel, phisector,layer,istraw);
-
-      TRTUncompressedHit
-        uncompressedHit( hitID, trackID, pdgCode,
-                         (float) kineticEnergy, (float) energyDepositInKeV,
-                         (float) sol1raw.x(), (float) sol1raw.y(), sol1raw.z(),
-                         (float) sol2raw.x(), (float) sol2raw.y(), sol2raw.z(),
-                         (float) time);
+      const int hitID = hitid_helper->buildHitId( barrel_endcap, ispos, ringwheel, phisector,layer,istraw);
 
       ATH_MSG_VERBOSE("[ trthit ] Add a TRTUncompressedHit hit to the collection. ");
       // fill into the HitCollection
-      m_hitColl->Insert(uncompressedHit);
+      HepMcParticleLink partLink(isp.barcode(), 0,
+                                 HepMcParticleLink::IS_EVENTNUM,
+                                 HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+      m_hitColl->Emplace( hitID,
+                          partLink,
+                          isp.pdgCode(),
+                          (float) kineticEnergy, (float) energyDepositInKeV,
+                          (float) sol1raw.x(), (float) sol1raw.y(), sol1raw.z(),
+                          (float) sol2raw.x(), (float) sol2raw.y(), sol2raw.z(),
+                          (float) time );
     }
 
   }
