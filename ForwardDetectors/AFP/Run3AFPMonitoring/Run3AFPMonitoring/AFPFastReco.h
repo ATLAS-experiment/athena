@@ -57,10 +57,10 @@ class AFPFastReco
 	void reco();
 
 	/// Returns vector of clusters
-	std::vector<AFPCluster> clusters() const { return m_clusters; }
+	const std::vector<AFPCluster>& clusters() const { return m_clusters; }
 
 	/// Returns vector of tracks
-	std::vector<AFPTrack> tracks() const { return m_tracks; }
+	const std::vector<AFPTrack>& tracks() const { return m_tracks; }
 
   	private:
 	/// Performs fast cluster reconstruction
