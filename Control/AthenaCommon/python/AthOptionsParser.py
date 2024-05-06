@@ -222,8 +222,8 @@ def getArgumentParser(legacy_args=False, **kwargs):
                             'endrun', 'stop', 'full', 'full-athena', 'all'],
                    help='perform double delete checking, disables the use of tcmalloc.')
 
-    g.add_argument('--tracelevel', metavar='LEVEL', nargs='?', type=int, choices=range(0,4), const=3,
-                   help='trace level for python configuration')
+    g.add_argument('--tracelevel', metavar='LEVEL', nargs='?', type=int, choices=range(1,4), const=3,
+                   help='trace level for python configuration (%(choices)s)')
 
     # --------------------------------------------------------------------------
     if legacy_args:
@@ -240,9 +240,6 @@ def getArgumentParser(legacy_args=False, **kwargs):
 
         g.add_argument('-s', '--showincludes', action='store_true',
                        help='show printout of included files')
-
-        g.add_argument('--trace', metavar='PATTERN', dest='trace_pattern',
-                       help='also show files that match %(metavar)s')
 
     # --------------------------------------------------------------------------
     if __athenaCLI:

@@ -3,10 +3,6 @@ import AthenaCommon.Include as AthCIncMod
 if opts.showincludes:
    AthCIncMod.marker = ' -#-'      # distinguish bootstrap from other jo-code
 
-if opts.trace_pattern:
-   AthCIncMod.tracePattern = opts.trace_pattern
-
-
 ### setup interactive prompt
 if opts.interactive:
    from AthenaCommon.Interactive import configureInteractivePrompt
