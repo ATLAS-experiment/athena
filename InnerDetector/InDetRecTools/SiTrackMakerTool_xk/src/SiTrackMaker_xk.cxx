@@ -75,6 +75,18 @@ StatusCode InDet::SiTrackMaker_xk::initialize()
   } else {
     m_trigInDetTrackFollowingTool.disable();
   }
+
+  /// Get trigger road predictor tool
+  ///
+  if ( m_useTrigInDetRoadPredictorTool) {
+    if ( m_trigInDetRoadPredictorTool.retrieve().isFailure() ) {
+      ATH_MSG_FATAL( "Failed to retrieve tool " << m_trigInDetRoadPredictorTool );
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG( "Retrieved tool " << m_trigInDetRoadPredictorTool );
+  } else {
+    m_trigInDetRoadPredictorTool.disable();
+  }
   
   /// Get seed to track conversion tool
   /// This is used if we want to write out the seeds for
@@ -685,10 +697,18 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   /// This is done by extrapolating our estimated starting parameters through the detector
   /// and collecting all detector elements reasonably close to the projected trajectory.
   /// This will populate the 'DE" list.
+  
   std::vector<const InDetDD::SiDetectorElement*> DE;
-  if (!m_cosmicTrack) m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::alongMomentum,   DE, data.roadMakerData());
-  else                m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::oppositeMomentum,DE, data.roadMakerData());
-
+  
+  if(!m_useTrigInDetRoadPredictorTool) {
+    if (!m_cosmicTrack) m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::alongMomentum,   DE, data.roadMakerData());
+    else                m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::oppositeMomentum,DE, data.roadMakerData());
+  }
+  else {
+    int road_length = m_trigInDetRoadPredictorTool->getRoad(Sp, DE, ctx);
+    if(road_length == 0) return tracks;
+  }
+  
   /// if we don't use all of pix and SCT, filter our list, erasing any that don't fit our requirements
   if (!data.pix() || !data.sct()) detectorElementsSelection(data, DE);
 
@@ -837,12 +857,17 @@ std::unique_ptr<Trk::TrackParameters> InDet::SiTrackMaker_xk::getAtaPlane
 (MagField::AtlasFieldCache& fieldCache,
  SiTrackMakerEventData_xk& data,
  bool sss,
- const std::vector<const Trk::SpacePoint*>& SP,
+ const std::vector<const Trk::SpacePoint*>& theSeed,
  const EventContext& ctx) const
 {
   /// we need at least three space points on the seed.
-  if (SP.size() < 3) return nullptr;
+  if (theSeed.size() < 3) return nullptr;
 
+  /// for tracklets we select first, middle, and last spacepoint of the seed to improve pT estimate
+  
+  unsigned int middleIdx = theSeed.size() == 3 ? 1 : theSeed.size()/2;
+  const std::vector<const Trk::SpacePoint*> SP = {theSeed.at(0), theSeed.at(middleIdx), theSeed.back()};
+  
   /// get the first cluster on the first hit
   const Trk::PrepRawData* cl  = SP[0]->clusterList().first;
   if (!cl) return nullptr;
@@ -1110,8 +1135,9 @@ bool InDet::SiTrackMaker_xk::newSeed(SiTrackMakerEventData_xk& data, const std::
 
 int InDet::SiTrackMaker_xk::kindSeed(const std::vector<const Trk::SpacePoint*>& Sp) 
 {
-  if(Sp.size()!=3) return 4;
-
+  
+  if(Sp.size()!=3) return 0;//correct handling of Pixel-only ITk tracklets
+  
   std::vector<const Trk::SpacePoint*>::const_iterator s=Sp.begin(),se=Sp.end();
 
   int n = 0;

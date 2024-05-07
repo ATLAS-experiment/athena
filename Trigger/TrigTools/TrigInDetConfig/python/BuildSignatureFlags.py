@@ -61,7 +61,8 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("doHitDV",              False)
   flags.addFlag("doDisappearingTrk",    False)
   flags.addFlag("useDynamicRoiZWidth",  False)
-
+  
+  
   #precision tracking configuration values
   #__provisional change__:
   #the following settings are incorrect but this is what is being used in the production running
@@ -771,6 +772,9 @@ def collToRecordable(flags,name):
 def addGlobalFlags(flags: AthConfigFlags, category : str):
   flags.addFlag(f'{category}.RoiZedWidthDefault', 180.0 * Units.mm)
   flags.addFlag(f'{category}.doGPU', False)
+  flags.addFlag(f'{category}.UseTrigTrackFollowing', False)
+  flags.addFlag(f'{category}.UseTrigRoadPredictor', False)
+  flags.addFlag(f'{category}.UseTracklets', False)
 
   
 import unittest
