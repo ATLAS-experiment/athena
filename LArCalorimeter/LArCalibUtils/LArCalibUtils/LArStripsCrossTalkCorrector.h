@@ -83,8 +83,8 @@ class ATLAS_NOT_THREAD_SAFE LArStripsCrossTalkCorrector : public AthAlgorithm
   const LArEM_ID*     m_emId{nullptr};
   unsigned int        m_event_counter=0;
   //Ranges for eta and phi indices for barrel(0) and endcap(1)
-  const std::array<unsigned,2> m_MAXeta{448,208};
-  const std::array<unsigned,2> m_MINeta{1,0};
+  static constexpr auto m_MAXeta=std::to_array<unsigned>({448,208});
+  static constexpr auto m_MINeta=std::to_array<unsigned>({1,0});
   const unsigned int  m_MAXphi=64;
   int                 m_nStrips=-1;
   //Algorithm-Properties:
