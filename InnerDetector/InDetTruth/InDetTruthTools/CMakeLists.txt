@@ -9,5 +9,3 @@ atlas_add_component( InDetTruthTools
                      src/components/*.cxx
                      LINK_LIBRARIES AtlasHepMCLib  TruthUtils AthenaBaseComps TrkEventPrimitives AtlasDetDescr InDetIdentifier ReadoutGeometryBase InDetReadoutGeometry InDetSimData InDetPrepRawData TrkPrepRawData TrkTruthData InDetTruthInterfaces TrkTruthTrackInterfaces TruthUtils )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

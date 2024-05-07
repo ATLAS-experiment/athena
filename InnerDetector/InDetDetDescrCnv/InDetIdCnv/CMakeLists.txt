@@ -8,6 +8,3 @@ atlas_add_component( InDetIdCnv
                      src/*.cxx
                      LINK_LIBRARIES StoreGateLib DetDescrCnvSvcLib IdDictDetDescr GaudiKernel InDetIdentifier )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
