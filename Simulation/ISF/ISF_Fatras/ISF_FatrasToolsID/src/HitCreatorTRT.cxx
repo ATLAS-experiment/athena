@@ -210,7 +210,7 @@ void iFatras::HitCreatorTRT::createSimHit(const ISF::ISFParticle& isp, const Trk
       ATH_MSG_VERBOSE("[ trthit ] Add a TRTUncompressedHit hit to the collection. ");
       // fill into the HitCollection
       HepMcParticleLink partLink(isp.barcode(), 0,
-                                 HepMcParticleLink::IS_EVENTNUM,
+                                 HepMcParticleLink::IS_POSITION,
                                  HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
       m_hitColl->Emplace( hitID,
                           partLink,
