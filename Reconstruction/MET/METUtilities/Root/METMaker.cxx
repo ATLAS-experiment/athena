@@ -142,7 +142,11 @@ namespace met {
     declareProperty("DoRemoveElecTrks",   m_doRemoveElecTrks   = true                );
     declareProperty("DoRemoveElecTrksEM", m_doRemoveElecTrksEM = false               );
 
-    declareProperty("DoSimpleOR",         m_doSimpleOR         = false                );
+    declareProperty("skipSystematicJetSelection", m_skipSystematicJetSelection = false,
+            "EXPERIMENTAL: whether to use simplified OR based on nominal jets "
+            "and for jet-related systematics only. "
+            "WARNING: this property is strictly for doing physics studies of the feasibility "
+            "of this OR scheme, it should not be used in a regular analysis");
 
     // muon overlap variables (expert use only)
     declareProperty("JetTrkNMuOlap",      m_jetTrkNMuOlap = 5                        );
@@ -232,7 +236,7 @@ namespace met {
     ATH_MSG_INFO("Suppressing warnings of objects missing in METAssociationMap for objects with pT < " << m_missObjWarningPtThreshold/1e3 << " GeV.");
 
     // overlap removal simplification?
-    if (m_doSimpleOR) {
+    if (m_skipSystematicJetSelection) {
       ATH_MSG_INFO("Requesting simplified overlap removal procedure in MET calculation");
     }
     
@@ -719,7 +723,7 @@ namespace met {
 
         // init nominal_jet and either actually asign nominal jet or fall back to systematic jet
         const xAOD::Jet * nominal_jet = nullptr;
-        if(m_doSimpleOR) {
+        if(m_skipSystematicJetSelection) {
           // retrieve nominal calibrated jet
           if (acc_nominalObject.isAvailable(*jet))
             nominal_jet = static_cast<const xAOD::Jet*>(*acc_nominalObject(*jet));
