@@ -78,7 +78,7 @@ class CfgPyComponent:
 
             ## special case of the OutputLevel: take the value from the
             ## svcMgr.MessageSvc if none already set by user
-            setattr(self, 'OutputLevel', _get_prop_value (self, 'OutputLevel') )
+            self.OutputLevel = _get_prop_value (self, 'OutputLevel')
 
         ## populate the PyComponents instances repository
         o = PyComponents.instances.get(self.getName(), None)
