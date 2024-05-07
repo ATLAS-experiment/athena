@@ -88,9 +88,6 @@ namespace Barcode {
     ParticleBarcode                               m_secondaryIncrement;
     ParticleBarcode                               m_currentSecondary;
 
-    /** throw error messages if a possible overflow is detected */
-    bool                                          m_doUnderOverflowChecks;
-
     /** switch whether to include the process code in the vertex barcode */
     bool                                          m_encodePhysicsProcess;
   };

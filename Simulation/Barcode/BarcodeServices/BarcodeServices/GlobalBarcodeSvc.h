@@ -91,9 +91,6 @@ namespace Barcode {
     /** barcode offset for each generation of updated particles */
     ParticleBarcode                               m_particleGenerationIncrement;
 
-    /** throw error messages if a possible overflow is detected */
-    bool                                          m_doUnderOverflowChecks;
-
     /** switch whether to include the process code in the vertex barcode */
     bool                                          m_encodePhysicsProcess;
   };

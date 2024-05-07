@@ -15,13 +15,11 @@ Barcode::LegacyBarcodeSvc::LegacyBarcodeSvc(const std::string& name,ISvcLocator*
   m_currentVertex(-1),
   m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
-  m_currentSecondary(1),
-  m_doUnderOverflowChecks(true)
+  m_currentSecondary(1)
 {
   // python properties
   declareProperty("VertexIncrement"            ,  m_vertexIncrement);
   declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement);
-  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks);
 }
 
 
@@ -89,7 +87,7 @@ Barcode::VertexBarcode Barcode::LegacyBarcodeSvc::newVertex( Barcode::ParticleBa
   bc.currentVertex += m_vertexIncrement;
   // a naive underflog checking based on the fact that vertex
   // barcodes should never be positive
-  if ( m_doUnderOverflowChecks && (bc.currentVertex > 0))
+  if ( bc.currentVertex > 0)
     {
       ATH_MSG_ERROR("LegacyBarcodeSvc::newVertex(...)"
                     << " will return a vertex barcode greater than 0: "
@@ -110,7 +108,7 @@ Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::newSecondary( Barcode::Parti
   bc.currentSecondary += m_secondaryIncrement;
   // a naive overflow checking based on the fact that particle
   // barcodes should never be negative
-  if ( m_doUnderOverflowChecks && (bc.currentSecondary < 0))
+  if (bc.currentSecondary < 0)
     {
       ATH_MSG_DEBUG("LegacyBarcodeSvc::newSecondary(...)"
                     << " will return a particle barcode of less than 0: "

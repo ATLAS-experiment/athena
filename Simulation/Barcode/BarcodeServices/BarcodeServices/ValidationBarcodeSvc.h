@@ -89,8 +89,6 @@ namespace Barcode {
     ParticleBarcode                               m_particleGenerationIncrement;
     ParticleBarcode                               m_barcodeGenerationOffset; //!< not sure why this is needed...
 
-    /** throw error messages if a possible overflow is detected */
-    bool                                          m_doUnderOverflowChecks;
   };
 
 

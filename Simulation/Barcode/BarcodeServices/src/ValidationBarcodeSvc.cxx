@@ -19,14 +19,12 @@ Barcode::ValidationBarcodeSvc::ValidationBarcodeSvc(const std::string& name,ISvc
   m_secondaryIncrement(1),
   m_currentSecondary(1),
   m_particleGenerationIncrement(HepMC::SIM_REGENERATION_INCREMENT),
-  m_barcodeGenerationOffset(1e8),
-  m_doUnderOverflowChecks(true)
+  m_barcodeGenerationOffset(1e8)
 {
   // python properties
   declareProperty("VertexIncrement"            ,  m_vertexIncrement);
   declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement);
   declareProperty("BarcodeGenerationOffset"    ,  m_barcodeGenerationOffset);
-  declareProperty("DoUnderAndOverflowChecks"   ,  m_doUnderOverflowChecks);
 }
 
 
@@ -57,7 +55,7 @@ Barcode::VertexBarcode Barcode::ValidationBarcodeSvc::newVertex( Barcode::Partic
   m_currentVertex += m_vertexIncrement;
   // a naive underflog checking based on the fact that vertex
   // barcodes should never be positive
-  if ( m_doUnderOverflowChecks && (m_currentVertex > 0))
+  if ( m_currentVertex > 0)
     {
       ATH_MSG_ERROR("ValidationBarcodeSvc::newVertex(...)"
                     << " will return a vertex barcode greater than 0: "
@@ -76,7 +74,7 @@ Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::newSecondary( Barcode::P
   m_currentSecondary += m_secondaryIncrement;
   // a naive overflow checking based on the fact that particle
   // barcodes should never be negative
-  if ( m_doUnderOverflowChecks && (m_currentSecondary < 0))
+  if ( m_currentSecondary < 0)
     {
       ATH_MSG_ERROR("ValidationBarcodeSvc::newSecondary(...)"
                     << " will return a particle barcode of less than 0: "
