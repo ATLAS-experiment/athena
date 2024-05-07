@@ -17,7 +17,7 @@ def LArPhysWavePredictionCfg(flags):
     CaliWaveTag=rs.getFolderTag(flags.LArCalib.CaliWave.Folder)
     DetCellParamsTag=rs.getFolderTag(flags.LArCalib.DetCellParams.Folder)
     CaliPulseParamsTag=rs.getFolderTag(flags.LArCalib.CaliPulseParams.Folder)
-    MphysOverMcalTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
+    MphysOverMcalTag=rs.getFolderTag(flags.LArCalib.MphysOverMcal.Folder)
     PhysWaveTag=rs.getFolderTag(flags.LArCalib.PhysWave.Folder)
     del rs #Close database
 
@@ -135,7 +135,7 @@ def LArPhysWavePredictionCfg(flags):
     result.merge(OutputConditionsAlgCfg(flags,
                                         outputFile=flags.LArCalib.Output.POOLFile,
                                         ObjectList=["LArPhysWaveContainer#LArPhysWave#"+flags.LArCalib.PhysWave.Folder,
-                                                    "LArMphysOverMcalComplete#LArMphysOverMcal#"+flags.LArCalib.MPhysOverMCal.Folder,],
+                                                    "LArMphysOverMcalComplete#LArMphysOverMcal#"+flags.LArCalib.MphysOverMcal.Folder,],
                                         IOVTagList=[PhysWaveTag,MphysOverMcalTag],
                                         Run1=flags.LArCalib.IOVStart,
                                         Run2=flags.LArCalib.IOVEnd

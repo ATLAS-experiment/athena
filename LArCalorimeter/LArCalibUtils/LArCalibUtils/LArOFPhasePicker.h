@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCALIBUTILS_LArOFPhasePicker_H
@@ -12,10 +12,13 @@ AUTHORS:  P. Strizenec
 CREATED:  Mar. 2008
 
 Used to pick-up a one OFC phase to fill online Db
-Use a phases stored in CondDB (using a Tshaper raw condition) or a default 0.
+Use a phases stored in CondDB (using a Tshaper raw condition) or a default from jO
+Adding possibility to weights OFCb for SC before storing
 ********************************************************************/
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "LArCOOLConditions/LArOFCweightSC.h"
 
 class LArOFCBinComplete;
 class LArOnlineID_Base;
@@ -37,6 +40,8 @@ class LArOFPhasePicker : public AthAlgorithm
 
   const LArOFCBinComplete* m_inputPhase;
   const LArOnlineID_Base*  m_onlineID;
+
+  SG::ReadCondHandleKey<LArOFCweightSC> m_ofcWKey{this,"OFCbWeightKey","","Key for weighting the OFCb"};
 
   //Job properties
   std::string m_keyOFC;

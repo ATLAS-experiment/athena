@@ -5,7 +5,6 @@
 #include "LArCalibUtils/LArCaliWaveAverage.h"
 #include "LArCalibUtils/LArCaliWaveBuilder.h"
 #include "LArCalibUtils/LArCaliWaveBuilderXtalk.h"
-#include "LArCalibUtils/LArCaliWaveMerger.h"
 #include "LArCalibUtils/LArCaliWaveSelector.h"
 #include "LArCalibUtils/LArDeltaRespPredictor.h"
 #include "LArCalibUtils/LArDeltaRespTool.h"
@@ -55,7 +54,6 @@ DECLARE_COMPONENT( LArCalibDigitMaker )
 DECLARE_COMPONENT( LArCaliWaveAverage )
 DECLARE_COMPONENT( LArCaliWaveBuilder )
 DECLARE_COMPONENT( LArCaliWaveBuilderXtalk )
-DECLARE_COMPONENT( LArCaliWaveMerger )
 DECLARE_COMPONENT( LArCaliWaveSelector )
 DECLARE_COMPONENT( LArDeltaRespPredictor )
 DECLARE_COMPONENT( LArMasterWaveBuilder )
@@ -98,3 +96,8 @@ DECLARE_COMPONENT( LArAutoCorrMerger )
 DECLARE_COMPONENT( LArMphysOverMcalMerger )
 DECLARE_COMPONENT( LArShapeMerger )
 DECLARE_COMPONENT( LArRampMerger )
+DECLARE_COMPONENT( LArDetCellParamsMerger )
+DECLARE_COMPONENT( LArCaliPulseParamsMerger )
+DECLARE_COMPONENT( LArPhysWaveMerger )
+DECLARE_COMPONENT( LArCaliWaveMerger )
+

@@ -113,7 +113,8 @@ StatusCode LArMphysOverMcal2Ntuple::stop() {
 
  unsigned cellCounter=0;
  unsigned filledCell=0;
- for(long igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN; igain++) {
+ unsigned nGain = m_isSC ? 1 : CaloGain::LARNGAIN;
+ for(unsigned igain=CaloGain::LARHIGHGAIN; igain<nGain; igain++) {
    for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      if ( cabling->isOnlineConnected(hwid) && !m_onlineId->isFCALchannel(hwid)) {
 	 fillFromIdentifier(hwid);       
