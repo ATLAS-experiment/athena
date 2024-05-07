@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/MultifoldGNN.h"
@@ -45,8 +45,9 @@ namespace FlavorTagDiscriminants {
   void MultifoldGNN::decorate(const xAOD::Jet& jet) const {
     getFold(jet).decorate(jet);
   }
-  void MultifoldGNN::decorateWithDefaults(const xAOD::Jet& jet) const {
-    getFold(jet).decorateWithDefaults(jet);
+  void MultifoldGNN::decorateWithDefaults(const SG::AuxElement& jet) const {
+    // note that the default values should be identical betwen all folds
+    m_folds.at(0)->decorateWithDefaults(jet);
   }
 
   // Dependencies

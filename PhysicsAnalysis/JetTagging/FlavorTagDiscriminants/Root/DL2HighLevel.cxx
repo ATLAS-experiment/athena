@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/DL2HighLevel.h"
@@ -63,7 +63,7 @@ namespace FlavorTagDiscriminants {
   void DL2HighLevel::decorate(const xAOD::Jet& jet) const {
     m_dl2->decorate(jet);
   }
-  void DL2HighLevel::decorateWithDefaults(const xAOD::Jet& jet) const {
+  void DL2HighLevel::decorateWithDefaults(const SG::AuxElement& jet) const {
     m_dl2->decorateWithDefaults(jet);
   }
 
