@@ -324,11 +324,16 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
             } else {
                 fill(tool, MuonSmallSectorZ, MuonSmallSectorR, MuonSector, MuonCIndex);
             }
-            SegmentXPosBarrel = muonSegment->x();
-            SegmentYPosBarrel = muonSegment->y();
-            SegmentXPosEndcap = muonSegment->x();
-            SegmentYPosEndcap = muonSegment->y();
-            fill(tool, SegmentXPosBarrel, SegmentYPosBarrel, SegmentXPosEndcap, SegmentYPosEndcap);
+            const double muonSegmentEta = TLorentzVector(muonSegment->px(), muonSegment->py(), muonSegment->pz(), 0).Eta();
+            if (std::abs(muonSegmentEta) > 1.05) {
+                SegmentXPosEndcap = muonSegment->x();
+                SegmentYPosEndcap = muonSegment->y();
+                fill(tool, SegmentXPosEndcap, SegmentYPosEndcap);
+            } else {
+                SegmentXPosBarrel = muonSegment->x();
+                SegmentYPosBarrel = muonSegment->y();
+                fill(tool, SegmentXPosBarrel, SegmentYPosBarrel);
+            }
         }
     }
 
