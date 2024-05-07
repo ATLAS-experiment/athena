@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_VertexReco package
@@ -28,12 +28,7 @@ def AFP_VertexReco_Cfg(flags, kwargs={}):
 	# collect all output names and make a list with unique names for write handle keys; if this goes wrong AFP_VertexRecoTool::initialize() will complain
 	outputVertexList=[]
 	for vertexTool in verticesToolsList:
-		try:
-			# in case the "verticesContainerName" is set
-			contName=getattr(vertexTool, "verticesContainerName")
-		except AttributeError:
-			# in case the "verticesContainerName" is not set
-			contName=vertexTool.getDefaultProperty("verticesContainerName")
+		contName=getattr(vertexTool, "verticesContainerName", vertexTool.getDefaultProperty("verticesContainerName"))
 		if contName not in outputVertexList:
 			outputVertexList.append(contName)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_GlobReco package
@@ -18,12 +18,7 @@ def AFP_GlobReco_Cfg(flags, kwargs={}):
 	# collect all output names and make a list with unique names for write handle keys; if this goes wrong AFP_GlobRecoTool::initialize() will complain
 	outputProtonList=[]
 	for protonTool in protonsToolsList:
-		try:
-			# in case the "protonsContainerName" is set
-			contName=getattr(protonTool, "protonsContainerName")
-		except AttributeError:
-			# in case the "protonsContainerName" is not set
-			contName=protonTool.getDefaultProperty("protonsContainerName")
+		contName=getattr(protonTool, "protonsContainerName", protonTool.getDefaultProperty("protonsContainerName"))
 		if contName not in outputProtonList:
 			outputProtonList.append(contName)
 

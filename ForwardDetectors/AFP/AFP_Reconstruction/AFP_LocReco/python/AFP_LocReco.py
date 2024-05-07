@@ -41,7 +41,7 @@ def AFP_LocReco_SiD_Cfg(flags, kwargs={}):
         for kalmanTool in kalmanToolsList:
                 try:
                         # in case the "tracksContainerName" is set
-                        contName=getattr(kalmanTool, "tracksContainerName")
+                        contName=kalmanTool.tracksContainerName
                 except AttributeError:
                         # in case the "tracksContainerName" is not set
                         contName=kalmanTool.getDefaultProperty("tracksContainerName")
@@ -86,12 +86,7 @@ def AFP_LocReco_TD_Cfg(flags, kwargs={}):
         # collect all output names and make a list with unique names for write handle keys; if this goes wrong AFP_TDLocRecoTool::initialize() will complain
         outputBasicList=[]
         for basicTool in basicToolsList:
-                try:
-                        # in case the "tracksContainerName" is set
-                        contName=getattr(basicTool, "tracksContainerName")
-                except AttributeError:
-                        # in case the "tracksContainerName" is not set
-                        contName=basicTool.getDefaultProperty("tracksContainerName")
+                contName=getattr(basicTool, "tracksContainerName", basicTool.getDefaultProperty("tracksContainerName"))
                 if contName not in outputBasicList:
                         outputBasicList.append(contName)
 

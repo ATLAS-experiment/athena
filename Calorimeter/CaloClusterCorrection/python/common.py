@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: CaloClusterCorrection/python/common.py
@@ -879,9 +879,9 @@ def _config_from_jo (corr, jo, key, sampling, valid_keys, order):
         parms = parms[sampling]
 
     if order != 0 and hasattr (corr, 'order'):
-        setattr (corr, 'order', order)
+        corr.order = order
     if hasattr (corr, 'isDummy'):
-        setattr (corr, 'isDummy', 0)
+        corr.isDummy = 0
 
     log = logging.getLogger ('CaloClusterCorrection')
 
