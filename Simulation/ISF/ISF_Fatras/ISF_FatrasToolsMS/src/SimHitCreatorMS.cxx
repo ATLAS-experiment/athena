@@ -268,7 +268,7 @@ void iFatras::SimHitCreatorMS::createHits(const ISF::ISFParticle& isp,
       const Amg::Vector3D& exitPos(pos + 0.5*segLengthSTGC*unitMom);
 
       HepMcParticleLink partLink(isp.barcode(), 0,
-                                 HepMcParticleLink::IS_EVENTNUM,
+                                 HepMcParticleLink::IS_POSITION,
                                  HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
       if ( m_idHelperSvc->isMM(id) )  {
         m_mmSimHitCollection->Emplace(simID, timeInfo, pos,
@@ -379,7 +379,7 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
 
       // a new simhit
       HepMcParticleLink partLink(isp.barcode(), 0,
-                                 HepMcParticleLink::IS_EVENTNUM,
+                                 HepMcParticleLink::IS_POSITION,
                                  HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
       m_mdtSimHitCollection->Emplace(simId,globalTimeEstimate,
                                      std::abs(residual),
@@ -406,7 +406,7 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
 
     // a new simhit
     HepMcParticleLink partLink(isp.barcode(), 0,
-                               HepMcParticleLink::IS_EVENTNUM,
+                               HepMcParticleLink::IS_POSITION,
                                HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     m_rpcSimHitCollection->Emplace(simId,globalTimeEstimate, localPos, partLink, localPos, energyDeposit,1.,isp.pdgCode(),isp.momentum().mag() ) ;
 
@@ -430,7 +430,7 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
 
     // a new simhit
     HepMcParticleLink partLink(isp.barcode(), 0,
-                               HepMcParticleLink::IS_EVENTNUM,
+                               HepMcParticleLink::IS_POSITION,
                                HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     m_tgcSimHitCollection->Emplace(simId,globalTimeEstimate, localPos, localDir, partLink, energyDeposit, stepLength ) ;
   } else if (m_idHelperSvc->isCsc(id)) {
@@ -470,7 +470,7 @@ bool iFatras::SimHitCreatorMS::createHit(const ISF::ISFParticle& isp,
 
     // a new simhit
     HepMcParticleLink partLink(isp.barcode(), 0,
-                               HepMcParticleLink::IS_EVENTNUM,
+                               HepMcParticleLink::IS_POSITION,
                                HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     const double kineticEnergy{-1.}; // dummy value
     m_cscSimHitCollection->Emplace(simId,globalTimeEstimate,energyDeposit, hitStart, hitEnd, lundcode, partLink, kineticEnergy ) ;
