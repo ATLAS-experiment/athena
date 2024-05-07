@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // +======================================================================+
@@ -10,19 +10,14 @@
 // +                                                                      +
 // +======================================================================+
 // 
-// ........ includes
 //
 #include "LArL1Sim/LArTTL1Maker.h"
 // .......... utilities
 //
-#include <math.h>
-#include <fstream>
-
 #include "AthenaKernel/RNGWrapper.h"
 
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandomEngine.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 #include "LArRawEvent/LArTTL1.h"
 
@@ -46,14 +41,16 @@
 #include "AthenaKernel/ITriggerTime.h"
 
 //
+#include <cmath>
+#include <fstream>
 
 
 using CLHEP::RandGaussZiggurat;
 
 
 namespace {
-const double crossingTime = 25 /* nanosecond */;
-const double crossingRate = 1. / crossingTime;
+  constexpr double crossingTime = 25 /* nanosecond */;
+  constexpr double crossingRate = 1. / crossingTime;
 }
 
 
@@ -372,11 +369,11 @@ StatusCode LArTTL1Maker::execute()
   SG::WriteHandle<LArTTL1Container> ttL1ContainerHad(m_HadTTL1ContainerName);
   ATH_CHECK(ttL1ContainerHad.record(std::make_unique<LArTTL1Container>()));
   
-   LArTTL1Container *truth_ttL1ContainerEm=nullptr;
-   LArTTL1Container *truth_ttL1ContainerHad=nullptr;
+   std::unique_ptr<LArTTL1Container> truth_ttL1ContainerEm;
+   std::unique_ptr<LArTTL1Container> truth_ttL1ContainerHad;
    if(!m_truthHitsContainer.empty()) {
-      truth_ttL1ContainerEm = new LArTTL1Container();
-      truth_ttL1ContainerHad = new LArTTL1Container();
+      truth_ttL1ContainerEm = std::make_unique<LArTTL1Container>();
+      truth_ttL1ContainerHad =  std::make_unique<LArTTL1Container>();
    }
 
 
@@ -906,7 +903,7 @@ std::vector<float> LArTTL1Maker::computeSignal(const Identifier towerId, const i
   bool barrelEnd = m_lvl1Helper->is_barrel_end(towerId);
   bool emec= m_lvl1Helper->is_emec(towerId);
 
-  unsigned int visEvecSize=ttSumEnergy.size();
+  int visEvecSize = std::ssize(ttSumEnergy);
   ATH_MSG_VERBOSE ( "computeSignal: special case = " << specialCase  );
 
   //
@@ -941,7 +938,7 @@ std::vector<float> LArTTL1Maker::computeSignal(const Identifier towerId, const i
     //
     // ... loop on time samples 
     //
-    for (unsigned int iTime=0; iTime<visEvecSize; iTime++) {
+    for (int iTime=0; iTime<visEvecSize; iTime++) {
       if(fabs(ttSumEnergy[iTime]) > 0.) {
 	if(!m_noEmCalibMode) {
 	  // apply calibration coefficient
@@ -1008,7 +1005,7 @@ std::vector<float> LArTTL1Maker::computeSignal(const Identifier towerId, const i
     //
     // ... loop on time samples 
     //
-    for (unsigned int iTime=0; iTime<visEvecSize; iTime++) {
+    for (int iTime=0; iTime<visEvecSize; iTime++) {
       float theEnergy = ttSumEnergy[iTime];
       if(!m_noHadCalibMode) {
 	// apply calibration coefficient
@@ -1060,7 +1057,7 @@ std::vector<float> LArTTL1Maker::computeSignal(const Identifier towerId, const i
     //
     // ... loop on time samples (only one if no pile-up)
     //
-    for (unsigned int iTime=0; iTime<visEvecSize; iTime++) {
+    for (int iTime=0; iTime<visEvecSize; iTime++) {
       float theEnergy = ttSumEnergy[iTime];
       if((!m_noEmCalibMode&&module==1)||(!m_noHadCalibMode&&module>1)) {
 	// apply calibration coefficient
