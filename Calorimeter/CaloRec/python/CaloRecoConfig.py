@@ -103,6 +103,7 @@ if __name__=="__main__":
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
     flags.Exec.OutputLevel=INFO
+    flags.Exec.MaxEvents=10
     flags.fillFromArgs()
 
     flags.lock()
@@ -123,4 +124,4 @@ if __name__=="__main__":
     acc.store(f)
     f.close()
 
-    acc.run(10)
+    acc.run()
