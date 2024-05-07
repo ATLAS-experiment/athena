@@ -354,9 +354,7 @@ namespace DerivationFramework {
     massesPsi.push_back(m_vtx1Daug2MassHypo);
     massesPsi.push_back(m_vtx1Daug3MassHypo);
     if(m_vtx1Daug_num==4) massesPsi.push_back(m_vtx1Daug4MassHypo);
-    std::vector<double> massesJpsi2;
-    massesJpsi2.push_back(m_vtx2Daug1MassHypo);
-    massesJpsi2.push_back(m_vtx2Daug2MassHypo);
+    std::array<double,2> massesJpsi2{m_vtx2Daug1MassHypo, m_vtx2Daug2MassHypo};
 
     // Get Psi container
     SG::ReadHandle<xAOD::VertexContainer> psiContainer(m_vertexPsiContainerKey);

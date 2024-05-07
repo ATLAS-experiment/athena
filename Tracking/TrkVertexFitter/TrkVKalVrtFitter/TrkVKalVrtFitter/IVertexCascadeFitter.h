@@ -13,6 +13,7 @@
 #include  "xAODTracking/TrackParticleFwd.h"
 #include <memory>
 #include <vector>
+#include <span>
 
 class EventContext;
 
@@ -46,17 +47,17 @@ namespace Trk{
           }
       
     virtual VertexID startVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                   const  std::vector<double>& particleMass,
+                                   std::span<const double> particleMass,
                                    IVKalState& istate,
 				   double massConstraint = 0.) const = 0;
  
       virtual VertexID  nextVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                   const  std::vector<double>& particleMass,
+                                   std::span<const double> particleMass,
                                    IVKalState& istate,
 				   double massConstraint = 0.) const = 0;
  
       virtual VertexID  nextVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                   const  std::vector<double>& particleMass,
+                                   std::span<const double> particleMass,
 		                   const  std::vector<VertexID> &precedingVertices,
                                    IVKalState& istate,
 				   double massConstraint = 0.) const = 0;

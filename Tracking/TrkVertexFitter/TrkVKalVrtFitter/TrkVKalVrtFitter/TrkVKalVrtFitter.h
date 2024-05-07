@@ -25,7 +25,6 @@
 #include  "TrkVKalVrtFitter/VKalExtPropagator.h" //for Trk::VKalExtPropagator (member)
 
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"  //for VKalVrtControl (member)
-
 //
 class IChronoStatSvc;
 class EventContext;
@@ -140,17 +139,17 @@ namespace Trk{
 //
         VertexID startVertex(
           const std::vector<const xAOD::TrackParticle*>& list,
-          const std::vector<double>& particleMass,
+          std::span<const double> particleMass,
           IVKalState& istate,
           double massConstraint = 0.) const override final;
 
         VertexID nextVertex(const std::vector<const xAOD::TrackParticle*>& list,
-                            const std::vector<double>& particleMass,
+                            std::span<const double> particleMass,
                             IVKalState& istate,
                             double massConstraint = 0.) const override final;
 
         VertexID nextVertex(const std::vector<const xAOD::TrackParticle*>& list,
-                            const std::vector<double>& particleMass,
+                            std::span<const double> particleMass,
                             const std::vector<VertexID>& precedingVertices,
                             IVKalState& istate,
                             double massConstraint = 0.) const override final;

@@ -60,7 +60,7 @@ namespace Trk {
 //----------------------------------------------------------------------------------------
 
 VertexID TrkVKalVrtFitter::startVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                       const  std::vector<double>& particleMass,
+                                       std::span<const double> particleMass,
                                        IVKalState& istate,
 	  			       const  double massConstraint) const
 {
@@ -95,7 +95,7 @@ int TrkVKalVrtFitter::getCascadeNDoF (const CascadeState& cstate)
 // Next vertex in cascade
 //
 VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                      const  std::vector<double>& particleMass,
+                                      std::span<const double> particleMass,
                                       IVKalState& istate,
 	  		              const  double massConstraint) const
 {
@@ -142,7 +142,7 @@ VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackPartic
 // Next vertex in cascade
 //
 VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackParticle*> & list,
-                                      const  std::vector<double>& particleMass,
+                                      std::span<const double> particleMass,
 		                      const  std::vector<VertexID> &precedingVertices,
                                       IVKalState& istate,
 	  		              const  double massConstraint) const

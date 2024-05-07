@@ -407,7 +407,7 @@ TVector3 xAOD::BPhysHelper::totalP()
 }
 
 /*****************************************************************************/
-TLorentzVector xAOD::BPhysHelper::totalP(const std::vector<double>& masses)
+TLorentzVector xAOD::BPhysHelper::totalP(std::span<const double> masses)
 {
   // cache refitted tracks
   if( !cacheRefTracks() ) 

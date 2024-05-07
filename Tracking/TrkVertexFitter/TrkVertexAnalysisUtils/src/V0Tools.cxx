@@ -39,14 +39,14 @@ namespace Trk
 
   double V0Tools::invariantMass(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return invariantMass(vxCandidate,masses);
   }
 
 
 
-  double V0Tools::invariantMass(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::invariantMass(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     double px = 0., py = 0., pz = 0., e = 0.;
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
@@ -69,12 +69,12 @@ namespace Trk
 
   double V0Tools::invariantMassError(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return invariantMassError(vxCandidate,masses);
   }
 
-  double V0Tools::invariantMassError(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::invariantMassError(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -101,12 +101,12 @@ namespace Trk
 
   double V0Tools::massErrorV0Fitter(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return massErrorV0Fitter(vxCandidate,masses);
   }
 
-  double V0Tools::massErrorV0Fitter(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::massErrorV0Fitter(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -167,11 +167,11 @@ namespace Trk
 
   double V0Tools::massErrorVKalVrt(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
     return massErrorVKalVrt(vxCandidate,masses);
   }
 
-  double V0Tools::massErrorVKalVrt(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::massErrorVKalVrt(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -242,12 +242,12 @@ namespace Trk
 
   double V0Tools::massErrorVxCandidate(const xAOD::Vertex * vxCandidate, double posTrackMass, double negTrackMass) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return massErrorVxCandidate(vxCandidate,masses);
   }
 
-  double V0Tools::massErrorVxCandidate(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::massErrorVxCandidate(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -317,12 +317,12 @@ namespace Trk
 
   double V0Tools::invariantMassProbability(const xAOD::Vertex * vxCandidate, double V0Mass, double posTrackMass, double negTrackMass) const
   {
-    std::vector<double> masses = {posTrackMass , negTrackMass};
+    std::array<double, 2> masses = {posTrackMass , negTrackMass};
 
     return invariantMassProbability(vxCandidate,V0Mass,masses);
   }
 
-  double V0Tools::invariantMassProbability(const xAOD::Vertex * vxCandidate, double V0Mass, const std::vector<double> &masses) const
+  double V0Tools::invariantMassProbability(const xAOD::Vertex * vxCandidate, double V0Mass, std::span<const double> masses) const
   {
     double mass = invariantMass(vxCandidate, masses);
     double massErr = invariantMassError(vxCandidate, masses);
@@ -1175,12 +1175,12 @@ namespace Trk
 
   double V0Tools::tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, double posTrackMass, double negTrackMass) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return tau(vxCandidate,vertex,masses);
   }
 
-  double V0Tools::tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const
+  double V0Tools::tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -1197,12 +1197,12 @@ namespace Trk
 
   double V0Tools::tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, double posTrackMass, double negTrackMass, double massV0) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return tau(vxCandidate,vertex,masses,massV0);
   }
 
-  double V0Tools::tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses, double massV0) const
+  double V0Tools::tau(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses, double massV0) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -1231,12 +1231,12 @@ namespace Trk
   double V0Tools::tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, double posTrackMass, double negTrackMass) const
   {
     // Tau = CONST*M*(Px*dx+Py*dy)/(PT*PT)
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return tauError(vxCandidate,vertex,masses);
   }
 
-  double V0Tools::tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const
+  double V0Tools::tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const
   {
     // Tau = CONST*M*(Px*dx+Py*dy)/(PT*PT)
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
@@ -1364,12 +1364,12 @@ namespace Trk
 
   double V0Tools::tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, double posTrackMass, double negTrackMass, double massV0) const
   {
-    std::vector<double> masses = {posTrackMass, negTrackMass};
+    std::array<double, 2> masses = {posTrackMass, negTrackMass};
 
     return tauError(vxCandidate,vertex,masses,massV0);
   }
 
-  double V0Tools::tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses, double ) const
+  double V0Tools::tauError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses, double ) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -1495,7 +1495,7 @@ namespace Trk
     return CONST*tauErr;
   }
 
-  double V0Tools::tau3D(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const
+  double V0Tools::tau3D(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -1519,7 +1519,7 @@ namespace Trk
     return CONST*M*LXYZ/P;
   }
 
-  double V0Tools::tau3DError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const
+  double V0Tools::tau3DError(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const
   {
     // Tau = CONST*M*(Px*dx+Py*dy+Pz*dz)/(P*P)
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
@@ -2148,7 +2148,7 @@ namespace Trk
   }
   */
 
-  double V0Tools::invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     double px = 0., py = 0., pz = 0., e = 0.;
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
@@ -2172,7 +2172,7 @@ namespace Trk
     return (msq>0.) ? sqrt(msq) : 0.;
   }
 
-  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext& ctx, const Trk::IExtrapolator* extrapolator) const
+  double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, std::span<const double> masses, const EventContext& ctx, const Trk::IExtrapolator* extrapolator) const
   {
     Trk::PerigeeSurface perigeeSurface(vxCandidate->position());
     double px = 0., py = 0., pz = 0., e = 0.;
@@ -2202,7 +2202,7 @@ namespace Trk
   }
 
   double V0Tools::invariantMassBeforeFit(const xAOD::Vertex * vxCandidate, 
-        const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
+        std::span<const double> masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
   {
     Trk::PerigeeSurface perigeeSurface(vertex);
     double px = 0., py = 0., pz = 0., e = 0.;
@@ -2231,7 +2231,7 @@ namespace Trk
     return (msq>0.) ? sqrt(msq) : 0.;
   }
 
-  double V0Tools::invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses) const
+  double V0Tools::invariantMassErrorBeforeFitIP(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -2297,7 +2297,7 @@ namespace Trk
   }
 
 
-  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, const std::vector<double> &masses, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
+  double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, std::span<const double> masses, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -2310,7 +2310,7 @@ namespace Trk
 
 
   double V0Tools::invariantMassErrorBeforeFit(const xAOD::Vertex * vxCandidate, 
-           const std::vector<double> &masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
+           std::span<const double> masses, const Amg::Vector3D& vertex, const EventContext& ctx, const Trk::IExtrapolator* extrap) const
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
@@ -2382,7 +2382,7 @@ namespace Trk
   }
 
 
-  double V0Tools::massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double>  &masses) const
+  double V0Tools::massTauCov(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const
   {
     // Tau = CONST*M*(Px*dx+Py*dy)/(PT*PT)
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
@@ -2530,7 +2530,7 @@ namespace Trk
       return V0_cov;
   }
 
-  Amg::MatrixX V0Tools::tauMassCovariance(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, const std::vector<double> &masses) const
+  Amg::MatrixX V0Tools::tauMassCovariance(const xAOD::Vertex * vxCandidate, const xAOD::Vertex* vertex, std::span<const double> masses) const
   {
     // Tau = CONST*M*(Px*dx+Py*dy)/(PT*PT)
     Amg::MatrixX V0_err;

@@ -414,7 +414,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillVertexHists(const ToolHandle<GenericMo
   }
   
   using namespace TrigVtx;
-  TLorentzVector dimuonMom = dimuonVertexHelper.totalP({TrigParticleMasses().mass[TrigParticleName::muon], TrigParticleMasses().mass[TrigParticleName::muon]});
+  TLorentzVector dimuonMom = dimuonVertexHelper.totalP(std::array<double,2>{TrigParticleMasses().mass[TrigParticleName::muon], TrigParticleMasses().mass[TrigParticleName::muon]});
   
   auto dimu_mass = Monitored::Scalar<float>(objStr+"_mass",-999.);
   auto dimu_pt = Monitored::Scalar<float>(objStr+"_pt",-999.);

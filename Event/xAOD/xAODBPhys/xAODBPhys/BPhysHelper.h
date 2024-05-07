@@ -292,7 +292,7 @@ namespace xAOD {
        *  @returns: Total 4-momentum, (0,0,0,0) on error
        */
       
-      TLorentzVector totalP(const std::vector<double>& masses);
+      TLorentzVector totalP(std::span<const double> masses);
 
       /** Returns pT error
        *
