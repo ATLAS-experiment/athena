@@ -63,13 +63,13 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
     const int chips = design->numberOfCircuits();            
     int rowsPerChip = design->rowsPerCircuit();
     int columnsPerChip = design->columnsPerCircuit();
-    const int chipsInPhi = design->rows()/rowsPerChip;
-    const int chipsinEta = design->columns()/columnsPerChip;            
+    // const int chipsInPhi = design->rows()/rowsPerChip;
+    // const int chipsinEta = design->columns()/columnsPerChip;            
     
-    const float phiPitch = design->phiPitch();
-    bool use50x50 = true;
-    if (phiPitch < s_pitch50x50)
-      use50x50 = false; 
+    // const float phiPitch = design->phiPitch();
+    // bool use50x50 = true;
+    // if (phiPitch < s_pitch50x50)
+    //   use50x50 = false; 
 
 
     Region region = (*element)->isBarrel() ? BARREL : ENDCAP;  
@@ -114,7 +114,7 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
         
         // evaluating the chip number considering the number of rows and columns per chip and
         // the total number of rows and columns on the sensor
-        int chip = std::ceil(pixEtaIx/columnsPerChip) + chipsInPhi*std::ceil(pixPhiIx/rowsPerChip);
+        // int chip = std::ceil(pixEtaIx/columnsPerChip) + chipsInPhi*std::ceil(pixPhiIx/rowsPerChip);
                   
         // get the eta/phi index wrt to the chip, not the module
         int pixEta = pixEtaIx - std::ceil(pixEtaIx/columnsPerChip)*columnsPerChip;
