@@ -60,7 +60,7 @@ bool BuildNSWReadoutGeometry::BuildReadoutGeometry(MuonGM::MuonDetectorManager* 
             } else if (chTag.substr(0, 3) == "sTG") {
                 std::unique_ptr<sTgcReadoutElement> re = std::make_unique<sTgcReadoutElement>(vol, sName, etaIndex, phiIndex, mLayer, mgr);
                 std::string myVolName = (chTag.substr(0, 8)).c_str();
-                re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
+                re->initDesign(2.6);
                 re->fillCache();
                 mgr->addsTgcReadoutElement(std::move(re));
             }

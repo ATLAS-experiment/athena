@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_STGCREADOUTELEMENT_H
@@ -13,9 +13,10 @@
 #include "MuonReadoutGeometry/MuonClusterReadoutElement.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MuonPadDesign.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
-class BLinePar;
-class GeoVFullPhysVol;
+
+class MuonReadoutGeomCnvAlg;
 
 namespace MuonGM {
     /**
@@ -25,9 +26,12 @@ namespace MuonGM {
 
     class sTgcReadoutElement final : public MuonClusterReadoutElement {
     public:
+        friend class ::MuonReadoutGeomCnvAlg;
+   
         /** constructor */
-
-        sTgcReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, int zi, int fi, int mL, MuonDetectorManager* mgr);
+        sTgcReadoutElement(GeoVFullPhysVol* pv, 
+                           const std::string& stName, 
+                           int zi, int fi, int mL, MuonDetectorManager* mgr);
 
         /** destructor */
         ~sTgcReadoutElement();
@@ -150,8 +154,7 @@ namespace MuonGM {
         virtual bool measuresPhi(const Identifier& id) const override final;
 
         /** @brief initialize the design classes for this readout element */
-        void initDesign(double largeX, double smallX, double lengthY, double stripPitch, double wirePitch, double stripWidth,
-                        double wireWidth, double thickness);
+        void initDesign(double thickness);
 
         /** returns the MuonChannelDesign class for the given identifier */
         const MuonChannelDesign* getDesign(const Identifier& id) const;
@@ -199,14 +202,20 @@ namespace MuonGM {
         static double triggerBandIdToRadius(bool isLarge, int triggerBand); 
         
     private:
-        std::vector<MuonChannelDesign> m_phiDesign;
-        std::vector<MuonChannelDesign> m_etaDesign;
-        std::vector<MuonPadDesign> m_padDesign;
+        
+        void initDesignFromSQLite(double thickness);
+        
+        void initDesignFromAGDD(double thickness);
 
-        std::vector<int> m_nStrips;
-        std::vector<int> m_nWires;
-        std::vector<int> m_nPads;
-        int    m_nlayers{0};
+        const sTgcIdHelper& m_idHelper{idHelperSvc()->stgcIdHelper()};
+        std::array<MuonChannelDesign,4> m_phiDesign{};
+        std::array<MuonChannelDesign,4> m_etaDesign{};
+        std::array<MuonPadDesign,4> m_padDesign{};
+
+        std::array<int, 4> m_nStrips{};
+        std::array<int, 4> m_nWires{};
+        std::array<int, 4> m_nPads{};
+        static constexpr int m_nlayers{4};
         int    m_ml{0};
         double m_offset{0.};
         
@@ -219,20 +228,17 @@ namespace MuonGM {
         const BLinePar*  m_BLinePar{nullptr};
         Amg::Transform3D m_delta{Amg::Transform3D::Identity()};
 
-        // const double m_largeSectorOpeningAngle = 28.0;
-        // const double m_smallSectorOpeningAngle = 17.0;
-
         // surface dimensions for strips
-        std::vector<double> m_halfX;
-        std::vector<double> m_minHalfY;
-        std::vector<double> m_maxHalfY;
+        std::array<double, 4> m_halfX{};
+        std::array<double, 4> m_minHalfY{};
+        std::array<double, 4> m_maxHalfY{};
         // surface dimensions for pads and wires
-        std::vector<double> m_PadhalfX;
-        std::vector<double> m_PadminHalfY;
-        std::vector<double> m_PadmaxHalfY;
+        std::array<double, 4> m_PadhalfX{};
+        std::array<double, 4> m_PadminHalfY{};
+        std::array<double, 4> m_PadmaxHalfY{};
 
         // transforms (RE->layer)
-        Amg::Transform3D m_Xlg[4];
+        std::array<Amg::Transform3D, 4> m_Xlg{make_array<Amg::Transform3D, 4>(Amg::Transform3D::Identity())};
 
 
         // The radial positions of the trigger bands cannot be derived from the readout geometry, therefore hard-coding them for now
