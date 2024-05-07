@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.cmt_newanalysisalg
 # @purpose streamline and ease the creation of new athena algs
@@ -329,8 +329,8 @@ def main(args):
 
     
     #following code borrowed from gen_klass
-    hdr = getattr(Templates, 'alg_hdr_template')
-    cxx = getattr(Templates, 'alg_cxx_template')
+    hdr = Templates.alg_hdr_template
+    cxx = Templates.alg_cxx_template
     
     namespace_klass = full_alg_name.replace('::','__')
     namespace_begin,namespace_end = "",""
@@ -417,7 +417,7 @@ DECLARE_COMPONENT( %(klass)s )
       ::: create jobo [%(full_jobo_name)s] and script [%(full_script_name)s] for alg [%(full_alg_name)s]""" %locals()))
    
       #following code borrowed from gen_klass
-      jobo = getattr(Templates, 'jobo_template')
+      jobo = Templates.jobo_template
    
       e = dict( klass=full_alg_name,
                inFile=os.environ['ASG_TEST_FILE_MC'],
@@ -432,7 +432,7 @@ DECLARE_COMPONENT( %(klass)s )
          o_hdr.flush()
          o_hdr.close()
 
-    scripto = getattr(Templates, 'script_template')
+    scripto = Templates.script_template
 
     e = dict( klass=full_alg_name,
               inFile=os.environ['ASG_TEST_FILE_MC'],
