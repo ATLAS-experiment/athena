@@ -16,7 +16,6 @@
 #include "TrkSurfaces/Surface.h"
 // 
 #include "StoreGate/StoreGateSvc.h"
-#include "InDetIdentifier/SCT_ID.h"
 
 InDet::SCT_OverlapDescriptor::SCT_OverlapDescriptor(bool addMoreSurfaces, int eta_slices)
   : m_robustMode(true),

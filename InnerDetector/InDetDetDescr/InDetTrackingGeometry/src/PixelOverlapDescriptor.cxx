@@ -16,7 +16,6 @@
 #include "TrkSurfaces/Surface.h"
 //
 #include "StoreGate/StoreGateSvc.h"
-#include "InDetIdentifier/PixelID.h"
 
 InDet::PixelOverlapDescriptor::PixelOverlapDescriptor(bool addMoreSurfaces, int eta_slices, int phi_slices):
   m_robustMode(true),

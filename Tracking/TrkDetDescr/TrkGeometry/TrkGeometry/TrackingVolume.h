@@ -31,10 +31,10 @@
 #include "TrkVolumes/Volume.h"
 // STL
 #include <string>
+#include <span>
 // ATH_MSG macros
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
-#include "CxxUtils/span.h"
 #include "CxxUtils/CachedUniquePtr.h"
 #include "CxxUtils/checker_macros.h"
 #ifndef TRKGEOMETRY_MAXLAYERATTEMPTS
@@ -58,7 +58,7 @@ typedef BinnedArray<TrackingVolume> TrackingVolumeArray;
 
 // For local spans (typedef to make it easier for C++20 std:: one)
 template<class T>
-using ArraySpan = CxxUtils::span<T>;
+using ArraySpan = std::span<T>;
 
 //Helper for const correct access to boundary surfaces  via a span
 //We want const correct access to the underlying plain ptrs.
@@ -76,7 +76,7 @@ public:
   constexpr size_t size() const noexcept { return m_span.size(); }
 
 private:
-  CxxUtils::span<const std::shared_ptr<T>> m_span;
+  ArraySpan<const std::shared_ptr<T>> m_span;
 };
 
 

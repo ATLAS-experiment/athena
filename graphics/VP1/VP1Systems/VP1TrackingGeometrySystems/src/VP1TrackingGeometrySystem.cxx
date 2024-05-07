@@ -265,195 +265,195 @@ VP1TrackingGeometrySystem::VP1TrackingGeometrySystem()
 {
   m_d->retrieveSuccess = false;
   m_d->senderMapFilled = false;
-  m_d->volswitch = 0;
+  m_d->volswitch = nullptr;
   
   // beam pipe
-  m_d->beamPipeSwitch = 0;
-  m_d->sephelper_beamPipe = 0;
+  m_d->beamPipeSwitch = nullptr;
+  m_d->sephelper_beamPipe = nullptr;
   
   // Pixel section
-  m_d->pixSurfBarrelSwitch = 0;
-  m_d->pixSurfECASwitch  = 0;
-  m_d->pixSurfECCSwitch  = 0;
-  m_d->sephelper_pixSurfBarrel = 0;
-  m_d->sephelper_pixSurfECA  = 0;
-  m_d->sephelper_pixSurfECC  = 0;               
+  m_d->pixSurfBarrelSwitch = nullptr;
+  m_d->pixSurfECASwitch  = nullptr;
+  m_d->pixSurfECCSwitch  = nullptr;
+  m_d->sephelper_pixSurfBarrel = nullptr;
+  m_d->sephelper_pixSurfECA  = nullptr;
+  m_d->sephelper_pixSurfECC  = nullptr;               
 
-  m_d->pixLayBarrelSwitch = 0;
-  m_d->pixLayECASwitch  = 0;
-  m_d->pixLayECCSwitch  = 0;
-  m_d->sephelper_pixLayBarrel = 0;
-  m_d->sephelper_pixLayECA  = 0;
-  m_d->sephelper_pixLayECC  = 0;            
+  m_d->pixLayBarrelSwitch = nullptr;
+  m_d->pixLayECASwitch  = nullptr;
+  m_d->pixLayECCSwitch  = nullptr;
+  m_d->sephelper_pixLayBarrel = nullptr;
+  m_d->sephelper_pixLayECA  = nullptr;
+  m_d->sephelper_pixLayECC  = nullptr;            
   
   // SCT section
-  m_d->sctSurfBarrelSwitch = 0;
-  m_d->sctSurfECASwitch  = 0;
-  m_d->sctSurfECCSwitch  = 0;
-  m_d->sephelper_sctSurfBarrel = 0;
-  m_d->sephelper_sctSurfECA  = 0;
-  m_d->sephelper_sctSurfECC  = 0;           
+  m_d->sctSurfBarrelSwitch = nullptr;
+  m_d->sctSurfECASwitch  = nullptr;
+  m_d->sctSurfECCSwitch  = nullptr;
+  m_d->sephelper_sctSurfBarrel = nullptr;
+  m_d->sephelper_sctSurfECA  = nullptr;
+  m_d->sephelper_sctSurfECC  = nullptr;           
 
-  m_d->sctLayBarrelSwitch = 0;
-  m_d->sctLayECASwitch  = 0;
-  m_d->sctLayECCSwitch  = 0;
-  m_d->sephelper_sctLayBarrel = 0;
-  m_d->sephelper_sctLayECA  = 0;
-  m_d->sephelper_sctLayECC  = 0;              
+  m_d->sctLayBarrelSwitch = nullptr;
+  m_d->sctLayECASwitch  = nullptr;
+  m_d->sctLayECCSwitch  = nullptr;
+  m_d->sephelper_sctLayBarrel = nullptr;
+  m_d->sephelper_sctLayECA  = nullptr;
+  m_d->sephelper_sctLayECC  = nullptr;              
 
   // TRT section
-  m_d->trtSurfBarrelSwitch = 0;
-  m_d->trtSurfECASwitch  = 0;
-  m_d->trtSurfECCSwitch  = 0;
-  m_d->sephelper_trtSurfBarrel = 0;
-  m_d->sephelper_trtSurfECA  = 0;
-  m_d->sephelper_trtSurfECC  = 0;           
+  m_d->trtSurfBarrelSwitch = nullptr;
+  m_d->trtSurfECASwitch  = nullptr;
+  m_d->trtSurfECCSwitch  = nullptr;
+  m_d->sephelper_trtSurfBarrel = nullptr;
+  m_d->sephelper_trtSurfECA  = nullptr;
+  m_d->sephelper_trtSurfECC  = nullptr;           
 
-  m_d->trtLayBarrelSwitch = 0;
-  m_d->trtLayECASwitch  = 0;
-  m_d->trtLayECCSwitch  = 0;
-  m_d->sephelper_trtLayBarrel = 0;
-  m_d->sephelper_trtLayECA  = 0;
-  m_d->sephelper_trtLayECC  = 0;
+  m_d->trtLayBarrelSwitch = nullptr;
+  m_d->trtLayECASwitch  = nullptr;
+  m_d->trtLayECCSwitch  = nullptr;
+  m_d->sephelper_trtLayBarrel = nullptr;
+  m_d->sephelper_trtLayECA  = nullptr;
+  m_d->sephelper_trtLayECC  = nullptr;
 
   // passive layers
-  m_d->passiveLayBarrelSwitch = 0;
-  m_d->passiveLayECASwitch  = 0;
-  m_d->passiveLayECCSwitch  = 0;
-  m_d->sephelper_passiveLayBarrel = 0;
-  m_d->sephelper_passiveLayECA  = 0;
-  m_d->sephelper_passiveLayECC  = 0;
+  m_d->passiveLayBarrelSwitch = nullptr;
+  m_d->passiveLayECASwitch  = nullptr;
+  m_d->passiveLayECCSwitch  = nullptr;
+  m_d->sephelper_passiveLayBarrel = nullptr;
+  m_d->sephelper_passiveLayECA  = nullptr;
+  m_d->sephelper_passiveLayECC  = nullptr;
 
-  m_d->clipswitch = 0;
-  m_d->msBswitch = 0;
-  m_d->msIswitch = 0;
-  m_d->msOswitch = 0;
-  m_d->msBIswitch = 0;
-  m_d->msBMswitch = 0;
-  m_d->msBOswitch = 0;
-  m_d->msEIswitch = 0;
-  m_d->msEMswitch = 0;
-  m_d->msEOswitch = 0;
-  m_d->msCSswitch = 0;
-  m_d->msTGswitch = 0;
-  m_d->msBIlayswitch = 0;
-  m_d->msBMlayswitch = 0;
-  m_d->msBOlayswitch = 0;
-  m_d->msEIlayswitch = 0;
-  m_d->msEMlayswitch = 0;
-  m_d->msEOlayswitch = 0;
-  m_d->msCSlayswitch = 0;
-  m_d->msTGlayswitch = 0;
-  m_d->msBTenvswitch = 0;
-  m_d->msETenvswitch = 0;
-  m_d->msShenvswitch = 0;
-  m_d->msFeenvswitch = 0;
-  m_d->msRaenvswitch = 0;
-  m_d->msBTdlswitch = 0;
-  m_d->msETdlswitch = 0;
-  m_d->msShdlswitch = 0;
-  m_d->msFedlswitch = 0;
-  m_d->msRadlswitch = 0;
+  m_d->clipswitch = nullptr;
+  m_d->msBswitch = nullptr;
+  m_d->msIswitch = nullptr;
+  m_d->msOswitch = nullptr;
+  m_d->msBIswitch = nullptr;
+  m_d->msBMswitch = nullptr;
+  m_d->msBOswitch = nullptr;
+  m_d->msEIswitch = nullptr;
+  m_d->msEMswitch = nullptr;
+  m_d->msEOswitch = nullptr;
+  m_d->msCSswitch = nullptr;
+  m_d->msTGswitch = nullptr;
+  m_d->msBIlayswitch = nullptr;
+  m_d->msBMlayswitch = nullptr;
+  m_d->msBOlayswitch = nullptr;
+  m_d->msEIlayswitch = nullptr;
+  m_d->msEMlayswitch = nullptr;
+  m_d->msEOlayswitch = nullptr;
+  m_d->msCSlayswitch = nullptr;
+  m_d->msTGlayswitch = nullptr;
+  m_d->msBTenvswitch = nullptr;
+  m_d->msETenvswitch = nullptr;
+  m_d->msShenvswitch = nullptr;
+  m_d->msFeenvswitch = nullptr;
+  m_d->msRaenvswitch = nullptr;
+  m_d->msBTdlswitch = nullptr;
+  m_d->msETdlswitch = nullptr;
+  m_d->msShdlswitch = nullptr;
+  m_d->msFedlswitch = nullptr;
+  m_d->msRadlswitch = nullptr;
 
-  m_d->sephelper_vol = 0;
-  m_d->sephelper_msB = 0;
-  m_d->sephelper_msI = 0;
-  m_d->sephelper_msO = 0;
-  m_d->sephelper_msBI = 0;
-  m_d->sephelper_msBM = 0;
-  m_d->sephelper_msBO = 0;
-  m_d->sephelper_msEI = 0;
-  m_d->sephelper_msEM = 0;
-  m_d->sephelper_msEO = 0;
-  m_d->sephelper_msCS = 0;
-  m_d->sephelper_msTG = 0;
-  m_d->sephelper_msBIlay = 0;
-  m_d->sephelper_msBMlay = 0;
-  m_d->sephelper_msBOlay = 0;
-  m_d->sephelper_msEIlay = 0;
-  m_d->sephelper_msEMlay = 0;
-  m_d->sephelper_msEOlay = 0;
-  m_d->sephelper_msCSlay = 0;
-  m_d->sephelper_msTGlay = 0;
-  m_d->sephelper_msBTenv = 0;
-  m_d->sephelper_msETenv = 0;
-  m_d->sephelper_msShenv = 0;
-  m_d->sephelper_msFeenv = 0;
-  m_d->sephelper_msRaenv = 0;
-  m_d->sephelper_msBTdl = 0;
-  m_d->sephelper_msETdl = 0;
-  m_d->sephelper_msShdl = 0;
-  m_d->sephelper_msFedl = 0;
-  m_d->sephelper_msRadl = 0;
+  m_d->sephelper_vol = nullptr;
+  m_d->sephelper_msB = nullptr;
+  m_d->sephelper_msI = nullptr;
+  m_d->sephelper_msO = nullptr;
+  m_d->sephelper_msBI = nullptr;
+  m_d->sephelper_msBM = nullptr;
+  m_d->sephelper_msBO = nullptr;
+  m_d->sephelper_msEI = nullptr;
+  m_d->sephelper_msEM = nullptr;
+  m_d->sephelper_msEO = nullptr;
+  m_d->sephelper_msCS = nullptr;
+  m_d->sephelper_msTG = nullptr;
+  m_d->sephelper_msBIlay = nullptr;
+  m_d->sephelper_msBMlay = nullptr;
+  m_d->sephelper_msBOlay = nullptr;
+  m_d->sephelper_msEIlay = nullptr;
+  m_d->sephelper_msEMlay = nullptr;
+  m_d->sephelper_msEOlay = nullptr;
+  m_d->sephelper_msCSlay = nullptr;
+  m_d->sephelper_msTGlay = nullptr;
+  m_d->sephelper_msBTenv = nullptr;
+  m_d->sephelper_msETenv = nullptr;
+  m_d->sephelper_msShenv = nullptr;
+  m_d->sephelper_msFeenv = nullptr;
+  m_d->sephelper_msRaenv = nullptr;
+  m_d->sephelper_msBTdl = nullptr;
+  m_d->sephelper_msETdl = nullptr;
+  m_d->sephelper_msShdl = nullptr;
+  m_d->sephelper_msFedl = nullptr;
+  m_d->sephelper_msRadl = nullptr;
 
-  m_d->trackvol2sonode = 0;
-  m_d->surface2sonode = 0;
+  m_d->trackvol2sonode = nullptr;
+  m_d->surface2sonode = nullptr;
 
-  m_d->lineEdit_TrackingGeometrySvcName = 0;
-  m_d->lineEdit_TrackingGeometryName = 0;
-  m_d->pushButton_Retrieve = 0;
+  m_d->lineEdit_TrackingGeometrySvcName = nullptr;
+  m_d->lineEdit_TrackingGeometryName = nullptr;
+  m_d->pushButton_Retrieve = nullptr;
   
-  m_d->checkBox_pixSurfBarrel     = 0;
-  m_d->checkBox_pixSurfECA        = 0;
-  m_d->checkBox_pixSurfECC        = 0; 
-  m_d->checkBox_sctSurfBarrel     = 0;
-  m_d->checkBox_sctSurfECA        = 0;
-  m_d->checkBox_sctSurfECC        = 0;
-  m_d->checkBox_trtSurfBarrel     = 0;
-  m_d->checkBox_trtSurfECA        = 0;
-  m_d->checkBox_trtSurfECC        = 0;
+  m_d->checkBox_pixSurfBarrel     = nullptr;
+  m_d->checkBox_pixSurfECA        = nullptr;
+  m_d->checkBox_pixSurfECC        = nullptr; 
+  m_d->checkBox_sctSurfBarrel     = nullptr;
+  m_d->checkBox_sctSurfECA        = nullptr;
+  m_d->checkBox_sctSurfECC        = nullptr;
+  m_d->checkBox_trtSurfBarrel     = nullptr;
+  m_d->checkBox_trtSurfECA        = nullptr;
+  m_d->checkBox_trtSurfECC        = nullptr;
   
-  m_d->checkBox_beamPipe          = 0;    
-  m_d->checkBox_pixLayBarrel      = 0;
-  m_d->checkBox_pixLayECA         = 0;
-  m_d->checkBox_pixLayECC         = 0;  
-  m_d->checkBox_sctLayBarrel      = 0;
-  m_d->checkBox_sctLayECA         = 0;
-  m_d->checkBox_sctLayECC         = 0;
-  m_d->checkBox_trtLayBarrel      = 0;
-  m_d->checkBox_trtLayECA         = 0;
-  m_d->checkBox_trtLayECC         = 0;
-  m_d->checkBox_passiveLayBarrel  = 0;
-  m_d->checkBox_passiveLayECA     = 0;
-  m_d->checkBox_passiveLayECC     = 0;
+  m_d->checkBox_beamPipe          = nullptr;    
+  m_d->checkBox_pixLayBarrel      = nullptr;
+  m_d->checkBox_pixLayECA         = nullptr;
+  m_d->checkBox_pixLayECC         = nullptr;  
+  m_d->checkBox_sctLayBarrel      = nullptr;
+  m_d->checkBox_sctLayECA         = nullptr;
+  m_d->checkBox_sctLayECC         = nullptr;
+  m_d->checkBox_trtLayBarrel      = nullptr;
+  m_d->checkBox_trtLayECA         = nullptr;
+  m_d->checkBox_trtLayECC         = nullptr;
+  m_d->checkBox_passiveLayBarrel  = nullptr;
+  m_d->checkBox_passiveLayECA     = nullptr;
+  m_d->checkBox_passiveLayECC     = nullptr;
   
-  m_d->checkBox_TrackingVolumes = 0;
-  m_d->checkBox_ClipPlane = 0;
-  m_d->checkBox_MuonStaticFrameB = 0;
-  m_d->checkBox_MuonStaticFrameI = 0;
-  m_d->checkBox_MuonStaticFrameO = 0;
-  m_d->checkBox_msBIvol = 0;
-  m_d->checkBox_msBMvol = 0;
-  m_d->checkBox_msBOvol = 0;
-  m_d->checkBox_msEIvol = 0;
-  m_d->checkBox_msEMvol = 0;
-  m_d->checkBox_msEOvol = 0;
-  m_d->checkBox_msCSvol = 0;
-  m_d->checkBox_msTGvol = 0;
-  m_d->checkBox_msBIlay = 0;
-  m_d->checkBox_msBMlay = 0;
-  m_d->checkBox_msBOlay = 0;
-  m_d->checkBox_msEIlay = 0;
-  m_d->checkBox_msEMlay = 0;
-  m_d->checkBox_msEOlay = 0;
-  m_d->checkBox_msCSlay = 0;
-  m_d->checkBox_msTGlay = 0;
-  m_d->checkBox_msBTenv = 0;
-  m_d->checkBox_msETenv = 0;
-  m_d->checkBox_msShenv = 0;
-  m_d->checkBox_msFeenv = 0;
-  m_d->checkBox_msRaenv = 0;
-  m_d->checkBox_msBTdl = 0;
-  m_d->checkBox_msETdl = 0;
-  m_d->checkBox_msShdl = 0;
-  m_d->checkBox_msFedl = 0;
-  m_d->checkBox_msRadl = 0;
+  m_d->checkBox_TrackingVolumes = nullptr;
+  m_d->checkBox_ClipPlane = nullptr;
+  m_d->checkBox_MuonStaticFrameB = nullptr;
+  m_d->checkBox_MuonStaticFrameI = nullptr;
+  m_d->checkBox_MuonStaticFrameO = nullptr;
+  m_d->checkBox_msBIvol = nullptr;
+  m_d->checkBox_msBMvol = nullptr;
+  m_d->checkBox_msBOvol = nullptr;
+  m_d->checkBox_msEIvol = nullptr;
+  m_d->checkBox_msEMvol = nullptr;
+  m_d->checkBox_msEOvol = nullptr;
+  m_d->checkBox_msCSvol = nullptr;
+  m_d->checkBox_msTGvol = nullptr;
+  m_d->checkBox_msBIlay = nullptr;
+  m_d->checkBox_msBMlay = nullptr;
+  m_d->checkBox_msBOlay = nullptr;
+  m_d->checkBox_msEIlay = nullptr;
+  m_d->checkBox_msEMlay = nullptr;
+  m_d->checkBox_msEOlay = nullptr;
+  m_d->checkBox_msCSlay = nullptr;
+  m_d->checkBox_msTGlay = nullptr;
+  m_d->checkBox_msBTenv = nullptr;
+  m_d->checkBox_msETenv = nullptr;
+  m_d->checkBox_msShenv = nullptr;
+  m_d->checkBox_msFeenv = nullptr;
+  m_d->checkBox_msRaenv = nullptr;
+  m_d->checkBox_msBTdl = nullptr;
+  m_d->checkBox_msETdl = nullptr;
+  m_d->checkBox_msShdl = nullptr;
+  m_d->checkBox_msFedl = nullptr;
+  m_d->checkBox_msRadl = nullptr;
 
   m_d->initialTrackingGeometrySvcName = "AtlasTrackingGeometrySvc";
   m_d->initialTrackingGeometryName    = "";
 
-  m_d->detStore = 0;
-  m_d->root = 0;
+  m_d->detStore = nullptr;
+  m_d->root = nullptr;
 }
 
 //_____________________________________________________________________________________
@@ -882,7 +882,7 @@ void VP1TrackingGeometrySystem::retrieveTrackingGeometry()
   if (idCalo) processTrkVolume(idCalo);
   else processTrkVolume(highestVolume);
 
-  processMsVolume(highestVolume,0,0);
+  processMsVolume(highestVolume,nullptr,nullptr);
 
   SoRotationXYZ* rotClip = new SoRotationXYZ;
   rotClip->axis.setValue( SoRotationXYZ::X);
@@ -1025,7 +1025,7 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
   // loop over confined layers
   if (confinedLayers){
     Trk::BinnedArraySpan<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
-    Trk::BinnedArraySpan<Trk::Layer const * const>::const_iterator layerIter = layerVector.begin();
+    Trk::BinnedArraySpan<Trk::Layer const * const>::iterator layerIter = layerVector.begin();
     // loop over layers
     for ( ; layerIter != layerVector.end(); ++layerIter){
       // push_back the layer
@@ -1041,8 +1041,8 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
         const Trk::SurfaceArray* layerSubSurfaces = (*layerIter)->surfaceArray();
 
         /** current separator helpers */
-        VP1ExtraSepLayerHelper* layerSepHelper = 0;
-        VP1ExtraSepLayerHelper* surfaceSepHelper = 0;
+        VP1ExtraSepLayerHelper* layerSepHelper = nullptr;
+        VP1ExtraSepLayerHelper* surfaceSepHelper = nullptr;
         
         if ( volumeName.contains("BeamPipe") > 0 ) {
             layerSepHelper = m_d->sephelper_beamPipe;
@@ -1115,7 +1115,7 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
         // Surface
         if (layerSubSurfaces && surfaceSepHelper){
           Trk::BinnedArraySpan<Trk::Surface const * const> surfaceVector = layerSubSurfaces->arrayObjects();
-          Trk::BinnedArraySpan<Trk::Surface const * const>::const_iterator surfaceIter = surfaceVector.begin();
+          Trk::BinnedArraySpan<Trk::Surface const * const>::iterator surfaceIter = surfaceVector.begin();
           for ( ; surfaceIter != surfaceVector.end(); ++surfaceIter ){
             // push_back the surface
             if (*surfaceIter)
@@ -1130,8 +1130,8 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
   // get the confined volumes and loop over it -> call recursively
   if (confinedVolumes){
     Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIter = volumes.begin();
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIterEnd = volumes.end();
+    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIter = volumes.begin();
+    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
     for ( ; volIter != volIterEnd; ++volIter)
       if (*volIter) processTrkVolume(*volIter);
   }
@@ -1179,8 +1179,8 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
     // get the confined volumes and loop over it -> call recursively
     if (confinedVolumes){
       Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIter = volumes.begin();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIterEnd = volumes.end();
+      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIter = volumes.begin();
+      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
       for ( ; volIter != volIterEnd; ++volIter)
 	if (*volIter) processMsVolume(*volIter,sepHelper, layHelper);
     }
@@ -1189,7 +1189,7 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
   Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols = tvol->confinedDetachedVolumes();
   if (!detVols.empty()) {
     // identify separators
-    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator dIter = detVols.begin();
+    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::iterator dIter = detVols.begin();
     for ( ;dIter!=detVols.end(); ++dIter) {
       if ( (tvol->inside((*dIter)->trackingVolume()->center(),0.) || (*dIter)->trackingVolume()->center().perp()<0.001) ) {
 	std::string name = (*dIter)->name();
@@ -1230,7 +1230,7 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
 	  { sepHelper = m_d->sephelper_msBTenv; layHelper =  m_d->sephelper_msBTdl; }
       }
       if (sepHelper) processMsVolume( (*dIter)->trackingVolume(), sepHelper, layHelper);
-      sepHelper = 0; layHelper = 0;
+      sepHelper = nullptr; layHelper = nullptr;
     }
   }
 }
@@ -1267,7 +1267,7 @@ void VP1TrackingGeometrySystem::processMsLayDense(const Trk::TrackingVolume* tvo
   const Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol->confinedLayers();
   if (confinedLayers){
     Trk::BinnedArraySpan<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
-    Trk::BinnedArraySpan<Trk::Layer const * const>::const_iterator layerIter = layerVector.begin();
+    Trk::BinnedArraySpan<Trk::Layer const * const>::iterator layerIter = layerVector.begin();
     // loop over layers
     for ( ; layerIter != layerVector.end(); ++layerIter){
       // push_back the layer
@@ -1305,9 +1305,9 @@ void VP1TrackingGeometrySystem::processMsLayDense(const Trk::TrackingVolume* tvo
   // dense volumes
   const auto confVols = tvol->confinedDenseVolumes();
   if (!confVols.empty()){
-    const auto *volIter = confVols.begin();
+    auto volIter = confVols.begin();
     for ( ; volIter != confVols.end(); ++volIter){
-      if (*volIter && sepHelper ) processMsVolume( *volIter, 0, layHelper );
+      if (*volIter && sepHelper ) processMsVolume( *volIter, nullptr, layHelper );
     }
   }
 }
@@ -1326,7 +1326,7 @@ QWidget * VP1TrackingGeometrySystem::buildController()
     return new QLabel("Geometry not configured.");
   }
 
-  QWidget * controller = new QWidget(0);
+  QWidget * controller = new QWidget(nullptr);
   Ui::TrackingGeometryControllerForm ui;
   ui.setupUi(controller);
 
@@ -1426,17 +1426,17 @@ QWidget * VP1TrackingGeometrySystem::buildController()
   m_d->checkBox_passiveLayECC    = ui.checkBox_LayersECC;
 
   m_d->checkBox_pixSurfECA = ui.checkBox_PixelSurfacesECA;
-  m_d->surfacesNames.push_back("PixelECA");
+  m_d->surfacesNames.emplace_back("PixelECA");
   m_d->checkBox_pixSurfBarrel = ui.checkBox_PixelSurfacesBarrel;
-  m_d->surfacesNames.push_back("PixelBarrel");
+  m_d->surfacesNames.emplace_back("PixelBarrel");
   m_d->checkBox_pixSurfECC = ui.checkBox_PixelSurfacesECC;
-  m_d->surfacesNames.push_back("PixelECC");
+  m_d->surfacesNames.emplace_back("PixelECC");
   m_d->checkBox_sctSurfECA = ui.checkBox_SctSurfacesECA;
-  m_d->surfacesNames.push_back("SCT_ECA");
+  m_d->surfacesNames.emplace_back("SCT_ECA");
   m_d->checkBox_sctSurfBarrel = ui.checkBox_SctSurfacesBarrel;
-  m_d->surfacesNames.push_back("SCT_Barrel");
+  m_d->surfacesNames.emplace_back("SCT_Barrel");
   m_d->checkBox_sctSurfECC = ui.checkBox_SctSurfacesECC;
-  m_d->surfacesNames.push_back("SCT_ECC");
+  m_d->surfacesNames.emplace_back("SCT_ECC");
 
   m_d->checkBox_ClipPlane = ui.checkBox_ClipPlane;
   m_d->checkBox_MuonStaticFrameB = ui.checkBox_MuonStaticFrameB;
@@ -1569,7 +1569,7 @@ VP1TrackingGeometrySystem::saveState()
 {
   //TK: BAD!!!!
   messageDebug("WARNING: VP1TrackingGeometrySystem persistification disabled for now due to crashes!");
-  return QByteArray();
+  return {};
   /** sroe: unreachable code, coverity 17207
   ensureBuildController();
   // Setup stream writing to a byteArray:
@@ -1605,8 +1605,7 @@ void
 VP1TrackingGeometrySystem::restoreFromState( QByteArray /*ba*/) //unused parameter
 {
   messageDebug("WARNING: VP1TrackingGeometrySystem persistification disabled for now due to crashes!");
-  return;
-  /** sroe: none of the following code was reachable, coverity defect 17185
+ /** sroe: none of the following code was reachable, coverity defect 17185
   // Setup stream for getting the contents of the byteArray:
   QBuffer buffer(&ba);
   buffer.open(QIODevice::ReadOnly);

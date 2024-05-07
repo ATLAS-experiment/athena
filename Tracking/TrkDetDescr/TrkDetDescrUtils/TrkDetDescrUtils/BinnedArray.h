@@ -14,10 +14,10 @@
 // GaudiKernel
 #include "GaudiKernel/GaudiException.h"
 // Eigen
-#include "CxxUtils/span.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
 // STL
+#include <span>
 #include <vector>
 
 class MsgStream;
@@ -31,7 +31,7 @@ namespace Trk {
    @author Christos Anastopoulos (AthenaMT)
    */
 template<class T>
-using BinnedArraySpan = CxxUtils::span<T>;
+using BinnedArraySpan = std::span<T>;
 
 template<class T>
 class BinnedArray

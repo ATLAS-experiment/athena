@@ -2899,7 +2899,7 @@ namespace Trk {
     // loop over confined layers
     if (confinedLayers != nullptr) {
       Trk::BinnedArraySpan<Trk::Layer const * const >layerVector = confinedLayers->arrayObjects();
-      Trk::BinnedArraySpan<Trk::Layer const * const >::const_iterator layerIter = layerVector.begin();
+      Trk::BinnedArraySpan<Trk::Layer const * const >::iterator layerIter = layerVector.begin();
 
       // loop over layers
       for (; layerIter != layerVector.end(); ++layerIter) {
@@ -2989,8 +2989,8 @@ namespace Trk {
     if (confinedVolumes != nullptr) {
       Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
 
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const >::const_iterator volIter = volumes.begin();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIterEnd = volumes.end();
+      Trk::BinnedArraySpan<Trk::TrackingVolume const * const >::iterator volIter = volumes.begin();
+      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::iterator volIterEnd = volumes.end();
 
       for (; volIter != volIterEnd; ++volIter) {
         if (*volIter != nullptr) {
