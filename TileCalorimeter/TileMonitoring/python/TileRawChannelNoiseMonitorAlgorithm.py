@@ -38,6 +38,7 @@ def TileRawChannelNoiseMonitoringConfig(flags, **kwargs):
     kwargs.setdefault('TriggerTypes', [0x82])
     kwargs.setdefault('Gain', 1)
     kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
+    kwargs.setdefault('ignoreDisconnectedChannels', flags.Common.isOnline)
 
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
