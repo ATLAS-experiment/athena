@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -43,7 +43,9 @@ const std::vector<std::vector<double>> TrigBmumuxComboHypo::s_trkMass{
   {PDG::mKaon, PDG::mKaon, PDG::mPion},              // {D_s+.K+, D_s+.K-, D_s+.pi+}
   {PDG::mPion, PDG::mPion, PDG::mKaon},              // {D+.pi+, D+.pi+, D+.K-}
   {PDG::mKaon, PDG::mPion},                          // {D0.K-, D0.pi+}
-  {PDG::mMuon, PDG::mMuon, PDG::mPion}               // {Psi.mu1, Psi.mu2, D*+.pi+}
+  {PDG::mMuon, PDG::mMuon, PDG::mPion},              // {Psi.mu1, Psi.mu2, D*+.pi+}
+  {PDG::mPion, PDG::mPion},                          // {trk1, trk2}
+  {PDG::mMuon, PDG::mMuon, PDG::mPion}               // {mu1, mu2, trk1}
 };
 
 TrigBmumuxComboHypo::TrigBmumuxComboHypo(const std::string& name, ISvcLocator* pSvcLocator)
@@ -314,379 +316,498 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
   auto mon_nBPhysObject = Monitored::Scalar<int>("nBPhysObject", 0);
   auto group = Monitored::Group(m_monTool, mon_nTrk, mon_nSelectedTrk, mon_nBPhysObject);
 
-  const auto& tracks = state.tracks;
-  mon_nTrk = tracks.size();
-  mon_nBPhysObject = state.trigBphysCollection().size();
+  for (size_t dimuonIndex = 0; dimuonIndex < state.dimuons.size(); ++dimuonIndex) {
 
-  for (size_t idx = 0; idx < state.dimuons.size(); ++idx) {
-    const xAOD::Vertex* dimuon = state.dimuons.get(idx);
+    ATH_CHECK( findBmumuxCandidates_selectTracks(state, dimuonIndex) );
+    if (state.selectedTracks.empty()) continue;
+    nSelectedTrk.push_back(state.selectedTracks.size());
 
-    std::vector<const xAOD::Muon*> muons(2, nullptr);
-    const auto& muonIndices = state.trigBphysMuonIndices.at(idx);
-    for (size_t i = 0; i < 2; ++i) {
-      const auto& muon = state.muons.at(muonIndices[i]);
-      muons[i] = *muon.link;
-    }
+    ATH_CHECK( findBmumuxCandidates_fit(state, dimuonIndex, true) );
+    ATH_CHECK( findBmumuxCandidates_fastFit(state, dimuonIndex) );
+    ATH_CHECK( findBmumuxCandidates_fit(state, dimuonIndex) );
+  }
 
-    auto dimuonTriggerObjectEL = ElementLink<xAOD::TrigBphysContainer>(state.trigBphysCollection(), idx);
-    ATH_CHECK( dimuonTriggerObjectEL.isValid() );
+  mon_nTrk = state.tracks.size();
+  mon_nBPhysObject = state.trigBphysCollection().size() - state.dimuons.size();
 
-    // vtx1 = {mu1, mu2, trk1}
-    std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_vtx1(dimuon->trackParticleLinks());
-    trackParticleLinks_vtx1.emplace_back();
+  return StatusCode::SUCCESS;
+}
 
-    // vtx2 = {mu1, mu2, trk1, trk2}
-    std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_vtx2(trackParticleLinks_vtx1);
-    trackParticleLinks_vtx2.emplace_back();
 
-    // vtx3 = {trk1, trk2, trk3}
-    std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_vtx3(3);
+StatusCode TrigBmumuxComboHypo::findBmumuxCandidates_selectTracks(TrigBmumuxState& state, size_t dimuonIndex) const {
 
-    const xAOD::TrackParticle* mu1 = *trackParticleLinks_vtx1[0];
-    const xAOD::TrackParticle* mu2 = *trackParticleLinks_vtx1[1];
-    auto p_dimuon = mu1->genvecP4().SetM(PDG::mMuon) + mu2->genvecP4().SetM(PDG::mMuon);
+  auto& selectedTracks = state.selectedTracks;
+  auto& selectedTrackZ0 = state.selectedTrackZ0;
 
-    // check impact parameter of the track with respect to the fitted dimuon vertex
-    // we can safely omit tracks with large z0
-    std::vector<ElementLink<xAOD::TrackParticleContainer>> selectedTracks;
-    selectedTracks.reserve(tracks.size());
-    std::map<const xAOD::TrackParticle*, double> selectedTrackZ0;
-    for (const auto& trackEL : tracks) {
-      if (state.isCompositeRoI && !isInSameRoI(muons[0], *trackEL) && !isInSameRoI(muons[1], *trackEL)) continue;
-      if (m_trkZ0 > 0.) {
-        std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(state.context(), **trackEL, dimuon->position()));
-        if (perigee && std::abs(perigee->parameters()[Trk::z0]) < m_trkZ0) {
-          selectedTracks.push_back(trackEL);
-          selectedTrackZ0[*trackEL] = perigee->parameters()[Trk::z0];
-        }
-      }
-      else {
+  selectedTracks.clear();
+  selectedTrackZ0.clear();
+
+  const xAOD::Vertex* dimuon = state.dimuons.get(dimuonIndex);
+
+  std::vector<const xAOD::Muon*> muons(2, nullptr);
+  const auto& muonIndices = state.trigBphysMuonIndices.at(dimuonIndex);
+  for (size_t i = 0; i < 2; ++i) {
+    const auto& muon = state.muons.at(muonIndices[i]);
+    muons[i] = *muon.link;
+  }
+
+  const xAOD::TrackParticle* mu1 = dimuon->trackParticle(0);
+  const xAOD::TrackParticle* mu2 = dimuon->trackParticle(1);
+
+  // check impact parameter of the track with respect to the fitted dimuon vertex
+  // we can safely omit tracks with large z0
+  state.selectedTracks.reserve(state.tracks.size());
+  for (const auto& trackEL : state.tracks) {
+    if (state.isCompositeRoI && !isInSameRoI(muons[0], *trackEL) && !isInSameRoI(muons[1], *trackEL)) continue;
+    if (m_trkZ0 > 0.) {
+      std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(state.context(), **trackEL, dimuon->position()));
+      if (perigee && std::abs(perigee->parameters()[Trk::z0]) < m_trkZ0) {
         selectedTracks.push_back(trackEL);
-        selectedTrackZ0[*trackEL] = -1000.;
+        selectedTrackZ0[*trackEL] = perigee->parameters()[Trk::z0];
       }
     }
-    // remove muon duplicates
-    if (selectedTracks.size() < 2) continue;
-    std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu1->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
-    if (isIdenticalTracks(mu1, *selectedTracks.back())) selectedTracks.pop_back();
-    std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu2->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
-    if (isIdenticalTracks(mu2, *selectedTracks.back())) selectedTracks.pop_back();
-    std::sort(selectedTracks.begin(), selectedTracks.end(), [](const auto& lhs, const auto& rhs){ return ((*lhs)->pt() > (*rhs)->pt()); });
+    else {
+      selectedTracks.push_back(trackEL);
+      selectedTrackZ0[*trackEL] = -1000.;
+    }
+  }
 
-    ATH_MSG_DEBUG( "Found " << selectedTracks.size() << " tracks consistent with dimuon vertex " << idx );
-    nSelectedTrk.push_back(selectedTracks.size());
+  // remove muon duplicates
+  if (selectedTracks.size() < 2) {
+    ATH_MSG_DEBUG( "Found no tracks consistent with dimuon vertex " << dimuonIndex );
+    selectedTracks.clear();
+    selectedTrackZ0.clear();
+    return StatusCode::SUCCESS;
+  }
+  std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu1->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
+  if (isIdenticalTracks(mu1, *selectedTracks.back())) selectedTracks.pop_back();
+  std::sort(selectedTracks.begin(), selectedTracks.end(), [p_mu=mu2->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
+  if (isIdenticalTracks(mu2, *selectedTracks.back())) selectedTracks.pop_back();
+  std::sort(selectedTracks.begin(), selectedTracks.end(), [](const auto& lhs, const auto& rhs){ return ((*lhs)->pt() > (*rhs)->pt()); });
 
-    size_t iterations = 0;
-    bool isOverWarningThreshold = false;
-    // dimuon + 1 track
-    for (size_t itrk1 = 0; itrk1 < selectedTracks.size(); ++itrk1) {
-      const xAOD::TrackParticle* trk1 = *selectedTracks[itrk1];
+  ATH_MSG_DEBUG( "Found " << selectedTracks.size() << " tracks consistent with dimuon vertex " << dimuonIndex );
 
-      trackParticleLinks_vtx1[2] = selectedTracks[itrk1];
-      auto p_trk1 = trk1->genvecP4();
-      auto charge1 = trk1->charge();
+  return StatusCode::SUCCESS;
+}
 
-      std::unique_ptr<xAOD::Vertex> vtx1;
-      bool makeFit_vtx1 = true;
 
-      // B+ -> mu+ mu- K+
-      if (m_BplusToMuMuKaon &&
-          p_trk1.Pt() > m_BplusToMuMuKaon_minKaonPt &&
-          isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon)).M(), m_BplusToMuMuKaon_massRange)) {
+StatusCode TrigBmumuxComboHypo::findBmumuxCandidates_fit(TrigBmumuxState& state, size_t dimuonIndex, bool makeCombinations) const {
+
+  const auto& selectedTracks = state.selectedTracks;
+  if (makeCombinations) state.trackCombinations.clear();
+
+  const xAOD::Vertex* dimuon = state.dimuons.get(dimuonIndex);
+  auto dimuonTriggerObjectEL = ElementLink<xAOD::TrigBphysContainer>(state.trigBphysCollection(), dimuonIndex);
+  ATH_CHECK( dimuonTriggerObjectEL.isValid() );
+
+  // vtx1 = {mu1, mu2, trk1}
+  std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_vtx1(dimuon->trackParticleLinks());
+  trackParticleLinks_vtx1.emplace_back();
+
+  // vtx2 = {mu1, mu2, trk1, trk2}
+  std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_vtx2(trackParticleLinks_vtx1);
+  trackParticleLinks_vtx2.emplace_back();
+
+  // vtx3 = {trk1, trk2, trk3}
+  std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_vtx3(3);
+
+  const xAOD::TrackParticle* mu1 = *trackParticleLinks_vtx1[0];
+  const xAOD::TrackParticle* mu2 = *trackParticleLinks_vtx1[1];
+  auto p_dimuon = mu1->genvecP4().SetM(PDG::mMuon) + mu2->genvecP4().SetM(PDG::mMuon);
+
+  size_t iterations = 0;
+  size_t nTrigBphysObjects = state.trigBphysCollection().size();
+  bool isOverWarningThreshold = false;
+  // dimuon + 1 track
+  for (size_t itrk1 = 0; itrk1 < selectedTracks.size(); ++itrk1) {
+    const xAOD::TrackParticle* trk1 = *selectedTracks[itrk1];
+
+    trackParticleLinks_vtx1[2] = selectedTracks[itrk1];
+    auto p_trk1 = trk1->genvecP4();
+    auto charge1 = trk1->charge();
+
+    std::unique_ptr<xAOD::Vertex> vtx1;
+    bool makeFit_vtx1 = !makeCombinations;
+    bool passFastFit_vtx1 = (!makeCombinations && !state.isBadCombination(itrk1));
+
+    // B+ -> mu+ mu- K+
+    if (m_BplusToMuMuKaon &&
+        p_trk1.Pt() > m_BplusToMuMuKaon_minKaonPt &&
+        isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon)).M(), m_BplusToMuMuKaon_massRange)) {
+
+      if (makeCombinations && m_BplusToMuMuKaon_useFastFit) state.addTrackCombination(itrk1);
+      if (!vtx1 && makeFit_vtx1 && (passFastFit_vtx1 || !m_BplusToMuMuKaon_useFastFit)) {
         vtx1 = fit(state.context(), trackParticleLinks_vtx1, kB_2mu1trk, dimuon);
         makeFit_vtx1 = false;
         ++iterations;
-        if (vtx1 && vtx1->chiSquared() < m_BplusToMuMuKaon_chi2) {
-          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx1, xAOD::TrigBphys::BKMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon}, dimuonTriggerObjectEL);
-          ATH_CHECK( state.addTriggerObject(trigBphys) );
-        }
       }
-
-      // B_c+ -> J/psi(-> mu+ mu-) pi+
-      if (m_BcToMuMuPion &&
-          p_trk1.Pt() > m_BcToMuMuPion_minPionPt &&
-          isInMassRange(p_dimuon.M(), m_BcToMuMuPion_dimuonMassRange) &&
-          isInMassRange((p_dimuon + p_trk1.SetM(PDG::mPion)).M() - p_dimuon.M() + PDG::mJpsi, m_BcToMuMuPion_massRange)) {
-        if (!vtx1 && makeFit_vtx1) {
-          vtx1 = fit(state.context(), trackParticleLinks_vtx1, kB_2mu1trk, dimuon);
-          makeFit_vtx1 = false;
-          ++iterations;
-        }
-        if (vtx1 && vtx1->chiSquared() < m_BcToMuMuPion_chi2) {
-          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx1, xAOD::TrigBphys::BCPIMUMU, {PDG::mMuon, PDG::mMuon, PDG::mPion}, dimuonTriggerObjectEL);
-          ATH_CHECK( state.addTriggerObject(trigBphys) );
-        }
-      }
-      vtx1.reset();
-
-      // dimuon + 2 tracks
-      for (size_t itrk2 = itrk1 + 1; itrk2 < selectedTracks.size(); ++itrk2) {
-        const xAOD::TrackParticle* trk2 = *selectedTracks[itrk2];
-
-        trackParticleLinks_vtx2[2] = selectedTracks[itrk1];
-        trackParticleLinks_vtx2[3] = selectedTracks[itrk2];
-        auto p_trk2 = trk2->genvecP4();
-        auto charge2 = trk2->charge();
-
-        std::unique_ptr<xAOD::Vertex> vtx2;
-        bool makeFit_vtx2 = true;
-
-        // B_s0 -> mu+ mu- phi(-> K+ K-)
-        if (m_BsToMuMuPhi1020 &&
-            (!m_BsToMuMuPhi1020_rejectSameChargeTracks || charge1 * charge2 < 0.) &&
-            p_trk1.Pt() > m_BsToMuMuPhi1020_minKaonPt &&
-            p_trk2.Pt() > m_BsToMuMuPhi1020_minKaonPt &&
-            isInMassRange((p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mKaon)).M(), m_BsToMuMuPhi1020_phiMassRange) &&
-            isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mKaon)).M(), m_BsToMuMuPhi1020_massRange)) {
-          vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
-          makeFit_vtx2 = false;
-          ++iterations;
-          if (vtx2 && vtx2->chiSquared() < m_BsToMuMuPhi1020_chi2) {
-            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::BSPHIMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon, PDG::mKaon}, dimuonTriggerObjectEL);
-            ATH_CHECK( state.addTriggerObject(trigBphys) );
-          }
-        }
-
-        // B0 -> mu+ mu- K*0(-> K+ pi-)
-        if (m_BdToMuMuKstar0 &&
-            (!m_BdToMuMuKstar0_rejectSameChargeTracks || charge1 * charge2 < 0.) &&
-            p_trk1.Pt() > m_BdToMuMuKstar0_minKaonPt &&
-            p_trk2.Pt() > m_BdToMuMuKstar0_minPionPt &&
-            isInMassRange((p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M(), m_BdToMuMuKstar0_KstarMassRange) &&
-            isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M(), m_BdToMuMuKstar0_massRange)) {
-          if (!vtx2 && makeFit_vtx2) {
-            vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
-            makeFit_vtx2 = false;
-            ++iterations;
-          }
-          if (vtx2 && vtx2->chiSquared() < m_BdToMuMuKstar0_chi2) {
-            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::BDKSTMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon, PDG::mPion}, dimuonTriggerObjectEL);
-            ATH_CHECK( state.addTriggerObject(trigBphys) );
-          }
-        }
-        // anti-B0 -> mu+ mu- anti-K*0(-> K- pi+)
-        if (m_BdToMuMuKstar0 &&
-            (!m_BdToMuMuKstar0_rejectSameChargeTracks || charge1 * charge2 < 0.) &&
-            p_trk1.Pt() > m_BdToMuMuKstar0_minPionPt &&
-            p_trk2.Pt() > m_BdToMuMuKstar0_minKaonPt &&
-            isInMassRange((p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M(), m_BdToMuMuKstar0_KstarMassRange) &&
-            isInMassRange((p_dimuon + p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M(), m_BdToMuMuKstar0_massRange)) {
-          if (!vtx2 && makeFit_vtx2) {
-            vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
-            makeFit_vtx2 = false;
-            ++iterations;
-          }
-          if (vtx2 && vtx2->chiSquared() < m_BdToMuMuKstar0_chi2) {
-            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::BDKSTMUMU, {PDG::mMuon, PDG::mMuon, PDG::mPion, PDG::mKaon}, dimuonTriggerObjectEL);
-            ATH_CHECK( state.addTriggerObject(trigBphys) );
-          }
-        }
-
-        // Lambda_b0 -> J/psi(-> mu+ mu-) p K-
-        if (m_LambdaBToMuMuProtonKaon &&
-            p_trk1.Pt() > m_LambdaBToMuMuProtonKaon_minProtonPt &&
-            p_trk2.Pt() > m_LambdaBToMuMuProtonKaon_minKaonPt &&
-            (p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
-            (p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
-            isInMassRange(p_dimuon.M(), m_LambdaBToMuMuProtonKaon_dimuonMassRange) &&
-            isInMassRange((p_dimuon + p_trk1.SetM(PDG::mProton) + p_trk2.SetM(PDG::mKaon)).M() - p_dimuon.M() + PDG::mJpsi, m_LambdaBToMuMuProtonKaon_massRange)) {
-          if (!vtx2 && makeFit_vtx2) {
-            vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
-            makeFit_vtx2 = false;
-            ++iterations;
-          }
-          if (vtx2 && vtx2->chiSquared() < m_LambdaBToMuMuProtonKaon_chi2 && Lxy(state.beamSpotPosition(), *vtx2) > 0.) {
-            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::LBPQMUMU, {PDG::mMuon, PDG::mMuon, PDG::mProton, PDG::mKaon}, dimuonTriggerObjectEL);
-            ATH_CHECK( state.addTriggerObject(trigBphys) );
-          }
-        }
-        // anti-Lambda_b0 -> J/psi(-> mu+ mu-) anti-p K+
-        if (m_LambdaBToMuMuProtonKaon &&
-            p_trk1.Pt() > m_LambdaBToMuMuProtonKaon_minKaonPt &&
-            p_trk2.Pt() > m_LambdaBToMuMuProtonKaon_minProtonPt &&
-            (p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
-            (p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
-            isInMassRange(p_dimuon.M(), m_LambdaBToMuMuProtonKaon_dimuonMassRange) &&
-            isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mProton)).M() - p_dimuon.M() + PDG::mJpsi, m_LambdaBToMuMuProtonKaon_massRange)) {
-          if (!vtx2 && makeFit_vtx2) {
-            vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
-            makeFit_vtx2 = false;
-            ++iterations;
-          }
-          if (vtx2 && vtx2->chiSquared() < m_LambdaBToMuMuProtonKaon_chi2 && Lxy(state.beamSpotPosition(), *vtx2) > 0.) {
-            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::LBPQMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon, PDG::mProton}, dimuonTriggerObjectEL);
-            ATH_CHECK( state.addTriggerObject(trigBphys) );
-          }
-        }
-        vtx2.reset();
-
-        for (size_t itrk3 = 0; itrk3 < selectedTracks.size(); ++itrk3) {
-          const xAOD::TrackParticle* trk3 = *selectedTracks[itrk3];
-          if (itrk3 == itrk1 || itrk3 == itrk2) continue;
-
-          trackParticleLinks_vtx3[0] = selectedTracks[itrk1];
-          trackParticleLinks_vtx3[1] = selectedTracks[itrk2];
-          trackParticleLinks_vtx3[2] = selectedTracks[itrk3];
-          auto p_trk3 = trk3->genvecP4();
-          auto charge3 = trk3->charge();
-
-          std::unique_ptr<xAOD::Vertex> vtx3;
-          bool makeFit_vtx3 = true;
-
-          // B_c+ -> J/psi(-> mu+ mu-) D_s+(->phi(-> K+ K-) pi+)
-          p_trk1.SetM(PDG::mKaon);  // D_s+.phi.K+
-          p_trk2.SetM(PDG::mKaon);  // D_s+.phi.K-
-          p_trk3.SetM(PDG::mPion);  // D_s+.pi+
-          if (m_BcToDsMuMu &&
-              charge1 * charge2 < 0. &&
-              p_trk1.Pt() > m_BcToDsMuMu_minKaonPt &&
-              p_trk2.Pt() > m_BcToDsMuMu_minKaonPt &&
-              p_trk3.Pt() > m_BcToDsMuMu_minPionPt &&
-              isInMassRange(p_dimuon.M(), m_BcToDsMuMu_dimuonMassRange) &&
-              isInMassRange((p_trk1 + p_trk2).M(), m_BcToDsMuMu_phiMassRange) &&
-              isInMassRange((p_trk1 + p_trk2 + p_trk3).M(), m_BcToDsMuMu_DsMassRange) &&
-              isInMassRange((p_dimuon + p_trk1 + p_trk2 + p_trk3).M() - p_dimuon.M() + PDG::mJpsi, m_BcToDsMuMu_massRange)) {
-            if (!vtx3 && makeFit_vtx3) {
-              vtx3 = fit(state.context(), trackParticleLinks_vtx3, kDs, dimuon);
-              makeFit_vtx3 = false;
-              ++iterations;
-            }
-            if (vtx3 && vtx3->chiSquared() < m_BcToDsMuMu_chi2) {
-              xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx3, xAOD::TrigBphys::BCDSMUMU, {PDG::mKaon, PDG::mKaon, PDG::mPion}, dimuonTriggerObjectEL);
-              ATH_CHECK( state.addTriggerObject(trigBphys) );
-            }
-          }
-
-          // B_c+ -> J/psi(-> mu+ mu-) D+(-> K- pi+ pi+)
-          p_trk1.SetM(PDG::mPion);  // D+.pi+
-          p_trk2.SetM(PDG::mPion);  // D+.pi+
-          p_trk3.SetM(PDG::mKaon);  // D+.K-
-          if (m_BcToDplusMuMu &&
-              charge1 * charge2 > 0. && charge1 * charge3 < 0. &&
-              p_trk1.Pt() > m_BcToDplusMuMu_minPionPt &&
-              p_trk2.Pt() > m_BcToDplusMuMu_minPionPt &&
-              p_trk3.Pt() > m_BcToDplusMuMu_minKaonPt &&
-              isInMassRange(p_dimuon.M(), m_BcToDplusMuMu_dimuonMassRange) &&
-              isInMassRange((p_trk1 + p_trk2 + p_trk3).M(), m_BcToDplusMuMu_DplusMassRange) &&
-              isInMassRange((p_dimuon + p_trk1 + p_trk2 + p_trk3).M() - p_dimuon.M() + PDG::mJpsi, m_BcToDplusMuMu_massRange)) {
-            if (!vtx3 && makeFit_vtx3) {
-              vtx3 = fit(state.context(), trackParticleLinks_vtx3, kDplus, dimuon);
-              makeFit_vtx3 = false;
-              ++iterations;
-            }
-            if (vtx3 && vtx3->chiSquared() < m_BcToDplusMuMu_chi2 && Lxy(dimuon->position(), *vtx3) > 0.) {
-              xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx3, xAOD::TrigBphys::BCDPMUMU, {PDG::mPion, PDG::mPion, PDG::mKaon}, dimuonTriggerObjectEL);
-              ATH_CHECK( state.addTriggerObject(trigBphys) );
-            }
-          }
-          vtx3.reset();
-
-        }
-      }
-
-      if (iterations > m_fitAttemptsWarningThreshold && !isOverWarningThreshold) {
-        ATH_MSG_WARNING( iterations << " combinations for vertex fitter have been processed; " << mon_nBPhysObject << " vertices have been created" );
-        isOverWarningThreshold = true;
-      }
-      if (iterations > m_fitAttemptsBreakThreshold) {
-        ATH_MSG_WARNING( "the number of fit attempts has exceeded the limit; breaking the loop at this point" );
-        break;
+      if (vtx1 && vtx1->chiSquared() < m_BplusToMuMuKaon_chi2) {
+        xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx1, xAOD::TrigBphys::BKMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon}, dimuonTriggerObjectEL);
+        ATH_CHECK( state.addTriggerObject(trigBphys) );
       }
     }
 
-    iterations = 0;
-    isOverWarningThreshold = false;
-    // B_c+ -> J/psi(-> mu+ mu-) D*+(-> D0(-> K- pi+) pi+)
-    if (m_BcToDstarMuMu && isInMassRange(p_dimuon.M(), m_BcToDstarMuMu_dimuonMassRange)) {
-      std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_D0(2);  // {K-, pi+}
+    // B_c+ -> J/psi(-> mu+ mu-) pi+
+    if (m_BcToMuMuPion &&
+        p_trk1.Pt() > m_BcToMuMuPion_minPionPt &&
+        isInMassRange(p_dimuon.M(), m_BcToMuMuPion_dimuonMassRange) &&
+        isInMassRange((p_dimuon + p_trk1.SetM(PDG::mPion)).M() - p_dimuon.M() + PDG::mJpsi, m_BcToMuMuPion_massRange)) {
 
-      for (size_t itrk1 = 0; itrk1 < selectedTracks.size(); ++itrk1) {
-        const xAOD::TrackParticle* trk1 = *selectedTracks[itrk1];
+      if (makeCombinations && m_BcToMuMuPion_useFastFit) state.addTrackCombination(itrk1);
+      if (!vtx1 && makeFit_vtx1 && (passFastFit_vtx1 || !m_BcToMuMuPion_useFastFit)) {
+        vtx1 = fit(state.context(), trackParticleLinks_vtx1, kB_2mu1trk, dimuon);
+        makeFit_vtx1 = false;
+        ++iterations;
+      }
+      if (vtx1 && vtx1->chiSquared() < m_BcToMuMuPion_chi2) {
+        xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx1, xAOD::TrigBphys::BCPIMUMU, {PDG::mMuon, PDG::mMuon, PDG::mPion}, dimuonTriggerObjectEL);
+        ATH_CHECK( state.addTriggerObject(trigBphys) );
+      }
+    }
+    vtx1.reset();
 
-        trackParticleLinks_D0[0] = selectedTracks[itrk1];
-        auto p_trk1 = trk1->genvecP4();
-        p_trk1.SetM(PDG::mKaon);
-        auto charge1 = trk1->charge();
+    // dimuon + 2 tracks
+    for (size_t itrk2 = itrk1 + 1; itrk2 < selectedTracks.size(); ++itrk2) {
+      const xAOD::TrackParticle* trk2 = *selectedTracks[itrk2];
 
-        for (size_t itrk2 = 0; itrk2 < selectedTracks.size(); ++itrk2) {
-          if (itrk2 == itrk1) continue;
-          const xAOD::TrackParticle* trk2 = *selectedTracks[itrk2];
+      trackParticleLinks_vtx2[2] = selectedTracks[itrk1];
+      trackParticleLinks_vtx2[3] = selectedTracks[itrk2];
+      auto p_trk2 = trk2->genvecP4();
+      auto charge2 = trk2->charge();
 
-          trackParticleLinks_D0[1] = selectedTracks[itrk2];
-          auto p_trk2 = trk2->genvecP4();
-          p_trk2.SetM(PDG::mPion);
-          auto charge2 = trk2->charge();
+      std::unique_ptr<xAOD::Vertex> vtx2;
+      bool makeFit_vtx2 = !makeCombinations;
+      bool passFastFit_vtx2 = (!makeCombinations && !state.isBadCombination(itrk1) && !state.isBadCombination(itrk2));
 
-          std::unique_ptr<xAOD::Vertex> D0;
-          if (charge1 * charge2 < 0. &&
-              p_trk1.Pt() > m_BcToDstarMuMu_minD0KaonPt &&
-              p_trk2.Pt() > m_BcToDstarMuMu_minD0PionPt &&
-              isInMassRange((p_trk1 + p_trk2).M(), m_BcToDstarMuMu_D0MassRange) &&
-              isInMassRange((p_dimuon + p_trk1 + p_trk2).M() - p_dimuon.M() + PDG::mJpsi, m_BcToDstarMuMu_massRange)) {
-            D0 = fit(state.context(), trackParticleLinks_D0, kD0, dimuon);
-            ++iterations;
-          }
-          bool isValidD0 = false;
-          if (D0 && D0->chiSquared() < m_BcToDstarMuMu_chi2 && Lxy(dimuon->position(), *D0) > 0.) {
-            isValidD0 = true;
-            ATH_MSG_DEBUG( "Partially reconstructed B_c+(-> mu+ mu- D0 X) candidate has been created" );
-            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *D0, xAOD::TrigBphys::DZKPI, s_trkMass[kD0], dimuonTriggerObjectEL);
-            ATH_CHECK( state.addTriggerObject(trigBphys) );
-          }
+      // B_s0 -> mu+ mu- phi(-> K+ K-)
+      if (m_BsToMuMuPhi1020 &&
+          (!m_BsToMuMuPhi1020_rejectSameChargeTracks || charge1 * charge2 < 0.) &&
+          p_trk1.Pt() > m_BsToMuMuPhi1020_minKaonPt &&
+          p_trk2.Pt() > m_BsToMuMuPhi1020_minKaonPt &&
+          isInMassRange((p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mKaon)).M(), m_BsToMuMuPhi1020_phiMassRange) &&
+          isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mKaon)).M(), m_BsToMuMuPhi1020_massRange)) {
 
-          if (m_BcToDstarMuMu_makeDstar && isValidD0) {  // full B_c+ reconstruction
-            xAOD::TrackParticle::GenVecFourMom_t p_D0 = momentum(*D0, s_trkMass[kD0]);
-
-            for (size_t itrk3 = 0; itrk3 < selectedTracks.size(); ++itrk3) {
-              const xAOD::TrackParticle* trk3 = *selectedTracks[itrk3];
-              if (itrk3 == itrk1 || itrk3 == itrk2) continue;
-
-              // J/psi + pion from D*+
-              trackParticleLinks_vtx1[2] = selectedTracks[itrk3];
-              auto p_trk3 = trk3->genvecP4();
-              p_trk3.SetM(PDG::mPion);
-
-              if (p_trk3.Pt() > m_BcToDstarMuMu_minDstarPionPt &&
-                  (m_BcToDstarMuMu_maxDstarPionZ0 < 0. || std::abs(selectedTrackZ0[trk3]) < m_BcToDstarMuMu_maxDstarPionZ0) &&
-                  isInMassRange((p_D0 + p_trk3).M() - p_D0.M() + PDG::mD0, m_BcToDstarMuMu_DstarMassRange)) {
-                auto Bc_vtx1 = fit(state.context(), trackParticleLinks_vtx1, kB_PsiPi);
-                ++iterations;
-
-                if (Bc_vtx1 && Bc_vtx1->chiSquared() < m_BcToDstarMuMu_chi2) {
-                  ATH_MSG_DEBUG( "Decay vertex(mu+ mu- D*+.pi+) for B_c+ candidate has been created" );
-                  xAOD::TrigBphys* triggerObject_vtx1 = makeTriggerObject(state, *Bc_vtx1, xAOD::TrigBphys::DSTDZPI, s_trkMass[kB_PsiPi], dimuonTriggerObjectEL);
-                  auto triggerObjectEL_vtx1 = ElementLink<xAOD::TrigBphysContainer>(state.trigBphysCollection(), state.trigBphysCollection().size());
-                  ATH_CHECK( state.addTriggerObject(triggerObject_vtx1) );
-                  ATH_CHECK( triggerObjectEL_vtx1.isValid() );
-
-                  // refit D0 vertex
-                  auto Bc_vtx2 = fit(state.context(), trackParticleLinks_D0, kD0, Bc_vtx1.get());
-                  ++iterations;
-                  if (Bc_vtx2 && Bc_vtx2->chiSquared() < m_BcToDstarMuMu_chi2) {
-                    ATH_MSG_DEBUG( "Fully reconstructed B_c+(-> mu+ mu- D*+) candidate has been created" );
-                    xAOD::TrigBphys* triggerObject_vtx2 = makeTriggerObject(state, *Bc_vtx2, xAOD::TrigBphys::BCDSTMUMU, s_trkMass[kD0], triggerObjectEL_vtx1);
-                    ATH_CHECK( state.addTriggerObject(triggerObject_vtx2) );
-                  }
-                }
-              }
-            }
-          }  // end of full B_c+ reconstruction
-
+        if (makeCombinations && m_BsToMuMuPhi1020_useFastFit) {
+          state.addTrackCombination(itrk1);
+          state.addTrackCombination(itrk2);
+        }
+        if (!vtx2 && makeFit_vtx2 && (passFastFit_vtx2 || !m_BsToMuMuPhi1020_useFastFit)) {
+          vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
+          makeFit_vtx2 = false;
+          ++iterations;
+        }
+        if (vtx2 && vtx2->chiSquared() < m_BsToMuMuPhi1020_chi2) {
+          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::BSPHIMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon, PDG::mKaon}, dimuonTriggerObjectEL);
+          ATH_CHECK( state.addTriggerObject(trigBphys) );
         }
       }
 
+      // B0 -> mu+ mu- K*0(-> K+ pi-)
+      if (m_BdToMuMuKstar0 &&
+          (!m_BdToMuMuKstar0_rejectSameChargeTracks || charge1 * charge2 < 0.) &&
+          p_trk1.Pt() > m_BdToMuMuKstar0_minKaonPt &&
+          p_trk2.Pt() > m_BdToMuMuKstar0_minPionPt &&
+          isInMassRange((p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M(), m_BdToMuMuKstar0_KstarMassRange) &&
+          isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M(), m_BdToMuMuKstar0_massRange)) {
+
+        if (makeCombinations && m_BdToMuMuKstar0_useFastFit) {
+          state.addTrackCombination(itrk1);
+          state.addTrackCombination(itrk2);
+        }
+        if (!vtx2 && makeFit_vtx2 && (passFastFit_vtx2 || !m_BdToMuMuKstar0_useFastFit)) {
+          vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
+          makeFit_vtx2 = false;
+          ++iterations;
+        }
+        if (vtx2 && vtx2->chiSquared() < m_BdToMuMuKstar0_chi2) {
+          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::BDKSTMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon, PDG::mPion}, dimuonTriggerObjectEL);
+          ATH_CHECK( state.addTriggerObject(trigBphys) );
+        }
+      }
+      // anti-B0 -> mu+ mu- anti-K*0(-> K- pi+)
+      if (m_BdToMuMuKstar0 &&
+          (!m_BdToMuMuKstar0_rejectSameChargeTracks || charge1 * charge2 < 0.) &&
+          p_trk1.Pt() > m_BdToMuMuKstar0_minPionPt &&
+          p_trk2.Pt() > m_BdToMuMuKstar0_minKaonPt &&
+          isInMassRange((p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M(), m_BdToMuMuKstar0_KstarMassRange) &&
+          isInMassRange((p_dimuon + p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M(), m_BdToMuMuKstar0_massRange)) {
+
+        if (makeCombinations && m_BdToMuMuKstar0_useFastFit) {
+          state.addTrackCombination(itrk1);
+          state.addTrackCombination(itrk2);
+        }
+        if (!vtx2 && makeFit_vtx2 && (passFastFit_vtx2 || !m_BdToMuMuKstar0_useFastFit)) {
+          vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
+          makeFit_vtx2 = false;
+          ++iterations;
+        }
+        if (vtx2 && vtx2->chiSquared() < m_BdToMuMuKstar0_chi2) {
+          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::BDKSTMUMU, {PDG::mMuon, PDG::mMuon, PDG::mPion, PDG::mKaon}, dimuonTriggerObjectEL);
+          ATH_CHECK( state.addTriggerObject(trigBphys) );
+        }
+      }
+
+      // Lambda_b0 -> J/psi(-> mu+ mu-) p K-
+      if (m_LambdaBToMuMuProtonKaon &&
+          p_trk1.Pt() > m_LambdaBToMuMuProtonKaon_minProtonPt &&
+          p_trk2.Pt() > m_LambdaBToMuMuProtonKaon_minKaonPt &&
+          (p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
+          (p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
+          isInMassRange(p_dimuon.M(), m_LambdaBToMuMuProtonKaon_dimuonMassRange) &&
+          isInMassRange((p_dimuon + p_trk1.SetM(PDG::mProton) + p_trk2.SetM(PDG::mKaon)).M() - p_dimuon.M() + PDG::mJpsi, m_LambdaBToMuMuProtonKaon_massRange)) {
+
+        if (makeCombinations && m_LambdaBToMuMuProtonKaon_useFastFit) {
+          state.addTrackCombination(itrk1);
+          state.addTrackCombination(itrk2);
+        }
+        if (!vtx2 && makeFit_vtx2 && (passFastFit_vtx2 || !m_LambdaBToMuMuProtonKaon_useFastFit)) {
+          vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
+          makeFit_vtx2 = false;
+          ++iterations;
+        }
+        if (vtx2 && vtx2->chiSquared() < m_LambdaBToMuMuProtonKaon_chi2 && Lxy(state.beamSpotPosition(), *vtx2) > 0.) {
+          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::LBPQMUMU, {PDG::mMuon, PDG::mMuon, PDG::mProton, PDG::mKaon}, dimuonTriggerObjectEL);
+          ATH_CHECK( state.addTriggerObject(trigBphys) );
+        }
+      }
+      // anti-Lambda_b0 -> J/psi(-> mu+ mu-) anti-p K+
+      if (m_LambdaBToMuMuProtonKaon &&
+          p_trk1.Pt() > m_LambdaBToMuMuProtonKaon_minKaonPt &&
+          p_trk2.Pt() > m_LambdaBToMuMuProtonKaon_minProtonPt &&
+          (p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mPion)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
+          (p_trk1.SetM(PDG::mPion) + p_trk2.SetM(PDG::mKaon)).M() > m_LambdaBToMuMuProtonKaon_minKstarMass &&
+          isInMassRange(p_dimuon.M(), m_LambdaBToMuMuProtonKaon_dimuonMassRange) &&
+          isInMassRange((p_dimuon + p_trk1.SetM(PDG::mKaon) + p_trk2.SetM(PDG::mProton)).M() - p_dimuon.M() + PDG::mJpsi, m_LambdaBToMuMuProtonKaon_massRange)) {
+
+        if (makeCombinations && m_LambdaBToMuMuProtonKaon_useFastFit) {
+          state.addTrackCombination(itrk1);
+          state.addTrackCombination(itrk2);
+        }
+        if (!vtx2 && makeFit_vtx2 && (passFastFit_vtx2 || !m_LambdaBToMuMuProtonKaon_useFastFit)) {
+          vtx2 = fit(state.context(), trackParticleLinks_vtx2, kB_2mu2trk, dimuon);
+          makeFit_vtx2 = false;
+          ++iterations;
+        }
+        if (vtx2 && vtx2->chiSquared() < m_LambdaBToMuMuProtonKaon_chi2 && Lxy(state.beamSpotPosition(), *vtx2) > 0.) {
+          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx2, xAOD::TrigBphys::LBPQMUMU, {PDG::mMuon, PDG::mMuon, PDG::mKaon, PDG::mProton}, dimuonTriggerObjectEL);
+          ATH_CHECK( state.addTriggerObject(trigBphys) );
+        }
+      }
+      vtx2.reset();
+
+      for (size_t itrk3 = 0; itrk3 < selectedTracks.size(); ++itrk3) {
+        const xAOD::TrackParticle* trk3 = *selectedTracks[itrk3];
+        if (itrk3 == itrk1 || itrk3 == itrk2) continue;
+
+        trackParticleLinks_vtx3[0] = selectedTracks[itrk1];
+        trackParticleLinks_vtx3[1] = selectedTracks[itrk2];
+        trackParticleLinks_vtx3[2] = selectedTracks[itrk3];
+        auto p_trk3 = trk3->genvecP4();
+        auto charge3 = trk3->charge();
+
+        std::unique_ptr<xAOD::Vertex> vtx3;
+        bool makeFit_vtx3 = !makeCombinations;
+        bool passFastFit_vtx3 = (!makeCombinations && !state.isBadCombination(itrk1, itrk2, itrk3));
+
+        // B_c+ -> J/psi(-> mu+ mu-) D_s+(->phi(-> K+ K-) pi+)
+        p_trk1.SetM(PDG::mKaon);  // D_s+.phi.K+
+        p_trk2.SetM(PDG::mKaon);  // D_s+.phi.K-
+        p_trk3.SetM(PDG::mPion);  // D_s+.pi+
+        if (m_BcToDsMuMu &&
+            charge1 * charge2 < 0. &&
+            p_trk1.Pt() > m_BcToDsMuMu_minKaonPt &&
+            p_trk2.Pt() > m_BcToDsMuMu_minKaonPt &&
+            p_trk3.Pt() > m_BcToDsMuMu_minPionPt &&
+            isInMassRange(p_dimuon.M(), m_BcToDsMuMu_dimuonMassRange) &&
+            isInMassRange((p_trk1 + p_trk2).M(), m_BcToDsMuMu_phiMassRange) &&
+            isInMassRange((p_trk1 + p_trk2 + p_trk3).M(), m_BcToDsMuMu_DsMassRange) &&
+            isInMassRange((p_dimuon + p_trk1 + p_trk2 + p_trk3).M() - p_dimuon.M() + PDG::mJpsi, m_BcToDsMuMu_massRange)) {
+
+          if (makeCombinations && m_BcToDsMuMu_useFastFit) state.addTrackCombination(itrk1, itrk2, itrk3);
+          if (!vtx3 && makeFit_vtx3 && (passFastFit_vtx3 || !m_BcToDsMuMu_useFastFit)) {
+            vtx3 = fit(state.context(), trackParticleLinks_vtx3, kDs, dimuon);
+            makeFit_vtx3 = false;
+            ++iterations;
+          }
+          if (vtx3 && vtx3->chiSquared() < m_BcToDsMuMu_chi2) {
+            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx3, xAOD::TrigBphys::BCDSMUMU, {PDG::mKaon, PDG::mKaon, PDG::mPion}, dimuonTriggerObjectEL);
+            ATH_CHECK( state.addTriggerObject(trigBphys) );
+          }
+        }
+
+        // B_c+ -> J/psi(-> mu+ mu-) D+(-> K- pi+ pi+)
+        p_trk1.SetM(PDG::mPion);  // D+.pi+
+        p_trk2.SetM(PDG::mPion);  // D+.pi+
+        p_trk3.SetM(PDG::mKaon);  // D+.K-
+        if (m_BcToDplusMuMu &&
+            charge1 * charge2 > 0. && charge1 * charge3 < 0. &&
+            p_trk1.Pt() > m_BcToDplusMuMu_minPionPt &&
+            p_trk2.Pt() > m_BcToDplusMuMu_minPionPt &&
+            p_trk3.Pt() > m_BcToDplusMuMu_minKaonPt &&
+            isInMassRange(p_dimuon.M(), m_BcToDplusMuMu_dimuonMassRange) &&
+            isInMassRange((p_trk1 + p_trk2 + p_trk3).M(), m_BcToDplusMuMu_DplusMassRange) &&
+            isInMassRange((p_dimuon + p_trk1 + p_trk2 + p_trk3).M() - p_dimuon.M() + PDG::mJpsi, m_BcToDplusMuMu_massRange)) {
+
+          if (makeCombinations && m_BcToDplusMuMu_useFastFit) state.addTrackCombination(itrk1, itrk2, itrk3);
+          if (!vtx3 && makeFit_vtx3 && (passFastFit_vtx3 || !m_BcToDplusMuMu_useFastFit)) {
+            vtx3 = fit(state.context(), trackParticleLinks_vtx3, kDplus, dimuon);
+            makeFit_vtx3 = false;
+            ++iterations;
+          }
+          if (vtx3 && vtx3->chiSquared() < m_BcToDplusMuMu_chi2 && Lxy(dimuon->position(), *vtx3) > 0.) {
+            xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *vtx3, xAOD::TrigBphys::BCDPMUMU, {PDG::mPion, PDG::mPion, PDG::mKaon}, dimuonTriggerObjectEL);
+            ATH_CHECK( state.addTriggerObject(trigBphys) );
+          }
+        }
+        vtx3.reset();
+
+      }
+    }
+
+    if (iterations > m_fitAttemptsWarningThreshold && !isOverWarningThreshold) {
+      ATH_MSG_WARNING( "Dimuon + tracks: " << state.trigBphysCollection().size() - nTrigBphysObjects << " vertices created after " << iterations << " vertex fitter calls" );
+      isOverWarningThreshold = true;
+    }
+    if (iterations > m_fitAttemptsBreakThreshold) {
+      ATH_MSG_WARNING( "Dimuon + tracks: the number of fit attempts has exceeded the limit; breaking the loop at this point" );
+      break;
+    }
+  }
+  ATH_MSG_DEBUG( "Dimuon + tracks: " << state.trigBphysCollection().size() - nTrigBphysObjects << " vertices created after " << iterations << " vertex fitter calls" );
+
+  iterations = 0;
+  nTrigBphysObjects = state.trigBphysCollection().size();
+  isOverWarningThreshold = false;
+  // B_c+ -> J/psi(-> mu+ mu-) D*+(-> D0(-> K- pi+) pi+)
+  if (!makeCombinations && m_BcToDstarMuMu && isInMassRange(p_dimuon.M(), m_BcToDstarMuMu_dimuonMassRange)) {
+    std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_D0(2);  // {K-, pi+}
+
+    for (size_t itrk1 = 0; itrk1 < selectedTracks.size(); ++itrk1) {
+      const xAOD::TrackParticle* trk1 = *selectedTracks[itrk1];
+
+      trackParticleLinks_D0[0] = selectedTracks[itrk1];
+      auto p_trk1 = trk1->genvecP4();
+      p_trk1.SetM(PDG::mKaon);
+      auto charge1 = trk1->charge();
+
+      for (size_t itrk2 = 0; itrk2 < selectedTracks.size(); ++itrk2) {
+        if (itrk2 == itrk1) continue;
+        const xAOD::TrackParticle* trk2 = *selectedTracks[itrk2];
+
+        trackParticleLinks_D0[1] = selectedTracks[itrk2];
+        auto p_trk2 = trk2->genvecP4();
+        p_trk2.SetM(PDG::mPion);
+        auto charge2 = trk2->charge();
+
+        std::unique_ptr<xAOD::Vertex> D0;
+        if (charge1 * charge2 < 0. &&
+            p_trk1.Pt() > m_BcToDstarMuMu_minD0KaonPt &&
+            p_trk2.Pt() > m_BcToDstarMuMu_minD0PionPt &&
+            isInMassRange((p_trk1 + p_trk2).M(), m_BcToDstarMuMu_D0MassRange) &&
+            isInMassRange((p_dimuon + p_trk1 + p_trk2).M() - p_dimuon.M() + PDG::mJpsi, m_BcToDstarMuMu_massRange)) {
+          D0 = fit(state.context(), trackParticleLinks_D0, kD0, dimuon);
+          ++iterations;
+        }
+        bool isValidD0 = false;
+        if (D0 && D0->chiSquared() < m_BcToDstarMuMu_chi2 && Lxy(dimuon->position(), *D0) > 0.) {
+          isValidD0 = true;
+          ATH_MSG_DEBUG( "Partially reconstructed B_c+(-> mu+ mu- D0 X) candidate has been created" );
+          xAOD::TrigBphys* trigBphys = makeTriggerObject(state, *D0, xAOD::TrigBphys::DZKPI, s_trkMass[kD0], dimuonTriggerObjectEL);
+          ATH_CHECK( state.addTriggerObject(trigBphys) );
+        }
+
+        if (m_BcToDstarMuMu_makeDstar && isValidD0) {  // full B_c+ reconstruction
+          xAOD::TrackParticle::GenVecFourMom_t p_D0 = momentum(*D0, s_trkMass[kD0]);
+
+          for (size_t itrk3 = 0; itrk3 < selectedTracks.size(); ++itrk3) {
+            const xAOD::TrackParticle* trk3 = *selectedTracks[itrk3];
+            if (itrk3 == itrk1 || itrk3 == itrk2) continue;
+
+            // J/psi + pion from D*+
+            trackParticleLinks_vtx1[2] = selectedTracks[itrk3];
+            auto p_trk3 = trk3->genvecP4();
+            p_trk3.SetM(PDG::mPion);
+
+            if (p_trk3.Pt() > m_BcToDstarMuMu_minDstarPionPt &&
+                (m_BcToDstarMuMu_maxDstarPionZ0 < 0. || std::abs(state.selectedTrackZ0[trk3]) < m_BcToDstarMuMu_maxDstarPionZ0) &&
+                isInMassRange((p_D0 + p_trk3).M() - p_D0.M() + PDG::mD0, m_BcToDstarMuMu_DstarMassRange)) {
+              auto Bc_vtx1 = fit(state.context(), trackParticleLinks_vtx1, kB_PsiPi);
+              ++iterations;
+
+              if (Bc_vtx1 && Bc_vtx1->chiSquared() < m_BcToDstarMuMu_chi2) {
+                ATH_MSG_DEBUG( "Decay vertex(mu+ mu- D*+.pi+) for B_c+ candidate has been created" );
+                xAOD::TrigBphys* triggerObject_vtx1 = makeTriggerObject(state, *Bc_vtx1, xAOD::TrigBphys::DSTDZPI, s_trkMass[kB_PsiPi], dimuonTriggerObjectEL);
+                auto triggerObjectEL_vtx1 = ElementLink<xAOD::TrigBphysContainer>(state.trigBphysCollection(), state.trigBphysCollection().size());
+                ATH_CHECK( state.addTriggerObject(triggerObject_vtx1) );
+                ATH_CHECK( triggerObjectEL_vtx1.isValid() );
+
+                // refit D0 vertex
+                auto Bc_vtx2 = fit(state.context(), trackParticleLinks_D0, kD0, Bc_vtx1.get());
+                ++iterations;
+                if (Bc_vtx2 && Bc_vtx2->chiSquared() < m_BcToDstarMuMu_chi2) {
+                  ATH_MSG_DEBUG( "Fully reconstructed B_c+(-> mu+ mu- D*+) candidate has been created" );
+                  xAOD::TrigBphys* triggerObject_vtx2 = makeTriggerObject(state, *Bc_vtx2, xAOD::TrigBphys::BCDSTMUMU, s_trkMass[kD0], triggerObjectEL_vtx1);
+                  ATH_CHECK( state.addTriggerObject(triggerObject_vtx2) );
+                }
+              }
+            }
+          }
+        }  // end of full B_c+ reconstruction
+
+      }
+
       if (iterations > m_fitAttemptsWarningThreshold && !isOverWarningThreshold) {
-        ATH_MSG_WARNING( iterations << " combinations for vertex fitter have been processed; " << mon_nBPhysObject << " vertices have been created" );
+        ATH_MSG_WARNING( "B_c+ -> mu+ mu- D*+: " << state.trigBphysCollection().size() - nTrigBphysObjects << " vertices created after " << iterations << " vertex fitter calls" );
         isOverWarningThreshold = true;
       }
       if (iterations > m_fitAttemptsBreakThreshold) {
-        ATH_MSG_WARNING( "the number of fit attempts has exceeded the limit; breaking the loop at this point" );
+        ATH_MSG_WARNING( "B_c+ -> mu+ mu- D*+: the number of fit attempts has exceeded the limit; breaking the loop at this point" );
         break;
       }
-    }  // end of B_c+ -> J/psi D*+ topology
+    }
+    ATH_MSG_DEBUG( "B_c+ -> mu+ mu- D*+: " << state.trigBphysCollection().size() - nTrigBphysObjects << " vertices created after " << iterations << " vertex fitter calls" );
 
-  }  // end of dimuon loop
-  mon_nBPhysObject = state.trigBphysCollection().size() - mon_nBPhysObject;
+  }  // end of B_c+ -> J/psi D*+ topology
+
+  return StatusCode::SUCCESS;
+}
+
+
+StatusCode TrigBmumuxComboHypo::findBmumuxCandidates_fastFit(TrigBmumuxState& state, size_t dimuonIndex) const {
+
+  state.badTrackCombinations.clear();
+
+  const xAOD::Vertex* dimuon = state.dimuons.get(dimuonIndex);
+
+  // {mu1, mu2, trk1}
+  std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_2mu1trk(dimuon->trackParticleLinks());
+  trackParticleLinks_2mu1trk.emplace_back();
+
+  // {trk1, trk2}
+  std::vector<ElementLink<xAOD::TrackParticleContainer>> trackParticleLinks_2trk(2);
+
+  size_t n = state.selectedTracks.size();
+  size_t iterations = 0;
+  for (const auto& item : state.trackCombinations) {
+    if (item.second < 5) continue;
+
+    size_t key = item.first;
+    if (key < n) {  // dimuon + track
+      trackParticleLinks_2mu1trk[2] = state.selectedTracks[key];
+      auto vertex = fit(state.context(), trackParticleLinks_2mu1trk, kFastFit_2mu1trk, dimuon);
+      iterations++;
+      if (!vertex || vertex->chiSquared() > m_fastFit_2mu1trk_chi2) state.badTrackCombinations.push_back(key);
+    }
+    else {  // track + track
+      trackParticleLinks_2trk[0] = state.selectedTracks[key % n];
+      trackParticleLinks_2trk[1] = state.selectedTracks[key / n];
+      auto vertex = fit(state.context(), trackParticleLinks_2trk, kFastFit_2trk);
+      iterations++;
+      if (!vertex || vertex->chiSquared() > m_fastFit_2trk_chi2) state.badTrackCombinations.push_back(key);
+    }
+  }
+  std::sort(state.badTrackCombinations.begin(), state.badTrackCombinations.end());
+  ATH_MSG_DEBUG( "Fast fit found " << state.badTrackCombinations.size() << " bad combinations after " << iterations << " iterations" );
 
   return StatusCode::SUCCESS;
 }
@@ -713,9 +834,9 @@ StatusCode TrigBmumuxComboHypo::createDecisionObjects(TrigBmumuxState& state) co
     // need to get the references to the original muon objects used to build the dimuon vertex
     // the position of this vertex in state.dimuons container is the same as for dimuonTriggerObject in trigBphysCollection
     // dimuon vertex has already been decorated with muon indices
-    auto muonindex = dimuonTriggerObject->index();
-    const xAOD::Vertex* dimuon = state.dimuons.get(muonindex);
-    if ( !dimuon || muonindex >= state.trigBphysMuonIndices.size() ) {
+    auto dimuonIndex = dimuonTriggerObject->index();
+    const xAOD::Vertex* dimuon = state.dimuons.get(dimuonIndex);
+    if ( !dimuon || dimuonIndex >= state.trigBphysMuonIndices.size() ) {
       ATH_MSG_ERROR( "Failed to find original muons the dimuon vertex had been built from" );
       return StatusCode::FAILURE;
     }
@@ -724,7 +845,7 @@ StatusCode TrigBmumuxComboHypo::createDecisionObjects(TrigBmumuxState& state) co
     Decision* decision = TrigCompositeUtils::newDecisionIn(&state.decisions(), TrigCompositeUtils::comboHypoAlgNodeName());
 
     std::vector<const DecisionIDContainer*> previousDecisionIDs;
-    for (const size_t& i : state.trigBphysMuonIndices.at(muonindex)) {
+    for (const size_t& i : state.trigBphysMuonIndices.at(dimuonIndex)) {
       const auto& muon = state.muons.at(i);
       // attach all previous decisions: if the same previous decision is called twice, that's fine - internally takes care of that
       // we already have an array of links to the previous decisions, so there is no need to use TrigCompositeUtils::linkToPrevious()
@@ -751,7 +872,7 @@ std::unique_ptr<xAOD::Vertex> TrigBmumuxComboHypo::fit(
     Decay decay,
     const xAOD::Vertex* dimuon) const {
 
-  ATH_MSG_DEBUG( "Perform vertex fit" );
+  ATH_MSG_VERBOSE( "Perform vertex fit" );
 
   if (trackParticleLinks.size() < 2) {
     ATH_MSG_WARNING( "At least two tracks should be given to the vertex fitter" );
@@ -767,7 +888,7 @@ std::unique_ptr<xAOD::Vertex> TrigBmumuxComboHypo::fit(
     startingPoint = Amg::Vector3D(dimuon->x(), dimuon->y(), dimuon->z());
   }
   else {
-    if (decay != Decay::kPsi_2mu && decay != Decay::kB_PsiPi) {
+    if (decay != Decay::kPsi_2mu && decay != Decay::kB_PsiPi && decay != Decay::kFastFit_2trk) {
       ATH_MSG_WARNING( "Already fitted dimuon vertex should be provided for B -> mu1 mu2 trk1 .. trkN decay as a starting point for fitter" );
     }
     int flag = 0;
@@ -777,7 +898,7 @@ std::unique_ptr<xAOD::Vertex> TrigBmumuxComboHypo::fit(
     startingPoint = m_vertexPointEstimator->getCirclesIntersectionPoint(&perigee1, &perigee2, flag, errorcode);
     if (errorcode != 0) startingPoint = Amg::Vector3D::Zero(3);
   }
-  ATH_MSG_DEBUG( "Starting point: (" << startingPoint(0) << ", " << startingPoint(1) << ", " << startingPoint(2) << ")" );
+  ATH_MSG_VERBOSE( "Starting point: (" << startingPoint(0) << ", " << startingPoint(1) << ", " << startingPoint(2) << ")" );
 
   auto fitterState = m_vertexFitter->makeState(context);
   m_vertexFitter->setMassInputParticles(s_trkMass[static_cast<size_t>(decay)], *fitterState);
@@ -790,15 +911,15 @@ std::unique_ptr<xAOD::Vertex> TrigBmumuxComboHypo::fit(
 
   std::unique_ptr<xAOD::Vertex> vertex(m_vertexFitter->fit(tracklist, startingPoint, *fitterState));
   if (!vertex) {
-    ATH_MSG_DEBUG( "Vertex fit fails" );
+    ATH_MSG_VERBOSE( "Vertex fit fails" );
     return vertex;
   }
   if (vertex->chiSquared() > 150. || (decay == Decay::kPsi_2mu && vertex->chiSquared() > m_dimuon_chi2)) {
-    ATH_MSG_DEBUG( "Fit is successful, but vertex chi2 is too high, we are not going to save it (chi2 = " << vertex->chiSquared() << ")" );
+    ATH_MSG_VERBOSE( "Fit is successful, but vertex chi2 is too high, we are not going to save it (chi2 = " << vertex->chiSquared() << ")" );
     vertex.reset();
     return vertex;
   }
-  ATH_MSG_DEBUG( "Fit is successful" );
+  ATH_MSG_VERBOSE( "Fit is successful" );
 
   // update trackParticleLinks()
   vertex->clearTracks();
@@ -864,7 +985,7 @@ xAOD::TrigBphys* TrigBmumuxComboHypo::makeTriggerObject(
     result->setLowerChainLink(dimuonLink);
   }
 
-  ATH_MSG_DEBUG(
+  ATH_MSG_VERBOSE(
     "TrigBphys object:\n\t  " <<
     "roiId:         " << result->roiId()  << "\n\t  " <<
     "particleType:  " << result->particleType() << "\n\t  " <<
