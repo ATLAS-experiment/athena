@@ -7,7 +7,7 @@
 '''
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType, Format
+from AthenaConfiguration.Enums import BeamType, Format, LHCPeriod
 from TileConfiguration.TileConfigFlags import TileRunType
 
 def _configFlagsFromPartition(flags, partition, log):
@@ -200,6 +200,7 @@ if __name__=='__main__':
         _configFlagsFromPartition(flags, args.partition, log)
         flags.Input.isMC = False
         flags.Input.Format = Format.BS
+        flags.GeoModel.Run = LHCPeriod.Run3
         if args.mbts and args.useMbtsTrigger:
             if args.partition in ['TileMon']:
                 flags.Trigger.triggerConfig = 'DB:{:s}:{:d},{:d},{:d},{:d}'.format('TRIGGERDB_RUN3', 3185, 4357, 4219, 2543)

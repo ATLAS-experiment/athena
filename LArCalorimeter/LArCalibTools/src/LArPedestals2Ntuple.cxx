@@ -74,7 +74,10 @@ StatusCode LArPedestals2Ntuple::stop()
 
 
  unsigned cellCounter=0;
- for(long igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN; igain++) {
+ auto maxgain = CaloGain::LARNGAIN;
+ if(m_isSC) maxgain=CaloGain::LARMEDIUMGAIN;
+
+ for(long igain=CaloGain::LARHIGHGAIN; igain<maxgain; igain++) {
    for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      if (larPedestal->pedestal(hwid,igain)>ILArPedestal::ERRORCODE) {
        fillFromIdentifier(hwid);       

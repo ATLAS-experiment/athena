@@ -43,7 +43,7 @@ def LArPileUpAutoCorrCfg(flags):
     if flags.LArCalib.isSC:
        PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
        RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
-       MpMcTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
+       MpMcTag=rs.getFolderTag(flags.LArCalib.MphysOverMcal.Folder)
     rsac=FolderTagResolver(dbname="COOLOFL_LAR/CONDBR2")
     PhysAutoCorrTag= rsac.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     nColl=flags.LArCalib.OFC.Ncoll
@@ -63,7 +63,7 @@ def LArPileUpAutoCorrCfg(flags):
                             className="LArPedestalComplete"))
         result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
                             className="LArRampComplete"))
-        result.merge(addFolders(flags,flags.LArCalib.MPhysOverMCal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
+        result.merge(addFolders(flags,flags.LArCalib.MphysOverMcal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
                             className="LArMphysOverMcalComplete"))
 
     #Need ADC2MeV values for AutoCorrCondAlg ... 

@@ -24,7 +24,7 @@ def addLArCalibFlags(flags, isSC=False):
     flags.addFlag("LArCalib.Ramp.Folder",     lambda prevFlags: _prefix(prevFlags)+"Ramps/RampLinea")
     flags.addFlag("LArCalib.OFCPhys.Folder",  lambda prevFlags: _prefix(prevFlags)+"OFC/PhysWave/RTM/")
     flags.addFlag("LArCalib.Shape.Folder",  lambda prevFlags: _prefix(prevFlags)+"Shape/RTM/")
-    flags.addFlag("LArCalib.MPhysOverMCal.Folder", lambda prevFlags: _prefix(prevFlags)+"MphysOverMcal/RTM")
+    flags.addFlag("LArCalib.MphysOverMcal.Folder", lambda prevFlags: _prefix(prevFlags)+"MphysOverMcal/RTM")
     flags.addFlag("LArCalib.PhysCaliTdiff.Folder",lambda prevFlags: _prefix(prevFlags)+"PhysCaliTdiff")
     flags.addFlag("LArCalib.CaliPulseParams.Folder", lambda prevFlags: _prefix(prevFlags)+"CaliPulseParams/RTM")
     flags.addFlag("LArCalib.DetCellParams.Folder", lambda prevFlags: _prefix(prevFlags)+"DetCellParams/RTM")
@@ -93,4 +93,5 @@ def _getInputFiles(prevFlags):
         
     return allFiles
 
-    
+def LArCalibFolderTag(folder,tag):
+    return ''.join(folder.split('/')) + tag    

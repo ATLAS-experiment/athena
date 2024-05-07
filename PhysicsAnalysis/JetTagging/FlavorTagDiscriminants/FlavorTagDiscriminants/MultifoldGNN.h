@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MULTIFOLD_GNN_H
@@ -29,7 +29,7 @@ namespace FlavorTagDiscriminants {
     ~MultifoldGNN();
     void decorate(const xAOD::BTagging& btag) const;
     void decorate(const xAOD::Jet& jet) const;
-    void decorateWithDefaults(const xAOD::Jet& jet) const;
+    void decorateWithDefaults(const SG::AuxElement& jet) const;
 
     std::set<std::string> getDecoratorKeys() const;
     std::set<std::string> getAuxInputKeys() const;

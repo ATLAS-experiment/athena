@@ -14,6 +14,7 @@
 #include "LArRawConditions/LArSingleFloatP.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "LArCabling/LArOnOffIdMapping.h"
+#include "LArCOOLConditions/LArfSamplSC.h"
 
 
 
@@ -58,7 +59,7 @@ class LArCompleteToFlat: public AthAlgorithm
   CondAttrListCollection* uA2MeVFlat(const ILAruA2MeV* input, const std::string& outputName);
   CondAttrListCollection* pedestalFlat(const ILArPedestal* input, const std::string& outputName);
   CondAttrListCollection* rampFlat(const ILArRamp* input, const std::string& outputName);
-  CondAttrListCollection* ofcFlat(const ILArOFC* input, const std::string& outputName);
+  CondAttrListCollection* ofcFlat(const ILArOFC* input, const std::string& outputName, const LArfSamplSC* weights=nullptr);
   CondAttrListCollection* shapeFlat(const LArShapeComplete* input, const std::string& outputName);
   AthenaAttributeList* DSPThresholdsFlat(const LArDSPThresholdsComplete* input, const std::string& outputName);
 
@@ -70,6 +71,7 @@ class LArCompleteToFlat: public AthAlgorithm
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeySC{this,"CablingSCKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"};
+  SG::ReadCondHandleKey<LArfSamplSC> m_weightsKeySC{this,"WeightsSCKey","","SG Key of weights object"};
 
   ///InputSGKeys
   std::string m_uA2MeVInput;

@@ -1,5 +1,5 @@
 /*
-+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/MultifoldGNNTool.h"
@@ -42,7 +42,7 @@ namespace FlavorTagDiscriminants {
   void MultifoldGNNTool::decorate(const xAOD::Jet& jet) const {
     m_gnn->decorate(jet);
   }
-  void MultifoldGNNTool::decorateWithDefaults(const xAOD::Jet& jet) const {
+  void MultifoldGNNTool::decorateWithDefaults(const SG::AuxElement& jet) const {
     m_gnn->decorateWithDefaults(jet);
   }
 

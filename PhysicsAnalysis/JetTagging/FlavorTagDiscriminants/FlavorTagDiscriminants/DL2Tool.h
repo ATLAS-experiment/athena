@@ -1,6 +1,6 @@
 // for text editors: this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DL2_TOOL_H
@@ -36,7 +36,7 @@ namespace FlavorTagDiscriminants {
     // returns 0 for success
     virtual void decorate(const xAOD::BTagging& btag) const override;
     virtual void decorate(const xAOD::Jet& jet) const override;
-    virtual void decorateWithDefaults(const xAOD::Jet& jet) const override;
+    virtual void decorateWithDefaults(const SG::AuxElement& jet) const override;
 
     virtual std::set<std::string> getDecoratorKeys() const override;
     virtual std::set<std::string> getAuxInputKeys() const override;
