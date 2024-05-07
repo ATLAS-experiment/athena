@@ -198,15 +198,15 @@ def getChunkSize(flags) -> int:
                 msg.info('Chunk size set to auto flush (%i)', chunk_size)
             else:
                 msg.info('LZMA nor ZLIB in use, chunk_size set to default (%i)', chunk_size)
-                #Use auto flush only if file is compressed with LZMA, ZLIB or LZ4, else use default chunk_size
+        #Use auto flush only if file is compressed with LZMA, ZLIB or LZ4, else use default chunk_size
         elif flags.MP.ChunkSize == -3:
             if md.get('file_comp_alg',-1) in [1,2,4]:
                 chunk_size = md.get('auto_flush',-1)
                 msg.info('Chunk size set to auto flush (%i)', chunk_size)
             else:
                 msg.info('LZMA, ZLIB nor LZ4 in use, chunk_size set to (%i)', chunk_size)
-        #Use auto flush value for chunk_size, regarldess of compression algorithm
-        elif flags.MPChunkSize <= -4:
+        #Use auto flush value for chunk_size, regardless of compression algorithm
+        elif flags.MP.ChunkSize <= -4:
             chunk_size = md.get('auto_flush',-1)
             msg.info('Chunk size set to auto flush (%i)', chunk_size)
         else:
