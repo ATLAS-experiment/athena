@@ -277,7 +277,7 @@ class JobOptionsTemplate(object):
 
                 msg.info('Successfully wrote runargs file {0}'.format(self._runArgsFile))
 
-            except (IOError, OSError) as e:
+            except OSError as e:
                 errMsg = 'Got an error when writing JO template {0}: {1}'.format(self._runArgsFile, e)
                 msg.error(errMsg)
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_RUNARGS_ERROR'), errMsg)

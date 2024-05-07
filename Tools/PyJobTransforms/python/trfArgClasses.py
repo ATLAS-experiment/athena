@@ -1117,7 +1117,7 @@ class argFile(argList):
             if self._urlType == 'posix':
                 try:
                     self._fileMetadata[fname]['size'] = os.stat(fname).st_size
-                except (IOError, OSError) as e:
+                except OSError as e:
                     msg.error('Got exception {0!s} raised while stating file {1}'.format(e, fname))
                     self._fileMetadata[fname]['size'] = None
             else:
@@ -1141,7 +1141,7 @@ class argFile(argList):
                         if chunk == 0:
                             break
                     self._fileMetadata[fname]['integrity'] = True
-                except (OSError, IOError) as e:
+                except OSError as e:
                     msg.error('Got exception {0!s} raised while checking integrity of file {1}'.format(e, fname))
                     self._fileMetadata[fname]['integrity'] = False
                 except UnicodeDecodeError:
@@ -1156,7 +1156,7 @@ class argFile(argList):
                             if chunk == 0:
                                 break
                         self._fileMetadata[fname]['integrity'] = True
-                    except (OSError, IOError) as e:
+                    except OSError as e:
                         msg.error('Got exception {0!s} raised while checking integrity of file {1}'.format(e, fname))
                         self._fileMetadata[fname]['integrity'] = False
 
@@ -1184,7 +1184,7 @@ class argFile(argList):
                     self._fileMetadata[fname]['file_size'] = size
                     self._fileMetadata[fname]['_exists'] = True
                     msg.debug('POSIX file {0} exists'.format(fname))
-                except (IOError, OSError) as e:
+                except OSError as e:
                     msg.error('Got exception {0!s} raised while stating file {1}  - probably it does not exist'.format(e, fname))
                     self._fileMetadata[fname]['_exists'] = False
             else:
@@ -1787,7 +1787,7 @@ class argBZ2File(argFile):
                         break
                 self._fileMetadata[fname]['integrity'] = True
                 f.close()
-            except (OSError, IOError) as e:
+            except OSError as e:
                 msg.error('Got exception {0!s} raised while checking integrity of file {1}'.format(e, fname))
                 self._fileMetadata[fname]['integrity'] = False
                 
@@ -1816,7 +1816,7 @@ class argFTKIPFile(argBZ2File):
                     if line.startswith('F'):
                         eventCount += 1
                 self._fileMetadata[fname]['nentries'] = eventCount
-            except (OSError, IOError) as e:
+            except OSError as e:
                 msg.error('Event count for file {0} failed: {1!s}'.format(fname, e))
                 self._fileMetadata[fname]['nentries'] = None
 
@@ -1844,7 +1844,7 @@ class argHepEvtAsciiFile(argFile):
                     if len(line.split(" "))==3:
                         eventCount += 1
                 self._fileMetadata[fname]['nentries'] = eventCount
-            except (OSError, IOError) as e:
+            except OSError as e:
                 msg.error('Event count for file {0} failed: {1!s}'.format(fname, e))
                 self._fileMetadata[fname]['nentries'] = None
                 

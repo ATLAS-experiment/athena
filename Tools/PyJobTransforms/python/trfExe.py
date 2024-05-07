@@ -1714,7 +1714,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                     # run Athena command
                     print(' '.join(self._cmd), file=wrapper)
             os.chmod(self._wrapperFile, 0o755)
-        except (IOError, OSError) as e:
+        except OSError as e:
             errMsg = 'error writing athena wrapper {fileName}: {error}'.format(
                 fileName = self._wrapperFile,
                 error = e
@@ -1988,7 +1988,7 @@ class DQMergeExecutor(scriptExecutor):
                 else:
                     exitErrorMessage = "Logfile error in {0}: \"{1}\"".format(self._logFileName,
                                                                               worstError['firstError']['message'])
-        except (OSError, IOError) as e:
+        except OSError as e:
             exitCode = trfExit.nameToCode('TRF_EXEC_LOGERROR')
             raise trfExceptions.TransformValidationException(exitCode,
                   'Exception raised while attempting to scan logfile {0}: {1}'.format(self._logFileName, e))
@@ -2072,7 +2072,7 @@ class bsMergeExecutor(scriptExecutor):
                 for fname in self.conf.dataDictionary[self._inputBS].value:
                     if fname not in self._maskedFiles:
                         print(fname, file=BSFileList)
-        except (IOError, OSError) as e:
+        except OSError as e:
             errMsg = 'Got an error when writing list of BS files to {0}: {1}'.format(self._mergeBSFileList, e)
             msg.error(errMsg)
             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_WRAPPER'), errMsg)
@@ -2174,7 +2174,7 @@ class archiveExecutor(scriptExecutor):
                     print("            os.unlink(f)", file=zip_wrapper)
                     print("zf.close()", file=zip_wrapper)
                 os.chmod('zip_wrapper.py', 0o755)
-            except (IOError, OSError) as e:
+            except OSError as e:
                 errMsg = 'error writing zip wrapper {fileName}: {error}'.format(fileName = 'zip_wrapper.py',
                     error = e
                 )
@@ -2202,7 +2202,7 @@ class archiveExecutor(scriptExecutor):
                     print("     archive.extractall(path)", file=unarchive_wrapper)
                     print("     archive.close()", file=unarchive_wrapper)
                 os.chmod('unarchive_wrapper.py', 0o755)
-            except (IOError, OSError) as e:
+            except OSError as e:
                 errMsg = 'error writing unarchive wrapper {fileName}: {error}'.format(fileName = 'unarchive_wrapper.py',
                     error = e
                 )
