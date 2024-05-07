@@ -29,7 +29,6 @@
 #include "ICondSvcSetupDone.h"
 
 #include "TClass.h"
-#include "CxxUtils/starts_with.h"
 
 
 namespace
@@ -139,7 +138,7 @@ CondInputLoader::initialize()
           std::string pat = "LArConditionsContainer<";
           for (size_t ibase = 0;  ibase < nbases; ++ibase) {
             std::string basename = rt.BaseAt(ibase).Name();
-            if (CxxUtils::starts_with (basename, pat)) {
+            if (basename.starts_with( pat)) {
               std::string subset = "LArConditionsSubset<" + basename.substr (pat.size(), std::string::npos);
               loadDict (subset);
               loadDict ("LArConditionsSubset_p1");

@@ -5,7 +5,6 @@
 #include "TrigT1Interfaces/MbtsCTP.h"
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
 #include "TrigConfData/L1Menu.h"
-#include "CxxUtils/starts_with.h"
 
 
 
@@ -89,7 +88,7 @@ LVL1::TrigT1MBTS::initialize()
             m_thresholds_c[module] = hwValue;
             m_cablestarts_c[module] = startbit;
          }
-      } else if(CxxUtils::starts_with (thrname, "MBTS_A") && thrname.size()>6) {
+      } else if(thrname.starts_with( "MBTS_A") && thrname.size()>6) {
          // Get the discriminator threshold settings (single inputs) for the A side.
          // figure out module number from threshold name
          if(module >= m_thresholds_a.size()) {

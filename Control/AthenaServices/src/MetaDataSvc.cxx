@@ -31,7 +31,7 @@
 #include <sstream>
 
 #include "boost/bind/bind.hpp"
-#include "boost/algorithm/string/predicate.hpp"
+
 
 namespace {
   bool
@@ -247,7 +247,7 @@ StatusCode MetaDataSvc::newMetadataSource(const Incident& inc)
    const std::string guid = fileInc->fileGuid();
    const std::string fileName = fileInc->fileName();
    m_allowMetaDataStop = false;
-   if (!boost::starts_with (fileName, "BSF:")) {
+   if (!fileName.starts_with( "BSF:")) {
       // the input file is _not_ bytestream
       if (!m_clearedInputDataStore) {
          if (!m_inputDataStore->clearStore().isSuccess()) {
@@ -572,7 +572,7 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
       ATH_MSG_DEBUG("MetaDataSvc called without MetaDataContainer set.");
       return(StatusCode::SUCCESS);
    }
-   if (boost::starts_with (fileName, "BSF:")) {
+   if (fileName.starts_with( "BSF:")) {
       ATH_MSG_DEBUG("MetaDataSvc called for non ROOT file.");
    } else if (fileName.compare(0, 3, "SHM")==0) {
       ATH_MSG_DEBUG("MetaDataSvc called for shared memory.");

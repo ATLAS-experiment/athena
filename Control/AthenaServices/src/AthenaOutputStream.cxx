@@ -43,7 +43,6 @@
 #include "SelectionVetoes.h"
 
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <cassert>
 #include <mutex>
 #include <string>
@@ -1168,7 +1167,7 @@ void AthenaOutputStream::tokenizeAtSep( std::vector<std::string>& subStrings,
                                         const std::string& sepstr ) const {
   subStrings.clear(); // clear from previous iteration step
   // If the portia starts with a wildcard, add an empty string
-  if ( boost::starts_with (portia, sepstr )) {
+  if (portia.starts_with( sepstr )) {
     subStrings.push_back("");
   }
   boost::char_separator<char> csep(sepstr.c_str());

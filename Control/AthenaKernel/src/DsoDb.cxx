@@ -67,7 +67,7 @@ namespace {
       return false;
     }
     static const boost::regex e("\\w*?.dll");
-    return !boost::algorithm::starts_with(libname, SHLIB_PREFIX) &&
+    return !libname.starts_with(SHLIB_PREFIX) &&
             boost::regex_match(libname, e);
   }
 
@@ -80,7 +80,7 @@ namespace {
   std::string getlibname(const std::string& libname)
   {
     std::string lib = libname;
-    if (!boost::algorithm::starts_with(lib, "lib")) {
+    if (!lib.starts_with( "lib")) {
       lib = std::string("lib") + lib;
     }
     if (!boost::algorithm::ends_with(lib, SHLIB_SUFFIX)) {
@@ -307,7 +307,7 @@ DsoDb::build_repository()
        itr != iend;
        ++itr) {
     //std::cerr << "--[" << *itr << "]...\n";
-    if (boost::algorithm::starts_with(*itr, rootsys)) {
+    if (itr->starts_with(rootsys)) {
       continue;
     }
     fs::path p(*itr);
@@ -418,7 +418,7 @@ DsoDb::build_repository()
         // std::cerr << " [" << line << "] -> [" << dso_key << "] [" << libname << "]\n";
 
         DsoMap_t *db = NULL;
-        if (boost::algorithm::starts_with(dso_key, PluginNs) || is_components) {
+        if (dso_key.starts_with(PluginNs) || is_components) {
           db = &m_pf;
         } else {
           db = &m_db;
@@ -666,7 +666,7 @@ DsoDb::rflx_type ATLAS_NOT_THREAD_SAFE (const std::string& type_name) const
   System::ImageHandle handle;
   std::string libname = ::to_string(fs::path(libs[0]).filename());
   boost::algorithm::trim(libname);
-  if (boost::algorithm::starts_with(libname, SHLIB_PREFIX)) {
+  if (libname.starts_with(SHLIB_PREFIX)) {
     libname = libname.substr(SHLIB_PREFIX.size(), std::string::npos);
   }
   if (boost::algorithm::ends_with(libname, SHLIB_SUFFIX)) {
