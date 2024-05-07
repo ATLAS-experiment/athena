@@ -78,7 +78,7 @@ namespace MuonGM {
       else if (key.substr(0,3)=="sTG") {
 	      std::string sName = vName.substr(7,4);
 	      std::unique_ptr<sTgcReadoutElement> re = std::make_unique<sTgcReadoutElement>(pV, sName, ec*eta, phi, ml, m_manager);
-	      re->initDesign(-999., -999., -999., 3.2, -999., 2.7, -999., 2.6);
+	      re->initDesign(2.6);
 	      re->fillCache();
 	      m_manager->addsTgcReadoutElement(std::move(re));
       }

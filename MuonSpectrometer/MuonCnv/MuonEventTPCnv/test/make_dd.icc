@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/make_dd.icc
@@ -127,7 +127,7 @@ void MuonChamber::makeMdt (const Identifier& id)
 void MuonChamber::makesTgc (const Identifier& id)
 {
   auto elt = std::make_unique<MuonGM::sTgcReadoutElement>(&m_pvol, "STS", 1, 2, 1, &m_muo_dd);
-  elt->initDesign (0, 0, 0, 0, 0, 0, 0, 1);
+  elt->initDesign (1);
   elt->setIdentifier (id);
   
   //elt->m_ngasgaps = 2;
