@@ -65,7 +65,7 @@ namespace Analysis {
         std::vector<JpsiCandidate> getPairs(const std::vector<const xAOD::TrackParticle*>&) const;
         std::vector<JpsiCandidate> getPairs(const std::vector<const xAOD::Muon*>&) const;
         std::vector<JpsiCandidate> getPairs2Colls(const std::vector<const xAOD::TrackParticle*>&, const std::vector<const xAOD::Muon*>&, bool) const;
-        double getInvariantMass(const JpsiCandidate&, const std::vector<double>& ) const;
+        double getInvariantMass(const JpsiCandidate&, std::span<const double> ) const;
         std::vector<JpsiCandidate> selectCharges(const std::vector<JpsiCandidate>&) const;
         xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer* importedTrackCollection) const;
         bool passesMCPCuts(const xAOD::Muon*) const;
