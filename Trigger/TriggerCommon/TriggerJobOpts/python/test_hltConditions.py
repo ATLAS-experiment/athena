@@ -41,9 +41,15 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 
 flags.Concurrency.NumThreads = 1
-flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_cos.00415453.express_express.merge.RAW/data22_cos.00415453.express_express.merge.RAW._lb0200._SFO-11._0001.1']
+#flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00428770.express_express.merge.RAW._lb0221._SFO-ALL._0001.1']
+flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_cos.00433897.express_express.merge.RAW._lb0134._SFO-ALL._0001.1']
 flags.IOVDb.SqliteInput = 'cool_tmp.db'  # created by createSqlite
 flags.IOVDb.SqliteFolders = (folder,)
+
+flags.Trigger.L1.errorOnMissingTOB=False
+
+from TriggerJobOpts.TriggerConfigFlags import trigGlobalTag
+flags.IOVDb.GlobalTag=trigGlobalTag(flags)
 
 # Create sqlite file
 createSqlite(flags)
@@ -57,6 +63,9 @@ iovDbSvc = acc.getService('IOVDbSvc')
 for i,f in enumerate(iovDbSvc.Folders):
    if folder in f:
       iovDbSvc.Folders[i] += '<forceRunNumber>9999999</forceRunNumber>'
+# allow missing ROB in the input file
+l1bsdec = acc.getEventAlgo("L1TriggerByteStreamDecoder")
+l1bsdec.MaybeMissingROBs += [0x941000]
 
 # Run
 import sys

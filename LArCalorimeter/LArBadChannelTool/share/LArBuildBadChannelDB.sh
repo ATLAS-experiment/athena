@@ -395,13 +395,13 @@ cat $summaryFile
 echo "Output sqlite files:"
 echo "$outputSqlite: Containing UPD1 and/or UPD4 and/or Bulk version of bad-channel list for OFFLINE DB. UPD4 valid as of run $runnumber"
 echo "Upload to OFFLINE oracle server:"
-echo "export COOL_FLASK=http://aiatlas001.cern.ch:5000"
-echo "/afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py  --flask ${outputSqlite} CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
+echo "export COOL_FLASK=https://cool-proxy-app.cern.ch"
+echo "/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py  --flask ${outputSqlite} CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
 if [ -f $outputSqliteOnl ];
 then
     echo "$outputSqliteOnl: Containing UPD1 version of bad-channel list for ONLINE DB."
     echo "Upload to ONLINE oracle server using"
-    echo "export COOL_FLASK=http://aiatlas001.cern.ch:5000"
-    echo "/afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py BadChannels.db CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
+    echo "export COOL_FLASK=https://cool-proxy-app.cern.ch"
+    echo "/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --online BadChannels.db CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
 fi 
 

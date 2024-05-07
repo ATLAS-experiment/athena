@@ -68,6 +68,10 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
                 ATH_MSG_DEBUG("DB Noise cuts are:");
                 noiseCuts->dump();
             }
+            if(noiseCuts->size()==0) {
+              ATH_MSG_ERROR("No noise cuts loaded from conditions db for event with timestamp" << ctx.eventID().time_stamp());
+              return StatusCode::FAILURE;
+            }
             for (auto itr = noiseCuts->begin(); itr != noiseCuts->end(); ++itr) {
                 if (itr->first >= 50) continue;
                 noiseCutsMap[std::pair(itr->first, 0)] = itr->second["EmPS"].data<int>();

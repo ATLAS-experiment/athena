@@ -29,7 +29,7 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
     toESD = []
 
     # excluded track aux data
-    excludedAuxData = ('-clusterAssociation.-TTVA_AMVFVertices_forReco.-AssoClustersUFO'
+    excludedAuxData = ('-clusterAssociation.-TTVA_AMVFVertices_forReco'
                        '.-TTVA_AMVFWeights_forReco')
     # remove track decorations used internally by FTAG software
     excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
