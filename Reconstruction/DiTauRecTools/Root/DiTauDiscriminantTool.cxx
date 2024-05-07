@@ -24,7 +24,7 @@ DiTauDiscriminantTool::DiTauDiscriminantTool( const std::string& name )
   , m_bdt()
   , m_eDecayMode(DecayMode::Default)
 {
-  declareProperty( "WeightsFile", m_sWeightsFile = "tauRecTools/00-02-00/DiTau_JetBDT_spring2017.weights.root");
+  declareProperty( "WeightsFile", m_sWeightsFile = "tauRecTools/R22_preprod/DiTau_JetBDT_winter2024.weights.root");
   declareProperty( "BDTScoreName", m_sBDTScoreName = "JetBDT");
   declareProperty( "DiTauDecayChannel", m_sDecayMode = "HadHad");
 }
