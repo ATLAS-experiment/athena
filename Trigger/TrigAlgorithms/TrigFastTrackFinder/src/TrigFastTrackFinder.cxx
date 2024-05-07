@@ -577,7 +577,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   mnt_timer_TripletMaking.start();
 
   std::vector<TrigInDetTriplet> triplets;
-
+  std::vector<GNN_TrigTracklet> tracklets;
 
   if(!m_useGPU) {
     if (m_ITkMode) {
@@ -589,15 +589,14 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
 
 	std::vector<GNN_TrigTracklet> vGNN_Tracks;
 
-	seedGen.getTracklets(tmpRoi.get(), vGNN_Tracks);
+	seedGen.getTracklets(tmpRoi.get(), tracklets);
 	
-	for(auto& track : vGNN_Tracks) {
+	for(auto& track : tracklets) {
 	  for(auto& seed : track.m_seeds) {
 	    triplets.emplace_back(seed);
 	  }
 	  ATH_MSG_DEBUG("GNN tracklet has " << track.m_track.size()<<" spacepoints");
 	}
-	vGNN_Tracks.clear();
       }
     } else {
       TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
@@ -672,8 +671,15 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
       }
     }
 
-    std::vector<const Trk::SpacePoint*> spVec = {osp1, osp2, osp3};
+    std::vector<const Trk::SpacePoint*> spVec = {osp1, osp2, osp3};//the default 3-SP seed
 
+    if( m_useTracklets && (!tracklets.empty())) {//create n-SP seed
+      spVec.clear();
+      for(const auto& sp : tracklets[tripletIdx].m_track) {
+        spVec.push_back(sp->offlineSpacePoint());
+      }
+    }
+    
     ++mnt_roi_nSeeds;
 
     std::list<Trk::Track*> tracks;
