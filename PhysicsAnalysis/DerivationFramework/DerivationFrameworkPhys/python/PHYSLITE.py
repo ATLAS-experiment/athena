@@ -48,10 +48,10 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg.info('Do Muons')
 
     subConfig = factory.makeConfig ('Muons', containerName='AnalysisMuons')
-    subConfig.setOptionValue ('.trackSelection', False)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Muons.WorkingPoint', containerName='AnalysisMuons',
-        selectionName='loose')
+                                    selectionName='loose')
+    subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.quality', 'Loose')
     subConfig.setOptionValue ('.isolation', 'NonIso')
     configSeq += subConfig
@@ -68,12 +68,12 @@ def CPAlgorithmsCfg(flags):
 
     subConfig = factory.makeConfig ('Electrons', containerName='AnalysisElectrons')
     subConfig.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
-    subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisElectrons',
-        selectionName='loose')
+                                    selectionName='loose')
+    subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
@@ -89,12 +89,12 @@ def CPAlgorithmsCfg(flags):
     # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
     subConfig = factory.makeConfig ('Electrons', containerName='AnalysisSiHitElectrons')
     subConfig.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
-    subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint', containerName='AnalysisSiHitElectrons', selectionName='SiHits')
+    subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.likelihoodWP', 'SiHitElectron')
     subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True) # needed to veto FSR electrons 

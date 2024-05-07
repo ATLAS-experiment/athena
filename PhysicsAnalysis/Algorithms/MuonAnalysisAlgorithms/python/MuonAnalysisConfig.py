@@ -21,10 +21,6 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('ptSelectionOutput', False, type=bool,
             info="pT cut to apply to calibrated muons, in MeV. "
             "The default is 3.0 GeV.")
-        self.addOption ('trackSelection', True, type=bool,
-            info="whether or not to set up an instance of "
-            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
-            "z_0 sin(theta) cuts. The default is True.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
@@ -70,17 +66,6 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration)
-
-        # Set up the track selection algorithm:
-        if self.trackSelection :
-            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                                'MuonTrackSelectionAlg' + self.postfix )
-            alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
-            alg.maxD0Significance = 3
-            alg.maxDeltaZ0SinTheta = 0.5
-            alg.particles = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Set up the muon calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
@@ -131,6 +116,16 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('postfix', selectionName, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
+        self.addOption ('trackSelection', True, type=bool,
+            info="whether or not to set up an instance of "
+            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
+            "z_0 sin(theta) cuts. The default is True.")
+        self.addOption ('maxD0Significance', 3, type=float,
+            info="maximum d0 significance used for the trackSelection"
+            "The default is 3")
+        self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
+            info="maximum Delta z0sinTheta in mm used for the trackSelection"
+            "The default is 0.5 mm")
         self.addOption ('quality', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
             "Loose, LowPt, HighPt.")
@@ -182,6 +177,17 @@ class MuonWorkingPointConfig (ConfigBlock) :
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
+
+        # Set up the track selection algorithm:
+        if self.trackSelection :
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+                                'MuonTrackSelectionAlg' + postfix )
+            alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
+            alg.maxD0Significance = self.maxD0Significance
+            alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, preselection=self.qualitySelectionOutput)
 
         # Setup the muon quality selection
         alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',

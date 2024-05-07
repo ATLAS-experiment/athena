@@ -33,10 +33,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="whether or not to perform isolation corrections (leakage "
             "corrections), i.e. set up an instance of "
             "CP::EgammaIsolationCorrectionAlg.")
-        self.addOption ('trackSelection', True, type=bool,
-            info="whether or not to set up an instance of "
-            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
-            "z_0 sin(theta) cuts. The default is True.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
@@ -78,17 +74,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration)
-
-        # Set up the track selection algorithm:
-        if self.trackSelection :
-            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
-                                        'ElectronTrackSelectionAlg' + self.postfix )
-            alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
-            alg.maxD0Significance = 5
-            alg.maxDeltaZ0SinTheta = 0.5
-            alg.particles = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Select electrons only with good object quality.
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' + self.postfix )
@@ -164,6 +149,16 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
+        self.addOption ('trackSelection', True, type=bool,
+            info="whether or not to set up an instance of "
+            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
+            "z_0 sin(theta) cuts. The default is True.")
+        self.addOption ('maxD0Significance', 5, type=float,
+            info="maximum d0 significance used for the trackSelection"
+            "The default is 5")
+        self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
+            info="maximum z0sinTheta in mm used for the trackSelection"
+            "The default is 0.5 mm")
         self.addOption ('likelihoodWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH. ")
@@ -210,6 +205,17 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             postfix = self.selectionName
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
+
+        # Set up the track selection algorithm:
+        if self.trackSelection :
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+                                        'ElectronTrackSelectionAlg' + postfix )
+            alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
+            alg.maxD0Significance = self.maxD0Significance
+            alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         if 'LH' in self.likelihoodWP:
             # Set up the likelihood ID selection algorithm
