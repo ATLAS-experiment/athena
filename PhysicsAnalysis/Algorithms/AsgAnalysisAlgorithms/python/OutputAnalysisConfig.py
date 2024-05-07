@@ -47,6 +47,9 @@ class OutputAnalysisConfig (ConfigBlock):
             "prefaced by the keywords enable or disable) to turn on/off the "
             "writing of branches to the output ntuple. The default is None "
             "(no modification to the scheduled output branches).")
+        self.addOption ('alwaysAddNosys', False, type=bool,
+            info="If set to True, all branches will be given a systematics suffix, "
+            "even if they have no systematics (beyond the nominal).")
 
 
     def makeAlgs (self, config) :
@@ -114,6 +117,8 @@ class OutputAnalysisConfig (ConfigBlock):
                 if outputConfig.noSys :
                     outputConfig.outputContainerName = outputConfig.outputContainerName.replace ('%SYS%', 'NOSYS')
                     outputConfig.variableName = outputConfig.variableName.replace ('%SYS%', 'NOSYS')
+                    if self.alwaysAddNosys :
+                        outputName += "_NOSYS"
                 else :
                     outputName += '_%SYS%'
                 myVars += [outputConfig.outputContainerName + '.' + outputConfig.variableName + ' -> ' + outputName]
