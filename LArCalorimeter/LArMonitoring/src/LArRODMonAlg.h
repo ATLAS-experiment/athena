@@ -49,9 +49,9 @@ class LArRODMonAlg: public AthMonitorAlgorithm
 private:
   const LArOnlineID* m_LArOnlineIDHelper=nullptr;
 
-  enum PARTITION                                         {  EMBC=0,EMBA,  EMECC,  EMECA,  HECC,  HECA,  FCALC, FCALA,  N_PARTITIONS};
-  const std::array<std::string,N_PARTITIONS+1> m_PARTNAMES{"EMBC","EMBA","EMECC","EMECA","HECC","HECA","FCalC","FCalA","UNKNOWN"};
-
+  enum PARTITION                                              {  EMBC=0,EMBA,  EMECC,  EMECA,  HECC,  HECA,  FCALC,  FCALA,  N_PARTITIONS};
+  static constexpr auto m_PARTNAMES=std::to_array<const char*>({"EMBC","EMBA","EMECC","EMECA","HECC","HECA","FCalC","FCalA","UNKNOWN"});
+  
   class ERRCOUNTER {
   public:
     ERRCOUNTER() {
@@ -64,7 +64,7 @@ private:
 
 
   PARTITION getPartition(const HWIdentifier chid) const;
-  const std::string & getPartitionName(const HWIdentifier chid) const;
+  const char* getPartitionName(const HWIdentifier chid) const;
 
   struct diff_t {
     float e_on=0;
@@ -211,40 +211,13 @@ LArRODMonAlg::PARTITION LArRODMonAlg::getPartition(const HWIdentifier chid) cons
       return FCALA;
   }
 
-  ATH_MSG_FATAL( "Channel 0x "<< std::hex << chid.get_identifier32().get_compact() << std::dec << " neither EMB nor EMEC nor HEC nor FCAL???" );
+  ATH_MSG_FATAL(std::format("Channel {:#x} neither EMB nor EMEC nor HEC nor FCAL???",chid.get_identifier32().get_compact()));
   return N_PARTITIONS;
 }
 
 inline 
-const std::string & LArRODMonAlg::getPartitionName(const HWIdentifier chid) const{
-  const int side=m_LArOnlineIDHelper->pos_neg(chid);
-  if (m_LArOnlineIDHelper->isEMBchannel(chid)) {
-    if (side==0)
-      return m_PARTNAMES[0];
-    else
-      return m_PARTNAMES[1];
-  }
-  if (m_LArOnlineIDHelper->isEMECchannel(chid)) {
-     if (side==0)
-       return m_PARTNAMES[2];
-     else
-       return m_PARTNAMES[3];
-  }
-  if (m_LArOnlineIDHelper->isHECchannel(chid)){
-    if (side==0)
-      return m_PARTNAMES[4];
-    else
-      return m_PARTNAMES[5];
-  }
-  if (m_LArOnlineIDHelper->isFCALchannel(chid)) {
-    if (side==0)
-      return m_PARTNAMES[6];
-    else
-      return m_PARTNAMES[7];
-  }
-
-  ATH_MSG_FATAL( "Channel 0x "<< std::hex << chid.get_identifier32().get_compact() << std::dec << " neither EMB nor EMEC nor HEC nor FCAL???" );
-  return m_PARTNAMES[8];
+const char* LArRODMonAlg::getPartitionName(const HWIdentifier chid) const{
+  return m_PARTNAMES[getPartition(chid)];
 }
 
 #endif

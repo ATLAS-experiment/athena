@@ -200,7 +200,7 @@ StatusCode LArNoisyROMonAlg::fillHistograms(const EventContext& ctx) const {
   // Loop on all FEBs noisy in Std definition (i.e >30 channels with q factor > 4000)
   // And fill the 2D maps of fraction of fraction of noisy events
   unsigned int NbNoisyFEB = 0;
-  std::array<unsigned,4> partMask({{LArNoisyROSummary::EMBCMask,LArNoisyROSummary::EMBAMask,LArNoisyROSummary::EMECCMask,LArNoisyROSummary::EMECAMask}});
+  constexpr auto partMask=std::to_array<unsigned>({LArNoisyROSummary::EMBCMask,LArNoisyROSummary::EMBAMask,LArNoisyROSummary::EMECCMask,LArNoisyROSummary::EMECAMask});
 
   ATH_MSG_DEBUG("NoisyFEB vector size " << noisyFEB.size());
 
