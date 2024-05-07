@@ -6,7 +6,6 @@
 #include "GaudiKernel/EventIDBase.h"
 #include "AthenaKernel/StoreID.h"
 #include "AthenaKernel/BaseInfo.h"
-#include "CxxUtils/starts_with.h"
 
 
 //---------------------------------------------------------------------------
@@ -360,7 +359,7 @@ CondSvc::isValidID(const EventContext& ctx, const DataObjID& id) const {
 
   // FIXME: this is ugly, but we need to strip out the name of the store.
   std::string sk = id.key();
-  if (CxxUtils::starts_with (sk, StoreID::storeName(StoreID::CONDITION_STORE))) {
+  if (sk.starts_with( StoreID::storeName(StoreID::CONDITION_STORE))) {
     sk.erase(0,15);
   }
 

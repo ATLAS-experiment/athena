@@ -10,7 +10,6 @@
 #include "AthContainers/AuxElement.h"
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
-#include "CxxUtils/starts_with.h"
 
 #include <unordered_map>
 #include <regex>
@@ -314,7 +313,7 @@ namespace TrigCompositeUtils {
     // Loop over each DecisionContainer,
     for (const std::string& key : keys) {
       // Get and check this container
-      if ( not (CxxUtils::starts_with(key, "HLTNav_") or CxxUtils::starts_with(key, "_HLTNav_")) ) {
+      if ( ! (key.starts_with( "HLTNav_") ||  key.starts_with("_HLTNav_")) ) {
         continue; // Only concerned about the decision containers which make up the navigation, they have name prefix of HLTNav (or _HLTNav for transient-only mode)
       }
       if (keysToIgnore.count(key) == 1) {

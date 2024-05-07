@@ -14,7 +14,6 @@
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainers/tools/error.h"
 #include "CxxUtils/checker_macros.h"
-#include "CxxUtils/starts_with.h"
 #include <cassert>
 #include <sstream>
 #include <cstring>
@@ -594,7 +593,7 @@ AuxTypeRegistry::addFactory (lock_t& /*lock*/,
   else
     m_factories.insert_or_assign (key, factory);
 
-  if (CxxUtils::starts_with (SG::normalizedTypeinfoName (ti_alloc),
+  if (SG::normalizedTypeinfoName (ti_alloc).starts_with(
                           SG::auxAllocatorNamePrefix))
   {
     m_allocMap.insert_or_assign (ti.name(), &ti_alloc);

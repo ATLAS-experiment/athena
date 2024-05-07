@@ -21,7 +21,6 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
-#include "CxxUtils/starts_with.h"
 
 #include <algorithm>
 #include <iostream>
@@ -424,77 +423,77 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
   if (pmaterial!= nullptr) 
       return pmaterial;
 
-  if(CxxUtils::starts_with(name, "std"))
+  if(name.starts_with("std"))
     {
       detector = "std";
       tmp_materials = m_stdmaterials;
       tmp_matcomponents = m_stdmatcomponents;
       data_id = "STDMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "trt"))
+  else if(name.starts_with("trt"))
     {
       detector = "trt";
       tmp_materials = m_trtmaterials;
       tmp_matcomponents = m_trtmatcomponents;
       data_id = "TRTMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "LAr"))
+  else if(name.starts_with("LAr"))
     {
       detector = "LAr";
       tmp_materials = m_larmaterials;
       tmp_matcomponents = m_larmatcomponents;
       data_id = "LARMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "muo"))
+  else if(name.starts_with("muo"))
     {
       detector = "muo";
       tmp_materials = m_muomaterials;
       tmp_matcomponents = m_muomatcomponents;
       data_id = "MUOMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "pixtb"))
+  else if(name.starts_with("pixtb"))
     {
       detector = "pixtb";
       tmp_materials = m_pixtbmaterials;
       tmp_matcomponents = m_pixtbmatcomponents;
       data_id = "PIXELTBMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "pix"))
+  else if(name.starts_with("pix"))
     {
       detector = "pix";
       tmp_materials = m_pixmaterials;
       tmp_matcomponents = m_pixmatcomponents;
       data_id = "PIXMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "sct"))
+  else if(name.starts_with("sct"))
     {
       detector = "sct";
       tmp_materials = m_sctmaterials;
       tmp_matcomponents = m_sctmatcomponents;
       data_id = "SCTMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "indet"))
+  else if(name.starts_with("indet"))
     {
       detector = "indet";
       tmp_materials = m_indetmaterials;
       tmp_matcomponents = m_indetmatcomponents;
       data_id = "INDETMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "shield"))
+  else if(name.starts_with("shield"))
     {
       detector = "shield";
       tmp_materials = m_shieldmaterials;
       tmp_matcomponents = m_shieldmatcomponents;
       data_id = "SHIELDMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "tile"))
+  else if(name.starts_with("tile"))
     {
       detector = "tile";
       tmp_materials = m_tilematerials;
       tmp_matcomponents = m_tilematcomponents;
       data_id = "TILEMATERIALS_DATA_ID";
     }
-  else if(CxxUtils::starts_with(name, "toro"))
+  else if(name.starts_with("toro"))
     {
       detector = "toro";
       tmp_materials = m_toromaterials;
@@ -502,12 +501,12 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
       data_id = "TOROMATERIALS_DATA_ID";
     }
   else {return 0 ;}
-	
+
   for( ind = 0; ind < tmp_materials->size(); ind++)
     {
       const IRDBRecord* rec = (*tmp_materials)[ind];
       tmp_name = detector+"::"+rec->getString("NAME");
-		
+
       if( name == tmp_name){
 	material_name  =detector+"::"+rec->getString("NAME");
 	material_id = rec->getLong(data_id);

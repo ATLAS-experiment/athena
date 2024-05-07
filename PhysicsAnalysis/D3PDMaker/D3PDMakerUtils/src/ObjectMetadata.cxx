@@ -9,7 +9,6 @@
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CxxUtils/starts_with.h"
 
 // Local include(s):
 #include "D3PDMakerUtils/ObjectMetadata.h"
@@ -115,7 +114,7 @@ namespace D3PD {
 
       // Check that the variable has the correct prefix:
       if( m_prefix != "" &&
-          !CxxUtils::starts_with (name, m_prefix) )
+          !name.starts_with( m_prefix) )
       {
          REPORT_MESSAGE_WITH_CONTEXT( MSG::ERROR, "ObjectMetadata" )
             << "Specified variable name (" << name << ") doesn't have the "

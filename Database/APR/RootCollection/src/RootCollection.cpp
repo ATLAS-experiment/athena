@@ -25,8 +25,6 @@
 #include "TMessage.h"
 #include "TDirectory.h"
 
-#include "CxxUtils/starts_with.h"
-
 #define corENDL coral::MessageStream::endmsg
 
 #include <map>
@@ -187,7 +185,7 @@ namespace pool {
       if( m_open ) close();
 
       if( !m_fileCatalog
-        && CxxUtils::starts_with (m_fileName, "PFN:")
+        && m_fileName.starts_with ( "PFN:")
         && m_description.connection().empty() )
       {
         // special case with no catalog and PFN specified

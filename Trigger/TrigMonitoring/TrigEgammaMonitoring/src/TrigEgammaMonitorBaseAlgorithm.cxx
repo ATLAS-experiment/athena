@@ -149,9 +149,9 @@ bool TrigEgammaMonitorBaseAlgorithm::isPrescaled(const std::string& trigger) con
     bool rerun=true; //assume rerun for l1
     std::string l1item="";
 
-    if(boost::starts_with(trigger, "L1" ))
+    if(trigger.starts_with( "L1" ))
         l1item=trigger;
-    if(boost::starts_with(trigger,"HLT")){
+    if(trigger.starts_with("HLT")){
         l1item = getL1Item(trigger);
         const unsigned int bit=tdt()->isPassedBits(trigger);
         efprescale=bit & TrigDefs::EF_prescaled;

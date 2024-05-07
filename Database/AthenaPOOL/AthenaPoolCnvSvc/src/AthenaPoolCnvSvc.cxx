@@ -30,7 +30,6 @@
 
 #include "AuxDiscoverySvc.h"
 
-#include "CxxUtils/starts_with.h"
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
@@ -206,7 +205,7 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
    PMonUtils::BasicStopWatch stopWatch("cObj_" + objName, m_chronoMap);
    if (!m_persSvcPerInputType.empty()) { // Use separate PersistencySvc for each input data type
       TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddress);
-      if (tokAddr != nullptr && tokAddr->getToken() != nullptr && (CxxUtils::starts_with(tokAddr->getToken()->contID(), m_persSvcPerInputType.value() + "(") || CxxUtils::starts_with(tokAddr->getToken()->contID(), m_persSvcPerInputType.value() + "_"))) {
+      if (tokAddr != nullptr && tokAddr->getToken() != nullptr && (tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "(") || tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "_"))) {
          const unsigned int maxContext = m_poolSvc->getInputContextMap().size();
          const unsigned int auxContext = m_poolSvc->getInputContext(tokAddr->getToken()->classID().toString() + tokAddr->getToken()->dbID().toString(), 1);
          char text[32];
@@ -989,18 +988,18 @@ StatusCode AthenaPoolCnvSvc::convertAddress(const IOpaqueAddress* pAddress,
 StatusCode
 AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const
 {
-  if (CxxUtils::starts_with (fileSpec, "oracle") || CxxUtils::starts_with (fileSpec, "mysql")) {
+  if (fileSpec.starts_with ( "oracle") || fileSpec.starts_with ( "mysql")) {
       outputTech = pool::POOL_RDBMS_StorageType.type();
-   } else if (CxxUtils::starts_with (fileSpec, "ROOTKEY:")) {
+   } else if (fileSpec.starts_with ( "ROOTKEY:")) {
       outputTech = pool::ROOTKEY_StorageType.type();
       fileSpec.erase(0, 8);
-   } else if (CxxUtils::starts_with (fileSpec, "ROOTTREE:")) {
+   } else if (fileSpec.starts_with ( "ROOTTREE:")) {
       outputTech = pool::ROOTTREE_StorageType.type();
       fileSpec.erase(0, 9);
-   } else if (CxxUtils::starts_with (fileSpec, "ROOTTREEINDEX:")) {
+   } else if (fileSpec.starts_with ( "ROOTTREEINDEX:")) {
       outputTech = pool::ROOTTREEINDEX_StorageType.type();
       fileSpec.erase(0, 14);
-   } else if (CxxUtils::starts_with (fileSpec, "ROOTRNTUPLE:")) {
+   } else if (fileSpec.starts_with ( "ROOTRNTUPLE:")) {
       outputTech = pool::ROOTRNTUPLE_StorageType.type();
       fileSpec.erase(0, 12);
    } else if (outputTech == 0) {
