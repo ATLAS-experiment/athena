@@ -179,9 +179,9 @@ namespace Trk
       return -999999.;
     }
     std::vector<xAOD::TrackParticle::FourMom_t> particleMom(NTrk);
-    std::vector<Amg::MatrixX> particleDeriv(NTrk);
+    std::vector<AmgMatrix(3,3)> particleDeriv(NTrk);
     xAOD::TrackParticle::FourMom_t totalMom;
-    Amg::MatrixX tmpDeriv(3,3); tmpDeriv.setZero();
+    AmgMatrix(3,3) tmpDeriv; tmpDeriv.setZero();
     auto fullCov = convertCovMatrix(vxCandidate);
     if (fullCov.size() == 0) return -999999.;
 
@@ -366,18 +366,13 @@ namespace Trk
 
   Amg::Vector3D V0Tools::trackMomentum(const xAOD::Vertex * vxCandidate, unsigned int trkIndex)
   {
-    double px = 0., py = 0., pz = 0.;
     const Trk::TrackParameters* aPerigee = vxCandidate->vxTrackAtVertex()[trkIndex].perigeeAtVertex();
-    px = aPerigee->momentum()[Trk::px];
-    py = aPerigee->momentum()[Trk::py];
-    pz = aPerigee->momentum()[Trk::pz];
-    Amg::Vector3D mom(px,py,pz);
-    return mom;
+    return aPerigee->momentum();
   }
 
   Amg::Vector3D V0Tools::positiveTrackMomentum(const xAOD::Vertex * vxCandidate)
   {
-    Amg::Vector3D mom;
+    Amg::Vector3D mom; mom.setZero();
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (NTrk != 2) return mom;
     for( unsigned int it=0; it<NTrk; it++) {
@@ -389,7 +384,7 @@ namespace Trk
 
   Amg::Vector3D V0Tools::negativeTrackMomentum(const xAOD::Vertex * vxCandidate)
   {
-    Amg::Vector3D mom;
+    Amg::Vector3D mom; mom.setZero();
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (NTrk != 2) return mom;
     for( unsigned int it=0; it<NTrk; it++) {
@@ -401,15 +396,11 @@ namespace Trk
 
   Amg::Vector3D V0Tools::V0Momentum(const xAOD::Vertex * vxCandidate)
   {
-    double px = 0., py = 0., pz = 0.;
+    Amg::Vector3D mom; mom.setZero();
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     for( unsigned int it=0; it<NTrk; it++) {
-      Amg::Vector3D mom_trk = trackMomentum(vxCandidate,it);
-      px += mom_trk.x();
-      py += mom_trk.y();
-      pz += mom_trk.z();
+      mom += trackMomentum(vxCandidate,it);
     }
-    Amg::Vector3D mom(px,py,pz);
     return mom;
   }
 
@@ -485,8 +476,7 @@ namespace Trk
 
   Amg::Vector3D V0Tools::vtx(const xAOD::Vertex * vxCandidate)
   {
-    Amg::Vector3D vertex(vxCandidate->position().x(),vxCandidate->position().y(),vxCandidate->position().z());
-    return vertex;
+    return vxCandidate->position();
   }
 
   double V0Tools::rxy(const xAOD::Vertex * vxCandidate)
@@ -510,7 +500,7 @@ namespace Trk
     double rxy = (rxysq>0.) ? sqrt(rxysq) : 0.;
     double drdx = dx/rxy;
     double drdy = dy/rxy;
-    Amg::MatrixX D_vec(2,1); D_vec.setZero();
+    AmgMatrix(2, 1) D_vec; D_vec.setZero();
     D_vec(0,0)  = drdx;
     D_vec(1,0)  = drdy;
     Amg::MatrixX rxy_err = D_vec.transpose() * cov.block(0,0,2,2) * D_vec;
@@ -597,7 +587,6 @@ namespace Trk
     }
 
     Amg::MatrixX PtErrSq(1,1);
-    double PtErrsq = 0.;
     if (ndim == 5*NTrk+3 || ndim == 5*NTrk+6) {
       Amg::MatrixX D_vec(5*NTrk,1); D_vec.setZero();
       for( unsigned int it=0; it<NTrk; it++) {
@@ -623,7 +612,7 @@ namespace Trk
       PtErrSq = D_vec.transpose() * fullCov.block(3,3,ndim-3,ndim-3) * D_vec;
     }
 
-    PtErrsq = PtErrSq(0,0);
+    double PtErrsq = PtErrSq(0,0);
     if (PtErrsq <= 0.) ATH_MSG_DEBUG("ptError: negative sqrt PtErrsq " << PtErrsq);
     return (PtErrsq>0.) ? sqrt(PtErrsq) : 0.;
   }
@@ -2160,9 +2149,10 @@ namespace Trk
       if (masses[it] >= 0.) {
         const xAOD::TrackParticle* TP = origTrack(vxCandidate,it);
         if (TP == nullptr) return -999999.;
-        px += TP->p4().Px();
-        py += TP->p4().Py();
-        pz += TP->p4().Pz();
+        TLorentzVector Tp4 = TP->p4();
+        px += Tp4.Px();
+        py += Tp4.Py();
+        pz += Tp4.Pz();
         double pesq = 1./(TP->qOverP()*TP->qOverP()) + masses[it]*masses[it];
         double pe = (pesq>0.) ? sqrt(pesq) : 0.;
         e += pe;
@@ -2265,9 +2255,10 @@ namespace Trk
         double pe = (tmp>0.) ? sqrt(tmp) : 0.;
         e[it] = pe;
         E  += e[it];
-        Px += TP->p4().Px();
-        Py += TP->p4().Py();
-        Pz += TP->p4().Pz();
+        TLorentzVector p4 = TP->p4();
+        Px += p4.Px();
+        Py += p4.Py();
+        Pz += p4.Pz();
       }
     }
 
@@ -2676,7 +2667,7 @@ namespace Trk
 
     Amg::MatrixX mtx(ndim,ndim);
 
-    long int ij=0;
+    Eigen::Index ij=0;
     for (int i=1; i<= ndim; i++) {
       for (int j=1; j<=i; j++){
         if (i==j) {
