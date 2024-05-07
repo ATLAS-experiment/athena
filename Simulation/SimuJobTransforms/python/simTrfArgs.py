@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import logging
 msg = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ def addPileUpTrfArgs(parser):
                         help='Input HITS file for cavern background sub-events', group='PileUp')
     parser.add_argument('--inputBeamHaloHitsFile', nargs='+', action='append',
                         type=argFactory(argHITSFile, io='input', executor=['EVNTtoRDO','HITtoRDO'], auxiliaryFile=True),
-                        help='Input HITS file for beam halo sub-events', group='PileUp'),
+                        help='Input HITS file for beam halo sub-events', group='PileUp')
     parser.add_argument('--inputBeamGasHitsFile', nargs='+', action='append',
                         type=argFactory(argHITSFile, io='input', executor=['EVNTtoRDO','HITtoRDO'], auxiliaryFile=True),
                         help='Input HITS file for beam gas sub-events', group='PileUp')

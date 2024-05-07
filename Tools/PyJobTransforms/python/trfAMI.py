@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfAMI
 #  @brief Utilities for configuration of transforms via AMI tags
@@ -511,7 +511,7 @@ def getTrfConfigFromAMI(tag, suppressNonJobOptions = True):
 
         if 'outputs' in result[0]:
             outputs=deserialiseFromAMIString(result[0]['outputs'])
-            trf.outFiles=dict( (k, getOutputFileName(k.lstrip('output').rstrip('File')) ) for k in outputs )
+            trf.outFiles=dict( (k, getOutputFileName(k.removeprefix('output').removesuffix('File')) ) for k in outputs )
             trf.outfmts=[ outputs[k]['dstype'] for k in outputs ]
     except KeyError as e:
         raise TransformAMIException(AMIerrorCode, "Missing key in AMI data: {0}".format(e))

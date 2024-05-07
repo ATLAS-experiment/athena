@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @Package PyJobTransforms.trfValidateRootFile
 # @brief Functionality to test a Root file for corruption
@@ -77,7 +77,7 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
     try:
         reader=RNTupleReader.Open(ntuple)
-    except BaseException as err:
+    except Exception as err:
         msg.warning('Could not open ntuple %s: %s', ntuple, err)
         return 1
 
@@ -86,7 +86,7 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
     for i in reader:
         try:
             reader.LoadEntry(i)
-        except BaseException as err:
+        except Exception as err:
             msg.warning('Event %s of ntuple %s is corrupted: %s', i, reader.GetDescriptor().GetName(), err)
             return 1
 

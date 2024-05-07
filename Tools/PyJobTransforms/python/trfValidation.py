@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfValidation
 #
@@ -155,7 +155,7 @@ class ignorePatterns(object):
 
                         self._structuredPatterns.append({'service': reWho, 'level': level, 'message': reMessage})
 
-            except (IOError, OSError) as xxx_todo_changeme:
+            except OSError as xxx_todo_changeme:
                 (errno, errMsg) = xxx_todo_changeme.args
                 msg.warning('Failed to open error pattern file {0}: {1} ({2})'.format(fullName, errMsg, errno))
 
