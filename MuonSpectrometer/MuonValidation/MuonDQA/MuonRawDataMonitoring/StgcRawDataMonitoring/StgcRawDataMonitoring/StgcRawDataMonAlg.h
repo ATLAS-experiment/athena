@@ -96,6 +96,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   Gaudi::Property<double> m_cutPt{this, "cutPt", 15000.};
   Gaudi::Property<double> m_cutEtaDown{this, "cutEtaDown", 1.3};
   Gaudi::Property<double> m_cutEtaUp{this, "cutEtaUp", 2.4};
+  Gaudi::Property<double> m_minDeltaR{this, "minDeltaR", 0.1};
   Gaudi::Property<int> m_cutTriggerPhiId{this, "cutTriggerPhiId", 63};
   Gaudi::Property<int> m_cutTriggerBandId{this, "cutTriggerBandId", 255};
 };    
