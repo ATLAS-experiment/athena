@@ -119,9 +119,22 @@ namespace FlavorTagDiscriminants {
     decorate(jet, jet);
   }
 
-  void GNN::decorateWithDefaults(const xAOD::Jet& jet) const {
+  void GNN::decorateWithDefaults(const SG::AuxElement& jet) const {
     for (const auto& dec: m_decorators.jetFloat) {
       dec.second(jet) = m_defaultValue;
+    }
+    // for some networks we need to set a lot of empty vectors as well
+    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V1) {
+      // vector outputs, e.g. track predictions
+      for (const auto& dec: m_decorators.jetVecChar) {
+        dec.second(jet) = {};
+      }
+      for (const auto& dec: m_decorators.jetVecFloat) {
+        dec.second(jet) = {};
+      }
+      for (const auto& dec: m_decorators.jetTrackLinks) {
+        dec.second(jet) = {};
+      }
     }
   }
 

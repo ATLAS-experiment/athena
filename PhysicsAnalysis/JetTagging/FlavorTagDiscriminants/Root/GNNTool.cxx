@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/GNNTool.h"
@@ -34,7 +34,7 @@ namespace FlavorTagDiscriminants {
   void GNNTool::decorate(const xAOD::Jet& jet) const {
     m_gnn->decorate(jet, jet);
   }
-  void GNNTool::decorateWithDefaults(const xAOD::Jet& jet) const {
+  void GNNTool::decorateWithDefaults(const SG::AuxElement& jet) const {
     m_gnn->decorateWithDefaults(jet);
   }
 

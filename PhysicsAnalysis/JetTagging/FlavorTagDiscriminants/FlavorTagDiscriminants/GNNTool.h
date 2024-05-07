@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GNN_TOOL_H
@@ -7,7 +7,7 @@
 
 // Tool includes
 #include "AsgTools/AsgTool.h"
-#include "FlavorTagDiscriminants/IBTagDecorator.h"
+#include "FlavorTagDiscriminants/IBTagConditionalDecorator.h"
 #include "FlavorTagDiscriminants/IJetTagConditionalDecorator.h"
 
 #include "FlavorTagDiscriminants/GNNToolifiers.h"
@@ -28,11 +28,14 @@ namespace FlavorTagDiscriminants {
   // Tool to to flavor tag jet/btagging object
   // using GNN based taggers
   class GNNTool : public asg::AsgTool,
-                  virtual public IBTagDecorator,
+                  virtual public IBTagConditionalDecorator,
                   virtual public IJetTagConditionalDecorator
   {
 
-    ASG_TOOL_CLASS2(GNNTool, IBTagDecorator, IJetTagConditionalDecorator)
+    ASG_TOOL_CLASS2(
+      GNNTool,
+      IBTagConditionalDecorator,
+      IJetTagConditionalDecorator)
     public:
       GNNTool(const std::string& name);
       ~GNNTool();
@@ -41,7 +44,7 @@ namespace FlavorTagDiscriminants {
 
       virtual void decorate(const xAOD::BTagging& btag) const override;
       virtual void decorate(const xAOD::Jet& jet) const override;
-      virtual void decorateWithDefaults(const xAOD::Jet& jet) const override;
+      virtual void decorateWithDefaults(const SG::AuxElement& jet) const override;
       void decorate(const xAOD::Jet& jet, const SG::AuxElement& decorated) const;
 
       virtual std::set<std::string> getDecoratorKeys() const override;

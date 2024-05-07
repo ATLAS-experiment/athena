@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -59,10 +59,12 @@ namespace FlavorTagDiscriminants {
     CHECK( m_dec_barcode.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
     CHECK( m_dec_muon_origin_label.initialize() );
-    
+
     // Retrieve tools
     ATH_CHECK( m_trackTruthOriginTool.retrieve() );
-    ATH_CHECK( m_truthLeptonTool.retrieve() );
+    if (!m_truthLeptonTool.empty()) {
+      ATH_CHECK( m_truthLeptonTool.retrieve() );
+    }
 
     return StatusCode::SUCCESS;
   }
