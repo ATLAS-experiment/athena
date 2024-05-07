@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILERAWCHANNELNOISEMONITORALGORITHM_H
@@ -39,6 +39,9 @@ class TileRawChannelNoiseMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<bool> m_checkDCS{this, "CheckDCS", false, "Check Tile DCS status"};
     Gaudi::Property<std::vector<unsigned int>> m_triggerTypes{this,
         "TriggerTypes", {}, "Given trigger types only events with these TT will be used, otherwise all"};
+
+    Gaudi::Property<bool> m_ignoreDisconnectedChannels{this,
+        "ignoreDisconnectedChannels", false, "Ignore disconnected channels"};
 
     Gaudi::Property<std::vector<int>> m_fragIDsToIgnoreDMUerrors{this,
          "FragIDsToIgnoreDMUErrors", {}, "List of Tile frag IDs for which ignore DMU errors"};
