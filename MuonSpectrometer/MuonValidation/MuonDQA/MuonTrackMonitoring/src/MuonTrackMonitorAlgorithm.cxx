@@ -324,7 +324,7 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
             } else {
                 fill(tool, MuonSmallSectorZ, MuonSmallSectorR, MuonSector, MuonCIndex);
             }
-            const double muonSegmentEta = TLorentzVector(muonSegment->px(), muonSegment->py(), muonSegment->pz(), 0).Eta();
+            const double muonSegmentEta = Amg::Vector3D(muonSegment->px(), muonSegment->py(), muonSegment->pz()).eta();
             if (std::abs(muonSegmentEta) > 1.05) {
                 SegmentXPosEndcap = muonSegment->x();
                 SegmentYPosEndcap = muonSegment->y();
