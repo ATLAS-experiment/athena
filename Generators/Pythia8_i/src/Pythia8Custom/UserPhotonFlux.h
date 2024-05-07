@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MAIN70EXAMPLE__H
-#define MAIN70EXAMPLE__H
+#ifndef PYTHIA8_I_USERPHOTONFLUX_H
+#define PYTHIA8_I_USERPHOTONFLUX_H
 
 #include "Pythia8_i/IPythia8Custom.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -100,7 +100,7 @@ class UserPhotonFlux: public AthAlgTool, virtual public IPythia8Custom {
    *  Probably not used for this application */
   virtual double CrossSectionScaleFactor() const  override;
 
-  StatusCode InitializePythiaInfo(Pythia8::Pythia& ) const;
+  StatusCode InitializePythiaInfo(Pythia8::Pythia& ) const override;
 
  private:
 
