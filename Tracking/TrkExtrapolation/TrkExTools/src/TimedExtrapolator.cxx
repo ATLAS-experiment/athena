@@ -482,7 +482,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
     // detached volume boundaries
     Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols = cache.m_currentStatic->confinedDetachedVolumes();
     if (!detVols.empty()) {
-      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::iterator iTer = detVols.begin();
       for (; iTer != detVols.end(); ++iTer) {
         // active station ?
         const Trk::Layer *layR = (*iTer)->layerRepresentation();
@@ -601,7 +601,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
       }
       // collect dense volume boundary
       if (!confinedDense.empty()) {
-        const auto *vIter = confinedDense.begin();
+        auto vIter = confinedDense.begin();
         for (; vIter != confinedDense.end(); ++vIter) {
           const auto& bounds = (*vIter)->boundarySurfaces();
           cache.m_denseVols.emplace_back(*vIter, bounds.size());
@@ -774,7 +774,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
                         particle);
         } else {
           ATH_MSG_VERBOSE("  [o] Collecting intersection with active input layer.");
-          cache.m_hitVector->push_back(Trk::HitInfo(currPar->uniqueClone(), timeLim.time, cache.m_navigLays[i].second->layerType(), 0.));
+          cache.m_hitVector->emplace_back(currPar->uniqueClone(), timeLim.time, cache.m_navigLays[i].second->layerType(), 0.);
         }
       } // ------------------------------------------------- Fatras mode off -----------------------------------
     }
@@ -1002,7 +1002,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
             overlapSearch(cache,*m_subPropagators[0], *currPar, *nextPar, *nextLayer, timeLim.time, dir, true, particle);
           } else if (nextLayer->layerType() > 0 && nextLayer->isOnLayer(nextPar->position())) {
             ATH_MSG_VERBOSE("  [o] Collecting intersection with active layer.");
-            cache.m_hitVector->push_back(Trk::HitInfo(nextPar->uniqueClone(), timeLim.time, nextLayer->layerType(), 0.));
+            cache.m_hitVector->emplace_back(nextPar->uniqueClone(), timeLim.time, nextLayer->layerType(), 0.);
           }
         } // ------------------------------------------------- Fatras mode off -----------------------------------
 
@@ -1293,11 +1293,11 @@ Trk::TimedExtrapolator::overlapSearch(Trk::TimedExtrapolator::Cache &cache,
   // now fill them into the parameter vector -------> hit creation done <----------------------
   for (; parsOnLayerIter != parsOnLayerIterEnd; ++parsOnLayerIter) {
     if (cache.m_hitVector) {
-      cache.m_hitVector->push_back(Trk::HitInfo(
+      cache.m_hitVector->emplace_back(
         std::unique_ptr<const Trk::TrackParameters>(*parsOnLayerIter),
          time,
          0,
-         0.));
+         0.);
     }
   }
 }
@@ -1634,7 +1634,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
   // detached volume boundaries
   Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols = cache.m_currentStatic->confinedDetachedVolumes();
   if (!detVols.empty()) {
-    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::iterator iTer = detVols.begin();
     for (; iTer != detVols.end(); ++iTer) {
       // active station ?
       const Trk::Layer *layR = (*iTer)->layerRepresentation();
@@ -1706,7 +1706,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
         const auto confinedDense =
           (*iTer)->trackingVolume()->confinedDenseVolumes();
         if (!confinedDense.empty()) {
-          const auto *vIter = confinedDense.begin();
+          auto vIter = confinedDense.begin();
           for (; vIter != confinedDense.end(); ++vIter) {
             const auto& bounds = (*vIter)->boundarySurfaces();
             int newB = 0;
@@ -2197,7 +2197,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
     if (cache.m_hitVector && binIDMat) {
       // std::cout <<"id info at the alignable volume entry:"<<binIDMat->second<<std::endl;
       if (binIDMat->second > 0) {
-        cache.m_hitVector->push_back(Trk::HitInfo(currPar->uniqueClone(), timeLim.time, binIDMat->second, 0.));
+        cache.m_hitVector->emplace_back(currPar->uniqueClone(), timeLim.time, binIDMat->second, 0.);
       }
     }
 
@@ -2415,7 +2415,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
       if (cache.m_hitVector && iis[is].identifier > 0) {      // save entry to the next layer
         ATH_MSG_VERBOSE("active layer entry:" << currLay << " at R,z:" << nextPos.perp() << "," << nextPos.z());
         auto nextPar = std::make_unique<Trk::CurvilinearParameters>(nextPos, currPar->momentum(), 0.);
-        cache.m_hitVector->push_back(Trk::HitInfo(std::move(nextPar), timeLim.time, iis[is].identifier, 0.));
+        cache.m_hitVector->emplace_back(std::move(nextPar), timeLim.time, iis[is].identifier, 0.);
       }
     }
   }   // end loop over intersections
@@ -2425,7 +2425,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
   if (cache.m_hitVector) {      // save volume exit /active layer only ?
     ATH_MSG_VERBOSE("active layer/volume exit:" << currLay << " at R,z:" << nextPos.perp() << "," << nextPos.z());
     if (binIDMat and(binIDMat->second > 0)) {
-      cache.m_hitVector->push_back(Trk::HitInfo(nextPar->uniqueClone(), timeLim.time, currLay, 0.));
+      cache.m_hitVector->emplace_back(nextPar->uniqueClone(), timeLim.time, currLay, 0.);
     }
   }
 
@@ -2526,7 +2526,7 @@ Trk::TimedExtrapolator::extrapolateInAlignableTV(Trk::TimedExtrapolator::Cache &
     if (binMat) {
       const Trk::IdentifiedMaterial *binIDMat = binMat->material(currPar->position());
       if (binIDMat->second > 0) {
-        cache.m_hitVector->push_back(Trk::HitInfo(currPar->uniqueClone(), timeLim.time, binIDMat->second, 0.));
+        cache.m_hitVector->emplace_back(currPar->uniqueClone(), timeLim.time, binIDMat->second, 0.);
       }
     }
   }
@@ -2679,7 +2679,7 @@ Trk::TimedExtrapolator::extrapolateInAlignableTV(Trk::TimedExtrapolator::Cache &
                 // double s = (nextPar->position()-m_identifiedParameters->back().first->position()).mag();
                 // if (s>0.001) m_identifiedParameters->push_back(std::pair<const Trk::TrackParameters*,int>
                 // (nextPar->clone(), -binIDMat->second));
-                cache.m_hitVector->push_back(Trk::HitInfo(nextPar->uniqueClone(), timeLim.time, -binIDMat->second, 0.));
+                cache.m_hitVector->emplace_back(nextPar->uniqueClone(), timeLim.time, -binIDMat->second, 0.);
               }
             }
           }

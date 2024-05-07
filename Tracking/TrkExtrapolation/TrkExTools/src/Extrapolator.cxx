@@ -654,7 +654,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols =
       staticVol->confinedDetachedVolumes();
     if (!detVols.empty()) {
-      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::iterator iTer = detVols.begin();
       for (; iTer != detVols.end(); ++iTer) {
         // active station ?
         const Trk::Layer* layR = (*iTer)->layerRepresentation();
@@ -907,7 +907,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
       }
       // collect dense volume boundary
       if (!confinedDense.empty()) {
-        const auto *vIter = confinedDense.begin();
+        auto vIter = confinedDense.begin();
         for (; vIter != confinedDense.end(); ++vIter) {
           const auto bounds = (*vIter)->boundarySurfaces();
           cache.m_denseVols.emplace_back(*vIter, bounds.size());
@@ -4645,7 +4645,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
     Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols =
       cache.m_currentStatic->confinedDetachedVolumes();
     if (!detVols.empty()) {
-      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::iterator iTer = detVols.begin();
       for (; iTer != detVols.end(); ++iTer) {
         // active station ?
         const Trk::Layer* layR = (*iTer)->layerRepresentation();
@@ -4765,7 +4765,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       }
       // collect dense volume boundary
       if (!confinedDense.empty()) {
-        const auto *vIter = confinedDense.begin();
+        auto vIter = confinedDense.begin();
         for (; vIter != confinedDense.end(); ++vIter) {
           const auto& bounds = (*vIter)->boundarySurfaces();
           cache.m_denseVols.emplace_back(*vIter, bounds.size());

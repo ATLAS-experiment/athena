@@ -263,7 +263,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
     return nullptr;
 
   const bool bevelled = std::find_if(vols.begin(),vols.end(), 
-                              [](const VolumePtr ptr) -> bool {
+                              [](const VolumePtr& ptr) -> bool {
                                   return dynamic_cast<const BevelledCylinderVolumeBounds*>(&(ptr->volumeBounds()));
                               }) != vols.end();
  
@@ -280,9 +280,9 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
       volPos;
     std::vector<VolumePtr> fullPhiVols;
 
-    for (VolumePtr vol : vols) {
-      auto cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
-      auto bcyl =dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
+    for (const VolumePtr& vol : vols) {
+      const auto *cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
+      const auto *bcyl =dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
       double rmin{0.}, rmax{0.}, dphi{0.}, mRad{0.};
       int type = 0;
 
@@ -370,7 +370,7 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
       phiSteps.push_back(+M_PI);
     }
     for (auto & fullPhiVol : fullPhiVols) {
-      auto cyl =dynamic_cast<const CylinderVolumeBounds*>(&(fullPhiVol->volumeBounds()));
+      const auto *cyl =dynamic_cast<const CylinderVolumeBounds*>(&(fullPhiVol->volumeBounds()));
       if (!cyl) {
         ATH_MSG_WARNING("dynamic_cast<const CylinderVolumeBounds*>  failed ... trying to continue loop");
         continue;
@@ -487,8 +487,8 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(const std::vector<VolumeP
   double phiSector = M_PI;
   std::vector<std::pair<double, std::pair<double, double>>> volPos;
 
-  for (auto vol : vols) {
-   auto cyl =dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
+  for (const auto& vol : vols) {
+   const auto *cyl =dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
     if (!cyl) {
        ATH_MSG_WARNING("dynamic_cast<const CylinderVolumeBounds*> failed ... trying to continue loop");
        continue;
@@ -662,8 +662,8 @@ TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(const std::vector<VolumeP
   std::vector<std::pair<float, std::pair<float, float>>> volPos;
 
   for (const VolumePtr& vol : vols) {
-    auto cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
-    auto bcyl = dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
+    const auto *cyl = dynamic_cast<const CylinderVolumeBounds*>(&(vol->volumeBounds()));
+    const auto *bcyl = dynamic_cast<const BevelledCylinderVolumeBounds*>(&(vol->volumeBounds()));
     double zmin{0.}, zmax{0.}, dphi{0.}, mRad{0.};
     if (cyl) {
       zmin = vol->center().z() - cyl->halflengthZ();
@@ -836,7 +836,7 @@ std::unique_ptr<TrackingVolumeArray>
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (; volIter != vols.end(); ++volIter) {
-    auto currentCubBounds = dynamic_cast<const CuboidVolumeBounds*>(&((*volIter)->volumeBounds()));
+    const auto *currentCubBounds = dynamic_cast<const CuboidVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!currentCubBounds) {
       ATH_MSG_ERROR("Given TrackingVolume to TrackingVolumeArrayCreator didn't "
                     "match specified shape: return 0");
@@ -866,7 +866,7 @@ std::unique_ptr<TrackingVolumeArray>
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (; volIter != vols.end(); ++volIter) {
-    auto currentTrdBounds = dynamic_cast<const TrapezoidVolumeBounds*>(&((*volIter)->volumeBounds()));
+    const auto *currentTrdBounds = dynamic_cast<const TrapezoidVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!currentTrdBounds) {
       ATH_MSG_ERROR("Given TrackingVolume to TrackingVolumeArrayCreator didn't "
                     "match specified shape: return 0");
@@ -896,7 +896,7 @@ std::unique_ptr<TrackingVolumeArray>
   // loop over volumes and fill primaries
   auto volIter = vols.begin();
   for (; volIter != vols.end(); ++volIter) {
-    auto currentDTrdBounds =dynamic_cast<const DoubleTrapezoidVolumeBounds*>(&((*volIter)->volumeBounds()));
+    const auto *currentDTrdBounds =dynamic_cast<const DoubleTrapezoidVolumeBounds*>(&((*volIter)->volumeBounds()));
     if (!currentDTrdBounds) {
       ATH_MSG_ERROR("Given TrackingVolume to TrackingVolumeArrayCreator didn't "
                     "match specified shape: return 0");

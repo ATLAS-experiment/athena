@@ -55,14 +55,13 @@ TrackingVolumeToSoNode::TrackingVolumeToSoNode()
 }
 
 TrackingVolumeToSoNode::~TrackingVolumeToSoNode()
-{
-}
+= default;
 
 SoNode*  TrackingVolumeToSoNode::translateTrackingVolume(const Trk::TrackingVolume& tvol) const{
 
   //Fixme: We need to add a transformation also.
 
-  SoNode* sovol = 0;
+  SoNode* sovol = nullptr;
 
   // get the surface bounds
   const Trk::VolumeBounds& tvolBounds = tvol.volumeBounds();
@@ -198,7 +197,7 @@ SoNode*  TrackingVolumeToSoNode::translateTrackingVolume(const Trk::TrackingVolu
     }
   }
 
-  if (!sovol) return 0;
+  if (!sovol) return nullptr;
 
   // place and transform them
   SoSeparator* sosep = new SoSeparator();
@@ -212,7 +211,7 @@ SoNode*  TrackingVolumeToSoNode::translateTrackingVolume(const Trk::TrackingVolu
 
 const GeoShape* TrackingVolumeToSoNode::getShapeFromBounds(const Trk::VolumeBounds* tvolBounds ) const
 {
-  const GeoShape* sh=0;
+  const GeoShape* sh=nullptr;
   // cast bounds
   const Trk::CylinderVolumeBounds* tvolCylBounds = dynamic_cast<const Trk::CylinderVolumeBounds*>(tvolBounds);
   const Trk::CuboidVolumeBounds* tvolCubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(tvolBounds);
