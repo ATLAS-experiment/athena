@@ -26,7 +26,7 @@ class JobOptAction(argparse.Action):
             raise ValueError('Only job options or one pickle file is allowed')
 
         setattr(args, self.dest, scripts)
-        setattr(args, 'fromdb', pkls[0] if pkls else None)
+        args.fromdb = pkls[0] if pkls else None
 
 
 class MemCheckAction(argparse.Action):
@@ -40,10 +40,10 @@ class MemCheckAction(argparse.Action):
         import Hephaestus.MemoryTracker as memtrack  # noqa: F401
 
         if option_string=='--delete-check':
-            setattr(args, 'memchk_mode', 'delete-check')
+            args.memchk_mode = 'delete-check'
             import Hephaestus.DeleteChecker          # noqa: F401
         else:
-            setattr(args, 'memchk_mode', 'leak-check')
+            args.memchk_mode = 'leak-check'
 
 
 class AthHelp(argparse.Action):
@@ -303,7 +303,7 @@ def parse(legacy_args=False):
 
     parser = getArgumentParser(legacy_args)
     opts, leftover = parser.parse_known_args(args)
-    setattr(opts, 'user_opts', user_opts)
+    opts.user_opts = user_opts
 
     # If the argument parser has been extended, the script name(s) may end up
     # in the leftovers. Try to find them there:

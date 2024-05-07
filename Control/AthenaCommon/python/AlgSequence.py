@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/AlgSequence.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -61,7 +61,7 @@ class AthSequencer( GaudiSequencerConf.AthSequencer ):
 
 # store the new AthSequencer into CfgMgr to make it available
 from AthenaCommon import CfgMgr
-setattr( CfgMgr, 'AthSequencer', AthSequencer )
+CfgMgr.AthSequencer = AthSequencer
 del CfgMgr
 
 ### AthRetrySequencer ----------------------------------------------------------
@@ -103,7 +103,7 @@ if hasattr(GaudiSequencerConf, 'AthRetrySequencer'):
         pass # AthRetrySequencer
     # store the new AthRetrySequencer into CfgMgr to make it available
     from AthenaCommon import CfgMgr
-    setattr( CfgMgr, 'AthRetrySequencer', AthRetrySequencer )
+    CfgMgr.AthRetrySequencer = AthRetrySequencer
     del CfgMgr
     pass # monkey-patching AthRetrySequencer
 
