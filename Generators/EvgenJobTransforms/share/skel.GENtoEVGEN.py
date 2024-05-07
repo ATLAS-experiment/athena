@@ -10,7 +10,6 @@
 ## and import standard framework objects with standard local scope names
 
 import ast
-import platform
 import os, re, string, subprocess
 import AthenaCommon.AlgSequence as acas
 import AthenaCommon.AppMgr as acam
@@ -279,7 +278,7 @@ for opt in str(evgenConfig).split(os.linesep):
 evgenLog.info(".transform =                  Gen_tf")
 
 ## Print platform
-evgenLog.info(".platform = "+platform.platform())
+evgenLog.info(".platform = "+str(os.environ['BINARY_TAG']))
 
 ## Sort and check generator name / JO name consistency
 ##
