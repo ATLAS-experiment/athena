@@ -1,11 +1,10 @@
 #!/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
 import ROOT
 from PyCool import cool
 import os
-#from CaloCondBlobAlgs import CaloCondTools, CaloCondLogger
+
 
 def CaloCondBlobWriter(spec,valuePairs,defaultValue):
 
@@ -31,8 +30,7 @@ def CaloCondBlobWriter(spec,valuePairs,defaultValue):
    print ("Build CaloCondBlob object")
    data = cool.Record( spec )
    blob = data['CaloCondBlob16M']
-   #flt = g.CaloCondBlobFlt.getInstance(blob)
-   fltClass=getattr(ROOT,'CaloCondBlobFlt')
+   fltClass=ROOT.CaloCondBlobFlt
    flt=fltClass.getInstance(blob)
    flt.init(defVec,nChannels,1)
    

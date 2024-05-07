@@ -260,8 +260,7 @@ def regSelToolsCfg(flags, detNames):
         elif det == 'STGC':
             flagName = 'sTGC'
         detFlag = f'Enable{flagName}'
-        detFlagCont = getattr(flags, 'Detector')
-        detEnabled = getattr(detFlagCont, detFlag)
+        detEnabled = getattr(flags.Detector, detFlag)
         if not detEnabled:
             _log.debug('regSelToolsCfg: skip adding detector "%s" because the flag Detector.%s is False', det, detFlag)
             continue

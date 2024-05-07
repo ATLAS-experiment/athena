@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from copy import deepcopy
 from math import ceil
@@ -120,8 +120,7 @@ def loadPileUpProfile(flags, fragment_string):
 
     from importlib import import_module
     loaded_module = import_module(fragment_string)
-    function_def = getattr(loaded_module, 'setupProfile')
-    return function_def(flags)
+    return loaded_module.setupProfile(flags)
 
 
 def generatePileUpProfile(flags,
@@ -357,8 +356,7 @@ def setupPileUpProfile(flags):
 
     from importlib import import_module
     loaded_module = import_module(bunchStructure)
-    function_def = getattr(loaded_module, 'setupBunchStructure')
-    function_def(flags)
+    loaded_module.setupBunchStructure(flags)
 
     # Setup pile-up profile
     flags.Digitization.PU.NumberOfCollisions = flags.Digitization.PU.NumberOfLowPtMinBias + flags.Digitization.PU.NumberOfHighPtMinBias
