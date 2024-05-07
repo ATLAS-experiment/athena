@@ -61,20 +61,20 @@
 
 #ifndef GSFFindIndexOfMimimum_H
 #define GSFFindIndexOfMimimum_H
-#include "CxxUtils/assume_aligned.h"
 #include "CxxUtils/inline_hints.h"
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
 #include <algorithm>
+#include <memory>
 namespace findIdxOfMinDetail {
 
 // index of minimum scalar
 ATH_ALWAYS_INLINE
 int32_t scalarC(const float* distancesIn, int n) {
   const float* array =
-      CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+      std::assume_aligned<GSFConstants::alignment>(distancesIn);
   float minvalue = array[0];
   int minIndex = 0;
   for (int i = 0; i < n; ++i) {
@@ -91,7 +91,7 @@ int32_t scalarC(const float* distancesIn, int n) {
 ATH_ALWAYS_INLINE
 int32_t scalarSTL(const float* distancesIn, int n) {
   const float* array =
-      CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+      std::assume_aligned<GSFConstants::alignment>(distancesIn);
   return std::distance(array, std::min_element(array, array + n));
 }
 
@@ -100,7 +100,7 @@ ATH_ALWAYS_INLINE
 int32_t vecAlwaysTrackIdx(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
-      CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+      std::assume_aligned<GSFConstants::alignment>(distancesIn);
   const vec<int, 4> increment = {16, 16, 16, 16};
 
   vec<int, 4> indices1 = {0, 1, 2, 3};
@@ -186,7 +186,7 @@ ATH_ALWAYS_INLINE
 int32_t vecUpdateIdxOnNewMin(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
-      CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+      std::assume_aligned<GSFConstants::alignment>(distancesIn);
 
   int32_t idx = 0;
   float min = distancesIn[0];
@@ -262,7 +262,7 @@ ATH_ALWAYS_INLINE
 float vecFindMinimum(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
-      CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+      std::assume_aligned<GSFConstants::alignment>(distancesIn);
 
   vec<float, 4> minValues1;
   vec<float, 4> minValues2;
@@ -347,7 +347,7 @@ ATH_ALWAYS_INLINE
 int32_t vecIdxofValue(const float value, const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
-      CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+      std::assume_aligned<GSFConstants::alignment>(distancesIn);
 
   vec<float, 4> values1;
   vec<float, 4> values2;
@@ -387,7 +387,7 @@ ATH_ALWAYS_INLINE
 int32_t vecMinThenIdx(const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
-      CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+      std::assume_aligned<GSFConstants::alignment>(distancesIn);
   const float min = vecFindMinimum(array, n);
   return vecIdxofValue(min, array, n);
 }

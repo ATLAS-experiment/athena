@@ -75,14 +75,14 @@ template<typename T, size_t ALIGNMENT>
 inline typename AlignedDynArray<T, ALIGNMENT>::pointer
 AlignedDynArray<T, ALIGNMENT>::buffer() noexcept
 {
-  return CxxUtils::assume_aligned<ALIGNMENT>(m_buffer);
+  return std::assume_aligned<ALIGNMENT>(m_buffer);
 }
 
 template<typename T, size_t ALIGNMENT>
 inline typename AlignedDynArray<T, ALIGNMENT>::const_pointer
 AlignedDynArray<T, ALIGNMENT>::buffer() const noexcept
 {
-  return CxxUtils::assume_aligned<ALIGNMENT>(std::as_const(m_buffer));
+  return std::assume_aligned<ALIGNMENT>(std::as_const(m_buffer));
 }
 
 template<typename T, size_t ALIGNMENT>
@@ -105,14 +105,14 @@ template<typename T, size_t ALIGNMENT>
 inline typename AlignedDynArray<T, ALIGNMENT>::iterator
 AlignedDynArray<T, ALIGNMENT>::begin() noexcept
 {
-  return CxxUtils::assume_aligned<ALIGNMENT>(iterator(buffer()));
+  return std::assume_aligned<ALIGNMENT>(iterator(buffer()));
 }
 
 template<typename T, size_t ALIGNMENT>
 inline typename AlignedDynArray<T, ALIGNMENT>::const_iterator
 AlignedDynArray<T, ALIGNMENT>::begin() const noexcept
 {
-  return CxxUtils::assume_aligned<ALIGNMENT>(const_iterator(buffer()));
+  return std::assume_aligned<ALIGNMENT>(const_iterator(buffer()));
 }
 
 template<typename T, size_t ALIGNMENT>

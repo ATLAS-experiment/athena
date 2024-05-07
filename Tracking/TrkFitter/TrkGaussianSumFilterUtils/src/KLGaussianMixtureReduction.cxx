@@ -8,11 +8,11 @@
 //
 #include "TrkGaussianSumFilterUtils/GSFFindIndexOfMinimum.h"
 //
-#include "CxxUtils/assume_aligned.h"
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"
 //
 #include <cmath>
+#include <memory>
 #include <limits>
 #include <numeric>
 #include <stdexcept>
@@ -234,9 +234,9 @@ calculateAllDistances(const Component1D* componentsIn,
                       const int32_t n)
 {
   const Component1D* components =
-    CxxUtils::assume_aligned<GSFConstants::alignment>(componentsIn);
+    std::assume_aligned<GSFConstants::alignment>(componentsIn);
   float* distances =
-    CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+    std::assume_aligned<GSFConstants::alignment>(distancesIn);
   for (int32_t i = 1; i < n; ++i) {
     const int32_t indexConst = (i - 1) * i / 2;
     const Component1D componentI = components[i];
@@ -266,9 +266,9 @@ updateDistances(
   int32_t n)
 {
   float* distances =
-    CxxUtils::assume_aligned<GSFConstants::alignment>(distancesIn);
+    std::assume_aligned<GSFConstants::alignment>(distancesIn);
   Component1D* components =
-    CxxUtils::assume_aligned<GSFConstants::alignment>(componentsIn);
+    std::assume_aligned<GSFConstants::alignment>(componentsIn);
   // We swap the last elements with the ones indexed by minFrom.
   // After this the remaining components we care about
   // are n-1 which we return
@@ -323,7 +323,7 @@ findMergesImpl(const Component1DArray& componentsIn,
 {
   // copy the array for internal use
   Component1DArray copyComponents(componentsIn);
-  Component1D* components = CxxUtils::assume_aligned<GSFConstants::alignment>(
+  Component1D* components = std::assume_aligned<GSFConstants::alignment>(
     copyComponents.components.data());
   // Based on the inputSize n allocate enough space for the pairwise distances
   int32_t nn = n * (n - 1) / 2;
