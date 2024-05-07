@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DL2_HIGH_LEVEL_HH
@@ -12,6 +12,7 @@
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"
 #include "xAODJet/JetFwd.h"
+#include "AthContainers/AuxElement.h"
 
 #include <memory>
 #include <string>
@@ -35,7 +36,7 @@ namespace FlavorTagDiscriminants {
     ~DL2HighLevel();
     void decorate(const xAOD::BTagging& btag) const;
     void decorate(const xAOD::Jet& jet) const;
-    void decorateWithDefaults(const xAOD::Jet& jet) const;
+    void decorateWithDefaults(const SG::AuxElement& jet) const;
     FTagDataDependencyNames getDataDependencyNames() const;
   private:
     std::shared_ptr<const DL2> m_dl2;

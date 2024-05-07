@@ -79,6 +79,8 @@ StatusCode LArOFPhasePicker::initialize()
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
   }
+
+  ATH_CHECK(m_ofcWKey.initialize(!m_ofcWKey.empty()));
   
   return StatusCode::SUCCESS;
 }
@@ -138,6 +140,16 @@ StatusCode LArOFPhasePicker::pickOFC() {
   }
   ATH_MSG_DEBUG("Working on OFC container '"<< m_keyOFC << "' new container will be '" << m_keyOFC_new << "'");
 
+  const LArOFCweightSC *ofW = nullptr;
+  if(!m_ofcWKey.empty()) {
+     SG::ReadCondHandle<LArOFCweightSC> wHdl{m_ofcWKey};
+     ofW=*wHdl;
+     if(!ofW){
+        ATH_MSG_WARNING("Could not get the OFCb weights asked with key "<<m_ofcWKey.key()<<", no weighting done !!!");
+     } else {
+        ATH_MSG_DEBUG("Got the OFCb weights with key "<<m_ofcWKey.key());
+     }
+  }
 
   int count = 0;
   for(unsigned int gain = CaloGain::LARHIGHGAIN; gain < CaloGain::LARNGAIN; ++gain) {
@@ -148,36 +160,46 @@ StatusCode LArOFPhasePicker::pickOFC() {
       const HWIdentifier id = it.channelId() ; 
       const int nPhases=ofc.OFC_aSize();
       if (nPhases==0) {
-	ATH_MSG_DEBUG("Got empty OFC object for channel " << m_onlineID->channel_name(id) << " (disconnected?)");
-	continue;
+        ATH_MSG_DEBUG("Got empty OFC object for channel " << m_onlineID->channel_name(id) << " (disconnected?)");
+        continue;
       }
       ATH_MSG_VERBOSE("nPhases=" << nPhases);
       count++;
       std::size_t phase=std::min(m_defaultPhase,nPhases-1);
 
       if(m_inputPhase) {
-	 const int p = m_inputPhase->bin(id, gain);
-        ATH_MSG_VERBOSE("OFC picking, gain=" << gain << ", channel "  << m_onlineID->channel_name(id) <<", p=" << p);
-	 if (p>0 && p<nPhases) phase=p;
+         const int p = m_inputPhase->bin(id, gain);
+        ATH_MSG_DEBUG("OFC picking, gain=" << gain << ", channel "  << m_onlineID->channel_name(id) <<", p=" << p);
+         if (p>0 && p<nPhases) phase=p;
        }
-      ATH_MSG_VERBOSE("OFC picking, gain=" << gain << ", channel "  << m_onlineID->channel_name(id) <<", phase=" << phase);
+      ATH_MSG_DEBUG("OFC picking, gain=" << gain << ", channel "  << m_onlineID->channel_name(id) <<", phase=" << phase);
       ILArOFC::OFCRef_t vOFC_a = ofc.OFC_a(phase);
       ILArOFC::OFCRef_t vOFC_b = ofc.OFC_b(phase);
       const float timeOffset=ofc.timeOffset()+m_timeOffsetCorr;
       //some sanity check on the OFCs
       if ( vOFC_a.size() == 0 || vOFC_b.size() == 0 ) {
-	ATH_MSG_WARNING( "OFC not found for gain "<< gain << " channel "  <<  m_onlineID->channel_name(id) );
+        ATH_MSG_WARNING( "OFC not found for gain "<< gain << " channel "  <<  m_onlineID->channel_name(id) );
 
       }else if ( vOFC_a.size() != vOFC_b.size() ) {
-	ATH_MSG_WARNING( "OFC a (" << vOFC_a.size() << ") and b (" << vOFC_b.size() << ") are not the same size for channel " 
-			  <<  m_onlineID->channel_name(id) );
-	ATH_MSG_WARNING( "Will be not exported !!!" );
+        ATH_MSG_WARNING( "OFC a (" << vOFC_a.size() << ") and b (" << vOFC_b.size() << ") are not the same size for channel " 
+                          <<  m_onlineID->channel_name(id) );
+        ATH_MSG_WARNING( "Will be not exported !!!" );
       } else { // save in new container
-	std::vector<std::vector<float> > OFC_a;
-	OFC_a.push_back(vOFC_a.asVector());
-	std::vector<std::vector<float> > OFC_b;
-	OFC_b.push_back(vOFC_b.asVector());
-	larOFCComplete->set(id,(int)gain,OFC_a,OFC_b,timeOffset,25.); //There is no sensible time-bin width for single-phase OFCs 25 seems to make the most sense...
+        std::vector<std::vector<float> > OFC_a;
+        OFC_a.push_back(vOFC_a.asVector());
+        std::vector<std::vector<float> > OFC_b;
+        OFC_b.push_back(vOFC_b.asVector());
+        if(ofW) { // weight OFCb
+           ATH_MSG_DEBUG("weighting channel by "<<ofW->getW(id));
+           std::transform(OFC_b[0].begin(), OFC_b[0].end(), OFC_b[0].begin(),
+                                std::bind(std::multiplies<float>(), std::placeholders::_1, ofW->getW(id)));
+        } else if (m_isSC && m_onlineID->isHECchannel(id)) { // weight HEC OFCb for SC
+           ATH_MSG_DEBUG("weighting HEC channel by 1.5");
+           std::transform(OFC_b[0].begin(), OFC_b[0].end(), OFC_b[0].begin(),
+                                std::bind(std::multiplies<float>(), std::placeholders::_1, 1.5));
+
+        }
+        larOFCComplete->set(id,(int)gain,OFC_a,OFC_b,timeOffset,25.); //There is no sensible time-bin width for single-phase OFCs 25 seems to make the most sense...
       }
     }
   }
@@ -229,15 +251,15 @@ StatusCode LArOFPhasePicker::pickShape()
       const HWIdentifier id = it.channelId() ; 
       const int nPhases=shape.shapeSize();
       if (nPhases==0) {
-	ATH_MSG_DEBUG("Got empty Shape object for channel " <<  m_onlineID->channel_name(id) << " (disconnected?)");
-	continue;
+        ATH_MSG_DEBUG("Got empty Shape object for channel " <<  m_onlineID->channel_name(id) << " (disconnected?)");
+        continue;
       }
       count++;
 
       std::size_t phase=std::min(m_defaultPhase,nPhases-1);
       if(m_inputPhase) {
-	 const int p = m_inputPhase->bin(id, gain);
-	 if (p>0 && p<nPhases) phase=p;
+         const int p = m_inputPhase->bin(id, gain);
+         if (p>0 && p<nPhases) phase=p;
        }
 
       ATH_MSG_VERBOSE("Shape picking, gain=" << gain << ", channel "  << m_onlineID->channel_name(id) << ", phase=" << phase);
@@ -246,17 +268,17 @@ StatusCode LArOFPhasePicker::pickShape()
       const float timeOffset=shape.timeOffset();
       //some sanity check on the Shapes
       if ( vShape.size() == 0 || vShapeDer.size() == 0 ) {
-	ATH_MSG_WARNING( "Shape not found for gain "<< gain << " channel " <<  m_onlineID->channel_name(id) );
+        ATH_MSG_WARNING( "Shape not found for gain "<< gain << " channel " <<  m_onlineID->channel_name(id) );
       } else if ( vShape.size() != vShapeDer.size() ) {
-	ATH_MSG_WARNING( "Shape a (" << vShape.size() << ") and b (" << vShapeDer.size() << ") are not the same size for channel" 
-			  <<  m_onlineID->channel_name(id) );
-	ATH_MSG_WARNING( "Will be not exported !!!" );
+        ATH_MSG_WARNING( "Shape a (" << vShape.size() << ") and b (" << vShapeDer.size() << ") are not the same size for channel" 
+                          <<  m_onlineID->channel_name(id) );
+        ATH_MSG_WARNING( "Will be not exported !!!" );
       } else { // save in new container
-	std::vector<std::vector<float> > shapeDer;
-	std::vector<std::vector<float> > shapeAmpl;
-	shapeAmpl.push_back(vShape.asVector());
-	shapeDer.push_back(vShapeDer.asVector());	
-	larShapeComplete->set(id,(int)gain,shapeAmpl,shapeDer,timeOffset,25.); //There is no sensible time-bin width for single-phase OFCs 25 seems to make the most sense...
+        std::vector<std::vector<float> > shapeDer;
+        std::vector<std::vector<float> > shapeAmpl;
+        shapeAmpl.push_back(vShape.asVector());
+        shapeDer.push_back(vShapeDer.asVector());        
+        larShapeComplete->set(id,(int)gain,shapeAmpl,shapeDer,timeOffset,25.); //There is no sensible time-bin width for single-phase OFCs 25 seems to make the most sense...
       }
     }
   }

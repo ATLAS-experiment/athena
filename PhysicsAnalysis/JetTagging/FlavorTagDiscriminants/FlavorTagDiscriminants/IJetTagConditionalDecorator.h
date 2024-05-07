@@ -1,6 +1,6 @@
 // for text editors: this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This is similar to the IJetTagDecorator, the difference being that
@@ -16,13 +16,14 @@
 
 #include "IDependencyReporter.h"
 #include "IJetTagDecorator.h"
+#include "IDefaultDecorator.h"
 
 #include "AsgTools/IAsgTool.h"
-#include "xAODJet/JetFwd.h"
 
 class IJetTagConditionalDecorator : virtual public asg::IAsgTool,
                                     virtual public IDependencyReporter,
-                                    virtual public IJetTagDecorator
+                                    virtual public IJetTagDecorator,
+                                    virtual public IDefaultDecorator
 {
 ASG_TOOL_INTERFACE(IJetTagConditionalDecorator)
 
@@ -30,11 +31,6 @@ public:
 
   /// Destructor.
   virtual ~IJetTagConditionalDecorator() { };
-
-  /// Method to decorate a jet.
-  virtual void decorate(const xAOD::Jet& jet) const = 0;
-  /// Method to decorate a jet with defaults.
-  virtual void decorateWithDefaults(const xAOD::Jet& jet) const = 0;
 
 };
 

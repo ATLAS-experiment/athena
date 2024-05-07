@@ -14,12 +14,15 @@ if __name__=='__main__':
   parser.add_argument('-r','--run', dest='run', default=0x7fffffff, help='Run number', type=int)
   parser.add_argument('--sqlite', dest='sqlite', default=None, help='sqlite file to read from (default: oracle)', type=str)
   parser.add_argument('-t','--tag',dest='dbtag',default=None,help="Global conditions tag", type=str)
+  parser.add_argument('-f','--ftag',dest='ftag',default=None,help="folder tag suffig", type=str)
   parser.add_argument('-o','--out', dest='out', default="LArConditions.root", help='Output root file', type=str)
   parser.add_argument('--ofcfolder',dest='ofcfolder',default="", help="OFC flavor",type=str)
-  parser.add_argument('-s','--isSC', action='store_true', default=False, help='is SC?')
-  parser.add_argument('-m','--isMC', action='store_true', default=False, help='is MC?')
+  parser.add_argument('-s','--isSC', dest='isSC', action='store_true', default=False, help='is SC?')
+  parser.add_argument('-m','--isMC', dest='isMC', action='store_true', default=False, help='is MC?')
 
-  parser.add_argument("--objects",dest="objects",default="PEDESTAL,RAMP,OFC,MPHYSOVERMCAL",help="List of conditions types to be dumped",type=str)
+  parser.add_argument("--objects",dest="objects",default="PEDESTAL,RAMP",help="List of conditions types to be dumped",type=str)
+  parser.add_argument("--folders",dest="folders",default="/LAR/ElecCalibFlat/Pedestal,/LAR/ElecCalibFlat/Ramp",help="List of folders to be taken from sqlite",type=str)
+  parser.add_argument('--offline',dest="offline", action='store_true', default=False, help='is offline folder?')
    
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -44,10 +47,14 @@ if __name__=='__main__':
             "HVSCALE":"HVScaleCorr",
             "FSAMPL":"fSampl",
             "AUTOCORR":"AutoCorr",
-            "AC":"AutoCorr"
+            "AC":"AutoCorr",
+            "CALIWAVE":"CaliWave",
+            "PHYSWAVE":"PhysWave",
+            "OFCCALI":"OFCCali"
           }
 
   objects=set()
+  objectsOnl=set() 
   for obj in args.objects.split(","):
     objU=obj.upper()
     if objU not in objTable:
@@ -55,7 +62,12 @@ if __name__=='__main__':
       sys.exit(0)
 
     objects.add(objTable[objU])
+    if "OFCCALI" not in obj.upper() and 'WAVE' not in obj.upper() and not args.offline:
+       objectsOnl.add(objTable[objU])
     
+  flds=set()
+  for fld in args.folders.split(","):
+     flds.add(fld)
  
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   flags=initConfigFlags()
@@ -91,12 +103,15 @@ if __name__=='__main__':
   elif flags.IOVDb.DatabaseInstance == "COMP200":
     flags.IOVDb.GlobalTag="COMCOND-BLKPA-RUN1-09"
   else: 
-    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2022-07"
+    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2024-01"
 
   #flags.Exec.OutputLevel=1
 
   if (args.sqlite):
     flags.IOVDb.SqliteInput=args.sqlite
+    flags.IOVDb.SqliteFolders=tuple(flds)
+  if len(objects)!=len(objectsOnl):
+    flags.IOVDb.DBConnection="COOLOFL_LAR/CONDBR2" 
 
   flags.lock()
   
@@ -123,15 +138,20 @@ if __name__=='__main__':
     cfg.merge(LArOnOffIdMappingSCCfg(flags))
     cfg.merge(LArCalibIdMappingSCCfg(flags))
     cfg.merge(LArLATOMEMappingCfg(flags))
+    if not args.offline:
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+       cfg.merge(LArElecCalibDBSCCfg(flags,objectsOnl))
   else: 
     #Setup regular cabling
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg, LArCalibIdMappingCfg
     cfg.merge(LArOnOffIdMappingCfg(flags))
     cfg.merge(LArCalibIdMappingCfg(flags))
-    
+    if not args.offline:
+       from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
+       cfg.merge(LArElecCalibDBCfg(flags,objectsOnl))
   
   from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-  cfg.merge(LArBadChannelCfg(flags))
+  cfg.merge(LArBadChannelCfg(flags, isSC=flags.LArCalib.isSC))
 
   if flags.LArCalib.isSC: 
     bcKey = "LArBadChannelSC" 
@@ -139,11 +159,11 @@ if __name__=='__main__':
     bcKey = "LArBadChannel"
 
 
-  from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
-  cfg.merge(LArElecCalibDBCfg(flags,objects))
+
 
   if "Pedestal" in objects:
-    cfg.addEventAlgo(CompFactory.LArPedestals2Ntuple(ContainerKey = "LArPedestal",
+    ckey = "LArPedestalSC" if flags.LArCalib.isSC else "LArPedestal"
+    cfg.addEventAlgo(CompFactory.LArPedestals2Ntuple(ContainerKey = ckey,
                                                         AddFEBTempInfo = False, 
                                                         isSC = flags.LArCalib.isSC,
                                                         BadChanKey = bcKey
@@ -156,28 +176,77 @@ if __name__=='__main__':
                                                     BadChanKey = bcKey
                                                   ))
   if "Ramp" in objects:
-    cfg.addEventAlgo(CompFactory.LArRamps2Ntuple(RampKey="LArRampSym" if flags.Input.isMC else "LArRamp",
+    ckey = "LArRampSC" if flags.LArCalib.isSC else "LArRamp"
+    if flags.Input.isMC: ckey = "LArRampSym"
+    cfg.addEventAlgo(CompFactory.LArRamps2Ntuple(RampKey=ckey,
                                                  AddFEBTempInfo = False, 
                                                  isSC = flags.LArCalib.isSC,
                                                  BadChanKey = bcKey
                                                ))
   
   if "OFC" in objects:
+    if args.offline: 
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       for fld in flds:
+          if 'OFC' in fld:
+             if args.ftag:
+                cfg.merge(addFolders(flags,fld,tag="".join(foldername.split('/')) + args.ftag))
+             else:
+                cfg.merge(addFolders(flags,fld))
+             ckey= 'LArOFC' if '1phase' in fld else 'LArLArOFCPhys4samples'
+             break
+    else:         
+       ckey = "LArOFCSC" if flags.LArCalib.isSC else "LArOFC"
     cfg.addEventAlgo(CompFactory.LArOFC2Ntuple(AddFEBTempInfo   = False,   
+                                               ContainerKey=ckey,
+                                               isSC = flags.LArCalib.isSC,
+                                               BadChanKey = bcKey
+                                             ))
+
+  if "OFCCali" in objects:
+    if args.offline: 
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       for fld in flds:
+          if 'OFC' in fld:
+             if args.ftag:
+                cfg.merge(addFolders(flags,fld,tag="".join(foldername.split('/')) + args.ftag))
+             else:
+                cfg.merge(addFolders(flags,fld))
+             ckey= 'LArOFC' if '1phase' in fld else 'LArOFC'
+             break
+    else:         
+       ckey = "LArOFCSCCali" if flags.LArCalib.isSC else "LArOFCCali"
+       fldr = "/LAR/ElecCalibFlatSC/OFCCali" if flags.LArCalib.isSC else "/LAR/ElecCalibFlat/OFCCali"
+       dbString = "<db>sqlite://;schema="+args.sqlite+";dbname=CONDBR2" if args.sqlite else  "<db>COOLONL_LAR/CONDBR2</db>"
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       cfg.merge(addFolders(flags,fldr,detDb=dbString,className="CondAttrListCollection"))
+       LArOFCSCCondAlg  =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCSC>")("LArOFCSCCaliCondAlg")
+       LArOFCSCCondAlg.ReadKey=fldr
+       LArOFCSCCondAlg. WriteKey=ckey
+       cfg.addCondAlgo(LArOFCSCCondAlg)
+
+    cfg.addEventAlgo(CompFactory.LArOFC2Ntuple("LArOFC2NtupleCali",
+                                               AddFEBTempInfo   = False,   
+                                               ContainerKey=ckey,
+                                               NtupleName="OFCCali",
                                                isSC = flags.LArCalib.isSC,
                                                BadChanKey = bcKey
                                              ))
 
 
   if "Shape" in objects:
-    cfg.addEventAlgo(CompFactory.LArShape2Ntuple(ContainerKey="LArShapeSym" if flags.Input.isMC else "LArShape",
+    ckey = "LArShapeSC" if flags.LArCalib.isSC else "LArShape"
+    if flags.Input.isMC:
+       ckey="LArShapeSym"
+    cfg.addEventAlgo(CompFactory.LArShape2Ntuple(ContainerKey=ckey,
                                                  AddFEBTempInfo   = False,   
                                                  isSC = flags.LArCalib.isSC,
                                                  BadChanKey = bcKey
                
                                                ))
   if "MphysOverMcal" in objects:
-    cfg.addEventAlgo(CompFactory.LArMphysOverMcal2Ntuple(ContainerKey   = "LArMphysOverMcal",
+    ckey = "LArMphysOverMcalSC" if flags.LArCalib.isSC else "LArMphysOverMcal"
+    cfg.addEventAlgo(CompFactory.LArMphysOverMcal2Ntuple(ContainerKey   = ckey,
                                                          AddFEBTempInfo   = False,
                                                          isSC = flags.LArCalib.isSC,
                                                          BadChanKey = bcKey
@@ -206,6 +275,42 @@ if __name__=='__main__':
                                                   isSC=flags.LArCalib.isSC
                                                 ))
 
+  if "CaliWave" in objects:
+    if flags.Input.isMC:
+       print('No CaliWave in MC')
+    else:   
+       fld = "/LAR/ElecCalibOflSC/CaliWaves/CaliWave" if flags.LArCalib.isSC else "/LAR/ElecCalibOfl/CaliWaves/CaliWave"   
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       #cfg.merge(addFolders(flags,fld,className="LArCaliWaveContainer"))
+       cfg.merge(addFolders(flags,fld))
+       cfg.addEventAlgo(CompFactory.LArCaliWaves2Ntuple(KeyList = ["LArCaliWave"],
+                                                 NtupleName = "CALIWAVE",
+                                                 AddFEBTempInfo = False,   
+                                                 SaveDerivedInfo = True,
+                                                 AddCalib = True,
+                                                 SaveJitter = True,
+                                                 isFlat = False,
+                                                 isSC = flags.LArCalib.isSC,
+                                                 BadChanKey = bcKey
+                                               ))
+
+  if "PhysWave" in objects:
+    if flags.Input.isMC:
+       print('No PhysWave in MC yet')
+    else:   
+       fld = "/LAR/ElecCalibOflSC/PhysWaves/RTM" if flags.LArCalib.isSC else "/LAR/ElecCalibOfl/PhysWaves/RTM"   
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       #cfg.merge(addFolders(flags,fld,className="LArPhysWaveContainer"))
+       cfg.merge(addFolders(flags,fld))
+       cfg.addEventAlgo(CompFactory.LArPhysWaves2Ntuple(KeyList = ["LArPhysWave"],
+                                                 NtupleName = "PHYSWAVE",
+                                                 AddFEBTempInfo = False,   
+                                                 SaveDerivedInfo = True,
+                                                 AddCalib = True,
+                                                 isFlat = False,
+                                                 isSC = flags.LArCalib.isSC,
+                                                 BadChanKey = bcKey
+                                               ))
 
   rootfile=args.out
   if os.path.exists(rootfile):
@@ -213,6 +318,9 @@ if __name__=='__main__':
   cfg.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
   cfg.setAppProperty("HistogramPersistency","ROOT")
 
+  if args.dbtag and 'CALIB' in args.dbtag:
+     cfg.getService("IOVDbSvc").DBInstance=""
+    
   cfg.run(1)
   sys.exit(0)
   

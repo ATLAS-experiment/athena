@@ -92,6 +92,7 @@ if (NOT XAOD_STANDALONE)
     src/BTagTrackLinkCopyAlg.cxx
     src/BTaggingBuilderAlg.cxx
     src/PoorMansIpAugmenterAlg.cxx
+    src/BTagConditionalDecoratorAlg.cxx
     src/JetTagConditionalDecoratorAlg.cxx
     src/TruthDecoratorHelpers.cxx
     src/TrackLeptonDecoratorAlg.cxx
@@ -101,6 +102,8 @@ if (NOT XAOD_STANDALONE)
     src/SoftElectronTruthDecoratorAlg.cxx
     src/FoldDecoratorAlg.cxx
     src/GNNAuxTaskDecoratorAlg.cxx
+    src/CountIParticleAlg.cxx
+    src/CountTrackParticleAlg.cxx
     src/components/FlavorTagDiscriminants_entries.cxx
     LINK_LIBRARIES FlavorTagDiscriminants
     )

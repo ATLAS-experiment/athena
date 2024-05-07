@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_TrigBmumuxComboHypo_H
@@ -55,17 +55,40 @@ class TrigBmumuxState: public ::ITrigBphysState {
   }
   virtual ~TrigBmumuxState() = default;
 
+  // EFCB muon candidates from mergeMuonsFromDecisions()
   struct Muon {
     ElementLink<xAOD::MuonContainer> link;
     std::vector<ElementLink<TrigCompositeUtils::DecisionContainer>> decisionLinks;
     TrigCompositeUtils::DecisionIDContainer decisionIDs;
   };
   std::vector<Muon> muons;
+
+  // tracks from mergeTracksFromViews()
   std::vector<ElementLink<xAOD::TrackParticleContainer>> tracks;
+  bool isCompositeRoI = false;
+
+  // dimuon candidates from findDimuonCandidates()
   xAOD::VertexContainer dimuons;
   xAOD::VertexAuxContainer dimuonsStore;
-  std::vector<std::array<size_t, 2>> trigBphysMuonIndices;
-  bool isCompositeRoI = false;
+  std::vector<std::array<size_t, 2>> trigBphysMuonIndices;  // {mu1, mu2} indices in state.muons for dimuon in state.dimuons
+
+  // tracks to be fitted with given dimuon candidate from findBmumuxCandidates_selectTracks()
+  std::vector<ElementLink<xAOD::TrackParticleContainer>> selectedTracks;
+  std::map<const xAOD::TrackParticle*, double> selectedTrackZ0;  // track z0 impact parameters wrt dimuon vertex
+
+  // track combinations from findBmumuxCandidates_fit(makeCombinations = true)
+  std::map<size_t, size_t> trackCombinations;  // key = track index for dimuon + track case OR state.getCombinationKey(trk1, trk2) for track + track case : number of found combinations
+
+  // sorted vector of track combinations which failed vertex fit from findBmumuxCandidates_fastFit()
+  std::vector<size_t> badTrackCombinations;
+
+  size_t getCombinationKey(size_t i1, size_t i2) const { size_t n = selectedTracks.size(); return (i1 < i2 ? i1 + n * i2 : i2 + n * i1); }
+  void addTrackCombination(size_t i1) { trackCombinations[i1]++; }
+  void addTrackCombination(size_t i1, size_t i2) { trackCombinations[getCombinationKey(i1, i2)]++; }
+  void addTrackCombination(size_t i1, size_t i2, size_t i3) { addTrackCombination(i1, i2); addTrackCombination(i1, i3); addTrackCombination(i2, i3); }
+  bool isBadCombination(size_t i1) const { return std::binary_search(badTrackCombinations.begin(), badTrackCombinations.end(), i1); }
+  bool isBadCombination(size_t i1, size_t i2, size_t i3) const { return (isBadCombination(getCombinationKey(i1, i2)) || isBadCombination(getCombinationKey(i1, i3)) || isBadCombination(getCombinationKey(i2, i3))); }
+
   StatusCode addTriggerObject(xAOD::TrigBphys* triggerObject) {
     if (!triggerObject) {
       return StatusCode::FAILURE;
@@ -73,6 +96,7 @@ class TrigBmumuxState: public ::ITrigBphysState {
     trigBphysCollection().push_back(triggerObject);
     return StatusCode::SUCCESS;
   }
+
 };
 
 
@@ -80,7 +104,13 @@ class TrigBmumuxState: public ::ITrigBphysState {
  * @class TrigBmumuxComboHypo
  * @brief EF hypothesis algorithm for B -> mu+ mu- X decays:
  *        B+ -> mu+ mu- K+
+ *        B_c+ -> J/psi(-> mu+ mu-) pi+
  *        B_s0 -> mu+ mu- phi1020(-> K+, K-)
+ *        B0 -> mu+ mu- K*0(-> K+ pi-)
+ *        Lambda_b0 -> J/psi(-> mu+ mu-) p K-
+ *        B_c+ -> J/psi(-> mu+ mu-) D_s+(->phi(-> K+ K-) pi+)
+ *        B_c+ -> J/psi(-> mu+ mu-) D+(-> K- pi+ pi+)
+ *        B_c+ -> J/psi(-> mu+ mu-) D*+(-> D0(-> K- pi+) pi+) partial (lost pion from D*+) and full reconstruction
  */
 class TrigBmumuxComboHypo: public ::ComboHypo {
  public:
@@ -91,20 +121,64 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
   virtual StatusCode execute(const EventContext& context) const override;
 
   enum Decay : size_t {
-    kPsi_2mu,      // psi -> mu+ mu-
-    kB_2mu1trk,    // B -> mu+ mu- trk1
-    kB_2mu2trk,    // B -> mu+ mu- trk1 trk2
-    kDs,           // D_s+ -> K+ K- pi+
-    kDplus,        // D+ -> K- pi+ pi+
-    kD0,           // D0 -> K- pi+
-    kB_PsiPi       // psi + pion from D*+
+    kPsi_2mu,         // psi -> mu+ mu-
+    kB_2mu1trk,       // B -> mu+ mu- trk1
+    kB_2mu2trk,       // B -> mu+ mu- trk1 trk2
+    kDs,              // D_s+ -> K+ K- pi+
+    kDplus,           // D+ -> K- pi+ pi+
+    kD0,              // D0 -> K- pi+
+    kB_PsiPi,         // psi + pion from D*+
+    kFastFit_2trk,    // trk1 + trk2
+    kFastFit_2mu1trk  // dimuon + trk1
   };
 
  private:
+
+  /**
+   * @brief Go through state.previousDecisions(), fetch xAOD::Muons objects attached to decisions
+   * and save links to them in state.muons().
+   */
   StatusCode mergeMuonsFromDecisions(TrigBmumuxState&) const;
+
+  /**
+   * @brief Go through state.previousDecisions() and fetch xAOD::TrackParticle objects associated with the nearest SG::View.
+   * Enable overlap removal to get collection of unique objects at state.tracks().
+   */
   StatusCode mergeTracksFromViews(TrigBmumuxState&) const;
+
+  /**
+   * @brief Make all possible dimuon combinations from state.muons(), fit muon InDet tracks to the common vertex,
+   * dimuon vertices are stored in state.dimuons() and in state.trigBphysCollection() (as xAOD::TrigBphys objects).
+   */
   StatusCode findDimuonCandidates(TrigBmumuxState&) const;
+
+  /**
+   * @brief Find B decays by appling next three subprocedures to each found dimuon candidate.
+   */
   StatusCode findBmumuxCandidates(TrigBmumuxState&) const;
+
+  /**
+   * @brief Select tracks in vicinity of given dimuon vertex.
+   */
+  StatusCode findBmumuxCandidates_selectTracks(TrigBmumuxState&, size_t dimuonIndex) const;
+
+  /**
+   * @brief Go through (dimuon+track) and (track+track) combinations found by findBmumuxCandidates_fit(makeCombinations = true)
+   * Perform fast fit if combination occurred more than five times.
+   * If fast fit fails, put combination into state.badTrackCombinations().
+   */
+  StatusCode findBmumuxCandidates_fastFit(TrigBmumuxState&, size_t dimuonIndex) const;
+
+  /**
+   * @brief Perform fit of B decays for the topologies described above if makeCombinations = false.
+   * Otherwise add simple combinations to state.trackCombinations().
+   */
+  StatusCode findBmumuxCandidates_fit(TrigBmumuxState&, size_t dimuonIndex, bool makeCombinations = false) const;
+
+  /**
+   * @brief Create a decision for each xAOD::TrigBphys object from state.trigBphysCollection() and save it to state.decisions();
+   * use hypoTools() to assign correct decisionIDs according to xAOD::TrigBphys::particleType()
+   */
   StatusCode createDecisionObjects(TrigBmumuxState&) const;
 
   std::unique_ptr<xAOD::Vertex> fit(
@@ -150,6 +224,10 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "FitAttemptsWarningThreshold", 200, "Events processing this many calls of the vertex fitter will generate a WARNING message (time-out protect)"};
   Gaudi::Property<size_t> m_fitAttemptsBreakThreshold {this,
     "FitAttemptsBreakThreshold", 1000, "Events processing this many calls of the vertex fitter will generate a second WARNING message and the loop over combinations will be terminated at this point (time-out protect)"};
+  Gaudi::Property<double> m_fastFit_2trk_chi2 {this,
+    "FastFit_2trk_chi2", 50., "maximum chi2 for fast fit of trk1 + trk2"};
+   Gaudi::Property<double> m_fastFit_2mu1trk_chi2 {this,
+    "FastFit_2mu1trk_chi2", 60., "maximum chi2 for fast fit of dimuon + trk1"};
 
   // dimuon properties
   Gaudi::Property<bool> m_dimuon_rejectSameChargeTracks {this,
@@ -168,6 +246,8 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "BplusToMuMuKaon_massRange", {4500., 5900.}, "B+ mass range"};
   Gaudi::Property<float> m_BplusToMuMuKaon_chi2 {this,
     "BplusToMuMuKaon_chi2", 50., "maximum chi2 of the fitted B+ vertex"};
+  Gaudi::Property<bool> m_BplusToMuMuKaon_useFastFit {this,
+    "BplusToMuMuKaon_useFastFit", false, "true: perform vertex fit depending on only if fast fit; false: always perform vertex fit"};
 
   // B_c+ -> J/psi(-> mu+ mu-) pi+
   Gaudi::Property<bool> m_BcToMuMuPion {this,
@@ -180,6 +260,8 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "BcToMuMuPion_massRange", {5500., 7300.}, "B_c+ mass range"};
   Gaudi::Property<float> m_BcToMuMuPion_chi2 {this,
     "BcToMuMuPion_chi2", 50., "maximum chi2 of the fitted B_c+ vertex"};
+  Gaudi::Property<bool> m_BcToMuMuPion_useFastFit {this,
+    "BcToMuMuPion_useFastFit", false, "true: perform vertex fit depending on only if fast fit; false: always perform vertex fit"};
 
   // B_s0 -> mu+ mu- phi(-> K+ K-)
   Gaudi::Property<bool> m_BsToMuMuPhi1020 {this,
@@ -194,6 +276,8 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "BsToMuMuPhi1020_phiMassRange", {940., 1100.}, "phi1020 mass range"};
   Gaudi::Property<float> m_BsToMuMuPhi1020_chi2 {this,
     "BsToMuMuPhi1020_chi2", 60., "maximum chi2 of the fitted B+ vertex"};
+  Gaudi::Property<bool> m_BsToMuMuPhi1020_useFastFit {this,
+    "BsToMuMuPhi1020_useFastFit", false, "true: perform vertex fit depending on only if fast fit; false: always perform vertex fit"};
 
   // B0 -> mu+ mu- K*0(-> K+ pi-)
   Gaudi::Property<bool> m_BdToMuMuKstar0 {this,
@@ -210,6 +294,8 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "BdToMuMuKstar0_KstarMassRange", {700., 1100.}, "K*0 mass range"};
   Gaudi::Property<float> m_BdToMuMuKstar0_chi2 {this,
     "BdToMuMuKstar0_chi2", 60., "maximum chi2 of the fitted B0 vertex"};
+  Gaudi::Property<bool> m_BdToMuMuKstar0_useFastFit {this,
+    "BdToMuMuKstar0_useFastFit", true, "true: perform vertex fit depending on only if fast fit; false: always perform vertex fit"};
 
   // Lambda_b0 -> J/psi(-> mu+ mu-) p K-
   Gaudi::Property<bool> m_LambdaBToMuMuProtonKaon {this,
@@ -228,6 +314,8 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "LambdaBToMuMuProtonKaon_massRange", {4800., 6400.}, "Lambda_b0 mass range"};
   Gaudi::Property<float> m_LambdaBToMuMuProtonKaon_chi2 {this,
     "LambdaBToMuMuProtonKaon_chi2", 60., "maximum chi2 of the fitted Lambda_b0 vertex"};
+  Gaudi::Property<bool> m_LambdaBToMuMuProtonKaon_useFastFit {this,
+    "LambdaBToMuMuProtonKaon_useFastFit", true, "true: perform vertex fit depending on only if fast fit; false: always perform vertex fit"};
 
   // B_c+ -> J/psi(-> mu+ mu-) D_s+(->phi(-> K+ K-) pi+)
   Gaudi::Property<bool> m_BcToDsMuMu {this,
@@ -246,6 +334,8 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "BcToDsMuMu_DsMassRange", {1750., 2100.}, "D_s+ mass range"};
   Gaudi::Property<float> m_BcToDsMuMu_chi2 {this,
     "BcToDsMuMu_chi2", 60., "maximum chi2 of the fitted B_c+ vertex"};
+  Gaudi::Property<bool> m_BcToDsMuMu_useFastFit {this,
+    "BcToDsMuMu_useFastFit", true, "true: perform vertex fit depending on only if fast fit; false: always perform vertex fit"};
 
   // B_c+ -> J/psi(-> mu+ mu-) D+(-> K- pi+ pi+)
   Gaudi::Property<bool> m_BcToDplusMuMu {this,
@@ -262,6 +352,8 @@ class TrigBmumuxComboHypo: public ::ComboHypo {
     "BcToDplusMuMu_DplusMassRange", {1750., 2000.}, "D+ mass range"};
   Gaudi::Property<float> m_BcToDplusMuMu_chi2 {this,
     "BcToDplusMuMu_chi2", 60., "maximum chi2 of the fitted B_c+ vertex"};
+  Gaudi::Property<bool> m_BcToDplusMuMu_useFastFit {this,
+    "BcToDplusMuMu_useFastFit", true, "true: perform vertex fit depending on only if fast fit; false: always perform vertex fit"};
 
   // B_c+ -> J/psi(-> mu+ mu-) D*+(-> D0(-> K- pi+) pi+)
   Gaudi::Property<bool> m_BcToDstarMuMu {this,
