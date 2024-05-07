@@ -21,6 +21,12 @@ if __name__=='__main__':
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file for bad channels', type=str)
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
+   parser.add_argument('-w','--ofcwsqlite', dest='ofcwsql', default="", help='Input sqlite file for OFC weights', type=str)
+   parser.add_argument('-t','--ofcwtag', dest='ofcwtag', default="", help='Tag for OFC weights', type=str)
+   parser.add_argument('--poolcat', dest='poolcat', default="freshConstants.xml", help='Catalog of POOL files', type=str)
+   parser.add_argument('-p','--ofcphasesqlite', dest='ofcphsql', default="/afs/cern.ch/user/p/pavol/w0/public/DB_update_22/fillDB/SCOFCPhase.db", help='Input sqlite file for OFC phases', type=str)
+   parser.add_argument('-u','--ofcphasetag', dest='ofcphtag', default="LARElecCalibOflSCOFCBinPhysShift-07", help='Tag for OFC phases', type=str)
+   parser.add_argument('--isCalib', dest='caliofc', action='store_true', default=False, help='is caliOFCs ?')
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -33,7 +39,7 @@ if __name__=='__main__':
 
    # now set flags according parsed options
    
-   from LArCalibProcessing.LArCalib_OFPhasePickerConfig import LArOFPhasePickerCfg
+   from LArCalibProcessing.LArCalib_OFPhasePickerConfig import LArOFPhasePickerCfg,LArCaliOFPhasePickerCfg
    
    #Import the MainServices (boilerplate)
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -52,7 +58,10 @@ if __name__=='__main__':
    gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
    flags.LArCalib.Gain=gainNumMap[args.gain.upper()]
 
-   flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
+   if args.insqlitefile.startswith('/'):
+      flags.LArCalib.Input.Database = args.insqlitefile
+   else:   
+      flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
 
    # pileup normalisation
    flags.LArCalib.OFC.Ncoll = 60
@@ -79,7 +88,10 @@ if __name__=='__main__':
 
    flags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputRootFileName
    flags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPoolFileName
-   flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
+   if args.outsql.startswith('/'):
+      flags.IOVDb.DBConnection="sqlite://;schema=" + args.outsql +";dbname=CONDBR2"
+   else:
+      flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
@@ -95,9 +107,21 @@ if __name__=='__main__':
    
    cfg=MainServicesCfg(flags)
    
-   cfg.merge(LArOFPhasePickerCfg(flags))
+   if args.caliofc:
+      cfg.merge(LArCaliOFPhasePickerCfg(flags))
+   else:         
+      if args.supercells:
+         
+         if args.ofcwsql and args.ofcwtag:
+            cfg.merge(LArOFPhasePickerCfg(flags,InputSCOFCPhaseDb=args.ofcphsql,SCOFCPhaseTag=args.ofcphtag,InputSCOFCWeightDb=args.ofcwsql,SCOFCWeightTag=args.ofcwtag))
+         else:
+            cfg.merge(LArOFPhasePickerCfg(flags,InputSCOFCPhaseDb=args.ofcphsql,SCOFCPhaseTag=args.ofcphtag))
+      else:
+         cfg.merge(LArOFPhasePickerCfg(flags))
 
    cfg.getService("MessageSvc").defaultLimit = 9999999  # all messages
+   cfg.getService("PoolSvc").WriteCatalog="xmlcatalog_file:%s"%args.poolcat
+   cfg.getService("PoolSvc").ReadCatalog+=["xmlcatalog_file:%s"%args.poolcat]
    #run the application
    cfg.run(1) 
 

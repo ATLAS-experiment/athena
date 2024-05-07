@@ -56,7 +56,7 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
   while (std::getline(myfile, line)) {
       std::stringstream st(line);
       if(m_isSC) {
-        st>>std::hex>>id>>std::dec>>value;
+        st>>std::dec>>id>>std::dec>>value;
         hash=0;
       } else {
          st>>std::hex>>id>>std::dec>>hash>>value;
@@ -72,7 +72,10 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
         hash=0; 
       }
 
-      values[hash][m_onlineID->channel_Hash(chid)]=value;
+      if(m_isSC) 
+         values[hash][m_onlineSCID->channel_Hash(chid)]=value;
+      else   
+         values[hash][m_onlineID->channel_Hash(chid)]=value;
   } // over the input file
 
   for (unsigned gain=0;gain<nGain;++gain) {
@@ -249,7 +252,7 @@ StatusCode LArFlatFromFile::stop() {
     unsigned line_count = std::count( std::istream_iterator<char>(myfile),
                                       std::istream_iterator<char>(), '\n');
     myfile.close();
-    if (2*m_hashMax != line_count) {
+    if (m_checkCompletness && 2*m_hashMax != line_count) {
 	ATH_MSG_ERROR( "Failed to check file with OFCs" );
 	return StatusCode::FAILURE;
     } else {
@@ -270,7 +273,7 @@ StatusCode LArFlatFromFile::stop() {
     unsigned line_count = std::count( std::istream_iterator<char>(myfile),
                                       std::istream_iterator<char>(), '\n');
     myfile.close();
-    if (m_ngain*m_hashMax != line_count) {
+    if (m_checkCompletness && m_ngain*m_hashMax != line_count) {
 	ATH_MSG_ERROR( "Failed to check input file "<<m_SingleInput );
         ATH_MSG_ERROR( "Line count: "<<line_count<<" expected: "<<m_ngain*m_hashMax<<" "<<m_isSC);
 	return StatusCode::FAILURE;

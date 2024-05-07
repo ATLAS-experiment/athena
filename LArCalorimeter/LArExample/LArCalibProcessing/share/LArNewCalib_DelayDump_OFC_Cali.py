@@ -17,7 +17,7 @@ if __name__=='__main__':
    parser.add_argument('-e','--outrdir', dest='outrdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/ntuples", help='Output root file directory', type=str)
    parser.add_argument('-o','--outrwavefile', dest='outrwavefile', default="", help='Output CaliWave root file name', type=str)
    parser.add_argument('-p','--outrofcfile', dest='outrofcfile', default="", help='Output OFC root file name', type=str)
-   parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
+   parser.add_argument('-c','--isSC', dest='supercells', default=False, action='store_true', help='is SC data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file for bad channels', type=str)
 
    args = parser.parse_args()

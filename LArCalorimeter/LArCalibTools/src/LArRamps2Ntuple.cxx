@@ -396,8 +396,8 @@ StatusCode LArRamps2Ntuple::stop() {
  } else {//have only fitted ramp
 
    //Iterate over gains and cells
-   for ( unsigned igain=CaloGain::LARHIGHGAIN; 
-	 igain<CaloGain::LARNGAIN ; ++igain )
+   unsigned nGain = m_isSC ? 1 : CaloGain::LARNGAIN;
+   for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<nGain ; ++igain )
    {
      for (HWIdentifier chid : m_onlineId->channel_range()) {
        if (cabling->isOnlineConnected(chid)) {

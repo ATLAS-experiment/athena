@@ -270,21 +270,23 @@ def LArDelay_OFCCali_PoolDumpCfg(flags):
     rootfile=flags.LArCalib.Output.ROOTFile
     rootfile2=flags.LArCalib.Output.ROOTFile2
     if rootfile:
-        result.addEventAlgo(CompFactory.LArCaliWaves2Ntuple(KeyList = ["LArCaliWave",],
+        result.addEventAlgo(CompFactory.LArCaliWaves2Ntuple(KeyList = ["CaliWave",] if flags.LArCalib.isSC else ["LArCaliWave",],
                                                             NtupleName  = "CALIWAVE",
                                                             AddFEBTempInfo = False,
                                                             SaveDerivedInfo = True,
                                                             ApplyCorrection = True,
                                                             BadChanKey = bcKey,
                                                             AddCalib=True,
-                                                            SaveJitter=True
+                                                            SaveJitter=True,
+                                                            isSC=flags.LArCalib.isSC
                                                         ))
 
         if not rootfile2:
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                       AddFEBTempInfo  = False,
                                                       BadChanKey = bcKey,
-                                                      AddCalib=True
+                                                      AddCalib=True,
+                                                      isSC=flags.LArCalib.isSC
                                                   ))
 
         import os
@@ -299,14 +301,16 @@ def LArDelay_OFCCali_PoolDumpCfg(flags):
                                                    AddFEBTempInfo  = False,
                                                    NtupleFile = "FILE1",
                                                    BadChanKey = bcKey,
-                                                   AddCalib=True
+                                                   AddCalib=True,
+                                                   isSC=flags.LArCalib.isSC
                                                ))
         else:
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                    AddFEBTempInfo  = False,
                                                    NtupleFile = "FILE2",
                                                    BadChanKey = bcKey,
-                                                   AddCalib=True
+                                                   AddCalib=True,
+                                                   isSC=flags.LArCalib.isSC
                                                ))
 
            import os
