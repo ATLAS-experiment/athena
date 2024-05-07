@@ -87,9 +87,6 @@ namespace Barcode {
     ParticleBarcode                               m_secondaryIncrement;
     ParticleBarcode                               m_currentSecondary;
 
-    /** throw error messages if a possible overflow is detected */
-    bool                                          m_doUnderOverflowChecks;
-
     struct BarcodeInfo {
         BarcodeInfo() = delete;
         BarcodeInfo(VertexBarcode cv, ParticleBarcode cs) : currentVertex(cv), currentSecondary(cs) {};

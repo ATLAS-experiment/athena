@@ -18,13 +18,11 @@ Barcode::GenericBarcodeSvc::GenericBarcodeSvc(const std::string& name,ISvcLocato
   m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
   m_secondaryIncrement(1),
   m_currentSecondary(1),
-  m_doUnderOverflowChecks(true),
   m_encodePhysicsProcess(false)
 {
   // python properties
   declareProperty("VertexIncrement"               ,  m_vertexIncrement);
   declareProperty("SecondaryIncrement"            ,  m_secondaryIncrement);
-  declareProperty("DoUnderAndOverflowChecks"      ,  m_doUnderOverflowChecks);
   declareProperty("EncodePhysicsProcessInVertexBC",  m_encodePhysicsProcess);
 }
 
@@ -68,7 +66,7 @@ Barcode::VertexBarcode Barcode::GenericBarcodeSvc::newVertex( Barcode::ParticleB
 
   // a naive underflog checking based on the fact that vertex
   // barcodes should never be positive
-  if ( m_doUnderOverflowChecks && ( newBC > 0))
+  if (  newBC > 0)
     {
       ATH_MSG_ERROR("LegacyBarcodeSvc::newVertex(...)"
                     << " will return a vertex barcode greater than 0: '"
@@ -89,7 +87,7 @@ Barcode::ParticleBarcode Barcode::GenericBarcodeSvc::newSecondary( Barcode::Part
 
   // a naive overflow checking based on the fact that particle
   // barcodes should never be negative
-  if ( m_doUnderOverflowChecks && (m_currentSecondary < 0))
+  if ( m_currentSecondary < 0)
     {
       ATH_MSG_ERROR("LegacyBarcodeSvc::newSecondary(...)"
                     << " will return a particle barcode of less than 0: '"
