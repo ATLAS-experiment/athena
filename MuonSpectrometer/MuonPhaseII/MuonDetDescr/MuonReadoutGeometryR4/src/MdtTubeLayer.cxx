@@ -56,6 +56,9 @@ const Amg::Transform3D MdtTubeLayer::tubeTransform(const unsigned int tube) cons
     m_layerNode->exec(&volAcc);
     return layerTransform() * volAcc.getDefTransform();
 }
+GeoVolumeCursor MdtTubeLayer::tubeCursor() const {
+  return GeoVolumeCursor(m_layerNode);
+}
 const Amg::Vector3D MdtTubeLayer::tubePosInLayer(const unsigned int tube) const {
     return  layerTransform().inverse() * tubeTransform(tube).translation();
 }

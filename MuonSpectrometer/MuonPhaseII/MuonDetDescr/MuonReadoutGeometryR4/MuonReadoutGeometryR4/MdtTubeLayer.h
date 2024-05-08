@@ -7,6 +7,7 @@
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GeoModelKernel/GeoVPhysVol.h>
 #include <GeoModelKernel/GeoTransform.h>
+#include <GeoModelKernel/GeoVolumeCursor.h>
 #include <GeoModelUtilities/TransientConstSharedPtr.h>
 
 #include <set>
@@ -40,6 +41,8 @@ namespace MuonGMR4{
         unsigned int nTubes() const;
         ///@brief: Returns the transformation from the layer to the muon station
         const Amg::Transform3D& layerTransform() const;
+        ///@brief Return a cursor object over the tubes in the layer.
+        GeoVolumeCursor tubeCursor() const;
         ///@brief Returns the transformation of the tube to the muon station
         ///       Index counting [0 - nTubes()-1]
         const Amg::Transform3D tubeTransform(const unsigned int tube) const;
