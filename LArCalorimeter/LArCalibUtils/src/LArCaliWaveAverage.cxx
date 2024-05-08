@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArCaliWaveAverage.h"
@@ -328,7 +328,7 @@ std::vector<HWIdentifier> LArCaliWaveAverage::SymmetricChannels(HWIdentifier ChI
 } 
 
 
-LArCaliWave LArCaliWaveAverage::WaveAverage(std::vector<LArCaliWave> ToBeAveraged) 
+LArCaliWave LArCaliWaveAverage::WaveAverage(const std::vector<LArCaliWave>& ToBeAveraged) 
 {   
   if ( !ToBeAveraged.empty() ) { 
     
