@@ -37,7 +37,6 @@ echo " "
 echo " ********** Making DAOD_PHYSVAL **********"
 echo " "
 run "DAOD_PHYSVAL" Derivation_tf.py \
-    --CA "all:True" \
     --athenaMPMergeTargetSize "DAOD_*:0" \
     --formats "PHYSVAL" \
     --multiprocess "True" \
@@ -55,7 +54,6 @@ echo " "
 echo " ********** Making NTUP_PHYSVAL **********"
 echo " "
 run "NTUP_PHYSVAL" Derivation_tf.py \
-    --CA \
     --inputDAOD_PHYSVALFile "DAOD_PHYSVAL.OUT.root" \
     --outputNTUP_PHYSVALFile "NTUP_PHYSVAL.root" \
     --validationFlags doExample, doMET, doEgamma, doInDet, doTau, doJet, doBtag, doMuon, doZee, doTopoCluster, doPFlow_FlowElements \

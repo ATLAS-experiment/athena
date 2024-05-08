@@ -11,7 +11,6 @@
 set -e
 
 Derivation_tf.py \
---CA True \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1 \
 --outputDAODFile art.pool.root \
 --formats EGAM1 EGAM2 EGAM3 EGAM4 EGAM5 EGAM7 EGAM8 EGAM9 EGAM10 JETM1 JETM3 JETM4 JETM6 FTAG1 FTAG2 FTAG3 IDTR2 TRIG8 LLP1 STDM7 HIGG1D1 MUON1 \
