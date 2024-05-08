@@ -70,7 +70,11 @@ StatusCode MdtReadoutElement::initElement() {
 #endif
     /// Cache the transformations to the tube layers
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
-    for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube) {
+    MdtTubeLayer& layer = *m_pars.tubeLayers[lay-1];
+    GeoVolumeCursor tubeCursor = layer.tubeCursor();
+    GeoTrf::Transform3D layerTransform = layer.layerTransform();
+    for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube, tubeCursor.next()) {
+      assert (!tubeCursor.atEnd());
       const IdentifierHash idHash = measurementHash(lay,tube);
       if (m_pars.removedTubes.count(idHash)) {
          prevTubePos = std::nullopt;
@@ -81,15 +85,16 @@ StatusCode MdtReadoutElement::initElement() {
       ATH_CHECK(strawSurfaceFactory(idHash, m_pars.tubeBounds->make_bounds(innerTubeRadius(), 0.5*tubeLength(idHash))));
 #endif
       ///Ensure that all linear transformations are rotations
-      const AmgSymMatrix(3) tubeRot = toTubeFrame(idHash).linear();
+      GeoTrf::Transform3D tubeFrame = layerTransform*tubeCursor.getDefTransform();
+      const AmgSymMatrix(3) tubeRot = tubeFrame.linear();
       if (std::abs(tubeRot.determinant()- 1.) > std::numeric_limits<float>::epsilon()){
          ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Transformation matrix is not a pure rotation for "<<
                        idHelperSvc()->toStringDetEl(identify())<<" in layer: "<<lay<<", tube: "<<tube
-                       <<Amg::toString(toTubeFrame(idHash)));
+                       <<Amg::toString(tubeFrame));
          return StatusCode::FAILURE;
       }
       /// Ensure that all tubes have the same pitch
-      const Amg::Vector3D tubePos = toTubeFrame(idHash).translation();
+      const Amg::Vector3D tubePos = tubeFrame.translation();
       
       constexpr double pitchTolerance = 20. * Gaudi::Units::micrometer;
       if (prevTubePos) {
@@ -112,6 +117,8 @@ StatusCode MdtReadoutElement::initElement() {
                           <<dR<<" tube position: "<<Amg::toString(tubePos,2)
                           <<" previous:"<<Amg::toString((*prevLayPos), 2));
          }
+      }
+      if (tube == 1) {
          prevLayPos = std::make_optional<Amg::Vector3D>(tubePos);
       }
       prevTubePos = std::make_optional<Amg::Vector3D>(tubePos);
