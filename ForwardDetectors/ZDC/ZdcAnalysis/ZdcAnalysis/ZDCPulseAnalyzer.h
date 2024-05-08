@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCPulseAnalyzer_h
@@ -155,12 +155,6 @@ private:
   unsigned int m_postExclLGADCThresh{0};
   unsigned int m_maxSamplesPostExcl{0};
 
-  // Enable of a user-provided filter on the FADC samples
-  //
-  bool m_haveUserFilter{false};
-  void (*m_userFilterHG)(std::vector<float>& FADCSamples, std::vector<bool> useSamples){};
-  void (*m_userFilterLG)(std::vector<float>& FADCSamples, std::vector<bool> useSamples){};
-  
   //
   unsigned int m_timingCorrMode{NoTimingCorr};
   float m_timingCorrRefADC{500};

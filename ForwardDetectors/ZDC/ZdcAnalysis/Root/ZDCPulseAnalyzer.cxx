@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
@@ -197,7 +197,6 @@ void ZDCPulseAnalyzer::SetDefaults()
 
   m_enablePreExcl = false;
   m_enablePostExcl = false;
-  m_haveUserFilter = false;
   
   m_timingCorrMode = NoTimingCorr;
   m_haveNonlinCorr = false;

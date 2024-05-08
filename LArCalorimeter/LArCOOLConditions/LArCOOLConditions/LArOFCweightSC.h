@@ -6,14 +6,12 @@
 #ifndef LARCOOLCONDITIONS_OFCWEIGHTSC_H
 #define LARCOOLCONDITIONS_OFCWEIGHTSC_H
 
-//#include "LArElecCalib/ILArfSampl.h" 
 #include "LArCOOLConditions/LArSingleFloatBlob.h"
 #include "LArCOOLConditions/LArCondSuperCellBase.h"
 
-
 class CondAttrListCollection;
 
-class LArOFCweightSC: //public ILArfSampl,
+class LArOFCweightSC:
 		   public LArCondSuperCellBase,
 		   public LArSingleFloatBlob {
 
@@ -21,7 +19,7 @@ public:
   LArOFCweightSC(); 
   LArOFCweightSC(const CondAttrListCollection* attrList);
 
-  virtual ~LArOFCweightSC();
+  virtual ~LArOFCweightSC() = default;
 
   bool good() const { return m_isInitialized && m_nChannels>0; }
   
@@ -29,9 +27,6 @@ public:
   const float& getW(const HWIdentifier& chid) const;
 
 private:
-  //static const float errorcode;
-  const float m_null;
-
 };
 
 #include "AthenaKernel/CondCont.h"
