@@ -23,3 +23,10 @@ atlas_add_test( TrackParticleTruthCollectionCnv_p2_test
                 SOURCES
                 test/TrackParticleTruthCollectionCnv_p2_test.cxx
                 LINK_LIBRARIES AthenaPoolCnvSvcLib AtlasHepMCLib DataModelAthenaPoolLib GeneratorObjectsTPCnv Particle ParticleTruth SGTools TrackParticleTruthTPCnv )
+
+atlas_add_test( TrackParticleTruthCollectionCnv_p3_test
+                SOURCES
+                test/TrackParticleTruthCollectionCnv_p3_test.cxx
+                LINK_LIBRARIES AthenaPoolCnvSvcLib AtlasHepMCLib DataModelAthenaPoolLib GeneratorObjectsTPCnv Particle ParticleTruth SGTools TrackParticleTruthTPCnv )
+
+
