@@ -1,7 +1,7 @@
 //-*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "AsgDataHandles/WriteHandle.h"
+#include "AthContainers/Decorator.h"
 
 
 
@@ -138,13 +139,14 @@ std::vector<const xAOD::Electron*> JetInputElRemovalTool::selectElectron()const{
 
   selected_electrons_v.clear();
   bool isTight=false;
-  
+
+  SG::Decorator< char > idflagDec( m_elIDname );
   for (const auto *electron_itr : *electrons){
     
     isTight=false;
     
     //Select only el with given quality
-    if (electron_itr->auxdecor< char >(m_elIDname)==1){
+    if (idflagDec (*electron_itr)==1){
       isTight=true;
     }
     
