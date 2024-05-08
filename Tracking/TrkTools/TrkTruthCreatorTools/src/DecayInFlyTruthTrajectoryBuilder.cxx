@@ -40,7 +40,7 @@ void DecayInFlyTruthTrajectoryBuilder::
 buildTruthTrajectory(TruthTrajectory *result, const HepMC::ConstGenParticlePtr& input) const
 {
   result->clear();
-  if(input) {
+  if (input) {
     HepMC::ConstGenParticlePtr  next{nullptr};
     HepMC::ConstGenParticlePtr  current = input;
 
@@ -48,22 +48,25 @@ buildTruthTrajectory(TruthTrajectory *result, const HepMC::ConstGenParticlePtr& 
     // in the TruthTrajectory, so we need to use a tmp storage while
     // traversing the structure.
     std::stack<HepMC::ConstGenParticlePtr> tmp;
-    while( (next = getDaughter(current)) ) {
+    while ( (next = getDaughter(current)) ) {
       tmp.push(current = next);
     }
 
+    // All particles in the TruthTrajectory will be from the same GenEvent
+    const int eventNumber = input->parent_event()->event_number();
+
     // copy the outer half to result
-    while(!tmp.empty()) {
-      result->emplace_back(tmp.top(),0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
+    while (!tmp.empty()) {
+      result->emplace_back(tmp.top(), eventNumber, HepMcParticleLink::IS_EVENTNUM);
       tmp.pop();
     }
 
     // The input particle itself
-    result->emplace_back(input,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
+    result->emplace_back(input, eventNumber, HepMcParticleLink::IS_EVENTNUM);
 
     // Now continue towards the interaction point
-    while( (next = getMother(current)) ) {
-      result->emplace_back(current = next,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
+    while ( (next = getMother(current)) ) {
+      result->emplace_back(current = next, eventNumber, HepMcParticleLink::IS_EVENTNUM);
     }
   }
 }
