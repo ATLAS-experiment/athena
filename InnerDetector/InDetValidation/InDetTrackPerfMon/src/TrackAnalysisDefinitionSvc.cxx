@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,7 @@
 
 /// STL includes 
 #include <algorithm>
+#include <memory>
 
 /// -------------------
 /// --- Constructor ---
@@ -94,15 +95,17 @@ std::string TrackAnalysisDefinitionSvc::plotsFullDir( std::string chain ) const
 
   /// get "subDir"
   std::string subDir( m_subFolder );
-  if( subDir.empty() ) ATH_MSG_WARNING( "Empty plots sub-directory" );
-
-  /// reduce: "/subDir" -> "subDir"
-  if( subDir[0] == '/' ) {
-    subDir.erase( subDir.begin() );
+  if( subDir.empty() ) {
+    ATH_MSG_WARNING( "Empty plots sub-directory" );
+  } else  {
+    /// reduce: "/subDir" -> "subDir"
+    if( subDir[0] == '/' ) {
+      subDir.erase( subDir.begin() );
+    }
+    /// add a slash: "subDir" -> "subDir/"
+    if( subDir.back() != '/' ) subDir += "/";
   }
-
-  /// add a slash: "subDir" -> "subDir/"
-  if( subDir.back() != '/' ) subDir += "/";
+  
 
   return m_sortPlotsByChain.value() ?
          topDir + chain + subDir :

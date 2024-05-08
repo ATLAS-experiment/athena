@@ -122,17 +122,17 @@ bool IDTPM::SinglePlotDefinition::isValid() const
 /// or "name" if folder is empty
 void IDTPM::SinglePlotDefinition::redoIdDigest()
 {
-  if( m_folder.empty() ) m_identifier = m_name;
-
-  /// reduce: "/folder" -> "folder"
-  if( m_folder[0] == '/' ) {
-    m_folder.erase( m_folder.begin() );
+  if( m_folder.empty() ){
+    m_identifier = m_name;
+  } else {
+    /// reduce: "/folder" -> "folder"
+    if( m_folder[0] == '/' ) {
+      m_folder.erase( m_folder.begin() );
+    }
+    /// add a slash: "folder" -> "folder/"
+    if( m_folder.back() != '/' ) m_folder += "/";
+    m_identifier = m_folder + m_name;
   }
-
-  /// add a slash: "folder" -> "folder/"
-  if( m_folder.back() != '/' ) m_folder += "/";
-
-  m_identifier = m_folder + m_name;
 }
 
 
