@@ -55,14 +55,12 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
    outputFile.write("\n")
    if (not isTruth):
       outputFile.write("Derivation_tf.py \\\n")
-      outputFile.write("--CA True \\\n")
       outputFile.write("--inputAODFile "+inputFile+" \\\n")
       outputFile.write("--outputDAODFile art.pool.root \\\n")
       outputFile.write("--formats "+formatName+" \\\n")
       outputFile.write("--maxEvents "+nEvents+" \\\n")
    if isTruth:
       outputFile.write("Derivation_tf.py \\\n")
-      outputFile.write("--CA True \\\n") 
       outputFile.write("--inputEVNTFile "+inputFile+" \\\n")
       outputFile.write("--outputDAODFile art.pool.root \\\n")
       outputFile.write("--formats "+formatName+" \\\n") 
@@ -101,7 +99,6 @@ def generateTrains(formatList,label,inputFile,isMC,nEvents):
    outputFile.write("set -e"+"\n")
    outputFile.write("\n")
    outputFile.write("Derivation_tf.py \\\n")
-   outputFile.write("--CA True \\\n")
    outputFile.write("--inputAODFile "+inputFile+" \\\n") 
    outputFile.write("--outputDAODFile art.pool.root \\\n")
    outputFile.write("--formats "+" ".join(formatList)+" \\\n")
