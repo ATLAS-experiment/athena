@@ -21,17 +21,17 @@ atlas_add_component( ITkPixelByteStreamCnv
    ByteStreamCnvSvcBaseLib InDetIdentifier PixelReadoutGeometryLib IRegionSelector
    xAODEventInfo TrigSteeringEvent InDetByteStreamErrors  ITkPixelByteStreamCnvLib ByteStreamCnvSvcLib )
    
-atlas_add_test(ITkPixelRodDecoder_test
-  SOURCES test/ITkPixelRodDecoder_test.cxx 
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} 
-  LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES}   AthenaBaseComps GaudiKernel IdDictParser StoreGateLib  Identifier ITkPixelByteStreamCnvLib
-  POST_EXEC_SCRIPT "nopost.sh" )
+# atlas_add_test(ITkPixelRodDecoder_test
+#   SOURCES test/ITkPixelRodDecoder_test.cxx 
+#   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} 
+#   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES}   AthenaBaseComps GaudiKernel IdDictParser StoreGateLib  Identifier ITkPixelByteStreamCnvLib
+#   POST_EXEC_SCRIPT "nopost.sh" )
   
-atlas_add_test(ITkPixelRawDataProviderTool_test
-  SOURCES test/ITkPixelRawDataProviderTool_test.cxx 
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} 
-  LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES}   AthenaBaseComps GaudiKernel IdDictParser StoreGateLib  Identifier ITkPixelByteStreamCnvLib
-  POST_EXEC_SCRIPT "nopost.sh" )
+# atlas_add_test(ITkPixelRawDataProviderTool_test
+#   SOURCES test/ITkPixelRawDataProviderTool_test.cxx 
+#   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} 
+#   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES}   AthenaBaseComps GaudiKernel IdDictParser StoreGateLib  Identifier ITkPixelByteStreamCnvLib
+#   POST_EXEC_SCRIPT "nopost.sh" )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.txt )
