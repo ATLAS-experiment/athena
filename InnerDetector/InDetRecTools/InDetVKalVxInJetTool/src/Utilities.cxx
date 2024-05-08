@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Vadim Kostyukhin (vadim.kostyukhin@cern.ch)
 
@@ -576,11 +576,13 @@ namespace InDet{
 
 
   int InDetVKalVxInJetTool::getIdHF(const xAOD::TrackParticle* TP ) {
-      if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
+      static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> > truthParticleLinkAcc ("truthParticleLink");
+      if( truthParticleLinkAcc.isAvailable (*TP) ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
-                               TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+          truthParticleLinkAcc (*TP);
         if( !tplink.isValid() ) return 0;
-        if( TP->auxdata< float >( "truthMatchProbability" ) < 0.5 ) return 0;
+        static const SG::ConstAccessor<float> truthMatchProbabilityAcc ("truthMatchProbability");
+        if( truthMatchProbabilityAcc (*TP ) < 0.5 ) return 0;
         if (HepMC::is_simulation_particle(*tplink)) return 0;
         if( (*tplink)->hasProdVtx()){
           if( (*tplink)->prodVtx()->nIncomingParticles()==1){
@@ -625,17 +627,19 @@ namespace InDet{
 
 
   int InDetVKalVxInJetTool::getG4Inter(const xAOD::TrackParticle* TP ) {
-      if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
+      static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> > truthParticleLinkAcc ("truthParticleLink");
+      if( truthParticleLinkAcc.isAvailable (*TP) ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
-                               TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+          truthParticleLinkAcc (*TP);
         if( tplink.isValid() && HepMC::is_simulation_particle(*tplink)) return 1;
       }
       return 0;
   }
   int InDetVKalVxInJetTool::getMCPileup(const xAOD::TrackParticle* TP ) {
-      if( TP->isAvailable< ElementLink< xAOD::TruthParticleContainer> >( "truthParticleLink") ) {
+      static const SG::ConstAccessor< ElementLink< xAOD::TruthParticleContainer> > truthParticleLinkAcc ("truthParticleLink");
+      if( truthParticleLinkAcc.isAvailable (*TP) ) {
         const ElementLink<xAOD::TruthParticleContainer>& tplink = 
-                               TP->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+          truthParticleLinkAcc (*TP);
         if( !tplink.isValid() ) return 1;
       } else { return 1; }
       return 0;
