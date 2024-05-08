@@ -1119,8 +1119,10 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
         
         float clo_res_eta = 1001.; // initial value; no sense
         float clo_res_phi = 1001.;
-        int NHit_perEvt_eta = 0;
-        int NHit_perEvt_phi = 0;
+        int NHitwithCut_perMuon_eta = 0;
+        int NHitwithCut_perMuon_phi = 0;
+        int NHitnoCut_perMuon_eta = 0;
+        int NHitnoCut_perMuon_phi = 0;
         std::vector<const Muon::RpcPrepData*> view_hits_eta;
         std::vector<const Muon::RpcPrepData*> view_hits_phi;
 
@@ -1202,6 +1204,12 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                         }
                     }
 
+                    if (measuresPhi) {
+                        NHitnoCut_perMuon_phi++;
+                    } else {
+                        NHitnoCut_perMuon_eta++;
+                    }
+
                     // process hit within |time| < 12.5 ns && on Track
                     if (isOutTime){
                         continue;
@@ -1216,7 +1224,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                         fill(tool, res_phi, res_panel, i_panelInd_res);
 
                         if (std::abs(residual_phi) < m_diffHitTrackPostion) {
-                            NHit_perEvt_phi++;
+                            NHitwithCut_perMuon_phi++;
                             view_hits_phi.push_back(rpcData);
                         }
                     } else {
@@ -1227,7 +1235,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                         fill(tool, res_eta, res_panel, i_panelInd_res);
 
                         if (std::abs(residual_eta) < m_diffHitTrackPostion){
-                            NHit_perEvt_eta++;
+                            NHitwithCut_perMuon_eta++;
                             view_hits_eta.push_back(rpcData);
                         }
                     }
@@ -1243,23 +1251,28 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
 
         // Declare the quantities which should be monitored
         if (muon_source == ZCand) {
-            auto hitMulti_eta = Scalar<int>("hitMulti_eta", NHit_perEvt_eta);
-            auto hitMulti_phi = Scalar<int>("hitMulti_phi", NHit_perEvt_phi);
+            auto hitMulti_eta = Scalar<int>("hitMulti_eta", NHitwithCut_perMuon_eta);
+            auto hitMulti_phi = Scalar<int>("hitMulti_phi", NHitwithCut_perMuon_phi);
             auto hitMulti = Scalar<int>("hitMulti", 0);
             auto i_panelIndex = Scalar<int>("panelInd_hM", -1);
             auto i_passExtrap = Scalar<bool>("muon_passExtrap", false);
+            auto i_passExtrap_sig = Scalar<bool>("muon_passExtrap_signalhit", false);
             auto i_LB = Scalar<int>("LB_detEff", lumiBlock);
 
             fill(tool, hitMulti_eta, hitMulti_phi);
 
             //
             // Eta panel
-            hitMulti = NHit_perEvt_eta;
+            hitMulti = NHitwithCut_perMuon_eta;
             i_panelIndex = etaPanel_ind;
-            if (NHit_perEvt_eta > 0)
+
+            if (NHitnoCut_perMuon_eta > 0)
                 i_passExtrap = true;
 
-            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_LB);
+            if (NHitwithCut_perMuon_eta > 0)
+                i_passExtrap_sig = true;
+
+            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_passExtrap_sig, i_LB);
             ATH_CHECK(fillClusterSize(view_hits_eta, etaPanel_ind, lumiBlock,
                                       sector, 0));  // isPhi = 0
 
@@ -1270,12 +1283,15 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
 
             //
             // Phi panel
-            hitMulti = NHit_perEvt_phi;
+            hitMulti = NHitwithCut_perMuon_phi;
             i_panelIndex = phiPanel_ind;
-            if (NHit_perEvt_phi > 0)
+            if (NHitnoCut_perMuon_phi > 0)
                 i_passExtrap = true;
 
-            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_LB);
+            if (NHitwithCut_perMuon_phi > 0)
+                i_passExtrap_sig = true; 
+
+            fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_passExtrap_sig, i_LB);
             ATH_CHECK(fillClusterSize(view_hits_phi, phiPanel_ind, lumiBlock,
                                       sector, 1));  // isPhi = 1
 
@@ -1283,25 +1299,28 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
                 closest_res_phi = clo_res_phi;
                 fill(tool, closest_res_phi);
             }
-        } else {
-            auto i_panelIndex = Scalar<int>("panelInd_hM_allMu", -1);
-            auto i_passExtrap = Scalar<bool>("muon_passExtrap_allMu", false);
-
-            //
-            // Eta panel
-            i_panelIndex = etaPanel_ind;
-            if (NHit_perEvt_eta > 0)
-                i_passExtrap = true;
-            fill(tool, i_panelIndex, i_passExtrap);
-
-            //
-            // Phi panel
-            i_panelIndex = phiPanel_ind;
-            if (NHit_perEvt_phi > 0)
-                i_passExtrap = true;
-
-            fill(tool, i_panelIndex, i_passExtrap);
         }
+
+        // 
+        // All muon
+        // 
+        auto i_panelIndex = Scalar<int>("panelInd_hM_allMu", -1);
+        auto i_passExtrap = Scalar<bool>("muon_passExtrap_allMu", false);
+
+        //
+        // Eta panel
+        i_panelIndex = etaPanel_ind;
+        if (NHitwithCut_perMuon_eta > 0)
+            i_passExtrap = true;
+        fill(tool, i_panelIndex, i_passExtrap);
+
+        //
+        // Phi panel
+        i_panelIndex = phiPanel_ind;
+        if (NHitwithCut_perMuon_phi > 0)
+            i_passExtrap = true;
+
+        fill(tool, i_panelIndex, i_passExtrap);
     }
 
     return StatusCode::SUCCESS;

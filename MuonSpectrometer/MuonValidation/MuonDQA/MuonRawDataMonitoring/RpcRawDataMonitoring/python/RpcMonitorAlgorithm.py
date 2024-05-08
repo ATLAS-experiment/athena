@@ -182,7 +182,11 @@ def RpcMonitoringConfig(inputFlags):
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
-
+    myGroup_track.defineHistogram('muon_passExtrap_signalhit,panelInd_hM;Detection_Efficiency_MuonFromZ_signalHit', 
+                            title='Panels detection efficiency for muons decayed from Z candidates(Signal hits);Panel Index;Efficiency',
+                            type='TEfficiency',
+                            path=trackPath,
+                            xbins=8592, xmin=-0.5, xmax=8591.5)
     myGroup_track.defineHistogram('muon_passExtrap,LB_detEff;Detection_Efficiency_LB_MuonFromZ', 
                             title='Panels detection efficiency for muons decayed from Z candidates;Luminosity Block;Efficiency',
                             type='TEfficiency',
