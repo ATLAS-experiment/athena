@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -965,38 +965,37 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 	// In barrel frame (generally the same as the global frame)
 	m_detectorManager->addAlignableTransform(AlignmentLevelModule, idModule, xfx1, pShell, pBarrelVol);
 
-  Identifier TRT_Identifier;
 	// Add the substructure here:
 	pShell->add(new GeoIdentifierTag(iABC));
-  TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
-  int strawStatusHT = TRTCond::StrawStatus::Good;
-  if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
-  ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
+	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
+	int strawStatusHT = TRTCond::StrawStatus::Good;
+	if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+	ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
-  // Ruslan: insert radiators with Ar-straws
-  // Artem: same for Kr
-  switch (agm)
-    {
-    case GM_ARGON:
-      ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
-		     << idHelper->print_to_string(TRT_Identifier)); 
-      pShell->add(pRadAR);
-      break;
-    case GM_KRYPTON:
-      ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
-		     << idHelper->print_to_string(TRT_Identifier));
-      pShell->add(pRadKR);
-      break;
-    case GM_XENON:
-      ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
-		     << idHelper->print_to_string(TRT_Identifier) );
-      pShell->add(pRad);
-      break;
-    default:
-      ATH_MSG_FATAL( "Unexpected gas mixture: " << agm ); 
-      throw std::runtime_error("Unexpected gas mixture");
-      return;
-    }
+	// Ruslan: insert radiators with Ar-straws
+	// Artem: same for Kr
+	switch (agm)
+	{
+	case GM_ARGON:
+	  ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
+			 << idHelper->print_to_string(TRT_Identifier));
+	  pShell->add(pRadAR);
+	  break;
+	case GM_KRYPTON:
+	  ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
+			 << idHelper->print_to_string(TRT_Identifier));
+	  pShell->add(pRadKR);
+	  break;
+	case GM_XENON:
+	  ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
+			 << idHelper->print_to_string(TRT_Identifier) );
+	  pShell->add(pRad);
+	  break;
+	default:
+	  ATH_MSG_FATAL( "Unexpected gas mixture: " << agm );
+	  throw std::runtime_error("Unexpected gas mixture");
+	  return;
+	}
 
 	//-------------------------------------------------------------------//
 	//                                                                   //
@@ -1279,37 +1278,36 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		  phiPlane +=  deltaPhiForStrawsA;
 		}
 
-    Identifier TRT_Identifier;
-    int bar_ec = (iiSide) ? -2 : +2;
-    TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
-    int strawStatusHT = TRTCond::StrawStatus::Good;
-    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
-    ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
+		int bar_ec = (iiSide) ? -2 : +2;
+		Identifier TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
+		int strawStatusHT = TRTCond::StrawStatus::Good;
+		if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+		ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
-    // Ruslan: insert plane with Ar-straws
-    // Artem: same for Kr
-    switch (agm)
-      {
-      case GM_ARGON:
-        ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneA_Ar->clone(); 
-        break;
-      case GM_KRYPTON:
-        ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneA_Kr->clone();
-        break;
-      case GM_XENON:
-        ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneA->clone();
-        break;
-      default:
-        ATH_MSG_FATAL( "Unexpected gas mixture: " << agm ); 
-        throw std::runtime_error("Unexpected gas mixture");
-        return;
-      }
+		// Ruslan: insert plane with Ar-straws
+		// Artem: same for Kr
+		switch (agm)
+		{
+		case GM_ARGON:
+		  ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneA_Ar->clone();
+		  break;
+		case GM_KRYPTON:
+		  ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneA_Kr->clone();
+		  break;
+		case GM_XENON:
+		  ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneA->clone();
+		  break;
+		default:
+		  ATH_MSG_FATAL( "Unexpected gas mixture: " << agm );
+		  throw std::runtime_error("Unexpected gas mixture");
+		  return;
+		}
 
 
 		xfPlane = new GeoTransform(GeoTrf::TranslateZ3D(m_data->endCapLayerZPositionA[iiPlane] - m_data->endCapLengthOfWheelsA/2)*GeoTrf::RotateZ3D(phiPlane));
@@ -1579,40 +1577,37 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		  m_detectorManager->addAlignableTransform(AlignmentLevelSubWheel, idSubModule, xfAlignableModule, pWheelB); 	    
 		}
 
-    Identifier TRT_Identifier;
-    int bar_ec = (iiSide) ? -2 : +2;
-    TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
-    int strawStatusHT = TRTCond::StrawStatus::Good;
-    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
-    ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
+		int bar_ec = (iiSide) ? -2 : +2;
+		Identifier TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
+		int strawStatusHT = TRTCond::StrawStatus::Good;
+		if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+		ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
-    //Ruslan: insert plane with Ar-straws
-    //Artem: same for Kr
-    switch (agm)
-      {
-      case GM_ARGON:
-        ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier) );
-        childPlane = pStrawPlaneB_Ar->clone();
-        break;
-      case GM_KRYPTON:
-        ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier));
-        childPlane = pStrawPlaneB_Kr->clone();
-        break;
-      case GM_XENON:
-        ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
-		       << idHelper->print_to_string(TRT_Identifier));
-        childPlane = pStrawPlaneB->clone();
-        break;
-      default:
-        ATH_MSG_FATAL( "Unexpected gas mixture: " << agm); 
-        throw std::runtime_error("Unexpected gas mixture");
-        return;
-      }
+		//Ruslan: insert plane with Ar-straws
+		//Artem: same for Kr
+		switch (agm)
+		{
+		case GM_ARGON:
+		  ATH_MSG_DEBUG( "Marking Argon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier) );
+		  childPlane = pStrawPlaneB_Ar->clone();
+		  break;
+		case GM_KRYPTON:
+		  ATH_MSG_DEBUG( "Marking Krypton straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier));
+		  childPlane = pStrawPlaneB_Kr->clone();
+		  break;
+		case GM_XENON:
+		  ATH_MSG_DEBUG( "Marking Xenon straws from /TRT/Cond/StatusHT:\t"
+				 << idHelper->print_to_string(TRT_Identifier));
+		  childPlane = pStrawPlaneB->clone();
+		  break;
+		default:
+		  ATH_MSG_FATAL( "Unexpected gas mixture: " << agm);
+		  throw std::runtime_error("Unexpected gas mixture");
+		  return;
+		}
         
-//		childPlane = pStrawPlaneB->clone();
-		
 		// phiPlane is phi of straw 0, sector 0 (online numbering)
 		double phiPlane = m_data->endCapPhiOfFirstStraw + RotationsOfStrawPlanes[iiPlane%nStrawLayMaxEc]*deltaPhiForStrawsB;
 
