@@ -39,33 +39,36 @@ StatusCode ElasticTruthTrajectoryBuilder::initialize() {
 void ElasticTruthTrajectoryBuilder::
 buildTruthTrajectory(TruthTrajectory *result, const HepMC::ConstGenParticlePtr& input) const
 {
-	result->clear();
-	if(input) {
-		HepMC::ConstGenParticlePtr next(nullptr);
-		HepMC::ConstGenParticlePtr current = input;
+  result->clear();
+  if (input) {
+    HepMC::ConstGenParticlePtr next(nullptr);
+    HepMC::ConstGenParticlePtr current = input;
 
-		// Extend trajectory outwards.  The last particle should go at [0]
-		// in the TruthTrajectory, so we need to use a tmp storage while
-		// traversing the structure.
-		std::stack<HepMC::ConstGenParticlePtr> tmp;
-		while( (next = getDaughter(current)) ) {
-			tmp.push(current = next);
-		}
+    // Extend trajectory outwards.  The last particle should go at [0]
+    // in the TruthTrajectory, so we need to use a tmp storage while
+    // traversing the structure.
+    std::stack<HepMC::ConstGenParticlePtr> tmp;
+    while ( (next = getDaughter(current)) ) {
+      tmp.push(current = next);
+    }
 
-		// copy the outer half to result
-		while(!tmp.empty()) {
-                  result->emplace_back(tmp.top(),0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
-			tmp.pop();
-		}
+    // All particles in the TruthTrajectory will be from the same GenEvent
+    const int eventNumber = input->parent_event()->event_number();
 
-		// The input particle itself
-		result->emplace_back(input,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
+    // copy the outer half to result
+    while (!tmp.empty()) {
+      result->emplace_back(tmp.top(), eventNumber, HepMcParticleLink::IS_EVENTNUM);
+      tmp.pop();
+    }
 
-		// Now continue towards the interaction point
-		while( (next = getMother(current)) ) {
-			result->emplace_back(current = next,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
-		}
-	}
+    // The input particle itself
+    result->emplace_back(input, eventNumber, HepMcParticleLink::IS_EVENTNUM);
+
+    // Now continue towards the interaction point
+    while ( (next = getMother(current)) ) {
+      result->emplace_back(current = next, eventNumber, HepMcParticleLink::IS_EVENTNUM);
+    }
+  }
 }
 
 //================================================================
