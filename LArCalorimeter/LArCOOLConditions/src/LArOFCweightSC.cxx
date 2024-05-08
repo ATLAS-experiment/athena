@@ -4,20 +4,12 @@
 
 #include "LArCOOLConditions/LArOFCweightSC.h"
 
-
-//const float LArOFCweightSC::errorcode=ILArfSampl::ERRORCODE;
-
 LArOFCweightSC::LArOFCweightSC()
-  : LArCondSuperCellBase ("LArOFCweightSC"),
-    m_null(0.)
+  : LArCondSuperCellBase ("LArOFCweightSC")
 {}
 
-LArOFCweightSC::~LArOFCweightSC() {}
-
-
 LArOFCweightSC::LArOFCweightSC(const CondAttrListCollection* attrList)
-  : LArCondSuperCellBase ("LArOFCweightSC"),
-    m_null(0.)
+  : LArCondSuperCellBase ("LArOFCweightSC")
 {
   if (initializeBase().isFailure()) return;
  
@@ -26,8 +18,6 @@ LArOFCweightSC::LArOFCweightSC(const CondAttrListCollection* attrList)
   if (m_pValues.size()!=1) {
     ATH_MSG_ERROR( "Found unexpected number of gains (" << m_pValues.size() <<"). Expected exactly one gain." );
   }
-
-  return;
 }
 
 
