@@ -119,7 +119,8 @@ const Acts::Surface &ActsTrk::ActsToTrkConverterTool::trkSurfaceToActsSurface(
   if (it != m_actsSurfaceMap.end()) {
     return *it->second;
   }
-  ATH_MSG_WARNING(atlasSurface);
+  ATH_MSG_ERROR("No Acts surface corresponding to this ATLAS surface:");
+  ATH_MSG_ERROR(atlasSurface);
   throw std::domain_error("No Acts surface corresponding to the ATLAS one");
 }
 
@@ -161,12 +162,21 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
   // get the associated surface
   if (atlasParameter.hasSurface() &&
       atlasParameter.associatedSurface().owner() != Trk::SurfaceOwner::noOwn) {
-    actsSurface = trkSurfaceToActsSurface(atlasParameter.associatedSurface())
-                      .getSharedPtr();
+    try {
+      actsSurface = trkSurfaceToActsSurface(atlasParameter.associatedSurface())
+                        .getSharedPtr();
+    } catch (const std::exception &e) {
+      ATH_MSG_ERROR("Could not find ACTS surface for this TrackParameter:");
+      ATH_MSG_ERROR(atlasParameter);
+      throw;  // Nothing we can do, so just pass exception on...
+    }
   }
   // no associated surface create a perigee one
   else {
-    ATH_MSG_VERBOSE("trkTrackParametersToActsParameters:: No associated surface found, creating a perigee surface.");
+    ATH_MSG_VERBOSE(
+        "trkTrackParametersToActsParameters:: No associated surface found, "
+        "creating a perigee surface. Trk parameters:");
+    ATH_MSG_VERBOSE(atlasParameter);
     actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(
         Acts::Vector3(0., 0., 0.));
   }
@@ -438,37 +448,43 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
                                    << actsTSOS.index());
       actsTrack.tipIndex() = actsTSOS.index();
 
-
       if (tsos->trackParameters()) {
-        ATH_MSG_VERBOSE("Converting track parameters.");
-        // TODO - work out whether we should set predicted, filtered, smoothed
-        const Acts::BoundTrackParameters parameters =
-            trkTrackParametersToActsParameters(*(tsos->trackParameters()), gctx);
-        ATH_MSG_VERBOSE("Track parameters: "<<parameters.parameters());
-        // Sanity check on positions
-        actsTrackParameterPositionCheck(parameters, *(tsos->trackParameters()), gctx);
+        // TODO This try/catch is temporary and should be removed once the sTGC problem is fixed.
+        try {
+          ATH_MSG_VERBOSE("Converting track parameters.");
+          // TODO - work out whether we should set predicted, filtered, smoothed
+          const Acts::BoundTrackParameters parameters =
+              trkTrackParametersToActsParameters(*(tsos->trackParameters()), gctx);
+          ATH_MSG_VERBOSE("Track parameters: " << parameters.parameters());
+          // Sanity check on positions
+          actsTrackParameterPositionCheck(parameters, *(tsos->trackParameters()), gctx);
 
-        if (first_tsos) {
-          // This is the first track state, so we need to set the track
-          // parameters
-          actsTrack.parameters() = parameters.parameters();
-          actsTrack.covariance() = *parameters.covariance();
-          actsTrack.setReferenceSurface(
-              parameters.referenceSurface().getSharedPtr());
-          first_tsos = false;
-        } else {
-          actsTSOS.setReferenceSurface(parameters.referenceSurface().getSharedPtr());
-          // Since we're converting final Trk::Tracks, let's assume they're smoothed
-          actsTSOS.smoothed() = parameters.parameters();
-          actsTSOS.smoothedCovariance() = *parameters.covariance();
-          // Not yet implemented in MultiTrajectory.icc
-          // actsTSOS.typeFlags() |= Acts::TrackStateFlag::ParameterFlag;
-          if (!(actsTSOS.hasSmoothed() && actsTSOS.hasReferenceSurface())) {
-            ATH_MSG_WARNING("TrackState does not have smoothed state ["<<actsTSOS.hasSmoothed()<<"] or reference surface ["<<actsTSOS.hasReferenceSurface()<<"].");
+          if (first_tsos) {
+            // This is the first track state, so we need to set the track
+            // parameters
+            actsTrack.parameters() = parameters.parameters();
+            actsTrack.covariance() = *parameters.covariance();
+            actsTrack.setReferenceSurface(
+                parameters.referenceSurface().getSharedPtr());
+            first_tsos = false;
           } else {
-            ATH_MSG_VERBOSE("TrackState has smoothed state and reference surface.");  
+            actsTSOS.setReferenceSurface(parameters.referenceSurface().getSharedPtr());
+            // Since we're converting final Trk::Tracks, let's assume they're smoothed
+            actsTSOS.smoothed() = parameters.parameters();
+            actsTSOS.smoothedCovariance() = *parameters.covariance();
+            // Not yet implemented in MultiTrajectory.icc
+            // actsTSOS.typeFlags() |= Acts::TrackStateFlag::ParameterFlag;
+            if (!(actsTSOS.hasSmoothed() && actsTSOS.hasReferenceSurface())) {
+              ATH_MSG_WARNING("TrackState does not have smoothed state ["
+                              << actsTSOS.hasSmoothed()
+                              << "] or reference surface ["
+                              << actsTSOS.hasReferenceSurface() << "].");
+            } else {
+              ATH_MSG_VERBOSE("TrackState has smoothed state and reference surface.");
+            }
           }
-
+        } catch (const std::exception& e){
+          ATH_MSG_ERROR("Unable to convert TrackParameter. Will be missing from ACTS track.");
         }
       }
       if (tsos->measurementOnTrack()) {
@@ -508,11 +524,11 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
     const Trk::TrackParameters &trkparameters,
     const Acts::GeometryContext &gctx) const {
   auto actsPos = parameters.position(gctx);
-  ATH_MSG_VERBOSE("Acts position: "
-                    << actsPos << " vs "
-                    << trkparameters.position());
-  ATH_MSG_VERBOSE(parameters.referenceSurface().toString(gctx));
-  ATH_MSG_VERBOSE("GeometryId "<<parameters.referenceSurface().geometryId().value());  
+  // ATH_MSG_VERBOSE("Acts position: \n"
+  //                   << actsPos << " vs trk position: \n"
+  //                   << trkparameters.position());
+  // ATH_MSG_VERBOSE(parameters.referenceSurface().toString(gctx));
+  // ATH_MSG_VERBOSE("GeometryId "<<parameters.referenceSurface().geometryId().value());  
 
   if (std::fabs(actsPos.x() - trkparameters.position().x()) >
           0.01 ||
@@ -520,8 +536,8 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
           0.01 ||
       std::fabs(actsPos.z() - trkparameters.position().z()) >
           0.01) {
-    ATH_MSG_WARNING("Parameter position mismatch: "
-                    << actsPos << " vs "
+    ATH_MSG_WARNING("Parameter position mismatch. Acts \n"
+                    << actsPos << " vs Trk \n"
                     << trkparameters.position());
     ATH_MSG_WARNING("Acts surface:");
     ATH_MSG_WARNING(parameters.referenceSurface().toString(gctx));
