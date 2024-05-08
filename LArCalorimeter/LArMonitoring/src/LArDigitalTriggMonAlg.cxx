@@ -119,6 +119,7 @@ struct Digi_MonValues {
   int digi_partition;
   float digi_diff_adc_ped_norm;
   float digi_diff_adc_ped;
+  float digi_diff_adc0_ped;
   int digi_bcid;
   unsigned int digi_lb;
   bool digi_passDigiNom;
@@ -158,6 +159,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   
   // General Monitored variables
   auto lumi_block = Monitored::Scalar<unsigned int>("lumi_block", 0);
+  auto time_stamp = Monitored::Scalar<unsigned int>("time_stamp", 0);
   auto BCID = Monitored::Scalar<int>("BCID",0);
   auto Pedestal = Monitored::Scalar<float>("Pedestal",0.0);
   auto PedestalRMS = Monitored::Scalar<float>("PedestalRMS",0.0);
@@ -176,6 +178,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto Digi_sampos = Monitored::Scalar<int>("Digi_sampos",-1); // Msampos
   auto Digi_ADC = Monitored::Scalar<int>("Digi_ADC",-1); // MADC
   auto Digi_Diff_ADC_Ped = Monitored::Scalar<float>("Digi_Diff_ADC_Ped", -999); // Diff_ADC_Pedestal
+  auto Digi_Diff_ADC0_Ped = Monitored::Scalar<float>("Digi_Diff_ADC0_Ped", -999); // Pedestal diff
   auto Digi_Diff_ADC_Ped_Norm = Monitored::Scalar<float>("Digi_Diff_ADC_Ped_Norm",-999); // Diff_ADC_Pedestal_Norm
   // cuts
   auto notBadQual = Monitored::Scalar<bool>("notBadQual",false);
@@ -269,6 +272,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
   BCID = thisEvent->bcid();// - 88)%((36+7)*4 + 36 + 31);
   lumi_block = thisEvent->lumiBlock();
+  time_stamp = thisEvent->timeStamp();
 
   float mu = lbInteractionsPerCrossing(ctx);
   float event_mu = lbLuminosityPerBCID(ctx);
@@ -361,7 +365,9 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       int thismaxPos = std::distance(digito->begin(), maxSam);
       Digi_maxpos=thismaxPos+1; //count samples [1,5]
       float ADC_max = pLArDigit->samples().at(Digi_maxpos-1);
+      float ADC_0 = pLArDigit->samples().at(0);
       // Start Loop over samples
+      Digi_Diff_ADC0_Ped = ADC_0 - Pedestal;
       for(unsigned i=0; i<trueNSamples;++i) {
 	badNotMasked = false;
 	notBadQual = false;
@@ -395,8 +401,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 	}
 
   //Should be able to use emplace_back here with C++20, see https://en.cppreference.com/w/cpp/language/aggregate_initialization
-	lvaluemap_digi.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
-	lvaluemap_digi_ALL.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
+	lvaluemap_digi.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
+	lvaluemap_digi_ALL.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
 
       } // End loop over samples
 
@@ -418,13 +424,14 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       auto digi_part_partition = Monitored::Collection("Digi_part_partition",tool,[](const auto& v){return v.digi_partition;});
       auto digi_part_diff_adc_ped_norm = Monitored::Collection("Digi_part_diff_adc_ped_norm",tool,[](const auto& v){return v.digi_diff_adc_ped_norm;});
       auto digi_part_diff_adc_ped = Monitored::Collection("Digi_part_diff_adc_ped",tool,[](const auto& v){return v.digi_diff_adc_ped;});
+      auto digi_part_diff_adc0_ped = Monitored::Collection("Digi_part_diff_adc0_ped",tool,[](const auto& v){return v.digi_diff_adc0_ped;});
       auto digi_part_bcid = Monitored::Collection("Digi_part_BCID",tool,[](const auto& v){return v.digi_bcid;});
       auto digi_part_lb = Monitored::Collection("Digi_part_LB",tool,[](const auto& v){return v.digi_lb;});
       auto digi_part_passDigiNom = Monitored::Collection("Digi_part_passDigiNom",tool,[](const auto& v){return v.digi_passDigiNom;});
       auto digi_part_badNotMasked = Monitored::Collection("Digi_part_badNotMasked",tool,[](const auto& v){return v.digi_badNotMasked;});
 
       fill(m_tools[m_toolmapLayerNames_digi.at(m_layerNames[ilayer])], 
-	   digi_part_eta, digi_part_phi, digi_part_ieta, digi_part_iphi, digi_part_sampos, digi_part_adc, digi_part_latomesourceidbin, digi_part_pedestal, digi_part_maxpos, digi_part_diff_adc_ped_norm, digi_part_diff_adc_ped, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
+	   digi_part_eta, digi_part_phi, digi_part_ieta, digi_part_iphi, digi_part_sampos, digi_part_adc, digi_part_latomesourceidbin, digi_part_pedestal, digi_part_maxpos, digi_part_diff_adc_ped_norm, digi_part_diff_adc_ped, digi_part_diff_adc0_ped, digi_part_bcid, digi_part_lb, digi_part_passDigiNom, digi_part_badNotMasked);
     }
   
 
@@ -510,18 +517,24 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       if ( ! m_bcMask.cellShouldBeMasked(bcCont,id)) {
 	notMasked = true;
       }
-      if ( rawSCReco != 0 && rawSCReco->passTauSelection().at(0) == true){ //only compare Et if tau selection is passed
-	passTauSel = true;
+      // popopopo
+      
+      if ( rawSCReco != 0 && rawSCReco->passTauSelection().size()>0){ //only compare Et if tau selection is passed
+	if (rawSCReco->passTauSelection().at(0) == true) passTauSel = true;
       }
-      int bcid_ind = 0;
+      unsigned int bcid_ind = 0;
       if (rawSC->energies().size()>0){
 	for ( auto & SCe : rawSC->bcids() ){
 	  if ( SCe == BCID ) break;
 	  bcid_ind++;
 	}
-	if ( rawSC->bcids().at(bcid_ind) != BCID ) ATH_MSG_WARNING("BCID not found in SC bcids list!! "<<BCID<<" "<<rawSC->bcids().at(bcid_ind));
+	if ( bcid_ind  >= rawSC->bcids().size() ){
+	  ATH_MSG_WARNING("BCID not found in SC bcids list!! "<<BCID<<" BCIDs size: "<<rawSC->bcids().size()<<", proposed index: "<<bcid_ind);
+	} else if ( rawSC->bcids().at(bcid_ind) != BCID ){
+	  ATH_MSG_WARNING("BCID not found in SC bcids list!! "<<BCID<<" "<<rawSC->bcids().at(bcid_ind));
+	}
 
-	if (rawSC->energies().size() > (unsigned)bcid_ind){
+	if (rawSC->energies().size() > bcid_ind){
 	  SC_energy_onl = rawSC->energies().at(bcid_ind);
 	}else{
 	  ATH_MSG_WARNING("rawSC energies vector is too small for the requested BCID index "<<bcid_ind<<" (size is "<<rawSC->energies().size()<<", bcid vec size is "<<rawSC->bcids().size()<<")");
@@ -537,15 +550,17 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 	  SC_energy_ofl = rawSCReco->energies().at(0); // algorithm already selects the correct energy
 	}else{
 	  ATH_MSG_WARNING("rawSCReco energies vector is empty!");
-	SC_energy_ofl = 0;
+	  SC_energy_ofl = 0;
 	}
       } 
       SC_ET_diff = SC_energy_onl - SC_energy_ofl;	
       SC_ET_onl = ( SC_energy_onl* 12.5 ) / 1000;  // Converted to GeV
       SC_ET_ofl = ( SC_energy_ofl* 12.5 ) / 1000;  // Converted to GeV
       SC_ET_onl_muscaled = event_mu > 0. ? SC_ET_onl / event_mu : SC_ET_onl;
-      int Etau = 0; 
-      if ( rawSCReco != 0 ){ Etau = rawSCReco->tauEnergies().at(0); }
+      int Etau = 0;
+      if ( rawSCReco != 0 ){
+	if ( rawSCReco->tauEnergies().size()>0 ){ Etau = rawSCReco->tauEnergies().at(0); }
+      }
       SC_time = (SC_energy_ofl != 0) ? (float)Etau / (float)SC_energy_ofl : Etau; 
       
       ATH_MSG_DEBUG("Energy onl - Energy ofl: "<<SC_energy_onl<<",  "<<SC_energy_ofl<<std::endl); 
@@ -564,7 +579,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       if (SC_ET_ofl > 1){
         eToflGt1GeV = true;
       }
-      if ( rawSC->satur().size()>0 ){
+      if ( rawSC->satur().size()>bcid_ind ){
 	if ( rawSC->satur().at(bcid_ind) ){
 	  if ( notMasked ){
 	    saturNotMasked = true;  
