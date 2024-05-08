@@ -113,200 +113,207 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
     
   int nbOfFebsInError = 0;
 
-  for (const auto *const it : *hdrCont) {
+  for (const auto* const it : *hdrCont) {
 
-      HWIdentifier febid= it->FEBId();
-      unsigned int int_id =  febid.get_identifier32().get_compact();
-   
-      if (m_checkAllFeb || m_isHec || m_isFcal || m_isEmb || m_isEmec || m_isEmPS){
-	all_febs.erase(int_id);
-      }
-      // ctrl3 
-      // const std::vector <uint16_t> &febctrl3 = it->FebCtrl3();
+    HWIdentifier febid = it->FEBId();
+    unsigned int int_id = febid.get_identifier32().get_compact();
 
-      // Retrieve rodstatus from DSP header
-      uint32_t rodstatus = it->RodStatus();
-      // Retrieve SCA adresses
-      const std::vector <uint16_t> &sca = it->SCA();
-      // Eventype = 2 : transparent/raw data - 4 : Physic - 7 : calibration - 10 : pedestal
-      uint32_t eventType = it->DetEventType();      
-
-      // Check the type consistency among different FEBs
-      bool typeMism = false;
-      // The event type is not yet determined(1st FEB) - Take this as reference
-      if (eventTypeFirst == 999) eventTypeFirst = eventType;
-      if (eventType != eventTypeFirst) typeMism = true;
-
-      std::bitset<32> rodstatusbits(rodstatus);
-      
-      bool scaOutOfRange = false;
-      bool badNbOfSp = false;
-      bool zeroSp = false;
-      bool checkSumErr=false; 
-
-      // Extract the number of samples for the first non zero samples block                                             
-      // This allow to allow to always plot the number of samples in the histo                                          
-      if (nbSamplesFirst == 0){
-        // Raw data / transparent : Nb of samples is here determined with size of raw data vector                       
-        if (eventType == 2 && (!sca.empty())) nbSamplesFirst=sca.size();
-        // Physic : Nb of samples is here determined with method of LArFEBMonHeader                                     
-        if (eventType == 4 && (it->NbSamples() != 0)) nbSamplesFirst=it->NbSamples();
-      }
-      // Test the uniformity of number of samples and that sca # is inside [0;143] only in raw data                     
-      if (eventType == 2){
-	if (nbSamplesFirst!=sca.size() && !sca.empty()) badNbOfSp = true;
-	for (unsigned int i=0; i<sca.size(); ++i){
-	  if (sca[i]>143) scaOutOfRange = true;
-	}
-      }
-      if (eventType == 4 && (nbSamplesFirst != it->NbSamples()) && (it->NbSamples() != 0)) badNbOfSp = true;
-
-      // Test that the number of samples is not zero only in raw data and results mode                                  
-      if (eventType == 2 &&  sca.empty()) zeroSp = true;
-      if (eventType == 4 &&  (it->RodResults1Size()  == 0)) zeroSp = true;
-
-
-      if (!zeroSp){
-	if (!it->ChecksumVerification()) checkSumErr = true; 
-	if (eventType==4) {
-	  int expSize1 = 0;
-	  if ((it->FormatVersion()&0xF)<=11) expSize1 = it->NbSweetCells1() + 83 + (int) ceilf((it->NbSamples()+1)/2.0); // Old DSP version
-	  if ((it->FormatVersion()&0xF)>=12) expSize1 = it->NbSweetCells1() + 84 + (int) ceilf((it->NbSamples()+1)/2.0); // New DSP version after 07/11 with new extra word SumE
-	  if (expSize1 != it->RodResults1Size()) {
-		checkSumErr = true; 
-	  }
-	  int nbOf32bits = (it->NbSweetCells2() * it->NbSamples() +1) / 2.0;
-	  if ( nbOf32bits != it->RodResults2Size()) {
-		checkSumErr = true; 
-	  }
-	}
-      }
-
-      
-
-      uint16_t errw=0; 
-
-      /* enum LArFebErrorType{
-	 Parity,BCID,SampleHeader,EVTID,ScacStatus,ScaOutOfRange,
-	 GainMismatch,TypeMismatch,NumOfSamples,EmptyDataBlock,DspBlockSize,CheckSum, BadGain, N_LArFebErrorType
-	 } ;
-      */
-
-      if (rodstatusbits[6])
-	errw = errw | (1<< LArFebErrorSummary::Parity);
-	
-      if( rodstatusbits[2] || rodstatusbits[7])
-	errw = errw | (1<< LArFebErrorSummary::BCID);
-	
-      if(rodstatusbits[3] || rodstatusbits[8])
-	errw = errw | (1<< LArFebErrorSummary::SampleHeader);
-	
-      if( ( rodstatusbits[1] || rodstatusbits[9] ) && ! masked(int_id, m_knownEvtId) )
-	errw = errw | (1<< LArFebErrorSummary::EVTID);
-
-      if( ( rodstatusbits[4] || rodstatusbits[11] || rodstatusbits[12]) && ! masked(int_id, m_knownSCACStatus) )
-	errw = errw | (1<< LArFebErrorSummary::ScacStatus);
-
-      if (scaOutOfRange)
-	errw = errw | (1<< LArFebErrorSummary::ScaOutOfRange);
-
-      if (rodstatusbits[5])
-	errw = errw | (1<< LArFebErrorSummary::GainMismatch);
-
-      if (rodstatusbits[24])
-	errw = errw | (1<< LArFebErrorSummary::BadGain);
-
-      if (typeMism) 
-	errw = errw | (1<< LArFebErrorSummary::TypeMismatch);
-
-      if (badNbOfSp)
-	errw = errw | (1<< LArFebErrorSummary::NumOfSamples);
-
-      if (zeroSp && ! masked(int_id,m_knownZeroSample) )
-	errw = errw | (1<< LArFebErrorSummary::EmptyDataBlock);
-
-      if (checkSumErr)
-	//if (zeroSp)
-	errw = errw | (1<< LArFebErrorSummary::CheckSum);
-
-
-      if (errw!=0){
-	// check which errors should be ignored for this feb
-	const LArBadFeb febStatus = badFebs->status(febid);
-	unsigned int err_toignore = febStatus.ignoreErrors();
-	if (err_toignore >0) {
-	  uint16_t erri = (uint16_t) (err_toignore);
-	  errw = errw & ( ~erri); 
-	}
-      }
-
-
-      for (unsigned int i=0;i<LArFebErrorSummary::N_LArFebErrorType;++i){
-	if ( errw & (1<<i)){
-	  m_errors[i]+=1; 
-	}
-      }
-      ATH_MSG_DEBUG( " Error for this FEB id  "<<std::hex<< int_id << " is " <<errw );
-	
-      if ( ! febErrorSummary->set_feb_error(int_id, errw) ) {
-	
-	ATH_MSG_DEBUG( " failed to insert the error into LArFebErrorSummary  "<< std::hex << febid << std::dec  );
-
-      }
-
-      if(errw!=0) { // should this FEB be counted as in error ?
-        const LArBadFeb febStatus = badFebs->status(febid);
-        if(!febStatus.inError() && ! ( febStatus.deadReadout() || febStatus.deadAll() )) 
-               nbOfFebsInError += 1;
-      } 
-
-  }// loop over headers
-  
-  if (m_checkAllFeb || m_isHec || m_isFcal || m_isEmb || m_isEmec || m_isEmPS){
-    const uint16_t errw = 1<< LArFebErrorSummary::MissingHeader; 
-    bool warn=false;
-    for (auto it : all_febs) { 
-      const HWIdentifier febid =  HWIdentifier( Identifier32(it) ) ; 
-      const LArBadFeb febStatus = badFebs->status(febid);
-      if ( febStatus.deadReadout() || febStatus.deadAll() || febStatus.deactivatedInOKS() ) {
-	ATH_MSG_DEBUG( " This FEB is not read out  0x"<< std::hex << it << std::dec  );
-      }
-      else {
-	//Print warning only for first couple of events and if we have at least one FEB read out
-	//(dont' flood log with useless message is LAr is not in the run)
-	//if (this->outputLevel()<=MSG::WARNING && m_missingFebsWarns < m_warnLimit &&  hdrCont->size()>0) {
-	if (msgLvl(MSG::WARNING) && m_missingFebsWarns.load() < m_warnLimit &&  !hdrCont->empty()) {
-	  warn=true;
-	  const std::string bec= m_onlineHelper->barrel_ec(febid)==0 ? "BARREL/" : "ENDCAP/";
-	  const std::string side=m_onlineHelper->pos_neg(febid)==0 ? "C/" : "A/";
-	  ATH_MSG_WARNING( "FEB [" <<bec<<side<<m_onlineHelper->feedthrough(febid)<<"/"<<m_onlineHelper->slot(febid)<<"] not read out!"  );
-	}	
-
-	febErrorSummary->set_feb_error(it,errw); 
-	m_errors[LArFebErrorSummary::MissingHeader]+=1; 
-      }//end else missing FEB to report 
-	    
-    }//end loop over febs
-    if (warn) {
-      if ((++m_missingFebsWarns)==m_warnLimit)
-	ATH_MSG_WARNING( "No more warnings about FEBs not read out!"  );
+    if (m_checkAllFeb || m_isHec || m_isFcal || m_isEmb || m_isEmec || m_isEmPS) {
+      all_febs.erase(int_id);
     }
-  }//end if checkCompletness
+    // ctrl3
+    // const std::vector <uint16_t> &febctrl3 = it->FebCtrl3();
+
+    // Retrieve rodstatus from DSP header
+    uint32_t rodstatus = it->RodStatus();
+    // Retrieve SCA adresses
+    const std::vector<uint16_t>& sca = it->SCA();
+    // Eventype = 2 : transparent/raw data - 4 : Physic - 7 : calibration - 10 : pedestal
+    uint32_t eventType = it->DetEventType();
+
+    // Check the type consistency among different FEBs
+    bool typeMism = false;
+    // The event type is not yet determined(1st FEB) - Take this as reference
+    if (eventTypeFirst == 999)
+      eventTypeFirst = eventType;
+    if (eventType != eventTypeFirst)
+      typeMism = true;
+
+    std::bitset<32> rodstatusbits(rodstatus);
+
+    bool scaOutOfRange = false;
+    bool badNbOfSp = false;
+    bool zeroSp = false;
+    bool checkSumErr = false;
+
+    // Extract the number of samples for the first non zero samples block
+    // This allow to allow to always plot the number of samples in the histo
+    if (nbSamplesFirst == 0) {
+      // Raw data / transparent : Nb of samples is here determined with size of raw data vector
+      if (eventType == 2 && (!sca.empty()))
+        nbSamplesFirst = sca.size();
+      // Physic : Nb of samples is here determined with method of LArFEBMonHeader
+      if (eventType == 4 && (it->NbSamples() != 0))
+        nbSamplesFirst = it->NbSamples();
+    }
+    // Test the uniformity of number of samples and that sca # is inside [0;143] only in raw data
+    if (eventType == 2) {
+      if (nbSamplesFirst != sca.size() && !sca.empty())
+        badNbOfSp = true;
+      for (unsigned int i = 0; i < sca.size(); ++i) {
+        if (sca[i] > 143)
+          scaOutOfRange = true;
+      }
+    }
+    if (eventType == 4 && (nbSamplesFirst != it->NbSamples()) && (it->NbSamples() != 0))
+      badNbOfSp = true;
+
+    // Test that the number of samples is not zero only in raw data and results mode
+    if (eventType == 2 && sca.empty())
+      zeroSp = true;
+    if (eventType == 4 && (it->RodResults1Size() == 0))
+      zeroSp = true;
+
+    if (!zeroSp) {
+      if (!it->ChecksumVerification())
+        checkSumErr = true;
+      if (eventType == 4) {
+        int expSize1 = 0;
+        if ((it->FormatVersion() & 0xF) <= 11)
+          expSize1 = it->NbSweetCells1() + 83 + (int)ceilf((it->NbSamples() + 1) / 2.0);  // Old DSP version
+        if ((it->FormatVersion() & 0xF) >= 12)
+          expSize1 = it->NbSweetCells1() + 84 + (int)ceilf((it->NbSamples() + 1) / 2.0);  // New DSP version after 07/11 with new extra word SumE
+        if (expSize1 != it->RodResults1Size()) {
+          checkSumErr = true;
+        }
+        int nbOf32bits = (it->NbSweetCells2() * it->NbSamples() + 1) / 2.0;
+        if (nbOf32bits != it->RodResults2Size()) {
+          checkSumErr = true;
+        }
+      }
+    }
+
+    uint16_t errw = 0;
+
+    /* enum LArFebErrorType{
+       Parity,BCID,SampleHeader,EVTID,ScacStatus,ScaOutOfRange,
+       GainMismatch,TypeMismatch,NumOfSamples,EmptyDataBlock,DspBlockSize,CheckSum, BadGain, N_LArFebErrorType
+       } ;
+    */
+
+    if (rodstatusbits[6])
+      errw = errw | (1 << LArFebErrorSummary::Parity);
+
+    if (rodstatusbits[2] || rodstatusbits[7])
+      errw = errw | (1 << LArFebErrorSummary::BCID);
+
+    if (rodstatusbits[3] || rodstatusbits[8])
+      errw = errw | (1 << LArFebErrorSummary::SampleHeader);
+
+    if ((rodstatusbits[1] || rodstatusbits[9]) && !masked(int_id, m_knownEvtId))
+      errw = errw | (1 << LArFebErrorSummary::EVTID);
+
+    if ((rodstatusbits[4] || rodstatusbits[11] || rodstatusbits[12]) && !masked(int_id, m_knownSCACStatus))
+      errw = errw | (1 << LArFebErrorSummary::ScacStatus);
+
+    if (scaOutOfRange)
+      errw = errw | (1 << LArFebErrorSummary::ScaOutOfRange);
+
+    if (rodstatusbits[5])
+      errw = errw | (1 << LArFebErrorSummary::GainMismatch);
+
+    if (rodstatusbits[24])
+      errw = errw | (1 << LArFebErrorSummary::BadGain);
+
+    if (typeMism)
+      errw = errw | (1 << LArFebErrorSummary::TypeMismatch);
+
+    if (badNbOfSp)
+      errw = errw | (1 << LArFebErrorSummary::NumOfSamples);
+
+    if (zeroSp && !masked(int_id, m_knownZeroSample))
+      errw = errw | (1 << LArFebErrorSummary::EmptyDataBlock);
+
+    if (checkSumErr)
+      // if (zeroSp)
+      errw = errw | (1 << LArFebErrorSummary::CheckSum);
+
+    if (errw != 0) {
+      // check which errors should be ignored for this feb
+      const LArBadFeb febStatus = badFebs->status(febid);
+      unsigned int err_toignore = febStatus.ignoreErrors();
+      if (err_toignore > 0) {
+        uint16_t erri = (uint16_t)(err_toignore);
+        errw = errw & (~erri);
+      }
+    }
+
+    if (errw !=0) {
+      std::lock_guard lock(m_mtx);
+      for (unsigned int i = 0; i < LArFebErrorSummary::N_LArFebErrorType; ++i) {
+        if (errw & (1 << i)) {
+          m_errors[i] += 1;
+        } 
+      ++(m_errsPerFeb[int_id]);
+      }
+    }
+    ATH_MSG_DEBUG(std::format(" Error for this FEB id  {:#x} is {:#x}",int_id,errw));
+
+    if (!febErrorSummary->set_feb_error(int_id, errw)) {
+
+      ATH_MSG_DEBUG(" failed to insert the error into LArFebErrorSummary  " << std::hex << febid << std::dec);
+    }
+
+    if (errw != 0) {  // should this FEB be counted as in error ?
+      const LArBadFeb febStatus = badFebs->status(febid);
+      if (!febStatus.inError() && !(febStatus.deadReadout() || febStatus.deadAll()))
+        nbOfFebsInError += 1;
+    }
+
+  }  // loop over headers
+
+  if (m_checkAllFeb || m_isHec || m_isFcal || m_isEmb || m_isEmec || m_isEmPS) {
+    const uint16_t errw = 1 << LArFebErrorSummary::MissingHeader;
+    bool warn = false;
+    for (auto it : all_febs) {
+      const HWIdentifier febid = HWIdentifier(Identifier32(it));
+      const LArBadFeb febStatus = badFebs->status(febid);
+      if (febStatus.deadReadout() || febStatus.deadAll() || febStatus.deactivatedInOKS()) {
+        ATH_MSG_DEBUG(" This FEB is not read out  0x" << std::hex << it << std::dec);
+      } else {
+        // Print warning only for first couple of events and if we have at least one FEB read out
+        //(dont' flood log with useless message is LAr is not in the run)
+        // if (this->outputLevel()<=MSG::WARNING && m_missingFebsWarns < m_warnLimit &&  hdrCont->size()>0) {
+        if (msgLvl(MSG::WARNING) && m_missingFebsWarns.load() < m_warnLimit && !hdrCont->empty()) {
+          warn = true;
+          const std::string bec = m_onlineHelper->barrel_ec(febid) == 0 ? "BARREL/" : "ENDCAP/";
+          const std::string side = m_onlineHelper->pos_neg(febid) == 0 ? "C/" : "A/";
+          ATH_MSG_WARNING("FEB [" << bec << side << m_onlineHelper->feedthrough(febid) << "/" << m_onlineHelper->slot(febid) << "] not read out!");
+        }
+
+        febErrorSummary->set_feb_error(it, errw);
+        m_errors[LArFebErrorSummary::MissingHeader] += 1;
+      }  // end else missing FEB to report
+
+    }  // end loop over febs
+    if (warn) {
+      if ((++m_missingFebsWarns) == m_warnLimit)
+        ATH_MSG_WARNING("No more warnings about FEBs not read out!");
+    }
+  }  // end if checkCompletness
 
   if (nbOfFebsInError >= m_minFebsInError) {
-    ATH_MSG_DEBUG (" set error bit for LAr for this event ");
-    if (!eventInfo->updateErrorState(xAOD::EventInfo::LAr,xAOD::EventInfo::Error)) {
-      ATH_MSG_WARNING (" cannot set error state for LAr ");
+    ATH_MSG_DEBUG(" set error bit for LAr for this event ");
+    if (!eventInfo->updateErrorState(xAOD::EventInfo::LAr, xAOD::EventInfo::Error)) {
+      ATH_MSG_WARNING(" cannot set error state for LAr ");
     }
-    if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTED)) {
-      ATH_MSG_WARNING (" cannot set event bit info for LAr ");
+    if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::LAr, LArEventBitInfo::DATACORRUPTED)) {
+      ATH_MSG_WARNING(" cannot set event bit info for LAr ");
     }
-  }  
-  
+  }
+
   return StatusCode::SUCCESS;
-
 }
-
 
 bool LArFebErrorSummaryMaker::masked (unsigned int hid, const std::set<unsigned int>& v_feb) {
 
@@ -321,9 +328,14 @@ StatusCode LArFebErrorSummaryMaker::finalize()
 
   for (unsigned int i=0;i<LArFebErrorSummary::N_LArFebErrorType;++i){
     uint16_t err = 1<<i; 
-    ATH_MSG_INFO( " type, name, count = " << i << " " << LArFebErrorSummary::error_to_string(err) << " " << m_errors[i].load()  );
+    ATH_MSG_INFO( " type, name, count = " << i << " " << LArFebErrorSummary::error_to_string(err) << " " << m_errors[i]  );
   }
   
+  for (auto feb_err : m_errsPerFeb) {
+    ATH_MSG_INFO(std::format("Feb {:#x} {} had errors for {} event(s)",feb_err.first,m_onlineHelper->channel_name(HWIdentifier(feb_err.first)),feb_err.second));
+
+  }
+
   return StatusCode::SUCCESS;
 
 }

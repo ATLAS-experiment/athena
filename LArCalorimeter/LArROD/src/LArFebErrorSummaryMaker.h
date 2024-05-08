@@ -51,9 +51,13 @@ class LArFebErrorSummaryMaker : public AthReentrantAlgorithm
 
  private:
 
-  //Atomic counters:
+  //Counters:
   mutable std::atomic<int> m_missingFebsWarns{0}; //counter for missing FEB warnings
-  mutable std::array<std::atomic<unsigned>, LArFebErrorSummary::N_LArFebErrorType > m_errors ATLAS_THREAD_SAFE; //error types accumulator
+  //Lock used when keeping track of errors (rare)
+  mutable std::mutex m_mtx; //mutex to guards write-ops on the following objects:
+  mutable std::array<unsigned, LArFebErrorSummary::N_LArFebErrorType> m_errors ATLAS_THREAD_SAFE; //error types accumulator
+  mutable std::map<unsigned,unsigned> m_errsPerFeb ATLAS_THREAD_SAFE;
+
 
   //The following variables are set in initialize:
   std::set<unsigned int> m_all_febs ; 
