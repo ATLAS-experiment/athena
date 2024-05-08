@@ -64,7 +64,7 @@ namespace xAOD {
       /// Change the capacity of the vector
       virtual void reserve( size_t sz ) override;
       /// Shift the elements of the vector
-      virtual void shift( size_t pos, ptrdiff_t offs ) override;
+      virtual bool shift( size_t pos, ptrdiff_t offs ) override;
       /// Insert a range of elements via move.
       virtual bool insertMove (size_t pos, void* beg, void* end,
                                SG::IAuxStore& srcStore) override;
