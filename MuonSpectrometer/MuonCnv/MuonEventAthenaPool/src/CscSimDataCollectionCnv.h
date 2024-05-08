@@ -9,6 +9,7 @@
 #include "MuonSimData/CscSimDataCollection.h"
 #include "MuonEventTPCnv/MuonDigitContainer/CscSimDataCollectionCnv_p1.h"
 #include "MuonEventTPCnv/MuonDigitContainer/CscSimDataCollectionCnv_p2.h"
+#include "MuonEventTPCnv/MuonDigitContainer/CscSimDataCollectionCnv_p3.h"
 
 // the latest persistent representation type of DataCollection:
 typedef  Muon::CscSimDataCollection_p2  CscSimDataCollection_PERS;
@@ -32,6 +33,7 @@ public:
 private:
     CscSimDataCollectionCnv_p1    m_TPConverter_p1;
     CscSimDataCollectionCnv_p2    m_TPConverter_p2;
+    CscSimDataCollectionCnv_p3    m_TPConverter_p3;
 };
 
 #endif
