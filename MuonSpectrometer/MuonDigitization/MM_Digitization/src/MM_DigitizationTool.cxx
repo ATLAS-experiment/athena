@@ -527,7 +527,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
                 ATH_MSG_WARNING("Failed to retrieve detector element for: " << m_idHelperSvc->toString(layerID));
                 continue;
             }
-    	    const std::vector<int>& readoutSide=detectorReadoutElement->getReadoutSide();
+    	    const std::array<int, 4>& readoutSide=detectorReadoutElement->getReadoutSide();
 
             //
             // Sanity Checks
