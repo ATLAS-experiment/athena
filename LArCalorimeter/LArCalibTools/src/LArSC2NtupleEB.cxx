@@ -254,32 +254,35 @@ StatusCode LArSC2NtupleEB::execute()
 
      if(truenet > iterSC->energies().size()) truenet=iterSC->energies().size();
      for( unsigned i=0; i<truenet;++i){  
-          if(etcontainer) {
-            m_energyVec_ET[cellCounter][i]  = iterSC->energies().at(i);
-            if(iterSC->bcids().size()) m_bcidVec_ET[cellCounter][i]  = iterSC->bcids().at(i);
-            if(iterSC->passTauSelection().size()) m_passVec_ET[cellCounter][i]  = iterSC->passTauSelection().at(i);
-            if(iterSC->satur().size()) m_saturVec_ET[cellCounter][i]  = iterSC->satur().at(i);
-
-            m_scNet = truenet;
-          } else {
-            m_energyVec_Reco[cellCounter][i]  = iterSC->energies().at(i);
-            if(m_energyVec_Reco[cellCounter][i] !=0) m_tauVec_Reco[cellCounter][i]  = iterSC->tauEnergies().at(i)/m_energyVec_Reco[cellCounter][i];
-            m_passVec_Reco[cellCounter][i]  = iterSC->passTauSelection().at(i);
-            m_saturVec_Reco[cellCounter][i]  = iterSC->satur().at(i);
-            m_bcidVec_Reco[cellCounter][i]  = iterSC->bcids().at(i);
-            m_recoNet = truenet;
-          }
+          if(fabs(iterSC->energies().at(i)) > m_eCut) { 
+            if(etcontainer) {
+               m_energyVec_ET[cellCounter][i]  = iterSC->energies().at(i);
+               if(iterSC->bcids().size()) m_bcidVec_ET[cellCounter][i]  = iterSC->bcids().at(i);
+               if(iterSC->passTauSelection().size()) m_passVec_ET[cellCounter][i]  = iterSC->passTauSelection().at(i);
+               if(iterSC->satur().size()) m_saturVec_ET[cellCounter][i]  = iterSC->satur().at(i);
+               m_scNet = truenet;
+            } else {
+               m_energyVec_Reco[cellCounter][i]  = iterSC->energies().at(i);
+               if(m_energyVec_Reco[cellCounter][i] !=0) m_tauVec_Reco[cellCounter][i]  = iterSC->tauEnergies().at(i)/m_energyVec_Reco[cellCounter][i];
+               m_passVec_Reco[cellCounter][i]  = iterSC->passTauSelection().at(i);
+               m_saturVec_Reco[cellCounter][i]  = iterSC->satur().at(i);
+               m_bcidVec_Reco[cellCounter][i]  = iterSC->bcids().at(i);
+               m_recoNet = truenet;
+            }
+          } //m_eCut
      }
 
      if(etcontainer && recocontainer) {
         truenet = m_recoNet;
         if(truenet > secondSC->energies().size()) truenet=secondSC->energies().size();
         for( unsigned i=0; i<truenet;++i){  
+          if(fabs(secondSC->energies().at(i)) > m_eCut) { 
             m_energyVec_Reco[cellCounter][i]  = secondSC->energies().at(i);
             if(m_energyVec_Reco[cellCounter][i] !=0) m_tauVec_Reco[cellCounter][i]  = secondSC->tauEnergies().at(i)/m_energyVec_Reco[cellCounter][i];
             m_passVec_Reco[cellCounter][i]  = secondSC->passTauSelection().at(i);
             m_saturVec_Reco[cellCounter][i]  = secondSC->satur().at(i);
             m_bcidVec_Reco[cellCounter][i]  = secondSC->bcids().at(i);
+          }
         }
         m_recoNet = truenet;
      }

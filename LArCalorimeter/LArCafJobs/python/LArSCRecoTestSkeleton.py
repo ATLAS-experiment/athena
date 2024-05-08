@@ -110,7 +110,7 @@ def fromRunArgs(runArgs):
     cfg.addEventAlgo(CompFactory.LArSC2NtupleEB("LArSC2NtupleEB", isSC=True, AddBadChannelInfo=flags.LArSCDump.doBC, BadChanKey="LArBadChannelSC",
                             OffId=flags.LArSCDump.doOfflineId, AddHash=flags.LArSCDump.doHash, AddCalib=flags.LArSCDump.doCalib, RealGeometry=flags.LArSCDump.doGeom, ExpandId=flags.LArSCDump.expandId, # from LArCond2NtupleBase 
                             FillBCID=flags.LArSCDump.doBCID, EnergyContainerKey=SCKey,
-                            scNet=flags.LArSCDump.nEt, 
+                            scNet=flags.LArSCDump.nEt, EnergyCut=runArgs.energyCut,
                             RecoContainerKey="SC_ET_RECO", RawChanContainerKey="LArRawChannels",
                             OutputLevel=3))
 

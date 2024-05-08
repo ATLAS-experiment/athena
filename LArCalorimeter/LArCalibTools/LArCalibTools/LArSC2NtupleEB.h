@@ -30,6 +30,8 @@ class LArSC2NtupleEB : public LArCond2NtupleBaseEB
   Gaudi::Property< unsigned int >  m_recoNet{this, "recoNet", 5, "number of energies from reco"};
   Gaudi::Property< bool > m_fillBCID{this, "FillBCID", false, "if to fill BCID"};
 
+  Gaudi::Property< float > m_eCut{this, "EnergyCut", 0., "when to fll"};
+
   NTuple::Item<unsigned long long> m_IEvent;
   NTuple::Item<short> m_bcid;
 

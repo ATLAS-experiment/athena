@@ -34,6 +34,11 @@ if __name__ == '__main__':
                             type=trfArgClasses.argFactory(trfArgClasses.argInt),
                             help='shift of start sample for reco...')
     
+    trf.parser.add_argument('--energyCut', 
+                            default=trfArgClasses.argFloat(0.),
+                            type=trfArgClasses.argFactory(trfArgClasses.argFloat),
+                            help='store only SC with |energies| above this cut...')
+    
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
