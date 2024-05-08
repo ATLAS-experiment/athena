@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVector.icc
@@ -315,9 +315,13 @@ bool AuxTypeVectorHolder<T, CONT>::setOption (const AuxDataOption& option)
  * and similarly for following elements.
  * The container should then be shrunk by @c -offs elements
  * (running destructors as appropriate).
+ *
+ * Returns true if it is known that iterators have not been invalidated;
+ * false otherwise.  (Will always return false when increasing the size
+ * of an empty container.)
  */
 template <class T, class CONT>
-void AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
+bool AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
 {
   vector_type& vec = *m_vecPtr;
   if (offs < 0) {
@@ -326,8 +330,10 @@ void AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
                vec.end(),
                vec.begin() + (pos+offs)*SCALE);
     vec.resize (vec.size() + offs*SCALE);
+    return true;
   }
   else if (offs > 0) {
+    const void* orig = vec.data();
     size_t oldsz = vec.size();
     // Add to the end, zero-filled.
     vec.resize (vec.size() + offs*SCALE,
@@ -342,7 +348,9 @@ void AuxTypeVectorHolder<T, CONT>::shift (size_t pos, ptrdiff_t offs)
                  vec.begin() + (pos+offs)*SCALE,
                  Zero<typename AuxDataTraits<T>::element_type>::zero());
     }
+    return vec.data() == orig;
   }
+  return true;
 }
 
 

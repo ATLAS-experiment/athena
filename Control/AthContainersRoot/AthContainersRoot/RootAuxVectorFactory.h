@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/RootAuxVectorFactory.h
@@ -175,8 +175,12 @@ public:
    * and similarly for following elements.
    * The container should then be shrunk by @c -offs elements
    * (running destructors as appropriate).
+   *
+   * Returns true if it is known that iterators have not been invalidated;
+   * false otherwise.  (Will always return false when increasing the size
+   * of an empty container.)
    */
-  virtual void shift (size_t pos, ptrdiff_t offs) override;
+  virtual bool shift (size_t pos, ptrdiff_t offs) override;
 
 
   /**

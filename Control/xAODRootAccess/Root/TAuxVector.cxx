@@ -168,8 +168,12 @@ namespace xAOD {
     * and similarly for following elements.
     * The container should then be shrunk by @c -offs elements
     * (running destructors as appropriate).
+    *
+    * Returns true if it is known that iterators have not been invalidated;
+    * false otherwise.  (Will always return false when increasing the size
+    * of an empty container.)
     */
-   void TAuxVector::shift( size_t pos, ptrdiff_t offs ) {
+   bool TAuxVector::shift( size_t pos, ptrdiff_t offs ) {
 
       size_t eltsz = m_proxy->GetIncrement();
       if( offs < 0 ) {
@@ -182,6 +186,7 @@ namespace xAOD {
                     beg + eltsz * ( pos + offs ),
                     m_proxy->Size() - pos );
          m_proxy->Allocate( m_proxy->Size() + offs, false );
+         return true;
 
       } else if( offs > 0 ) {
 
@@ -192,9 +197,10 @@ namespace xAOD {
                     beg + eltsz * ( pos + offs ),
                     m_proxy->Size() - pos - offs);
          clearRange( beg + eltsz * pos, offs );
+         return false;
       }
 
-      return;
+      return true;
    }
 
    bool TAuxVector::insertMove (size_t pos, void* beg, void* end,

@@ -117,8 +117,12 @@ public:
    * and similarly for following elements.
    * The container should then be shrunk by @c -offs elements
    * (running destructors as appropriate).
+   *
+   * Returns true if it is known that iterators have not been invalidated;
+   * false otherwise.  (Will always return false when increasing the size
+   * of an empty container.)
    */
-  virtual void shift (size_t pos, ptrdiff_t offs) = 0;
+  virtual bool shift (size_t pos, ptrdiff_t offs) = 0;
 
 
   /**
