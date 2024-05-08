@@ -84,12 +84,6 @@ namespace ISF {
     /** Set shared barcode for child particles */
     void setSharedChildParticleBarcode( ITruthIncident& truthincident) const;
 
-    /** Helper function to determine the largest particle barcode set by the generator */
-    int maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) const;
-
-    /** Helper function to determine the largest vertex barcode set by the generator */
-    int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) const;
-
     ServiceHandle<Barcode::IBarcodeSvc> m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc", ""};           //!< The Barcode service
 
     /** the truth strategies applied (as AthenaToolHandle Array) */

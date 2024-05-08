@@ -231,7 +231,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     // and survives.
     // Set the barcode to the next available value below the simulation
     // barcode offset.
-    newPrimBC = this->maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1;
+    newPrimBC = HepMC::maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1;
   }
   else {
     newPrimBC = parentBC + HepMC::SIM_REGENERATION_INCREMENT;
@@ -265,7 +265,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       HepMC::GenParticlePtr  p = nullptr;
       // generate a new barcode for the child particle
       Barcode::ParticleBarcode secBC = (isQuasiStableVertex) ?
-        this->maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1 : m_barcodeSvc->newSecondary( parentBC, processCode); // TODO replace m_barcodeSvc
+        HepMC::maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1 : m_barcodeSvc->newSecondary( parentBC, processCode); // TODO replace m_barcodeSvc
       if ( secBC == Barcode::fUndefinedBarcode) {
         if (m_ignoreUndefinedBarcodes)
           ATH_MSG_WARNING("Unable to generate new Secondary Particle Barcode. Continuing due to 'IgnoreUndefinedBarcodes'==True");
@@ -378,37 +378,3 @@ void ISF::TruthSvc::setSharedChildParticleBarcode( ISF::ITruthIncident& ti) cons
   }
 }
 
-int ISF::TruthSvc::maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) const {
-  int maxBarcode=0;
-#ifdef HEPMC3
-  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
-  for (const auto& bp: allbarcodes->barcode_to_particle_map()) {
-    if (!HepMC::is_simulation_particle(bp.first)) { maxBarcode=std::max(maxBarcode,bp.first); }
-  }
-#else
-  for (auto currentGenParticle: *genEvent) {
-    const int barcode=HepMC::barcode(currentGenParticle);
-    if(barcode > maxBarcode &&  !HepMC::is_simulation_particle(barcode)) { maxBarcode=barcode; }
-  }
-#endif
-  return maxBarcode;
-}
-
-int ISF::TruthSvc::maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) const {
-  int maxBarcode=0;
-#ifdef HEPMC3
-  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
-  for (const auto& bp: allbarcodes->barcode_to_vertex_map()) {
-    if (!HepMC::is_simulation_vertex(bp.first)) { maxBarcode=std::min(maxBarcode,bp.first); }
-  }
-#else
-  HepMC::GenEvent::vertex_const_iterator currentGenVertexIter;
-  for (currentGenVertexIter= genEvent->vertices_begin();
-       currentGenVertexIter!= genEvent->vertices_end();
-       ++currentGenVertexIter) {
-    const int barcode((*currentGenVertexIter)->barcode());
-    if(barcode < maxBarcode && !HepMC::is_simulation_vertex(barcode)) { maxBarcode=barcode; }
-  }
-#endif
-  return maxBarcode;
-}
