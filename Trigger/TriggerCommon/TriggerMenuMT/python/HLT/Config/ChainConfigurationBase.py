@@ -43,8 +43,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         self.chainPartNameNoMult = self.chainPartName[1:] if self.mult > 1 else self.chainPartName
         self.chainPartNameNoMultwL1 += "_"+self.chainL1Item
 
-    def getStep(self, flags, stepID, stepPartName, sequenceCfgArray, comboHypoCfg=ComboHypoCfg, comboTools=[], **stepArgs):
-        stepName = 'Step%s'%str(stepID) + '_' + stepPartName
+    def getStep(self, flags, stepName, sequenceCfgArray, comboHypoCfg=ComboHypoCfg, comboTools=[], **stepArgs):
         log.debug("Configuring step %s", stepName)
         
         # do not generate Menu Sequences, just store the functions that can do that
@@ -58,7 +57,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
                 return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools)
 
         # if not returned any step
-        raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)
+        raise RuntimeError("[getStep] No sequences generated for step %s!", stepName)
 
     def getEmptyStep(self, stepID, stepPartName):
         stepName = 'Step%s'%str(stepID) + '_' + stepPartName

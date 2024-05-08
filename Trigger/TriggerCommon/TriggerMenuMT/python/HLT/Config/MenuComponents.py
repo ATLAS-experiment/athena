@@ -767,7 +767,7 @@ class ChainStep(object):
         comboName = CFNaming.comboHypoName(self.name)
         key = hash((comboName, self.comboHypoCfg))
         if key not in _ComboHypoPool:            
-            _ComboHypoPool[key] = createComboAlg(None, name=comboName, comboHypoCfg=self.comboHypoCfg)
+            _ComboHypoPool[key] = ComboMaker(comboName, self.comboHypoCfg)
         self.combo = _ComboHypoPool[key]
                 
 
@@ -800,16 +800,6 @@ class ChainStep(object):
                 repr_string +=",  ComboHypoTools = %s" %(' '.join(map(str, [tool.__name__ for tool in self.comboToolConfs]))) 
         repr_string += "\n"       
         return repr_string
-
-
-def createComboAlg(dummyFlags, name, comboHypoCfg):
-    # remove StepXXX_ from the name
-    if re.search('^Step[0-9]_',name):
-        name = name[6:]
-    elif re.search('^Step[0-9]{2}_', name):
-        name = name[7:]
-    return ComboMaker(name, comboHypoCfg)
-
 
 
 class InEventRecoCA( ComponentAccumulator ):
