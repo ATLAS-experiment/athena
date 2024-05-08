@@ -2,22 +2,13 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <iostream>
 #include "MuonIdHelpers/RpcIdHelper.h"
 RpcIdHelper::RpcIdHelper() : MuonIdHelper("RpcIdHelper") {}
 
 // Initialize dictionary
 int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
-    int status = 0;
-    constexpr int detHashSize = sizeof(m_detectorElement_hashes) / sizeof(unsigned int);
-    constexpr int modHashSize = sizeof(m_module_hashes) / sizeof(unsigned int);
-    for (int h = 0; h < detHashSize ; ++h) {
-        unsigned int* e = &(m_detectorElement_hashes[0][0][0][0][0])+ h;
-        (*e) = -1;
-    }
-    for (int h = 0; h < modHashSize ; ++h) {
-        unsigned int* e = &(m_module_hashes[0][0][0][0])+ h;
-        (*e) = -1;
-    }
+    int status = 0;    
 
     // Check whether this helper should be reinitialized
     if (!reinitialize(dict_mgr)) {
@@ -281,50 +272,64 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
 int RpcIdHelper::init_id_to_hashes() {
     unsigned int hash_max = module_hash_max();
-    for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_module_vec[i];
-        int station = stationName(id);
-        int eta = stationEta(id) + 10;  // for negative etas
-        int phi = stationPhi(id);
-        int dR = doubletR(id);
-        m_module_hashes[station][eta - 1][phi - 1][dR - 1] = i;
+    for (unsigned int i = 0; i < hash_max; ++i) {        
+        const Identifier& id = m_module_vec[i];
+        m_module_hashes[id] = i;
     }
 
     hash_max = detectorElement_hash_max();
     for (unsigned int i = 0; i < hash_max; ++i) {
-        Identifier id = m_detectorElement_vec[i];
-        int station = stationName(id);
-        int eta = stationEta(id) + 10;  // for negative eta
-        int phi = stationPhi(id);
-        int dR = doubletR(id);
-        int zIdx = zIndex(id);
-        m_detectorElement_hashes[station][eta - 1][phi - 1][dR - 1][zIdx - 1] = i;
+        const Identifier& id = m_detectorElement_vec[i];
+        m_detectorElement_hashes[id] = i;
     }
+    m_st_BMS = stationNameIndex("BMS");
+    m_st_BIL = stationNameIndex("BIL");
     return 0;
 }
 
 int RpcIdHelper::get_module_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    // Identifier moduleId = elementID(id);
-    // IdContext context = module_context();
-    // return get_hash(moduleId,hash_id,&context);
-    int station = stationName(id);
-    int eta = stationEta(id) + 10;  // for negative etas
-    int phi = stationPhi(id);
-    int dR = doubletR(id);
-    hash_id = m_module_hashes[station][eta - 1][phi - 1][dR - 1];
+    const auto itr = m_module_hashes.find(parentID(id));
+    if (itr == m_module_hashes.end()) {
+        hash_id = IdentifierHash(-1);
+        return 1;
+    }
+    hash_id = itr->second;
     return 0;
 }
 
 int RpcIdHelper::get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const {
-    // Identifier detectorElementId = detectorElementID(id);
-    // IdContext context = detectorElement_context();
-    // return get_hash(detectorElementId,hash_id,&context);
-    int station = stationName(id);
-    int eta = stationEta(id) + 10;  // for negative eta
-    int phi = stationPhi(id);
-    int dR = doubletR(id);
-    int zIdx = zIndex(id);
-    hash_id = m_detectorElement_hashes[station][eta - 1][phi - 1][dR - 1][zIdx - 1];
+    Identifier detElId = id;    
+    // Certain chambers require doublet Phi in hashing (See zIndex()) - do not reset m_dpb_impl in these cases
+    bool reset_dbp = true;
+    const int station = stationName(id);
+    
+    if (m_st_BMS == station) {
+        int eta = stationEta(id);
+        int dR = doubletR(id);
+        int dZ = doubletZ(id);
+        if (std::abs(eta) == 2 && dZ == 3) {
+            reset_dbp = false;
+        } else if (std::abs(eta) == 4 && dR == 2 && dZ == 3) {
+            reset_dbp = false;
+        } else if (std::abs(eta) == 4 && dR == 1 && dZ == 2) {
+            reset_dbp = false;
+        }
+    } else if (m_st_BIL == station && std::abs(stationEta(id)) == 2) {
+        reset_dbp = false;
+    }
+    
+    if (reset_dbp) m_dbp_impl.reset(detElId);
+    m_gap_impl.reset(detElId);
+    m_mea_impl.reset(detElId);
+    m_str_impl.reset(detElId);
+ 
+    auto itr = m_detectorElement_hashes.find(detElId);
+    if (itr == m_detectorElement_hashes.end()) {
+        ATH_MSG_VERBOSE("Cannot find a valid detector element hash for "<<print_to_string(id));
+        hash_id = IdentifierHash(-1);
+        return 1;
+    }
+    hash_id = itr->second;
     return 0;
 }
 
@@ -871,7 +876,7 @@ Identifier RpcIdHelper::elementID(const Identifier& id) const { return parentID(
 /*     Identifier panelID  (const Identifier& padID, int gasGap,) const; */
 /*     Identifier panelID  (const Identifier& channelID) const; */
 /*     Identifier panelID  (int stationName, int stationEta, int stationPhi, int doubletR, */
-/* 		         int doubletZ, int doubletPhi,int gasGap,) const; */
+/*                  int doubletZ, int doubletPhi,int gasGap,) const; */
 
 Identifier RpcIdHelper::panelID(int stationName, int stationEta, int stationPhi, int doubletR, int doubletZ, int doubletPhi, int gasGap,
                                 int measuresPhi) const {
@@ -1188,6 +1193,9 @@ int RpcIdHelper::zIndex(const std::string& name, int eta, int dR, int dZ, int dP
         } else if (abs(eta) == 4 && dR == 1 && dZ == 2) {
             if (dP == 2) dbz_index++;
         }
+    } else if (name == "BIL") {
+        if (abs(eta) == 2 && dP == 2) dbz_index++;
     }
+
     return dbz_index;
 }

@@ -775,7 +775,7 @@ namespace Muon {
         else if (isMM(id)) return moduleHash(*m_mmIdHelper, id);
         else if (issTgc(id)) return moduleHash(*m_stgcIdHelper, id);
         else if (isCsc(id)) return moduleHash(*m_cscIdHelper, id);
-        ATH_MSG_WARNING("No muon Identifier "<<id);
+        ATH_MSG_WARNING("moduleHash(): No muon Identifier "<<id);
         return IdentifierHash{};
     }
     IdentifierHash MuonIdHelperSvc::detElementHash(const Identifier& id) const {
@@ -785,7 +785,7 @@ namespace Muon {
         else if (isMM(id)) return detElementHash(*m_mmIdHelper, id);
         else if (issTgc(id)) return detElementHash(*m_stgcIdHelper, id);
         else if (isCsc(id)) return detElementHash(*m_cscIdHelper, id);
-        ATH_MSG_WARNING("No muon Identifier "<<id);
+        ATH_MSG_WARNING("detElementHash(): No muon Identifier "<<id);
         return IdentifierHash{};
     }
 

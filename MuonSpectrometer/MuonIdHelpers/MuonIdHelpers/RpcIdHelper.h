@@ -180,8 +180,8 @@ private:
     int init_id_to_hashes();
     int zIndex(const Identifier& id) const;
     static int zIndex(const std::string& name, int eta, int dR, int dZ, int dP) ;
-    unsigned int m_module_hashes[60][20][8][2]{};
-    unsigned int m_detectorElement_hashes[60][20][8][2][4]{};
+    std::unordered_map<Identifier, unsigned int> m_module_hashes;
+    std::unordered_map<Identifier, unsigned int > m_detectorElement_hashes;
 
     // compact id indices
     size_type m_DOUBLETR_INDEX{0};
@@ -233,6 +233,8 @@ private:
         StripMax = 99
     };
     unsigned int m_gasGapMax{UINT_MAX};  // maximum number of gas gaps
+    int m_st_BMS{-1};
+    int m_st_BIL{-1};
 };
 
 // For backwards compatibility
