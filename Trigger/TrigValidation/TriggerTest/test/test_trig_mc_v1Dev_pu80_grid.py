@@ -29,7 +29,6 @@ ex.input = 'ttbar_pu80'
 ex.threads = 8
 ex.concurrent_events = 8
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"']
-ex.args = '--CA'
 # the conditions override is needed because the RDO was produced with a single beamspot
 ex.args += ' --postExec \'from IOVDbSvc.IOVDbSvcConfig import addOverride; cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"));\''
 

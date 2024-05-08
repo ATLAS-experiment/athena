@@ -17,7 +17,6 @@ ex.input = 'ttbar'
 ex.threads = 2
 ex.concurrent_events = 2
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

@@ -42,7 +42,6 @@ class ExecStep(Step):
         self.auto_report_result = True
         self.required = True
         self.depends_on_previous = True
-        self._isCA = False   # pure CA job ('athena --CA' or 'athenaHLT')
 
     def construct_name(self):
         if self.name and self.type == 'other':
@@ -105,10 +104,6 @@ class ExecStep(Step):
             del_env('ATHENA_NPROC_NUM')
             del_env('ATHENA_CORE_NUMBER')
 
-        # Note that Reco_tf is not considered "CA" as flags are set via the usual preExec
-        self._isCA = (self.type in ['athena', 'Reco_tf'] and '--CA' in self.args or
-                      self.type=='athenaHLT' and not self.job_options.endswith('.py'))
-
     def configure_input(self):
         self.log.debug('Configuring input for step %s', self.name)
         if self.input is None:
@@ -168,11 +163,11 @@ class ExecStep(Step):
         # match --preExec, --preExec= ignoring spaces
         m = re.search(r'--preExec\s*=?\s*', self.args)
         if m is None:
-            self.args += f'--preExec "{precommand}" '
+            self.args += f' --preExec "{precommand}" '
         else:
             # Insert new preExec. It is important to not use the '=' sign so we
             # can chain multiple preExecs.
-            self.args = self.args[:m.span()[0]] + f'--preExec "{precommand}" ' + self.args[m.span()[1]:]
+            self.args = self.args[:m.span()[0]] + f' --preExec "{precommand}" ' + self.args[m.span()[1]:]
 
     def configure_args(self, test):
         self.log.debug('Configuring args for step %s', self.name)
@@ -211,8 +206,7 @@ class ExecStep(Step):
             if self.costmon:
                 self.flags.append('Trigger.CostMonitoring.monitorAllEvents=True')
             if self.fpe_auditor:
-                if self._isCA:  # FIXME: this prevents flags breaking _tf command line (ATR-28872)
-                    self.flags.append('Exec.FPE=1')
+                self.flags.append('Exec.FPE=1')
 
         # Run config-only if requested
         if self.config_only :
@@ -323,15 +317,11 @@ class ExecStep(Step):
             if self.type.endswith('_tf'):  # for transform, set flags as pre-exec
                 if self.type == 'Trig_reco_tf':
                     # No 'flags.' prefix for the trigger transform
-                    self.add_trf_precommand(';'.join(f'{flag}' for flag in self.flags))
+                    self.add_trf_precommand(' '.join(f'{flag}' for flag in self.flags))
                 else:
                     self.add_trf_precommand(';'.join(f'flags.{flag}' for flag in self.flags))
             else:  # athena(HLT)
-                if self._isCA:
-                    self.args += ' ' + ' '.join(self.flags)
-                else:
-                    self.log.warning('Setting flags in legacy job options is no longer supported. Ignoring: '
-                                     + ' '.join(self.flags))
+                self.args += ' ' + ' '.join(self.flags)
 
         # Strip extra whitespace
         self.args = self.args.strip()

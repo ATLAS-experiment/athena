@@ -16,7 +16,6 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar'
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1"']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

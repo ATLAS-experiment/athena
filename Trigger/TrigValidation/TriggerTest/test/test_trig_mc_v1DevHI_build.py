@@ -12,7 +12,6 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.args = '--CA'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar' # TODO restore to 'pbpb', MR !68783
 ex.threads = 1

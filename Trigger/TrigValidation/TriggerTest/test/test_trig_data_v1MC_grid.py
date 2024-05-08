@@ -30,7 +30,6 @@ ex.threads = 4
 ex.concurrent_events = 4
 ex.flags = ['Trigger.triggerMenuSetup="MC_pp_run3_v1"',
             'Trigger.doLVL1=True']
-ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'
