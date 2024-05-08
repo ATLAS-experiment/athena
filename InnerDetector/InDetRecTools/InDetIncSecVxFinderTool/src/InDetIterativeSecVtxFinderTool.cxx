@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
@@ -684,7 +684,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
           }
         }//end of iterating on tracks at previous vertices
 
-        if ( nrobbed > 0 )  mDecor_nrobbed( *(*vxIter) ) = (*vxIter)->auxdata<int>("nrobbed") + 1 ;
+        if ( nrobbed > 0 )  mDecor_nrobbed( *(*vxIter) ) ++;
 
       }//end of iterating on already found vertices in event
 
@@ -971,7 +971,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
       continue ;
     }
 
-    int nrobbed = (*vxIter)->auxdata<int>("nrobbed") ;
+    int nrobbed = mDecor_nrobbed (**vxIter);
     if ( nrobbed < 1 ) 
     {
       ++vxIter ;
@@ -1013,15 +1013,15 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
     float chi2dof2 = QxAODVertex->chiSquared()/QxAODVertex->numberDoF() ;
 
     float oldhf = 0. ;
-    if ( (*vxIter)->isAvailable<float>( "radiiPattern" ) )
-      oldhf = (*vxIter)->auxdata<float>( "radiiPattern" ) ;
+    if ( mDecor_HitsFilter.isAvailable (**vxIter) )
+      oldhf = mDecor_HitsFilter (**vxIter);
     if ( chi2dof2 >=  chi2dof1 ) 
     {
       ++vxIter ;
       continue ;
     }
 
-    int nit = (*vxIter)->auxdata<int>( "NumInputTrk" ) ;
+    int nit = mDecor_intrk (**vxIter);
     *(*vxIter) = *QxAODVertex ;
 
     bool isv0 = V0kine( getVertexMomenta( QxAODVertex ), (&(*QxAODVertex))->position(), m_v0mass, m_dir ) ;
