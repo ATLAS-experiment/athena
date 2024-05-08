@@ -487,7 +487,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
 
         int kFilled = 0; 
         for(unsigned int k=0; k<16; k++){
-            if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] != 2 ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ) { 
+            if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] != 4 ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ) { 
                 int krow = XMPD_GTRN_ARR[i][k]/12;
                 int kcolumn = XMPD_GTRN_ARR[i][k]%12;
                 if(kFilled <8 ){
