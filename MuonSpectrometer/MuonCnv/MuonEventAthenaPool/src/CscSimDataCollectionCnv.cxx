@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscSimDataCollectionCnv.h"
@@ -33,9 +33,16 @@ CscSimDataCollection* CscSimDataCollectionCnv::createTransient() {
     static const pool::Guid   p0_guid("250EC949-F98B-4F74-9034-178847D1B622");
     static const pool::Guid   p1_guid("DD2A8397-4435-4DA2-AD14-ADD7294694B2");
     static const pool::Guid   p2_guid("023993E1-BAAA-4F36-8CD4-8F03E3983E8D");
+    static const pool::Guid   p3_guid("018F5280-E75C-7B27-9881-75B356B2A282");
     ATH_MSG_DEBUG("createTransient(): main converter");
     CscSimDataCollection* p_collection(nullptr);
-    if( compareClassGuid(p2_guid) ) {
+    if( compareClassGuid(p3_guid) ) {
+      ATH_MSG_DEBUG("createTransient(): T/P version 3 detected");
+      std::unique_ptr< Muon::CscSimDataCollection_p3 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p3 >() );
+      p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
+    }
+  //----------------------------------------------------------------
+    else if( compareClassGuid(p2_guid) ) {
       ATH_MSG_DEBUG("createTransient(): T/P version 2 detected");
       std::unique_ptr< Muon::CscSimDataCollection_p2 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p2 >() );
       p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
