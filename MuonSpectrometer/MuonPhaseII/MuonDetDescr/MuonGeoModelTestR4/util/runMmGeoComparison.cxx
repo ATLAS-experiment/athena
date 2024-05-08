@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @brief Helper macro to compare the output from the readout geometry dumps:
@@ -285,8 +285,8 @@ int main( int argc, char** argv ) {
         return EXIT_FAILURE;
     }
     /// check whether the files are xroot d -> otherwise call path resovler
-    if (refFile.find("root://") != 0) refFile = PathResolver::FindCalibFile(refFile);
-    if (testFile.find("root://") != 0) testFile = PathResolver::FindCalibFile(testFile);
+    if (!refFile.starts_with ("root://")) refFile = PathResolver::FindCalibFile(refFile);
+    if (!testFile.starts_with ("root://")) testFile = PathResolver::FindCalibFile(testFile);
     /// Parse the tree dump
     std::set<MmChamber> refChambers = readTreeDump(refFile);
     if (refChambers.empty()) {
