@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RadLengthAction.h"
@@ -281,7 +281,7 @@ namespace G4UA
   }
 
   // how variables should be dumped in variables map
-  void RadLengthAction::fillVariables(std::vector<double> varvec, const std::string& name){
+  void RadLengthAction::fillVariables(const std::vector<double>& varvec, const std::string& name){
     // first three components should be added (deltaenergy, radlength, intlength)
     for(unsigned int i = 0; i<3; i++) variables[name].at(i) += varvec.at(i);
     // other components should be overwritten
