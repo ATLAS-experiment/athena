@@ -1,10 +1,12 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
 
 # ATTENTION: This is a ComponentAccumulator-based configuration file
 # (not to be confused with ConfigAccumulator). If you are an analysis
-# user you are likely looking for some other Block in
+# user you are likely looking for GeneratorAnalysisBlock in
 # AsgAnalysisConfig.py. That uses the block-configuration generally
 # used for algorithms under PhysicsAnalysis/Algorithms. If you are
 # using the block configuration do not use this configuration. We
@@ -20,26 +22,33 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 # best judgement whether to fix this configuration or to change it to
 # wrap the block configuration instead.
 
-def PileupReweightingToolCfg(flags, name="PileupReweightingTool", **kwargs):
-    acc = ComponentAccumulator()
-    from Campaigns.Utils import getMCCampaign,Campaign
-    campaign = getMCCampaign(flags.Input.Files)
-    
-    from PileupReweighting.AutoconfigurePRW import defaultConfigFiles,getConfigurationFiles,getLumicalcFiles
-    kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
-    if campaign in [Campaign.MC23a,Campaign.MC23c]:
-        kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
-    else:
-        kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
-    
-    acc.setPrivateTools(CompFactory.CP.PileupReweightingTool(**kwargs))
-    return acc
+def PMGTruthWeightAlgCfg(flags, systematicsRegex='.*'):
+    """Decorate systematically varied generator weights to
+    'EventInfo', with a human-readable name.
 
+    With systematicsRegex set to 'None', do not add the
+    SystematicsSvc.
 
-def PileupReweightingAlgCfg(flags, name="PileupReweightingAlg", **kwargs):
-    acc = ComponentAccumulator()
-    acc.addService(CompFactory.CP.SystematicsSvc("SystematicsSvc"))
-    kwargs.setdefault("pileupReweightingTool", acc.popToolsAndMerge(PileupReweightingToolCfg(flags)))
-    acc.addEventAlgo(CompFactory.CP.PileupReweightingAlg(name, **kwargs))
-    return acc
-
+    """
+    ca = ComponentAccumulator()
+    # we need both the systematics service and the metadata service to
+    # make this tool work.
+    if systematicsRegex is not None:
+        ca.addService(
+            CompFactory.CP.SystematicsSvc(
+                name="SystematicsSvc",
+                sigmaRecommended=1,
+                systematicsRegex=systematicsRegex,
+            )
+        )
+    ca.merge(MetaDataSvcCfg(flags))
+    ca.addEventAlgo(
+        CompFactory.CP.PMGTruthWeightAlg(
+            name="PMGTruthWeightAlg",
+            truthWeightTool=CompFactory.PMGTools.PMGTruthWeightTool(
+                name="PMGTruthWeightTool"
+            ),
+            decoration = 'generatorWeight_%SYS%',
+        )
+    )
+    return ca
