@@ -47,25 +47,25 @@ class MinBiasChainConfig(ChainConfigurationBase):
         return self.buildChain(steps)
 
     def getMinBiasMbtsStep(self, flags):
-        return self.getStep(flags,1,'Mbts', [MinBiasMbtsSequenceGenCfg])
+        return self.getStep(flags, 'Mbts', [MinBiasMbtsSequenceGenCfg])
 
     def getMinBiasEmptyMbtsStep(self, flags):
         return self.getEmptyStep(1,'EmptyMbts')
 
     def getMinBiasSpStep(self, flags):
-        return self.getStep(flags,2,'SPCount', [MinBiasSPSequenceGenCfg])
+        return self.getStep(flags, 'SPCount', [MinBiasSPSequenceGenCfg])
 
     def getMinBiasZFindStep(self, flags):
-        return self.getStep(flags,3,'ZFind', [MinBiasZVertexFinderSequenceGenCfg])
+        return self.getStep(flags, 'ZFind', [MinBiasZVertexFinderSequenceGenCfg])
 
     def getMinBiasTrkStep(self, flags):
-        return self.getStep(flags,4,'TrkCount', [MinBiasTrkSequenceGenCfg])
+        return self.getStep(flags, 'TrkCount', [MinBiasTrkSequenceGenCfg])
 
     def getAFPTrkStep(self, flags):
-        return self.getStep(flags,1,'AFPTrk', [AFPTrkSequenceGenCfg])
+        return self.getStep(flags, 'AFPTrk', [AFPTrkSequenceGenCfg])
 
     def getAFPGlobalStep(self, flags):
-        return self.getStep(flags,2,'AFPGlobal', [AFPGlobalSequenceGenCfg])
+        return self.getStep(flags, 'AFPGlobal', [AFPGlobalSequenceGenCfg])
     
     def getAFPToFDeltaZStep(self, flags):
-        return self.getStep(flags,2,'AFPToFDeltaZ', [AFPToFDeltaZSequenceGenCfg])
+        return self.getStep(flags, 'AFPToFDeltaZ', [AFPToFDeltaZSequenceGenCfg])

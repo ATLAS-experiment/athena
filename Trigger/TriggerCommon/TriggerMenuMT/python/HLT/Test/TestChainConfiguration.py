@@ -124,28 +124,28 @@ class TestChainConfiguration(ChainConfigurationBase):
     ## Muons    
     
     def Step_mu11(self, flags):
-        return self.getStep(flags,1,"mu11",[ muCfg111 ])
+        return self.getStep(flags, "mu11",[ muCfg111 ])
 
     def Step_mu21(self, flags):
-        return self.getStep(flags,2,"mu21",[ muCfg211 ])
+        return self.getStep(flags, "mu21",[ muCfg211 ])
 
     def Step_mu11Dr(self, flags):
-        return self.getStep(flags,1,"mu11",[ muCfg111 ], comboTools=[dimuDrComboHypoTool])
+        return self.getStep(flags, "mu11",[ muCfg111 ], comboTools=[dimuDrComboHypoTool])
 
     def Step_mu21Dr(self, flags):
-        return self.getStep(flags,2,"mu21",[ muCfg211 ], comboTools=[dimuDrComboHypoTool])
+        return self.getStep(flags, "mu21",[ muCfg211 ], comboTools=[dimuDrComboHypoTool])
 
     def Step_mu22(self, flags):
-        return self.getStep(flags,2,"mu22",[ muCfg222 ])
+        return self.getStep(flags, "mu22",[ muCfg222 ])
 
     def Step_mu31(self, flags):
-        return self.getStep(flags,3,"mu31",[ muCfg311 ])
+        return self.getStep(flags, "mu31",[ muCfg311 ])
 
     def Step_mu32(self, flags):
-        return self.getStep(flags,3,"mu32",[ muCfg322 ])
+        return self.getStep(flags, "mu32",[ muCfg322 ])
    
     def Step_mu41(self, flags):
-        return self.getStep(flags,4,"mu41",[ muCfg411 ])
+        return self.getStep(flags, "mu41",[ muCfg411 ])
 
     def Step_empty1(self, flags):
         return self.getEmptyStep(1,'empty')
@@ -156,26 +156,26 @@ class TestChainConfiguration(ChainConfigurationBase):
     # Electrons
 
     def Step_em11(self, flags):
-        return self.getStep(flags,1,"em11",[ elCfg111 ])
+        return self.getStep(flags, "em11",[ elCfg111 ])
     
     def Step_em11Dr(self, flags):
-        return self.getStep(flags,1,"em11",[ elCfg111 ], comboTools=[dimuDrComboHypoTool])
+        return self.getStep(flags, "em11",[ elCfg111 ], comboTools=[dimuDrComboHypoTool])
 
     def Step_em21(self, flags):
-        return self.getStep(flags,2,"em21",[ elCfg211 ])
+        return self.getStep(flags, "em21",[ elCfg211 ])
 
     def Step_em21Dr(self, flags):
-        return self.getStep(flags,2,"em21",[ elCfg211 ], comboTools=[dimuDrComboHypoTool])
+        return self.getStep(flags, "em21",[ elCfg211 ], comboTools=[dimuDrComboHypoTool])
 
     def Step_em22(self, flags):
-        return self.getStep(flags,2,"em22",[ elCfg222 ])
+        return self.getStep(flags, "em22",[ elCfg222 ])
 
     def Step_em23(self, flags):
-        return self.getStep(flags,2,"em23",[ elCfg223 ])
+        return self.getStep(flags, "em23",[ elCfg223 ])
 
     def Step_em31(self, flags):
-        return self.getStep(flags,3,"em31",[ elCfg311 ])
+        return self.getStep(flags, "em31",[ elCfg311 ])
 
     def Step_gam11(self, flags):
-        return self.getStep(flags,1,"gam11",[ gamCfg111 ])
+        return self.getStep(flags, "gam11",[ gamCfg111 ])
 

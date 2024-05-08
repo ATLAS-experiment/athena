@@ -87,23 +87,23 @@ class BphysicsChainConfiguration(MuonChainConfiguration):
 
     def getDimuL2(self, flags):
         if 'noL2Comb' in self.chainPart['extra']:
-            return self.getStep(flags, 2, 'dimuL2', [dimuL2SequenceGenCfg], comboHypoCfg=StreamerDimuL2ComboHypoCfg)
+            return self.getStep(flags, 'dimuL2', [dimuL2SequenceGenCfg], comboHypoCfg=StreamerDimuL2ComboHypoCfg)
         elif 'l2mt' in self.chainPart['l2AlgInfo']:
-            return self.getStep(flags, 2, 'dimuL2MT', [mul2mtCBOvlpRmSequenceGenCfg], comboHypoCfg=StreamerDimuL2MTComboHypoCfg)
+            return self.getStep(flags, 'dimuL2MT', [mul2mtCBOvlpRmSequenceGenCfg], comboHypoCfg=StreamerDimuL2MTComboHypoCfg)
         else:
-            return self.getStep(flags, 2, 'dimuL2IO', [mul2IOOvlpRmSequenceGenCfg], comboHypoCfg=StreamerDimuL2IOComboHypoCfg)
+            return self.getStep(flags, 'dimuL2IO', [mul2IOOvlpRmSequenceGenCfg], comboHypoCfg=StreamerDimuL2IOComboHypoCfg)
 
     def getDimuEF(self, flags):
-        return self.getStep(flags, 5, 'dimuEF', [dimuEFSequenceGenCfg], comboHypoCfg=DimuEFComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict])
+        return self.getStep(flags, 'dimuEF', [dimuEFSequenceGenCfg], comboHypoCfg=DimuEFComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict])
 
     def getDimuEFCB(self, flags):
-        return self.getStep(flags, 4, 'dimuEFCB', [muEFCBSequenceGenCfg], comboHypoCfg=StreamerDimuEFComboHypoCfg)
+        return self.getStep(flags, 'dimuEFCB', [muEFCBSequenceGenCfg], comboHypoCfg=StreamerDimuEFComboHypoCfg)
 
     def getBmux(self, flags):
-        return self.getStep(flags, 5, 'bmux', [bmumuxSequenceGenCfg], comboHypoCfg=BmuxComboHypoCfg, comboTools=[TrigBmumuxComboHypoToolFromDict])
+        return self.getStep(flags, 'bmux', [bmumuxSequenceGenCfg], comboHypoCfg=BmuxComboHypoCfg, comboTools=[TrigBmumuxComboHypoToolFromDict])
 
     def getBmumux(self, flags):
-        return self.getStep(flags, 5, 'bmumux', [bmumuxSequenceGenCfg], comboHypoCfg=BmumuxComboHypoCfg, comboTools=[TrigBmumuxComboHypoToolFromDict])
+        return self.getStep(flags, 'bmumux', [bmumuxSequenceGenCfg], comboHypoCfg=BmumuxComboHypoCfg, comboTools=[TrigBmumuxComboHypoToolFromDict])
 
     def getBmutrk(self, flags):
-        return self.getStep(flags, 5, 'bmutrk', [bmumuxSequenceGenCfg], comboHypoCfg=BmutrkComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict])
+        return self.getStep(flags, 'bmutrk', [bmumuxSequenceGenCfg], comboHypoCfg=BmutrkComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict])
