@@ -147,7 +147,6 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     flags.Scheduler.AutoLoadUnmetDependencies = True
     flags.PerfMon.doFullMonMT = True
    
-
     flags.lock()
     flags.dump(evaluate = True)
     if not flags.Muon.usePhaseIIGeoSetup:
@@ -166,15 +165,12 @@ def executeTest(cfg, num_events = 1):
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     if not cfg.run(num_events).isSuccess(): exit(1)
+
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)  
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
-
-    cfg.getService("MessageSvc").setVerbose = []
-    cfg.getService("MessageSvc").warningLimit = 1000000
-    cfg.getService("MessageSvc").verboseLimit = 1000000
     
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
