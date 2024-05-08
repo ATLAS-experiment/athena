@@ -70,7 +70,7 @@ class JobOptionsTemplate(object):
             try:
                 if self._exe._isCAEnabled():
                     # Write a shebang to identify CA files.
-                    print("#!/usr/bin/env athena.py --CA", file=runargsFile)
+                    print("#!/usr/bin/env athena.py", file=runargsFile)
                 # First write a little header
                 print(os.linesep.join(("# Run arguments file auto-generated on {0} by:".format(time.asctime()),
                                                      "# JobTransform: {0}".format(self._exe.name),
