@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKPERFMON_TRACKANALYSISDEFINITIONSVC_H
@@ -22,7 +22,6 @@
 /// STL includes
 #include <string>
 #include <vector>
-#include <memory>
 
 class TrackAnalysisDefinitionSvc final :
     public asg::AsgService,
