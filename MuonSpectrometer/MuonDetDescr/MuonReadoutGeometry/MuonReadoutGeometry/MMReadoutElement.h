@@ -155,7 +155,7 @@ namespace MuonGM {
         std::array<MuonChannelDesign, 4> m_etaDesign{};
 
         std::array<int, 4> m_nStrips{};     // #of active strips
-        static constexpr int m_nlayers{4};  // #of gas gaps
+        int m_nlayers{0};  // #of gas gaps
 
         const NswPassivationDbData* m_passivData{nullptr};
 

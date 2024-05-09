@@ -89,21 +89,20 @@ namespace MuonGM {
             m_lWidthChamber = 2*trd->getYHalfLength2();       // top base length (full chamber)
             m_lengthChamber = 2*trd->getZHalfLength();        // height of the trapezoid (full chamber)         
         } else {
-            THROW_EXCEPTION("Expected a Geo trd "<<printGeoShape(pvc->getLogVol()->getShape()));
+            ATH_MSG_DEBUG("Expected a GeoTrd but got "<<printGeoShape(pvc->getLogVol()->getShape()));
         }
 
         std::vector<GeoChildNodeWithTrf> children{getChildrenWithRef(pvc, false)};
-        int llay = 0;
         for (const GeoChildNodeWithTrf& child : children) {
             ATH_MSG_VERBOSE("Child node "<<child.nodeName<<" "<<child.volume->getLogVol()->getName()); 
             if (child.volume->getLogVol()->getName().find("Sensitive") == std::string::npos) {
                 continue;
             }
-            ++llay;
-            if (llay > 4) {
+            ++m_nlayers;
+            if (m_nlayers > 4) {
                 THROW_EXCEPTION("number of MM layers > 4: increase transform array size" );
             }
-            m_Xlg[llay - 1] =  child.transform;
+            m_Xlg[m_nlayers - 1] =  child.transform;
             // save layer dimensions
             if (foundShape) {
                 continue;
