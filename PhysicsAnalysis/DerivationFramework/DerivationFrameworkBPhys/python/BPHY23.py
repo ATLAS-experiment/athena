@@ -494,6 +494,7 @@ def BPHY23Cfg(flags):
         list_2trk0trk_obj[i].MassUpperCut             = X_hi
         list_2trk0trk_obj[i].Chi2Cut                  = 30.
         list_2trk0trk_obj[i].MaxCandidates            = 15
+        list_2trk0trk_obj[i].MaxnPV                   = 100
         list_2trk0trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list_2trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list_2trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -546,7 +547,7 @@ def BPHY23Cfg(flags):
         list2_2trk0trk_obj[i].ApplyJpsi1MassConstraint = True
         list2_2trk0trk_obj[i].ApplyPsi1MassConstraint  = True
         list2_2trk0trk_obj[i].ApplyJpsi2MassConstraint = True
-        list2_2trk0trk_obj[i].Chi2Cut                  = 40.
+        list2_2trk0trk_obj[i].Chi2Cut                  = 30.
         list2_2trk0trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list2_2trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list2_2trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -554,6 +555,7 @@ def BPHY23Cfg(flags):
         list2_2trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list2_2trk0trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_2trk0trk_hypo[i]+"_RefPrimaryVertices"
         list2_2trk0trk_obj[i].RefitPV                  = True
+        list2_2trk0trk_obj[i].MaxnPV                   = 100
 
     #######################
     ###  1 trk + 0 trk  ###
@@ -580,6 +582,7 @@ def BPHY23Cfg(flags):
         list_1trk0trk_obj[i].MassUpperCut             = X_hi
         list_1trk0trk_obj[i].Chi2Cut                  = 30.
         list_1trk0trk_obj[i].MaxCandidates            = 15
+        list_1trk0trk_obj[i].MaxnPV                   = 100
         list_1trk0trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list_1trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -628,7 +631,7 @@ def BPHY23Cfg(flags):
         list2_1trk0trk_obj[i].ApplyJpsi1MassConstraint = True
         list2_1trk0trk_obj[i].ApplyPsi1MassConstraint  = True
         list2_1trk0trk_obj[i].ApplyJpsi2MassConstraint = True
-        list2_1trk0trk_obj[i].Chi2Cut                  = 40.
+        list2_1trk0trk_obj[i].Chi2Cut                  = 30.
         list2_1trk0trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list2_1trk0trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list2_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -636,6 +639,7 @@ def BPHY23Cfg(flags):
         list2_1trk0trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list2_1trk0trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_1trk0trk_hypo[i]+"_RefPrimaryVertices"
         list2_1trk0trk_obj[i].RefitPV                  = True
+        list2_1trk0trk_obj[i].MaxnPV                   = 100
 
     #######################
     ###  1 trk + 1 trk  ###
@@ -663,11 +667,12 @@ def BPHY23Cfg(flags):
         list_1trk1trk_obj[i].NumberOfPsi2Daughters    = 3
         list_1trk1trk_obj[i].MassLowerCut             = 0.
         list_1trk1trk_obj[i].MassUpperCut             = X_hi
-        list_1trk1trk_obj[i].Chi2CutPsi1              = 12.
-        list_1trk1trk_obj[i].Chi2CutPsi2              = 12.
+        list_1trk1trk_obj[i].Chi2CutPsi1              = 5.
+        list_1trk1trk_obj[i].Chi2CutPsi2              = 5.
         list_1trk1trk_obj[i].Chi2Cut                  = 30.
         list_1trk1trk_obj[i].MaxCandidates            = 15
         list_1trk1trk_obj[i].RemoveDuplicatePairs     = True
+        list_1trk1trk_obj[i].MaxnPV                   = 100
         list_1trk1trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list_1trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -723,7 +728,7 @@ def BPHY23Cfg(flags):
         list2_1trk1trk_obj[i].ApplyPsi1MassConstraint  = True
         list2_1trk1trk_obj[i].ApplyJpsi2MassConstraint = True
         list2_1trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-        list2_1trk1trk_obj[i].Chi2Cut                  = 40.
+        list2_1trk1trk_obj[i].Chi2Cut                  = 30.
         list2_1trk1trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list2_1trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list2_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -731,6 +736,7 @@ def BPHY23Cfg(flags):
         list2_1trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list2_1trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_1trk1trk_hypo[i]+"_RefPrimaryVertices"
         list2_1trk1trk_obj[i].RefitPV                  = True
+        list2_1trk1trk_obj[i].MaxnPV                   = 100
 
     ########################
     ###  2 trks + 1 trk  ###
@@ -779,10 +785,11 @@ def BPHY23Cfg(flags):
         list_2trk1trk_obj[i].NumberOfPsi2Daughters    = 3
         list_2trk1trk_obj[i].MassLowerCut             = 0.
         list_2trk1trk_obj[i].MassUpperCut             = X_hi
-        list_2trk1trk_obj[i].Chi2CutPsi1              = 10.
-        list_2trk1trk_obj[i].Chi2CutPsi2              = 12.
+        list_2trk1trk_obj[i].Chi2CutPsi1              = 5.
+        list_2trk1trk_obj[i].Chi2CutPsi2              = 5.
         list_2trk1trk_obj[i].Chi2Cut                  = 30.
-        list_2trk1trk_obj[i].MaxCandidates            = 20
+        list_2trk1trk_obj[i].MaxCandidates            = 15
+        list_2trk1trk_obj[i].MaxnPV                   = 100
         list_2trk1trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list_2trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -818,7 +825,7 @@ def BPHY23Cfg(flags):
         list2_2trk1trk_obj[i].HypothesisName           = list2_2trk1trk_hypo[i]
         list2_2trk1trk_obj[i].Psi1Vertices             = list2_2trk1trk_psi1Input[i]
         list2_2trk1trk_obj[i].Psi2Vertices             = list2_2trk1trk_psi2Input[i]
-        list2_2trk1trk_obj[i].MaxCandidates            = 20
+        list2_2trk1trk_obj[i].MaxCandidates            = 15
         list2_2trk1trk_obj[i].NumberOfPsi1Daughters    = 4
         list2_2trk1trk_obj[i].NumberOfPsi2Daughters    = 3
         list2_2trk1trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
@@ -839,7 +846,7 @@ def BPHY23Cfg(flags):
         list2_2trk1trk_obj[i].ApplyPsi1MassConstraint  = True
         list2_2trk1trk_obj[i].ApplyJpsi2MassConstraint = True
         list2_2trk1trk_obj[i].ApplyPsi2MassConstraint  = True
-        list2_2trk1trk_obj[i].Chi2Cut                  = 40.
+        list2_2trk1trk_obj[i].Chi2Cut                  = 30.
         list2_2trk1trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list2_2trk1trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list2_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -847,6 +854,7 @@ def BPHY23Cfg(flags):
         list2_2trk1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list2_2trk1trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_2trk1trk_hypo[i]+"_RefPrimaryVertices"
         list2_2trk1trk_obj[i].RefitPV                  = True
+        list2_2trk1trk_obj[i].MaxnPV                   = 100
 
     ########################
     ###  1 trks + 2 trk  ###
@@ -875,10 +883,11 @@ def BPHY23Cfg(flags):
         list_1trk2trk_obj[i].NumberOfPsi2Daughters    = 4
         list_1trk2trk_obj[i].MassLowerCut             = 0.
         list_1trk2trk_obj[i].MassUpperCut             = X_hi
-        list_1trk2trk_obj[i].Chi2CutPsi1              = 12.
-        list_1trk2trk_obj[i].Chi2CutPsi2              = 10.
+        list_1trk2trk_obj[i].Chi2CutPsi1              = 5.
+        list_1trk2trk_obj[i].Chi2CutPsi2              = 5.
         list_1trk2trk_obj[i].Chi2Cut                  = 30.
-        list_1trk2trk_obj[i].MaxCandidates            = 20
+        list_1trk2trk_obj[i].MaxCandidates            = 15
+        list_1trk2trk_obj[i].MaxnPV                   = 100
         list_1trk2trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list_1trk2trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list_1trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -958,11 +967,12 @@ def BPHY23Cfg(flags):
         list_2trk2trk_obj[i].NumberOfPsi2Daughters    = 4
         list_2trk2trk_obj[i].MassLowerCut             = 0.
         list_2trk2trk_obj[i].MassUpperCut             = X_hi
-        list_2trk2trk_obj[i].Chi2CutPsi1              = 10.
-        list_2trk2trk_obj[i].Chi2CutPsi2              = 10.
+        list_2trk2trk_obj[i].Chi2CutPsi1              = 4.
+        list_2trk2trk_obj[i].Chi2CutPsi2              = 4.
         list_2trk2trk_obj[i].Chi2Cut                  = 30.
-        list_2trk2trk_obj[i].MaxCandidates            = 25
+        list_2trk2trk_obj[i].MaxCandidates            = 15
         list_2trk2trk_obj[i].RemoveDuplicatePairs     = True
+        list_2trk2trk_obj[i].MaxnPV                   = 100
         list_2trk2trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list_2trk2trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list_2trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -998,7 +1008,7 @@ def BPHY23Cfg(flags):
         list2_2trk2trk_obj[i].HypothesisName           = list2_2trk2trk_hypo[i]
         list2_2trk2trk_obj[i].Psi1Vertices             = list2_2trk2trk_psi1Input[i]
         list2_2trk2trk_obj[i].Psi2Vertices             = list2_2trk2trk_psi2Input[i]
-        list2_2trk2trk_obj[i].MaxCandidates            = 25
+        list2_2trk2trk_obj[i].MaxCandidates            = 15
         list2_2trk2trk_obj[i].NumberOfPsi1Daughters    = 4
         list2_2trk2trk_obj[i].NumberOfPsi2Daughters    = 4
         list2_2trk2trk_obj[i].Jpsi1MassLowerCut        = Jpsi_lo
@@ -1019,7 +1029,7 @@ def BPHY23Cfg(flags):
         list2_2trk2trk_obj[i].ApplyPsi1MassConstraint  = True
         list2_2trk2trk_obj[i].ApplyJpsi2MassConstraint = True
         list2_2trk2trk_obj[i].ApplyPsi2MassConstraint  = True
-        list2_2trk2trk_obj[i].Chi2Cut                  = 40.
+        list2_2trk2trk_obj[i].Chi2Cut                  = 30.
         list2_2trk2trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
         list2_2trk2trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list2_2trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
@@ -1027,6 +1037,7 @@ def BPHY23Cfg(flags):
         list2_2trk2trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list2_2trk2trk_obj[i].RefPVContainerName       = "BPHY23_"+list2_2trk2trk_hypo[i]+"_RefPrimaryVertices"
         list2_2trk2trk_obj[i].RefitPV                  = True
+        list2_2trk2trk_obj[i].MaxnPV                   = 100
 
 
     list_all_obj = list_2trk0trk_obj + list_1trk0trk_obj + list_1trk1trk_obj + list_2trk1trk_obj + list_1trk2trk_obj + list_2trk2trk_obj
@@ -1050,6 +1061,7 @@ def BPHY23Cfg(flags):
         passedCandidates += ["BPHY23_" + obj.HypothesisName + "_MainVtx"]
 
     BPHY23_SelectEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "BPHY23_SelectEvent", VertexContainerNames = passedCandidates)
+    acc.addPublicTool(BPHY23_SelectEvent)
 
     augmentation_tools = [BPHY23_Reco_mumu, BPHY23FourTrackReco_PsiX3872, BPHY23FourTrackReco_Bs0, BPHY23FourTrackReco_B0, BPHY23ThreeTrackReco_Zc3900, BPHY23ThreeTrackReco_Bpm, BPHY23Rev_Psi4Body, BPHY23Rev_X3872, BPHY23Rev_Bs0, BPHY23Rev_B0Kpi, BPHY23Rev_B0piK, BPHY23Rev_Zc3900, BPHY23Rev_Bpm, BPHY23Select_Jpsi, BPHY23Select_Psi, BPHY23Select_Upsi, BPHY23Rev_Jpsi, BPHY23Rev_Psi, BPHY23Rev_Upsi] + list_all_obj + list2_all_obj
     for t in augmentation_tools : acc.addPublicTool(t)
