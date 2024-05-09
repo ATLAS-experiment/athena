@@ -11,5 +11,4 @@ if "INFILE" in dir():
 ## Import useful analysis stuff
 from AthenaPython import PyAthena
 from AthenaPython.PyAthena import StatusCode, McEventCollection, HepMC, CLHEP
-import McParticleEvent.Pythonizations
 from GeneratorModules.EvgenAnalysisAlg import EvgenAnalysisAlg
