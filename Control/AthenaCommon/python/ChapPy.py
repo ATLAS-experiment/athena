@@ -110,7 +110,7 @@ class Athena( object ):
     def __init__( self,
                   jobOptions   = [ ],
                   cmdOptions   = None,
-                  logFile      = open( "/dev/null", "w" ),
+                  logFile      = open( "/dev/null", "w" ),  # noqa: B008 (re-using same FD for all instances)
                   logLevel     = None,
                   showIncludes = False,
                   checkLeak    = False ):
