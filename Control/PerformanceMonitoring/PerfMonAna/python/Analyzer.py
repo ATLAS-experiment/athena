@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: Analyzer.py
 # @purpose: a set of classes to analyze data from a perfmon tuple
@@ -107,7 +107,7 @@ def make_stack( canvas, pad_nbr, title, drawopt="nostack" ):
     #DR if stack is None:
     if not stack:
         stack = ROOT.THStack(stack_name, title)
-        setattr(stack, '_graphs', [])
+        stack._graphs = []
     return stack
 
 def make_canvas(name, title, items, shape=None):
@@ -120,8 +120,8 @@ def make_canvas(name, title, items, shape=None):
     if not c:
         drawOpt = ""
         c = ROOT.TCanvas(name, title)
-        setattr(c, '_stacks', [make_stack(c,i,title) for i in range(nItems)])
-        setattr(c, '_shape',  shape)
+        c._stacks = [make_stack(c,i,title) for i in range(nItems)]
+        c._shape = shape
         def _plot(self):
             return
             #DR if self._shape is None: return
@@ -134,7 +134,7 @@ def make_canvas(name, title, items, shape=None):
                 for gr in stack._graphs:
                     gr.Draw("SAME")
             return
-        setattr(c, '_plot', _plot)
+        c._plot = _plot
         if nItems>=1:
             c.Divide(shape[0], shape[1])
         elif nItems==0:
