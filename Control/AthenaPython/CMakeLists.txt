@@ -30,7 +30,7 @@ atlas_add_dictionary( AthenaPythonDict
 # Install files from the package:
 atlas_install_python_modules( python/*.py python/tests
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py share/tests/*.py )
+atlas_install_joboptions( share/tests/*.py )
 
 # Tests in the package:
 atlas_add_test( pyathena
