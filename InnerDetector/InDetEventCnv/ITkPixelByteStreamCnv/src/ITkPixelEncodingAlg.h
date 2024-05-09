@@ -3,7 +3,7 @@
 */
 
 #ifndef ITKPIXEL_ENCODINGALG_H
-#define ITKPIXEL_ENCODINGALG_Hi
+#define ITKPIXEL_ENCODINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "InDetRawData/PixelRDO_Container.h"
@@ -22,8 +22,8 @@ class ITkPixelEncodingAlg : public AthReentrantAlgorithm
     ITkPixelEncodingAlg(const std::string &name, ISvcLocator *pSvcLocator);
     ~ITkPixelEncodingAlg(){}
 
-    virtual StatusCode initialize();
-    virtual StatusCode execute (const EventContext& ctx) const;
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute (const EventContext& ctx) const override;
 
   private:
 
