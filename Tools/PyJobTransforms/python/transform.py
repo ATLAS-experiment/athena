@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.transform
 #
@@ -44,8 +44,7 @@ class transform(object):
     #  @param trfName Name of the transform. Default is executable name with .py rstripped.
     #  @param executor Executor list
     def __init__(self, standardSignalHandlers = True, standardTrfArgs = True, standardValidationArgs=True, 
-                 trfName = path.basename(sys.argv[0]).rsplit('.py', 1)[0], 
-                 executor = set([transformExecutor(),]), exeArgs = None, description = ''):
+                 trfName = None, executor = None, exeArgs = None, description = ''):
         '''Transform class initialiser'''
         msg.debug('Welcome to ATLAS job transforms')
         
@@ -62,12 +61,12 @@ class transform(object):
         self._trfPredata = os.environ.get('TRF_PREDATA')
 
         ## Transform _name
-        self._name = trfName        
+        self._name = trfName or path.basename(sys.argv[0]).rsplit('.py', 1)[0]
         
         ## @note Holder for arguments this trf understands
         #  Use @c argparse.SUPPRESS to have non-given arguments unset, rather than None
         #  Support reading arguments from a file using the notation @c @file 
-        self.parser = trfArgParser(description='Transform {0}. {1}'.format(trfName, description),
+        self.parser = trfArgParser(description='Transform {0}. {1}'.format(self.name, description),
                                    argument_default=argparse.SUPPRESS,
                                    fromfile_prefix_chars='@')
 
@@ -90,9 +89,9 @@ class transform(object):
         self._executors = set()
         self._executorDictionary = {}
         
-        # If we were passed executors at construction time then append them to the set:
+        # Append the given executors or a default one to the set:
         if executor is not None:
-            self.appendToExecutorSet(executor)
+            self.appendToExecutorSet(executor or {transformExecutor()})
         
         ## Transform exit code/message holders
         self._exitCode = None

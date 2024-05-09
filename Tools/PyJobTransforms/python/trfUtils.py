@@ -106,7 +106,7 @@ def getAncestry(listMyOrphans = False):
 #  @param parent The parent process for which to return all the child PIDs
 #  @param listOrphans Parameter value to pass to getAncestry() if necessary
 #  @return @c children List of child PIDs
-def listChildren(psTree = None, parent = os.getpid(), listOrphans = False):
+def listChildren(psTree = None, parent = os.getpid(), listOrphans = False):  # noqa: B008 (PID is constant)
     '''Take a psTree dictionary and list all children'''
     if psTree is None:
         psTree = getAncestry(listMyOrphans = listOrphans)
@@ -873,7 +873,7 @@ class ParallelJobProcessor(object):
     def __init__(
         self,
         jobSubmission = None,
-        numberOfProcesses = multiprocessing.cpu_count(),
+        numberOfProcesses = multiprocessing.cpu_count(),  # noqa: B008 (cpu_count is constant)
         ):
         self.jobSubmission = jobSubmission
         self.numberOfProcesses = numberOfProcesses
