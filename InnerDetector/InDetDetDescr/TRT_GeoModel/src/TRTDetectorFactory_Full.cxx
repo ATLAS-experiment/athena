@@ -21,7 +21,6 @@
 
 #include "InDetGeoModelUtils/ExtraMaterial.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
-#include "InDetGeoModelUtils/InDetMaterialManager.h"
 #include "InDetGeoModelUtils/GeoNodePtr.h"
 
 #include "GeoModelKernel/GeoTube.h"
@@ -105,16 +104,6 @@ TRTDetectorFactory_Full::TRTDetectorFactory_Full(InDetDD::AthenaComps * athenaCo
 { 
 }
 //////////////////////////////////////////////////////////////////////////////////
-
-
-
-/////////////////////////////////// Destructor ///////////////////////////////////
-//
-TRTDetectorFactory_Full::~TRTDetectorFactory_Full() 
-{ 
-}
-//////////////////////////////////////////////////////////////////////////////////
-
 
 
 ///////////////////////////// getDetectorManager /////////////////////////////////

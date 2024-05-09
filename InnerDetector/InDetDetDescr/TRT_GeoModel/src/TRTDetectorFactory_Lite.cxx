@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -47,7 +47,7 @@ using namespace GeoXF;
 //
 TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqliteReader, 
 						 InDetDD::AthenaComps * athenaComps,
-						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon
+						 const ITRT_StrawStatusSummaryTool* /*sumTool*/, // added for Argon. Will be used in later revisions
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
 						 int overridedigversion,
@@ -59,22 +59,10 @@ TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqlit
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
     m_overridedigversion(overridedigversion),
     m_alignable(alignable),
-    m_sumTool(sumTool),
+//    m_sumTool(sumTool),
     m_useDynamicAlignFolders(useDynamicAlignmentFolders)
 { 
 }
-//////////////////////////////////////////////////////////////////////////////////
-
-
-
-/////////////////////////////////// Destructor ///////////////////////////////////
-//
-TRTDetectorFactory_Lite::~TRTDetectorFactory_Lite() 
-{ 
-}
-//////////////////////////////////////////////////////////////////////////////////
-
-
 
 ///////////////////////////// getDetectorManager /////////////////////////////////
 //
