@@ -220,8 +220,13 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     }
     else{
       maxNenergies=nsamples-firsamples-startSample+1;
+      if(m_startSample) maxNenergies -= m_startSample;
     }
-    if(maxNenergies<0) maxNenergies=0;
+    if(maxNenergies<0) {
+       maxNenergies=0;
+    } else {
+       startSample += m_startSample;
+    }
     if((int)nEnergies>maxNenergies){
       ATH_MSG_WARNING("requested nEnergies > maxNenergies " << m_nEnergies << ">" <<maxNenergies<<". setting nEnegries to maxNenergies");
       nEnergies=maxNenergies;

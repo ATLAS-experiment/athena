@@ -102,7 +102,7 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
 
                 if self.chainPart['beamspotChain'] != '':
                         stepName = f"Step4_{self.jc_name}_beamspotJet"
-                        chainSteps = [self.getStep(flags, 4, stepName, [getBeamspotVtxSequenceGenCfg])]
+                        chainSteps = [self.getStep(flags, stepName, [getBeamspotVtxSequenceGenCfg])]
 
                 else:
                         key = self.chainPart['addInfo'][0] + "_" + self.chainPart['l2IDAlg'][0] #TODO: hardcoded index
@@ -129,10 +129,10 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
         # Configuration TrkFS step
         # --------------------
         def getTrkFSStep(self, flags):
-                return self.getStep(flags,1,"trkFS_trkfast",[allTE_trkfastSequenceGenCfg],signature="FS")
+                return self.getStep(flags, "trkFS_trkfast",[allTE_trkfastSequenceGenCfg],signature="FS")
 
         # --------------------
         # Configuration of costmonitor (costmonitor ?? but isn't this is the actua chain configuration ??)
         # --------------------
         def getAllTEStep(self, flags):
-                return self.getStep(flags,1,"allTE_trkfast",[allTE_trkfastSequenceGenCfg],signature="beamSpot")
+                return self.getStep(flags, "allTE_trkfast",[allTE_trkfastSequenceGenCfg],signature="beamSpot")

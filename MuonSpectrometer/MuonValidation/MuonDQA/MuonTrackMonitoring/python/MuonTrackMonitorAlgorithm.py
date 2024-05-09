@@ -267,7 +267,7 @@ def MuonTrackConfig(flags, **kwargs):
             title='Muons_AllCBMuons_eta_phi_1All;eta;phi', 
             type='TH2F', path='Muons/AllCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllCBMuonEta,CBMuonPt;Muons_AllCBMuons_eta_pt', 
+    myGroup.defineHistogram('AllCBMuonEta,AllCBMuonPt;Muons_AllCBMuons_eta_pt', 
             title='Muons_AllCBMuons_eta_pt;eta;pt', 
             type='TH2F', path='Muons/AllCBMuons', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=100, ymin=0, ymax=200, opt='kAlwaysCreate')
@@ -1763,17 +1763,17 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_NoTrig_CBMuons_t0err;t_{0}Error;Entries', 
             type='TH1F', path='Segments/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=10, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBSegmentXYPosEndcap;Segments_NoTrig_CBMuons_xypos_endcap', 
+    myGroup.defineHistogram('NoTrigCBSegmentXPosEndcap,NoTrigCBSegmentYPosEndcap;Segments_NoTrig_CBMuons_xypos_endcap', 
             title='Segments_NoTrig_CBMuons_xypos_endcap;x_{pos};y_{pos}', 
-            type='TH1F', path='Segments/NoTrigCBMuons', 
+            type='TH2F', path='Segments/NoTrigCBMuons', 
             xbins=24, xmin=-12000, xmax=12000, ybins=24, ymin=-12000, ymax=12000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBSegmentXYPosBarrel;Segments_NoTrig_CBMuons_xypos_barrel', 
+    myGroup.defineHistogram('NoTrigCBSegmentXPosBarrel,NoTrigCBSegmentYPosBarrel;Segments_NoTrig_CBMuons_xypos_barrel', 
             title='Segments_NoTrig_CBMuons_xypos_barrel;x_{pos};y_{pos}', 
-            type='TH1F', path='Segments/NoTrigCBMuons', 
+            type='TH2F', path='Segments/NoTrigCBMuons', 
             xbins=24, xmin=-12000, xmax=12000, ybins=24, ymin=-12000, ymax=12000, opt='kAlwaysCreate')
 
     # NoTrig/Segments/NonCBMuons
-    myGroup.defineHistogram('NoTrigNonCBMuonSector,CBMuonCIndex;Segments_NoTrig_NonCBMuons_chamberIndex_perSector', 
+    myGroup.defineHistogram('NoTrigNonCBMuonSector,NoTrigNonCBMuonCIndex;Segments_NoTrig_NonCBMuons_chamberIndex_perSector', 
             title='Segments_NoTrig_NonCBMuons_chamberIndex_perSector;Sector;ChamberIndex', 
             type='TH2F', path='Segments/NoTrigNonCBMuons', 
             xbins=30, xmin=-15, xmax=15, ybins=17, ymin=0, ymax=17, opt='kAlwaysCreate')
@@ -1801,13 +1801,13 @@ def MuonTrackConfig(flags, **kwargs):
             title='Segments_NoTrig_NonCBMuons_t0err;t_{0}Error;Entries', 
             type='TH1F', path='Segments/NoTrigNonCBMuons', 
             xbins=100, xmin=0, xmax=10, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBSegmentXYPosEndcap;Segments_NoTrig_NonCBMuons_xypos_endcap', 
+    myGroup.defineHistogram('NoTrigNonCBSegmentXPosEndcap,NoTrigNonCBSegmentYPosEndcap;Segments_NoTrig_NonCBMuons_xypos_endcap', 
             title='Segments_NoTrig_NonCBMuons_xypos_endcap;x_{pos};y_{pos}', 
-            type='TH1F', path='Segments/NoTrigNonCBMuons', 
+            type='TH2F', path='Segments/NoTrigNonCBMuons', 
             xbins=24, xmin=-12000, xmax=12000, ybins=24, ymin=-12000, ymax=12000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBSegmentXYPosBarrel;Segments_NoTrig_NonCBMuons_xypos_barrel', 
+    myGroup.defineHistogram('NoTrigNonCBSegmentXPosBarrel,NoTrigNonCBSegmentYPosBarrel;Segments_NoTrig_NonCBMuons_xypos_barrel', 
             title='Segments_NoTrig_NonCBMuons_xypos_barrel;x_{pos};y_{pos}', 
-            type='TH1F', path='Segments/NoTrigNonCBMuons', 
+            type='TH2F', path='Segments/NoTrigNonCBMuons', 
             xbins=24, xmin=-12000, xmax=12000, ybins=24, ymin=-12000, ymax=12000, opt='kAlwaysCreate')
 
     # Segments/Container
@@ -1889,11 +1889,11 @@ def MuonTrackConfig(flags, **kwargs):
             title='TracksMS_ContainerNoTrig_Type;MS-Type;Entries', 
             type='TH1F', path='TracksMS/ContainerNoTrig', 
             xbins=15, xmin=0, xmax=15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('ContainerNoTrigMSEta,MSPhi;TracksMS_ContainerNoTrig_eta_phi', 
+    myGroup.defineHistogram('ContainerNoTrigMSEta,ContainerNoTrigMSPhi;TracksMS_ContainerNoTrig_eta_phi', 
             title='TracksMS_ContainerNoTrig_eta_phi;eta;phi', 
             type='TH2F', path='TracksMS/ContainerNoTrig', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')
-    myGroup.defineHistogram('ContainerNoTrigMSEta,MSPhi;TracksMS_ContainerNoTrig_eta_phi_broad', 
+    myGroup.defineHistogram('ContainerNoTrigMSEta,ContainerNoTrigMSPhi;TracksMS_ContainerNoTrig_eta_phi_broad', 
             title='TracksMS_ContainerNoTrig_eta_phi_broad;eta;phi', 
             type='TH2F', path='TracksMS/ContainerNoTrig', 
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=-3.15, ymax=3.15, opt='kAlwaysCreate')

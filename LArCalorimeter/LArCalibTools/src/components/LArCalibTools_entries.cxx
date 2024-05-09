@@ -43,6 +43,7 @@
 #include "LArCalibTools/LArRinj2Ntuple.h"
 #include "LArCalibTools/LArOFCBin2Ntuple.h"
 #include "LArCalibTools/LArADC2MeV2Ntuple.h"
+#include "LArCalibTools/LArSC2NtupleEB.h"
  
 using LArReadCaliPulseParams = LArReadParamsFromFile<LArCaliPulseParamsComplete> ;
 using LArReadDetCellParams = LArReadParamsFromFile<LArDetCellParamsComplete> ;
@@ -114,3 +115,4 @@ DECLARE_COMPONENT( LArSC2Ntuple )
 DECLARE_COMPONENT( LArRinj2Ntuple )
 DECLARE_COMPONENT( LArOFCBin2Ntuple )
 DECLARE_COMPONENT( LArADC2MeV2Ntuple )
+DECLARE_COMPONENT( LArSC2NtupleEB )

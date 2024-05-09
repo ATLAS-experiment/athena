@@ -129,25 +129,25 @@ class CalibChainConfiguration(ChainConfigurationBase):
 
 
     def getAcceptedEventsStep(self, flags, i):
-        return self.getStep(flags,1, 'AcceptedEvents', [acceptedEventsSequenceGenCfg])
+        return self.getStep(flags, 'AcceptedEvents', [acceptedEventsSequenceGenCfg])
 
     def getAllTEStep(self, flags, i):
-        return self.getStep(flags,1, 'LArNoiseBurst', [getLArNoiseBurstSequenceGenCfg])
+        return self.getStep(flags, 'LArNoiseBurst', [getLArNoiseBurstSequenceGenCfg])
 
     def getCaloAllEMStep(self, flags, i):
-        return self.getStep(flags,1, 'LArPSALLEM', [getCaloAllEMLayersPSSequenceGenCfg], doAllorAllEM=False)
+        return self.getStep(flags, 'LArPSALLEM', [getCaloAllEMLayersPSSequenceGenCfg], doAllorAllEM=False)
 
     def getCaloAllStep(self, flags, i):
-        return self.getStep(flags,1, 'LArPSALL', [getCaloAllEMLayersPSSequenceGenCfg], doAllorAllEM=True)
+        return self.getStep(flags, 'LArPSALL', [getCaloAllEMLayersPSSequenceGenCfg], doAllorAllEM=True)
 
     def getIDCalibEmpty(self, flags, i):
         return self.getEmptyStep(1, 'IDCalibEmptyStep')
 
     def getIDCalibFTFReco(self, flags, i):
-        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFSequenceGenCfg])
+        return self.getStep(flags, 'IDCalibFTFCfg',[IDCalibFTFSequenceGenCfg])
 
     def getIDCalibTrigger(self, flags, i):
-        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerSequenceGenCfg])
+        return self.getStep(flags, 'IDCalibTriggerCfg',[IDCalibTriggerSequenceGenCfg])
 
 #----------------------------------------------------------------
 
