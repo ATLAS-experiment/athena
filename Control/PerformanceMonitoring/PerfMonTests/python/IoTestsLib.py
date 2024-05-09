@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @file PerfMonTests.IoTestsLib
 ## @date April 2009
@@ -114,10 +114,7 @@ def io_test1_read(fname, verbose=False):
             continue
         tot_bytes += nb
         # use the values directly from the tree
-        data = getattr(t, 'data')
-        sz = len(data)
-        assert sz > 0
-        #print ("::: ievt [%3i] : #data = %s" % (ievt, sz))
+        assert len(t.data) > 0
     stop = pymon()
 
     del t
@@ -175,10 +172,7 @@ def io_test2_read(fname, verbose=False):
             continue
         tot_bytes += nb
         # use the values directly from the tree
-        data = getattr(t, 'data')
-        sz = len(data)
-        assert sz > 0
-        #print ("::: ievt [%3i] : #data = %s" % (ievt, sz))
+        assert len(t.data) > 0
     stop = pymon()
 
     del t
