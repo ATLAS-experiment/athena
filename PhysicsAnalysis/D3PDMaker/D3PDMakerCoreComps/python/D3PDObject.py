@@ -80,7 +80,7 @@ class DeferArg (object):
     If FooD3PDObject is then instantiated with a StoreGate key of `Bar',
     then the Name argument of this block will be set to `name_Bar'.
 """
-    def __init__ (self, str, gdict = globals(), **kw):
+    def __init__ (self, str, gdict = globals(), **kw):  # noqa: B008 (globals is already a global ref.)
         self.str = str
         self.gdict = gdict
         self.kw = kw
