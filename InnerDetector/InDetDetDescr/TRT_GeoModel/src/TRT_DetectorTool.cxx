@@ -8,9 +8,7 @@
 
 #include "GeoModelUtilities/GeoModelExperiment.h"
 
-#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
@@ -21,49 +19,17 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
 
-#include "CxxUtils/checker_macros.h"
-
 /////////////////////////////////// Constructor //////////////////////////////////
 //
 TRT_DetectorTool::TRT_DetectorTool( const std::string& type, const std::string& name, const IInterface* parent )
-  : GeoModelTool( type, name, parent ), 
-    m_initialLayout(true),
-    m_geoDbTagSvc("GeoDbTagSvc",name),
-    m_geometryDBSvc("InDetGeometryDBSvc",name),
-    m_sumTool("TRT_StrawStatusSummaryTool", this),
-    m_doArgonMixture(1),
-    m_doKryptonMixture(1),
-    m_useDynamicAlignFolders(false),
-    m_manager(nullptr),
-    m_athenaComps(nullptr)
+  : GeoModelTool( type, name, parent )
 {
-  declareProperty("UseOldActiveGasMixture", m_useOldActiveGasMixture = false );
-  declareProperty("DC2CompatibleBarrelCoordinates",  m_DC2CompatibleBarrelCoordinates = false );
-  declareProperty("OverrideDigVersion",  m_overridedigversion = -999 );
-  declareProperty("Alignable", m_alignable = true);
-  declareProperty("GeoDbTagSvc", m_geoDbTagSvc);
-  declareProperty("GeometryDBSvc", m_geometryDBSvc);
-  declareProperty("DoXenonArgonMixture", m_doArgonMixture); // Set to 1 to use argon. DEFAULT VALUE is 1. Overridden by DOARGONMIXTURE switch
-  declareProperty("DoKryptonMixture", m_doKryptonMixture); // Set to 1 to use krypton. DEFAULT VALUE is 1. Overridden by DOKRYPTONMIXTURE switch
-  declareProperty("useDynamicAlignFolders", m_useDynamicAlignFolders);
-
 }
-
-
-
-/////////////////////////////////// Destructor ///////////////////////////////////
-//
-TRT_DetectorTool::~TRT_DetectorTool() 
-{
-  delete m_athenaComps;
-}
-
 
 //////////////  Create the Detector Node corresponding to this tool //////////////
 //
 StatusCode TRT_DetectorTool::create()
 { 
-
   // Get the detector configuration.
   ATH_CHECK( m_geoDbTagSvc.retrieve());
 
@@ -73,25 +39,19 @@ StatusCode TRT_DetectorTool::create()
   ServiceHandle<IRDBAccessSvc> accessSvc(m_geoDbTagSvc->getParamSvcName(),name());
   ATH_CHECK( accessSvc.retrieve());
 
-  // 
   // Locate the top level experiment node 
-  // 
-  GeoModelExperiment * theExpt; 
-  if (StatusCode::SUCCESS != detStore()->retrieve( theExpt, "ATLAS" )) { 
-    ATH_MSG_ERROR(  "Could not find GeoModelExperiment ATLAS" ); 
-    return (StatusCode::FAILURE); 
-  } 
+  GeoModelExperiment* theExpt{nullptr};
+  ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
   GeoPhysVol *world = theExpt->getPhysVol();
   
   // Retrieve the Geometry DB Interface
   ATH_CHECK( m_geometryDBSvc.retrieve() );
 
   // Pass athena services to factory, etc
-  m_athenaComps = new InDetDD::AthenaComps("TRT_GeoModel");
-  m_athenaComps->setDetStore(detStore().operator->());
-  m_athenaComps->setGeoDbTagSvc(m_geoDbTagSvc.get());
-  m_athenaComps->setRDBAccessSvc(accessSvc.get());
-  m_athenaComps->setGeometryDBSvc(m_geometryDBSvc.get());
+  m_athenaComps.setDetStore(detStore().operator->());
+  m_athenaComps.setGeoDbTagSvc(m_geoDbTagSvc.get());
+  m_athenaComps.setRDBAccessSvc(accessSvc.get());
+  m_athenaComps.setGeometryDBSvc(m_geometryDBSvc.get());
 
   GeoModelIO::ReadGeoModel* sqliteReader  = m_geoDbTagSvc->getSqliteReader();
   //
@@ -102,7 +62,7 @@ StatusCode TRT_DetectorTool::create()
   if (sqliteReader) {
     ATH_MSG_INFO( " Building TRT geometry from GeoModel factory TRTDetectorFactory_Lite" );
     TRTDetectorFactory_Lite theTRTFactory(sqliteReader,
-					  m_athenaComps,
+					  &m_athenaComps,
 					  m_sumTool.get(),
 					  m_useOldActiveGasMixture,
 					  m_DC2CompatibleBarrelCoordinates,
@@ -140,24 +100,16 @@ StatusCode TRT_DetectorTool::create()
     }
 
     m_DC2CompatibleBarrelCoordinates = switches->getInt("DC2COMPATIBLE");
-    m_useOldActiveGasMixture         	= ( switches->getInt("GASVERSION") == 0 );
-    m_initialLayout                  	= switches->getInt("INITIALLAYOUT");
+    m_useOldActiveGasMixture         = ( switches->getInt("GASVERSION") == 0 );
+    m_initialLayout                  = switches->getInt("INITIALLAYOUT");
       
     // Check if the new switches exists:
-    if ((m_doArgonMixture == 1) ||( m_doKryptonMixture == 1) ){
-      if(!switches->isFieldNull( "DOARGONMIXTURE")) {
-	if      ( switches->getInt("DOARGONMIXTURE") == 0) { m_doArgonMixture = 0; }
-	else if ( switches->getInt("DOARGONMIXTURE") == 1) { m_doArgonMixture = 1; }
-      } else {
-	ATH_MSG_INFO( "Parameter DOARGONMIXTURE not available, m_doArgonMixture= " << m_doArgonMixture );
-      }
+    if (m_doArgonMixture || m_doKryptonMixture ){
+      if      ( switches->getInt("DOARGONMIXTURE") == 0) { m_doArgonMixture = false; }
+      else if ( switches->getInt("DOARGONMIXTURE") == 1) { m_doArgonMixture = true; }
 
-      if(!switches->isFieldNull( "DOKRYPTONMIXTURE")) {
-	if      ( switches->getInt("DOKRYPTONMIXTURE") == 0) { m_doKryptonMixture = 0; }
-	else if ( switches->getInt("DOKRYPTONMIXTURE") == 1) { m_doKryptonMixture = 1; }
-      } else {
-	ATH_MSG_INFO( "Parameter DOKRYPTONMIXTURE not available, m_doKryptonMixture= " << m_doKryptonMixture );
-      }
+      if      ( switches->getInt("DOKRYPTONMIXTURE") == 0) { m_doKryptonMixture = false; }
+      else if ( switches->getInt("DOKRYPTONMIXTURE") == 1) { m_doKryptonMixture = true; }
     }
 
     ATH_MSG_INFO( "Creating the TRT" );
@@ -172,7 +124,7 @@ StatusCode TRT_DetectorTool::create()
 
     ATH_MSG_INFO( " Building TRT geometry from GeoModel factory TRTDetectorFactory_Full" );
 
-    TRTDetectorFactory_Full theTRTFactory(m_athenaComps,
+    TRTDetectorFactory_Full theTRTFactory(&m_athenaComps,
 					  m_sumTool.get(),
 					  m_useOldActiveGasMixture,
 					  m_DC2CompatibleBarrelCoordinates,
@@ -188,17 +140,11 @@ StatusCode TRT_DetectorTool::create()
   }
 
   // Register the TRTDetectorNode instance with the Transient Detector Store
-  if (m_manager) {
-    theExpt->addManager(m_manager);
-	
-    StatusCode sc = detStore()->record(m_manager,m_manager->getName());
-    if (sc.isFailure() ) {
-      ATH_MSG_ERROR("Could not register TRT_DetectorManager");
-      return( StatusCode::FAILURE );
-    }
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
+  if (!m_manager) return StatusCode::FAILURE;
+
+  theExpt->addManager(m_manager);
+  ATH_CHECK(detStore()->record(m_manager,m_manager->getName()));
+  return StatusCode::SUCCESS;
 }
 
 
