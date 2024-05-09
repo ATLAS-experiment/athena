@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
 import D3PDMakerCoreComps
@@ -22,7 +22,7 @@ class MultiReaderAlg( D3PD__MultiReaderAlg ):
                   name,
                   seq = topSequence,
                   tuplename = None,
-                  preD3PDAlgSeqName = D3PDMakerFlags.PreD3PDAlgSeqName(),
+                  preD3PDAlgSeqName = D3PDMakerFlags.PreD3PDAlgSeqName(),  # noqa: B008 (constant string)
                   **kwargs ):
 
         self.__logger = logging.getLogger( "MultiReaderAlg" )
