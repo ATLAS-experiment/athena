@@ -58,6 +58,7 @@ class LArLATOMEBuilderAlg : public AthReentrantAlgorithm {
 
 
   //The following matters only in the MC case, when we have a 32 sample shapes
+  //or we want to test shifted reco
   Gaudi::Property<int> m_startSample{this,"startEnergy",0,"the first energy to compute with respect to the BCID"};
   Gaudi::Property<int> m_nEnergies{this, "nEnergies", 1, "how many energies to compute"};
 

@@ -127,11 +127,11 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     def getFastCalo(self, flags, is_probe_leg=False):
         stepName = "PhotonFastCalo"
         
-        return self.getStep(flags,1,stepName,[fastCaloSequenceGenCfg], name='Photon', is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[fastCaloSequenceGenCfg], name='Photon', is_probe_leg=is_probe_leg)
 
     def getFastPhoton(self, flags, is_probe_leg=False):
         stepName = "FastPhoton"
-        return self.getStep(flags,2,stepName,[fastPhotonSequenceGenCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[fastPhotonSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     def getPrecisionCaloPhoton(self, flags, is_probe_leg=False):
         do_ion = 'ion' in self.chainPart['extra']
@@ -140,11 +140,11 @@ class PhotonChainConfiguration(ChainConfigurationBase):
         else:
             stepName = "PhotonPrecisionCalo"
 
-        return self.getStep(flags,3,stepName,[precisionCaloSequenceGenCfg], ion=do_ion, is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[precisionCaloSequenceGenCfg], ion=do_ion, is_probe_leg=is_probe_leg)
     
     def getHipTRT(self, flags, is_probe_leg=False):
         stepName = "hipTRT"
-        return self.getStep(flags,2,stepName,[TRTHitGeneratorSequenceGenCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,[TRTHitGeneratorSequenceGenCfg], is_probe_leg=is_probe_leg)
 
     def getPrecisionPhoton(self, flags, is_probe_leg=False):
 
@@ -154,7 +154,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
         if do_ion:
             stepName += '_ion'
 
-        return self.getStep(flags,4,stepName,sequenceCfgArray=[precisionPhotonSequenceGenCfg], ion=do_ion, is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,sequenceCfgArray=[precisionPhotonSequenceGenCfg], ion=do_ion, is_probe_leg=is_probe_leg)
 
     def getPhotonCaloIso(self, flags, is_probe_leg=False):
 
@@ -173,4 +173,4 @@ class PhotonChainConfiguration(ChainConfigurationBase):
             else:
                 comboTools.append(diphotonDPhiHypoToolFromDict)
 
-        return self.getStep(flags,5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoSequenceGenCfg], name='Photon', comboTools=comboTools, ion=do_ion, is_probe_leg=is_probe_leg)
+        return self.getStep(flags, stepName,sequenceCfgArray=[precisionPhotonCaloIsoSequenceGenCfg], name='Photon', comboTools=comboTools, ion=do_ion, is_probe_leg=is_probe_leg)

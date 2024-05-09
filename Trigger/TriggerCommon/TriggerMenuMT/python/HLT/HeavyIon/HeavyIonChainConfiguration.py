@@ -19,5 +19,5 @@ class HeavyIonChainConfig(ChainConfigurationBase):
     log.debug('Assembling chain for %s', self.chainName)
     steps = []
     if 'Fgap' in self.chainPart['hypoFgapInfo'][0]:
-        steps.append(self.getStep(flags,1, 'Fgap', [HIFwdGapMenuSequenceGenCfg]))
+        steps.append(self.getStep(flags, 'Fgap', [HIFwdGapMenuSequenceGenCfg]))
     return self.buildChain(steps)

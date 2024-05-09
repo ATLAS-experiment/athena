@@ -14,5 +14,11 @@ athena ZdcRec/ZdcRecConfig.py --CA --filesInput /cvmfs/atlas-nightlies.cern.ch/r
 #Remember retval of transform as art result
 RES=$?
 xAODDigest.py AOD.pool.root digest.txt
-echo "art-result: $RES Reco"
+echo "art-result: $RES reco"
 
+dcubeName="ZdcRecRun463427"
+dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/dcube/config/ZdcRecRun462427.xml"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/ReferenceHistograms/HIST-ref.root"
+
+bash /cvmfs/atlas.cern.ch/repo/sw/art/dcube/bin/art-dcube $dcubeName HIST.root $dcubeXml $dcubeRef
+echo  "art-result: $? plot"
