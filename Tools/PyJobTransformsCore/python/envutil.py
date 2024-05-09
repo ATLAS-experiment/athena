@@ -27,7 +27,10 @@ def has_wildcards(filename):
         return False
 
 
-def find_file_split( filename, dirlist = [ os.getcwd() ], access = os.R_OK, depth = 0 ):
+def find_file_split( filename,
+                     dirlist = [ os.getcwd() ],  # noqa: B008 (getcwd always returns the same)
+                     access = os.R_OK,
+                     depth = 0 ):
     """Search for file <filename> with access rights <access> (see os.access()) in directory list <dirlist>.
     Search into directory tree of each directory in <dirlist> up to depth <depth>. The default directory
     list is a list containing only the current working directory.
@@ -79,7 +82,10 @@ def find_file_split( filename, dirlist = [ os.getcwd() ], access = os.R_OK, dept
     return None
 
 
-def find_file( filename, dirlist = [ os.getcwd() ], access = os.R_OK, depth = 0 ):
+def find_file( filename,
+               dirlist = [ os.getcwd() ],  # noqa: B008 (getcwd always returns the same)
+               access = os.R_OK,
+               depth = 0 ):
     """Search for file <filename> with access rights <access> (see os.access()) in directory list <dirlist>,
     Search into directory tree of each directory up to depth <depth>. The default directory list is
     a list containing only the current working directory.
@@ -90,7 +96,9 @@ def find_file( filename, dirlist = [ os.getcwd() ], access = os.R_OK, depth = 0 
     return found and os.path.join( found[0], found[1] )
 
 
-def find_file_updir( filename, dir = os.getcwd(), access = os.R_OK ):
+def find_file_updir( filename,
+                     dir = os.getcwd(),  # noqa: B008 (getcwd always returns the same)
+                     access = os.R_OK ):
     """Find a file in directory <dir> or its higher level dirs."""
     curdir = os.path.abspath( dir )
     fullfile = os.path.join( curdir, filename )

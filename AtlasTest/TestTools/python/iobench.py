@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file : iobench.py
 # @author: Sebastien Binet <binet@cern.ch>
@@ -333,7 +333,7 @@ class AthBench(object):
                   nTimes = 1,
                   stdout = sys.stdout,
                   stderr = sys.stderr,
-                  ioStatsLogFile = workDir("ioStats.out") ):
+                  ioStatsLogFile = workDir("ioStats.out") ):  # noqa: B008 (executed once on purpose)
         object.__init__(self)
 
         self.athena = athenaJob
