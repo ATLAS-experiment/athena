@@ -31,9 +31,8 @@ from .Physics_pp_run3_v1 import (
 )
 
 from .SignatureDicts import ChainStore
-from . import PhysicsP1_HI_run3_v1 as HIp1_menu
 from .PhysicsP1_HI_run3_v1 import HardProbesStream,MinBiasStream,UPCStream
-
+from . import MC_HI_run3_v1 as mc_menu
 
 
 def getDevHISignatures():
@@ -138,7 +137,7 @@ def setupMenu(menu_name):
     from AthenaCommon.Logging import logging
     log = logging.getLogger( __name__ )
 
-    chains = HIp1_menu.getPhysicsHISignatures()
+    chains = mc_menu.setupMenu(menu_name)
 
     log.info('[setupMenu] going to add the Dev menu chains now')
 
