@@ -56,11 +56,11 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     sectorMax     = 16
     layerMax      = 8
     
-    titleEtaPhiEffMap = '; #eta (reco); #phi (reco); Efficiency'
+    titleEtaPhiEffMap = '; #eta (reco); #phi (reco); Pad trigger efficiency wrt. reco. muon'
     varEtaPhiEffMap   = 'muonRecoTriggerMatch,etaRecoMuonEff,phiRecoMuonEff;padTrigger_Efficiency_per_etaPhi'
     sTgcOverviewGroup.defineHistogram(varEtaPhiEffMap, type = 'TEfficiency', title = titleEtaPhiEffMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
 
-    titleEtaEffMap = '; #eta (reco); Efficiency'
+    titleEtaEffMap = '; #eta (reco); Pad trigger efficiency wrt. reco. muon'
     varEtaEffMap   = 'muonRecoTriggerMatch,etaRecoMuonEff;padTrigger_Efficiency_per_eta'
     sTgcOverviewGroup.defineHistogram(varEtaEffMap, type = 'TEfficiency', title = titleEtaEffMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., opt = 'kAlwaysCreate')
 
@@ -122,7 +122,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
         varPhiPadTriggerMap   = f'phiPadTrigger_{sideIndex};padTrigger_Map_per_phi_Side{sideIndex}'
         sTgcOverviewGroup.defineHistogram(varPhiPadTriggerMap, type = 'TH1F', title = titlePhiPadTriggerMap, path = 'Overview', xbins = 100, xmin = -math.pi, xmax = math.pi, opt = 'kAlwaysCreate')
         
-        titlePhiEffMap = f'{sideIndex}; #phi (reco); Efficiency'
+        titlePhiEffMap = f'{sideIndex}; #phi (reco); Pad trigger efficiency wrt. reco. muon'
         varPhiEffMap   = f'muonRecoTriggerMatch,phiRecoMuonEff_{sideIndex};padTrigger_Efficiency_per_phi_Side_{sideIndex}'
         sTgcOverviewGroup.defineHistogram(varPhiEffMap, type = 'TEfficiency', title = titlePhiEffMap, path = 'Overview', xbins = 100, xmin = -math.pi, xmax = math.pi, opt = 'kAlwaysCreate')
 
@@ -130,11 +130,11 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             efficiencyGlobalRgroup = helper.addGroup(sTgcMonAlg, f'rPosStrip_{sideIndex}{sectorIndex}', globalPath + 'Expert/Efficiency/')
             
             for layerIndex in range(1, layerMax + 1):
-                titleEffGlobalRstrip = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}; sTgc-GlobalR-Strip (on track) [mm]; Efficiency'
+                titleEffGlobalRstrip = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}; sTgc-GlobalR-Strip (on track) [mm]' + f'; Efficiency sTGC strip {sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}'
                 varEffGlobalRstrip = f'hitLayer,rPosStrip_{sideIndex}_sector_{sectorIndex}_layer_{layerIndex};Efficiency_per_Radius_Layer{layerIndex}'
                 efficiencyGlobalRgroup.defineHistogram(varEffGlobalRstrip, type = 'TEfficiency', title = titleEffGlobalRstrip, path = f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins = 100, xmin = 0., xmax = 5000., opt = 'kAlwaysCreate')
         for layerIndex in range(1, layerMax + 1):
-            titleEffYvsXstrip = f'{sideIndex}L{layerIndex}; sTgc-GlobalX-Strip (on track) [mm]; sTgc-GlobalY-Strip (on track) [mm]; Efficiency'
+            titleEffYvsXstrip = f'{sideIndex}L{layerIndex}; sTgc-GlobalX-Strip (on track) [mm]; sTgc-GlobalY-Strip (on track) [mm]; Efficiency sTGC strip {sideIndex}L{layerIndex}'
             varEffYvsXstrip = f'hitLayer,xPosStrip_{sideIndex}_layer_{layerIndex},yPosStrip_{sideIndex}_layer_{layerIndex};strip_efficiency_per_mm_squared_Wheel{sideIndex}_layer{layerIndex}'
             sTgcOverviewGroup.defineHistogram(varEffYvsXstrip, type = 'TEfficiency', title = titleEffYvsXstrip, path = 'Overview', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
 
@@ -160,15 +160,15 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             varTimingWireTrack    = f'wireTrackSectorSided_quad_{stationEtaIndex}_layer_{layerIndex},wireTrackTiming_quad_{stationEtaIndex}_layer_{layerIndex};All_wire_timing_in_Q{stationEtaIndex}_Layer{layerIndex}'
             sTgcWireTimingExpertGroup.defineHistogram(varTimingWireTrack, type = 'TH2F', title = titleTimingWireTrack, path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 201, ymin = -75.5, ymax = 125.5, opt = 'kAlwaysCreate')
             
-            titleSectorsVersusLumiblockPad  = f'Pad_L{layerIndex}Q{stationEtaIndex}; LB; All Sectors; Hits'
+            titleSectorsVersusLumiblockPad  = f'Pad_L{layerIndex}Q{stationEtaIndex}; LB; Sector; Hits'
             varSectorsVersusLumiblockPad    = f'padLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},padSector_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_pad_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
             sTgcLBpadShifterGroup.defineHistogram(varSectorsVersusLumiblockPad, type = 'TH2F', title = titleSectorsVersusLumiblockPad, path = f'Q{stationEtaIndex}', xbins = 2001, xmin = -0.5, xmax = 2000.5, ybins = 2*sectorMax + 1, ymin = -sectorMax - 0.5, ymax = sectorMax + 0.5, opt = 'kAlwaysCreate')
 
-            titleSectorsVersusLumiblockStrip  = f'Strip_L{layerIndex}Q{stationEtaIndex}; LB; All Sectors; Hits'
+            titleSectorsVersusLumiblockStrip  = f'Strip_L{layerIndex}Q{stationEtaIndex}; LB; Sector; Hits'
             varSectorsVersusLumiblockStrip    = f'stripLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},stripSector_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_strip_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
             sTgcLBstripShifterGroup.defineHistogram(varSectorsVersusLumiblockStrip, type = 'TH2F', title = titleSectorsVersusLumiblockStrip, path = f'Q{stationEtaIndex}', xbins = 2001, xmin = -0.5, xmax = 2000.5, ybins = 2*sectorMax + 1, ymin = -sectorMax - 0.5, ymax = sectorMax + 0.5, opt = 'kAlwaysCreate')
             
-            titleSectorsVersusLumiblockWire  = f'Wire_L{layerIndex}Q{stationEtaIndex}; LB; All Sectors; Hits'
+            titleSectorsVersusLumiblockWire  = f'Wire_L{layerIndex}Q{stationEtaIndex}; LB; Sector; Hits'
             varSectorsVersusLumiblockWire    = f'wireLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},wireSector_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_wire_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
             sTgcLBwireShifterGroup.defineHistogram(varSectorsVersusLumiblockWire, type = 'TH2F', title = titleSectorsVersusLumiblockWire, path = f'Q{stationEtaIndex}', xbins = 2001, xmin = -0.5, xmax = 2000.5, ybins = 2*sectorMax + 1, ymin = -sectorMax - 0.5, ymax = sectorMax + 0.5, opt = 'kAlwaysCreate')
 
