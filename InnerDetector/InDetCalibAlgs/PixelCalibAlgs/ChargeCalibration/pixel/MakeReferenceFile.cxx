@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
     printf("%-11s: %s\n", "Output File",outputFileName.c_str()) ; 
     printf("%-11s: %s\n", "Last IOV"   ,useLastIOV ? "True" : "False");  
     printf("%-11s: %s\n", "IOV used"   ,useIOV.c_str()) ; 
-
+    
     int returnCode = 0;
     DbConnection connection(dbName);
     FolderSpec fs(folderName, tagName);
@@ -372,7 +372,6 @@ int main(int argc, char *argv[])
         opFile << myIOVs.back().second << "\n";
         opFile.close();
     }
-
 
     return returnCode;
 }

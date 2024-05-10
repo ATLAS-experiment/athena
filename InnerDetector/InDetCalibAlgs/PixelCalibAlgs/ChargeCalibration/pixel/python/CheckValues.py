@@ -84,6 +84,17 @@ def CheckThresholds(calib):
                 CalibRMS[mod_layer]["normal"].append(fe[1])
                 CalibRMS[mod_layer]["long"].append(fe[3])               
             else:
+                
+                bool1, str1 = ValThreshold(mod_layer,"normal",fe[0],5)
+                bool2, str2 = ValThreshold(mod_layer,"long"  ,fe[4],5)
+                bool3, str3 = ValThreshold(mod_layer,"ganged",fe[8],5)
+                if bool1:
+                    report[key] += ("FE%02u: "% ife) + str1
+                if bool2:
+                    report[key] += ("FE%02u: "% ife) + str2                 
+                if bool3:
+                    report[key] += ("FE%02u: "% ife) + str3                 
+                
                 totint_nor = CalculateTOT(fe[3],fe[12:15])
                 totint_lon = CalculateTOT(fe[7],fe[15:18])
                 totint_gan = CalculateTOT(fe[11],fe[15:18])
