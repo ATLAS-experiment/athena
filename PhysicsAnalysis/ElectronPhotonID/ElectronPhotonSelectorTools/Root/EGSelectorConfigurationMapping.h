@@ -126,16 +126,16 @@ const std::map<std::string, unsigned int> PhotonCutPointToMask = {
 };
 const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
   { "VeryLooseDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
     "ElectronDNNMulticlassVeryLoose.conf"},
   { "LooseDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
     "ElectronDNNMulticlassLoose.conf"},
   { "MediumDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
     "ElectronDNNMulticlassMedium.conf"},
   { "TightDNNElectron",
-    "ElectronPhotonSelectorTools/offline/mc20_20231026/"
+    "ElectronPhotonSelectorTools/offline/mc20_20240509/"
     "ElectronDNNMulticlassTight.conf"}
 };
 }
