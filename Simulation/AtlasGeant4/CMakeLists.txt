@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AtlasGeant4 )
@@ -37,6 +37,7 @@ set( AtlasGeant4_TARGET_OBJECTS
     SCT_G4_SDLib
     TRT_G4_SDLib
     MuonG4SDLib
+    MuonSensitiveDetectorsR4Lib
     G4DebuggingHelperLib
     G4ProfilingToolsLib
     Geo2G4Lib )
@@ -75,6 +76,7 @@ set( AtlasGeant4Component_TARGET_OBJECTS
     LArG4SD
     MagFieldUtils
     MuonG4SD
+    MuonSensitiveDetectorsR4
     G4AtlasServices
     Charginos
     ExtraParticles
