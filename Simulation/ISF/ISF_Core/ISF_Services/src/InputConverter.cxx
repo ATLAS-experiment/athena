@@ -1039,7 +1039,10 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   /// In the case that particles are being passed back to Geant4 then
   /// we may have particles which have already interacted, so we
   /// should set the regeneration number accordingly.
-  const int regenerationNr = HepMC::generations(&isp);
+  const int regenerationNr = HepMC::StatusBased::generations(&isp);
+  if (HepMC::BarcodeBased::generations(&isp) != regenerationNr) {
+    ATH_MSG_WARNING ("StatusBased::generations() = " << regenerationNr << ", BarcodeBased::generations()  = " << HepMC::BarcodeBased::generations(&isp) << ", isp: " << isp);
+  }
   ppi->SetRegenerationNr(regenerationNr);
 
   if ( genpart ) {

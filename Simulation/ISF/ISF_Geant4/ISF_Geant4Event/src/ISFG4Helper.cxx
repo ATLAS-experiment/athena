@@ -45,13 +45,13 @@ iGeant4::ISFG4Helper::convertG4TrackToISFParticle(const G4Track& aTrack,
 
   Barcode::ParticleBarcode barcode = (truth && truth->getTruthParticle() ) ?  HepMC::barcode(truth->getTruthParticle()) : Barcode::fUndefinedBarcode; // FIXME barcode-based
   const int id = (truth && truth->getTruthParticle() ) ? HepMC::uniqueID(truth->getTruthParticle()) : HepMC::UNDEFINED_ID;
-
+  const int status = (truth && truth->getTruthParticle() ) ? truth->getTruthParticle()->status() : 1;
   ISF::ISFParticle *isp = new ISF::ISFParticle( position,
                                                 momentum,
                                                 mass,
                                                 charge,
                                                 pdgID,
-                                                1,
+                                                status,
                                                 gTime,
                                                 parent,
                                                 id,
