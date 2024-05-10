@@ -275,6 +275,10 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;  
 }
 
+std::vector<size_t> TrigNavSlimmingMTAlg::lookupHardCodedLegMultiplicities(const std::string& chain) const {
+  if (chain == "HLT_id_cosmicid_L1MU11_EMPTY") return std::vector<size_t>(1,1); // size = 1, value at index 0 = 1
+  return std::vector<size_t>();
+}
 
 StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs) const {
   for (const std::string& filter : m_chainsFilter) {
@@ -285,11 +289,16 @@ StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs) con
       const TrigConf::HLTChain* hltChain = m_trigDec->ExperimentalAndExpertMethods().getChainConfigurationDetails(chain);
       const HLT::Identifier chainID( hltChain->chain_name() );
       chainIDs.insert( chainID.numeric() );
-      const std::vector<size_t> legMultiplicites = hltChain->leg_multiplicities();
+      std::vector<size_t> legMultiplicites = hltChain->leg_multiplicities();
       ATH_MSG_VERBOSE("Including " << chain << " and its " << legMultiplicites.size() << " legs in the trigger slimming output");
       if (legMultiplicites.size() == 0) {
-        ATH_MSG_ERROR("chain " << chainID << " has invalid configuration, no multiplicity data.");
-      } else if (legMultiplicites.size() > 1) {
+        legMultiplicites = lookupHardCodedLegMultiplicities(chain);
+        if (legMultiplicites.size() == 0) {
+          ATH_MSG_ERROR("chain " << chainID << " has invalid configuration, no multiplicity data.");
+          return StatusCode::FAILURE;
+        }
+      }
+      if (legMultiplicites.size() > 1) {
         // For multi-leg chains, the DecisionIDs are handled per leg.
         // We don't care here exactly how many objects are required per leg, just that there are two-or-more legs
         for (size_t legNumeral = 0; legNumeral < legMultiplicites.size(); ++legNumeral) {

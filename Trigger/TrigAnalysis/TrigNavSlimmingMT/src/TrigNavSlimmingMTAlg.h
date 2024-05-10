@@ -192,11 +192,16 @@ private:
     Outputs& outputContainers) const;
 
   /**
-   * @brief Print debug infomration relating to the re-packing of feature links as Particle objects
+   * @brief Print debug information relating to the re-packing of feature links as Particle objects
    **/
   void printIParticleRepackingDebug(
     const TrigCompositeUtils::Decision* output,
     const std::string& when) const;
+
+  /**
+   * @brief Supplemental leg multiplicity information to support MC20 
+   **/
+  std::vector<size_t> lookupHardCodedLegMultiplicities(const std::string& chain) const;
 
   /**
    * @brief Look for an ElementLink<COLLECTION> with the given edge-name in 'decision',
