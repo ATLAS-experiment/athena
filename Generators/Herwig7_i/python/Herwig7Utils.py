@@ -9,7 +9,7 @@ import math, os, subprocess
 from AthenaCommon import Logging
 athMsgLog = Logging.logging.getLogger('Herwig7Utils')
 
-integration_grids_precision_threshold = 0.0005 # warn if integration xsec below
+integration_grids_precision_threshold = 0.0005 #  if integration xsec below a warning is issue in debug mode and an erroro in production mode
 
 
 ## Class for handling commands to modify the generator configuration
