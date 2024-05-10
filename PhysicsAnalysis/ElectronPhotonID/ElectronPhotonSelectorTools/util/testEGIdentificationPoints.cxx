@@ -115,6 +115,10 @@ int main( int argc, char* argv[] ) {
      ANA_CHECK(electronMediumLHSelector.setProperty("OutputLevel", mylevel));
      ANA_CHECK(electronMediumLHSelector.initialize());
      
+     asg::StandaloneToolHandle<IAsgElectronLikelihoodTool> electronMediumDNNSelector ("AsgElectronSelectorTool/electronMediumDNNSelector");
+     ANA_CHECK(electronMediumDNNSelector.setProperty("WorkingPoint", "MediumDNNElectron"));
+     ANA_CHECK(electronMediumDNNSelector.setProperty("OutputLevel", mylevel));
+     ANA_CHECK(electronMediumDNNSelector.initialize());
      
    // Loop over the events:
      for( Long64_t entry = 0; entry < entries; ++entry ) {
@@ -132,7 +136,7 @@ int main( int argc, char* argv[] ) {
        ANA_MSG_INFO("---------------------------");
        ANA_MSG_INFO("Electron: " << counter);
        ANA_MSG_INFO("Electron LH Medium accept result: " <<bool(electronMediumLHSelector->accept(el)));
-       ANA_MSG_INFO("Electron Cut based");
+       ANA_MSG_INFO("Electron DNN Medium accept result: " <<bool(electronMediumDNNSelector->accept(el)));
        ANA_MSG_INFO("Electron Cut Medium accept result: " <<bool(electronMediumIsEMSelector->accept(el)));
    
        //Bitset manipulation 
