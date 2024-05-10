@@ -1,6 +1,4 @@
-################################################################################
-# Package: MuonG4SD
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonG4SD )
@@ -17,7 +15,6 @@ atlas_add_library( MuonG4SDLib
                    NO_PUBLIC_HEADERS MuonG4SD
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth MuonIdHelpersLib)
-set_target_properties( MuonG4SDLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Component(s) in the package:
 atlas_add_library( MuonG4SD
@@ -26,7 +23,13 @@ atlas_add_library( MuonG4SD
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth )
-set_target_properties( MuonG4SD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
+# Turn on/off LTO for all libraries in the package.
+set_target_properties(
+   MuonG4SDLib
+   MuonG4SD
+   PROPERTIES
+   INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Helper function setting up the tests in the package:
 function( _add_test name )
@@ -35,6 +38,9 @@ function( _add_test name )
       INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
       LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${GTEST_LIBRARIES} TestTools MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth CxxUtils
       POST_EXEC_SCRIPT nopost.sh )
+   set_target_properties( MuonG4SD_${name}
+      PROPERTIES
+      INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 endfunction()
 
 _add_test( CSCSensitiveDetector_gtest )

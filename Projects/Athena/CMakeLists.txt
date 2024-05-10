@@ -71,7 +71,13 @@ set( CxxUtilsSettings_DIR
 find_package( CxxUtilsSettings )
 
 # Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
-option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4" ON )
+include( CheckIPOSupported )
+check_ipo_supported( RESULT ATLAS_IPO_CHECK_RESULT )
+if( NOT ATLAS_IPO_CHECK_RESULT )
+   message( STATUS "Link-time-optimization is not supported in this build" )
+endif()
+option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4"
+   ${ATLAS_IPO_CHECK_RESULT} )
 
 # Find the ATLAS CMake code:
 find_package( AtlasCMake QUIET )

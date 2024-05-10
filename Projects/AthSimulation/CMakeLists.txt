@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
-cmake_minimum_required( VERSION 3.6 )
+cmake_minimum_required( VERSION 3.10 )
 file( READ ${CMAKE_SOURCE_DIR}/version.txt _version )
 string( STRIP ${_version} _version )
 project( AthSimulation VERSION ${_version} LANGUAGES C CXX Fortran )
@@ -24,7 +24,13 @@ set( CxxUtilsSettings_DIR
 find_package( CxxUtilsSettings )
 
 # Decide whether to enable LTO for AtlasGeant4 and its OBJECT libs
-option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4" ON )
+include( CheckIPOSupported )
+check_ipo_supported( RESULT ATLAS_IPO_CHECK_RESULT )
+if( NOT ATLAS_IPO_CHECK_RESULT )
+   message( STATUS "Link-time-optimization is not supported in this build" )
+endif()
+option( ATLAS_GEANT4_USE_LTO "Use link-time-optimization in building AtlasGeant4"
+   ${ATLAS_IPO_CHECK_RESULT} )
 
 # Find the ATLAS CMake code:
 find_package( AtlasCMake QUIET )
