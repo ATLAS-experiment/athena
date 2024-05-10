@@ -43,7 +43,7 @@ iGeant4::ISFG4Helper::convertG4TrackToISFParticle(const G4Track& aTrack,
   double charge  = particleDefinition.GetPDGCharge();
   int    pdgID   = particleDefinition.GetPDGEncoding();
 
-  Barcode::ParticleBarcode barcode = (truth && truth->getTruthParticle() ) ?  HepMC::barcode(truth->getTruthParticle()) : Barcode::fUndefinedBarcode; // FIXME barcode-based
+  int barcode = (truth && truth->getTruthParticle() ) ?  HepMC::barcode(truth->getTruthParticle()) : HepMC::UNDEFINED_ID; // FIXME barcode-based
   const int id = (truth && truth->getTruthParticle() ) ? HepMC::uniqueID(truth->getTruthParticle()) : HepMC::UNDEFINED_ID;
 
   ISF::ISFParticle *isp = new ISF::ISFParticle( position,

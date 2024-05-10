@@ -31,7 +31,7 @@ atlas_add_library( ISF_FastCaloSimParametrizationLib
                    PUBLIC_HEADERS ISF_FastCaloSimParametrization
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AtlasHepMCLib BarcodeEventLib CaloDetDescrLib CaloInterfaceLib CxxUtils GaudiKernel ISF_FastCaloSimEvent ISF_InterfacesLib LArElecCalib LArReadoutGeometry StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AtlasHepMCLib CaloDetDescrLib CaloInterfaceLib CxxUtils GaudiKernel ISF_FastCaloSimEvent ISF_InterfacesLib LArElecCalib LArReadoutGeometry StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters
                    PRIVATE_LINK_LIBRARIES CaloGeoHelpers xAODCaloEvent G4AtlasToolsLib MCTruth)
 set_target_properties( ISF_FastCaloSimParametrizationLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 

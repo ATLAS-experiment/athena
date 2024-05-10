@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_INPUTCONVERTER_H
@@ -13,8 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthService.h"
-
-#include "BarcodeEvent/Barcode.h"
 
 namespace HepPDT {
   class ParticleDataTable;

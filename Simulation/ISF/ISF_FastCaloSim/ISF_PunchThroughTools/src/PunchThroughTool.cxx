@@ -1348,8 +1348,8 @@ ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( const ISF::ISFParticle &i
   const double pTime = 0;  /** @TODO: fix */
 
   //assign barcodes to the produced particles
-  Barcode::PhysicsProcessCode processCode{0};
-  const Barcode::ParticleBarcode secBC = m_barcodeSvc->newSecondary( isfp.barcode(), processCode);
+  int processCode{0};
+  const int secBC = m_barcodeSvc->newSecondary( isfp.barcode(), processCode);
 
   ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, 1 + HepMC::SIM_STATUS_THRESHOLD, pTime, isfp, secBC);
   finalPar->setNextGeoID( AtlasDetDescr::fAtlasMS);

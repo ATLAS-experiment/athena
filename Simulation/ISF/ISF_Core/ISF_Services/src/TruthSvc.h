@@ -23,7 +23,6 @@
 
 // Barcode
 #include "BarcodeInterfaces/IBarcodeSvc.h"
-#include "BarcodeEvent/Barcode.h"
 
 // McEventCollection
 #include "GeneratorObjects/McEventCollection.h"

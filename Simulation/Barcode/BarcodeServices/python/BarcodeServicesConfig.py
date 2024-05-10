@@ -1,6 +1,6 @@
 """ComponentAccumulator BarcodeServices configurations
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,7 +13,7 @@ def BarcodeSvcCfg(flags, **kwargs):
         TruthStrategy.MC12: MC12BarcodeSvcCfg,
         TruthStrategy.MC12LLP: MC12LLPBarcodeSvcCfg,
         TruthStrategy.MC12Plus: MC12PlusBarcodeSvcCfg,
-        TruthStrategy.MC15: MC15BarcodeSvcCfg,
+        TruthStrategy.MC15: MC15aBarcodeSvcCfg,
         TruthStrategy.MC15a: MC15aBarcodeSvcCfg,
         TruthStrategy.MC15aPlus: MC15aPlusBarcodeSvcCfg,
         TruthStrategy.MC15aPlusLLP: MC15aPlusLLPBarcodeSvcCfg,
@@ -22,13 +22,6 @@ def BarcodeSvcCfg(flags, **kwargs):
     }
     MCxCfg = stratmap[flags.Sim.TruthStrategy]
     return MCxCfg(flags, name="BarcodeSvc", **kwargs)
-
-
-def MC15BarcodeSvcCfg(flags, name="Barcode_MC15BarcodeSvc", **kwargs):
-    result = ComponentAccumulator()
-    svc = CompFactory.Barcode.GenericBarcodeSvc(name, **kwargs)
-    result.addService(svc, primary=True)
-    return result
 
 
 def MC12BarcodeSvcCfg(flags, name="Barcode_MC12BarcodeSvc", **kwargs):

@@ -32,7 +32,7 @@ static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &par
 
 ISF::ISFTruthIncident::ISFTruthIncident( ISF::ISFParticle &parent,
                                          const ISFParticleVector& children,
-                                         Barcode::PhysicsProcessCode process,
+                                         int process,
                                          AtlasDetDescr::AtlasRegion geoID,
                                          ISF::KillPrimary killsPrimary,
                                          const HepMC::FourVector *position) :
@@ -67,7 +67,7 @@ int ISF::ISFTruthIncident::physicsProcessCategory() const {
   return -1;
 }
 
-Barcode::PhysicsProcessCode ISF::ISFTruthIncident::physicsProcessCode() const {
+int ISF::ISFTruthIncident::physicsProcessCode() const {
   return m_process;
 }
 
@@ -95,7 +95,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
     return getHepMCTruthParticle(m_parent);
 }
 
-Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
+int ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
   return m_parent.barcode();
 }
 
@@ -107,7 +107,7 @@ bool ISF::ISFTruthIncident::parentSurvivesIncident() const {
   return !(m_killsPrimary == ISF::fKillsPrimary);
 }
 
-HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident(Barcode::ParticleBarcode newBC) {
+HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident(int newBC) {
   // if parent is killed in the interaction -> return nullptr
   if (m_killsPrimary==ISF::fKillsPrimary) return nullptr;
 
@@ -140,12 +140,12 @@ int ISF::ISFTruthIncident::childPdgCode(unsigned short index) const {
   return m_children[index]->pdgCode();
 }
 
-Barcode::ParticleBarcode ISF::ISFTruthIncident::childBarcode(unsigned short index) const {
-  return numberOfChildren() > index ? m_children[index]->barcode() : Barcode::fUndefinedBarcode;
+int ISF::ISFTruthIncident::childBarcode(unsigned short index) const {
+  return numberOfChildren() > index ? m_children[index]->barcode() : HepMC::UNDEFINED_ID;
 }
 
 HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
-                                                           Barcode::ParticleBarcode bc) {
+                                                           int bc) {
   // the child particle
   ISF::ISFParticle *sec = m_children[index];
 
@@ -164,7 +164,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::updateChildParticle(unsigned short 
   return existingChild;
 }
 
-void ISF::ISFTruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarcode bc) {
+void ISF::ISFTruthIncident::setAllChildrenBarcodes(int bc) {
   unsigned short numSec = numberOfChildren();
   for (unsigned short i=0; i<numSec; i++) {
     // the current particle

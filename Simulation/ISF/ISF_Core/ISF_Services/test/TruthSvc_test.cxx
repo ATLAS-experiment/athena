@@ -85,7 +85,7 @@ namespace ISFTesting {
     virtual ~DummyTruthIncident() {};
     virtual const HepMC::FourVector&  position() const override {return m_myPosition;};
     virtual int                       physicsProcessCategory() const override { return 1;};
-    virtual Barcode::PhysicsProcessCode physicsProcessCode() const override {return 1;};
+    virtual int physicsProcessCode() const override {return 1;};
     virtual double                    parentP2() const override {return 1.0;};
     virtual double                    parentPt2() const override {return 1.0;};
     /** Return Ekin of the parent particle */
@@ -97,14 +97,14 @@ namespace ISFTesting {
         (only called for particles that will enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr      parentParticle() override {return nullptr;};
     /** Return the barcode of the parent particle */
-    virtual Barcode::ParticleBarcode  parentBarcode() override {return 1;};
+    virtual int  parentBarcode() override {return 1;};
     /** Return the unique ID of the parent particle */
     virtual int  parentUniqueID() override {return 1;}
     /** Return a boolean whether or not the parent particle survives the incident */
     virtual bool                      parentSurvivesIncident() const override {return false;};
     /** Return the parent particle after the TruthIncident vertex (and assign
         a new barcode to it) */
-    virtual HepMC::GenParticlePtr        parentParticleAfterIncident(Barcode::ParticleBarcode) override {return nullptr;};
+    virtual HepMC::GenParticlePtr        parentParticleAfterIncident(int) override {return nullptr;};
 
     /** Return p^2 of the i-th child particle */
     virtual double                    childP2(unsigned short) const override {return 1.0;};
@@ -115,12 +115,12 @@ namespace ISFTesting {
     /** Return the PDG Code of the i-th child particle */
     virtual int                       childPdgCode(unsigned short) const override {return 1;};
     /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
-    Barcode::ParticleBarcode  childBarcode(unsigned short) const override final {return 0;};
+    int  childBarcode(unsigned short) const override final {return 0;};
     /** Return the i-th child as a HepMC particle type and assign the given
         Barcode to the simulator particle (only called for particles that will
         enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr        childParticle(unsigned short,
-                                                       Barcode::ParticleBarcode) override {return nullptr;};
+                                                       int) override {return nullptr;};
     /** Update the properties of a child particle from a pre-defined
         interaction based on the properties of the ith child of the
         current TruthIncident (only used in quasi-stable particle
@@ -128,7 +128,7 @@ namespace ISFTesting {
     virtual HepMC::GenParticlePtr        updateChildParticle(unsigned short,
                                                           HepMC::GenParticlePtr ) const override {return nullptr;};
     /** Set the the barcode of all child particles to the given bc */
-    virtual void                      setAllChildrenBarcodes(Barcode::ParticleBarcode) override {};
+    virtual void                      setAllChildrenBarcodes(int) override {};
   private:
     const HepMC::FourVector m_myPosition{0.0, 40.0, 0.0, 40.0};
   };
@@ -141,11 +141,11 @@ namespace ISFTesting {
 
     virtual ~MockTruthIncident() {};
     MOCK_METHOD0(geoID, AtlasDetDescr::AtlasRegion());
-    MOCK_CONST_METHOD0(physicsProcessCode, Barcode::PhysicsProcessCode());
+    MOCK_CONST_METHOD0(physicsProcessCode, int());
     MOCK_CONST_METHOD0(parentParticle, HepMC::ConstGenParticlePtr ());
     MOCK_METHOD0(parentParticle, HepMC::GenParticlePtr ());
-    MOCK_METHOD0(parentBarcode, Barcode::ParticleBarcode());
-    MOCK_METHOD1(parentParticleAfterIncident, HepMC::GenParticlePtr (Barcode::ParticleBarcode));
+    MOCK_METHOD0(parentBarcode, int());
+    MOCK_METHOD1(parentParticleAfterIncident, HepMC::GenParticlePtr (int));
     MOCK_METHOD1(setPassWholeVertices, void(bool));
     MOCK_CONST_METHOD0(numberOfChildren, unsigned short());
   };

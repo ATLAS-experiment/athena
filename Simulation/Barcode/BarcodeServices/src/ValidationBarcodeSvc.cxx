@@ -49,8 +49,8 @@ StatusCode Barcode::ValidationBarcodeSvc::initialize()
 
 /** Generate a new unique vertex barcode, based on the parent particle barcode and
     the physics process code causing the truth vertex*/
-Barcode::VertexBarcode Barcode::ValidationBarcodeSvc::newVertex( Barcode::ParticleBarcode /* parent */,
-                                                                 Barcode::PhysicsProcessCode /* process */)
+int Barcode::ValidationBarcodeSvc::newVertex( int /* parent */,
+                                                                 int /* process */)
 {
   m_currentVertex += m_vertexIncrement;
   // a naive underflog checking based on the fact that vertex
@@ -68,8 +68,8 @@ Barcode::VertexBarcode Barcode::ValidationBarcodeSvc::newVertex( Barcode::Partic
 /** Generate a new unique barcode for a secondary particle, based on the parent
     particle barcode and the process code of the physics process that created
     the secondary  */
-Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::newSecondary( Barcode::ParticleBarcode parentBC,
-                                                                      Barcode::PhysicsProcessCode /* process */)
+int Barcode::ValidationBarcodeSvc::newSecondary( int parentBC,
+                                                                      int /* process */)
 {
   m_currentSecondary += m_secondaryIncrement;
   // a naive overflow checking based on the fact that particle
@@ -81,7 +81,7 @@ Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::newSecondary( Barcode::P
                     << m_currentSecondary << ". Possibly Integer Overflow?");
     }
   int primGen = int( (parentBC-m_particleGenerationIncrement) / m_barcodeGenerationOffset);
-  Barcode::ParticleBarcode returnBC = m_currentSecondary + (primGen+1)*m_barcodeGenerationOffset;
+  int returnBC = m_currentSecondary + (primGen+1)*m_barcodeGenerationOffset;
 
   return returnBC;
 }
@@ -90,32 +90,32 @@ Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::newSecondary( Barcode::P
 /** Generate a common barcode which will be shared by all children
     of the given parent barcode (used for child particles which are
     not stored in the mc truth event) */
-Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::sharedChildBarcode( Barcode::ParticleBarcode parentBC,
-                                                                            Barcode::PhysicsProcessCode /* process */)
+int Barcode::ValidationBarcodeSvc::sharedChildBarcode( int parentBC,
+                                                                            int /* process */)
 {
   return parentBC+m_barcodeGenerationOffset;
 }
 
 
-void Barcode::ValidationBarcodeSvc::registerLargestGenEvtParticleBC( Barcode::ParticleBarcode /* bc */)
+void Barcode::ValidationBarcodeSvc::registerLargestGenEvtParticleBC( int /* bc */)
 {
 }
 
 
-void Barcode::ValidationBarcodeSvc::registerLargestGenEvtVtxBC( Barcode::VertexBarcode /* bc */)
+void Barcode::ValidationBarcodeSvc::registerLargestGenEvtVtxBC( int /* bc */)
 {
 }
 
 
 /** Return the secondary particle offset */
-Barcode::ParticleBarcode Barcode::ValidationBarcodeSvc::secondaryParticleBcOffset() const
+int Barcode::ValidationBarcodeSvc::secondaryParticleBcOffset() const
 {
   return m_firstSecondary;
 }
 
 
 /** Return the secondary vertex offset */
-Barcode::VertexBarcode Barcode::ValidationBarcodeSvc::secondaryVertexBcOffset() const
+int Barcode::ValidationBarcodeSvc::secondaryVertexBcOffset() const
 {
   return m_firstVertex;
 }
