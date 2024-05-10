@@ -37,6 +37,7 @@ def createTrigEgammaConfigFlags():
     # Fastcalo bdt calibration 
     flags.addFlag('Trigger.egamma.fastCaloETCalibration',False)
     flags.addFlag('Trigger.egamma.fastCaloETCalibrationVersion','egammaFastCaloCalib/online/v0')
+    flags.addFlag('Trigger.egamma.CalibrationETThreshold', 3.)
     return flags
 
 
