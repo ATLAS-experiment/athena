@@ -9,8 +9,7 @@
 #include "AtlasDetDescr/AtlasRegion.h"
 
 // Barcode includes
-#include "BarcodeEvent/Barcode.h"
-#include "BarcodeEvent/PhysicsProcessCode.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // forward declarations
 #include "AtlasHepMC/GenParticle_fwd.h"
@@ -59,7 +58,7 @@ namespace ISF {
     /** Return category of the physics process represented by the truth incident (eg hadronic, em, ..) */
     virtual int                       physicsProcessCategory() const = 0;
     /** Return specific physics process code of the truth incident (eg ionisation, bremsstrahlung, ..)*/
-    virtual Barcode::PhysicsProcessCode physicsProcessCode() const = 0;
+    virtual int physicsProcessCode() const = 0;
 
     /** Return p^2 of the parent particle */
     virtual double                    parentP2() const = 0;
@@ -74,14 +73,14 @@ namespace ISF {
     virtual HepMC::GenParticlePtr      parentParticle() = 0;
     virtual int      parentStatus() = 0;
     /** Return the barcode of the parent particle */
-    virtual Barcode::ParticleBarcode  parentBarcode() = 0; // TODO Remove this method
+    virtual int  parentBarcode() = 0; // TODO Remove this method
     /** Return the unique ID of the parent particle */
     virtual int  parentUniqueID() = 0;
     /** Return a boolean whether or not the parent particle survives the incident */
     virtual bool                      parentSurvivesIncident() const = 0;
     /** Return the parent particle after the TruthIncident vertex (and assign
         a new barcode to it) */
-    virtual HepMC::GenParticlePtr     parentParticleAfterIncident(Barcode::ParticleBarcode newBC) = 0;
+    virtual HepMC::GenParticlePtr     parentParticleAfterIncident(int newBC) = 0;
 
     /** Return total number of child particles */
     inline unsigned short             numberOfChildren() const;
@@ -94,7 +93,7 @@ namespace ISF {
     /** Return the PDG Code of the i-th child particle */
     virtual int                       childPdgCode(unsigned short index) const = 0;
     /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
-    virtual Barcode::ParticleBarcode  childBarcode(unsigned short index) const = 0;
+    virtual int  childBarcode(unsigned short index) const = 0;
     /** Return true if at least one child particle passes the given p^2 cut
         (= at least one child with p^2 >= pt2cut) */
     inline bool                       childrenP2Pass(double p2cut);
@@ -108,7 +107,7 @@ namespace ISF {
         Barcode to the simulator particle (only called for particles that will
         enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr     childParticle(unsigned short index,
-                                                    Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode) = 0;
+                                                    int bc = HepMC::UNDEFINED_ID) = 0;
     /** Update the properties of a child particle from a pre-defined
         interaction based on the properties of the ith child of the
         current TruthIncident (only used in quasi-stable particle
@@ -116,7 +115,7 @@ namespace ISF {
     virtual HepMC::GenParticlePtr     updateChildParticle(unsigned short index,
                                                           HepMC::GenParticlePtr existingChild) const = 0;
     /** Set the the barcode of all child particles to the given bc */
-    virtual void                      setAllChildrenBarcodes(Barcode::ParticleBarcode bc) = 0;
+    virtual void                      setAllChildrenBarcodes(int bc) = 0;
 
     /** Record that a particular child passed a check */
     inline void                       setChildPassedFilters(unsigned short index);

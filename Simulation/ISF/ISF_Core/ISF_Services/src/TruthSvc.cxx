@@ -202,8 +202,8 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 #ifdef  DEBUG_TRUTHSVC
   ATH_MSG_INFO("Starting recordIncidentToMCTruth(...)");
 #endif
-  Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
-  Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
+  int processCode = ti.physicsProcessCode();
+  int       parentBC = ti.parentBarcode();
 
   if (ti.parentParticle()->end_vertex()) {
     ATH_MSG_WARNING ("Attempting to record a TruthIncident for a particle which has already decayed!");
@@ -225,7 +225,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 
   ATH_MSG_VERBOSE ( "Outgoing particles:" );
   // update parent barcode and add it to the vertex as outgoing particle
-  Barcode::ParticleBarcode newPrimBC = Barcode::fUndefinedBarcode;
+  int newPrimBC = HepMC::UNDEFINED_ID;
   if (classification == ISF::QS_SURV_VTX) {
     // Special case when a particle with a pre-defined decay interacts
     // and survives.
@@ -264,9 +264,9 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
     if (writeOutChild) {
       HepMC::GenParticlePtr  p = nullptr;
       // generate a new barcode for the child particle
-      Barcode::ParticleBarcode secBC = (isQuasiStableVertex) ?
+      int secBC = (isQuasiStableVertex) ?
         HepMC::maxGeneratedParticleBarcode(ti.parentParticle()->parent_event())+1 : m_barcodeSvc->newSecondary( parentBC, processCode); // TODO replace m_barcodeSvc
-      if ( secBC == Barcode::fUndefinedBarcode) {
+      if ( secBC == HepMC::UNDEFINED_ID) {
         if (m_ignoreUndefinedBarcodes)
           ATH_MSG_WARNING("Unable to generate new Secondary Particle Barcode. Continuing due to 'IgnoreUndefinedBarcodes'==True");
         else {
@@ -279,7 +279,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
         // add particle to vertex
         vtxFromTI->add_particle_out( p);
 #ifdef HEPMC3
-        Barcode::ParticleBarcode secBCFromTI = ti.childBarcode(i);
+        int secBCFromTI = ti.childBarcode(i);
         HepMC::suggest_barcode( p, secBCFromTI ? secBCFromTI :secBC );
 #endif
       }
@@ -296,11 +296,11 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 /** Record the given truth incident to the MC Truth */
 HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITruthIncident& ti ) const {
 
-  Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
-  Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
+  int processCode = ti.physicsProcessCode();
+  int       parentBC = ti.parentBarcode();
 
   std::vector<double> weights(1);
-  Barcode::ParticleBarcode primaryBC = parentBC % HepMC::SIM_REGENERATION_INCREMENT;
+  int primaryBC = parentBC % HepMC::SIM_REGENERATION_INCREMENT;
   weights[0] = static_cast<double>( primaryBC );
 
   // Check for a previous end vertex on this particle.  If one existed, then we should put down next to this
@@ -319,8 +319,8 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
   }
 
   // generate vertex
-  Barcode::VertexBarcode vtxbcode = m_barcodeSvc->newVertex( parentBC, processCode ); // TODO replace barcodeSvc
-  if ( vtxbcode == Barcode::fUndefinedBarcode) {
+  int vtxbcode = m_barcodeSvc->newVertex( parentBC, processCode ); // TODO replace barcodeSvc
+  if ( vtxbcode == HepMC::UNDEFINED_ID) {
     if (m_ignoreUndefinedBarcodes) {
       ATH_MSG_WARNING("Unable to generate new Truth Vertex Barcode. Continuing due to 'IgnoreUndefinedBarcodes'==True");
     } else {
@@ -363,17 +363,17 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
 
 /** Set shared barcode for child particles particles */
 void ISF::TruthSvc::setSharedChildParticleBarcode( ISF::ITruthIncident& ti) const {
-  Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
-  Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
+  int processCode = ti.physicsProcessCode();
+  int       parentBC = ti.parentBarcode();
 
   ATH_MSG_VERBOSE ( "End Vertex representing process: " << processCode << ". TruthIncident failed cuts. Skipping.");
 
   // generate one new barcode for all child particles
-  Barcode::ParticleBarcode childBC = m_barcodeSvc->sharedChildBarcode( parentBC, processCode);
+  int childBC = m_barcodeSvc->sharedChildBarcode( parentBC, processCode);
 
   // propagate this barcode into the TruthIncident only if
   // it is a proper barcode, ie !=fUndefinedBarcode
-  if (childBC != Barcode::fUndefinedBarcode) {
+  if (childBC != HepMC::UNDEFINED_ID) {
     ti.setAllChildrenBarcodes( childBC );
   }
 }

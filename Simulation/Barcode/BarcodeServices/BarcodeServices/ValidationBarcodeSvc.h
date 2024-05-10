@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BARCODESERVICES_VALIDATIONBARCODESVC_H
@@ -14,7 +14,6 @@
 #include "AthenaBaseComps/AthService.h"
 
 //include
-#include "BarcodeEvent/Barcode.h"
 #include "BarcodeInterfaces/IBarcodeSvc.h"
 
 class IIncidentSvc;
@@ -48,46 +47,46 @@ namespace Barcode {
 
     /** Generate a new unique vertex barcode, based on the parent particle barcode and
         the physics process code causing the truth vertex*/
-    virtual VertexBarcode newVertex( ParticleBarcode parentBC=Barcode::fUndefinedBarcode,
-                                     PhysicsProcessCode process=Barcode::fUndefinedProcessCode );
+    virtual int newVertex( int parentBC=HepMC::UNDEFINED_ID,
+                                     int process=0 );
 
     /** Generate a new unique barcode for a secondary particle, based on the parent
         particle barcode and the process code of the physics process that created
         the secondary  */
-    virtual ParticleBarcode newSecondary( ParticleBarcode parentBC=Barcode::fUndefinedBarcode,
-                                          PhysicsProcessCode process=Barcode::fUndefinedProcessCode );
+    virtual int newSecondary( int parentBC=HepMC::UNDEFINED_ID,
+                                          int process=0 );
 
     /** Generate a common barcode which will be shared by all children
         of the given parent barcode (used for child particles which are
         not stored in the mc truth event) */
-    virtual ParticleBarcode sharedChildBarcode( ParticleBarcode parentBC,
-                                                PhysicsProcessCode process=Barcode::fUndefinedProcessCode );
+    virtual int sharedChildBarcode( int parentBC,
+                                                int process=0 );
 
     /** Return the secondary particle and vertex offsets */
-    virtual Barcode::ParticleBarcode secondaryParticleBcOffset() const;
-    virtual Barcode::VertexBarcode   secondaryVertexBcOffset()  const;
+    virtual int secondaryParticleBcOffset() const;
+    virtual int   secondaryVertexBcOffset()  const;
 
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
-    virtual void registerLargestGenEvtParticleBC( ParticleBarcode bc);
-    virtual void registerLargestGenEvtVtxBC( VertexBarcode bc);
+    virtual void registerLargestGenEvtParticleBC( int bc);
+    virtual void registerLargestGenEvtVtxBC( int bc);
 
   private:
     ServiceHandle<IIncidentSvc>                   m_incidentSvc;   //!< IncidentSvc to catch begin of event and end of envent
 
     /** barcode information used for GenVertices */
-    VertexBarcode                                 m_firstVertex;
-    VertexBarcode                                 m_vertexIncrement;
-    VertexBarcode                                 m_currentVertex;
+    int                                 m_firstVertex;
+    int                                 m_vertexIncrement;
+    int                                 m_currentVertex;
 
     /** barcode information used for secondary GenParticles */
-    ParticleBarcode                               m_firstSecondary;
-    ParticleBarcode                               m_secondaryIncrement;
-    ParticleBarcode                               m_currentSecondary;
+    int                               m_firstSecondary;
+    int                               m_secondaryIncrement;
+    int                               m_currentSecondary;
 
     /** barcode offset for each generation of updated particles */
-    ParticleBarcode                               m_particleGenerationIncrement;
-    ParticleBarcode                               m_barcodeGenerationOffset; //!< not sure why this is needed...
+    int                               m_particleGenerationIncrement;
+    int                               m_barcodeGenerationOffset; //!< not sure why this is needed...
 
   };
 

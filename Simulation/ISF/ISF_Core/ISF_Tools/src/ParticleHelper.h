@@ -14,8 +14,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 // ISF includes
 #include "ISF_Interfaces/IParticleHelper.h"
-// Barcode includes
-#include "BarcodeEvent/Barcode.h"
 
 namespace ISF {
 
@@ -47,7 +45,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         Barcode::ParticleBarcode bc,
+                                         int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;
@@ -61,7 +59,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         Barcode::ParticleBarcode bc,
+                                         int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;
@@ -75,7 +73,7 @@ namespace ISF {
                                          int status,
                                          double pTime,
                                          const ISFParticle &parent,
-                                         Barcode::ParticleBarcode bc,
+                                         int bc,
                                          int id,
                                          TruthBinding* tBinding = nullptr,
                                          const HepMcParticleLink * partLink = nullptr) const override final;

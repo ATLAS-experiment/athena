@@ -48,6 +48,9 @@
 #include "G4ProductionCutsTable.hh"
 #include "G4ios.hh"
 
+// TruthUtils
+#include "TruthUtils/MagicNumbers.h"
+
 // CLHEP
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -508,8 +511,8 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
                                                           1, //status
                                                           time,
                                                           *parent,
-                                                          0, // undefined id
-                                                          Barcode::fUndefinedBarcode,
+                                                          HepMC::UNDEFINED_ID, // id
+                                                          HepMC::UNDEFINED_ID, // barcode
                                                           truthBinding );
       cParticle->setNextGeoID( parent->nextGeoID() );
       cParticle->setNextSimID( parent->nextSimID() );

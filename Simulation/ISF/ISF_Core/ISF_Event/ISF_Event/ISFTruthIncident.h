@@ -8,9 +8,6 @@
 // stl includes
 #include <vector>
 
-// Barcode include
-#include "BarcodeEvent/PhysicsProcessCode.h"
-
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
@@ -40,7 +37,7 @@ namespace ISF {
   public:
     ISFTruthIncident( ISF::ISFParticle &parent,
                       const ISFParticleVector &children,
-                      Barcode::PhysicsProcessCode process,
+                      int process,
                       AtlasDetDescr::AtlasRegion geoID,
                       ISF::KillPrimary killsPrimary = ISF::fPrimarySurvives,
                       const HepMC::FourVector *position = 0);
@@ -54,7 +51,7 @@ namespace ISF {
     /** Return category of the physics process represented by the truth incident (eg hadronic, em, ..) */
     int                       physicsProcessCategory() const override final;
     /** Return specific physics process code of the truth incident (eg ionisation, bremsstrahlung, ..)*/
-    Barcode::PhysicsProcessCode physicsProcessCode() const override final;
+    int physicsProcessCode() const override final;
 
     /** Return p^2 of the parent particle */
     double                    parentP2() const override final;
@@ -69,14 +66,14 @@ namespace ISF {
     HepMC::GenParticlePtr      parentParticle() override final;
     int      parentStatus() override final;
     /** Return the barcode of the parent particle */
-    Barcode::ParticleBarcode  parentBarcode() override final; // TODO Remove this method
+    int  parentBarcode() override final; // TODO Remove this method
     /** Return the unique ID of the parent particle */
     int  parentUniqueID() override final;
     /** Return a boolean whether or not the parent particle survives the incident */
     bool                      parentSurvivesIncident() const override final;
     /** Return the parent particle after the TruthIncident vertex (and give
         it a new barcode) */
-    HepMC::GenParticlePtr     parentParticleAfterIncident(Barcode::ParticleBarcode newBC) override final;
+    HepMC::GenParticlePtr     parentParticleAfterIncident(int newBC) override final;
 
     /** Return p^2 of the i-th child particle */
     double                    childP2(unsigned short index) const override final;
@@ -87,12 +84,12 @@ namespace ISF {
     /** Return the PDG Code of the i-th child particle */
     int                       childPdgCode(unsigned short index) const override final;
     /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
-    Barcode::ParticleBarcode  childBarcode(unsigned short) const override final;
+    int  childBarcode(unsigned short) const override final;
     /** Return the i-th child as a HepMC particle type and assign the given
         Barcode to the simulator particle (usually only called for particles that
         will enter the HepMC truth event) */
     HepMC::GenParticlePtr     childParticle(unsigned short index,
-                                            Barcode::ParticleBarcode bc) override final;
+                                            int bc) override final;
     /** Update the properties of a child particle from a pre-defined
         interaction based on the properties of the ith child of the
         current TruthIncident (only used in quasi-stable particle
@@ -100,7 +97,7 @@ namespace ISF {
     virtual HepMC::GenParticlePtr     updateChildParticle(unsigned short index,
                                                           HepMC::GenParticlePtr existingChild) const override final;
     /** Set the the barcode of all child particles to the given bc */
-    void                      setAllChildrenBarcodes(Barcode::ParticleBarcode bc) override final;
+    void                      setAllChildrenBarcodes(int bc) override final;
   private:
     ISFTruthIncident();
 
@@ -112,7 +109,7 @@ namespace ISF {
 
     ISF::ISFParticle&                  m_parent;
     const ISFParticleVector&           m_children;
-    const Barcode::PhysicsProcessCode  m_process;
+    const int  m_process;
     const ISF::KillPrimary             m_killsPrimary;
     const HepMC::FourVector*           m_position;
   };

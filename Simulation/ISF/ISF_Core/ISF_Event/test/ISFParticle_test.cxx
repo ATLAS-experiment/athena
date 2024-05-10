@@ -9,7 +9,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "AtlasDetDescr/AtlasRegion.h"
-#include "BarcodeEvent/Barcode.h"
+#include "TruthUtils/MagicNumbers.h"
 
 void testConstructors() {
     Amg::Vector3D pos(1., 0., 2.);
@@ -20,7 +20,7 @@ void testConstructors() {
     int    status =  10005;
     double time    = 923.;
     const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
-    Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode;
+    int bc = HepMC::UNDEFINED_ID;
     int id = 0;
     ISF::TruthBinding *truth = 0;
 

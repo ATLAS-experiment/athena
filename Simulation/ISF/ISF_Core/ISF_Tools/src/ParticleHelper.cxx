@@ -36,7 +36,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle(double x, double y, double
                                                       int status,
                                                       double pTime,
                                                       const ISFParticle &parent,
-                                                      Barcode::ParticleBarcode bc,
+                                                      int bc,
                                                       int id,
                                                       TruthBinding* tBinding,
                                                       const HepMcParticleLink * partLink) const {
@@ -64,7 +64,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const Amg::Vector3D& x,
                                                        int status,
                                                        double pTime,
                                                        const ISFParticle &parent,
-                                                       Barcode::ParticleBarcode bc,
+                                                       int bc,
                                                        int id,
                                                        TruthBinding* tBinding,
                                                        const HepMcParticleLink * partLink) const {
@@ -91,7 +91,7 @@ ISF::ISFParticle* ISF::ParticleHelper::createParticle( const HepGeom::Point3D<do
                                                        int status,
                                                        double pTime,
                                                        const ISFParticle &parent,
-                                                       Barcode::ParticleBarcode bc,
+                                                       int bc,
                                                        int id,
                                                        TruthBinding* tBinding,
                                                        const HepMcParticleLink * partLink) const {

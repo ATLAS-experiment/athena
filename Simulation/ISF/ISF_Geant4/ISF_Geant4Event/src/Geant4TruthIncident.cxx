@@ -86,13 +86,13 @@ const HepMC::FourVector& iGeant4::Geant4TruthIncident::position() const {
 
 int iGeant4::Geant4TruthIncident::physicsProcessCategory() const {
   const G4VProcess *process = m_step->GetPostStepPoint()->GetProcessDefinedStep();
-  // TODO: need to check that G4ProcessSubTypes Match Barcode::PhysicsProcessCode
+  // TODO: need to check that G4ProcessSubTypes Match int
   return process->GetProcessType();
 }
 
-Barcode::PhysicsProcessCode iGeant4::Geant4TruthIncident::physicsProcessCode() const {
+int iGeant4::Geant4TruthIncident::physicsProcessCode() const {
   const G4VProcess *process = m_step->GetPostStepPoint()->GetProcessDefinedStep();
-  // TODO: need to check that G4ProcessSubTypes Match Barcode::PhysicsProcessCode
+  // TODO: need to check that G4ProcessSubTypes Match int
   return process->GetProcessSubType();
 }
 
@@ -114,16 +114,16 @@ int iGeant4::Geant4TruthIncident::parentPdgCode() const {
   return  m_step->GetTrack()->GetDefinition()->GetPDGEncoding();
 }
 
-Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() { // TODO Remove this method
+int iGeant4::Geant4TruthIncident::parentBarcode() { // TODO Remove this method
   auto parent = parentParticle();
 
-  return (parent) ? HepMC::barcode(parent) : Barcode::fUndefinedBarcode;
+  return (parent) ? HepMC::barcode(parent) : HepMC::UNDEFINED_ID;
 }
 
 int iGeant4::Geant4TruthIncident::parentUniqueID() {
   auto parent = parentParticle();
 
-  return (parent) ? HepMC::uniqueID(parent) : Barcode::fUndefinedBarcode;
+  return (parent) ? HepMC::uniqueID(parent) : HepMC::UNDEFINED_ID;
 }
 
 int iGeant4::Geant4TruthIncident::parentStatus()  {
@@ -147,7 +147,7 @@ bool iGeant4::Geant4TruthIncident::parentSurvivesIncident() const {
   }
 }
 
-HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(Barcode::ParticleBarcode newBarcode) {
+HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(int newBarcode) {
   const G4Track *track = m_step->GetTrack();
 
   // check if particle is a alive in G4 or in ISF
@@ -209,7 +209,7 @@ int iGeant4::Geant4TruthIncident::childPdgCode(unsigned short i) const {
   return m_children[i]->GetDefinition()->GetPDGEncoding();
 }
 
-Barcode::ParticleBarcode  iGeant4::Geant4TruthIncident::childBarcode(unsigned short index) const {
+int  iGeant4::Geant4TruthIncident::childBarcode(unsigned short index) const {
   // the G4Track instance for the current child particle
   const G4Track* track = m_children[index];
   // This should be a *secondary* track.  If it has a primary, it was a decay and
@@ -226,14 +226,14 @@ Barcode::ParticleBarcode  iGeant4::Geant4TruthIncident::childBarcode(unsigned sh
   return 0;
 }
 
-void iGeant4::Geant4TruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarcode) {
+void iGeant4::Geant4TruthIncident::setAllChildrenBarcodes(int) {
   G4ExceptionDescription description;
   description << G4String("setAllChildrenBarcodes: ") + "Shared child particle barcodes are not implemented in ISF_Geant4 at this point.";
   G4Exception("iGeant4::Geant4TruthIncident", "NotImplemented", FatalException, description);
 }
 
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short i,
-                                                                  Barcode::ParticleBarcode newBarcode) {
+                                                                  int newBarcode) {
   // the G4Track instance for the current child particle
   const G4Track* thisChildTrack = m_children[i];
 

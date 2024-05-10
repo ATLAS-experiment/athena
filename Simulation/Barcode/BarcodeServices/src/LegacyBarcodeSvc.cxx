@@ -80,8 +80,8 @@ Barcode::LegacyBarcodeSvc::BarcodeInfo& Barcode::LegacyBarcodeSvc::getBarcodeInf
 
 /** Generate a new unique vertex barcode, based on the parent particle barcode and
     the physics process code causing the truth vertex*/
-Barcode::VertexBarcode Barcode::LegacyBarcodeSvc::newVertex( Barcode::ParticleBarcode /* parent */,
-                                                             Barcode::PhysicsProcessCode /* process */)
+int Barcode::LegacyBarcodeSvc::newVertex( int /* parent */,
+                                                             int /* process */)
 {
   BarcodeInfo& bc = getBarcodeInfo();
   bc.currentVertex += m_vertexIncrement;
@@ -101,8 +101,8 @@ Barcode::VertexBarcode Barcode::LegacyBarcodeSvc::newVertex( Barcode::ParticleBa
 /** Generate a new unique barcode for a secondary particle, based on the parent
     particle barcode and the process code of the physics process that created
     the secondary  */
-Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::newSecondary( Barcode::ParticleBarcode /* parentBC */,
-                                                                  Barcode::PhysicsProcessCode /* process */)
+int Barcode::LegacyBarcodeSvc::newSecondary( int /* parentBC */,
+                                                                  int /* process */)
 {
   BarcodeInfo& bc = getBarcodeInfo();
   bc.currentSecondary += m_secondaryIncrement;
@@ -114,7 +114,7 @@ Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::newSecondary( Barcode::Parti
                     << " will return a particle barcode of less than 0: "
                     << bc.currentSecondary << ". Reset to zero.");
 
-      bc.currentSecondary = Barcode::fUndefinedBarcode;
+      bc.currentSecondary = HepMC::UNDEFINED_ID;
     }
 
   return bc.currentSecondary;
@@ -124,30 +124,30 @@ Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::newSecondary( Barcode::Parti
 /** Generate a common barcode which will be shared by all children
     of the given parent barcode (used for child particles which are
     not stored in the mc truth event) */
-Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::sharedChildBarcode( Barcode::ParticleBarcode /* parentBC */,
-                                                                        Barcode::PhysicsProcessCode /* process */)
+int Barcode::LegacyBarcodeSvc::sharedChildBarcode( int /* parentBC */,
+                                                                        int /* process */)
 {
   // concept of shared barcodes not present in MC12 yet
-  return Barcode::fUndefinedBarcode;
+  return HepMC::UNDEFINED_ID;
 }
 
 
-void Barcode::LegacyBarcodeSvc::registerLargestGenEvtParticleBC( Barcode::ParticleBarcode /* bc */) {
+void Barcode::LegacyBarcodeSvc::registerLargestGenEvtParticleBC( int /* bc */) {
 }
 
 
-void Barcode::LegacyBarcodeSvc::registerLargestGenEvtVtxBC( Barcode::VertexBarcode /* bc */) {
+void Barcode::LegacyBarcodeSvc::registerLargestGenEvtVtxBC( int /* bc */) {
 }
 
 
 /** Return the secondary particle offset */
-Barcode::ParticleBarcode Barcode::LegacyBarcodeSvc::secondaryParticleBcOffset() const {
+int Barcode::LegacyBarcodeSvc::secondaryParticleBcOffset() const {
   return m_firstSecondary;
 }
 
 
 /** Return the secondary vertex offset */
-Barcode::VertexBarcode Barcode::LegacyBarcodeSvc::secondaryVertexBcOffset() const {
+int Barcode::LegacyBarcodeSvc::secondaryVertexBcOffset() const {
   return m_firstVertex;
 }
 

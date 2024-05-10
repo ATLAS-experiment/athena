@@ -16,7 +16,7 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const ISFParticle &parent,
                               int id,
-                             Barcode::ParticleBarcode barcode,
+                             int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position(pos),
@@ -47,7 +47,7 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const ISFParticle &parent,
                               int id,
-                              Barcode::ParticleBarcode barcode,
+                              int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position( pos.x(), pos.y(), pos.z()),
@@ -78,7 +78,7 @@ ISF::ISFParticle::ISFParticle(
                               double time,
                               const DetRegionSvcIDPair &origin,
                               int id,
-                              Barcode::ParticleBarcode barcode,
+                              int barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
   m_position(pos),
@@ -268,7 +268,7 @@ bool ISF::ISFParticle::isIdent(const ISF::ISFParticle& rhs) const
   return pass;
 }
 
-void ISF::ISFParticle::setBarcodeAndUpdateHepMcParticleLink( Barcode::ParticleBarcode bc) {
+void ISF::ISFParticle::setBarcodeAndUpdateHepMcParticleLink( int bc) {
   // set a new barcode
   setBarcode(bc);
 

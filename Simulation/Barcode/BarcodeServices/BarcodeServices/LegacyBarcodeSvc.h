@@ -13,7 +13,6 @@
 #include "AthenaBaseComps/AthService.h"
 
 //include
-#include "BarcodeEvent/Barcode.h"
 #include "BarcodeInterfaces/IBarcodeSvc.h"
 
 #include "tbb/concurrent_unordered_map.h"
@@ -51,47 +50,47 @@ namespace Barcode {
 
     /** Generate a new unique vertex barcode, based on the parent particle barcode and
         the physics process code causing the truth vertex*/
-    virtual VertexBarcode newVertex( ParticleBarcode parentBC=Barcode::fUndefinedBarcode,
-                                     PhysicsProcessCode process=Barcode::fUndefinedProcessCode ) override;
+    virtual int newVertex( int parentBC=HepMC::UNDEFINED_ID,
+                                     int process=0 ) override;
 
     /** Generate a new unique barcode for a secondary particle, based on the parent
         particle barcode and the process code of the physics process that created
         the secondary  */
-    virtual ParticleBarcode newSecondary( ParticleBarcode parentBC=Barcode::fUndefinedBarcode,
-                                          PhysicsProcessCode process=Barcode::fUndefinedProcessCode ) override;
+    virtual int newSecondary( int parentBC=HepMC::UNDEFINED_ID,
+                                          int process=0 ) override;
 
     /** Generate a common barcode which will be shared by all children
         of the given parent barcode (used for child particles which are
         not stored in the mc truth event) */
-    virtual ParticleBarcode sharedChildBarcode( ParticleBarcode parentBC,
-                                                PhysicsProcessCode process=Barcode::fUndefinedProcessCode ) override;
+    virtual int sharedChildBarcode( int parentBC,
+                                                int process=0 ) override;
 
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
-    virtual void registerLargestGenEvtParticleBC( ParticleBarcode bc) override;
-    virtual void registerLargestGenEvtVtxBC( VertexBarcode bc) override;
+    virtual void registerLargestGenEvtParticleBC( int bc) override;
+    virtual void registerLargestGenEvtVtxBC( int bc) override;
 
     /** Return the secondary particle and vertex offsets */
-    virtual Barcode::ParticleBarcode secondaryParticleBcOffset() const override;
-    virtual Barcode::VertexBarcode   secondaryVertexBcOffset()  const override;
+    virtual int secondaryParticleBcOffset() const override;
+    virtual int   secondaryVertexBcOffset()  const override;
 
   private:
 
     /** barcode information used for GenVertices */
-    VertexBarcode                                 m_firstVertex;
-    VertexBarcode                                 m_vertexIncrement;
-    VertexBarcode                                 m_currentVertex;
+    int                                 m_firstVertex;
+    int                                 m_vertexIncrement;
+    int                                 m_currentVertex;
 
     /** barcode information used for secondary GenParticles */
-    ParticleBarcode                               m_firstSecondary;
-    ParticleBarcode                               m_secondaryIncrement;
-    ParticleBarcode                               m_currentSecondary;
+    int                               m_firstSecondary;
+    int                               m_secondaryIncrement;
+    int                               m_currentSecondary;
 
     struct BarcodeInfo {
         BarcodeInfo() = delete;
-        BarcodeInfo(VertexBarcode cv, ParticleBarcode cs) : currentVertex(cv), currentSecondary(cs) {};
-        VertexBarcode currentVertex;
-        ParticleBarcode currentSecondary;
+        BarcodeInfo(int cv, int cs) : currentVertex(cv), currentSecondary(cs) {};
+        int currentVertex;
+        int currentSecondary;
     };
 
     using LegacyBarcodeSvcThreadMap_t = tbb::concurrent_unordered_map

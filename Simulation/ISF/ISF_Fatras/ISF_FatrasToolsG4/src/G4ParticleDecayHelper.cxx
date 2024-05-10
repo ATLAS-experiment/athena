@@ -213,7 +213,7 @@ void iFatras::G4ParticleDecayHelper::decay(const ISF::ISFParticle& particleToDec
 void iFatras::G4ParticleDecayHelper::handleDecayParticles(const ISF::ISFParticle& particle,
                                                           const ISF::ISFParticleVector& decayProducts) const {
    // process the decay products ---------------------------------------
-  Barcode::PhysicsProcessCode                 process = 201;
+  int                 process = 201;
    // (i) none       
    if (!decayProducts.size()) {
         ATH_MSG_WARNING("[ decay ] Particle Decay Creator did not return any"
@@ -382,8 +382,8 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
                                                             1 + HepMC::SIM_STATUS_THRESHOLD, //status
                                                             timeStamp, 
                                                             parent,
-                                                            0, // undefined id
-							    Barcode::fUndefinedBarcode,
+                                                            HepMC::UNDEFINED_ID, // id
+							    HepMC::UNDEFINED_ID, // barcode
 							    truthBinding );
 
     children.push_back( childParticle);

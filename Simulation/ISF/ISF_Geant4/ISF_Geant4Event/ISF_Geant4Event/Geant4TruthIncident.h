@@ -52,7 +52,7 @@ namespace iGeant4 {
       /** Return category of the physics process represented by the truth incident (eg hadronic, em, ..) */
       int                       physicsProcessCategory() const override final;
       /** Return specific physics process code of the truth incident (eg ionisation, bremsstrahlung, ..)*/
-      Barcode::PhysicsProcessCode physicsProcessCode() const override final;
+      int physicsProcessCode() const override final;
 
       /** Return p^2 of the parent particle */
       double                    parentP2() const override final;
@@ -63,7 +63,7 @@ namespace iGeant4 {
       /** Return the PDG Code of the parent particle */
       int                       parentPdgCode() const override final;
       /** Return the barcode of the parent particle */
-      Barcode::ParticleBarcode  parentBarcode() override final; // TODO Remove this method
+      int  parentBarcode() override final; // TODO Remove this method
       /** Return the unique ID of the parent particle */
       int  parentUniqueID() override final;
       /** Return the status of the parent particle */
@@ -72,7 +72,7 @@ namespace iGeant4 {
       bool                      parentSurvivesIncident() const override final;
       /** Return the parent particle after the TruthIncident vertex (and give
           it a new barcode) */
-      HepMC::GenParticlePtr     parentParticleAfterIncident(Barcode::ParticleBarcode newBC) override final;
+      HepMC::GenParticlePtr     parentParticleAfterIncident(int newBC) override final;
 
       /** Return p of the i-th child particle */
       const G4ThreeVector       childP(unsigned short index) const;
@@ -85,9 +85,9 @@ namespace iGeant4 {
       /** Return the PDG Code of the i-th child particle */
       int                       childPdgCode(unsigned short index) const override final;
       /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
-      Barcode::ParticleBarcode  childBarcode(unsigned short index) const override final; // TODO Remove - only used in one place in TruthSvc
+      int  childBarcode(unsigned short index) const override final; // TODO Remove - only used in one place in TruthSvc
       /** Set the the barcode of all child particles to the given bc */
-      void                      setAllChildrenBarcodes(Barcode::ParticleBarcode bc) override final;
+      void                      setAllChildrenBarcodes(int bc) override final;
 
       /**  The interaction classifications are described as follows:
            STD_VTX: interaction of a particle without a pre-defined decay;
@@ -105,7 +105,7 @@ namespace iGeant4 {
       /** Return the i-th child as a HepMC particle type and assign the given
           Barcode to the simulator particle */
       HepMC::GenParticlePtr   childParticle(unsigned short index,
-                                            Barcode::ParticleBarcode bc) override final;
+                                            int bc) override final;
       /** Update the properties of a child particle from a pre-defined
           interaction based on the properties of the ith child of the
           current TruthIncident (only used in quasi-stable particle
