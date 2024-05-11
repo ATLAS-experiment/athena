@@ -112,7 +112,6 @@ def getEBnoL1PSSeed(l1items, l1seedname):
     l1EBitems = {
         'PhysicsHigh':
         [
-            'L1_MU5VF_3MU3V',
             'L1_eEM18L_MU8F','L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M','L1_2eEM10L_MU8F', 'L1_2eEM18M',
             'L1_eEM24L_3eEM12L',
             'L1_4jJ40', 'L1_jJ160', 'L1_XE50', 'L1_2jJ40_jXE110',
@@ -122,7 +121,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
             'L1_3MU5VF','L1_MU8F_2jJ40_jJ50',
             'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ125p30ETA49', 'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49',
             'L1_2MU5VF_3MU3V','L1_MU8VF_2MU5VF',
-            'L1_jMJJ-500-NFF', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 'L1_SC111-CjJ40', 'L1_BPH-7M11-25DR99-2MU3VF',
+            'L1_jMJJ-500-NFF', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 'L1_SC111-CjJ40',
             'L1_HT190-jJ40s5pETA21', 'L1_TAU20IM_2TAU12IM_4J12p0ETA25', 
             'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55',
         ],
