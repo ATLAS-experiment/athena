@@ -6,6 +6,7 @@
 
 # Declare the package name:
 atlas_subdir( MuonGeoModelTestR4 )
+find_package( ROOT COMPONENTS Core Tree TreePlayer )
 
 atlas_add_component( MuonGeoModelTestR4
                      src/components/*.cxx src/*.cxx
