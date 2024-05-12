@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimRegionMap.h
@@ -222,31 +222,34 @@ uint32_t FPGATrackSimRegionMap::getUnmappedID(uint32_t region, const FPGATrackSi
   int eta          = hit.getEtaModule();
   int phi          = hit.getPhiModule();
 
+    int anyerr = 0;
     int err[] = {1,1,1,1,1,1};
 
-    if (region >= m_map.size()) err[1] = 2;
+    if (region >= m_map.size()) anyerr = err[1] = 2;
 
-    if (layer >= m_map[region].size()) err[2] = 2;
+    if (!anyerr && layer >= m_map[region].size()) anyerr = err[2] = 2;
 
-    if (section >= m_map[region][layer].size()) err[3] = 2;
+    if (!anyerr && section >= m_map[region][layer].size()) anyerr = err[3] = 2;
 
-    int eta_min = m_map[region][layer][section].eta_min;
-    int eta_max = m_map[region][layer][section].eta_max;
+    if (!anyerr) {
+      int eta_min = m_map[region][layer][section].eta_min;
+      int eta_max = m_map[region][layer][section].eta_max;
 
-    if (eta < eta_min) err[4] = 3;
-    if (eta > eta_max) err[4] = 2;
+      if (eta < eta_min) err[4] = 3;
+      if (eta > eta_max) err[4] = 2;
 
-    int phi_min = m_map[region][layer][section].phi_min;
-    int phi_max = m_map[region][layer][section].phi_max;
+      int phi_min = m_map[region][layer][section].phi_min;
+      int phi_max = m_map[region][layer][section].phi_max;
 
-    // Need special cases for phi berrause it can go from 2pi to 0.
-    if (phi_min <= phi_max) // Region does not cross phi = 0
-    {
+      // Need special cases for phi berrause it can go from 2pi to 0.
+      if (phi_min <= phi_max) // Region does not cross phi = 0
+      {
         if (phi < phi_min || phi > phi_max) err[5] = 2;
-    }
-    else // Region crosses phi = 0
-    {
+      }
+      else // Region crosses phi = 0
+      {
         if (phi < phi_min && phi > phi_max) err[5] = 3;
+      }
     }
 
     int error_code = 100000*err[0] + 10000*err[1] + 1000*err[2] + 100*err[3] + 10*err[4] + err[5];

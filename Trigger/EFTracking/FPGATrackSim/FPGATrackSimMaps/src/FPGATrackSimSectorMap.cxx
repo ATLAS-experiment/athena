@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimMaps/FPGATrackSimSectorMap.h"
@@ -30,7 +30,6 @@ std::map<int,int> FPGATrackSimSectorMap::makeLookup(const char* fname)
 }
 
 void FPGATrackSimSectorMap::SetSector(int sec1, int sec2, int sec) {
-  if (m_data.find(sec1)==m_data.end()) m_data[sec1] = mapint();
   m_data[sec1][sec2]=sec;
 }
 
