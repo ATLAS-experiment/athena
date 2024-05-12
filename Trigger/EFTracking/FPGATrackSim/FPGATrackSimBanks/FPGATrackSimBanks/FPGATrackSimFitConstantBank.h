@@ -1,9 +1,10 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimFITCONSTANTBANK_H
 #define FPGATrackSimFITCONSTANTBANK_H
 
 #include <Eigen/StdVector>
+// cppcheck-suppress unknownMacro
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::MatrixXf)
 #include <Eigen/Core>
 #include <Eigen/LU>
