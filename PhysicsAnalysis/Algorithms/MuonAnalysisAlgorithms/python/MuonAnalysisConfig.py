@@ -19,6 +19,9 @@ class MuonCalibrationConfig (ConfigBlock):
             "Typically not needed here since the calibration is common to "
             "all muons.")
         self.addOption ('ptSelectionOutput', False, type=bool,
+            info="whether or not to apply a minimum pT cut to "
+            "calibrated electrons. The default is False.")
+        self.addOption ('minPt', 3.0e3, type=float,
             info="pT cut to apply to calibrated muons, in MeV. "
             "The default is 3.0 GeV.")
         self.addOption ('recalibratePhyslite', True, type=bool,
@@ -85,14 +88,15 @@ class MuonCalibrationConfig (ConfigBlock):
             alg.skipNominal = True
 
         # Set up the the pt selection
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'MuonPtCutAlg' + self.postfix )
-        alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
-        config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.particles = config.readName (self.containerName)
-        alg.selectionTool.minPt = 3e3
-        alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             preselection = self.ptSelectionOutput)
+        if self.minPt > 0:
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'MuonPtCutAlg' + self.postfix )
+            alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+            alg.particles = config.readName (self.containerName)
+            alg.selectionTool.minPt = self.minPt
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                preselection = self.ptSelectionOutput)
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
