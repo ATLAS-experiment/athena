@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimDetectorTool.h"
@@ -68,7 +68,7 @@ void FPGATrackSimDetectorTool::dumpGlobalToLocalModuleMap() {
 
   SCT_ID::const_id_iterator wafer_it = m_sctId->wafer_begin();
   SCT_ID::const_id_iterator wafer_end = m_sctId->wafer_end();
-  for (; wafer_it!=wafer_end; wafer_it++) {
+  for (; wafer_it!=wafer_end; ++wafer_it) {
     const Identifier id = *wafer_it;
     const IdentifierHash idhash = m_sctId->wafer_hash(id);
 

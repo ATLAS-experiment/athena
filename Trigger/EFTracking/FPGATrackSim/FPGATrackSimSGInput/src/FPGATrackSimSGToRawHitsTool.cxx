@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -115,7 +115,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* h
   if (m_readOfflineClusters) {
     std::vector <FPGATrackSimCluster> clusters;
     ATH_CHECK(readOfflineClusters(clusters, eventContext));
-    for (auto cluster : clusters) optional.addOfflineCluster(cluster);
+    for (const auto& cluster : clusters) optional.addOfflineCluster(cluster);
     ATH_MSG_DEBUG("Saved " << optional.nOfflineClusters() << " offline clusters");
     ATH_CHECK(dumpPixelClusters(pixelClusterIndexMap, eventContext));
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimInput/FPGATrackSimReadRawRandomHitsTool.h"
@@ -68,14 +68,14 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
     }
   else // not resetting, start by copying over truth information from old header
     {
-      for (auto truthtrack : header->optional().getTruthTracks())
+      for (const auto& truthtrack : header->optional().getTruthTracks())
         {
 	        if (truthtrack.getBarcode() > mbc) mbc = truthtrack.getBarcode();
       	  optional.addTruthTrack(truthtrack);
         }
 
       // now we got the max bar code, copy the offline tracks
-      for (auto offlinetrack : header->optional().getOfflineTracks()) 
+      for (const auto& offlinetrack : header->optional().getOfflineTracks()) 
 	      { 
       	  optional.addOfflineTrack(offlinetrack);
       	}
