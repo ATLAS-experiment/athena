@@ -64,7 +64,7 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
 
     // Error checking
-    if (m_phiMin >= m_phiMax || m_phiBins == 0) {
+    if (m_phiMin >= m_phiMax || m_phiBins == 0u) {
         ATH_MSG_FATAL("initialize() Phi range invalid");
 	return StatusCode::FAILURE;
     }
@@ -612,7 +612,7 @@ void FPGATrackSimHough1DShiftTool::matchIdealGeoSector(FPGATrackSimRoad & r) con
 // This does a linear approximation of the Hough transform equation.
 float FPGATrackSimHough1DShiftTool::getPtFromShiftDiff(int shift) const
 {
-    if (m_iterLayer == 0) ATH_MSG_FATAL("getPtFromShiftDiff() iterLayer can't be 0");
+    if (m_iterLayer == 0u) ATH_MSG_FATAL("getPtFromShiftDiff() iterLayer can't be 0");
     return (shift * m_phiStep / fpgatracksim::A) / (m_r[m_iterLayer] - m_r[0]);
 }
 
