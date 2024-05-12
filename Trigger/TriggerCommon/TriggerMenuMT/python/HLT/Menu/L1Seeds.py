@@ -171,7 +171,7 @@ def getL1LowLumi():
         'L1_MU8F_eTAU20M_jJ55_2jJ30',
         'L1_MU8F_eTAU20M',
         'L1_MU8F_cTAU20M',
-        'L1_J75', 'L1_4J15',
+        'L1_J75', #'L1_4J15',
         'L1_XE50', 'L1_3J25p0ETA23',
         'L1_3J40', 'L1_2jJ40_jXE110',
         'L1_MU5VF_jJ80', 'L1_J75p31ETA49'
@@ -247,7 +247,7 @@ def getL1BKeePrimaryLegacy():
         'L1_J40p0ETA25_2J25_J20p31ETA49',
         'L1_J25p0ETA23_2J15p31ETA49',
         'L1_J100',
-        'L1_4J15', 
+        #'L1_4J15', 
         'L1_3J35p0ETA23',
         'L1_3J15p0ETA25_XE40',
         'L1_2eEM24L',
