@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimLogicalHitsProcessAlg.h"
 
@@ -221,7 +221,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         else {
 	  ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
 	  float bestchi2 = 1.e15;
-	  for (auto track : tracks_1st) {
+	  for (const FPGATrackSimTrack& track : tracks_1st) {
 	    float chi2 = track.getChi2ndof();
 	    if (chi2 < bestchi2) bestchi2 = chi2;
 	    auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all",chi2);
@@ -241,7 +241,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Overlap removal
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     unsigned ntrackOLR = 0;
-    for (auto track : tracks_1st) { if (track.passedOR()) ntrackOLR++;}
+    for (const FPGATrackSimTrack& track : tracks_1st) { if (track.passedOR()) ntrackOLR++;}
     auto mon_ntracks_1st_olr = Monitored::Scalar<unsigned>("ntrack_1st_afterOLR", ntrackOLR);
     Monitored::Group(m_monTool,mon_ntracks_1st_olr);
 

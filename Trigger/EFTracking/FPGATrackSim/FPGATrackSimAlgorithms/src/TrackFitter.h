@@ -30,7 +30,7 @@ class TrackFitter
 
         int fitTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vector<FPGATrackSimTrack>& tracks);
   
-        std::vector<FPGATrackSimTrack> getMissingHitsCheckTracks() {return m_tracks_missinghits_track;}
+        const std::vector<FPGATrackSimTrack>& getMissingHitsCheckTracks() {return m_tracks_missinghits_track;}
 
         ///////////////////////////////////////////////////////////////////////
         // Constructor and Initialization
