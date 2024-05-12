@@ -20,7 +20,7 @@ class MuonCalibrationConfig (ConfigBlock):
             "all muons.")
         self.addOption ('ptSelectionOutput', False, type=bool,
             info="whether or not to apply a minimum pT cut to "
-            "calibrated electrons. The default is False.")
+            "calibrated muons. The default is False.")
         self.addOption ('minPt', 3.0e3, type=float,
             info="pT cut to apply to calibrated muons, in MeV. "
             "The default is 3.0 GeV.")
