@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -350,10 +350,10 @@ bool EGammaAmbiguityTool::isInVertex(const xAOD::TrackParticle& trk, const xAOD:
 /** Return true if the vertex passes the requirement on Rconv - RfirstHit **/
 bool EGammaAmbiguityTool::passDeltaR_innermost(const xAOD::Vertex& vx) const
 {
-  if (not vx.isAvailable<float>("minRfirstHit")){
+  static const SG::AuxElement::Accessor<float> minRfirstHitAcc("minRfirstHit");
+  if (not minRfirstHitAcc.isAvailable(vx)) {
     ATH_MSG_WARNING("minRfirstHit not available");
     return false;
   }
-  static const SG::AuxElement::Accessor<float> acc("minRfirstHit");
-  return xAOD::EgammaHelpers::conversionRadius(&vx) - acc(vx) < m_maxDeltaR_innermost;
+  return xAOD::EgammaHelpers::conversionRadius(&vx) - minRfirstHitAcc(vx) < m_maxDeltaR_innermost;
 }
