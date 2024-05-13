@@ -19,9 +19,9 @@ namespace SG {
  *
  * The name -> auxid lookup is done here.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-AtomicConstAccessor<T>::AtomicConstAccessor (const std::string& name)
+AtomicConstAccessor<T, ALLOC>::AtomicConstAccessor (const std::string& name)
   : Base (name, "", SG::AuxVarFlags::Atomic)
 {
 }
@@ -34,10 +34,10 @@ AtomicConstAccessor<T>::AtomicConstAccessor (const std::string& name)
  *
  * The name -> auxid lookup is done here.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-AtomicConstAccessor<T>::AtomicConstAccessor (const std::string& name,
-                                             const std::string& clsname)
+AtomicConstAccessor<T, ALLOC>::AtomicConstAccessor (const std::string& name,
+                                                    const std::string& clsname)
   : Base (name, clsname, SG::AuxVarFlags::Atomic)
 {
 }
@@ -49,9 +49,9 @@ AtomicConstAccessor<T>::AtomicConstAccessor (const std::string& name,
  *
  * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-AtomicConstAccessor<T>::AtomicConstAccessor (const SG::auxid_t auxid)
+AtomicConstAccessor<T, ALLOC>::AtomicConstAccessor (const SG::auxid_t auxid)
   : Base (auxid, SG::AuxVarFlags::Atomic)
 {
 }
@@ -64,9 +64,11 @@ AtomicConstAccessor<T>::AtomicConstAccessor (const SG::auxid_t auxid)
  * As this class can be used only read-only for basic types, return
  * the result by value.  That makes it easier to call from python.
  */
-template <class T>
+template <class T, class ALLOC>
+template <class ELT>
+ATH_REQUIRES( IsConstAuxElement<ELT> )
 inline
-T AtomicConstAccessor<T>::operator() (const AuxElement& e) const
+T AtomicConstAccessor<T, ALLOC>::operator() (const ELT& e) const
 {
   return reinterpret_cast<const_reference_type> (Base::operator() (e));
 }
@@ -84,10 +86,10 @@ T AtomicConstAccessor<T>::operator() (const AuxElement& e) const
  * As this class can be used only read-only for basic types, return
  * the result by value.  That makes it easier to call from python.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-T AtomicConstAccessor<T>::operator() (const AuxVectorData& container,
-                                      size_t index) const
+T AtomicConstAccessor<T, ALLOC>::operator() (const AuxVectorData& container,
+                                             size_t index) const
 {
   return reinterpret_cast<const_reference_type> (Base::operator() (container, index));
 }
@@ -97,10 +99,11 @@ T AtomicConstAccessor<T>::operator() (const AuxVectorData& container,
  * @brief Get a pointer to the start of the auxiliary data array.
  * @param container The container from which to fetch the variable.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-typename AtomicConstAccessor<T>::const_container_pointer_type
-AtomicConstAccessor<T>::getDataArray (const AuxVectorData& container) const
+auto
+AtomicConstAccessor<T, ALLOC>::getDataArray (const AuxVectorData& container) const
+  -> const_container_pointer_type
 {
   return reinterpret_cast<const_container_pointer_type>
     (container.getDataArray (Base::auxid()));
