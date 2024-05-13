@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/ReadDecorHandle.icc
@@ -148,6 +148,43 @@ typename ReadDecorHandle<T, D>::const_reference_type
 ReadDecorHandle<T, D>::operator() (size_t i)
 {
   return m_acc (*this->vectorData(), i);
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a const reference.
+ * @param e The element for which to fetch the variable.
+ * @param deflt Default value.
+ *
+ * If this variable is not available, then return @c deflt instead.
+ */
+template <class T, class D>
+inline
+typename ReadDecorHandle<T, D>::const_reference_type
+ReadDecorHandle<T, D>::withDefault (const AuxElement& e, const D& deflt) const
+{
+  // FIXME?  In principle, should check here that E is actually an element
+  // of our declared container.  But that would force a SG lookup here
+  // which we otherwise wouldn't need to do.
+  return m_acc.withDefault (e, deflt);
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a const reference.
+ * @param index The index of the desired element.
+ * @param deflt Default value.
+ *
+ * This looks up the variable in the object referenced by this handle.
+ * For a standalone object, pass an index of 0.
+ * If this variable is not available, then return @c deflt instead.
+ */
+template <class T, class D>
+inline
+typename ReadDecorHandle<T, D>::const_reference_type
+ReadDecorHandle<T, D>::withDefault (size_t i, const D& deflt)
+{
+  return m_acc.withDefault (*this->vectorData(), i, deflt);
 }
 
 
