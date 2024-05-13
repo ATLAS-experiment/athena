@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MdtEtaTransformTester.h"
+#include "MuonHoughTransformTester.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -20,15 +20,16 @@ namespace MuonValR4 {
     
 
 
-    MdtEtaTransformTester::MdtEtaTransformTester(const std::string& name,
+    MuonHoughTransformTester::MuonHoughTransformTester(const std::string& name,
                                 ISvcLocator* pSvcLocator)
         : AthHistogramAlgorithm(name, pSvcLocator) {}
 
 
-    StatusCode MdtEtaTransformTester::initialize() {
+    StatusCode MuonHoughTransformTester::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_inSimHitKeys.initialize());
         ATH_CHECK(m_inHoughMaximaKey.initialize());
+        ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
         ATH_CHECK(m_tree.init(this));
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -41,13 +42,13 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MdtEtaTransformTester::finalize() {
+    StatusCode MuonHoughTransformTester::finalize() {
         ATH_CHECK(m_tree.write());
         if (m_allCan) m_allCan->SaveAs(Form("%s]", m_allCanName.value().c_str()));
         return StatusCode::SUCCESS;
     }
 
-    Amg::Transform3D MdtEtaTransformTester::toChamberTrf(const ActsGeometryContext& gctx,
+    Amg::Transform3D MuonHoughTransformTester::toChamberTrf(const ActsGeometryContext& gctx,
                                                          const Identifier& hitId) const {
         const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId); 
         //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
@@ -58,7 +59,7 @@ namespace MuonValR4 {
         return muonChamber->globalToLocalTrans(gctx) * reElement->localToGlobalTrans(gctx, trfHash);
     }
 
-    StatusCode MdtEtaTransformTester::execute()  {
+    StatusCode MuonHoughTransformTester::execute()  {
         
         const EventContext & ctx = Gaudi::Hive::currentContext();
         SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
@@ -71,6 +72,9 @@ namespace MuonValR4 {
         
         SG::ReadHandle<MuonR4::StationHoughMaxContainer> readHoughPeaks(m_inHoughMaximaKey, ctx);
         ATH_CHECK(readHoughPeaks.isPresent());        
+        
+        SG::ReadHandle<MuonR4::StationHoughSegmentSeedContainer> readSegmentSeeds(m_inHoughSegmentSeedKey, ctx);
+        ATH_CHECK(readSegmentSeeds.isPresent());        
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
 
@@ -93,8 +97,8 @@ namespace MuonValR4 {
             }
         }
         
-        std::map<const MuonGMR4::MuonChamber*, std::vector<MuonR4::HoughMaximum>> houghPeakMap{};
-        for (const MuonR4::StationHoughMaxima  & max : *readHoughPeaks){
+        std::map<const MuonGMR4::MuonChamber*, std::vector<MuonR4::HoughSegmentSeed>> houghPeakMap{};
+        for (const MuonR4::StationHoughSegmentSeeds  & max : *readSegmentSeeds){
             houghPeakMap.emplace(max.chamber(),max.getMaxima());
         }   
 
@@ -132,9 +136,11 @@ namespace MuonValR4 {
             m_out_gen_nTGCHits = nTgc;
 
             m_out_gen_tantheta = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.y()/chamberDir.z() : 1.e10); 
+            m_out_gen_tanphi = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10); 
             m_out_gen_z0 = chamberPos.y(); 
+            m_out_gen_x0 = chamberPos.x(); 
 
-            const std::vector<MuonR4::HoughMaximum>& houghMaxima = houghPeakMap[reElement->getChamber()];
+            const std::vector<MuonR4::HoughSegmentSeed>& houghMaxima = houghPeakMap[reElement->getChamber()];
             if (houghMaxima.empty()){
                 if (!m_tree.fill(ctx)) {
                     return StatusCode::FAILURE;
@@ -144,11 +150,15 @@ namespace MuonValR4 {
                 }
                 continue;
             }
-            const MuonR4::HoughMaximum* foundMax = nullptr; 
+            const MuonR4::HoughSegmentSeed* foundMax = nullptr; 
             // find the best hough maximum
             size_t max_hits{0};
-            for (const MuonR4::HoughMaximum & max : houghMaxima){                
+            size_t max_etaHits{0};
+            size_t max_phiHits{0};
+            for (const MuonR4::HoughSegmentSeed & max : houghMaxima){                
                 size_t nFound{0}; 
+                size_t nEta{0};
+                size_t nPhi{0}; 
                 for (const xAOD::MuonSimHit* simHit : hits) {
 
                     for (const MuonR4::HoughHitType & hitOnMax : max.getHitsInMax()) {
@@ -161,24 +171,34 @@ namespace MuonValR4 {
                         ///  the hit is in the same gas gap
                         else if (m_idHelperSvc->gasGapId(hitOnMax->identify()) == simHit->identify()) {
                             ++nFound;
+                            if (hitOnMax->measuresEta()) ++nEta; 
+                            if (hitOnMax->measuresPhi()) ++nPhi; 
                         }
                     }
                 }
                 if (nFound > max_hits){
                     max_hits = nFound;
+                    max_etaHits = nEta;
+                    max_phiHits = nPhi; 
                     foundMax = &max; 
                 }
             }
             /// Maximum could be associated to the hit
             if (foundMax != nullptr){
                 m_out_hasMax = true; 
-                m_out_max_tantheta = foundMax->getX();
-                m_out_max_z0 = foundMax->getY();
+                m_out_max_hasPhiExtension = foundMax->hasPhiExtension(); 
+                m_out_max_tantheta = foundMax->tanTheta();
+                m_out_max_z0 = foundMax->interceptY();
+                if (m_out_max_hasPhiExtension.getVariable()){
+                    m_out_max_tanphi = foundMax->tanPhi();
+                    m_out_max_x0 = foundMax->interceptX(); 
+                }
                 m_out_max_nHits = max_hits; 
+                m_out_max_nEtaHits = max_etaHits; 
+                m_out_max_nPhiHits = max_phiHits; 
                 unsigned int nMdt{0}, nRpc{0}, nTgc{0}; 
                 for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
                     /// Skip all space points that don' contain any phi measurement
-                    if (!houghSP->measuresEta()) continue;
                     
                     const xAOD::UncalibratedMeasurement* meas = houghSP->primaryMeasurement();
                     switch (meas->type()) {
@@ -224,9 +244,9 @@ namespace MuonValR4 {
         }
         return StatusCode::SUCCESS;
     }
-    StatusCode MdtEtaTransformTester::drawEventDisplay(const EventContext& ctx,
+    StatusCode MuonHoughTransformTester::drawEventDisplay(const EventContext& ctx,
                                                        const std::vector<const xAOD::MuonSimHit*>& simHits,
-                                                       const MuonR4::HoughMaximum* foundMax) const {
+                                                       const MuonR4::HoughSegmentSeed* foundMax) const {
         
         if (simHits.size() < 4) return StatusCode::SUCCESS;
 
@@ -344,12 +364,12 @@ namespace MuonValR4 {
         tl.SetTextSize(18); 
         tl.Draw();
         if (foundMax) {
-            auto  mrk = std::make_unique<TMarker>( foundMax->getY(), 0., kFullTriangleUp);
+            auto  mrk = std::make_unique<TMarker>( foundMax->interceptY(), 0., kFullTriangleUp);
             mrk->SetMarkerSize(1);
             mrk->SetMarkerColor(kOrange-3); 
             mrk->Draw();
             primitives.emplace_back(std::move(mrk));
-            auto trajectory = std::make_unique<TArrow>( foundMax->getY(), 0., foundMax->getY() +  0.3 * frameWidth * foundMax->getX(), 0.3 * frameWidth);
+            auto trajectory = std::make_unique<TArrow>( foundMax->interceptY(), 0., foundMax->interceptY() +  0.3 * frameWidth * foundMax->tanTheta(), 0.3 * frameWidth);
             trajectory->SetLineColor(kOrange-3); 
             trajectory->Draw();
             primitives.push_back(std::move(trajectory));

@@ -14,6 +14,7 @@
 #include <StoreGate/ReadCondHandle.h>
 #include <StoreGate/WriteHandle.h>
 #include <CLHEP/Random/RandGaussZiggurat.h>
+#include <CLHEP/Random/RandFlat.h>
 #include <GaudiKernel/PhysicalConstants.h>
 // Random Numbers
 #include <AthenaKernel/RNGWrapper.h>

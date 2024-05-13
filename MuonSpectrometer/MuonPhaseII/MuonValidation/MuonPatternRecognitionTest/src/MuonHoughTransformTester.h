@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONFASTDIGITEST_MUONVALR4_MdtEtaTransformTester_H
-#define MUONFASTDIGITEST_MUONVALR4_MdtEtaTransformTester_H
+#ifndef MUONVALR4_MuonHoughTransformTester_H
+#define MUONVALR4_MuonHoughTransformTester_H
 
 // Framework includes
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
@@ -32,10 +32,10 @@
 
 namespace MuonValR4{
 
-  class MdtEtaTransformTester : public AthHistogramAlgorithm {
+  class MuonHoughTransformTester : public AthHistogramAlgorithm {
   public:
-    MdtEtaTransformTester(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~MdtEtaTransformTester()  = default;
+    MuonHoughTransformTester(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~MuonHoughTransformTester()  = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
@@ -46,12 +46,13 @@ namespace MuonValR4{
                                   const Identifier& hitId) const;
     StatusCode drawEventDisplay(const EventContext& ctx,
                                 const std::vector<const xAOD::MuonSimHit*>& simHits,
-                                const MuonR4::HoughMaximum* foundMax) const;
+                                const MuonR4::HoughSegmentSeed* foundMax) const;
     
     // MDT sim hits in xAOD format 
     SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{ "xMdtSimHits","xRpcSimHits","xTgcSimHits"}, "xAOD  SimHit collections"};
                                                           
     SG::ReadHandleKey<MuonR4::StationHoughMaxContainer> m_inHoughMaximaKey{this, "StationHoughMaxContainer", "MuonHoughStationMaxima"};
+    SG::ReadHandleKey<MuonR4::StationHoughSegmentSeedContainer> m_inHoughSegmentSeedKey{this, "StationHoughSegmentSeedContainer", "MuonHoughStationSegmentSeeds"};
     SG::ReadHandleKey<MuonR4::MuonSpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
     
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
@@ -75,11 +76,18 @@ namespace MuonValR4{
     
     MuonVal::ScalarBranch<float>& m_out_gen_tantheta{m_tree.newScalar<float>("genTanTheta", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_z0{m_tree.newScalar<float>("genZ0", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_tanphi{m_tree.newScalar<float>("genTanPhi", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_x0{m_tree.newScalar<float>("genX0", 0.0)}; 
     MuonVal::ScalarBranch<bool>&  m_out_hasMax {m_tree.newScalar<bool>("hasMax", false)}; 
+    MuonVal::ScalarBranch<bool>&  m_out_max_hasPhiExtension {m_tree.newScalar<bool>("maxHasPhiExtension", false)}; 
     MuonVal::ScalarBranch<float>& m_out_max_tantheta{m_tree.newScalar<float>("maxTanTheta", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_max_z0{m_tree.newScalar<float>("maxZ0", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_max_tanphi{m_tree.newScalar<float>("maxTanPhi", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_max_x0{m_tree.newScalar<float>("maxX0", 0.0)}; 
     
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nHits{m_tree.newScalar<unsigned int>("maxNHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned int>& m_out_max_nEtaHits{m_tree.newScalar<unsigned int>("maxNEtaHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned int>& m_out_max_nPhiHits{m_tree.newScalar<unsigned int>("maxNPhiHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nMdt{m_tree.newScalar<unsigned int>("maxNMdtHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nRpc{m_tree.newScalar<unsigned int>("maxNRpcHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nTgc{m_tree.newScalar<unsigned int>("maxNTgcHits", 0)}; 
@@ -115,4 +123,4 @@ namespace MuonValR4{
   };
 }
 
-#endif // MUONFASTDIGITEST_MUONVALR4_MdtEtaTransformTester_H
+#endif // MUONFASTDIGITEST_MUONVALR4_MuonHoughTransformTester_H

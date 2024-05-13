@@ -4,9 +4,15 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def MuonHoughTransformAlgCfg(flags, name = "MuonHoughTransformAlg", **kwargs):
+def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwargs):
     result = ComponentAccumulator()
-    theAlg = CompFactory.MuonR4.MuonHoughTransformAlg(name, **kwargs)
+    theAlg = CompFactory.MuonR4.MuonPhiHoughTransformAlg(name, **kwargs)
+    result.addEventAlgo(theAlg, primary=True)
+    return result
+
+def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwargs):
+    result = ComponentAccumulator()
+    theAlg = CompFactory.MuonR4.MuonEtaHoughTransformAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
 
@@ -24,7 +30,8 @@ if __name__=="__main__":
     cfg.merge(xAODSimHitToMdtMeasCnvAlgCfg(flags))
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointMakerAlgCfg
     cfg.merge(MuonSpacePointMakerAlgCfg(flags))
-    cfg.merge(MuonHoughTransformAlgCfg(flags))
+    cfg.merge(MuonEtaHoughTransformAlgCfg(flags))
+    cfg.merge(MuonPhiHoughTransformAlgCfg(flags))
 
     # output spam reduction
     cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval=500
