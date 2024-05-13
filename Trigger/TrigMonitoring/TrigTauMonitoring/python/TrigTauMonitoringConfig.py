@@ -112,11 +112,29 @@ class TrigTauMonAlgBuilder:
     if self.activate_L1:
       self.configureAlgorithmL1()
 
+  @functools.cached_property
+  def _L1_Phase1_thresholds_stdmap(self):
+    import ROOT
+    m = ROOT.std.map[ROOT.std.string, ROOT.float]()
+    for item, thr in self.L1_Phase1_thresholds.items():
+      m[item] = thr
+    return m
+
+  @functools.cached_property
+  def _L1_Phase1_threshold_mappings_stdmap(self):
+    import ROOT
+    m = ROOT.std.map[ROOT.std.string, ROOT.uint64_t]()
+    for item, thr in self.L1_Phase1_threshold_mappings.items():
+      m[item] = thr
+    return m
 
   @functools.lru_cache(maxsize=1000)
-  def getTriggerInfo(self, trigger: str):
+  def getTriggerInfo(self, trigger: str, use_thresholds=True):
     from TrigTauMonitoring.TrigTauInfo import TrigTauInfo
-    return TrigTauInfo(trigger)
+    if use_thresholds:
+      return TrigTauInfo(trigger, self._L1_Phase1_thresholds_stdmap, self._L1_Phase1_threshold_mappings_stdmap)
+    else:
+      return TrigTauInfo(trigger)
 
 
   def configureTriggers(self):
@@ -142,7 +160,7 @@ class TrigTauMonAlgBuilder:
       # without PhI triggers. Also some old SMKs have broken HLTMonitoring DB links, with chains that are not in the Trigger Menu
       if trigger not in HLT_menu: continue
 
-      info = self.getTriggerInfo(trigger)
+      info = self.getTriggerInfo(trigger, use_thresholds=False)
 
       if self.activate_single_tau and info.isHLTSingleTau():
         self.HLT_single_items.append(trigger)
