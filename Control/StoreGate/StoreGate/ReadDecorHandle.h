@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/ReadDecorHandle.h
@@ -174,6 +174,28 @@ public:
    * @param e The element for which to fetch the variable.
    */
   const_reference_type operator() (const AuxElement& e) const;
+
+
+  /**
+   * @brief Fetch the variable for one element, as a const reference.
+   * @param index The index of the desired element.
+   * @param deflt Default value.
+   *
+   * This looks up the variable in the object referenced by this handle.
+   * For a standalone object, pass an index of 0.
+   * If this variable is not available, then return @c deflt instead.
+   */
+  const_reference_type withDefault (size_t index, const D& deflt);
+
+
+  /**
+   * @brief Fetch the variable for one element, as a const reference.
+   * @param e The element for which to fetch the variable.
+   * @param deflt Default value.
+   *
+   * If this variable is not available, then return @c deflt instead.
+   */
+  const_reference_type withDefault (const AuxElement& e, const D& deflt) const;
 
 
   /**
