@@ -178,7 +178,10 @@ namespace xAOD {
 
       /// @}
 
-   protected:
+      /// Declare how to wrap variables for this sort of base.
+      template <class T, class ALLOC = std::allocator<T> >
+      using AuxVariable_t = std::vector<T, ALLOC>;
+
       /// Get the auxiliary ID for one of the persistent variables
       template< typename T, typename ALLOC >
       auxid_t getAuxID( const std::string& name,
