@@ -50,6 +50,7 @@ StatusCode LArRampBuilder::initialize()
   ATH_CHECK( m_cablingKeySC.initialize(m_isSC) );
 
   ATH_CHECK(m_bcContKey.initialize(m_doBadChannelMask));
+  if(m_isSC) m_bcMask.setSC();
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
 
   //Intermediate ramp object (DAC/ADC pairs)

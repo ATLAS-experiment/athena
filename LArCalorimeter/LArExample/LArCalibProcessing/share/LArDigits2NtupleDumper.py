@@ -28,6 +28,7 @@ if __name__=='__main__':
   parser.add_argument('-t','--addGeom', dest='geom', default=False, help='Add real geom info to output ntuple', type=bool)
   parser.add_argument('-u','--addBC', dest='bc', default=False, help='Add Bad. chan info to output ntuple', type=bool)
   parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', type=bool)
+  parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -79,6 +80,10 @@ if __name__=='__main__':
   log.info("Autoconfigured: ")
   log.info("nSamples: %d digitsKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.digitsKey)
 
+  #GEometry
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
   # now construct the job
   flags.LAr.doAlign=False
 
@@ -91,6 +96,11 @@ if __name__=='__main__':
 
      flags.Trigger.enableL1CaloLegacy = True
      flags.Trigger.enableL1CaloPhase1 = True
+
+  # additions for EMF
+  if args.emf:
+     flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
+     flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannels","/LAR/BadChannelsOfl/KnownBADFEBs","/LAR/BadChannelsOfl/KnownMNBFEBs","/LAR/BadChannelsOfl/MissingFEBs","/LAR/Identifier/OnOffIdMap",)
 
   flags.lock()
 
@@ -129,7 +139,7 @@ if __name__=='__main__':
   from LArCalibTools.LArDigits2NtupleConfig import LArDigits2NtupleCfg
   acc.merge(LArDigits2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=False, isFlat=True, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, # from LArCond2NtupleBase 
-                            NSamples=flags.LArSCDump.nSamples, FTlist={}, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
+                            NSamples=flags.LArSCDump.nSamples, FTlist=[], ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             FillLB=args.evtree, 
                             OutputLevel=args.olevel
                            ))

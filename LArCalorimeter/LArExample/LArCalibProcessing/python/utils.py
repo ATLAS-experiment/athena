@@ -60,7 +60,10 @@ class FolderTagResolver:
             
     def getFolderTagSuffix(self,foldername,globalTag=None):
         ft=self.getFolderTag(foldername,globalTag)
-        p=ft.find("-")
+        if '_mu' in ft: 
+           p=ft.find("_mu") 
+        else: 
+           p=ft.find("-")
         if p==-1:
             return "-Default"
         else: 
