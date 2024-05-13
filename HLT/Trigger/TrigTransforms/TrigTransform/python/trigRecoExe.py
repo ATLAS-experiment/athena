@@ -137,8 +137,7 @@ class trigRecoExecutor(athenaExecutor):
             # updates for CA
             if self._isCAEnabled():
                 msg.info("Running in CA mode")
-                # we don't use the runargs file with athenaHLT so add the JO and preExecs to the command line and remove the CA option
-                self._cmd.remove('--CA')
+                # we don't use the runargs file with athenaHLT so add the JO and preExecs to the command line
                 self._cmd.append(self._skeletonCA)
                 if 'preExec' in self.conf.argdict:
                     self._cmd.extend(self.conf.argdict['preExec'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor))
