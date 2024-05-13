@@ -42,7 +42,7 @@ void errorHandler (int level,
     if (!rootErrorHandlers[i] (level, abort, location, msg)) return;
   }
   // They all returned true.  Call the previous handler.
-  origHandler (level, abort, location, msg);
+  origHandler.load() (level, abort, location, msg);
 }
 
 
