@@ -100,4 +100,3 @@ DECLARE_COMPONENT( LArDetCellParamsMerger )
 DECLARE_COMPONENT( LArCaliPulseParamsMerger )
 DECLARE_COMPONENT( LArPhysWaveMerger )
 DECLARE_COMPONENT( LArCaliWaveMerger )
-

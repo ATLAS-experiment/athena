@@ -153,33 +153,30 @@ if __name__=='__main__':
   from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
   cfg.merge(LArBadChannelCfg(flags, isSC=flags.LArCalib.isSC))
 
-  if flags.LArCalib.isSC: 
-    bcKey = "LArBadChannelSC" 
-  else: 
-    bcKey = "LArBadChannel"
-
-
-
+  bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"
 
   if "Pedestal" in objects:
     ckey = "LArPedestalSC" if flags.LArCalib.isSC else "LArPedestal"
     cfg.addEventAlgo(CompFactory.LArPedestals2Ntuple(ContainerKey = ckey,
                                                         AddFEBTempInfo = False, 
+                                                        AddCalib = True,
                                                         isSC = flags.LArCalib.isSC,
                                                         BadChanKey = bcKey
                                                       ))
                       
   if "AutoCorr" in objects:
-    cfg.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey = "LArAutoCorrSym" if flags.Input.isMC else "LArAutoCorr",
-                                                    AddFEBTempInfo  = False, 
+    ckey="LArAutoCorrSC" if flags.LArCalib.isSC else "LArAutoCorr"
+    cfg.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey = "LArAutoCorrSym" if flags.Input.isMC else ckey,
+                                                    AddFEBTempInfo = False, 
+                                                    AddCalib = True,
                                                     isSC = flags.LArCalib.isSC,
                                                     BadChanKey = bcKey
                                                   ))
   if "Ramp" in objects:
     ckey = "LArRampSC" if flags.LArCalib.isSC else "LArRamp"
-    if flags.Input.isMC: ckey = "LArRampSym"
-    cfg.addEventAlgo(CompFactory.LArRamps2Ntuple(RampKey=ckey,
+    cfg.addEventAlgo(CompFactory.LArRamps2Ntuple(RampKey="LArRampSym" if flags.Input.isMC else ckey,
                                                  AddFEBTempInfo = False, 
+                                                 AddCalib = True,
                                                  isSC = flags.LArCalib.isSC,
                                                  BadChanKey = bcKey
                                                ))
@@ -240,22 +237,25 @@ if __name__=='__main__':
        ckey="LArShapeSym"
     cfg.addEventAlgo(CompFactory.LArShape2Ntuple(ContainerKey=ckey,
                                                  AddFEBTempInfo   = False,   
+                                                 AddCalib = True,
                                                  isSC = flags.LArCalib.isSC,
                                                  BadChanKey = bcKey
                
                                                ))
   if "MphysOverMcal" in objects:
-    ckey = "LArMphysOverMcalSC" if flags.LArCalib.isSC else "LArMphysOverMcal"
-    cfg.addEventAlgo(CompFactory.LArMphysOverMcal2Ntuple(ContainerKey   = ckey,
+    cfg.addEventAlgo(CompFactory.LArMphysOverMcal2Ntuple(ContainerKey   = "LArMphysOverMcalSC" if flags.LArCalib.isSC else "LArMphysOverMcal",
                                                          AddFEBTempInfo   = False,
+                                                         AddCalib = True,
                                                          isSC = flags.LArCalib.isSC,
                                                          BadChanKey = bcKey
                                                        ))
 
   #ADC2MeV and DACuA are handled by the same ntuple dumper
   if "DAC2uA" in objects or "uA2MeV" in objects:
-    ua2MeVKey="LAruA2MeVSym" if flags.Input.isMC else "LAruA2MeV"
-    dac2uAKey="LArDAC2uASym" if flags.Input.isMC else "LArDAC2uA" 
+    uackey = "LAruA2MeVSC" if flags.LArCalib.isSC else "LAruA2MeV"
+    dackey = "LArDAC2uASC" if flags.LArCalib.isSC else "LArDAC2uA"
+    ua2MeVKey="LAruA2MeVSym" if flags.Input.isMC else uackey
+    dac2uAKey="LArDAC2uASym" if flags.Input.isMC else dackey
 
     cfg.addEventAlgo(CompFactory.LAruA2MeV2Ntuple(uA2MeVKey=ua2MeVKey if "uA2MeV" in objects else "",
                                                   DAC2uAKey=dac2uAKey if "DAC2uA" in objects else "",
@@ -265,13 +265,14 @@ if __name__=='__main__':
     
 
   if "HVScaleCorr" in objects:
-    cfg.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple(AddFEBTempInfo = False,
+    cfg.addEventAlgo(CompFactory.LArHVScaleCorr2Ntuple(ContainerKey= "LArHVScaleCorrSC" if flags.LArCalib.isSC else "LArHVScaleCorr",
+                                                       AddFEBTempInfo = False,
                                                        isSC = flags.LArCalib.isSC,
                                                        BadChanKey = bcKey
                                                      ))
 
   if "fSampl" in objects:
-    cfg.addEventAlgo(CompFactory.LArfSampl2Ntuple(ContainerKey="LArfSamplSym",
+    cfg.addEventAlgo(CompFactory.LArfSampl2Ntuple(ContainerKey="LArfSamplSC" if flags.LArCalib.isSC else "LArfSamplSym",
                                                   isSC=flags.LArCalib.isSC
                                                 ))
 

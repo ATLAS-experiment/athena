@@ -57,6 +57,8 @@ if __name__=="__main__":
     #The following flags help finding the input bytestream files: 
     flags.LArCalib.Input.RunNumbers = [int(args.run),]
     flags.LArCalib.Input.Database = args.insql
+    flags.IOVDb.SqliteInput=args.insql
+    flags.IOVDb.SqliteFolders=("/LAR/ElecCalibOfl/PhysWaves/RTM","/LAR/ElecCalibOfl/AutoCorrs/AutoCorr","/LAR/ElecCalibOfl/AutoCorrs/PhysicsAutoCorr")
        
     flags.LArCalib.Output.ROOTFile = args.rootfile
     flags.LArCalib.Output.POOLFile = args.poolfile
