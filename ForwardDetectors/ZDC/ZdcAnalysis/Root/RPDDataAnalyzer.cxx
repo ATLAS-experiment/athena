@@ -3,6 +3,7 @@
 #include "TLinearFitter.h"
 #include "TMath.h"
 #include <limits>
+#include <set>
 
 const auto zeroVector = [](std::vector<float>& v){ v.assign(v.size(), 0); };
 const auto zeroVectorVector = [](std::vector<std::vector<float>>& vv){ for (std::vector<float>& v : vv) v.assign(v.size(), 0); };
@@ -193,14 +194,12 @@ float RPDDataAnalyzer::calculateBaselineSamplesMSE(unsigned int channel, std::fu
  * Perform an exponential fit in baseline-subtracted baseline samples and set relevant status bits.
  * Returns true if the fit and subtraction are good, false if there was a problem.
  */
-bool RPDDataAnalyzer::doPileupExpFit(unsigned int channel)
+bool RPDDataAnalyzer::doPileupExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints)
 {
   TLinearFitter fitter(1, "1 ++ x");
-  double x, y;
-  for (unsigned int sample = 0; sample < m_nBaselineSamples; sample++) {
+  double x;
+  for (auto const& [sample, y] : pileupFitPoints) {
     x = sample;
-    y = m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel);
-    if (y <= 0) continue;
     fitter.AddPoint(&x, std::log(y));
   }
   if (fitter.Eval()) {
@@ -226,14 +225,12 @@ bool RPDDataAnalyzer::doPileupExpFit(unsigned int channel)
  * Perform a stretched exponential fit in baseline-subtracted baseline samples and set relevant status bits.
  * Returns true if the fit and subtraction are good, false if there was a problem.
  */
-bool RPDDataAnalyzer::doPileupStretchedExpFit(unsigned int channel)
+bool RPDDataAnalyzer::doPileupStretchedExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints)
 {
   TLinearFitter fitter(1, "1 ++ (x + 4)**(0.5) ++ (x + 4)**(-0.5)");
-  double x, y;
-  for (unsigned int sample = 0; sample < m_nBaselineSamples; sample++) {
+  double x;
+  for (auto const& [sample, y] : pileupFitPoints) {
     x = sample;
-    y = m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel);
-    if (y <= 0) continue;
     fitter.AddPoint(&x, std::log(y));
   }
   if (fitter.Eval()) {
@@ -282,11 +279,19 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   float const& calibFactor = m_calibFactors.at(channel);
 
   float baselineSum = 0;
-  unsigned int nFitPoints = 0;
+  /** points (sample, baseline-subtracted ADC) with ADC above baseline, to be used in fit in case of pileup */
+  std::vector<std::pair<unsigned int, float>> pileupFitPoints;
+  /** set of (unique) ADC values in baseline samples above nominal baseline */
+  std::set<float> uniqueBaselineValues;
   for (unsigned int sample = 0; sample < m_nBaselineSamples; sample++) {
-    float &adc = m_chFadcData.at(channel).at(sample);
+    float const& adc = m_chFadcData.at(channel).at(sample);
     baselineSum += adc;
-    if (adc - m_nominalBaseline > 0) nFitPoints++;
+    float const adcBaselineSubtr = adc - m_nominalBaseline;
+    if (adcBaselineSubtr > 0) {
+      // this sample is a candidate for pileup fit
+      pileupFitPoints.push_back({sample, adcBaselineSubtr});
+      uniqueBaselineValues.insert(adc);
+    }
   }
   float baselineStdDev = TMath::RMS(m_chFadcData.at(channel).begin(), std::next(m_chFadcData.at(channel).begin(), m_nBaselineSamples));
 
@@ -307,7 +312,7 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   // we suspect that there is pileup - use nominal baseline
   m_chBaseline.at(channel) = m_nominalBaseline;
 
-  if (nFitPoints < 2) {
+  if (pileupFitPoints.size() < s_minPileupFitPoints || uniqueBaselineValues.size() < s_minUniquePileupFitPoints) {
     m_chStatus.at(channel).set(InsufficientPileupFitPointsBit, true);
     // there are not enough points to do fit, so just use nominal baseline and call it a day
     for (unsigned int sample = 0; sample < m_nSamples; sample++) {
@@ -319,8 +324,8 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   // there is OOT pileup in this channel => expect approx. negative exponential in baseline samples
   m_chStatus.at(channel).set(OutOfTimePileupBit, true);
   // fit (approximately) to exponential and stretched exponential in baseline samples
-  bool expFitSuccess = doPileupExpFit(channel);
-  bool stretchedExpFitSuccess = doPileupStretchedExpFit(channel);
+  bool expFitSuccess = doPileupExpFit(channel, pileupFitPoints);
+  bool stretchedExpFitSuccess = doPileupStretchedExpFit(channel, pileupFitPoints);
 
   if (stretchedExpFitSuccess) {
     // calculate fadc data with baseline and pileup contribution subtracted

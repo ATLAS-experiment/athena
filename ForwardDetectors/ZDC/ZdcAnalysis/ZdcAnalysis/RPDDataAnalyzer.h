@@ -89,8 +89,8 @@ class RPDDataAnalyzer
 
   void setSideStatusBits();
 
-  bool doPileupExpFit(unsigned int channel);
-  bool doPileupStretchedExpFit(unsigned int channel);
+  bool doPileupExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints);
+  bool doPileupStretchedExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints);
   float calculateBaselineSamplesMSE(unsigned int channel, std::function<float(unsigned int)> const& fit) const;
 
   ZDCMsg::MessageFunctionPtr m_msgFunc_p;
@@ -133,5 +133,18 @@ class RPDDataAnalyzer
   std::vector<float> m_ch2ndOrderStretchedExpPileupMSE; /** mean squared error of pileup stretched exponential fit in baseline samples (if pileup was detected and fit did not fail); per channel */
   std::vector<std::bitset<32>> m_chStatus; /** status bits per channel */
   std::bitset<32> m_sideStatus; /** status bits for side */
+
+  /**
+   * in the case of pileup, the number of points (above baseline) in baseline samples required to perform fit.
+   * if insufficient points, set InsufficientPileupFitPointsBit and abort pileup subtraction
+   */
+  static unsigned int constexpr s_minPileupFitPoints = 3;
+  /**
+   * in the case of pileup, the number of UNIQUE points (above baseline) in baseline samples required to perform fit.
+   * this number must be at least the number of parameters in pileup fits, else inversion of Gram matrix in TLinearFitter
+   * will fail and generate ROOT error that propagates to Athena.
+   * if insufficient points, set InsufficientPileupFitPointsBit and abort pileup subtraction.
+   */
+  static unsigned int constexpr s_minUniquePileupFitPoints = 3;
 };
 #endif
