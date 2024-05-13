@@ -11,13 +11,13 @@ JobProperties.jobPropertiesDisallowed = True
 
 def fromRunArgs(runArgs):
     from AthenaCommon.Logging import logging
-    log = logging.getLogger('EVNTMerge')
-    log.info('****************** STARTING EVNT MERGING *****************')
+    log = logging.getLogger("EVNTMerge")
+    log.info("****************** STARTING EVNT MERGING *****************")
 
-    log.info('**** Transformation run arguments')
+    log.info("**** Transformation run arguments")
     log.info(str(runArgs))
 
-    log.info('**** Setting-up configuration flags')
+    log.info("**** Setting-up configuration flags")
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
@@ -26,19 +26,19 @@ def fromRunArgs(runArgs):
 
     commonRunArgsToFlags(runArgs, flags)
 
-    if hasattr(runArgs, 'inputEVNTFile'):
+    if hasattr(runArgs, "inputEVNTFile"):
         flags.Input.Files = runArgs.inputEVNTFile
     else:
-        raise RuntimeError('No input EVNT file defined')
+        raise RuntimeError("No input EVNT file defined")
 
-    if hasattr(runArgs, 'outputEVNT_MRGFile'):
-        if runArgs.outputEVNT_MRGFile == 'None':
-            flags.Output.EVNTFileName = ''
+    if hasattr(runArgs, "outputEVNT_MRGFile"):
+        if runArgs.outputEVNT_MRGFile == "None":
+            flags.Output.EVNTFileName = ""
             # TODO decide if we need a specific EVNT_MRGFileName flag
         else:
             flags.Output.EVNTFileName  = runArgs.outputEVNT_MRGFile
     else:
-        raise RuntimeError('No outputEVNT_MRGFile defined')
+        raise RuntimeError("No outputEVNT_MRGFile defined")
 
     # Pre-include
     processPreInclude(runArgs, flags)
@@ -63,11 +63,11 @@ def fromRunArgs(runArgs):
     cfg.merge(IOVDbSvcCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(flags, 'EVNT', disableEventTag=True, takeItemsFromInput = True))
+    cfg.merge(OutputStreamCfg(flags, "EVNT", disableEventTag=True, takeItemsFromInput = True))
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT"))
+    cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT", disableEventTag=True))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
@@ -87,9 +87,9 @@ def fromRunArgs(runArgs):
             hepmc_version = "HepMC2"
         elif hepmc_version == "3":
             hepmc_version = "HepMC3"
-        log.info('Input file was produced with %s', hepmc_version)
+        log.info("Input file was produced with %s", hepmc_version)
         from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
-        cfg.merge(TagInfoMgrCfg(flags, tagValuePairs={'hepmc_version': hepmc_version}))
+        cfg.merge(TagInfoMgrCfg(flags, tagValuePairs={"hepmc_version": hepmc_version}))
 
     import time
     tic = time.time()
