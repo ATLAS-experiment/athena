@@ -2429,8 +2429,6 @@ _Digitization_Parameters
 _Generation_Parameters
 _Simulation_Parameters
 _TagInfo
-eElesPerf
-eElesPerfAux.
 egammaClusters
 egammaClustersAux.
 egammaClustersAuxDyn.BadChannelList
