@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # File:    BchCleanup.py
 # Package: TileCalibBlobPython
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             usage()
             sys.exit(2)
         else:
-            assert False, "unhandled option"
+            raise RuntimeError("unhandled option")
 
 
     from TileCalibBlobPython.TileCalibLogger import getLogger
