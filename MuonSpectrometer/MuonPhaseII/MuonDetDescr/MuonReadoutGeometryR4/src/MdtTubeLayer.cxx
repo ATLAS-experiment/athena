@@ -7,6 +7,7 @@
 
 #include <GeoModelHelpers/TransformSorter.h>
 #include <GeoModelHelpers/GeoPhysVolSorter.h>
+#include <GeoModelUtilities/GeoVisitVolumes.h>
 
 namespace MuonGMR4{
 
@@ -38,13 +39,46 @@ MdtTubeLayer::MdtTubeLayer(const PVConstLink layer,
 const Amg::Transform3D& MdtTubeLayer::layerTransform() const {
     return m_layTrf->getDefTransform();
 }
+namespace {
+// Helper to find the Nth child volume, without keeping track
+// of the transform.
+class GeoGetChild : public IGeoVisitVolumesNoXformAction
+{
+public:
+  GeoGetChild (size_t n) : m_n (n) {}
+  virtual void operator() (GeoNodeAction& action,
+                           int /*id*/,
+                           const std::string& /*name*/,
+                           const GeoVPhysVol* volume) override
+  {
+    if (m_n == 0) {
+      m_node = volume;
+      action.terminate();
+    }
+    else {
+      --m_n;
+    }
+  }
+
+  size_t m_n;
+  const GeoVPhysVol* m_node = nullptr;
+};
+} // anonymous namespace
 PVConstLink MdtTubeLayer::getTubeNode(unsigned int tube) const {
      if (tube >= nTubes()) {
         std::stringstream except{};
         except<<__FILE__<<":"<<__LINE__<<" "<<m_layerNode->getLogVol()->getName()<<" has only "<<nTubes()<<" tubes. But "<<tube<<" is requested. Please check.";
         throw std::out_of_range(except.str());
     }
-    return m_layerNode->getChildVol(tube);
+
+    // Don't use getChildVol.  Under the hood, that keeps track of the
+    // transform to each child, even though that is not actually used.
+    // This is slow, especially in debug builds where Eigen operations
+    // tend to be expensive.
+    GeoGetChild a (tube);
+    GeoVisitVolumes visitor (a);
+    m_layerNode->exec (&visitor);
+    return a.m_node;
 }
 const Amg::Transform3D MdtTubeLayer::tubeTransform(const unsigned int tube) const {    
     if (tube >= nTubes()) {
