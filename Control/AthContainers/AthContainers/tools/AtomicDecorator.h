@@ -38,23 +38,23 @@ namespace SG {
 /**
  * @brief Access an auxiliary variable atomically.
  */
-template <class T>
+template <class T, class ALLOC = AuxAllocator_t<T> >
 class AtomicDecorator
-  : public Decorator<T>
+  : public Decorator<T, ALLOC>
 {
 public:
   /// Base class.
-  typedef Decorator<T> Base;
+  using Base = Decorator<T, ALLOC>;
 
   /// Type referencing an item.
-  typedef std::atomic<T>& reference_type;
+  using reference_type = std::atomic<T>&;
 
   /// Type the user sees.
-  typedef typename AuxDataTraits<T>::element_type element_type;
+  using element_type = typename AuxDataTraits<T, ALLOC>::element_type;
 
   /// Pointer into the container holding this item.
-  typedef std::atomic<T>* container_pointer_type;
-  typedef const std::atomic<T>* const_container_pointer_type;
+  using container_pointer_type = std::atomic<T>*;
+  using const_container_pointer_type = const std::atomic<T>*;
 
   // Consistency checks.
   static_assert (std::is_same<T, typename Base::element_type>::value,
@@ -108,7 +108,9 @@ public:
    * that do not yet exist (in which case they will be marked as decorations)
    * or variables already marked as decorations.
    */
-  reference_type operator() (const AuxElement& e) const;
+  template <class ELT>
+  ATH_REQUIRES( IsConstAuxElement<ELT> )
+  reference_type operator() (const ELT& e) const;
 
 
   /**
