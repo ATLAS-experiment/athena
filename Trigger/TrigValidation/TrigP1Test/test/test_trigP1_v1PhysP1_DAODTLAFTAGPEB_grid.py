@@ -56,7 +56,7 @@ tlareco.input = ''
 tlareco.explicit_input = True
 tlareco.args = '--inputBSFile=' + find_file('*.physics_FTagPEBTLA*._athenaHLT*.data')  # output of the previous step
 tlareco.args += ' --outputDAOD_TLAFTAGPEBFile=DAOD_TLAFTAGPEB.pool.root'
-tlareco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
+tlareco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2024-03\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
 tlareco.args += ' --CA'
 

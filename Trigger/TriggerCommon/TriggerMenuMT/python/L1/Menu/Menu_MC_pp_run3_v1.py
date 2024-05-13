@@ -166,6 +166,9 @@ def defineMenu():
         #'L1_BPH-0DR3-EM7J15',
         'L1_LAR-ZEE',
 
+        #ATR-29330
+        'L1_4J15',
+
     ]
 
     # To replace thresholds in the physics menu

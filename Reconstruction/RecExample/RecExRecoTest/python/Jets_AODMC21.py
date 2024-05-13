@@ -9,6 +9,7 @@ if __name__=="__main__":
     # We have to set the production step, which PFFlow muon linking uses for autoconfiguration.
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Derivation
+    flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
     flags.fillFromArgs()
     flags.lock()
 
