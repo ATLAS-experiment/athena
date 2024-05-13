@@ -4,9 +4,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def MdtEtaTransformTesterCfg(flags, name = "MdtEtaTransformTester", **kwargs):
+def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwargs):
     result = ComponentAccumulator()
-    theAlg = CompFactory.MuonValR4.MdtEtaTransformTester(name, **kwargs)
+    theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
 
@@ -27,15 +27,16 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)
     
     from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonHoughTransformAlgCfg
+    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonEtaHoughTransformAlgCfg, MuonPhiHoughTransformAlgCfg
     from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
     # from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
     cfg.merge(setupHistSvcCfg(flags,out_file=args.outRootFile,out_stream="MuonEtaHoughTransformTest"))
     cfg.merge(MuonSimHitToMeasurementCfg(flags))
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointMakerAlgCfg 
     cfg.merge(MuonSpacePointMakerAlgCfg(flags))
-    cfg.merge(MuonHoughTransformAlgCfg(flags))
-    cfg.merge(MdtEtaTransformTesterCfg(flags,
+    cfg.merge(MuonEtaHoughTransformAlgCfg(flags))
+    cfg.merge(MuonPhiHoughTransformAlgCfg(flags))
+    cfg.merge(MuonHoughTransformTesterCfg(flags,
                                        drawDisplayFailed =args.displayFailedSeeds,
                                        drawDisplaySuccss = args.displayGoodSeeds))
     cfg.merge(PerfMonMTSvcCfg(flags))
