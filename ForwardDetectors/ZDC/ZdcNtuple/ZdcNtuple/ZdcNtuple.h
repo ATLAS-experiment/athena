@@ -234,7 +234,7 @@ public:
   unsigned int t_RpdSideStatus[2];
   unsigned int t_RpdModuleTruthNphotons[2][16];
 
-  bool t_centroidEventValid;
+  char t_centroidEventValid;
   unsigned int t_centroidStatus[2];
   float t_RPDChannelSubtrAmp[2][16];
   float t_RPDSubtrAmpSum[2];
