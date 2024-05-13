@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # @file: perf-dpmon.py
 # @purpose: analyze the output of PerfMon::StorePayloadMon to display the
 #           DataProxies' payload sizes
@@ -23,7 +23,7 @@ def ana(fname, n_consumers):
     mod_file = open(fname)
     mod = imp.load_module(mod_name, mod_file, fname, ('', '', imp.PY_SOURCE))
 
-    dp_mon_data = getattr(mod, 'data')
+    dp_mon_data = mod.data
 
     nevts = len(dp_mon_data)
     for ievt in range(nevts):

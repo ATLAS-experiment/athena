@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__  = "Frank Winklmeier"
 __version__ = "$Revision: 270227 $"
@@ -261,7 +261,7 @@ def resAvg(res):
    return a
 
 
-def calcEventAvg(comps, sliceObj=slice(None)):
+def calcEventAvg(comps, sliceObj=slice(None)):  # noqa: B008
 
    tmp = {}  # { comp: [] }
    for evt in comps[sliceObj]:
