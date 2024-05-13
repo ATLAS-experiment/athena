@@ -454,11 +454,19 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 
     const size_t thisFragmentSize = buffer.size()*sizeof(uint32_t);
     ATH_MSG_DEBUG( "Serialised size of " << address.persTypeName() << " is " << thisFragmentSize << " bytes" );
-
+    uint16_t  storeInterfaceId=0; std::vector<uint32_t> storeInterfaceBuffer;
     for (const uint16_t id : addressActiveModuleIds) {
+      
       // If result not yet truncated, try adding the serialised data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
-        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode));
+        // for truncation allowed collecitons, save the interface for a later addition
+        if (address.truncationMode==Address::Truncation::Allowed){
+          if (address.category == Address::Category::xAODInterface){
+            storeInterfaceId=id;
+            storeInterfaceBuffer=buffer;
+          }        
+        } else 
+        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode, storeInterfaceId, storeInterfaceBuffer));
       }
       // Check for truncation after adding data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
@@ -484,7 +492,8 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
                                                 const uint16_t id,
                                                 const std::vector<uint32_t>& data,
-                                                Address::Truncation truncationMode) const {
+                                                Address::Truncation truncationMode, 
+                                                const uint16_t  storeInterfaceId, const std::vector<uint32_t>& storeInterfaceBuffer) const {
   if (m_truncationThresholds.value().count(id)==0) {
     ATH_MSG_ERROR("Module ID " << id << " missing from TruncationThresholds map. Cannot determine if result needs truncation");
     return StatusCode::FAILURE;
@@ -513,6 +522,10 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
     hltResult.addTruncatedModuleId(id, severeTruncation);
   }
   else {
+    // for truncation allowed collections, add first the interface, only if the Aux is stored
+    if (truncationMode==Address::Truncation::Allowed){
+      hltResult.addSerialisedData(storeInterfaceId, storeInterfaceBuffer);
+    }
     // The data fits, so add it to the result
     ATH_MSG_DEBUG("Adding data to result with module ID " << id);
     hltResult.addSerialisedData(id, data);
@@ -524,6 +537,7 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
                                                    xAOD::TrigCompositeContainer& debugInfoCont,
                                                    HLT::HLTResultMT& resultToFill,
                                                    SGImplSvc* evtStore) const {
+  ATH_MSG_DEBUG("TriggerEDMSerialiserTool::fillDebugInfo");
   // If full result truncation happened, flag all results as truncated to produce debug info for all
   if (resultToFill.getTruncatedModuleIds().count(fullResultTruncationID)>0) {
     ATH_MSG_ERROR("HLT result truncation on total size! Limit of "
@@ -561,9 +575,11 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
         if (!truncationInfo.recorded && truncationInfo.size > largestDropped.second) {
           largestDropped = {truncationInfo.addrPtr->persTypeName(), truncationInfo.size};
         }
-        // Decide if this was a severe truncation (event goes to debug stream)
+        // Decide if this was a severe truncation (event goes to debug stream)                
         if (!truncationInfo.recorded) {
           severeTruncation |= (truncationInfo.addrPtr->truncationMode==Address::Truncation::Error);
+          ATH_MSG_DEBUG("Entering "<<truncationInfo.recorded<<" severeTruncation="<<severeTruncation);
+
         }
       }
       totalSize(*debugInfoThisModule) = sizeSum;

@@ -110,11 +110,11 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
     if ttype == ThrType.jEM:
         return getConfig_jEM()
     if ttype == ThrType.eTAU:
-        return getConfig_eTAU(do_eFex_BDT_Tau)
+        return getConfig_eTAU(do_eFex_BDT_Tau, do_HI_tob_thresholds)
     if ttype == ThrType.cTAU:
         return getConfig_cTAU(do_eFex_BDT_Tau)
     if ttype == ThrType.jTAU:
-        return getConfig_jTAU()
+        return getConfig_jTAU(do_HI_tob_thresholds)
     if ttype == ThrType.jJ:
         return getConfig_jJ()
     if ttype == ThrType.jLJ:
@@ -381,7 +381,7 @@ class L1Config_eTAU:
     bitshift_rHad = 3
 
 
-    def __call__(self, do_eFex_BDT_Tau=True) -> odict:
+    def __call__(self, do_eFex_BDT_Tau=True, do_HI_tob_thresholds=False) -> odict:
         # Load either RCore or BDT cut thresholds
         rCore_fw_loose = self.BDT_fw_loose if do_eFex_BDT_Tau else self.rCore_fw_loose
         rCore_fw_medium = self.BDT_fw_medium if do_eFex_BDT_Tau else self.rCore_fw_medium
@@ -404,7 +404,7 @@ class L1Config_eTAU:
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
                  ]),
         ]
-        confObj["ptMinToTopo"] = 5 # PLACEHOLDER
+        confObj["ptMinToTopo"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
         confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
@@ -534,7 +534,7 @@ getConfig_cTAU = L1Config_cTAU()
 
 
 @dataclass
-class L1Config_jTAU():
+class L1Config_jTAU:
     # jTAU isolation cut:
     # 10 bits (0 - 1023)
     # jTAU.EtIso / jTAU.Et < isolation_fw/1024 -> pass
@@ -544,7 +544,7 @@ class L1Config_jTAU():
     isolation_fw_tight: int = 307
 
 
-    def __call__(self) -> odict:
+    def __call__(self,do_HI_tob_thresholds=False) -> odict:
         confObj = odict()
         confObj["workingPoints"] = odict()
         confObj["workingPoints"]["Loose"] = [
@@ -559,12 +559,12 @@ class L1Config_jTAU():
             odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_tight)), ("isolation_fw", self.isolation_fw_tight), 
                   ]),
         ]
-        confObj["ptMinToTopo1"] = 5 # PLACEHOLDER
-        confObj["ptMinToTopo2"] = 5 # PLACEHOLDER
-        confObj["ptMinToTopo3"] = 5 # PLACEHOLDER
-        confObj["ptMinxTOB1"] = 5 # PLACEHOLDER
-        confObj["ptMinxTOB2"] = 5 # PLACEHOLDER
-        confObj["ptMinxTOB3"] = 5 # PLACEHOLDER
+        confObj["ptMinToTopo1"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinToTopo2"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinToTopo3"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinxTOB1"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinxTOB2"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinxTOB3"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 200
         confObj["maxEt"] = 50 # PLACEHOLDER
 

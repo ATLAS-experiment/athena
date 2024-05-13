@@ -118,7 +118,7 @@ def defineInputsMenu():
         "legacy" : False,
         "thresholds" : [ # Topo1A: eFex EM, eFex TAU, gJ, gLJ
             # eTAU thresholds for commissioning
-            ('eTAU12',3), ('eTAU20',3), ('eTAUSPARE1',3), 
+            ('eTAU12',3), ('eTAU20',3), ('eTAU1',3),
 
             (None,3),
 
@@ -199,7 +199,7 @@ def defineInputsMenu():
 
             'jTAU30', 'jTAU30M',
             # jTAU thresholds for production
-            'jTAUSPARE1',
+            'jTAU1',
 
             None, 
 

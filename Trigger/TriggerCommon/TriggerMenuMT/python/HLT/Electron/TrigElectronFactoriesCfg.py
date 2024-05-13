@@ -126,7 +126,8 @@ def TrigElectronIsoBuilderCfg(flags, tag, TrackParticleLocation, electronCollect
                                         TrackIsolationTool    = acc.popToolsAndMerge(TrigTrackIsolationToolCfg(flags,tag,TrackParticleLocation)),
                                         ElIsoTypes            = [[isoPar.ptcone30,isoPar.ptcone20]],
                                         ElCorTypes            = [[isoPar.coreTrackPtr]],
-                                        ElCorTypesExtra       = [[]])
+                                        ElCorTypesExtra       = [[]],
+                                        IsTrigger = True)
         acc.addEventAlgo(builder)
         return acc
 

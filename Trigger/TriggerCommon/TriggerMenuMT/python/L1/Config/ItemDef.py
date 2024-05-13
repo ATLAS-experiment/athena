@@ -477,10 +477,12 @@ class ItemDef:
         MenuItem('L1_TAU40_UNPAIRED_ISO'   ).setLogic( d.HA40  & unpaired_isocond ).setTriggerType( TT.calo )
 
         #Phase-I
+        MenuItem('L1_eTAU1'  ).setLogic( d.eTAU1   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU12'  ).setLogic( d.eTAU12   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU20'  ).setLogic( d.eTAU20   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU20L' ).setLogic( d.eTAU20L  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU20M' ).setLogic( d.eTAU20M  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_jTAU1'  ).setLogic( d.jTAU1   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_jTAU20'  ).setLogic( d.jTAU20   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_jTAU30'  ).setLogic( d.jTAU30   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_jTAU30M' ).setLogic( d.jTAU30M  & physcond).setTriggerType( TT.calo )
