@@ -259,6 +259,7 @@ def SetupMetaDataForStreamCfg(
             itemOrList=helperLists.mdItems,
             AcceptAlgs=AcceptAlgs,
             HelperTools=helperLists.helperTools,
+            **kwargs
         )
     )
     # Configure the MetaDataSvc and pass the relevant tools
