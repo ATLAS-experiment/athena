@@ -41,6 +41,9 @@ class ItkpixEncoder{
         void setEventsPerStream(const uint nEventsPerStream = 16){m_nEventsPerStream = nEventsPerStream;}
     
     protected:
+        // Chip geometry
+        uint m_nCol, m_nRow, m_nCCol, m_nQRow, m_nColInCCol, m_nRowInQRow;
+
         // Output
         std::vector<uint32_t> m_words;
         uint m_nEventsPerStream, m_currCCol, m_currQRow, m_currEvent;//, m_lastQRow;
@@ -51,9 +54,6 @@ class ItkpixEncoder{
         uint8_t  m_currBit;
         std::vector<std::vector<bool>> m_hitQCores;
         std::vector<uint> m_lastQRow;
-
-        // Chip geometry
-        uint m_nCol, m_nRow, m_nCCol, m_nQRow, m_nColInCCol, m_nRowInQRow;
 
         //Globals - could be replace with compile-time conditioning instead of run-time if performance is critical
         bool m_plainHitMap, m_dropToT;

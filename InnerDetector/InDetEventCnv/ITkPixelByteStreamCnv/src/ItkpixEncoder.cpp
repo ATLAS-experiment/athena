@@ -76,8 +76,8 @@ void ItkpixEncoder::pushWords32(){
 void ItkpixEncoder::encodeQCore(const uint nCCol, const uint nQRow){
     //produce hit map and ToTs
     //First, get the top-left pixel in the QCore
-    uint m_col = nCCol * m_nColInCCol;
-    uint m_row = nQRow * m_nRowInQRow;
+    uint col = nCCol * m_nColInCCol;
+    uint row = nQRow * m_nRowInQRow;
 
     //now loop, store ToTs, and build index of the
     //compressed hit map in the LUT
@@ -85,8 +85,8 @@ void ItkpixEncoder::encodeQCore(const uint nCCol, const uint nQRow){
     std::vector<uint16_t> tots;
     tots.reserve(16);
     int pix = 0;
-    for (uint pixRow = m_row; pixRow < m_row + m_nRowInQRow; pixRow++){
-        for (uint pixCol = m_col; pixCol < m_col + m_nColInCCol; pixCol++){
+    for (uint pixRow = row; pixRow < row + m_nRowInQRow; pixRow++){
+        for (uint pixCol = col; pixCol < col + m_nColInCCol; pixCol++){
             if (m_hitMap(pixCol, pixRow)){
                 lutIndex |= 0x1 << pix;
                 tots.push_back(m_hitMap(pixCol, pixRow) - 1);
@@ -114,11 +114,11 @@ void ItkpixEncoder::encodeQCore(const uint nCCol, const uint nQRow){
 bool ItkpixEncoder::hitInQCore(const uint CCol, const uint QRow){
     //Was there a hit in this QCore?
 
-    uint m_col = CCol * m_nColInCCol;
-    uint m_row = QRow * m_nRowInQRow;
+    uint col = CCol * m_nColInCCol;
+    uint row = QRow * m_nRowInQRow;
 
-    for (uint pixRow = m_row; pixRow < m_row + m_nRowInQRow; pixRow++){
-        for (uint pixCol = m_col; pixCol < m_col + m_nColInCCol; pixCol++){
+    for (uint pixRow = row; pixRow < row + m_nRowInQRow; pixRow++){
+        for (uint pixCol = col; pixCol < col + m_nColInCCol; pixCol++){
             if (m_hitMap(pixCol, pixRow)) return true;
         }
     }
@@ -166,7 +166,7 @@ void ItkpixEncoder::encodeEvent(){
             QRow + 1 == m_lastQRow[CCol] ? addBits64(0x1, 1) : addBits64(0x0, 1);
 
             //add the isNeighbor bit. If false, add the QRow address as well.
-            if (QRow == previousQRow + 1){
+            if (QRow == (uint)previousQRow + 1){
                 addBits64(0x1, 1);
             }
             else {

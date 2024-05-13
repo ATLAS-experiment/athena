@@ -5,10 +5,12 @@
 // #include "src/ITkPixelRawDataProviderTool.h"
 // #include "src/ITkPixelRodDecoder.h"
 #include "src/ITkPixelEncodingAlg.h"
+#include "src/ItkPixelEncodingTool.h"
 // #include "src/PixelRDOTool.h"
 
 
 // DECLARE_COMPONENT( ITkPixelRawDataProviderTool )  
 // DECLARE_COMPONENT( ITkPixelRodDecoder )
 DECLARE_COMPONENT( ITkPixelEncodingAlg )
+DECLARE_COMPONENT( ItkPixelEncodingTool )
 // DECLARE_COMPONENT( PixelRDOTool )

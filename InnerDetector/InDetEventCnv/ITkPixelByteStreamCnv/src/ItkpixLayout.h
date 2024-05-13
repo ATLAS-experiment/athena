@@ -21,21 +21,21 @@ template<class T> class ItkpixLayout{
         T& operator()(const uint16_t col, const uint16_t row){
 
             //Columns are stored after one another
-            return pixels[ col * 384 + row ];
+            return m_pixels[ col * 384 + row ];
 
         }
 
         T operator()(const uint16_t col, const uint16_t row) const {
 
             //Columns are stored after one another
-            return pixels[ col * 384 + row ];
+            return m_pixels[ col * 384 + row ];
 
         }
 
     private:
 
         //All chips will allways have 400*384 pixels
-        std::array<T, 153600> pixels = {};
+        std::array<T, 153600> m_pixels = {};
 
 };
 
