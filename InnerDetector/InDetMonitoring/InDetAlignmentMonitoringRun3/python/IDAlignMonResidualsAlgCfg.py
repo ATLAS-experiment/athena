@@ -298,6 +298,16 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         tool.defineHistogram(name, title = title, type = 'TH1F',
                              xbins = 100 * m_FinerBinningFactor, xmin = m_minSiResFillRange, xmax = m_maxSiResFillRange)
 
+    # Define local X 3D histograms 
+    residualX3DArray = helper.addArray([len(layersPix)], alg, 'PixResidualX_3D', topPath = pathResiduals)
+    for postfix, tool in residualX3DArray.Tools.items():
+        layer = layersPix[int( postfix.split('_')[1] )]
+        title = ('Local X Residual vs Module Eta-Phi-ID Pixel Barrel layer %s; Mod Eta; Mod Phi; Local X Residual [mm]' % layer) 
+        name = 'm_modEta,m_modPhi,m_pix_residualsx;pix_b' + layer + '_xresvsmodetaphi_3d'
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = m_EtaModulesPix[int(layer)], xmin = m_EtaModulesMinPix[int(layer)], xmax = m_EtaModulesMaxPix[int(layer)],
+                                                  ybins = m_PhiModules[int(layer)], ymin = -0.5, ymax = m_PhiModules[int(layer)] - 0.5,
+                                                  zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
+
     residualYArray = helper.addArray([len(layersPix)], alg, 'PixResidualY', topPath = pathResiduals)
     for postfix, tool in residualYArray.Tools.items():
         layer = layersPix[int( postfix.split('_')[1] )]
