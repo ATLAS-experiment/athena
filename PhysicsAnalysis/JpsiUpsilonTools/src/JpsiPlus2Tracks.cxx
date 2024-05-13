@@ -448,7 +448,7 @@ namespace Analysis {
         if (m_useMassConst) {
             constexpr double jpsiTableMass = 3096.916;
             m_VKVFitter->setMassInputParticles(m_altMassMuonTracks,*state);
-            std::vector<int> indices= {1, 2};
+            std::array<int,2> indices= {1, 2};
             if (m_altMassConst<0.0) m_VKVFitter->setMassForConstraint(jpsiTableMass,indices,*state);
             if (m_altMassConst>0.0) m_VKVFitter->setMassForConstraint(m_altMassConst,indices,*state);
         }

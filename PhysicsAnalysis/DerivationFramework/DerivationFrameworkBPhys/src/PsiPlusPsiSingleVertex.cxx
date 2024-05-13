@@ -406,22 +406,22 @@ namespace DerivationFramework {
       std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
       m_iVertexFitter->setMassInputParticles(massesInputTracks, *state);
       if (m_constrJpsi1) {
-	m_iVertexFitter->setMassForConstraint(m_mass_jpsi1, std::vector<int>{1,2}, *state);
+	m_iVertexFitter->setMassForConstraint(m_mass_jpsi1, std::array<int,2>{1,2}, *state);
       }
       if (m_constrPsi1 && m_vtx1Daug_num>=3) {
 	m_iVertexFitter->setMassForConstraint(m_mass_psi1, m_vtx1Daug_num==4 ? std::vector<int>{1,2,3,4} : std::vector<int>{1,2,3}, *state);
       }
       if (m_constrDiTrk1 && m_vtx1Daug_num==4) {
-	m_iVertexFitter->setMassForConstraint(m_mass_diTrk1, std::vector<int>{3,4}, *state);
+	m_iVertexFitter->setMassForConstraint(m_mass_diTrk1, std::array<int,2>{3,4}, *state);
       }
       if (m_constrJpsi2) {
-	m_iVertexFitter->setMassForConstraint(m_mass_jpsi2, std::vector<int>{m_vtx1Daug_num+1,m_vtx1Daug_num+2}, *state);
+	m_iVertexFitter->setMassForConstraint(m_mass_jpsi2, std::array<int,2>{m_vtx1Daug_num+1,m_vtx1Daug_num+2}, *state);
       }
       if (m_constrPsi2 && m_vtx2Daug_num>=3) {
 	m_iVertexFitter->setMassForConstraint(m_mass_psi2, m_vtx1Daug_num==4 ? std::vector<int>{m_vtx1Daug_num+1,m_vtx1Daug_num+2,m_vtx1Daug_num+3,m_vtx1Daug_num+4} : std::vector<int>{m_vtx1Daug_num+1,m_vtx1Daug_num+2,m_vtx1Daug_num+3}, *state);
       }
       if (m_constrDiTrk2 && m_vtx2Daug_num==4) {
-	m_iVertexFitter->setMassForConstraint(m_mass_diTrk2, std::vector<int>{m_vtx1Daug_num+3,m_vtx1Daug_num+4}, *state);
+	m_iVertexFitter->setMassForConstraint(m_mass_diTrk2, std::array<int,2>{m_vtx1Daug_num+3,m_vtx1Daug_num+4}, *state);
       }
 
       // Starting point
