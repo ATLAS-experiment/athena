@@ -80,7 +80,7 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     } else {
       m_hitExtend.resize(m_nLayers,0); // all 0
     }
-    if (m_iterStep == 0) m_iterStep = m_hitExtend[m_iterLayer] * 2 + 1; // default 1
+    if (m_iterStep == 0u) m_iterStep = m_hitExtend[m_iterLayer] * 2 + 1; // default 1
 
     // Copy correct r values
     m_r.resize(m_nLayers);
@@ -163,7 +163,7 @@ void FPGATrackSimHough1DShiftTool::calculateShifts()
 		}
 
 		// if thre are d0shifts, apply them
-		for (auto d0shift: m_d0shifts){
+		for (const std::vector<int>& d0shift: m_d0shifts){
 		    m_shifts.push_back(applyVariation(shifts,d0shift,1));
 		    m_shifts.push_back(applyVariation(shifts,d0shift,-1));
 		}
@@ -490,7 +490,7 @@ std::vector<boost::dynamic_bitset<>> FPGATrackSimHough1DShiftTool::makeHitMasks(
 }
 
 
-FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(std::vector<const FPGATrackSimHit*> hits, int bin_track, size_t iShift)
+FPGATrackSimRoad FPGATrackSimHough1DShiftTool::makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, size_t iShift)
 {
     std::vector<int> const & shifts = m_shifts[iShift];
     float qpT = m_qpt[iShift];
@@ -804,7 +804,7 @@ void FPGATrackSimHough1DShiftTool::calculated0Shifts()
     ATH_MSG_DEBUG("d0 Shifts Found = " << m_d0shifts.size());
 }
 
-std::vector<int> FPGATrackSimHough1DShiftTool::applyVariation(std::vector<int> base, std::vector<int> var, int sign) const
+std::vector<int> FPGATrackSimHough1DShiftTool::applyVariation(const std::vector<int>& base, const std::vector<int>& var, int sign) const
 {
     std::vector<int> retv;
 

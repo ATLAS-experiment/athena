@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATRACKSIMHOUGH1DSHIFTTOOL_H
 #define FPGATRACKSIMHOUGH1DSHIFTTOOL_H
@@ -191,7 +191,7 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         void readShifts(std::string const & filepath);
         std::vector<boost::dynamic_bitset<>> makeHitMasks(const std::vector<const FPGATrackSimHit*> & hits);
 
-        FPGATrackSimRoad makeRoad(std::vector<const FPGATrackSimHit*> hits, int bin_track, size_t iShift);
+        FPGATrackSimRoad makeRoad(const std::vector<const FPGATrackSimHit*>& hits, int bin_track, size_t iShift);
         void matchIdealGeoSector(FPGATrackSimRoad & r) const;
         bool passThreshold(std::vector<boost::dynamic_bitset<>>& binHits, int bin ) const;
         void printHitMasks(std::vector<boost::dynamic_bitset<>> const & hitMasks) const;
@@ -208,7 +208,7 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         float deltaPhi(float r, float qPt) const;
 
         void calculated0Shifts();
-        std::vector<int> applyVariation(std::vector<int> base, std::vector<int> var, int sign) const;
+        std::vector<int> applyVariation(const std::vector<int>& base, const std::vector<int>& var, int sign) const;
         void calculateDropable();
         std::vector<int> shiftWithDrop(std::vector<int>& shift,unsigned droplayer) const;
 
