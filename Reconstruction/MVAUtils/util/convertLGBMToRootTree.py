@@ -336,6 +336,14 @@ def test_generic(booster, mvautils_predict, mva_utils, data_input):
     return True
 
 
+# helper for tree traversal
+def _ff(tree, node_infos):
+    if "left_child" in tree:
+        node_infos.append((tree["split_feature"], tree["threshold"]))
+        _ff(tree["left_child"])
+        _ff(tree["right_child"])
+
+
 def test_detail_event(booster, mva_utils, input_values):
     logging.info("input values")
     for ivar, input_value in enumerate(input_values):
@@ -363,17 +371,11 @@ def test_detail_event(booster, mva_utils, input_values):
 
             # dump the tree from lightgbm
             node_infos = []
-
-            def ff(tree):
-                if "left_child" in tree:
-                    node_infos.append((tree["split_feature"], tree["threshold"]))
-                    ff(tree["left_child"])
-                    ff(tree["right_child"])
-
-            ff(
-                booster.dump_model()["tree_info"][itree][
-                    "tree_structure"
-                ]
+            _ff(
+                 booster.dump_model()["tree_info"][itree][
+                     "tree_structure"
+                 ],
+                 node_infos
             )
 
             # we now which tree is failing, check if this is
@@ -495,16 +497,11 @@ def test_multiclass(booster, mva_utils, ntests=10000, test_file=None):
                             # due to input values very close to the threshold
                             # the problem is that lgbm is using double,
                             # while mva_utils is using float
-                            def ff(tree):
-                                if "left_child" in tree:
-                                    node_infos.append((tree["split_feature"], tree["threshold"]))
-                                    ff(tree["left_child"])
-                                    ff(tree["right_child"])
-
-                            ff(
-                                booster.dump_model()["tree_info"][itree * nclasses + isubtree][
-                                    "tree_structure"
-                                ]
+                            _ff(
+                                 booster.dump_model()["tree_info"][itree * nclasses + isubtree][
+                                     "tree_structure"
+                                 ],
+                                 node_infos
                             )
                             for node_info in node_infos:
                                 value = input_values[node_info[0]]
