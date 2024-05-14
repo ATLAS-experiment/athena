@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmbiguityResolutionAlg.h"
@@ -22,12 +22,15 @@
 namespace {
    std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
       const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
-      return (*atlasSourceLink)->identifierHash();
+      const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
+      return uncalibMeas.identifierHash();
    }
 
    bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
-      return    (*a.get<ActsTrk::ATLASUncalibSourceLink>())->identifierHash()
-             == (*b.get<ActsTrk::ATLASUncalibSourceLink>())->identifierHash();
+      const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
+      const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
+
+      return uncalibMeas_a.identifierHash() == uncalibMeas_b.identifierHash();
    }
 }
 

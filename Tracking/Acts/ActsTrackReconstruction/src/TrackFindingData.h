@@ -139,7 +139,7 @@ namespace
     class BaseIterator
     {
     public:
-      BaseIterator(const EventContext &ctx,
+      BaseIterator([[maybe_unused]] const EventContext &ctx,
                    const xAOD::UncalibratedMeasurementContainer *container,
                    unsigned int element_index,
                    const Acts::GeometryIdentifier &geometry_id)
@@ -148,13 +148,6 @@ namespace
             m_geometryId(geometry_id)
 
       {
-        if (container != nullptr) {
-          m_refElementLink.toIndexedElement (*container, 0, ctx);
-        }
-        if (m_refElementLink.isValid() && !container->empty())
-        {
-          m_refElementLink.getStorableObjectPointer();
-        }
       }
       BaseIterator &operator++()
       {
@@ -166,7 +159,7 @@ namespace
       Acts::SourceLink operator*() const
       {
         assert(m_container && m_index < m_container->size());
-        return Acts::SourceLink(ActsTrk::ATLASUncalibSourceLink(m_refElementLink, m_index));
+        return Acts::SourceLink(ActsTrk::ATLASUncalibSourceLink(m_container->at(m_index)));
       }
       using value_type = unsigned int;
       using difference_type = unsigned int;
@@ -177,7 +170,6 @@ namespace
     private:
       const xAOD::UncalibratedMeasurementContainer *m_container;
       unsigned int m_index;
-      ActsTrk::ATLASUncalibSourceLink m_refElementLink;
       Acts::GeometryIdentifier m_geometryId;
     };
 
@@ -299,7 +291,7 @@ namespace
     {
       if (m_disabled || m_nextSeed == m_nUsedMeasurements.size())
         return;
-      for (auto [iiseed, eiseed] = m_seedIndex.equal_range(&(**sl)); iiseed != eiseed; ++iiseed)
+      for (auto [iiseed, eiseed] = m_seedIndex.equal_range(&(ActsTrk::getUncalibratedMeasurement(sl))); iiseed != eiseed; ++iiseed)
       {
         size_t iseed = iiseed->second;
         assert(iseed < m_nUsedMeasurements.size());

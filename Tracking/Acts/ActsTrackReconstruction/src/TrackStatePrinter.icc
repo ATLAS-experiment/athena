@@ -101,10 +101,11 @@ namespace ActsTrk
     if (state.hasUncalibratedSourceLink())
     {
       ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-      index = (*sl)->index();
+      const xAOD::UncalibratedMeasurement &umeas = getUncalibratedMeasurement(sl);
+      index = umeas.index();
       for (const auto &[container, offset] : container_offset)
       {
-        if ((*sl)->container() == container)
+        if (umeas.container() == container)
         {
           index += offset;
           break;
