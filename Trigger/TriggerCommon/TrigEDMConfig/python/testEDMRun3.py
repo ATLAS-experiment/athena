@@ -61,7 +61,7 @@ def main():
                 "associated interface container in the EDM list")
       return_code = 1
 
-    file_types = edm[1].split(" ")
+    file_types = edm[1].split() # might return empty list, this is fine - 0 output file types allowed for an EDM entry (in case of obsolete containers)
 
     for file_type in file_types:
       if file_type not in AllowedOutputFormats:
