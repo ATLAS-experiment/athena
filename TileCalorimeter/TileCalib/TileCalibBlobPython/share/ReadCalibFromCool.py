@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # ReadCalibFromCool.py
 # Andrei Artamonov 2009-11-03
@@ -149,7 +149,7 @@ for o, a in opts:
         usage()
         sys.exit(2)
     else:
-        assert False, "unhandeled option"
+        raise RuntimeError("unhandled option")
 
 
 from TileCalibBlobPython import TileCalibTools
