@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/JetTruthLabelingTool.h"
@@ -8,6 +8,7 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgTools/CurrentContext.h"
+#include "AthContainers/ConstAccessor.h"
 
 JetTruthLabelingTool::JetTruthLabelingTool(const std::string& name) :
   asg::AsgTool(name)
@@ -326,12 +327,13 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     truthGroomedJets = SG::makeHandle(m_truthGroomedJetCollectionName, ctx);
   }
   const SG::AuxElement::Accessor<int> nbAcc (m_truthLabelName + "_NB");
+  static const SG::ConstAccessor< ElementLink< xAOD::JetContainer > > ParentAcc ("Parent");
   for(const xAOD::Jet *jet : jets) {
 
     /// Get parent ungroomed reco jet for matching
     const xAOD::Jet* parent = nullptr;
     if ( m_matchUngroomedParent ){
-      ElementLink<xAOD::JetContainer> element_link = jet->auxdata<ElementLink<xAOD::JetContainer> >("Parent");
+      ElementLink<xAOD::JetContainer> element_link = ParentAcc (*jet);
       if ( element_link.isValid() ) {
         parent = *element_link;
       }
@@ -405,7 +407,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     if ( m_getTruthGroomedJetValues ) {
       if ( matchTruthJet ) {
         for ( const xAOD::Jet* truthGroomedJet : *truthGroomedJets ) {
-          ElementLink<xAOD::JetContainer> element_link = truthGroomedJet->auxdata<ElementLink<xAOD::JetContainer> >("Parent");
+          ElementLink<xAOD::JetContainer> element_link = ParentAcc (*truthGroomedJet);
           if ( !element_link.isValid() ) { continue; }
           if ( matchTruthJet == *element_link ) {
             matchTruthGroomedJet = truthGroomedJet;
