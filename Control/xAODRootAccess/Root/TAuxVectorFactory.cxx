@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
@@ -78,6 +78,8 @@ namespace xAOD {
                                  const SG::AuxVectorData& src,  size_t src_index,
                                  size_t n ) const {
 
+      if (n == 0) return;
+
       // The size of one element in memory:
       const size_t eltsz = m_proxy->GetIncrement();
 
@@ -137,6 +139,8 @@ namespace xAOD {
                                  SG::AuxVectorData& b, size_t bindex,
                                  size_t n ) const {
 
+      if (n == 0) return;
+
       // The size of one element in memory:
       const size_t eltsz = m_proxy->GetIncrement();
 
@@ -191,6 +195,8 @@ namespace xAOD {
    void TAuxVectorFactory::clear( void* dst,
                                   size_t dst_index,
                                   size_t n ) const {
+
+      if (n == 0) return;
 
       // The size of one element in memory:
       const size_t eltsz = m_proxy->GetIncrement();
