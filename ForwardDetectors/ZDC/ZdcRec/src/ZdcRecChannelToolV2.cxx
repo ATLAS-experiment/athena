@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -34,6 +34,7 @@
 
 #include "ZdcIdentifier/ZdcID.h"
 #include "ZdcConditions/ZdcCablingService.h"
+#include "AthContainers/Accessor.h"
 
 const int      slink2ppmChannel[64] =
   {0,  4,  8,  12,  16,  20,  24,  28,  32,  36,  40,  44,  48,  52,  56,  60,
@@ -168,10 +169,14 @@ int ZdcRecChannelToolV2::convertTT2ZM(const xAOD::TriggerTowerContainer* ttColle
       if (iter != digits_map.end())
 	{
 	  ATH_MSG_DEBUG("adding data to " << std::hex << (*iter).first << " p=" << (*iter).second << " from tt=" << tt << " zdcModule=" << (*iter).second->zdcModule());
-	  if (gain==0&&delay==0) (*iter).second->auxdata<std::vector<uint16_t>>("g0d0Data") = tt->adc() ;
-	  if (gain==0&&delay==1) (*iter).second->auxdata<std::vector<uint16_t>>("g0d1Data") = tt->adc() ;
-	  if (gain==1&&delay==0) (*iter).second->auxdata<std::vector<uint16_t>>("g1d0Data") = tt->adc() ;
-	  if (gain==1&&delay==1) (*iter).second->auxdata<std::vector<uint16_t>>("g1d1Data") = tt->adc() ;
+          static const SG::Accessor<std::vector<uint16_t> > g0d1dataAcc ("g0d1data");
+          static const SG::Accessor<std::vector<uint16_t> > g1d1dataAcc ("g1d1data");
+          static const SG::Accessor<std::vector<uint16_t> > g0d0dataAcc ("g0d0data");
+          static const SG::Accessor<std::vector<uint16_t> > g1d0dataAcc ("g1d0data");
+	  if (gain==0&&delay==0) g0d0dataAcc(*iter->second) = tt->adc() ;
+	  if (gain==0&&delay==1) g0d1dataAcc(*iter->second) = tt->adc() ;
+	  if (gain==1&&delay==0) g1d0dataAcc(*iter->second) = tt->adc() ;
+	  if (gain==1&&delay==1) g1d1dataAcc(*iter->second) = tt->adc() ;
 	  ATH_MSG_DEBUG("added data to " << std::hex << (*iter).first << " p=" << (*iter).second << " from tt=" << tt);
 	}      
     }
