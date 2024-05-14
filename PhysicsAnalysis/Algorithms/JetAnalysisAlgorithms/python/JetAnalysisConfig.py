@@ -377,7 +377,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
             config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
-            if self.runFJvtEfficiency and self.config.dataType() is not DataType.Data:
+            if self.runFJvtEfficiency and config.dataType() is not DataType.Data:
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+postfix )
                 config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
