@@ -4,9 +4,7 @@
 # art-description: Test of the RDOtoRDOTrigger transform with Dev menu
 # art-type: grid
 # art-include: main/Athena
-# art-include: 24.0/Athena
 # art-architecture: '#&nvidia'
-# art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
