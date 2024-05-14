@@ -8,6 +8,7 @@ find_package( Boost )
 find_package( Eigen )
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
 find_package( lwtnn )
+find_package( onnxruntime )
 
 # Optional dependencies.
 set( extra_public_libs )
@@ -28,12 +29,12 @@ atlas_add_library( tauRecToolsLib
    tauRecTools/*.h Root/*.cxx tauRecTools/lwtnn/*.h Root/lwtnn/*.cxx
    PUBLIC_HEADERS tauRecTools
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
-   ${LWTNN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   ${LWTNN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} ${LWTNN_LIBRARIES}
-   ${ROOT_LIBRARIES}
+   ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODEventInfo xAODJet xAODParticleEvent xAODPFlow xAODTau xAODTracking xAODEventShape
-   MVAUtils ${extra_public_libs}
+   MVAUtils FlavorTagDiscriminants ${extra_public_libs}
    PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver )
 
 atlas_add_dictionary( tauRecToolsDict
@@ -46,5 +47,5 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AsgMessagingLib xAODBase
       xAODCaloEvent xAODJet xAODPFlow xAODTau FourMomUtils tauRecToolsLib PFlowUtilsLib
-      ${extra_private_libs} )
+      FlavorTagDiscriminants ${extra_private_libs} )
 endif()
