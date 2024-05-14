@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -86,6 +86,7 @@ namespace CP
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("release", m_release.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("systematicScheme", m_sysScheme.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("applyCorrectionOnData", m_applyCorrectionOnData.value()));
+	    ATH_CHECK(m_MuonIntSagittaTool.setProperty("doDirectCBCalib", m_doDirectCBCalib.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("doEtaSagittaSys", m_doEtaSagittaSys.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("OutputLevel", msg().level()));
         }       

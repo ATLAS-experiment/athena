@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCAST_MUONCALIBINTSAGITTATOOL_H
@@ -65,6 +65,9 @@ namespace CP {
         Gaudi::Property<bool>  m_doEtaSagittaSys{this, "doEtaSagittaSys",   false, "Do Eta dependant systematic system"};
         Gaudi::Property<bool> m_applyCorrectionOnData{this, "applyCorrectionOnData",   true, "If to apply sagitta corrections on data, or take the full effect as systematic"};
 
+        // Do direct CB calibration 
+        Gaudi::Property<bool> m_doDirectCBCalib{this, "doDirectCBCalib", true, "Apply sagitta corrections on CB tracks, otherwise, on ID+MS"};
+      
         // Rho value to be used
         Gaudi::Property<bool> m_useFixedRho{this, "useFixedRho",   true, "Force Fixed Rho"};
         Gaudi::Property<float> m_fixedRhoValue{this, "fixedRhoValue", 1,     "Value for rho, if it is forced"};
