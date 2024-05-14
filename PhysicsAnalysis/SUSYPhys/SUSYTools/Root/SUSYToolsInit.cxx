@@ -1085,11 +1085,16 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       // electron triggers - first SFs (but we need to massage the id string since all combinations are not supported)
   
       //single lepton
-      ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<eleId<<"_"<<m_eleIso_WP);
+      
+      std::string triggerEleID = m_isRun3? TString(eleId).ReplaceAll("LooseBLayer", "Loose").Data() : eleId;
+      
+      if(m_isRun3 && eleId.find("LooseBLayer") != std::string::npos) ATH_MSG_WARNING("Replacing 'LooseBLayer' with 'Loose' for Electron ID while configuring single-ele trigger SF using: " << m_eleEffMapFilePath);
+      
+      ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<triggerEleID<<"_"<<m_eleIso_WP);
       std::string triggerEleIso("");
-      if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+eleId+"_"+m_eleIso_WP) != eSF_keys.end()){
+      if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_eleIso_WP) != eSF_keys.end()){
         triggerEleIso   = m_eleIso_WP;
-      } else if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+eleId+"_"+m_el_iso_fallback[m_eleIso_WP]) != eSF_keys.end()){
+      } else if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_el_iso_fallback[m_eleIso_WP]) != eSF_keys.end()){
         //--- Check to see if the only issue is an unknown isolation working point
         triggerEleIso = m_el_iso_fallback[m_eleIso_WP];
         ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool_trig_singleLep_*) Your selected electron Iso WP ("
@@ -1103,12 +1108,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
   
-      toolName = "AsgElectronEfficiencyCorrectionTool_trig_singleLep_" + m_eleId;
+      toolName = "AsgElectronEfficiencyCorrectionTool_trig_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trig_singleLep.isUserConfigured() ) {
         m_elecEfficiencySFTool_trig_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("TriggerKey", m_electronTriggerSFStringSingle) );
-        ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IdKey", eleId) );
+        ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IdKey", triggerEleID) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IsoKey", triggerEleIso) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("CorrelationModel", m_EG_corrModel) );
         if (!isData()) {
@@ -1119,12 +1124,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       } else ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.retrieve() );
       
   
-      toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_singleLep_" + m_eleId;
+      toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trigEff_singleLep.isUserConfigured() ) {
         m_elecEfficiencySFTool_trigEff_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePath : m_eleEffMapFilePathRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("TriggerKey", "Eff_"+m_electronTriggerSFStringSingle) );
-        ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IdKey", eleId) );
+        ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IdKey", triggerEleID) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IsoKey", triggerEleIso) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("CorrelationModel", m_EG_corrModel) );
         if (!isData()) {
