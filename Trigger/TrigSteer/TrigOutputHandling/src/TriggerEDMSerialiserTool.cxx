@@ -454,19 +454,19 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 
     const size_t thisFragmentSize = buffer.size()*sizeof(uint32_t);
     ATH_MSG_DEBUG( "Serialised size of " << address.persTypeName() << " is " << thisFragmentSize << " bytes" );
-    uint16_t  storeInterfaceId=0; std::vector<uint32_t> storeInterfaceBuffer;
+    uint16_t  deferredInterfaceId=0; std::vector<uint32_t> deferredInterfaceBuffer;
     for (const uint16_t id : addressActiveModuleIds) {
       
       // If result not yet truncated, try adding the serialised data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
-        // for truncation allowed collecitons, save the interface for a later addition
+        // for truncation allowed collections, save the interface for a deferred addition
         if (address.truncationMode==Address::Truncation::Allowed){
           if (address.category == Address::Category::xAODInterface){
-            storeInterfaceId=id;
-            storeInterfaceBuffer=buffer;
+            deferredInterfaceId=id;
+            deferredInterfaceBuffer=buffer;
           }        
         } else 
-        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode, storeInterfaceId, storeInterfaceBuffer));
+        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode, deferredInterfaceId, deferredInterfaceBuffer));
       }
       // Check for truncation after adding data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
@@ -493,7 +493,7 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
                                                 const uint16_t id,
                                                 const std::vector<uint32_t>& data,
                                                 Address::Truncation truncationMode, 
-                                                const uint16_t  storeInterfaceId, const std::vector<uint32_t>& storeInterfaceBuffer) const {
+                                                const uint16_t  deferredInterfaceId, const std::vector<uint32_t>& deferredInterfaceBuffer) const {
   if (m_truncationThresholds.value().count(id)==0) {
     ATH_MSG_ERROR("Module ID " << id << " missing from TruncationThresholds map. Cannot determine if result needs truncation");
     return StatusCode::FAILURE;
@@ -522,9 +522,9 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
     hltResult.addTruncatedModuleId(id, severeTruncation);
   }
   else {
-    // for truncation allowed collections, add first the interface, only if the Aux is stored
+    // for truncation allowed collections, add first the interface, only if the Aux is can be stored
     if (truncationMode==Address::Truncation::Allowed){
-      hltResult.addSerialisedData(storeInterfaceId, storeInterfaceBuffer);
+      hltResult.addSerialisedData(deferredInterfaceId, deferredInterfaceBuffer);
     }
     // The data fits, so add it to the result
     ATH_MSG_DEBUG("Adding data to result with module ID " << id);
@@ -537,7 +537,6 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
                                                    xAOD::TrigCompositeContainer& debugInfoCont,
                                                    HLT::HLTResultMT& resultToFill,
                                                    SGImplSvc* evtStore) const {
-  ATH_MSG_DEBUG("TriggerEDMSerialiserTool::fillDebugInfo");
   // If full result truncation happened, flag all results as truncated to produce debug info for all
   if (resultToFill.getTruncatedModuleIds().count(fullResultTruncationID)>0) {
     ATH_MSG_ERROR("HLT result truncation on total size! Limit of "
@@ -578,8 +577,6 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
         // Decide if this was a severe truncation (event goes to debug stream)                
         if (!truncationInfo.recorded) {
           severeTruncation |= (truncationInfo.addrPtr->truncationMode==Address::Truncation::Error);
-          ATH_MSG_DEBUG("Entering "<<truncationInfo.recorded<<" severeTruncation="<<severeTruncation);
-
         }
       }
       totalSize(*debugInfoThisModule) = sizeSum;
