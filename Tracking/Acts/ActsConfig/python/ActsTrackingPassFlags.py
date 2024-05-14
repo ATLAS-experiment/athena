@@ -142,20 +142,3 @@ def createActsValidateAmbiguityResolutionTrackingPassFlags():
     icf.doActsToAthenaResolvedTrack = True
     return icf
 
-def createActsBenchmarkSpotTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = "ActsBenchmarkSpot"
-    deactivateAthenaComponents(icf)
-    # Very not-standard configuration
-    icf.doAthenaCluster = True
-    icf.doActsCluster = True
-    icf.doAthenaToActsCluster = True
-    icf.doActsSpacePoint = True
-    icf.doActsSeed = True
-    icf.doActsTrack = True
-    icf.doActsAmbiguityResolution = True
-    icf.doActsToAthenaResolvedTrack = True
-    return icf
-
-
-    

@@ -7,7 +7,6 @@ def actsAloneWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = True
-    from TrkConfig.TrkConfigFlags import TrackingComponent
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
     
 def actsHeavyIonFlags(flags) -> None:
@@ -68,7 +67,3 @@ def actsValidateGSFFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use GaussianSumFitter"""
     from ActsConfig.ActsConfigFlags import TrackFitterType
     flags.Acts.trackFitterType = TrackFitterType.GaussianSumFitter
-
-def actsBenchmarkSpotFlags(flags) -> None:
-    """flags for Reco_tf with CA used for becnkmarking with SPOT"""
-    flags.Tracking.recoChain = [TrackingComponent.BenchmarkSpot]
