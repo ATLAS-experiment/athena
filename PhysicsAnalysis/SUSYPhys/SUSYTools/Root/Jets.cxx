@@ -56,6 +56,7 @@ namespace ST {
   const static SG::AuxElement::Decorator<float> dec_btag_pb("btag_pb");
   const static SG::AuxElement::Decorator<float> dec_btag_pc("btag_pc");
   const static SG::AuxElement::Decorator<float> dec_btag_pu("btag_pu");
+  const static SG::AuxElement::Decorator<float> dec_btag_ptau("btag_ptau");
   // for backwards compatibility
   const static SG::AuxElement::Decorator<float> dec_btag_dl1pb("btag_dl1pb");
   const static SG::AuxElement::Decorator<float> dec_btag_dl1pc("btag_dl1pc");
@@ -1094,7 +1095,7 @@ namespace ST {
     dec_btag_weight(input) = weight;
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag weight: " << weight );
 
-    double btag_pb(-10), btag_pc(-10), btag_pu(-10);
+    double btag_pb(-10), btag_pc(-10), btag_pu(-10), btag_ptau(-10);
     // following name change is needed given different name is used for GN2v00 in derivation and in CDI
     std::string actualTagger = btagTagger;
     if (btagTagger == "GN2v00LegacyWP" || btagTagger == "GN2v00NewAliasWP"){
@@ -1103,12 +1104,15 @@ namespace ST {
     xAOD::BTaggingUtilities::getBTagging(input)->pb(actualTagger, btag_pb);
     xAOD::BTaggingUtilities::getBTagging(input)->pc(actualTagger, btag_pc);
     xAOD::BTaggingUtilities::getBTagging(input)->pu(actualTagger, btag_pu);
+    xAOD::BTaggingUtilities::getBTagging(input)->pu(actualTagger, btag_ptau);
     dec_btag_pb(input) = btag_pb;
     dec_btag_pc(input) = btag_pc;
     dec_btag_pu(input) = btag_pu;
-    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pb: " << btag_pb );
-    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pc: " << btag_pc );
-    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pu: " << btag_pu );
+    dec_btag_ptau(input) = btag_ptau;
+    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pb:   " << btag_pb );
+    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pc:   " << btag_pc );
+    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pu:   " << btag_pu );
+    ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type ptau: " << btag_ptau );
     // backwards compatibility
     if ( btagSelTool->name().find("DL1")!=std::string::npos ) {
        dec_btag_dl1pb(input) = btag_pb;
