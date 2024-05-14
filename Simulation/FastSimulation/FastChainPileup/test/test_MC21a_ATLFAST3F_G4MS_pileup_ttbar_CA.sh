@@ -38,7 +38,7 @@ FastChain_tf.py \
     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
     --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
     --preInclude 'Campaigns.MC21a' 'Campaigns.MC21SimulationNoIoV' \
-    --postInclude 'PyJobTransforms.UseFrontier' 'Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
+    --postInclude 'PyJobTransforms.UseFrontier' 'DigitizationConfig.DigitizationSteering.DigitizationTestingPostInclude' \
     --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
