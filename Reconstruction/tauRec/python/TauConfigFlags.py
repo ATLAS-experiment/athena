@@ -60,6 +60,9 @@ def createTauConfigFlags():
     # R22 DeepSet tau ID tune without track RNN scores, for now define a second set of flags, but ultimately we'll choose one and drop the other
     tau_cfg.addFlag("Tau.TauJetDeepSetConfig_v2", ["tauid_1p_R22_dpst_noTrackScore.json", "tauid_2p_R22_dpst_noTrackScore.json", "tauid_3p_R22_dpst_noTrackScore.json"])
     tau_cfg.addFlag("Tau.TauJetDeepSetWP_v2", ["model_1p_R22_dpst_noTrackScore.root", "model_2p_R22_dpst_noTrackScore.root", "model_3p_R22_dpst_noTrackScore.root"])
+    # GNTau ID tune file (need to add another version for noAux)
+    tau_cfg.addFlag("Tau.TauGNNConfig", ["GNTau_noAux_simplified.onnx"])
+    tau_cfg.addFlag("Tau.TauGNNWP_v0", ["GNTauNA_flat_model_1p.root", "GNTauNA_flat_model_2p.root", "GNTauNA_flat_model_3p.root"])
 
     # PanTau config flags
     from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags

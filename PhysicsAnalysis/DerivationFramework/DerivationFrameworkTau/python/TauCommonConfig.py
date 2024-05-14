@@ -103,6 +103,7 @@ def AddTauIDDecorationCfg(flags, **kwargs):
 
     kwargs.setdefault("evetoFix",         True)
     kwargs.setdefault("DeepSetID",        True)
+    kwargs.setdefault("GNNTauID",        True)
     kwargs.setdefault("TauContainerName", "TauJets")
     kwargs.setdefault("prefix",           kwargs['TauContainerName'])
 
@@ -122,6 +123,11 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         # R22 DeepSet tau ID tune without track RNN scores
         tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags, version="v2")) )
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags, version="v2")) )
+
+    if kwargs['GNNTauID']:    
+        # Add in GNTau!
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags)) )
 
     if tools:
         for tool in tools:
