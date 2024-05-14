@@ -41,6 +41,7 @@ if __name__=='__main__':
   parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', action='store_true')
   parser.add_argument('-q','--addNoisyRO', dest='noisyRO', default=False, help='Add reco and info from LArNoisyROSummary to output ntuple', action='store_true')
   parser.add_argument('--addTT', dest='TT', default=False, help='Add info from LArTriggerTowers to output ntuple', action='store_true')
+  parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -157,10 +158,15 @@ if __name__=='__main__':
   flags.LArSCDump.fillNoisyRO=args.noisyRO
   # in case stores needs to be debugged:
   #from AthenaCommon.Constants import DEBUG
-  #flags.Exec.OutputLevel=DEBUG
+  flags.Exec.OutputLevel=args.olevel
   #flags.Debug.DumpCondStore=True
   #flags.Debug.DumpDetStore=True
   #flags.Debug.DumpEvtStore=True
+
+  # additions for EMF
+  if args.emf:
+     flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
+     flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
 
   flags.lock()
   flags.dump('LArSCDump.*')
@@ -192,7 +198,7 @@ if __name__=='__main__':
       acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
 
   from LArCalibTools.LArSC2NtupleConfig import LArSC2NtupleCfg
-  acc.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
+  acc.merge(LArSC2NtupleCfg(flags, isEmf = args.emf, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, # from LArCond2NtupleBase 
                             NSamples=flags.LArSCDump.nSamples, FTlist=[], FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
@@ -214,7 +220,6 @@ if __name__=='__main__':
       log.info(f)
   log.info("Output file: ")
   log.info(args.outfile)
-
 
   # and run
   acc.run(args.maxev)

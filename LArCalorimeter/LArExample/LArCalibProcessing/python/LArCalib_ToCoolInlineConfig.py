@@ -147,6 +147,8 @@ if __name__=="__main__":
     flags.Debug.DumpCondStore=True
     flags.Debug.DumpEvtStore=True
 
+    from AthenaCommon.Constants import DEBUG
+    flags.Exec.OutputLevel=DEBUG
     flags.dump()
     flags.lock()
    

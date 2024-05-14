@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
@@ -276,8 +276,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
             xxuv_to_uvxx(recon,thisPlane,pars[station]);
           }
 
-          int special_time = thisTime + (event+1)*100;
-
           hitData_entry hit_entry(event,
                                thisTime,
                                thisCharge,
@@ -294,7 +292,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
                                tru_phi,
                                true,
                                BC_id,
-                               special_time,
                                mazin_check,
                                mazin_check);
 

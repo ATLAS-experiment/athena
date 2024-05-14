@@ -24,18 +24,18 @@ def EfexInputMonitoringConfig(flags):
                               ybins=1,ymin=0,ymax=1,ylabels=[""],
                               opt=['kCanRebin','kAlwaysCreate'],merge="merge")
 
-    helper.defineHistogram('LBNString,TowerEta,TowerCount;h_dataTowers_ecal',title='DataTowers ECAL Average;LBN;Eta',
+    helper.defineHistogram('LBN,TowerEta,TowerCount;h_dataTowers_ecal',title='DataTowers ECAL Average;LBN;Eta',
                            fillGroup="ecal",
                            type='TProfile2D',
-                           xlabels=[""],
+                           xbins=1,xmin=0,xmax=1,
                            ybins=50,ymin=-2.5,ymax=2.5,
-                           opt=['kCanRebin','kAlwaysCreate'],merge="merge")
-    helper.defineHistogram('LBNString,TowerEta,TowerCount;h_dataTowers_hcal',title='DataTowers HCAL Average;LBN;Eta',
+                           opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
+    helper.defineHistogram('LBN,TowerEta,TowerCount;h_dataTowers_hcal',title='DataTowers HCAL Average;LBN;Eta',
                            fillGroup="hcal",
                            type='TProfile2D',
-                           xlabels=[""],
+                           xbins=1,xmin=0,xmax=1,
                            ybins=50,ymin=-2.5,ymax=2.5,
-                           opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+                           opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
     helper.defineTree('LBNString,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID,timeSince,timeUntil;errors',
                                            "lbnString/string:error/string:eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string:timeSince/I:timeUntil/I",
                                            title="errors tree;LBN;Error",fillGroup="errors")

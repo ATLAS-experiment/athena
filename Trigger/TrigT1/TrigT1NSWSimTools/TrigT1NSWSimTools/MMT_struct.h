@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_STRUCT_H
@@ -357,7 +357,7 @@ struct evInf_entry{
 };
 
 struct hitData_key{
-  hitData_key(int bct=0, double t=0, double gt=0, int vmm=-1,int ev=-1);
+  hitData_key(int bct=0, double gt=0, int vmm=-1,int ev=-1);
   //for these operators, "less" means what you think it means
   //with precedence of quantities the same as order in the constructor
   //in the context of "earlier," it might make sense to say that a hit is earlier if,
@@ -373,7 +373,7 @@ struct hitData_key{
   void print() const;
 
   int BC_time;
-  double time,gtime;
+  double gtime;
   int VMM_chip,event;
 
 
@@ -436,7 +436,7 @@ struct Hit{
 
 struct hitData_entry{
   hitData_entry(int ev=0, double gt=0, double q=0, int vmm=0, int mmfe=0, int pl=0, int st=0, int est=0, int phi=0, int mult=0, int gg=0, double locX=0, double tr_the=0, double tru_phi=0,
-	     bool q_tbg=0, int bct=0, double time=0,const ROOT::Math::XYZVector& tru=ROOT::Math::XYZVector(), const ROOT::Math::XYZVector& rec=ROOT::Math::XYZVector(),
+	     bool q_tbg=0, int bct=0, const ROOT::Math::XYZVector& tru=ROOT::Math::XYZVector(), const ROOT::Math::XYZVector& rec=ROOT::Math::XYZVector(),
 	     double fit_the=0, double fit_phi=0, double fit_dth=0, double tru_dth=0,// double tru_thl=0, double tru_thg=0,
 	     double mxg=0, double mug=0, double mvg=0, double mxl=0, double the_mx=0, double the_my=0, int the_roi=0);
 
@@ -452,7 +452,6 @@ struct hitData_entry{
   double localX,tru_theta_ip,tru_phi_ip;
   bool truth_nbg;//truth (i.e. not bg) if true,
   int BC_time;/*fit theta, phi, dtheta originally here*/
-  double time;
   ROOT::Math::XYZVector truth,recon;
   double fit_theta,fit_phi;
   double fit_dtheta;

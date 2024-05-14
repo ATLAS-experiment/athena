@@ -237,24 +237,13 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                                ylabels = [str(x) for x in range(1,nsamples+1)],
                                                pattern=[(part)])
                 
-                partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_LATOME_'+thisSel,
-                                               title='ADC - Pedestal vs LATOME name '+selStrPart[thisSel]+'; ; ADC - Pedestal',
-                                               type='TH2F',
-                                               cutmask='Digi_part_'+thisSel,
-                                               path=thisTopPath,
-                                               xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                                               ybins=64, ymin=-32, ymax=32,
-                                               xlabels=BinLabel_LATOME,
-                                               pattern=[(part)])
-
-
                 partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_diff_adc0_ped;Diff_ADC0_Ped_vs_LATOME_'+thisSel,
                                                title='ADC[0] - Pedestal vs LATOME name '+selStrPart[thisSel]+'; ; ADC[0] - Pedestal',
                                                type='TH2F',
                                                cutmask='Digi_part_'+thisSel,
                                                path=thisTopPath,
                                                xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                                               ybins=68, ymin=-34, ymax=34,
+                                               ybins=64, ymin=-32, ymax=32,
                                                xlabels=BinLabel_LATOME,
                                                pattern=[(part)])
 
@@ -283,8 +272,8 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
             if not flags.Common.isOnline: continue   # Skip the remaining histos if we are running offline
             #### HERE - plots which should only be booked for the nominal selection
             if thisSel != "passDigiNom": continue
-            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc_ped;Coverage_Diff_ADC_Ped_'+thisSel,  
-                                           title='ADC - Pedestal'+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc0_ped;Coverage_Diff_ADC0_Ped_'+thisSel,  
+                                           title='ADC[0] - Pedestal'+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
                                            type='TProfile2D',
                                            cutmask='Digi_part_'+thisSel,
                                            path=thisTopPath+'/Coverage',
@@ -295,8 +284,8 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
             #####################
 
-            partGroup_digi.defineHistogram('Digi_part_BCID,Digi_part_iphi,Digi_part_diff_adc_ped;Diff_ADC_Ped_Per_BCID_Per_iphi_'+thisSel,
-                                           title='ADC - Pedestal '+selStrPart[thisSel]+': iphi vs BCID;BCID;iphi',
+            partGroup_digi.defineHistogram('Digi_part_BCID,Digi_part_iphi,Digi_part_diff_adc0_ped;Diff_ADC0_Ped_Per_BCID_Per_iphi_'+thisSel,
+                                           title='ADC[0] - Pedestal '+selStrPart[thisSel]+': iphi vs BCID;BCID;iphi',
                                            type='TProfile2D',
                                            cutmask='Digi_part_'+thisSel,
                                            path=thisTopPath,
@@ -339,8 +328,8 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            ybins=500, ymin=0, ymax=5000, #raw ADC is 12 bit 
                                            pattern=[(part)])
             
-            partGroup_digi.defineHistogram('Digi_part_diff_adc_ped;Diff_ADC_Ped_'+thisSel,
-                                           title='LATOME (ADC-ped) '+selStrPart[thisSel]+'; (ADC - pedestal)',
+            partGroup_digi.defineHistogram('Digi_part_diff_adc0_ped;Diff_ADC0_Ped_'+thisSel,
+                                           title='LATOME (ADC[0]-ped) '+selStrPart[thisSel]+'; (ADC - pedestal)',
                                            type='TH1F',
                                            cutmask='Digi_part_'+thisSel,
                                            path=thisTopPath,
@@ -356,7 +345,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
                                            xlabels = [str(x) for x in range(1,nsamples+1)],
                                            pattern=[(part)])
-                       
+            
             partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc;ADC_vs_BCID_'+thisSel, 
                                            title='ADC value vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
                                            type='TProfile',
@@ -366,8 +355,8 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            ybins=500, ymin=0, ymax=5000,
                                            pattern=[(part)])
 
-            partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_BCID_'+thisSel, 
-                                           title='ADC - Ped value vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
+            partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc0_ped;Diff_ADC0_Ped_vs_BCID_'+thisSel, 
+                                           title='ADC[0] - Ped value vs BCID '+selStrPart[thisSel]+'; BCID; ADC[0] Value',
                                            type='TProfile',
                                            cutmask='Digi_part_'+thisSel,
                                            path=thisTopPath,

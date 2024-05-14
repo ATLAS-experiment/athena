@@ -40,10 +40,10 @@ def LArPileUpAutoCorrCfg(flags):
     rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
     # FIXME these tags has to be re-enabled in 2024 also for main readout:
-    if flags.LArCalib.isSC:
-       PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
-       RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
-       MpMcTag=rs.getFolderTag(flags.LArCalib.MphysOverMcal.Folder)
+    #if flags.LArCalib.isSC:
+    PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
+    RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
+    MpMcTag=rs.getFolderTag(flags.LArCalib.MphysOverMcal.Folder)
     rsac=FolderTagResolver(dbname="COOLOFL_LAR/CONDBR2")
     PhysAutoCorrTag= rsac.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     nColl=flags.LArCalib.OFC.Ncoll
@@ -55,25 +55,25 @@ def LArPileUpAutoCorrCfg(flags):
 
     del rs
 
-    result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags), 
+    result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags)+"<key>LArAutoCorr</key>", 
                             className="LArAutoCorrComplete"))
     # FIXME these folders has to be re-enabled in 2024 also for Main readout:
-    if flags.LArCalib.isSC:
-        result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags), 
-                            className="LArPedestalComplete"))
-        result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
-                            className="LArRampComplete"))
-        result.merge(addFolders(flags,flags.LArCalib.MphysOverMcal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
-                            className="LArMphysOverMcalComplete"))
+    #if flags.LArCalib.isSC:
+    result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags)+"<key>LArPedestal</key>", 
+                        className="LArPedestalComplete"))
+    result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
+                        className="LArRampComplete"))
+    result.merge(addFolders(flags,flags.LArCalib.MphysOverMcal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
+                        className="LArMphysOverMcalComplete"))
 
     #Need ADC2MeV values for AutoCorrCondAlg ... 
     #use current production values as input conditions
     if flags.LArCalib.isSC:
        requiredConditions=["DAC2uA","HVScaleCorr"]
     else:   
-       requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr","Ramp","Pedestal","MphysOverMcal"]
+       #requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr","Ramp","Pedestal","MphysOverMcal"]
        # in 2024 put:
-       #requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr"]
+       requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr"]
     if flags.LArCalib.isSC:
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
        result.merge(LArElecCalibDBSCCfg(flags,requiredConditions))
@@ -102,13 +102,11 @@ def LArPileUpAutoCorrCfg(flags):
     theLArAutoCorrTotalCondAlg.LArAutoCorrObjKey="LArAutoCorr"
     theLArAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey="LArPhysAutoCorr"  
     theLArAutoCorrTotalCondAlg.LArOnOffIdMappingObjKey=mapKey
+    theLArAutoCorrTotalCondAlg.LArPedestalObjKey="LArPedestal"
     if flags.LArCalib.isSC:
-       theLArAutoCorrTotalCondAlg.LArPedestalObjKey="Pedestal"
        theLArAutoCorrTotalCondAlg.LArShapeObjKey = "LArShapeSC"
        theLArAutoCorrTotalCondAlg.LArfSamplObjKey = "LArfSamplSC"
        theLArAutoCorrTotalCondAlg.LArMinBiasObjKey = "LArMinBiasSC"
-    else:   
-       theLArAutoCorrTotalCondAlg.LArPedestalObjKey="LArPedestal"
 
     result.addCondAlgo(theLArAutoCorrTotalCondAlg)
     

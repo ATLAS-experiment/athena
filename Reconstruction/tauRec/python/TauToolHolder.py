@@ -260,24 +260,6 @@ def CellWeightToolCfg(flags):
     # --
     return result
 
-    # _name = sPrefix + 'CellWeightTool'
-
-    # once StandardCellWeightCalib is updated can use this
-    # from CaloRec.CaloTopoClusterFlags import jobproperties
-    # -- auto configure weight tool
-    # finder = jobproperties.CaloTopoClusterFlags.cellWeightRefFinder.get_Value()
-    # size   = jobproperties.CaloTopoClusterFlags.cellWeightRefSize.get_Value()
-    # signal = jobproperties.CaloTopoClusterFlags.cellWeightRefSignal.get_Value()
-    # Defaults already set in StandardCellWeightCalib:
-    # finder=Cone, size=0.4, signal=Topo
-
-    #from CaloClusterCorrection.StandardCellWeightCalib import getCellWeightTool
-    # CaloWeightTool = getCellWeightTool(finder,size,signal)
-    #CaloWeightTool = result.popToolsAndMerge(getCellWeightTool(flags))
-    
-    #result.setPrivateTools(CaloWeightTool)
-    #return result
-
 #########################################################################
 # Photon Shot Finder
 def TauShotFinderCfg(flags):

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_struct.h"
@@ -1047,10 +1047,10 @@ evFit_entry::evFit_entry(int event,double fthe,double fphi,double fdth,int roi,i
 void evFit_entry::print()const{
 }
 
-hitData_key::hitData_key(int bct, double t, double gt, int vmm, int ev):BC_time(bct),time(t),gtime(gt),VMM_chip(vmm),event(ev) {}
+hitData_key::hitData_key(int bct, double gt, int vmm, int ev):BC_time(bct),gtime(gt),VMM_chip(vmm),event(ev) {}
 
 bool hitData_key::operator==(const hitData_key& rhs) const{
-  if(this->BC_time==rhs.BC_time && this->time==rhs.time && this->gtime==rhs.gtime && this->VMM_chip==rhs.VMM_chip && this->event==rhs.event) return true;
+  if(this->BC_time==rhs.BC_time && this->gtime==rhs.gtime && this->VMM_chip==rhs.VMM_chip && this->event==rhs.event) return true;
   return false;
 }
 
@@ -1059,19 +1059,17 @@ bool hitData_key::operator!=(const hitData_key& rhs) const{
 }
 bool hitData_key::operator<(const hitData_key& rhs) const{
   if(this->BC_time<rhs.BC_time) return true;
-  else if(this->BC_time==rhs.BC_time && this->time<rhs.time) return true;
-  else if(this->BC_time==rhs.BC_time && this->time==rhs.time && this->gtime<rhs.gtime) return true;
-  else if(this->BC_time==rhs.BC_time && this->time==rhs.time && this->gtime==rhs.gtime && this->VMM_chip<rhs.VMM_chip) return true;
-  else if(this->BC_time==rhs.BC_time && this->time==rhs.time && this->gtime==rhs.gtime && this->VMM_chip==rhs.VMM_chip && this->event<rhs.event) return true;
+  else if(this->BC_time==rhs.BC_time && this->gtime<rhs.gtime) return true;
+  else if(this->BC_time==rhs.BC_time && this->gtime==rhs.gtime && this->VMM_chip<rhs.VMM_chip) return true;
+  else if(this->BC_time==rhs.BC_time && this->gtime==rhs.gtime && this->VMM_chip==rhs.VMM_chip && this->event<rhs.event) return true;
   return false;
 }
 
 bool hitData_key::operator>(const hitData_key& rhs) const{
   if(this->BC_time>rhs.BC_time) return true;
-  else if(this->BC_time==rhs.BC_time && this->time>rhs.time) return true;
-  else if(this->BC_time==rhs.BC_time && this->time==rhs.time && this->gtime>rhs.gtime) return true;
-  else if(this->BC_time==rhs.BC_time && this->time==rhs.time && this->gtime==rhs.gtime && this->VMM_chip>rhs.VMM_chip) return true;
-  else if(this->BC_time==rhs.BC_time && this->time==rhs.time && this->gtime==rhs.gtime && this->VMM_chip==rhs.VMM_chip && this->event>rhs.event) return true;
+  else if(this->BC_time==rhs.BC_time && this->gtime>rhs.gtime) return true;
+  else if(this->BC_time==rhs.BC_time && this->gtime==rhs.gtime && this->VMM_chip>rhs.VMM_chip) return true;
+  else if(this->BC_time==rhs.BC_time && this->gtime==rhs.gtime && this->VMM_chip==rhs.VMM_chip && this->event>rhs.event) return true;
   return false;
 }
 
@@ -1085,12 +1083,12 @@ bool hitData_key::operator>=(const hitData_key& rhs) const{
 
 string hitData_key::hdr()const{
   ostringstream out;
-  out << setw(12) << "BC_t" << setw(12) << "t" << setw(12) << "g_t" << setw(12) << "VMM" << setw(12) << "event";
+  out << setw(12) << "BC_t" << setw(12) << "g_t" << setw(12) << "VMM" << setw(12) << "event";
   return out.str();
 }
 string hitData_key::str()const{
   ostringstream out;
-  out << setw(12) << this->BC_time << setw(12) << this->time << setw(12) << this->gtime << setw(12) << this->VMM_chip << setw(12) << this->event;
+  out << setw(12) << this->BC_time << setw(12) << this->gtime << setw(12) << this->VMM_chip << setw(12) << this->event;
   return out.str();
 }
 void hitData_key::print()const{
@@ -1215,17 +1213,17 @@ void Hit::print() const{
 }
 
 hitData_entry::hitData_entry(int ev, double gt, double q, int vmm, int mmfe, int pl, int st, int est, int phi, int mult, int gg, double locX, double tr_the, double tru_phi,
-		       bool q_tbg, int bct, double t, const ROOT::Math::XYZVector& tru, const ROOT::Math::XYZVector& rec,
+		       bool q_tbg, int bct, const ROOT::Math::XYZVector& tru, const ROOT::Math::XYZVector& rec,
 		       double fit_the, double fit_ph, double fit_dth, double tru_dth,// double tru_thl, double tru_thg,
 		       double mxg, double mug, double mvg, double mxl, double the_mx, double the_my, int the_roi):
-  event(ev),gtime(gt),charge(q),VMM_chip(vmm),MMFE_VMM(mmfe),plane(pl),strip(st),station_eta(est),station_phi(phi),multiplet(mult),gasgap(gg),localX(locX),tru_theta_ip(tr_the),tru_phi_ip(tru_phi),truth_nbg(q_tbg),BC_time(bct),time(t),truth(tru),recon(rec),fit_theta(fit_the),fit_phi(fit_ph),fit_dtheta(fit_dth),tru_dtheta(tru_dth),
+  event(ev),gtime(gt),charge(q),VMM_chip(vmm),MMFE_VMM(mmfe),plane(pl),strip(st),station_eta(est),station_phi(phi),multiplet(mult),gasgap(gg),localX(locX),tru_theta_ip(tr_the),tru_phi_ip(tru_phi),truth_nbg(q_tbg),BC_time(bct),truth(tru),recon(rec),fit_theta(fit_the),fit_phi(fit_ph),fit_dtheta(fit_dth),tru_dtheta(tru_dth),
   /*tru_theta_local(tru_thl),tru_theta_global(tru_thg),*/M_x_global(mxg),M_u_global(mug),M_v_global(mvg),M_x_local(mxl),mx(the_mx),my(the_my),roi(the_roi) {}
 
 Hit hitData_entry::entry_hit(std::shared_ptr<MMT_Parameters> par)const{
   return Hit(entry_key(),entry_info(par));
 }
 hitData_key hitData_entry::entry_key() const{
-  return hitData_key(BC_time,time,gtime,VMM_chip,event);
+  return hitData_key(BC_time,gtime,VMM_chip,event);
 }
 
 hitData_info hitData_entry::entry_info(std::shared_ptr<MMT_Parameters> par)const{

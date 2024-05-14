@@ -536,12 +536,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, errD0_m);
     auto d0_bscorr_m = Monitored::Scalar<float>( "m_d0_bscorr", d0bscorr );
     fill(genericTrackGroup, d0_bscorr_m);
-
     //d0 vs Eta
     auto eta_2filld0bscorr_m = Monitored::Scalar<float>( "m_eta_2filld0bscorr", trketa );
     auto d0_bscorr_2filleta_m = Monitored::Scalar<float>( "m_d0_bscorr_2filleta", d0bscorr );
     fill(genericTrackGroup, eta_2filld0bscorr_m, d0_bscorr_2filleta_m); 
-   
     //d0 vs phi 
     auto phi_2filld0bscorr_m = Monitored::Scalar<float>( "m_phi_2filld0bscorr", trkphi );
     auto d0_bscorr_2fillphi_m = Monitored::Scalar<float>( "m_d0_bscorr_2fillphi", d0bscorr );
@@ -584,7 +582,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto pT_2fillpTRes_m = Monitored::Scalar<float>( "m_pT_2fillpTRes", pT );
     fill(genericTrackGroup, pT_2fillpTRes_m, pTRes_2fillpT_m);
 
-     //d0 vs pT
+    //d0 vs pT
     auto pT_2filld0bscorr_m = Monitored::Scalar<float>( "m_pT_2filld0bscorr", pT );
     auto d0_bscorr_2fillpT_m = Monitored::Scalar<float>( "m_d0_bscorr_2fillpT", d0bscorr );
     fill(genericTrackGroup, pT_2filld0bscorr_m, d0_bscorr_2fillpT_m); 
