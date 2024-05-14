@@ -196,12 +196,6 @@ namespace MuonGM {
                 m_etaDesign[il].setFirstPos(m_diamondShape ? -(m_etaDesign[il].xSize()- yCutout) + m_etaDesign[il].firstPitch
                                                            : -0.5 * m_etaDesign[il].xSize()+ m_etaDesign[il].firstPitch);
                 m_etaDesign[il].nch = nStrips;
-      
-                m_nStrips[il] = m_etaDesign[il].nch;
-
-                m_halfX[il]    = 0.5*m_etaDesign[il].xSize();
-                m_minHalfY[il] = 0.5*sStripWidth;
-                m_maxHalfY[il] = 0.5*lStripWidth;
             }
     
             //-------------------
@@ -229,7 +223,6 @@ namespace MuonGM {
               m_phiDesign[il].wireCutout = wireCutout[il];                         // Size of "active" wire region for digits
               m_phiDesign[il].nch = nWires[il];
 
-              m_nWires[il] = m_phiDesign[il].nGroups;                            // number of nWireGroups
             }
 
             //-------------------
@@ -251,11 +244,7 @@ namespace MuonGM {
                 m_padDesign[il].lPadWidth = lPadWidth;
 
                 m_padDesign[il].nPadColumns = nPadPhi[il];
-      
-                m_PadhalfX[il]    = 0.5*m_padDesign[il].Size;
-                m_PadminHalfY[il] = 0.5*sPadWidth;
-                m_PadmaxHalfY[il] = 0.5*lPadWidth;
-      
+
                 // The C side of the NSW is mirrored instead of rotated
                 // We should be using the same values for the pads for both A and C
                 // It is easier for us to simply read the same correct value once
@@ -340,13 +329,7 @@ namespace MuonGM {
             m_etaDesign[il].setFirstPos((m_diamondShape) ? -(m_etaDesign[il].xSize()- yCutout) + m_etaDesign[il].firstPitch
                                                          : -0.5 * m_etaDesign[il].xSize()+ m_etaDesign[il].firstPitch);
             m_etaDesign[il].nch         = roParam.nStrips;
-        
-            m_nStrips[il] = m_etaDesign[il].nch;
-            
-            m_halfX[il]    = 0.5*m_etaDesign[il].xSize();
-            m_minHalfY[il] = 0.5*roParam.sStripWidth;
-            m_maxHalfY[il] = 0.5*roParam.lStripWidth;
-        
+
             ATH_MSG_DEBUG("initDesign:" << getStationName() << " layer " << il 
                        << ", strip pitch " << m_etaDesign[il].inputPitch
                        << ", nstrips " << m_etaDesign[il].nch 
@@ -377,7 +360,6 @@ namespace MuonGM {
             m_phiDesign[il].nGroups     = roParam.nWireGroups[il];    // Number of Wire Groups
             m_phiDesign[il].wireCutout  = roParam.wireCutout[il];     // Size of "active" wire region for digits
             m_phiDesign[il].nch         = roParam.nWires[il];
-            m_nWires[il] = m_phiDesign[il].nGroups;  // number of nWireGroups
                 
             ATH_MSG_DEBUG( "initDesign:" << getStationName() << " layer " << il << ", wireGang pitch "
                             << m_phiDesign[il].inputPitch << ", nWireGangs " << m_phiDesign[il].nch );
@@ -401,10 +383,6 @@ namespace MuonGM {
             m_padDesign[il].sPadWidth = roParam.sPadWidth;
             m_padDesign[il].lPadWidth = roParam.lPadWidth;
             m_padDesign[il].nPadColumns = roParam.nPadPhi[il];
-
-            m_PadhalfX[il]    = 0.5*m_padDesign[il].Size;
-            m_PadminHalfY[il] = 0.5*roParam.sPadWidth;
-            m_PadmaxHalfY[il] = 0.5*roParam.lPadWidth;
 
             // The C side of the NSW is mirrored instead of rotated
             // We should be using the same values for the pads for both A and C
@@ -498,16 +476,27 @@ namespace MuonGM {
             //-------------------
 
             if (m_diamondShape) {
-                m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::RotatedDiamondBounds>(
-                    m_minHalfY[layer], m_maxHalfY[layer], m_maxHalfY[layer], m_halfX[layer] - m_etaDesign[layer].yCutout() / 2, m_etaDesign[layer].yCutout() / 2));  // strips
-                m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::DiamondBounds>(
-                    m_PadminHalfY[layer], m_PadmaxHalfY[layer], m_PadmaxHalfY[layer], m_PadhalfX[layer] - m_padDesign[layer].yCutout / 2, m_padDesign[layer].yCutout / 2));  // pad and wires
-                    
+                m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::RotatedDiamondBounds>(m_etaDesign[layer].minYSize() / 2., 
+                                                                                                  m_etaDesign[layer].maxYSize() / 2., 
+                                                                                                  m_etaDesign[layer].maxYSize() / 2., 
+                                                                                                  m_etaDesign[layer].xSize() / 2. - m_etaDesign[layer].yCutout() / 2, 
+                                                                                                  m_etaDesign[layer].yCutout() / 2));  // strips
+
+                m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::DiamondBounds>(m_padDesign[layer].sPadWidth / 2., 
+                                                                                           m_padDesign[layer].lPadWidth / 2., 
+                                                                                           m_padDesign[layer].lPadWidth / 2., 
+                                                                                           m_padDesign[layer].Size / 2. - m_padDesign[layer].yCutout / 2, m_padDesign[layer].yCutout / 2));  // pad and wires
+
             } else {
-                m_surfaceData->m_surfBounds.push_back(
-                    std::make_unique<Trk::RotatedTrapezoidBounds>(m_halfX[layer], m_minHalfY[layer], m_maxHalfY[layer]));  // strips
-                m_surfaceData->m_surfBounds.push_back(
-                    std::make_unique<Trk::TrapezoidBounds>(m_PadminHalfY[layer], m_PadmaxHalfY[layer], m_PadhalfX[layer]));
+                m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::RotatedTrapezoidBounds>(m_etaDesign[layer].xSize() / 2., 
+                                                                                                    m_etaDesign[layer].minYSize() / 2., 
+                                                                                                    m_etaDesign[layer].maxYSize() / 2.));  // strips
+
+                m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::TrapezoidBounds>(m_padDesign[layer].sPadWidth /2., 
+                                                                                             m_padDesign[layer].lPadWidth / 2., 
+                                                                                             m_padDesign[layer].Size / 2.));
+
+
             }
 
             //-------------------
@@ -577,10 +566,13 @@ namespace MuonGM {
         if (gasgap < 1 || gasgap > m_nlayers) return false;
 
         int strip = m_idHelper.channel(id);
-        if (m_idHelper.channelType(id) == sTgcIdHelper::sTgcChannelTypes::Strip && (strip < 1 || strip > m_nStrips[gasgap - 1])) return false;
-        if (m_idHelper.channelType(id) == sTgcIdHelper::sTgcChannelTypes::Wire && (strip < 1 || strip > m_nWires[gasgap - 1])) return false;
-        if (m_idHelper.channelType(id) == sTgcIdHelper::sTgcChannelTypes::Pad && (strip < 1 || strip > m_nPads[gasgap - 1])) return false;
-
+        if (strip < 1) return false;
+        if (m_idHelper.channelType(id) == sTgcIdHelper::sTgcChannelTypes::Strip && strip > m_etaDesign[gasgap - 1].nch) return false;
+        if (m_idHelper.channelType(id) == sTgcIdHelper::sTgcChannelTypes::Wire &&  strip > m_phiDesign[gasgap -1].nGroups) return false;
+        if (m_idHelper.channelType(id) == sTgcIdHelper::sTgcChannelTypes::Pad) {
+            const auto [etaId, phiId] = m_padDesign[gasgap -1].etaPhiId(strip);
+            if (etaId < 0 || phiId < 0) return false;
+        }
         return true;
     }
 
@@ -731,7 +723,6 @@ namespace MuonGM {
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
             // of m_delta so that it can be applied on chamber frame coordinates.
-            Amg::Translation3D t(0., 0., m_offset);
             m_ALinePar  = &aline;
             m_delta     = Amg::getTranslateZ3D(m_offset)*m_delta*Amg::getTranslateZ3D(-m_offset);
             refreshCache();

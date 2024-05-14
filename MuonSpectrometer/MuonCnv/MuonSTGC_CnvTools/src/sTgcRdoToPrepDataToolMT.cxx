@@ -135,7 +135,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
 
         bool getLocalPos = detEl->stripPosition(rdoId, localPos);
         if ( !getLocalPos ) {
-            ATH_MSG_ERROR("Could not get the local strip position for sTgc");
+            ATH_MSG_ERROR("Could not get the local strip position for "<<m_idHelperSvc->toString(rdoId));
             return StatusCode::FAILURE;
         } 
 

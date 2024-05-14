@@ -98,7 +98,7 @@ StatusCode GeoModelsTgcTest::execute() {
          }         
       }
       const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
-      for (int layer = 1; layer <= reElement->numLayers(); ++layer) {
+      for (unsigned int layer = 1; layer <= reElement->numLayers(); ++layer) {
         for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
             unsigned int numChannel = 0;
             bool isValidLay{false};
@@ -190,7 +190,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
    const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
-   for (int layer = 1; layer <= reElement->numLayers(); ++layer) {
+   for (unsigned int layer = 1; layer <= reElement->numLayers(); ++layer) {
         for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
             unsigned int numWireGroup = 0;
             /// Use idHelper to get the identifier

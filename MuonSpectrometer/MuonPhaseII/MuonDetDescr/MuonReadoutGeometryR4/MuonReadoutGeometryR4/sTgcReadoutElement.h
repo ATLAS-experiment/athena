@@ -107,7 +107,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Returns the multilayer of the sTgcReadoutElement
     int multilayer() const;
     /// Returns the number of gas gap layers
-    int numLayers() const;
+    unsigned int numLayers() const;
     /// Returns the thickness of the gas gap
     double gasGapThickness() const;
     /// Returns the yCutout value of the chamber

@@ -13,10 +13,13 @@
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 
 #include <MuonAlignmentDataR4/MdtAlignmentStore.h>
+#include <MuonAlignmentDataR4/sTgcAlignmentStore.h>
 
 #include <MuonReadoutGeometry/MuonStation.h>
 #include <MuonReadoutGeometry/MdtReadoutElement.h>
 #include <MuonReadoutGeometry/RpcReadoutElement.h>
+#include <MuonReadoutGeometry/sTgcReadoutElement.h>
+#include <MuonReadoutGeometry/MuonChannelDesign.h>
 
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <GaudiKernel/SystemOfUnits.h>
@@ -88,6 +91,7 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     detMgr->addTreeTop(world);
     ATH_CHECK(buildMdt(geoContext, detMgr.get(), world));
     ATH_CHECK(buildRpc(geoContext, detMgr.get(), world));
+    ATH_CHECK(buildSTGC(geoContext, detMgr.get(), world));
 
     ATH_CHECK(writeHandle.record(std::move(detMgr)));
     return StatusCode::SUCCESS;
@@ -286,6 +290,90 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
             }
         }
     }
+    return StatusCode::SUCCESS;
+}
+StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
+                                             MuonGM::MuonDetectorManager* mgr,
+                                             PVLink world) const{
+    using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
+    SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::sTgc);
+    auto alignStore = alignItr ? static_cast<const sTgcAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
+
+    const std::vector<const MuonGMR4::sTgcReadoutElement*> sTgcReadOuts{m_detMgr->getAllsTgcReadoutElements()};
+    for (const MuonGMR4::sTgcReadoutElement* copyMe : sTgcReadOuts) {
+        const Identifier reId = copyMe->identify();
+        GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
+        PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
+        GeoIntrusivePtr<GeoFullPhysVol> physVol{dynamic_pointer_cast<GeoFullPhysVol>(clonedVol)};
+        world->add(make_intrusive<GeoTransform>(copyMe->localToGlobalTrans(gctx)));
+        world->add(physVol);
+
+        auto newRE = std::make_unique<MuonGM::sTgcReadoutElement>(physVol, 
+                                                                  m_idHelperSvc->stationNameString(reId),
+                                                                  copyMe->stationEta(),
+                                                                  copyMe->stationPhi(),
+                                                                  copyMe->multilayer(), mgr);
+        
+        if (alignStore && alignStore->getBLine(reId)) {
+            newRE->setBLinePar(*alignStore->getBLine(reId));
+        }
+        for (unsigned int layer = 1; layer < copyMe->numLayers(); ++layer) {
+            using channelType = MuonGMR4::sTgcReadoutElement::ReadoutChannelType;
+            using ChannelDesign =  MuonGM::MuonChannelDesign;
+            const IdentifierHash layerHash = MuonGMR4::sTgcReadoutElement::createHash(layer,channelType::Strip,0);
+            newRE->m_Xlg[layer -1] =  Amg::getTranslate3D(copyMe->globalToLocalTrans(gctx) *
+                                                          copyMe->center(gctx, layerHash));
+
+            const MuonGMR4::StripDesign& copyEtaDesign{copyMe->stripDesign(layerHash)}; 
+            /// Initialize the eta design
+            ChannelDesign& etaDesign{newRE->m_etaDesign[layer-1]};
+            etaDesign.type =  ChannelDesign::ChannelType::etaStrip;
+            etaDesign.detType = ChannelDesign::DetType::STGC;
+            if (copyMe->yCutout()) {
+                etaDesign.defineDiamond(copyEtaDesign.shortHalfHeight(),
+                                        copyEtaDesign.longHalfHeight(),
+                                        copyEtaDesign.halfWidth(),
+                                        copyMe->yCutout());
+            } else {
+                etaDesign.defineTrapezoid(copyEtaDesign.shortHalfHeight(),
+                                          copyEtaDesign.longHalfHeight(),
+                                          copyEtaDesign.halfWidth());
+            }
+            etaDesign.inputPitch  = copyEtaDesign.stripPitch();
+            etaDesign.inputWidth  = copyEtaDesign.stripWidth();
+            etaDesign.nch = copyEtaDesign.numStrips();
+            etaDesign.setFirstPos( (*copyEtaDesign.center(1)).x());
+            /// Initialize the phi design
+
+            const MuonGMR4::WireGroupDesign& copyPhiDesign{copyMe->wireDesign(layerHash)};
+            
+            ChannelDesign& phiDesign{newRE->m_phiDesign[layer-1]};
+            phiDesign.type = ChannelDesign::ChannelType::phiStrip;
+            phiDesign.detType = ChannelDesign::DetType::STGC;
+            if (copyMe->yCutout() == 0.) {
+                phiDesign.defineTrapezoid(copyPhiDesign.shortHalfHeight(),
+                                          copyPhiDesign.longHalfHeight(),
+                                          copyPhiDesign.halfWidth());
+              } else { 
+                phiDesign.defineDiamond(copyPhiDesign.shortHalfHeight(),
+                                        copyPhiDesign.longHalfHeight(),
+                                        copyPhiDesign.halfWidth(), 
+                                        copyMe->yCutout());
+              }
+              phiDesign.inputPitch  = copyPhiDesign.stripPitch();
+              phiDesign.inputWidth  = 0.015;
+              phiDesign.setFirstPos((*copyPhiDesign.center(1)).x()); // Position of 1st wire, accounts for staggering
+            //   phiDesign.firstPitch = firstWireGroup[il];             // Number of Wires in 1st group, group staggering
+              //phiDesign.groupWidth  = wireGroupWidth;                // Number of Wires normal group
+              phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
+              phiDesign.wireCutout = copyMe->yCutout();                         // Size of "active" wire region for digits
+              phiDesign.nch = copyPhiDesign.nAllWires();
+        }     
+        
+        mgr->addsTgcReadoutElement(std::move(newRE));
+   }
+    
+    
     return StatusCode::SUCCESS;
 }
 StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,

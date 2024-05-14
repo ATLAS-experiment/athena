@@ -44,6 +44,11 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                             MuonGM::MuonDetectorManager* mgr,
                             PVLink world) const;
 
+        StatusCode buildSTGC(const ActsGeometryContext& gctx,
+                             MuonGM::MuonDetectorManager* mgr,
+                             PVLink world) const;
+
+        
         StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
                                   const MuonGMR4::RpcReadoutElement& refEle,
                                   const MuonGM::RpcReadoutElement& testEle) const;

@@ -32,7 +32,8 @@ inline double sTgcReadoutElement::thickness() const { return 2.* m_pars.halfCham
 inline double sTgcReadoutElement::sFrameWidth() const { return m_pars.sFrameWidth; }
 inline double sTgcReadoutElement::lFrameWidth() const { return m_pars.lFrameWidth; }
 inline int sTgcReadoutElement::multilayer() const { return m_multiLayer; }
-inline int sTgcReadoutElement::numLayers() const { return m_pars.numLayers; }
+
+inline unsigned int sTgcReadoutElement::numLayers() const { return m_pars.numLayers; }
 inline unsigned int sTgcReadoutElement::nChTypes() const { return m_pars.nChTypes; }
 inline double sTgcReadoutElement::gasGapThickness() const { return m_pars.gasTck; }
 inline double sTgcReadoutElement::gasGapPitch() const { return m_gasGapPitch; }
