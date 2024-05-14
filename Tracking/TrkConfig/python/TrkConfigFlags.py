@@ -51,8 +51,6 @@ class TrackingComponent(FlagEnum):
     ActsValidateSeeds = "ActsValidateSeeds"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
-    # Benchmarking
-    BenchmarkSpot = "BenchmarkSpot"
     # GNN
     GNNChain = "GNNChain"
 
@@ -516,7 +514,6 @@ def createTrackingConfigFlags():
         createActsValidateSeedsTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
-        createActsBenchmarkSpotTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags
     )
 
@@ -534,8 +531,6 @@ def createTrackingConfigFlags():
                           createActsValidateTracksTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateAmbiguityResolutionPass",
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
-                          createActsBenchmarkSpotTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
 

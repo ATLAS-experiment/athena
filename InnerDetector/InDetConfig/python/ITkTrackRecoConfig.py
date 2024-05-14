@@ -21,8 +21,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateSpacePoints : "ActsValidateSpacePoints",
         TrackingComponent.ActsValidateSeeds : "ActsValidateSeeds",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
-        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
-        TrackingComponent.BenchmarkSpot : "ActsBenchmarkSpot"
+        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution"
     }
     
     # Athena Pass
