@@ -1610,13 +1610,7 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                     if self._containerSetup is not None:
                         asetupFile = open(self._setupFile, 'w')
                         wfile = asetupFile
-                    print("# asetup", file=wfile)
-                    print('echo Sourcing {AtlasSetupDirectory}/scripts/asetup.sh {asetupStatus}'.format(
-                        AtlasSetupDirectory = os.environ['AtlasSetup'],
-                        asetupStatus        = asetup
-                    ), file=wfile)
-                    print('source {AtlasSetupDirectory}/scripts/asetup.sh {asetupStatus}'.format(
-                        AtlasSetupDirectory = os.environ['AtlasSetup'],
+                    print('asetup {asetupStatus}'.format(
                         asetupStatus        = asetup
                     ), file=wfile)
                     print('if [ ${?} != "0" ]; then exit 255; fi', file=wfile)
