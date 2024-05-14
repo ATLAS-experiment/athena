@@ -6,7 +6,13 @@
 # Purpose: Test reading xAOD objects directly from root.
 #
 
+# Work around library loading order issue seen with the LTO build.
+# Otherwise we can get inconsistent resolution of a static std::string,
+# leading to a free() failure during exit().
 import ROOT
+if ROOT.gSystem.FindDynamicLibrary ("libGaudiKernel", True):
+    ROOT.gSystem.Load("libGaudiKernel")
+
 import cppyy
 
 import sys
