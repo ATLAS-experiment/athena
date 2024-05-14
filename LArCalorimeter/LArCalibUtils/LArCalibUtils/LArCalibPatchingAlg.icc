@@ -22,6 +22,7 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::initialize() {
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_CLKey.initialize() );
 
+
   if(m_patchMethodProp=="FEBNeighbor") {
     m_patchMethod=FEBNeighbor;
     return StatusCode::SUCCESS;
@@ -77,6 +78,7 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::stop() {
      m_caloId = dynamic_cast<const CaloCell_Base_ID*>(caloid); 
   }
 
+  if(m_isSC) m_bcMask.setSC();
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToPatch,msg()));
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -127,6 +129,7 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::stop() {
   }
 
   LArBadChanBitPacking packing;
+  LArBadChanSCBitPacking scpacking;
 
   unsigned maxgain;
   if(m_isSC) maxgain=CaloGain::LARMEDIUMGAIN; else maxgain=CaloGain::LARNGAIN;
@@ -138,7 +141,7 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::stop() {
       const HWIdentifier chid = it.channelId();
       if (!cabling->isOnlineConnected(chid)) continue; //Don't care about disconnected channels
       if (m_bcMask.cellShouldBeMasked(bcCont,chid)) {
-	const std::string bcType=packing.stringStatus(bcCont->status(chid));
+	const std::string bcType = m_isSC ? scpacking.stringStatus(bcCont->status(chid)) : packing.stringStatus(bcCont->status(chid));
 	ATH_MSG_INFO ( "Found problematic channel 0x" << MSG::hex << chid.get_identifier32().get_compact() << MSG::dec << " [" << bcType << "]" 
                        <<" Gain:" << igain << " " <<  m_onlineHelper->channel_name(chid) << ". Trying to patch." );
 	if (patch(chid,igain, bcCont, cabling, clCont)) {
@@ -546,8 +549,10 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
   // Organize waves per DAC and calculate tmax (peaking time)
   std::map<int,perDAC_t> neighbors_per_dac; //In most cases, there is only one DAC, eg one entry in this map
 
+  ATH_MSG_DEBUG(" symCells size "<<symCells.size());
   for (HWIdentifier hwid : symCells) {
     for (const LArCaliWave& cwave : m_contIn->get(hwid,gain)) {
+      ATH_MSG_VERBOSE("found wave in channel " << m_onlineHelper->channel_name(hwid) << ", gain " << gain);
       const int ourDAC = cwave.getDAC();
       double tmax=-1;
       wHelper.getDMax(cwave, tmax);
@@ -562,6 +567,8 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
     }//end loop over DACs
   }// end loop over sym-cells
   
+  ATH_MSG_DEBUG(" neighbors_per_dac size "<<neighbors_per_dac.size());
+
   for (auto& dacWave : neighbors_per_dac) {
     dacWave.second.tmaxAvg/=dacWave.second.tmax_wave.size();
     ATH_MSG_DEBUG("Average tmax computed " << dacWave.second.tmaxAvg << " for DAC=" << dacWave.first << ", to patch channel " << m_onlineHelper->channel_name(chid) << ", gain " << gain);

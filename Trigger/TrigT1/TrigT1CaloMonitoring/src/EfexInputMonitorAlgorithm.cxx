@@ -76,6 +76,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
     auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
     auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
+    auto lbn = Monitored::Scalar<int>("LBNS",GetEventInfo(ctx)->lumiBlock());
 
     // mismatches can be caused by recent/imminent OTF maskings, so track timings
     auto timeSince = Monitored::Scalar<int>("timeSince", -1);
@@ -128,7 +129,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 TowerRefCount = Toweret_count[i];
                 if (TowerRefCount==1025) missingLAr=true; // 1025 comes from eFexTowerBuilder if it had no supercells
                 if(TowerRefCount==1025 || TowerRefCount==1022) TowerRefCount=0; // unavailable or invalid code
-                fill((i<10) ? "ecal" : "hcal",lbnString,Towereta,TowerRefCount);
+                fill((i<10) ? "ecal" : "hcal",lbn,Towereta,TowerRefCount);
             }
         }
     }
@@ -207,7 +208,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                   fill("errors",Decision,timeSince,timeUntil,evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
               }
           }
-          fill((i<10) ? "ecal" : "hcal",lbnString,Towereta,TowerCount);
+          fill((i<10) ? "ecal" : "hcal",lbn,Towereta,TowerCount);
       }
   }
 

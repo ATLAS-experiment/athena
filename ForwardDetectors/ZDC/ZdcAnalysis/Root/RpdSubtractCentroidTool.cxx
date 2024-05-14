@@ -404,7 +404,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
   ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
 
   // initialize write handles from write handle keys
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, bool> centroidEventValidHandle(m_centroidEventValidKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, char> centroidEventValidHandle(m_centroidEventValidKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> centroidStatusHandle(m_centroidStatusKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, std::vector<float>> rpdChannelSubtrAmpHandle(m_RPDChannelSubtrAmpKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> rpdSubtrAmpSumHandle(m_RPDSubtrAmpSumKey);
@@ -427,6 +427,7 @@ void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSum
       side = 1;
     } else {
       // global sum container
+      // event status is bool, but stored as char to save disk space
       centroidEventValidHandle(*zdcSum) = m_eventStatus;
       cosDeltaReactionPlaneAngleHandle(*zdcSum) = m_cosDeltaReactionPlaneAngle;
       continue;

@@ -219,7 +219,7 @@ StatusCode ZdcNtuple :: initialize ()
     }
     if (enableCentroid)
     {
-      m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/b");
+      m_outputTree->Branch("zdc_centroidEventValid", &t_centroidEventValid, "zdc_centroidEventValid/B");
       m_outputTree->Branch("zdc_centroidStatus", &t_centroidStatus, "zdc_centroidStatus[2]/i");
       m_outputTree->Branch("zdc_RPDChannelSubtrAmp", &t_RPDChannelSubtrAmp, "zdc_RPDChannelSubtrAmp[2][16]/F");
       m_outputTree->Branch("zdc_RPDSubtrAmpSum", &t_RPDSubtrAmpSum, "zdc_RPDSubtrAmpSum[2]/F");
@@ -710,7 +710,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
     {
       if (zdcSum->zdcSide()==0) {
         // new global sum
-        t_centroidEventValid = zdcSum->auxdataConst<bool>("centroidEventValid" + auxSuffix);
+        t_centroidEventValid = zdcSum->auxdataConst<char>("centroidEventValid" + auxSuffix);
         t_cosDeltaReactionPlaneAngle = zdcSum->auxdataConst<float>("cosDeltaReactionPlaneAngle" + auxSuffix);
         continue;
       }

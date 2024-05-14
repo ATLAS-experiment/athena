@@ -195,6 +195,8 @@ if __name__=='__main__':
    if args.ignoreE:
          cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
 
+   cfg.getService("MessageSvc").defaultLimit=20000 #more messages
+
    #run the application
    cfg.run() 
 

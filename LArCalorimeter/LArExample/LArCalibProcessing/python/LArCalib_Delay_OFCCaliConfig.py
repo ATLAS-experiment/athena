@@ -115,9 +115,14 @@ def LArDelay_OFCCaliCfg(flags):
         theLArCaliWavePatcher.SuperCells = flags.LArCalib.isSC 
         #theLArCaliWavePatcher.PatchMethod="PhiNeighbor" ##take the first neigbour
         theLArCaliWavePatcher.PatchMethod = "PhiAverage" ##do an aveage in phi after removing bad and empty event
-        theLArCaliWavePatcher.ProblemsToPatch = [
-            "deadCalib","deadReadout","deadPhys","almostDead","short",
-        ]
+        if flags.LArCalib.isSC:
+           theLArCaliWavePatcher.ProblemsToPatch = [
+            "deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs",]
+           theLArCaliWavePatcher.OnOffMap="LArOnOffIdMapSC" 
+           theLArCaliWavePatcher.CalibLineKey="LArCalibIdMapSC"
+        else:
+           theLArCaliWavePatcher.ProblemsToPatch = [
+            "deadCalib","deadReadout","deadPhys","almostDead","short", ]
 
         result.addEventAlgo(theLArCaliWavePatcher)
     pass

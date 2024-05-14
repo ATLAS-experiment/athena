@@ -216,6 +216,10 @@ if __name__=="__main__":
     else:   
        InputSQLiteFiles = args.insql
  
+    if len(InputSQLiteFiles) == 1: #Main readout case, copy first input to output
+       import shutil, os
+       shutil.copyfile(InputSQLiteFiles[0],args.outsql)   
+
     #Import the flag-container that is the arguemnt to the configuration methods
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
