@@ -236,12 +236,12 @@ inline int  maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) {
 #ifdef HEPMC3
   auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
   for (const auto& bp: allbarcodes->barcode_to_particle_map()) {
-    if (!HepMC::is_simulation_particle(bp.first)) { maxBarcode=std::max(maxBarcode,bp.first); }
+    if (!HepMC::BarcodeBased::is_simulation_particle(bp.first)) { maxBarcode=std::max(maxBarcode,bp.first); }
   }
 #else
   for (auto currentGenParticle: *genEvent) {
     const int barcode=HepMC::barcode(currentGenParticle);
-    if(barcode > maxBarcode &&  !HepMC::is_simulation_particle(barcode)) { maxBarcode=barcode; }
+    if (barcode > maxBarcode &&  !HepMC::BarcodeBased::is_simulation_particle(barcode)) { maxBarcode=barcode; }
   }
 #endif
   return maxBarcode;
@@ -252,7 +252,7 @@ inline int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) {
 #ifdef HEPMC3
   auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
   for (const auto& bp: allbarcodes->barcode_to_vertex_map()) {
-    if (!HepMC::is_simulation_vertex(bp.first)) { maxBarcode=std::min(maxBarcode,bp.first); }
+    if (!HepMC::BarcodeBased::is_simulation_vertex(bp.first)) { maxBarcode=std::min(maxBarcode,bp.first); }
   }
 #else
   HepMC::GenEvent::vertex_const_iterator currentGenVertexIter;
@@ -260,7 +260,7 @@ inline int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) {
        currentGenVertexIter!= genEvent->vertices_end();
        ++currentGenVertexIter) {
     const int barcode((*currentGenVertexIter)->barcode());
-    if(barcode < maxBarcode && !HepMC::is_simulation_vertex(barcode)) { maxBarcode=barcode; }
+    if (barcode < maxBarcode && !HepMC::BarcodeBased::is_simulation_vertex(barcode)) { maxBarcode=barcode; }
   }
 #endif
   return maxBarcode;
