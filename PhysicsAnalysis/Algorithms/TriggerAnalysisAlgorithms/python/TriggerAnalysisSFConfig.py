@@ -23,6 +23,12 @@ class TriggerAnalysisSFBlock (ConfigBlock):
             "to enforce an OR of triggers without looking up the individual "
             "triggers. Used for both trigger selection and SFs. "
             "The default is {} (empty dictionary).")
+        self.addOption ('multiTriggerChainsPerYear', {}, type=None,
+            info="a dictionary with key (string) a trigger set name and value a "
+            "triggerChainsPerYear dictionary, following the previous convention. "
+            "Relevant for analyses using different triggers in different categories, "
+            "where the trigger global scale factors shouldn't be combined. "
+            "The default is {} (empty dictionary).")
         self.addOption ('noFilter', False, type=bool,
             info="do not apply an event filter. The default is False, i.e. "
             "remove events not passing trigger selection and matching.")
@@ -88,7 +94,8 @@ class TriggerAnalysisSFBlock (ConfigBlock):
         return matchingTool
 
     
-    def makeTriggerGlobalEffCorrAlg(self, config, matchingTool, noSF):
+    def makeTriggerGlobalEffCorrAlg(self, config, matchingTool, noSF,
+                                    triggerSuffix=''):
 
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' )
         if config.geometry() == LHCPeriod.Run3:
@@ -119,9 +126,9 @@ class TriggerAnalysisSFBlock (ConfigBlock):
 
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() == LHCPeriod.Run3
-        alg.scaleFactorDecoration = 'globalTriggerEffSF_%SYS%'
-        alg.matchingDecoration = 'globalTriggerMatch_%SYS%'
-        alg.eventDecisionOutputDecoration = 'globalTriggerMatch_dontsave_%SYS%'
+        alg.scaleFactorDecoration = 'globalTriggerEffSF'+triggerSuffix+'_%SYS%'
+        alg.matchingDecoration = 'globalTriggerMatch'+triggerSuffix+'_%SYS%'
+        alg.eventDecisionOutputDecoration = 'globalTriggerMatch'+triggerSuffix+'_dontsave_%SYS%'
         alg.doMatchingOnly = config.dataType() is DataType.Data or noSF
         alg.noFilter = self.noFilter
         alg.electronID = self.electronID
@@ -138,8 +145,8 @@ class TriggerAnalysisSFBlock (ConfigBlock):
             raise ValueError ('TriggerAnalysisConfig: at least one object collection must be provided! (electrons, muons, photons)' )
 
         if config.dataType() != DataType.Data and not alg.doMatchingOnly:
-            config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF')
-        config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch', noSys=True)
+            config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF'+triggerSuffix)
+        config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch'+triggerSuffix, noSys=False)
 
         return
 
@@ -152,7 +159,9 @@ class TriggerAnalysisSFBlock (ConfigBlock):
         matchingTool = self.makeTriggerMatchingTool(config, decisionTool)
 
         # Calculate multi-lepton (electron/muon/photon) trigger efficiencies and SFs
-        if self.triggerChainsPerYear and not self.noGlobalTriggerEff:
-            self.makeTriggerGlobalEffCorrAlg(config, matchingTool, self.noEffSF)
+        if self.multiTriggerChainsPerYear and not self.noGlobalTriggerEff:
+            for suffix, trigger_chains in self.multiTriggerChainsPerYear:
+                self.triggerChainsPerYear = trigger_chains
+                self.makeTriggerGlobalEffCorrAlg(config, matchingTool, self.noEffSF, suffix)
 
         return
