@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -123,7 +123,8 @@ namespace CP
         // Write the pT into the object
         mu.ID.calib_pt = corrIDpT;
         mu.ME.calib_pt = corrMEpT;
-        mu.CB.calib_pt = corrCBpT;
+	if(m_doDirectCBCalib) mu.CB.calib_pt = corrCBpT;
+	else mu.CB.calib_pt = corrStatCombCBpT;
 
         // Return gracefully:
         return CorrectionCode::Ok;
