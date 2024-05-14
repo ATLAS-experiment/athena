@@ -142,8 +142,7 @@ def generatePileUpProfile(flags,
         totalEvents = flags.ExecutorSplitting.TotalEvents
 
     if maxEvents == -1:
-        raise SystemExit("maxEvents = %d is not supported! Please set this to the number of events per file times the number of files per job." % (
-            maxEvents,))
+        raise ValueError("maxEvents = -1 is not supported! Please set this to the number of events per file times the number of files per job.")
     if not doNotCorrectMaxEvents and not flags.ExecutorSplitting.TotalSteps > 1:
         # round up to nearest 100 events..
         corrMaxEvents = ceil(float(maxEvents) / 100.0) * 100.0
