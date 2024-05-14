@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -120,7 +120,7 @@ evFit_entry MMT_Fitter::fit_event(int event, vector<Hit>& track, vector<hitData_
 
 int MMT_Fitter::find_hitData(const vector<hitData_entry>& hitDatas, const hitData_key& key) const{
   for(unsigned int i=0;i<hitDatas.size();i++){
-    if(hitDatas[i].BC_time==key.BC_time && hitDatas[i].time==key.time && hitDatas[i].gtime==key.gtime && hitDatas[i].VMM_chip==key.VMM_chip) return i;
+    if(hitDatas[i].BC_time==key.BC_time && hitDatas[i].gtime==key.gtime && hitDatas[i].VMM_chip==key.VMM_chip) return i;
   }
   return -1;
 }
