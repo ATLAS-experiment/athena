@@ -2,6 +2,9 @@
 #!/usr/bin/env python
 # ListSlimming.py - List of collections for slimming from athena 21.2 HION4 and EGAM1ExtraContent.py
 
+#################################################################################
+#HION4
+
 def HION4SmartCollections():
     variables  = []
     variables += ["EventInfo"]
@@ -187,5 +190,111 @@ def HION4ExtraVariablesEventShape():
     for shape in ["TopoClusterIsoCentral", "TopoClusterIsoForward", "NeutralParticleFlowIsoCentral",
                   "NeutralParticleFlowIsoForward", "ParticleFlowIsoCentral", "ParticleFlowIsoForward"]:
         variables += [shape + "EventShape.DensitySigma.Density.DensityArea"]
+    
+    return variables
+
+#################################################################################
+#HION12
+
+def HION12SmartCollections():
+    variables  = []
+    variables += ["Electrons"]             # Smart collection for electrons
+    variables += ["Muons"]                  # Smart collection for muons
+    variables += ["Photons"]                # Smart collection for photons
+    variables += ["InDetTrackParticles"]    # Smart collection for tracks
+
+    return variables
+
+def HION12AllVarContent():
+    variables  = []
+    variables += ["AntiKt4EMPFlowJets"]                          # Include R = 0.4 anti-kt EM Particle Flow jets
+    variables += ["AntiKt4EMTopoJets"]                           # Include R = 0.4 anti-kt EM topo-jets
+    variables += ["AntiKt4LCTopoJets"]                           # Include R = 0.4 anti-kt local calibration topo-jets
+    variables += ["CaloCalTopoClusters"]                         # Include topocluster information
+    variables += ["PrimaryVertices"]                             # Include a list of all primary vertices
+    variables += ["NCB_MuonSegments"]                            # Include the non-collision background muons to handle punch-throughs.
+    variables += ["JetETMissChargedParticleFlowObjects"]         # Include the charged particle flow objects from the Jet/ET Miss group
+    variables += ["JetETMissNeutralParticleFlowObjects"]         # Include the neutral particle flow objects from the Jet/ET Miss group
+    variables += ["TauChargedParticleFlowObjects"]               # Include the charged particle flow objects used for Tau reconstruction
+    variables += ["TauNeutralParticleFlowObjects"]               # Include the neutral particle flow objects used for Tau reconstruction
+    variables += ["TauShotParticleFlowObjects"]                  # Include the["shot" particle flow objects used for Tau reconstruction
+    variables += ["Kt4EMPFlowEventShape"]                        # The event shape specifically for R=0.4 EM PFlow jets
+    variables += ["Kt4EMTopoOriginEventShape"]                   # The event shape specifically for R=0.4 EM Topo jets
+    variables += ["Kt4LCTopoOriginEventShape"]                   # The event shape specifically for R=0.4 LC Topo jets
+    variables += ["TopoClusterIsoCentralEventShape"]             # Part of the event shape for topo-jets
+    variables += ["TopoClusterIsoVeryForwardEventShape"]         # Part of the event shape for topo-jets
+    variables += ["TopoClusterIsoForwardEventShape"]             # Part of the event shape for topo-jets
+    variables += ["NeutralParticleFlowIsoCentralEventShape"]     # Part of the event shape for PFlow jets
+    variables += ["ParticleFlowIsoCentralEventShape"]            # Part of the event shape for PFlow jets
+    variables += ["NeutralParticleFlowIsoForwardEventShape"]     # Part of the event shape for PFlow jets
+    variables += ["ParticleFlowIsoForwardEventShape"]            # Part of the event shape for PFlow jets
+    variables += ["HLT_xAOD__JetContainer_a4tcemsubjesISFS"]     # Include the HLT R = 0.4 EM Topo trigger jets (2018 HI Run)
+    variables += ["HLT_xAOD__JetContainer_a4ionemsubjesISFS"]    # Include the HLT R = 0.4 heavy ion trigger jets (2015 HI Run)
+    variables += ["HLT_xAOD__JetContainer_a10tclcwsubjesFS"]     # Include the HLT R = 1.0 LCW Topo trigger jets (2018 HI Run)
+
+    return variables
+
+def HION12HIJetBranches():
+    state_vars  = []
+    state_vars += ["pt"]
+    state_vars += ["eta"]
+    state_vars += ["phi"]
+    state_vars += ["m"]
+
+    states  = []
+    states += ["JetUnsubtractedScaleMomentum"]
+    states += ["JetSubtractedScaleMomentum"]
+
+    HIJetBranches = []
+    for v in state_vars:
+        HIJetBranches += [v]
+        for s in states:
+            HIJetBranches += [s+'.'+v]
+
+    HIJetBranches += ["ConstituentScale"]
+    HIJetBranches += ["constituentLinks"]
+    HIJetBranches += ["constituentWeights"]
+    HIJetBranches += ["AverageLArQF"]
+    HIJetBranches += ["EMFrac"]
+    HIJetBranches += ["FracSamplingMax"]
+    HIJetBranches += ["FracSamplingMaxIndex"]
+    HIJetBranches += ["HECFrac"]
+    HIJetBranches += ["HECQuality"]
+    HIJetBranches += ["LArQuality"]
+    HIJetBranches += ["N90Constituents"]
+    HIJetBranches += ["NegativeE"]
+    HIJetBranches += ["Timing"]
+    HIJetBranches += ["BchCorrCell"]
+    HIJetBranches += ["LArBadHVEnergyFrac"]
+    HIJetBranches += ["LArBadHVNCell"]
+    HIJetBranches += ["EnergyPerSampling"]
+    HIJetBranches += ["GhostAntiKt4HITrackJets"]
+    HIJetBranches += ["GhostAntiKt4HITrackJetsCount"]
+    HIJetBranches += ["GhostAntiKt4HITrackJetsPt"]
+    HIJetBranches += ["GhostMuonSegmentCount"]
+    HIJetBranches += ["GhostTrack"]
+    HIJetBranches += ["NumTrkPt4000"]
+    HIJetBranches += ["SumPtTrkPt4000"]
+    HIJetBranches += ["TrackWidthPt4000"]
+    HIJetBranches += ["Width"]
+    HIJetBranches += ["MaxConstituentET"]
+    HIJetBranches += ["MaxOverMean"]
+    
+    return HIJetBranches
+
+def HION12Extra():
+    ExtraJets  = []
+    ExtraJets += ["AntiKt4HITrackJets"]          # Include R = 0.4 Heavy Ion anti-kt track jets
+    ExtraJets += ["AntiKt4HIJets"]               # Include R = 0.4 Heavy Ion anti-kt tower jets
+    ExtraJets += ["AntiKt10HIJets"]              # Include R = 1.0 Heavy Ion anti-kt tower jets
+    
+    HIJetBranches = HION12HIJetBranches()
+    
+    variables  = []
+    for collection in ExtraJets:
+        for branch in HIJetBranches:
+            variables += [collection+'.'+branch]
+
+    variables += ['Muons.MuonSpectrometerPt'] 
     
     return variables
