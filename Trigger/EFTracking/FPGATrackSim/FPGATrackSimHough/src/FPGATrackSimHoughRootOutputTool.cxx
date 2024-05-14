@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPGATrackSimHough/FPGATrackSimHoughRootOutputTool.h"
@@ -129,7 +129,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(std::vector<FPGATrackSimRoa
 
     m_offline_q.push_back(track.getQOverPt() > 0 ? 1 : -1);
     int nhole(0), nmeasurement(0), ninert(0), nbrem(0), nscatter(0), nperigee(0), noutlier(0), nother(0);
-    for (auto hit : track.getOfflineHits()) {
+    for (const auto& hit : track.getOfflineHits()) {
       if (hit.getHitType() == OfflineHitType::Measurement) nmeasurement++;
       else if (hit.getHitType() == OfflineHitType::InertMaterial) ninert++;
       else if (hit.getHitType() == OfflineHitType::BremPoint) nbrem++;
