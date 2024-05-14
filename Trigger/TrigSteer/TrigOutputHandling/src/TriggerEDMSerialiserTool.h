@@ -177,10 +177,10 @@ class TriggerEDMSerialiserTool: public extends<AthAlgTool, HLTResultMTMakerTool>
 
   /**
    * Try appending serialised data to HLT result. If data would exceed truncation threshold, don't add and flag the
-   * corresponding module ID as truncated.
+   * corresponding module ID as truncated. Pass the deferred interface and buffer for truncated fragments, when allowed
    * @return FAILURE in case the truncation threshold is undefined
    */
-  StatusCode tryAddData(HLT::HLTResultMT& hltResult, const uint16_t id, const std::vector<uint32_t>& data, Address::Truncation truncationMode, const uint16_t  storeInterfaceId, const std::vector<uint32_t>& storeInterfaceBuffer) const;
+  StatusCode tryAddData(HLT::HLTResultMT& hltResult, const uint16_t id, const std::vector<uint32_t>& data, Address::Truncation truncationMode, const uint16_t  deferredInterfaceId, const std::vector<uint32_t>& deferredInterfaceBuffer) const;
 
   /**
    * Parse the truncation debug information, fill monitoring histograms, fill and record the debug info collection
