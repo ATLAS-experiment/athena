@@ -154,6 +154,8 @@ private:
   PublicToolHandle<IFastSimulationMasterTool> m_fastSimTool{this, "FastSimMasterTool", "FastSimulationMasterTool", ""};
   /// @}
   PublicToolHandleArray<G4UA::IUserActionTool> m_actionTools{this, "UserActionTools", {}, "User action tools to be added to the G4 Action service."};
+  // FastCaloSim in Geant4 configuration
+  Gaudi::Property<std::string> m_simplifiedGeoPath{this, "SimplifiedGeoPath", "", "Path to the simplified geometry file used to transport particles"};
 
 };
 
