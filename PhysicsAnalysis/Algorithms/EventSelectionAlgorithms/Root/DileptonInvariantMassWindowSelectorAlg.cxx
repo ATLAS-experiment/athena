@@ -5,6 +5,9 @@
 /// @author Baptiste Ravina
 
 #include "EventSelectionAlgorithms/DileptonInvariantMassWindowSelectorAlg.h"
+#include "Math/Vector4D.h"
+
+using ROOT::Math::PtEtaPhiEVector;
 
 namespace CP {
 
@@ -49,7 +52,7 @@ namespace CP {
 	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
 
       // apply the requested selection
-      TLorentzVector lepton0, lepton1;
+      PtEtaPhiEVector lepton0, lepton1;
       int total_leptons = 0;
       bool isfilled0(false), isfilled1(false);
       if (m_electronsHandle) {
@@ -57,10 +60,10 @@ namespace CP {
 	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
 	    total_leptons++;
 	    if (!isfilled0){
-	      lepton0 = el->p4();
+	      lepton0.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
 	      isfilled0 = true;
 	    } else if (!isfilled1){
-	      lepton1 = el->p4();
+	      lepton1.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
 	      isfilled1 = true;
 	    } else {
 	      break;
@@ -73,10 +76,10 @@ namespace CP {
 	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
 	    total_leptons++;
 	    if (!isfilled0){
-	      lepton0 = mu->p4();
+	      lepton0.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
 	      isfilled0 = true;
 	    } else if (!isfilled1){
-	      lepton1 = mu->p4();
+	      lepton1.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
 	      isfilled1 = true;
 	    } else {
 	      break;
