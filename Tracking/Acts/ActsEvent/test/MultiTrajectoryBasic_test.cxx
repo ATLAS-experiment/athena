@@ -316,20 +316,23 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   auto index = mtj->addTrackState();
   using namespace Acts::HashedStringLiteral;
 
-  auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>(
-      "hello", 7);  // EL to a fictional container & a fictional index
+  // auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>(
+  //     "hello", 7);  // EL to a fictional container & a fictional index
+  // auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>(
+  //     "hello", 7);  // EL to a fictional container & a fictional index
 
-  auto link1 = Acts::SourceLink(el1);  // a fictional geometry ID
+  auto link1 = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));  // a fictional geometry ID
   auto ts = mtj->getTrackState(index);
   ts.setUncalibratedSourceLink(std::move(link1));  // set link at position 0
   // get it back
   auto link1Back = ts.getUncalibratedSourceLink();
-  const auto & el1Back =
-      link1Back.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
-  // compare them by key & index because equality, requires proper has key
-  // generation and is bound to SG
-  BOOST_CHECK_EQUAL(el1.key(), el1Back.key());
-  BOOST_CHECK_EQUAL(el1.index(), el1Back.index());
+  auto ptrBack =
+       link1Back.get<const xAOD::UncalibratedMeasurement *>();
+  BOOST_CHECK_EQUAL(static_cast<const void *>(ptrBack), reinterpret_cast<const void *>(0xDEADBEEF));
+  // // compare them by key & index because equality, requires proper has key
+  // // generation and is bound to SG
+  // BOOST_CHECK_EQUAL(el1.key(), el1Back.key());
+  // BOOST_CHECK_EQUAL(el1.index(), el1Back.index());
 }
 
 BOOST_FIXTURE_TEST_CASE(Clear, EmptyMTJ) {
@@ -848,20 +851,12 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
   BOOST_CHECK_EQUAL(ts.chi2(), pc.chi2);
 
   // set SourceLink and get it back
-  auto el = ElementLink<xAOD::UncalibratedMeasurementContainer>(
-      "hello", 7);  // EL to a fictional container & a fictional index
-  auto link = Acts::SourceLink(el);  // a fictional geometry ID
+  auto link = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));  // a fictional geometry ID
   ts.setUncalibratedSourceLink(link);
   BOOST_CHECK_EQUAL(
-      ts.getUncalibratedSourceLink()
-          .get<ElementLink<xAOD::UncalibratedMeasurementContainer>>()
-          .index(),
-      link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().index());
-  BOOST_CHECK_EQUAL(
-      ts.getUncalibratedSourceLink()
-          .get<ElementLink<xAOD::UncalibratedMeasurementContainer>>()
-          .key(),
-      link.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>().key());
+      static_cast<const void *>(ts.getUncalibratedSourceLink()
+                                .get<const xAOD::UncalibratedMeasurement *>()),
+      static_cast<const void *>(link.get<const xAOD::UncalibratedMeasurement *>()));
 }
 
 BOOST_FIXTURE_TEST_CASE(InsertRefSurface, EmptyMTJ) {

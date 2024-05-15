@@ -228,12 +228,12 @@ namespace xAOD {
          * @brief EL to uncalibrated measurement
          * Can be invalid sometimes!
          */
-        ElementLink<xAOD::UncalibratedMeasurementContainer> uncalibratedMeasurementLink() const;
+        const xAOD::UncalibratedMeasurement *uncalibratedMeasurement() const;
 
         /**
          * @brief Set EL to uncalibrated measurement
          */
-        void setUncalibratedMeasurementLink( ElementLink<xAOD::UncalibratedMeasurementContainer> );
+        void setUncalibratedMeasurement( const xAOD::UncalibratedMeasurement * );
 
         /**
          * @brief geometry ID associated with uncalibrated measurement

@@ -126,17 +126,17 @@ BOOST_AUTO_TEST_CASE(TrackMeasurementLinksToUncalibratedMeasurement){
     {
         auto m = new xAOD::TrackMeasurement();    
         measurements.push_back(m);
-        m->setUncalibratedMeasurementLink({stripClusters, 1}); // skipping intentionally 1st element
+        m->setUncalibratedMeasurement(stripClusters.at(1)); // skipping intentionally 1st element
     }
     {
         auto m = new xAOD::TrackMeasurement();    
         measurements.push_back(m);
-        m->setUncalibratedMeasurementLink({pixelClusters, 1}); // skipping intentionally 1st element
+        m->setUncalibratedMeasurement(pixelClusters.at(1)); // skipping intentionally 1st element
     }
     {
         auto m = new xAOD::TrackMeasurement();    
         measurements.push_back(m);
-        m->setUncalibratedMeasurementLink({pixelClusters, 0}); // reordering
+        m->setUncalibratedMeasurement(pixelClusters.at(0)); // reordering
     }
 
     const std::vector<IdentifierHash> expectedIDs = {90099, 10099, 10077};

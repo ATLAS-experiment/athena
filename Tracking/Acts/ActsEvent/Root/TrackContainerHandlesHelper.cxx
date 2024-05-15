@@ -2,8 +2,12 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "xAODTracking/TrackStateContainer.h"
+#include "xAODTracking/TrackState.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 #include <string>
+#include <sstream>
 #include <regex>
 
 #include "StoreGate/WriteHandle.h"
@@ -205,6 +209,12 @@ ConstTrackContainerHandlesHelper::buildMtj(const Acts::TrackingGeometry* geo,
     throw std::runtime_error(
         "ConstMultiTrajectoryHandle::build, StatesLink is invalid");
   }
+  // The restoration of the pointers to uncalibrated measurements should only
+  // be done once, if it is done in parallel by multiple callers all callers should
+  // write exactly the same value to exactly the same memory location
+  xAOD::TrackStateAuxContainer *nonConstStatesLink ATLAS_THREAD_SAFE = const_cast<xAOD::TrackStateAuxContainer *>(statesLink.getDataPtr());
+  restoreUncalibMeasurementPtr(*nonConstStatesLink);
+
   DataLink<xAOD::TrackParametersAuxContainer> parametersLink(
       m_parametersKey.key() + "Aux.", evtContext);
   if (not parametersLink.isValid()) {
@@ -274,5 +284,39 @@ ConstTrackContainerHandlesHelper::build(const Acts::TrackingGeometry* geo,
 
   return constTrack;
 
+}
+
+namespace {
+   void throwConflictingUncalibratedMeasurementPointerValue(const xAOD::UncalibratedMeasurement *is, const xAOD::UncalibratedMeasurement *should) {
+      std::stringstream msg;
+      msg << "Conflicting values for TrackState.uncalibratedMeasurement. Already set " << static_cast<const void *>(is)
+          << " would set " << static_cast<const void *>(should);
+      throw std::runtime_error(msg.str());
+   }
+}
+
+void ConstTrackContainerHandlesHelper::restoreUncalibMeasurementPtr(xAOD::TrackStateAuxContainer &statesLink) const {
+      // see if we can get the variable from trans
+   using link_t = ElementLink< xAOD::UncalibratedMeasurementContainer >;
+   auto linkAuxId = SG::AuxTypeRegistry::instance().getAuxID< link_t >("uncalibratedMeasurementLink");
+
+   xAOD::TrackStateContainer helper;
+   for (std::size_t i(0); i<statesLink.size(); ++i) {
+      helper.push_back( std::make_unique< xAOD::TrackState >() );
+   }
+   helper.setStore( &statesLink );
+
+   static const SG::AuxElement::Accessor< const xAOD::UncalibratedMeasurement * > accesor("uncalibratedMeasurement");
+   const void* ptrToSomething = statesLink.getData (linkAuxId);
+   for (xAOD::TrackState *state : helper) {
+      const link_t &el = static_cast<const link_t *>(ptrToSomething)[state->index()];
+      const xAOD::UncalibratedMeasurement *ptr = (el.isValid() ? *el : nullptr);
+      if (accesor(*state) != ptr && accesor(*state)!=nullptr) {
+         throwConflictingUncalibratedMeasurementPointerValue(accesor(*state), ptr);
+      }
+      else {
+         accesor(*state) = ptr;
+      }
+   }
 }
 }  // namespace ActsTrk

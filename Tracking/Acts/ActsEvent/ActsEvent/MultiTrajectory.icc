@@ -121,3 +121,36 @@ void ActsTrk::MutableMultiTrajectory::addColumn_impl(std::string_view name) {
     throw std::runtime_error("Can't add decoration of this type to MutableMultiTrajectory");
   }
 }
+inline typename Acts::SourceLink
+ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
+    ActsTrk::IndexType istate) const {
+  assert(istate < m_trackStatesAux->uncalibratedMeasurement.size());
+  // at the moment when converting Trk::Track to Acts tracks the measurements on track
+  // are not converted to xAOD::UncalibratedMeasurements, and the Acts::SourceLinks
+  // just contain a pointer to the Trk::Measurement. To keep this functionality
+  // SourceLinks are either stored in the m_uncalibratedSourceLinks cache
+  // or taken from the xAOD backend.
+  if (m_trackStatesAux->uncalibratedMeasurement[istate]){
+    return Acts::SourceLink(m_trackStatesAux->uncalibratedMeasurement[istate]);
+  }
+  else {
+    return m_uncalibratedSourceLinks[istate].value();
+  }
+}
+
+inline typename Acts::SourceLink
+ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(
+    ActsTrk::IndexType istate) const {
+  assert(istate < m_trackStatesAux->uncalibratedMeasurement.size());
+  // at the moment when converting Trk::Track to Acts tracks the measurements on track
+  // are not converted to xAOD::UncalibratedMeasurements, and the Acts::SourceLinks
+  // just contain a pointer to the Trk::Measurement. To keep this functionality
+  // SourceLinks are either stored in the m_uncalibratedSourceLinks cache
+  // or taken from the xAOD backend.
+  if (m_trackStatesAux->uncalibratedMeasurement[istate]){
+    return Acts::SourceLink(m_trackStatesAux->uncalibratedMeasurement[istate]);
+  }
+  else {
+    return m_uncalibratedSourceLinks[istate].value();
+  }
+}

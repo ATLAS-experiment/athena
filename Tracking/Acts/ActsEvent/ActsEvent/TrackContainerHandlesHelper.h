@@ -88,6 +88,8 @@ class ConstTrackContainerHandlesHelper {
       const EventContext& context) const;
 
  private:
+  // @throw if pointers in TrackStateContainer are already set.
+  void restoreUncalibMeasurementPtr(xAOD::TrackStateAuxContainer &statesLink) const;
   // MTJ part
   SG::ReadHandleKey<xAOD::TrackStateContainer> m_statesKey;
   SG::ReadHandleKey<xAOD::TrackParametersContainer> m_parametersKey;

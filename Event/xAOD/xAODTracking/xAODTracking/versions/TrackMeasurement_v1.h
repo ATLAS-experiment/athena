@@ -75,21 +75,14 @@ namespace xAOD {
 
         /**
          * @brief access the uncalibrated measurement
-         * TODO consider bare pointer access
          */
-        const ElementLink<UncalibratedMeasurementContainer>& uncalibratedMeasurementLink() const;
+        const xAOD::UncalibratedMeasurement *uncalibratedMeasurement() const;
 
-        /**
-         * @brief return pointer to uncalibrated measurement if the underlying link is valid
-         *
-         * @return const UncalibratedMeasurement* or nullptr
-         */
-        const UncalibratedMeasurement* uncalibratedMeasurement() const;
 
         /**
          * @brief set uncalibrated measurement
          */
-        void setUncalibratedMeasurementLink( const ElementLink<UncalibratedMeasurementContainer>& link);
+        void setUncalibratedMeasurement(const xAOD::UncalibratedMeasurement *uncalibrated_measurement);
 
 
         /**
