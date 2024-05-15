@@ -399,6 +399,7 @@ class EventCutFlowBlock (ConfigBlock):
         else:
             # user provides nothing: get all available selections from EventInfo directly
             alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
+        alg.selections = [sel+',as_char' for sel in alg.selections]
         if self.selectionName:
             alg.preselection = self.selectionName + '_%SYS%'
         alg.eventInfo = config.readName (self.containerName)
