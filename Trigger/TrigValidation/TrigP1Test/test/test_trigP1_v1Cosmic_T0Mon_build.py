@@ -9,6 +9,9 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
 
+# Specify trigger menu once here:
+triggermenu = 'Cosmic_run3_v1'
+
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
 hlt.type = 'athenaHLT'
@@ -18,7 +21,7 @@ hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data_cos'
 hlt.max_events = 50
-hlt.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
+hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
              'Beam.Type=BeamType.Cosmics',
              'Trigger.forceEnableAllChains=True']
 hlt.args = '-o output'
@@ -31,9 +34,28 @@ filter_bs.input = ''
 filter_bs.args = '-s Main ' + find_file('*_HLTMPPy_output.*.data')
 
 # Tier-0 reco step (BS->AOD)
+# DQ.Steering.HLT.doJet=False : No AntiKtEMPFlow jets in cosmics.
 tzrecoPreExec = ' '.join([
-  "flags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';",
+  f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
   "flags.Trigger.AODEDMSet=\'AODFULL\';",
+  "from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff;",
+  "allSteeringFlagsOff(flags);",
+  "flags.DQ.Steering.doDataFlowMon=True;",
+  "flags.DQ.Steering.doHLTMon=True;",
+  "flags.DQ.Steering.doLVL1CaloMon=True;",
+  "flags.DQ.Steering.doGlobalMon=True;",
+  "flags.DQ.Steering.doLVL1InterfacesMon=True;",
+  "flags.DQ.Steering.doCTPMon=True;",
+  "flags.DQ.Steering.HLT.doBjet=True;",
+  "flags.DQ.Steering.HLT.doInDet=True;",
+  "flags.DQ.Steering.HLT.doBphys=True;",
+  "flags.DQ.Steering.HLT.doCalo=True;",
+  "flags.DQ.Steering.HLT.doEgamma=True;",
+  "flags.DQ.Steering.HLT.doJet=False;",
+  "flags.DQ.Steering.HLT.doMET=True;",
+  "flags.DQ.Steering.HLT.doMinBias=True;",
+  "flags.DQ.Steering.HLT.doMuon=True;",
+  "flags.DQ.Steering.HLT.doTau=True;",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
@@ -45,25 +67,16 @@ tzreco.explicit_input = True
 tzreco.max_events = 50
 tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
+tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
 tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2023-02\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 tzreco.args += ' --CA'
 
-# Tier-0 monitoring step (AOD->HIST)
-tzmon = ExecStep.ExecStep('Tier0Mon')
-tzmon.type = 'other'
-tzmon.executable = 'Run3DQTestingDriver.py'
-tzmon.input = ''
-tzmon.args = '--threads=1'
-tzmon.args += ' --dqOffByDefault'
-# HLT jet monitoring disabled as it requires offline PFlow jets which can't be reconstructed for cosmics
-tzmon.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True DQ.Steering.HLT.doJet=False Trigger.triggerMenuSetup=\'Cosmic_run3_v1\''
-
 # The full test
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [hlt, filter_bs, tzreco, tzmon]
+test.exec_steps = [hlt, filter_bs, tzreco]
 test.check_steps = CheckSteps.default_check_steps(test)
 
 # Overwrite default histogram file name for checks
