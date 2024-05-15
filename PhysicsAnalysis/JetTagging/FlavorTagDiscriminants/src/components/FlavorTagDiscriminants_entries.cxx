@@ -29,6 +29,8 @@
 #include "src/CountIParticleAlg.h"
 #include "src/CountTrackParticleAlg.h"
 
+#include "FlavorTagDiscriminants/NNSharingSvc.h"
+
 using namespace FlavorTagDiscriminants;
 
 DECLARE_COMPONENT(VRJetOverlapDecoratorTool)
@@ -53,6 +55,9 @@ DECLARE_COMPONENT(TrackTruthDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronDecoratorAlg)
 DECLARE_COMPONENT(SoftElectronTruthDecoratorAlg)
 DECLARE_COMPONENT(TrackClassifier)
+
+DECLARE_COMPONENT(NNSharingSvc)
+
 DECLARE_COMPONENT(FoldDecoratorAlg)
 DECLARE_COMPONENT(CountIParticleAlg)
 DECLARE_COMPONENT(CountTrackParticleAlg)

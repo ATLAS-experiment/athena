@@ -30,8 +30,10 @@ set(FTDSource
   Root/OnnxUtil.cxx
   Root/OnnxOutput.cxx
   Root/GNN.cxx
+  Root/GNNOptions.cxx
   Root/GNNTool.cxx
   Root/GNNToolifiers.cxx
+  Root/NNSharingSvc.cxx
   Root/FlipTagEnums.cxx
   Root/AssociationEnums.cxx
   Root/VRJetOverlapDecorator.cxx
@@ -114,6 +116,10 @@ atlas_add_dictionary( FlavorTagDiscriminantsDict
    LINK_LIBRARIES FlavorTagDiscriminants )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_add_executable( testOptionsHash
+  src/testHash.cxx
+  LINK_LIBRARIES FlavorTagDiscriminants )
 
 # add onnx metadata executable
 atlas_add_executable( get-onnx-model-info

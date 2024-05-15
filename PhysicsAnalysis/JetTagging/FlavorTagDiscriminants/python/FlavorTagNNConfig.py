@@ -5,7 +5,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from os.path import commonpath
 from pathlib import PurePath
 
-def DL2ToolCfg(ConfigFlags, NNFile, **options):
+def addAndReturnSharingSvc(flags, ca):
+    svc = CompFactory.FlavorTagDiscriminants.NNSharingSvc('FTagNNSharingSvc')
+    ca.addService(svc)
+    return svc
+
+def DL2ToolCfg(flags, NNFile, **options):
     acc = ComponentAccumulator()
 
     # default is "STANDARD" in case of a setup of the standard b-taggers. "NEGATIVE_IP_ONLY" [and "FLIP_SIGN"] if want to set up the flip taggers
@@ -42,7 +47,7 @@ def DL2ToolCfg(ConfigFlags, NNFile, **options):
 
     return acc
 
-def GNNToolCfg(ConfigFlags, NNFile, **options):
+def GNNToolCfg(flags, NNFile, **options):
     acc = ComponentAccumulator()
 
     # this map lets us change the names of EDM inputs with respect to
@@ -62,6 +67,7 @@ def GNNToolCfg(ConfigFlags, NNFile, **options):
     gnntool = CompFactory.FlavorTagDiscriminants.GNNTool(
         name='decorator',
         nnFile=NNFile,
+        nnSharingService=addAndReturnSharingSvc(flags, acc),
         **options)
 
     acc.setPrivateTools(gnntool)
@@ -126,7 +132,7 @@ def getUndeclaredBtagVars(BTaggingCollection):
     return [f'{BTaggingCollection}.{x}' for x in undeclared_btag]
 
 def FlavorTagNNCfg(
-        ConfigFlags,
+        flags,
         BTaggingCollection,
         TrackCollection,
         NNFile,
@@ -142,10 +148,10 @@ def FlavorTagNNCfg(
         variableRemapping=variableRemapping)
     if NNFile_extension == "json":
         nn_name = NNFile.replace("/", "_").replace("_network.json", "")
-        decorator = acc.popToolsAndMerge(DL2ToolCfg(ConfigFlags, **nn_opts))
+        decorator = acc.popToolsAndMerge(DL2ToolCfg(flags, **nn_opts))
     elif NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
-        decorator = acc.popToolsAndMerge(GNNToolCfg(ConfigFlags, **nn_opts))
+        decorator = acc.popToolsAndMerge(GNNToolCfg(flags, **nn_opts))
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
@@ -199,6 +205,7 @@ def MultifoldGNNCfg(
                 nnFiles=nnFilePaths,
                 flipTagConfig=FlipConfig,
                 variableRemapping=remapping,
+                nnSharingService=addAndReturnSharingSvc(flags, acc)
             ),
             undeclaredReadDecorKeys=veto_list,
         )

@@ -21,9 +21,14 @@ namespace FlavorTagDiscriminants {
 
   StatusCode GNNTool::initialize() {
 
-    ATH_MSG_INFO("Initialize bTagging Tool (GNN) from: " + m_nn_file);
-
-    m_gnn.reset(new GNN(m_nn_file, getOptions(m_props)));
+    auto opts = getOptions(m_props);
+    if (!m_nnsvc.empty()) {
+      ATH_CHECK(m_nnsvc.retrieve());
+      m_gnn = m_nnsvc->get(m_nn_file, opts);
+    } else {
+      ATH_MSG_INFO("Initialize bTagging Tool (GNN) from: " + m_nn_file);
+      m_gnn.reset(new GNN(m_nn_file, opts));
+    }
 
     return StatusCode::SUCCESS;
   }

@@ -20,6 +20,17 @@ namespace {
     }
     return first;
   }
+  auto getNNs(
+    const std::vector<std::string>& nn_files,
+    const FlavorTagDiscriminants::GNNOptions& o)
+  {
+    namespace ftd = FlavorTagDiscriminants;
+    std::vector<std::shared_ptr<const ftd::GNN>> nns;
+    for (const auto& nn_file: nn_files) {
+      nns.emplace_back(std::make_shared<const ftd::GNN>(nn_file, o));
+    }
+    return nns;
+  }
 }
 
 namespace FlavorTagDiscriminants {
@@ -28,12 +39,16 @@ namespace FlavorTagDiscriminants {
     const std::vector<std::string>& nn_files,
     const std::string& fold_hash_name,
     const GNNOptions& o):
+    MultifoldGNN(getNNs(nn_files, o), fold_hash_name)
+  {
+  }
+  MultifoldGNN::MultifoldGNN(
+    const std::vector<std::shared_ptr<const GNN>>& nns,
+    const std::string& fold_hash_name):
+    m_folds(nns),
     m_fold_hash(fold_hash_name),
     m_jetLink(jetLinkName)
   {
-    for (const auto& nn_file: nn_files) {
-      m_folds.emplace_back(std::make_unique<GNN>(nn_file, o));
-    }
   }
   MultifoldGNN::MultifoldGNN(MultifoldGNN&&) = default;
   MultifoldGNN::MultifoldGNN(const MultifoldGNN&) = default;
