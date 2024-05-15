@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonEfficiencyCorrections )
@@ -6,12 +6,18 @@ atlas_subdir( MuonEfficiencyCorrections )
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree RIO Hist Physics )
 
+set (extra_libs)
+if( NOT XAOD_STANDALONE )
+   set (extra_libs MuonTesterTreeLib)
+endif()
+
 # Libraries in the package:
 atlas_add_library( MuonEfficiencyCorrectionsLib
    MuonEfficiencyCorrections/*.h Root/*.cxx
    PUBLIC_HEADERS MuonEfficiencyCorrections
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODMuon xAODEventInfo MuonAnalysisInterfacesLib PATInterfaces AsgDataHandlesLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} AsgTools xAODMuon xAODEventInfo MuonAnalysisInterfacesLib 
+                  PATInterfaces AsgDataHandlesLib
    PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
 
 if( NOT XAOD_STANDALONE )
@@ -34,8 +40,10 @@ endmacro( _add_exec )
 
 if( XAOD_STANDALONE )
    _add_exec( MuonEfficiencyScaleFactorsTest )
-   _add_exec( MuonEfficiencyScaleFactorsSFFileTester )
    _add_exec( MuonTriggerSFRootCoreTest )
    _add_exec( MuonTriggerSFFilesTest )
    _add_exec( MuonTriggerSFConfGenerator )
 endif()
+
+# Install files from the package:
+atlas_install_python_modules( python/*.py )

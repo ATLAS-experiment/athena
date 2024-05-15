@@ -1,7 +1,7 @@
 /*
  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
-
+#ifndef XAOD_STANDALONE 
 #ifndef MUONEFFICIENCYCORRECTION_MUONSFTESTHELPER_H
 #define MUONEFFICIENCYCORRECTION_MUONSFTESTHELPER_H
 
@@ -13,12 +13,11 @@
 #include <MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h>
 #include <MuonAnalysisInterfaces/IMuonSelectionTool.h>
 
+#include <MuonTesterTree/MuonTesterBranch.h>
+#include <MuonTesterTree/ScalarBranch.h>
+#include <MuonTesterTree/MuonTesterTree.h>
 
-#include <AsgTools/ToolHandle.h>
-#include <AsgTools/AnaToolHandle.h>
-
-#include <AsgTools/IAsgTool.h>
-#include <AsgTools/AsgTool.h>
+#include <GaudiKernel/ToolHandle.h>
 
 //General includes
 #include <memory>
@@ -28,182 +27,122 @@
 #include <TFile.h>
 //Helper class to test the Muon efficiency SFs plus their systematics
 namespace TestMuonSF {
-    //########################################
-    //      Template class to connect the    #
-    //      Variables with the TTree         #
-    //########################################
-    class SFBranches {
-        public:
-            SFBranches(TTree* tree);
-            virtual ~SFBranches()= default;
-            virtual std::string name() const =0;
-            virtual bool init()=0;
-        protected:
-            template<typename T> bool initBranch(T& Var, const std::string& Syst) {
-                std::string bName = name() + (Syst.empty() ? std::string("") : std::string("_")) + Syst;
-                if (m_tree->FindBranch(bName.c_str())) {
-                    Error("SFBranches::initBranch()", "The branch %s already exists in TTree %s", bName.c_str(), m_tree->GetName());
-                    return false;
-                }
-                if (m_tree->Branch(bName.c_str(), &Var) == nullptr) {
-                    Error("SFBranches::initBranch()", "Could not create the branch %s in TTree %s", bName.c_str(), m_tree->GetName());
-                    return false;
-                } else Info("SFBranches::initBranch()", "Created the branch %s in TTree %s", bName.c_str(), m_tree->GetName());
-                return true;
-            }
-        private:
-            TTree* m_tree;
-
-    };
     //####################################################
     //      Helper class to write ntuples to test the    #
     //      MuonTriggerScaleFactors                      #
     //####################################################
-    class TriggerSFBranches: public SFBranches {
+   
+    class TriggerSFBranches: public MuonVal::MuonTesterBranch {
         public:
-            TriggerSFBranches(TTree* tree, const ToolHandle<CP::IMuonTriggerScaleFactors>& Handle, const std::string& Trigger);
+            TriggerSFBranches(MuonVal::MuonTesterTree& tree, 
+                              const ToolHandle<CP::IMuonTriggerScaleFactors>& Handle, 
+                              const std::string& muonContainer,
+                              const std::string& Trigger);
             virtual ~TriggerSFBranches() = default;
-            CP::CorrectionCode fill(const xAOD::MuonContainer* Muons);
-            virtual bool init();
-            virtual std::string name() const;
+            
+            bool fill(const EventContext& ctx) override final;
+            bool init() override final;
+          
         private:
-            CP::CorrectionCode getSF(const xAOD::MuonContainer* muons, double &Var, const CP::SystematicVariation &syst);
-            ToolHandle<CP::IMuonTriggerScaleFactors> m_handle;
-            std::string m_trigger;
-            double m_nominal_SF;
-            double m_stat_up_SF;
-            double m_stat_down_SF;
-            double m_sys_up_SF;
-            double m_sys_down_SF;
-    };
-    typedef std::unique_ptr<TriggerSFBranches> TriggerSFBranch_Ptr;
+            CP::CorrectionCode getSF(const xAOD::MuonContainer* muons, 
+                                     MuonVal::ScalarBranch<double> &Var, 
+                                     const CP::SystematicVariation &syst);
 
-    //###################################################
-    //      General interface for the Reconstruction    #
-    //      Isolation / TTVA scalefactors               #
-    //###################################################
-    class MuonEffiBranches: public SFBranches {
+            SG::ReadHandleKey<xAOD::MuonContainer> m_key{};
+            
+            ToolHandle<CP::IMuonTriggerScaleFactors> m_handle{};
+            std::string m_trigger{};
+            MuonVal::ScalarBranch<double> m_nominal_SF{tree(), name(), 1.};
+            MuonVal::ScalarBranch<double> m_stat_up_SF{tree(), name()+"_STAT_UP", 1.};
+            MuonVal::ScalarBranch<double> m_stat_down_SF{tree(), name()+"_STAT_DN", 1.};
+            MuonVal::ScalarBranch<double> m_sys_up_SF{tree(), name()+"_SYS_UP", 1.};
+            MuonVal::ScalarBranch<double> m_sys_down_SF{tree(), name()+"_SYS_DN", 1.};
+    };
+
+    
+    class MuonEffiBranch{
         public:
-            MuonEffiBranches(TTree* tree);
-            virtual CP::CorrectionCode fill(const xAOD::Muon& muon)=0;
-            ~MuonEffiBranches() = default;
-
+            virtual void setMuon(const xAOD::Muon& muon) = 0;
     };
-    typedef std::unique_ptr<MuonEffiBranches> EffiBranch_Ptr;
     //###################################################################
     //      Helper class to write the scale-factor ntuples to test the  #
     //      MuonReconstruction/ Isolation/ TTVA scalefactors            #
     //###################################################################
-    class MuonSFBranches: public MuonEffiBranches {
+    class MuonSFBranches: public MuonVal::MuonTesterBranch, public MuonEffiBranch {
         public:
-             MuonSFBranches(TTree* tree, const ToolHandle<CP::IMuonEfficiencyScaleFactors> &handle, const std::string& rel_name = "");
-             CP::CorrectionCode fill(const xAOD::Muon& muon) override;
+             MuonSFBranches(MuonVal::MuonTesterTree& tree, 
+                            const ToolHandle<CP::IMuonEfficiencyScaleFactors> &handle, 
+                            const std::string& rel_name = "");
+             
              virtual ~MuonSFBranches() = default;
-             bool init() override;
-             std::string name() const override;
-        private:
-            ToolHandle<CP::IMuonEfficiencyScaleFactors> m_handle;
-            bool m_uncorrelate_sys;
-            std::string m_release;
 
-            //SF's
+
+             void setMuon(const xAOD::Muon& muon) override final;
+
+             bool fill(const EventContext& ctx) override final;
+
+             bool init() override final;
+
+            /// Dummy helper function that encodes the systname set
+            static std::string systName(const CP::SystematicSet& set) {
+                return set.name().empty() ? std::string("") : std::string("__") + set.name();
+            }
+
+        private:
+            ToolHandle<CP::IMuonEfficiencyScaleFactors> m_handle{};
+            bool m_uncorrelate_sys{false};
+
+            /// Helper struct to store scale factor, data efficiency + mc efficiency
+            /// for each systematic variation
             struct SFSet {
-                    SFSet() {
-                        scale_factor = mc_eff = data_eff = 1.;
+                    SFSet(const CP::SystematicSet& _cpSet,
+                          MuonSFBranches& _parent):
+                    cpSet{_cpSet}, parent{_parent}{}
+                    /// Initialization of the branches
+                    bool init() {
+                        return scaleFactor.init() && mcEff.init() && dataEff.init();
                     }
-                    float scale_factor;
-                    float mc_eff;
-                    float data_eff;
+                    /// check that all branches are set properly
+                    bool fill(const EventContext& ctx) {
+                        return scaleFactor.fill(ctx) && mcEff.fill(ctx) && dataEff.fill(ctx);
+                    }
+                    /// Systematic set
+                    const CP::SystematicSet cpSet{};
+                    /// Parent from which the TTree pointer & name is retrieved
+                    MuonSFBranches& parent;
+                    /// Actual branches storing scaleFactor & mcEff & dataEff
+                    MuonVal::ScalarBranch<float> scaleFactor{parent.tree(),parent.name()+"SF" + systName(cpSet), 1.f};
+                    MuonVal::ScalarBranch<float> mcEff{parent.tree(),parent.name()+"MCEff" + systName(cpSet), 1.f};
+                    MuonVal::ScalarBranch<float> dataEff{parent.tree(),parent.name()+"DataEff" + systName(cpSet),1.f};
             };
             
-            CP::CorrectionCode fill_systematic(const xAOD::Muon muon, std::pair<const CP::SystematicSet, MuonSFBranches::SFSet>& set);
-            bool AddToTree(const CP::SystematicSet& syst, MuonSFBranches::SFSet& ScaleFactor);
-
-            std::map<CP::SystematicSet, SFSet> m_SFs;
+            CP::CorrectionCode fillSystematic(const xAOD::Muon& muon, SFSet& set);
+    
+            std::vector<std::unique_ptr<SFSet>> m_SFs{};
 
     };
     //#######################################################
     //          Helper class for writing                    #
     //          scale-factor replicas to the test-ntuples   #
     //#######################################################
-    class MuonReplicaBranches: public MuonEffiBranches {
+    
+    class MuonReplicaBranches: public MuonVal::MuonTesterBranch, public MuonEffiBranch {
         public:
-            MuonReplicaBranches(TTree* tree, const ToolHandle<CP::IMuonEfficiencyScaleFactors> &handle, const std::string& rel_name = "");
-            CP::CorrectionCode fill(const xAOD::Muon& muon) override;
-
-            bool init() override;
-            std::string name() const override;
-        private:
-            ToolHandle<CP::IMuonEfficiencyScaleFactors> m_handle;
-            std::string m_release;
-            std::map<CP::SystematicSet, std::vector<float>> m_SFs;
-    };
-
-    //###################################################
-    //      Helper class to write                       #
-    //      The muon properties for the efficiency sfs  #
-    //###################################################
-    class MuonInfoBranches: public MuonEffiBranches {
-        public:
-            MuonInfoBranches(TTree* tree, const ToolHandle<CP::IMuonSelectionTool>& sel_tool);
-            virtual ~MuonInfoBranches() = default;
-            bool init() override;
-            std::string name() const override;
-            CP::CorrectionCode fill(const xAOD::Muon& muon) override;
-
-        private:
-            const ToolHandle<CP::IMuonSelectionTool>& m_selection_tool;
-            float m_pt;
-            float m_eta;
-            float m_phi;
-            unsigned int m_quality;
-            unsigned int m_author;
-            unsigned int m_type;
-            bool m_passLowPt;
-            bool m_passHighPt;
-            uint8_t m_precLayers;
-    };
-
-    class MuonSFTestHelper {
-        public:
-
-            //Standalone constructor if only one SF release is asked for
-            MuonSFTestHelper(const std::string& release_name = "", bool HasOwnerShip = false);
-            // Constructor for the comparisons between two releases
-            MuonSFTestHelper(std::shared_ptr<TTree> Tree, const std::string& release_name = "");
-            MuonSFTestHelper(TTree*Tree, const std::string& release_name = "");
-
-            MuonSFTestHelper(const MuonSFTestHelper&) = delete;
-            MuonSFTestHelper& operator=(const MuonSFTestHelper&) = delete;
-
-            ~MuonSFTestHelper() = default;
-
-            //Initialize the tool
-            bool init();
-            void addTool(const asg::AnaToolHandle<CP::IMuonEfficiencyScaleFactors> &handle);
-            void addTool(const ToolHandle<CP::IMuonEfficiencyScaleFactors>& handle);
-
-            void addReplicaTool(const asg::AnaToolHandle<CP::IMuonEfficiencyScaleFactors> &handle);
-            void addReplicaTool(const ToolHandle<CP::IMuonEfficiencyScaleFactors>& handle);
-
-            void setSelectionTool(const asg::AnaToolHandle<CP::IMuonSelectionTool> & sel_tool);
-            void setSelectionTool(const ToolHandle<CP::IMuonSelectionTool> & sel_tool);
+            MuonReplicaBranches(MuonVal::MuonTesterTree& tree, 
+                                const ToolHandle<CP::IMuonEfficiencyScaleFactors> &handle, 
+                                const std::string& rel_name = "");
             
-            TTree* tree();
-            std::shared_ptr<TTree> tree_shared();
-            CP::CorrectionCode fill(const xAOD::MuonContainer* muons);
-            CP::CorrectionCode fill(const xAOD::Muon* mu);
-            CP::CorrectionCode fill(const xAOD::Muon& mu);
-            void fillTree();
+            void setMuon(const xAOD::Muon& muon) override final;
+
+            bool init() override;
+            
+            bool fill(const EventContext& ctx) override;
 
         private:
-            std::string m_name;
-            std::shared_ptr<TTree> m_tree;
-            TTree* m_tree_raw_ptr;
-            std::vector<EffiBranch_Ptr> m_Branches;
-            ToolHandle<CP::IMuonSelectionTool> m_sel_tool;
+            ToolHandle<CP::IMuonEfficiencyScaleFactors> m_handle{};
+            
+            std::map<CP::SystematicSet, std::shared_ptr<MuonVal::VectorBranch<float>>> m_SFs{};
     };
-
 }
-
+#endif
 #endif
