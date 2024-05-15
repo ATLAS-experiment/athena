@@ -2,7 +2,7 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 
 namespace {
-    const static std::map<std::string, float> workingPoints{{"Loose", 0.5}, {"Tight", 0.4}};
+    const static std::map<std::string, float> workingPoints{{"Loose", 0.5}, {"Tight", 0.4}, {"Tighter", 0.2}};
 }
 
 namespace CP {
@@ -43,7 +43,8 @@ namespace CP {
     }
 
     bool FJvtSelectionTool::select(const xAOD::IParticle *jet) const {
-        return m_jvtAcc(*jet) <= m_jvtCut && m_timingAcc(*jet) <= m_timingCut;
+        // select jet if it passes fJvt requirement and timing cut (if configured)
+        return m_jvtAcc(*jet) <= m_jvtCut && ( m_timingCut > 0 ? std::abs( m_timingAcc(*jet) ) <= m_timingCut : true );
     }
 
 } // namespace CP

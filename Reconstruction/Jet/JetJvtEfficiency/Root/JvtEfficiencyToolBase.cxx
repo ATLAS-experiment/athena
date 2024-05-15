@@ -11,7 +11,7 @@
 namespace {
     bool getBin(const TAxis &axis, float value, int &bin) {
         bin = axis.FindBin(value);
-        return (bin != 0 && bin != axis.GetNbins());
+        return (bin != 0 && bin != axis.GetNbins()+1);
     }
     bool getBinContentAndError(const TH2 &h, float x, float y, float &content, float &error) {
         int xBin{}, yBin{};
@@ -85,6 +85,7 @@ namespace CP {
     StatusCode JvtEfficiencyToolBase::initHists(const std::string &file, const std::string &wp) {
         if (file.empty()) {
             m_useDummySFs = true;
+            ATH_MSG_INFO("No SF file provided, running with dummy SFs of 1 +/- " << m_dummySFError);
             return StatusCode::SUCCESS;
         }
         std::string resolved = PathResolverFindCalibFile(file);
