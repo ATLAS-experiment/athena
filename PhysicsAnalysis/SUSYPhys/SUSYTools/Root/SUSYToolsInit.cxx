@@ -537,7 +537,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("JetContainer", m_defaultJets) );  
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("WorkingPoint", m_JvtWP) );
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("MaxPtForJvt", m_JvtPtMax) );
-      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("SFFile", m_JvtConfig) );
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("SFFile", m_isRun3 ? m_JvtConfigRun3 : m_JvtConfigRun2) );
       ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetNNJvtEfficiencyTool.retrieve() );
     } else if (m_jetNNJvtEfficiencyTool.isUserConfigured()) ATH_CHECK( m_jetNNJvtEfficiencyTool.retrieve() );
@@ -565,7 +565,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("JetContainer", m_defaultJets) );  
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("WorkingPoint", m_fJvtWP) );
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("MaxPtForJvt", m_fJvtPtMax) );
-      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("SFFile", m_fJvtConfig) );
+      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("SFFile", m_isRun3 ? m_fJvtConfigRun3 : m_fJvtConfigRun2) );
       ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetfJvtEfficiencyTool.retrieve() );
     } else  ATH_CHECK( m_jetfJvtEfficiencyTool.retrieve() );
