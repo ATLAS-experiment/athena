@@ -39,11 +39,11 @@ namespace Barcode {
     virtual ~ValidationBarcodeSvc();
 
     /** Athena algorithm's interface methods */
-    StatusCode  initialize();
-    StatusCode  finalize();
+    virtual StatusCode  initialize() override;
+    virtual StatusCode  finalize() override;
 
     /** Incident to reset the barcodes at the beginning of the event */
-    void handle(const Incident& inc);
+    virtual void handle(const Incident& inc) override;
 
     /** Generate a new unique vertex barcode, based on the parent particle barcode and
         the physics process code causing the truth vertex*/
@@ -63,11 +63,11 @@ namespace Barcode {
         of the given parent barcode (used for child particles which are
         not stored in the mc truth event) */
     virtual int sharedChildBarcode( int parentBC,
-                                                int process=0 );
+                                    int process=0 ) override;
 
     /** Return the secondary particle and vertex offsets */
-    virtual int secondaryParticleBcOffset() const;
-    virtual int   secondaryVertexBcOffset()  const;
+    virtual int secondaryParticleBcOffset() const override;
+    virtual int secondaryVertexBcOffset() const override;
 
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
