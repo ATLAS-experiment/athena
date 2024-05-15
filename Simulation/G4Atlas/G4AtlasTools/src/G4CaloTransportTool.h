@@ -29,9 +29,9 @@ class G4CaloTransportTool : virtual public extends1<AthAlgTool, IG4CaloTransport
     G4CaloTransportTool(const std::string&, const std::string&, const IInterface*);
 
     // Algorithm initialize at begin of job
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override final;
     // Algorithm finalize at begin of job
-    virtual StatusCode finalize();
+    virtual StatusCode finalize() override final;
     // Initialize propagator for the current thread
     StatusCode initializePropagator() override final;
     // Transport input track through the geometry
