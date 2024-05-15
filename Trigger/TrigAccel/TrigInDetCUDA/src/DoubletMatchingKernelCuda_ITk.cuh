@@ -304,7 +304,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 				// Triplet duplicates (from the same track) will have the same pt within stddev (based on 1GeV single muon)
 				float dPt = std::abs(1./pt_array[l] - 1./pt_array[l2]);
-				if (dPt > 1*0.00015243) continue;
+				if (dPt > 0.00015243) continue;
 
 				++nDupes;
 			}
@@ -344,18 +344,19 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 			int k = atomicAdd(&d_Out->m_nSeeds, nT);    
 			int nStored=0;
 			for(int tIdx=0;tIdx<nTriplets;tIdx++) {
-				if (Q_array[tIdx] > 10000) continue;
+				if (Q_array[tIdx] > 10000) continue; // reject seeds without duplicates
 				if(sortedIdx[tIdx]<TRIPLET_BUFFER_DEPTH_ITk) {//store this triplet
-
 					int pairIdx = PairIdx_array[tIdx];
 					int doublet_i = pairIdx / nOuter; // inner doublet
 					int doublet_j = startOfOuter + pairIdx % nOuter; //outer doublet
+					if (doublet_i >= MAX_NUMBER_DOUBLETS_ITk || doublet_j >= MAX_NUMBER_DOUBLETS_ITk) continue;
 					int spiIdx = spIdx_array[doublet_i];
 					int spoIdx = spIdx_array[doublet_j];
-					d_Out->m_innerIndex[k+nStored] = dSpacepoints->m_index[spiIdx];
-					d_Out->m_middleIndex[k+nStored] = dSpacepoints->m_index[spmIdx];
-					d_Out->m_outerIndex[k+nStored] = dSpacepoints->m_index[spoIdx];
+					d_Out->m_innerIndex[k+nStored] = spiIdx;
+					d_Out->m_middleIndex[k+nStored] = spmIdx;
+					d_Out->m_outerIndex[k+nStored] = spoIdx;
 					d_Out->m_Q[k+nStored] = Q_array[tIdx];
+					d_Out->m_pT[k+nStored] = pt_array[tIdx];
 					nStored++;
 				}
 			}
