@@ -55,6 +55,6 @@ namespace CP {
     }
 
     bool NNJvtSelectionTool::select(const xAOD::IParticle *jet) const {
-        return m_jvtAcc(*jet) > m_cutMap(*jet);
+        return m_jvtAcc(*jet) > m_cutMap(jet->pt(), m_etaAcc(*jet));
     }
 } // namespace CP

@@ -51,7 +51,7 @@ namespace CP {
                 this, "DummySFError", 0.1, "The amount by which to vary the dummy SF"};
         // NB: Use a string not a read handle key as this is not written with a write handle key
         Gaudi::Property<std::string> m_jetEtaName{
-                this, "JetEtaName", "DetectorEta", "The name of the jet eta to use."};
+                this, "JetEtaName", "eta", "The name of the jet eta to use."};
         std::unique_ptr<TH2> m_jvtHist;
         std::unique_ptr<TH2> m_effHist;
         bool m_useDummySFs{false};

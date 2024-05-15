@@ -27,11 +27,11 @@ namespace CP {
                 "The working point to use. Set to 'Custom' to manually set the values"};
         Gaudi::Property<float> m_jvtCut{this, "JvtCut", 999, "The JVT selection to make"};
         SG::ReadDecorHandleKey<xAOD::JetContainer> m_jvtMoment{
-                this, "JvtMomentName", "FJvt", "The name of the Jvt moment to use"};
+                this, "JvtMomentName", "DFCommonJets_fJvt", "The name of the Jvt moment to use"};
         SG::ReadDecorHandleKey<xAOD::JetContainer> m_timingMoment{
                 this, "TimingMomentName", "Timing", "The name of the timing moment to use"};
         Gaudi::Property<float> m_timingCut{
-                this, "TimingCut", 10, "Only accept jets with time less than this"};
+                this, "TimingCut", -1, "Only accept jets with time less than this; negative values deactivate timing requirement"};
 
         virtual bool select(const xAOD::IParticle *jet) const override;
 
