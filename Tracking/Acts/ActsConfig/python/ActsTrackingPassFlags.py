@@ -61,6 +61,9 @@ def createActsLargeRadiusTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
     # Mark as secondary pass 
     icf.isSecondaryPass = True
+    # For the time being we do not store sepate containers for LRT (to be revised)
+    # In Athena this is handled by the Tracking.storeSeparateLargeD0Container flag
+    icf.storeSeparateContainer = False
     return icf
 
 def createActsConversionTrackingPassFlags():
