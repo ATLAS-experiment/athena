@@ -36,28 +36,28 @@ namespace Barcode {
     LegacyBarcodeSvc( const std::string& name, ISvcLocator* pSvcLocator );
 
     /** Destructor */
-    virtual ~LegacyBarcodeSvc();
+    virtual ~LegacyBarcodeSvc() = default;
 
     /** Athena algorithm's interface methods */
     virtual StatusCode  initialize() override;
-    virtual StatusCode  finalize() override;
 
     /** Construct and insert a new set of barcode members. To be called for every new thread. */
-    virtual StatusCode initializeBarcodes() override;
+    virtual StatusCode initializeBarcodes(int largestGeneratedParticleBC=0, int largestGeneratedVertexBC=0) override;
 
     /** Reset barcodes. To be called at the beginning of each event. */
-    virtual StatusCode resetBarcodes() override;
+    virtual StatusCode resetBarcodes(int largestGeneratedParticleBC=0, int largestGeneratedVertexBC=0) override;
 
-    /** Generate a new unique vertex barcode, based on the parent particle barcode and
-        the physics process code causing the truth vertex*/
-    virtual int newVertex( int parentBC=HepMC::UNDEFINED_ID,
-                                     int process=0 ) override;
+    /** Generate a new unique barcode for a secondary particle above the simulation offset */
+    virtual int newSecondaryParticle( int) override;
 
-    /** Generate a new unique barcode for a secondary particle, based on the parent
-        particle barcode and the process code of the physics process that created
-        the secondary  */
-    virtual int newSecondary( int parentBC=HepMC::UNDEFINED_ID,
-                                          int process=0 ) override;
+    /** Generate a new unique particle barcode below the simulation offset (for particles from pre-defined decays) */
+    virtual int newGeneratedParticle(int ) override;
+
+    /** Generate a new unique vertex barcode above the simulation offset */
+    virtual int newSimulationVertex() override;
+
+    /** Generate a new unique vertex barcode below the simulation offset */
+    virtual int newGeneratedVertex() override;
 
     /** Generate a common barcode which will be shared by all children
         of the given parent barcode (used for child particles which are
@@ -67,8 +67,10 @@ namespace Barcode {
 
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
-    virtual void registerLargestGenEvtParticleBC( int bc) override;
-    virtual void registerLargestGenEvtVtxBC( int bc) override;
+    virtual void registerLargestGeneratedParticleBC( int bc) override;
+    virtual void registerLargestGeneratedVtxBC( int bc) override;
+    virtual void registerLargestSecondaryParticleBC( int bc) override;
+    virtual void registerLargestSimulationVtxBC( int bc) override;
 
     /** Return the secondary particle and vertex offsets */
     virtual int secondaryParticleBcOffset() const override;
@@ -77,20 +79,24 @@ namespace Barcode {
   private:
 
     /** barcode information used for GenVertices */
-    int                                 m_firstVertex;
-    int                                 m_vertexIncrement;
-    int                                 m_currentVertex;
+    int m_firstVertex;
+    int m_vertexIncrement;
 
     /** barcode information used for secondary GenParticles */
-    int                               m_firstSecondary;
-    int                               m_secondaryIncrement;
-    int                               m_currentSecondary;
+    int m_firstSecondary;
+    int m_particleIncrement;
 
     struct BarcodeInfo {
-        BarcodeInfo() = delete;
-        BarcodeInfo(int cv, int cs) : currentVertex(cv), currentSecondary(cs) {};
-        int currentVertex;
-        int currentSecondary;
+      BarcodeInfo() = delete;
+      BarcodeInfo(int csv, int csp, int cgv, int cgp)
+        : currentSimulationVertex(csv)
+        , currentSecondaryParticle(csp)
+        , currentGeneratedVertex(cgv)
+        , currentGeneratedParticle(cgp) {};
+      int currentSimulationVertex{};
+      int currentSecondaryParticle{};
+      int currentGeneratedVertex{};
+      int currentGeneratedParticle{};
     };
 
     using LegacyBarcodeSvcThreadMap_t = tbb::concurrent_unordered_map

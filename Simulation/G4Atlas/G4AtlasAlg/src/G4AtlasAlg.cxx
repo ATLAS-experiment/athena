@@ -315,9 +315,6 @@ StatusCode G4AtlasAlg::execute()
     ATH_MSG_ALWAYS("G4AtlasAlg: Event num. "  << n_Event << " start processing");
   }
 
-  // tell TruthService we're starting a new event
-  ATH_CHECK( m_truthRecordSvc->initializeTruthCollection() );
-
   // Release GeoModel Geometry if necessary
   if (m_releaseGeoModel) {
     try {
@@ -378,6 +375,14 @@ StatusCode G4AtlasAlg::execute()
   }
 
   ATH_MSG_DEBUG("Recorded output GenEvent collection " << outputTruthCollection.name() << " in store " << outputTruthCollection.store());
+
+  const int largestGeneratedParticleBC =  (outputTruthCollection->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedParticleBarcode(outputTruthCollection->at(0)); // TODO make this more robust
+  const int largestGeneratedVertexBC =  (outputTruthCollection->empty()) ? HepMC::UNDEFINED_ID
+    : HepMC::maxGeneratedVertexBarcode(outputTruthCollection->at(0)); // TODO make this more robust
+  // tell TruthService we're starting a new event
+  ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
+
   G4Event *inputEvent{};
   ATH_CHECK( m_inputConverter->convertHepMCToG4Event(*outputTruthCollection, inputEvent, *shadowTruth) );
 

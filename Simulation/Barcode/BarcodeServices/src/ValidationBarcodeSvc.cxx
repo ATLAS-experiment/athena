@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BarcodeServices/ValidationBarcodeSvc.h"
@@ -47,10 +47,8 @@ StatusCode Barcode::ValidationBarcodeSvc::initialize()
 }
 
 
-/** Generate a new unique vertex barcode, based on the parent particle barcode and
-    the physics process code causing the truth vertex*/
-int Barcode::ValidationBarcodeSvc::newVertex( int /* parent */,
-                                                                 int /* process */)
+/** Generate a new unique vertex barcode*/
+int Barcode::ValidationBarcodeSvc::newSimulationVertex()
 {
   m_currentVertex += m_vertexIncrement;
   // a naive underflog checking based on the fact that vertex
@@ -66,17 +64,15 @@ int Barcode::ValidationBarcodeSvc::newVertex( int /* parent */,
 
 
 /** Generate a new unique barcode for a secondary particle, based on the parent
-    particle barcode and the process code of the physics process that created
-    the secondary  */
-int Barcode::ValidationBarcodeSvc::newSecondary( int parentBC,
-                                                                      int /* process */)
+    particle barcode */
+int Barcode::ValidationBarcodeSvc::newSecondaryParticle( int parentBC )
 {
   m_currentSecondary += m_secondaryIncrement;
   // a naive overflow checking based on the fact that particle
   // barcodes should never be negative
   if ( m_currentSecondary < 0)
     {
-      ATH_MSG_ERROR("ValidationBarcodeSvc::newSecondary(...)"
+      ATH_MSG_ERROR("ValidationBarcodeSvc::newSecondaryParticle(...)"
                     << " will return a particle barcode of less than 0: "
                     << m_currentSecondary << ". Possibly Integer Overflow?");
     }
@@ -87,6 +83,41 @@ int Barcode::ValidationBarcodeSvc::newSecondary( int parentBC,
 }
 
 
+/** Generate a new unique particle barcode below the simulation offset (for particles from pre-defined decays) */
+int Barcode::ValidationBarcodeSvc::newGeneratedParticle( int parentBC )
+{
+  m_currentSecondary += m_secondaryIncrement;
+  // a naive overflow checking based on the fact that particle
+  // barcodes should never be negative
+  if ( m_currentSecondary < 0)
+    {
+      ATH_MSG_ERROR("ValidationBarcodeSvc::newGeneratedParticle(...)"
+                    << " will return a particle barcode of less than 0: "
+                    << m_currentSecondary << ". Possibly Integer Overflow?");
+    }
+  int primGen = int( (parentBC-m_particleGenerationIncrement) / m_barcodeGenerationOffset);
+  int returnBC = m_currentSecondary + (primGen+1)*m_barcodeGenerationOffset;
+
+  return returnBC;
+}
+
+
+/** Generate a new unique vertex barcode*/
+int Barcode::ValidationBarcodeSvc::newGeneratedVertex()
+{
+  m_currentVertex += m_vertexIncrement;
+  // a naive underflog checking based on the fact that vertex
+  // barcodes should never be positive
+  if ( m_currentVertex > 0)
+    {
+      ATH_MSG_ERROR("ValidationBarcodeSvc::newGeneratedVertex(...)"
+                    << " will return a vertex barcode greater than 0: "
+                    << m_currentVertex << ". Possibly Integer Underflow?");
+    }
+  return m_currentVertex;
+}
+
+
 /** Generate a common barcode which will be shared by all children
     of the given parent barcode (used for child particles which are
     not stored in the mc truth event) */
@@ -94,16 +125,6 @@ int Barcode::ValidationBarcodeSvc::sharedChildBarcode( int parentBC,
                                                                             int /* process */)
 {
   return parentBC+m_barcodeGenerationOffset;
-}
-
-
-void Barcode::ValidationBarcodeSvc::registerLargestGenEvtParticleBC( int /* bc */)
-{
-}
-
-
-void Barcode::ValidationBarcodeSvc::registerLargestGenEvtVtxBC( int /* bc */)
-{
 }
 
 

@@ -12,18 +12,8 @@ Barcode::LegacyBarcodeSvc::LegacyBarcodeSvc(const std::string& name,ISvcLocator*
   base_class(name,svc),
   m_firstVertex(-HepMC::SIM_BARCODE_THRESHOLD-1),
   m_vertexIncrement(-1),
-  m_currentVertex(-1),
   m_firstSecondary(HepMC::SIM_BARCODE_THRESHOLD+1),
-  m_secondaryIncrement(1),
-  m_currentSecondary(1)
-{
-  // python properties
-  declareProperty("VertexIncrement"            ,  m_vertexIncrement);
-  declareProperty("SecondaryIncrement"         ,  m_secondaryIncrement);
-}
-
-
-Barcode::LegacyBarcodeSvc::~LegacyBarcodeSvc()
+  m_particleIncrement(1)
 {
 }
 
@@ -40,7 +30,8 @@ StatusCode Barcode::LegacyBarcodeSvc::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode Barcode::LegacyBarcodeSvc::initializeBarcodes() {
+
+StatusCode Barcode::LegacyBarcodeSvc::initializeBarcodes(int largestGeneratedParticleBC, int largestGeneratedVertexBC) {
     static std::mutex barcodeMutex;
     std::lock_guard<std::mutex> barcodeLock(barcodeMutex);
     ATH_MSG_DEBUG( name() << "::initializeBarcodes()" );
@@ -50,74 +41,134 @@ StatusCode Barcode::LegacyBarcodeSvc::initializeBarcodes() {
   const auto tid = std::this_thread::get_id();
   auto bcPair = m_bcThreadMap.find(tid);
   if ( bcPair == m_bcThreadMap.end() ) {
-      auto result = m_bcThreadMap.insert( std::make_pair( tid, BarcodeInfo(m_currentVertex, m_currentSecondary)) );
+    auto result = m_bcThreadMap.insert( std::make_pair( tid, BarcodeInfo(-HepMC::SIM_BARCODE_THRESHOLD, HepMC::SIM_BARCODE_THRESHOLD, largestGeneratedVertexBC, largestGeneratedParticleBC) ) );
       if (result.second) {
           ATH_MSG_DEBUG( "initializeBarcodes: initialized new barcodes for thread ID " << tid );
-          ATH_CHECK( this->resetBarcodes() );
+          ATH_CHECK( this->resetBarcodes(largestGeneratedParticleBC, largestGeneratedVertexBC) );
           ATH_MSG_DEBUG( "initializeBarcodes: reset new barcodes for thread ID " << tid );
       } else {
           ATH_MSG_ERROR( "initializeBarcodes: failed to initialize new barcode for thread ID " << tid );
       }
   } else {
       ATH_MSG_DEBUG( "initializeBarcodes: barcodes for this thread ID found, did not construct new" );
-      ATH_CHECK( this->resetBarcodes() );
+      ATH_CHECK( this->resetBarcodes(largestGeneratedParticleBC, largestGeneratedVertexBC) );
       ATH_MSG_DEBUG( "initializeBarcodes: reset existing barcodes for thread ID " << tid );
   }
   return StatusCode::SUCCESS;
 }
 
-//FIXME this should return an optional type, since returning the value of the end iterator is undefined behaviour (I think it causes a segfault).
+
 Barcode::LegacyBarcodeSvc::BarcodeInfo& Barcode::LegacyBarcodeSvc::getBarcodeInfo() {
     const auto tid = std::this_thread::get_id();
     auto bcPair = m_bcThreadMap.find(tid);
     if ( bcPair == m_bcThreadMap.end() ) {
-        ATH_MSG_ERROR( "getBarcodeInfo: failed to get BarcodeInfo for thread ID " << tid );
+      ATH_MSG_WARNING( "getBarcodeInfo: failed to find BarcodeInfo for thread ID " << tid << ", created a new one." );
+      Barcode::LegacyBarcodeSvc::BarcodeInfo barcodeInfo = BarcodeInfo(-HepMC::SIM_BARCODE_THRESHOLD, HepMC::SIM_BARCODE_THRESHOLD, 0, 0);
+      auto result = m_bcThreadMap.insert( std::make_pair( tid, barcodeInfo ) );
+      if (result.second) {
+        auto bcPair = m_bcThreadMap.find(tid);
         return bcPair->second;
-    } else {
-        return bcPair->second;
+      }
+      ATH_MSG_ERROR ( "getBarcodeInfo: could not add a the new BarcodeInfo object to the map!" );
+      return m_bcThreadMap.begin()->second;
     }
+    return bcPair->second;
 }
 
-/** Generate a new unique vertex barcode, based on the parent particle barcode and
-    the physics process code causing the truth vertex*/
-int Barcode::LegacyBarcodeSvc::newVertex( int /* parent */,
-                                                             int /* process */)
+
+/** Generate a new unique vertex simulated barcode */
+int Barcode::LegacyBarcodeSvc::newSimulationVertex()
 {
   BarcodeInfo& bc = getBarcodeInfo();
-  bc.currentVertex += m_vertexIncrement;
+  bc.currentSimulationVertex += m_vertexIncrement;
   // a naive underflog checking based on the fact that vertex
   // barcodes should never be positive
-  if ( bc.currentVertex > 0)
+  if ( bc.currentSimulationVertex > -HepMC::SIM_BARCODE_THRESHOLD)
     {
-      ATH_MSG_ERROR("LegacyBarcodeSvc::newVertex(...)"
-                    << " will return a vertex barcode greater than 0: "
-                    << bc.currentVertex << ". Possibly Integer Underflow?");
+      ATH_MSG_WARNING("LegacyBarcodeSvc::newSimulationVertex()"
+                    << " will return a vertex barcode greater than "
+                    << -HepMC::SIM_BARCODE_THRESHOLD << ": "
+                    << bc.currentSimulationVertex << ". Reset to "
+                    << HepMC::UNDEFINED_ID);
+      bc.currentSimulationVertex = HepMC::UNDEFINED_ID;
     }
 
-  return bc.currentVertex;
+  return bc.currentSimulationVertex;
 }
 
 
-/** Generate a new unique barcode for a secondary particle, based on the parent
-    particle barcode and the process code of the physics process that created
-    the secondary  */
-int Barcode::LegacyBarcodeSvc::newSecondary( int /* parentBC */,
-                                                                  int /* process */)
+/** Generate a new unique barcode for a secondary particle */
+int Barcode::LegacyBarcodeSvc::newSecondaryParticle(int)
 {
   BarcodeInfo& bc = getBarcodeInfo();
-  bc.currentSecondary += m_secondaryIncrement;
+  bc.currentSecondaryParticle += m_particleIncrement;
   // a naive overflow checking based on the fact that particle
   // barcodes should never be negative
-  if (bc.currentSecondary < 0)
+  if (bc.currentSecondaryParticle < HepMC::SIM_BARCODE_THRESHOLD)
     {
-      ATH_MSG_DEBUG("LegacyBarcodeSvc::newSecondary(...)"
-                    << " will return a particle barcode of less than 0: "
-                    << bc.currentSecondary << ". Reset to zero.");
+      ATH_MSG_WARNING("LegacyBarcodeSvc::newSecondaryParticle()"
+                    << " will return a particle barcode of less than "
+                    << HepMC::SIM_BARCODE_THRESHOLD << ": "
+                    << bc.currentSecondaryParticle << ". Reset to "
+                    << HepMC::UNDEFINED_ID);
 
-      bc.currentSecondary = HepMC::UNDEFINED_ID;
+      bc.currentSecondaryParticle = HepMC::UNDEFINED_ID;
     }
 
-  return bc.currentSecondary;
+  return bc.currentSecondaryParticle;
+}
+
+
+/** Generate a new unique vertex barcode for pre-defined decay vertices */
+int Barcode::LegacyBarcodeSvc::newGeneratedVertex()
+{
+  BarcodeInfo& bc = getBarcodeInfo();
+  bc.currentGeneratedVertex += m_vertexIncrement;
+  // a naive underflog checking based on the fact that vertex
+  // barcodes should never be positive
+  if ( bc.currentGeneratedVertex > 0) {
+      ATH_MSG_WARNING("LegacyBarcodeSvc::newGeneratedVertex()"
+                    << " will return a vertex barcode greater than 0: "
+                    << bc.currentGeneratedVertex << ". Reset to "
+                    << HepMC::UNDEFINED_ID);
+
+      bc.currentGeneratedVertex = HepMC::UNDEFINED_ID;
+    }
+  if ( bc.currentGeneratedVertex < -HepMC::SIM_BARCODE_THRESHOLD) {
+      ATH_MSG_ERROR("LegacyBarcodeSvc::newGeneratedVertex()"
+                    << " will return a vertex barcode below "
+                    << -HepMC::SIM_BARCODE_THRESHOLD << ": "
+                    << bc.currentGeneratedVertex << ". Expect clashes with simulation vertices.");
+    }
+
+  return bc.currentGeneratedVertex;
+}
+
+
+/** Generate a new unique barcode for a particle produced in a pre-defined decay  */
+int Barcode::LegacyBarcodeSvc::newGeneratedParticle(int)
+{
+  BarcodeInfo& bc = getBarcodeInfo();
+  bc.currentGeneratedParticle += m_particleIncrement;
+  // a naive overflow checking based on the fact that particle
+  // barcodes should never be negative
+  if (bc.currentGeneratedParticle < 0)
+    {
+      ATH_MSG_WARNING("LegacyBarcodeSvc::newGeneratedParticle()"
+                    << " will return a particle barcode of less than 0: "
+                    << bc.currentGeneratedParticle << ". Reset to "
+                    << HepMC::UNDEFINED_ID);
+
+      bc.currentGeneratedParticle = HepMC::UNDEFINED_ID;
+    }
+  if ( bc.currentGeneratedParticle > HepMC::SIM_BARCODE_THRESHOLD) {
+      ATH_MSG_ERROR("LegacyBarcodeSvc::newGeneratedParticle()"
+                    << " will return a particle barcode below "
+                    << -HepMC::SIM_BARCODE_THRESHOLD << ": "
+                    << bc.currentGeneratedParticle << ". Expect clashes with simulation particles.");
+    }
+
+  return bc.currentGeneratedParticle;
 }
 
 
@@ -132,11 +183,25 @@ int Barcode::LegacyBarcodeSvc::sharedChildBarcode( int /* parentBC */,
 }
 
 
-void Barcode::LegacyBarcodeSvc::registerLargestGenEvtParticleBC( int /* bc */) {
+void Barcode::LegacyBarcodeSvc::registerLargestGeneratedParticleBC( int bc ) {
+    ATH_MSG_DEBUG( "registering largest generated particle barcode" );
+    BarcodeInfo& barcodeInfo = getBarcodeInfo();
+    barcodeInfo.currentGeneratedParticle = bc;
 }
 
 
-void Barcode::LegacyBarcodeSvc::registerLargestGenEvtVtxBC( int /* bc */) {
+void Barcode::LegacyBarcodeSvc::registerLargestGeneratedVtxBC( int bc ) {
+    ATH_MSG_DEBUG( "registering largest generated particle barcode" );
+    BarcodeInfo& barcodeInfo = getBarcodeInfo();
+    barcodeInfo.currentGeneratedVertex = bc;
+}
+
+
+void Barcode::LegacyBarcodeSvc::registerLargestSecondaryParticleBC( int /* bc */) {
+}
+
+
+void Barcode::LegacyBarcodeSvc::registerLargestSimulationVtxBC( int /* bc */) {
 }
 
 
@@ -152,20 +217,14 @@ int Barcode::LegacyBarcodeSvc::secondaryVertexBcOffset() const {
 }
 
 
-StatusCode Barcode::LegacyBarcodeSvc::resetBarcodes()
+StatusCode Barcode::LegacyBarcodeSvc::resetBarcodes(int largestGeneratedParticleBC, int largestGeneratedVertexBC)
 {
     ATH_MSG_DEBUG( "resetBarcodes: resetting barcodes" );
     BarcodeInfo& bc = getBarcodeInfo();
-    bc.currentVertex    = m_firstVertex    - m_vertexIncrement;
-    bc.currentSecondary = m_firstSecondary - m_secondaryIncrement;
+    bc.currentSimulationVertex = m_firstVertex - m_vertexIncrement;
+    bc.currentSecondaryParticle = m_firstSecondary - m_particleIncrement;
+    bc.currentGeneratedVertex = largestGeneratedVertexBC;
+    bc.currentGeneratedParticle = largestGeneratedParticleBC;
+
     return StatusCode::SUCCESS;
-}
-
-
-/** framework methods */
-StatusCode Barcode::LegacyBarcodeSvc::finalize()
-{
-  ATH_MSG_VERBOSE ("finalize() ...");
-  ATH_MSG_VERBOSE ("finalize() successful");
-  return StatusCode::SUCCESS;
 }

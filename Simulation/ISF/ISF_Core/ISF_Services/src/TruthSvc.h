@@ -69,7 +69,7 @@ namespace ISF {
     void registerTruthIncident( ITruthIncident& truthincident, bool saveAllChildren=false) const override;
 
     /** Initialize the Truth Svc at the beginning of each event */
-    StatusCode initializeTruthCollection() override;
+    StatusCode initializeTruthCollection(int largestGeneratedParticleBC=0, int largestGeneratedVertexBC=0) override;
 
     /** Finalize the Truth Svc at the end of each event*/
     StatusCode releaseEvent() override;
