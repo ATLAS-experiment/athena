@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -1348,9 +1348,9 @@ ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( const ISF::ISFParticle &i
   const double pTime = 0;  /** @TODO: fix */
 
   //assign barcodes to the produced particles
-  int processCode{0};
-  const int secBC = m_barcodeSvc->newSecondary( isfp.barcode(), processCode);
-
+  const int secBC = m_barcodeSvc->newSecondaryParticle( isfp.barcode() );
+  // NB we are not considering the possibility that the punch-through
+  // particle is the incoming particle having survived an interaction.
   ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, 1 + HepMC::SIM_STATUS_THRESHOLD, pTime, isfp, secBC);
   finalPar->setNextGeoID( AtlasDetDescr::fAtlasMS);
 

@@ -47,14 +47,17 @@ namespace Barcode {
 
     /** Generate a new unique vertex barcode, based on the parent particle barcode and
         the physics process code causing the truth vertex*/
-    virtual int newVertex( int parentBC=HepMC::UNDEFINED_ID,
-                                     int process=0 );
+    virtual int newSimulationVertex() override;
 
     /** Generate a new unique barcode for a secondary particle, based on the parent
-        particle barcode and the process code of the physics process that created
-        the secondary  */
-    virtual int newSecondary( int parentBC=HepMC::UNDEFINED_ID,
-                                          int process=0 );
+        particle barcode */
+    virtual int newSecondaryParticle( int parentBC=HepMC::UNDEFINED_ID ) override;
+
+   /** Generate a new unique particle barcode below the simulation offset (for particles from pre-defined decays) */
+    virtual int newGeneratedParticle(int parentBC=HepMC::UNDEFINED_ID ) override;
+
+    /** Generate a new unique vertex barcode below the simulation offset */
+    virtual int newGeneratedVertex() override;
 
     /** Generate a common barcode which will be shared by all children
         of the given parent barcode (used for child particles which are
@@ -68,8 +71,10 @@ namespace Barcode {
 
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
-    virtual void registerLargestGenEvtParticleBC( int bc);
-    virtual void registerLargestGenEvtVtxBC( int bc);
+    virtual void registerLargestGeneratedParticleBC( int ) override {};
+    virtual void registerLargestGeneratedVtxBC( int ) override {};
+    virtual void registerLargestSecondaryParticleBC( int ) override {};
+    virtual void registerLargestSimulationVtxBC( int ) override {};
 
   private:
     ServiceHandle<IIncidentSvc>                   m_incidentSvc;   //!< IncidentSvc to catch begin of event and end of envent

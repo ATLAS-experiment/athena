@@ -22,29 +22,28 @@ namespace Barcode {
   */
   class IBarcodeSvc : virtual public IInterface {
 
-    ///////////////////////////////////////////////////////////////////
-    // Public methods:
-    ///////////////////////////////////////////////////////////////////
   public:
 
     //TODO not fully implemented in Generic, Global, and Validation BarcodeSvcs
     //only fully implemented in LegacyBarcodeSvc (only barcode service used in production)
-    virtual StatusCode initializeBarcodes() { return StatusCode::SUCCESS; };
-    virtual StatusCode resetBarcodes() { return StatusCode::SUCCESS; };
+    virtual StatusCode initializeBarcodes(int, int) { return StatusCode::SUCCESS; };
+    virtual StatusCode resetBarcodes(int, int) { return StatusCode::SUCCESS; };
 
     /// Creates the InterfaceID and interfaceID() method
     DeclareInterfaceID(IBarcodeSvc, 1 , 0);
 
-    /** Generate a new unique vertex barcode, based on the parent particle barcode and
-        the physics process code causing the truth vertex*/
-    virtual int newVertex( int parentBC=HepMC::UNDEFINED_ID,
-                                     int process=0 ) = 0;
 
-    /** Generate a new unique barcode for a secondary particle, based on the parent
-        particle barcode and the process code of the physics process that created
-        the secondary  */
-    virtual int newSecondary( int parentBC=HepMC::UNDEFINED_ID,
-                                          int process=0 ) = 0;
+    /** Generate a new unique barcode for a secondary particle above the simulation offset */
+    virtual int newSecondaryParticle(int parentBC) = 0;
+
+    /** Generate a new unique particle barcode below the simulation offset (for particles from pre-defined decays) */
+    virtual int newGeneratedParticle(int parentBC) = 0;
+
+    /** Generate a new unique vertex barcode above the simulation offset */
+    virtual int newSimulationVertex() = 0;
+
+    /** Generate a new unique vertex barcode below the simulation offset */
+    virtual int newGeneratedVertex() = 0;
 
     /** Generate a common barcode which will be shared by all children
         of the given parent barcode (used for child particles which are
@@ -54,8 +53,10 @@ namespace Barcode {
 
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
-    virtual void registerLargestGenEvtParticleBC( int bc) = 0;
-    virtual void registerLargestGenEvtVtxBC( int bc) = 0;
+    virtual void registerLargestGeneratedParticleBC( int bc) = 0;
+    virtual void registerLargestGeneratedVtxBC( int bc) = 0;
+    virtual void registerLargestSecondaryParticleBC( int bc) = 0;
+    virtual void registerLargestSimulationVtxBC( int bc) = 0;
 
     /** Return the secondary particle and vertex offsets */
     virtual int secondaryParticleBcOffset() const = 0;

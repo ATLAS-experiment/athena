@@ -338,8 +338,7 @@ namespace ISFTesting {
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
     HepMC::FourVector vtxPosition(0.0, 40.0, 0.0, 40.0);
     EXPECT_CALL(ti, physicsProcessCode())
-      .Times(2)
-      .WillOnce(::testing::Return(21))
+      .Times(1)
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
       .Times(2)
@@ -613,8 +612,7 @@ namespace ISFTesting {
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
     HepMC::FourVector vtxPosition(0.0, 40.0, 0.0, 40.0);
     EXPECT_CALL(ti, physicsProcessCode())
-      .Times(2)
-      .WillOnce(::testing::Return(21))
+      .Times(1)
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
       .Times(2)
