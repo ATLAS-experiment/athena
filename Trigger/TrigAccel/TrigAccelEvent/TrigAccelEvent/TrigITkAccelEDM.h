@@ -101,6 +101,7 @@ namespace ITk {
     int m_middleIndex[MAX_NUMBER_OUTPUT_SEEDS];
     int m_outerIndex[MAX_NUMBER_OUTPUT_SEEDS];
     float m_Q[MAX_NUMBER_OUTPUT_SEEDS];
+    float m_pT[MAX_NUMBER_OUTPUT_SEEDS];
   } OUTPUT_SEED_STORAGE;
   
 }

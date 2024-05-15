@@ -64,6 +64,7 @@ SeedMakingManagedDeviceContext() : m_deviceId(-1), m_spacepoints(0), d_size(0), 
 
 
   unsigned char *m_outputseeds;
+  unsigned char *m_confirmedseeds;
   
   unsigned char *d_doubletstorage;
   unsigned char *d_doubletinfo;
