@@ -200,7 +200,6 @@ namespace MuonGM {
                 /// Input width is defined as the distance between two channels
                 design.inputWidth = stripPitch * std::cos(design.stereoAngle());
           
-                m_nStrips[il] = design.totalStrips;
                 if (!design.hasStereoAngle()) {  // eta layers
                     design.nch  = design.totalStrips - design.nMissedBottomEta - design.nMissedTopEta;
                     design.setFirstPos(-0.5 * design.xSize() + stripPitch);
@@ -275,7 +274,6 @@ namespace MuonGM {
             /// Input width is defined as the distance between two channels
             design.inputWidth          = pitch * std::cos(design.stereoAngle());
         
-            m_nStrips[il] =  design.totalStrips;
             if (!design.hasStereoAngle()) {  // eta layers
                 design.nch = design.totalStrips - design.nMissedBottomEta - design.nMissedTopEta;
                 design.setFirstPos(-0.5 * design.xSize() + pitch);
@@ -337,7 +335,7 @@ namespace MuonGM {
         if (gasgap < 1 || gasgap > m_nlayers) return false;
 
         int strip = m_idHelper.channel(id);
-        return strip >= 1 && strip <= m_nStrips[gasgap - 1];
+        return strip >= 1 && strip <= m_etaDesign[gasgap - 1].totalStrips;
     }
 
 

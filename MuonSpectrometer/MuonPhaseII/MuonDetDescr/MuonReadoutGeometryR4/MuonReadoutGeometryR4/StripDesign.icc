@@ -20,7 +20,7 @@ namespace MuonGMR4 {
     inline const Amg::Vector2D& StripDesign::cornerTopRight() const { return m_topRight; }
     inline const Amg::Vector2D& StripDesign::stripNormal() const { return m_stripNormal; }
     inline const Amg::Vector2D& StripDesign::stripDir() const { return m_stripDir; }
-
+    inline const Amg::Vector2D& StripDesign::firstStripPos() const { return m_firstStripPos; }
 
     SET_DIRECTION(edgeDirTop, m_dirTopEdge, m_topLeft, m_topRight)
     SET_DIRECTION(edgeDirBottom, m_dirBotEdge, m_bottomLeft, m_bottomRight)

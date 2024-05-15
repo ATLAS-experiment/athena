@@ -154,7 +154,6 @@ namespace MuonGM {
         // MuonChannelDesign m_phiDesign;
         std::array<MuonChannelDesign, 4> m_etaDesign{};
 
-        std::array<int, 4> m_nStrips{};     // #of active strips
         int m_nlayers{0};  // #of gas gaps
 
         const NswPassivationDbData* m_passivData{nullptr};
@@ -289,11 +288,11 @@ namespace MuonGM {
 
     inline int MMReadoutElement::numberOfLayers(bool) const { return m_nlayers; }
 
-    inline int MMReadoutElement::numberOfStrips(const Identifier& layerId) const { return m_nStrips[layerHash(layerId)]; }
+    inline int MMReadoutElement::numberOfStrips(const Identifier& layerId) const { return m_etaDesign[layerHash(layerId)].totalStrips; }
 
     inline int MMReadoutElement::numberOfStrips(int lay, bool /*measPhi*/) const {
-        if (lay > -1 && lay < (int)m_nStrips.size())
-            return m_nStrips[lay];
+        if (lay > -1 && lay < static_cast<int>(m_etaDesign.size()))
+            return m_etaDesign[lay].totalStrips;
         else
             return -1;
     }
