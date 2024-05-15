@@ -18,8 +18,17 @@ namespace FlavorTagDiscriminants {
     std::map<std::string, std::string> variable_remapping = {};
     TrackLinkType track_link_type = TrackLinkType::TRACK_PARTICLE;
     float default_output_value = NAN;
-    bool decorate_tracks = false;
+    bool operator==(const GNNOptions&) const;
+    std::size_t hash() const;
   };
 }
+
+// some definitions to make sure we can use GNNOptions as a key
+template<>
+struct std::hash<FlavorTagDiscriminants::GNNOptions> {
+  std::size_t operator()(const FlavorTagDiscriminants::GNNOptions& o) const {
+    return o.hash();
+  }
+};
 
 #endif

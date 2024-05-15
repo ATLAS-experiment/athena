@@ -7,6 +7,8 @@
 
 // Tool includes
 #include "AsgTools/AsgTool.h"
+#include "AsgServices/ServiceHandle.h"
+#include "FlavorTagDiscriminants/INNSharingSvc.h"
 #include "FlavorTagDiscriminants/IBTagConditionalDecorator.h"
 #include "FlavorTagDiscriminants/IJetTagConditionalDecorator.h"
 
@@ -52,10 +54,12 @@ namespace FlavorTagDiscriminants {
 
     private:
 
+    ServiceHandle<INNSharingSvc> m_nnsvc {
+      this, "nnSharingService", "", "NN sharing service"};
     std::vector<std::string> m_nn_files;
     std::string m_fold_hash_name;
-      GNNToolProperties m_props;
-      std::unique_ptr<const MultifoldGNN> m_gnn;
+    GNNToolProperties m_props;
+    std::shared_ptr<const MultifoldGNN> m_gnn;
   };
 }
 #endif
