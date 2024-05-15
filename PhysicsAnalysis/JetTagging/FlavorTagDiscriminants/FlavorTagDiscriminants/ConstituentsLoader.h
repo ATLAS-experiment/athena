@@ -76,7 +76,7 @@ namespace FlavorTagDiscriminants {
               m_config = cfg;
             };
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
+            virtual std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
                 const xAOD::Jet& jet, 
                 [[maybe_unused]] const SG::AuxElement& btag) const = 0;
             virtual FTagDataDependencyNames getDependencies() const = 0;
