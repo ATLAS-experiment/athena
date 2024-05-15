@@ -252,15 +252,16 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_jetJvt(-99.),
     m_JvtWP(""),
     m_JvtPtMax(-99.),
-    m_JvtConfig(""),
+    m_JvtConfigRun2(""),
+    m_JvtConfigRun3(""),
     m_trkJetPt(-99.),
     m_trkJetEta(-99.),
     m_doFwdJVT(false),
     m_fJvtWP(""),
     m_fJvtPtMax(-99.),
     m_fJvtEtaMin(-99.),
-    m_fJvtConfig(""),
-    m_fJvtRecalculate(false),
+    m_fJvtConfigRun2(""),
+    m_fJvtConfigRun3(""),
     m_JMScalib(false),
     //
     m_orDoTau(false),
@@ -1503,7 +1504,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_jetEta, "Jet.Eta", rEnv, 2.8);
   configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "FixedEffPt"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
-  configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "", true); // empty string means dummy SF
+  configFromFile(m_JvtConfigRun2, "Jet.JvtConfigRun2", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
+  configFromFile(m_JvtConfigRun3, "Jet.JvtConfigRun3", rEnv, "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root", true); // empty string means dummy SF
   configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
@@ -1535,10 +1537,10 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   //
   configFromFile(m_doFwdJVT, "FwdJet.doJVT", rEnv, false); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_fJvtWP, "FwdJet.JvtWP", rEnv, "Loose");
-  configFromFile(m_fJvtPtMax, "FwdJet.JvtPtMax", rEnv, 120e3);
+  configFromFile(m_fJvtPtMax, "FwdJet.JvtPtMax", rEnv, 60e3);
   configFromFile(m_fJvtEtaMin, "FwdJet.JvtEtaMin", rEnv, 2.5);
-  configFromFile(m_fJvtConfig, "FwdJet.JvtConfig", rEnv, "", true); // empty string means dummy SF
-  configFromFile(m_fJvtRecalculate, "FwdJet.JvtRecalculate", rEnv, false);
+  configFromFile(m_fJvtConfigRun2, "FwdJet.JvtConfigRun2", rEnv, "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
+  configFromFile(m_fJvtConfigRun3, "FwdJet.JvtConfigRun3", rEnv, "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root", true); // empty string means dummy SF
   configFromFile(m_JMScalib, "Jet.JMSCalib", rEnv, false);
   //
   configFromFile(m_useBtagging, "Btag.enable", rEnv, true);

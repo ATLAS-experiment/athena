@@ -716,8 +716,8 @@ namespace ST {
     double m_jetJvt;
     std::string m_JvtWP;
     double m_JvtPtMax;
-    std::string m_JvtConfig;
-    std::string m_JvtConfig_SFFile;
+    std::string m_JvtConfigRun2;
+    std::string m_JvtConfigRun3;
 
     double m_trkJetPt;
     double m_trkJetEta;
@@ -726,10 +726,8 @@ namespace ST {
     std::string m_fJvtWP;
     double m_fJvtPtMax;
     double m_fJvtEtaMin;
-    std::string m_fJvtConfig;
-    std::string m_fJvtConfig_SFFile;
-    bool m_fJvtRecalculate;
-    bool m_fJvt_useTightOP;
+    std::string m_fJvtConfigRun2;
+    std::string m_fJvtConfigRun3;
 
     bool m_JMScalib;
 

@@ -1164,7 +1164,10 @@ StatusCode SUSYToolsAlg::execute() {
         }
 
         if(isNominal){ //JVT
-          jets_weight_nominal = jet_weight = m_SUSYTools->JVT_SF(jets);
+          jet_weight = m_SUSYTools->JVT_SF(jets);
+          jet_weight *= m_SUSYTools->FJVT_SF(jets);
+          jets_weight_nominal = jet_weight;
+          jets_weight_nominal *= m_SUSYTools->FJVT_SF(jets);
           weight_jets->SetBinContent(1, weight_jets->GetBinContent(1)+jet_weight);
         }
         else if (!syst_affectsJets || (syst_affectsJets && !sysInfo.affectsWeights)){
@@ -1172,6 +1175,7 @@ StatusCode SUSYToolsAlg::execute() {
         }
         else if ( syst_affectsJets && sysInfo.affectsWeights ){
           jet_weight = m_SUSYTools->JVT_SF(jets);
+          jet_weight *= m_SUSYTools->FJVT_SF(jets);
           size_t iwbin = find(m_syst_weights["Jet"].begin(), m_syst_weights["Jet"].end(), sys.name()) - m_syst_weights["Jet"].begin();
           if(iwbin < m_syst_weights["Jet"].size()) {  weight_jets->SetBinContent(iwbin+1, weight_jets->GetBinContent(iwbin+1)+jet_weight); }
         }
