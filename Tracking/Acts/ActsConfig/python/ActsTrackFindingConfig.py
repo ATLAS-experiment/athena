@@ -165,6 +165,11 @@ def ActsTrackFindingCfg(flags,
         kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, strip=["ActsConversionStripEstimatedTrackParams"]))
         kwargs.setdefault('SeedContainerKeys', isdet(flags, strip=["ActsConversionStripSeeds"]))
         kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkPixelClusters_Cached"], strip=["ITkConversionStripClusters_Cached"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkConversionStripClusters"]))
+    elif flags.Tracking.ActiveConfig.extension == "ActsLargeRadius":
+        kwargs.setdefault('SeedLabels', isdet(flags, pixel=["PPP"], strip=["SSS"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["PPP"]))
+        kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"], strip=[f"{flags.Tracking.ActiveConfig.extension}StripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"]))
+        kwargs.setdefault('SeedContainerKeys', isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelSeeds"], strip=[f"{flags.Tracking.ActiveConfig.extension}StripSeeds"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelSeeds"]))
+        kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=["ITkLargeRadiusPixelClusters_Cached"], strip=["ITkLargeRadiusStripClusters_Cached"]) if flags.Acts.useCache else isdet(flags, pixel=["ITkLargeRadiusPixelClusters"], strip=["ITkLargeRadiusStripClusters"]))
     else:
         kwargs.setdefault('SeedLabels', isdet(flags, pixel=["PPP"], strip=["SSS"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=["PPP"]))
         kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"], strip=[f"{flags.Tracking.ActiveConfig.extension}StripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else isdet(flags, pixel=[f"{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams"]))
