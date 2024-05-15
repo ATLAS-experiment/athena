@@ -266,7 +266,7 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
     # pass only if cache is enabled. In the latter case it is used to collect all
     # the clusters from all views before passing them to the downstream algorithms
 
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+    if flags.Tracking.ActiveConfig.isSecondaryPass:
         # Secondary passes
         kwargs.setdefault('runCacheCreation', False)
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
@@ -285,7 +285,10 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
         
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
-
+    # Large Radius pass uses the same roi as the primary pass (FS roi)
+    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+        roisName = 'ActsRegionOfInterest'
+    
     # Cluster Collection name(s) and Space Point Collection name(s)
     # The name depends on the tracking pass as well as the cache mechanism
     pixelClustersName = 'ITkPixelClusters'
@@ -294,7 +297,7 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
     stripSpacePointsName = 'ITkStripSpacePoints'
     stripOverlapSpacePointsName = 'ITkStripOverlapSpacePoints'
     # Secondary passes modify the collection name
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+    if flags.Tracking.ActiveConfig.isSecondaryPass:
         pixelClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelClusters'
         stripClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}StripClusters'
         pixelSpacePointsName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelSpacePoints'

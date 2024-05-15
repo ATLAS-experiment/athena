@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -47,6 +47,22 @@ def createActsHeavyIonTrackingPassFlags():
 
     return icf
 
+def createActsLargeRadiusTrackingPassFlags():
+    icf = createITkLargeD0TrackingPassFlags()
+    icf.extension = "ActsLargeRadius"
+    deactivateAthenaComponents(icf)
+    icf.doActsCluster = True
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    # Ambiguity resolution can follow if ActsTrack is 
+    # enabled. Ambi. can be activated/deactivated with 
+    # the flag: Acts.doAmbiguityResolution
+    icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+    # Mark as secondary pass 
+    icf.isSecondaryPass = True
+    return icf
+
 def createActsConversionTrackingPassFlags():
     icf = createITkConversionTrackingPassFlags()
     icf.extension = "ActsConversion"
@@ -59,6 +75,8 @@ def createActsConversionTrackingPassFlags():
     # enabled. Ambi. can be activated/deactivated with 
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+    # Mark as secondary pass
+    icf.isSecondaryPass = True
     return icf
     
 def createActsValidateClustersTrackingPassFlags():

@@ -351,11 +351,11 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
         kwargs.setdefault('PixelSeedingAlg.useFastTracking', flags.Tracking.doITkFastTracking)    
         kwargs.setdefault('PixelSeedingAlg.OutputSeeds', f'{flags.Tracking.ActiveConfig.extension}PixelSeeds')
         kwargs.setdefault('PixelSeedingAlg.OutputEstimatedTrackParameters', f'{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams')
-        # Space Point naming is not yet fully connected to tracking passes - this will change
-        if flags.Tracking.ActiveConfig.extension == "ActsConversion":
-            kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', ['ITkConversionPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkConversionPixelSpacePoints'])
-        else:
-            kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'])
+
+        pixelSpacePoints = ['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints']        
+        if flags.Tracking.ActiveConfig.isSecondaryPass:
+            pixelSpacePoints = [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelSpacePoints_Cached'] if flags.Acts.useCache else [f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelSpacePoints']
+        kwargs.setdefault('PixelSeedingAlg.InputSpacePoints', pixelSpacePoints)
 
         # Analysis algo(s)
         if flags.Acts.doAnalysis:
@@ -376,6 +376,10 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
         # Space Point naming is not yet fully connected to tracking passes - this will change
         if flags.Tracking.ActiveConfig.extension == 'ActsConversion':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkConversionStripSpacePoints_Cached'] if flags.Acts.useCache else ['ITkConversionStripSpacePoints'])
+        elif flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLargeRadiusStripSpacePoints_Cached',
+                                                                   'ITkLargeRadiusStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLargeRadiusStripSpacePoints',
+                                                                                                                                                'ITkLargeRadiusStripOverlapSpacePoints'])
         else:
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkStripSpacePoints_Cached',
                                                                    'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints',

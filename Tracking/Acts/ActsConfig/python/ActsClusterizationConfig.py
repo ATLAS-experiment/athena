@@ -275,7 +275,7 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
     # pass only if cache is enabled. In the latter case it is useed to collect all
     # the clusters from all views before passing them to the downstream algorithms
 
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+    if flags.Tracking.ActiveConfig.isSecondaryPass:
         # Secondary passes
         kwargs.setdefault('runCacheCreation', False)
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
@@ -288,6 +288,10 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
 
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
+    # Large Radius Tracking uses full scan RoI created in the primary pass
+    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+        roisName = 'ActsRegionOfInterest'
+        
     # Name of the Cluster container -> ITk + extension without "Acts" + Pixel or Strip + Clusters
     # We also define the same collection from the main ACTS pass (primary)
     primaryPixelClustersName = 'ITkPixelClusters'
@@ -296,7 +300,7 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
     stripClustersName = primaryStripClustersName
 
     # If the workflow is not a primary pass, then change the name of the cluster collections adding that information
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion']:
+    if flags.Tracking.ActiveConfig.isSecondaryPass:
         pixelClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}PixelClusters'
         stripClustersName = f'ITk{flags.Tracking.ActiveConfig.extension.replace("Acts", "")}StripClusters'
     

@@ -313,6 +313,8 @@ def createITkTrackingPassFlags():
     icf.addFlag("storeTrackSeeds", False)
     icf.addFlag("storeSiSPSeededTracks", False)
 
+    # --- flags for ACTS tracking
+    icf.addFlag("isSecondaryPass", False)
     return icf
 
 
