@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/BeamlineSetup.h"
@@ -11,7 +11,7 @@ ForwardTrack::ForwardTrack()
 {
 }
 
-void ForwardTrack::initialize(ForwardTracker::ConfigData cData) {
+void ForwardTrack::initialize(const ForwardTracker::ConfigData& cData) {
   
   std::cout << " ForwardTrack::initialize " << std::endl;
   std::cout << " ConfigData "               << cData;
