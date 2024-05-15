@@ -24,14 +24,16 @@
 
 namespace FlavorTagDiscriminants {
 
-  typedef std::pair<std::vector<float>, std::vector<int64_t>> input_pair;
+  // the first element is the input data, the second is the shape
+  using Inputs = std::pair<std::vector<float>, std::vector<int64_t>>;
 
-  enum class OnnxModelVersion{UNKNOWN, V0, V1};
+  enum class OnnxModelVersion{UNKNOWN, V0, V1, V2};
 
   NLOHMANN_JSON_SERIALIZE_ENUM( OnnxModelVersion , {
     { OnnxModelVersion::UNKNOWN, "" },
     { OnnxModelVersion::V0, "v0" },
     { OnnxModelVersion::V1, "v1" },
+    { OnnxModelVersion::V2, "v2" },
   })
 
   //
@@ -53,7 +55,7 @@ namespace FlavorTagDiscriminants {
         std::map<std::string, std::vector<float>> vecFloat;
       };
 
-      InferenceOutput runInference(std::map<std::string, input_pair>& gnn_inputs) const;
+      InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const;
 
       const lwt::GraphConfig getLwtConfig() const;
       const nlohmann::json& getMetadata() const;
