@@ -73,12 +73,19 @@ class TRTDetectorFactory_Full : public InDetDD::DetectorFactoryBase  {
   ActiveGasMixture DecideGasMixture(int strawStatusHT);
 
   // private helper methods:
-  const GeoShape * makeModule ( double length, const GeoTrf::Vector2D& corner1 ,  const GeoTrf::Vector2D& corner2, const GeoTrf::Vector2D& corner3,
-				const GeoTrf::Vector2D& corner4, GeoTrf::Transform3D & absolutePosition, double shrinkDist=0 ) const;
-  //GeoPhysVol * makeStraw( double& activeGasZPosition, bool hasLargeDeadRegion=false ) const;
-  GeoPhysVol * makeStraw( double& activeGasZPosition, bool hasLargeDeadRegion=false, ActiveGasMixture gasMixture = GM_XENON);
-  //GeoFullPhysVol  *makeStrawPlane( size_t w ) const;
-  GeoFullPhysVol  *makeStrawPlane( size_t w , ActiveGasMixture gasMixture = GM_XENON);
+  const GeoShape* makeModule(double length
+			     , const GeoTrf::Vector2D& corner1
+			     , const GeoTrf::Vector2D& corner2
+			     , const GeoTrf::Vector2D& corner3
+			     , const GeoTrf::Vector2D& corner4
+			     , GeoTrf::Transform3D & absolutePosition
+			     , double shrinkDist=0) const;
+
+  GeoPhysVol* makeStraw(bool hasLargeDeadRegion=false
+			, ActiveGasMixture gasMixture = GM_XENON);
+
+  GeoFullPhysVol* makeStrawPlane(size_t w
+				 , ActiveGasMixture gasMixture = GM_XENON);
 
   // private member data:
   InDetDD::TRT_DetectorManager                  *m_detectorManager = nullptr; // ownership handed to calleer.
