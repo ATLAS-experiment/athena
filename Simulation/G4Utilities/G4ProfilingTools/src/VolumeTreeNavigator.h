@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ class VolumeTreeNavigator : public AthMessaging {
       const G4StepPoint* GetPreStepPoint() const;
       const G4StepPoint* GetPostStepPoint() const;
       int                GetStepNumber() const;
-      VolTree            GetHistory() const;
+      const VolTree&     GetHistory() const;
       int                GetFullDepth() const;
 
   private:

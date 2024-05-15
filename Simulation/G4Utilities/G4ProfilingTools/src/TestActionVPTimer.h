@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -64,6 +64,10 @@ namespace G4UA
     };
 
     TestActionVPTimer(const Config& config);
+
+    TestActionVPTimer(const TestActionVPTimer&);
+    TestActionVPTimer& operator=(const TestActionVPTimer&);
+
 
     struct volumeData {                 //!< Structure of data for given volume
     public:
