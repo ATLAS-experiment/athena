@@ -12,7 +12,7 @@
 namespace FlavorTagDiscriminants
 {
   class GNN;
-  class GNNOptions;
+  struct GNNOptions;
   class INNSharingSvc: virtual public asg::IAsgService
   {
   public:
