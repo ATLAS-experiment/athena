@@ -16,7 +16,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def UTTJetRecoSequenceGenCfg(flags):
 
         topoClusterSequence = jetmetTopoClusteringCfg(flags,RoIs = '')
-        clustersKey = "HLT_TopoCaloClustersFS"
  
         from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
@@ -29,7 +28,7 @@ def UTTJetRecoSequenceGenCfg(flags):
                 {'recoAlg': 'a4', 'constitType': 'tc', 'clusterCalib': 'em', 'constitMod': '', 'trkopt': 'notrk'}
         )
 
-        jetDefDict = JetRecoDataDeps(flags, clustersKey, **jetRecoDict)
+        jetDefDict = JetRecoDataDeps(flags, **jetRecoDict)
         JetCA = JetRecoCfg(flags, **jetDefDict)
         HypoAlg = CompFactory.TrigStreamerHypoAlg("UTTJetRecDummyStream")
 

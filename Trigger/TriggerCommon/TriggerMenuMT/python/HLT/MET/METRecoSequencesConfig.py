@@ -232,10 +232,10 @@ def jetInputCfg(flags, force_tracks: bool = False, **recoDict) -> StepOutput:
         inputs.merge_other(clusterInputCfg(flags, calib="em"))
 
     acc = ComponentAccumulator()
-    jetDefDict = JetRecoDataDeps(flags, clustersKey=inputs["Clusters"], **jrd)
+    jetDefDict = JetRecoDataDeps(flags, **jrd)
     jetName, jetDef = jetDefDict['final']
     jet_acc = JetRecoCfg(flags, **jetDefDict)
     acc.merge(jet_acc)
     return StepOutput.create(
-        acc, inputs, Jets=jetName, JetDef=jetDef, **flags.Jet.Context[jrd["trkopt"]] 
+        acc, inputs, Jets=jetName, JetDef=jetDef, **jetDef._contextDic
     )

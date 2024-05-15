@@ -723,8 +723,14 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib_ftf',                  'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalib_ftfAux.'+JetVars,   'BS ESD AODFULL AODSLIM', 'Jet'),
 
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftf',                  'BS ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftfAux.'+JetVars,   'BS ESD', 'Jet'),
+
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftf',                        'BS ESD', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftfAux.'+JetCopyVars, 'BS ESD', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',                        'BS ESD AODCOMM', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODCOMM', 'Jet'),
