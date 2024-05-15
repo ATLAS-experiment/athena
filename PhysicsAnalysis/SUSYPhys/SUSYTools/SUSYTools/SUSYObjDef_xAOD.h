@@ -678,6 +678,8 @@ namespace ST {
     double m_elebaselinez0;
     std::string m_eleEffMapFilePath;
     std::string m_eleEffMapFilePathRun2;
+    bool   m_eleAllowRun3TrigSFFallback;
+
 
     double m_muBaselinePt;
     double m_muBaselineEta;

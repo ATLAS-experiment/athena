@@ -312,6 +312,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles") );
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthBosonContainerName", "TruthBoson") );  // Set this if you are using a TRUTH3 style truth boson container
       ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthTopQuarkContainerName", "TruthTop") ); // Set this if you are using a TRUTH3 style truth top quark container
+      ATH_CHECK( m_jetTruthLabelingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetTruthLabelingTool.retrieve() );
     } else if (m_jetTruthLabelingTool.isUserConfigured()) ATH_CHECK(m_jetTruthLabelingTool.retrieve());
 
@@ -695,6 +696,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         m_muonLRTORTool.setTypeAndName("CP::MuonLRTOverlapRemovalTool/"+toolName);
         ATH_CHECK( m_muonLRTORTool.setProperty("overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy) );
         if (m_isRun3) ATH_CHECK( m_muonLRTORTool.setProperty("UseRun3WP", true ));
+        ATH_CHECK( m_muonLRTORTool.setProperty("OutputLevel", this->msg().level()) );
         ATH_CHECK( m_muonLRTORTool.retrieve() );
     } else ATH_CHECK( m_muonLRTORTool.retrieve() );
 
@@ -1086,17 +1088,39 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
       //single lepton
       
-      std::string triggerEleID = m_isRun3? TString(eleId).ReplaceAll("LooseBLayer", "Loose").Data() : eleId;
-      
       if(m_isRun3 && eleId.find("LooseBLayer") != std::string::npos) ATH_MSG_WARNING("Replacing 'LooseBLayer' with 'Loose' for Electron ID while configuring single-ele trigger SF using: " << m_eleEffMapFilePath);
+      std::string triggerEleID = m_isRun3? TString(eleId).ReplaceAll("LooseBLayer", "Loose").Data() : eleId;
+      std::string triggerEleIso= m_eleIso_WP;
       
-      ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<triggerEleID<<"_"<<m_eleIso_WP);
-      std::string triggerEleIso("");
-      if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_eleIso_WP) != eSF_keys.end()){
+      // This is an hack to work with ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map4.txt to allow 
+
+      if(m_isRun3 && m_eleAllowRun3TrigSFFallback){
+        bool pass_isRun3TrigSFFallback = true;
+        if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)                {triggerEleID = "Loose";}
+        else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
+        else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)           {triggerEleID = "Loose";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleIso= "Tight_VarRad";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
+        else {pass_isRun3TrigSFFallback=false;}
+        if(pass_isRun3TrigSFFallback){
+          ATH_MSG_INFO(" ************** This is only for testing/studying purpose! ************** ");
+          ATH_MSG_INFO(" ************** For official recommendation, please get in contact with the SUSY Bkg Forum ************** ");
+          ATH_MSG_INFO("In the current map ("<<m_eleEffMapFilePath<<"), the only supported Electron ID working-points supported for Electron Trigger Scale Factor are 'Loose_Loose_VarRad' and 'Tight_Tight_VarRad' ");
+          ATH_MSG_INFO("Only for single-lepton trigger scale factor, fall back to Electron ID:  -> "<< triggerEleID << " with Isolation: " << triggerEleIso);
+        }
+      }
+      
+      
+      ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<triggerEleID<<"_"<<triggerEleIso);
+
+      if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+triggerEleIso) != eSF_keys.end()){
         triggerEleIso   = m_eleIso_WP;
-      } else if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_el_iso_fallback[m_eleIso_WP]) != eSF_keys.end()){
+      } else if (std::find(eSF_keys.begin(), eSF_keys.end(), m_electronTriggerSFStringSingle+"_"+triggerEleID+"_"+m_el_iso_fallback[triggerEleIso]) != eSF_keys.end()){
         //--- Check to see if the only issue is an unknown isolation working point
-        triggerEleIso = m_el_iso_fallback[m_eleIso_WP];
+        triggerEleIso = m_el_iso_fallback[triggerEleIso];
         ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool_trig_singleLep_*) Your selected electron Iso WP ("
           << m_eleIso_WP
           << ") does not have trigger SFs defined. Falling back to "
