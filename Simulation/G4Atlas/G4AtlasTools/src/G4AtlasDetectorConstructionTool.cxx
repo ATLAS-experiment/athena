@@ -59,6 +59,8 @@ StatusCode G4AtlasDetectorConstructionTool::initialize( )
   ATH_MSG_DEBUG( "Setting up field managers" );
   ATH_CHECK( m_fieldManagers.retrieve() );
 
+  ATH_CHECK( m_G4CaloTransportTool.retrieve( DisableTool{ m_G4CaloTransportTool.empty() } ) ); 
+
   return StatusCode::SUCCESS;
 }
 
@@ -120,6 +122,15 @@ void G4AtlasDetectorConstructionTool::ConstructSDandField()
     if (!sc.isSuccess())
     {
       ATH_MSG_FATAL( "Unable to initialise field with " << fm->name() );
+      return;
+    }
+  }
+
+  if (m_G4CaloTransportTool.isEnabled()){
+    ATH_MSG_DEBUG("Setting up G4CaloTransportTool");
+    if (m_G4CaloTransportTool->initializePropagator().isFailure())
+    {
+      ATH_MSG_FATAL("Failed to initialize G4CaloTransportTool for worker thread.");
       return;
     }
   }

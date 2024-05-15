@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -12,10 +12,8 @@
 
 // Random generator includes
 #include "AthenaKernel/RNGWrapper.h"
-// Athena check macros
-#include "AthenaBaseComps/AthCheckMacros.h"
 
-// Geant4 includes
+// Geant4 particle includes
 #include "G4Gamma.hh"
 #include "G4Electron.hh"
 #include "G4Positron.hh"
@@ -32,18 +30,26 @@
 #undef FCS_DEBUG
 
 
+
 FastCaloSim::FastCaloSim(const std::string& name,
                          const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
                          const Gaudi::Property<std::string>& randomEngineName,
+                         const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
                          const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
+                         const PublicToolHandle<IG4CaloTransportTool>& G4CaloTransportTool,
                          const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
                          const Gaudi::Property<std::string>& CaloCellContainerSDName,
+                         const Gaudi::Property<bool>& doG4Transport,
                          FastCaloSimTool * FastCaloSimTool)
 
 : G4VFastSimulationModel(name),
   m_rndmGenSvc(rndmGenSvc), m_randomEngineName(randomEngineName),
-  m_FastCaloSimCaloExtrapolation(FastCaloSimCaloExtrapolation), m_FastCaloSimSvc(FastCaloSimSvc),
+  m_FastCaloSimCaloTransportation(FastCaloSimCaloTransportation), 
+  m_FastCaloSimCaloExtrapolation(FastCaloSimCaloExtrapolation),
+  m_G4CaloTransportTool(G4CaloTransportTool),
+  m_FastCaloSimSvc(FastCaloSimSvc),
   m_CaloCellContainerSDName(CaloCellContainerSDName),
+  m_doG4Transport(doG4Transport),
   m_FastCaloSimTool(FastCaloSimTool)
 {
 }
@@ -53,8 +59,16 @@ void FastCaloSim::StartOfAthenaEvent(const EventContext& ctx ){
   m_rngWrapper = m_rndmGenSvc->getEngine(m_FastCaloSimTool, m_randomEngineName);
   m_rngWrapper->setSeed( m_randomEngineName, ctx );
 
+
   return;
 }
+
+void FastCaloSim::EndOfAthenaEvent(const EventContext&){
+
+
+  return;
+}
+
 
 G4bool FastCaloSim::IsApplicable(const G4ParticleDefinition& particleType)
 {   
@@ -142,7 +156,7 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
     
     #ifdef FCS_DEBUG
       if(passMinEkinPions) G4cout<<"[FastCaloSim::ModelTrigger] Model triggered"<<G4endl;
-      else G4cout<<"[FastCaloSim::ModelTrigger] Pion with Ekin="<<Ekin<<"below the minimum "<<minEkinPions<<" MeV threshold. Model not triggered."<<G4endl;
+      else G4cout<<"[FastCaloSim::ModelTrigger] Pion with Ekin="<<Ekin<<" below the minimum "<<minEkinPions<<" MeV threshold. Model not triggered."<<G4endl;
     #endif
 
     return passMinEkinPions;
@@ -154,7 +168,7 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
 
   #ifdef FCS_DEBUG
     if(passMinEkinOtherHadrons) G4cout<<"[FastCaloSim::ModelTrigger] Model triggered"<<G4endl;
-    else G4cout<<"[FastCaloSim::ModelTrigger] Other hadron with Ekin="<<Ekin<<"below the minimum "<<minEkinOtherHadrons<<" MeV threshold. Model not triggered."<<G4endl;
+    else G4cout<<"[FastCaloSim::ModelTrigger] Other hadron with Ekin="<<Ekin<<" below the minimum "<<minEkinOtherHadrons<<" MeV threshold. Model not triggered."<<G4endl;
   #endif
 
   return passMinEkinOtherHadrons;
@@ -209,10 +223,17 @@ void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
   calculated as Ekin = E() + M() instead of E() - M() this is 
   achieved by setting an Ekin offset of 2*M() to the truth state */
   if(pdgID == -2212 || pdgID == -2112) truthState.set_Ekin_off(2 * G4Particle -> GetPDGMass());
-  
-  // Perform the FastCaloSim extrapolation to the calo ID boundary and all other calo layers
-  m_FastCaloSimCaloExtrapolation->extrapolate(extrapolState, &truthState);
 
+
+  // Perform particle transportation through calorimeter system eiher with ATLAS tracking tools or with Geant4
+  std::vector<G4FieldTrack> caloSteps = m_doG4Transport ? m_G4CaloTransportTool -> transport(*G4PrimaryTrack) 
+                                                        : m_FastCaloSimCaloTransportation -> transport(&truthState, false);
+
+  // Extrapolate transported stepos to ID-Calo boundary and all layers of the calorimeter system
+  m_FastCaloSimCaloExtrapolation->extrapolate(extrapolState, &truthState, caloSteps);
+
+
+  
   // Do not simulate further if extrapolation to ID - Calo boundary fails
   if(extrapolState.IDCaloBoundary_eta() == -999){
     #ifdef FCS_DEBUG

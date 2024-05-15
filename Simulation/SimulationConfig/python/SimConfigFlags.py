@@ -69,6 +69,7 @@ def createSimConfigFlags():
 
     # G4AtlasAlg
     scf.addFlag("Sim.ReleaseGeoModel", False)
+    scf.addFlag("Sim.SimplifiedGeoPath", "")
     scf.addFlag("Sim.RecordFlux", False)
     scf.addFlag("Sim.TruthStrategy", lambda prevFlags : TruthStrategy.Validation if prevFlags.Sim.ISF.ValidationMode else TruthStrategy.MC12,
                 type=TruthStrategy)

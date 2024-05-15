@@ -68,24 +68,28 @@ StatusCode FastCaloSimCaloExtrapolation::finalize(){
   return StatusCode::SUCCESS;
 }
 
-void FastCaloSimCaloExtrapolation::extrapolate(TFCSExtrapolationState& result, const TFCSTruthState* truth) const{ 
+
+void FastCaloSimCaloExtrapolation::extrapolate(TFCSExtrapolationState& result, const TFCSTruthState* truth, const std::vector<G4FieldTrack>& caloSteps) const{ 
   
-  ATH_MSG_DEBUG("Start FastCaloSimCaloExtrapolation::extrapolate");
-  std::vector<G4FieldTrack> caloSteps = m_CaloTransportation -> transport(truth, false);
-
-  ATH_MSG_DEBUG("Done FastCaloSimCaloExtrapolation::extrapolate: caloHits");
-
-  ATH_MSG_DEBUG("FastCaloSimCaloExtrapolation::extrapolate:*** Do extrapolation to ID-calo boundary ***");
+  ATH_MSG_DEBUG("[extrapolate] Initializing extrapolation to ID-Calo boundary");
   extrapolateToID(result, caloSteps, truth);
  
-  ATH_MSG_DEBUG("FastCaloSimCaloExtrapolation::extrapolate:*** Do extrapolation ***");
+  ATH_MSG_DEBUG("[extrapolate] Initializing extrapolation to calorimeter layers");
   extrapolateToLayers(result, caloSteps, truth);
 
-  ATH_MSG_DEBUG("FastCaloSimCaloExtrapolation::extrapolate: Truth extrapolation done");
-
-  ATH_MSG_DEBUG("Done FastCaloSimCaloExtrapolation::extrapolate");
+  ATH_MSG_DEBUG("[extrapolate] Extrapolation done");
 
 }
+
+void FastCaloSimCaloExtrapolation::extrapolate(TFCSExtrapolationState& result, const TFCSTruthState* truth) const{ 
+  
+  ATH_MSG_DEBUG("[extrapolate] Initializing transport of track through calorimeter system with ATLAS tracking tools.");
+  std::vector<G4FieldTrack> caloSteps = m_CaloTransportation -> transport(truth, false);
+  ATH_MSG_DEBUG("[extrapolate] Finalized transport of track through calorimeter system with ATLAS tracking tools.");
+  
+  extrapolate(result, truth, caloSteps);
+}
+
 
 void FastCaloSimCaloExtrapolation::extrapolateToID(TFCSExtrapolationState& result, const std::vector<G4FieldTrack>& caloSteps, const TFCSTruthState* truth) const{
 
