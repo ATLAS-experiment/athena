@@ -43,7 +43,7 @@ namespace xAOD {
     std::vector< float > zLocal;
     std::vector< float > xSlope;
     std::vector< float > ySlope;
-    std::vector< int > nHoles;
+    std::vector< unsigned int > nHoles;
     std::vector< int > nClusters;
     std::vector< std::vector<AFPTrack_v2::AFPClusterLink_t> > clusters;
     std::vector< float > chi2;
