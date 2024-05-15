@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ForwardTrack_H
@@ -16,13 +16,13 @@ class ForwardTrack {
   
   ForwardTrack();
   
-  void initialize(ForwardTracker::ConfigData);
+  void initialize(const ForwardTracker::ConfigData&);
   
   bool TrackParticle(ForwardTracker::Particle);
 
-  inline ForwardTracker::Point    fPos() { return m_fPosition; }
-  inline ForwardTracker::Point    fMom() { return m_fMomentum; }
-  inline ForwardTracker::Particle fPar() { return m_fParticle; }
+  inline const ForwardTracker::Point&    fPos() { return m_fPosition; }
+  inline const ForwardTracker::Point&    fMom() { return m_fMomentum; }
+  inline const ForwardTracker::Particle& fPar() { return m_fParticle; }
 
  private:
 
