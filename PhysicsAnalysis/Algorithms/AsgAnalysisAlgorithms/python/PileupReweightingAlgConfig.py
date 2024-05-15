@@ -20,18 +20,18 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 # best judgement whether to fix this configuration or to change it to
 # wrap the block configuration instead.
 
-def PileupReweightingToolCfg(flags, name="PileupReweightingTool", **kwargs):
+def PileupReweightingToolCfg(flags, name="PileupReweightingTool", commonPRW=True, **kwargs):
     acc = ComponentAccumulator()
-    from Campaigns.Utils import getMCCampaign,Campaign
+    from Campaigns.Utils import getMCCampaign
     campaign = getMCCampaign(flags.Input.Files)
-    
+
     from PileupReweighting.AutoconfigurePRW import defaultConfigFiles,getConfigurationFiles,getLumicalcFiles
     kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
-    if campaign in [Campaign.MC23a,Campaign.MC23c]:
+    if commonPRW:
         kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
     else:
         kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
-    
+
     acc.setPrivateTools(CompFactory.CP.PileupReweightingTool(**kwargs))
     return acc
 
