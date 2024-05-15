@@ -244,10 +244,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Overlap removal
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
-    unsigned ntrackOLRChi2 = 0, ntrackChi2 = 0;
+    unsigned ntrackOLRChi2 = 0;
     for (auto track : tracks_1st) {
         if (track.getChi2ndof() < 10) {
-            ntrackChi2++;
             m_nTracksChi2Tot++;
 	    if (track.passedOR()) {
 	        ntrackOLRChi2++;
