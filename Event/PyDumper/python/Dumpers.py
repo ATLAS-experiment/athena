@@ -30,6 +30,7 @@ from math import \
 
 from AthenaPython import PyAthena
 from PyUtils.fprint import fprint, fprintln, fwrite
+from PyDumper import PDG
 import ROOT
 import cppyy
 
@@ -2796,7 +2797,7 @@ def _genvertex_particles_out_size(e):
     return e.particles_out().size()
 
 
-def barcodes (beg, end, sz, f):
+def barcodes (beg, end, sz):
     #out = [x.barcode() for x in toiter (beg, end)]
 
     # Work around pyroot iterator comparison breakage.
@@ -2808,9 +2809,25 @@ def barcodes (beg, end, sz, f):
         out.append (x.barcode())
 
     out.sort()
-    for i in out:
-        fprint (f, i)
-    return
+    return out
+def genvertex_in_barcodes(v):
+    if hasattr(v, 'particles_in_const_begin'):
+        parts = barcodes(v.particles_in_const_begin(),
+                         v.particles_in_const_end(),
+                         v.particles_in_size())
+    else:
+        parts = [_gen_barcode(p) for p in v.particles_in()]
+        parts.sort()
+    return parts
+def genvertex_out_barcodes(v):
+    if hasattr(v, 'particles_out_const_begin'):
+        parts = barcodes(v.particles_out_const_begin(),
+                         v.particles_out_const_end(),
+                         v.particles_out_size())
+    else:
+        parts = [_gen_barcode(p) for p in v.particles_out()]
+        parts.sort()
+    return parts
 def dump_GenVertex (v, f):
     fprint (f, "%d %d %d %d %d" %
             (v.status() if hasattr(v,'status') else v.id(),
@@ -2828,42 +2845,38 @@ def dump_GenVertex (v, f):
         ww = list(v.weights())
     fprintln (f, [w for w in ww])
     fprint (f, '     (')
-    if hasattr(v, 'particles_in_const_begin'):
-        barcodes(v.particles_in_const_begin(),
-                 v.particles_in_const_end(),
-                 v.particles_in_size(), f)
-    else:
-        parts = [_gen_barcode(p) for p in v.particles_in()]
-        parts.sort()
-        for bc in parts:
-            fprint (f, bc)
+    for bc in genvertex_in_barcodes(v):
+        fprint (f, bc)
     fprint (f, ')(')
-    if hasattr(v, 'particles_out_const_begin'):
-        barcodes(v.particles_out_const_begin(),
-                 v.particles_out_const_end(),
-                 v.particles_out_size(), f)
-    else:
-        parts = [_gen_barcode(p) for p in v.particles_out()]
-        parts.sort()
-        for bc in parts:
-            fprint (f, bc)
+    for bc in genvertex_out_barcodes(v):
+        fprint (f, bc)
     fprint (f, ')')
 
     return
 
 
 def dump_GenParticle (p, f):
-    fprint (f, "%d %d %d %d" %
+    fprint (f, "%d %5s %d %d" %
             (_gen_barcode(p),
-             p.pdg_id(),
+             PDG.pdgid_to_name(p.pdg_id()),
              p.parent_event().event_number(),
              p.status(),))
     if p.production_vertex():
-        fprint (f, _gen_barcode (p.production_vertex()))
+        s = str(_gen_barcode (p.production_vertex())) + '('
+        parts = genvertex_in_barcodes (p.production_vertex())
+        for bc in parts: s += '%d ' % bc
+        if len(parts) > 3: s += '...'
+        s += '->)'
+        fprint (f, s)
     else:
         fprint (f, None)
     if p.end_vertex():
-        fprint (f, _gen_barcode (p.end_vertex()))
+        s = str (_gen_barcode (p.end_vertex())) + '(->'
+        parts = genvertex_out_barcodes (p.end_vertex())
+        for bc in parts: s += '%d ' % bc
+        if len(parts) > 3: s += '...'
+        s += ')'
+        fprint (f, s)
     else:
         fprint (f, None)
     dump_HLV (p.momentum(), f)
