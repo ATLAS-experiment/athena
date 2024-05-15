@@ -35,7 +35,7 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
-
+        
     # Acts Heavy Ion Pass
     if TrackingComponent.ActsHeavyIon in flags.Tracking.recoChain:
         flags_set += [flags.cloneAndReplace(
@@ -48,6 +48,12 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ActiveConfig",
             "Tracking.ITkGNNPass")]
 
+    # Acts Large Radius Pass
+    if flags.Acts.doLargeRadius:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLargeRadiusPass")]
+        
     # Acts Conversion Pass
     if flags.Detector.EnableCalo and flags.Acts.doITkConversion:
         flags_set += [flags.cloneAndReplace(
@@ -121,7 +127,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
             AssociationMapName=AssociationMapName))
 
     # Run truth, but only do this for non ACTS workflows
-    if flags.Tracking.doTruth and extension not in ['Acts', 'ActsConversion']:
+    if flags.Tracking.doTruth and extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
         result.merge(ITkTrackTruthCfg(
             flags,
@@ -131,7 +137,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
 
     # Create track particles from all the different track collections
     # We have different algorithms depending on the EDM being used
-    if extension not in ['Acts', 'ActsConversion']:
+    if extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         # Workflows that use Trk Tracks
         from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
         result.merge(ITkTrackParticleCnvAlgCfg(
@@ -186,7 +192,7 @@ def ITkTrackRecoPassCfg(flags,
     # This is the track collection AFTER the ambiguity resolution
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
-    if extension in ['Acts', 'ActsConversion']:
+    if extension in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         TrackContainer = extension + "ResolvedTracks"
     if doTrackOverlay and extension == "Conversion":
         TrackContainer = flags.Overlay.SigPrefix + TrackContainer
@@ -194,7 +200,7 @@ def ITkTrackRecoPassCfg(flags,
     # This is the track collection BEFORE the ambiguity resolution
     SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
     # For ACTS the name is totally different
-    if  extension in ['Acts', 'ActsConversion']:
+    if  extension in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         SiSPSeededTracks = extension + "Tracks"
         
     # This performs track finding
@@ -223,7 +229,7 @@ def ITkTrackRecoPassCfg(flags,
 
         # Track container, for ACTS workflow, depends on whether we activated the ambiguity resolution or not
         inputTrack = TrackContainer
-        if extension in ['Acts', 'ActsConversion'] and not flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
+        if extension in ['Acts', 'ActsConversion', 'ActsLargeRadius'] and not flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
             inputTrack = SiSPSeededTracks
 
         result.merge(ITkStoreTrackSeparateContainerCfg(
@@ -237,14 +243,14 @@ def ITkTrackRecoPassCfg(flags,
             "ITkAmbiguityProcessorSplitProb" + extension)
         # Collect all the Trk Track collections to be then merged in a single big collection
         # Merging will be done later, and after that we create track particles from the merged collection
-        if extension not in ['Acts', 'ActsConversion']:
+        if extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
             InputCombinedITkTracks += [TrackContainer]
         else:
             InputCombinedActsTracks += [TrackContainer]
 
     # This is only used in this same function for the Track-PRD association
     # Not yet supported for ACTS tracks
-    if extension not in ['Acts', 'ActsConversion']:
+    if extension not in ['Acts', 'ActsConversion', 'ActsLargeRadius']:
         InputExtendedITkTracks += [TrackContainer]
         
     return result, ClusterSplitProbContainer
@@ -338,6 +344,7 @@ def ITkTrackFinalCfg(flags,
         isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
         'ActsValidateAmbiguityResolution' in splitProbName or \
         'ActsConversion' in splitProbName or \
+        'ActsLargeRadius' in splitProbName or \
         ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
     return result
