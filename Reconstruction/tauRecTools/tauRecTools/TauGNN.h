@@ -82,7 +82,7 @@ public:
     FlavorTagDiscriminants::OnnxUtil::OutputConfig gnn_output_config;
 
 private:
-    using input_pair = FlavorTagDiscriminants::input_pair;
+    using Inputs = FlavorTagDiscriminants::Inputs;
     // Abbreviations for lwtnn
     using VariableMap = std::map<std::string, double>;
     using VectorMap = std::map<std::string, std::vector<double>>;
