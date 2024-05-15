@@ -251,6 +251,14 @@ def EGammaCommonCfg(ConfigFlags):
     )
     acc.addPublicTool(PhotonIsEMSelectorLoose)
 
+    # Medium 
+    PhotonIsEMSelectorMedium = acc.popToolsAndMerge(
+        AsgPhotonIsEMSelectorCfg(
+            ConfigFlags, name="PhotonIsEMSelectorMedium", quality=egammaPID.PhotonIDMedium
+        )
+    )
+    acc.addPublicTool(PhotonIsEMSelectorMedium)
+
     # Tight (default == pt-dependent)
     PhotonIsEMSelectorTight = acc.popToolsAndMerge(
         AsgPhotonIsEMSelectorCfg(
@@ -524,6 +532,21 @@ def EGammaCommonCfg(ConfigFlags):
         )
     )
 
+    # decorate photons with the output of IsEM medium 
+    # on MC, fudge the shower shapes before computing the ID (but the
+    # original shower shapes are not overridden)
+    PhotonPassIsEMMedium = acc.getPrimaryAndMerge(
+        EGSelectionToolWrapperCfg(
+            ConfigFlags,
+            name="PhotonPassIsEMMedium",
+            EGammaSelectionTool=PhotonIsEMSelectorMedium,
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
+            CutType="",
+            StoreGateEntryName="DFCommonPhotonsIsEMMedium",
+            ContainerName="Photons",
+        )
+    )
+
     # decorate photons with the output of IsEM tight
     # on full-sim MC, fudge the shower shapes before computing the ID
     # (but the original shower shapes are not overridden)
@@ -614,6 +637,7 @@ def EGammaCommonCfg(ConfigFlags):
         ElectronPassDNNMedium,
         ElectronPassDNNTight,
         PhotonPassIsEMLoose,
+        PhotonPassIsEMMedium,
         PhotonPassIsEMTight,
         PhotonPassIsEMTightPtIncl,
         PhotonPassCleaning,

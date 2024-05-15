@@ -20,10 +20,10 @@ def PhotonIsEMMediumSelectorConfig(theTool):
     These are the photon isEM definitions from *DC14*
     '''
 
-    # MEDIUM (20/11/2013 -- Ludovica@cern.ch)
+    # MEDIUM (10/05/24 - see ATLASG-2708)
     #  Coming from Fer
     #
-    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMMediumSelectorCutDefs.conf"
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMMediumSelectorCutDefs_pTdep_smooth.conf"
 
 
 # Current cut-based tight menu. When updating tight, simply change the config-file below
@@ -37,9 +37,9 @@ def PhotonIsEMTightSelectorConfig(theTool):
     '''
 
     #
-    # Pt-dependent tight cuts, derived in August 2018 ("v11")
+    # Tight (10/05/24 - see ATLASG-2708)
     #
-    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/20180825/PhotonIsEMTightSelectorCutDefs.conf"
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMTightSelectorCutDefs_pTdep_mc20_smooth.conf"
 
 #
 # Pt-inclusive tight ID menu, derived in January 2018.
