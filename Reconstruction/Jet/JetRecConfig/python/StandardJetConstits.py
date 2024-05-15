@@ -136,8 +136,13 @@ _stdInputList = [
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
                      algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
                      ),
-    # alternative ID tracks for ftf
+    # alternative ID tracks for ftf (FS HLT tracking)
     JetInputExternal("JetSelectedTracks_ftf",     xAODType.TrackParticle,
+                     prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
+                     algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
+                     ),
+    # alternative ID tracks for roiftf (jet super-RoI HLT tracking)
+    JetInputExternal("JetSelectedTracks_roiftf",     xAODType.TrackParticle,
                      prereqs= [ inputsFromContext("Tracks") ], # in std context, this is InDetTrackParticles (see StandardJetContext)
                      algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
                      ),
@@ -169,6 +174,11 @@ _stdInputList = [
                      prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices") ]
                      ),
     JetInputExternal("JetTrackVtxAssoc_ftf",      xAODType.TrackParticle,
+                     algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
+                     # previous default for ttva : WorkingPoint="Custom", d0_cut= 2.0, dzSinTheta_cut= 2.0 
+                     prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices") ]
+                     ),
+    JetInputExternal("JetTrackVtxAssoc_roiftf",      xAODType.TrackParticle,
                      algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVA_" + jdef.context, WorkingPoint="Nonprompt_All_MaxWeight"),
                      # previous default for ttva : WorkingPoint="Custom", d0_cut= 2.0, dzSinTheta_cut= 2.0 
                      prereqs = ["input:JetTrackUsedInFitDeco", inputsFromContext("Vertices") ]

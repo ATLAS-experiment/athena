@@ -7,9 +7,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-from ..CommonSequences.FullScanDefs import  trkFSRoI, em_clusters, lc_clusters, fs_towers
+from ..CommonSequences.FullScanDefs import trkFSRoI, fs_towers
 from ..Config.MenuComponents import parOR
-from .JetRecoCommon import getClustersKey, jetDefToString, jetCalibFromJetDef
+from .JetRecoCommon import jetDefToString, jetCalibFromJetDef
 from TrigEDMConfig.TriggerEDM import recordable
 
 # Hypo tool generators
@@ -18,7 +18,6 @@ from .JetPresel import caloPreselJetHypoToolFromDict, roiPreselJetHypoToolFromDi
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, jetmetTopoClusteringCfg_LC, HICaloTowerCfg
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
-import functools
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -47,19 +46,23 @@ def getTrackingInputMaker(flags : AthConfigFlags, trkopt : str):
 
             log.info( roiUpdater )
 
-            InputMakerAlg = CompFactory.InputMakerForRoI( "IM_Jet_TrackingStep",
-                                                          mergeUsingFeature = False,
-                                                          RoITool = CompFactory.ViewCreatorFSROITool( name="RoiTool_FS", 
-                                                                                                      RoiUpdater=roiUpdater,
-                                                                                                      RoisWriteHandleKey=recordable( flags.Trigger.InDetTracking.fullScan.roi ) ),
-                                                          RoIs = trkFSRoI )
+            InputMakerAlg = CompFactory.InputMakerForRoI(
+                "IM_Jet_TrackingStep",
+                mergeUsingFeature = False,
+                RoITool = CompFactory.ViewCreatorFSROITool(
+                    name="RoiTool_FS",
+                    RoiUpdater=roiUpdater,
+                    RoisWriteHandleKey=recordable( flags.Trigger.InDetTracking.fullScan.roi )
+                ),
+                RoIs = trkFSRoI,
+            )
         else: 
-            InputMakerAlg = CompFactory.InputMakerForRoI( "IM_Jet_TrackingStep",
-                                                          mergeUsingFeature = False,
-                                                          RoITool = CompFactory.ViewCreatorInitialROITool(),
-                                                          RoIs = trkFSRoI)
-
-
+            InputMakerAlg = CompFactory.InputMakerForRoI(
+                "IM_Jet_TrackingStep",
+                mergeUsingFeature = False,
+                RoITool = CompFactory.ViewCreatorInitialROITool(),
+                RoIs = trkFSRoI,
+            )
 
     elif trkopt=="roiftf":
         InputMakerAlg = CompFactory.EventViewCreatorAlgorithm(
@@ -75,7 +78,8 @@ def getTrackingInputMaker(flags : AthConfigFlags, trkopt : str):
             Views = "JetSuperRoIViews",
             InViewRoIs = "InViewRoIs",
             RequireParentView = False,
-            ViewFallThrough = True)
+            ViewFallThrough = True,
+        )
     else:
         raise RuntimeError(f"Unrecognised trkopt '{trkopt}' provided, choices are ['ftf','roiftf']")
     return InputMakerAlg
@@ -98,7 +102,8 @@ def getTrackingInputMaker(flags : AthConfigFlags, trkopt : str):
 #     filtered into a vew container to accelerate the hypo
 #   - Then pass the JetDefinitions into the configurator functions,
 #     which return ComponentAccumulator.
-#   - The configurators are deferred in execuation using `functools.partial`
+#   - When ChainSteps are created by JetChainConfiguration.getStep,
+#     the MenuSequenceCA generators will be wrapped in a deferred call
 #     so that when constructing the full HLT menu, we don't regenerate
 #     identical sequence configurations repeatedly.
 
@@ -162,7 +167,7 @@ def hypoToolGenerator(hypoType):
 # cut data dependency to InputMaker and allow full scan CaloCell+Clustering to be
 # shared with EGamma (ATR-24722)
 @AccumulatorCache
-def jetCaloPreselSelCfg(flags, **jetDefDict):
+def jetCaloPreselMenuSequenceGenCfg(flags, **jetDefDict):
     jetsOut, jetDef = jetDefDict['final']
     jetDefStr = jetDefToString(jetDef)
     reco = InEventRecoCA(f"jetSeqCaloPresel_{jetDefStr}_RecoSequence", inputMaker=getCaloInputMaker())
@@ -180,22 +185,13 @@ def jetCaloPreselSelCfg(flags, **jetDefDict):
     selAcc = SelectionCA(selName(reco.name, hypoType=JetHypoAlgType.CALOPRESEL))
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetDefStr, jetsIn=jetsOut, hypoType=JetHypoAlgType.CALOPRESEL))
-    return selAcc
 
-def jetCaloPreselMenuSequenceGenCfg(flags, **jetRecoDict):
-    clustersKey = getClustersKey(jetRecoDict)
-    from .JetRecoSequencesConfig import JetRecoDataDeps
-    jetDefDict = JetRecoDataDeps(flags, clustersKey, **jetRecoDict)
-    jetsOut, jetDef = jetDefDict['final']
-    def makejetCaloPreselMenuSequence():
-        selAcc = jetCaloPreselSelCfg(flags, **jetDefDict)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.CALOPRESEL))
-    return functools.partial(makejetCaloPreselMenuSequence), jetDef, clustersKey
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.CALOPRESEL))
 
 # A null preselection, which will only run the cluster making (step 1)
 # We set RoIs='' for same reason as described for jetCaloPreselMenuSequence
 @AccumulatorCache
-def jetCaloSelCfg(flags, clusterCalib):
+def jetCaloRecoMenuSequenceGenCfg(flags, clusterCalib):
     reco = InEventRecoCA(f"jetSeqCaloReco_{clusterCalib}_RecoSequence", inputMaker=getCaloInputMaker())
 
     if clusterCalib=='lcw':
@@ -206,25 +202,15 @@ def jetCaloSelCfg(flags, clusterCalib):
     selAcc = SelectionCA(selName(reco.name, hypoType=JetHypoAlgType.PASSTHROUGH))
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr="caloreco", jetsIn=None, hypoType=JetHypoAlgType.PASSTHROUGH))
-    return selAcc
 
-def jetCaloRecoMenuSequenceGenCfg(flags, clusterCalib):
-    if clusterCalib == "em":
-        clustersKey = em_clusters
-    elif clusterCalib == "lcw":
-        clustersKey =  lc_clusters
-
-    def makejetCaloRecoMenuSequence():
-        selAcc = jetCaloSelCfg(flags, clusterCalib)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.PASSTHROUGH))
-    return functools.partial(makejetCaloRecoMenuSequence), clustersKey
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.PASSTHROUGH))
 
 
 # A full hypo selecting only on calo jets (step 1)
 # Passing isPerf = True disables the hypo
 # We set RoIs='' for same reason as described for jetCaloPreselMenuSequence
 @AccumulatorCache
-def jetCaloHypoSelCfg(flags, isPerf, **jetDefDict):
+def jetCaloHypoMenuSequenceGenCfg(flags, isPerf, **jetDefDict):
     jetsOut, jetDef = jetDefDict['final']
     jetDefStr = jetDefToString(jetDef)
     reco = InEventRecoCA(f"jetSeqCaloHypo_{jetDefStr}{'_perf' if isPerf else ''}_RecoSequence", inputMaker=getCaloInputMaker())
@@ -243,26 +229,15 @@ def jetCaloHypoSelCfg(flags, isPerf, **jetDefDict):
     selAcc = SelectionCA(selName(reco.name, hypoType=hypoType))
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetDefStr, jetsIn=jetsOut, hypoType=hypoType))
-    return selAcc, hypoType
-    
 
-def jetCaloHypoMenuSequenceGenCfg(flags, isPerf, **jetRecoDict):
-    from .JetRecoSequencesConfig import JetRecoDataDeps
-    clustersKey = getClustersKey(jetRecoDict)
-    jetDefDict = JetRecoDataDeps(flags, clustersKey, **jetRecoDict)
-    jetsOut, jetDef = jetDefDict['final']
-
-    def makejetCaloHypoMenuSequence():
-        selAcc, hypoType = jetCaloHypoSelCfg(flags, isPerf, **jetDefDict)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
-    return functools.partial(makejetCaloHypoMenuSequence), jetDef
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
 
 # A full hypo selecting only on heavy ion calo jets (step 1)
 # Passing isPerf = True disables the hypo
 # We set RoIs='' for same reason as described for jetCaloPreselMenuSequence
 @AccumulatorCache
-def jetHICaloSelCfg(flags, isPerf, **jetRecoDict):
+def jetHICaloHypoMenuSequenceGenCfg(flags, isPerf, **jetRecoDict):
     reco = InEventRecoCA(f"jetSeqHICaloHypo_{jetRecoDict['jetDefStr']}{'_perf' if isPerf else ''}_RecoSequence", inputMaker=getCaloInputMaker())
 
     reco.mergeReco( HICaloTowerCfg(flags) )
@@ -275,36 +250,14 @@ def jetHICaloSelCfg(flags, isPerf, **jetRecoDict):
     selAcc = SelectionCA(selName(reco.name, hypoType=hypoType))
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetRecoDict['jetDefStr'], jetsIn=jetsOut, hypoType=hypoType))
-    return selAcc, hypoType
 
-def jetHICaloHypoMenuSequenceGenCfg(flags, isPerf, **jetRecoDict):
-    from .JetRecoCommon import defineHIJets, getHLTPrefix
-    JES_is_data=False
-    calib_seq='EtaJES' #only do in situ for R=0.4 jets in data
-    if jetRecoDict["jetCalib"].endswith("IS") and (not flags.Input.isMC):
-         JES_is_data=True
-         calib_seq += "_Insitu"
-    # Corresponds to 'jetDef_final' in jetHIRecoSequenceCA
-    jetDef = defineHIJets(jetRecoDict,clustersKey="HLT_HICaloClustersFS",prefix=getHLTPrefix())
-    jetDef.modifiers= [
-            "HLTHIJetConstSub_iter1:iter1",
-            "HLTHIJetJetConstMod_iter1",
-            "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data),
-            "Sort",
-            "Filter:20000"
-        ]
-    jetDef.lock()
-
-    def makejetHICaloHypoMenuSequence():
-        selAcc, hypoType = jetHICaloSelCfg(flags, isPerf, **jetRecoDict)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
-    return functools.partial(makejetHICaloHypoMenuSequence), jetDef
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
 
 # A full hypo selecting on jets with FS track reco (step 2)
 # To combine either with a presel or a passthrough sequence
 @AccumulatorCache
-def jetFSTrackingSelCfg(flags, isPerf, **jetDefDict):
+def jetFSTrackingHypoMenuSequenceGenCfg(flags, isPerf, **jetDefDict):
     jetsOut, jetDef = jetDefDict['final']
     jetDefStr = jetDefToString(jetDef)
     trkopt = jetDef.context
@@ -341,19 +294,8 @@ def jetFSTrackingSelCfg(flags, isPerf, **jetDefDict):
     selAcc = SelectionCA(selName(reco.name, hypoType=hypoType))
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetDefStr, jetsIn=jetsOut, hypoType=hypoType))
-    return selAcc, hypoType
 
-
-def jetFSTrackingHypoMenuSequenceGenCfg(flags, clustersKey, isPerf, **jetRecoDict):
-    from .JetRecoSequencesConfig import JetRecoDataDeps
-    clustersKey = getClustersKey(jetRecoDict)
-    jetDefDict = JetRecoDataDeps(flags, clustersKey, **jetRecoDict)
-    jetsOut, jetDef = jetDefDict['final']
-
-    def makejetFSTrackingHypoMenuSequence():
-        selAcc, hypoType = jetFSTrackingSelCfg(flags, isPerf, **jetDefDict)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
-    return functools.partial(makejetFSTrackingHypoMenuSequence), jetDef
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
 
 # A full hypo selecting on jets with RoI track reco (step 2)
@@ -409,8 +351,6 @@ def jetRoITrackJetTagSelCfg(flags, preselJetDef, isPresel=True):
     return selAcc, hypoType
 
 def jetRoITrackJetTagHypoMenuSequenceGenCfg(flags, jetDef, isPresel=True):
-    def makejetRoITrackJetTagHypoMenuSequence():
-        selAcc, hypoType = jetRoITrackJetTagSelCfg(flags, jetDef, isPresel)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
-    return functools.partial(makejetRoITrackJetTagHypoMenuSequence)
+    selAcc, hypoType = jetRoITrackJetTagSelCfg(flags, jetDef, isPresel)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
