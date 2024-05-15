@@ -143,7 +143,6 @@ StatusCode FPGATrackSimInputHeaderTool::readData(FPGATrackSimEventInputHeader* h
 
 
   // increase counters
-  ATH_MSG_INFO(m_event);
   m_EventTree->GetEntry(m_event++);
   ATH_MSG_DEBUG("Reading event  "<<m_eventHeader->event() );
   *header= *m_eventHeader; //copy object to the external pointer

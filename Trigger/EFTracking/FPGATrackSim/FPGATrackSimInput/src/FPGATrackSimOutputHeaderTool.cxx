@@ -127,7 +127,6 @@ StatusCode FPGATrackSimOutputHeaderTool::finalize()
   ATH_MSG_INFO ("finalize: closing files");
 
   if (m_rwoption.value() == std::string("RECREATE")) {
-    m_EventTree->Print();
     ATH_MSG_INFO ("Contains " << m_EventTree->GetEntries() << " entries, over " << m_event << " events run");
     // close the output files, but check that it exists (for athenaMP)
     m_infile->Write();
