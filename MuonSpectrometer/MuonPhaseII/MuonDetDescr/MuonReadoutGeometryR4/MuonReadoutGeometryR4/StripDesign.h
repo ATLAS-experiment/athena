@@ -140,6 +140,8 @@ namespace MuonGMR4 {
             const Amg::Vector2D& stripNormal() const;
             /// Vector pointing along the strip
             const Amg::Vector2D& stripDir() const;
+            /// Vector indicating the first strip position
+            const Amg::Vector2D& firstStripPos() const;
         private:
             void setStereoAngle(double stereo);
             /// Resets the cache of the directions

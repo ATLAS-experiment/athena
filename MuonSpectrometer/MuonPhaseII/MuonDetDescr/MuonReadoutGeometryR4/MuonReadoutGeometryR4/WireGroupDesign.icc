@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_WIREGROUPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_WIREGROUPDESIGN_ICC
@@ -15,7 +15,7 @@ namespace MuonGMR4 {
             return Amg::Vector2D::Zero();
         }
         const wireGroup& wireGrp = m_groups[groupNum];
-        return StripDesign::stripPosition(0) + 
+        return firstStripPos() + 
                (wireGrp.accumlWires + wireGrp.numWires/2)*stripPitch() * stripNormal();
     }
     inline CheckVector2D WireGroupDesign::wirePosition(unsigned int groupNum, 
@@ -33,7 +33,7 @@ namespace MuonGMR4 {
                         " [1-"<<wireGrp.numWires<<"] wires.");
             return std::nullopt;
         }
-        return std::make_optional<Amg::Vector2D>(StripDesign::stripPosition(0) +  
+        return std::make_optional<Amg::Vector2D>(firstStripPos() +  
                                                  (wireGrp.accumlWires + (wireNum - 1))*stripPitch() * stripNormal());
     }
     inline CheckVector2D WireGroupDesign::leftWireEdge(unsigned int groupNum,
@@ -61,7 +61,7 @@ namespace MuonGMR4 {
     }
 
     inline int WireGroupDesign::stripNumber(const Amg::Vector2D& extPos) const {
-        std::optional<double> wirePitches = Amg::intersect<2>(StripDesign::stripPosition(0), stripDir(),
+        std::optional<double> wirePitches = Amg::intersect<2>(firstStripPos(), stripDir(),
                                                                extPos, - Amg::Vector2D::UnitX());
         if (!wirePitches) {
             return -1;

@@ -10,15 +10,25 @@
 #include <GeoModelKernel/GeoFullPhysVol.h>
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/RpcReadoutElement.h>
+#include <MuonReadoutGeometryR4/TgcReadoutElement.h>
+#include <MuonReadoutGeometryR4/MmReadoutElement.h>
+#include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
+
+
 #include <MuonReadoutGeometryR4/MuonChamber.h>
 
 #include <MuonAlignmentDataR4/MdtAlignmentStore.h>
 #include <MuonAlignmentDataR4/sTgcAlignmentStore.h>
+#include <MuonAlignmentDataR4/MmAlignmentStore.h>
+
 
 #include <MuonReadoutGeometry/MuonStation.h>
 #include <MuonReadoutGeometry/MdtReadoutElement.h>
 #include <MuonReadoutGeometry/RpcReadoutElement.h>
 #include <MuonReadoutGeometry/sTgcReadoutElement.h>
+#include <MuonReadoutGeometry/MMReadoutElement.h>
+
 #include <MuonReadoutGeometry/MuonChannelDesign.h>
 
 #include <AthenaKernel/IOVInfiniteRange.h>
@@ -38,6 +48,7 @@ namespace {
         return  readOutVol->getAbsoluteTransform().inverse() *
                 readOutVol->getParent()->getX();
     }
+    using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
 }
 
 MuonReadoutGeomCnvAlg::MuonReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
@@ -90,8 +101,10 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     PVLink world{createGeoWorld()};
     detMgr->addTreeTop(world);
     ATH_CHECK(buildMdt(geoContext, detMgr.get(), world));
-    ATH_CHECK(buildRpc(geoContext, detMgr.get(), world));
     ATH_CHECK(buildSTGC(geoContext, detMgr.get(), world));
+    ATH_CHECK(buildMM(geoContext, detMgr.get(), world));
+
+    ATH_CHECK(buildRpc(geoContext, detMgr.get(), world));
 
     ATH_CHECK(writeHandle.record(std::move(detMgr)));
     return StatusCode::SUCCESS;
@@ -250,9 +263,54 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
 }
 
 StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                                 const MuonGMR4::MmReadoutElement& refEle,
+                                                 const MuonGM::MMReadoutElement& testEle) const {
+    if (!m_checkGeo) {
+        return StatusCode::SUCCESS;
+    }
+    ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
+                <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
+                <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
+    const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+    for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++ gasGap) {
+        const Identifier gapId = idHelper.channelID(refEle.identify(), refEle.multilayer(),  gasGap, 1);
+        
+        const Amg::Transform3D& refTrf{refEle.localToGlobalTrans(gctx, gapId)};
+        const Amg::Transform3D& testTrf{testEle.transform(gapId)};
+        if (!Amg::doesNotDeform(refTrf.inverse()*testTrf)) {
+            ATH_MSG_FATAL("The layer "<<m_idHelperSvc->toStringGasGap(gapId)<<" does not transform equally"
+                         <<GeoTrf::toString(refTrf, true) <<" vs. "<<GeoTrf::toString(testTrf, true));
+            return StatusCode::FAILURE;
+        }
+        const MuonGMR4::StripDesign& stripDesign{refEle.stripLayer(gapId).design()};
+        
+        for (int strip = stripDesign.firstStripNumber(); strip <= stripDesign.numStrips(); ++strip) {
+            const Identifier stripId = idHelper.channelID(refEle.identify(), refEle.multilayer(), gasGap, strip);
+            const Amg::Vector3D refStripPos{refEle.stripPosition(gctx, stripId)};
+            const Amg::Vector3D refStripDir{refEle.localToGlobalTrans(gctx, refEle.layerHash(stripId)).linear() * Amg::Vector3D::UnitX()};
+
+            Amg::Vector3D testStripPos{Amg::Vector3D::Zero()};
+            if (!testEle.stripGlobalPosition(stripId, testStripPos)) {
+                ATH_MSG_FATAL("Failed to retrieve strip position "<<m_idHelperSvc->toString(stripId));
+                return StatusCode::FAILURE;
+            }
+            const double dist = refStripDir.dot(refStripPos - testStripPos);
+            if (std::abs(dist) > 10. * Gaudi::Units::micrometer) {
+                ATH_MSG_FATAL("The strip "<<Amg::toString(testStripPos)<<" is not describing the same strip as "
+                            <<Amg::toString(refStripPos)<<". Channel "<<m_idHelperSvc->toString(stripId)
+                            <<" distance: "<<dist<<" "<<(dist / testEle.m_etaDesign[gasGap -1].inputWidth));
+                return StatusCode::FAILURE;
+            }
+            ATH_MSG_VERBOSE("Channel postion "<<m_idHelperSvc->toString(stripId)<<" match between legacy & new");
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+
+StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                                  const MuonGMR4::RpcReadoutElement& refEle,
                                                  const MuonGM::RpcReadoutElement& testEle) const {
-    if (!msgLvl(MSG::VERBOSE)) {
+    if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
     ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
@@ -292,10 +350,70 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
     }
     return StatusCode::SUCCESS;
 }
+
+StatusCode MuonReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx,
+                                          MuonGM::MuonDetectorManager* mgr,
+                                          PVLink world) const {
+
+    SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mm);
+    const auto alignStore = alignItr ?
+                            static_cast<const MmAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
+
+    const std::vector<const MuonGMR4::MmReadoutElement*> mmReadouts{m_detMgr->getAllMmReadoutElements()};
+    for (const MuonGMR4::MmReadoutElement* copyMe : mmReadouts) {
+        const Identifier reId = copyMe->identify();
+        GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
+        PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
+        GeoIntrusivePtr<GeoFullPhysVol> physVol{dynamic_pointer_cast<GeoFullPhysVol>(clonedVol)};
+        world->add(make_intrusive<GeoTransform>(copyMe->localToGlobalTrans(gctx)));
+        world->add(physVol);
+
+        auto newRE = std::make_unique<MuonGM::MMReadoutElement>(physVol, 
+                                                                m_idHelperSvc->stationNameString(reId),
+                                                                copyMe->stationEta(),
+                                                                copyMe->stationPhi(),
+                                                                copyMe->multilayer(), mgr,
+                                                                alignStore ? alignStore->passivation : nullptr);
+        /// Loop over the gas gaps & efine the 
+        for (unsigned int gasGap = 0; gasGap < copyMe->nGasGaps(); ++gasGap) {
+            const MuonGMR4::StripLayer& stripLayer{copyMe->stripLayer(copyMe->createHash(0, gasGap +1))};
+            const MuonGMR4::StripDesign& designFrom{stripLayer.design()};
+            
+            newRE->m_Xlg[gasGap] = stripLayer.toOrigin() * 
+                                   Amg::getRotateZ3D(-designFrom.stereoAngle()) * 
+                                   Amg::getRotateY3D(90. * Gaudi::Units::deg);
+            ATH_MSG_VERBOSE("Layer transform "<<gasGap<<" "<<GeoTrf::toString(newRE->m_Xlg[gasGap], true));
+            
+            MuonGM::MuonChannelDesign& designTo{newRE->m_etaDesign[gasGap]};
+            designTo.defineTrapezoid(designFrom.shortHalfHeight(),
+                                     designFrom.longHalfHeight(),
+                                     designFrom.halfWidth(), 
+                                     designFrom.stereoAngle());
+            designTo.type = MuonGM::MuonChannelDesign::ChannelType::etaStrip;
+            designTo.detType = MuonGM::MuonChannelDesign::DetType::MM;
+            designTo.inputPitch = designFrom.stripPitch();
+            designTo.inputWidth = designTo.inputPitch * std::cos(designTo.stereoAngle());
+            designTo.nMissedBottomEta  = designTo.nMissedBottomStereo = designFrom.firstStripNumber() - 1;
+            designTo.totalStrips = designFrom.numStrips();
+            designTo.nch = designFrom.numStrips();
+            
+            designTo.setFirstPos(designFrom.firstStripPos().x() + 0.5*designTo.inputPitch);
+        }
+
+        newRE->fillCache();
+        if (alignStore && alignStore->getBLine(reId)) {
+            newRE->setBLinePar(*alignStore->getBLine(reId));
+        }
+        ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newRE));
+        mgr->addMMReadoutElement(std::move(newRE));
+
+    }
+    return StatusCode::SUCCESS;
+}
+
 StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
                                              MuonGM::MuonDetectorManager* mgr,
                                              PVLink world) const{
-    using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::sTgc);
     auto alignStore = alignItr ? static_cast<const sTgcAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
@@ -309,7 +427,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
         world->add(physVol);
 
         auto newRE = std::make_unique<MuonGM::sTgcReadoutElement>(physVol, 
-                                                                  m_idHelperSvc->stationNameString(reId),
+                                                                  m_idHelperSvc->stationNameString(reId).substr(1),
                                                                   copyMe->stationEta(),
                                                                   copyMe->stationPhi(),
                                                                   copyMe->multilayer(), mgr);
@@ -342,7 +460,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
             etaDesign.inputPitch  = copyEtaDesign.stripPitch();
             etaDesign.inputWidth  = copyEtaDesign.stripWidth();
             etaDesign.nch = copyEtaDesign.numStrips();
-            etaDesign.setFirstPos( (*copyEtaDesign.center(1)).x());
+            etaDesign.setFirstPos(copyEtaDesign.firstStripPos().x());
             /// Initialize the phi design
 
             const MuonGMR4::WireGroupDesign& copyPhiDesign{copyMe->wireDesign(layerHash)};
@@ -362,7 +480,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
               }
               phiDesign.inputPitch  = copyPhiDesign.stripPitch();
               phiDesign.inputWidth  = 0.015;
-              phiDesign.setFirstPos((*copyPhiDesign.center(1)).x()); // Position of 1st wire, accounts for staggering
+              phiDesign.setFirstPos(copyPhiDesign.firstStripPos().x()); // Position of 1st wire, accounts for staggering
             //   phiDesign.firstPitch = firstWireGroup[il];             // Number of Wires in 1st group, group staggering
               //phiDesign.groupWidth  = wireGroupWidth;                // Number of Wires normal group
               phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
@@ -380,7 +498,6 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
                                            MuonGM::MuonDetectorManager* mgr,
                                            PVLink world) const {    
     /// Access the B-Line and As-built parameters
-    using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mdt);
     const MdtAlignmentStore* alignStore = alignItr ?
                                  static_cast<const MdtAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
@@ -474,7 +591,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
 StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                                  const MuonGMR4::MdtReadoutElement& refEle,
                                                  const MuonGM::MdtReadoutElement& testEle) const {
-    if (!msgLvl(MSG::VERBOSE)) {
+    if (!m_checkGeo) {
         return StatusCode::SUCCESS;
     }
     

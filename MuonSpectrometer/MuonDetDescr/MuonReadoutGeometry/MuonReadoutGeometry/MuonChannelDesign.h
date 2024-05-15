@@ -193,14 +193,13 @@ namespace MuonGM {
 
     //============================================================================
     inline int MuonChannelDesign::channelNumber(const Amg::Vector2D& pos) const {
-        static const Amg::Vector2D x_axis{1.,0.};
            
         int chNum{-1};
         if (type == ChannelType::etaStrip && detType == DetType::MM) {
             // ** MM strips: keeping cases outside the active area, but within the envelope, 
             // to avoid warnings from MuonPRDTest. Those channels are removed from digitization.
             const Amg::Vector2D posInEta = m_rotMat.inverse()*pos;
-            const double xMid = (posInEta - firstPos()*x_axis).dot(m_stereoNormal) / m_stereoNormal.x();
+            const double xMid = (posInEta - firstPos()*Amg::Vector2D::UnitX()).dot(m_stereoNormal) / m_stereoNormal.x();
             const int missedBottom =  numberOfMissingBottomStrips();
 
             // first position is always 1/2 pitch above the center of the first active strip
@@ -356,8 +355,7 @@ namespace MuonGM {
             if (st <= nMissedBottom || st > nMissedBottom + nch) return false;
             
             // firstPos is 1/2 pitch above the center of the first active strip.
-            static const Amg::Vector2D x_axis{1.,0.};
-            pos = (firstPos()  + inputPitch* (st - nMissedBottom - 1.5)) * x_axis;
+            pos = (firstPos()  + inputPitch* (st - nMissedBottom - 1.5)) * Amg::Vector2D::UnitX();
         } else {
 
             /// sTGC and default case for eta strips
