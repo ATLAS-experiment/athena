@@ -24,7 +24,10 @@ def fromRunArgs(runArgs):
     evgenLog.debug('****************** Setting-up configuration flags *****************')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    
+
+    from AthenaConfiguration.Enums import ProductionStep
+    flags.Common.ProductionStep = ProductionStep.Generation
+
     # Convert run arguments to athena flags
     from GeneratorConfig.GeneratorConfigFlags import  generatorRunArgsToFlags
     commonRunArgsToFlags(runArgs, flags)
