@@ -32,8 +32,9 @@ def getTrkAnaDicts( flags, input_file, unpackChains=False ):
             analysesDict.update( { trkAnaName : trkAnaDict } )
             ## Update TrkAnalysis tag for this entry
             analysesDict[trkAnaName]["anaTag"] = "_" + trkAnaName
-            ## Update SubFolder for this entry (= trkAnaName if empty)
-            if analysesDict[trkAnaName]["SubFolder"] == "" :
+            ## Update SubFolder for this entry (= trkAnaName if not set or empty)
+            if ( "SubFolder" not in analysesDict[trkAnaName].keys() or
+                 analysesDict[trkAnaName]["SubFolder"] == "" ) :
                 analysesDict[trkAnaName]["SubFolder"] = trkAnaName
             analysesDict[trkAnaName]["SubFolder"] += "/"
             ## Update TrkAnalysis ChainNames to full chain list (not regex)
@@ -106,7 +107,7 @@ def getPlotsDefList( flags ):
     log = logging.getLogger( "getPlotsDefList" )
 
     # open the list of json files
-    log.debug( "plotsDefFileList : ", flags.PhysVal.IDTPM.plotsDefFileList ) 
+    log.debug( "plotsDefFileList : %s", flags.PhysVal.IDTPM.plotsDefFileList ) 
     listPath = find_datafile( flags.PhysVal.IDTPM.plotsDefFileList )
     if listPath is None:
         log.error( "plotsDefFileList not found" )
@@ -115,21 +116,19 @@ def getPlotsDefList( flags ):
     plotsDefFileNames = []
     with open( listPath, "r" ) as input_flist :
         plotsDefFileNames = input_flist.read().splitlines()
-    log.debug( "plotsDefFileNames : ", plotsDefFileNames )
 
     # creating the basic histogrm definition dictionary 
     plotsDefDict = {}
 
     for plotsDefFileName in plotsDefFileNames :
         dataPath = find_datafile( plotsDefFileName )
-        log.debug( "Reading input plots definitions : ", dataPath )
+        log.debug( "Reading input plots definitions : %s", dataPath )
         if dataPath is None:
             log.error( "plotsDefFile %s not found", plotsDefFileName )
             return None
 
         with open( dataPath, "r" ) as input_json_file :
             plotsDefDict.update( json.load( input_json_file ) )
-    log.debug( "Full plots definition dict : ", plotsDefDict )
 
     # Turn all histo definitions into a list of strings
     # each string has a flattened json format
@@ -140,7 +139,6 @@ def getPlotsDefList( flags ):
 
         # flatten json histo dict
         plotDictFlat = flatten_json( newPlotDict )
-        print( "\t - Flattened-json plot definition : ", plotDictFlat )
 
         # Turn json into string
         plotDefStr = str( json.dumps( plotDictFlat ) )

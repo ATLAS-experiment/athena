@@ -105,7 +105,6 @@ std::string TrackAnalysisDefinitionSvc::plotsFullDir( std::string chain ) const
     /// add a slash: "subDir" -> "subDir/"
     if( subDir.back() != '/' ) subDir += "/";
   }
-  
 
   return m_sortPlotsByChain.value() ?
          topDir + chain + subDir :

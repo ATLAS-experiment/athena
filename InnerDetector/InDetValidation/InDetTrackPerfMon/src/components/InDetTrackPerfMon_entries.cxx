@@ -15,12 +15,13 @@
 #include "../TrackTruthMatchingTool.h"
 #include "../TruthTrackMatchingTool.h"
 #include "../DeltaRMatchingTool.h"
-/// TODO - To be included in later MRs
-//#include "../PlotsDefinitionSvc.h"
-//#include "../JsonPlotsDefReadTool.h"
+#include "../PlotsDefinitionSvc.h"
+#include "../JsonPlotsDefReadTool.h"
 
 DECLARE_COMPONENT( InDetTrackPerfMonTool )
 DECLARE_COMPONENT( TrackAnalysisDefinitionSvc )
+DECLARE_COMPONENT( PlotsDefinitionSvc )
+DECLARE_COMPONENT( IDTPM::JsonPlotsDefReadTool )
 DECLARE_COMPONENT( IDTPM::TrackQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::RoiSelectionTool )
 DECLARE_COMPONENT( IDTPM::TrackRoiSelectionTool )
@@ -34,6 +35,3 @@ DECLARE_COMPONENT( IDTPM::TruthTrackMatchingTool )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trk )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trkTruth )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_truthTrk )
-/// TODO - To be included in later MRs
-//DECLARE_COMPONENT( IDTPM::PlotsDefinitionSvc )
-//DECLARE_COMPONENT( IDTPM::JsonPlotsDefReadTool )

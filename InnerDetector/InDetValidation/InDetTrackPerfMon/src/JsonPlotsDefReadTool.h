@@ -16,7 +16,7 @@
 #include "AsgTools/AsgTool.h"
 
 /// Local includes
-#include "InDetTrackPerfMon/IPlotsDefReadTool.h"
+#include "IPlotsDefReadTool.h"
 
 
 namespace IDTPM {

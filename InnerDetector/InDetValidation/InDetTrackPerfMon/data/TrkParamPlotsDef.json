@@ -1,0 +1,12 @@
+{
+    "$TRKTAG_pt" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_eta" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "Entries" }
+    }
+}

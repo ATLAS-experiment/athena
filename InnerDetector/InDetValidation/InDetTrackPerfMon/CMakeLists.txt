@@ -12,7 +12,7 @@ find_package( nlohmann_json )
 
 # Component(s) in the package:
 atlas_add_library( InDetTrackPerfMonLib
-                   src/*.cxx
+                   src/*.cxx src/plots/*.cxx
                    PUBLIC_HEADERS InDetTrackPerfMon
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib CxxUtils GaudiKernel InDetIdentifier TrkValHistUtils xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrigDecisionToolLib AsgServicesLib 
