@@ -481,7 +481,7 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
       const G4ParticleDefinition *parDef = trk->GetParticleDefinition();
 
       // skip ions
-      if (parDef->GetPDGEncoding()>1.e09) continue;
+      if (parDef->GetPDGEncoding()>1.e09) continue; // FIXME add a method to AtlasPID.h for this check
 
       //Prepare and build the physics table for secondaries
       //process->PreparePhysicsTable(*parDef);
@@ -495,23 +495,27 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
       const G4ThreeVector &momG4 = dynPar->GetMomentum();
       Amg::Vector3D mom( momG4.x(), momG4.y(), momG4.z() );
 
-      //Let's make sure the new ISFParticle get some valid TruthBinding and HepMcParticleLink objects
-      ISF::TruthBinding* truthBinding = NULL;
+      //Let's make sure the new ISFParticles get a valid TruthBinding
+      // FIXME check that this does not cause problems in the TruthSvc
+      ISF::TruthBinding* truthBinding{};
       if (parent->getTruthBinding()) {
- 	        ATH_MSG_VERBOSE("Could retrieve TruthBinding from original ISFParticle");
- 	        truthBinding = new ISF::TruthBinding(*parent->getTruthBinding());
+        ATH_MSG_VERBOSE("Could retrieve TruthBinding from original ISFParticle");
+        truthBinding = new ISF::TruthBinding(*parent->getTruthBinding());
       }
-      else
- 	        ATH_MSG_WARNING("Could not retrieve TruthBinding from original ISFParticle, might cause issues later on.");
+      else {
+        ATH_MSG_WARNING("Could not retrieve TruthBinding from original ISFParticle, might cause issues later on.");
+      }
+      const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+      const int id = HepMC::UNDEFINED_ID;
       ISF::ISFParticle* cParticle = new ISF::ISFParticle( position,
                                                           mom,
                                                           parDef->GetPDGMass(),
                                                           parDef->GetPDGCharge(),
                                                           parDef->GetPDGEncoding(),
-                                                          1, //status
+                                                          status,
                                                           time,
                                                           *parent,
-                                                          HepMC::UNDEFINED_ID, // id
+                                                          id,
                                                           HepMC::UNDEFINED_ID, // barcode
                                                           truthBinding );
       cParticle->setNextGeoID( parent->nextGeoID() );

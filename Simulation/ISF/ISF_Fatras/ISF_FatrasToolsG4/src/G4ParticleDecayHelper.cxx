@@ -368,21 +368,25 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
     const G4ThreeVector &mom= prod->GetMomentum();
     Amg::Vector3D amgMom( mom.x(), mom.y(), mom.z() );
 
-    ISF::TruthBinding * truthBinding = NULL;
+    //Let's make sure the new ISFParticles get a valid TruthBinding
+    // FIXME check that this does not cause problems in the TruthSvc
+    ISF::TruthBinding* truthBinding{};
     if (parent.getTruthBinding()) {
-       ATH_MSG_VERBOSE("Could retrieve TruthBinding from original ISFParticle");
-       truthBinding = new ISF::TruthBinding(*parent.getTruthBinding());
+      ATH_MSG_VERBOSE("Could retrieve TruthBinding from original ISFParticle");
+      truthBinding = new ISF::TruthBinding(*parent.getTruthBinding());
     }
-    else ATH_MSG_WARNING("Could not retrieve original TruthBinding  from ISFParticle");
+    else { ATH_MSG_WARNING("Could not retrieve original TruthBinding  from ISFParticle"); }
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID;
     ISF::ISFParticle* childParticle = new ISF::ISFParticle( vertex,
                                                             amgMom,
                                                             prod->GetMass(),
                                                             prod->GetCharge(),
                                                             prod->GetPDGcode(),
-                                                            1 + HepMC::SIM_STATUS_THRESHOLD, //status
-                                                            timeStamp, 
+                                                            status,
+                                                            timeStamp,
                                                             parent,
-                                                            HepMC::UNDEFINED_ID, // id
+                                                            id,
 							    HepMC::UNDEFINED_ID, // barcode
 							    truthBinding );
 

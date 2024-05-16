@@ -18,7 +18,7 @@
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
 #include "ISF_FatrasInterfaces/IParticleDecayHelper.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
 #include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
@@ -1286,15 +1286,17 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
     //std::cout <<"brem opening angle:in:out:"<< cos(theta) <<","<<newDirection*particleDir<< std::endl;
 
     // -------> create the brem photon <--------------------
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     ISF::ISFParticle *bremPhoton = new ISF::ISFParticle( vertex,
                                                          gammaE*newDirection,
                                                          0,   //!< mass
                                                          0,   //!< charge
-                                                         22,  //!< pdg code
-                                                         1 + HepMC::SIM_STATUS_THRESHOLD,   //!< status
+                                                         MC::PHOTON,  //!< pdg code
+                                                         status,
                                                          time,  //!< time
                                                          *parent,
-                                                         0 // FIXME hard-coded id
+                                                         id
                                                          );
 
     // in the validation mode, add process info
@@ -1416,15 +1418,17 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
     particleDir = (particleDir*pElectron- gammaE*newDirection).unit();
 
     // -------> create the brem photon <--------------------
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     ISF::ISFParticle *bremPhoton = new ISF::ISFParticle( vertex,
                                                          gammaE*newDirection,
                                                          0,   //!< mass
                                                          0,   //!< charge
-                                                         22,  //!< pdg code
-                                                         1,   //!< status
+                                                         MC::PHOTON,  //!< pdg code
+                                                         status,
                                                          timeLim.time,  //!< time
                                                          *parent,
-                                                         0 // FIXME hard-coded id
+                                                         id
                                                          );
 
 
@@ -1594,27 +1598,29 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
     // double cTh = 1.-fmin/(1.-fr)/fr;
 
     // first implementation: ctH=1
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
 
     children[0] = new ISF::ISFParticle( position,
                                         fr*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
 
     children[1] = new ISF::ISFParticle( position,
                                         (1-fr)*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
 
     // in the validation mode, add process info
@@ -1713,27 +1719,29 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
     // double cTh = 1.-fmin/(1.-fr)/fr;
 
     // first implementation: ctH=1
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
 
     children[0] = new ISF::ISFParticle( position,
                                         fr*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
 
     children[1] = new ISF::ISFParticle( position,
                                         (1-fr)*momentum,
                                         0.,
                                         0.,
-                                        22,
-                                        1,
+                                        MC::PHOTON,
+                                        status,
                                         time,
                                         *parent,
-                                        0 // FIXME hard-coded id
+                                        id
                                         );
 
     // in the validation mode, add process info
