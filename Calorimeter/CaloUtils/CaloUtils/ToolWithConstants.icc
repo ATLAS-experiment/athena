@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CaloUtils/ToolWithConstants.icc
@@ -306,7 +306,7 @@ ToolWithConstants<BASE>::mergeConstants (CaloRec::ToolConstants& out,
                                          const EventContext& ctx) const
 {
   Context myctx = context (ctx);
-  return m_impl.mergeConstants (this->type(),
+  return m_impl.mergeConstants (toolType(),
                                 toolVersion(),
                                 myctx,
                                 m_isdummy (myctx),
@@ -331,6 +331,24 @@ template <class BASE>
 int ToolWithConstants<BASE>::toolVersion() const
 {
   return 0;
+}
+
+
+/**
+ * @brief Return the name of the type of this tool.
+ *
+ * A saved set of constants includes both the C++ class name and
+ * a version number.  Normally, the class name is taken from the
+ * Gaudi type() method, but that may be changed by overriding
+ * this method.  This can be used, for example, when there are
+ * tools with distinct C++ classes but which are yet similar enough
+ * to combine together.
+ */
+template <class BASE>
+  ATH_TWC_REQUIRES
+const std::string& ToolWithConstants<BASE>::toolType() const
+{
+  return this->type();
 }
 
 
