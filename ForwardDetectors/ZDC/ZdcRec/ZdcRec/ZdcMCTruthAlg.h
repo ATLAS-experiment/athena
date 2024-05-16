@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZdcMCTruthAlg_H
@@ -21,7 +21,7 @@ class ZdcMCTruthAlg : public AthAlgorithm {
 
 public:
 
-    ZdcMCTruthAlg(std::string name, ISvcLocator* pSvcLocator);
+    ZdcMCTruthAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual ~ZdcMCTruthAlg();
 
