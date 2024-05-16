@@ -190,8 +190,6 @@ void ISF::TruthSvc::registerTruthIncident( ISF::ITruthIncident& ti, bool saveAll
 
     }
 
-    //  -> assign shared barcode to all child particles (if barcode service supports it)
-    setSharedChildParticleBarcode( ti);
   }
 
   return;
@@ -360,21 +358,3 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
 
   return parent->end_vertex();
 }
-
-/** Set shared barcode for child particles particles */
-void ISF::TruthSvc::setSharedChildParticleBarcode( ISF::ITruthIncident& ti) const {
-  int processCode = ti.physicsProcessCode();
-  int       parentBC = ti.parentBarcode();
-
-  ATH_MSG_VERBOSE ( "End Vertex representing process: " << processCode << ". TruthIncident failed cuts. Skipping.");
-
-  // generate one new barcode for all child particles
-  int childBC = m_barcodeSvc->sharedChildBarcode( parentBC, processCode);
-
-  // propagate this barcode into the TruthIncident only if
-  // it is a proper barcode, ie !=fUndefinedBarcode
-  if (childBC != HepMC::UNDEFINED_ID) {
-    ti.setAllChildrenBarcodes( childBC );
-  }
-}
-

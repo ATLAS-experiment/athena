@@ -80,9 +80,6 @@ namespace ISF {
     /** Record and end vertex to the MC Truth for the parent particle */
     HepMC::GenVertexPtr  createGenVertexFromTruthIncident( ITruthIncident& truthincident) const;
 
-    /** Set shared barcode for child particles */
-    void setSharedChildParticleBarcode( ITruthIncident& truthincident) const;
-
     ServiceHandle<Barcode::IBarcodeSvc> m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc", ""};           //!< The Barcode service
 
     /** the truth strategies applied (as AthenaToolHandle Array) */

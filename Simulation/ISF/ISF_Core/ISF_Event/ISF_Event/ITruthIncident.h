@@ -114,8 +114,6 @@ namespace ISF {
         simulation). */
     virtual HepMC::GenParticlePtr     updateChildParticle(unsigned short index,
                                                           HepMC::GenParticlePtr existingChild) const = 0;
-    /** Set the the barcode of all child particles to the given bc */
-    virtual void                      setAllChildrenBarcodes(int bc) = 0;
 
     /** Record that a particular child passed a check */
     inline void                       setChildPassedFilters(unsigned short index);

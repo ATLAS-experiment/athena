@@ -226,12 +226,6 @@ int  iGeant4::Geant4TruthIncident::childBarcode(unsigned short index) const {
   return 0;
 }
 
-void iGeant4::Geant4TruthIncident::setAllChildrenBarcodes(int) {
-  G4ExceptionDescription description;
-  description << G4String("setAllChildrenBarcodes: ") + "Shared child particle barcodes are not implemented in ISF_Geant4 at this point.";
-  G4Exception("iGeant4::Geant4TruthIncident", "NotImplemented", FatalException, description);
-}
-
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short i,
                                                                   int newBarcode) {
   // the G4Track instance for the current child particle
