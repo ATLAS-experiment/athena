@@ -11,6 +11,13 @@
 #include "LArRawConditions/LArOFCComplete.h"
 #include "LArRawConditions/LArOFCBinComplete.h"
 #include "LArRawConditions/LArPhysCaliTdiffComplete.h"
+#include "LArRawConditions/LArCaliWaveContainer.h"
+#include "LArRawConditions/LArPhysWaveContainer.h"
+#include "LArRawConditions/LArOFCComplete.h"
+#include "LArRawConditions/LArOFCBinComplete.h"
+#include "LArRawConditions/LArShapeComplete.h"
+#include "LArRawConditions/LArWaveCumul.h"
+
 #include "CoralBase/Blob.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 
@@ -20,8 +27,10 @@
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include "CaloIdentifier/CaloGain.h"
 
 #include <cassert>
+#include <tuple> //std::ignore
 
 #include "tbb/parallel_for.h"
 
@@ -239,7 +248,7 @@ StatusCode LArOFCAlg::stop()
       m_calo_dd_man->get_element(id);
     }
 
-    m_onlineID->isFCALchannel(chanData.chid);
+    std::ignore = m_onlineID->isFCALchannel(chanData.chid);
 
 
     if (!m_larPhysWaveBinKey.empty()) {

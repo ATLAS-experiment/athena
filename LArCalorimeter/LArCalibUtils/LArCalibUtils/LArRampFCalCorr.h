@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -18,9 +18,9 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 #include "LArRawConditions/LArRampComplete.h"
-#include "LArIdentifier/LArOnlineID.h"
 
 #include "CxxUtils/checker_macros.h"
+class LArOnlineID;
 
 class ATLAS_NOT_THREAD_SAFE LArRampFCalCorr : public AthAlgorithm
 {
@@ -39,9 +39,9 @@ class ATLAS_NOT_THREAD_SAFE LArRampFCalCorr : public AthAlgorithm
 
   static int toMod(int& slot);
 
-  const LArOnlineID* m_onlineHelper;
+  const LArOnlineID* m_onlineHelper{};
 
-  float m_threshold;
+  float m_threshold{};
 };
 
 #endif

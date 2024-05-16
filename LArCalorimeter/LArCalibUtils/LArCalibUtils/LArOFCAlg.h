@@ -2,45 +2,38 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCALIBUTILS_LAROFCALGORITHM_H
 #define LARCALIBUTILS_LAROFCALGORITHM_H
  
-#include <vector>
-#include <string>
- 
-#include "LArRawConditions/LArWaveCumul.h"
-
-#include "GaudiKernel/ToolHandle.h"
-#include "LArElecCalib/ILArAutoCorrDecoderTool.h"
-
-#include "CaloIdentifier/CaloGain.h"
-#include "LArRawConditions/LArCaliWaveContainer.h"
-#include "LArRawConditions/LArPhysWaveContainer.h"
-
-#include "LArRawConditions/LArOFCComplete.h"
-#include "LArRawConditions/LArOFCBinComplete.h"
-#include "LArRawConditions/LArShapeComplete.h"
-#include "LArCOOLConditions/LArDSPConfig.h"
-#include "LArCabling/LArOnOffIdMapping.h"
-#include "StoreGate/ReadCondHandleKey.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
-#include <Eigen/Dense>
+#include "LArElecCalib/ILArAutoCorrDecoderTool.h"
+#include "LArCOOLConditions/LArDSPConfig.h" //unique_ptr template param with no explicit d'tor
+#include "LArCabling/LArOnOffIdMapping.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
+
+#include <Eigen/Dense> //Eigen::MatrixXd
 
 #include "tbb/blocked_range.h"
 #include "tbb/global_control.h"
 
 #include <memory>
+#include <vector>
+#include <string>
 
 #include "CxxUtils/checker_macros.h"
 
 class LArOnlineID_Base; 
 class CaloDetDescrManager_Base; 
+class LArCaliWaveContainer;
+class LArOFCBinComplete;
+class LArWaveCumul;
 
 
 class ATLAS_NOT_THREAD_SAFE LArOFCAlg:public AthAlgorithm {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -11,8 +11,6 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-#include "CaloIdentifier/LArEM_ID.h"
-#include "LArIdentifier/LArOnlineID.h"
 #include "LArElecCalib/ILArPedestal.h"
 #include "LArRawEvent/LArAccumulatedCalibDigit.h"
 #include "LArRecConditions/LArBadChannelMask.h"
@@ -21,6 +19,11 @@
 #include <vector>
 #include <string>
 #include <bitset>
+#include <array>
+
+class LArEM_ID;
+class LArOnlineID;
+class LArAccumulatedCalibDigit;
 
 //Poor man's histogramming class to monitor difference introduced by xtalk corr
 class XtalkCorrHisto {
@@ -111,10 +114,10 @@ class ATLAS_NOT_THREAD_SAFE LArStripsCrossTalkCorrector : public AthAlgorithm
   std::set<HWIdentifier> m_uncorrectedIds;
 
   struct neighbour_t{
-   int dist;
-   const LArAccumulatedCalibDigit* dig;
-   double ped;
-   double weight;
+   int dist{};
+   const LArAccumulatedCalibDigit* dig{};
+   double ped{};
+   double weight{};
  };
 
 
