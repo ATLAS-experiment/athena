@@ -41,10 +41,10 @@ def ITkEventCnvToolCfg(flags, name='ITkEventCnvTool', **kwargs):
     acc.setPrivateTools(CompFactory.InDet.InDetEventCnvTool(name, **kwargs))
     return acc
 
-def MuonCnvToolFixTGCsCfg(flags, name='MuonCnvToolFixTGCs', **kwargs):
+def MuonEventCnvToolCfg(flags, name='MuonEventCnvTool', **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     acc = MuonGeoModelCfg(flags)
-    kwargs.setdefault("FixTGCs", True)
+    kwargs.setdefault("FixTGCs", not flags.Muon.usePhaseIIGeoSetup)
     acc.setPrivateTools(CompFactory.Muon.MuonEventCnvTool(name, **kwargs))
     return acc
 
@@ -66,7 +66,7 @@ def TrkEventCnvSuperToolCfg(flags, name='EventCnvSuperTool', **kwargs):
 
     if kwargs["DoMuons"] and "MuonCnvTool" not in kwargs:
         kwargs.setdefault("MuonCnvTool", acc.popToolsAndMerge(
-            MuonCnvToolFixTGCsCfg(flags)))
+            MuonEventCnvToolCfg(flags)))
 
     acc.addPublicTool(CompFactory.Trk.EventCnvSuperTool(name, **kwargs))
     return acc
