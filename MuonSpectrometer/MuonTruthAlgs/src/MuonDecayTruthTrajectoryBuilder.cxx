@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Niels van Eldik 2010
@@ -41,18 +41,19 @@ namespace Muon {
 
             // copy the outer half to result
             while (!tmp.empty()) {
-                ATH_MSG_DEBUG(" Adding daughter: " << current);
-                result->emplace_back(tmp.top(),0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
+                ATH_MSG_DEBUG(" Adding daughter: " << current); // FIXME "current" is not changed in this loop - it might make sense to print tmp.top() instead here?
+                result->emplace_back(tmp.top(),tmp.top()->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
                 tmp.pop();
             }
 
             // The input particle itself
-            result->emplace_back(input,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
+            result->emplace_back(input,input->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
 
             // Now continue towards the interaction point
             while ((next = getMother(current))) {
-                ATH_MSG_DEBUG(" Adding mother:  " << current);
-                result->emplace_back(current = next,0,HepMcParticleLink::IS_EVENTNUM); // FIXME should not be using eventIndex=0 with IS_EVENTNUM either obtain event number from GenParticlePtr or use IS_POSITION
+                ATH_MSG_DEBUG(" Adding mother:  " << current); // FIXME "current" here refers to the child particle rather than the mother? Consider moving this after "current = next"
+                current = next;
+                result->emplace_back(current,current->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
             }
 
             ATH_MSG_DEBUG(" Final TruthTrajectory: ");
