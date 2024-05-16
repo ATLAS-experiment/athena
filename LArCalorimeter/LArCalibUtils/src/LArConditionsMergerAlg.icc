@@ -24,7 +24,7 @@ StatusCode LArConditionsMergerAlg<T,T1>::execute() {
      ATH_CHECK(out->setGroupingType(m_groupingType,msg()));
      ATH_CHECK(out->initialize());
   
-     for (auto key : m_detStoreKeys){
+     for (const auto & key : m_detStoreKeys){
          //SG::ReadHandle<T1> calContainer(key);
          const T1* t1Container = nullptr;
          StatusCode sc = detStore()->retrieve(t1Container,key);
@@ -47,7 +47,7 @@ StatusCode LArConditionsMergerAlg<T,T1>::execute() {
      ATH_CHECK(out->setGroupingType(m_groupingType,msg()));
      ATH_CHECK(out->initialize());
   
-     for (auto& key : m_readKeys) {
+     for (const auto & key : m_readKeys) {
        SG::ReadCondHandle<T> handle{key};
        const T* obj=*handle;
        bool stat=out->merge(*obj);

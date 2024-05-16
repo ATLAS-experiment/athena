@@ -1,14 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArOFPhaseFill.h"
 #include "CaloIdentifier/CaloGain.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include "LArIdentifier/LArOnlineID_Base.h"
+#include "LArRawConditions/LArOFCBinComplete.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IToolSvc.h"
+#include "AthenaKernel/IOVSvcDefs.h"
 
 #include <fstream>
 #include <map>
@@ -94,8 +97,6 @@ StatusCode LArOFPhaseFill::stop()
                 iss>>std::dec>>onlid>>g>>phase;
            else{
               if(m_isSC)
-                 iss>>std::dec>>b_ec>>p_n>>ft>>sl>>ch>>g>>phase;
-              else   
                  iss>>std::dec>>b_ec>>p_n>>ft>>sl>>ch>>g>>phase;
               if(!iss.good()) {
                  ATH_MSG_WARNING("Wrong line: "<<line);

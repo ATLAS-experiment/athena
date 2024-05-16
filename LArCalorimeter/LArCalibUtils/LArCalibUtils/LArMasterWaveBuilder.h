@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,19 +10,17 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "LArRawConditions/LArWave.h"
-#include "LArRawConditions/LArWaveHelper.h"
-#include "LArRawConditions/LArCaliWave.h"
+
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
 
-#include "LArIdentifier/LArOnlineID.h"
-#include "CaloIdentifier/LArEM_ID.h"
-
 #include <vector>
 #include <string>
-#include <map>
+
+class LArWave;
+class LArWaveHelper;
+class LArCaliWave;
 
 class LArMasterWaveBuilder : public AthAlgorithm {
 public:
