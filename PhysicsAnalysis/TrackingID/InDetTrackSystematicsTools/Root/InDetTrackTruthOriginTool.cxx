@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
@@ -8,6 +8,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <math.h>
 
@@ -42,12 +43,14 @@ namespace InDet {
       // in practice, all tracks seem to have a truth link, but we need to also
       // check whether it's valid
       typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
-      if ( !track->isAvailable<TruthLink>("truthParticleLink") ) { 
+      static const SG::ConstAccessor<TruthLink>
+        truthParticleLinkAcc ("truthParticleLink");
+      if ( !truthParticleLinkAcc.isAvailable(*track) ) { 
         return nullptr;
       }
 
       // retrieve the link and check its validity
-      const TruthLink &link = track->auxdata<TruthLink>("truthParticleLink");
+      const TruthLink &link = truthParticleLinkAcc(*track);
 
       // a missing or invalid link implies truth particle has been dropped from 
       // the truth record at some stage - probably it was from pilup which by

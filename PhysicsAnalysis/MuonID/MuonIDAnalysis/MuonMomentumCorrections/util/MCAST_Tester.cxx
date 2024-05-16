@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -35,6 +35,7 @@
 #include "xAODCore/tools/ReadStats.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODMuon/MuonContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 ANA_MSG_HEADER(msgMMC)
 ANA_MSG_SOURCE(msgMMC, "MCASTTest")
@@ -346,6 +347,8 @@ int main(int argc, char* argv[]) {
                          muon->muonType());
 
                 // either use the correctedCopy call or correct the muon object itself
+                static const SG::ConstAccessor<float> InnerDetectorPtAcc ("InnerDetectorPt");
+                static const SG::ConstAccessor<float> MuonSpectrometerPtAcc ("MuonSpectrometerPt");
                 if (useCorrectedCopy) {
                     // ::: Create a calibrated muon:
                     xAOD::Muon* mu = 0;
@@ -354,8 +357,8 @@ int main(int argc, char* argv[]) {
                         continue;
                     }
                     CorrPtCB = mu->pt();
-                    CorrPtID = mu->auxdata<float>("InnerDetectorPt");
-                    CorrPtMS = mu->auxdata<float>("MuonSpectrometerPt");
+                    CorrPtID = InnerDetectorPtAcc (*mu);
+                    CorrPtMS = MuonSpectrometerPtAcc (*mu);
 
                     
                     sysTreeMap[*sysListItr]->Fill();
@@ -368,8 +371,8 @@ int main(int argc, char* argv[]) {
                         continue;
                     }
                     CorrPtCB = muon->pt();
-                    CorrPtID = muon->auxdata<float>("InnerDetectorPt");
-                    CorrPtMS = muon->auxdata<float>("MuonSpectrometerPt");
+                    CorrPtID = InnerDetectorPtAcc (*muon);
+                    CorrPtMS = MuonSpectrometerPtAcc (*muon);
                     ExpResoCB = corrTool->expectedResolution("CB", *muon, true);
                     ExpResoID = corrTool->expectedResolution("ID", *muon, true);
                     ExpResoMS = corrTool->expectedResolution("MS", *muon, true);

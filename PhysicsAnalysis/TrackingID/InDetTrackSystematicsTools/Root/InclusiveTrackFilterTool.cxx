@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/InclusiveTrackFilterTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace InDet {
 
@@ -50,7 +51,8 @@ namespace InDet {
       return false;
     }
 
-    if (track->isAvailable<unsigned long>("patternRecoInfo") ) {
+    static const SG::ConstAccessor<unsigned long> patternRecoInfoAcc ("patternRecoInfo");
+    if (patternRecoInfoAcc.isAvailable(*track) ) {
       const std::bitset<xAOD::NumberOfTrackRecoInfo> patternReco = track->patternRecoInfo();
       if(not patternReco.test(49)) {
         ATH_MSG_DEBUG( "Applying LRT uncertainties to non-LRT track! Skipping" );
