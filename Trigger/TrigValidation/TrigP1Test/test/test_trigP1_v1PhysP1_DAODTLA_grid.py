@@ -58,7 +58,6 @@ tlareco.args = '--inputBSFile=' + find_file('*.physics_TLA*._athenaHLT*.data')  
 tlareco.args += ' --outputDAOD_TLAFile=DAOD_TLA.pool.root'
 tlareco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2024-03\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)
-tlareco.args += ' --CA'
 
 # The full test
 test = Test.Test()
