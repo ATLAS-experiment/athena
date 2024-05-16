@@ -1056,7 +1056,9 @@ CP::SystematicSet TrigGlobalEfficiencyCorrectionTool::recommendedSystematics() c
 StatusCode TrigGlobalEfficiencyCorrectionTool::applySystematicVariation(const CP::SystematicSet& systematic)
 {
   for (auto&& t: m_suppliedElectronEfficiencyTools) ANA_CHECK(t->applySystematicVariation(systematic));
+  for (auto&& t: m_suppliedElectronScaleFactorTools) ANA_CHECK(t->applySystematicVariation(systematic));
   for (auto&& t: m_suppliedPhotonEfficiencyTools) ANA_CHECK(t->applySystematicVariation(systematic));
+  for (auto&& t: m_suppliedPhotonScaleFactorTools) ANA_CHECK(t->applySystematicVariation(systematic));
   for (auto&& t: m_suppliedMuonTools) ANA_CHECK(t->applySystematicVariation(systematic));
 
   return StatusCode::SUCCESS;

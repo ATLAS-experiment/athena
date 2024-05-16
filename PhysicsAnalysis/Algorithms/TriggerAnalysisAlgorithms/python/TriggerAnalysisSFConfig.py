@@ -152,6 +152,13 @@ class TriggerAnalysisSFBlock (ConfigBlock):
 
     def makeAlgs (self, config) :
 
+        if (self.multiTriggerChainsPerYear and self.triggerChainsPerYear and
+            self.triggerChainsPerYear is not self.multiTriggerChainsPerYear.get('')):
+            raise Exception('multiTriggerChainsPerYear and triggerChainsPerYear cannot be configured at the same time!')
+
+        if self.triggerChainsPerYear and not self.multiTriggerChainsPerYear:
+            self.multiTriggerChainsPerYear = {'': self.triggerChainsPerYear}
+
         # Create the decision algorithm, keeping track of the decision tool for later
         decisionTool = self.makeTriggerDecisionTool(config)
 
@@ -160,7 +167,7 @@ class TriggerAnalysisSFBlock (ConfigBlock):
 
         # Calculate multi-lepton (electron/muon/photon) trigger efficiencies and SFs
         if self.multiTriggerChainsPerYear and not self.noGlobalTriggerEff:
-            for suffix, trigger_chains in self.multiTriggerChainsPerYear:
+            for suffix, trigger_chains in self.multiTriggerChainsPerYear.items():
                 self.triggerChainsPerYear = trigger_chains
                 self.makeTriggerGlobalEffCorrAlg(config, matchingTool, self.noEffSF, suffix)
 
