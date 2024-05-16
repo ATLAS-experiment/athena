@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PARTICLEJETTOOLS_JETTRUTHLABELINGTOOL_H
@@ -39,7 +39,7 @@ public:
   void print() const override;
   
   /// returns the name of large-R jet truth label
-  std::string getLargeRJetTruthLabelName() const {
+  const std::string& getLargeRJetTruthLabelName() const {
     return m_truthLabelName;
   };
 
