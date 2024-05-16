@@ -30,7 +30,7 @@ RPDDataAnalyzer::RPDDataAnalyzer(
   m_pileupBaselineStdDevThresh(config.pileupBaselineStdDevThresh),
   m_nNegativesAllowed(config.nNegativesAllowed),
   m_AdcOverflow(config.AdcOverflow),
-  m_calibFactors(calibFactors),
+  m_outputCalibFactors(calibFactors),
   m_chFadcData(m_nChannels, std::vector<float>(m_nSamples, 0)),
   m_chCorrectedFadcData(m_nChannels, std::vector<float>(m_nSamples, 0)),
   m_chMaxSample(m_nChannels, 0),
@@ -52,10 +52,10 @@ RPDDataAnalyzer::RPDDataAnalyzer(
   m_chStatus(m_nChannels)
 {
   if (m_endSignalSample == 0) m_endSignalSample = m_nSamples; // sentinel value 0 -> go to end of waveform
-  if (m_calibFactors.size() != m_nChannels) {
+  if (m_outputCalibFactors.size() != m_nChannels) {
     (*m_msgFunc_p)(ZDCMsg::Fatal,
       "RPDDataAnalyzer::RPDDataAnalyzer: received incorrect number of channels in calibration factors ("
-        + std::to_string(m_calibFactors.size()) + " != " + std::to_string(m_nChannels) + ")"
+        + std::to_string(m_outputCalibFactors.size()) + " != " + std::to_string(m_nChannels) + ")"
     );
   }
   m_sideStatus.reset();
@@ -146,7 +146,7 @@ bool RPDDataAnalyzer::checkPulses(unsigned int channel) {
   unsigned int postPulseSample = 0;
   for (unsigned int sample = 1; sample < m_nSamples - 1; sample++) {
     float secondDiff = m_chFadcData.at(channel).at(sample + 1) - 2*m_chFadcData.at(channel).at(sample) + m_chFadcData.at(channel).at(sample - 1);
-    if (secondDiff*m_calibFactors.at(channel) > m_pulse2ndDerivThresh) continue; // no pulse here
+    if (secondDiff > m_pulse2ndDerivThresh) continue; // no pulse here
     if (sample < m_goodPulseSampleStart && secondDiff < prePulseSize) {
       prePulseSize = secondDiff;
       prePulseSample = sample;
@@ -187,7 +187,7 @@ float RPDDataAnalyzer::calculateBaselineSamplesMSE(unsigned int channel, std::fu
     MSE += std::pow(m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel) - fit(sample), 2);
   }
   MSE /= m_nBaselineSamples;
-  return MSE*std::pow(m_calibFactors.at(channel), 2);
+  return MSE;
 }
 
 /**
@@ -276,17 +276,15 @@ unsigned int RPDDataAnalyzer::countSignalRangeNegatives(std::vector<float> const
  * Returns true if pileup subtraction succeeded, false if there was a problem.
 */
 bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
-  float const& calibFactor = m_calibFactors.at(channel);
-
-  float baselineSum = 0;
+  float nominalBaselineSubtrSum = 0;
   /** points (sample, baseline-subtracted ADC) with ADC above baseline, to be used in fit in case of pileup */
   std::vector<std::pair<unsigned int, float>> pileupFitPoints;
   /** set of (unique) ADC values in baseline samples above nominal baseline */
   std::set<float> uniqueBaselineValues;
   for (unsigned int sample = 0; sample < m_nBaselineSamples; sample++) {
     float const& adc = m_chFadcData.at(channel).at(sample);
-    baselineSum += adc;
     float const adcBaselineSubtr = adc - m_nominalBaseline;
+    nominalBaselineSubtrSum += adcBaselineSubtr;
     if (adcBaselineSubtr > 0) {
       // this sample is a candidate for pileup fit
       pileupFitPoints.push_back({sample, adcBaselineSubtr});
@@ -295,7 +293,7 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   }
   float baselineStdDev = TMath::RMS(m_chFadcData.at(channel).begin(), std::next(m_chFadcData.at(channel).begin(), m_nBaselineSamples));
 
-  if (baselineSum*calibFactor < m_pileupBaselineSumThresh || baselineStdDev*calibFactor < m_pileupBaselineStdDevThresh) {
+  if (nominalBaselineSubtrSum < m_pileupBaselineSumThresh || baselineStdDev < m_pileupBaselineStdDevThresh) {
     // there is NO pileup, we will trust the average of baseline samples as a good baseline estimate
     m_chBaseline.at(channel) = TMath::Mean(m_chFadcData.at(channel).begin(), std::next(m_chFadcData.at(channel).begin(), m_nBaselineSamples));
     // calculate fadc data with baseline subtracted
@@ -371,7 +369,7 @@ void RPDDataAnalyzer::calculateMaxSampleMaxAdc(unsigned int channel)
     }
   }
   m_chMaxAdc.at(channel) = maxAdc;
-  m_chMaxAdcCalib.at(channel) = maxAdc*m_calibFactors.at(channel);
+  m_chMaxAdcCalib.at(channel) = maxAdc*m_outputCalibFactors.at(channel);
   m_chMaxSample.at(channel) = maxSample;
 }
 
@@ -385,7 +383,7 @@ void RPDDataAnalyzer::calculateSumAdc(unsigned int channel) {
     signalRangeAdcSum += m_chCorrectedFadcData.at(channel).at(sample);
   }
   m_chSumAdc.at(channel) = signalRangeAdcSum;
-  m_chSumAdcCalib.at(channel) = signalRangeAdcSum*m_calibFactors.at(channel);
+  m_chSumAdcCalib.at(channel) = signalRangeAdcSum*m_outputCalibFactors.at(channel);
 
   if (m_chStatus.at(channel)[OutOfTimePileupBit]) {
     // there is pileup in this channel, calculate fraction of baseline-subtracted raw signal
@@ -489,7 +487,7 @@ float RPDDataAnalyzer::getChSumAdc(unsigned int channel) const
 }
 
 /**
- * Get sum of RPD data in signal range after baseline and pileup subtraction, with calibration factors applied.
+ * Get sum of RPD data in signal range after baseline and pileup subtraction, with output calibration factors applied.
 */
 float RPDDataAnalyzer::getChSumAdcCalib(unsigned int channel) const
 {
@@ -505,7 +503,7 @@ float RPDDataAnalyzer::getChMaxAdc(unsigned int channel) const
 }
 
 /**
- * Get max of RPD data in signal range after baseline and pileup subtraction, with calibration factors applied.
+ * Get max of RPD data in signal range after baseline and pileup subtraction, with output calibration factors applied.
 */
 float RPDDataAnalyzer::getChMaxAdcCalib(unsigned int channel) const
 {

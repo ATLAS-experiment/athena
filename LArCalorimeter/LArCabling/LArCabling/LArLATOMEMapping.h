@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARLATOMEMAPPING_H
@@ -12,8 +12,9 @@
 #include "Identifier/IdentifierHash.h"
 
 #include <vector>
-#include <algorithm>
-
+//#include <algorithm>
+#include <unordered_map>
+#include "CxxUtils/AthUnlikelyMacros.h"
 /**
   * fixed number of channels on one LATOME board<br>
   *
@@ -36,7 +37,7 @@ class LArLATOMEMapping {
   LArLATOMEMapping(unsigned nLatomes=0);
   
   /**
-   * create a HWIdentifier from an Identifier (not inline)<br>
+   * create a HWIdentifier from an Identifier <br>
    *
    */
   HWIdentifier getChannelID(const unsigned int sourceID, const unsigned int chan) const;
@@ -50,21 +51,23 @@ class LArLATOMEMapping {
 
   std::vector<unsigned int>  m_sourceID;
   std::vector<std::vector< HWIdentifier> > m_onlineID;
+  std::unordered_map<unsigned,std::vector< HWIdentifier> > m_map;
 
 };
 
 
 //Inline methods:
 inline HWIdentifier LArLATOMEMapping::getChannelID(const unsigned int sourceID, const unsigned int chan) const {
-   if(chan >= N_LATOME_CHANNELS || std::find(m_sourceID.begin(), m_sourceID.end(), sourceID ) == m_sourceID.end()) {
-      return m_hwidEmpty;
-   } else {  
-      auto it=std::find(m_sourceID.begin(),  m_sourceID.end(), sourceID );
-      return m_onlineID[std::distance(m_sourceID.begin(), it)][chan];
-   }
+  auto it = m_map.find(sourceID);
+  if (ATH_UNLIKELY(it == m_map.end())) {
+    return m_hwidEmpty;
+  }
+  const std::vector<HWIdentifier>& chanVec = it->second;
+  if (ATH_UNLIKELY(chan > chanVec.size())) {
+    return m_hwidEmpty;
+  }
+  return chanVec[chan];
 }
-
-
 
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( LArLATOMEMapping, 219977637 , 1)

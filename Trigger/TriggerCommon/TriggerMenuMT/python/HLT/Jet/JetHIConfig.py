@@ -17,6 +17,54 @@ logging.getLogger().info("JetHIConfig LOG: Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
+# For now all duplicated from jetHIRecoSequenceCA -- to be cleaned up by experts
+def HeavyIonJetRecoDataDeps(flags, **jetRecoDict):
+    # The template unsubtracted jet definition
+    jetNamePrefix = JetRecoCommon.getHLTPrefix()
+    clustersKey = JetRecoCommon.getClustersKey(jetRecoDict)
+    jetDef_unsub = JetRecoCommon.defineHIJets(jetRecoDict,clustersKey=clustersKey,prefix=jetNamePrefix,suffix="_Unsubtracted")
+    jetDef_unsub._internalAtt['finalPJContainer'] = "PseudoJet"+clustersKey
+
+    # Seed jets for subtraction
+    associationName = "%s_DR8Assoc" % (clustersKey)
+    jetDef_seed0 = jetDef_unsub.clone()
+    jetDef_seed0.suffix = jetDef_unsub.suffix.replace("Unsubtracted", "seed0")
+    jetDef_seed0.radius = 0.2
+    jetsFullName_seed0 = jetDef_seed0.fullname()
+    stdJetModifiers.update(
+        # we give a function as PtMin : it will be evaluated when instantiating the tool (modspec will come alias usage like "Filter:10000" --> PtMin=100000) 
+        HLTHIJetAssoc = JetModifier("HIJetDRAssociationTool","HIJetDRAssociation", ContainerKey=clustersKey, DeltaR=0.8, AssociationName=associationName),
+        HLTHIJetMaxOverMean = JetModifier("HIJetMaxOverMeanTool","HIJetMaxOverMean", JetContainer = jetsFullName_seed0),
+        HLTHIJetDiscrim = JetModifier("HIJetDiscriminatorTool","HIJetDiscriminator", MaxOverMeanCut = 4, MinimumETMaxCut=3000),
+    )
+    jetDef_seed0.modifiers=["HLTHIJetAssoc", "HLTHIJetMaxOverMean", "HLTHIJetDiscrim", "Filter:5000"]
+
+    JES_is_data=False
+    calib_seq='EtaJES' #only do in situ for R=0.4 jets in data
+    if jetRecoDict["jetCalib"].endswith("IS") and not flags.Input.isMC:
+         JES_is_data=True
+         calib_seq += "_Insitu"
+
+    # Second seed
+    # Copy default jets: seed1
+    jetDef_seed1 = jetDef_unsub.clone()
+    jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
+    jetDef_seed1.radius = 0.2
+    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
+
+    # Final subracted jets
+    jetDef_final = jetDef_unsub.clone()
+    jetDef_final.suffix = jetDef_unsub.suffix.replace("_Unsubtracted","")
+    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Sort", "Filter:20000"]
+
+    jetDefDict = {
+        "unsub": (jetDef_unsub.fullname(), jetDef_unsub),
+        "seed0": (jetDef_seed0.fullname(), jetDef_seed0),
+        "seed1": (jetDef_seed1.fullname(), jetDef_seed1),
+        "final": (jetDef_final.fullname(), jetDef_final),
+    }
+    return jetDefDict
+
 def jetHIEventShapeSequenceCA(configFlags, clustersKey, towerKey):
     acc = ComponentAccumulator()
     

@@ -53,17 +53,20 @@ def getTLASignatureSequenceGenCfg(flags, chainDict, chainPart):
     elif signature == 'Muon':    
         return MuonTLAMenuSequenceGenCfg(flags, muChainPart=chainPart)
 
-    elif signature  == 'Jet' or signature  == 'Bjet':   
-        jetDef = JetChainConfiguration(chainDict)
-        jetInputCollectionName = jetDef.jetName
+    elif signature  == 'Jet' or signature  == 'Bjet':
+        # Use the jet reco machinery to define the jet collection
+        jetChainConfig = JetChainConfiguration(chainDict)
+        jetChainConfig.prepareDataDependencies(flags)
+        jetInputCollectionName = jetChainConfig.jetName
         log.debug(f"TLA jet input collection = {jetInputCollectionName}")
+
         # Turn off b-tagging for jets that have no tracks anyway - we want to avoid 
         # adding a TLA AntiKt4EMTopoJets_subjetsIS BTagging container in the EDM.
         # We do not switch off BTag recording for Jet signatures as both Jet and Bjet signature
         # will use the same hypo alg, so it needs to be configured the same!
         # Thus, BTag recording will always run for PFlow jets, creating an empty container if no btagging exists. 
         attachBtag = True
-        if jetDef.recoDict["trkopt"] == "notrk": attachBtag = False
+        if jetChainConfig.recoDict["trkopt"] == "notrk": attachBtag = False
         return JetTLAMenuSequenceGenCfg(flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
 
 

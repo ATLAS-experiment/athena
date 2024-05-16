@@ -33,6 +33,7 @@
 #include <regex>
 
 namespace FlavorTagDiscriminants {
+    using Tracks = std::vector<const xAOD::TrackParticle*>;
 
     // tracksConfig 
     ConstituentsInputConfig createTracksLoaderConfig(
@@ -40,14 +41,12 @@ namespace FlavorTagDiscriminants {
       FlipTagConfig flip_config
     );
 
-
     // Subclass for Tracks loader inherited from abstract IConstituentsLoader class
     class TracksLoader : public IConstituentsLoader {
       public:
-        typedef std::vector<const xAOD::TrackParticle*> Tracks;
 
         TracksLoader(ConstituentsInputConfig, const FTagOptions& options);
-        std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
+        std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override;
         std::tuple<char, std::map<std::string, std::vector<double>>>  getDL2Data(
@@ -75,21 +74,20 @@ namespace FlavorTagDiscriminants {
         using TPC = xAOD::TrackParticleContainer;
         using TrackLinks = std::vector<ElementLink<TPC>>;
         using PartLinks = std::vector<ElementLink<IPC>>;
-        using TPV = std::vector<const xAOD::TrackParticle*>;
 
         TrackSortVar trackSortVar(ConstituentsSortOrder, const FTagOptions&);
         std::pair<TrackFilter,std::set<std::string>> trackFilter(
           ConstituentsSelection, const FTagOptions&);
-        std::pair<TrackSequenceFilter,std::set<std::string>> flipFilter(
+        std::pair<TrackSequenceFilter,std::set<std::string>> trackFlipper(
           const FTagOptions&);
         
         Tracks getTracksFromJet(const Jet& jet, const AE& btag) const;
 
         TrackSortVar m_trackSortVar;
         TrackFilter m_trackFilter;
-        TrackSequenceFilter m_flipFilter;
-        std::function<TPV(const SG::AuxElement&)> m_associator;
-        getter_utils::CustomSequenceGetter<xAOD::TrackParticle> m_customSequenceGetter;
+        TrackSequenceFilter m_trackFlipper;
+        std::function<Tracks(const SG::AuxElement&)> m_associator;
+        getter_utils::SeqGetter<xAOD::TrackParticle> m_seqGetter;
     };
 }
 

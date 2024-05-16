@@ -94,6 +94,9 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
+    from AthenaConfiguration.Enums import ProductionStep
+    flags.Common.ProductionStep = ProductionStep.Generation
+
     # Convert run arguments to global athena flags
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     commonRunArgsToFlags(runArgs, flags)

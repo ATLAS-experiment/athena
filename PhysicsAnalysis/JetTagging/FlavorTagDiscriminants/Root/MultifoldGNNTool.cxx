@@ -23,15 +23,18 @@ namespace FlavorTagDiscriminants {
 
   StatusCode MultifoldGNNTool::initialize() {
 
-    ATH_MSG_INFO("Initialize multi-fold GNN");
-
-    m_gnn.reset(
-      new MultifoldGNN(
-        m_nn_files,
-        m_fold_hash_name,
-        getOptions(m_props)
-        )
-      );
+    auto opts = getOptions(m_props);
+    if (!m_nnsvc.empty()) {
+      ATH_CHECK(m_nnsvc.retrieve());
+      std::vector<std::shared_ptr<const GNN>> gnns;
+      for (const auto& file: m_nn_files) {
+        gnns.emplace_back(m_nnsvc->get(file, opts));
+      }
+      m_gnn.reset(new MultifoldGNN(gnns, m_fold_hash_name));
+    } else {
+      ATH_MSG_INFO("Initialize multi-fold GNN");
+      m_gnn.reset(new MultifoldGNN(m_nn_files, m_fold_hash_name, opts));
+    }
 
     return StatusCode::SUCCESS;
   }

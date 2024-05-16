@@ -73,17 +73,17 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
 
     declareProperty("RpdNbaselineSamples", m_rpdNbaselineSamples = 7, "Number of baseline samples; the sample equal to this number is the start of signal region");
     declareProperty("RpdEndSignalSample", m_rpdEndSignalSample = 23, "Samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window");
-    declareProperty("RpdPulse2ndDerivThresh", m_rpdPulse2ndDerivThresh = -18, "Second differences less than or equal to this number indicate a pulse"); // 3 sigma = 3*3.9, 2nd difference in baseline for first-in-train bcid evts
+    declareProperty("RpdPulse2ndDerivThresh", m_rpdPulse2ndDerivThresh = -18, "Second differences less than or equal to this number indicate a pulse");
     declareProperty("RpdPostPulseFracThresh", m_rpdPostPulseFracThresh = 0.15, "If there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse");
     declareProperty("RpdGoodPulseSampleStart", m_rpdGoodPulseSampleStart = 8, "Pulses before this sample are considered pre-pulses");
     declareProperty("RpdGoodPulseSampleStop", m_rpdGoodPulseSampleStop = 10, "Pulses after this sample are considered post-pulses");
     declareProperty("RpdNominalBaseline", m_rpdNominalBaseline = 100, "The global nominal baseline; used when pileup is detected");
-    declareProperty("RpdPileupBaselineSumThresh", m_rpdPileupBaselineSumThresh = 684 + 3*23, "Baseline sums less than this number indicate there is NO pileup"); // 3 sigma, sum of baseline samples in first-in-train bcid evts
+    declareProperty("RpdPileupBaselineSumThresh", m_rpdPileupBaselineSumThresh = 53, "Baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup");
     declareProperty("RpdPileupBaselineStdDevThresh", m_rpdPileupBaselineStdDevThresh = 2, "Baseline standard deviations less than this number indicate there is NO pileup");
     declareProperty("RpdNNegativesAllowed", m_rpdNNegativesAllowed = 2, "Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range");
     declareProperty("RpdAdcOverflow", m_rpdAdcOverflow = 4095, "ADC values greater than or equal to this number are considered overflow");
-    declareProperty("RpdSideCCalibFactors", m_rpdSideCCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD side C (arm 1-2) channels in reconstruction");
-    declareProperty("RpdSideACalibFactors", m_rpdSideACalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD side A (arm 8-1) channels in reconstruction");
+    declareProperty("RpdSideCCalibFactors", m_rpdSideCOutputCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side C");
+    declareProperty("RpdSideACalibFactors", m_rpdSideAOutputCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side A");
 
     declareProperty("LHCRun", m_LHCRun = 3);
 
@@ -308,8 +308,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
   rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
   rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideACalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
 
  return zdcDataAnalyzer;
 
@@ -415,8 +415,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
   rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
   rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideACalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
 
  return zdcDataAnalyzer;
 
@@ -586,8 +586,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
   rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
   rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideACalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
   
   return zdcDataAnalyzer;
 }

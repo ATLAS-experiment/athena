@@ -110,7 +110,7 @@ TauGNN::compute(const xAOD::TauJet &tau,
                          const std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const {
     InputMap scalarInputs;
     InputSequenceMap vectorInputs;
-    std::map<std::string, input_pair> gnn_input;
+    std::map<std::string, Inputs> gnn_input;
     ATH_MSG_DEBUG("Starting compute...");
     //Prepare input variables
     if (!calculateInputVariables(tau, tracks, clusters, scalarInputs, vectorInputs)) {
@@ -124,7 +124,7 @@ TauGNN::compute(const xAOD::TauJet &tau,
         tau_feats.push_back(static_cast<float>(scalarInputs[m_config.input_layer_scalar][varname]));
     }
     std::vector<int64_t> tau_feats_dim = {1, static_cast<int64_t>(tau_feats.size())};
-    input_pair tau_info (tau_feats, tau_feats_dim);
+    Inputs tau_info (tau_feats, tau_feats_dim);
     gnn_input.insert({"tau_vars", tau_info});
 
     //Add track-level features to the input
@@ -141,7 +141,7 @@ TauGNN::compute(const xAOD::TauJet &tau,
         var_idx++;
     }
     std::vector<int64_t> trk_feats_dim = {num_nodes, num_node_vars};
-    input_pair trk_info (trk_feats, trk_feats_dim);
+    Inputs trk_info (trk_feats, trk_feats_dim);
     gnn_input.insert({"track_vars", trk_info});
     
     //Add cluster-level features to the input
@@ -158,7 +158,7 @@ TauGNN::compute(const xAOD::TauJet &tau,
         var_idx++;
     }
     std::vector<int64_t> cls_feats_dim = {num_nodes, num_node_vars};
-    input_pair cls_info (cls_feats, cls_feats_dim);
+    Inputs cls_info (cls_feats, cls_feats_dim);
     gnn_input.insert({"cluster_vars", cls_info});    
 
     //RUN THE INFERENCE!!!
