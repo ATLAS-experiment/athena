@@ -5,86 +5,103 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
 from ActsConfig.ActsUtilities import extractChildKwargs
 
-def MapToInDetSimDataWrapCfg(flags,
-                             collection_name: str) -> ComponentAccumulator:
+def MapToInDetSimDataWrapSvcCfg(flags,
+                                *,
+                                collectionName: str) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     AddressRemappingSvc = CompFactory.AddressRemappingSvc(
-        TypeKeyOverwriteMaps = ["InDetSimDataCollection#%s->InDetSimDataCollectionWrap#%s" % (collection_name, collection_name) ]
+        TypeKeyOverwriteMaps = [f"InDetSimDataCollection#{collectionName}->InDetSimDataCollectionWrap#{collectionName}"]
         )
     acc.addService(AddressRemappingSvc)
     return acc
 
 
-def PixelClusterToTruthAssociationCfg(flags,
-                                      name: str = 'PixelClusterToTruthAssociationAlg',
-                                      **kwargs) -> ComponentAccumulator:
+def ActsPixelClusterToTruthAssociationAlgCfg(flags,
+                                             name: str = 'ActsPixelClusterToTruthAssociationAlg',
+                                             **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkPixelSDO_Map') )
-    kwargs.setdefault('InputTruthParticleLinks','xAODTruthLinks')
-    kwargs.setdefault('SimData','ITkPixelSDO_Map')
-    kwargs.setdefault('DepositedEnergyMin',300) # @TODO revise ? From PRD_MultiTruthBuilder.h; should be 1/10 of threshold
-    kwargs.setdefault('Measurements','ITkPixelClusters')
-    kwargs.setdefault('AssociationMapOut','ITkPixelClustersToTruthParticles')
+    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkPixelSDO_Map') )
+
+    kwargs.setdefault('InputTruthParticleLinks', 'xAODTruthLinks')
+    kwargs.setdefault('SimData', 'ITkPixelSDO_Map')
+    kwargs.setdefault('DepositedEnergyMin', 300) # @TODO revise ? From PRD_MultiTruthBuilder.h; should be 1/10 of threshold
+    kwargs.setdefault('Measurements', 'ITkPixelClusters')
+    kwargs.setdefault('AssociationMapOut', 'ITkPixelClustersToTruthParticles')
+    
     acc.addEventAlgo( CompFactory.ActsTrk.PixelClusterToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
-def StripClusterToTruthAssociationCfg(flags,
-                                      name: str = 'StripClusterToTruthAssociationAlg',
-                                      **kwargs) -> ComponentAccumulator:
+def ActsStripClusterToTruthAssociationAlgCfg(flags,
+                                             name: str = 'ActsStripClusterToTruthAssociationAlg',
+                                             **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
+    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkStripSDO_Map') )
 
-    kwargs.setdefault('InputTruthParticleLinks','xAODTruthLinks')
-    kwargs.setdefault('SimData','ITkStripSDO_Map')
-    kwargs.setdefault('DepositedEnergyMin',600) # @TODO revise ? From PRD_MultiTruthBuilder.h; should be 1/10 of threshold
-    kwargs.setdefault('Measurements','ITkStripClusters')
-    kwargs.setdefault('AssociationMapOut','ITkStripClustersToTruthParticles')
+    kwargs.setdefault('InputTruthParticleLinks', 'xAODTruthLinks')
+    kwargs.setdefault('SimData', 'ITkStripSDO_Map')
+    kwargs.setdefault('DepositedEnergyMin', 600) # @TODO revise ? From PRD_MultiTruthBuilder.h; should be 1/10 of threshold
+    kwargs.setdefault('Measurements', 'ITkStripClusters')
+    kwargs.setdefault('AssociationMapOut', 'ITkStripClustersToTruthParticles')
+    
     acc.addEventAlgo( CompFactory.ActsTrk.StripClusterToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
-def TrackToTruthAssociationCfg(flags,
-                               name: str = 'ActsTracksToTruthAssociationAlg',
-                               **kwargs) -> ComponentAccumulator:
+def ActsTrackToTruthAssociationAlgCfg(flags,
+                                      name: str = 'ActsTracksToTruthAssociationAlg',
+                                      **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
+    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkStripSDO_Map') )
+
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+        
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
-def TruthParticleHitCountAlgCfg(flags,
-                                name: str = 'TruthParticleHitCountAlg',
-                                **kwargs) -> ComponentAccumulator:
+def ActsTruthParticleHitCountAlgCfg(flags,
+                                    name: str = 'ActsTruthParticleHitCountAlg',
+                                    **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkStripSDO_Map') )
+
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
     kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
     kwargs.setdefault('NHitsMin',4)
+
+    if 'TrackingGeometryTool' not in kwargs:    
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    
     acc.addEventAlgo( CompFactory.ActsTrk.TruthParticleHitCountAlg(name=name, **kwargs) )
     return acc
 
 
-def ITkTruthAssociationCfg(flags,
-                           **kwargs) -> ComponentAccumulator:
+def ActsTruthAssociationAlgCfg(flags,
+                              **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    if flags.Detector.EnableITkPixel :
-        acc.merge(PixelClusterToTruthAssociationCfg(flags, **extractChildKwargs(prefix="PixelClusterToTruthAssociation.", **kwargs) ))
-    if flags.Detector.EnableITkStrip :
-        acc.merge(StripClusterToTruthAssociationCfg(flags, **extractChildKwargs(prefix="StripClusterToTruthAssociation.", **kwargs) ))
+    
+    if flags.Detector.EnableITkPixel:
+        acc.merge(ActsPixelClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="PixelClusterToTruthAssociationAlg.", **kwargs) ))
+        
+    if flags.Detector.EnableITkStrip:
+        acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="StripClusterToTruthAssociationAlg.", **kwargs) ))
+        
     return acc
-
-
-def TrackFindingValidationAlgCfg(flags,
-                                 name: str = 'ActsTracksValidationAlg',
-                                 **kwargs) -> ComponentAccumulator:
+    
+    
+def ActsTrackFindingValidationAlgCfg(flags,
+                                     name: str = 'ActsTracksValidationAlg',
+                                     **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('TruthParticleHitCounts','TruthParticleHitCounts')
     kwargs.setdefault('TrackToTruthAssociationMap','ActsTracksToTruthParticles')
@@ -99,11 +116,12 @@ def TrackFindingValidationAlgCfg(flags,
     kwargs.setdefault('StatisticPtBins',[1e3,2.5e3,5e3,10e3,100e3])
     kwargs.setdefault('ShowDetailedTables',False)
     kwargs.setdefault('PdgIdCategorisation',False)
+    kwargs.setdefault('StatisticEtaBins',[eta/10. for eta in range(5, 40, 5)])
+    
     if 'TruthSelectionTool' not in kwargs:
         from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
         kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
             InDetRttTruthSelectionToolCfg(flags)))
 
-    kwargs.setdefault('StatisticEtaBins',[eta/10. for eta in range(5, 40, 5)])
     acc.addEventAlgo( CompFactory.ActsTrk.TrackFindingValidationAlg(name=name, **kwargs) )
     return acc

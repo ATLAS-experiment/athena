@@ -179,9 +179,9 @@ def ITkRecPreProcessingSiliconCfg(flags):
             acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
 
         if flags.Tracking.ActiveConfig.doActsCluster or flags.Tracking.ActiveConfig.doAthenaToActsCluster:
-            from ActsConfig.ActsTruthConfig import ITkTruthAssociationCfg, TruthParticleHitCountAlgCfg
-            acc.merge(ITkTruthAssociationCfg(flags))
-            acc.merge(TruthParticleHitCountAlgCfg(flags))
+            from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
+            acc.merge(ActsTruthAssociationAlgCfg(flags))
+            acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
 
 
     return acc

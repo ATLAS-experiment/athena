@@ -168,17 +168,17 @@ def ITkTrackingSiPatternCfg(flags,
             TracksTruth=ResolvedTrackCollectionKey+"TruthCollection"))
 
     if runActsTrackTruth :
-        from ActsConfig.ActsTruthConfig import TrackToTruthAssociationCfg, TrackFindingValidationAlgCfg
+        from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
         acts_tracks=f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
-        acc.merge(TrackToTruthAssociationCfg(flags,
-                                             name=f"{acts_tracks}TrackToTruthAssociationAlg",
-                                             ACTSTracksLocation=acts_tracks,
-                                             AssociationMapOut=acts_tracks+"ToTruthParticleAssociation"))
-
-        acc.merge(TrackFindingValidationAlgCfg(flags,
-                                               name=f"{acts_tracks}TrackFindingValidationAlg",
-                                               TrackToTruthAssociationMap=acts_tracks+"ToTruthParticleAssociation"
-                                               ))
+        acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
+                                                    name=f"{acts_tracks}TrackToTruthAssociationAlg",
+                                                    ACTSTracksLocation=acts_tracks,
+                                                    AssociationMapOut=acts_tracks+"ToTruthParticleAssociation"))
+        
+        acc.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                   name=f"{acts_tracks}TrackFindingValidationAlg",
+                                                   TrackToTruthAssociationMap=acts_tracks+"ToTruthParticleAssociation"
+                                                   ))
 
 
     return acc
