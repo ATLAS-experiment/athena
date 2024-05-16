@@ -1555,7 +1555,18 @@ class athenaExecutor(scriptExecutor):
         self._wrapperFile        = 'runwrapper.{name}.sh'.format(name = self._name)
         self._setupFile          = 'setup.{name}.sh'.format(name = self._name)
 
-        container_cmd = None
+        # Create a setupATLAS script
+        setupATLAS = 'my_setupATLAS.sh'
+        with open(setupATLAS, 'w') as f:
+            print("#!/bin/bash", file=f)
+            print("""
+if [ -z $ATLAS_LOCAL_ROOT_BASE ]; then
+  export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
+fi
+source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
+                  , file=f)
+        os.chmod(setupATLAS, 0o755)
+
         msg.debug(
             'Preparing wrapper file {wrapperFileName} with '
             'asetup={asetupStatus} and dbsetup={dbsetupStatus}'.format(
@@ -1564,43 +1575,27 @@ class athenaExecutor(scriptExecutor):
                 dbsetupStatus   = self._dbsetup
             )
         )
+
+        container_cmd = None
         try:
             with open(self._wrapperFile, 'w') as wrapper:
-                print('#! /bin/sh', file=wrapper)
+                print('#!/bin/sh', file=wrapper)
                 if self._containerSetup is not None:
-                    # Prepare for container run: generate a script launching container
-                    # This is required for running on the grid
-                    setupScript = "my_setupATLAS.sh"
-                    if not os.path.isfile(setupScript):
-                        contSetupFile = open(setupScript, 'w')
-                        contText = """#! /bin/bash
-
-if [ -z $ATLAS_LOCAL_ROOT_BASE ]; then
-  export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-fi
-
-source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
-                        print(contText, file=contSetupFile)
-                        contSetupFile.close()
-                        os.chmod(setupScript, 0o755)
-                    container_cmd = [ os.path.abspath(setupScript),
+                    container_cmd = [ os.path.abspath(setupATLAS),
                                      "-c",
                                      self._containerSetup,
                                      "--pwd",
                                      self._workdir,
                                      "-s",
-                                     self._setupFile,
+                                     os.path.join('.', self._setupFile),
                                      "-r"]
-                    print('echo This wrapper is executed within a container', file=wrapper)
-                    print('echo For a local re-run, please do:', file=wrapper)
-                    container_cmd_local = container_cmd.copy()
-                    container_cmd_local[0] = "setupATLAS"
-                    print('echo '+ " ".join(container_cmd_local) + " " + path.join('.', self._wrapperFile), file=wrapper)
-                    print('echo "(or with --pwd \\`pwd\\`)"', file=wrapper)
+                    print('echo "This wrapper is executed within a container! For a local re-run, do:"', file=wrapper)
+                    print('echo " '+ " ".join(['setupATLAS'] + container_cmd[1:] + [path.join('.', self._wrapperFile)]) + '"', file=wrapper)
                     print('echo "N.B.: if launching a nested container, navigate to /srv before running the above command"',
                           file = wrapper)
-                    print('echo "and use --pwd workdir, where workdir is the transform running directory within /srv"',
+                    print('echo "      and use --pwd workdir, where workdir is the transform running directory within /srv"',
                           file=wrapper)
+                    print('echo', file=wrapper)
 
                 if asetup:
                     wfile = wrapper
@@ -1610,9 +1605,8 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                     if self._containerSetup is not None:
                         asetupFile = open(self._setupFile, 'w')
                         wfile = asetupFile
-                    print('asetup {asetupStatus}'.format(
-                        asetupStatus        = asetup
-                    ), file=wfile)
+                    print(f'source ./{setupATLAS} -q', file=wfile)
+                    print(f'asetup {asetup}', file=wfile)
                     print('if [ ${?} != "0" ]; then exit 255; fi', file=wfile)
                 if dbsetup:
                     dbroot = path.dirname(dbsetup)
@@ -1629,7 +1623,6 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                 if self._disableMP:
                     print("# AthenaMP explicitly disabled for this executor", file=wrapper)
                 if self._envUpdate.len > 0:
-                    print("# Customised environment", file=wrapper)
                     for envSetting in  self._envUpdate.values:
                         if not envSetting.startswith('LD_PRELOAD'):
                             print("export", envSetting, file=wrapper)
