@@ -21,7 +21,7 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES TrigConfBase AthenaBaseComps )
 
    atlas_add_test( trigconf_msg_athena_test
-      SCRIPT athena --CA ${CMAKE_CURRENT_SOURCE_DIR}/test/test_TrigConfMsgAlg.py
+      SCRIPT athena ${CMAKE_CURRENT_SOURCE_DIR}/test/test_TrigConfMsgAlg.py
       LOG_SELECT_PATTERN "TrigConfMsgAlg" )
 
 endif()
