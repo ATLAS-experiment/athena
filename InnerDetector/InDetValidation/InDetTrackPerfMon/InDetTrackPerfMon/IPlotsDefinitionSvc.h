@@ -23,29 +23,28 @@
 
 
 namespace IDTPM {
-
   class SinglePlotDefinition;
+}
 
-  class IPlotsDefinitionSvc :
-      virtual public asg::IAsgService {
 
-  public:
+class IPlotsDefinitionSvc :
+  virtual public asg::IAsgService {
 
-    /// typedef for map definition
-    typedef std::unordered_map< std::string, SinglePlotDefinition > plotsDefMap_t;
+public:
 
-    /// Creates the InterfaceID and interfaceID() method
-    DeclareInterfaceID( IDTPM::IPlotsDefinitionSvc, 1, 0 );
+  /// typedef for map definition
+  typedef std::unordered_map< std::string, IDTPM::SinglePlotDefinition > plotsDefMap_t;
 
-    /// Destructor
-    virtual ~IPlotsDefinitionSvc() = default;
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID( IPlotsDefinitionSvc, 1, 0 );
 
-    /// Get the plot definition
-    virtual const SinglePlotDefinition& definition(
-        const std::string& identifier ) const = 0;
+  /// Destructor
+  virtual ~IPlotsDefinitionSvc() = default;
 
-  }; // class IPlotsDefinitionSvc
+  /// Get the plot definition
+  virtual const IDTPM::SinglePlotDefinition& definition(
+      const std::string& identifier ) const = 0;
 
-} // namespace IDTPM
+}; // class IPlotsDefinitionSvc
 
-#endif // > !INDETTRACKPERFMON_IHISTOGRAMDEFINITIONSVC_H
+#endif // > !INDETTRACKPERFMON_IPLOTSDEFINITIONSVC_H

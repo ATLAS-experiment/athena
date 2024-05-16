@@ -9,6 +9,7 @@
 
 /// local include(s)
 #include "PlotMgr.h"
+#include "InDetTrackPerfMon/IPlotsDefinitionSvc.h"
 
 /// Gaudi include(s)
 #include "GaudiKernel/ISvcLocator.h"
@@ -27,8 +28,7 @@ IDTPM::PlotMgr::PlotMgr(
     PlotMgr* pParent ) :
         PlotBase( pParent, dirName ),
         AthMessaging( "PlotMgr"+anaTag ),
-        m_anaTag( anaTag ),
-        m_plotsDefSvc( nullptr ) { }
+        m_anaTag( anaTag ) { }
 
 
 /// ------------------
@@ -38,13 +38,6 @@ StatusCode IDTPM::PlotMgr::initialize()
 {
   /// intialize PlotBase
   PlotBase::initialize();
-
-  /// load plotDefSvc 
-  if( not m_plotsDefSvc ) {
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    ATH_CHECK( svcLoc->service( "PlotsDefSvc"+m_anaTag, m_plotsDefSvc ) );
-  }
-
   return StatusCode::SUCCESS;
 }
 
@@ -57,11 +50,21 @@ IDTPM::SinglePlotDefinition IDTPM::PlotMgr::retrieveDefinition(
     const std::string& folderOverride, 
     const std::string& nameOverride ) const
 {
-  /// Retrieve copy of SinglePlotDefinition
-  SinglePlotDefinition sDef = m_plotsDefSvc->definition( identifier );
+  /// Loading PlotsDefinitionSvc
+  IPlotsDefinitionSvc* plotsDefSvc;
+  ISvcLocator* svcLoc = Gaudi::svcLocator();
+  StatusCode sc = svcLoc->service( "PlotsDefSvc"+m_anaTag, plotsDefSvc );
+  if( sc.isFailure() ) {
+    ATH_MSG_ERROR( "Could not load PlotsDefSvc"+m_anaTag );
+    SinglePlotDefinition nullDef;
+    return nullDef;
+  }
+
+  /// retrieve a copy of the plot definition
+  SinglePlotDefinition sDef = plotsDefSvc->definition( identifier );
 
   /// Check if definition is empty or non-valid 
-  if( sDef.isEmpty() or !sDef.isValid() )  return sDef;
+  if( sDef.isEmpty() or not sDef.isValid() )  return sDef;
 
   /// Override directory?
   if( not folderOverride.empty() )  sDef.folder( folderOverride );
@@ -87,6 +90,7 @@ StatusCode IDTPM::PlotMgr::book(
   pHisto = Book1D( def.name(), def.titleDigest(),
                    def.nBinsX(), def.xLow(), def.xHigh(),
                    false );
+
   return StatusCode::SUCCESS;
 }
 

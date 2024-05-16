@@ -13,6 +13,57 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
 
+def JsonPlotsDefReadToolCfg( flags, name="JsonPlotsDefReadTool", **kwargs ):
+    '''
+    Tool to read the plots definitions from an input file in JSON format
+    '''
+    log = logging.getLogger( "JsonPlotsDefReadTool" )
+    acc = ComponentAccumulator()
+
+    ## Getting list of strings with plots definitions
+    from InDetTrackPerfMon.ConfigUtils import getPlotsDefList
+    plotsDefList = getPlotsDefList( flags )
+    log.debug( "Loading the following plot definitions:" )
+    for plotDef in plotsDefList : log.debug( "\t-> %s", plotDef )
+
+    kwargs.setdefault( "PlotsDefs", plotsDefList )
+
+    acc.setPrivateTools(
+        CompFactory.IDTPM.JsonPlotsDefReadTool( name, **kwargs ) )
+    return acc
+
+
+def PlotsDefReadToolCfg( flags, name="PlotsDefReadTool", **kwargs ):
+    '''
+    CA-based configuration for the Tool to read the plots definition
+    '''
+    log = logging.getLogger( "PlotsDefReadTool" )
+
+    if flags.PhysVal.IDTPM.plotsDefFormat == "JSON" :
+        return JsonPlotsDefReadToolCfg(
+            flags, name = "JsonPlotsDefReadTool" +
+                flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )
+
+    log.error( "Non supported plots definition file type %s",
+               flags.PhysVal.IDTPM.plotsDefFormat )
+    return None
+
+
+def PlotsDefinitionSvcCfg( flags, name="PlotsDefSvc", **kwargs ):
+    '''
+    CA-based configuration for the PlotsDefinition Service
+    '''
+    acc = ComponentAccumulator()
+
+    if "PlotsDefReadTool" not in kwargs:
+        kwargs.setdefault( "PlotsDefReadTool", acc.popToolsAndMerge(
+            PlotsDefReadToolCfg( flags ) ) )
+
+    acc.addService(
+        CompFactory.PlotsDefinitionSvc( name, **kwargs ) )
+    return acc
+
+
 def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     '''
     CA-based configuration for the TrackAnalysisDefinition Service
@@ -59,9 +110,15 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
 
     kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
 
+    ## TrackAnalysisDefinitionSvc
     acc.merge( TrackAnalysisDefinitionSvcCfg( flags,
                    name="TrkAnaDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) )
 
+    ## PlotsDefinitionSvc
+    acc.merge( PlotsDefinitionSvcCfg( flags,
+                    name="PlotsDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) )
+
+    ## now the sub-tools
     if "TrackQualitySelectionTool" not in kwargs:
         from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
         kwargs.setdefault( "TrackQualitySelectionTool", acc.popToolsAndMerge(

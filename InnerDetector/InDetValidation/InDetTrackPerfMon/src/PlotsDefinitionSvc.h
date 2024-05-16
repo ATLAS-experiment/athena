@@ -22,50 +22,46 @@
 
 /// Local include(s)
 #include "InDetTrackPerfMon/IPlotsDefinitionSvc.h"
-#include "InDetTrackPerfMon/IPlotsDefReadTool.h"
+#include "IPlotsDefReadTool.h"
 #include "SinglePlotDefinition.h"
 
 
-namespace IDTPM {
+class PlotsDefinitionSvc :
+    public asg::AsgService,
+    virtual public IPlotsDefinitionSvc {
 
-  class PlotsDefinitionSvc :
-      public asg::AsgService,
-      virtual public IPlotsDefinitionSvc {
+public:
 
-  public:
+  /// Constructor
+  PlotsDefinitionSvc( const std::string& name, ISvcLocator* pSvcLocator );
 
-    /// Constructor
-    PlotsDefinitionSvc( const std::string& name, ISvcLocator* pSvcLocator );
+  /// Destructor
+  virtual ~PlotsDefinitionSvc() = default;
 
-    /// Destructor
-    virtual ~PlotsDefinitionSvc() = default;
+  /// initialize
+  virtual StatusCode initialize() override;
 
-    /// initialize
-    virtual StatusCode initialize() override;
+  /// finalize
+  virtual StatusCode finalize() override;
 
-    /// finalize
-    virtual StatusCode finalize() override;
+  /// Get the plot definition
+  virtual const IDTPM::SinglePlotDefinition& definition(
+      const std::string& identifier ) const override;
 
-    /// Get the plot definition
-    virtual const SinglePlotDefinition& definition(
-        const std::string& identifier ) const override;
-
-    /// Update the map with a new entry
-    StatusCode update( const SinglePlotDefinition& def );
+  /// Update the map with a new entry
+  StatusCode update( const IDTPM::SinglePlotDefinition& def );
  
-  private:
+private:
 
-    plotsDefMap_t m_plotsDefMap;
+  plotsDefMap_t m_plotsDefMap;
 
-    SinglePlotDefinition m_nullDef;
+  IDTPM::SinglePlotDefinition m_nullDef;
 
-    ToolHandle< IPlotsDefReadTool > m_plotsDefReadTool {
-        this, "PlotsDefReadTool", "IDTPM::InDetTrackPerfMon/IPlotsDefReadTool", "Tool to read plots definitions from parsed list of strings" };
+  ToolHandle< IDTPM::IPlotsDefReadTool > m_plotsDefReadTool {
+      this, "PlotsDefReadTool", "IDTPM::InDetTrackPerfMon/IPlotsDefReadTool", "Tool to read plots definitions from parsed list of strings" };
 
-    std::string m_anaTag;
+  std::string m_anaTag;
   
-  }; // class PlotsDefinitionSvc
-
-} // namespace IDTPM
+}; // class PlotsDefinitionSvc
 
 #endif // > !INDETTRACKPERFMON_PLOTSDEFINITIONSVC_H

@@ -20,8 +20,6 @@
 /// Athena includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
-/// TODO - To be included in later MRs
-//#include "AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h"
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
@@ -29,8 +27,7 @@
 #include "RoiSelectionTool.h"
 #include "InDetTrackPerfMon/ITrackSelectionTool.h"
 #include "ITrackMatchingTool.h"
-/// TODO - To be included in later MRs
-//#include "TrackAnalysisPlotsMgr.h"
+#include "TrackAnalysisPlotsMgr.h"
 
 /// STL includes
 #include <string>
@@ -72,24 +69,9 @@ private :
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleName {
         this, "TruthParticleContainerName",  "TruthParticles", "Name of container of TruthParticles" };
 
-    /// Offline Primary vertex container's name
-    //SG::ReadHandleKey<xAOD::VertexContainer> m_offlineVertexContainerName {
-    //    this, "VertexContainerName", "PrimaryVertices", "offline vertices" };
-
-    /// Truth vertex container's name
-    //SG::ReadHandleKey<xAOD::TruthVertexContainer> m_truthVertexContainerName {
-    //    this, "TruthVertexContainerName",  "TruthVertices", "truth vertices" };
-
     /// EventInfo container name
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoContainerName {
         this, "EventInfoContainerName", "EventInfo", "event info" };
-
-    /// TODO - To be included in later MRs
-    //SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventName {
-    //    this, "TruthEvents", "TruthEvents", "Name of the truth events container probably either TruthEvent or TruthEvents" };
-
-    //SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileUpEventName {
-    //    this, "TruthPileupEvents", "TruthPileupEvents", "Name of the truth pileup events container probably TruthPileupEvent(s)" };
 
     PublicToolHandle< Trig::TrigDecisionTool > m_trigDecTool {
         this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "" };
@@ -113,9 +95,8 @@ private :
     /// TrackAnalysisDefinitionSvc
     ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
 
-    /// TODO - To be included in later MRs
     /// plots
-    //std::vector< std::unique_ptr< IDTPM::TrackAnalysisPlotsMgr > >  m_trkAnaPlotsMgrVec;
+    std::vector< std::unique_ptr< IDTPM::TrackAnalysisPlotsMgr > >  m_trkAnaPlotsMgrVec;
 };
 
 #endif

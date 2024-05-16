@@ -74,6 +74,23 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   ATH_CHECK( m_truthParticleName.initialize( 
       m_trkAnaDefSvc->useTruth() and not m_truthParticleName.key().empty() ) );
 
+  /// Retrieving list of configured chains
+  const std::vector< std::string >& configuredChains = m_trkAnaDefSvc->configuredChains();
+  m_trkAnaPlotsMgrVec.reserve( configuredChains.size() );
+
+  /// booking analyses
+  for( const std::string& thisChain : configuredChains ) {
+    ATH_MSG_DEBUG( "Booking TrkAnalysis/histograms for chain : " << thisChain );
+
+    /// Instantiating a different TrkAnalysis object (with corresponding histograms) 
+    /// for every configured chain
+    m_trkAnaPlotsMgrVec.emplace_back(
+        std::make_unique< IDTPM::TrackAnalysisPlotsMgr >(
+            m_trkAnaDefSvc->plotsFullDir( thisChain ),
+            m_anaTag.value(),
+            thisChain ) );
+  } // close m_configuredChains loop 
+
   return StatusCode::SUCCESS;
 }
 
@@ -85,6 +102,26 @@ StatusCode InDetTrackPerfMonTool::bookHistograms()
 {
   ATH_MSG_INFO( "Booking plots" );
 
+  for( size_t iAna=0 ; iAna < m_trkAnaPlotsMgrVec.size() ; iAna++ ) {
+
+    /// initialising/booking histograms
+    ATH_CHECK( m_trkAnaPlotsMgrVec[iAna]->initialize() );
+
+    /// Register booked histogram to corresponding monitoring group
+    /// Register "plain" histograms (including TH1/2/3 and TProfiles)
+    std::vector< HistData > hists = m_trkAnaPlotsMgrVec[iAna]->retrieveBookedHistograms();
+    for ( size_t ih=0 ; ih<hists.size() ; ih++ ) {
+      ATH_CHECK( regHist( hists[ih].first, hists[ih].second, all ) );
+    }
+
+    // do the same for Efficiencies, but there's a twist:
+    std::vector< EfficiencyData > effs = m_trkAnaPlotsMgrVec[iAna]->retrieveBookedEfficiencies();
+    for ( size_t ie=0 ; ie<effs.size() ; ie++ ) {
+      ATH_CHECK( regEfficiency( effs[ie].first, MonGroup( this, effs[ie].second, all ) ) );
+    }
+
+  } // closing loop over TrkAnalyses
+  
   return StatusCode::SUCCESS;
 }
 
@@ -106,7 +143,6 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// filling TrackAnalysisCollections
   ATH_CHECK( loadCollections( thisTrkAnaCollections ) );
 
-  /// some debug printouts
   ATH_MSG_DEBUG( "Processing event = " << pie->eventNumber() <<
                  "\n==========================================" );
   ATH_MSG_DEBUG( "ALL Track Info: " << thisTrkAnaCollections.printInfo() );
@@ -134,7 +170,9 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// -------------------------------------------
   /// one TrkAnalysis per configured chain (trigger only)
   /// only one dummy chain (named "Offline") for offline analysis
-  for( const std::string& thisChain : m_trkAnaDefSvc->configuredChains() ) {
+  for( size_t iAna=0 ; iAna < m_trkAnaPlotsMgrVec.size() ; iAna++ ) {
+
+    const std::string& thisChain = m_trkAnaPlotsMgrVec[iAna]->chain();
     ATH_MSG_DEBUG( "Processing chain = " << thisChain );
 
     /// ----------------------------------
@@ -212,6 +250,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// --------------------------
       /// --- Filling histograms ---
       /// --------------------------
+      ATH_CHECK( m_trkAnaPlotsMgrVec[iAna]->fill( thisTrkAnaCollections ) );
 
     } // close selectedRois loop
 
@@ -227,6 +266,12 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 StatusCode InDetTrackPerfMonTool::procHistograms() {
 
   ATH_MSG_INFO( "Finalizing plots" );
+
+  if( endOfRunFlag() ) {
+    for( size_t iAna=0 ; iAna < m_trkAnaPlotsMgrVec.size() ; iAna++ ) {
+      m_trkAnaPlotsMgrVec[iAna]->finalize();
+    }
+  }
 
   ATH_MSG_INFO( "Successfully finalized hists" );
 

@@ -26,7 +26,7 @@
         "MatchingType"    : "DeltaRMatch",
         "dRmax"           : 0.05,
         "pTResMax"        : -9.9,
-        "doEfficiencies" : false
+        "plotEfficiencies" : false
     },
     "TrkAnaTrigEle" : {
         "enabled" : true,
@@ -39,7 +39,7 @@
         "pTResMax"        : -9.9,
         "SelectOfflineObject" : "Electron", 
         "ObjectQuality"       : "Tight",
-        "doOfflineElectrons" : true
+        "plotOfflineElectrons" : true
     },
     "TrkAnaOffl1" : {
         "enabled" : true,

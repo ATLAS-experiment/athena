@@ -21,7 +21,6 @@
 #include "AthenaBaseComps/AthMessaging.h"
 
 /// local include(s)
-#include "InDetTrackPerfMon/IPlotsDefinitionSvc.h"
 #include "SinglePlotDefinition.h"
 
 /// STL include(s)
@@ -61,13 +60,13 @@ namespace IDTPM {
     /// @param nameOverride: Allows to override the histo name 
     /// @param folderOverride: Allows to override the folder of the histo
     template < class P >
-    StatusCode book(
+    StatusCode retrieveAndBook(
         P*& pHisto,
         const std::string& identifier,
         const std::string& folderOverride = "",
-        const std::string& nameOverride = "" ) const
+        const std::string& nameOverride = "" )
     {
-      SinglePlotDefinition def =
+      const SinglePlotDefinition& def =
           retrieveDefinition( identifier, folderOverride, nameOverride );
       if( def.isEmpty() or not def.isValid() ) {
         ATH_MSG_WARNING( "Trying to book empty or non-valid plot : " << identifier );
@@ -131,10 +130,6 @@ namespace IDTPM {
   protected:
 
     std::string m_anaTag;
-
-  private:
-
-    IPlotsDefinitionSvc* m_plotsDefSvc;
 
   }; // class PlotMgr
 
