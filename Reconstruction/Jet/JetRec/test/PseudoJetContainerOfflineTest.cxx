@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRec/IParticleExtractor.h"
@@ -82,8 +82,8 @@ protected:
   std::unique_ptr<const IParticleExtractor> m_pExtractor_noghost{};
   std::unique_ptr<const IParticleExtractor> m_pExtractor_ghost{};
 
-  Jet* m_testjet0;
-  Jet* m_testjet1;
+  Jet* m_testjet0 = nullptr;
+  Jet* m_testjet1 = nullptr;
 };
 
 
