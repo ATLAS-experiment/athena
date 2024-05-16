@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataCommon/versions/CLinksAuxContainer_v1.h
@@ -36,8 +36,8 @@ public:
 
 
 private:
-  std::vector<ElementLink<CVec> > link;
-  std::vector<std::vector<ElementLink<CVec> > > links;
+  AUXVAR_DECL (ElementLink<CVec>, link);
+  AUXVAR_DECL (std::vector<ElementLink<CVec> >, links);
 };
 
 
