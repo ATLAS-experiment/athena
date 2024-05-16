@@ -96,8 +96,6 @@ namespace ISF {
         simulation) - TODO only a dummy implementation currently */
     virtual HepMC::GenParticlePtr     updateChildParticle(unsigned short index,
                                                           HepMC::GenParticlePtr existingChild) const override final;
-    /** Set the the barcode of all child particles to the given bc */
-    void                      setAllChildrenBarcodes(int bc) override final;
   private:
     ISFTruthIncident();
 

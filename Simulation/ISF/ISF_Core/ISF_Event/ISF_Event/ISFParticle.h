@@ -157,8 +157,6 @@ namespace ISF {
     int barcode() const; // FIXME barcode-based
     /** set a new barcode */
     void setBarcode(int bc); // FIXME barcode-based
-    /** set a new barcode and update the HepMcParticleLink  */
-    void setBarcodeAndUpdateHepMcParticleLink(int bc); // FIXME barcode-based TODO Update this method to use the unique ID rather than the barcode.
 
     /** unique ID */
     int id() const;

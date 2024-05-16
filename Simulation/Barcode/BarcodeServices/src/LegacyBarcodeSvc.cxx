@@ -172,17 +172,6 @@ int Barcode::LegacyBarcodeSvc::newGeneratedParticle(int)
 }
 
 
-/** Generate a common barcode which will be shared by all children
-    of the given parent barcode (used for child particles which are
-    not stored in the mc truth event) */
-int Barcode::LegacyBarcodeSvc::sharedChildBarcode( int /* parentBC */,
-                                                                        int /* process */)
-{
-  // concept of shared barcodes not present in MC12 yet
-  return HepMC::UNDEFINED_ID;
-}
-
-
 void Barcode::LegacyBarcodeSvc::registerLargestGeneratedParticleBC( int bc ) {
     ATH_MSG_DEBUG( "registering largest generated particle barcode" );
     BarcodeInfo& barcodeInfo = getBarcodeInfo();

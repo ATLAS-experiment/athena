@@ -164,19 +164,6 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::updateChildParticle(unsigned short 
   return existingChild;
 }
 
-void ISF::ISFTruthIncident::setAllChildrenBarcodes(int bc) {
-  unsigned short numSec = numberOfChildren();
-  for (unsigned short i=0; i<numSec; i++) {
-    // the current particle
-    ISF::ISFParticle *p = m_children[i];
-
-    // set a new barcode and update the ISFParticle's HMPL
-    p->setBarcodeAndUpdateHepMcParticleLink(bc);
-  }
-
-  return;
-}
-
 
 /** return attached truth particle */
 HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFParticle& particle ) const {

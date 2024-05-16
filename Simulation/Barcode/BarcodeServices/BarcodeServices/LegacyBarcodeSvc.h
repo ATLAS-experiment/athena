@@ -59,12 +59,6 @@ namespace Barcode {
     /** Generate a new unique vertex barcode below the simulation offset */
     virtual int newGeneratedVertex() override;
 
-    /** Generate a common barcode which will be shared by all children
-        of the given parent barcode (used for child particles which are
-        not stored in the mc truth event) */
-    virtual int sharedChildBarcode( int parentBC,
-                                                int process=0 ) override;
-
     /** Inform the BarcodeSvc about the largest particle and vertex Barcodes
         in the event input */
     virtual void registerLargestGeneratedParticleBC( int bc) override;

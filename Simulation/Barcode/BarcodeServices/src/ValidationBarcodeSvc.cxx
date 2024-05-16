@@ -118,16 +118,6 @@ int Barcode::ValidationBarcodeSvc::newGeneratedVertex()
 }
 
 
-/** Generate a common barcode which will be shared by all children
-    of the given parent barcode (used for child particles which are
-    not stored in the mc truth event) */
-int Barcode::ValidationBarcodeSvc::sharedChildBarcode( int parentBC,
-                                                                            int /* process */)
-{
-  return parentBC+m_barcodeGenerationOffset;
-}
-
-
 /** Return the secondary particle offset */
 int Barcode::ValidationBarcodeSvc::secondaryParticleBcOffset() const
 {

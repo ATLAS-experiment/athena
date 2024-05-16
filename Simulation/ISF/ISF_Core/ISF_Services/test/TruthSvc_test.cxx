@@ -127,8 +127,6 @@ namespace ISFTesting {
         simulation). */
     virtual HepMC::GenParticlePtr        updateChildParticle(unsigned short,
                                                           HepMC::GenParticlePtr ) const override {return nullptr;};
-    /** Set the the barcode of all child particles to the given bc */
-    virtual void                      setAllChildrenBarcodes(int) override {};
   private:
     const HepMC::FourVector m_myPosition{0.0, 40.0, 0.0, 40.0};
   };
@@ -408,13 +406,6 @@ namespace ISFTesting {
     anEvent->set_beam_particles(inParticle1,inParticle2);
 
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
-    EXPECT_CALL(ti, physicsProcessCode())
-      .Times(1)
-      .WillOnce(::testing::Return(21));
-    EXPECT_CALL(ti, parentBarcode())
-      .Times(1)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
-
     registerTruthIncident(ti);
     HepMC::GenVertexPtr  generated = HepMC::barcode_to_vertex(anEvent.get(),-200001); //Find a nicer way to get this.
     HepMC::GenVertexPtr  expectedVtx(nullptr);
@@ -456,12 +447,10 @@ namespace ISFTesting {
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
     HepMC::FourVector vtxPosition(0.0, 40.0, 0.0, 40.0);
     EXPECT_CALL(ti, physicsProcessCode())
-      .Times(2)
-      .WillOnce(::testing::Return(21))
+      .Times(1)
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(2)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(1)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
       .Times(1)
@@ -532,12 +521,10 @@ namespace ISFTesting {
     MockTruthIncident ti(AtlasDetDescr::fAtlasID, 2);
     HepMC::FourVector vtxPosition(0.0, 40.0, 0.0, 40.0);
     EXPECT_CALL(ti, physicsProcessCode())
-      .Times(2)
-      .WillOnce(::testing::Return(21))
+      .Times(1)
       .WillOnce(::testing::Return(21));
     EXPECT_CALL(ti, parentBarcode())
-      .Times(2)
-      .WillOnce(::testing::Return(HepMC::barcode(inParticle3)))
+      .Times(1)
       .WillOnce(::testing::Return(HepMC::barcode(inParticle3)));
     EXPECT_CALL(ti, parentParticle())
       .Times(1)

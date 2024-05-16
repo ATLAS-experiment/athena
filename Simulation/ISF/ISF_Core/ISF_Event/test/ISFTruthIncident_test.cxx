@@ -330,17 +330,6 @@ namespace MCTesting {
 
   }
 
-  TEST_F(ISFTruthIncident_test, testSetAllChildrenBarcodes) {
-
-    int newBarcode = 42;
-    unsigned short numSec = m_truthIncident->numberOfChildren();
-    m_truthIncident->setAllChildrenBarcodes(newBarcode);
-    for (unsigned short index=0; index<numSec; index++) {
-      ASSERT_EQ(m_truthIncident->childBarcode(index), newBarcode);
-    }
-
-  }
-
 } // <-- namespace MCTesting
 
 

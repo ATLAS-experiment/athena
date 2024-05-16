@@ -86,8 +86,6 @@ namespace iGeant4 {
       int                       childPdgCode(unsigned short index) const override final;
       /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
       int  childBarcode(unsigned short index) const override final; // TODO Remove - only used in one place in TruthSvc
-      /** Set the the barcode of all child particles to the given bc */
-      void                      setAllChildrenBarcodes(int bc) override final;
 
       /**  The interaction classifications are described as follows:
            STD_VTX: interaction of a particle without a pre-defined decay;
