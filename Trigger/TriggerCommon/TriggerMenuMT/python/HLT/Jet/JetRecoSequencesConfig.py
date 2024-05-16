@@ -14,6 +14,7 @@ from .JetRecoCommon import (
     getCalibMods,
     getDecorList,
     getHLTPrefix,
+    getClustersKey,
     isPFlow,
     doTracking,
     doFSTracking,
@@ -27,6 +28,7 @@ from AthenaCommon.CFElements import parOR
 from ..CommonSequences.FullScanDefs import fs_cells
 from ..Bjet.BjetFlavourTaggingConfig import fastFlavourTaggingCfg
 from .JetTrackingConfig import JetRoITrackingCfg
+from .JetHIConfig import HeavyIonJetRecoDataDeps
 
 from JetRecConfig import JetRecConfig
 from JetRecConfig import JetInputConfig
@@ -36,8 +38,6 @@ from JetRecTools import OnlineMon
 from JetRec import JetOnlineMon
 
 from EventShapeTools.EventDensityConfig import getEventShapeName
-
-from TrigEDMConfig.TriggerEDM import recordable
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
@@ -53,36 +53,45 @@ def formatFilteredJetsName(jetsIn, jetPtMinGeV):
 # Data dependency generation for the stages of jet reconstruction
 # This is used to precompute the collections that will be generated,
 # which can be passed as needed out to other steps
-def JetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+def JetRecoDataDeps(flags, **jetRecoDict):
+
     jetalg, jetradius, extra = interpretRecoAlg(jetRecoDict["recoAlg"])
 
-    if extra == "r":
+    if jetRecoDict['ionopt']=='ion':
+        jetDefDict = HeavyIonJetRecoDataDeps(
+            flags, **jetRecoDict
+        )
+    elif extra == "r":
         jetDefDict = ReclusteredJetRecoDataDeps(
-            flags, clustersKey, **jetRecoDict
+            flags, **jetRecoDict
         )
         jetDefDict['final'] = jetDefDict['reclustered']
     elif extra in ["t", "sd"]:
         jetDefDict = GroomedJetRecoDataDeps(
-            flags, clustersKey, **jetRecoDict
+            flags, **jetRecoDict
         )
         jetDefDict['final'] = jetDefDict['groomed']
     else:
         jetDefDict = StandardJetRecoDataDeps(
-            flags, clustersKey, **jetRecoDict
+            flags, **jetRecoDict
         )
         jetDefDict['final'] = jetDefDict['calib']
 
     # Consistency check that we generated what we intended to generate
-    assert jetRecoDict['jetDefStr'] == jetDefToString(jetDefDict['final'][1])
+    gen_jetDefStr = jetDefToString(jetDefDict['final'][1])
+    assert jetRecoDict['jetDefStr'] == gen_jetDefStr, (
+        f"Expected jetDefStr {jetRecoDict['jetDefStr']} from reco dict, generated {gen_jetDefStr}"
+    )
 
     return jetDefDict
 
 
-def StandardJetBuildDataDeps(flags, clustersKey, **jetRecoDict):
+def StandardJetBuildDataDeps(flags, **jetRecoDict):
     """Jet clustering step -- generally only called through StandardJetRecoDataDeps"""
     use_FS_tracking = doFSTracking(jetRecoDict)
     trkopt = jetRecoDict['trkopt']
-    
+    clustersKey = getClustersKey(jetRecoDict)
+
     is_pflow = isPFlow(jetRecoDict)
     if is_pflow:
         jetDef = defineJets(
@@ -119,19 +128,19 @@ def StandardJetBuildDataDeps(flags, clustersKey, **jetRecoDict):
         pj_name = f"{pj_name}MergedWithGhostTracks"
     jetDef._internalAtt["finalPJContainer"] = pj_name
 
-    jetsOut = recordable(jetDef.fullname())
+    jetsOut = jetDef.fullname()
     jetDef = solveDependencies(jetDef,flags)
     jetDef.lock()
 
     return {'build': (jetsOut, jetDef)}
 
 
-def StandardJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+def StandardJetRecoDataDeps(flags, **jetRecoDict):
     """Jet clustering + calibration (via shallow copy)"""
     if jetRecoDict["jetCalib"] == "nojcalib":
         # If we don't calibrate, we need to return the clustered jets with filter
         jetDefDict = StandardJetBuildDataDeps(
-            flags, clustersKey, **jetRecoDict
+            flags, **jetRecoDict
         )
         jetsNoCalib, jetDef = jetDefDict['build']
         jetDef.lock()
@@ -146,7 +155,7 @@ def StandardJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
             jetCalib="nojcalib"
         )
         jetDefDict = StandardJetBuildDataDeps(
-            flags, clustersKey, **jrdNoJCalib
+            flags, **jrdNoJCalib
         )
         jetsNoCalib, jetDefNoCalib = jetDefDict['build']
         jetsViewNoCalib = formatFilteredJetsName(jetsNoCalib, jetPtMinGeV=JET_DEFAULT_VIEW_PT_MIN_GEV)
@@ -180,7 +189,7 @@ def StandardJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
         jetDefDict.update({'nojcalib':(jetsViewNoCalib, jetDefNoCalib), 'calib':(jetsOut, jetDef)})
         return jetDefDict
 
-def ReclusteredJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+def ReclusteredJetRecoDataDeps(flags, **jetRecoDict):
     basicJetRecoDict = cloneAndUpdateJetRecoDict(
         jetRecoDict,
         # Standard size for reclustered inputs
@@ -188,7 +197,7 @@ def ReclusteredJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
     )
 
     jetDefDict = StandardJetRecoDataDeps(
-        flags, clustersKey, **basicJetRecoDict
+        flags, **basicJetRecoDict
     )
     basicJetsName, basicJetDef = jetDefDict['calib']
 
@@ -208,12 +217,12 @@ def ReclusteredJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
     rcJetDef._internalAtt["finalPJContainer"] = rcConstitPJKey
     rcJetDef.lock()
 
-    rcJetsOut = recordable(rcJetDef.fullname())
+    rcJetsOut = rcJetDef.fullname()
     jetDefDict['reclustered'] = (rcJetsOut, rcJetDef)
     return jetDefDict
 
 
-def GroomedJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
+def GroomedJetRecoDataDeps(flags, **jetRecoDict):
     ungroomedJRD = cloneAndUpdateJetRecoDict(
         jetRecoDict,
         # Drop grooming spec
@@ -222,15 +231,11 @@ def GroomedJetRecoDataDeps(flags, clustersKey, **jetRecoDict):
         jetCalib = "nojcalib",
     )
 
-    jetDefDict = StandardJetBuildDataDeps(
-        flags,
-        clustersKey,
-        **ungroomedJRD,
-    )
+    jetDefDict = StandardJetBuildDataDeps(flags, **ungroomedJRD)
     ungroomedJetsName, ungroomedDef = jetDefDict['build']
 
     groomDef = defineGroomedJets(jetRecoDict, ungroomedDef)
-    groomedJetsName = recordable(groomDef.fullname())
+    groomedJetsName = groomDef.fullname()
     groomDef.modifiers = getCalibMods(flags,jetRecoDict)
     groomDef.modifiers += [
         "Sort",

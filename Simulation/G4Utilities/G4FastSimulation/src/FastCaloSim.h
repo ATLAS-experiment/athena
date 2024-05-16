@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4FASTSIMULATION_FASTCALOSIM_H
@@ -7,14 +7,16 @@
 
 // Service handle to define smart pointer to FastCaloSim parametrisation service
 #include "GaudiKernel/ServiceHandle.h"
-// Tool handle to define smart pointer to FastCaloSim extrapolation tool
-#include "GaudiKernel/ToolHandle.h"
 // Geant4 fast simulation base class
 #include "G4VFastSimulationModel.hh"
 // FastCaloSim parametrisation service interface
 #include "ISF_FastCaloSimInterfaces/IFastCaloSimParamSvc.h"
 // FastCaloSim extrapolation tool interface
 #include "ISF_FastCaloSimParametrization/IFastCaloSimCaloExtrapolation.h"
+// FastCaloSim ATLAS transportation tool interface
+#include "ISF_FastCaloSimParametrization/IFastCaloSimCaloTransportation.h"
+// Geant4 transportation tool interface
+#include "G4AtlasInterfaces/IG4CaloTransportTool.h"
 // Random generator service interface
 #include "AthenaKernel/IAthRNGSvc.h"
 // FastCaloSim tool
@@ -22,6 +24,8 @@
 
 
 class CaloCellContainerSD;
+class G4FieldTrack;
+class G4SafetyHelper;
 
 class FastCaloSim: public G4VFastSimulationModel
 {
@@ -30,15 +34,19 @@ class FastCaloSim: public G4VFastSimulationModel
   FastCaloSim(const std::string& name, 
               const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
               const Gaudi::Property<std::string>& randomEngineName,
+              const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
               const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
+              const PublicToolHandle<IG4CaloTransportTool>& G4CaloTransportTool,
               const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
               const Gaudi::Property<std::string>& CaloCellContainerSDName,
+              const Gaudi::Property<bool>& doG4Transport,
               FastCaloSimTool * FastCaloSimTool);
   ~FastCaloSim() {}
 
   G4bool IsApplicable(const G4ParticleDefinition&) override final;
   void DoIt(const G4FastTrack&, G4FastStep&) override final;
   void StartOfAthenaEvent(const EventContext& ctx);
+  void EndOfAthenaEvent(const EventContext& ctx);
 
   /** Determines the applicability of the fast sim model to this particular track.
   Checks that geometric location, energy, and particle type are within bounds.  Also checks for
@@ -57,12 +65,22 @@ class FastCaloSim: public G4VFastSimulationModel
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc;
   Gaudi::Property<std::string> m_randomEngineName;
   ATHRNG::RNGWrapper* m_rngWrapper{};
+
+  // FastCaloSimCaloTransportation tool to transport particles through the detector with the ATLAS tracking tools 
+  PublicToolHandle<IFastCaloSimCaloTransportation> m_FastCaloSimCaloTransportation;
   // FastCaloSimCaloExtrapolation tool to extrapolate particle shower positions to layers
   PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation;
+  // Geant4 transportation tool
+  PublicToolHandle<IG4CaloTransportTool> m_G4CaloTransportTool;
+
+
   // Main FastCaloSim service
   ServiceHandle<ISF::IFastCaloSimParamSvc> m_FastCaloSimSvc;
   // Name of associated CaloCellContainer sensitive detector
   Gaudi::Property<std::string> m_CaloCellContainerSDName;
+  // Boolean flag to enable Geant4 transportation
+  Gaudi::Property<bool> m_doG4Transport;
+
   // Fast simulation FastCaloSimTool 
   FastCaloSimTool * m_FastCaloSimTool;
 };

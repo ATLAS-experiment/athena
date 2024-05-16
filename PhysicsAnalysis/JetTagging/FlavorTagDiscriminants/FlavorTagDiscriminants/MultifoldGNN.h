@@ -24,6 +24,8 @@ namespace FlavorTagDiscriminants {
     MultifoldGNN(const std::vector<std::string>& folds,
                  const std::string& fold_hash_name,
                  const GNNOptions& opts);
+    MultifoldGNN(const std::vector<std::shared_ptr<const GNN>>& folds,
+                 const std::string& fold_hash_name);
     MultifoldGNN(MultifoldGNN&&);
     MultifoldGNN(const MultifoldGNN&);
     ~MultifoldGNN();
@@ -36,7 +38,7 @@ namespace FlavorTagDiscriminants {
     std::set<std::string> getConstituentAuxInputKeys() const;
   private:
     const GNN& getFold(const SG::AuxElement& element) const;
-    std::vector<std::shared_ptr<GNN>> m_folds;
+    std::vector<std::shared_ptr<const GNN>> m_folds;
     SG::AuxElement::ConstAccessor<uint32_t> m_fold_hash;
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
   };

@@ -247,180 +247,183 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  auto nJet = Monitored::Scalar<int>(nJetH,0.0);
 	  nJet = onlinejets.size();
 	  fill("TrigBjetMonitor",nJet);
-	  
-	  float muonPt1(0.), muonEta1(0.), muonPhi1(0.), muonZ1(0.), jetPt1(0.), jetEta1(0.), jetPhi1(0.), jetZ1(0.), muonZ(0.);
-	  double GN1_mv(0.), GN2_mv(0.);
-	  bool theLLR(false), theLLR_GN1(false), theLLR_GN2(false);
-	  bool plotDeltaZ(false);
-	  
-	  for(const auto& muonLinkInfo : onlinemuons) {
-	    const xAOD::Muon* muon = *(muonLinkInfo.link);
-	    // muonPt
-	    std::string NameH = "muonPt_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto muonPt = Monitored::Scalar<float>(NameH,0.0);
-	    muonPt = (muon->pt())*1.e-3;
-	    ATH_MSG_DEBUG("        muonPt: " << muonPt);
-	    fill("TrigBjetMonitor",muonPt);
-	    // muonEta
-	    NameH = "muonEta_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto muonEta = Monitored::Scalar<float>(NameH,0.0);
-	    muonEta = muon->eta();
-	    ATH_MSG_DEBUG("        muonEta: " << muonEta);
-	    fill("TrigBjetMonitor",muonEta);
-	    // muonPhi
-	    NameH = "muonPhi_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto muonPhi = Monitored::Scalar<float>(NameH,0.0);
-	    muonPhi = muon->phi();
-	    ATH_MSG_DEBUG("        muonPhi : " << muonPhi);
-	    // muonZ
-	    auto link = muon->combinedTrackParticleLink();    // TM and DG 18/06/22
-	    if (link.isValid()) {
-	      plotDeltaZ = true;
-	      const xAOD::TrackParticle* track = *link;
-	      muonZ = track->z0() + track->vz(); 
-	    } else {
-	      plotDeltaZ = false;
-	      muonZ = 0.;
-	    }
+
+	  if (nMuon*nJet > 0) {
 	    
-	    if (imuon == 0) {
-	      //store the parameter for the 1st muon
-	      muonPt1 = muonPt;
-	      muonEta1 = muonEta;
-	      muonPhi1 = muonPhi;
-	      muonZ1 = muonZ;
-	    }// if imuon==0
-	    
-	    // The associated jet loop 
-	    for(const auto& jetLinkInfo : onlinejets) {
-	      const xAOD::Jet* jet = *(jetLinkInfo.link);
-	      // jetPt
-	      NameH = "jetPt_"+trigName;
+	    float muonPt1(0.), muonEta1(0.), muonPhi1(0.), muonZ1(0.), jetPt1(0.), jetEta1(0.), jetPhi1(0.), jetZ1(0.), muonZ(0.);
+	    double GN1_mv(0.), GN2_mv(0.);
+	    bool theLLR(false), theLLR_GN1(false), theLLR_GN2(false);
+	    bool plotDeltaZ(false);
+	  
+	    for(const auto& muonLinkInfo : onlinemuons) {
+	      const xAOD::Muon* muon = *(muonLinkInfo.link);
+	      // muonPt
+	      std::string NameH = "muonPt_"+trigName;
 	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto jetPt = Monitored::Scalar<float>(NameH,0.0);
-	      jetPt = (jet->pt())*1.e-3;
-	      ATH_MSG_DEBUG("        jetPt: " << jetPt);
-	      fill("TrigBjetMonitor",jetPt);
-	      // jetEta
-	      NameH = "jetEta_"+trigName;
+	      auto muonPt = Monitored::Scalar<float>(NameH,0.0);
+	      muonPt = (muon->pt())*1.e-3;
+	      ATH_MSG_DEBUG("        muonPt: " << muonPt);
+	      fill("TrigBjetMonitor",muonPt);
+	      // muonEta
+	      NameH = "muonEta_"+trigName;
 	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto jetEta = Monitored::Scalar<float>(NameH,0.0);
-	      jetEta = jet->eta();
-	      ATH_MSG_DEBUG("        jetEta : " << jetEta);
-	      fill("TrigBjetMonitor",jetEta);
-	      // jetPhi
-	      NameH = "jetPhi_"+trigName;
+	      auto muonEta = Monitored::Scalar<float>(NameH,0.0);
+	      muonEta = muon->eta();
+	      ATH_MSG_DEBUG("        muonEta: " << muonEta);
+	      fill("TrigBjetMonitor",muonEta);
+	      // muonPhi
+	      NameH = "muonPhi_"+trigName;
 	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto jetPhi = Monitored::Scalar<float>(NameH,0.0);
-	      jetPhi = jet->phi();
-	      ATH_MSG_DEBUG("        jetPhi : " << jetPhi);
+	      auto muonPhi = Monitored::Scalar<float>(NameH,0.0);
+	      muonPhi = muon->phi();
+	      ATH_MSG_DEBUG("        muonPhi : " << muonPhi);
+	      // muonZ
+	      auto link = muon->combinedTrackParticleLink();    // TM and DG 18/06/22
+	      if (link.isValid()) {
+		plotDeltaZ = true;
+		const xAOD::TrackParticle* track = *link;
+		muonZ = track->z0() + track->vz(); 
+	      } else {
+		plotDeltaZ = false;
+		muonZ = 0.;
+	      }
 	      
-	      // Take the b-tagging info from the first jet
-	      if (ijet == 0) {
-		//store the parameter for the 1st jet
-		jetPt1 = jetPt;
-		jetEta1 = jetEta;
-		jetPhi1 = jetPhi;
-		jetZ1 = zPrmVtx;
+	      if (imuon == 0) {
+		//store the parameter for the 1st muon
+		muonPt1 = muonPt;
+		muonEta1 = muonEta;
+		muonPhi1 = muonPhi;
+		muonZ1 = muonZ;
+	      }// if imuon==0
+	      
+	      // The associated jet loop 
+	      for(const auto& jetLinkInfo : onlinejets) {
+		const xAOD::Jet* jet = *(jetLinkInfo.link);
+		// jetPt
+		NameH = "jetPt_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto jetPt = Monitored::Scalar<float>(NameH,0.0);
+		jetPt = (jet->pt())*1.e-3;
+		ATH_MSG_DEBUG("        jetPt: " << jetPt);
+		fill("TrigBjetMonitor",jetPt);
+		// jetEta
+		NameH = "jetEta_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto jetEta = Monitored::Scalar<float>(NameH,0.0);
+		jetEta = jet->eta();
+		ATH_MSG_DEBUG("        jetEta : " << jetEta);
+		fill("TrigBjetMonitor",jetEta);
+		// jetPhi
+		NameH = "jetPhi_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto jetPhi = Monitored::Scalar<float>(NameH,0.0);
+		jetPhi = jet->phi();
+		ATH_MSG_DEBUG("        jetPhi : " << jetPhi);
 		
-		auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30 
-
-		if ( btaggingLinkInfo.isValid() ) {
-
-		  const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
+		// Take the b-tagging info from the first jet
+		if (ijet == 0) {
+		  //store the parameter for the 1st jet
+		  jetPt1 = jetPt;
+		  jetEta1 = jetEta;
+		  jetPhi1 = jetPhi;
+		  jetZ1 = zPrmVtx;
 		  
-		  double GN1_pu(0.), GN1_pc(0.), GN1_pb(0.);
-		  btag->pu("GN120220813",GN1_pu);
-		  ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
-		  btag->pc("GN120220813",GN1_pc);
-		  ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
-		  btag->pb("GN120220813",GN1_pb);
-		  ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
-		  theLLR = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
-		  theLLR_GN1 = theLLR;
-		  if ( !theLLR ) GN1_mv=-100.;
-		  ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
+		  auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30 
 		  
-		  double GN2_pu(0.), GN2_pc(0.), GN2_pb(0.);
-		  btag->pu("GN220240122",GN2_pu);
-		  ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
-		  btag->pc("GN220240122",GN2_pc);
-		  ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
-		  btag->pb("GN220240122",GN2_pb);
-		  ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
-		  theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
-		  theLLR_GN2 = theLLR;
-		  if ( !theLLR ) GN2_mv=-100.;
-		  ATH_MSG_DEBUG("        GN2_mv: " << GN2_mv << " LLR: " << theLLR); 
+		  if ( btaggingLinkInfo.isValid() ) {
+		    
+		    const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
+		    
+		    double GN1_pu(0.), GN1_pc(0.), GN1_pb(0.);
+		    btag->pu("GN120220813",GN1_pu);
+		    ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
+		    btag->pc("GN120220813",GN1_pc);
+		    ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
+		    btag->pb("GN120220813",GN1_pb);
+		    ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
+		    theLLR = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
+		    theLLR_GN1 = theLLR;
+		    if ( !theLLR ) GN1_mv=-100.;
+		    ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
+		    
+		    double GN2_pu(0.), GN2_pc(0.), GN2_pb(0.);
+		    btag->pu("GN220240122",GN2_pu);
+		    ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
+		    btag->pc("GN220240122",GN2_pc);
+		    ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
+		    btag->pb("GN220240122",GN2_pb);
+		    ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
+		    theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
+		    theLLR_GN2 = theLLR;
+		    if ( !theLLR ) GN2_mv=-100.;
+		    ATH_MSG_DEBUG("        GN2_mv: " << GN2_mv << " LLR: " << theLLR); 
+		    
+		  }
 		  
-		}
-
-	      }// if ijet==0
+		}// if ijet==0
+		
+		ijet++;
+		
+	      }// for onlinejets
 	      
-	      ijet++;
+	      imuon++;
 	      
-	    }// for onlinejets
+	    }// for onlinemuons
 	    
-	    imuon++;
+	    // muon vs jet histograms
 	    
-	  }// for onlinemuons
-	  
-	  // muon vs jet histograms
-	  
-	  // Delta R(muon,jet)
-	  std::string DeltaRH = "DeltaR_"+trigName;
-	  ATH_MSG_DEBUG( " DeltaRH: " << DeltaRH  );
-	  auto DeltaR = Monitored::Scalar<float>(DeltaRH,0.0);
-	  float DeltaEta = muonEta1 - jetEta1;
-	  float DeltaPhi = phiCorr( phiCorr(muonPhi1) - phiCorr(jetPhi1) );
-	  DeltaR = sqrt( DeltaEta*DeltaEta + DeltaPhi*DeltaPhi );
-	  ATH_MSG_DEBUG("       Delta R : " << DeltaR);
-	  fill("TrigBjetMonitor",DeltaR);
-	  
-	  // Delta Z(muon,jet)
-	  std::string DeltaZH = "DeltaZ_"+trigName;
-	  ATH_MSG_DEBUG( " DeltaZH: " << DeltaZH  );
-	  auto DeltaZ = Monitored::Scalar<float>(DeltaZH,0.0);
-	  DeltaZ = std::abs(muonZ1-jetZ1);
-	  ATH_MSG_DEBUG("       Delta Z : " << DeltaZ);
-	  if (plotDeltaZ) fill("TrigBjetMonitor",DeltaZ);
-	  
-	  // muonPt/jetPt
-	  std::string RatioPtH = "RatioPt_"+trigName;
-	  ATH_MSG_DEBUG( " RatioPtH: " << RatioPtH  );
-	  auto RatioPt = Monitored::Scalar<float>(RatioPtH,0.0);
-	  RatioPt = -100.;
-	  if (jetPt1 > 0.) RatioPt = muonPt1/jetPt1;
-	  ATH_MSG_DEBUG("        RatioPt : " << RatioPt);
-	  if (RatioPt > 0.) fill("TrigBjetMonitor",RatioPt);
-	  
-	  // muonPt relative to jet direction
-	  std::string RelPtH = "RelPt_"+trigName;
-	  ATH_MSG_DEBUG( " RelPtH: " << RelPtH  );
-	  auto RelPt = Monitored::Scalar<float>(RelPtH,0.0);
-	  RelPt = 1.e10;
-	  bool calc_relpt = CalcRelPt (muonPt1, muonEta1, muonPhi1, jetPt1, jetEta1, jetPhi1, RelPt);
-	  ATH_MSG_DEBUG("        RelPt : " << RelPt);	
-
-	  // wGN1
-	  std::string wGN1H = "wGN1_"+trigName;
-	  ATH_MSG_DEBUG( " NameH: " << wGN1H  );
-	  auto wGN1 = Monitored::Scalar<float>(wGN1H,0.0);
-	  wGN1 = float(GN1_mv);
-	  ATH_MSG_DEBUG("        wGN1: " << wGN1 << " RelPt : " << RelPt);
-	  if (calc_relpt && theLLR_GN1) fill("TrigBjetMonitor",wGN1,RelPt);
-	  
-	  // wGN2
-	  std::string wGN2H = "wGN2_"+trigName;
-	  ATH_MSG_DEBUG( " NameH: " << wGN2H  );
-	  auto wGN2 = Monitored::Scalar<float>(wGN2H,0.0);
-	  wGN2 = float(GN2_mv);
-	  ATH_MSG_DEBUG("        wGN2: " << wGN2 << " RelPt : " << RelPt);
-	  if (calc_relpt && theLLR_GN2) fill("TrigBjetMonitor",wGN2,RelPt);
-	  
+	    // Delta R(muon,jet)
+	    std::string DeltaRH = "DeltaR_"+trigName;
+	    ATH_MSG_DEBUG( " DeltaRH: " << DeltaRH  );
+	    auto DeltaR = Monitored::Scalar<float>(DeltaRH,0.0);
+	    float DeltaEta = muonEta1 - jetEta1;
+	    float DeltaPhi = phiCorr( phiCorr(muonPhi1) - phiCorr(jetPhi1) );
+	    DeltaR = sqrt( DeltaEta*DeltaEta + DeltaPhi*DeltaPhi );
+	    ATH_MSG_DEBUG("       Delta R : " << DeltaR);
+	    fill("TrigBjetMonitor",DeltaR);
+	    
+	    // Delta Z(muon,jet)
+	    std::string DeltaZH = "DeltaZ_"+trigName;
+	    ATH_MSG_DEBUG( " DeltaZH: " << DeltaZH  );
+	    auto DeltaZ = Monitored::Scalar<float>(DeltaZH,0.0);
+	    DeltaZ = std::abs(muonZ1-jetZ1);
+	    ATH_MSG_DEBUG("       Delta Z : " << DeltaZ);
+	    if (plotDeltaZ) fill("TrigBjetMonitor",DeltaZ);
+	    
+	    // muonPt/jetPt
+	    std::string RatioPtH = "RatioPt_"+trigName;
+	    ATH_MSG_DEBUG( " RatioPtH: " << RatioPtH  );
+	    auto RatioPt = Monitored::Scalar<float>(RatioPtH,0.0);
+	    RatioPt = -100.;
+	    if (jetPt1 > 0.) RatioPt = muonPt1/jetPt1;
+	    ATH_MSG_DEBUG("        RatioPt : " << RatioPt);
+	    if (RatioPt > 0.) fill("TrigBjetMonitor",RatioPt);
+	    
+	    // muonPt relative to jet direction
+	    std::string RelPtH = "RelPt_"+trigName;
+	    ATH_MSG_DEBUG( " RelPtH: " << RelPtH  );
+	    auto RelPt = Monitored::Scalar<float>(RelPtH,0.0);
+	    RelPt = 1.e10;
+	    bool calc_relpt = CalcRelPt (muonPt1, muonEta1, muonPhi1, jetPt1, jetEta1, jetPhi1, RelPt);
+	    ATH_MSG_DEBUG("        RelPt : " << RelPt);	
+	    
+	    // wGN1
+	    std::string wGN1H = "wGN1_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << wGN1H  );
+	    auto wGN1 = Monitored::Scalar<float>(wGN1H,0.0);
+	    wGN1 = float(GN1_mv);
+	    ATH_MSG_DEBUG("        wGN1: " << wGN1 << " RelPt : " << RelPt);
+	    if (calc_relpt && theLLR_GN1) fill("TrigBjetMonitor",wGN1,RelPt);
+	    
+	    // wGN2
+	    std::string wGN2H = "wGN2_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << wGN2H  );
+	    auto wGN2 = Monitored::Scalar<float>(wGN2H,0.0);
+	    wGN2 = float(GN2_mv);
+	    ATH_MSG_DEBUG("        wGN2: " << wGN2 << " RelPt : " << RelPt);
+	    if (calc_relpt && theLLR_GN2) fill("TrigBjetMonitor",wGN2,RelPt);
+	    
+	  } // if (nMuon*nJet > 0)
 	  
 	}// if mujetChain
 	
@@ -437,201 +440,206 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  auto nJet = Monitored::Scalar<int>(nJetH,0.0);
 	  nJet = onlinejets.size();
 	  fill("TrigBjetMonitor",nJet);
-	  for(const auto& jetLinkInfo : onlinejets) {
-	    const xAOD::Jet* jet = *(jetLinkInfo.link);
-	    // jetPt
-	    std::string NameH = "jetPt_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto jetPt = Monitored::Scalar<float>(NameH,0.0);
-	    jetPt = (jet->pt())*1.e-3;
-	    ATH_MSG_DEBUG("        jetPt: " << jetPt);
-	    fill("TrigBjetMonitor",jetPt);
-	    // jetEta
-	    NameH = "jetEta_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto jetEta = Monitored::Scalar<float>(NameH,0.0);
-	    jetEta = jet->eta();
-	    // jetPhi
-	    NameH = "jetPhi_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto jetPhi = Monitored::Scalar<float>(NameH,0.0);
-	    jetPhi = jet->phi();
-	    ATH_MSG_DEBUG("        jetEta: " << jetEta << " jetPhi : " << jetPhi);
-	    fill("TrigBjetMonitor",jetEta,jetPhi);
-	    
-	    // zPV associated to the jets in the same event: they are the same for every jet in the same event so only the first zPV should be plotted
-	    if (ijet == 0) {
-	      
-	      // Fetch and plot PV
-	      
-	      std::string vtxname = m_onlineVertexContainerKey.key();
-	      if ( vtxname.compare(0, 4, "HLT_")==0 ) vtxname.erase(0,4);
-	      auto vertexLinkInfo = TrigCompositeUtils::findLink<xAOD::VertexContainer>(jetLinkInfo.source, vtxname ); // CV 200120 & MS 290620
-	      ATH_CHECK( vertexLinkInfo.isValid() ) ; // TM 200120
-	      const xAOD::Vertex* vtx = *(vertexLinkInfo.link);
-	      NameH = "PVz_jet_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto PVz_jet = Monitored::Scalar<float>(NameH,0.0);
-	      PVz_jet = vtx->z();
-	      ATH_MSG_DEBUG("        PVz_jet: " << PVz_jet);
-	      fill("TrigBjetMonitor",PVz_jet);
-	      NameH = "PVx_jet_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto PVx_jet = Monitored::Scalar<float>(NameH,0.0);
-	      PVx_jet = vtx->x();
-	      ATH_MSG_DEBUG("        PVx_jet: " << PVx_jet);
-	      fill("TrigBjetMonitor",PVx_jet);
-	      NameH = "PVy_jet_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto PVy_jet = Monitored::Scalar<float>(NameH,0.0);
-	      PVy_jet = vtx->y();
-	      ATH_MSG_DEBUG("        PVy_jet: " << PVy_jet);
-	      fill("TrigBjetMonitor",PVy_jet);
-	      
-	      
-	    } // if (ijet == 0)
-	    
-	    ijet++;
-	    
-	    // Fetch and plot BTagging information
-	    
-	    auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30 
-	    ATH_CHECK( btaggingLinkInfo.isValid() ) ;
-	    const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
-	    
-	    
-	    bool theLLR(false);
-	    
-	    NameH = "GN1_pu_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN1_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("GN120220813",GN1_pu);
-	    ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
-	    fill("TrigBjetMonitor",GN1_pu);
-	    
-	    NameH = "GN1_pc_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN1_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("GN120220813",GN1_pc);
-	    ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
-	    fill("TrigBjetMonitor",GN1_pc);
-	    
-	    NameH = "GN1_pb_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN1_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("GN120220813",GN1_pb);
-	    ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
-	    fill("TrigBjetMonitor",GN1_pb);
-	    
-	    NameH = "GN1_mv_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN1_mv = Monitored::Scalar<double>(NameH,0.0);
-	    theLLR = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
-	    if ( theLLR ) fill("TrigBjetMonitor",GN1_mv);
-	    ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
-	    
-
-
-	    NameH = "GN2_pu_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN2_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("GN220240122",GN2_pu);
-	    ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
-	    fill("TrigBjetMonitor",GN2_pu);
-	    
-	    NameH = "GN2_pc_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN2_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("GN220240122",GN2_pc);
-	    ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
-	    fill("TrigBjetMonitor",GN2_pc);
-	    
-	    NameH = "GN2_pb_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN2_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("GN220240122",GN2_pb);
-	    ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
-	    fill("TrigBjetMonitor",GN2_pb);
-	    
-	    NameH = "GN2_mv_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto GN2_mv = Monitored::Scalar<double>(NameH,0.0);
-	    theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
-	    if ( theLLR ) fill("TrigBjetMonitor",GN2_mv);
-	    ATH_MSG_DEBUG("        GN2_mv: " << GN2_mv << " LLR: " << theLLR); 
-	    
-	    
-	    // Tracks associated to triggered jets ( featurs = onlinejets ) courtesy of Tim Martin on 12/05/2020 
-	    const auto track_it_pair = m_trigDecTool->associateToEventView(theTracks, jetLinkInfo.source, "roi");
-	    const xAOD::TrackParticleContainer::const_iterator start_it = track_it_pair.first;
-	    const xAOD::TrackParticleContainer::const_iterator end_it = track_it_pair.second;
-	    
-	    int count = 0;
-	    for ( xAOD::TrackParticleContainer::const_iterator it = start_it; it != end_it; ++it) {
-	      count++;
-	      ATH_MSG_DEBUG( " Track " << count << " with pT " << (*it)->pt() <<" from BJet with pT " << (*jetLinkInfo.link)->pt() );
-	      ATH_MSG_DEBUG( " Track " << count << " with pT/eta/phi " << (*it)->pt() << "/" << (*it)->eta() << "/" << (*it)->phi() );
-	      ATH_MSG_DEBUG( " Track " << count << " with d0/sigd0 " << (*it)->d0() << "/" << Amg::error((*it)->definingParametersCovMatrix(), 0) );
-	      ATH_MSG_DEBUG( " Track " << count << " with z0/sigz0 " << (*it)->z0() << "/" << Amg::error((*it)->definingParametersCovMatrix(), 1) );
-	      std::string NameH = "trkPt_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto trkPt = Monitored::Scalar<float>(NameH,0.0);
-	      trkPt = ((*it)->pt())*1.e-3;
-	      ATH_MSG_DEBUG("        trkPt: " << trkPt);
-	      fill("TrigBjetMonitor",trkPt);
-	      NameH = "trkEta_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto trkEta = Monitored::Scalar<float>(NameH,0.0);
-	      trkEta = (*it)->eta();
-	      NameH = "trkPhi_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto trkPhi = Monitored::Scalar<float>(NameH,0.0);
-	      trkPhi = (*it)->phi();
-	      ATH_MSG_DEBUG("        trkEta: " << trkEta << " trkPhi : " << trkPhi);
-	      fill("TrigBjetMonitor",trkEta,trkPhi);
-	      NameH = "d0_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto d0 = Monitored::Scalar<float>(NameH,0.0);
-	      d0 = (*it)->d0();
-	      ATH_MSG_DEBUG("        d0: " << d0);
-	      fill("TrigBjetMonitor",d0);
-	      NameH = "z0_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto z0 = Monitored::Scalar<float>(NameH,0.0);
-	      z0 = (*it)->z0();
-	      ATH_MSG_DEBUG("        z0: " << z0);
-	      fill("TrigBjetMonitor",z0);
-	      NameH = "ed0_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto ed0 = Monitored::Scalar<float>(NameH,0.0);
-	      ed0 = Amg::error((*it)->definingParametersCovMatrix(), 0);
-	      ATH_MSG_DEBUG("        ed0: " << ed0);
-	      fill("TrigBjetMonitor",ed0);
-	      NameH = "sd0_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto sd0 = Monitored::Scalar<float>(NameH,0.0);
-	      sd0 = -10.;
-	      if (ed0 > 0.) sd0 = std::abs(d0)/ed0;
-	      ATH_MSG_DEBUG("        sd0: " << sd0);
-	      fill("TrigBjetMonitor",sd0);
-	      NameH = "ez0_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto ez0 = Monitored::Scalar<float>(NameH,0.0);
-	      ez0 = Amg::error((*it)->definingParametersCovMatrix(), 1);
-	      ATH_MSG_DEBUG("        ez0: " << ez0);
-	      fill("TrigBjetMonitor",ez0);
-	    } // it on tracks
-	    ATH_MSG_DEBUG( "  Number of tracks: " << count );
-	    itrack += count;
-	    
-	  } // jetLinkInfo from onlinejets
 	  
-	  ATH_MSG_DEBUG("  Total number of triggered b-jets: " << ijet << " nJet : " << nJet);
-	  ATH_MSG_DEBUG(" Total number of triggered tracks associated to the b-jets: " << itrack);
-	  std::string nTrackH = "nTrack_"+trigName;
-	  auto nTrack = Monitored::Scalar<int>(nTrackH,0.0);
-	  nTrack = itrack;
-	  fill("TrigBjetMonitor",nTrack);
+	  if (nJet > 0) {
+	    
+	    for(const auto& jetLinkInfo : onlinejets) {
+	      const xAOD::Jet* jet = *(jetLinkInfo.link);
+	      // jetPt
+	      std::string NameH = "jetPt_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto jetPt = Monitored::Scalar<float>(NameH,0.0);
+	      jetPt = (jet->pt())*1.e-3;
+	      ATH_MSG_DEBUG("        jetPt: " << jetPt);
+	      fill("TrigBjetMonitor",jetPt);
+	      // jetEta
+	      NameH = "jetEta_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto jetEta = Monitored::Scalar<float>(NameH,0.0);
+	      jetEta = jet->eta();
+	      // jetPhi
+	      NameH = "jetPhi_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto jetPhi = Monitored::Scalar<float>(NameH,0.0);
+	      jetPhi = jet->phi();
+	      ATH_MSG_DEBUG("        jetEta: " << jetEta << " jetPhi : " << jetPhi);
+	      fill("TrigBjetMonitor",jetEta,jetPhi);
+	      
+	      // zPV associated to the jets in the same event: they are the same for every jet in the same event so only the first zPV should be plotted
+	      if (ijet == 0) {
+		
+		// Fetch and plot PV
+		
+		std::string vtxname = m_onlineVertexContainerKey.key();
+		if ( vtxname.compare(0, 4, "HLT_")==0 ) vtxname.erase(0,4);
+		auto vertexLinkInfo = TrigCompositeUtils::findLink<xAOD::VertexContainer>(jetLinkInfo.source, vtxname ); // CV 200120 & MS 290620
+		ATH_CHECK( vertexLinkInfo.isValid() ) ; // TM 200120
+		const xAOD::Vertex* vtx = *(vertexLinkInfo.link);
+		NameH = "PVz_jet_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto PVz_jet = Monitored::Scalar<float>(NameH,0.0);
+		PVz_jet = vtx->z();
+		ATH_MSG_DEBUG("        PVz_jet: " << PVz_jet);
+		fill("TrigBjetMonitor",PVz_jet);
+		NameH = "PVx_jet_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto PVx_jet = Monitored::Scalar<float>(NameH,0.0);
+		PVx_jet = vtx->x();
+		ATH_MSG_DEBUG("        PVx_jet: " << PVx_jet);
+		fill("TrigBjetMonitor",PVx_jet);
+		NameH = "PVy_jet_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto PVy_jet = Monitored::Scalar<float>(NameH,0.0);
+		PVy_jet = vtx->y();
+		ATH_MSG_DEBUG("        PVy_jet: " << PVy_jet);
+		fill("TrigBjetMonitor",PVy_jet);
+		
+		
+	      } // if (ijet == 0)
+	      
+	      ijet++;
+	      
+	      // Fetch and plot BTagging information
+	      
+	      auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30 
+	      ATH_CHECK( btaggingLinkInfo.isValid() ) ;
+	      const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
+	      
+	      
+	      bool theLLR(false);
+	      
+	      NameH = "GN1_pu_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN1_pu = Monitored::Scalar<double>(NameH,0.0);
+	      btag->pu("GN120220813",GN1_pu);
+	      ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
+	      fill("TrigBjetMonitor",GN1_pu);
+	      
+	      NameH = "GN1_pc_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN1_pc = Monitored::Scalar<double>(NameH,0.0);
+	      btag->pc("GN120220813",GN1_pc);
+	      ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
+	      fill("TrigBjetMonitor",GN1_pc);
+	      
+	      NameH = "GN1_pb_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN1_pb = Monitored::Scalar<double>(NameH,0.0);
+	      btag->pb("GN120220813",GN1_pb);
+	      ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
+	      fill("TrigBjetMonitor",GN1_pb);
+	      
+	      NameH = "GN1_mv_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN1_mv = Monitored::Scalar<double>(NameH,0.0);
+	      theLLR = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
+	      if ( theLLR ) fill("TrigBjetMonitor",GN1_mv);
+	      ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
+	      
+	      
+	      
+	      NameH = "GN2_pu_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2_pu = Monitored::Scalar<double>(NameH,0.0);
+	      btag->pu("GN220240122",GN2_pu);
+	      ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
+	      fill("TrigBjetMonitor",GN2_pu);
+	      
+	      NameH = "GN2_pc_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2_pc = Monitored::Scalar<double>(NameH,0.0);
+	      btag->pc("GN220240122",GN2_pc);
+	      ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
+	      fill("TrigBjetMonitor",GN2_pc);
+	      
+	      NameH = "GN2_pb_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2_pb = Monitored::Scalar<double>(NameH,0.0);
+	      btag->pb("GN220240122",GN2_pb);
+	      ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
+	      fill("TrigBjetMonitor",GN2_pb);
+	      
+	      NameH = "GN2_mv_tr_"+trigName;
+	      ATH_MSG_DEBUG( " NameH: " << NameH  );
+	      auto GN2_mv = Monitored::Scalar<double>(NameH,0.0);
+	      theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
+	      if ( theLLR ) fill("TrigBjetMonitor",GN2_mv);
+	      ATH_MSG_DEBUG("        GN2_mv: " << GN2_mv << " LLR: " << theLLR); 
+	      
+	      
+	      // Tracks associated to triggered jets ( featurs = onlinejets ) courtesy of Tim Martin on 12/05/2020 
+	      const auto track_it_pair = m_trigDecTool->associateToEventView(theTracks, jetLinkInfo.source, "roi");
+	      const xAOD::TrackParticleContainer::const_iterator start_it = track_it_pair.first;
+	      const xAOD::TrackParticleContainer::const_iterator end_it = track_it_pair.second;
+	      
+	      int count = 0;
+	      for ( xAOD::TrackParticleContainer::const_iterator it = start_it; it != end_it; ++it) {
+		count++;
+		ATH_MSG_DEBUG( " Track " << count << " with pT " << (*it)->pt() <<" from BJet with pT " << (*jetLinkInfo.link)->pt() );
+		ATH_MSG_DEBUG( " Track " << count << " with pT/eta/phi " << (*it)->pt() << "/" << (*it)->eta() << "/" << (*it)->phi() );
+		ATH_MSG_DEBUG( " Track " << count << " with d0/sigd0 " << (*it)->d0() << "/" << Amg::error((*it)->definingParametersCovMatrix(), 0) );
+		ATH_MSG_DEBUG( " Track " << count << " with z0/sigz0 " << (*it)->z0() << "/" << Amg::error((*it)->definingParametersCovMatrix(), 1) );
+		std::string NameH = "trkPt_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto trkPt = Monitored::Scalar<float>(NameH,0.0);
+		trkPt = ((*it)->pt())*1.e-3;
+		ATH_MSG_DEBUG("        trkPt: " << trkPt);
+		fill("TrigBjetMonitor",trkPt);
+		NameH = "trkEta_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto trkEta = Monitored::Scalar<float>(NameH,0.0);
+		trkEta = (*it)->eta();
+		NameH = "trkPhi_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto trkPhi = Monitored::Scalar<float>(NameH,0.0);
+		trkPhi = (*it)->phi();
+		ATH_MSG_DEBUG("        trkEta: " << trkEta << " trkPhi : " << trkPhi);
+		fill("TrigBjetMonitor",trkEta,trkPhi);
+		NameH = "d0_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto d0 = Monitored::Scalar<float>(NameH,0.0);
+		d0 = (*it)->d0();
+		ATH_MSG_DEBUG("        d0: " << d0);
+		fill("TrigBjetMonitor",d0);
+		NameH = "z0_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto z0 = Monitored::Scalar<float>(NameH,0.0);
+		z0 = (*it)->z0();
+		ATH_MSG_DEBUG("        z0: " << z0);
+		fill("TrigBjetMonitor",z0);
+		NameH = "ed0_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto ed0 = Monitored::Scalar<float>(NameH,0.0);
+		ed0 = Amg::error((*it)->definingParametersCovMatrix(), 0);
+		ATH_MSG_DEBUG("        ed0: " << ed0);
+		fill("TrigBjetMonitor",ed0);
+		NameH = "sd0_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto sd0 = Monitored::Scalar<float>(NameH,0.0);
+		sd0 = -10.;
+		if (ed0 > 0.) sd0 = std::abs(d0)/ed0;
+		ATH_MSG_DEBUG("        sd0: " << sd0);
+		fill("TrigBjetMonitor",sd0);
+		NameH = "ez0_"+trigName;
+		ATH_MSG_DEBUG( " NameH: " << NameH  );
+		auto ez0 = Monitored::Scalar<float>(NameH,0.0);
+		ez0 = Amg::error((*it)->definingParametersCovMatrix(), 1);
+		ATH_MSG_DEBUG("        ez0: " << ez0);
+		fill("TrigBjetMonitor",ez0);
+	      } // it on tracks
+	      ATH_MSG_DEBUG( "  Number of tracks: " << count );
+	      itrack += count;
+	      
+	    } // jetLinkInfo from onlinejets
+	    
+	    ATH_MSG_DEBUG("  Total number of triggered b-jets: " << ijet << " nJet : " << nJet);
+	    ATH_MSG_DEBUG(" Total number of triggered tracks associated to the b-jets: " << itrack);
+	    std::string nTrackH = "nTrack_"+trigName;
+	    auto nTrack = Monitored::Scalar<int>(nTrackH,0.0);
+	    nTrack = itrack;
+	    fill("TrigBjetMonitor",nTrack);
+	    
+	  } // if (nJet > 0)
 	  
 	} //if bjetChain
 	

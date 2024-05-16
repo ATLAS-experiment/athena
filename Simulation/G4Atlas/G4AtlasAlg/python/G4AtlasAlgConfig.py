@@ -29,10 +29,15 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
     ## Killing neutrinos
 
-    ## Don"t drop the GeoModel
+    ## Don't drop the GeoModel
     kwargs.setdefault("ReleaseGeoModel", flags.Sim.ReleaseGeoModel)
     kwargs.setdefault("ExtraInputs", InputContainerListCfg(flags))
     kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags))
+
+    # Set the path to the simplified calorimeter geometry for particle transport if provided
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim and flags.Sim.SimplifiedGeoPath:
+        kwargs.setdefault("SimplifiedGeoPath", flags.Sim.SimplifiedGeoPath)
+
     ## Record the particle flux during the simulation
     kwargs.setdefault("RecordFlux", flags.Sim.RecordFlux)
 

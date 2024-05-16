@@ -39,7 +39,11 @@ namespace FlavorTagDiscriminants {
   class GNN
   {
   public:
+    // recommended constructor, file path + options
     GNN(const std::string& nnFile, const GNNOptions& opts);
+    // redefined options constructor, will share underlying network
+    GNN(const GNN&, const GNNOptions& opts);
+    // legacy constructor
     GNN(const std::string& nnFile,
         const FlipTagConfig& flip_config = FlipTagConfig::STANDARD,
         const std::map<std::string, std::string>& variableRemapping = {},
@@ -60,6 +64,8 @@ namespace FlavorTagDiscriminants {
 
     std::shared_ptr<const OnnxUtil> m_onnxUtil;
   private:
+    // private constructor, delegate of the above public ones
+    GNN(std::shared_ptr<const OnnxUtil>, const GNNOptions& opts);
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
     using TrackLinks = std::vector<ElementLink<TPC>>;

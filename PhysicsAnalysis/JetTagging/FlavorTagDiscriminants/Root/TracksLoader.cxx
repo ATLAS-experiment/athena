@@ -8,7 +8,6 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/StringUtils.h"
 
 namespace FlavorTagDiscriminants {
-
     // factory for functions which return the sort variable we
     // use to order tracks
     TracksLoader::TrackSortVar TracksLoader::trackSortVar(
@@ -212,12 +211,9 @@ namespace FlavorTagDiscriminants {
     // start by defining the raw functions, there's a factory
     // function below to convert the configuration enums to a
     // std::function
-    std::vector<const xAOD::TrackParticle*> negativeIpOnly(
-        BTagTrackIpAccessor& aug,
-        const std::vector<const xAOD::TrackParticle*>& tracks,
-        const xAOD::Jet& j) 
+    Tracks negativeIpOnly(BTagTrackIpAccessor& aug, const Tracks& tracks, const xAOD::Jet& j) 
     {
-        std::vector<const xAOD::TrackParticle*> filtered;
+        Tracks filtered;
         // we want to reverse the order of the tracks as part of the
         // flipping
         for (auto ti = tracks.crbegin(); ti != tracks.crend(); ti++) {
@@ -229,7 +225,7 @@ namespace FlavorTagDiscriminants {
       }
 
     // factory function
-    std::pair<TracksLoader::TrackSequenceFilter,std::set<std::string>> TracksLoader::flipFilter(
+    std::pair<TracksLoader::TrackSequenceFilter,std::set<std::string>> TracksLoader::trackFlipper(
         const FTagOptions& options)
     {
         namespace ph = std::placeholders;  // for _1, _2, _3
@@ -271,8 +267,8 @@ namespace FlavorTagDiscriminants {
         IConstituentsLoader(cfg),
         m_trackSortVar(TracksLoader::trackSortVar(cfg.order, options)),
         m_trackFilter(TracksLoader::trackFilter(cfg.selection, options).first),
-        m_flipFilter(TracksLoader::flipFilter(options).first),
-        m_customSequenceGetter(getter_utils::CustomSequenceGetter<xAOD::TrackParticle>(
+        m_trackFlipper(TracksLoader::trackFlipper(options).first),
+        m_seqGetter(getter_utils::SeqGetter<xAOD::TrackParticle>(
           cfg.inputs, options))
     {
         // We have several ways to get tracks: either we retrieve an
@@ -283,8 +279,8 @@ namespace FlavorTagDiscriminants {
         //
         if (options.track_link_type == TrackLinkType::IPARTICLE) {
             SG::AuxElement::ConstAccessor<PartLinks> acc(options.track_link_name);
-            m_associator = [acc](const SG::AuxElement& btag) -> TPV {
-            TPV tracks;
+            m_associator = [acc](const SG::AuxElement& btag) -> Tracks {
+            Tracks tracks;
             for (const ElementLink<IPC>& link: acc(btag)) {
                 if (!link.isValid()) {
                 throw std::logic_error("invalid particle link");
@@ -299,8 +295,8 @@ namespace FlavorTagDiscriminants {
             };
         } else if (options.track_link_type == TrackLinkType::TRACK_PARTICLE){
             SG::AuxElement::ConstAccessor<TrackLinks> acc(options.track_link_name);
-            m_associator = [acc](const SG::AuxElement& btag) -> TPV {
-            TPV tracks;
+            m_associator = [acc](const SG::AuxElement& btag) -> Tracks {
+            Tracks tracks;
             for (const ElementLink<TPC>& link: acc(btag)) {
                 if (!link.isValid()) {
                 throw std::logic_error("invalid track link");
@@ -313,15 +309,15 @@ namespace FlavorTagDiscriminants {
             throw std::logic_error("Unknown TrackLinkType");
         }
         auto track_data_deps = trackFilter(cfg.selection, options).second;
-        track_data_deps.merge(flipFilter(options).second);
-        track_data_deps.merge(m_customSequenceGetter.getDependencies());
+        track_data_deps.merge(trackFlipper(options).second);
+        track_data_deps.merge(m_seqGetter.getDependencies());
         m_deps.trackInputs.merge(track_data_deps);
         m_deps.bTagInputs.insert(options.track_link_name);
-        m_used_remap = m_customSequenceGetter.getUsedRemap();
+        m_used_remap = m_seqGetter.getUsedRemap();
         m_name = cfg.name;
     }
 
-    std::vector<const xAOD::TrackParticle*> TracksLoader::getTracksFromJet(
+    Tracks TracksLoader::getTracksFromJet(
         const xAOD::Jet& jet,
         const SG::AuxElement& btag) const
     {
@@ -340,20 +336,21 @@ namespace FlavorTagDiscriminants {
         return only_tracks;
     }
 
-    std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> TracksLoader::getData(
-      const xAOD::Jet& jet, 
-      [[maybe_unused]] const SG::AuxElement& btag) const {
-        Tracks flipped_tracks;
+    std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>>
+    TracksLoader::getData(const xAOD::Jet& jet, [[maybe_unused]] const SG::AuxElement& btag) const
+    {
         Tracks sorted_tracks = getTracksFromJet(jet, btag);
-        std::vector<const xAOD::IParticle*> flipped_tracks_ip;
-
-        flipped_tracks = m_flipFilter(sorted_tracks, jet);
+        Tracks flipped_tracks = m_trackFlipper(sorted_tracks, jet);
         
+        // cast to IParticle for aux task decoration
+        // this could probably be templated since we cast back again later
+        std::vector<const xAOD::IParticle*> flipped_iparticles;
         for (const auto& trk: flipped_tracks) {
-            flipped_tracks_ip.push_back(trk);
+          flipped_iparticles.push_back(trk);
         }
 
-        return std::make_tuple(m_config.output_name, m_customSequenceGetter.getFeats(jet, flipped_tracks), flipped_tracks_ip);
+        Inputs features = m_seqGetter.getFeats(jet, flipped_tracks);
+        return std::make_tuple(m_config.output_name, features, flipped_iparticles);
     }
 
     std::tuple<char, std::map<std::string, std::vector<double>>> TracksLoader::getDL2Data(
@@ -366,9 +363,9 @@ namespace FlavorTagDiscriminants {
 
       Tracks sorted_tracks = getTracksFromJet(jet, btag);
       if (ip_checker(sorted_tracks)) invalid = 1;
-      flipped_tracks = m_flipFilter(sorted_tracks, jet);
+      flipped_tracks = m_trackFlipper(sorted_tracks, jet);
       
-      auto feats = m_customSequenceGetter.getDL2Feats(jet, flipped_tracks);
+      auto feats = m_seqGetter.getDL2Feats(jet, flipped_tracks);
       return std::make_tuple(invalid, feats);
     };
 

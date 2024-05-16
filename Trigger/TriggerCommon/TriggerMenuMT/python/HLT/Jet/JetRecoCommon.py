@@ -129,17 +129,21 @@ def jetDefToString(jetDef):
     elif jetDef.inputdef.jetinputtype == JetInputType.Jet:
         # Reclustered
         poststr = 'r'
+
     algstr = f'{str.lower(_jetDef.algorithm[0])}{formatRvalue(_jetDef._radius)}{poststr}'
     constitdef = _jetDef.inputdef
-    clusterCalib = 'lcw' if 'LC' in constitdef.label else 'em'
-    constittype = 'pf' if 'PFlow' in constitdef.label else 'tc'
-    constitmods = ''
-    if isinstance(constitdef,JetInputConstitSeq):
-        ignore = ['EM','LC','CHS','CorrectPFO']
-        for mod in constitdef.modifiers:
-            if mod not in ignore:
-                constitmods += str.lower(mod)
-    constitstr = f'{constitmods}{constittype}_{clusterCalib}'
+    if constitdef.label == 'HI':
+        constitstr = 'ion'
+    else:
+        clusterCalib = 'lcw' if 'LC' in constitdef.label else 'em'
+        constittype = 'pf' if 'PFlow' in constitdef.label else 'tc'
+        constitmods = ''
+        if isinstance(constitdef,JetInputConstitSeq):
+            ignore = ['EM','LC','CHS','CorrectPFO']
+            for mod in constitdef.modifiers:
+                if mod not in ignore:
+                    constitmods += str.lower(mod)
+        constitstr = f'{constitmods}{constittype}_{clusterCalib}'
     jetdefstr = f'{algstr}_{constitstr}{jetDef.suffix}'
 
     return jetdefstr
@@ -243,6 +247,8 @@ def getHLTPrefix():
     return prefix
 
 def getClustersKey(recoDict):
+        if recoDict['ionopt'] == 'ion':
+            return "HLT_HICaloClustersFS"
         clusterCalib = recoDict["clusterCalib"]
         if clusterCalib == "em":
             from ..CommonSequences.FullScanDefs import em_clusters

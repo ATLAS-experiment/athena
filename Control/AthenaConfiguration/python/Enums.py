@@ -44,6 +44,7 @@ class Format(FlagEnum):
 class ProductionStep(FlagEnum):
     # steps should be added when needed
     Default = 'Default'
+    Generation = 'Generation'
     Simulation = 'Simulation'
     PileUpPresampling = 'PileUpPresampling'
     Overlay = 'Overlay'

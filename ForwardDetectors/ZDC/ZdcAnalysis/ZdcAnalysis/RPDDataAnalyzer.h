@@ -111,15 +111,15 @@ class RPDDataAnalyzer
   float m_pileupBaselineStdDevThresh; /** Baseline standard deviations less than this number indicate there is not pileup */
   unsigned int m_nNegativesAllowed; /** Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range */
   unsigned int m_AdcOverflow; /** ADC values greater than or equal to this number are considered overflow */
-  std::vector<float> m_calibFactors; /** multiplicative calibration factors to apply to raw data; per channel */
+  std::vector<float> m_outputCalibFactors; /** multiplicative calibration factors to apply to output, e.g., max and sum ADC; per channel */
 
   std::vector<std::vector<float>> m_chFadcData; /** raw RPD data; index channel then sample */
   std::vector<std::vector<float>> m_chCorrectedFadcData; /** RPD data with baseline and pileup subtracted; index channel then sample */
   std::vector<float> m_chMaxSample; /** sample of max of RPD data in signal range after pileup subtraction; per channel */
   std::vector<float> m_chSumAdc; /** sum of RPD data in signal range after baseline and pileup subtraction; per channel */
-  std::vector<float> m_chSumAdcCalib; /** sum of RPD data in signal range after baseline and pileup subtraction, with calibration factors applied; per channel */
+  std::vector<float> m_chSumAdcCalib; /** sum of RPD data in signal range after baseline and pileup subtraction, with output calibration factors applied; per channel */
   std::vector<float> m_chMaxAdc; /** max of RPD data in signal range after baseline and pileup subtraction; per channel */
-  std::vector<float> m_chMaxAdcCalib; /** max of RPD data in signal range after baseline and pileup subtraction, with calibration factors applied; per channel */
+  std::vector<float> m_chMaxAdcCalib; /** max of RPD data in signal range after baseline and pileup subtraction, with output calibration factors applied; per channel */
   std::vector<float> m_chPileupFrac; /** OOT pileup sum as a fraction of non-pileup sum in entire window (0 if no OOT pileup, -1 if sum ADC <= 0); per channel */
   std::vector<float> m_chBaseline; /** baseline used in baseline subtraction; per channel */
   std::vector<std::vector<float>> m_chPileupExpFitParams; /** parameters for pileup exponential fit (if pileup was detected and fit did not fail): exp( [0] + [1]*sample ); per channel */

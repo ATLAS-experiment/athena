@@ -1,16 +1,16 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from AthenaCommon.Logging import logging
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+import logging
+msg = logging.getLogger(__name__)
 
 def executeFromFragment(fragment_string, flags, cfg=None):
     """Execute a function from a pre/post include fragment."""
     # detect legacy job options in the transition period:
     if fragment_string.endswith('.py'):
-        log = logging.getLogger('PyJobTransforms')
-        log.warning(f'Trying to load legacy job options {fragment_string}. This should NOT be used in production!')
+        msg.warning(f'Trying to load legacy job options {fragment_string}. This should NOT be used in production!')
         fragment_string = fragment_string[:-3]
         fragment_string = fragment_string.replace('/', '.')
-        log.warning(f'Resolved to {fragment_string}')
+        msg.warning(f'Resolved to {fragment_string}')
 
     parts = fragment_string.split('.')
     if len(parts) < 2:
@@ -87,14 +87,12 @@ def UseFrontier(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
 
-    log = logging.getLogger('UseFrontier')
-
     cfg = ComponentAccumulator()
     if environ.get('FRONTIER_SERVER'):
-        log.info('Enabling FRONTIER DB access')
+        msg.info('Enabling FRONTIER DB access')
         cfg.addService(CompFactory.DBReplicaSvc(COOLSQLiteVetoPattern='DBRelease'))
     else:
-        log.info('Using default DB access')
+        msg.info('Using default DB access')
 
     return cfg
 

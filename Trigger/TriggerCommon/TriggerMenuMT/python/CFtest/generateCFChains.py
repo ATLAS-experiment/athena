@@ -120,39 +120,45 @@ def generateCFChains(flags):
     from TriggerMenuMT.HLT.Jet.JetRecoCommon import jetRecoDictFromString
     def jetCaloHypoMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
+        from TriggerMenuMT.HLT.Jet.JetRecoSequencesConfig import JetRecoDataDeps
+        jetDefDict = JetRecoDataDeps(flags, **jetRecoDict)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloHypoMenuSequenceGenCfg
-        return jetCaloHypoMenuSequenceGenCfg(flags, isPerf=False, **jetRecoDict)
+        return functools.partial(jetCaloHypoMenuSequenceGenCfg, flags, isPerf=False, **jetDefDict)
 
     def jetCaloPreselMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
+        from TriggerMenuMT.HLT.Jet.JetRecoSequencesConfig import JetRecoDataDeps
+        jetDefDict = JetRecoDataDeps(flags, **jetRecoDict)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloPreselMenuSequenceGenCfg
-        return jetCaloPreselMenuSequenceGenCfg(flags, **jetRecoDict)
+        return functools.partial(jetCaloPreselMenuSequenceGenCfg, flags, **jetDefDict)
 
-    def jetTrackingHypoMenuSequenceFromString(jet_def_str,clustersKey):
+    def jetTrackingHypoMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
+        from TriggerMenuMT.HLT.Jet.JetRecoSequencesConfig import JetRecoDataDeps
+        jetDefDict = JetRecoDataDeps(flags, **jetRecoDict)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequenceGenCfg
-        return jetFSTrackingHypoMenuSequenceGenCfg(flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
+        return functools.partial(jetFSTrackingHypoMenuSequenceGenCfg, flags, isPerf=False, **jetDefDict)
 
     if 'Jet' in flags.Trigger.enabledSignatures:
 
         # small-R jets
-        jetSeq_a4_tc_em, jetDef = jetCaloHypoMenuSequenceFromString("a4_tc_em_subjesIS")
+        jetSeq_a4_tc_em = jetCaloHypoMenuSequenceFromString("a4_tc_em_subjesIS")
         step_a4_tc_em = makeChainStep("Step_jet_a4_tc_em", [jetSeq_a4_tc_em])
         
         # large-R jets
-        jetSeq_a10_tc_lcw_subjes, jetDef = jetCaloHypoMenuSequenceFromString("a10_tc_lcw_subjes")
+        jetSeq_a10_tc_lcw_subjes = jetCaloHypoMenuSequenceFromString("a10_tc_lcw_subjes")
         step_a10_tc_lcw_subjes = makeChainStep("Step_jet_a10_subjes_tc_lcw", [jetSeq_a10_tc_lcw_subjes])
         
-        jetSeq_a10r, jetDef = jetCaloHypoMenuSequenceFromString("a10r_tc_em_subjesIS")
+        jetSeq_a10r = jetCaloHypoMenuSequenceFromString("a10r_tc_em_subjesIS")
         step_a10r = makeChainStep("Step_jet_a10r", [jetSeq_a10r])
 
-        jetSeq_a10t, jetDef = jetCaloHypoMenuSequenceFromString("a10t_tc_lcw_jes")
+        jetSeq_a10t = jetCaloHypoMenuSequenceFromString("a10t_tc_lcw_jes")
         step_a10t = makeChainStep("Step_jet_a10t", [jetSeq_a10t])
         
         # Jet chains with tracking
-        jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
+        jetSeq_a4_tc_em_presel = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
         step_a4_tc_em_presel = makeChainStep("Step_jet_a4_tc_em_presel", [jetSeq_a4_tc_em_presel])
-        jetSeq_a4_pf_em_ftf, jetDef = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subresjesgscIS_ftf",emclusters)
+        jetSeq_a4_pf_em_ftf = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subresjesgscIS_ftf")
         step_a4_pf_em_ftf = makeChainStep("Step_jet_a4_pf_em_ftf", [jetSeq_a4_pf_em_ftf])
 
         menu.chainsInMenu['Jet'] = [
@@ -175,8 +181,8 @@ def generateCFChains(flags):
     if 'Bjet' in flags.Trigger.enabledSignatures:
         from TriggerMenuMT.HLT.Bjet.BjetMenuSequences import getBJetSequenceGenCfg
 
-        jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
-        jetSeq_a4_tc_em_gsc_ftf, jetDef = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subjesgscIS_ftf",emclusters)
+        jetSeq_a4_tc_em_presel = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
+        jetSeq_a4_tc_em_gsc_ftf = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subjesgscIS_ftf")
         jc_name = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
 
         bjet_sec= functools.partial(getBJetSequenceGenCfg, flags, jc_name)
