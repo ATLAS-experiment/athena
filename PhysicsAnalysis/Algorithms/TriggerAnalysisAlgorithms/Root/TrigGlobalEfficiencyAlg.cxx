@@ -128,8 +128,8 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
 	handles.push_back(t->getHandle());
 	std::string name = handles[handles.size()-1].name();
 	legsPerTool[name] = triggers;
-	// and add the efficiency systematics (not SF!)
-	if (!isSFTool) ANA_CHECK(m_systematicsList.addSystematics( *handles[handles.size()-1] ));
+	// and add the systematics
+	ANA_CHECK(m_systematicsList.addSystematics( *handles[handles.size()-1] ));
       }
     }
   }
@@ -158,8 +158,8 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
 	handles.push_back(t->getHandle());
 	std::string name = handles[handles.size()-1].name();
 	legsPerTool[name] = triggers;
-	// and add the efficiency systematics (not SF!)
-	if (!isSFTool) ANA_CHECK(m_systematicsList.addSystematics( *handles[handles.size()-1] ));
+	// and add the systematics
+	ANA_CHECK(m_systematicsList.addSystematics( *handles[handles.size()-1] ));
       }
     }
   }
