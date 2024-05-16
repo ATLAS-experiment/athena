@@ -9,7 +9,7 @@
 #
 # Example usage:
 #   athenaHLT -C 'from TriggerJobOpts import PostExec; PostExec.foo([args])' ... TriggerJobOpts.runHLT
-#   athena --CA --postExec 'from TriggerJobOpts import PostExec; PostExec.foo([args])' TriggerJobOpts/runHLT.py
+#   athena --postExec 'from TriggerJobOpts import PostExec; PostExec.foo([args])' TriggerJobOpts/runHLT.py
 #
 
 from AthenaCommon.Logging import logging
