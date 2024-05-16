@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/exceptions.h
@@ -281,6 +281,40 @@ public:
                     const std::string& key,
                     SG::sgkey_t sgkey);
 };
+
+
+/**
+ * @brief Exception -- Bad thinning request
+ *
+ * thin() was called on an ElementLink with an index type that is not
+ * compatible with an integer.
+ */
+class ExcBadThinning
+  : public std::runtime_error
+{
+public:
+  /**
+   * @brief Constructor.
+   * @param clid CLID of the link.
+   * @param key String key of the link.
+   * @param sgkey Hashed key of the link.
+   */
+  ExcBadThinning (CLID clid,
+                  const std::string& key,
+                  SG::sgkey_t sgkey);
+};
+
+
+/**
+ * @brief Throw a SG::ExcBadThinning exception.
+ * @param clid CLID of the link.
+ * @param key String key of the link.
+ * @param sgkey Hashed key of the link.
+ */
+[[noreturn]]
+void throwExcBadThinning (CLID clid,
+                          const std::string& key,
+                          SG::sgkey_t sgkey);
 
 
 } // namespace SG

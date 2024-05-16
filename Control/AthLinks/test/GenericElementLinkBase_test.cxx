@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,8 +17,10 @@
 #include "SGTools/CurrentEventStore.h"
 #include "AthLinks/tools/MapIndexingPolicy.h"
 #include "AthLinks/tools/SetIndexingPolicy.h"
+#include "AthLinks/tools/ForwardIndexingPolicy.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "AthenaKernel/ThinningCache.h" 
 #include <map>
 #include <iostream>
 #include <cstdlib>
@@ -534,6 +536,40 @@ void test4 (SGTest::TestStore& store)
 }
 
 
+// Thinning
+void test5 (SGTest::TestStore& store)
+{
+  std::cout << "test5\n";
+
+  SG::ThinningCache cache;
+
+  using intVecLink_t =
+    ElementLinkBaseT_test<SG::ForwardIndexingPolicy<std::vector<int> > >;
+
+  std::string ikey = "icont";
+  intVecLink_t ilink (ikey, 54321, 12, &store);
+  sgkey_t sgkey_ilink = ilink.key();
+
+  ilink.thin (&cache);
+  assert (ilink.index() == 12);
+  assert (ilink.key() == sgkey_ilink);
+
+  SG::ThinningDecisionBase dec (20);
+  dec.thin (7);
+  dec.thin (8);
+  dec.buildIndexMap();
+  cache.addThinning ("icont", {sgkey_ilink}, &dec);
+
+  ilink.thin (&cache);
+  assert (ilink.index() == 10);
+  assert (ilink.key() == sgkey_ilink);
+
+  std::string mkey = "mcont";
+  ElementLinkBase_test mlink (mkey, 54322, "mkey", &store);
+  EXPECT_EXCEPTION (SG::ExcBadThinning, mlink.thin (&cache));
+}
+
+
 int main()
 {
   Athena::getMessageSvcQuiet = true;
@@ -543,5 +579,6 @@ int main()
   test2 (*store);
   test3 (*store);
   test4 (*store);
+  test5 (*store);
   return 0;
 }
