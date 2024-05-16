@@ -115,7 +115,7 @@ namespace ISF {
     std::vector<double> inversePCA(int pcaCdfIterator, std::vector<double> &variables) const;
 
     //apply the inverse CDF trainsform
-    static double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) ;
+    static double inverseCdfTransform(double variable, const std::map<double, double>& inverse_cdf_map) ;
 
     //dot product between matrix and vector, used to inverse PCA
     static std::vector<double> dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) ;

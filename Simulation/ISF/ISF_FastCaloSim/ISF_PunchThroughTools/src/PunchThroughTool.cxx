@@ -966,7 +966,7 @@ std::map<double, double> ISF::PunchThroughTool::getVariableCDFmappings(xmlNodePt
     return mappings;
 }
 
-double ISF::PunchThroughTool::inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) {
+double ISF::PunchThroughTool::inverseCdfTransform(double variable, const std::map<double, double>& inverse_cdf_map) {
 
     double norm_cdf = normal_cdf(variable);
 
