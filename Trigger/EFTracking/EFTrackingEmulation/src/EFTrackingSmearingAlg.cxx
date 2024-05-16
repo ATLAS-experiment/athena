@@ -151,7 +151,7 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   }
 
   // configure the Smearer
-  m_mySmearer = (void *) new FakeTrackSmearer(smearerName.c_str(), m_RandomSeed, msgLvl (MSG::DEBUG));
+  m_mySmearer = (void *) new FakeTrackSmearer(smearerName, m_RandomSeed, msgLvl (MSG::DEBUG));
   ((FakeTrackSmearer *) m_mySmearer)->SetInputTracksPtCut(m_inputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetTrackingEfficiency(m_smearedTrackEfficiency);
