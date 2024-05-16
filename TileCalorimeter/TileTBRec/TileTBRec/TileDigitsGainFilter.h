@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -25,39 +25,43 @@
 #ifndef TILETBREC_TILEDIGITSGAINFILTER_H
 #define TILETBREC_TILEDIGITSGAINFILTER_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "TileEvent/TileDigitsContainer.h"
+
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 
 class TileHWID;
 
-#include <string>
-#include <vector>
-
-/** 
+/**
  @class TileDigitsGainFilter
  @brief This algorithm copies TileDigits from input container to output container
  */
-class TileDigitsGainFilter: public AthAlgorithm {
+class TileDigitsGainFilter: public AthReentrantAlgorithm {
   public:
     // Constructor
-    TileDigitsGainFilter(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     //Destructor 
-    virtual ~TileDigitsGainFilter();
+    virtual ~TileDigitsGainFilter() = default;
 
     //Gaudi Hooks
     StatusCode initialize() override; //!< initialize method
-    StatusCode execute() override;    //!< execute method
+    StatusCode execute(const EventContext& ctx) const override;    //!< execute method
     StatusCode finalize() override;   //!< finalize method
 
   private:
 
-    const TileHWID*    m_tileHWID;
+    SG::ReadHandleKey<TileDigitsContainer> m_inputContainerKey{this,
+        "InputDigitsContainer", "TileDigitsCnt", "Input Tile digits container key"};
 
-    std::string m_inputContainer;  //!< Name of the input TileDigitsContainer
-    std::string m_outputContainer; //!< Name of the output TileDigitsContainer
+    SG::WriteHandleKey<TileDigitsContainer> m_outputContainerKey{this,
+        "OutputDigitsContainer", "TileDigitsFiltered", "Output Tile digits container key"};
 
-    int m_threshold;
+    Gaudi::Property<int> m_threshold{this,
+        "HighGainThreshold", 4095, "Threshold to check overflowes in high gain"};
+
+    const TileHWID* m_tileHWID{nullptr};
 
 };
 
