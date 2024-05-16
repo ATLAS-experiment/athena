@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -17,34 +17,17 @@
 
 // Tile includes
 #include "TileTBRec/TileDigitsGainFilter.h"
-#include "TileEvent/TileDigitsContainer.h"
-#include "TileEvent/TileRawChannelContainer.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
+#include "TileEvent/TileDigitsContainer.h"
 #include "TileIdentifier/TileHWID.h"
 
 // Atlas includes
 #include "AthContainers/ConstDataVector.h"
-#include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
 
 //C++ STL includes
 #include <vector>
-#include <algorithm>
-#include <cstring>
-
-//
-// Constructor
-//
-TileDigitsGainFilter::TileDigitsGainFilter(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-  , m_tileHWID(nullptr)
-{
-  declareProperty("InputDigitsContainer", m_inputContainer = "TileDigitsCnt");
-  declareProperty("OutputDigitsContainer", m_outputContainer = "TileDigitsFiltered");
-  declareProperty("HighGainThreshold", m_threshold = 4095);
-}
-
-TileDigitsGainFilter::~TileDigitsGainFilter() {
-}
 
 //
 // Alg standard initialize function
@@ -53,8 +36,11 @@ StatusCode TileDigitsGainFilter::initialize() {
 
   CHECK( detStore()->retrieve(m_tileHWID) );
 
-  ATH_MSG_INFO( "Input digits container: '" << m_inputContainer
-                << "'  output container: '" << m_outputContainer << "'" );
+  ATH_CHECK( m_inputContainerKey.initialize() );
+  ATH_CHECK( m_outputContainerKey.initialize() );
+
+  ATH_MSG_INFO( "Input digits container: '" << m_inputContainerKey
+                << "'  output container: '" << m_outputContainerKey << "'" );
 
 
   ATH_MSG_INFO( "Threshold to check overflowed in HG: " << m_threshold);
@@ -68,15 +54,13 @@ StatusCode TileDigitsGainFilter::initialize() {
 //
 // Begin Execution Phase.
 //
-StatusCode TileDigitsGainFilter::execute() {
+StatusCode TileDigitsGainFilter::execute(const EventContext& ctx) const {
+
+  SG::ReadHandle<TileDigitsContainer> inputContainer(m_inputContainerKey, ctx);
+  ATH_CHECK( inputContainer.isValid() );
 
   // Create new container for filtered digits
   auto outputContainer = std::make_unique<TileDigitsContainer>(false, SG::VIEW_ELEMENTS);
-  
-
-  const TileDigitsContainer* inputContainer(nullptr);
-  CHECK( evtStore()->retrieve(inputContainer, m_inputContainer) );
-
   outputContainer->set_unit(inputContainer->get_unit());
   outputContainer->set_type(inputContainer->get_type());
   outputContainer->set_bsflags(inputContainer->get_bsflags());
@@ -147,11 +131,11 @@ StatusCode TileDigitsGainFilter::execute() {
       }
 
     }
-    CHECK( outputContainer->addCollection (outColl.release()->asDataVector(),
-                                           collIt.hashId()) );
+    ATH_CHECK( outputContainer->addCollection (outColl.release()->asDataVector(), collIt.hashId()) );
   }
 
-  CHECK( evtStore()->record(std::move(outputContainer), m_outputContainer, false) );
+  SG::WriteHandle<TileDigitsContainer> outputDigitsContainer(m_outputContainerKey, ctx);
+  ATH_CHECK( outputDigitsContainer.record(std::move(outputContainer)) );
 
   return StatusCode::SUCCESS;
 }
