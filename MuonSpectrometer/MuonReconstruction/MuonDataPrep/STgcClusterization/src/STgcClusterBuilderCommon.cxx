@@ -340,10 +340,18 @@ std::optional<Muon::STgcClusterPosition> Muon::STgcClusterBuilderCommon::caruana
     return std::nullopt;
   }
   
+  
+  Amg::Vector3D globalClusterPos {detEl->surface(clusterId).transform()*Amg::Vector3D{reconstructedPosX, 0,0}}; 
+  Amg::Vector3D clusDir{ NswClustering::toLocal(detEl->surface(clusterId), globalClusterPos) };
+  
   NswErrorCalibData::Input errorCalibIn{};
   errorCalibIn.stripId = clusterId;
   errorCalibIn.clusterAuthor = static_cast<unsigned>(sTgcPrepData::Author::Caruana);
-  errorCalibIn.clusterError = std::sqrt(sigmaSq);
+  errorCalibIn.clusterError = std::sqrt(sigmaSq); 
+  errorCalibIn.locPhi = clusDir.phi();
+  errorCalibIn.locTheta = clusDir.theta();
+  errorCalibIn.localPos = Amg::Vector2D{reconstructedPosX, 0};
+  errorCalibIn.clusterSize = cluster.size();
 
   const double localUncertainty = m_errorCalibData.clusterUncertainty(errorCalibIn);
 
