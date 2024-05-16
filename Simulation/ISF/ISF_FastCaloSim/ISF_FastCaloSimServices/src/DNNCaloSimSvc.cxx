@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -100,6 +100,7 @@ StatusCode ISF::DNNCaloSimSvc::initialize()
   const FCALDetectorManager * fcalManager=nullptr;
   ATH_CHECK(detStore()->retrieve(fcalManager));
 
+  // cppcheck-suppress nullPointerRedundantCheck; false positive
   const CaloIdManager* caloId_mgr = m_caloDetDescrManager->getCalo_Mgr();
   m_emID = caloId_mgr->getEM_ID();
   
