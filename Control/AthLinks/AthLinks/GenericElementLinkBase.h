@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,8 +19,10 @@
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthLinks/tools/selection_ns.h"
 #include "AthLinks/DataLinkBase.h"
+#include "AthenaKernel/getThinningCache.h"
 #include "CxxUtils/CachedValue.h"
 #include "CxxUtils/checker_macros.h"
+#include <concepts>
 
 
 // Forward declaration(s):
@@ -37,6 +39,9 @@ class ElementLinkBaseT_test;
 
 
 namespace SG {
+
+
+class ThinningCache;
 
 
 /**
@@ -188,6 +193,30 @@ public:
    * is not in SG.
    */
   bool toPersistent();
+
+
+  /**
+   * @brief Adjust for thinning.
+   *
+   * If this link points to a container that has been thinned,
+   * it will be adjusted accordingly.
+   *
+   * Returns @c true if the link was changed; @c false otherwise.
+   */
+  bool thin();
+
+
+  /**
+   * @brief Adjust for thinning.
+   *
+   * If this link points to a container that has been thinned,
+   * it will be adjusted accordingly.
+   * @param thinningCache Thinning cache for the current stream
+   *                      (may be null).
+   *
+   * Returns @c true if the link was changed; @c false otherwise.
+   */
+  bool thin (const SG::ThinningCache* thinningCache);
 
 
 protected:
@@ -456,6 +485,45 @@ protected:
 
 
 private:
+  /**
+   * @brief Adjust for thinning.
+   *
+   * If this link points to a container that has been thinned,
+   * it will be adjusted accordingly.
+   * @param Index of the element.
+   * @param thinningCache Thinning cache for the current stream
+   *                      (may be null).
+   *
+   * Returns @c true if the link was changed; @c false otherwise.
+   *
+   * This overload will be used for the case where thinning is supported:
+   * the index can be interconverted with size_t.
+   */
+  template <class INDEX>
+  requires (std::convertible_to<INDEX, size_t> &&
+            std::convertible_to<size_t, INDEX>)
+  bool thin1 (INDEX& persIndex,const SG::ThinningCache* thinningCache);
+
+
+  /**
+   * @brief Adjust for thinning.
+   *
+   * If this link points to a container that has been thinned,
+   * it will be adjusted accordingly.
+   * @param Index of the element.
+   * @param thinningCache Thinning cache for the current stream
+   *                      (may be null).
+   *
+   * Returns @c true if the link was changed; @c false otherwise.
+   *
+   * This overload will be used for the case where thinning is not supported.
+   */
+  template <class INDEX>
+  requires (!(std::convertible_to<INDEX, size_t> &&
+              std::convertible_to<size_t, INDEX>))
+  bool thin1 (INDEX& persIndex,const SG::ThinningCache* thinningCache);
+
+
   template <class OTHER_POLICY>
   friend class GenericElementLinkBase;
 

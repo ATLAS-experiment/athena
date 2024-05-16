@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/GenericElementLinkBase.icc
@@ -34,7 +34,7 @@ inline
 bool
 GenericElementLinkBase<INDEXING_POLICY>::hasCachedElement() const
 {
-  return m_element.isValid();;
+  return m_element.isValid();
 }
 
 
@@ -177,6 +177,99 @@ GenericElementLinkBase<INDEXING_POLICY>::toPersistent()
   if (m_proxy.toPersistent (m_key, m_index))
     m_element.reset();
   return true;
+}
+
+
+/**
+ * @brief Adjust for thinning.
+ *
+ * If this link points to a container that has been thinned,
+ * it will be adjusted accordingly.
+ *
+ * Returns @c true if the link was changed; @c false otherwise.
+ */
+template <class INDEXING_POLICY>
+inline
+bool GenericElementLinkBase<INDEXING_POLICY>::thin()
+{
+  return thin (SG::getThinningCache());
+}
+
+
+/**
+ * @brief Adjust for thinning.
+ * @param thinningCache Thinning cache for the current stream
+ *                      (may be null).
+ *
+ * If this link points to a container that has been thinned,
+ * it will be adjusted accordingly.
+ *
+ * Returns @c true if the link was changed; @c false otherwise.
+ */
+template <class INDEXING_POLICY>
+inline
+bool GenericElementLinkBase<INDEXING_POLICY>::thin (const SG::ThinningCache* thinningCache)
+{
+  return thin1 (m_index, thinningCache);
+}
+
+
+/**
+ * @brief Adjust for thinning.
+ *
+ * If this link points to a container that has been thinned,
+ * it will be adjusted accordingly.
+ * @param Index of the element.
+ * @param thinningCache Thinning cache for the current stream
+ *                      (may be null).
+ *
+ * Returns @c true if the link was changed; @c false otherwise.
+ *
+ * This overload will be used for the case where thinning is supported:
+ * the index can be interconverted with size_t.
+ */
+template <class INDEXING_POLICY>
+template <class INDEX>
+requires (std::convertible_to<INDEX, size_t> &&
+          std::convertible_to<size_t, INDEX>)
+inline
+bool GenericElementLinkBase<INDEXING_POLICY>::thin1 (INDEX& persIndex,
+                                                     const SG::ThinningCache* thinningCache)
+{
+  bool ret1 = toPersistent();
+  size_t index = static_cast<size_t>(persIndex);
+  bool ret = m_proxy.thin (m_key, index, thinningCache);
+  if (ret) {
+    persIndex = static_cast<stored_index_type>(index);
+    m_element.reset();
+  }
+  return ret1  || ret;
+}
+
+
+/**
+ * @brief Adjust for thinning.
+ *
+ * If this link points to a container that has been thinned,
+ * it will be adjusted accordingly.
+ * @param Index of the element.
+ * @param thinningCache Thinning cache for the current stream
+ *                      (may be null).
+ *
+ * Returns @c true if the link was changed; @c false otherwise.
+ *
+ * This overload will be used for the case where thinning is not supported.
+ */
+template <class INDEXING_POLICY>
+template <class INDEX>
+requires (!(std::convertible_to<INDEX, size_t> &&
+            std::convertible_to<size_t, INDEX>))
+inline
+bool GenericElementLinkBase<INDEXING_POLICY>::thin1 (INDEX& /*persIndex*/,
+                                                     const SG::ThinningCache* /*thinningCache*/)
+{
+  throwExcBadThinning (this->proxy() ? this->proxy()->clID() : CLID_NULL,
+                       this->dataID(), this->key());
 }
 
 
