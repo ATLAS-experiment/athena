@@ -326,7 +326,7 @@ TauSelectionCutJetIDWP::TauSelectionCutJetIDWP(TauSelectionTool* tTST)
 //______________________________________________________________________________
 void TauSelectionCutJetIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
-  // FIXME: should this be extended to deepset ID?
+  // FIXME: should this be extended to gntau ID?
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)); 
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose)+2);
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+4);
@@ -365,25 +365,25 @@ bool TauSelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
   case JETIDRNNTIGHT:
     if (xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)) bPass = true;
     break;
-  case JETIDDEEPSETVERYLOOSE:
-    static const SG::AuxElement::ConstAccessor<char> acc_deepSetVeryLoose("JetDeepSetVeryLoose");
-    if (!acc_deepSetVeryLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet VeryLoose WP not available" << endmsg;
-    else bPass = acc_deepSetVeryLoose(xTau);
+  case JETIDGNTAUVERYLOOSE:
+    static const SG::AuxElement::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v0");
+    if (!acc_gnTauVeryLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau VeryLoose WP not available" << endmsg;
+    else bPass = acc_gnTauVeryLoose(xTau);
     break;
-  case JETIDDEEPSETLOOSE:
-    static const SG::AuxElement::ConstAccessor<char> acc_deepSetLoose("JetDeepSetLoose");
-    if (!acc_deepSetLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet Loose WP not available" << endmsg;
-    else bPass = acc_deepSetLoose(xTau);
+  case JETIDGNTAULOOSE:
+    static const SG::AuxElement::ConstAccessor<char> acc_gnTauLoose("GNTauL_v0");
+    if (!acc_gnTauLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Loose WP not available" << endmsg;
+    else bPass = acc_gnTauLoose(xTau);
     break;
-  case JETIDDEEPSETMEDIUM:
-    static const SG::AuxElement::ConstAccessor<char> acc_deepSetMedium("JetDeepSetMedium");
-    if (!acc_deepSetMedium.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet Medium WP not available" << endmsg;
-    else bPass = acc_deepSetMedium(xTau);
+  case JETIDGNTAUMEDIUM:
+    static const SG::AuxElement::ConstAccessor<char> acc_gnTauMedium("GNTauM_v0");
+    if (!acc_gnTauMedium.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Medium WP not available" << endmsg;
+    else bPass = acc_gnTauMedium(xTau);
     break;
-  case JETIDDEEPSETTIGHT:
-    static const SG::AuxElement::ConstAccessor<char> acc_deepSetTight("JetDeepSetTight");
-    if (!acc_deepSetTight.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "DeepSet Tight WP not available" << endmsg;
-    else bPass = acc_deepSetTight(xTau);
+  case JETIDGNTAUTIGHT:
+    static const SG::AuxElement::ConstAccessor<char> acc_gnTauTight("GNTauT_v0");
+    if (!acc_gnTauTight.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Tight WP not available" << endmsg;
+    else bPass = acc_gnTauTight(xTau);
     break;
   default:
     m_tTST->msg() << MSG::WARNING << "The jet ID working point with the enum " << m_tTST->m_iJetIDWP << " is not available" << endmsg;

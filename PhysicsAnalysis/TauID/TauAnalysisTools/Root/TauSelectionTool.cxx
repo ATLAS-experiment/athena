@@ -539,10 +539,10 @@ int TauSelectionTool::convertStrToJetIDWP(const std::string& sJetIDWP) const
   else if (sJetIDWP == "JETIDRNNLOOSE")     return int(JETIDRNNLOOSE);
   else if (sJetIDWP == "JETIDRNNMEDIUM")    return int(JETIDRNNMEDIUM);
   else if (sJetIDWP == "JETIDRNNTIGHT")     return int(JETIDRNNTIGHT);
-  else if (sJetIDWP == "JETIDDEEPSETVERYLOOSE") return int(JETIDDEEPSETVERYLOOSE);
-  else if (sJetIDWP == "JETIDDEEPSETLOOSE")     return int(JETIDDEEPSETLOOSE);
-  else if (sJetIDWP == "JETIDDEEPSETMEDIUM")    return int(JETIDDEEPSETMEDIUM);
-  else if (sJetIDWP == "JETIDDEEPSETTIGHT")     return int(JETIDDEEPSETTIGHT);
+  else if (sJetIDWP == "JETIDGNTAUVERYLOOSE") return int(JETIDGNTAUVERYLOOSE);
+  else if (sJetIDWP == "JETIDGNTAULOOSE")     return int(JETIDGNTAULOOSE);
+  else if (sJetIDWP == "JETIDGNTAUMEDIUM")    return int(JETIDGNTAUMEDIUM);
+  else if (sJetIDWP == "JETIDGNTAUTIGHT")     return int(JETIDGNTAUTIGHT);
 
   ATH_MSG_ERROR( "jet ID working point "<<sJetIDWP<<" is unknown, the JetIDWP cut will not accept any tau!" );
   return -1;
@@ -577,14 +577,14 @@ std::string TauSelectionTool::convertJetIDWPToStr(int iJetIDWP) const
     return "JETIDRNNMEDIUM";
   case JETIDRNNTIGHT:
     return "JETIDRNNTIGHT";
-  case JETIDDEEPSETVERYLOOSE:
-    return "JETIDDEEPSETVERYLOOSE";
-  case JETIDDEEPSETLOOSE:
-    return "JETIDDEEPSETLOOSE";
-  case JETIDDEEPSETMEDIUM:
-    return "JETIDDEEPSETMEDIUM";
-  case JETIDDEEPSETTIGHT:
-    return "JETIDDEEPSETTIGHT";
+  case JETIDGNTAUVERYLOOSE:
+    return "JETIDGNTAUVERYLOOSE";
+  case JETIDGNTAULOOSE:
+    return "JETIDGNTAULOOSE";
+  case JETIDGNTAUMEDIUM:
+    return "JETIDGNTAUMEDIUM";
+  case JETIDGNTAUTIGHT:
+    return "JETIDGNTAUTIGHT";
 
   default:
     ATH_MSG_WARNING( "JetID working point with enum " << iJetIDWP << " is unknown, the JetIDWP cut will not accept any tau!" );
