@@ -609,15 +609,17 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 	double mass = Trk::ParticleMasses::mass[ childType[i] ];
 
 	// create the particle
+        const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+        const int id = HepMC::UNDEFINED_ID;
 	ISF::ISFParticle *child = new ISF::ISFParticle ( vertex,
 							 childP,
 							 mass,
 							 charge[i],
 							 pdgid[i],
-							 1 + HepMC::SIM_STATUS_THRESHOLD,
+							 status,
 							 time,
 							 *parent,
-                                                         0 // FIXME hardcoded id
+                                                         id
                                                          );
 	// in the validation mode, add process info
 	if (m_validationMode) {
@@ -678,6 +680,7 @@ bool iFatras::HadIntProcessorParametric::doHadronicInteraction(double time, cons
   // push onto ParticleStack
 
   if (processSecondaries && !ispVec.empty() ) {
+     // FIXME Check this doesn't cause problems in the TruthSvc
        for (unsigned int ic=0; ic<ispVec.size(); ic++) {
  	        if (!ispVec[ic]->getTruthBinding()) {
  	                ispVec[ic]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
@@ -716,6 +719,7 @@ bool iFatras::HadIntProcessorParametric::recordHadState(double time, double p,
 
   // push onto ParticleStack
   if (!ispVec.empty() ) {
+    // FIXME Check this doesn't cause problems in the TruthSvc
 	for (unsigned int ic=0; ic<ispVec.size(); ic++) {
 	        if (!ispVec[ic]->getTruthBinding()) {
 	                ispVec[ic]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));

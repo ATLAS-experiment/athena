@@ -242,16 +242,18 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
     ISF::ISFParticleVector children(nchild);
 
     int ichild = 0;
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     if (  p1 > m_minChildEnergy ) {
       ISF::ISFParticle* ch1 = new ISF::ISFParticle( vertex,
-                                               p1*childDirection,
-                                               mass,
-                                               charge1,
-                                               pdg1,
-                                               1 + HepMC::SIM_STATUS_THRESHOLD,
-                                               time,
-                                               *parent,
-                                                    0 // FIXME hard-coded id
+                                                    p1*childDirection,
+                                                    mass,
+                                                    charge1,
+                                                    pdg1,
+                                                    status,
+                                                    time,
+                                                    *parent,
+                                                    id
                                                     );
       // in the validation mode, add process info
       if (m_validationMode) {
@@ -262,6 +264,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
         ch1->setUserInformation(validInfo);
       }
       children[ichild] = ch1;
+      // FIXME Check this doesn't cause problems in the TruthSvc
       if (!ch1->getTruthBinding()) {
 	ch1->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
       }
@@ -271,14 +274,14 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
 
     if (  p2 > m_minChildEnergy ) {
       ISF::ISFParticle* ch2  = new ISF::ISFParticle( vertex,
-                                               p2*childDirection,
-                                               mass,
-                                               charge2,
-                                               pdg2,
-                                               1 + HepMC::SIM_STATUS_THRESHOLD,
-                                               time,
-                                               *parent,
-                                                     0 // FIXME hard-coded id
+                                                     p2*childDirection,
+                                                     mass,
+                                                     charge2,
+                                                     pdg2,
+                                                     status,
+                                                     time,
+                                                     *parent,
+                                                     id
                                                      );
       
       // in the validation mode, add process info
@@ -290,6 +293,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
         ch2->setUserInformation(validInfo);
       }
       children[ichild] = ch2;
+      // FIXME Check this doesn't cause problems in the TruthSvc
       if (!ch2->getTruthBinding()) {
         ch2->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
       }
@@ -350,16 +354,17 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
     int    pdg2  = s_pdgToHypo.convert(childType, charge2, false);
 
     // removal of soft children to be done in layer mat updator
-
+    const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+    const int id = HepMC::UNDEFINED_ID; // This will be set if the child particle is saved to the GenEvent
     std::unique_ptr<ISF::ISFParticle> ch1(new ISF::ISFParticle(vertex,
                                                                p1*childDirection,
                                                                mass,
                                                                charge1,
                                                                pdg1,
-                                                               1,
+                                                               status,
                                                                time,
                                                                *parent,
-                                                               0 // FIXME hard-coded id
+                                                               id
                                                                ));
     
     std::unique_ptr<ISF::ISFParticle> ch2(new ISF::ISFParticle(vertex,
@@ -367,10 +372,10 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                                                mass,
                                                                charge2,
                                                                pdg2,
-                                                               1,
+                                                               status,
                                                                time,
                                                                *parent,
-                                                               0 // FIXME hard-coded id
+                                                               id
                                                                ));
 
     ISF::ISFParticleVector children{ch1.release(),
@@ -385,6 +390,7 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
     m_truthRecordSvc->registerTruthIncident( truth);
 
     //Make sure the conversion products get a chance to have correct truth info before pushing into the particle broker
+    // FIXME Check this doesn't cause problems later in the TruthSvc
     if (!children[0]->getTruthBinding()) {
         children[0]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
     }
