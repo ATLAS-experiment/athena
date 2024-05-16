@@ -9,6 +9,7 @@ find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead)
 atlas_add_library( CrackRegionGeoModel
 		   src/*.cxx
 		   PUBLIC_HEADERS CrackRegionGeoModel
+		   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
 		   LINK_LIBRARIES ${GEOMODEL_LIBRARIES}
 		   PRIVATE_LINK_LIBRARIES GaudiKernel GeoModelUtilities StoreGateLib RDBAccessSvcLib )
 

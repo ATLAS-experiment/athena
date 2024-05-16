@@ -14,6 +14,7 @@ atlas_add_library( PixelReadoutGeometryLib
   src/PixelDetectorManager.cxx
   src/PixelModuleDesign.cxx
   PUBLIC_HEADERS PixelReadoutGeometry
+  INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel CxxUtils GaudiKernel GeoPrimitives InDetIdentifier InDetReadoutGeometry PixelReadoutDefinitionsLib ReadoutGeometryBase TrkDetElementBase TrkSurfaces
   PRIVATE_LINK_LIBRARIES AthenaBaseComps AthenaPoolUtilities DetDescrConditions Identifier StoreGateLib TrkEventPrimitives InDetGeoModelUtils)
 

@@ -10,4 +10,5 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_component( GeoModelEnvelopes
                      src/*.cxx
                      src/components/*.cxx
+		     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GaudiKernel GeoModelInterfaces GeoModelUtilities SGTools StoreGateLib )
