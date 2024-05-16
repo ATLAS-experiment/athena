@@ -78,15 +78,16 @@ foreach( name CscMcDataCnv_p1_test CscSimDataCnv_p1_test
       )
 
    atlas_add_test( ${name}
-      SOURCES test/${name}.cxx
-      LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GaudiKernel TrkSurfaces TrkEventTPCnv TestTools
-      StoreGateLib TPTools AGDDKernel AGDDControl AtlasDetDescr 
-      IdDict IdDictDetDescr IdDictParser InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry
-      MuonAGDDDescription MuonReadoutGeometry MuonIdHelpersLib
-      TrkEventPrimitives TrkPseudoMeasurementOnTrack MuonEventTPCnv AthenaKernel
-      LOG_IGNORE_PATTERN "MultiRange built successfully|element hash max|DEBUG|Strip range"
-      PROPERTIES TIMEOUT 300 )
+     SOURCES test/${name}.cxx
+     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
+     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GaudiKernel TrkSurfaces TrkEventTPCnv TestTools
+     StoreGateLib TPTools AGDDKernel AGDDControl AtlasDetDescr 
+     IdDict IdDictDetDescr IdDictParser InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry
+     MuonAGDDDescription MuonReadoutGeometry MuonIdHelpersLib
+     TrkEventPrimitives TrkPseudoMeasurementOnTrack MuonEventTPCnv AthenaKernel
+     LOG_IGNORE_PATTERN "MultiRange built successfully|element hash max|DEBUG|Strip range"
+     PROPERTIES TIMEOUT 300 )
    set_target_properties ( MuonEventTPCnv_${name} PROPERTIES ENABLE_EXPORTS True )
-
+   
 endforeach()
 

@@ -18,8 +18,10 @@ set( CMAKE_AUTORCC TRUE )
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Component(s) in the package:
+
 atlas_add_library( VP1TrackingGeometrySystems VP1TrackingGeometrySystems/*.h src/*.h src/*.cxx src/*.qrc  
                    PUBLIC_HEADERS VP1TrackingGeometrySystems
+		   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} TrkVolumes VP1Base GL
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} GeoPrimitives GaudiKernel StoreGateLib TrkDetDescrInterfaces TrkDetDescrUtils TrkGeometry VP1HEPVis VP1Utils )
