@@ -110,13 +110,15 @@ namespace Muon {
             const MuonSegmentCombinationCollection*, const EventContext& ctx) const override;
 
     private:
+        using TgcEdge = TgcClusterObj3D::Edge;
+
         void getSectors(const Amg::Vector3D& pos, std::vector<int>& sectors) const;
         void getSectors(const TgcClusterObj3D& tgc, std::vector<int>& sectors) const;
 
         double rCor(const Amg::Vector3D& pos, const Identifier& id) const;
         double rCor(const MuonCluster& rpc) const;
         double rCor(const MdtPrepData& mdt) const;
-        double rCor(const TgcClusterObj3D& tgc, int val, int sector) const;
+        double rCor(const TgcClusterObj3D& tgc, const TgcEdge val, int sector) const;
 
         int sublay(const Identifier& id, float z = 0) const;  // the z value is only used for the tgcs
 
@@ -216,7 +218,7 @@ namespace Muon {
     };
 
     inline void MuonLayerHoughTool::getSectors(const TgcClusterObj3D& tgc, std::vector<int>& sectors) const {
-        return getSectors(tgc.p11, sectors);
+        getSectors(tgc.getEdge(TgcEdge::LowEtaLowPhi), sectors);
     }
 
     inline void MuonLayerHoughTool::getSectors(const Amg::Vector3D& pos, std::vector<int>& sectors) const {
@@ -231,8 +233,8 @@ namespace Muon {
 
     inline double MuonLayerHoughTool::rCor(const MdtPrepData& mm) const { return rCor(mm.globalPosition(), mm.identify()); }
 
-    inline double MuonLayerHoughTool::rCor(const TgcClusterObj3D& tgc, int val, int sector) const {
-        const Amg::Vector3D& pos = val == 1 ? tgc.p11 : (val == 2 ? tgc.p12 : (val == 3 ? tgc.p21 : tgc.p22));
+    inline double MuonLayerHoughTool::rCor(const TgcClusterObj3D& tgc, const TgcEdge val, int sector) const {
+        const Amg::Vector3D& pos{tgc.getEdge(val)};
         return m_sectorMapping.transformRToSector(pos.perp(), pos.phi(), sector);
     }
 

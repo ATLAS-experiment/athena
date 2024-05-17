@@ -1161,7 +1161,7 @@ namespace MuonCombined {
             ATH_MSG_DEBUG("hit x,y_min,y_max,w = " << (*hit)->x << "," << (*hit)->ymin << "," << (*hit)->ymax << "," << (*hit)->w);
             // treat the case that the hit is a composite TGC hit
             if ((*hit)->tgc) {
-                for (const auto& prd : (*hit)->tgc->etaCluster.hitList) handleCluster(*prd, clusters);
+                for (const auto& prd : (*hit)->tgc->etaCluster) handleCluster(*prd, clusters);
             } else if ((*hit)->prd) {
                 Identifier id = (*hit)->prd->identify();
                 if (m_idHelperSvc->isMdt(id))
@@ -1359,10 +1359,10 @@ namespace MuonCombined {
             const MuonHough::MuonPhiLayerHough::Maximum& maximum = **pit;
             for (const std::shared_ptr<MuonHough::PhiHit>& hit : maximum.hits) {
                 // treat the case that the hit is a composite TGC hit
-                if (hit->tgc && !hit->tgc->phiCluster.hitList.empty()) {
-                    Identifier id = hit->tgc->phiCluster.hitList.front()->identify();
+                if (hit->tgc) {
+                    Identifier id = hit->tgc->phiCluster.front()->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
-                    for (const Muon::MuonCluster* prd : hit->tgc->phiCluster.hitList) handleCluster(*prd, phiClusterOnTracks);
+                    for (const Muon::MuonCluster* prd : hit->tgc->phiCluster) handleCluster(*prd, phiClusterOnTracks);
                 } else if (hit->prd && !(hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData))) {
                     const Identifier id = hit->prd->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;

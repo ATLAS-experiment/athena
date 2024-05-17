@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MOOSEGMENTFINDERS_MUOSEGMENTFINDERALGS_H
@@ -7,25 +7,17 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CscSegmentMakers/ICscSegmentFinder.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPattern/MuonPatternChamberIntersect.h"
-#include "MuonPrepRawData/CscPrepDataCollection.h"
-#include "MuonPrepRawData/MdtPrepDataCollection.h"
-#include "MuonPrepRawData/RpcPrepDataCollection.h"
-#include "MuonPrepRawData/TgcPrepDataCollection.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
 #include "MuonRecToolInterfaces/IMuonSegmentMaker.h"
 #include "MuonSegment/MuonSegmentCombinationCollection.h"
-#include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinder.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentSelectionTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonNSWSegmentFinderTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonPatternCalibration.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonSegmentOverlapRemovalTool.h"
 #include "TrkSegment/SegmentCollection.h"
-#include "TrkTruthData/PRD_MultiTruthCollection.h"
 
 class MuonSegmentFinderAlg : public AthReentrantAlgorithm {
 public:
@@ -57,11 +49,6 @@ private:
         this,
         "SegmentMaker",
         "Muon::DCMathSegmentMaker/DCMathSegmentMaker",
-    };
-    ToolHandle<Muon::IMuonClusterSegmentFinder> m_clusterSegMaker{
-        this,
-        "MuonClusterSegmentFinder",
-        "Muon::MuonClusterSegmentFinder/MuonClusterSegmentFinder",
     };
     ToolHandle<Muon::IMuonSegmentOverlapRemovalTool> m_segmentOverlapRemovalTool{
         this,
@@ -111,41 +98,11 @@ private:
         "CSC_Clusters",
         "CSC PRDs",
     };
-    SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtPrdsKey{
-        this,
-        "MDT_PRDs",
-        "MDT_DriftCircles",
-        "MDT PRDs",
-    };
-    SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_rpcPrdsKey{
-        this,
-        "RPC_PRDs",
-        "RPC_Measurements",
-        "RPC PRDs",
-    };
-    SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_tgcPrdsKey{
-        this,
-        "TGC_PRDs",
-        "TGC_Measurements",
-        "TGC PRDs",
-    };
     SG::ReadHandleKey<MuonPatternCombinationCollection> m_patternCollKey{
         this,
         "MuonLayerHoughCombisKey",
         "MuonLayerHoughCombis",
         "Hough combinations",
-    };
-    SG::ReadHandleKey<PRD_MultiTruthCollection> m_tgcTruth{
-        this,
-        "TGCTruth",
-        "TGC_TruthMap",
-        "TGC PRD Multi-truth Collection",
-    };
-    SG::ReadHandleKey<PRD_MultiTruthCollection> m_rpcTruth{
-        this,
-        "RPCTruth",
-        "RPC_TruthMap",
-        "RPC PRD Multi-truth Collection",
     };
 
     StatusCode createSegmentsWithMDTs(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segs) const;
@@ -165,9 +122,6 @@ private:
 
 
     Gaudi::Property<bool> m_printSummary{this, "PrintSummary", false};
-    Gaudi::Property<bool> m_doTGCClust{this, "doTGCClust", false, "selection flags for cluster based segment finding"};
-    Gaudi::Property<bool> m_doRPCClust{this, "doRPCClust", false, "selection flags for cluster based segment finding"};
-    Gaudi::Property<bool> m_doClusterTruth{this, "doClusterTruth", false, "selection flags for cluster based segment finding"};
 
     /// Run segment finding with eta / phi determination
     Gaudi::Property<bool> m_doFullFinder{this, "FullFinder", true}; 
