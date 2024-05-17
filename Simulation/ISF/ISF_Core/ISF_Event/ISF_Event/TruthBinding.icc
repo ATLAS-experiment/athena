@@ -88,4 +88,9 @@ namespace ISF {
   HepMC::ConstGenParticlePtr TruthBinding::getGenerationZeroTruthParticle() const { return m_generationZeroTruthParticle; }
   void                TruthBinding::setGenerationZeroTruthParticle(HepMC::GenParticlePtr p) { m_generationZeroTruthParticle = p; }
 
+  /** Create a TruthBinding for a child particle */
+  TruthBinding* TruthBinding::childTruthBinding(HepMC::GenParticlePtr childP) const {
+    return new TruthBinding(childP, m_primaryTruthParticle, childP);
+  }
+
 } // end ISF namespace

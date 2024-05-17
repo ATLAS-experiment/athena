@@ -59,6 +59,9 @@ namespace ISF {
     inline HepMC::ConstGenParticlePtr getGenerationZeroTruthParticle() const;
     inline void                setGenerationZeroTruthParticle(HepMC::GenParticlePtr p);
 
+    /** Create a TruthBinding for a child particle */
+    inline TruthBinding* childTruthBinding(HepMC::GenParticlePtr childP) const;
+
   private:
     HepMC::GenParticlePtr   m_truthParticle{};               //!< pointer to particle in MC truth
     HepMC::GenParticlePtr   m_primaryTruthParticle{};        //!< pointer to corresponding primary (generator) particle
