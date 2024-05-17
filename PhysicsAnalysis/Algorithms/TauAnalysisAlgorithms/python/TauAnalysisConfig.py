@@ -11,6 +11,8 @@ class TauCalibrationConfig (ConfigBlock):
     def __init__ (self, containerName='') :
         super (TauCalibrationConfig, self).__init__ ()
         self.containerName = containerName
+        self.addOption ('inputContainer', 'TauJets', type=str, 
+            info="select tau input container, by default set to TauJets")     
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
@@ -35,7 +37,7 @@ class TauCalibrationConfig (ConfigBlock):
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisTauJets")
         else :
-            config.setSourceName (self.containerName, "TauJets")
+            config.setSourceName (self.containerName, self.inputContainer)
 
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
@@ -175,8 +177,8 @@ class TauWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
 
 
-def makeTauCalibrationConfig( seq, containerName, postfix = None,
-                              rerunTruthMatching = None):
+def makeTauCalibrationConfig( seq, containerName, inputContainer='TauJets',
+                              postfix = None, rerunTruthMatching = None):
     """Create tau calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -192,6 +194,7 @@ def makeTauCalibrationConfig( seq, containerName, postfix = None,
     """
 
     config = TauCalibrationConfig (containerName)
+    config.setOptionValue ('inputContainer', inputContainer)
     if postfix is not None :
         config.setOptionValue ('postfix', postfix)
     if rerunTruthMatching is not None :
