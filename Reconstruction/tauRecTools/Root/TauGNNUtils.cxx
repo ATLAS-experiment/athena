@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNUtils.h"
@@ -32,6 +32,7 @@ bool GNNVarCalc::compute(const std::string &name, const xAOD::TauJet &tau,
                       const std::vector<const xAOD::TauTrack *> &tracks,
                       std::vector<double> &out) const {
     out.clear();
+    out.reserve(tracks.size());
 
     // Retrieve calculator function
     TrackCalc func = nullptr;
@@ -57,6 +58,7 @@ bool GNNVarCalc::compute(const std::string &name, const xAOD::TauJet &tau,
                       const std::vector<xAOD::CaloVertexedTopoCluster> &clusters,
                       std::vector<double> &out) const {
     out.clear();
+    out.reserve(clusters.size());
 
     // Retrieve calculator function
     ClusterCalc func = nullptr;

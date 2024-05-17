@@ -25,6 +25,7 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   declareProperty("VertexCorrection", m_doVertexCorrection = true);
   declareProperty("DecorateTracks", m_decorateTracks = false);
   declareProperty("TrackClassification", m_doTrackClassification = true);
+  declareProperty("MinTauPt", m_minTauPt = 0.);
 
   // Naming conventions for the network weight files:
   declareProperty("InputLayerScalar", m_input_layer_scalar = "tau_vars");
@@ -82,8 +83,9 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;
   out_pjet(tau) = -1111.0f;
+
   //Skip execution for low-pT taus to save resources
-  if(tau.pt()<13000) {
+  if (tau.pt() < m_minTauPt) {
     return StatusCode::SUCCESS;
   }
 
@@ -129,7 +131,7 @@ StatusCode TauGNNEvaluator::get_tracks(const xAOD::TauJet &tau, std::vector<cons
     std::vector<const xAOD::TauTrack*>::iterator it = tracks.begin();
     while(it != tracks.end()) {
       if((*it)->flag(xAOD::TauJetParameters::unclassified)) {
-  it = tracks.erase(it);
+	it = tracks.erase(it);
       }
       else {
 	++it;
@@ -151,8 +153,7 @@ StatusCode TauGNNEvaluator::get_clusters(const xAOD::TauJet &tau, std::vector<xA
 
   TLorentzVector tauAxis = tauRecTools::getTauAxis(tau, m_doVertexCorrection);
 
-  std::vector<xAOD::CaloVertexedTopoCluster> vertexedClusterList = tau.vertexedClusters();
-  for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList) {
+  for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : tau.vertexedClusters()) {
     TLorentzVector clusterP4 = vertexedCluster.p4();
     if (clusterP4.DeltaR(tauAxis) > m_max_cluster_dr) continue;
       

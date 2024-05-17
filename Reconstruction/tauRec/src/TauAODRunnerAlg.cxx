@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TauAODRunnerAlg.h"
@@ -66,6 +66,7 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
   xAOD::TauJetContainer *newTauCon = outputTauHandle.ptr();
 
   static const SG::AuxElement::Accessor<ElementLink<xAOD::TauJetContainer>> acc_ori_tau_link("originalTauJet");
+  static const SG::AuxElement::Accessor<char> acc_modified("ModifiedInAOD");
 
   for (const xAOD::TauJet *tau : *pTauContainer) {
     // deep copy the tau container
@@ -87,6 +88,21 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
       // relink the tautrack
       linkToTauTrack.toContainedElement(*newTauTrkCon, newTauTrk);
       newTau->addTauTrackLink(linkToTauTrack);
+    }
+
+    // 'ModifiedInAOD' will be overriden by modification tools for relevant candidates
+    acc_modified(*newTau) = static_cast<char>(false);
+
+    StatusCode sc;
+    for (const ToolHandle<ITauToolBase> &tool : m_modificationTools) {
+      ATH_MSG_DEBUG("RunnerAlg Invoking tool " << tool->name());
+      sc = tool->execute(*newTau);
+      if (sc.isFailure()) break;
+    }
+
+    // if tau candidate was not modified, remove it from container, track cleanup performed by thinning algorithm downstream
+    if (!acc_modified(*newTau)) {
+      newTauCon->pop_back();
     }
   }
 
@@ -123,49 +139,34 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
   ATH_CHECK(vertOutHandle.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
   xAOD::VertexContainer* pSecVtxContainer = vertOutHandle.ptr();
 
-  int n_tau_modified = 0;
-  static const SG::AuxElement::Accessor<char> acc_modified("ModifiedInAOD");
-
   for (xAOD::TauJet *pTau : *newTauCon) {
-    // Loop stops when Failure indicated by one of the tools
     StatusCode sc;
-    //add a identifier of if the tau is modifed by the mod tools
-    acc_modified(*pTau) = static_cast<char>(false);
-    // iterate over the copy
-    for (const ToolHandle<ITauToolBase> &tool : m_modificationTools) {
+    for (const ToolHandle<ITauToolBase> &tool : m_officialTools) {
       ATH_MSG_DEBUG("RunnerAlg Invoking tool " << tool->name());
-      sc = tool->execute(*pTau);
+      if (tool->type() == "TauPi0ClusterCreator")
+	sc = tool->executePi0ClusterCreator(*pTau, *neutralPFOContainer, *hadronicClusterPFOContainer, *pi0ClusterContainer);
+      else if (tool->type() == "TauVertexVariables")
+	sc = tool->executeVertexVariables(*pTau, *pSecVtxContainer);
+      else if (tool->type() == "TauPi0ClusterScaler")
+	sc = tool->executePi0ClusterScaler(*pTau, *neutralPFOContainer, *chargedPFOContainer);
+      else if (tool->type() == "TauPi0ScoreCalculator")
+	sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
+      else if (tool->type() == "TauPi0Selector")
+	sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
+      else if (tool->type() == "PanTau::PanTauProcessor")
+	sc = tool->executePanTau(*pTau, *pi0Container, *neutralPFOContainer);
+      else if (tool->type() == "tauRecTools::TauTrackRNNClassifier")
+	sc = tool->executeTrackClassifier(*pTau, *newTauTrkCon);
+      else
+	sc = tool->execute(*pTau);
       if (sc.isFailure()) break;
     }
-    if (sc.isSuccess()) ATH_MSG_VERBOSE("The tau candidate has been modified successfully by the invoked modification tools.");
-    // if tau is not modified by the above tools, never mind running the tools afterward
-    if (static_cast<bool>(isTauModified(pTau))) {
-      n_tau_modified++;
-      for (const ToolHandle<ITauToolBase> &tool : m_officialTools) {
-	ATH_MSG_DEBUG("RunnerAlg Invoking tool " << tool->name());
-	if (tool->type() == "TauPi0ClusterCreator")
-	  sc = tool->executePi0ClusterCreator(*pTau, *neutralPFOContainer, *hadronicClusterPFOContainer, *pi0ClusterContainer);
-	else if (tool->type() == "TauVertexVariables")
-	  sc = tool->executeVertexVariables(*pTau, *pSecVtxContainer);
-	else if (tool->type() == "TauPi0ClusterScaler")
-	  sc = tool->executePi0ClusterScaler(*pTau, *neutralPFOContainer, *chargedPFOContainer);
-	else if (tool->type() == "TauPi0ScoreCalculator")
-	  sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
-	else if (tool->type() == "TauPi0Selector")
-	  sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
-	else if (tool->type() == "PanTau::PanTauProcessor")
-	  sc = tool->executePanTau(*pTau, *pi0Container, *neutralPFOContainer);
-	else if (tool->type() == "tauRecTools::TauTrackRNNClassifier")
-	  sc = tool->executeTrackClassifier(*pTau, *newTauTrkCon);
-	else
-	  sc = tool->execute(*pTau);
-	if (sc.isFailure()) break;
-      }
-      if (sc.isSuccess()) ATH_MSG_VERBOSE("The tau candidate has been modified successfully by the invoked official tools.");
-    }
+    if (sc.isSuccess()) ATH_MSG_VERBOSE("The tau candidate has been modified successfully by the invoked official tools.");
   }
+
   ATH_MSG_VERBOSE("The tau candidate container has been modified by the rest of the tools");
-  ATH_MSG_DEBUG(n_tau_modified << " / " << pTauContainer->size() <<" taus were modified");
+  ATH_MSG_DEBUG(newTauCon->size() << " / " << pTauContainer->size() <<" taus were modified");
+
   return StatusCode::SUCCESS;
 }
 

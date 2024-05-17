@@ -854,6 +854,7 @@ def TauGNNEvaluatorCfg(flags):
                                               MaxTracks = 30,
                                               MaxClusters = 20,
                                               MaxClusterDR = 15.0,
+                                              MinTauPt = flags.Tau.MinPtDAOD,
                                               VertexCorrection = True,
                                               DecorateTracks = False,
                                               InputLayerScalar = "tau_vars",
