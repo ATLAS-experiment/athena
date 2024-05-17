@@ -41,7 +41,7 @@ case $ArtProcess in
 
       dcubeShifterXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml"
       dcubeExpertXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml"
-      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_test_mu100GeV_reco_r24.0.39.root"
+      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_mu100GeV_reco_r24.0.43.root"
 
       echo "compare with 24.0.1"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
