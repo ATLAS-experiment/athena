@@ -5,6 +5,7 @@
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 3999
 # art-output: test_minbias.HITS.pool.root
 # art-output: test_minbias.HITS_FLT.pool.root
 
