@@ -4,7 +4,7 @@
 
 /// local include(s)
 #include "TrackMatchingLookup.h"
-#include "TrackParmetersHelper.h"
+#include "TrackParametersHelper.h"
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
 
 /// gaudi includes
