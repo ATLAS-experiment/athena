@@ -89,6 +89,63 @@ def MC23d(flags):
         flags.Digitization.PU.HighPtMinBiasInputColOffset = -1
 
 
+def MC23HeavyIons2023NoPileUp(flags):
+    """MC23 flags for the 2023 Heavy Ions run (without pile-up)"""
+    flags.Input.MCCampaign = Campaign.MC23a
+
+    flags.Beam.BunchSpacing = 50
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 460000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags)
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+    flags.Trigger.L1.doAlfaCtpin = True
+
+
+def MC23HeavyIons2023(flags):
+    """MC23 flags for the 2023 Heavy Ions run"""
+    flags.Input.MCCampaign = Campaign.MC23a
+
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Input.ConditionsRunNumber = 460000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
+    LArConfigRun3NoPileUp(flags) # TO CHECK is this actually what we want c.f. LArConfigRun3PileUp
+
+    # radiation damage
+    from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
+    flags.Digitization.PixelPlanarRadiationDamageSimulationType = PixelRadiationDamageSimulationType.RamoPotential
+
+    # pile-up
+    flags.Digitization.PileUp = True
+    flags.Digitization.DoXingByXingPileUp = True
+    flags.Digitization.PU.BunchStructureConfig = "RunDependentSimData.BunchStructureHeavyIon2022"
+    flags.Digitization.PU.InitialBunchCrossing = 0
+    flags.Digitization.PU.FinalBunchCrossing = 0
+    flags.Digitization.PU.NumberOfCavern = 1 # We are using the Cavern Background input for the Hijing HITS-level events
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags) # TO CHECK is it an issue if this is set for RDOtoRDOTrigger?
+    flags.Reco.EnableZDC = False # TO CHECK is this actually needed? I think it should be False by default
+
+    #all
+    flags.Trigger.AODEDMSet = 'AODFULL'
+    flags.Trigger.triggerMenuSetup = 'Dev_HI_run3_v1_TriggerValidation_prescale'
+    flags.Trigger.L1.doAlfaCtpin = True
+
+
 def MC23aSingleBeamspot(flags):
     """MC23a flags for MC to match 2022 Run 3 data (single beamspot version)"""
     MC23a(flags)
@@ -210,6 +267,15 @@ def MC23SimulationLowMuRun(flags):
     MC23SimulationNoIoV(flags)
 
     flags.Input.RunNumber = [420000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1] # dummy value
+
+
+def MC23Simulation2023HeavyIonRun(flags):
+    """MC23 flags for simulation simulation of the 2023 Heavy Ion run"""
+    MC23SimulationNoIoV(flags)
+
+    flags.Input.RunNumber = [460000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumber = [1] # dummy value
 

@@ -17,4 +17,4 @@ jobproperties.LArDigitizationFlags.useFcalHighGain.set_Value_and_Lock(True)    #
 if jobproperties.Beam.numberOfCollisions() != 0:
    from AthenaCommon.Logging import logging
    mlog = logging.getLogger ('SetLArConfigRun2')
-   mlog.error("Beam.numberOfCollisions %f different from what is expected for Run2 no pileup digi/reco ", jobproperties.Beam.numberOfCollisions) 
+   mlog.error("Beam.numberOfCollisions %f different from what is expected for Run2 no pileup digi/reco ", jobproperties.Beam.numberOfCollisions())
