@@ -42,7 +42,7 @@ LUCID_SimHit::LUCID_SimHit(short tubeID,
 
   m_tubeID       (tubeID),
   m_pdgCode      (pdgCode),
-  m_partLink     (truthBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
+  m_partLink     (truthBarcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
   m_genVolume    (genVolume),
   m_stepStartPosX(stepStartPosX),
   m_stepStartPosY(stepStartPosY),

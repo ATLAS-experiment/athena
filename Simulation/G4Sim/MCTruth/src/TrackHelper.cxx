@@ -51,8 +51,8 @@ HepMcParticleLink TrackHelper::GetParticleLink()
 {
   // FIXME update to use HepMcParticleLink::IS_POSITION ATLASSIM-6999
 #if defined(HEPMC3)
-  return HepMcParticleLink(this->GetUniqueID(), 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+  return HepMcParticleLink(this->GetUniqueID(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
 #else
-  return HepMcParticleLink(this->GetBarcode(), 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
+  return HepMcParticleLink(this->GetBarcode(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
 #endif
 }
