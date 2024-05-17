@@ -3,14 +3,14 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def SeedJetBuilderCfg(ConfigFlags, name="DiTauRec_SeedJetBuilder", **kwargs):
+def SeedJetBuilderCfg(flags, name="DiTauRec_SeedJetBuilder", **kwargs):
     """Configure the seed jet builder"""
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.SeedJetBuilder(name, **kwargs))
     return acc
 
 
-def SubjetBuilderCfg(ConfigFlags, name="DiTauRec_SubjetBuilder", **kwargs):
+def SubjetBuilderCfg(flags, name="DiTauRec_SubjetBuilder", **kwargs):
     """Configure the subjet builder"""
     acc = ComponentAccumulator()
 
@@ -20,7 +20,7 @@ def SubjetBuilderCfg(ConfigFlags, name="DiTauRec_SubjetBuilder", **kwargs):
     acc.setPrivateTools(CompFactory.SubjetBuilder(name, **kwargs))
     return acc
 
-def TVAToolCfg(ConfigFlags, name="TVATool_forDiTaus", **kwargs):
+def TVAToolCfg(flags, name="TVATool_forDiTaus", **kwargs):
     """Configure the TVA tool"""
     acc = ComponentAccumulator()
 
@@ -33,18 +33,18 @@ def TVAToolCfg(ConfigFlags, name="TVATool_forDiTaus", **kwargs):
     acc.setPrivateTools(CompFactory.TrackVertexAssociationTool(name, **kwargs))
     return acc
 
-def JetAlgCfg(ConfigFlags, name="DiTauRec_JetAlgorithm", **kwargs): # Name changed wrt legacy config DiTauRec_TVATool
+def JetAlgCfg(flags, name="DiTauRec_JetAlgorithm", **kwargs): # Name changed wrt legacy config DiTauRec_TVATool
     """Configure the JetAlgorithm"""
     acc = ComponentAccumulator()
 
-    tools = [acc.popToolsAndMerge(TVAToolCfg(ConfigFlags))]
+    tools = [acc.popToolsAndMerge(TVAToolCfg(flags))]
     kwargs.setdefault("Tools", tools)
 
     acc.addEventAlgo(CompFactory.JetAlgorithm(name, **kwargs))
     return acc
 
 # require TrackVertexAssociation to be produced by TVA tool - see above
-def VertexFinderCfg(ConfigFlags, name="DiTauRec_VertexFinder", **kwargs):
+def VertexFinderCfg(flags, name="DiTauRec_VertexFinder", **kwargs):
     """Configure the vertex finder"""
     acc = ComponentAccumulator()
 
@@ -55,7 +55,7 @@ def VertexFinderCfg(ConfigFlags, name="DiTauRec_VertexFinder", **kwargs):
     acc.setPrivateTools(CompFactory.VertexFinder(name, **kwargs))
     return acc
 
-def DiTauTrackFinderCfg(ConfigFlags, name="DiTauRec_DiTauTrackFinder", **kwargs):
+def DiTauTrackFinderCfg(flags, name="DiTauRec_DiTauTrackFinder", **kwargs):
     """Configure the di-tau track finder"""    
     acc = ComponentAccumulator()
     
@@ -65,14 +65,14 @@ def DiTauTrackFinderCfg(ConfigFlags, name="DiTauRec_DiTauTrackFinder", **kwargs)
 
     if "TrackSelectorTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
-        InDetTrackSelectorTool = acc.popToolsAndMerge(TauRecInDetTrackSelectorToolCfg(ConfigFlags))
+        InDetTrackSelectorTool = acc.popToolsAndMerge(TauRecInDetTrackSelectorToolCfg(flags))
         acc.addPublicTool(InDetTrackSelectorTool)
         kwargs.setdefault("TrackSelectorTool", InDetTrackSelectorTool)
 
     acc.setPrivateTools(CompFactory.DiTauTrackFinder(name, **kwargs))
     return acc
 
-def CellFinderCfg(ConfigFlags, name="DiTauRec_CellFinder", **kwargs):
+def CellFinderCfg(flags, name="DiTauRec_CellFinder", **kwargs):
     """Configure the cell finder"""
     acc = ComponentAccumulator()
 
@@ -85,7 +85,7 @@ def CellFinderCfg(ConfigFlags, name="DiTauRec_CellFinder", **kwargs):
     return acc
 
 
-def IDVarCalculatorCfg(ConfigFlags, name="DiTauRec_IDVarCalculator", **kwargs):
+def IDVarCalculatorCfg(flags, name="DiTauRec_IDVarCalculator", **kwargs):
     """Configure the IDVarCalculator"""
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.IDVarCalculator(name, **kwargs))
