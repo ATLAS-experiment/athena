@@ -236,7 +236,8 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Executing " << name() << " ... ");
 
     auto timer = Monitored::Timer<std::chrono::milliseconds>("TIME_execute");
-    auto mon = Monitored::Group(m_monTool, timer);
+    auto mon_nTracks = Monitored::Scalar<int>("nTracks");
+    auto mon = Monitored::Group(m_monTool, timer, mon_nTracks);
 
     // ================================================== //
     // ===================== INPUTS ===================== //
@@ -354,6 +355,8 @@ namespace ActsTrk
     }
 
     ATH_MSG_DEBUG("    \\__ Created " << tracksContainer.size() << " tracks");
+
+    mon_nTracks = tracksContainer.size();
 
     copyStats(event_stat);
 

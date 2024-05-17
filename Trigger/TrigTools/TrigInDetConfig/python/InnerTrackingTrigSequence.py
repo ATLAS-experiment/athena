@@ -5,9 +5,10 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 class InnerTrackingTrigSequence:
 
-  def create(flags : AthConfigFlags, *args, **kwargs) -> InnerTrackerTrigSequence:   
-    
-    if flags.Detector.GeometryITk:
+  def create(flags : AthConfigFlags, *args, **kwargs) -> InnerTrackerTrigSequence:
+    if flags.Trigger.useActsTracking:
+      from TrigInDetConfig.ActsTrigSequence import ActsTrigSequence as InnerTrackingSequence
+    elif flags.Detector.GeometryITk:
       from TrigInDetConfig.ITkTrigSequence import ITkTrigSequence as InnerTrackingSequence
     else:
       from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence as InnerTrackingSequence

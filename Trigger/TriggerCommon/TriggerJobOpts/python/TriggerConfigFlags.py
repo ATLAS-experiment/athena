@@ -472,6 +472,13 @@ def createTriggerRecoFlags():
         return createTrigTrackingPassFlags(mode='ITk')
     flags.addFlagsCategory( 'Trigger.ITkTracking', __idITk )
 
+    def _idActs():
+        from TrigInDetConfig.TrigTrackingPassFlags import createTrigTrackingPassFlags
+        return createTrigTrackingPassFlags(mode='Acts')
+    flags.addFlagsCategory( 'Trigger.ActsTracking', _idActs )
+
+    flags.addFlag('Trigger.useActsTracking', False, help='use ACTS for ITk tracking')
+
     def __trigCalo():
         from TrigCaloRec.TrigCaloConfigFlags import createTrigCaloConfigFlags
         return createTrigCaloConfigFlags()
