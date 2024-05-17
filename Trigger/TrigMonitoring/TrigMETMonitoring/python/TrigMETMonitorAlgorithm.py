@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigMETMonitoringAlgorithm.py
@@ -223,6 +223,12 @@ def TrigMETMonConfig(inputFlags):
     TrigMETMonChain4Alg.algsHLT = algsHLTChain4
     TrigMETMonChain5Alg.algsHLT = algsHLTChain5
     TrigMETMonChain6Alg.algsHLT = algsHLTChain6
+
+    ## PreSel cut
+    l1MetAlg = 1 #0=legacy,1=jFex,2=gFexJWOJ
+    l1MetCut = 48.0 #50.0,48.0,?
+    TrigMETMonAlg.L1MetAlg = l1MetAlg
+    TrigMETMonAlg.L1MetCut = l1MetCut
 
     ### cell component and status bit
     comp_names = ["PreSamplB", "EMB1", "EMB2", "EMB3", # LAr barrel

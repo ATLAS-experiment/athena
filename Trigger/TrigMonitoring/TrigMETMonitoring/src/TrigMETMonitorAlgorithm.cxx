@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "TrigMETMonitorAlgorithm.h"
@@ -674,7 +674,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       }
     }
 
-    // get L1_roiMet_Et for pre-selection
+    // get L1 MET for pre-selection
     float L1_roiMet_Et = 0;
     if ( l1_roi_cont.isValid() ) {
       if ((l1_roi_cont->energyX())>-9e12 && (l1_roi_cont->energyX())<9e12 && (l1_roi_cont->energyY())>-9e12 && (l1_roi_cont->energyY())<9e12) {
@@ -683,6 +683,21 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
            L1_roiMet_Et = std::sqrt(Ex*Ex + Ey*Ey);
       }
     }
+    float L1_jFexMet_Et = 0;
+    if (l1_jFexMet_cont.isValid() && l1_jFexMet_cont->size() > 0) {
+      float L1_met_Ex = 0;
+      float L1_met_Ey = 0;
+      for (const auto l1_jmet: *l1_jFexMet_cont) {
+        L1_met_Ex += l1_jmet->Ex()/Gaudi::Units::GeV;
+        L1_met_Ey += l1_jmet->Ey()/Gaudi::Units::GeV;
+      }
+      L1_jFexMet_Et = std::sqrt(L1_met_Ex*L1_met_Ex + L1_met_Ey*L1_met_Ey);
+    }
+    float L1_gFexJWOJMet_Et = 0;
+
+    float L1_PreSelMet_Et = L1_roiMet_Et;
+    if (m_L1MetAlg == 1) L1_PreSelMet_Et = L1_jFexMet_Et;
+    if (m_L1MetAlg == 2) L1_PreSelMet_Et = L1_gFexJWOJMet_Et;
 
     // access HLT MET values
     for (const std::string& alg : m_algsHLT) {
@@ -795,7 +810,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
         float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
-        if (L1_roiMet_Et > 50. && !std::isnan(hlt_Et)) {
+        if (L1_PreSelMet_Et > m_L1MetCut && !std::isnan(hlt_Et)) {
           auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", hlt_Et);
           fill(tool,met_presel_Et);
         }

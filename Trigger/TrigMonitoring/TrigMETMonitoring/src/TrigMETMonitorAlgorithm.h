@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMETMONITORING_TRIGMETMONITORALGORITHM_H
@@ -99,6 +99,9 @@ class TrigMETMonitorAlgorithm : public AthMonitorAlgorithm {
   Gaudi::Property<std::vector<std::string>> m_algsMET2d_tcpufit{this, "algsMET2d_tcpufit", {}, "HLT algorithms for 2D MET wrt tcpufit"};
   Gaudi::Property<std::vector<std::string>> m_compNames{this, "compNames", {}, "Calorimeter component names"};
   Gaudi::Property<std::vector<std::string>> m_bitNames{this, "bitNames", {}, "Status bit names"};
+
+  Gaudi::Property<int> m_L1MetAlg{this, "L1MetAlg", 1, "L1 MET algorithm for PreSel"}; //0=lagacy, 1=jFex, 2=gFexJWOJ
+  Gaudi::Property<double> m_L1MetCut{this, "L1MetCut", 50.0, "L1 MET cut for PreSel"};
 
   Gaudi::Property<double> m_electronPtCut{this, "electronPtCut", 0.0, "Electron pt cut for leading electron"};
   Gaudi::Property<double> m_electronEtaCut{this, "electronEtaCut", 0.0, "Electron eta cut for leading electron"};
