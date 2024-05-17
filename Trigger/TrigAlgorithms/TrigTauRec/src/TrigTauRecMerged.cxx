@@ -14,7 +14,7 @@
 #include "xAODTracking/VertexContainer.h"
 
 #include "xAODJet/Jet.h"
-#include "xAODJet/JetTrigAuxContainer.h"
+#include "xAODJet/JetAuxContainer.h"
 #include "xAODJet/JetContainer.h"
 
 #include "xAODTau/TauJetContainer.h"
@@ -291,9 +291,9 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     }
 
     std::unique_ptr<xAOD::JetContainer> theJetContainer{std::make_unique<xAOD::JetContainer>()};
-    std::unique_ptr<xAOD::JetTrigAuxContainer> theTrigJetAuxContainer{std::make_unique<xAOD::JetTrigAuxContainer>()};
+    std::unique_ptr<xAOD::JetAuxContainer> theJetAuxContainer{std::make_unique<xAOD::JetAuxContainer>()};
 
-    theJetContainer->setStore(theTrigJetAuxContainer.get());
+    theJetContainer->setStore(theJetAuxContainer.get());
 
     xAOD::Jet *aJet = new xAOD::Jet;
 
@@ -343,7 +343,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
 
     // Save Outputs
     SG::WriteHandle< xAOD::JetContainer > outTauSeedHandle = SG::makeHandle( m_trigtauSeedOutKey,ctx );
-    CHECK( outTauSeedHandle.record( std::move( theJetContainer ), std::move( theTrigJetAuxContainer ) ) );
+    CHECK( outTauSeedHandle.record( std::move( theJetContainer ), std::move( theJetAuxContainer ) ) );
   }
 
   //Check if jetLink is valid for all taus

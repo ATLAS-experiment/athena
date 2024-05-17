@@ -710,8 +710,8 @@ TriggerHLTListRun3 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
 
-    ('xAOD::JetContainer#HLT_jet_seed',                         'BS ESD', 'Tau', [InViews('tauCaloMVAViews')]),
-    ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  'BS ESD', 'Tau'),
+    ('xAOD::JetContainer#HLT_jet_seed',                         '', 'Tau', [InViews('tauCaloMVAViews')]),
+    ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  '', 'Tau'),
 
     # Jet
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
