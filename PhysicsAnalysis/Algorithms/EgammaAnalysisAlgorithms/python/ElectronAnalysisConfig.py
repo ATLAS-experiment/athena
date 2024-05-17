@@ -394,6 +394,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                     PATCore.ParticleDataType.Full
             if config.geometry() == LHCPeriod.Run2:
                 alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
+                alg.efficiencyCorrectionTool.CorrelationModel = "SIMPLIFIED" # remove when Run 2 R25 recommendations are available!
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_isol_bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)
