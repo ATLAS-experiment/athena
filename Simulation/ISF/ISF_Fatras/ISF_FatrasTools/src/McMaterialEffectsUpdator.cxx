@@ -656,7 +656,7 @@ iFatras::McMaterialEffectsUpdator::updateInLay(
       Trk::ParticleHypothesis pHypothesis =
         m_pdgToParticleHypothesis.convert(childs[ic]->pdgCode(), childs[ic]->charge());
       auto cparm = std::make_unique<Trk::CurvilinearParameters>(childs[ic]->position(), childs[ic]->momentum(), childs[ic]->charge());
-      Trk::PathLimit pLim = m_samplingTool->sampleProcess(mom, childs[ic]->charge(), pHypothesis);
+      Trk::PathLimit pLim = m_samplingTool->sampleProcess(m_randomEngine, mom, childs[ic]->charge(), pHypothesis);
 
       // TODO sample decays and save the material collection & path limits at the exit from the layer
       // (ISFFatrasParticle ?)
@@ -1460,7 +1460,7 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
 
 
     // layer update : don't push into particle stack untill destiny resolved
-    Trk::PathLimit pLim = m_samplingTool->sampleProcess(bremPhoton->momentum().mag(),0.,Trk::photon);
+    Trk::PathLimit pLim = m_samplingTool->sampleProcess(m_randomEngine, bremPhoton->momentum().mag(),0.,Trk::photon);
 
     // material fraction : flip if direction of propagation changed
     double ci = m_layer->surfaceRepresentation().normal().dot(particleDir);

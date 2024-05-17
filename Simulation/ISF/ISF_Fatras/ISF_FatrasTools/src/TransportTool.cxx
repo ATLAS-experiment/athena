@@ -262,7 +262,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
     pathLim=Trk::PathLimit( matLimit->dMax,matLimit->process);
     pathLim.updateMat(matLimit->dCollected,13.,0.);          // arbitrary Z choice : update MaterialPathInfo
   } else if (absPdg!=999 && pHypothesis<99) { // need to resample
-    pathLim = m_samplingTool->sampleProcess(isp.momentum().mag(),isp.charge(),pHypothesis);
+    pathLim = m_samplingTool->sampleProcess(m_randomEngine, isp.momentum().mag(),isp.charge(),pHypothesis);
   }
 
   // use extrapolation with path limit - automatic exit at subdetector boundary
