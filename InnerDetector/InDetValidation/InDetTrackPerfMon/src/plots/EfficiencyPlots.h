@@ -2,12 +2,12 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INDETTRACKPERFMON_PLOTS_TRACKPARAMETERSPLOTS_H
-#define INDETTRACKPERFMON_PLOTS_TRACKPARAMETERSPLOTS_H
+#ifndef INDETTRACKPERFMON_PLOTS_EFFICIENCYPLOTS_H
+#define INDETTRACKPERFMON_PLOTS_EFFICIENCYPLOTS_H
 
 /**
- * @file    TrackParametersPlots.h
- * @author  Marco Aparo <marco.aparo@cern.ch> 
+ * @file EfficiencyPlots.h
+ * @author Marco Aparo <Marco.Aparo@cern.ch>
  **/
 
 /// local includes
@@ -16,27 +16,29 @@
 
 namespace IDTPM {
 
-  class TrackParametersPlots : public PlotMgr {
+  class EfficiencyPlots : public PlotMgr {
 
   public:
 
     /// Constructor
-    TrackParametersPlots(
+    EfficiencyPlots(
         PlotMgr* pParent,
         const std::string& dirName,
         const std::string& anaTag,
         const std::string& trackType );
 
     /// Destructor
-    virtual ~TrackParametersPlots() = default;
+    virtual ~EfficiencyPlots() = default;
+
+    /// Dedicated fill method (for tracks and/or truth particles)
+    template< typename PARTICLE >
+    StatusCode fillPlots(
+        const PARTICLE& particle,
+        bool isMatched, float weight );
 
     /// Book the histograms
     void initializePlots(); // needed to override PlotBase
     StatusCode bookPlots();
-
-    /// Dedicated fill method (for tracks and/or truth particles)
-    template< typename PARTICLE >
-    StatusCode fillPlots( const PARTICLE& particle, float weight );
 
     /// Print out final stats on histograms
     void finalizePlots();
@@ -45,12 +47,12 @@ namespace IDTPM {
 
     std::string m_trackType;
 
-    TH1* m_pt;
-    TH1* m_eta;
+    TEfficiency* m_eff_vs_pt;
+    TEfficiency* m_eff_vs_eta;
     /// TODO - include more plots
 
-  }; // class TrackParametersPlots
+  }; // class EfficiencyPlots
 
 } // namespace IDTPM
 
-#endif // > ! INDETTRACKPERFMON_PLOTS_TRACKPARAMETERSPLOTS_H
+#endif // > ! INDETTRACKPERFMON_PLOTS_EFFICIENCYPLOTS_H
