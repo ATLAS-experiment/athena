@@ -236,7 +236,8 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       std::string jesConfigFat = m_jesConfigFat;
       std::string jesCalibSeqFat = m_jesCalibSeqFat;
-      // add Insitu if data (currently missing)
+      // add Insitu if data
+      if(isData()) jesCalibSeqFat += "_Insitu";
 
       // now instantiate the tool
       ATH_CHECK( m_jetFatCalibTool.setProperty("JetCollection", fatjetcoll) );
@@ -265,6 +266,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 #endif
       ATH_CHECK( m_WTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_WTaggerTool.retrieve() );
+
+      // Retrieving DecorationName (needed to access tagging results downstream):
+      std::string WConfigPath = PathResolverFindCalibFile("BoostedJetTaggers/"+m_WZTaggerCalibArea+"/"+m_WtagConfig);
+      if ( m_WconfigReader.ReadFile( WConfigPath.c_str(), EEnvLevel(0) ) ) {
+        ATH_MSG_ERROR( "Error while reading large-R config file : " << WConfigPath );
+        return StatusCode::FAILURE;
+      }
+      else ATH_MSG_DEBUG( "Successfully read large-R config file : " << WConfigPath );
+
+      m_WDecorName = m_WconfigReader.GetValue("DecorationName" ,"");
+      ANA_MSG_DEBUG( "Found DecorationName in large-R config file : " << m_WDecorName );
+
     } else if (m_WTaggerTool.isUserConfigured()) ATH_CHECK(m_WTaggerTool.retrieve());
 
     if (!m_ZTaggerTool.isUserConfigured() && !m_ZtagConfig.empty()) {
@@ -280,6 +293,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 #endif
       ATH_CHECK( m_ZTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_ZTaggerTool.retrieve() );
+
+      // Retrieving DecorationName (needed to access tagging results downstream):
+      std::string ZConfigPath = PathResolverFindCalibFile("BoostedJetTaggers/"+m_WZTaggerCalibArea+"/"+m_ZtagConfig);
+      if ( m_ZconfigReader.ReadFile( ZConfigPath.c_str(), EEnvLevel(0) ) ) {
+        ATH_MSG_ERROR( "Error while reading large-R config file : " << ZConfigPath );
+        return StatusCode::FAILURE;
+      }
+      else ATH_MSG_DEBUG( "Successfully read large-R config file : " << ZConfigPath );
+
+      m_ZDecorName = m_ZconfigReader.GetValue("DecorationName" ,"");
+      ANA_MSG_DEBUG( "Found DecorationName in large-R config file : " << m_ZDecorName );
+
     } else if (m_ZTaggerTool.isUserConfigured()) ATH_CHECK(m_ZTaggerTool.retrieve());
 
     if (!m_TopTaggerTool.isUserConfigured() && !m_ToptagConfig.empty()) {
@@ -295,6 +320,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 #endif
       ATH_CHECK( m_TopTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_TopTaggerTool.retrieve() );
+
+      // Retrieving DecorationName (needed to access tagging results downstream):
+      std::string TopConfigPath = PathResolverFindCalibFile("BoostedJetTaggers/"+m_TopTaggerCalibArea+"/"+m_ToptagConfig);
+      if ( m_TopconfigReader.ReadFile( TopConfigPath.c_str(), EEnvLevel(0) ) ) {
+        ATH_MSG_ERROR( "Error while reading large-R config file : " << TopConfigPath );
+        return StatusCode::FAILURE;
+      }
+      else ATH_MSG_DEBUG( "Successfully read large-R config file : " << TopConfigPath );
+
+      m_TopDecorName = m_TopconfigReader.GetValue("DecorationName" ,"");
+      ANA_MSG_DEBUG( "Found DecorationName in large-R config file : " << m_TopDecorName );
+
     } else if (m_TopTaggerTool.isUserConfigured()) ATH_CHECK(m_TopTaggerTool.retrieve());
 
     ///////////////////////////////////////////////////////////////////////////////////////////

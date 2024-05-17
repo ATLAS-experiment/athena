@@ -72,7 +72,7 @@ namespace ST {
   const static SG::AuxElement::Decorator<int> dec_wtagged("wtagged");
   const static SG::AuxElement::Decorator<int> dec_ztagged("ztagged");
   const static SG::AuxElement::Decorator<int> dec_toptagged("toptagged");
-          
+
   StatusCode SUSYObjDef_xAOD::GetJets(xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& jetkey, const xAOD::JetContainer* containerToBeCopied)
   {
     if (!m_tool_init) {
@@ -300,7 +300,7 @@ namespace ST {
     
 
     for (const auto& jet : *copy) {
-
+      
       ATH_CHECK( this->FillJet(*jet, true, true, doLargeRdecorations) );
       //
       //  For OR, selected if it passed cuts
@@ -405,9 +405,36 @@ namespace ST {
         dec_ztagged(input) = -1;
         dec_toptagged(input) = -1;
         if (doLargeRdecorations) {
-          if (!m_WtagConfig.empty()) dec_wtagged(input) = m_WTaggerTool->tag(input).isSuccess();
-          if (!m_ZtagConfig.empty()) dec_ztagged(input) = m_ZTaggerTool->tag(input).isSuccess();
-          if (!m_ToptagConfig.empty()) dec_toptagged(input) = m_TopTaggerTool->tag(input).isSuccess();
+          ATH_CHECK(m_WTaggerTool->tag(input));
+          ATH_CHECK(m_ZTaggerTool->tag(input));
+          ATH_CHECK(m_TopTaggerTool->tag(input));
+
+          // Retreive large-R tagging results for W/Z/top
+          if (!m_WtagConfig.empty()) {
+            // Only tag jets if they are inside the kinematic range
+            if ( !input.auxdata<bool>(m_WDecorName+"_ValidKinRange") ) {
+              ATH_MSG_VERBOSE("Large-R W candidate jet outside of recommended tagging range. Will set score to 0.");
+              dec_wtagged(input) = 0;
+            }
+            else dec_wtagged(input) = input.auxdata<bool>(m_WDecorName+"_Tagged");
+          }
+          if (!m_ZtagConfig.empty()) {
+            // Only tag jets if they are inside the kinematic range
+            if ( !input.auxdata<bool>(m_ZDecorName+"_ValidKinRange") ) {
+              ATH_MSG_VERBOSE("Large-R Z candidate jet outside of recommended tagging range. Will set score to 0.");
+              dec_ztagged(input) = 0;
+            }
+            else dec_ztagged(input) = input.auxdata<bool>(m_ZDecorName+"_Tagged");
+          }
+          if (!m_ToptagConfig.empty()) {
+            // Only tag jets if they are inside the kinematic range
+            if ( !input.auxdata<bool>(m_TopDecorName+"_ValidKinRange") ) {
+              ATH_MSG_VERBOSE("Large-R Top candidate jet outside of recommended tagging range. Will set score to 0.");
+              dec_toptagged(input) = 0;
+            }
+            else dec_toptagged(input) = input.auxdata<bool>(m_TopDecorName+"_Tagged");
+          }
+
         }
 
         // If a user hasn't specified an uncertainty config, then this tool will be empty
@@ -479,7 +506,7 @@ namespace ST {
         } else {
           ATH_MSG_DEBUG( "No valid fat jet uncertainty, but FillJet called with a fat jet. Skipping uncertainties." );
         }
-
+        ATH_MSG_VERBOSE(  "Large-R jet (pt,eta,phi) after calibration " << input.pt() << " " << input.eta() << " " << input.phi() );
 
         return StatusCode::SUCCESS;
       }
