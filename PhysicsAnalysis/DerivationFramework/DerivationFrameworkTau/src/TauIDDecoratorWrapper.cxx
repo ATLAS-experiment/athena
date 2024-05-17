@@ -21,7 +21,7 @@ namespace DerivationFramework {
 
     // parse the properties of TauWPDecorator tools
     for (const auto& tool : m_tauIDTools) {
-      if ((tool->type() != "TauWPDecorator" )) continue;
+      if (tool->type() != "TauWPDecorator") continue;
 
       // check whether we must compute eVeto WPs, as this requires the recalculation of a variable
       BooleanProperty useAbsEta("UseAbsEta", false);
@@ -86,23 +86,29 @@ namespace DerivationFramework {
     }
     const xAOD::VertexContainer* vtxContainer = vtxReadHandle.cptr();
     const xAOD::Vertex* pVtx = nullptr;
+    float sumpt_PV0 = 0., sumpt2_PV0 = 0.;
 
     // Check that PV container exists and is non-empty, find the PV if possible
-    if(vtxContainer != nullptr && vtxContainer->size()>0) {
-      ATH_MSG_DEBUG("Found vtx container for decorating taus!");
+    if (vtxContainer != nullptr && !vtxContainer->empty()) {
       auto itrVtx = std::find_if(vtxContainer->begin(), vtxContainer->end(),
-                                  [](const xAOD::Vertex* vtx) {
-                                      return vtx->vertexType() == xAOD::VxType::PriVtx;
-                                  });
-      pVtx = (itrVtx == vtxContainer->end() ? 0 : *itrVtx);
-      if(!pVtx){
-        ATH_MSG_WARNING("No PV found, using the first element instead!");
+				 [](const xAOD::Vertex* vtx) {
+				   return vtx->vertexType() == xAOD::VxType::PriVtx;
+				 });
+      pVtx = (itrVtx == vtxContainer->end() ? nullptr : *itrVtx);
+      if (pVtx == nullptr){
+        ATH_MSG_DEBUG("No PV found, using the first element instead!");
         pVtx = vtxContainer->at(0);
+      }
+
+      for (const ElementLink<xAOD::TrackParticleContainer>& trk : pVtx->trackParticleLinks()) {
+	sumpt_PV0 += (*trk)->pt();
+	sumpt2_PV0 += std::pow((*trk)->pt(), 2.);
       }
     }
     
     //Create accessors  
     static const SG::AuxElement::Decorator<float> acc_trackWidth("trackWidth");
+    static const SG::AuxElement::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
     static const SG::AuxElement::Accessor<float> acc_dz0_TV_PV0("dz0_TV_PV0");
     static const SG::AuxElement::Accessor<float> acc_log_sumpt_TV("log_sumpt_TV");
     static const SG::AuxElement::Accessor<float> acc_log_sumpt2_TV("log_sumpt2_TV");
@@ -110,12 +116,10 @@ namespace DerivationFramework {
     static const SG::AuxElement::Accessor<float> acc_log_sumpt2_PV0("log_sumpt2_PV0");
 
     for (const auto tau : *tauContainer) {
-      float tauTrackBasedWidth = 0;
-      // equivalent to
-      // tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)
+      float tauTrackBasedWidth = 0.;
+      // equivalent to tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)
       std::vector<const xAOD::TauTrack *> tauTracks = tau->tracks();
-      for (const xAOD::TauTrack *trk : tau->tracks(
-              xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
+      for (const xAOD::TauTrack *trk : tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
         tauTracks.push_back(trk);
       }
       double sumWeightedDR = 0.;
@@ -125,7 +129,7 @@ namespace DerivationFramework {
           sumWeightedDR += deltaR * track->pt();
           ptSum += track->pt();
       }
-      if (ptSum > 0) {
+      if (ptSum > 0.) {
         tauTrackBasedWidth = sumWeightedDR / ptSum;
       }
 
@@ -134,22 +138,16 @@ namespace DerivationFramework {
 
     // create shallow copy
     auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer);
-    
-    static const SG::AuxElement::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
 
     for (auto tau : *shallowCopy.first) {
       
       //Add in the TV/PV0 vertex variables needed for some calculators in TauGNNUtils.cxx (for GNTau)
-      float dz0_TV_PV0 = -999., sumpt_TV = 0., sumpt2_TV = 0., sumpt_PV0 = 0., sumpt2_PV0 = 0.;
-      if(pVtx!=nullptr) {
+      float dz0_TV_PV0 = -999., sumpt_TV = 0., sumpt2_TV = 0.;
+      if (pVtx!=nullptr) {
         dz0_TV_PV0 = tau->vertex()->z() - pVtx->z();
-        for (const ElementLink<xAOD::TrackParticleContainer>& trk : pVtx->trackParticleLinks()) {
-          sumpt_PV0 += (*trk)->pt();
-          sumpt2_PV0 += pow((*trk)->pt(), 2.);
-        }
         for (const ElementLink<xAOD::TrackParticleContainer>& trk : tau->vertex()->trackParticleLinks()) {
           sumpt_TV += (*trk)->pt();
-          sumpt2_TV += pow((*trk)->pt(), 2.);
+          sumpt2_TV += std::pow((*trk)->pt(), 2.);
         }
       }
       acc_dz0_TV_PV0(*tau) = dz0_TV_PV0;
@@ -157,7 +155,6 @@ namespace DerivationFramework {
       acc_log_sumpt2_TV(*tau) = (sumpt2_TV>0.) ? std::log(sumpt2_TV) : 0.;
       acc_log_sumpt_PV0(*tau) = (sumpt_PV0>0.) ? std::log(sumpt_PV0) : 0.;
       acc_log_sumpt2_PV0(*tau) = (sumpt2_PV0>0.) ? std::log(sumpt2_PV0) : 0.;
-      //End of vertex variable addition block  
 
       // ABS_ETA_LEAD_TRACK is removed from the AOD content and must be redecorated when computing eVeto WPs
       // note: this redecoration is not robust against charged track thinning, but charged tracks should never be thinned      

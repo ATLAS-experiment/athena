@@ -16,11 +16,6 @@
 #include <string>
 #include <map>
 
-// Forward declaration
-namespace lwt {
-    class LightweightGraph;
-}
-
 namespace TauGNNUtils {
     class GNNVarCalc;
 }
@@ -74,10 +69,6 @@ public:
         return m_var_calc.get();
     }
 
-    explicit operator bool() const {
-        return static_cast<bool>(m_graph);
-    }
-
     //Make the output config transparent to external tools
     FlavorTagDiscriminants::OnnxUtil::OutputConfig gnn_output_config;
 
@@ -92,7 +83,6 @@ private:
 
 private:
     const Config m_config;
-    std::unique_ptr<const lwt::LightweightGraph> m_graph;
 
     // Names of the input variables
     std::vector<std::string> m_scalar_inputs;

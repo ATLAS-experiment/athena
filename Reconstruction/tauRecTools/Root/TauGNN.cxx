@@ -4,14 +4,11 @@
 
 #include "tauRecTools/TauGNN.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "lwtnn/parse_json.hh"
 #include "PathResolver/PathResolver.h"
 
 #include <algorithm>
 #include <fstream>
-
-#include "lwtnn/LightweightGraph.hh"
-#include "lwtnn/Exceptions.hh"
-//#include "lwtnn/parse_json.hh"
 
 #include "tauRecTools/TauGNNUtils.h"
 
@@ -106,8 +103,8 @@ std::tuple<
     std::map<std::string, std::vector<char>>,
     std::map<std::string, std::vector<float>> >
 TauGNN::compute(const xAOD::TauJet &tau,
-                         const std::vector<const xAOD::TauTrack *> &tracks,
-                         const std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const {
+		const std::vector<const xAOD::TauTrack *> &tracks,
+		const std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const {
     InputMap scalarInputs;
     InputSequenceMap vectorInputs;
     std::map<std::string, Inputs> gnn_input;
