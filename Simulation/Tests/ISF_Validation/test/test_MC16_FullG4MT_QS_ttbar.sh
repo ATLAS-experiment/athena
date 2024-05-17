@@ -7,6 +7,7 @@
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-architecture:  '#x86_64-intel'
+# art-memory: 3999
 # art-output: test.HITS.pool.root
 # art-output: truth.root
 

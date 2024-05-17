@@ -5,6 +5,7 @@
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-memory: 2999
 # art-output: test_neutrino.HITS.pool.root
 
 Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc21_14TeV.900149.PG_single_nu_Pt50.evgen.EVNT.e8481/EVNT.30810279._000071.pool.root.1"
