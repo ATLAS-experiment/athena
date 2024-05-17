@@ -1,0 +1,22 @@
+{
+    "offEle_Et" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "Offline e^{#pm} E_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "offEle_EtOverPt" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "Offline e^{#pm} E_{T}/p_{T}", "nBins" : "100", "low" : "0.0", "high" : "10.0" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "eff_vs_offEle_Et" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Offline e^{#pm} E_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_offEle_EtOverPt" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Offline e^{#pm} E_{T}/p_{T}", "nBins" : "100", "low" : "0.0", "high" : "10.0" },
+        "yAxis" : { "title" : "Efficiency" }
+    }
+}

@@ -52,24 +52,23 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
         this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->referenceTag() );
   } 
 
-  /// TODO - To be included in later MRs
   /// Efficiency plots
-  /*if( m_trkAnaDefSvc->plotEfficiencies() ) {
-    m_plots_eff_vsTest = std::make_unique< InDetPerfPlot_Efficiencies >(
+  if( m_trkAnaDefSvc->plotEfficiencies() ) {
+    m_plots_eff_vsTest = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->testTag() );
-    m_plots_eff_vsRef = std::make_unique< InDetPerfPlot_Efficiencies >(
+    m_plots_eff_vsRef = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag() );
-  }*/
+  }
 
   /// Offline electron plots
-  /*if( m_trkAnaDefSvc->plotOfflineElectrons() ) {
-    m_plots_offEle = std::make_unique< InDetPerfPlot_OfflineElectron >(
+  if( m_trkAnaDefSvc->plotOfflineElectrons() ) {
+    m_plots_offEle = std::make_unique< OfflineElectronPlots >(
         this, "Tracks/Parameters", m_anaTag );
     if( m_trkAnaDefSvc->plotEfficiencies() ) {
-      m_plots_eff_vsOffEle = std::make_unique< InDetPerfPlot_OfflineElectron >(
+      m_plots_eff_vsOffEle = std::make_unique< OfflineElectronPlots >(
           this, "Tracks/Efficiencies", m_anaTag, true );
     }
-  }*/
+  }
 
   /// intialize PlotBase
   ATH_CHECK( PlotMgr::initialize() );
@@ -125,15 +124,21 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     }
 
     bool isMatched = matches.isTestMatched( *particle );
-    if( isMatched ) {
-      ATH_MSG_DEBUG( "Test track is matched to a reference" );
+
+    /// efficiency plots
+    if( m_plots_eff_vsTest ) {
+      ATH_CHECK( m_plots_eff_vsTest->fillPlots( *particle, isMatched, weight ) );
     }
 
-    /// TODO - To be included in later MRs
-    /// efficiency plots
-    /*if( m_plots_eff_vsTest ) {
-      ATH_CHECK( m_plots_eff_vsTest->fill( *particle, isMatched, weight ) );
-    }*/
+    /// offline electron plots (Offline is always either test or reference)
+    if( m_trkAnaDefSvc->isTestOffline() ) {
+      if( m_plots_offEle ) {
+        ATH_CHECK( m_plots_offEle->fillPlots( *particle, false, weight ) );
+      }
+      if( m_plots_eff_vsOffEle ) {
+        ATH_CHECK( m_plots_eff_vsOffEle->fillPlots( *particle, isMatched, weight ) );
+      }
+    }
 
   } // close loop over particles
 
@@ -166,24 +171,21 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     }
 
     bool isMatched = matches.isRefMatched( *particle );
-    if( isMatched ) {
-      ATH_MSG_DEBUG( "Reference track is matched to (at least) a test" );
-    }
 
-    /// TODO - To be included in later MRs
     /// efficiency plots
-    /*if( m_plots_eff_vsRef ) {
-      ATH_CHECK( m_plots_eff_vsRef->fill( *particle, isMatched, weight ) );
-    }*/
-
-    /// TODO - To be included in later MRs
-    /// offline electron plots
-    /*if( m_plots_offEle ) {
-      ATH_CHECK( m_plots_offEle->fill( *particle, false, weight ) );
+    if( m_plots_eff_vsRef ) {
+      ATH_CHECK( m_plots_eff_vsRef->fillPlots( *particle, isMatched, weight ) );
     }
-    if( m_plots_eff_vsOffEle ) {
-      ATH_CHECK( m_plots_eff_vsOffEle->fill( *particle, isMatched, weight ) );
-    }*/
+
+    /// offline electron plots (Offline is always either test or reference)
+    if( m_trkAnaDefSvc->isReferenceOffline() ) {
+      if( m_plots_offEle ) {
+        ATH_CHECK( m_plots_offEle->fillPlots( *particle, false, weight ) );
+      }
+      if( m_plots_eff_vsOffEle ) {
+        ATH_CHECK( m_plots_eff_vsOffEle->fillPlots( *particle, isMatched, weight ) );
+      }
+    }
 
   } // close loop over particles
 

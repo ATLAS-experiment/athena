@@ -21,9 +21,8 @@
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
 #include "PlotMgr.h"
 #include "plots/TrackParametersPlots.h"
-/// TODO - to be included in later MRs
-//#include "InDetTrackPerfMon/InDetPerfPlot_Efficiencies.h"
-//#include "InDetTrackPerfMon/InDetPerfPlot_OfflineElectron.h"
+#include "plots/EfficiencyPlots.h"
+#include "plots/OfflineElectronPlots.h"
 
 /// STD includes
 #include <string>
@@ -84,17 +83,16 @@ namespace IDTPM {
     /// TrackAnalysis definition service to "hold" the histograms configurations/flags
     ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
 
-    /// TODO - to be included in later MRs
     /// Plot categories
     /// plots w.r.t. test tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsTest;
-    //std::unique_ptr< InDetPerfPlot_Efficiencies >     m_plots_eff_vsTest;
+    std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTest;
     /// plots w.r.t. reference tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsRef;
-    //std::unique_ptr< InDetPerfPlot_Efficiencies >     m_plots_eff_vsRef;
+    std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsRef;
     /// plots w.r.t. reference offline electron
-    //std::unique_ptr< InDetPerfPlot_OfflineElectron >  m_plots_offEle;
-    //std::unique_ptr< InDetPerfPlot_OfflineElectron >  m_plots_eff_vsOffEle;
+    std::unique_ptr< OfflineElectronPlots >  m_plots_offEle;
+    std::unique_ptr< OfflineElectronPlots >  m_plots_eff_vsOffEle;
 
   }; // class TrackAnalysisPlotsMgr
 
