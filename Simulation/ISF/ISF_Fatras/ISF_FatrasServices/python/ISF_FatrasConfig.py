@@ -526,29 +526,7 @@ def fatrasParametricHadIntProcessorCfg(flags, name="ISF_FatrasParametricHadIntPr
 def fatrasProcessSamplingToolCfg(flags, name="ISF_FatrasProcessSamplingTool", **kwargs):
     mlog = logging.getLogger(name)
     mlog.debug('Start configuration')
-
     result = ComponentAccumulator()
-
-    kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
-
-    # truth record
-    if "TruthRecordSvc" not in kwargs:
-        kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
-
-    # decays
-    kwargs.setdefault("ParticleDecayHelper", result.addPublicTool(result.popToolsAndMerge(fatrasParticleDecayHelperCfg(flags))))
-
-    # photon conversion
-    kwargs.setdefault("PhotonConversionTool", result.addPublicTool(result.popToolsAndMerge(fatrasConversionCreatorCfg(flags))))
-
-    # Hadronic interactions
-    kwargs.setdefault("HadronicInteractionProcessor", result.addPublicTool(result.popToolsAndMerge(fatrasG4HadIntProcessorCfg(flags))))
-    kwargs.setdefault("HadronicInteraction", True)
-
-    # Validation Tool
-    kwargs.setdefault("PhysicsValidationTool", result.addPublicTool(result.popToolsAndMerge(fatrasPhysicsValidationToolCfg(flags))))
-    kwargs.setdefault("ValidationMode", flags.Sim.ISF.ValidationMode)
-
     result.setPrivateTools(CompFactory.iFatras.ProcessSamplingTool(name=name, **kwargs))
     return result
 
