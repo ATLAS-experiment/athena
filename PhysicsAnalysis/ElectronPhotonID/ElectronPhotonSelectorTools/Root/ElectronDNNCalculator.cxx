@@ -28,10 +28,10 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
                                              const std::string& quantileFileName,
                                              const std::vector<std::string>& variables,
                                              const bool multiClass,
-                                             const bool CFReject) :
+                                             const bool newVars) :
                                             asg::AsgMessagingForward(owner),
                                             m_multiClass(multiClass),
-                                            m_CFReject(CFReject)
+                                            m_newVars(newVars)
 {
   ATH_MSG_INFO("Initializing ElectronDNNCalculator...");
 
@@ -47,8 +47,11 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
 
   // Create input order for the NN, the data needs to be passed in this exact order
   lwt::InputOrder order;
+  // TODO: for latest DNN `inputVariables` has the same content
+  // as `variables` (including order), check if valid for 
+  // old dnn and if yes use `variables` directly.
   std::vector<std::string> inputVariables;
-  if(m_CFReject){
+  if(m_newVars){
     inputVariables = {"d0significance", "dPOverP",
                                             "deltaEta1", "deltaPhiRescaled2", "trans_TRTPID",
                                             "nPixHitsPlusDeadSensors", "nSCTHitsPlusDeadSensors",
@@ -103,7 +106,7 @@ Eigen::Matrix<float, -1, 1> ElectronDNNCalculator::calculate( const MVAEnum::MVA
 
   // This has to be in the same order as the InputOrder was defined
   
-  if(m_CFReject){
+  if(m_newVars){
     inputVector(0) = transformInput( m_quantiles.d0significance, varsStruct.d0significance);
     inputVector(1) = transformInput( m_quantiles.dPOverP, varsStruct.dPOverP);
     inputVector(2) = transformInput( m_quantiles.deltaEta1, varsStruct.deltaEta1);
@@ -225,7 +228,7 @@ int ElectronDNNCalculator::readQuantileTransformer( TTree* tree, const std::vect
     m_quantiles.Reta.push_back(readVars["Reta"]);
     m_quantiles.Eratio.push_back(readVars["Eratio"]);
     m_quantiles.wtots1.push_back(readVars["wtots1"]);
-    if(m_CFReject){
+    if(m_newVars){
       m_quantiles.SCTWeightedCharge.push_back(readVars["SCTWeightedCharge"]);
       m_quantiles.qd0.push_back(readVars["qd0"]);
     }
