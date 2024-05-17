@@ -487,7 +487,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
               phiDesign.wireCutout = copyMe->yCutout();                         // Size of "active" wire region for digits
               phiDesign.nch = copyPhiDesign.nAllWires();
         }     
-        
+        newRE->fillCache();
         mgr->addsTgcReadoutElement(std::move(newRE));
    }
     
