@@ -16,9 +16,6 @@ from CaloClusterCorrection.constants import \
 from CaloClusterCorrection.common import makecorr
 from AthenaCommon.SystemOfUnits   import deg
 
-from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-CaloNoiseCondAlg()
-
 #
 # This table lists all available versions of this correction.
 # See common.py for a description of the contents.
