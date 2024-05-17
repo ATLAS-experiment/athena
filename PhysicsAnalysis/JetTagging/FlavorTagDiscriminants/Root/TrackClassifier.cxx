@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <FlavorTagDiscriminants/TrackClassifier.h>
 #include "PathResolver/PathResolver.h"
+#include "AthContainers/AuxElement.h"
 
 #include <numeric>
 
@@ -52,6 +53,8 @@ std::map<std::string, double> TrackClassifier::ComputeScore(const xAOD::TrackPar
   double dr = (track->p4()).DeltaR(jet->p4());
   double ptfrac = (track->pt())/(jet->pt());
 
+  static const SG::AuxElement::ConstAccessor<float> AMVFWeightPVAcc ("AMVFWeightPV");
+
   // Build dictionary of inputs for lwtnn to use
   // It is ok to fill this with more variables than the model uses
   // as long as no variables are missing
@@ -74,7 +77,7 @@ std::map<std::string, double> TrackClassifier::ComputeScore(const xAOD::TrackPar
         {"numberOfSCTSharedHits",             (double) get(track, xAOD::numberOfSCTSharedHits)},
 	{"numberOfPixelHoles",              (double) get(track, xAOD::numberOfPixelHoles)},
 	{"numberOfSCTHoles",              (double) get(track, xAOD::numberOfSCTHoles)},
-	{"AMVFWeightPV",           (double) track->auxdata<float>("AMVFWeightPV")}
+	{"AMVFWeightPV",           (double) AMVFWeightPVAcc(*track)}
     };
 
   // Set up the nodes used for inputs
