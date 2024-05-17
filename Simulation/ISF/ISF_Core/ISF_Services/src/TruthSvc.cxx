@@ -250,6 +250,9 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 #ifdef HEPMC3
     HepMC::suggest_barcode( parentAfterIncident, newPrimaryBC ); // TODO check this works correctly
 #endif
+    // NB For ISFTruthIncident the m_parent ISFParticle still needs
+    // its id and particleLink properties to be properly updated at
+    // this point.
     ATH_MSG_VERBOSE ( "Parent After Incident: " << parentAfterIncident << ", barcode: " << HepMC::barcode(parentAfterIncident));
   }
 
@@ -278,6 +281,9 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
 #ifdef HEPMC3
         int secondaryParticleBCFromTI = ti.childBarcode(i);
         HepMC::suggest_barcode( p, secondaryParticleBCFromTI ? secondaryParticleBCFromTI : secondaryParticleBC );
+        // NB For ISFTruthIncident the current child ISFParticle still needs
+        // its id and particleLink properties to be properly updated at
+        // this point.
 #endif
       }
       ATH_MSG_VERBOSE ( "Writing out " << i << "th child particle: " << p << ", barcode: " << HepMC::barcode(p));
