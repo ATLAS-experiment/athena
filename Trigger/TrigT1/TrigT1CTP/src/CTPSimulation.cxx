@@ -631,6 +631,8 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       if( find(connNames.begin(), connNames.end(), connName) == connNames.end() ) {
          continue;
       }
+      bool opt_cable = false;
+      std::bitset<128> cable128 {0};
       uint64_t cable {0};
       if (CxxUtils::starts_with (connName, "Legacy")) { // legacy topo
          if (m_iKeyLegacyTopo.empty() || !m_doL1CaloLegacy )
@@ -708,12 +710,20 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
             cable = ( (uint64_t)topoInput->cableWord2( 1 ) << 32) + topoInput->cableWord2( 0 );
          } else if(connName == "Topo1Opt0") {
             ATH_MSG_DEBUG("BIT word Topo1Opt0: " << topoInput->optcableWord( connName ));
+            opt_cable = true;
+            cable128 = topoInput->optcableWord( connName );
          } else if(connName == "Topo1Opt1") {
             ATH_MSG_DEBUG("BIT word Topo1Opt1: " << topoInput->optcableWord( connName ));
+            opt_cable = true;
+            cable128 = topoInput->optcableWord( connName );
          } else if(connName == "Topo1Opt2") {
             ATH_MSG_DEBUG("BIT word Topo1Opt2: " << topoInput->optcableWord( connName ));
+            opt_cable = true;
+            cable128 = topoInput->optcableWord( connName );
          } else if(connName == "Topo1Opt3") {
             ATH_MSG_DEBUG("BIT word Topo1Opt3: " << topoInput->optcableWord( connName ));
+            opt_cable = true;
+            cable128 = topoInput->optcableWord( connName );
          }
       }
       auto & conn = l1menu->connector(connName);
@@ -721,7 +731,13 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          for(uint clock : {0,1}) {
             for(auto & tl : conn.triggerLines(fpga,clock)) {
                uint flatIndex = tl.flatindex();
-               uint pass = (cable & (static_cast<uint64_t>(0x1) << flatIndex)) == 0 ? 0 : 1;
+               uint pass = 0;
+               if (opt_cable) {
+                   pass = ((cable128 >> flatIndex).test(0)) == 0 ? 0 : 1;
+               }
+               else {
+                   pass = (cable & (static_cast<uint64_t>(0x1) << flatIndex)) == 0 ? 0 : 1;
+               }
                if(size_t pos = tl.name().find('['); pos == std::string::npos) {
                   thrMultiMap[tl.name()] = pass;
                   ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
