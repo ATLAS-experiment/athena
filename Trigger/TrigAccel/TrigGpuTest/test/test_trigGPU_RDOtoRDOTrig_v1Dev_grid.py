@@ -37,7 +37,6 @@ ex.concurrent_events = 4
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
 ex.args += ' --preInclude "all:Campaigns.MC23c"'
-ex.args += ' --CA "all:True"'
 
 test = Test.Test()
 test.art_type = 'grid'

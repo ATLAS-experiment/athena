@@ -4,5 +4,5 @@ They work only in the RDO to ESD transform. That is they need both RDO input obj
 
 Example command:
 ```sh
-Reco_tf.py --CA --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" --inputRDOFile  RUN4_muons.RDO.pool.root --outputESDFile ESD.test.root --steering doRAWtoALL  --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" --preExec='flags.Trigger.FPGATrackSim.wrapperFileName="NewWrapper.root";flags.Trigger.FPGATrackSim.wrapperMetaData="This Is My Meta Data, Put It All here!!!!"'
+Reco_tf.py --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" --inputRDOFile  RUN4_muons.RDO.pool.root --outputESDFile ESD.test.root --steering doRAWtoALL  --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" --preExec='flags.Trigger.FPGATrackSim.wrapperFileName="NewWrapper.root";flags.Trigger.FPGATrackSim.wrapperMetaData="This Is My Meta Data, Put It All here!!!!"'
 ```
