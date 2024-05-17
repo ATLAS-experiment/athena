@@ -6,7 +6,7 @@
 #define INDETTRACKPERFMON_TRKPARAMETERSHELPER_H
 
 /**
- * @file TrackParmetersHelper.h
+ * @file TrackParametersHelper.h
  * @brief Utility methods to access 
  *        track/truth particles parmeters in
  *        a consitent way in this package
