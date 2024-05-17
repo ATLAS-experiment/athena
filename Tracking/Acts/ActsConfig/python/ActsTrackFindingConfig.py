@@ -57,7 +57,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]))
     kwargs.setdefault("SeedContainerKeys", isdet(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
     # Measurement collections. These 2 lists must match element for element.
-    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters"], strip=["ITkStripClusters"]))
+    kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"]))
     kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, pixel=["ITkPixelDetectorElementCollection"], strip=["ITkStripDetectorElementCollection"]))
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')

@@ -744,6 +744,9 @@ def triggerIDCCacheCreatorsCfg(flags, seqName = None):
         from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
         acc.merge( InDetIDCCacheCreatorCfg(flags), sequenceName = seqName )
 
+        from TrigInDetConfig.TrigInDetConfig import ActsIDCCacheCreatorCfg
+        acc.merge( ActsIDCCacheCreatorCfg(flags), sequenceName = seqName )
+        
     return acc
 
 

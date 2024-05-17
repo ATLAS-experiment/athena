@@ -13,12 +13,12 @@ namespace ActsTrk::Cache {
     StatusCode CreatorAlg::initialize() {
         ATH_MSG_DEBUG("Initializing " << name() << " ...");
 	
-	m_do_pixClusters = not m_pixelClusterCacheKey.empty();
+        m_do_pixClusters = not m_pixelClusterCacheKey.empty();
         m_do_stripClusters = not m_stripClusterCacheKey.empty();
 
         m_do_pixSpacePoints = not m_pixelSPCacheKey.empty();
-	m_do_stripSpacePoints = not m_stripSPCacheKey.empty();
-	m_do_stripOverlapSpacePoints = not m_stripOSPCacheKey.empty();
+        m_do_stripSpacePoints = not m_stripSPCacheKey.empty();
+        m_do_stripOverlapSpacePoints = not m_stripOSPCacheKey.empty();
 	
         ATH_CHECK(m_pixelClusterCacheKey.initialize(m_do_pixClusters));
         ATH_CHECK(m_stripClusterCacheKey.initialize(m_do_stripClusters));

@@ -168,6 +168,8 @@ namespace ActsTrk {
       //add the ranges to the cache
       for(auto idr: cache_ranges){
         auto wh = cacheHandle->getWriteHandle(idr.first);
+        //check that item is not in the cache already (again)
+        if(wh.OnlineAndPresentInAnotherView()) continue;
         auto ce = std::make_unique<Cache::CacheEntry<xAOD::SpacePoint>>(pixelSpacePoints, idr.second);
         ATH_CHECK(wh.addOrDelete(std::move(ce))); 
       }
