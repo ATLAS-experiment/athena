@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiSpacePointsSeedTool_xk package
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -224,14 +224,6 @@ def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", **kwargs):
     if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("useFastTracking", True)
         kwargs.setdefault("maxSeedsForSpacePoint", 3)
-
-    if flags.Tracking.ActiveConfig.extension == "LargeD0":
-        kwargs.setdefault("maxSeedsForSpacePoint", 5)
-        kwargs.setdefault("isLRT", True)
-        kwargs.setdefault("maxZPPP",
-                          flags.Tracking.ActiveConfig.maxZSpacePointsPPPSeeds)
-        kwargs.setdefault("maxZSSS",
-                          flags.Tracking.ActiveConfig.maxZSpacePointsSSSSeeds)
 
     if flags.Tracking.writeSeedValNtuple:
         kwargs.setdefault("WriteNtuple", True)

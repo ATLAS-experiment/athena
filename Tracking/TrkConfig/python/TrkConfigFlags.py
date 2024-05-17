@@ -392,8 +392,8 @@ def createTrackingConfigFlags():
     from TrkConfig.TrackingPassFlags import (
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
         createMinBiasTrackingPassFlags, createUPCTrackingPassFlags,
-        createHIPTrackingPassFlags, createLargeD0TrackingPassFlags,
-        createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
+        createHIPTrackingPassFlags, createR3LargeD0TrackingPassFlags,
+        createLowPtLargeD0TrackingPassFlags,
         createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags,
         createLowPtRoITrackingPassFlags, createForwardTracksTrackingPassFlags,
         createBeamGasTrackingPassFlags, createVtxLumiTrackingPassFlags,
@@ -431,8 +431,6 @@ def createTrackingConfigFlags():
                          createHIPTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.MinBiasPass",
                          createMinBiasTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory("Tracking.LargeD0Pass",
-                         createLargeD0TrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.R3LargeD0Pass",
                          createR3LargeD0TrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.LowPtLargeD0Pass",

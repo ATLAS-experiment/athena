@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiTrackMakerTool_xk package
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -93,8 +93,7 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_ForwardTracks')
 
-    elif (flags.Tracking.ActiveConfig.extension in
-          ["LargeD0", "R3LargeD0", "LowPtLargeD0"]):
+    elif "LargeD0" in flags.Tracking.ActiveConfig.extension:
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_LargeD0')
 
