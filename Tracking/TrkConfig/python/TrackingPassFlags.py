@@ -513,37 +513,6 @@ def createLowPtRoITrackingPassFlags():
     return icf
 
 
-## LargeD0 mode ########################
-def createLargeD0TrackingPassFlags():
-    icf = createTrackingPassFlags()
-    icf.extension          = "LargeD0"
-    icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
-    icf.maxPT              = 1.0 * Units.TeV
-    icf.minPT              = 900 * Units.MeV
-    icf.maxEta             = 5
-    icf.maxPrimaryImpact   = 300.0 * Units.mm
-    icf.maxZImpact         = 1500.0 * Units.mm
-    icf.minClusters        = 7
-    icf.minSiNotShared     = 5
-    icf.maxShared          = 2   # cut is now on number of shared modules
-    icf.minPixel           = 0
-    icf.maxHoles           = 2
-    icf.maxPixelHoles      = 1
-    icf.maxSctHoles        = 2
-    icf.maxDoubleHoles     = 1
-    icf.radMax             = 600. * Units.mm
-    icf.nHolesMax          = icf.maxHoles
-    icf.nHolesGapMax       = icf.maxHoles # not as tight as 2*maxDoubleHoles
-    icf.maxTracksPerSharedPRD = 2
-    icf.doBremRecoverySi = False
-
-    icf.RunPixelPID             = False
-    icf.RunTRTPID               = False
-
-    return icf
-
-
 ## R3LargeD0 mode ########################
 def createR3LargeD0TrackingPassFlags():
     icf = createTrackingPassFlags()
