@@ -1,3 +1,4 @@
+#!/usr/bin/env athena
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
