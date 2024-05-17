@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  */
 #include "RandomProtoTrackCreator.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -17,13 +20,13 @@ StatusCode ActsTrk::RandomProtoTrackCreator::findProtoTracks(const EventContext&
     size_t nStrip = 7; 
     for (size_t k = 0; k < nPix; ++k){
         auto index = rand() % pixelContainer.size();
-        dummyPoints.push_back(ATLASUncalibSourceLink(pixelContainer.at(index),pixelContainer,ctx)); 
+        dummyPoints.push_back(makeATLASUncalibSourceLink(&pixelContainer, index, ctx));
     }
 
 
     for (size_t k = 0; k < nStrip; ++k){
         auto index = rand() % stripContainer.size();
-        dummyPoints.push_back(ATLASUncalibSourceLink(stripContainer.at(index),stripContainer,ctx)); 
+        dummyPoints.push_back(makeATLASUncalibSourceLink(&stripContainer, index, ctx));
     }
 
     ATH_MSG_DEBUG("Made a proto-track with " <<dummyPoints.size()<<" random clusters");
@@ -50,7 +53,7 @@ Amg::Vector3D ActsTrk::RandomProtoTrackCreator::getMeasurementPos(const xAOD::Un
 
 std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreator::makeDummyParams (const ActsTrk::ATLASUncalibSourceLink & firstPRD) const{
 
-  const xAOD::UncalibratedMeasurement* measurement = *firstPRD; 
+  const xAOD::UncalibratedMeasurement* measurement = &getUncalibratedMeasurement(firstPRD);
   using namespace Acts::UnitLiterals;
   std::shared_ptr<const Acts::Surface> actsSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
         Acts::Vector3(0., 0., 0.));

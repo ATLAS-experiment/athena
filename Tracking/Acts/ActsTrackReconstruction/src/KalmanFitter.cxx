@@ -462,7 +462,7 @@ KalmanFitter::fit(const EventContext& ,
    
   for (const ActsTrk::ATLASUncalibSourceLink& el : clusterList) {
     sourceLinks.emplace_back( el );
-    surfaces.push_back(&tracking_surface_helper.associatedActsSurface(**el));
+    surfaces.push_back(&tracking_surface_helper.associatedActsSurface( getUncalibratedMeasurement(el) ));
   }
  
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
@@ -889,9 +889,9 @@ KalmanFitter::fit(const EventContext& ctx,
   for (const xAOD::SpacePoint* sp : sps) {
     const auto& measurements = sp->measurements();
     for (const xAOD::UncalibratedMeasurement *umeas : measurements) {
-      ActsTrk::ATLASUncalibSourceLink el(*dynamic_cast<const xAOD::UncalibratedMeasurementContainer*>(umeas->container()), umeas->index());
+      ActsTrk::ATLASUncalibSourceLink el(makeATLASUncalibSourceLink(umeas));
       sourceLinks.emplace_back( el );
-      surfaces.push_back(&tracking_surface_helper.associatedActsSurface(**el));
+      surfaces.push_back(&tracking_surface_helper.associatedActsSurface(*umeas));
     }
   }
   return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext, tracking_surface_helper, surfaces.front()); 

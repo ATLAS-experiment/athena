@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ATLASOURCELINK_H
@@ -22,19 +22,48 @@
 
 namespace ActsTrk {
    using ATLASSourceLink = const Trk::MeasurementBase *;
-   using ATLASUncalibSourceLink = ElementLink<xAOD::UncalibratedMeasurementContainer>;
+   using ATLASUncalibSourceLink = const xAOD::UncalibratedMeasurement *;
 
+   inline const xAOD::UncalibratedMeasurement &getUncalibratedMeasurement(const ATLASUncalibSourceLink &source_link) {
+      assert(source_link);
+      return *source_link;
+   }
+   inline ATLASUncalibSourceLink makeATLASUncalibSourceLink(const xAOD::UncalibratedMeasurementContainer *container,
+                                                            std::size_t index,
+                                                            [[maybe_unused]] const EventContext& ctx) {
+      assert(container && index < container->size());
+      return container->at(index);
+   }
+   inline ATLASUncalibSourceLink makeATLASUncalibSourceLink([[maybe_unused]] const xAOD::UncalibratedMeasurementContainer *container,
+                                                            const xAOD::UncalibratedMeasurement *measurement,
+                                                            [[maybe_unused]] const EventContext& ctx) {
+      assert( container == measurement->container());
+      assert( container && measurement->index() < container->size() );
+      return measurement;
+   }
+   inline ATLASUncalibSourceLink makeATLASUncalibSourceLink(const xAOD::UncalibratedMeasurementContainer *container,
+                                                            std::size_t index) {
+      assert(container && index < container->size());
+      return container->at(index);
+   }
+   // *dynamic_cast<const xAOD::UncalibratedMeasurementContainer*>(umeas->container()), umeas->index()
+   inline ATLASUncalibSourceLink makeATLASUncalibSourceLink(const xAOD::UncalibratedMeasurement *measurement) {
+      assert(measurement && measurement->container() && measurement->index() < measurement->container()->size_v());
+      return measurement;
+   }
    inline float localXFromSourceLink(const ATLASUncalibSourceLink &source_link) {
-      assert( source_link.isValid());
-      return (*source_link)->type() == xAOD::UncalibMeasType::PixelClusterType
-         ? (*source_link)->localPosition<2>()[Trk::locX]
-         : (*source_link)->localPosition<1>()[Trk::locX];
+      const xAOD::UncalibratedMeasurement &uncalib_meas = getUncalibratedMeasurement(source_link);
+      return uncalib_meas.type() == xAOD::UncalibMeasType::PixelClusterType
+         ? uncalib_meas.localPosition<2>()[Trk::locX]
+         : uncalib_meas.localPosition<1>()[Trk::locX];
    }
 
    inline float localYFromSourceLink(const ATLASUncalibSourceLink &source_link) {
-      assert( source_link.isValid() && (*source_link)->type() == xAOD::UncalibMeasType::PixelClusterType );
-      return (*source_link)->localPosition<2>()[Trk::locY];
+      const xAOD::UncalibratedMeasurement &uncalib_meas = getUncalibratedMeasurement(source_link);
+      assert(uncalib_meas.type() == xAOD::UncalibMeasType::PixelClusterType );
+      return uncalib_meas.localPosition<2>()[Trk::locY];
    }
+
 }
 
 #endif

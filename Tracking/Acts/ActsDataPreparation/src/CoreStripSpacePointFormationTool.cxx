@@ -125,7 +125,7 @@ namespace ActsTrk
       size_t idx = 0;
       for (const auto& slink : slinks){
 	const auto& atlasSourceLink = slink.get<ATLASUncalibSourceLink>();
-	const xAOD::UncalibratedMeasurement *hit = *atlasSourceLink;
+	const xAOD::UncalibratedMeasurement *hit = &getUncalibratedMeasurement(atlasSourceLink);
 
 	// Check if the cluster is in the cluster container
 	const auto it = std::find(clusterContainer.begin(), clusterContainer.end(), dynamic_cast<const xAOD::StripCluster*>(hit));
@@ -206,7 +206,7 @@ namespace ActsTrk
             if ((*start)->identifierHash() != thisElement->identifyHash()) {
                throw std::logic_error("Identifier mismatch.");
             }
-	    auto slink = ATLASUncalibSourceLink(clusterContainer, (*start)->index());
+	    auto slink = makeATLASUncalibSourceLink(&clusterContainer, (*start)->index());
 	    neighbourSourceLinks[0].emplace_back(std::make_pair(slink, position));
 	  }
 	}
@@ -252,7 +252,7 @@ namespace ActsTrk
               if ((*start)->identifierHash() != otherElement->identifyHash()) {
                  throw std::logic_error("Identifier mismatch.");
               }
-              auto slink = ATLASUncalibSourceLink(clusterContainer, (*start)->index());
+              auto slink = makeATLASUncalibSourceLink(&clusterContainer, (*start)->index());
 	      neighbourSourceLinks[neigbourIndices[n]].emplace_back(std::make_pair(slink, position));
 	    }
 	  }
@@ -539,8 +539,7 @@ namespace ActsTrk
     ends2_acts.second = ends2.second;
     auto paramCovAccessor = [&](const Acts::SourceLink &slink) {
       const auto &atlasSLink = slink.get<ATLASUncalibSourceLink>();
-      assert( atlasSLink.isValid());
-      const xAOD::UncalibratedMeasurement *measurement = *atlasSLink;
+      const xAOD::UncalibratedMeasurement *measurement = &getUncalibratedMeasurement(atlasSLink);
       Acts::BoundVector loc = Acts::BoundVector::Zero();
       Acts::BoundSquareMatrix cov = Acts::BoundMatrix::Zero();
       switch (measurement->type()) {
@@ -666,9 +665,8 @@ double CoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDetector
 						 const InDetDD::SiDetectorElement *element,
 						 size_t &stripIndex) const
   {
-    assert( sourceLink.isValid());
-    const xAOD::UncalibratedMeasurement *measurement = *sourceLink;
-    auto cluster = dynamic_cast<const xAOD::StripCluster *>(measurement);
+    const xAOD::UncalibratedMeasurement &measurement = getUncalibratedMeasurement(sourceLink);
+    auto cluster = dynamic_cast<const xAOD::StripCluster *>(&measurement);
     if(!cluster){
       ATH_MSG_FATAL("Could not cast UncalibratedMeasurement as StripCluster");
       return {};

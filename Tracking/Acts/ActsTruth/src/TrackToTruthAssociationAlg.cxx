@@ -164,7 +164,7 @@ namespace ActsTrk
             if (!state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag) && state.hasUncalibratedSourceLink()) {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
               assert( sl.isValid() && *sl);
-              const xAOD::UncalibratedMeasurement &uncalibMeas = **sl;
+              const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
 
 
               const ActsTrk::MeasurementToTruthParticleAssociation *association_map = measurement_to_truth_association_maps.at(to_underlying(uncalibMeas.type()));
