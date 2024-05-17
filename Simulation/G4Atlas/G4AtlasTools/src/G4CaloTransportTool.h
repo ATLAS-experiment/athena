@@ -7,14 +7,14 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IG4CaloTransportTool.h"
-
-#include "G4Navigator.hh"
 #include "G4PropagatorInField.hh"
-
 #include "G4AtlasTools/ThreadLocalHolder.h"
 
+#include <vector>
 
 class G4Track;
+class G4VPhysicalVolume;
+class G4FieldTrack;
 
 /// @class G4CaloTransportTool
 /// @brief A tool which transports particles through the Geant4 geometry.
@@ -43,7 +43,7 @@ class G4CaloTransportTool : virtual public extends1<AthAlgTool, IG4CaloTransport
     // Advance track by single Geant4 step in geometry
     void doStep(G4FieldTrack& fieldTrack);
     // Pointer to the physical volume of the world (either simplified or full geometry)
-    G4VPhysicalVolume* m_worldVolume;
+    G4VPhysicalVolume* m_worldVolume{};
 
     // Whether to use simplified geometry for particle transport
     Gaudi::Property<bool> m_useSimplifiedGeo{this, "UseSimplifiedGeo", true, "Use simplified geometry for particle transport"};

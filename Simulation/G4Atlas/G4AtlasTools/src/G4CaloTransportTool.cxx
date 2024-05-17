@@ -5,10 +5,11 @@
 #include "G4CaloTransportTool.h"
 
 // Geant4 includes for for particle extrapolation
-#include "G4AtlasTools/ThreadLocalHolder.h"
 #include "G4FieldTrack.hh"
 #include "G4FieldTrackUpdator.hh"
 #include "G4LogicalVolumeStore.hh"
+#include "G4Navigator.hh"
+
 #include "G4PVPlacement.hh"
 #include "G4PathFinder.hh"
 #include "G4TransportationManager.hh"
