@@ -29,7 +29,9 @@ ActsReadEDM.py \
    readClusters=True \
    readSpacePoints=True \
    readTracks=True \
-   tracks="ActsTracks"
+   tracks="ActsTracks" \
+   readTrackParticles=True \
+   trackParticles="ActsCombinedTracksParticlesAlt"
 
 rc=$?
 if [ $rc != 0 ]; then

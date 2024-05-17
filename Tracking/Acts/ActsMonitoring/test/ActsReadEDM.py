@@ -3,6 +3,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 if __name__ == "__main__":
+    import re
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
@@ -20,6 +21,8 @@ if __name__ == "__main__":
     flags.addFlag("readSpacePoints", False)
     flags.addFlag("readTracks", False)
     flags.addFlag("tracks", "")
+    flags.addFlag("readTrackParticles", False)
+    flags.addFlag("trackParticles", "ActsCombinedTracksParticlesAlt")
     flags.fillFromArgs()
     
     flags.lock()
@@ -58,6 +61,16 @@ if __name__ == "__main__":
                                               name=f"{track}AnalysisAlg",
                                               OutputLevel=2,
                                               TracksLocation=track))
+    if flags.readTrackParticles:
+        from ActsConfig.ActsAnalysisConfig import ActsTrackParticleAnalysisAlgCfg
+        for tp in flags.trackParticles.split(','):
+            src_track_name = re.search(r'^(.*)ParticlesAlt.*',tp).group(1)
+            acc.merge(ActsTrackParticleAnalysisAlgCfg(flags,
+                                                      name=f"{tp}AnalysisAlg",
+                                                      OutputLevel=2,
+                                                      TrackParticleLocation=tp,
+                                                      ExtraInputs={('ActsTrk::TrackContainer',src_track_name)}, # ensure scheduled after reader
+                                                      MonGroupName=f"{tp}Analysis"))
             
     acc.printConfig()
     status = acc.run()
