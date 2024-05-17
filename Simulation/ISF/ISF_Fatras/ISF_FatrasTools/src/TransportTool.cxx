@@ -243,7 +243,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   if ( freepath>0. && freepath<0.01 ) {
     if (!m_particleDecayHelper.empty()) {
       ATH_MSG_VERBOSE( "[ fatras transport ] Decay is triggered for input particle.");
-      m_particleDecayHelper->decay(isp,isp.position(),isp.momentum(),isp.timeStamp());
+      m_particleDecayHelper->decay(isp,isp.position(),isp.momentum(),isp.timeStamp()); // Registers TruthIncident internally
     }
 
     // validation mode - for all particle registered into stack
@@ -381,7 +381,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   if (uisp && timeLim.tMax>0.  && timeLim.time >=timeLim.tMax ) {
     if (!m_particleDecayHelper.empty()) {
       ATH_MSG_VERBOSE( "[ fatras transport ] Decay is triggered for input particle.");
-      m_particleDecayHelper->decay(*uisp,uisp->position(),uisp->momentum(),uisp->timeStamp());
+      m_particleDecayHelper->decay(*uisp,uisp->position(),uisp->momentum(),uisp->timeStamp()); // Registers TruthIncident internally
     }
     delete uisp;
     return nullptr;

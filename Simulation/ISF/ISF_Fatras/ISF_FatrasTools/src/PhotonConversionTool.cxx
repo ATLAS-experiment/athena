@@ -264,11 +264,6 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
         ch1->setUserInformation(validInfo);
       }
       children[ichild] = ch1;
-      // FIXME Check this doesn't cause problems in the TruthSvc
-      if (!ch1->getTruthBinding()) {
-	ch1->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-      }
-      m_particleBroker->push( ch1, parent);
       ichild++;
     }
 
@@ -293,11 +288,6 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
         ch2->setUserInformation(validInfo);
       }
       children[ichild] = ch2;
-      // FIXME Check this doesn't cause problems in the TruthSvc
-      if (!ch2->getTruthBinding()) {
-        ch2->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-      }
-      m_particleBroker->push( ch2, parent);
     }
 
     // register TruthIncident
@@ -307,6 +297,20 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                  parent->nextGeoID(),
                                  ISF::fKillsPrimary );
     m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateChildParticleProperties();
+
+    // push onto ParticleStack
+    if (!children.empty() ) {
+      for (auto *childParticle : children) {
+        //Check that the new ISFParticles have a valid TruthBinding
+        if (!childParticle->getTruthBinding()) {
+          ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+        }
+        m_particleBroker->push(childParticle, parent);
+      }
+    }
 
     // save info for validation
     if (m_validationMode && m_validationTool) {
@@ -324,6 +328,7 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
 								       const Amg::Vector3D& childDirection,
 								       Trk::ParticleHypothesis childType) const
 {
+  // Called by PhotonConversionTool::doConversionOnLayer
     // calculate the child momentum
     double p1 = sqrt(childEnergy*childEnergy-Trk::ParticleMasses::mass[childType]*Trk::ParticleMasses::mass[childType]);    
 
@@ -388,14 +393,15 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                  parent->nextGeoID(),
                                  ISF::fKillsPrimary );
     m_truthRecordSvc->registerTruthIncident( truth);
+    // At this point we need to update the properties of the
+    // ISFParticles produced in the interaction
+    truth.updateChildParticleProperties();
 
-    //Make sure the conversion products get a chance to have correct truth info before pushing into the particle broker
-    // FIXME Check this doesn't cause problems later in the TruthSvc
-    if (!children[0]->getTruthBinding()) {
-        children[0]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
-    }
-    if (!children[1]->getTruthBinding()) {
-        children[1]->setTruthBinding(new ISF::TruthBinding(*parent->getTruthBinding()));
+    // Check that the new ISFParticles have a valid TruthBinding
+    for (auto *childParticle : children) {
+      if (!childParticle->getTruthBinding()) {
+        ATH_MSG_ERROR("Could not retrieve TruthBinding from child ISFParticle "<< *childParticle);
+      }
     }
 
     return children;
@@ -613,6 +619,7 @@ Amg::Vector3D iFatras::PhotonConversionTool::childDirection(const Amg::Vector3D&
 bool iFatras::PhotonConversionTool::doConversion(double time, const Trk::NeutralParameters& parm,
 						const Trk::ExtendedMaterialProperties* /*extMatProp*/) const {
 
+  // Called by McMaterialEffectsUpdator::interact
   double p = parm.momentum().mag();
 
   // get the energy
@@ -632,7 +639,7 @@ bool iFatras::PhotonConversionTool::doConversion(double time, const Trk::Neutral
                parm.momentum().unit(),
 	       childEnergy, p,
 	       childDir,
-	       Trk::electron);
+	       Trk::electron); // Registers TruthIncident internally
   // fill the TTree ----------------------------
   if (m_validationTree)
     m_validationTree->Fill();
@@ -644,7 +651,7 @@ bool iFatras::PhotonConversionTool::doConversion(double time, const Trk::Neutral
 ISF::ISFParticleVector iFatras::PhotonConversionTool::doConversionOnLayer(const ISF::ISFParticle* parent, 
 									 double time, const Trk::NeutralParameters& parm,
 									 const Trk::ExtendedMaterialProperties* /*ematprop*/) const {
-  
+  // Called by McMaterialEffectsUpdator::interactLay
   double p = parm.momentum().mag();
 
   // get the energy
@@ -668,7 +675,7 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::doConversionOnLayer(const 
 		   parm.momentum().unit(),
 		   childEnergy, p,
 		   childDir,
-		   Trk::electron);
+		   Trk::electron); // Registers TruthIncident internally
 
 }
 

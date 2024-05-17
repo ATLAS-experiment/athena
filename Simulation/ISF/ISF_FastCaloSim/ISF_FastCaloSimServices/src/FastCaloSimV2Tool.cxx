@@ -226,6 +226,9 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleC
                                      ISF::fKillsPrimary);
 
         m_truthRecordSvc->registerTruthIncident( truth, true );
+        // At this point we need to update the properties of the
+        // ISFParticles produced in the interaction
+        truth.updateChildParticleProperties();
 
         for (auto *secondary : *someSecondaries) {
           if (secondary->getTruthBinding()) {

@@ -96,6 +96,11 @@ namespace ISF {
         simulation) - TODO only a dummy implementation currently */
     virtual HepMC::GenParticlePtr     updateChildParticle(unsigned short index,
                                                           HepMC::GenParticlePtr existingChild) const override final;
+    /** Update the id and particleLink properties of the parentAfterIncident (to be called after registerTruthIncident) */
+    void updateParentAfterIncidentProperties();
+    /** Update the id and particleLink properties of the child particles (to be called after registerTruthIncident) */
+    void updateChildParticleProperties();
+
   private:
     ISFTruthIncident();
 
