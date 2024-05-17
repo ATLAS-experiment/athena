@@ -114,15 +114,18 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_badJetCut(""),
     m_fatJetUncConfig(""),
     m_fatJetUncVars(""),
+    m_WDecorName(""),
+    m_ZDecorName(""),
+    m_TopDecorName(""),
     m_WtagConfig(""),
     m_ZtagConfig(""),
-    m_WZTaggerCalibArea(""),
     m_ToptagConfig(""),
+    m_WZTaggerCalibArea(""),
+    m_TopTaggerCalibArea(""),
     m_WTagUncConfig(""),
     m_ZTagUncConfig(""),
     m_TopTagUncConfig(""),
     m_JetTruthLabelName(""),
-    m_TopTaggerCalibArea(""),
     m_tool_init(false),
     m_subtool_init(false),
     // set dummies for configuration
@@ -1521,16 +1524,16 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_fatJetUncVars, "Jet.LargeRuncVars", rEnv, "default"); // do all if not specified
   configFromFile(m_WtagConfig, "Jet.WtaggerConfig", rEnv, "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
   configFromFile(m_ZtagConfig, "Jet.ZtaggerConfig", rEnv, "SmoothedContainedZTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
-  configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "SmoothedWZTaggers/Rel21/February2022/");
+  configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/SmoothedWZTaggers/");
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
   configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
-  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/February2022/");
+  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/JSSWTopTaggerDNN/");
   configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");
-  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config");
-  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config");
+  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config");
+  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config");
   configFromFile(m_jesCalibSeq, "Jet.CalibSeq", rEnv, "JetArea_Residual_EtaJES_GSC_Insitu");
   configFromFile(m_jesCalibSeqJMS, "Jet.CalibSeqJMS", rEnv, "JetArea_Residual_EtaJES_GSC");
   configFromFile(m_jesCalibSeqFat, "Jet.CalibSeqFat", rEnv, "EtaJES_JMS");
