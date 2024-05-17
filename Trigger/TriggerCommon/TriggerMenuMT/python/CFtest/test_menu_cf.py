@@ -1,6 +1,5 @@
-#
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-#
+#!/usr/bin/env athena
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## This file runs runHLT with external menus
 # 3 tests of the CF to cover different menu generation frameworks and data inputs:
@@ -13,7 +12,7 @@ import itertools
 import functools
 
 from AthenaCommon.Logging import logging
-log = logging.getLogger('test_menu_cf_CA')
+log = logging.getLogger('test_menu_cf')
 from AthenaCommon.Constants import DEBUG
 
 
