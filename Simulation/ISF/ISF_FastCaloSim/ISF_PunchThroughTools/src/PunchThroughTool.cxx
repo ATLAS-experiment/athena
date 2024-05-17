@@ -141,13 +141,6 @@ StatusCode ISF::PunchThroughTool::initialize()
       return StatusCode::FAILURE;
     }
 
-  //barcode service
-  if (m_barcodeSvc.retrieve().isFailure() )
-    {
-      ATH_MSG_ERROR( "[ punchthrough ] Could not retrieve " << m_barcodeSvc );
-      return StatusCode::FAILURE;
-    }
-
   //envelope definition service
   if (m_envDefSvc.retrieve().isFailure() )
     {
@@ -1346,12 +1339,11 @@ ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( const ISF::ISFParticle &i
   charge *= (pdg > 0.) ?  1. : -1.;
 
   const double pTime = 0;  /** @TODO: fix */
-
-  //assign barcodes to the produced particles
-  const int secBC = m_barcodeSvc->newSecondaryParticle( isfp.barcode() );
+  const int status = 1 + HepMC::SIM_STATUS_THRESHOLD;
+  const int id = HepMC::UNDEFINED_ID;
   // NB we are not considering the possibility that the punch-through
   // particle is the incoming particle having survived an interaction.
-  ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, 1 + HepMC::SIM_STATUS_THRESHOLD, pTime, isfp, secBC);
+  ISF::ISFParticle* finalPar = new ISF::ISFParticle ( pos, mom, mass, charge, pdg, status, pTime, isfp, id);
   finalPar->setNextGeoID( AtlasDetDescr::fAtlasMS);
 
   // return the punch-through particle

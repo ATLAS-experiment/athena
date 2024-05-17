@@ -13,9 +13,6 @@
 // Athena Base
 #include "AthenaBaseComps/AthAlgTool.h"
 
-//Barcode
-#include "BarcodeInterfaces/IBarcodeSvc.h"
-
 //Geometry
 #include "SubDetectorEnvelopes/IEnvelopeDefSvc.h"
 
@@ -200,7 +197,6 @@ namespace ISF {
      *---------------------------------------------------------------------*/
     ServiceHandle<IPartPropSvc>          m_particlePropSvc{this, "PartPropSvc", "PartPropSvc", "particle properties svc"};
     ServiceHandle<IGeoIDSvc>             m_geoIDSvc{this, "GeoIDSvc", "ISF::GeoIDSvc"};
-    ServiceHandle<Barcode::IBarcodeSvc>  m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc"};
     ServiceHandle<IEnvelopeDefSvc>       m_envDefSvc{this, "EnvelopeDefSvc", "AtlasGeometry_EnvelopeDefSvc"};
 
     /** beam pipe radius */
