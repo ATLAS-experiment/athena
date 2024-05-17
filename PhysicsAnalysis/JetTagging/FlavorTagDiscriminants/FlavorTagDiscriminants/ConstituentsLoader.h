@@ -23,6 +23,8 @@
 // STL includes
 #include <string>
 #include <vector>
+#include <set>
+#include <tuple>
 
 namespace FlavorTagDiscriminants {
 
@@ -64,8 +66,8 @@ namespace FlavorTagDiscriminants {
     };
 
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables,
+      const std::string & name,
+      const std::vector<std::string> & input_variables,
       FlipTagConfig flip_config
     );
 
