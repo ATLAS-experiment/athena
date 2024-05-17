@@ -3,6 +3,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
+#include <regex>
 
 namespace {
   using namespace FlavorTagDiscriminants;
@@ -81,8 +82,8 @@ namespace FlavorTagDiscriminants {
     // Create a configuration for the constituents loaders
     //
     ConstituentsInputConfig createConstituentsLoaderConfig(
-      std::string name,
-      std::vector<std::string> input_variables,
+      const std::string & name,
+      const std::vector<std::string> & input_variables,
       FlipTagConfig flip_config
     ){
       ConstituentsInputConfig config;
