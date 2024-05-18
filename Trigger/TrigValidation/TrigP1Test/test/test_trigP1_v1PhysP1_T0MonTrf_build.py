@@ -20,7 +20,7 @@ hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'
 hlt.max_events = 50
-hlt.args = f'--preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True"'
+hlt.args = f'--CA --preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True"'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
@@ -64,6 +64,7 @@ tzreco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
 tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2024-03\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
+tzreco.args += ' --CA'
 
 #====================================================================================================
 # Merging NTUP_TRIGRATE/COST
