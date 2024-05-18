@@ -11,5 +11,5 @@ find_package( CLHEP )
 atlas_add_component( GeometryJiveXML
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} AthenaBaseComps CaloDetDescrLib CaloDetDescrUtils GaudiKernel InDetIdentifier InDetReadoutGeometry JiveXMLLib LArReadoutGeometry MuonIdHelpersLib MuonReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry StoreGateLib TRT_ReadoutGeometry TileDetDescr )
