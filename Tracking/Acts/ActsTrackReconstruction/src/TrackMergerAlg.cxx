@@ -19,7 +19,8 @@ namespace ActsTrk {
     ATH_CHECK(m_outputTrackCollection.initialize());
     // Create all the backends
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_outputTrackCollection.key())));
-    
+    ATH_CHECK(m_trackingGeometryTool.retrieve());
+
     return StatusCode::SUCCESS;
   }
   
@@ -55,7 +56,8 @@ namespace ActsTrk {
     }
     ATH_MSG_DEBUG("Created a track container with " << mergedTracks.size() << " elements");
 
-    std::unique_ptr< ActsTrk::TrackContainer > constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(mergedTracks), ctx);
+    std::unique_ptr< ActsTrk::TrackContainer > constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(mergedTracks), 
+      m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
     ATH_CHECK(mergedTracksHandle.record(std::move(constTracksContainer)));
     
     return StatusCode::SUCCESS;

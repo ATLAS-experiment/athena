@@ -360,7 +360,8 @@ namespace ActsTrk
 
     copyStats(event_stat);
 
-    std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), ctx);
+    std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), 
+      m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);
     // ================================================== //
     // ===================== OUTPUTS ==================== //
     // ================================================== //

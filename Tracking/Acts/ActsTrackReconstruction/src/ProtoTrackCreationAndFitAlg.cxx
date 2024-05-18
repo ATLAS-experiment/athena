@@ -121,7 +121,8 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
     destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
   }
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), ctx);  
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), 
+    m_trackingGeometryTool->getGeometryContext(ctx).context(), ctx);  
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
 

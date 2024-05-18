@@ -365,7 +365,6 @@ class MutableMultiTrajectory final
 
   friend ActsTrk::MutableTrackContainerHandlesHelper;
 
-
  private:
 
   std::unique_ptr<xAOD::TrackStateAuxContainer> m_trackStatesAux;
@@ -389,7 +388,8 @@ class MutableMultiTrajectory final
 
   std::vector<StoredSurface> m_surfaces;
   ActsGeometryContext m_geoContext;
-  // addjust prealocated size to actualy used
+
+  // adjust preallocated size to actually used
   void trim();
 };
 

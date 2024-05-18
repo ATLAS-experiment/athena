@@ -31,6 +31,9 @@ DEFINE_API(TrackSummary_v1, unsigned int, tipIndex, setTipIndex)
 
 DEFINE_API(TrackSummary_v1, unsigned int, stemIndex, setStemIndex)
 
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackSummary_v1, unsigned int, surfaceIndex, setSurfaceIndex)
+
+
 AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackSummary_v1, uint8_t, particleHypothesis, setParticleHypothesis)
 
 

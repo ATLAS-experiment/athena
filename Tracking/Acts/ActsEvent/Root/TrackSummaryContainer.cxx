@@ -5,7 +5,7 @@
 #include "xAODTracking/TrackSummary.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
-// this is list of xAOD container varaible names that are "hardcoded" in TrackSummary_v1
+// this is list of xAOD container variable names that are "hardcoded" in TrackSummary_v1
 // their compatibility is maintain ed by the unit tests: AllStaticxAODVaraiblesAreKnown
 const std::set<std::string> ActsTrk::TrackSummaryContainer::staticVariables = {
     "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
@@ -23,9 +23,9 @@ const std::set<Acts::HashedString> ActsTrk::TrackSummaryContainer::staticVariabl
 
 
 ActsTrk::TrackSummaryContainer::TrackSummaryContainer(
-    const DataLink<xAOD::TrackSummaryContainer>& link,
-    const DataLink<xAOD::TrackSurfaceAuxContainer>& surfLink)
-    : m_trackBackend(link), m_surfBackendAux(surfLink) {}
+    const DataLink<xAOD::TrackSummaryContainer>& link)
+    : m_trackBackend(link)
+    {}
 
 const Acts::Surface* ActsTrk::TrackSummaryContainer::referenceSurface_impl(
     ActsTrk::IndexType itrack) const {
@@ -99,18 +99,10 @@ ActsTrk::ConstCovariance ActsTrk::TrackSummaryContainer::covariance(
   return m_trackBackend->at(itrack)->covParamsEigen();
 }
 
-std::shared_ptr<const Acts::Surface>  ActsTrk::TrackSummaryContainer::surface(
-    ActsTrk::IndexType itrack) const {
-  const Acts::GeometryContext geoContext{};
-  return decodeSurface( m_surfBackendAux.cptr(), itrack, geoContext );
-}
-
 void ActsTrk::TrackSummaryContainer::fillFrom(
     ActsTrk::MutableTrackSummaryContainer& mtb) {
   m_surfaces = std::move(mtb.m_surfaces);
 }
-
-
 
 void ActsTrk::TrackSummaryContainer::restoreDecorations() {
   m_decorations = ActsTrk::detail::restoreDecorations(m_trackBackend->getConstStore(), staticVariables);
@@ -127,6 +119,13 @@ std::vector<Acts::HashedString> ActsTrk::TrackSummaryContainer::dynamicKeys_impl
   return result;
 }
 
+void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceContainer* src, const Acts::GeometryContext& geoContext) {
+  for ( auto xAODSurfacePtr: *src) {
+    m_surfaces.push_back( decodeSurface(xAODSurfacePtr, geoContext));
+  }
+}
+
+
 
 
 ////////////////////////////////////////////////////////////////////
@@ -139,11 +138,6 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer() {
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
 
   TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
-  m_mutableSurfBackend = std::make_unique<xAOD::TrackSurfaceContainer>();
-  m_mutableSurfBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
-  m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
-
-  TrackSummaryContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();  
 }
 
 ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
@@ -152,11 +146,6 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
   m_mutableTrackBackendAux = std::move(other.m_mutableTrackBackendAux);
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
   TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
-
-  m_mutableSurfBackend = std::move(other.m_mutableSurfBackend);
-  m_mutableSurfBackendAux = std::move(other.m_mutableSurfBackendAux);
-  m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
-  TrackSummaryContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();
 
   m_surfaces = std::move(other.m_surfaces);
   m_decorations = std::move(other.m_decorations);
@@ -170,11 +159,6 @@ ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::op
   m_mutableTrackBackendAux = std::exchange(other.m_mutableTrackBackendAux, nullptr);
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
   TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
-
-  m_mutableSurfBackend = std::exchange(other.m_mutableSurfBackend, nullptr);
-  m_mutableSurfBackendAux = std::exchange(other.m_mutableSurfBackendAux, nullptr);
-  m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
-  TrackSummaryContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();
 
   m_surfaces = std::move(other.m_surfaces);
   m_decorations = std::move(other.m_decorations);
@@ -204,29 +188,6 @@ void ActsTrk::MutableTrackSummaryContainer::removeTrack_impl(
   }
   m_mutableTrackBackend->erase(m_mutableTrackBackend->begin() + itrack);
 }
-
-// Add and remove surface
-ActsTrk::IndexType ActsTrk::MutableTrackSummaryContainer::addSurface_impl() {
-  m_mutableSurfBackendAux->resize(m_mutableSurfBackendAux->size()+1);
-  return m_mutableSurfBackendAux->size() - 1;
-}
-
-void ActsTrk::MutableTrackSummaryContainer::removeSurface_impl(
-    ActsTrk::IndexType isurf) {
-  if (isurf >= m_mutableSurfBackendAux->size()) {
-    throw std::out_of_range("removeSurface_impl");
-  }
-  // TODO find a more generic way to do this (possible issue may sneak ins when adding more variables to backend)  
-  for (auto i = isurf; i < m_mutableSurfBackendAux->size()-1; ++i) {
-    m_mutableSurfBackendAux->surfaceType[i] = m_mutableSurfBackendAux->surfaceType[i+1];
-    m_mutableSurfBackendAux->translation[i] = m_mutableSurfBackendAux->translation[i+1];
-    m_mutableSurfBackendAux->rotation[i] = m_mutableSurfBackendAux->rotation[i+1];
-    m_mutableSurfBackendAux->boundValues[i] = m_mutableSurfBackendAux->boundValues[i+1];
-  }  
-  m_mutableSurfBackendAux->resize(m_mutableSurfBackendAux->size()-1);
-}
-
-
 
 // this in fact may be a copy from other MutableTrackSymmaryContainer
 void ActsTrk::MutableTrackSummaryContainer::copyDynamicFrom_impl(
@@ -290,7 +251,16 @@ void ActsTrk::MutableTrackSummaryContainer::clear() {
 void ActsTrk::MutableTrackSummaryContainer::setReferenceSurface_impl(
     ActsTrk::IndexType itrack, std::shared_ptr<const Acts::Surface> surface) {
   m_surfaces.resize(itrack + 1, nullptr);
-  m_surfaces[itrack] = std::move(surface);
+  m_surfaces[itrack] = surface;
+}
+
+void ActsTrk::MutableTrackSummaryContainer::encodeSurfaces( xAOD::TrackSurfaceAuxContainer* dest,  const Acts::GeometryContext& geoContext) const {
+  dest->resize(m_surfaces.size());
+  size_t index = 0;
+  for ( auto& surface: m_surfaces ) {
+    encodeSurface(dest, index, surface.get(), geoContext);
+    index++;
+  }
 }
 
 void ActsTrk::MutableTrackSummaryContainer::setParticleHypothesis_impl(ActsTrk::IndexType itrack, const Acts::ParticleHypothesis& particleHypothesis) {

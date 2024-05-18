@@ -10,6 +10,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h" 
+#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 namespace ActsTrk {
 
@@ -28,6 +29,8 @@ namespace ActsTrk {
 	"Input Acts Tracks to be merged"};
     SG::WriteHandleKey< ActsTrk::TrackContainer > m_outputTrackCollection {this, "OutputTrackCollection", "",
       "Output Acts Tracks obtained from the merging of the input collections"};
+    ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+
   }; 
   
 }
