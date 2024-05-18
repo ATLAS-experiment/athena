@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERCORRECTION_CALOSWETA1B_G3_H
@@ -48,7 +48,11 @@ class CaloSwEta1b_g3 : public CaloClusterCorrection
   virtual void makeCorrection (const Context& myctx,
                                xAOD::CaloCluster* cluster) const override;
 
- private:
+  // Override tool type name to group all four together.
+  virtual const std::string& toolType() const override;
+
+
+private:
 
   CaloSwEta1b_g3() = delete;
   // parameters 
