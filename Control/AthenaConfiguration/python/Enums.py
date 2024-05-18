@@ -50,6 +50,7 @@ class ProductionStep(FlagEnum):
     Overlay = 'Overlay'
     FastChain = 'FastChain'
     Digitization = 'Digitization'
+    PileUpPretracking = 'PileUpPretracking'
     Reconstruction = 'Reconstruction'
     Derivation = 'Derivation'
 

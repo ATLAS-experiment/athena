@@ -13,7 +13,7 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
                     extendProvenanceRecord=True, AcceptAlgs=[], HelperTools=[]):
    eventInfoKey = "EventInfo"
-   if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+   if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
 
    msg = logging.getLogger("OutputStreamCfg")
