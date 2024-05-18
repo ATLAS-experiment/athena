@@ -57,8 +57,8 @@ namespace G4UA
     /// constructor
     TestActionTimer();
 
-    TestActionTimer(const TestActionTimer&);
-    TestActionTimer& operator=(const TestActionTimer&);
+    TestActionTimer(const TestActionTimer&) = delete;
+    TestActionTimer& operator=(const TestActionTimer&) = delete;
 
     /// this holds all the data from individual threads that needs to be merged at EoR
     struct Report

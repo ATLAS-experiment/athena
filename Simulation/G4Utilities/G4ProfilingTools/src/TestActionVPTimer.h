@@ -65,8 +65,8 @@ namespace G4UA
 
     TestActionVPTimer(const Config& config);
 
-    TestActionVPTimer(const TestActionVPTimer&);
-    TestActionVPTimer& operator=(const TestActionVPTimer&);
+    TestActionVPTimer(const TestActionVPTimer&) = delete;
+    TestActionVPTimer& operator=(const TestActionVPTimer&) = delete;
 
 
     struct volumeData {                 //!< Structure of data for given volume
