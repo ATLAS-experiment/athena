@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataModelTestDataRead/versions/GAuxContainer_v1.h
@@ -31,9 +31,9 @@ public:
   GAuxContainer_v1();
 
 private:
-  SG::PackedContainer<int> anInt;
-  std::vector<float> gFloat;
-  std::vector<std::vector<float> > gvFloat;
+  AUXVAR_PACKEDCONTAINER_DECL (int, anInt);
+  AUXVAR_DECL (float, gFloat);
+  AUXVAR_DECL (std::vector<float>, gvFloat);
 };
 
 

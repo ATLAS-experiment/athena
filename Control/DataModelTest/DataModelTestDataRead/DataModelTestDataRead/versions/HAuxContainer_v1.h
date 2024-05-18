@@ -1,11 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
-/**
+/*
  * @file DataModelTestDataRead/versions/HAuxContainer_v1.h
  * @author scott snyder <snyder@bnl.gov>
  * @date Jan, 2016
@@ -32,7 +29,7 @@ public:
   HAuxContainer_v1();
 
 private:
-  std::vector<int> anInt;
+  AUXVAR_DECL (int, anInt);
 };
 
 
