@@ -9,6 +9,7 @@
 
 // framework include(s)
 #include "AsgDataHandles/ReadHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 // EDM include(s)
 #include "xAODMuon/MuonContainer.h"
@@ -366,22 +367,22 @@ bool TauSelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
     if (xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)) bPass = true;
     break;
   case JETIDGNTAUVERYLOOSE:
-    static const SG::AuxElement::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v0");
+    static const SG::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v0");
     if (!acc_gnTauVeryLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau VeryLoose WP not available" << endmsg;
     else bPass = acc_gnTauVeryLoose(xTau);
     break;
   case JETIDGNTAULOOSE:
-    static const SG::AuxElement::ConstAccessor<char> acc_gnTauLoose("GNTauL_v0");
+    static const SG::ConstAccessor<char> acc_gnTauLoose("GNTauL_v0");
     if (!acc_gnTauLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Loose WP not available" << endmsg;
     else bPass = acc_gnTauLoose(xTau);
     break;
   case JETIDGNTAUMEDIUM:
-    static const SG::AuxElement::ConstAccessor<char> acc_gnTauMedium("GNTauM_v0");
+    static const SG::ConstAccessor<char> acc_gnTauMedium("GNTauM_v0");
     if (!acc_gnTauMedium.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Medium WP not available" << endmsg;
     else bPass = acc_gnTauMedium(xTau);
     break;
   case JETIDGNTAUTIGHT:
-    static const SG::AuxElement::ConstAccessor<char> acc_gnTauTight("GNTauT_v0");
+    static const SG::ConstAccessor<char> acc_gnTauTight("GNTauT_v0");
     if (!acc_gnTauTight.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Tight WP not available" << endmsg;
     else bPass = acc_gnTauTight(xTau);
     break;
@@ -410,8 +411,9 @@ TauSelectionCutRNNEleScore::TauSelectionCutRNNEleScore(TauSelectionTool* tTST)
 //______________________________________________________________________________
 void TauSelectionCutRNNEleScore::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
+   SG::ConstAccessor<float> acc ("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
    if(m_tTST->m_iEleIDVersion!=0){  
-      hHist.Fill(xTau.auxdataConst<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion)));
+      hHist.Fill(acc(xTau));
    } else {
       hHist.Fill(xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans));
    }
@@ -427,9 +429,10 @@ void TauSelectionCutRNNEleScore::setAcceptInfo(asg::AcceptInfo& info) const
 bool TauSelectionCutRNNEleScore::accept(const xAOD::TauJet& xTau,
                                      asg::AcceptData& acceptData)
 {
+  SG::ConstAccessor<float> acc ("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
   double fEleRNNScore = 0.;
   if(m_tTST->m_iEleIDVersion!=0){
-    fEleRNNScore = xTau.auxdataConst<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
+    fEleRNNScore = acc(xTau);
   }else{
     fEleRNNScore = xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans);
   }
@@ -474,14 +477,17 @@ TauSelectionCutEleIDWP::TauSelectionCutEleIDWP(TauSelectionTool* tTST)
 void TauSelectionCutEleIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
   if (m_tTST->m_iEleIDVersion!=0){
-  hHist.Fill((xTau.auxdataConst<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1));
-  hHist.Fill((xTau.auxdataConst<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+2);
-  hHist.Fill((xTau.auxdataConst<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+4);
+    SG::ConstAccessor<char> accLoose ("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion));
+    SG::ConstAccessor<char> accMedium ("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion));
+    SG::ConstAccessor<char> accTight ("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion));
+    hHist.Fill((accLoose(xTau) == 1));
+    hHist.Fill((accMedium(xTau) == 1)+2);
+    hHist.Fill((accTight(xTau) == 1)+4);
   }
   else{
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNLoose));
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNMedium)+2);
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNTight)+4);
+    hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNLoose));
+    hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNMedium)+2);
+    hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNTight)+4);
   }
 }
 
@@ -506,20 +512,23 @@ bool TauSelectionCutEleIDWP::accept(const xAOD::TauJet& xTau,
     bPass = true;
     break;
   case ELEIDRNNLOOSE:
-    if (m_tTST->m_iEleIDVersion!=0){ 
-      if (xTau.auxdataConst<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+    if (m_tTST->m_iEleIDVersion!=0){
+      SG::ConstAccessor<char> accLoose ("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion));
+      if (accLoose(xTau) == 1)bPass = true;
     }
     else if (xTau.isTau(xAOD::TauJetParameters::EleRNNLoose)) bPass = true;
     break;
   case ELEIDRNNMEDIUM:
     if (m_tTST->m_iEleIDVersion!=0){ 
-      if (xTau.auxdataConst<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+      SG::ConstAccessor<char> accMedium ("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion));
+      if (accMedium(xTau) == 1)bPass = true;
     }
     else if (xTau.isTau(xAOD::TauJetParameters::EleRNNMedium)) bPass = true;
     break;
   case ELEIDRNNTIGHT:
     if (m_tTST->m_iEleIDVersion!=0){ 
-      if (xTau.auxdataConst<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+      SG::ConstAccessor<char> accTight ("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion));
+      if (accTight(xTau) == 1)bPass = true;
     }
     else if (xTau.isTau(xAOD::TauJetParameters::EleRNNTight)) bPass = true;
     break;

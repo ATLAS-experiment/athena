@@ -8,6 +8,7 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
 
 using namespace TauAnalysisTools;
 
@@ -35,7 +36,8 @@ StatusCode TauTruthTrackMatchingTool::classifyTrack(const xAOD::TauTrack& xTrack
   // don't classify tracks if this was already done
   if (!m_bIsHadronicTrackAvailable.isValid())
   {
-    bool avail = xTrackParticle.isAvailable<char>("IsHadronicTrack");
+    static const SG::ConstAccessor<char> accIsHadronicTrack("IsHadronicTrack");
+    bool avail = accIsHadronicTrack.isAvailable(xTrackParticle);
     m_bIsHadronicTrackAvailable.set (avail);
     if (avail)
     {

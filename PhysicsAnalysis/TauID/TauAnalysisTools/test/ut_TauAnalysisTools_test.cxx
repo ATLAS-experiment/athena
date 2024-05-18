@@ -25,6 +25,7 @@
 
 // EDM include(s):
 #include "xAODTau/TauJetContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include "CxxUtils/checker_macros.h"
 
@@ -130,14 +131,18 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
                     << ", prong = " << int(xTau->nTracks())
                     << ", charge = " << int(xTau->charge()));
 
-      bool avail = xTau->isAvailable<char>("IsTruthMatched") ;
+      static const SG::ConstAccessor<char> accIsTruthMatched ("IsTruthMatched");
+      bool avail = accIsTruthMatched.isAvailable(*xTau);
       if (avail && (xTruthTau != nullptr))
       {
         if (xTruthTau->isTau())
         {
-          if ((bool)xTruthTau->auxdata<char>("IsHadronicTau"))
-            ANA_MSG_INFO( "Tau was matched to a truth hadronic tau, which has " << int(xTruthTau->auxdata<size_t>("numCharged"))
+          static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
+          if ((bool)accIsHadronicTau(*xTruthTau)) {
+            static const SG::ConstAccessor<size_t> accNumCharged ("numCharged");
+            ANA_MSG_INFO( "Tau was matched to a truth hadronic tau, which has " << int(accNumCharged(*xTruthTau))
                           << " prongs and a charge of " << int(xTruthTau->charge()));
+          }
           else
             ANA_MSG_INFO( "Tau was matched to a truth leptonic tau, which has a charge of " << int(xTruthTau->charge()));
         }
@@ -150,12 +155,14 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
         ANA_MSG_INFO( "Tau was not matched to truth" );
 
       typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
-      if (!xTau->isAvailable< Link_t >("truthParticleLink"))
+      static const SG::ConstAccessor< Link_t > accTruthParticleLink("truthParticleLink");
+      if (!accTruthParticleLink.isAvailable(*xTau))
       {
         ANA_MSG_WARNING("link truthParticleLink is not available");
         continue;
       }
-      auto xTruthJetLink = xTau->auxdata< ElementLink< xAOD::JetContainer > >("truthJetLink");
+      static const SG::ConstAccessor< ElementLink< xAOD::JetContainer > > accTruthJetLink("truthJetLink");
+      auto xTruthJetLink = accTruthJetLink(*xTau);
       if (xTruthJetLink.isValid())
       {
         const xAOD::Jet* xTruthJet = *xTruthJetLink;
