@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -8,6 +8,7 @@
 #include "PATInterfaces/ISystematicsTool.h"
 
 #include "xAODEgamma/Electron.h"
+#include "AthContainers/Accessor.h"
 #include "CxxUtils/ubsan_suppress.h"
 
 #include "TFile.h"
@@ -106,7 +107,8 @@ int main() {
    xAOD::Electron* e = new xAOD::Electron;
    e->makePrivateStore();
    e->setP4(25000.,2,3,4000.);
-   e->auxdata<double>("blah") = 4;
+   static const SG::Accessor<double> blahAcc ("blah");
+   blahAcc (*e) = 4;
 
    std::cout << myTool->evaluate(e) << std::endl; //should print 3.000
    std::cout << myTool2->evaluate(e) << std::endl; //should print 4.000

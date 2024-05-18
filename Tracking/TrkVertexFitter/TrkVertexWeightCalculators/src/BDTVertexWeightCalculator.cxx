@@ -13,6 +13,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/ReadDecorHandle.h>
+#include "AthContainers/ConstAccessor.h"
 
 #include <cmath>
 #include <limits>
@@ -131,9 +132,9 @@ const xAOD::Vertex* BDTVertexWeightCalculator::getVertex(
       continue;
     }
     if (v->vertexType() == xAOD::VxType::PriVtx) {
-      const float score = v->isAvailable<float>("score")
-                              ? v->auxdata<float>("score")
-                              : estimateSignalCompatibility(*v);
+      static const SG::ConstAccessor<float> acc ("score");
+      const float score =
+        acc.isAvailable(*v) ? acc(*v) : estimateSignalCompatibility(*v);
       if (score > best_score) {
         best_score = score;
         vertex = v;

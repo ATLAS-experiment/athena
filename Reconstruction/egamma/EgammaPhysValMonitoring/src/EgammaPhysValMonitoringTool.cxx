@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EgammaPhysValMonitoringTool.cxx 
@@ -28,6 +28,7 @@
 #include "MCTruthClassifier/MCTruthClassifierDefs.h"
 
 #include "StoreGate/ReadHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <iostream>
 
@@ -378,8 +379,9 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
         
         if(!m_isMC) m_oElectronValidationPlots.fill(*electron,*eventInfo,isElecPrompt);
         else {
-            if(electron->isAvailable <int>("truthType")) {
-                MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");
+            static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
+            if(truthTypeAcc.isAvailable (*electron)) {
+                MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) truthTypeAcc (*electron);
                 if(type==MCTruthPartClassifier::IsoElectron) {
                     isElecPrompt=true;
                     //fill energy scale
@@ -447,8 +449,9 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
     if (m_acc_electronLLH_TightNoPix.isAvailable(*electron)) electron->passSelection(pass_LHTightNoPix, "DFCommonElectronsLHTightNoPix");
     else pass_LHTightNoPix = static_cast<bool>(m_Electron_TightNoPix_LLHTool->accept(electron));
 
-    if(electron->isAvailable <int>("truthType")) {
-      MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) electron->auxdata<int>("truthType");
+    static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
+    if(truthTypeAcc.isAvailable(*electron)) {
+      MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) truthTypeAcc(*electron);
       if(type==MCTruthPartClassifier::IsoElectron) {
         isElecPrompt=true;
 	      //fill energy scale
@@ -538,8 +541,9 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
         if(xAOD::EgammaHelpers::isConvertedPhoton(photon)&&photon->pt()/GeV>7.)                  numofCnv++;
         if(!m_isMC) m_oPhotonValidationPlots.fill(*photon,*eventInfo, isPhotPrompt);
         else {
-            if(photon->isAvailable <int>("truthType")) {
-                MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) photon->auxdata<int>("truthType");
+            static const SG::ConstAccessor<int> truthTypeAcc ("truthType");
+            if(truthTypeAcc.isAvailable(*photon)) {
+                MCTruthPartClassifier::ParticleType type = (MCTruthPartClassifier::ParticleType) truthTypeAcc(*photon);
                 if(type==MCTruthPartClassifier::IsoPhoton) {
                     isPhotPrompt=true;	
                     //fill energy scale

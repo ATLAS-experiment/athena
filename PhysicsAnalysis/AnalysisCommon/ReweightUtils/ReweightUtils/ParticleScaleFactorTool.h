@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef REWEIGHTUTILS_PARTICLESCALEFACTORTOOL_H
@@ -12,6 +12,7 @@
 
 #include "TH1.h"
 #include "xAODBase/IParticle.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <functional>
 
@@ -41,13 +42,17 @@ class ParticleScaleFactorTool: public asg::AsgTool, public virtual IObservableTo
       }
       const std::type_info* ti = reg.getType( auxid );
       if( *ti == typeid( double ) ) {
-          return p.auxdataConst< double >( varname );
+          SG::ConstAccessor<double> acc (varname);
+          return acc(p);
       } else if( *ti == typeid( float ) ) {
-         return p.auxdataConst< float >( varname );
+          SG::ConstAccessor<float> acc (varname);
+          return acc(p);
       } else if( *ti == typeid( int ) ) {
-          return p.auxdataConst< int >( varname );
+          SG::ConstAccessor<int> acc (varname);
+          return acc(p);
       } else if( *ti == typeid( unsigned int ) ) {
-          return p.auxdataConst< unsigned int>( varname );
+          SG::ConstAccessor<unsigned int> acc (varname);
+          return acc(p);
       } 
       throw std::runtime_error("Unrecognised type for decoration: " + varname); 
    }
