@@ -155,14 +155,12 @@ This is the value assigned to correction_generation_default
 in CaloSwCorrections (or CaloTopoEMCorrections).  This should be different
 from any previously used generation string.
 
-To create these files, run the JO file CaloSwCorrectionsToCool.py.
+To create these files, run the Athena script WriteCaloSwCorrections.py.
 (There is a separate JO for topo EM cluster corrections.)
-The local pool file is specified at the start of the JO file
-CaloSwCorrectionsToPool.py; the local cool file is at the end
-of CaloSwCorrectionsToCool.py.
+The local pool file and cool files are specified at the start of that file.
 It doesn't really matter what these are named,
 so you shouldn't have to change them.  These files should be created
-as a result of running the JO.
+as a result of running the script.
 
 Now to test it.  Add a new entry for this file in poolfiles.py,
 for example:
