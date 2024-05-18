@@ -111,6 +111,21 @@ void test_linked()
 
   const AuxContainerLinkTest& cs = s;
   assert (cs.linkedVector (auxid2)->size() == 10);
+
+  auto v1 = reinterpret_cast<const std::vector<int>*> (s.getIOData (auxid1));
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (s.size() == 1);
+
+  s.resize (1);
+  assert (s.size() == 1);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+
+  s.reserve (1);
+  assert (s.size() == 1);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
 }
 
 
