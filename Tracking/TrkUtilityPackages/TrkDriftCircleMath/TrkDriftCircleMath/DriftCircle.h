@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATH_DRIFTCIRCLE_H
@@ -31,13 +31,6 @@ namespace TrkDriftCircleMath {
         };
 
     public:
-        /** minimal constructor
-            @param pos local position of the hit
-            @param r   drift radius
-            @param dr  error on drift radius
-            @param state state of the DC  */
-        DriftCircle(const LocVec2D& pos, double r, double dr, DriftState state = InTime) :
-            m_pos(pos), m_r(r), m_dr(dr), m_drPrecise(dr), m_state(state) {}
 
         /** full constructor
             @param pos local position of the hit
@@ -46,9 +39,14 @@ namespace TrkDriftCircleMath {
             @param state state of the DC
             @param identifier of hit
             @param index of drift circle use to link it back to the original RIO_OnTrack */
-        DriftCircle(const LocVec2D& pos, double r, double dr, DriftState state, MdtId id, int index,
-                    const Muon::MdtDriftCircleOnTrack* rot = nullptr) :
-            m_pos(pos), m_r(r), m_dr(dr), m_drPrecise(dr), m_state(state), m_id(id), m_index(index), m_rot(rot) {}
+        DriftCircle(const LocVec2D& pos, 
+                    double r, 
+                    double dr, 
+                    DriftState state, 
+                    MdtId id,
+                    const Muon::MdtDriftCircleOnTrack* rot,
+                    unsigned int index = 0) :
+            m_pos(pos), m_r(r), m_dr(dr), m_drPrecise(dr), m_state(state), m_id(id), m_rot(rot), m_idx{index} {}
 
         /** full constructor
             @param pos local position of the hit
@@ -58,9 +56,16 @@ namespace TrkDriftCircleMath {
             @param state state of the DC
             @param identifier of hit
             @param index of drift circle use to link it back to the original RIO_OnTrack */
-        DriftCircle(const LocVec2D& pos, double r, double dr, double drPrecise, DriftState state, MdtId id, int index,
-                    const Muon::MdtDriftCircleOnTrack* rot = nullptr) :
-            m_pos(pos), m_r(r), m_dr(dr), m_drPrecise(drPrecise), m_state(state), m_id(id), m_index(index), m_rot(rot) {}
+        DriftCircle(const LocVec2D& pos, 
+                    double r, 
+                    double dr, 
+                    double drPrecise, 
+                    DriftState state, 
+                    MdtId id,
+                    const Muon::MdtDriftCircleOnTrack* rot,
+                    unsigned int index  = 0) :
+            m_pos(pos), m_r(r), m_dr(dr), m_drPrecise(drPrecise), m_state(state), m_id(id), m_rot(rot),
+            m_idx{index} {}
 
         /** destructor */
         virtual ~DriftCircle() = default;
@@ -88,13 +93,10 @@ namespace TrkDriftCircleMath {
 
         /** access to drift state */
         const DriftState& driftState() const { return m_state; }
-
-        /** access to index */
-        int index() const { return m_index; }
-
-        /** access to index */
+        /** access to the ROT */
         const Muon::MdtDriftCircleOnTrack* rot() const { return m_rot; }
 
+        unsigned int index() const { return m_idx; }
         /** set method to allow update from t0 refit */
         void updateRadius(double r, double dr) {
             m_r = r;
@@ -108,8 +110,8 @@ namespace TrkDriftCircleMath {
         double m_drPrecise{0.};
         DriftState m_state;  // Masked by DCOnTrack::m_state which is a DCOnTrackState
         MdtId m_id{};
-        int m_index{-1};
         const Muon::MdtDriftCircleOnTrack* m_rot{nullptr};
+        unsigned int m_idx{0};
     };
 
     typedef std::vector<DriftCircle> DCVec;

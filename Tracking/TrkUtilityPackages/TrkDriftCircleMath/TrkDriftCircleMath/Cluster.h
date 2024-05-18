@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATH_CLUSTER_H
@@ -12,6 +12,10 @@
 #include "TrkDriftCircleMath/ClusterId.h"
 #include "TrkDriftCircleMath/LocVec2D.h"
 
+
+namespace Muon {
+    class MuonClusterOnTrack;
+}
 namespace TrkDriftCircleMath {
 
     /** class representing a cluster meaurement */
@@ -26,8 +30,12 @@ namespace TrkDriftCircleMath {
             @param pos local position of cluster
             @param err error on cluster position
             @param id cluster identifier
+            @param rot: Pointer to the ROT out of which the cluster is made
             @param index index of cluster use to link it back to the original RIO_OnTrack */
-        Cluster(const LocVec2D& pos, double err, ClusterId id, int index) : m_pos(pos), m_err(err), m_id(id), m_index(index) {}
+        Cluster(const LocVec2D& pos, double err, ClusterId id, 
+                const Muon::MuonClusterOnTrack* rot,
+                unsigned int index) : 
+            m_pos(pos), m_err(err), m_id(id), m_rot{rot}, m_idx{index} {}
 
         ~Cluster() = default;
 
@@ -47,13 +55,16 @@ namespace TrkDriftCircleMath {
         double err() const { return m_err; }
 
         /** index of cluster in input vector, use to link back the cluster to the MuonClusterOnTrack */
-        int index() const { return m_index; }
+        const Muon::MuonClusterOnTrack* rot() const { return m_rot; }
+        /** @brief: Index w.r.t cluster vector*/
+        unsigned int index() const { return m_idx; }
 
     private:
         LocVec2D m_pos{0., 0.};
         double m_err{0.};
         ClusterId m_id{};
-        int m_index{0};
+        const Muon::MuonClusterOnTrack* m_rot{nullptr};
+        unsigned int m_idx{0};
     };
 
     typedef std::vector<Cluster> CLVec;
