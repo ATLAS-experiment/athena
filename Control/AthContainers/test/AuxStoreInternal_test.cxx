@@ -56,6 +56,64 @@ public:
 };
 
 
+struct TestObj
+{
+  int m_x = 0;
+};
+
+
+class TestVec
+  : public SG::AuxTypeVector<TestObj>
+{
+public:
+  using Base = SG::AuxTypeVector<TestObj>;
+  using Base::Base;
+
+  virtual std::unique_ptr<SG::IAuxTypeVector> linkedVector() override
+  {
+    return std::move (m_linked);
+  }
+
+  std::unique_ptr<SG::IAuxTypeVector> m_linked;
+};
+
+
+class TestVecFactory
+  : public SG::AuxTypeVectorFactory<TestObj>
+{
+public:
+  TestVecFactory();
+
+  virtual
+  std::unique_ptr<SG::IAuxTypeVector> create (SG::auxid_t auxid,
+                                              size_t size,
+                                              size_t capacity,
+                                              bool isLinked) const override;
+
+  SG::auxid_t m_linked_id = SG::null_auxid;
+};
+
+
+TestVecFactory::TestVecFactory()
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  m_linked_id = r.getAuxID<int> ("ltest2_1", "",
+                                 SG::AuxVarFlags::Linked);
+}
+
+
+std::unique_ptr<SG::IAuxTypeVector>
+TestVecFactory::create (SG::auxid_t auxid,
+                        size_t size,
+                        size_t capacity,
+                        bool /*isLinked*/) const
+{
+  auto p = std::make_unique<TestVec> (auxid, size, capacity, false);
+  p->m_linked = std::make_unique<SG::AuxTypeVector<int> >(m_linked_id, 3, 3, true);
+  return p;
+}
+
+
 void test1()
 {
   std::cout << "test1\n";
@@ -474,13 +532,99 @@ void test_linked()
                                           auxid1);
   SG::AuxStoreInternal s;
   int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
-  [[maybe_unused]]
   float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
 
   assert (s.linkedVector (auxid2)->isLinked());
   assert (s.linkedVector (auxid2)->auxid() == auxid1);
   assert (s.linkedVector (auxid2)->toPtr() == vp1);
 
+  auto v1 = reinterpret_cast<const std::vector<int>*> (s.getIOData (auxid1));
+  auto v2 = reinterpret_cast<const std::vector<float>*> (s.getIOData (auxid2));
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 3);
+  assert (v2->capacity() == 3);
+  assert (s.size() == 3);
+
+  s.resize (7);
+  assert (s.size() == 7);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 7);
+
+  s.reserve (50);
+  assert (s.size() == 7);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 7);
+  assert (v2->capacity() == 50);
+
+  std::vector<int> vv1 { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+  std::vector<float> vv2 { 11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5 };
+
+  vp2 = reinterpret_cast<float*> (s.getData (auxid2, 7, 50));
+
+  std::copy (vv1.begin(), vv1.end(), vp1);
+  std::copy (vv2.begin(), vv2.end(), vp2);
+
+  s.shift (3, 1);
+  assert (s.size() == 8);
+  assert (v1->size() == 10);
+  assert (v2->size() == 8);
+  assert (*v1 == vv1);
+  assert (*v2 == (std::vector<float> { 11.5, 12.5, 13.5, 0, 14.5, 15.5, 16.5, 17.5 }) );
+
+  AuxStoreInternalTest s2;
+  auto vec3 = std::make_unique<SG::AuxTypeVector<int> > (auxid1, 4, 4, true);
+  auto vec4 = std::make_unique<SG::AuxTypeVector<float> > (auxid2, 6, 6, false);
+  s2.addVector (std::move (vec4), false);
+  s2.addVector (std::move (vec3), false);
+  auto v3 = reinterpret_cast<const std::vector<int>*> (s2.getIOData (auxid1));
+  auto v4 = reinterpret_cast<const std::vector<float>*> (s2.getIOData (auxid2));
+  assert (v3->size() == 4);
+  assert (v4->size() == 6);
+
+  s.insertMove (3, s2);
+  assert (s.size() == 14);
+  assert (v1->size() == 10);
+  assert (v2->size() == 14);
+  assert (*v1 == vv1);
+}
+
+
+void test_linked2()
+{
+  std::cout << "test_linked2\n";
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  (void)r.addFactory (typeid (TestObj),
+                      typeid (std::vector<TestObj>::allocator_type),
+                      std::make_unique<TestVecFactory>());
+
+  SG::auxid_t auxid1 = r.getAuxID<int> ("ltest2_1", "",
+                                        SG::AuxVarFlags::Linked);
+  SG::auxid_t auxid2 = r.getAuxID<TestObj> ("ltest2_2", "",
+                                            SG::AuxVarFlags::None,
+                                            auxid1);
+
+  {
+    SG::AuxStoreInternal s;
+    (void)s.getData (auxid2, 10, 10);
+
+    auto v1 = reinterpret_cast<const std::vector<int>*> (s.getIOData (auxid1));
+    auto v2 = reinterpret_cast<const std::vector<TestObj>*> (s.getIOData (auxid2));
+    assert (v1->size() == 3);
+    assert (v2->size() == 10);
+  }
+
+  {
+    SG::AuxStoreInternal s;
+    (void)s.getDecoration (auxid2, 10, 10);
+    auto v1 = reinterpret_cast<const std::vector<int>*> (s.getIOData (auxid1));
+    auto v2 = reinterpret_cast<const std::vector<TestObj>*> (s.getIOData (auxid2));
+    assert (v1->size() == 3);
+    assert (v2->size() == 10);
+  }
 }
 
 
@@ -592,6 +736,7 @@ int main()
   test4();
   test5();
   test_linked();
+  test_linked2();
   test_threading();
   return 0;
 }

@@ -504,6 +504,13 @@ void test_linked()
     assert (dv->size() == 1);
     store.addVector (std::move (pvup), false);
     store.addVector (std::move (dvup), false);
+    assert (pv->size() == 2);
+    assert (dv->size() == 1);
+  
+    b1.getDataArray (foo_links_id);
+    b1.getDataArray (foo_id);
+    assert (pv->size() == 10);
+    assert (dv->size() == 1);
   }
 }
 
