@@ -481,6 +481,7 @@ char* RootAuxVectorFactory::copyImpl (SG::auxid_t auxid,
                                       size_t src_index,
                                       size_t n) const
 {
+  if (n == 0) return nullptr;
   size_t eltsz = m_type.getSize();
   char* dstptr = reinterpret_cast<char*> (dst.getDataArray (auxid));
   if (&src == &dst) {
@@ -586,6 +587,7 @@ void RootAuxVectorFactory::swap (SG::auxid_t auxid,
                                  AuxVectorData& b, size_t bindex,
                                  size_t n) const
 {
+  if (n == 0) return;
   void* aptr = a.getDataArray (auxid);
   void* bptr = &a == &b ? aptr : b.getDataArray (auxid);
   m_type.swapRange (aptr, aindex, bptr, bindex, n);
@@ -603,6 +605,7 @@ void RootAuxVectorFactory::clear (SG::auxid_t auxid,
                                   AuxVectorData& dst, size_t dst_index,
                                   size_t n) const
 {
+  if (n == 0) return;
   m_type.clearRange (dst.getDataArray (auxid), dst_index, n);
 }
 
