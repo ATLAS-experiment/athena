@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
 #include "PathResolver/PathResolver.h"
+#include "AthContainers/ConstAccessor.h"
 
 // local include(s)
 #include "TauAnalysisTools/CommonSmearingTool.h"
@@ -153,8 +154,9 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
 
   // WARNING: overwriting ptFinalCalib would lead to irreproducibilities upon re-calibration (re-apply in-situ TES on already-calibrated PHYSLITE)
   if (m_bApplyMVATESQualityCheck) {
-    bool useCaloPt = false;     
-    if(xTau.isAvailable<float>("ptTauEnergyScale")) {
+    bool useCaloPt = false;
+    static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
+    if(accPtTauEnergyScale.isAvailable(xTau)) {
       const auto combinedTEStool = dynamic_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
       useCaloPt = combinedTEStool->getUseCaloPtFlag(xTau);	
       if (useCaloPt) {
@@ -164,7 +166,7 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
 	xTau.setP4(xTau.ptTauEnergyScale(), xTau.eta(), xTau.phi(), xTau.m()); 
       }
     }
-    static const SG::AuxElement::Accessor<char> accUseCaloPt("useCaloPt");
+    static const SG::Accessor<char> accUseCaloPt("useCaloPt");
     accUseCaloPt(xTau) = char(useCaloPt);
   }
 

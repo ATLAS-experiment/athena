@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -9,6 +9,7 @@
 #include "TauAnalysisTools/CommonDiTauEfficiencyTool.h"
 #include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/Decorator.h"
 
 // ROOT include(s)
 #include "TH2F.h"
@@ -155,7 +156,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getEfficiencyScaleFactor(const xAO
   e.g. if the variable was already decorated on a previous step (enured by the
   m_bSFIsAvailableCheckedDiTau check).
 
-  Technical note: cannot use `static SG::AuxElement::Decorator` as we will have
+  Technical note: cannot use `static SG::Decorator` as we will have
   multiple instances of this tool with different decoration names.
 */
 //______________________________________________________________________________
@@ -164,9 +165,10 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::applyEfficiencyScaleFactor(const x
 {
   double dSf = 0.;
 
+  SG::Decorator< double > decor (m_sVarName);
   if (!m_bSFIsAvailableCheckedDiTau)
   {
-    m_bSFIsAvailableDiTau = xDiTau.isAvailable< double >(m_sVarName);
+    m_bSFIsAvailableDiTau = decor.isAvailable(xDiTau);
     m_bSFIsAvailableCheckedDiTau = true;
     if (m_bSFIsAvailableDiTau)
     {
@@ -177,10 +179,10 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::applyEfficiencyScaleFactor(const x
   if (m_bSFIsAvailableDiTau)
     return CP::CorrectionCode::Ok;
 
-  // retreive scale factor
+  // retrieve scale factor
   CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xDiTau, dSf, iRunNumber, iMu);
   // adding scale factor to tau as decoration
-  xDiTau.auxdecor<double>(m_sVarName) = dSf;
+  decor(xDiTau) = dSf;
 
   return tmpCorrectionCode;
 }
@@ -324,7 +326,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getValue(const std::string& sHistN
 double TauAnalysisTools::TruthLeadPt(const xAOD::DiTauJet& xDiTau)
 {
   // return leading truth tau pt in GeV
-  static const SG::AuxElement::ConstAccessor< double > acc( "TruthVisLeadPt" );
+  static const SG::ConstAccessor< double > acc( "TruthVisLeadPt" );
   return acc( xDiTau ) * 0.001;
 }
 
@@ -332,7 +334,7 @@ double TauAnalysisTools::TruthLeadPt(const xAOD::DiTauJet& xDiTau)
 double TauAnalysisTools::TruthSubleadPt(const xAOD::DiTauJet& xDiTau)
 {
   // return subleading truth tau pt in GeV
-  static const SG::AuxElement::ConstAccessor< double > acc( "TruthVisSubleadPt" );
+  static const SG::ConstAccessor< double > acc( "TruthVisSubleadPt" );
   return acc( xDiTau ) * 0.001;
 }
 
@@ -340,6 +342,6 @@ double TauAnalysisTools::TruthSubleadPt(const xAOD::DiTauJet& xDiTau)
 double TauAnalysisTools::TruthDeltaR(const xAOD::DiTauJet& xDiTau)
 {
   // return truth taus distance delta R
-  static const SG::AuxElement::ConstAccessor< double > acc( "TruthVisDeltaR" );
+  static const SG::ConstAccessor< double > acc( "TruthVisDeltaR" );
   return acc( xDiTau );
 }

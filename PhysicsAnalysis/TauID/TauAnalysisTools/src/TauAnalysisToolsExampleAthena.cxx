@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
 #include "xAODTau/TauJetContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 // Local include(s):
 #include "TauAnalysisToolsExampleAthena.h"
@@ -73,7 +74,8 @@ StatusCode TauAnalysisToolsExampleAthena::execute()
 
     ATH_CHECK (m_effTool->applyEfficiencyScaleFactor(*tau));
 
-    ATH_MSG_INFO( "  sf = " << tau->auxdata< double >( "TauScaleFactorJetID" ) );
+    static const SG::ConstAccessor<double> accTauScaleFactorJetID ("TauScaleFactorJetID");
+    ATH_MSG_INFO( "  sf = " << accTauScaleFactorJetID (*tau) );
 
     ATH_CHECK (m_smearTool->applyCorrection(*tau));
     ATH_MSG_INFO( "Unsmeared tau pt " << tau->pt() << " Smeared tau pt: " << tau->p4().Pt());

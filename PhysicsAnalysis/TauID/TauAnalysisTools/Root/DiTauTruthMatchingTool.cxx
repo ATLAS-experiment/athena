@@ -13,6 +13,8 @@
 // Core include(s):
 #include "AthLinks/ElementLink.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Decorator.h"
 
 // EDM include(s):
 #include "xAODEgamma/ElectronContainer.h"
@@ -86,8 +88,8 @@ StatusCode DiTauTruthMatchingTool::findTruthTau(const xAOD::DiTauJet& xDiTau)
 {
   // check if decorations were already added to the first passed tau
   if (!m_bIsTruthMatchedAvailable.isValid()) {
-    bool avail = xDiTau.isAvailable<char>("IsTruthMatched");
-    m_bIsTruthMatchedAvailable.set (avail);
+    static const SG::ConstAccessor<char> accIsTruthMatched("IsTruthMatched");
+    m_bIsTruthMatchedAvailable.set (accIsTruthMatched.isAvailable(xDiTau));
   }
   if (*m_bIsTruthMatchedAvailable.ptr())
     return StatusCode::SUCCESS;
@@ -106,12 +108,12 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 
   xAOD::TruthParticleContainer xRemainingTruthTaus = xTruthTauContainer;
 
-  static const SG::AuxElement::Decorator<char> decIsTruthMatched("IsTruthMatched");
-  static const SG::AuxElement::Decorator<char> decIsTruthHadronic("IsTruthHadronic");
-  static const SG::AuxElement::Decorator<char> decIsTruthHadMu("IsTruthHadMu");
-  static const SG::AuxElement::Decorator<char> decIsTruthHadEl("IsTruthHadEl");
-  static const SG::AuxElement::ConstAccessor<int> accNSubjets("n_subjets");
-  static const SG::AuxElement::ConstAccessor<char> accIsTruthHadronic("IsTruthHadronic");
+  static const SG::Decorator<char> decIsTruthMatched("IsTruthMatched");
+  static const SG::Decorator<char> decIsTruthHadronic("IsTruthHadronic");
+  static const SG::Decorator<char> decIsTruthHadMu("IsTruthHadMu");
+  static const SG::Decorator<char> decIsTruthHadEl("IsTruthHadEl");
+  static const SG::ConstAccessor<int> accNSubjets("n_subjets");
+  static const SG::ConstAccessor<char> accIsTruthHadronic("IsTruthHadronic");
 
   // set default values for each subjet
   for (int i = 0; i < accNSubjets(xDiTau); ++i)
@@ -182,39 +184,42 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 	  if (i == 0 || i == 1) bTruthMatched = false;
 	}
     }
-  
-  xDiTau.auxdecor<std::vector<ElementLink<xAOD::TruthParticleContainer>>>("truthParticleLinks") = vTruthLinks;
+
+  static const SG::Decorator<std::vector<ElementLink<xAOD::TruthParticleContainer>>>
+    decTruthParticleLinks ("truthParticleLinks");
+  decTruthParticleLinks(xDiTau) = vTruthLinks;
   if (!m_bTruthTauAvailable)
     {
-      xDiTau.auxdecor<std::vector<ElementLink<xAOD::TruthParticleContainer>>>("TruthTaus") = vTruthLinks;
+      static const SG::Decorator<std::vector<ElementLink<xAOD::TruthParticleContainer>>>
+        decTruthTaus ("TruthTaus");
+      decTruthTaus(xDiTau) = vTruthLinks;
     }
   
   ElementLink<xAOD::TruthParticleContainer> lTruthLeptonLink;
-  static const SG::AuxElement::Decorator<unsigned int> decClassifierParticleType("classifierParticleTypeTruthLepton");
-  static const SG::AuxElement::Decorator<unsigned int> decClassifierParticleOrigin("classifierParticleOriginTruthLepton");
-  static const SG::AuxElement::Decorator<ElementLink<xAOD::TruthParticleContainer>> decTruthLeptonLink("truthLeptonLink");
+  static const SG::Decorator<unsigned int> decClassifierParticleType("classifierParticleTypeTruthLepton");
+  static const SG::Decorator<unsigned int> decClassifierParticleOrigin("classifierParticleOriginTruthLepton");
+  static const SG::Decorator<ElementLink<xAOD::TruthParticleContainer>> decTruthLeptonLink("truthLeptonLink");
   
   int mcTruthType = MCTruthPartClassifier::ParticleType::Unknown;
   int mcTruthOrigin = MCTruthPartClassifier::ParticleOrigin::NonDefined;
-  static const SG::AuxElement::ConstAccessor<int> accTruthType("truthType");
-  static const SG::AuxElement::ConstAccessor<int> accTruthOrigin("truthOrigin");
-  if(xDiTau.isAvailable<ElementLink<xAOD::ElectronContainer>>("elLink") &&
-     xDiTau.isAvailable<ElementLink<xAOD::MuonContainer>>("muonLink"))
+  static const SG::ConstAccessor<int> accTruthType("truthType");
+  static const SG::ConstAccessor<int> accTruthOrigin("truthOrigin");
+  static const SG::ConstAccessor<ElementLink<xAOD::ElectronContainer>> accElLink("elLink");
+  static const SG::ConstAccessor<ElementLink<xAOD::MuonContainer>> accMuLink("muonLink");
+  if(accElLink.isAvailable(xDiTau) && accMuLink.isAvailable(xDiTau))
     ATH_MSG_ERROR("Links to reco electron and reco muon available for one ditau candidate.");
-  if(xDiTau.isAvailable<ElementLink<xAOD::ElectronContainer>>("elLink")){
-    static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::ElectronContainer>> accElLink("elLink");
+  if(accElLink.isAvailable(xDiTau)){
     const xAOD::Electron* pElectron = *accElLink(xDiTau);
-    if ((pElectron->isAvailable<int>("truthType") && pElectron->isAvailable<int>("truthOrigin")))
+    if ((accTruthType.isAvailable(*pElectron) && accTruthOrigin.isAvailable(*pElectron)))
       {
 	mcTruthType = accTruthType(*pElectron);
 	mcTruthOrigin = accTruthOrigin(*pElectron);
       }
     lTruthLeptonLink = checkTruthLepton(pElectron);
   }
-  if(xDiTau.isAvailable<ElementLink<xAOD::MuonContainer>>("muonLink")){
-    static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::MuonContainer>> accMuLink("muonLink");
+  if(accMuLink.isAvailable(xDiTau)){
     const xAOD::Muon* pMuon = *accMuLink(xDiTau);
-    if (pMuon->isAvailable<int>("truthType") && pMuon->isAvailable<int>("truthOrigin"))
+    if (accTruthType.isAvailable(*pMuon) && accTruthOrigin.isAvailable(*pMuon))
       {
 	mcTruthType = accTruthType(*pMuon);
 	mcTruthOrigin = accTruthOrigin(*pMuon);
@@ -246,16 +251,16 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
     decIsTruthHadronic(xDiTau) = (char)false;
 
  
-  static const SG::AuxElement::Decorator<double> decTruthLeadPt("TruthVisLeadPt");
-  static const SG::AuxElement::Decorator<double> decTruthLeadEta("TruthVisLeadEta");
-  static const SG::AuxElement::Decorator<double> decTruthLeadPhi("TruthVisLeadPhi");
-  static const SG::AuxElement::Decorator<double> decTruthLeadM("TruthVisLeadM");
-  static const SG::AuxElement::Decorator<double> decTruthSubleadPt("TruthVisSubleadPt");
-  static const SG::AuxElement::Decorator<double> decTruthSubleadEta("TruthVisSubleadEta");
-  static const SG::AuxElement::Decorator<double> decTruthSubleadPhi("TruthVisSubleadPhi");
-  static const SG::AuxElement::Decorator<double> decTruthSubleadM("TruthVisSubleadM");
-  static const SG::AuxElement::Decorator<double> decTruthDeltaR("TruthVisDeltaR");
-  static const SG::AuxElement::Decorator<double> decTruthMass("TruthVisMass");   
+  static const SG::Decorator<double> decTruthLeadPt("TruthVisLeadPt");
+  static const SG::Decorator<double> decTruthLeadEta("TruthVisLeadEta");
+  static const SG::Decorator<double> decTruthLeadPhi("TruthVisLeadPhi");
+  static const SG::Decorator<double> decTruthLeadM("TruthVisLeadM");
+  static const SG::Decorator<double> decTruthSubleadPt("TruthVisSubleadPt");
+  static const SG::Decorator<double> decTruthSubleadEta("TruthVisSubleadEta");
+  static const SG::Decorator<double> decTruthSubleadPhi("TruthVisSubleadPhi");
+  static const SG::Decorator<double> decTruthSubleadM("TruthVisSubleadM");
+  static const SG::Decorator<double> decTruthDeltaR("TruthVisDeltaR");
+  static const SG::Decorator<double> decTruthMass("TruthVisMass");   
 
   if (accIsTruthHadronic(xDiTau))
     {
@@ -301,10 +306,10 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 //______________________________________________________________________________
 ElementLink<xAOD::TruthParticleContainer> DiTauTruthMatchingTool::checkTruthLepton(const xAOD::IParticle* pLepton) const {
   ElementLink<xAOD::TruthParticleContainer> truthParticleLink;
-  if(!pLepton->isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")){
+  static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> accTruthParticleLink("truthParticleLink");
+  if(!accTruthParticleLink.isAvailable(*pLepton)){
     return truthParticleLink;
   }
-  static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> accTruthParticleLink("truthParticleLink");
   truthParticleLink = accTruthParticleLink(*pLepton);
   return truthParticleLink;
 }
@@ -324,7 +329,7 @@ StatusCode DiTauTruthMatchingTool::truthMatch(const TLorentzVector& vSubjetTLV,
 				m_accMVis(*xTruthTauIt));
       if (vSubjetTLV.DeltaR(vTruthVisTLV) <= m_dMaxDeltaR)
 	{
-	  static const SG::AuxElement::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
+	  static const SG::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
 	  if ((bool)accIsHadronicTau(*xTruthTauIt))
 	    eTruthMatchedParticleType = TruthHadronicTau;
 	  else

@@ -9,6 +9,7 @@
 #include "TauAnalysisTools/CommonEfficiencyTool.h"
 #include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/Decorator.h"
 
 // ROOT include(s)
 #include "TF1.h"
@@ -271,7 +272,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
   e.g. if the variable was already decorated on a previous step (enured by the
   m_bSFIsAvailableChecked check).
 
-  Technical note: cannot use `static SG::AuxElement::Decorator` as we will have
+  Technical note: cannot use `static SG::Decorator` as we will have
   multiple instances of this tool with different decoration names.
 */
 //______________________________________________________________________________
@@ -280,9 +281,10 @@ CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::
 {
   double dSf = 0.;
 
+  SG::Decorator< double > decor (m_sVarName);
   if (!m_bSFIsAvailableChecked)
   {
-    m_bSFIsAvailable = xTau.isAvailable< double >(m_sVarName);
+    m_bSFIsAvailable = decor.isAvailable(xTau);
     m_bSFIsAvailableChecked = true;
     if (m_bSFIsAvailable)
     {
@@ -296,7 +298,7 @@ CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::
   // retrieve scale factor
   CP::CorrectionCode tmpCorrectionCode = getEfficiencyScaleFactor(xTau, dSf, iRunNumber, iMu);
   // adding scale factor to tau as decoration
-  xTau.auxdecor<double>(m_sVarName) = dSf;
+  decor(xTau) = dSf;
 
   return tmpCorrectionCode;
 }
