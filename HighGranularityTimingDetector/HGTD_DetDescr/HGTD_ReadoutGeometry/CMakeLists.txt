@@ -11,7 +11,7 @@ find_package( GeoModel COMPONENTS GeoPrimitives GeoModelKernel )
 atlas_add_library( HGTD_ReadoutGeometry
    HGTD_ReadoutGeometry/*.h src/*.cxx
    PUBLIC_HEADERS HGTD_ReadoutGeometry
-   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
+   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} Identifier
    ReadoutGeometryBase TrkEventPrimitives HGTD_Identifier AthenaBaseComps
