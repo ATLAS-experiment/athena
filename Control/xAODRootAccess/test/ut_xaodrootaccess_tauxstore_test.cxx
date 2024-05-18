@@ -32,13 +32,96 @@
       }                                                                 \
    } while( 0 )
 
+
+// The name of the application:
+const char* APP_NAME = "ut_xaodrootaccess_tauxstore_test";
+
+
+StatusCode test_linked()
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t auxid1 = r.getAuxID<int> ("ltest1", "",
+                                        SG::AuxVarFlags::Linked);
+  SG::auxid_t auxid2 = r.getAuxID<float> ("ltest2", "",
+                                          SG::AuxVarFlags::None,
+                                          auxid1);
+  TTree tree ("t", "t");
+  xAOD::TAuxStore s( "fooAux." );
+  RETURN_CHECK( APP_NAME, s.readFrom (&tree) );
+  int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 10, 10));
+  float* vp2 = reinterpret_cast<float*> (s.getData (auxid2, 3, 3));
+
+  auto v1 = reinterpret_cast<const std::vector<int>*> (s.getIOData (auxid1));
+  auto v2 = reinterpret_cast<const std::vector<float>*> (s.getIOData (auxid2));
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 3);
+  assert (v2->capacity() == 3);
+  assert (s.size() == 3);
+
+  s.resize (7);
+  assert (s.size() == 7);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 7);
+
+  s.reserve (50);
+  assert (s.size() == 7);
+  assert (v1->size() == 10);
+  assert (v1->capacity() == 10);
+  assert (v2->size() == 7);
+  assert (v2->capacity() == 50);
+
+  std::vector<int> vv1 { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+  std::vector<float> vv2 { 11.5, 12.5, 13.5, 14.5, 15.5, 16.5, 17.5 };
+
+  vp2 = reinterpret_cast<float*> (s.getData (auxid2, 7, 50));
+
+  std::copy (vv1.begin(), vv1.end(), vp1);
+  std::copy (vv2.begin(), vv2.end(), vp2);
+
+  s.shift (3, 1);
+  assert (s.size() == 8);
+  assert (v1->size() == 10);
+  assert (v2->size() == 8);
+  assert (*v1 == vv1);
+  assert (*v2 == (std::vector<float> { 11.5, 12.5, 13.5, 0, 14.5, 15.5, 16.5, 17.5 }) );
+
+  {
+    SG::IAuxTypeVector* vi = s.linkedVector (auxid2);
+    assert (vi != nullptr);
+  }
+  {
+    const xAOD::TAuxStore& cs = s;
+    const SG::IAuxTypeVector* vi = cs.linkedVector (auxid2);
+    assert (vi != nullptr);
+  }
+
+  TTree tree2 ("t2", "t2");
+  xAOD::TAuxStore s2( "fooAux." );
+  RETURN_CHECK( APP_NAME, s2.readFrom (&tree2) );
+  (void)s2.getData (auxid2, 6, 6);
+  (void)s2.getData (auxid1, 4, 4);
+  auto v3 = reinterpret_cast<const std::vector<int>*> (s2.getIOData (auxid1));
+  auto v4 = reinterpret_cast<const std::vector<float>*> (s2.getIOData (auxid2));
+  assert (v3->size() == 4);
+  assert (v4->size() == 6);
+
+  SG::auxid_set_t ignore;
+  s.insertMove (3, s2, ignore);
+  assert (s.size() == 14);
+  assert (v1->size() == 10);
+  assert (v2->size() == 14);
+  assert (*v1 == vv1);
+
+  return StatusCode::SUCCESS;
+}
+
+
 int main() {
 
    ANA_CHECK_SET_TYPE (int);
    using namespace asg::msgUserCode;
-
-   // The name of the application:
-   const char* APP_NAME = "ut_xaodrootaccess_tauxstore_test";
 
    // Initialise the environment:
    ANA_CHECK( xAOD::Init( APP_NAME ) );
@@ -174,6 +257,8 @@ int main() {
    SIMPLE_ASSERT( ! store.isDecoration( var1Id ) );
    SIMPLE_ASSERT( ! store.isDecoration( var2Id ) );
    SIMPLE_ASSERT( store.isDecoration( decId ) );
+
+   SIMPLE_ASSERT( test_linked().isSuccess() );
 
    return 0;
 }

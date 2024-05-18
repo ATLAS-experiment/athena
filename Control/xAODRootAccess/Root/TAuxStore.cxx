@@ -467,8 +467,8 @@ namespace xAOD {
       for( SG::auxid_t id : m_auxIDs) {
          // Make sure that we are still within the bounds of our vector:
          if( id >= m_vecs.size() ) break;
-         // Skip non-existent objects:
-         if( ! m_vecs[ id ] ) continue;
+         // Skip non-existent or linked objects:
+         if( ! m_vecs[ id ] || m_vecs[ id ]->isLinked() ) continue;
          // Ask the vector for its size:
          const size_t size = m_vecs[ id ]->size();
          // Only accept a non-zero size. Not sure why...
@@ -604,7 +604,7 @@ namespace xAOD {
 
       bool nomoves = true;
       for (SG::IAuxTypeVector* v : m_vecs) {
-         if(v) {
+         if(v && !v->isLinked()) {
            if (!v->resize( size ))
              nomoves = false;
          }
@@ -630,11 +630,12 @@ namespace xAOD {
          return;
       }
 
-      std::vector< SG::IAuxTypeVector* >::iterator itr = m_vecs.begin();
-      std::vector< SG::IAuxTypeVector* >::iterator end = m_vecs.end();
-      for( ; itr != end; ++itr ) {
-         if( *itr ) ( *itr )->reserve( size );
+      for (SG::IAuxTypeVector* v : m_vecs) {
+         if(v && !v->isLinked()) {
+           v->reserve( size );
+         }
       }
+
       if( m_transientStore ) {
          m_transientStore->reserve( size );
       }
@@ -663,11 +664,12 @@ namespace xAOD {
          m_size += offs;
       }
 
-      std::vector< SG::IAuxTypeVector* >::iterator itr = m_vecs.begin();
-      std::vector< SG::IAuxTypeVector* >::iterator end = m_vecs.end();
-      for( ; itr != end; ++itr ) {
-         if( *itr ) ( *itr )->shift( pos, offs );
+      for (SG::IAuxTypeVector* v : m_vecs) {
+         if(v && !v->isLinked()) {
+           v->shift( pos, offs );
+         }
       }
+
       if( m_transientStore ) {
          m_transientStore->shift( pos, offs );
       }
@@ -700,7 +702,7 @@ namespace xAOD {
         SG::IAuxTypeVector* v_dst = nullptr;
         if (id < m_vecs.size())
           v_dst = m_vecs[id];
-        if (v_dst) {
+        if (v_dst && !v_dst->isLinked()) {
           ignore.insert (id);
           if (other.getData (id)) {
             void* src_ptr = other.getData (id, other_size, other_size);
