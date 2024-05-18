@@ -17,8 +17,8 @@ hlt.forks = 1
 hlt.threads = 1
 hlt.concurrent_events = 1
 hlt.max_events = 50
-# currently using data21 input file (rel. 22)
-hlt.args = '"BSRDOtoRAW:False" --precommand=\\\"setMenu=\\\'PhysicsP1_pp_run3_v1\\\'\\\"'
+# currently using data21 input file (rel. 22), disable CA for athenaHLT
+hlt.args = ' --CA "all:True" "BSRDOtoRAW:False" --precommand=\\\"setMenu=\\\'PhysicsP1_pp_run3_v1\\\'\\\"'
 hlt.args += ' --streamSelection=Main,BphysDelayed,VBFDelayed'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
