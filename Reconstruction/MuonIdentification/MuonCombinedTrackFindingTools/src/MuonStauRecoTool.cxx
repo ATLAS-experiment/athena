@@ -524,9 +524,9 @@ namespace MuonCombined {
                 const Muon::MdtDriftCircleOnTrack& mdt = *entry.second;
                 Identifier id = mdt.identify();
                 // calibrate MDT
-                std::shared_ptr<const Muon::MdtDriftCircleOnTrack> calibratedMdt(
+                std::unique_ptr<const Muon::MdtDriftCircleOnTrack> calibratedMdt(
                     m_mdtCreatorStau->correct(*mdt.prepRawData(), pars, &calibrationStrategy, betaSeed));
-                if (!calibratedMdt.get()) {
+                if (!calibratedMdt) {
                     ATH_MSG_WARNING("Failed to recalibrate existing MDT on track " << m_idHelperSvc->toString(id));
                     continue;
                 }
@@ -553,11 +553,11 @@ namespace MuonCombined {
                                                 m_idHelperSvc->mdtIdHelper().tubeLayer(id) - 1, m_idHelperSvc->mdtIdHelper().tube(id) - 1);
 
                 // create new DriftCircle
-                TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, index, &mdt);
+                TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, &mdt, index);
                 TrkDriftCircleMath::DCOnTrack dcOnTrack(dc, 1., 1.);
 
                 dcs.push_back(dcOnTrack);
-                indexLookUp.emplace_back(calibratedMdt, &pars);
+                indexLookUp.emplace_back(std::move(calibratedMdt), &pars);
                 ++index;
             }
 

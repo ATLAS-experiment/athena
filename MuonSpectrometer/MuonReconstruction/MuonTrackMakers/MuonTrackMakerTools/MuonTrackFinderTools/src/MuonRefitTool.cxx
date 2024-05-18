@@ -1326,10 +1326,6 @@ namespace Muon {
 
         Amg::Transform3D gToStation;
 
-        // set to get Identifiers of chambers with hits
-        std::vector<std::pair<Identifier, bool>> indexIdMap;
-        indexIdMap.reserve(hits.size());
-
         TrkDriftCircleMath::DCSLFitter dcslFitter;
         TrkDriftCircleMath::SegmentFinder segFinder(5., 3., false);
         if (!m_t0Fitter.empty()) {
@@ -1339,9 +1335,8 @@ namespace Muon {
         segFinder.debugLevel(m_finderDebugLevel);
         segFinder.setRecoverMDT(false);
 
-        unsigned index = 0;
         for (const MdtDriftCircleOnTrack* mdt : hits) {
-            if (!mdt) { continue; }
+           
             Identifier id = mdt->identify();
 
             if (!detEl) {
@@ -1366,12 +1361,9 @@ namespace Muon {
                                             m_idHelperSvc->mdtIdHelper().tubeLayer(id) - 1, m_idHelperSvc->mdtIdHelper().tube(id) - 1);
 
             // create new DriftCircle
-            TrkDriftCircleMath::DriftCircle dc(lpos, r, 1., dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, index, mdt);
+            TrkDriftCircleMath::DriftCircle dc(lpos, r, 1., dr, TrkDriftCircleMath::DriftCircle::InTime, mdtid, mdt);
             dcsOnTrack.emplace_back(dc, 1., 1.);
             dcs.emplace_back(std::move(dc));
-            indexIdMap.emplace_back(id, false);
-
-            ++index;
         }
 
         if (!detEl) return false;
@@ -1477,16 +1469,8 @@ namespace Muon {
                 }
                 continue;
             }
-            indexIdMap[dcit->index()].second = true;
-        }
-
-        std::vector<std::pair<Identifier, bool>>::iterator iit = indexIdMap.begin();
-        std::vector<std::pair<Identifier, bool>>::iterator iit_end = indexIdMap.end();
-        for (; iit != iit_end; ++iit) {
-            if (iit->second) {
-                ATH_MSG_VERBOSE(" removing hit " << m_idHelperSvc->toString(iit->first));
-                removedIdentifiers.insert(iit->first);
-            }
+            removedIdentifiers.insert(dcit->rot()->identify());
+            ATH_MSG_VERBOSE(" removing hit " << m_idHelperSvc->toString(dcit->rot()->identify()));
         }
         return true;
     }

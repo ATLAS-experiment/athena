@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternTools/MuonHoughPatternFinderTool.h"
@@ -80,14 +80,16 @@ namespace Muon {
         ATH_MSG_VERBOSE("found Service muonHoughPatternTool: " << m_muonHoughPatternTool);
 
         ATH_CHECK(m_idHelperSvc.retrieve());
+        
+        const RpcIdHelper& rpcHelper{m_idHelperSvc->rpcIdHelper()};
+        const MdtIdHelper& mdtIdHelper{m_idHelperSvc->mdtIdHelper()};
+        m_RpcToMdtOuterStDict[rpcHelper.stationNameIndex("BOL")] = mdtIdHelper.stationNameIndex("BOS");
+        m_RpcToMdtOuterStDict[rpcHelper.stationNameIndex("BOS")] = mdtIdHelper.stationNameIndex("BOL");
+        m_RpcToMdtOuterStDict[rpcHelper.stationNameIndex("BMS")] = mdtIdHelper.stationNameIndex("BML");
+        m_RpcToMdtOuterStDict[rpcHelper.stationNameIndex("BML")] = mdtIdHelper.stationNameIndex("BMS");
 
-        m_RpcToMdtOuterStDict[m_idHelperSvc->rpcIdHelper().stationNameIndex("BOL")] = m_idHelperSvc->mdtIdHelper().stationNameIndex("BOS");
-        m_RpcToMdtOuterStDict[m_idHelperSvc->rpcIdHelper().stationNameIndex("BOS")] = m_idHelperSvc->mdtIdHelper().stationNameIndex("BOL");
-        m_RpcToMdtOuterStDict[m_idHelperSvc->rpcIdHelper().stationNameIndex("BMS")] = m_idHelperSvc->mdtIdHelper().stationNameIndex("BML");
-        m_RpcToMdtOuterStDict[m_idHelperSvc->rpcIdHelper().stationNameIndex("BML")] = m_idHelperSvc->mdtIdHelper().stationNameIndex("BMS");
-
-        m_RpcToMdtInnerStDict[m_idHelperSvc->rpcIdHelper().stationNameIndex("BMS")] = m_idHelperSvc->mdtIdHelper().stationNameIndex("BIS");
-        m_RpcToMdtInnerStDict[m_idHelperSvc->rpcIdHelper().stationNameIndex("BML")] = m_idHelperSvc->mdtIdHelper().stationNameIndex("BIL");
+        m_RpcToMdtInnerStDict[rpcHelper.stationNameIndex("BMS")] = mdtIdHelper.stationNameIndex("BIS");
+        m_RpcToMdtInnerStDict[rpcHelper.stationNameIndex("BML")] = mdtIdHelper.stationNameIndex("BIL");
 
         ATH_CHECK(m_printer.retrieve());
 
@@ -452,6 +454,7 @@ namespace Muon {
                                                       std::map<int, std::vector<std::pair<int, int>>>& tgcmdtstationmap) const {
         const unsigned int size = mdt_coll->size();
         if (!size) return;
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
 
         auto new_mdt_hit = [](const Muon::MdtPrepData* mdt_hit, double prob, double weight) {
             return std::make_shared<MuonHoughHit>(mdt_hit->globalPosition(), false /*measures_phi*/, MuonHough::MDT, prob, weight, mdt_hit);  // getPrd
@@ -493,7 +496,9 @@ namespace Muon {
         std::vector<SegmentData> collected_data{};
         collected_data.reserve(size);
 
-        std::vector<double> tubecount(m_idHelperSvc->mdtIdHelper().tubeMax() + 2);
+        std::vector<double> tubecount(idHelper.tubeMax() + 2);
+
+
 
         for (const Muon::MdtPrepData* mdt : *mdt_coll)  // first
         {
@@ -510,12 +515,12 @@ namespace Muon {
             prd_data.index = collected_data.size();
             prd_data.prd = mdt;
 
-            const int tube = m_idHelperSvc->mdtIdHelper().tube(prd_data.id());
-            const int multi_layer = m_idHelperSvc->mdtIdHelper().multilayer(prd_data.id());
-            const int tube_layer = m_idHelperSvc->mdtIdHelper().tubeLayer(prd_data.id());
+            const int tube = idHelper.tube(prd_data.id());
+            const int multi_layer = idHelper.multilayer(prd_data.id());
+            const int tube_layer = idHelper.tubeLayer(prd_data.id());
 
             prd_data.layer_number =
-                (multi_layer - 1) * m_idHelperSvc->mdtIdHelper().tubeLayerMax() + (tube_layer - 1);  // layer_number ranges from 0..5/7
+                (multi_layer - 1) * idHelper.tubeLayerMax() + (tube_layer - 1);  // layer_number ranges from 0..5/7
 
             tubecount[tube] += 1.;
             tubecount[tube - 1] += 0.5;
@@ -559,7 +564,7 @@ namespace Muon {
         // fast segment search:
 
         for (SegmentData& mdt_hit : collected_data) {
-            const int tube = m_idHelperSvc->mdtIdHelper().tube(mdt_hit.id());
+            const int tube = idHelper.tube(mdt_hit.id());
             if (tubecount[tube] > 1) ++nHitsPerLayer[mdt_hit.layer_number];
 
             // KILL 1 hit cases
@@ -568,7 +573,7 @@ namespace Muon {
 
         int ml1{0}, ml2{0};
         for (const auto& map_it : nHitsPerLayer) {
-            const bool count_1 = map_it.first >= m_idHelperSvc->mdtIdHelper().tubeLayerMax();
+            const bool count_1 = map_it.first >= idHelper.tubeLayerMax();
             ml1 += count_1;
             ml2 += !count_1;
         }
@@ -598,10 +603,17 @@ namespace Muon {
             const Amg::Vector3D& globalpos = mdt_hit.prd->globalPosition();
             
             const Identifier hitId = mdt_hit.id();
-            TrkDriftCircleMath::MdtId mdtid(mdtHelper.isBarrel(hitId), mdtHelper.multilayer(hitId) - 1, mdtHelper.tubeLayer(hitId) - 1,
+            TrkDriftCircleMath::MdtId mdtid(mdtHelper.isBarrel(hitId), 
+                                            mdtHelper.multilayer(hitId) - 1, 
+                                            mdtHelper.tubeLayer(hitId) - 1,
                                             mdtHelper.tube(hitId) - 1);
-            TrkDriftCircleMath::DriftCircle dc(TrkDriftCircleMath::LocVec2D(globalpos.perp(), globalpos.z()), mdt_hit.radius(),
-                                               mdt_hit.errradius(), TrkDriftCircleMath::DriftCircle::InTime, mdtid, mdt_hit.index);
+            TrkDriftCircleMath::DriftCircle dc(TrkDriftCircleMath::LocVec2D(globalpos.perp(), globalpos.z()), 
+                                               mdt_hit.radius(),
+                                               mdt_hit.errradius(), 
+                                               TrkDriftCircleMath::DriftCircle::InTime, 
+                                               mdtid, 
+                                               nullptr,
+                                               mdt_hit.index);
             dcs.emplace_back(std::move(dc));
         }
 
@@ -635,7 +647,7 @@ namespace Muon {
         // trigger confirmation checks:
 
         int stationcode = stationCode(collected_data[0].id());
-        const bool barrel = m_idHelperSvc->mdtIdHelper().isBarrel(collected_data[0].id());
+        const bool barrel = idHelper.isBarrel(collected_data[0].id());
         // rpc:
 
         std::map<int, std::vector<std::pair<int, int>>>::const_iterator stationmap_it = rpcmdtstationmap.find(stationcode);
@@ -1054,8 +1066,9 @@ namespace Muon {
             station1 = "EIL";
             station2 = "EIS";
         }
-        int stationNameMDT1 = m_idHelperSvc->mdtIdHelper().stationNameIndex(station1);
-        int stationNameMDT2 = m_idHelperSvc->mdtIdHelper().stationNameIndex(station2);
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+        int stationNameMDT1 = idHelper.stationNameIndex(station1);
+        int stationNameMDT2 = idHelper.stationNameIndex(station2);
 
         // store station Inner and Middle codes
 
@@ -1089,8 +1102,8 @@ namespace Muon {
         } else
             return;
 
-        stationNameMDT1 = m_idHelperSvc->mdtIdHelper().stationNameIndex(station1);
-        stationNameMDT2 = m_idHelperSvc->mdtIdHelper().stationNameIndex(station2);
+        stationNameMDT1 = idHelper.stationNameIndex(station1);
+        stationNameMDT2 = idHelper.stationNameIndex(station2);
 
         stationcode = stationCode(stationNameMDT1, idphi1MDT, ideta1MDT);
         addToStationMap(tgcmdtstationmap, it, stationcode, hit_begin, hit_end);

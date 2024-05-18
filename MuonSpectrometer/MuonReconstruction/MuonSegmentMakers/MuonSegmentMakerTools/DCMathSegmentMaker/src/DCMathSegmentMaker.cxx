@@ -205,12 +205,12 @@ namespace Muon {
                 (seg.chi2()/seg.ndof())<<"("<<seg.ndof()<<")"<<std::endl;
                 sstr<<"Mdt measurements: "<<seg.dcs().size()<<std::endl;
                 for (const TrkDriftCircleMath::DCOnTrack & mdt_meas : seg.dcs()){
-                sstr<<" **** "<<m_printer->print(*mdts[mdt_meas.index()]);
+                sstr<<" **** "<<m_printer->print(*mdt_meas.rot());
                 sstr<<" ("<<mdt_meas.state()<<")"<<std::endl;
                 }
                 sstr<<"Cluster measurements "<<seg.clusters().size()<<std::endl;
                 for (const TrkDriftCircleMath::Cluster& clus: seg.clusters()) {
-                    sstr<<" ---- "<<m_printer->print(*clusters[clus.index()])<<std::endl;
+                    sstr<<" ---- "<<m_printer->print(*clus.rot())<<std::endl;
                 }
                 sstr<<std::endl;
                 ++seg_n;
@@ -279,8 +279,7 @@ namespace Muon {
             for (const TrkDriftCircleMath::DCOnTrack& driftCircle : segment.dcs()) {
                 if (driftCircle.state() != TrkDriftCircleMath::DCOnTrack::OnTrack) continue;
 
-                const MdtDriftCircleOnTrack* riodc = mdts[driftCircle.index()];
-                if (!riodc) continue;
+                const MdtDriftCircleOnTrack* riodc{driftCircle.rot()};
                 int lay = m_idHelperSvc->mdtIdHelper().tubeLayer(riodc->identify());
                 int tube = m_idHelperSvc->mdtIdHelper().tube(riodc->identify());
                 double tubelen = 0.5 * riodc->prepRawData()->detectorElement()->getActiveTubeLength(lay, tube);
@@ -323,7 +322,7 @@ namespace Muon {
         std::set<Identifier> deltaVec;
         std::set<Identifier> outoftimeVec;
 
-        associateMDTsToSegment(gdir, segment, mdts, sInfo.geom, sInfo.globalTrans, sInfo.amdbTrans, deltaVec, outoftimeVec, rioDistVec);
+        associateMDTsToSegment(gdir, segment, sInfo.geom, sInfo.globalTrans, sInfo.amdbTrans, deltaVec, outoftimeVec, rioDistVec);
         std::vector<std::pair<double, std::unique_ptr<const Trk::MeasurementBase>>> garbage_collector;
 
         TrkDriftCircleMath::DCSLHitSelector hitSelector;
@@ -1037,7 +1036,7 @@ namespace Muon {
             }
             ATH_MSG_VERBOSE(" " << m_idHelperSvc->toString(id) << "  clid: " << clid.id() << " central phi "
                                 << meas->detectorElement()->center().phi() << " index " << index);
-            cls.emplace_back(lp, clust.error, clid, index);
+            cls.emplace_back(lp, clust.error, clid, meas, index);
         }
         return cls;
     }
@@ -1050,20 +1049,8 @@ namespace Muon {
         dcs.reserve(mdts.size());
         /* ********  Mdt hits  ******** */
         bool firstMdt = true;
-        unsigned index = 0;
-        for (const MdtDriftCircleOnTrack* rot : mdts) {
-            /// Need to chech the constructor of Drift Circle. Index does not seem to be set properly
-            if (!rot) {
-                ATH_MSG_WARNING(" rot not a MdtDriftCircleOnTrack ");
-                ++index;
-                continue;
-            }
-            const MuonGM::MdtReadoutElement* detEl = rot->prepRawData()->detectorElement();
 
-            if (!detEl) {
-                ATH_MSG_WARNING(" aborting not detEl found ");
-                return {};
-            }
+        for (const MdtDriftCircleOnTrack* rot : mdts) {
 
             Identifier id = rot->identify();
             Identifier elId = m_idHelperSvc->mdtIdHelper().elementID(id);
@@ -1083,7 +1070,7 @@ namespace Muon {
             double preciseError = dr;
             if (m_usePreciseError) { preciseError = m_preciseErrorScale * (0.23 * std::exp(-std::abs(r) / 6.06) + 0.0362); }
             // create new DriftCircle
-            TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, preciseError, TrkDriftCircleMath::DriftCircle::InTime, mdtid, index, rot);
+            TrkDriftCircleMath::DriftCircle dc(lpos, r, dr, preciseError, TrkDriftCircleMath::DriftCircle::InTime, mdtid, rot);
 
             TubeEnds tubeEnds = localTubeEnds(*rot, gToStation, amdbToGlobal);
             if (firstMdt) {
@@ -1104,9 +1091,7 @@ namespace Muon {
 
             chamberSet.insert(elId);
 
-            ++dcStatistics[detEl];
-
-            ++index;
+            ++dcStatistics[rot->prepRawData()->detectorElement()];
         }
 
         return dcs;
@@ -1189,7 +1174,7 @@ namespace Muon {
     }
 
    void DCMathSegmentMaker::associateMDTsToSegment(
-        const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment, const std::vector<const MdtDriftCircleOnTrack*>& mdts,
+        const Amg::Vector3D& gdir, TrkDriftCircleMath::Segment& segment,
         const TrkDriftCircleMath::ChamberGeometry* multiGeo, const Amg::Transform3D& gToStation, const Amg::Transform3D& amdbToGlobal,
         std::set<Identifier>& deltaVec, std::set<Identifier>& outoftimeVec,
         std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const {
@@ -1216,15 +1201,14 @@ namespace Muon {
         }
 
         for (TrkDriftCircleMath::DCOnTrack& dcit : segment.dcs()) {
-            if (dcit.state() == TrkDriftCircleMath::DCOnTrack::Delta) { deltaVec.insert(mdts[dcit.index()]->identify()); }
+            if (dcit.state() == TrkDriftCircleMath::DCOnTrack::Delta) { deltaVec.insert(dcit.rot()->identify()); }
 
-            if (dcit.state() == TrkDriftCircleMath::DCOnTrack::OutOfTime) { outoftimeVec.insert(mdts[dcit.index()]->identify()); }
+            if (dcit.state() == TrkDriftCircleMath::DCOnTrack::OutOfTime) { outoftimeVec.insert(dcit.rot()->identify()); }
 
             if (dcit.state() != TrkDriftCircleMath::DCOnTrack::OnTrack) continue;
 
-            const MdtDriftCircleOnTrack* riodc = dynamic_cast<const MdtDriftCircleOnTrack*>(mdts[dcit.index()]);
-            if (!riodc) continue;
-
+            const MdtDriftCircleOnTrack* riodc{dcit.rot()};
+            
             // choose which line to use (ml1 or ml2)
             TrkDriftCircleMath::TransformToLine toLine = toLineml1;
             if (m_idHelperSvc->mdtIdHelper().multilayer(riodc->identify()) == 2) toLine = toLineml2;
@@ -1280,7 +1264,7 @@ namespace Muon {
             // update the drift radius after recalibration, keep error
             TrkDriftCircleMath::DriftCircle new_dc(dcit.position(), std::abs(nonconstDC->driftRadius()), dcit.dr(), dcit.drPrecise(),
                                                    dcit.driftState(), dcit.id(),
-                                                   dcit.index(), nonconstDC.get());
+                                                   nonconstDC.get());
             TrkDriftCircleMath::DCOnTrack new_dc_on_track(new_dc, dcit.residual(), dcit.errorTrack());
             dcit = std::move(new_dc_on_track);
 

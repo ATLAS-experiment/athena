@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATH_TRANSFORMTOLINE_H
@@ -33,10 +33,10 @@ namespace TrkDriftCircleMath {
         }
 
         DriftCircle toLine(const DriftCircle& dc) const {
-            return DriftCircle(toLine(dc.position()), dc.r(), dc.dr(), dc.driftState(), dc.id(), dc.index(), dc.rot());
+            return DriftCircle(toLine(dc.position()), dc.r(), dc.dr(), dc.driftState(), dc.id(), dc.rot(), dc.index());
         }
         DriftCircle toLocal(const DriftCircle& dc) const {
-            return DriftCircle(toLocal(dc.position()), dc.r(), dc.dr(), dc.driftState(), dc.id(), dc.index(), dc.rot());
+            return DriftCircle(toLocal(dc.position()), dc.r(), dc.dr(), dc.driftState(), dc.id(), dc.rot(), dc.index());
         }
 
         /** rotate local position into line frame */
