@@ -19,6 +19,7 @@
 #include "InDetRecStatistics/TrackStatHelper.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenEvent.h"
 #include "CLHEP/Geometry/Point3D.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
