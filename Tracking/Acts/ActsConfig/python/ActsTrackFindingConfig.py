@@ -204,7 +204,11 @@ def ActsMainAmbiguityResolutionAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsAmbiguityResolutionMonitoringToolCfg(flags)))
-
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
     acc.addEventAlgo(
         CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
     return acc
@@ -259,6 +263,12 @@ def ActsTrackMergerAlgCfg(flags,
                           **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('OutputTrackCollection', 'ActsCombinedTracks')
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
     acc.addEventAlgo(CompFactory.ActsTrk.TrackMergerAlg(name, **kwargs))
     return acc
 

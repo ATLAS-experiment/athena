@@ -111,25 +111,6 @@ BOOST_FIXTURE_TEST_CASE(ImmutableAccess, FilledBackend) {
 }
 
 
-/////////////////////////////////////////////////////////////////////
-// Test of TrackSurfaceContainer in mutable TrackSummaryContainer  
-
-BOOST_FIXTURE_TEST_CASE(MutableSurfaceBackend_test, FilledBackend){
-
-//TODO: Here the empty surface is created. Tests of surfase filling are needed
-
-  auto i = m->addSurface_impl();
-  BOOST_CHECK_EQUAL(i, 0);
-
-  i = m->addSurface_impl();
-  BOOST_CHECK_EQUAL(i, 1); 
-
-  m->removeSurface_impl(i);
-  i = m->addSurface_impl();
-  BOOST_CHECK_EQUAL(i, 1);
-};
-
-
 template<typename surfType>
 void testSurface(surfType surf, std::shared_ptr<const Acts::Surface> outSurf, const Acts::GeometryContext& gctx) {
     BOOST_CHECK_EQUAL(int(surf->type()), int(outSurf->type()));
@@ -149,14 +130,14 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
     // Create filled xAOD::TrackSummaryContainer
     constexpr static size_t sz = 6;
 
-    xAOD::TrackSummaryContainer backend;
-    xAOD::TrackSummaryAuxContainer aux;
-    backend.setStore(&aux);
+    xAOD::TrackSummaryContainer summaryBackend;
+    xAOD::TrackSummaryAuxContainer summaryAux;
+    summaryBackend.setStore(&summaryAux);
 
     std::vector<double> semirandoms = {0.12, 0.92};
     for (const double sr : semirandoms) {    
         auto par = new xAOD::TrackSummary();    
-        backend.push_back(par);
+        summaryBackend.push_back(par);
         par->resize();
         for ( size_t i = 0; i < sz; ++i) {
             par->paramsEigen()(i) = i * sr;
@@ -178,8 +159,8 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
   transform *= Acts::AngleAxis3(rotation[2], Acts::Vector3(1., 0., 0.));  //rotX
 
   xAOD::TrackSurfaceContainer surfBackend;
-  xAOD::TrackSurfaceAuxContainer aux0;
-  surfBackend.setStore(&aux0);
+  xAOD::TrackSurfaceAuxContainer surfAux;
+  surfBackend.setStore(&surfAux);
   
   auto surfCurr = new xAOD::TrackSurface();
   surfBackend.push_back(surfCurr);
@@ -191,11 +172,9 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
   ActsTrk::encodeSurface(surfCurr, surf.get(), gctx);
 
   // Create constant ActsTrk::TrackSummaryContainer
-  std::unique_ptr<ActsTrk::TrackSummaryContainer> ms = std::make_unique<ActsTrk::TrackSummaryContainer>(&backend, &aux0);
+  std::unique_ptr<ActsTrk::TrackSummaryContainer> ms = std::make_unique<ActsTrk::TrackSummaryContainer>(&summaryBackend);
 
-  // Read the ActsTrk::TrackSummaryContainer and check track storage and track surfaces
-  auto cc = std::make_unique<ActsTrk::TrackSummaryContainer>(ms->trackBackend());
-  BOOST_CHECK_EQUAL(cc->size_impl(), 2);
+  BOOST_CHECK_EQUAL(ms->size_impl(), 2);
   
   auto outSurf = ActsTrk::decodeSurface(surfBackend[0], gctx);
   testSurface(surf, outSurf, gctx);

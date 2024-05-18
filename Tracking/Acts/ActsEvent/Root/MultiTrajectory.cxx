@@ -642,7 +642,6 @@ ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType ista
 
 void ActsTrk::MultiTrajectory::moveSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
   m_surfaces = std::move(mtj->m_surfaces);
-  INSPECTCALL(this << " " << m_surfaces.size());
 }
 
 // TODO remove this implementation once tracking uses only sourceLinks with EL

@@ -200,6 +200,19 @@ namespace xAOD
     const unsigned int* stemIndexPtr() const;
     unsigned int* stemIndexPtr();
 
+
+    /**
+      * @brief index of the surfaces in the surfaces collection
+      */
+    unsigned int surfaceIndex() const;
+
+    /**
+      * @brief Set the index in surface container
+      */
+    void setSurfaceIndex(unsigned int);
+
+
+
     /**
     * particle hypothesis access
     */

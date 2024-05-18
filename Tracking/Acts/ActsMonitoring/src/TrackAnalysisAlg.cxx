@@ -52,13 +52,12 @@ namespace ActsTrk {
     auto monitor_ndof = Monitored::Collection("ndof", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.nDoF()); } );
     auto monitor_nstates = Monitored::Collection("nStates", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.nTrackStates()); } );
     auto monitor_nmeas = Monitored::Collection("nMeasurements", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.nMeasurements()); } );
-    // TODO this needs to be fixed in the followup MR
-    // auto monitor_surftype = Monitored::Collection("surfaceType", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.referenceSurface().type()); } );
+    auto monitor_surftype = Monitored::Collection("surfaceType", proxies, [](const ConstTrackProxy& tp){ return static_cast<double>(tp.referenceSurface().type()); } );
 
 
     fill(m_monGroupName.value(), monitor_ntracks, monitor_theta, monitor_phi, 
         monitor_qoverp, monitor_nstates, monitor_phi, monitor_chi2, monitor_chi2OverNdof, 
-        monitor_ndof, monitor_nstates, monitor_nmeas);
+        monitor_ndof, monitor_nstates, monitor_nmeas, monitor_surftype);
     
     return StatusCode::SUCCESS;
   }
