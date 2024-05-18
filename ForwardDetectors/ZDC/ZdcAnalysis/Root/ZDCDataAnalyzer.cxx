@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <ZdcAnalysis/ZDCDataAnalyzer.h>
@@ -25,6 +25,12 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   m_haveECalib(false),
   m_haveT0Calib(false),
   m_currentLB(-1),
+
+  // Default "calibrations"
+  m_currentECalibCoeff ({{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}}),
+  m_currentT0OffsetsHG ({{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}}),
+  m_currentT0OffsetsLG ({{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}}),
+
   m_moduleMask(0),
   m_moduleSum({{0, 0}}),
   m_moduleSumErrSq({{0, 0}}),
@@ -60,12 +66,6 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
   m_pedestals[0] = {{100, 100, 100, 100}};
   m_pedestals[1] = {{100, 100, 100, 100}};
 
-  // Default "calibrations"
-  //
-  m_currentECalibCoeff = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
-
-  m_currentT0OffsetsHG = {{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}};
-  m_currentT0OffsetsLG = {{{{0, 0, 0, 0}}, {{0, 0, 0, 0}}}};
 
   // Construct the per-module pulse analyzers
   //
@@ -74,7 +74,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
       std::ostringstream moduleTag;
       moduleTag << "_s" << side << "_m" << module;
 
-      m_moduleAnalyzers[side][module].reset (new ZDCPulseAnalyzer(m_msgFunc_p, moduleTag.str().c_str(), m_nSample, m_deltaTSample, m_preSampleIdx,
+      m_moduleAnalyzers[side][module].reset (new ZDCPulseAnalyzer(m_msgFunc_p, moduleTag.str(), m_nSample, m_deltaTSample, m_preSampleIdx,
                                              m_pedestals[side][module], m_HGGains[side][module], m_fitFunction,
                                              peak2ndDerivMinSamples[side][module],
                                              peak2ndDerivMinThresholdsHG[side][module],
