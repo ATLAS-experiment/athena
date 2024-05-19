@@ -1165,19 +1165,15 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
 
                     // ---------------------------------
                     // Calculate distance between extrapolated muon track position and hit
-                    Amg::Vector3D hitPos_global = rpcData->globalPosition();
-                    const Amg::Vector3D hitPos_local =
-                        gap->readoutEl->globalToLocalCoords(hitPos_global, gap->gapid);
-
+                    float hit_local_x = rpcData->localPosition().x();
                     float trackPos_localY = exr.first.localPos.y();
                     float trackPos_localZ = exr.first.localPos.z();
 
-                    float residual_phi = trackPos_localY-hitPos_local.y();
-                    float residual_eta = trackPos_localZ-hitPos_local.z();
+                    float residual_phi = trackPos_localY-hit_local_x;
+                    float residual_eta = trackPos_localZ-hit_local_x;
 
                     // If hit is out-of-time
-                    // bool isOutTime = (std::abs(i_hitTime_sec+50.) > m_outtime); // for run 3
-                    bool isOutTime = (std::abs(i_hitTime_sec) > m_outtime); // for run 2 test
+                    bool isOutTime = (std::abs(i_hitTime_sec+50.) > m_outtime); // for run 3
                     int i_panel = measuresPhi ? gap->RpcPanel_eta_phi.second->panel_index :
                         gap->RpcPanel_eta_phi.first->panel_index;
                     
