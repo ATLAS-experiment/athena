@@ -8,7 +8,7 @@ import logging; log = logging.getLogger("DCSCalculator2.main")
 
 from DQUtils.db import fetch_iovs
 from DQUtils.iov_arrangement import inverse_lblb, run_iovs_from_lblb
-from DQUtils.general import timer, get_package_version
+from DQUtils.general import timer
 from DQUtils.utils import pprint_objects
 from DQUtils.logger import init_logger
 from DQUtils.sugar import RunLumi, IOVSet
@@ -16,7 +16,7 @@ from DQUtils.sugar import RunLumi, IOVSet
 from DQDefects import DefectsDB
 
 from DCSCalculator2.subdetectors import ALL_SYSTEMS, SYSTEM_MAP
-from DCSCalculator2.variable import DefectIOV
+from DCSCalculator2.variable import DefectIOV, DefectIOVFull
 
 import DCSCalculator2.config as config
 
@@ -88,7 +88,7 @@ def run_sequential(systems, lbtime, run_iovs):
             
     return result_iovs
 
-def go(iov, systems, db, indb, timewise=False):
+def go(iov, systems, db, indb, timewise=False, use_flask=False):
     """
     Run the DCS calculator for `run` on the `systems` specified, saving the 
     result to the `database`.
@@ -134,19 +134,24 @@ def go(iov, systems, db, indb, timewise=False):
         with timer("write result (%i iovs)" % len(result_iovs)):
             log.debug("Writing result (%i iovs)", len(result_iovs))
             defect_iovs = list(filter(lambda iov: isinstance(iov, DefectIOV), result_iovs))  # type: ignore
+            defect_iovs_full = [DefectIOVFull(recoverable=False, user='sys:defectcalculator', **_._asdict()) 
+                                for _ in defect_iovs]
             if len(defect_iovs) > 0:
-                ddb = DefectsDB(db, read_only=False, create=True)
-                defect_names = set(i.channel for i in defect_iovs)
+                ddb = DefectsDB(db, read_only=False, create=not use_flask)
+                defect_names = set(i.channel for i in defect_iovs_full)
                 for defect in defect_names:
                     if defect in ddb.defect_id_map:
                         continue
                     ddb.create_defect(defect, "Created by DCSCalculator2")
                 with ddb.storage_buffer:
-                    for iov in defect_iovs:
-                        ddb.insert(iov.channel, iov.since, iov.until,
-                                   iov.comment,
-                                   'sys:defectcalculator',
-                                   iov.present)
+                    if use_flask:
+                        import os
+                        import json
+                        secret_path = os.environ.get('COOLFLASK_SECRET', '/afs/cern.ch/user/a/atlasdqm/private/coolflask_secret/coolflask_secret.json')
+                        auth = json.loads(open(secret_path).read())
+                    else:
+                        auth = {}
+                    ddb.insert_multiple(defect_iovs_full, use_flask=use_flask, flask_auth=auth)
         
     args = len(result_iovs), hash(result_iovs)
     log.info("Success. Calculated %i iovs. Result hash: 0x%0x8.", *args)
@@ -156,10 +161,6 @@ def main(argv):
     optp, opts, args = config.parse_options(argv)
 
     init_logger(opts.verbose)
-    
-    log.info("Using %s", get_package_version("DQUtils"))
-    log.info("Using %s", get_package_version("DQDefects"))
-    log.info("Using %s", get_package_version("DCSCalculator2"))
     
     log.debug("Commandline arguments: %s", argv)
     log.debug("Current configuration: %s", (opts))
@@ -204,5 +205,5 @@ def main(argv):
     else:
         iov = RunLumi(since, 0), RunLumi(until+1, 0)
     
-    go(iov, systems, opts.output_database, opts.input_database, opts.timewise)
+    go(iov, systems, opts.output_database, opts.input_database, opts.timewise, opts.flask)
 

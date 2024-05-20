@@ -1,0 +1,11 @@
+ATLAS_CONDDB=dummy.cern.ch
+ATLAS_RELEASE=25.0.4
+DCSC_ARGS=-f
+DCSC_AUTH_PATH=/config
+DCSC_BUILD_DIR=build
+DCSC_DATADIR=/eos/user/a/atlasdqm/DCSCalculator
+DCSC_DEST_DB=oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_GLOBAL;dbname=CONDBR2;
+TNS_ADMIN=/eos/project/o/oracle/public/admin
+COOLFLASK_SECRET=/config/coolflask_secret/coolflask_secret.json
+DQM_COOL_FLASK_URI=https://cool-proxy-app.cern.ch/cool/multi_iovs
+DQU_MQINFO=/config/mqinfo
