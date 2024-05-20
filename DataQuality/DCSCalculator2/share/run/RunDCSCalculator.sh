@@ -39,7 +39,8 @@ then
         echo "Running calculator..."
 
         # DCSCalculator2
-        $basePath/ExecuteDCSC2.sh $run &> $logPath/dcsc2_$run
+        # Bail out if something bad happens
+        $basePath/ExecuteDCSC2.sh $run &> $logPath/dcsc2_$run || exit
    
         # Append the recently processed run numbers to the end of a file which
         # keeps track of the last 200 runs which were processed.

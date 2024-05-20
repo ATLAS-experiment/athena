@@ -103,7 +103,8 @@ class SCT(DCSC_DefectTranslate_Subdetector):
         from DQUtils import process_iovs
         rv = []
         for since, until, states in process_iovs(*flag_iovs.by_channel.values()):
-            if any(state.Code != GREEN for state in states):
+            if (any(state.Code != GREEN for state in states) 
+                    and not any(state.Code is None for state in states)):
                 # This line of code is awful!
                 badfrac = 'Bad fractions: ' + ', '.join('%s %.3f' % (defectmap[state.channel], state.deadFrac) for state in sorted(states, key=lambda x: x.channel))
                 rv.append(DefectIOV(since=since, until=until,
