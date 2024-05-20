@@ -299,155 +299,155 @@ Hydjet::set_user_params	(void)
     {
       ATH_MSG_INFO( " Command is: " << *i );
       StringParse mystring(*i);
-      std::string myparam = mystring.piece(1);
+      std::string myparam = mystring.piece<std::string>(1);
       if (myparam == "e")
         {
-          m_e         = mystring.numpiece(2);
+          m_e         = mystring.piece<double>(2);
         }
       else if (myparam == "a")
         {
-          m_a         = mystring.intpiece(2);
+          m_a         = mystring.piece<int>(2);
         }
       else if (myparam == "ifb")
         {
-          m_ifb       = mystring.intpiece(2);
+          m_ifb       = mystring.piece<int>(2);
         }
       else if (myparam == "bmin")
         {
-          m_bmin	= mystring.numpiece(2);
+          m_bmin = mystring.piece<double>(2);
           m_bmin      /= m_hyipar.RA();
         }
       else if (myparam == "bmax")
         {
-          m_bmax	= mystring.numpiece(2);
+          m_bmax = mystring.piece<double>(2);
           m_bmax      /= m_hyipar.RA();
         }
       else if (myparam == "bfix")
         {
-          m_bfix	= mystring.numpiece(2);
+          m_bfix = mystring.piece<double>(2);
           m_bfix      /= m_hyipar.RA();
         }
       else if (myparam == "nh")
         {
-          m_nh	= mystring.intpiece(2);
+          m_nh = mystring.piece<int>(2);
         }
       else if (myparam == "nseed")
         {
-          m_ludatr.mrlu(1)    = mystring.intpiece(2);
+          m_ludatr.mrlu(1)    = mystring.piece<int>(2);
         }
       else if (myparam == "ytfl")
         {
-          m_hyflow.ytfl()     = mystring.numpiece(2);
+          m_hyflow.ytfl()     = mystring.piece<double>(2);
         }
       else if (myparam == "ylfl")
         {
-          m_hyflow.ylfl()     = mystring.numpiece(2);
+          m_hyflow.ylfl()     = mystring.piece<double>(2);
         }
       else if (myparam == "tf")
         {
-          m_hyflow.tf()       = mystring.numpiece(2);
+          m_hyflow.tf()       = mystring.piece<double>(2);
         }
       else if (myparam == "fpart")
         {
-          m_hyflow.fpart()    = mystring.numpiece(2);
+          m_hyflow.fpart()    = mystring.piece<double>(2);
         }
       else if (myparam == "nhsel")
         {
-          m_hyjpar.nhsel()    = mystring.intpiece(2);
+          m_hyjpar.nhsel()    = mystring.piece<int>(2);
         }
       else if (myparam == "ishad")
         {
-          m_hyjpar.ishad()    = mystring.intpiece(2);
+          m_hyjpar.ishad()    = mystring.piece<int>(2);
         }
       else if (myparam == "ptmin")
         {
-          m_hyjpar.ptmin()    = mystring.numpiece(2);
+          m_hyjpar.ptmin()    = mystring.piece<double>(2);
           // hydjet recommendation
-          m_pysubs.ckin(3)    = mystring.numpiece(2);
+          m_pysubs.ckin(3)    = mystring.piece<double>(2);
         }
       else if (myparam == "ienglu")
         {
-          m_pyqpar.ienglu()  = mystring.intpiece(2);
+          m_pyqpar.ienglu()  = mystring.piece<int>(2);
         }
       else if (myparam == "ianglu")
         {
-          m_pyqpar.ianglu()  = mystring.intpiece(2);
+          m_pyqpar.ianglu()  = mystring.piece<int>(2);
         }
       else if (myparam == "t0")
         {
-          m_pyqpar.t0()  = mystring.numpiece(2);
+          m_pyqpar.t0()  = mystring.piece<double>(2);
         }
       else if (myparam == "tau0")
         {
-          m_pyqpar.tau0()  = mystring.numpiece(2);
+          m_pyqpar.tau0()  = mystring.piece<double>(2);
         }
       else if (myparam == "nf")
         {
-          m_pyqpar.nf()  = mystring.intpiece(2);
+          m_pyqpar.nf()  = mystring.piece<int>(2);
         }
       else if (myparam == "mstu")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pydat1.mstu(myelem) = mystring.intpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pydat1.mstu(myelem) = mystring.piece<int>(3);
         }
       else if (myparam == "paru")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pydat1.paru(myelem) = mystring.numpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pydat1.paru(myelem) = mystring.piece<double>(3);
         }
       else if (myparam == "mstj")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pydat1.mstj(myelem) = mystring.intpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pydat1.mstj(myelem) = mystring.piece<int>(3);
         }
       else if (myparam == "parj")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pydat1.parj(myelem) = mystring.numpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pydat1.parj(myelem) = mystring.piece<double>(3);
         }
       else if (myparam == "msel")
         {
-          m_pysubs.msel()       = mystring.intpiece(2);
+          m_pysubs.msel()       = mystring.piece<int>(2);
         }
       else if (myparam == "mselpd")
         {
-          m_pysubs.mselpd()   = mystring.intpiece(2);
+          m_pysubs.mselpd()   = mystring.piece<int>(2);
         }
       else if (myparam == "msub")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pysubs.msub(myelem) = mystring.intpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pysubs.msub(myelem) = mystring.piece<int>(3);
         }
       else if (myparam == "kfin")
         {
-          int		myelem1  = mystring.intpiece(2);
-          int		myelem2  = mystring.intpiece(3);
-          m_pysubs.kfin(myelem1,myelem2) = mystring.intpiece(4);
+          int		myelem1  = mystring.piece<int>(2);
+          int		myelem2  = mystring.piece<int>(3);
+          m_pysubs.kfin(myelem1,myelem2) = mystring.piece<int>(4);
         }
       else if (myparam == "ckin")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pysubs.ckin(myelem) = mystring.numpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pysubs.ckin(myelem) = mystring.piece<double>(3);
         }
       else if (myparam == "mstp")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pypars.mstp(myelem) = mystring.intpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pypars.mstp(myelem) = mystring.piece<int>(3);
         }
       else if (myparam == "parp")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pypars.parp(myelem) = mystring.numpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pypars.parp(myelem) = mystring.piece<double>(3);
         }
       else if (myparam == "msti")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pypars.msti(myelem) = mystring.intpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pypars.msti(myelem) = mystring.piece<int>(3);
         }
       else if (myparam == "pari")
         {
-          int		myelem  = mystring.intpiece(2);
-          m_pypars.pari(myelem) = mystring.numpiece(3);
+          int		myelem  = mystring.piece<int>(2);
+          m_pypars.pari(myelem) = mystring.piece<double>(3);
         }
       else
         {

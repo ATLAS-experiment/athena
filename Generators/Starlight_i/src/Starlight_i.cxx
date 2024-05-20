@@ -365,138 +365,138 @@ bool Starlight_i::prepare_params_file()
         ATH_MSG_INFO( "  Command is: " << *i  );
 
         StringParse mystring(*i);
-        std::string myparam = mystring.piece(1);
+        std::string myparam = mystring.piece<std::string>(1);
         if (myparam == "beam1Z")
         {
-          m_beam1Z  = mystring.numpiece(2);
+          m_beam1Z  = mystring.piece<double>(2);
         }
         else if (myparam == "beam1A")
         {
-          m_beam1A  = mystring.numpiece(2);
+          m_beam1A  = mystring.piece<double>(2);
         }
         else if (myparam == "beam2Z")
         {
-          m_beam2Z  = mystring.numpiece(2);
+          m_beam2Z  = mystring.piece<double>(2);
         }
         else if (myparam == "beam2A")
         {
-          m_beam2A  = mystring.numpiece(2);
+          m_beam2A  = mystring.piece<double>(2);
         }
         else if (myparam == "beam1Gamma")
         {
-          m_beam1Gamma  = mystring.numpiece(2);
+          m_beam1Gamma  = mystring.piece<double>(2);
         }
         else if (myparam == "beam2Gamma")
         {
-          m_beam2Gamma  = mystring.numpiece(2);
+          m_beam2Gamma  = mystring.piece<double>(2);
         }
         else if (myparam == "maxW")
         {
-          m_maxW  = mystring.numpiece(2);
+          m_maxW  = mystring.piece<double>(2);
         }
         else if (myparam == "minW")
         {
-          m_minW  = mystring.numpiece(2);
+          m_minW  = mystring.piece<double>(2);
         }
         else if (myparam == "nmbWBins")
         {
-          m_nmbWBins  = mystring.numpiece(2);
+          m_nmbWBins  = mystring.piece<double>(2);
         }
         else if (myparam == "maxRapidity")
         {
-          m_maxRapidity  = mystring.numpiece(2);
+          m_maxRapidity  = mystring.piece<double>(2);
         }
         else if (myparam == "nmbRapidityBins")
         {
-          m_nmbRapidityBins  = mystring.numpiece(2);
+          m_nmbRapidityBins  = mystring.piece<double>(2);
         }
         else if (myparam == "accCutPt")
         {
-          m_accCutPt = mystring.numpiece(2);
+          m_accCutPt = mystring.piece<double>(2);
         }
         else if (myparam == "minPt")
         {
-          m_minPt = mystring.numpiece(2);
+          m_minPt = mystring.piece<double>(2);
         }
         else if (myparam == "maxPt")
         {
-          m_maxPt = mystring.numpiece(2);
+          m_maxPt = mystring.piece<double>(2);
         }
         else if (myparam == "accCutEta")
         {
-          m_accCutEta = mystring.numpiece(2);
+          m_accCutEta = mystring.piece<double>(2);
         }
         else if (myparam == "minEta")
         {
-          m_minEta = mystring.numpiece(2);
+          m_minEta = mystring.piece<double>(2);
         }
         else if (myparam == "maxEta")
         {
-          m_maxEta = mystring.numpiece(2);
+          m_maxEta = mystring.piece<double>(2);
         }
         else if (myparam == "productionMode")
         {
-          m_productionMode  = mystring.numpiece(2);
+          m_productionMode  = mystring.piece<double>(2);
         }
         else if (myparam == "axionMass")
         {
-          m_axionMass  = mystring.numpiece(2);
+          m_axionMass  = mystring.piece<double>(2);
         }
         else if (myparam == "nmbEventsTot")
         {
-          m_nmbEventsTot  = mystring.numpiece(2);
+          m_nmbEventsTot  = mystring.piece<double>(2);
         }
         else if (myparam == "prodParticleId")
         {
-          m_prodParticleId  = mystring.numpiece(2);
+          m_prodParticleId  = mystring.piece<double>(2);
         }
         else if (myparam == "randomSeed")
         {
-          m_randomSeed  = mystring.numpiece(2);
+          m_randomSeed  = mystring.piece<double>(2);
         }
         else if (myparam == "outputFormat")
         {
-          m_outputFormat  = mystring.numpiece(2);
+          m_outputFormat  = mystring.piece<double>(2);
         }
         else if (myparam == "beamBreakupMode")
         {
-          m_beamBreakupMode  = mystring.numpiece(2);
+          m_beamBreakupMode  = mystring.piece<double>(2);
         }
         else if (myparam == "interferenceEnabled")
         {
-          m_interferenceEnabled  = mystring.numpiece(2);
+          m_interferenceEnabled  = mystring.piece<double>(2);
         }
         else if (myparam == "interferenceStrength")
         {
-          m_interferenceStrength  = mystring.numpiece(2);
+          m_interferenceStrength  = mystring.piece<double>(2);
         }
         else if (myparam == "coherentProduction")
         {
-          m_coherentProduction = mystring.numpiece(2);
+          m_coherentProduction = mystring.piece<double>(2);
         }
         else if (myparam == "incoherentFactor")
         {
-          m_incoherentFactor  = mystring.numpiece(2);
+          m_incoherentFactor  = mystring.piece<double>(2);
         }
         else if (myparam == "maxPtInterference")
         {
-          m_maxPtInterference  = mystring.numpiece(2);
+          m_maxPtInterference  = mystring.piece<double>(2);
         }
         else if (myparam == "nmbPtBinsInterference")
         {
-          m_nmbPtBinsInterference  = mystring.numpiece(2);
+          m_nmbPtBinsInterference  = mystring.piece<double>(2);
         }
         else if (myparam == "xsecMethod")
         {
-          m_xsecMethod = mystring.numpiece(2);
+          m_xsecMethod = mystring.piece<double>(2);
         }
         else if (myparam == "nThreads")
         {
-          m_nThreads = mystring.numpiece(2);
+          m_nThreads = mystring.piece<double>(2);
         }
         else if (myparam == "pythFullRec")
         {
-          m_pythFullRec = mystring.numpiece(2);
+          m_pythFullRec = mystring.piece<double>(2);
         }
         else
         {

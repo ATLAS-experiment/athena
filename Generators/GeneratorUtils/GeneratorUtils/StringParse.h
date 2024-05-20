@@ -7,6 +7,9 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <charconv>
+#include <iostream>
+#include <iomanip>
 
 /// @brief Utility object for parsing a string into tokens and returning them as a variety of types
 ///
@@ -25,104 +28,33 @@
 /// @author Yun-Ha.Shin, June 2006
 /// @author Andy Buckley, September 2012
 /// @author Andrii Verbytskyi, Jul 2023
+/// @author Andrii Verbytskyi, May 2024
 ///
-class StringParse {
+class StringParse: public std::vector<std::string> {
 public:
 
   /// Constructor, taking a string of whitespace-separated tokens
-  StringParse(const std::string& input)
-    : m_lstring (input)
-  {
+  StringParse(const std::string& input) {
     std::istringstream instring(input);
     std::string token;
-    while (instring >> token) {
-      m_lsubstring.push_back(token);
-    }
+    while (instring >> token) this->push_back(token);
   }
 
-  /// Templated function to get the num'th token as any type (via stringstream)
-  template <typename T> T piece(size_t num) const; 
-
-  /// Function to get the num'th token as an int
-  int intpiece(size_t num) const;
-
-  /// Function to get the num'th token as a long int
-  long longpiece(size_t num) const;
-
-  /// Function to get the num'th token as a double
-  double numpiece(size_t num) const;
-  
-  std::string piece(size_t num) const;
-
-  /// Number of tokens in the input string
-  size_t num_pieces() const { return m_lsubstring.size(); }
-
-private:
-
-  std::string m_lstring;
-  std::vector<std::string> m_lsubstring;
-
+  /// Templated function to get the num'th token as any numeric type
+  template <typename T> T piece(size_t num) const {
+    if (num > this->size()) return {-1};
+    std::string token = this->at(num-1);
+    T result{-1};
+    /// https://en.cppreference.com/w/cpp/utility/from_chars
+    auto [ptr, ec] = std::from_chars(token.data(), token.data() + token.size(), result);
+    if (ec == std::errc() && ptr == token.data() + token.size()) return result;
+    if (ec == std::errc::invalid_argument || ptr != token.data() + token.size() ) return {-1}; //std::cout << "This number cannot be parsed.\n"; 
+    if (ec == std::errc::result_out_of_range) return {-1}; //std::cout << "This number is out of range of the return type.\n";
+    return {-1};
+  }
 };
-
-  template <> double StringParse::piece(size_t num) const {
-    try {
-      std::string token = (num > num_pieces()) ? "?!?" : m_lsubstring[num-1];
-      size_t idx = 0;
-      auto ret = std::stod(token,&idx);
-      return (idx == token.size()) ? ret : std::stod("-1");
-    } catch (const std::invalid_argument& ex) {
-      return std::stod("-1");
-    }
-  }
-
-
-  template <> int StringParse::piece(size_t num) const {
-    try {
-      std::string token = (num > num_pieces()) ? "?!?" : m_lsubstring[num-1];
-      size_t idx = 0;
-      auto ret = std::stoi(token,&idx);
-      return (idx == token.size()) ? ret : std::stoi("-1");
-    } catch (const std::invalid_argument& ex) {
-      return std::stoi("-1");
-    }
-  }
-
-  template <> long StringParse::piece(size_t num) const {
-    try {
-      std::string token = (num > num_pieces()) ? "?!?" : m_lsubstring[num-1];
-      size_t idx = 0;
-      auto ret = std::stol(token,&idx);
-      return (idx == token.size()) ? ret : std::stol("-1");
-    } catch (const std::invalid_argument& ex) {
-      return std::stol("-1");
-    }
-  }
-
   /// Function to get the num'th token as a string
-  template <> std::string StringParse::piece(size_t num)  const{
-    return m_lsubstring.at(num-1);
-  }
-  
-  
-  /// Function to get the num'th token as an int
-  int StringParse::intpiece(size_t num) const {
-    if (num > num_pieces()) return -1;
-    return piece<int>(num);
-  }
-
-  /// Function to get the num'th token as a long int
-  long StringParse::longpiece(size_t num) const {
-    if (num > num_pieces()) return -1;
-    return piece<long>(num);
-  }
-
-  /// Function to get the num'th token as a double
-  double StringParse::numpiece(size_t num) const {
-    if (num > num_pieces()) return -1;
-    return piece<double>(num);
-  }
-
-  std::string StringParse::piece(size_t num) const {
-    return piece<std::string>(num);
-  }
+template <> std::string StringParse::piece(size_t num) const {
+    return num > this->size() ? std::string{} : this->at(num-1);
+}
 #endif
