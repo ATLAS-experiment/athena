@@ -20,8 +20,10 @@ namespace MuonR4{
         
         if (primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             m_driftR = primaryMeas->localPosition<1>()[0];
-         }
-        uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
+        }
+        if (primaryMeas->numDimensions() == 1) {
+            uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
+        }
         Jac.col(0)  = xAOD::channelNormalInChamber(gctx, primaryMeas).block<2,1>(0,0);
         if (secondaryMeas) {
             /// Position of the measurements expressed in the chamber frame
@@ -41,9 +43,11 @@ namespace MuonR4{
                 const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(primaryMeas);
                 uvcov(1,1) = 0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash());
             } else if (primaryMeas->type() == xAOD::UncalibMeasType::RpcStripType) {
-                const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(primaryMeas);
-                uvcov(1,1) = strip->measuresPhi() ? 0.5* strip->readoutElement()->stripPhiLength():
-                                                    0.5* strip->readoutElement()->stripEtaLength();
+                if (primaryMeas->numDimensions() == 1) {
+                    const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(primaryMeas);
+                    uvcov(1,1) = strip->measuresPhi() ? 0.5* strip->readoutElement()->stripPhiLength():
+                                                        0.5* strip->readoutElement()->stripEtaLength();
+                }
             } else if (primaryMeas->type() == xAOD::UncalibMeasType::TgcStripType) {
                 const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(primaryMeas);
                 if (strip->measuresPhi()) {
@@ -58,8 +62,17 @@ namespace MuonR4{
             uvcov(1,1) = std::pow(uvcov(1,1), 2);
         }
         Jac = Jac.inverse().eval();
+        /// In case of 2D measurements like sTgc-pads or BI-RPC strips we can directly take the covariance
+        /// from the measurement itself. To indicate that the space point measures both, eta & phi coordinate
+        /// set the secondary measurement to be the primary one
+        if (primaryMeas->numDimensions() == 2) {
+            uvcov = xAOD::toEigen(primaryMeas->localCovariance<2>());
+            m_secondaryMeas = m_primaryMeas;
+        }
+
         AmgSymMatrix(2) cov = Jac * uvcov * Jac.transpose();
         m_measUncerts =  Amg::Vector2D(std::sqrt(cov(0,0)), std::sqrt(cov(1,1)));
+
     }
             
     const xAOD::UncalibratedMeasurement* MuonSpacePoint::primaryMeasurement() const {
