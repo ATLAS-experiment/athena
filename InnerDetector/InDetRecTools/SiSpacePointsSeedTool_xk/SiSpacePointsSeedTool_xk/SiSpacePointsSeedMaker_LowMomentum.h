@@ -172,6 +172,7 @@ namespace InDet {
     //@{
     FloatProperty m_etamax{this, "etaMax", 2.7};
     FloatProperty m_ptmin{this, "pTmin", 100.};
+    FloatProperty m_fieldScale{this, "fieldScale", 1.};
     //@}
 
     /// @name Data members, which are updated only in initialize
