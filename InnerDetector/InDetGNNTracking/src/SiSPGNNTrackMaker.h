@@ -86,9 +86,6 @@ namespace InDet {
         this, "GNNTrackReaderTool",
         "InDet::GNNTrackReaderTool", "Track Reader"
       };
-
-      BooleanProperty m_useTrackFinder{this, "UseTrackFinder", false};
-      BooleanProperty m_useTrackReader{this, "UseTrackReader", true};
       //@}
 
       MsgStream&    dumptools(MsgStream&    out) const;

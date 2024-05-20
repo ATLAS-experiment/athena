@@ -26,16 +26,16 @@ StatusCode InDet::SiSPGNNTrackMaker::initialize()
   ATH_CHECK(m_trackFitter.retrieve());
   ATH_CHECK(m_seedFitter.retrieve());
 
-  if (m_useTrackFinder.value() == m_useTrackReader.value()) {
+  if (!m_gnnTrackFinder.empty() && !m_gnnTrackReader.empty()) {
     ATH_MSG_ERROR("Use either track finder or track reader, not both.");
     return StatusCode::FAILURE;
   }
 
-  if (m_useTrackFinder) {
+  if (!m_gnnTrackFinder.empty()) {
     ATH_MSG_INFO("Use GNN Track Finder");
     ATH_CHECK(m_gnnTrackFinder.retrieve());
   }
-  if (m_useTrackReader) {
+  if (!m_gnnTrackReader.empty()) {
     ATH_MSG_INFO("Use GNN Track Reader");
     ATH_CHECK(m_gnnTrackReader.retrieve());
   }
