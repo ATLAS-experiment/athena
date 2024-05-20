@@ -1,3 +1,4 @@
+#!/usr/bin/env athena
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ###########################################################################
 # Job options to test HLT conditions updates based on local sqlite file
@@ -6,7 +7,7 @@
 # deployment in the online DB.
 #
 # Usage:
-#  athena --CA --evtMax=10 TriggerJobOpts/test_hltConditions.py [flags...]
+#  athena --evtMax=10 TriggerJobOpts/test_hltConditions.py [flags...]
 #
 # Author: Frank Winklmeier
 ###########################################################################

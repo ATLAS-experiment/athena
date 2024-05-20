@@ -69,7 +69,6 @@ tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
 tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2024-03\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-tzreco.args += ' --CA'
 
 # The full test
 test = Test.Test()

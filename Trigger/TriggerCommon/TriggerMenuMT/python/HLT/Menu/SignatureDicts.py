@@ -592,7 +592,7 @@ TauChainParts = {
     'L1threshold'   : '',
     'chainPartName' : '',
     'threshold'     : '',
-    'preselection'  : ['tracktwoMVA', 'tracktwoMVABDT', 'tracktwoLLP', 'ptonly', 'trackLRT' ],
+    'preselection'  : ['tracktwoMVA', 'tracktwoLLP', 'ptonly', 'trackLRT' ],
     'selection'     : ['looseRNN', 'mediumRNN', 'tightRNN', 'perf', 'idperf',
                        'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'dikaonmass', 'singlepion'],
     'multiplicity'  : '',

@@ -16,6 +16,7 @@
 
 #include "JetTagTools/MultivariateTagManager.h"
 #include "JetTagTools/BTagVariables.h"
+#include "AthContainers/AuxElement.h"
 
 #include <fstream>
 #include <sstream>
@@ -174,12 +175,16 @@ namespace Analysis {
     float trkSum_vPt = NAN;
     float trkSum_vAbsEta =NAN;
 
-    trkSum_ntrk   = BTag.isAvailable<unsigned>("trkSum_ntrk") ? BTag.auxdata<unsigned>("trkSum_ntrk") : NAN;
-    trkSum_sPt    = BTag.isAvailable<float   >("trkSum_SPt" ) ? BTag.auxdata<float   >("trkSum_SPt" ) : NAN;
+    static const SG::AuxElement::ConstAccessor<unsigned> ntrkAcc ("trkSum_ntrk");
+    static const SG::AuxElement::ConstAccessor<float> SPtAcc ("trkSum_SPt");
+    trkSum_ntrk   = ntrkAcc.isAvailable(BTag) ? ntrkAcc(BTag) : NAN;
+    trkSum_sPt    = SPtAcc.isAvailable(BTag) ? SPtAcc(BTag): NAN;
 
     if (!std::isnan(trkSum_ntrk)){
-      trkSum_vPt    = BTag.isAvailable<float>("trkSum_VPt" ) ?      BTag.auxdata<float>("trkSum_VPt" )  : NAN;
-      trkSum_vAbsEta= BTag.isAvailable<float>("trkSum_VEta") ? std::abs(BTag.auxdata<float>("trkSum_VEta")) : NAN;
+      static const SG::AuxElement::ConstAccessor<float> VPtAcc ("trkSum_VPt");
+      static const SG::AuxElement::ConstAccessor<float> VEtaAcc ("trkSum_VEta");
+      trkSum_vPt    =  VPtAcc.isAvailable(BTag) ? VPtAcc(BTag) : NAN;
+      trkSum_vAbsEta= VEtaAcc.isAvailable(BTag) ? VEtaAcc(BTag) : NAN;
     }
 
     inputs[btagvar::TRKSUM_NTRK]   = trkSum_ntrk;
@@ -561,17 +566,19 @@ namespace Analysis {
       // note: we should extend this to data types beyond float at
       // some point
       std::string valid_key = key + "IsValid";
-      if ( ! BTag.isAvailable<float>(key) ) {
+      SG::AuxElement::ConstAccessor<float> keyAcc (key);
+      SG::AuxElement::ConstAccessor<float> valid_keyAcc (valid_key);
+      if ( ! keyAcc.isAvailable(BTag) ) {
         ATH_MSG_WARNING("aux data '" + key + "' is missing,"
                         " tagger inputs may be incomplete");
-      } else if (!BTag.isAvailable<char>(valid_key)) {
+      } else if (!valid_keyAcc.isAvailable(BTag)) {
         ATH_MSG_WARNING("no key '" + valid_key + "' found, invalid inputs"
                         " may be interperated incorrectly");
-        inputs[key] = BTag.auxdata<float>(key);
-      } else if (!BTag.auxdata<char>(valid_key)) {
+        inputs[key] = keyAcc(BTag);
+      } else if (!valid_keyAcc(BTag)) {
         inputs[key] = NAN;
       } else {
-        inputs[key] = BTag.auxdata<float>(key);
+        inputs[key] = keyAcc(BTag);
       }
     }
 

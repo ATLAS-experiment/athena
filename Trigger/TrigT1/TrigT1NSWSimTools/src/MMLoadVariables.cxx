@@ -12,13 +12,12 @@ MMLoadVariables::MMLoadVariables(const MuonGM::MuonDetectorManager* detManager, 
 }
 
 StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
-					    const McEventCollection *truthContainer,
+                                            const McEventCollection *truthContainer,
                                             const TrackRecordCollection* trackRecordCollection,
                                             const MmDigitContainer *nsw_MmDigitContainer,
                                             std::map<std::pair<int,unsigned int>,std::vector<digitWrapper> >& entries,
-                                            std::map<std::pair<int,unsigned int>,std::map<hitData_key,hitData_entry> >& Hits_Data_Set_Time,
+                                            std::map<std::pair<int,unsigned int>,std::vector<hitData_entry> >& Hits_Data_Set_Time,
                                             std::map<std::pair<int,unsigned int>,evInf_entry>& Event_Info,
-                                            std::map<std::string, std::shared_ptr<MMT_Parameters> > &pars,
                                             histogramDigitVariables &histDigVars) const {
       //*******Following MuonPRD code to access all the variables**********
       std::vector<ROOT::Math::PtEtaPhiEVector> truthParticles, truthParticles_ent, truthParticles_pos;
@@ -98,11 +97,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
       } // if truth container is not null
 
       int event = ctx.eventID().event_number();
-
       int TruthParticle_n = j;
-      evFit_entry fit;
-      fit.athena_event=event;
-
       unsigned int digit_particles = 0;
       for(auto digitCollectionIter : *nsw_MmDigitContainer) {
         // a digit collection is instanciated for each container, i.e. holds all digits of a multilayer
@@ -222,10 +217,8 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
                     truthParticles[i].Phi(), truthParticles_pos[i].Phi(), truthParticles_ent[i].Phi(),
                     truthParticles[i].Theta(), truthParticles_pos[i].Theta(), truthParticles_ent[i].Theta(), truthParticles_ent[i].Theta()-truthParticles_pos[i].Theta(),
                     TruthParticle_n,MuEntry_Particle_n,vertex[i]);
-        particle_info.NUV_bg_preVMM = 0;
         Event_Info[std::make_pair(event,i)] = particle_info;
       }
-
 
       //Loop over entries, which has digitization info for each event
       unsigned int ient=0;
@@ -243,10 +236,8 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
         }
 
         std::string station = it->second[0].stName;
-        bool uvxxmod=(pars[station]->setup.compare("xxuvuvxx")==0);
-
-        std::map<hitData_key,hitData_entry> hit_info;
-        std::vector<hitData_key> keys;
+        std::vector<hitData_entry> hit_info;
+        hit_info.reserve(it->second.size());
 
         //Now we need to loop on digits
         for (const auto &dW : it->second) {
@@ -269,13 +260,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
             dW.strip_gpos.Z()
             );
 
-          ROOT::Math::XYZVector athena_rec(dW.strip_gpos);
-          ROOT::Math::XYZVector recon(athena_rec.Y(),-athena_rec.X(),athena_rec.Z());
-
-          if(uvxxmod){
-            xxuv_to_uvxx(recon,thisPlane,pars[station]);
-          }
-
           hitData_entry hit_entry(event,
                                thisTime,
                                thisCharge,
@@ -295,90 +279,12 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
                                mazin_check,
                                mazin_check);
 
-          hit_info[hit_entry.entry_key()]=hit_entry;
-          ATH_MSG_DEBUG("Filling hit_info slot: ");
-          if (msgLvl(MSG::DEBUG)){
-            hit_entry.entry_key().print();
-          }
-          keys.push_back(hit_entry.entry_key());
+          hit_info.push_back(hit_entry);
+          ATH_MSG_DEBUG("Done filling hit_info structure");
         }//end digit wrapper loop
 
-        if (tru_it != Event_Info.end()) {
-          tru_it->second.N_hits_preVMM=hit_info.size();
-          tru_it->second.N_hits_postVMM=0;
-        }
-
-        std::vector<bool>plane_hit(pars[station]->setup.size(),false);
-
-        for(std::map<hitData_key,hitData_entry>::iterator it=hit_info.begin(); it!=hit_info.end(); ++it){
-          int plane=it->second.plane;
-          plane_hit[plane]=true;
-          if (tru_it != Event_Info.end()) tru_it->second.N_hits_postVMM++;
-        }
         Hits_Data_Set_Time[std::make_pair(event,ient)] = hit_info;
         ient++;
       }
     return StatusCode::SUCCESS;
-  }
-
-  double MMLoadVariables::phi_shift(double athena_phi,const std::string& wedgeType, int stationPhi) const{
-    float n = 2*(stationPhi-1);
-    if(wedgeType=="Small") n+=1;
-    float sectorPi = n*M_PI/8.;
-    if(n>8) sectorPi = (16.-n)*M_PI/8.;
-
-    if(n<8)       return (athena_phi-sectorPi);
-    else if(n==8) return (athena_phi + (athena_phi >= 0? -1:1)*sectorPi);
-    else if(n>8)  return (athena_phi+sectorPi);
-    else return athena_phi;
-
-  }
-  void MMLoadVariables::xxuv_to_uvxx(ROOT::Math::XYZVector& hit,const int plane, std::shared_ptr<MMT_Parameters> par) const{
-    if(plane<4)return;
-    else if(plane==4)hit_rot_stereo_bck(hit, par);//x to u
-    else if(plane==5)hit_rot_stereo_fwd(hit, par);//x to v
-    else if(plane==6)hit_rot_stereo_fwd(hit, par);//u to x
-    else if(plane==7)hit_rot_stereo_bck(hit, par);//v to x
-  }
-
-  void MMLoadVariables::hit_rot_stereo_fwd(ROOT::Math::XYZVector& hit, std::shared_ptr<MMT_Parameters> par)const{
-    double degree=M_PI/180.0*(par->stereo_degree);
-    bool striphack = false;
-    if(striphack) hit.SetY(hit.Y()*cos(degree));
-    else{
-      double xnew=hit.X()*std::cos(degree)+hit.Y()*std::sin(degree),ynew=-hit.X()*std::sin(degree)+hit.Y()*std::cos(degree);
-      hit.SetX(xnew);hit.SetY(ynew);
-    }
-  }
-
-  void MMLoadVariables::hit_rot_stereo_bck(ROOT::Math::XYZVector& hit, std::shared_ptr<MMT_Parameters> par)const{
-    double degree=-M_PI/180.0*(par->stereo_degree);
-    bool striphack = false;
-    if(striphack) hit.SetY(hit.Y()*std::cos(degree));
-    else{
-      double xnew=hit.X()*std::cos(degree)+hit.Y()*std::sin(degree),ynew=-hit.X()*std::sin(degree)+hit.Y()*std::cos(degree);
-      hit.SetX(xnew);hit.SetY(ynew);
-    }
-  }
-
-  int 
-  MMLoadVariables::Get_VMM_chip(int strip) const{  //Not Finished... Rough
-    int strips_per_VMM = 64;
-    return ceil(1.*strip/strips_per_VMM);
-  }
-
-  int 
-  MMLoadVariables::strip_number(int station, int plane, int spos, std::shared_ptr<MMT_Parameters> par)const{
-    if (station<=0||station>par->n_stations_eta) {
-      int base_strip = 0;
-      return base_strip;
-    }
-    if (plane<0||plane>(int)par->setup.size()) {
-      int base_strip = 0;
-
-      return base_strip;
-    }
-   
-    int base_strip=spos;
-    return base_strip;
-  }
+}

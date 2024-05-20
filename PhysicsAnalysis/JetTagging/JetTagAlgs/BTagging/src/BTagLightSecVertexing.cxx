@@ -25,6 +25,7 @@
 #include "xAODBase/IParticle.h" 
 
 #include "StoreGate/ReadDecorHandle.h"
+#include "AthContainers/AuxElement.h"
 
 namespace Analysis {
 
@@ -224,7 +225,8 @@ namespace Analysis {
     ATH_MSG_DEBUG("#BTAGJF# filling vertices for basename: " << basename);
     newBTag->setVariable<std::vector<ElementLink<xAOD::BTagVertexContainer> > >(basename, "JFvertices", JFVerticesLinks);
     newBTag->setDynBTagVxELName(basename, "JFvertices");
-    ATH_MSG_DEBUG("#BTAGJF# n vertices: " << newBTag->auxdata<BTagVertices>(basename + "_JFvertices").size());
+    static const SG::AuxElement::ConstAccessor<BTagVertices> vertsAcc (basename + "_JFvertices");
+    ATH_MSG_DEBUG("#BTAGJF# n vertices: " << vertsAcc (*newBTag).size());
 
     Amg::VectorX vtxPositions = Amg::VectorX::Zero(5);
     Amg::MatrixX vtxCovMatrix = Amg::MatrixX::Zero(5,5);
@@ -355,8 +357,10 @@ namespace Analysis {
           std::string trackname = m_secVertexFinderTrackNameList[nameiter];
           std::string basename =  m_secVertexFinderBaseNameList[nameiter];
 
+          SG::AuxElement::ConstAccessor<std::vector<ElementLink< xAOD::TrackParticleContainer > > >
+            trackAcc (trackname);
           std::vector<ElementLink< xAOD::TrackParticleContainer > > tracksInJet;
-          tracksInJet = (*btagIter)->auxdata< std::vector<ElementLink< xAOD::TrackParticleContainer > > >(trackname);
+          tracksInJet = trackAcc (**btagIter);
 
           std::vector<ElementLink< xAOD::TrackParticleContainer > >::iterator itEL = tracksInJet.begin();
           std::vector<ElementLink< xAOD::TrackParticleContainer > >::iterator itELend = tracksInJet.end();

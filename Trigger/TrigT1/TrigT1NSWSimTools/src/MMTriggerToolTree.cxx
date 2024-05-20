@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena/Gaudi includes
@@ -54,22 +54,8 @@ namespace NSWL1 {
       m_trigger_diamond_TP_dTheta_id = new std::vector<uint8_t>();
 
       m_trigger_RZslopes     = new std::vector<double>();
-      m_trigger_fitThe       = new std::vector<double>();
-      m_trigger_fitPhi       = new std::vector<double>();
-      m_trigger_fitDth       = new std::vector<double>();
       m_trigger_trueEtaRange = new std::vector<double>();
       m_trigger_truePtRange  = new std::vector<double>();
-      m_trigger_fitEtaRange  = new std::vector<double>();
-
-      m_trigger_large_fitThe       = new std::vector<double>();
-      m_trigger_large_fitPhi       = new std::vector<double>();
-      m_trigger_large_fitDth       = new std::vector<double>();
-      m_trigger_large_fitEtaRange  = new std::vector<double>();
-
-      m_trigger_small_fitThe       = new std::vector<double>();
-      m_trigger_small_fitPhi       = new std::vector<double>();
-      m_trigger_small_fitDth       = new std::vector<double>();
-      m_trigger_small_fitEtaRange  = new std::vector<double>();
 
       m_trigger_VMM          = new std::vector<int>();
       m_trigger_plane        = new std::vector<int>();
@@ -85,11 +71,6 @@ namespace NSWL1 {
       m_trigger_trueEtaPos   = new std::vector<double>();
       m_trigger_trueThePos   = new std::vector<double>();
       m_trigger_truePhiPos   = new std::vector<double>();
-      m_trigger_mxl          = new std::vector<double>();
-      m_trigger_mx           = new std::vector<double>();
-      m_trigger_my           = new std::vector<double>();
-      m_trigger_mu           = new std::vector<double>();
-      m_trigger_mv           = new std::vector<double>();
 
       m_NSWMM_dig_stationName = new std::vector<std::string>();
       m_NSWMM_dig_stationEta  = new std::vector<int>();
@@ -137,21 +118,8 @@ namespace NSWL1 {
         m_tree->Branch("MM_diamond_TP_dTheta_id", &m_trigger_diamond_TP_dTheta_id);
 
         m_tree->Branch("MM_RZslopes",             &m_trigger_RZslopes);
-        m_tree->Branch("MM_fitThe",               &m_trigger_fitThe);
-        m_tree->Branch("MM_fitPhi",               &m_trigger_fitPhi);
-        m_tree->Branch("MM_fitDth",               &m_trigger_fitDth);
         m_tree->Branch("MM_trueEtaRange",         &m_trigger_trueEtaRange);
         m_tree->Branch("MM_truePtRange",          &m_trigger_truePtRange);
-        m_tree->Branch("MM_fitEtaRange",          &m_trigger_fitEtaRange);
-        m_tree->Branch("MM_large_fitThe",         &m_trigger_large_fitThe);
-        m_tree->Branch("MM_large_fitPhi",         &m_trigger_large_fitPhi);
-        m_tree->Branch("MM_large_fitDth",         &m_trigger_large_fitDth);
-        m_tree->Branch("MM_large_fitEtaRange",    &m_trigger_large_fitEtaRange);
-
-        m_tree->Branch("MM_small_fitThe",         &m_trigger_small_fitThe);
-        m_tree->Branch("MM_small_fitPhi",         &m_trigger_small_fitPhi);
-        m_tree->Branch("MM_small_fitDth",         &m_trigger_small_fitDth);
-        m_tree->Branch("MM_small_fitEtaRange",    &m_trigger_small_fitEtaRange);
 
         m_tree->Branch("MM_VMM",                  &m_trigger_VMM);
         m_tree->Branch("MM_plane",                &m_trigger_plane);
@@ -167,12 +135,6 @@ namespace NSWL1 {
         m_tree->Branch("MM_trueEtaPos",           &m_trigger_trueEtaPos);
         m_tree->Branch("MM_trueThePos",           &m_trigger_trueThePos);
         m_tree->Branch("MM_truePhiPos",           &m_trigger_truePhiPos);
-        m_tree->Branch("MM_mxl",                  &m_trigger_mxl);
-        m_tree->Branch("MM_mx",                   &m_trigger_mx);
-        m_tree->Branch("MM_my",                   &m_trigger_my);
-        m_tree->Branch("MM_mu",                   &m_trigger_mu);
-        m_tree->Branch("MM_mv",                   &m_trigger_mv);
-
 
         m_tree->Branch("Digits_MM_stationName", &m_NSWMM_dig_stationName);
         m_tree->Branch("Digits_MM_stationEta",  &m_NSWMM_dig_stationEta);
@@ -229,22 +191,8 @@ namespace NSWL1 {
       m_trigger_diamond_TP_dTheta_id->clear();
 
       m_trigger_RZslopes->clear();
-      m_trigger_fitThe->clear();
-      m_trigger_fitPhi->clear();
-      m_trigger_fitDth->clear();
       m_trigger_trueEtaRange->clear();
       m_trigger_truePtRange->clear();
-      m_trigger_fitEtaRange->clear();
-
-      m_trigger_large_fitThe->clear();
-      m_trigger_large_fitPhi->clear();
-      m_trigger_large_fitDth->clear();
-      m_trigger_large_fitEtaRange->clear();
-
-      m_trigger_small_fitThe->clear();
-      m_trigger_small_fitPhi->clear();
-      m_trigger_small_fitDth->clear();
-      m_trigger_small_fitEtaRange->clear();
 
       m_trigger_VMM->clear();
       m_trigger_plane->clear();
@@ -260,11 +208,6 @@ namespace NSWL1 {
       m_trigger_trueEtaPos->clear();
       m_trigger_trueThePos->clear();
       m_trigger_truePhiPos->clear();
-      m_trigger_mxl->clear();
-      m_trigger_mx->clear();
-      m_trigger_my->clear();
-      m_trigger_mu->clear();
-      m_trigger_mv->clear();
 
       // information of the module down to the channel closest to the initial G4 hit
       // size of vector is m_NSWMM_nDigits
