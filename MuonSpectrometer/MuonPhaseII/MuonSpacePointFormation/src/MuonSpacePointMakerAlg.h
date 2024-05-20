@@ -16,6 +16,7 @@
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
 #include "xAODMuonPrepData/TgcStripContainer.h"
+#include "xAODMuonPrepData/MMClusterContainer.h"
 
 
 namespace MuonR4{
@@ -61,11 +62,21 @@ namespace MuonR4{
             SG::ReadHandleKey<xAOD::TgcStripContainer> m_tgcKey{this, "TgcKey", "xTgcStrips",
                                                                 "Key to the uncalibrated 1D tgc hits"};
 
+            SG::ReadHandleKey<xAOD::MMClusterContainer> m_mmKey{this, "MmKey", "xAODMMClusters",
+                                                                "Key to the uncalibrated 1D Mm hits"};
+
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             
             SG::WriteHandleKey<MuonSpacePointContainer> m_writeKey{this, "WriteKey", "MuonSpacePoints"};
+
+            Gaudi::Property<double> m_spacePointWindow{this, "spacePointWindowSize", 2.*Gaudi::Units::m,
+                                                       "Maximal size of a space point bucket"};
+            
+            Gaudi::Property<double> m_spacePointOverlap{this, "spacePointOverlap", 25.*Gaudi::Units::cm,
+                                                        "Hits that are within <spacePointOverlap> of the bucket margin. "
+                                                        "Are copied to the next bucket"};
     };
 }
 

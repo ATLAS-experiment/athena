@@ -80,6 +80,9 @@ namespace xAOD{
                 dir.block<2,1>(0,0) = strip->readoutElement()->stripLayout(strip->gasGap()).stripDir(strip->channelNumber());
             } 
             return trf.linear() *dir;
+        } else if (meas->type() == xAOD::UncalibMeasType::MMClusterType) {
+            const xAOD::MMCluster* clust = static_cast<const xAOD::MMCluster*>(meas);
+            return toChamberTransform(gctx,  clust) * Amg::Vector3D::UnitY();
         }
         THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         return Amg::Vector3D::Zero();        
@@ -101,6 +104,9 @@ namespace xAOD{
                 dir.block<2,1>(0,0) = strip->readoutElement()->stripLayout(strip->gasGap()).stripNormal(strip->channelNumber());
             } 
             return trf.linear() *dir;
+        } else if (meas->type() == xAOD::UncalibMeasType::MMClusterType) {
+            const xAOD::MMCluster* clust = static_cast<const xAOD::MMCluster*>(meas);
+            return toChamberTransform(gctx,  clust) * Amg::Vector3D::UnitX();
         }
         THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         return Amg::Vector3D::Zero();  
