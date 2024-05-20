@@ -5,6 +5,8 @@
 #include "GeoModelHelpers/throwExcept.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/RpcStrip.h"
+#include "xAODMuonPrepData/RpcStrip2D.h"
+#include "xAODMuonPrepData/RpcMeasurement.h"
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
@@ -32,7 +34,7 @@ namespace xAOD{
         if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
             return static_cast<const xAOD::MdtDriftCircle*>(meas)->readoutElement();
         } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
-            return static_cast<const xAOD::RpcStrip*>(meas)->readoutElement();
+            return static_cast<const xAOD::RpcMeasurement*>(meas)->readoutElement();
         } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
             return static_cast<const xAOD::TgcStrip*>(meas)->readoutElement();
         } else if (meas->type() == xAOD::UncalibMeasType::MMClusterType) {
@@ -53,8 +55,15 @@ namespace xAOD{
             const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(meas);
             return toChamberTransform(gctx, dc).translation();
         } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
-            const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(meas);
-            return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+            if (meas->numDimensions() == 1) {
+                const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(meas);
+                return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+            } else {
+                const xAOD::RpcStrip2D* strip = static_cast<const xAOD::RpcStrip2D*>(meas);
+                Amg::Vector3D locPos{Amg::Vector3D::Zero()};
+                locPos.block<2,1>(0,0) = xAOD::toEigen(strip->localPosition<2>());
+                return toChamberTransform(gctx, strip) * locPos;
+            }
         } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
             const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(meas);
             return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
@@ -70,7 +79,7 @@ namespace xAOD{
             const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(meas);
             return toChamberTransform(gctx,dc).linear() * Amg::Vector3D::UnitZ();
         } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
-            const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(meas);
+            const xAOD::RpcMeasurement* strip = static_cast<const xAOD::RpcMeasurement*>(meas);
             return toChamberTransform(gctx, strip).linear() * Amg::Vector3D::UnitY();
         } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
             const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(meas);            
@@ -91,7 +100,7 @@ namespace xAOD{
             const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(meas);
             return toChamberTransform(gctx,dc).linear() * Amg::Vector3D::UnitY();
         } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
-            const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(meas);
+            const xAOD::RpcMeasurement* strip = static_cast<const xAOD::RpcMeasurement*>(meas);
             return toChamberTransform(gctx, strip).linear() * Amg::Vector3D::UnitX();
         } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
             const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(meas);            
