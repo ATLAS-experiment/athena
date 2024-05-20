@@ -77,6 +77,14 @@ def GNNTrackReaderToolCfg(flags, name='GNNTrackReaderTool', **kwargs):
 def GNNTrackMakerCfg(flags, name="GNNTrackMaker", **kwargs):
     """Sets up a GNNTrackMaker algorithm and returns it."""
     
+    if flags.Tracking.GNN.usePixelHitsOnly:
+        return GNNSeedingTrackMakerCfg(flags, name, **kwargs)
+    else:
+        return GNNEndToEndTrackMaker(flags, name, **kwargs)
+
+def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
+    """Sets up a GNNTrackMaker algorithm and returns it."""
+    
     acc = ComponentAccumulator()
     
     ## tools 
@@ -91,16 +99,92 @@ def GNNTrackMakerCfg(flags, name="GNNTrackMaker", **kwargs):
         InDetGNNTrackFinderTool = acc.popToolsAndMerge(GNNTrackFinderToolCfg(flags))
         kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
         kwargs.setdefault("GNNTrackReaderTool", None)
-        kwargs.setdefault("UseTrackFinder", True)
-        kwargs.setdefault("UseTrackReader", False)
     elif flags.Tracking.GNN.useTrackReader:
         InDetGNNTrackReader = acc.popToolsAndMerge(GNNTrackReaderToolCfg(flags))
         kwargs.setdefault("GNNTrackReaderTool", InDetGNNTrackReader)
         kwargs.setdefault("GNNTrackFinderTool", None)
-        kwargs.setdefault("UseTrackFinder", False)
-        kwargs.setdefault("UseTrackReader", True)
     else:
         raise RuntimeError("GNNTrackFinder or GNNTrackReader must be enabled!")
 
     acc.addEventAlgo(CompFactory.InDet.SiSPGNNTrackMaker(name, **kwargs))
+    return acc
+
+def GNNSeedingTrackMakerCfg(flags, name="GNNSeedingTrackMaker", **kwargs):
+    """Sets up a GNN for seeding algorithm and returns it."""
+    acc = ComponentAccumulator()
+
+    from InDetConfig.SiCombinatorialTrackFinderToolConfig import SiDetElementBoundaryLinksCondAlg_xk_ITkPixel_Cfg, SiDetElementBoundaryLinksCondAlg_xk_ITkStrip_Cfg
+    acc.merge(SiDetElementBoundaryLinksCondAlg_xk_ITkPixel_Cfg(flags))
+    acc.merge(SiDetElementBoundaryLinksCondAlg_xk_ITkStrip_Cfg(flags))
+
+    # To produce AtlasFieldCacheCondObj
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
+
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+    ITkRotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(
+        flags, name="ITkRotCreator"+flags.Tracking.ActiveConfig.extension))
+    acc.addPublicTool(ITkRotCreator)
+    kwargs.setdefault("RIOonTrackTool", ITkRotCreator)
+
+    from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
+        RungeKuttaPropagatorCfg)
+    ITkPatternPropagator = acc.popToolsAndMerge(
+        RungeKuttaPropagatorCfg(flags, name="ITkPatternPropagator"))
+    acc.addPublicTool(ITkPatternPropagator)
+    kwargs.setdefault("PropagatorTool", ITkPatternPropagator)
+
+    from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdator_xkCfg
+    ITkPatternUpdator = acc.popToolsAndMerge(
+        KalmanUpdator_xkCfg(flags, name="ITkPatternUpdator"))
+    acc.addPublicTool(ITkPatternUpdator)
+    kwargs.setdefault("UpdatorTool", ITkPatternUpdator)
+
+    from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
+    kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(
+        ITkBoundaryCheckToolCfg(flags)))
+
+    from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
+        ITkPixelConditionsSummaryCfg)
+    kwargs.setdefault("PixelSummaryTool", acc.popToolsAndMerge(
+        ITkPixelConditionsSummaryCfg(flags)))
+
+    from SCT_ConditionsTools.ITkStripConditionsToolsConfig import (
+        ITkStripConditionsSummaryToolCfg)
+    kwargs.setdefault("StripSummaryTool", acc.popToolsAndMerge(
+        ITkStripConditionsSummaryToolCfg(flags)))
+
+    if flags.Tracking.GNN.useTrackFinder:
+        kwargs.setdefault("GNNTrackFinderTool", acc.popToolsAndMerge(GNNTrackFinderToolCfg(flags)))
+        kwargs.setdefault("GNNTrackReaderTool", None)
+    elif flags.Tracking.GNN.useTrackReader:
+        kwargs.setdefault("GNNTrackReaderTool", acc.popToolsAndMerge(GNNTrackReaderToolCfg(flags)))
+        kwargs.setdefault("GNNTrackFinderTool", None)
+    else:
+        raise RuntimeError("GNNTrackFinder or GNNTrackReader must be enabled!")
+
+    kwargs.setdefault("SeedFitterTool", acc.popToolsAndMerge(SeedFitterToolCfg(flags)))
+
+    from TrkConfig.CommonTrackFitterConfig import ITkTrackFitterCfg
+    kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(ITkTrackFitterCfg(flags)))
+
+    from InDetConfig.SiDetElementsRoadToolConfig import ITkSiDetElementsRoadMaker_xkCfg
+    kwargs.setdefault("RoadTool", acc.popToolsAndMerge(ITkSiDetElementsRoadMaker_xkCfg(flags)))
+
+    # configurations for Kalman filter.
+    # similar to https://gitlab.cern.ch/atlas/athena/-/blob/main/InnerDetector/InDetConfig/python/SiTrackMakerConfig.py#L188
+    kwargs.setdefault("nClustersMin", flags.Tracking.ActiveConfig.minClusters[0])
+    kwargs.setdefault("nWeightedClustersMin", flags.Tracking.ActiveConfig.nWeightedClustersMin[0])
+    kwargs.setdefault("nHolesMax", flags.Tracking.ActiveConfig.nHolesMax[0])
+    kwargs.setdefault("nHolesGapMax", flags.Tracking.ActiveConfig.nHolesGapMax[0])
+
+    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
+    kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem[0])
+    kwargs.setdefault("Xi2max", flags.Tracking.ActiveConfig.Xi2max[0])
+    kwargs.setdefault("Xi2maxNoAdd", flags.Tracking.ActiveConfig.Xi2maxNoAdd[0])
+    kwargs.setdefault("Xi2maxMultiTracks", flags.Tracking.ActiveConfig.Xi2max[0])
+    kwargs.setdefault("doMultiTracksProd", False)
+
+    acc.addEventAlgo(CompFactory.InDet.GNNSeedingTrackMaker(name, **kwargs))
     return acc

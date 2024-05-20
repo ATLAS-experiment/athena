@@ -379,6 +379,7 @@ def createTrackingConfigFlags():
     # GNN for ITk flags
     icf.addFlag("Tracking.GNN.useTrackFinder", False)
     icf.addFlag("Tracking.GNN.useTrackReader", False)
+    icf.addFlag("Tracking.GNN.usePixelHitsOnly", False)
 
     # enable reco steps
     icf.addFlag("Tracking.recoChain", [TrackingComponent.AthenaChain])
