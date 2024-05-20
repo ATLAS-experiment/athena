@@ -165,7 +165,7 @@ namespace ActsTrk
             {
               try {
                 auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-                assert( sl.isValid() && *sl != nullptr);
+                assert( sl != nullptr);
                 const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
                 measState = makeRIO_OnTrack(uncalibMeas, *parm);
                 ATH_MSG_DEBUG("Successfully used ATLASUncalibratedSourceLink");

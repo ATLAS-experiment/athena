@@ -90,7 +90,7 @@ namespace ActsTrk {
 
              if (state.hasUncalibratedSourceLink()) {
                 auto sl = state.getUncalibratedSourceLink().template get<ActsTrk::ATLASUncalibSourceLink>();
-                assert( sl.isValid() && *sl);
+                assert( sl != nullptr );
                 const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
                 if (measurement_to_summary_type.at(to_underlying(uncalibMeas.type())) <  xAOD::numberOfTrackSummaryTypes ) {
                    if (static_cast<unsigned int>(to_underlying(uncalibMeas.type())) < siDetEleColl.size()) {
