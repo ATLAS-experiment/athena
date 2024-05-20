@@ -40,24 +40,6 @@ class TrigTrackPreSelHypoTool : public extends<AthAlgTool, ITrigTrackPreSelHypoT
 
   HLT::Identifier m_decisionId;
 
-  Gaudi::Property<float>  m_lowerPtCut{ this, "lowerPtCut", 20000.0, "" };
-  Gaudi::Property<float>  m_lowerTrackPtCut{ this, "lowerTrackPtCut", 0.0, "" };
-  Gaudi::Property<float>  m_clusterCone{ this, "clusterCone", 0.2, "" };
-  Gaudi::Property<float>  m_coreSize{ this, "coreSize", 0.2, "" };
-  Gaudi::Property<float>  m_outerSize{ this, "outerSize", 0.4 , "" };
-  Gaudi::Property<float>  m_deltaRLeadTrkRoI{ this, "deltaRLeadTrkRoI", 0.2 , "" };
-  Gaudi::Property<float>  m_deltaZ0Cut{ this, "deltaZ0Cut", 2., "" };
-
-  Gaudi::Property<int>  m_tracksInCoreCut{ this, "tracksInCoreCut", 3, "" };
-  Gaudi::Property<int>  m_tracksInIsoCut{ this, "tracksInIsoCut", 1, "" };
-
-  Gaudi::Property<bool>  m_rejectNoTracks{ this, "rejectNoTracks", false, "" };
-  Gaudi::Property<bool>  m_relax_highpt{ this, "relax_highpt", true, "" };
-
-  Gaudi::Property<double>  m_highpt_threshold{ this, "highpt_threshold", 200000., "" };
-
-  Gaudi::Property<bool>  m_acceptAll{ this, "AcceptAll", false, "Ignore selection" };
-
   ToolHandle<GenericMonitoringTool> m_monTool{ this, "MonTool", "", "Monitoring tool" };
 
 };
