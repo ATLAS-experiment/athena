@@ -179,30 +179,9 @@ def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
 def TrigTauTrackHypoToolFromDict( flags, chainDict ):
 
     name = chainDict['chainName']
-    chainPart = chainDict['chainParts'][0]
 
-    criteria  = chainPart['selection']
-    threshold = chainPart['threshold']
     from AthenaConfiguration.ComponentFactory import CompFactory
     currentHypo = CompFactory.TrigTrackPreSelHypoTool(name)
-
-    if 'tauMon:online' in chainDict['monGroups']:
-       monTool = GenericMonitoringTool(flags, 'MonTool_' + name)
-       monTool.HistPath = 'TrigTauRecMerged_TrigTrackPreSelHypo/' + name
-
-       # define quantities to be monitored
-       monTool.defineHistogram("nTracksInCore", path='EXPERT', type='TH1I',title=';nTracksInCore; Entries', xbins=10, xmin=0.,xmax=10.)
-       monTool.defineHistogram("nTracksInIso",  path='EXPERT', type='TH1I',title=';nTracksInIso; Entries',  xbins=10, xmin=0.,xmax=10.)
-       monTool.defineHistogram("CutCounter",   path='EXPERT',  type='TH1I',title=';CutCounter; Entries',    xbins=10, xmin=0.,xmax=10.)
-       currentHypo.MonTool = monTool
-
-    currentHypo.AcceptAll = True
-
-    if criteria == 'cosmic':
-      currentHypo.LowerPtCut      = int(threshold)*1000.
-      currentHypo.TracksInCoreCut = 9999
-      currentHypo.TracksInIsoCut  = 9999
-      currentHypo.DeltaZ0Cut      = 9999.      
 
     return currentHypo
 
