@@ -126,7 +126,6 @@ StatusCode InDet::GNNSeedingTrackMaker::execute(const EventContext& ctx) const {
 
   // loop over all track candidates
   // and perform track fitting for each.
-  int trackCounter = -1;
   SiCombinatorialTrackFinderData_xk data;
   if (not data.isInitialized())
     initializeCombinatorialData(ctx, data);
@@ -166,7 +165,6 @@ StatusCode InDet::GNNSeedingTrackMaker::execute(const EventContext& ctx) const {
 
   for (auto& trackIndices : gnnTrackCandidates) {
 
-    trackCounter++;
     std::vector<const Trk::PrepRawData*> clusters;  // only pixel clusters!
     std::vector<const Trk::SpacePoint*> trackCandidate;
     trackCandidate.reserve(trackIndices.size());
