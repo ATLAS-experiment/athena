@@ -19,6 +19,7 @@ StatusCode MuonSpacePointMakerAlg::initialize() {
     ATH_CHECK(m_mdtKey.initialize(!m_mdtKey.empty()));
     ATH_CHECK(m_rpcKey.initialize(!m_rpcKey.empty()));
     ATH_CHECK(m_tgcKey.initialize(!m_tgcKey.empty()));
+    ATH_CHECK(m_mmKey.initialize(!m_mmKey.empty()));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
     return StatusCode::SUCCESS;
@@ -39,8 +40,9 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
     
     using PrdType = typename ContType::const_value_type;
     using PrdVec = std::vector<PrdType>;
-    /// Fill the Mdt hits directly into their respective pre sorted container
-    if constexpr (std::is_same<ContType, xAOD::MdtDriftCircleContainer>::value) {
+    /// Fill the Mdt && Micromegas directly into their presorted container
+    if constexpr (std::is_same<ContType, xAOD::MdtDriftCircleContainer>::value ||
+                  std::is_same<ContType, xAOD::MMClusterContainer>::value) {
         for (const PrdType prd : *readHandle) {
             fillContainer[prd->readoutElement()->getChamber()].etaHits.emplace_back(*gctx, prd, nullptr);
         }
@@ -48,8 +50,9 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
         /// Helper pair to separate eta & phi hits
         using EtaPhiHits = std::pair<PrdVec, PrdVec>;
         /// To reduce the combinatorics store the eta & phi hits per gas gap. 
-        /// All strip detectors have at maximum 4 gasGaps, 
-        //  But the Rpcs are additionally split accoring to their doubletPhi
+        /// All strip detectors in the muon spectrometer have maximally 4 gasGaps (sTgc, MM, Tgc).
+        /// Rpcs have nominally 2 or 3 gasGaps but each gasGap in R can be split into two modules 
+        /// according to their doubletPhi value 
         using EtaPhiHitsPerChamber = std::array<EtaPhiHits, 6>;
         std::map<const MuonGMR4::MuonReadoutElement*, EtaPhiHitsPerChamber> collectedPrds{};
         for (const PrdType prd : *readHandle) {
@@ -102,7 +105,8 @@ StatusCode MuonSpacePointMakerAlg::execute(const EventContext& ctx) const {
     PreSortedSpacePointMap preSortedContainer{};
     ATH_CHECK(loadContainerAndSort(ctx, m_mdtKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_rpcKey, preSortedContainer));
-    ATH_CHECK(loadContainerAndSort(ctx, m_tgcKey, preSortedContainer));   
+    ATH_CHECK(loadContainerAndSort(ctx, m_tgcKey, preSortedContainer));
+    ATH_CHECK(loadContainerAndSort(ctx, m_mmKey, preSortedContainer));
     std::unique_ptr<MuonSpacePointContainer> outContainer = std::make_unique<MuonSpacePointContainer>();
     
     for (auto &[chamber, hitsPerChamber] : preSortedContainer){
@@ -153,13 +157,9 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
               });
     
 
-
-    constexpr double maxWindowSize = 2. * Gaudi::Units::m;
-    constexpr double overlapSize = 25. * Gaudi::Units::cm;
-    
     double lastPoint = pointPos(spacePoints[0]);
 
-    auto newBucket = [&lastPoint, &splittedHits, &pointPos, &channelDir] (const double currPos) {
+    auto newBucket = [this, &lastPoint, &splittedHits, &pointPos, &channelDir] (const double currPos) {
         splittedHits.emplace_back();
         splittedHits.back().setBucketId(splittedHits.size() -1);
         MuonSpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
@@ -167,7 +167,7 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
      
         for (const std::shared_ptr<MuonSpacePoint>& pointInBucket : overlap) {
             const double overlapPos = pointPos(*pointInBucket) + pointInBucket->uncertainty()[1] * channelDir(*pointInBucket);
-            if (std::abs(overlapPos - currPos) < overlapSize) {
+            if (std::abs(overlapPos - currPos) < m_spacePointOverlap) {
                 newContainer.push_back(pointInBucket);
             }
         }
@@ -192,7 +192,7 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
            continue;
         }
         /// The current measurement is too far away from the first one. Make a new bucket
-        if (currPoint - lastPoint > maxWindowSize) {
+        if (currPoint - lastPoint > m_spacePointWindow) {
             newBucket(currPoint);            
         }
         std::shared_ptr<MuonSpacePoint> spacePoint = std::make_shared<MuonSpacePoint>(std::move(toSort));
@@ -200,7 +200,7 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
         if (splittedHits.size() > 1) {
             MuonSpacePointBucket& overlap{splittedHits[splittedHits.size() - 2]};
             const double overlapPos = currPoint - spacePoint->uncertainty()[1] * channelDir(*spacePoint);
-            if (overlapPos - overlap.coveredMax() < overlapSize) {
+            if (overlapPos - overlap.coveredMax() < m_spacePointOverlap) {
                 overlap.push_back(spacePoint);
             }
         }

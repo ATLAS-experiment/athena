@@ -7,7 +7,8 @@ def MuonSpacePointMakerAlgCfg(flags, name = "MuonSpacePointMakerAlg", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryMDT: kwargs.set_defaults("MdtKey" ,"")    
     if not flags.Detector.GeometryRPC: kwargs.set_defaults("RpcKey" ,"")
-    if not flags.Detector.GeometryTGC: kwargs.set_defaults("RpcKey" ,"")
+    if not flags.Detector.GeometryTGC: kwargs.set_defaults("TgcKey" ,"")
+    if not flags.Detector.GeometryMM: kwargs.set_defaults("MmKey" ,"")
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
     the_alg = CompFactory.MuonR4.MuonSpacePointMakerAlg(name, **kwargs)

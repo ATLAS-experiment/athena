@@ -7,6 +7,7 @@
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/TgcStrip.h"
+#include "xAODMuonPrepData/MMCluster.h"
 
 
 namespace MuonR4{
@@ -50,6 +51,9 @@ namespace MuonR4{
                 } else {
                     uvcov(1,1) = 0.5 * strip->readoutElement()->wireGangLayout(strip->gasGap()).stripLength(strip->channelNumber());
                 }
+            } else if (primaryMeas->type() == xAOD::UncalibMeasType::MMClusterType) {
+                const xAOD::MMCluster* clust = static_cast<const xAOD::MMCluster*>(primaryMeas);
+                uvcov(1,1) = 0.5 * clust->readoutElement()->stripLayer(clust->measurementHash()).design().stripLength(clust->channelNumber());
             }
             uvcov(1,1) = std::pow(uvcov(1,1), 2);
         }
