@@ -5,10 +5,10 @@
 #include "G4CaloTransportTool.h"
 
 // Geant4 includes for for particle extrapolation
-#include "G4AtlasTools/ThreadLocalHolder.h"
 #include "G4FieldTrack.hh"
 #include "G4FieldTrackUpdator.hh"
 #include "G4LogicalVolumeStore.hh"
+#include "G4Navigator.hh"
 #include "G4PVPlacement.hh"
 #include "G4PathFinder.hh"
 #include "G4TransportationManager.hh"
@@ -17,47 +17,6 @@ G4CaloTransportTool::G4CaloTransportTool(const std::string& type,
                                          const std::string& name,
                                          const IInterface* parent)
     : base_class(type, name, parent) {}
-
-StatusCode G4CaloTransportTool::initialize() {
-  if (m_useSimplifiedGeo) {
-
-    ATH_MSG_INFO("Creating simplified world volume for particle transport");
-
-    // Get the logical world volume of the simplified geometry by name
-    G4LogicalVolume* logVol = G4LogicalVolumeStore::GetInstance()->GetVolume(
-        m_simplifiedWorldLogName.value());
-
-    // Create the physical volume of the simplified world
-    m_worldVolume =
-        new G4PVPlacement(nullptr,                   // no rotation
-                          G4ThreeVector(0, 0, 0),    // world centre at (0,0,0)
-                          logVol,                    // logical volume
-                          "simplifiedWorldPhysVol",  // name of physical volume
-                          nullptr,                   // mother volume
-                          false,                     // not used
-                          999,                       // copy number
-                          false);                    // overlap check
-
-  } else {
-    // Get the default Geant4 world volume if we are not using the simplified
-    // geometry
-    m_worldVolume = G4TransportationManager::GetTransportationManager()
-                        ->GetNavigatorForTracking()
-                        ->GetWorldVolume();
-  }
-
-  if (!m_worldVolume) {
-    G4Exception("G4CaloTransportTool", "FailedToGetWorldVolume", FatalException,
-                "G4CaloTransportTool: Failed to get world volume.");
-    abort();
-  }
-
-  ATH_MSG_INFO("Using world volume: " << m_worldVolume->GetName());
-  ATH_MSG_INFO("Transport will be stopped at volume: " << m_transportLimitVolume.value());
-  ATH_MSG_INFO("Maximum allowed number of steps in particle transport: " << m_maxSteps.value());
-
-  return StatusCode::SUCCESS;
-}
 
 StatusCode G4CaloTransportTool::finalize() {
 
@@ -75,7 +34,25 @@ StatusCode G4CaloTransportTool::finalize() {
 }
 
 StatusCode G4CaloTransportTool::initializePropagator() {
-  ATH_MSG_INFO("Initializing G4PropagatorInField for thread " << G4Threading::G4GetThreadId());
+  ATH_MSG_INFO("Initializing G4PropagatorInField for thread "
+               << G4Threading::G4GetThreadId());
+
+  if (!m_worldVolume) {
+    // If not set, get either the simplified or full world volume
+    m_worldVolume = getWorldVolume();
+
+    if (!m_worldVolume) {
+      G4Exception("G4CaloTransportTool", "FailedToGetWorldVolume",
+                  FatalException,
+                  "G4CaloTransportTool: Failed to get world volume.");
+      abort();
+    }
+    ATH_MSG_INFO("Using world volume: " << m_worldVolume->GetName());
+    ATH_MSG_INFO("Transport will be stopped at volume: "
+                 << m_transportLimitVolume.value());
+    ATH_MSG_INFO("Maximum allowed number of steps in particle transport: "
+                 << m_maxSteps.value());
+  }
 
   // Check if we already have propagator set up for the current thread
   auto propagator = m_propagatorHolder.get();
@@ -88,6 +65,34 @@ StatusCode G4CaloTransportTool::initializePropagator() {
   }
 
   return StatusCode::SUCCESS;
+}
+
+G4VPhysicalVolume* G4CaloTransportTool::getWorldVolume() {
+
+  if (m_useSimplifiedGeo) {
+
+    ATH_MSG_INFO("Creating simplified world volume for particle transport");
+    // Get the logical world volume of the simplified geometry by name
+    G4LogicalVolume* logVol = G4LogicalVolumeStore::GetInstance()->GetVolume(
+        m_simplifiedWorldLogName.value());
+
+    // Create the physical volume of the simplified world
+    return new G4PVPlacement(
+        nullptr,                   // no rotation
+        G4ThreeVector(0, 0, 0),    // world centre at (0,0,0)
+        logVol,                    // logical volume
+        "simplifiedWorldPhysVol",  // name of physical volume
+        nullptr,                   // mother volume
+        false,                     // not used
+        999,                       // copy number
+        false);                    // overlap check
+
+  } else {
+    ATH_MSG_INFO("Using full geometry for particle transport");
+    return G4TransportationManager::GetTransportationManager()
+        ->GetNavigatorForTracking()
+        ->GetWorldVolume();
+  }
 }
 
 G4PropagatorInField* G4CaloTransportTool::makePropagator() {
