@@ -123,11 +123,11 @@ def TileTBBeamMonitoringConfig(flags, fragIDs=[0x100,0x101,0x200,0x201,0x402], *
         tool.defineHistogram(f'TOFDiff;TOFDiff{tof1}{tof2}', title=title, path='BeamElements',
                              type='TH1F', xbins=4096, xmin=-0.5, xmax=4095.5)
 
-    cherenkovVsTOFArray = helper.addArray([nCherenkov, nTOF], tileTBBeamMonAlg, 'CherenkovVsTOF', topPath='TestBeam')
+    cherenkovVsTOFArray = helper.addArray([nTOF, nCherenkov], tileTBBeamMonAlg, 'CherenkovVsTOF', topPath='TestBeam')
     for postfix, tool in cherenkovVsTOFArray.Tools.items():
         cherenkovTof = postfix.split('_')
-        tof = int(cherenkovTof.pop()) + 1
         cherenkov = int(cherenkovTof.pop()) + 1
+        tof = int(cherenkovTof.pop()) + 1
         title = f'Run {run}: Cherenkov {cherenkov} Amplitude vs TOF{tof} Amplitude'
         title += f';TOF{tof} Amplitude [ADC];Cherenkov{cherenkov} Amplitude [ADC]'
         name = f'amplitudeTOF,amplitudeCherenkov;Cher{cherenkov}TOF{tof}'
