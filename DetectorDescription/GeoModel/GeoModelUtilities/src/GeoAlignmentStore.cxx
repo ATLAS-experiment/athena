@@ -11,10 +11,10 @@ void GeoAlignmentStore::setDelta(const GeoAlignableTransform* axf, const GeoTrf:
 void GeoAlignmentStore::setDelta(const GeoAlignableTransform* axf, std::shared_ptr<const GeoTrf::Transform3D> trans) {
     m_deltas->setTransform(axf, std::move(trans));
 }
-void GeoAlignmentStore::setAbsPosition(const GeoVFullPhysVol* fpv, const GeoTrf::Transform3D& xf) { 
+void GeoAlignmentStore::setAbsPosition(const GeoNodePositioning* fpv, const GeoTrf::Transform3D& xf) { 
     m_absPositions->setTransform(fpv, xf); 
 }
-void GeoAlignmentStore::setDefAbsPosition(const GeoVFullPhysVol* fpv, const GeoTrf::Transform3D& xf) {
+void GeoAlignmentStore::setDefAbsPosition(const GeoNodePositioning* fpv, const GeoTrf::Transform3D& xf) {
     m_defAbsPositions->setTransform(fpv, xf);
 }
 void GeoAlignmentStore::lockDelta() {
