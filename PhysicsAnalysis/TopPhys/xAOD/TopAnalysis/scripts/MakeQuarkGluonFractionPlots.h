@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Regina Moles Valls - <regina.moles.valls@cern.ch>
 //R21 migration: Matteo Scornajenghi - <matteo.scornajenghi@cern.ch>
@@ -7,24 +7,13 @@
 #ifndef MAKEQUARKGLUONFRACTIONPLOTS_H
 #define MAKEQUARKGLUONFRACTIONPLOTS_H
 
-#include <iostream>
-#include <string>
-#include <fstream> 
-#include <sstream> 
-#include <stdlib.h> 
-#include <vector>
-#include "TStyle.h"
-#include "TCanvas.h"
-#include "TFile.h"
-#include "TKey.h"
-#include "TH2D.h"
-#include "TPostScript.h"
-#include <TError.h>
-#include "TROOT.h"
-#include "TClass.h"
-#include "TXMLEngine.h"
+
+#include "TXMLEngine.h"//typedefs for XMLNodePointer_t, XMLAttrPointer_t
 #include <map>
-#include <fstream>
+#include <string>
+#include <vector>
+
+class TH2D;
 
 // ===============================================================================
 //   Macro to compute the gluon initiated jets fraction in your sample/selection
@@ -39,7 +28,7 @@ struct config_1PointSyst{
    std::string name;
    std::string central;
    std::string variation;
-   float scalefactor;
+   float scalefactor{};
    std::string folder_c;
    std::string folder_v;
 };
@@ -49,7 +38,7 @@ struct config_2PointSyst{
    std::string central;
    std::string variation_up;
    std::string variation_down;
-   float scalefactor;
+   float scalefactor{};
    std::string folder_c;
    std::string folder_up;
    std::string folder_down;
@@ -83,7 +72,7 @@ class MakeQuarkGluonFractionPlots {
   std::string extractJetCollectionName(const std::string& histoname);
 
   //function to extract the JetNumber
-  std::string extractJetNumber(std::string histoname);
+  std::string extractJetNumber(const std::string & histoname);
   
   //function to compute the gluon fraction
   std::vector<TH2D*> computeQuarkGluonFraction (std::map< std::string,TH2D* > inputhistos, const std::string& quarkflavour, const std::string& prename);
@@ -117,17 +106,22 @@ class MakeQuarkGluonFractionPlots {
   std::string m_OutputFile;
 
   // store plots in PS files
-  bool m_doPS;
+  bool m_doPS{};
 
   config_NominalInput m_configNominal; 
   std::vector<config_1PointSyst> m_config1PointVec;
   std::vector<config_2PointSyst> m_config2PointVec;
 
-  bool m_mergechannels;
+  bool m_mergechannels{};
 
   void DumpToMap(std::map<std::string, TH2D*> &h_map, const std::string& filename, const std::string& channel, const std::string& folder, const std::string& keyname, bool createMap);
   void DumpFileToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap);
-  void CreateQGFFile(const std::string& prename, const std::map<std::string, TH2D*>& h_input,const std::vector< std::map<std::string, TH2D*> > & h_input_1P,const std::vector< std::map<std::string, TH2D*> > & h_input_1PVar,const std::vector< std::map<std::string, TH2D*> > & h_input_2P,const std::vector< std::map<std::string, TH2D*> > & h_input_2PUp,const std::vector< std::map<std::string, TH2D*> > & h_input_2PDown);
+  void CreateQGFFile(const std::string& prename, const std::map<std::string, TH2D*>& h_input,
+    const std::vector< std::map<std::string, TH2D*> > & h_input_1P,
+    const std::vector< std::map<std::string, TH2D*> > & h_input_1PVar,
+    const std::vector< std::map<std::string, TH2D*> > & h_input_2P,
+    const std::vector< std::map<std::string, TH2D*> > & h_input_2PUp,
+    const std::vector< std::map<std::string, TH2D*> > & h_input_2PDown);
 
 };
 

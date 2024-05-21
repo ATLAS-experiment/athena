@@ -4,6 +4,16 @@
 //   To run the macro: .x MakeQuarkGluonFractionPlots.cxx+("config.txt")
 //  ===============================================================================
 #include "MakeQuarkGluonFractionPlots.h"
+#include <TH1.h>
+#include <TH2D.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TROOT.h>  //gRoot
+#include <TStyle.h> //gStyle
+#include <cstdio>   //printf
+#include <iostream> //cout
+#include <cstring>  //strncmp
+#include <cmath>
 
 MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(const std::string& filename): 
   m_doGluVsFlavour("lightC"),
@@ -570,7 +580,7 @@ std::string MakeQuarkGluonFractionPlots::extractJetCollectionName(const std::str
   return NULL;
 }
 // Extract number of jets
-std::string MakeQuarkGluonFractionPlots::extractJetNumber(std::string histoname){
+std::string MakeQuarkGluonFractionPlots::extractJetNumber(const std::string & histoname){
   std::string njets;
   std::size_t found = histoname.find("njet");
   if (found!=std::string::npos){
