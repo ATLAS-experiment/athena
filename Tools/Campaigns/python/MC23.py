@@ -216,6 +216,16 @@ def MC23NoPileUpLowMuRun(flags):
     flags.Input.ConditionsRunNumber = 420000
 
 
+def MC23NoPileUpLowMuLowB(flags):
+    """MC23d flags for MC to match special run 460348"""
+    MC23NoPileUp(flags)   
+
+    flags.Input.MCCampaign = Campaign.MC23d
+    flags.Input.ConditionsRunNumber = 465000
+
+    # B-field configuration
+    flags.BField.configuredSolenoidFieldScale = 0.4
+
 def BeamspotSplitMC23a():
     """MC23a beamspot splitting configuration"""
     substeps = 4
@@ -284,6 +294,19 @@ def MC23cSimulationNoIoV(flags):
     """MC23 base flags for simulation without specifying conditions IoVs"""
     MC23SimulationNoIoV(flags)
     flags.Input.MCCampaign = Campaign.MC23c
+
+
+def MC23dSimulationLowMuLowB(flags):
+    """MC23 flags for simulation of special run 460348"""
+    MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23d
+
+    flags.Input.RunNumber = [465000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1] # dummy value
+
+    # B-field configuration
+    flags.BField.configuredSolenoidFieldScale = 0.4
 
 
 def MC23SimulationSingleIoV(flags):
