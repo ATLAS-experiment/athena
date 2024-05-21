@@ -1,0 +1,12 @@
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def sTgcMeasViewAlgCfg(flags, name="sTgcMeasViewAlg", **kwargs):
+    result = ComponentAccumulator()
+    if flags.Detector.GeometrysTGC:
+        return result
+    the_alg = CompFactory.MuonR4.sTgcMeasViewAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result

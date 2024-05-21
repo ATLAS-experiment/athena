@@ -52,6 +52,8 @@ def xAODSimHitTosTGCMeasCnvAlgCfg(flags, name = "SimHitTosTGCMeasurementCnvAlg",
 
     the_alg = CompFactory.xAODSimHitTosTGCMeasCnvAlg(name,**kwargs)
     result.addEventAlgo(the_alg,primary=True)
+    from xAODMuonMeasViewAlgs.ViewAlgsConfig import sTgcMeasViewAlgCfg
+    result.merge(sTgcMeasViewAlgCfg(flags))
     return result
 
 def xAODSimHitToMmMeasCnvAlgCfg(flags, name = "SimHitToMmMeasurementCnvAlg",**kwargs):
