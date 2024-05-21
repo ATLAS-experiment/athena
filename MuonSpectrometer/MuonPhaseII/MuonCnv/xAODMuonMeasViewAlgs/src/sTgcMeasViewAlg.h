@@ -39,13 +39,13 @@ namespace MuonR4 {
                                                                         const ContainerType* & contToPush) const;
 
 
-            SG::ReadHandleKey<xAOD::sTgcStripContainer> m_readKeyStrip{this, "StripKey", "xAODsTGCStrips", 
+            SG::ReadHandleKey<xAOD::sTgcStripContainer> m_readKeyStrip{this, "StripKey", "xAODsTgcStrips", 
                                                                        "Name of the xAOD::sTgcStripContainer"};
 
-            SG::ReadHandleKey<xAOD::sTgcWireContainer> m_readKeyWire{this, "WireKey", "xAODsTGCWires", 
+            SG::ReadHandleKey<xAOD::sTgcWireContainer> m_readKeyWire{this, "WireKey", "xAODsTgcWires", 
                                                                      "Name of the xAOD::sTgcWireContainer"};
             
-            SG::ReadHandleKey<xAOD::sTgcPadContainer> m_readKeyPad{this, "PadKey", "xAODsTGCPads", 
+            SG::ReadHandleKey<xAOD::sTgcPadContainer> m_readKeyPad{this, "PadKey", "xAODsTgcPads", 
                                                                    "Name of the xAOD::sTgcPadContainer"};
 
             SG::WriteHandleKey<xAOD::sTgcMeasContainer> m_writeKey{this, "WriteKey", "xAODsTgcMeasurements"};

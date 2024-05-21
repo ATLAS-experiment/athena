@@ -20,6 +20,7 @@ StatusCode MuonSpacePointMakerAlg::initialize() {
     ATH_CHECK(m_rpcKey.initialize(!m_rpcKey.empty()));
     ATH_CHECK(m_tgcKey.initialize(!m_tgcKey.empty()));
     ATH_CHECK(m_mmKey.initialize(!m_mmKey.empty()));
+    ATH_CHECK(m_stgcKey.initialize(!m_stgcKey.empty()));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
     return StatusCode::SUCCESS;
@@ -63,8 +64,19 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
             if constexpr (std::is_same<ContType, xAOD::RpcStripContainer>::value) {
                 gapIdx = 2*gapIdx + (prd->doubletPhi() - 1);
             }
+            bool measPhi{false};
+            if constexpr (std::is_same<ContType, xAOD::sTgcMeasContainer>::value) {
+                /// directly sort the sTgc pads into the container                
+                if (prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                    fillContainer[prd->readoutElement()->getChamber()].etaHits.emplace_back(*gctx, prd, nullptr);
+                    continue;
+                }
+                measPhi = prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire;
+            } else {
+                measPhi = prd->measuresPhi();
+            }
             EtaPhiHits& hitsPerLayer = hitsPerChamb[gapIdx];
-            if (!prd->measuresPhi()) {
+            if (measPhi) {
                 hitsPerLayer.first.push_back(prd);
             } else {
                 hitsPerLayer.second.push_back(prd);
@@ -107,6 +119,7 @@ StatusCode MuonSpacePointMakerAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(loadContainerAndSort(ctx, m_rpcKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_tgcKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_mmKey, preSortedContainer));
+    ATH_CHECK(loadContainerAndSort(ctx, m_stgcKey, preSortedContainer));
     std::unique_ptr<MuonSpacePointContainer> outContainer = std::make_unique<MuonSpacePointContainer>();
     
     for (auto &[chamber, hitsPerChamber] : preSortedContainer){

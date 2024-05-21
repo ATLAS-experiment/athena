@@ -17,6 +17,7 @@
 #include "xAODMuonPrepData/RpcStripContainer.h"
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
+#include "xAODMuonPrepData/sTgcMeasContainer.h"
 
 
 namespace MuonR4{
@@ -64,6 +65,9 @@ namespace MuonR4{
 
             SG::ReadHandleKey<xAOD::MMClusterContainer> m_mmKey{this, "MmKey", "xAODMMClusters",
                                                                 "Key to the uncalibrated 1D Mm hits"};
+
+            SG::ReadHandleKey<xAOD::sTgcMeasContainer> m_stgcKey{this, "sTgcKey", "xAODsTgcMeasurements"};
+
 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 

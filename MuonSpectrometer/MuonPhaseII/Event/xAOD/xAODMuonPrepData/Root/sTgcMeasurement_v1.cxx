@@ -28,4 +28,8 @@ IMPLEMENT_READOUTELEMENT(sTgcMeasurement_v1, m_readoutEle, sTgcReadoutElement)
 IdentifierHash sTgcMeasurement_v1::measurementHash() const {
    return MuonGMR4::sTgcReadoutElement::createHash(gasGap(), channelType(), channelNumber());
 }
+IdentifierHash sTgcMeasurement_v1::layerHash() const {
+   return MuonGMR4::sTgcReadoutElement::createHash(gasGap(), channelType(), 0);
+}
+
 }  // namespace xAOD

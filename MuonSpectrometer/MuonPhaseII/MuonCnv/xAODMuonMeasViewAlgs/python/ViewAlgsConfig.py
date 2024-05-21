@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def sTgcMeasViewAlgCfg(flags, name="sTgcMeasViewAlg", **kwargs):
     result = ComponentAccumulator()
-    if flags.Detector.GeometrysTGC:
+    if not flags.Detector.GeometrysTGC:
         return result
     the_alg = CompFactory.MuonR4.sTgcMeasViewAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)

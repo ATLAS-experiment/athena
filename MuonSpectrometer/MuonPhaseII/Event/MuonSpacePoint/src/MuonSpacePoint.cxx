@@ -8,6 +8,7 @@
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
+#include "xAODMuonPrepData/sTgcMeasurement.h"
 
 
 namespace MuonR4{
@@ -58,6 +59,19 @@ namespace MuonR4{
             } else if (primaryMeas->type() == xAOD::UncalibMeasType::MMClusterType) {
                 const xAOD::MMCluster* clust = static_cast<const xAOD::MMCluster*>(primaryMeas);
                 uvcov(1,1) = 0.5 * clust->readoutElement()->stripLayer(clust->measurementHash()).design().stripLength(clust->channelNumber());
+            } else if (primaryMeas->type() == xAOD::UncalibMeasType::sTgcStripType) {
+                const xAOD::sTgcMeasurement* meas = static_cast<const xAOD::sTgcMeasurement*>(primaryMeas);
+                switch (meas->channelType()) {
+                    case sTgcIdHelper::sTgcChannelTypes::Strip:
+                        uvcov(1,1) = 0.5 *  meas->readoutElement()->stripDesign(meas->measurementHash()).stripLength(meas->channelNumber());
+                        break;
+                    case sTgcIdHelper::sTgcChannelTypes::Wire:
+                        uvcov(1,1) = 0.5 *  meas->readoutElement()->wireDesign(meas->measurementHash()).stripLength(meas->channelNumber());
+                        break;
+                    /// Do nothing for the pads
+                    case sTgcIdHelper::sTgcChannelTypes::Pad:
+                        break;
+                }
             }
             uvcov(1,1) = std::pow(uvcov(1,1), 2);
         }
