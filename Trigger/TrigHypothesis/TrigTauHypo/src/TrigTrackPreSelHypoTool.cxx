@@ -56,14 +56,7 @@ StatusCode TrigTrackPreSelHypoTool::initialize()
 
   ATH_MSG_DEBUG( "Tool configured for chain/id: " << m_decisionId  );
 
-  ATH_MSG_DEBUG( " REGTEST: TrigTrackPreSelHypoTool will cut on "                           );
-  ATH_MSG_DEBUG( " REGTEST: Lower pt cut for track selection: " << m_lowerTrackPtCut   );
-  ATH_MSG_DEBUG( " REGTEST: Tracks in core <= "                 << m_tracksInCoreCut   );  
-  ATH_MSG_DEBUG( " REGTEST: Tracks in outer <= "                << m_tracksInIsoCut    );  
-  ATH_MSG_DEBUG( " REGTEST: Relax High pT: "                    << m_relax_highpt      );
-  ATH_MSG_DEBUG( " REGTEST: Relax High pT Threshold: "           << m_highpt_threshold );
-  ATH_MSG_DEBUG( " REGTEST: ------ "                                                   );
-
+  ATH_MSG_DEBUG( " REGTEST: Simple pass-trhough hypo, no selection is applied" );
 
   ATH_MSG_DEBUG( "Initialization of TrigTrackPreSelHypoTool completed successfully" );
   return StatusCode::SUCCESS;
@@ -76,23 +69,6 @@ bool TrigTrackPreSelHypoTool::decide( const ITrigTrackPreSelHypoTool::TrackingIn
 
   bool pass = false;
 
-  using namespace Monitored;
-
-  auto nTracksInCore     = Monitored::Scalar<int>( "nTracksInCore", -1);
-  auto nTracksInIso      = Monitored::Scalar<int>( "nTracksInIso", -1);
-  auto PassedCuts        = Monitored::Scalar<int>( "CutCounter", -1 );
-  auto monitorIt         = Monitored::Group( m_monTool, nTracksInCore, nTracksInIso, PassedCuts);
-
-  // general reset
-  PassedCuts = 0;
-
-  if ( m_acceptAll ) {
-    pass = true;
-    ATH_MSG_DEBUG( "AcceptAll property is set: taking all events" );
-  } else {
-    ATH_MSG_DEBUG( "AcceptAll property not set: applying selection" );
-  }
-
   //get RoI descriptor
   auto roiDescriptor = input.roi;
   float roIEta = roiDescriptor->eta();
@@ -104,98 +80,18 @@ bool TrigTrackPreSelHypoTool::decide( const ITrigTrackPreSelHypoTool::TrackingIn
   // get the tracks collection
   // Retrieve Input TrackCollection
   auto foundTracks = input.trackcollection;
-
+   
   if(!foundTracks->empty()){
-    pass = true;
     ATH_MSG_DEBUG( " Input track collection has size " << foundTracks->size() );
-
-    const Trk::Track *Ltrack = nullptr;
-    const Trk::Perigee *tp = nullptr;
-    float trk_pt_max = 0;
-
-    //first, identify highest pT leading track, we may need to add here some track quality requirements...
-    for (const Trk::Track* track : *foundTracks){
-      tp = track->perigeeParameters();
-      if(tp){
-	float trk_pt = tp->pT();
-	if(trk_pt < m_lowerTrackPtCut) continue;
-	float trk_eta = tp->eta();
-	float trk_phi = tp->parameters()[Trk::phi];
-	double dR_trk_tau = std::sqrt((roIEta-trk_eta)*(roIEta-trk_eta) + CxxUtils::wrapToPi(roIPhi-trk_phi)*CxxUtils::wrapToPi(roIPhi-trk_phi));
-	if ((trk_pt > trk_pt_max) && dR_trk_tau < m_deltaRLeadTrkRoI) {
-	  Ltrack = track;
-	  trk_pt_max = trk_pt;
-	}
-      }
-    }
-    if(Ltrack) {
-      ATH_MSG_DEBUG( " leading track pT " << trk_pt_max );
-    }
-    else ATH_MSG_DEBUG( " no leading track pT, using the RoI " );
-
-    //next, count tracks in core and outer region with respect to leading track (or RoI)  
-    float ltrk_eta;
-    float ltrk_phi;
-    float ltrk_z0;// for pile-up suppression cut
-    bool usePileupSuppCut;
-
-    if(Ltrack){
-      ltrk_eta = Ltrack->perigeeParameters()->eta();
-      ltrk_phi = Ltrack->perigeeParameters()->parameters()[Trk::phi];
-      // keep using the RoI direction (updated after topoclustering) as it is done in tauRec
-      //ltrk_eta = roIEta;
-      //ltrk_phi = roIPhi;
-      ltrk_z0 = Ltrack->perigeeParameters()->parameters()[Trk::z0];
-      usePileupSuppCut = true;
-    }
-    else{// if no leading track use the RoI as center, but turn off pileup suppression cut
-      ltrk_eta = roIEta;
-      ltrk_phi = roIPhi;
-      ltrk_z0 = 0.;
-      usePileupSuppCut = false;
-    }
-
-    for (const Trk::Track* track : *foundTracks){
-      tp = track->perigeeParameters();
-      if(tp){
-	float trk_eta = tp->eta();
-	float trk_phi = tp->parameters()[Trk::phi];
-	float trk_z0 = tp->parameters()[Trk::z0];
-        float trk_pt = tp->pT();
-        if(trk_pt < m_lowerTrackPtCut) continue;		
-	float dR_trki_ltrk = std::sqrt((ltrk_eta-trk_eta)*(ltrk_eta-trk_eta) + CxxUtils::wrapToPi(ltrk_phi-trk_phi)*CxxUtils::wrapToPi(ltrk_phi-trk_phi));
-	float dZ0 = std::abs(ltrk_z0 - trk_z0);
-	if((dR_trki_ltrk < m_coreSize) && ((dZ0 < m_deltaZ0Cut)||!usePileupSuppCut)){
-	  ++nTracksInCore;
-	}
-	if((dR_trki_ltrk > m_coreSize) && (dR_trki_ltrk < m_outerSize) && ((dZ0 < m_deltaZ0Cut)||!usePileupSuppCut)){
-	  ++nTracksInIso;
-	}
-      }
-    }
-  }else{
-    return pass;
   }
- 
-  ATH_MSG_DEBUG(
-		" REGTEST: Number of tracks in core(isolation) = "
-		<< nTracksInCore
-		<< " ("
-		<< nTracksInIso
-		<< ") "
-		<< "did not pass the number thresholds: " 
-		<< m_tracksInCoreCut
-		<< " ("
-		<< m_tracksInIsoCut
-		<< ")" );
 
-  PassedCuts++;
+  pass = true;
   
-  ATH_MSG_DEBUG( " REGTEST: TE accepted !! " );
+  ATH_MSG_DEBUG( " REGTEST: TE accepted !! " );  
   
   return pass;
-}
 
+}
 
 StatusCode TrigTrackPreSelHypoTool::decide(  std::vector<TrackingInfo>& input )  const {
 

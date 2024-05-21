@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
@@ -101,7 +101,7 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
     m_RZslope = m_R / m_Z;
 
     int eta = std::abs(m_station_eta)-1;
-    double base = par->ybases[m_plane][eta];
+    double base = par->getYbase(m_plane, eta);
     m_Y = base + m_strip*roP.stripPitch - roP.stripPitch/2.;
     m_YZslope = m_Y / m_Z;
 

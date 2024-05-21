@@ -1,5 +1,6 @@
+#!/usr/bin/env athena
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 def L1CaloLegacyEDMMonitoringConfig(inputFlags):
     '''Function to configure LVL1 L1CaloLegacyEDM algorithm in the monitoring system.'''

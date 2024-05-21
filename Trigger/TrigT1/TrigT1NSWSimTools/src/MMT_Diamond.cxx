@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
@@ -19,7 +19,7 @@ void MMT_Diamond::clearEvent() {
   }
 }
 
-void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::map<hitData_key,hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi) {
+void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<hitData_entry> &hitDatas, const MuonGM::MuonDetectorManager* detManager, std::shared_ptr<MMT_Parameters> par, const int phi) {
   ATH_MSG_DEBUG("createRoads_fillHits: Feeding hitDatas Start");
 
   diamond_t entry;
@@ -61,7 +61,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::map<hit
   this->setUVfactor(uvfactor);
 
   for (const auto &hit_entry : hitDatas) {
-    auto myhit = std::make_shared<MMT_Hit>(hit_entry.second, detManager, par, planeCoordinates);
+    auto myhit = std::make_shared<MMT_Hit>(hit_entry, detManager, par, planeCoordinates);
     if (myhit->verifyHit()) {
       m_hitslopes.push_back(myhit->getRZSlope());
       entry.ev_hits.push_back(myhit);

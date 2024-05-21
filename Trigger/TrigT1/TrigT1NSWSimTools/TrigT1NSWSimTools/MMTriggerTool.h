@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMTRIGGERTOOL_H
@@ -17,8 +17,6 @@
 //local includes
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
-#include "TrigT1NSWSimTools/MMT_Finder.h"
-#include "TrigT1NSWSimTools/MMT_Fitter.h"
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
 #include "TTree.h"
 
@@ -40,12 +38,6 @@ namespace NSWL1 {
     public IIncidentListener {
 
   public:
-
-    //load event stuff
-    std::vector<hitData_entry> event_hitDatas(int find_event, std::map<hitData_key,hitData_entry>& Hits_Data_Set_Time) const;
-    std::vector<hitData_key> event_hitData_keys(int find_event, std::map<hitData_key,hitData_entry>& Hits_Data_Set_Time) const;
-
-    //MMT_Loader stuff end
 
     MMTriggerTool(const std::string& type, const std::string& name, const IInterface* parent);
 
@@ -136,22 +128,8 @@ namespace NSWL1 {
     std::vector<uint8_t>* m_trigger_diamond_TP_dTheta_id ATLAS_THREAD_SAFE;
 
     std::vector<double>* m_trigger_RZslopes ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_fitThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_fitPhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_fitDth ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_trueEtaRange ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_truePtRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_fitEtaRange ATLAS_THREAD_SAFE;
-
-    std::vector<double>* m_trigger_large_fitThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_fitPhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_fitDth ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_fitEtaRange ATLAS_THREAD_SAFE;
-
-    std::vector<double>* m_trigger_small_fitThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_fitPhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_fitDth ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_fitEtaRange ATLAS_THREAD_SAFE;
 
     std::vector<int>* m_trigger_VMM ATLAS_THREAD_SAFE;
     std::vector<int>* m_trigger_plane ATLAS_THREAD_SAFE;
@@ -167,11 +145,6 @@ namespace NSWL1 {
     std::vector<double>* m_trigger_trueEtaPos ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_trueThePos ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_truePhiPos ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_mxl ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_mx ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_my ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_mu ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_mv ATLAS_THREAD_SAFE;
 
     std::vector<std::string> *m_NSWMM_dig_stationName ATLAS_THREAD_SAFE;
     std::vector<int> *m_NSWMM_dig_stationEta ATLAS_THREAD_SAFE;
