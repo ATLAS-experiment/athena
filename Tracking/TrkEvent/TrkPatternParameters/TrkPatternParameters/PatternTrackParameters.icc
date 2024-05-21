@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
@@ -207,7 +207,7 @@ inline PatternTrackParameters* PatternTrackParameters::clone() const {
   return new PatternTrackParameters(*this);
 }
 
-inline ParametersType PatternTrackParameters::type() const {
+inline constexpr ParametersType PatternTrackParameters::type() const {
   return Pattern;
 }
 
