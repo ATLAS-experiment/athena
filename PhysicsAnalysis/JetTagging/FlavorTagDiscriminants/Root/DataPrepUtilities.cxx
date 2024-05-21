@@ -211,9 +211,9 @@ namespace FlavorTagDiscriminants {
         {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
         {"(GN1[^_]*|GN2[^_]*)_(.*)"_r, "$1" + flip_name + "_$2"},
         {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
-        {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
+        {"(rnnip|(?:dips|DIPS)[^_]*)_(.*)"_r, "$1flip_$2"},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
-        {"(rnnip|dips[^_]*)"_r, "$1flip"},
+        {"(rnnip|(?:dips|DIPS)[^_]*)"_r, "$1flip"},
         {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1" + flip_name},
         {"pt|abs_eta|eta"_r, "$&"},
         {"softMuon.*|smt.*"_r, "$&"}
