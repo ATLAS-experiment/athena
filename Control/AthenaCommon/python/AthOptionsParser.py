@@ -46,19 +46,20 @@ class MemCheckAction(argparse.Action):
             args.memchk_mode = 'leak-check'
 
 
-class AthHelp(argparse.Action):
-   """Custom help to hide/show expert groups"""
-   def __call__(self, parser, namespace, values, option_string=None):
+class AthHelpFlags(argparse.Action):
+    """Custom help action to support flags"""
+    def __call__(self, parser, namespace, values, option_string=None):
 
-      for g in parser.expert_groups:
-         for a in g._group_actions:
-            if values!='all':
-               a.help = argparse.SUPPRESS
+        if not values:
+            parser.print_help()
+        else:
+            import runpy
+            sys.argv = ['athena.py', '--help']
+            if values != 'flags':
+                sys.argv.append(values)
+            runpy.run_module('AthenaConfiguration.AthNoop', run_name='__main__')
 
-      parser.print_help()
-      if values!='all':
-         print('\nUse --help=all to show all (expert) options')
-      sys.exit(0)
+        sys.exit(0)
 
 
 def get_version():
@@ -190,8 +191,9 @@ def getArgumentParser(legacy_args=False, **kwargs):
     g.add_argument('--version', action='version', version=get_version(),
                    help='print version number')
 
-    g.add_argument('-h', '--help', action='help',
-                   help='show help message')
+    g.add_argument('-h', '--help', metavar='FLAGS', nargs='?', action=AthHelpFlags,
+                   help='show help message (for FLAGS, "flags" for all categories)' if __athenaCLI
+                   else 'show help message (for FLAGS category)')
 
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Monitoring and debugging')

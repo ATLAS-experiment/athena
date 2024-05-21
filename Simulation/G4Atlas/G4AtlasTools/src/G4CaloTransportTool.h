@@ -28,8 +28,6 @@ class G4CaloTransportTool : virtual public extends1<AthAlgTool, IG4CaloTransport
 
     G4CaloTransportTool(const std::string&, const std::string&, const IInterface*);
 
-    // Algorithm initialize at begin of job
-    virtual StatusCode initialize() override final;
     // Algorithm finalize at begin of job
     virtual StatusCode finalize() override final;
     // Initialize propagator for the current thread
@@ -38,6 +36,8 @@ class G4CaloTransportTool : virtual public extends1<AthAlgTool, IG4CaloTransport
     virtual std::vector<G4FieldTrack> transport(const G4Track& G4InputTrack) override final;
 
   private:
+    // Get the world volume in which the particle transport is performed
+    G4VPhysicalVolume* getWorldVolume();
     // Create and return a new propagator
     G4PropagatorInField* makePropagator();
     // Advance track by single Geant4 step in geometry

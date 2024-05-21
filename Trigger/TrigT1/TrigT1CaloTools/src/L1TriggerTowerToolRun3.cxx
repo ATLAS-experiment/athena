@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //////////////////////////////////////////////////////////////////////
 //  L1TriggerTowerToolRun3.cxx 
@@ -1097,7 +1097,7 @@ void L1TriggerTowerToolRun3::bcidParams(const L1CaloCoolChannelId& channelId, in
                            get<1>(bcidDecision),
                            get<0>(bcidDecision) }; // reverse order
     if(get<0>(bcidEnergyRange)) {
-      std::tie(std::ignore, energyLow, energyHigh);
+      std::tie(std::ignore, energyLow, energyHigh) = bcidEnergyRange;
     } else ATH_MSG_WARNING( "::bcidParams: No BcidEnergyRange found" );
 
     if(get<0>(saturation)) {
