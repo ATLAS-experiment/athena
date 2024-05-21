@@ -181,6 +181,11 @@ def ContainersOnTheFly(flags=None):
         ["CHSGNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
         ["CHSGNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
 
+        ["CSSKGChargedParticleFlowObjects","xAOD::FlowElementContainer"],
+        ["CSSKGChargedParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+        ["CSSKGNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
+        ["CSSKGNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+
         ['UFOCSSK','xAOD::FlowElementContainer'],
         ['UFOCSSKAux','xAOD::FlowElementAuxContainer'],
 
