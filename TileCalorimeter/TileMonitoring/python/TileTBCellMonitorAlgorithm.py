@@ -6,10 +6,19 @@
 @brief Python configuration of TileTBCellMonitorAlgorithm algorithm for the Run III
 '''
 
+from AthenaCommon.SystemOfUnits import GeV
 
-def TileTBCellMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], useDemoCabling=2018, **kwargs):
+
+def TileTBCellMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], useDemoCabling=2018, useFELIX=False, **kwargs):
 
     ''' Function to configure TileTBCellMonitorAlgorithm algorithm in the monitoring system.'''
+
+    suffix = "Flx" if useFELIX else ""
+    topPath = 'TestBeam/' + ('Felix' if useFELIX else 'Legacy') + '/Cell'
+
+    kwargs.setdefault('CaloCellContainer', f'AllCalo{suffix}')
+    kwargs.setdefault('ScaleFactor', 0.25 if useFELIX else 1.0)
+    kwargs.setdefault('EnergyThresholdForTime', 1 * GeV)
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
@@ -27,10 +36,10 @@ def TileTBCellMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x1
     result.merge(TileInfoLoaderCfg(flags))
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, 'TileTBCellMonitoring')
+    helper = AthMonitorCfgHelper(flags, f'TileTBCell{suffix}Monitoring')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    tileTBCellMonAlg = helper.addAlgorithm(CompFactory.TileTBCellMonitorAlgorithm, 'TileTBCellMonAlg')
+    tileTBCellMonAlg = helper.addAlgorithm(CompFactory.TileTBCellMonitorAlgorithm, f'TileTBCell{suffix}MonAlg')
 
     tileTBCellMonAlg.TriggerChain = ''
 
@@ -122,69 +131,69 @@ def TileTBCellMonitoringConfig(flags, timeRange=[-100, 100], fragIDs=[0x100, 0x1
                                          xbins=xbins, xmin=xmin, xmax=xmax)
         return channelArray
 
-    totalEnergy = min(flags.Beam.Energy, 300)
+    totalEnergy = min(flags.Beam.Energy / GeV, 300)
     nEnergyBins = int(totalEnergy * 2)
     run = str(flags.Input.RunNumbers[0])
     nTimeBins = timeRange[1] - timeRange[0]
 
     # Configure histogram with TileTBCellMonAlg algorithm execution time
-    executeTimeGroup = helper.addGroup(tileTBCellMonAlg, 'TileTBCellMonExecuteTime', 'TestBeam')
-    executeTimeGroup.defineHistogram('TIME_execute', path='PulseShape', type='TH1F',
-                                     title='Time for execute TileTBCellMonAlg algorithm;time [#mus]',
-                                     xbins=100, xmin=0, xmax=1000)
+    executeTimeGroup = helper.addGroup(tileTBCellMonAlg, 'TileTBCellMonExecuteTime', topPath)
+    executeTimeGroup.defineHistogram('TIME_execute', path='', type='TH1F',
+                                     title=f'Time for execute TileTBCell{suffix}MonAlg algorithm;time [#mus]',
+                                     xbins=100, xmin=0, xmax=10000)
 
-    sampleEnergyArray = helper.addArray([modules], tileTBCellMonAlg, 'TileSampleEnergy', topPath='TestBeam')
+    sampleEnergyArray = helper.addArray([modules], tileTBCellMonAlg, 'TileSampleEnergy', topPath=topPath)
     for postfix, tool in sampleEnergyArray.Tools.items():
         moduleName = postfix[1:]
         partition = moduleName[:3]
         fullPath = f'{partition}/{moduleName}'
         titlePrefix = f'Run {run} {moduleName}:'
 
-        tool.defineHistogram(f'energy;EnergyTotal{moduleName}', path=fullPath, type='TH1D',
+        tool.defineHistogram(f'energy;EnergyTotal_{moduleName}', path=fullPath, type='TH1D',
                              title=f'{titlePrefix} Total energy;Energy [pC];Entries',
                              xbins=nEnergyBins, xmin=0.0, xmax=totalEnergy)
 
-        tool.defineHistogram('energyA,energyBC;EnergyTotalSampleBCVsA', path=fullPath, type='TH2D',
+        tool.defineHistogram(f'energyA,energyBC;EnergyTotalSampleBCVsA_{moduleName}', path=fullPath, type='TH2D',
                              title=f'{titlePrefix} Total energy in sample BC vs sample A;Sample A Energy [pC];Sample B Energy [pC]',
                              xbins=nEnergyBins, xmin=0.0, xmax=totalEnergy, ybins=nEnergyBins, ymin=0.0, ymax=totalEnergy)
 
-        tool.defineHistogram('energyD;EnergyTotalSampleD', path=fullPath, type='TH1D',
+        tool.defineHistogram(f'energyD;EnergyTotalSampleD_{moduleName}', path=fullPath, type='TH1D',
                              title=f'{titlePrefix} Total energy in sample D;Sample D Energy [pC];Entries',
                              xbins=nEnergyBins, xmin=0.0, xmax=totalEnergy)
 
-    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellEnergy', path='TestBeam', xvalue='energy',
+    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellEnergy', path=topPath, xvalue='energy',
                            title='Tile Cell Energy', xbins=nEnergyBins, xmin=0, xmax=totalEnergy,
                            run=run, aliasPrefix='CellEnergy', xtitle='Energy [pC]', ytitle='Entries')
 
-    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellEnergyDiff', path='TestBeam', xvalue='energyDiff',
-                           title='Tile Cell Energy difference between PMTs', xbins=nEnergyBins, xmin=0, xmax=totalEnergy,
-                           run=run, aliasPrefix='CellEnergy', xtitle='Energy [pC]', ytitle='Entries')
+    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellEnergyDiff', path=topPath, xvalue='energyDiff',
+                           title='Tile Cell Energy difference between PMTs', xbins=nEnergyBins, xmin=-totalEnergy, xmax=totalEnergy,
+                           run=run, aliasPrefix='CellEnergyDiff', xtitle='Energy [pC]', ytitle='Entries')
 
-    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellTime', path='TestBeam', xvalue='time',
+    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellTime', path=topPath, xvalue='time',
                            title='Tile Cell Time', xbins=nTimeBins, xmin=timeRange[0], xmax=timeRange[1],
                            run=run, aliasPrefix='CellTime', xtitle='Time [ns]', ytitle='Entries')
 
-    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellTimeDiff', path='TestBeam',
+    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellTimeDiff', path=topPath,
                            xvalue='timeDiff', title='Tile Cell Time difference between PMTs',
                            xbins=nTimeBins, xmin=timeRange[0], xmax=timeRange[1],
-                           run=run, aliasPrefix='CellTime', xtitle='Time [ns]', ytitle='Entries')
+                           run=run, aliasPrefix='CellTimeDiff', xtitle='Time [ns]', ytitle='Entries')
 
-    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellEnergyLeftVsRightPMT', path='TestBeam', type='TH2D',
+    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellEnergyLeftVsRightPMT', path=topPath, type='TH2D',
                            xvalue='energy1', yvalue='energy2', title='Tile Cell PMT2 vs PMT1 Energy',
                            xbins=nEnergyBins, xmin=0, xmax=totalEnergy, ybins=nEnergyBins, ymin=0, ymax=totalEnergy,
                            run=run, aliasPrefix='CellEnergyLeftVsRightPMT',
                            xtitle='Energy [pC]', ytitle='Energy [pC]')
 
-    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellTimeLeftVsRightPMT', path='TestBeam', type='TH2D',
+    addCellHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileCellTimeLeftVsRightPMT', path=topPath, type='TH2D',
                            xvalue='time1', yvalue='time2', title='Tile Cell PMT2 vs PMT1 Time',
                            xbins=nTimeBins, xmin=timeRange[0], xmax=timeRange[1], ybins=nTimeBins, ymin=timeRange[0], ymax=timeRange[1],
                            run=run, aliasPrefix='CellTimeLeftVsRightPMT', xtitle='Time [ns]', ytitle='Time [ns]')
 
-    addChannelHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileChannelEnergy', path='TestBeam/ChannelEnergy', type='TH1D',
+    addChannelHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileChannelEnergy', path=f'{topPath}/ChannelEnergy', type='TH1D',
                               xvalue='energy', title='Tile channel energy', xbins=nEnergyBins, xmin=0, xmax=totalEnergy,
                               run=run, aliasPrefix='ChannelEnergy', xtitle='Energy [pC]', ytitle='Entries')
 
-    addChannelHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileChannelTime', path='TestBeam/ChannelTime', type='TH1D',
+    addChannelHistogramsArray(helper, modules, tileTBCellMonAlg, name='TileChannelTime', path=f'{topPath}/ChannelTime', type='TH1D',
                               xvalue='time', title='Tile channel time', xbins=nTimeBins, xmin=timeRange[0], xmax=timeRange[1],
                               run=run, aliasPrefix='ChannelTime', xtitle='Time [ns]', ytitle='Entries')
 
