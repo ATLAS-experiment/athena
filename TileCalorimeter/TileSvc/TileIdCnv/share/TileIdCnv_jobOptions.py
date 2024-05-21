@@ -1,4 +1,0 @@
-if not 'TILEIDCNV_TILEIDCNV_HAS_BEEN_INCLUDED' in dir():
-   TILEIDCNV_TILEIDCNV_HAS_BEEN_INCLUDED = 1
-   # DLLs 
-   theApp.Dlls += [ "TileIdCnv" ]

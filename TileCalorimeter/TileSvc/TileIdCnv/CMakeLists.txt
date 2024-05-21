@@ -8,5 +8,3 @@ atlas_add_component( TileIdCnv
                      src/*.cxx
                      LINK_LIBRARIES DetDescrCnvSvcLib StoreGateLib IdDictDetDescr GaudiKernel TileIdentifier )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
