@@ -5,7 +5,7 @@
 #ifndef XAODMUONPREPDATA_STGCMEASCONTAINER_H
 #define XAODMUONPREPDATA_STGCMEASCONTAINER_H
 
-#include "xAODMuonPrepData/sTgcMeasurment.h"
+#include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/versions/sTgcMeasContainer_v1.h"
 
 /// Namespace holding all the xAOD EDM classes
