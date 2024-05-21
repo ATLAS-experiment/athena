@@ -165,7 +165,7 @@ def timer(name):
         yield
     finally:
         end = time()
-        log.debug("Took %.2f to %s", (end - start, name))                
+        log.debug("Took %.2f to %s", end - start, name)
 
 def interleave(*args):
     return [item for items in zip(*args) for item in items]
