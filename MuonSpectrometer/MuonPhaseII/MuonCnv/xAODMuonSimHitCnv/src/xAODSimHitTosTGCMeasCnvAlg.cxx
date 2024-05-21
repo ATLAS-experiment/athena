@@ -51,7 +51,7 @@ void xAODSimHitTosTGCMeasCnvAlg::digitizeStrip(const EventContext& ctx,
    
     int channelNumber = readOutEle->stripDesign(hitId).stripNumber(lHitPos.block<2,1>(0,0));
     if(channelNumber==-1){
-        ATH_MSG_WARNING("hit "<<Amg::toString(lHitPos)<<" is outside bounds "<<
+        ATH_MSG_WARNING("Strip hit "<<Amg::toString(lHitPos)<<" is outside bounds "<<
                         readOutEle->stripDesign(hitId)<<" rejecting it");
         return;
     }
@@ -112,7 +112,7 @@ void xAODSimHitTosTGCMeasCnvAlg::digitizeWire(const EventContext& ctx,
     const MuonGMR4::WireGroupDesign& design{readOutEle->wireDesign(hitId)};
     int channelNumber = design.stripNumber(lHitPos.block<2,1>(0,0));
     if(channelNumber==-1){
-        ATH_MSG_WARNING("hit "<<Amg::toString(lHitPos)<<" is outside wire bounds "<<design<<" rejecting it");
+        ATH_MSG_WARNING("Wire hit "<<Amg::toString(lHitPos)<<" is outside bounds "<<design<<" rejecting it");
         return;
     }
     bool isValid{false};

@@ -5,12 +5,25 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonSpacePointMakerAlgCfg(flags, name = "MuonSpacePointMakerAlg", **kwargs):
     result = ComponentAccumulator()
-    if not flags.Detector.GeometryMDT: kwargs.set_defaults("MdtKey" ,"")    
-    if not flags.Detector.GeometryRPC: kwargs.set_defaults("RpcKey" ,"")
-    if not flags.Detector.GeometryTGC: kwargs.set_defaults("TgcKey" ,"")
-    if not flags.Detector.GeometryMM: kwargs.set_defaults("MmKey" ,"")
+    if not flags.Detector.GeometryMDT: kwargs.setdefault("MdtKey" ,"")    
+    if not flags.Detector.GeometryRPC: kwargs.setdefault("RpcKey" ,"")
+    if not flags.Detector.GeometryTGC: kwargs.setdefault("TgcKey" ,"")
+    if not flags.Detector.GeometryMM: kwargs.setdefault("MmKey" ,"")
+    if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcKey" ,"")
+    
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
     the_alg = CompFactory.MuonR4.MuonSpacePointMakerAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def MuonSpacePointFormationCfg(flags):
+    result = ComponentAccumulator()
+    result.merge(MuonSpacePointMakerAlgCfg(flags, MmKey = "", sTgcKey = ""))
+    ### Split the Nsw hits into a separate space point container
+    if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
+        result.merge(MuonSpacePointMakerAlgCfg(flags, 
+                                               name="NswSpacePointMakerAlg",
+                                               MdtKey="", RpcKey = "", TgcKey ="",
+                                               WriteKey = "NswSpacePoints"))
     return result

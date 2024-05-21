@@ -31,16 +31,16 @@ namespace {
 namespace xAOD{
     const MuonGMR4::MuonReadoutElement* readoutElement(const UncalibratedMeasurement* meas){
         if (!meas) return nullptr;
-        if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
-            return static_cast<const xAOD::MdtDriftCircle*>(meas)->readoutElement();
-        } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
-            return static_cast<const xAOD::RpcMeasurement*>(meas)->readoutElement();
-        } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
-            return static_cast<const xAOD::TgcStrip*>(meas)->readoutElement();
-        } else if (meas->type() == xAOD::UncalibMeasType::MMClusterType) {
-            return static_cast<const xAOD::MMCluster*>(meas)->readoutElement();
-        } else if (meas->type() == xAOD::UncalibMeasType::sTgcStripType) {
-            return static_cast<const xAOD::sTgcMeasurement*>(meas)->readoutElement();
+        if (meas->type() == UncalibMeasType::MdtDriftCircleType){
+            return static_cast<const MdtDriftCircle*>(meas)->readoutElement();
+        } else if (meas->type() == UncalibMeasType::RpcStripType) {
+            return static_cast<const RpcMeasurement*>(meas)->readoutElement();
+        } else if (meas->type() == UncalibMeasType::TgcStripType) {
+            return static_cast<const TgcStrip*>(meas)->readoutElement();
+        } else if (meas->type() == UncalibMeasType::MMClusterType) {
+            return static_cast<const MMCluster*>(meas)->readoutElement();
+        } else if (meas->type() == UncalibMeasType::sTgcStripType) {
+            return static_cast<const sTgcMeasurement*>(meas)->readoutElement();
         }
         THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
         return nullptr;
@@ -48,49 +48,59 @@ namespace xAOD{
     
 
     Amg::Vector3D positionInChamber(const ActsGeometryContext& gctx,
-                                    const xAOD::UncalibratedMeasurement* meas){
+                                    const UncalibratedMeasurement* meas){
         if (!meas) return Amg::Vector3D::Zero();
 
-        if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(meas);
+        if (meas->type() == UncalibMeasType::MdtDriftCircleType) {
+            const MdtDriftCircle* dc = static_cast<const MdtDriftCircle*>(meas);
             return toChamberTransform(gctx, dc).translation();
-        } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
+        } else if (meas->type() == UncalibMeasType::RpcStripType) {
             if (meas->numDimensions() == 1) {
-                const xAOD::RpcStrip* strip = static_cast<const xAOD::RpcStrip*>(meas);
+                const RpcStrip* strip = static_cast<const RpcStrip*>(meas);
                 return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
             } else {
-                const xAOD::RpcStrip2D* strip = static_cast<const xAOD::RpcStrip2D*>(meas);
+                const RpcStrip2D* strip = static_cast<const RpcStrip2D*>(meas);
                 Amg::Vector3D locPos{Amg::Vector3D::Zero()};
-                locPos.block<2,1>(0,0) = xAOD::toEigen(strip->localPosition<2>());
+                locPos.block<2,1>(0,0) = toEigen(strip->localPosition<2>());
                 return toChamberTransform(gctx, strip) * locPos;
             }
-        } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
-            const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(meas);
+        } else if (meas->type() == UncalibMeasType::TgcStripType) {
+            const TgcStrip* strip = static_cast<const TgcStrip*>(meas);
             return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+        } else if (meas->type() == UncalibMeasType::sTgcStripType) {
+            const sTgcMeasurement* sTgc = static_cast<const sTgcMeasurement*>(meas);
+            if (sTgc->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip ||
+                sTgc->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
+                return toChamberTransform(gctx, sTgc) * (sTgc->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+            }
+            Amg::Vector3D locPos{Amg::Vector3D::Zero()};
+            locPos.block<2,1>(0,0) = toEigen(sTgc->localPosition<2>());
+            return toChamberTransform(gctx, sTgc) * locPos;
+            
         } else {
             THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         }
         return Amg::Vector3D::Zero();
     }
     Amg::Vector3D channelDirInChamber(const ActsGeometryContext& gctx,
-                                      const xAOD::UncalibratedMeasurement* meas) {        
+                                      const UncalibratedMeasurement* meas) {        
         if (!meas) return Amg::Vector3D::Zero();
-        if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(meas);
+        if (meas->type() == UncalibMeasType::MdtDriftCircleType) {
+            const MdtDriftCircle* dc = static_cast<const MdtDriftCircle*>(meas);
             return toChamberTransform(gctx,dc).linear() * Amg::Vector3D::UnitZ();
-        } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
-            const xAOD::RpcMeasurement* strip = static_cast<const xAOD::RpcMeasurement*>(meas);
+        } else if (meas->type() == UncalibMeasType::RpcStripType) {
+            const RpcMeasurement* strip = static_cast<const RpcMeasurement*>(meas);
             return toChamberTransform(gctx, strip).linear() * Amg::Vector3D::UnitY();
-        } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
-            const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(meas);            
+        } else if (meas->type() == UncalibMeasType::TgcStripType) {
+            const TgcStrip* strip = static_cast<const TgcStrip*>(meas);            
             const Amg::Transform3D trf = toChamberTransform(gctx, strip);
             Amg::Vector3D dir{Amg::Vector3D::UnitY()};
             if (strip->measuresPhi()) {
                 dir.block<2,1>(0,0) = strip->readoutElement()->stripLayout(strip->gasGap()).stripDir(strip->channelNumber());
             } 
             return trf.linear() *dir;
-        } else if (meas->type() == xAOD::UncalibMeasType::MMClusterType) {
-            const xAOD::MMCluster* clust = static_cast<const xAOD::MMCluster*>(meas);
+        } else if (meas->type() == UncalibMeasType::MMClusterType) {
+            const MMCluster* clust = static_cast<const MMCluster*>(meas);
             return toChamberTransform(gctx,  clust) * Amg::Vector3D::UnitY();
         }
         THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
@@ -99,22 +109,22 @@ namespace xAOD{
     Amg::Vector3D channelNormalInChamber(const ActsGeometryContext& gctx,
                                          const UncalibratedMeasurement* meas) {
         
-        if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(meas);
+        if (meas->type() == UncalibMeasType::MdtDriftCircleType) {
+            const MdtDriftCircle* dc = static_cast<const MdtDriftCircle*>(meas);
             return toChamberTransform(gctx,dc).linear() * Amg::Vector3D::UnitY();
-        } else if (meas->type() == xAOD::UncalibMeasType::RpcStripType) {
-            const xAOD::RpcMeasurement* strip = static_cast<const xAOD::RpcMeasurement*>(meas);
+        } else if (meas->type() == UncalibMeasType::RpcStripType) {
+            const RpcMeasurement* strip = static_cast<const RpcMeasurement*>(meas);
             return toChamberTransform(gctx, strip).linear() * Amg::Vector3D::UnitX();
-        } else if (meas->type() == xAOD::UncalibMeasType::TgcStripType) {
-            const xAOD::TgcStrip* strip = static_cast<const xAOD::TgcStrip*>(meas);            
+        } else if (meas->type() == UncalibMeasType::TgcStripType) {
+            const TgcStrip* strip = static_cast<const TgcStrip*>(meas);            
             const Amg::Transform3D trf = toChamberTransform(gctx, strip);
             Amg::Vector3D dir{Amg::Vector3D::UnitX()};
             if (strip->measuresPhi()) {
                 dir.block<2,1>(0,0) = strip->readoutElement()->stripLayout(strip->gasGap()).stripNormal(strip->channelNumber());
             } 
             return trf.linear() *dir;
-        } else if (meas->type() == xAOD::UncalibMeasType::MMClusterType) {
-            const xAOD::MMCluster* clust = static_cast<const xAOD::MMCluster*>(meas);
+        } else if (meas->type() == UncalibMeasType::MMClusterType) {
+            const MMCluster* clust = static_cast<const MMCluster*>(meas);
             return toChamberTransform(gctx,  clust) * Amg::Vector3D::UnitX();
         }
         THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");

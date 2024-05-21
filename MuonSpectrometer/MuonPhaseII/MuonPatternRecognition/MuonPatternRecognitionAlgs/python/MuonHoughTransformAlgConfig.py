@@ -25,11 +25,11 @@ if __name__=="__main__":
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     
-    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import xAODSimHitToMdtMeasCnvAlgCfg
+    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
     cfg.merge(setupHistSvcCfg(flags,out_file=args.outRootFile,out_stream="MuonHoughTransform"))
-    cfg.merge(xAODSimHitToMdtMeasCnvAlgCfg(flags))
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointMakerAlgCfg
-    cfg.merge(MuonSpacePointMakerAlgCfg(flags))
+    cfg.merge(MuonSimHitToMeasurementCfg(flags))
+    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+    cfg.merge(MuonSpacePointFormationCfg(flags))
     cfg.merge(MuonEtaHoughTransformAlgCfg(flags))
     cfg.merge(MuonPhiHoughTransformAlgCfg(flags))
 
