@@ -13,6 +13,9 @@ class LheConverterUpc(EvgenAnalysisAlg):
     '''
     Class for modifying output LHE file from Superchic and Madgraph + ensuring compatibility with Tauola
     Intended for ultraperipheral collision (UPC) processes i.e. y y -> l+ l-
+    This code also contains a hack that was present in the earlier version in the Generators/Superchic_i/python/LheConverterTauolaPhotonHack.py
+    The hack was recommended by the Tauola authors, intended for the gamma gamma -> tau+ tau- process
+    The hack changes the PDG ID of the initial state particles, from photons to electrons
     '''
 
     def __init__(self, name='LheConverterUpc', generator='Superchic', mode='Pythia8'):
