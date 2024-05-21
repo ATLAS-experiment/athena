@@ -104,11 +104,13 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "GlobalNeutralParticleFlowObjects",
             "CHSGChargedParticleFlowObjects",
             "CHSGNeutralParticleFlowObjects",
+            "CSSKGChargedParticleFlowObjects",
+            "CSSKGNeutralParticleFlowObjects",
             "TruthParticles",
             "TruthVertices",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
             ]
-
+    
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTAG1SlimmingHelper.AllVariables += [
             "AntiKt4EMTopoJets",
