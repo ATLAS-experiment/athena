@@ -7,7 +7,7 @@
 @brief Python configuration of TileDigitsFlxMonitorAlgorithm algorithm for the Run III
 '''
 
-def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
+def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], topPath='TestBeam', **kwargs):
     '''Function to configures TileRawChannelFlxMonAlg algorithms in the monitoring system.'''
 
     kwargs.setdefault('TileRawChannelContainerLegacy', 'TileRawChannelFit')
@@ -34,7 +34,7 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
         setattr(tileRawChannelFlxMonAlg, k, v)
 
     # Configure histogram with TileRawChannelFlxMonAlg algorithm execution time
-    executeTimeGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelFlxMonExecuteTime', 'Tile')
+    executeTimeGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelFlxMonExecuteTime', f'{topPath}/Felix')
     executeTimeGroup.defineHistogram('TIME_execute', path = 'RawChannel', type='TH1F',
                                      title = 'Time for execute TileRawChannelFlxMonAlg algorithm;time [#mus]',
                                      xbins = 300, xmin = 0, xmax = 300000)
@@ -53,7 +53,7 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             for drawer in range(0, Tile.MAX_DRAWER):
                 modules += [Tile.getDrawerString(ros, drawer)]
 
-    channelLegacyGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpLegacy', 'Tile/Legacy/RawChannel')
+    channelLegacyGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpLegacy', f'{topPath}/Legacy/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude (Legacy);Channel;Amplitude'
@@ -62,7 +62,7 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelLegacyGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                                xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelFelixGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpFlx', 'Tile/Felix/RawChannel')
+    channelFelixGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpFlx', f'{topPath}/Felix/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude (FELIX);Channel;Amplitude'
@@ -71,7 +71,7 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelFelixGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                               xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelCompareGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpDiff', 'Tile/Compare/RawChannel')
+    channelCompareGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpDiff', f'{topPath}/Compare/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude difference (FELIX-Legacy*{felixScale});Channel;Amplitude difference [ADC]'
@@ -80,7 +80,7 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelCompareGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                                 xbins = 48, xmin = -0.5, xmax = 47.5)
     
-    channelCompareVsLegacyGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpDiffVsLegacy', 'Tile/Compare/RawChannel')
+    channelCompareVsLegacyGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpDiffVsLegacy', f'{topPath}/Compare/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude difference (FELIX-Legacy*{felixScale});Amplitude (Legacy) [ADC];Amplitude difference [ADC]'
