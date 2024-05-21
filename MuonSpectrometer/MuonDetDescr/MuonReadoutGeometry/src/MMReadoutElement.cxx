@@ -92,7 +92,7 @@ namespace MuonGM {
             ATH_MSG_DEBUG("Expected a GeoTrd but got "<<printGeoShape(pvc->getLogVol()->getShape()));
         }
 
-        std::vector<GeoChildNodeWithTrf> children{getChildrenWithRef(pvc, false)};
+        std::vector<GeoChildNodeWithTrf> children{getAllSubVolumes(pvc)};
         for (const GeoChildNodeWithTrf& child : children) {
             ATH_MSG_VERBOSE("Child node "<<child.nodeName<<" "<<child.volume->getLogVol()->getName()); 
             if (child.volume->getLogVol()->getName().find("Sensitive") == std::string::npos) {
