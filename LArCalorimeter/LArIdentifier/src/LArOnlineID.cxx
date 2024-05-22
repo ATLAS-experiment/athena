@@ -770,3 +770,9 @@ bool LArOnlineID::isEMECOW(const HWIdentifier id) const {
 	   ft==23|| ft==24 )
 	  );
 }
+
+bool LArOnlineID::isEMECchannel(const HWIdentifier id) const
+/*========================================================*/
+{/* redefinition with isEMECIW and isEMECOW */
+  return (LArOnlineID::isEMECOW(id) || LArOnlineID::isEMECIW(id));
+}
