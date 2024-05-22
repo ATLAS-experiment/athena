@@ -147,15 +147,17 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
 
 
   // will need to hard code etFPGA ,a's and b's 
- 
+  int etBprime =0;
+
+
   metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
-  etFPGA (0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_eth, A_ets, A_etw); 
+  etFPGA (0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw); 
 
   metFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
-  etFPGA (1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_eth, B_ets, B_etw); 
+  etFPGA (1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw); 
 
   metFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
-  etFPGA (2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_eth, C_ets, C_etw); 
+  etFPGA (2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw); 
 
   metTotal(A_MHT_x, A_MHT_y, B_MHT_x, B_MHT_y, C_MHT_x, C_MHT_y, MHT_x, MHT_y);
   metTotal(A_MST_x, A_MST_y, B_MST_x, B_MST_y, C_MST_x, C_MST_y, MST_x, MST_y);
