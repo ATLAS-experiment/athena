@@ -68,19 +68,19 @@ class MmReadoutElement : public MuonReadoutElement {
     /// Returns the module thickness
     double moduleThickness() const;
     /// Length of gas Gap on short side
-    double gapLengthS(const int layer) const;
+    double gapLengthS(const IdentifierHash& layerHash) const;
     /// Length of gas Gap on long side
-    double gapLengthL(const int layer) const;
+    double gapLengthL(const IdentifierHash& layerHash) const;
     /// Height of gas Gap
-    double gapHeight(const int layer) const;
+    double gapHeight(const IdentifierHash& layerHash) const;
     /// Returns the number of gas gaps
     unsigned int nGasGaps() const;
     /// Returns the number of total active strips
-    unsigned int numStrips(const int layer) const;
+    unsigned int numStrips(const IdentifierHash& layerHash) const;
       /// Returns the first active strip
-    unsigned int firstStrip(const int layer) const;
+    unsigned int firstStrip(const IdentifierHash& layerHash) const;
     /// Returns the strip length
-    double stripLength(const int stripNumb, const int layer) const;
+    double stripLength(const IdentifierHash& measHash) const;
 
 
     StatusCode initElement() override final;
@@ -100,8 +100,8 @@ class MmReadoutElement : public MuonReadoutElement {
     IdentifierHash layerHash(const IdentifierHash& measHash) const;
     // measurementId : Retrieves the channel Identifier based on the above created channelHash (measurementHash)
     Identifier measurementId(const IdentifierHash& measHash) const override final;
-
-    static IdentifierHash createHash(const int strip, const int gasGap);
+    
+    static IdentifierHash createHash(const int gasGap, const int strip);
       /// Returns the position of the strip center
     Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
     Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;

@@ -136,7 +136,7 @@ Identifier MmSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
      if (std::abs(gapCentre.z() - hitAtGapPlane.z()) < tolerance) {
          ATH_MSG_VERBOSE("Assign hit "<<Amg::toString(hitAtGapPlane)<<" to "
                         <<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())<<" gasGap: "<<gap);
-         return readOutEle->measurementId(MmReadoutElement::createHash(1, gap));
+         return readOutEle->measurementId(MmReadoutElement::createHash(gap, 1));
      }
   }
   THROW_EXCEPTION("Invalid gasgap matching for hit "<<Amg::toString(hitAtGapPlane)<<" and detector element "

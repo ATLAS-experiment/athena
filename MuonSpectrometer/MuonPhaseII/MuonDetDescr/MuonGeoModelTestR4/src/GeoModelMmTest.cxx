@@ -175,18 +175,19 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
                                 <<" layer: "<<layer<<" strip: "<<strip);
                 continue;
             }
-            m_locStripCenter.push_back(reElement->stripLayer(chId).design().center(strip).value_or(Amg::Vector2D::Zero()));
-            m_isStereo.push_back(reElement->stripLayer(chId).design().hasStereoAngle());
-            m_stripCenter.push_back(reElement->stripPosition(gctx, chId));
-            m_stripLeftEdge.push_back(reElement->leftStripEdge(gctx,chId));
-            m_stripRightEdge.push_back(reElement->rightStripEdge(gctx,chId));
-            m_stripLength.push_back(reElement->stripLength(strip,layer));
+            const IdentifierHash measHash{reElement->measurementHash(chId)};
+            m_locStripCenter.push_back(reElement->stripLayer(measHash).design().center(strip).value_or(Amg::Vector2D::Zero()));
+            m_isStereo.push_back(reElement->stripLayer(measHash).design().hasStereoAngle());
+            m_stripCenter.push_back(reElement->stripPosition(gctx, measHash));
+            m_stripLeftEdge.push_back(reElement->leftStripEdge(gctx,measHash));
+            m_stripRightEdge.push_back(reElement->rightStripEdge(gctx,measHash));
+            m_stripLength.push_back(reElement->stripLength(measHash));
             m_gasGap.push_back(layer);
             m_channel.push_back(strip);
 
-            m_ActiveWidthS = reElement->gapLengthS(layer);
-            m_ActiveWidthL = reElement->gapLengthL(layer);
-            m_ActiveHeightR = reElement->gapHeight(layer);
+            m_ActiveWidthS = reElement->gapLengthS(measHash);
+            m_ActiveWidthL = reElement->gapLengthL(measHash);
+            m_ActiveHeightR = reElement->gapHeight(measHash);
 
             if (strip != fStrip) continue;
             const Amg::Transform3D stripGlobToLoc = reElement->globalToLocalTrans(gctx, chId);
