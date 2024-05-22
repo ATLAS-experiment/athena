@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -37,17 +37,19 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODMuon/MuonSegment.h"
 #include "xAODMuon/MuonSegmentContainer.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Accessor.h"
 
 namespace {
-    static const SG::AuxElement::Accessor<int> acc_nUnspoiledCscHits("nUnspoiledCscHits");
-    static const SG::AuxElement::Accessor<float> acc_MuonSpectrometerPt("MuonSpectrometerPt");
-    static const SG::AuxElement::Accessor<float> acc_InnerDetectorPt("InnerDetectorPt");
-    static const SG::AuxElement::Accessor<unsigned int> acc_numEnergyLossPerTrack("numEnergyLossPerTrack");
+    static const SG::Accessor<int> acc_nUnspoiledCscHits("nUnspoiledCscHits");
+    static const SG::Accessor<float> acc_MuonSpectrometerPt("MuonSpectrometerPt");
+    static const SG::Accessor<float> acc_InnerDetectorPt("InnerDetectorPt");
+    static const SG::Accessor<unsigned int> acc_numEnergyLossPerTrack("numEnergyLossPerTrack");
 
-    static const SG::AuxElement::Accessor<float> acc_ET_Core("ET_Core");
-    static const SG::AuxElement::Accessor<float> acc_ET_EMCore("ET_EMCore");
-    static const SG::AuxElement::Accessor<float> acc_ET_TileCore("ET_TileCore");
-    static const SG::AuxElement::Accessor<float> acc_ET_HECCore("ET_HECCore");
+    static const SG::Accessor<float> acc_ET_Core("ET_Core");
+    static const SG::Accessor<float> acc_ET_EMCore("ET_EMCore");
+    static const SG::Accessor<float> acc_ET_TileCore("ET_TileCore");
+    static const SG::Accessor<float> acc_ET_HECCore("ET_HECCore");
 }  // namespace
 namespace MuonCombined {
 
@@ -102,11 +104,11 @@ namespace MuonCombined {
 
         m_copyFloatSummaryAccessors.reserve( m_copyFloatSummaryKeys.size() );
         for (const std::string &a_key : m_copyFloatSummaryKeys ) {
-           m_copyFloatSummaryAccessors.push_back(std::make_unique< SG::AuxElement::Accessor<float> >(a_key));
+           m_copyFloatSummaryAccessors.push_back(std::make_unique< SG::Accessor<float> >(a_key));
         }
         m_copyCharSummaryAccessors.reserve( m_copyCharSummaryKeys.size() );
         for (const std::string &a_key : m_copyCharSummaryKeys ) {
-           m_copyCharSummaryAccessors.push_back(std::make_unique< SG::AuxElement::Accessor<uint8_t> >(a_key));
+           m_copyCharSummaryAccessors.push_back(std::make_unique< SG::Accessor<uint8_t> >(a_key));
         }
 
         return StatusCode::SUCCESS;
@@ -386,12 +388,12 @@ namespace MuonCombined {
 
     void MuonCreatorTool::addStatisticalCombination(const EventContext& ctx, xAOD::Muon& muon, const InDetCandidate* candidate,
                                                     const StacoTag* tag, OutputData& outputData) const {
-        static const SG::AuxElement::Accessor<float> acc_d0("d0_staco");
-        static const SG::AuxElement::Accessor<float> acc_z0("z0_staco");
-        static const SG::AuxElement::Accessor<float> acc_phi0("phi0_staco");
-        static const SG::AuxElement::Accessor<float> acc_theta("theta_staco");
-        static const SG::AuxElement::Accessor<float> acc_qOverP("qOverP_staco");
-        static const SG::AuxElement::Accessor<float> acc_qOverPerr("qOverPErr_staco");
+        static const SG::Accessor<float> acc_d0("d0_staco");
+        static const SG::Accessor<float> acc_z0("z0_staco");
+        static const SG::Accessor<float> acc_phi0("phi0_staco");
+        static const SG::Accessor<float> acc_theta("theta_staco");
+        static const SG::Accessor<float> acc_qOverP("qOverP_staco");
+        static const SG::Accessor<float> acc_qOverPerr("qOverPErr_staco");
 
         if (!tag) {
             // init variables if necessary.
@@ -452,10 +454,10 @@ namespace MuonCombined {
                     tp->setPatternRecognitionInfo(pattern);
 
                     const xAOD::TrackParticle &id_track_particle = candidate->indetTrackParticle();
-                    for (const std::unique_ptr< SG::AuxElement::Accessor<float> > &accessor  : m_copyFloatSummaryAccessors ) {
+                    for (const std::unique_ptr< SG::Accessor<float> > &accessor  : m_copyFloatSummaryAccessors ) {
                        (*accessor)( *tp ) = (*accessor)( id_track_particle );
 		    }
-                    for (const std::unique_ptr< SG::AuxElement::Accessor<uint8_t> > &accessor  : m_copyCharSummaryAccessors ) {
+                    for (const std::unique_ptr< SG::Accessor<uint8_t> > &accessor  : m_copyCharSummaryAccessors ) {
                        (*accessor)( *tp ) = (*accessor)( id_track_particle );
                     }
 
@@ -536,17 +538,27 @@ namespace MuonCombined {
             slowMuon->setRpcInfo(stauExtras->rpcBetaAvg, stauExtras->rpcBetaRms, stauExtras->rpcBetaChi2, stauExtras->rpcBetaDof);
             slowMuon->setMdtInfo(stauExtras->mdtBetaAvg, stauExtras->mdtBetaRms, stauExtras->mdtBetaChi2, stauExtras->mdtBetaDof);
             slowMuon->setCaloInfo(stauExtras->caloBetaAvg, stauExtras->caloBetaRms, stauExtras->caloBetaChi2, stauExtras->caloBetaDof);
-            std::vector<uint8_t>& eTechVec = slowMuon->auxdata<std::vector<uint8_t>>("hitTechnology");
-            std::vector<unsigned int>& idVec = slowMuon->auxdata<std::vector<unsigned int>>("hitIdentifier");
-            std::vector<float>& mToFVec = slowMuon->auxdata<std::vector<float>>("hitTOF");
-            std::vector<float>& xVec = slowMuon->auxdata<std::vector<float>>("hitPositionX");
-            std::vector<float>& yVec = slowMuon->auxdata<std::vector<float>>("hitPositionY");
-            std::vector<float>& zVec = slowMuon->auxdata<std::vector<float>>("hitPositionZ");
-            std::vector<float>& eVec = slowMuon->auxdata<std::vector<float>>("hitEnergy");
+            static const SG::Accessor<std::vector<uint8_t> > eTechAcc ("hitTechnology");
+            static const SG::Accessor<std::vector<unsigned int> > idAcc ("hitIdentifier");
+            static const SG::Accessor<std::vector<float> > mToFAcc ("hitTOF");
+            static const SG::Accessor<std::vector<float> > xAcc ("hitPositionX");
+            static const SG::Accessor<std::vector<float> > yAcc ("hitPositionY");
+            static const SG::Accessor<std::vector<float> > zAcc ("hitPositionZ");
+            static const SG::Accessor<std::vector<float> > eAcc ("hitEnergy");
+            static const SG::Accessor<std::vector<float> > errorAcc ("hitError");
+            static const SG::Accessor<std::vector<float> > shiftAcc ("hitShift");
+            static const SG::Accessor<std::vector<float> > propTimeAcc ("hitPropagationTime");
+            std::vector<uint8_t>& eTechVec = eTechAcc(*slowMuon);
+            std::vector<unsigned int>& idVec = idAcc(*slowMuon);
+            std::vector<float>& mToFVec = mToFAcc(*slowMuon);
+            std::vector<float>& xVec = xAcc(*slowMuon);
+            std::vector<float>& yVec = yAcc(*slowMuon);
+            std::vector<float>& zVec = zAcc(*slowMuon);
+            std::vector<float>& eVec = eAcc(*slowMuon);
 
-            std::vector<float>& errorVec = slowMuon->auxdata<std::vector<float>>("hitError");
-            std::vector<float>& shiftVec = slowMuon->auxdata<std::vector<float>>("hitShift");
-            std::vector<float>& propagationTimeVec = slowMuon->auxdata<std::vector<float>>("hitPropagationTime");
+            std::vector<float>& errorVec = errorAcc(*slowMuon);
+            std::vector<float>& shiftVec = shiftAcc(*slowMuon);
+            std::vector<float>& propagationTimeVec = propTimeAcc(*slowMuon);
 
             for (const auto& hit : stauExtras->hits) {
                 eTechVec.push_back(hit.eTech);
@@ -685,8 +697,8 @@ namespace MuonCombined {
     }
 
     void MuonCreatorTool::addCaloTag(xAOD::Muon& mu, const CaloTag* tag) const {
-        static const SG::AuxElement::Accessor<float> acc_ElType("CT_EL_Type");  // FIXME - should be uint
-        static const SG::AuxElement::Accessor<float> acc_ElFSREnergy("CT_ET_FSRCandidateEnergy");
+        static const SG::Accessor<float> acc_ElType("CT_EL_Type");  // FIXME - should be uint
+        static const SG::Accessor<float> acc_ElFSREnergy("CT_ET_FSRCandidateEnergy");
 
         if (!tag) {
             // init variables if necessary.

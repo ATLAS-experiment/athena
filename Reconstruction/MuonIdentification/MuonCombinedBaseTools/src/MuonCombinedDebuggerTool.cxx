@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 #include "MuonCombinedEvent/MuonCandidate.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace MuonCombined {
 
@@ -255,9 +256,11 @@ namespace MuonCombined {
             }
 
             // truth
-            if (inDetCandidate->indetTrackParticle().isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink")) {
+            static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
+              truthParticleLinkAcc("truthParticleLink");
+            if (truthParticleLinkAcc.isAvailable(inDetCandidate->indetTrackParticle())) {
                 ElementLink<xAOD::TruthParticleContainer> truthLink =
-                    inDetCandidate->indetTrackParticle().auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink");
+                  truthParticleLinkAcc(inDetCandidate->indetTrackParticle());
                 if (truthLink.isValid()) {
                     m_idtrack_has_truth.push_back(1);
                     m_idtrack_truth_id.push_back((*truthLink)->pdgId());
@@ -430,10 +433,11 @@ namespace MuonCombined {
             }
 
             // truth
-            if ((*muonCandidate->muonSpectrometerTrackLink())
-                    ->isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink")) {
+            static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
+              truthParticleLinkAcc("truthParticleLink");
+            if (truthParticleLinkAcc.isAvailable(**muonCandidate->muonSpectrometerTrackLink())) {
                 ElementLink<xAOD::TruthParticleContainer> truthLink =
-                    (*muonCandidate->muonSpectrometerTrackLink())->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink");
+                  truthParticleLinkAcc(**muonCandidate->muonSpectrometerTrackLink());
                 if (truthLink.isValid()) {
                     m_mstrack_has_truth.push_back(1);
                     m_mstrack_truth_id.push_back((*truthLink)->pdgId());
