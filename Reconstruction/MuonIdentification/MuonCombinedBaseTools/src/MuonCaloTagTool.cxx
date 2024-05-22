@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,7 @@
 #include "xAODTracking/TrackingPrimitives.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 // --- HepMC Includes ---
 #include <cmath>
@@ -150,9 +151,11 @@ namespace MuonCombined {
             // --- Get pdgId (when requested) ---
             int pdgId = 0;
 
+            static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
+              truthParticleLinkAcc("truthParticleLink");
             ElementLink<xAOD::TruthParticleContainer> truthLink;
-            if (tp->isAvailable<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink")) {
-                truthLink = tp->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink");
+            if (truthParticleLinkAcc.isAvailable(*tp)) {
+                truthLink = truthParticleLinkAcc(*tp);
                 if (m_doTruth && truthLink.isValid()) {
                     // no decay in flight
                     pdgId = (*truthLink)->pdgId();
