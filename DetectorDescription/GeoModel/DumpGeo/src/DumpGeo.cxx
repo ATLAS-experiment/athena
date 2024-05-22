@@ -115,9 +115,7 @@ StatusCode DumpGeo::initialize() {
     managersList.insert(blub.begin(), blub.end());
   }
   if (msgLvl(MSG::INFO)) {
-    std::cout
-        << "List of the GeoModel Detector Managers that are being dumped: "
-        << std::endl;
+    ATH_MSG_INFO("List of the GeoModel Detector Managers that are being dumped: ");
     for (auto const& man : managersList) {
       // get the DetectorManager
       const GeoVDetectorManager* manager = theExpt->getManager(man);
