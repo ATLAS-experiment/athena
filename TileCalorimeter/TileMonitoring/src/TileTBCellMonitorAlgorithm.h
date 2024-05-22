@@ -57,6 +57,9 @@ class TileTBCellMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<bool> m_fillHistogramsPerChannel{this,
         "fillHistogramsPerChannel", true, "Fill time and energy histograms per channel"};
 
+    Gaudi::Property<float> m_scaleFactor{this,
+        "ScaleFactor", 1.0, "Scale factor to apply to cell energy"};
+
     std::map<std::string, int> m_sampleEnergyGroups;
     std::map<std::string, int> m_energyGroups;
     std::map<std::string, int> m_energyDiffGroups;
@@ -70,6 +73,8 @@ class TileTBCellMonitorAlgorithm : public AthMonitorAlgorithm {
     const TileID* m_tileID{nullptr};
     const TileHWID* m_tileHWID{nullptr};
     const TileCablingService* m_cabling{nullptr};
+
+    double m_energyThresholdForTimeInGeV{0.0};
 
     std::array<unsigned int, TileCalibUtils::MAX_DRAWERIDX> m_drawerIdxToROS{};
     std::array<unsigned int, TileCalibUtils::MAX_DRAWERIDX> m_drawerIdxToDrawer{};

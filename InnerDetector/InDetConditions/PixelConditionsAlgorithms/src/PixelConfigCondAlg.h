@@ -172,7 +172,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     {this, "PixelParameterConditionsFolder", "PixelConditionsAlgorithms/v1/", "Folder name for pixel parameter conditions"};
 
     Gaudi::Property<std::string> m_conditionsFileName
-    {this, "PixelParameterConditionsFile", "PixelParametersList-02.dat", "File name for pixel parameter conditions"};
+    {this, "PixelParameterConditionsFile", "PixelParametersList-03.dat", "File name for pixel parameter conditions"};
 
     Gaudi::Property<std::string> m_usePrivateFileName
     {this, "UsePrivateFileName", "", "File name for private pixel settings (default:empty)"};

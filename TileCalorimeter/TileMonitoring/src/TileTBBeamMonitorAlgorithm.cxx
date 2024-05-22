@@ -146,9 +146,13 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
   // MUON/MuWall
   float muonWall[N_MUON_WALL_PMT] = {0};
 
-  int tof[16] = {0};
-  int btdc[16] = {0};
-  int btdcHitsN[16] = {0};
+  int tof[N_TDC_CHANNELS] = {0};
+  int btdc[N_TDC_CHANNELS] = {0};
+  for (int i = 0; i < N_TDC_CHANNELS; i += 2) {
+    btdc[i] = +0xFFFF;
+    btdc[i+1] = -0xFFFF;
+  }
+  int btdcHitsN[N_TDC_CHANNELS] = {0};
 
   double totalMuonWallEnergy = 0;
 
@@ -239,7 +243,7 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
           if ((channel > 11) && (channel < 16) && (run > 2211136)) {
             tof[channel] = amplitude;
             ATH_MSG_VERBOSE( "TOF: " << channel << " amp: " << amplitude);
-          } if (channel < 16) {
+          } else if (channel < 16) {
             if (m_TBperiod >= 2021) {
               if (btdcHitsN[channel] == 0) {
                 btdc[channel] = amplitude;
@@ -357,10 +361,12 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
   for (unsigned int pairIdx = 0; pairIdx < m_tofPairs.size(); ++pairIdx) {
     const std::pair<int, int>& tofPair = m_tofPairs[pairIdx];
-    int tof1 = tofPair.first;
-    int tof2 = tofPair.second;
-    auto monTOFDiff = Monitored::Scalar<double>("TOFDiff", tof[counterToTOF[tof1 - 1]] - tof[counterToTOF[tof2 - 1]]);
-    fill(m_tools[m_tofDiffGroups[pairIdx]], monTOFDiff);
+    int tof1 = tof[counterToTOF[tofPair.first - 1]];
+    int tof2 = tof[counterToTOF[tofPair.second - 1]];
+    if (tof1 != 0 && tof2 != 0) {
+      auto monTOFDiff = Monitored::Scalar<double>("TOFDiff", tof1 - tof2);
+      fill(m_tools[m_tofDiffGroups[pairIdx]], monTOFDiff);
+    }
   }
 
   for (int counter = 0; counter < N_S_COUNTER; ++counter) {
@@ -404,7 +410,7 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
     for (int column = 0; column < 4; ++column) {
       auto monRow = Monitored::Scalar<double>("row", row);
       auto monColumn = Monitored::Scalar<double>("column", column);
-      auto monAmplitude = Monitored::Scalar<double>("amplitude", muonWall[8 - (row * 4 + column)]);
+      auto monAmplitude = Monitored::Scalar<double>("amplitude", muonWall[7 - (row * 4 + column)]);
       fill("PMTHitMap", monColumn, monRow, monAmplitude);
     }
   }
@@ -420,15 +426,11 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
     bc1X = (btdc[1] - btdc[0]) * m_bc1HorizontalSlope + m_bc1HorizontalOffset;  // (right - left)
     bc1Y = (btdc[2] - btdc[3]) * m_bc1VerticalSlope + m_bc1VerticalOffset; // (up - down)
   }
-  fill(m_tools[m_beamChamberGroups.at("BC1")], bc1X);
-  fill(m_tools[m_beamChamberGroups.at("BC1")], bc1Y);
   fill(m_tools[m_beamChamberGroups.at("BC1")], bc1X, bc1Y);
 
   // For BC2:
   auto bc2X = Monitored::Scalar<double>("BC2X", (btdc[5] - btdc[4]) * m_bc2HorizontalSlope + m_bc2HorizontalOffset); // (right - left)
   auto bc2Y = Monitored::Scalar<double>("BC2Y", (btdc[6] - btdc[7]) * m_bc2VerticalSlope + m_bc2VerticalOffset); // (up - down)
-  fill(m_tools[m_beamChamberGroups.at("BC2")], bc2X);
-  fill(m_tools[m_beamChamberGroups.at("BC2")], bc2Y);
   fill(m_tools[m_beamChamberGroups.at("BC2")], bc2X, bc2Y);
 
   // Sum Plots
