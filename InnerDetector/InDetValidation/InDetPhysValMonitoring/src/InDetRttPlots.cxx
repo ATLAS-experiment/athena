@@ -289,8 +289,6 @@ InDetRttPlots::fillFakeRate(const xAOD::TrackParticle& track, const bool isFake,
 //
 void
 InDetRttPlots::fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Vertex* recoHardScatter, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float weight) {
-  // fill vertex container general properties
-  // m_verticesVsMuPlots->fill(vertexContainer); //if ever needed
   // fill vertex-specific properties, for all vertices and for hard-scattering vertex
 
   for (const auto& vtx : vertexContainer.stdcont()) {
@@ -316,8 +314,8 @@ InDetRttPlots::fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Ve
 
 
 void
-InDetRttPlots::fill(const xAOD::VertexContainer& vertexContainer, unsigned int nPU, float weight) {
-  if (m_verticesVsMuPlots) m_verticesVsMuPlots->fill(vertexContainer, nPU, weight);
+InDetRttPlots::fill(const xAOD::VertexContainer& vertexContainer, const unsigned int truthMu, const float actualMu, float weight) {
+  if (m_verticesVsMuPlots) m_verticesVsMuPlots->fill(vertexContainer, truthMu, actualMu, weight);
 }
 
 //
