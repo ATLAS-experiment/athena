@@ -390,15 +390,14 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TrackParticle& trkprt) 
   m_trkP[Z0SIN] = trkprt.z0() * sinTheta;
 
   // Track fit errors
-  m_trkErrP[D0] = std::sqrt(trkprt.definingParametersCovMatrix()(0, 0));
-  m_trkErrP[Z0] = std::sqrt(trkprt.definingParametersCovMatrix()(1, 1));
-  m_trkErrP[PHI] = std::sqrt(trkprt.definingParametersCovMatrix()(2, 2));
-  m_trkErrP[THETA] = std::sqrt(trkprt.definingParametersCovMatrix()(3, 3));
-  m_trkErrP[QOVERP] = std::sqrt(trkprt.definingParametersCovMatrix()(4, 4)) * Gaudi::Units::GeV;
-  m_trkErrP[QOVERPT] = std::sqrt(trkprt.definingParametersCovMatrix()(4, 4)) * inverseSinTheta;
-  m_trkErrP[Z0SIN] = std::sqrt(std::pow(m_trkErrP[Z0] * std::sin(m_trkP[THETA]), 2) + 
-                               std::pow(m_trkP[Z0] * m_trkErrP[THETA] * std::cos(m_trkP[THETA]), 2) + 
-                               2 * m_trkP[Z0] * std::sin(m_trkP[THETA]) * std::cos(m_trkP[THETA]) * trkprt.definingParametersCovMatrix()(1, 3));  // Fixing incorrect formula for z0sin error
+  m_trkErrP[D0] = trkprt.definingParametersCovMatrix()(0, 0) < 0 ? 0 : std::sqrt(trkprt.definingParametersCovMatrix()(0, 0));
+  m_trkErrP[Z0] = trkprt.definingParametersCovMatrix()(1, 1) < 0 ? 0 : std::sqrt(trkprt.definingParametersCovMatrix()(1, 1));
+  m_trkErrP[PHI] = trkprt.definingParametersCovMatrix()(2, 2) < 0 ? 0 : std::sqrt(trkprt.definingParametersCovMatrix()(2, 2));
+  m_trkErrP[THETA] = trkprt.definingParametersCovMatrix()(3, 3) < 0 ? 0 : std::sqrt(trkprt.definingParametersCovMatrix()(3, 3));
+  m_trkErrP[QOVERP] = trkprt.definingParametersCovMatrix()(4, 4) < 0 ? 0 : std::sqrt(trkprt.definingParametersCovMatrix()(4, 4)) * Gaudi::Units::GeV;
+  m_trkErrP[QOVERPT] = trkprt.definingParametersCovMatrix()(4, 4) < 0 ? 0 : std::sqrt(trkprt.definingParametersCovMatrix()(4, 4)) * inverseSinTheta;
+  float z0sin2 = std::pow(m_trkErrP[Z0] * std::sin(m_trkP[THETA]), 2) + std::pow(m_trkP[Z0] * m_trkErrP[THETA] * std::cos(m_trkP[THETA]), 2) + 2 * m_trkP[Z0] * std::sin(m_trkP[THETA]) * std::cos(m_trkP[THETA]) * trkprt.definingParametersCovMatrix()(1, 3); // Fixing incorrect formula for z0sin error
+  m_trkErrP[Z0SIN] = z0sin2 < 0 ? 0 : std::sqrt(z0sin2);
 
 
   // Get error on pT, taken from xAOD::TrackingHelpers.pTErr() but this function only works on a pointer input...
@@ -412,10 +411,10 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TrackParticle& trkprt) 
   } else {
     double pt = trkprt.pt();
     double diff_qp = -pt / std::abs(trkprt.qOverP());
-    double diff_theta = pt / std::tan(trkprt.theta());
+    double diff_theta = trkprt.theta() == 0 ? 0 : pt / std::tan(trkprt.theta());
     const std::vector<float>& cov = trkprt.definingParametersCovMatrixVec();
     double pt_err2 = diff_qp * (diff_qp * cov[14] + diff_theta * cov[13]) + diff_theta * diff_theta * cov[9];
-    m_trkErrP[PT] = std::sqrt(pt_err2) / Gaudi::Units::GeV;
+    m_trkErrP[PT] = pt_err2 < 0 ? 0 : std::sqrt(pt_err2) / Gaudi::Units::GeV;
   }
 
 }

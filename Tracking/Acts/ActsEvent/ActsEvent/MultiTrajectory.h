@@ -6,6 +6,7 @@
 #include <memory>
 #include <type_traits>
 #include <variant>
+#include <string_view>
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
@@ -150,7 +151,7 @@ class MutableMultiTrajectory final
    * @param key name of the decoration
    */
   template <typename T>
-  void addColumn_impl(const std::string& key);
+  void addColumn_impl(std::string_view key);
 
   /**
    * @brief unsets a given state

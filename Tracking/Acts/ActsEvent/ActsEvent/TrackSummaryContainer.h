@@ -4,6 +4,7 @@
 #ifndef ACTSEVENT_TRACKSUMMARYCONTAINER_H
 #define ACTSEVENT_TRACKSUMMARYCONTAINER_H
 #include <type_traits>
+#include <string_view>
 
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/Surfaces/Surface.hpp"
@@ -136,7 +137,7 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
   * enables the container to support decoration of given name and type
   */
   template <typename T>
-  constexpr void addColumn_impl(const std::string& key);
+  constexpr void addColumn_impl(std::string_view key);
 
   /**
   * copies decorations from other container
@@ -241,7 +242,7 @@ namespace details{
 
 template <typename T>
 constexpr void MutableTrackSummaryContainer::addColumn_impl(
-    const std::string& name) {
+    std::string_view name) {
   if (not ActsTrk::detail::accepted_decoration_types<T>::value) {
     throw std::runtime_error(
         "TrackSummaryContainer::addColumn_impl: "
