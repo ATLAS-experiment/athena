@@ -68,6 +68,9 @@ if "__main__" == __name__:
 
   log.info("CONFIG DONE")
 
-  cfg.run()
-
+  sc = cfg.run()
+  
+  if sc.isFailure():
+    import sys
+    sys.exit(1)
 

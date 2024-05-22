@@ -49,4 +49,8 @@ alg = ActsExtrapolationAlgCfg(flags,
 
 acc.merge(alg)
 acc.printConfig()
-acc.run()
+sc = acc.run()
+
+if sc.isFailure():
+    import sys
+    sys.exit(1)
