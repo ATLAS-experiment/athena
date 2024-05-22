@@ -225,7 +225,7 @@ def addOverride(flags, folder, tag, db=None):
     suffix = ''
     if db:
         suffix = f' <db>{db}</db>'
-    return IOVDbSvcCfg(flags, overrideTags=[f'<prefix>{folder}</prefix> <tag>{tag}</tag>{suffix}'])
+    return IOVDbSvcCfg(flags, overrideTags=(f'<prefix>{folder}</prefix> <tag>{tag}</tag>{suffix}',))
 
 
 def _extractFolder(folderString):
