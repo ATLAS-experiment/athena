@@ -8,7 +8,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TileConfiguration.TileConfigFlags import TileRunType
 
 import sys
 
@@ -43,7 +42,7 @@ def TileTestBeamRawChannelMakerCfg(flags, nsamples, useFELIX=False, **kwargs):
     return acc
 
 
-def TileTestBeamRecoCfg(flags, useDemoCabling, nsamples, useFELIX=False):
+def TileTestBeamRecoCfg(flags, useDemoCabling, nsamples, useFELIX=False, filterDigits=False, filterChannels=True):
 
     ''' Function to configure reconstruction of Tile TestBeam data.'''
 
@@ -51,9 +50,10 @@ def TileTestBeamRecoCfg(flags, useDemoCabling, nsamples, useFELIX=False):
 
     suffix = "Flx" if useFELIX else ""
     digitsContainer = f'TileDigits{suffix}Cnt'
+    rawChannelContainer = flags.Tile.RawChannelContainer.replace('TileRawChannel', f'TileRawChannel{suffix}')
 
     # =====> For FELIX configure the algorithm to select one gain
-    if useFELIX and flags.Tile.RunType is TileRunType.PHY:
+    if useFELIX and filterDigits:
             digitsContainer = 'TileDigitsFlxFiltered'
             TileDigitsGainFilter = CompFactory.TileDigitsGainFilter
             acc.addEventAlgo( TileDigitsGainFilter(HighGainThreshold=4095,
@@ -63,6 +63,12 @@ def TileTestBeamRecoCfg(flags, useDemoCabling, nsamples, useFELIX=False):
     #  =====> Configure reconstruction of Tile raw channels from digits
     acc.merge(TileTestBeamRawChannelMakerCfg(flags, nsamples, useFELIX, TileDigitsContainer=digitsContainer))
 
+    if useFELIX and filterChannels:
+        rawChannelContainerFiltered = f'{rawChannelContainer}Filtered'
+        TileRawChannelGainFilter = CompFactory.TileRawChannelGainFilter
+        acc.addEventAlgo( TileRawChannelGainFilter(InputRawChannelContainer=rawChannelContainer,
+                                                   OutputRawChannelContainer=rawChannelContainerFiltered) )
+        rawChannelContainer = rawChannelContainerFiltered
 
     #  =====> Configure reconstruction of Tile cells from raw channels
     from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
@@ -73,7 +79,7 @@ def TileTestBeamRecoCfg(flags, useDemoCabling, nsamples, useFELIX=False):
                                                             CaloCellsOutputName=f'AllCalo{suffix}{gainName[skipGain]}',
                                                             mergeChannels=False, SkipGain=skipGain))
         cellBuilder = cellMaker.CaloCellMakerToolNames['TileCellBuilder']
-        cellBuilder.TileRawChannelContainer = flags.Tile.RawChannelContainer.replace('TileRawChannel', f'TileRawChannel{suffix}')
+        cellBuilder.TileRawChannelContainer = rawChannelContainer
         cellBuilder.UseDemoCabling = useDemoCabling
         cellBuilder.maskBadChannels = False
         cellBuilder.MBTSContainer = ""
@@ -81,9 +87,12 @@ def TileTestBeamRecoCfg(flags, useDemoCabling, nsamples, useFELIX=False):
 
 
     # Configure TileInfoLoader to set up number of samples
+    ADCmax = 4095 if useFELIX else 1023
+    ADCmaskValue = 4800 if useFELIX else 2047
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
     acc.merge(TileInfoLoaderCfg(flags, name=f'TileInfoLoader{suffix}', TileInfo=f'TileInfo{suffix}',
-                                NSamples=nsamples, TrigSample=((nsamples-1)//2) ))
+                                NSamples=nsamples, TrigSample=((nsamples-1)//2),
+                                ADCmax=ADCmax, ADCmaskValue=ADCmaskValue))
 
     return acc
 
