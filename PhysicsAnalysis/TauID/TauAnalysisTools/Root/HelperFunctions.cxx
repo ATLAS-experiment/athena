@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -276,7 +276,7 @@ int TauAnalysisTools::getNTauDecayParticles(const xAOD::TruthParticle& xTruthTau
 }
 
 //______________________________________________________________________________
-bool TauAnalysisTools::testFileForEOFContainsCharacters(std::string sFileName)
+bool TauAnalysisTools::testFileForEOFContainsCharacters(const std::string& sFileName)
 {
   // returns true if last line in file is empty or the line starts with the
   // number sign #
