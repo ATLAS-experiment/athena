@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // this file contains all ITruthBinding inline methods
@@ -89,7 +89,9 @@ namespace ISF {
   void                TruthBinding::setGenerationZeroTruthParticle(HepMC::GenParticlePtr p) { m_generationZeroTruthParticle = p; }
 
   /** Create a TruthBinding for a child particle */
-  TruthBinding* TruthBinding::childTruthBinding(HepMC::GenParticlePtr childP) const {
+  // Not const: otherwise it can trigger a thread-safety checker warning
+  // because the non-const m_primaryTruthParticle escapes.
+  TruthBinding* TruthBinding::childTruthBinding(HepMC::GenParticlePtr childP) {
     return new TruthBinding(childP, m_primaryTruthParticle, childP);
   }
 

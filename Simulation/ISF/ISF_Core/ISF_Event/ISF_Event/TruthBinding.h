@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ namespace ISF {
     inline void                setGenerationZeroTruthParticle(HepMC::GenParticlePtr p);
 
     /** Create a TruthBinding for a child particle */
-    inline TruthBinding* childTruthBinding(HepMC::GenParticlePtr childP) const;
+    inline TruthBinding* childTruthBinding(HepMC::GenParticlePtr childP);
 
   private:
     HepMC::GenParticlePtr   m_truthParticle{};               //!< pointer to particle in MC truth
