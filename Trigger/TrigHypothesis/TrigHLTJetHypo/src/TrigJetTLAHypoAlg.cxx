@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
    */
 
 #include <algorithm>
@@ -61,7 +61,7 @@ StatusCode TrigJetTLAHypoAlg::execute( const EventContext& context ) const {
       ATH_MSG_DEBUG("This decision has " << prevJets.size() << " jets");
 
        //copy all jets into the new TLA collection
-      for (auto jet : prevJets)
+      for (const auto& jet : prevJets)
       {
           auto prevJetLink = jet.link;
           ATH_CHECK(prevJetLink.isValid());

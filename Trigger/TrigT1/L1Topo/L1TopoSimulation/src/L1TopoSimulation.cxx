@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoSimulation.h"
@@ -281,7 +281,7 @@ L1TopoSimulation::execute() {
      }    
 
      // set optical connectors
-     for( auto connOpt : l1menu->board("Topo1").connectorNames() ) {
+     for( const auto& connOpt : l1menu->board("Topo1").connectorNames() ) {
        auto outputOpt = globalOutput.count_field(connOpt);
        std::bitset<64> outputOpt_1(outputOpt.to_string());
        std::bitset<64> outputOpt_2((outputOpt<<64).to_string());
