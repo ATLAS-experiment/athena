@@ -182,7 +182,16 @@ def RpcMonitoringConfig(inputFlags):
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
-
+    myGroup_track.defineHistogram('muon_passExtrap_signalhit_gap,panelInd_hM;Detection_Efficiency_MuonFromZ_signalHit_EtaORPhi', 
+                            title='Panels(eta or phi) detection efficiency for muons decayed from Z candidates(Signal hits);Panel Index;Efficiency',
+                            type='TEfficiency',
+                            path=trackPath,
+                            xbins=8592, xmin=-0.5, xmax=8591.5)
+    myGroup_track.defineHistogram('muon_passExtrap_signalhit,panelInd_hM;Detection_Efficiency_MuonFromZ_signalHit', 
+                            title='Panels detection efficiency for muons decayed from Z candidates(Signal hits);Panel Index;Efficiency',
+                            type='TEfficiency',
+                            path=trackPath,
+                            xbins=8592, xmin=-0.5, xmax=8591.5)
     myGroup_track.defineHistogram('muon_passExtrap,LB_detEff;Detection_Efficiency_LB_MuonFromZ', 
                             title='Panels detection efficiency for muons decayed from Z candidates;Luminosity Block;Efficiency',
                             type='TEfficiency',
@@ -200,6 +209,36 @@ def RpcMonitoringConfig(inputFlags):
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
+   
+    myGroup_track.defineHistogram('residual_eta;residual_eta',
+                            title='Distance between extrapolated muon track position and RPC eta hit;Distance [mm];Number of hit',
+                            type='TH1D',
+                            path=trackPath,
+                            xbins=200, xmin=-100., xmax=100.)
+    
+    myGroup_track.defineHistogram('residual_phi;residual_phi',
+                            title='Distance between extrapolated muon track position and RPC eta hit;Distance [mm];Number of hit',
+                            type='TH1D',
+                            path=trackPath,
+                            xbins=200, xmin=-100., xmax=100.)
+    
+    myGroup_track.defineHistogram('closest_residual_eta;closest_residual_eta',
+                            title='The closest distance between extrapolated muon track position and RPC eta hit;Distance [mm];Number of muon track position',
+                            type='TH1D',
+                            path=trackPath,
+                            xbins=200, xmin=-100., xmax=100.)
+    
+    myGroup_track.defineHistogram('closest_residual_phi;closest_residual_phi',
+                            title='The closest distance between extrapolated muon track position and RPC eta hit;Distance [mm];Number of muon track position',
+                            type='TH1D',
+                            path=trackPath,
+                            xbins=200, xmin=-100., xmax=100.)
+    
+    myGroup_track.defineHistogram('residual_panel,panelInd_res_inTime;Residual_Panels', 
+                            title='Distance between extrapolated muon track position and RPC hit;Panel Index;Distance [mm];Number of hit',
+                            type='TH2D', 
+                            path=trackPath,
+                            xbins=100, xmin=-50., xmax=50., ybins=8592, ymin=-0.5, ymax=8591.5)
 
     ## All muon
     myGroup_track.defineHistogram('muPt_allMu;Pt_AllMuons',
