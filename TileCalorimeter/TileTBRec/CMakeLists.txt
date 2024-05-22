@@ -34,3 +34,8 @@ atlas_add_test( TileTestBeamRecoConfig_test
                 SCRIPT python -m TileTBRec.TileTestBeamRecoConfig
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileTBAANtupleConfig_test
+                SCRIPT python -m TileTBRec.TileTBAANtupleConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
