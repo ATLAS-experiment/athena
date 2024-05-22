@@ -177,3 +177,7 @@ if __name__ == "__main__":
     top_acc.printConfig(withDetails=True, summariseProps=True)
     top_acc.store(open("ITkTrackRecoWithProtoTracks.pkl", "wb"))
     sc = top_acc.run(1)
+
+    if sc.isFailure():
+        import sys
+        sys.exit(1)
