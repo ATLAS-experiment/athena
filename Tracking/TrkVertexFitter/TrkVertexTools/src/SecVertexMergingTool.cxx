@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
 #include "TrkVertexTools/SecVertexMergingTool.h"
 #include "TrkVertexFitterInterfaces/IVertexWeightCalculator.h" 
 #include "VxVertex/VxTrackAtVertex.h"
+#include "AthContainers/Accessor.h"
+#include "AthContainers/Decorator.h"
 #include <vector> 
 
 namespace Trk{
@@ -57,24 +59,34 @@ namespace Trk{
      xAOD::VertexAuxContainer* auxNewContainer = new xAOD::VertexAuxContainer();
      NewContainer->setStore(auxNewContainer);
 
-     bool moreDeco = (MyVxCont.front())->isAvailable<float>("MomentaDirection");
+     static const SG::Decorator<float> mDecor_sumPt2("sumPt2");
+     static const SG::Decorator<float> mDecor_mass("mass");
+     static const SG::Decorator<float> mDecor_energy("ee");
+     static const SG::Decorator<int> mDecor_nrobbed("nrobbed");
+     static const SG::Decorator<int> mDecor_intrk("NumInputTrk");
+
+     static const SG::Accessor<float> mAcc_sumPt2("sumPt2");
+     static const SG::Accessor<int> mAcc_momdir ("MomentaDirection");
+     static const SG::Accessor<float> mAcc_mass("mass");
+     static const SG::Accessor<float> mAcc_energy("ee");
+     static const SG::Accessor<int> mAcc_intrk("NumInputTrk");
+     static const SG::Accessor<float> mAcc_radpat("radiiPattern");
+     static const SG::Accessor<std::vector<float> > mAcc_trkwt("trkWeight");
+     static const SG::Accessor<int> mAcc_numtav("NumTrkAtVtx");
+     static const SG::Accessor<std::vector<float> > mAcc_trkdoe("trkDistOverError");
+
+     bool moreDeco = mAcc_momdir.isAvailable(*MyVxCont.front());
 
      if (!moreDeco)
        ATH_MSG_DEBUG("Missing decoration !!! ");
 
      /**
-         SG::AuxElement::Decorator<std::vector<float> > mDecor_trkWght(
-     "trkWeight" ) ; SG::AuxElement::Decorator<float> mDecor_trkDOE(
-     "trkDistOverError" ) ; SG::AuxElement::Decorator<float> mDecor_direction(
-     "MomentaDirection" ); SG::AuxElement::Decorator< float > mDecor_HitsFilter(
+         SG::Decorator<std::vector<float> > mDecor_trkWght(
+     "trkWeight" ) ; SG::Decorator<float> mDecor_trkDOE(
+     "trkDistOverError" ) ; SG::Decorator<float> mDecor_direction(
+     "MomentaDirection" ); SG::Decorator< float > mDecor_HitsFilter(
      "radiiPattern" );
      **/
-
-     static const SG::AuxElement::Decorator<float> mDecor_sumPt2("sumPt2");
-     static const SG::AuxElement::Decorator<float> mDecor_mass("mass");
-     static const SG::AuxElement::Decorator<float> mDecor_energy("ee");
-     static const SG::AuxElement::Decorator<int> mDecor_nrobbed("nrobbed");
-     static const SG::AuxElement::Decorator<int> mDecor_intrk("NumInputTrk");
 
      // add remerged flags to all
      std::vector<bool> remerged(MyVxCont.size(), false);
@@ -154,8 +166,8 @@ namespace Trk{
            newmerge = true;
 
            // update the decors
-           float pt1 = sqrt(vx->auxdata<float>("sumPt2"));
-           float pt2 = sqrt(mergeCand->auxdata<float>("sumPt2"));
+           float pt1 = sqrt(mAcc_sumPt2(*vx));
+           float pt2 = sqrt(mAcc_sumPt2(*mergeCand));
            float ntrk1 = 1.0 * ((vx->trackParticleLinks()).size());
            float ntrk2 = 1.0 * ((mergeCand->trackParticleLinks()).size());
            float wght1 =
@@ -165,30 +177,28 @@ namespace Trk{
 
            xAOD::VxType::VertexType typ1 = vx->vertexType();
            xAOD::VxType::VertexType typ2 = mergeCand->vertexType();
-           float mas1 = vx->auxdata<float>("mass");
-           float mas2 = mergeCand->auxdata<float>("mass");
-           float e1 = vx->auxdata<float>("ee");
-           float e2 = mergeCand->auxdata<float>("ee");
-           int inNtrk1 = vx->auxdata<int>("NumInputTrk");
-           int inNtrk2 = mergeCand->auxdata<int>("NumInputTrk");
+           float mas1 = mAcc_mass(*vx);
+           float mas2 = mAcc_mass(*mergeCand);
+           float e1 = mAcc_energy(*vx);
+           float e2 = mAcc_energy(*mergeCand);
+           int inNtrk1 = mAcc_intrk(*vx);
+           int inNtrk2 = mAcc_intrk(*mergeCand);
 
            int ntrks = 0;
            float md1 = 0., md2 = 0., hf1 = 0., hf2 = 0.;
            std::vector<float> trkW1, trkW2, doe1, doe2;
            if (moreDeco) {
-             doe1 = vx->auxdataConst<std::vector<float>>("trkDistOverError");
-             doe2 =
-               mergeCand->auxdataConst<std::vector<float>>("trkDistOverError");
+             doe1 = mAcc_trkdoe(*vx);
+             doe2 = mAcc_trkdoe(*mergeCand);
              doe2.insert(doe2.end(), doe1.begin(), doe1.end());
-             md1 = vx->auxdata<float>("MomentaDirection");
-             md2 = mergeCand->auxdata<float>("MomentaDirection");
-             hf1 = vx->auxdataConst<float>("radiiPattern");
-             hf2 = mergeCand->auxdataConst<float>("radiiPattern");
-             trkW1 = vx->auxdata<std::vector<float>>("trkWeight");
-             trkW2 = mergeCand->auxdata<std::vector<float>>("trkWeight");
+             md1 = mAcc_momdir(*vx);
+             md2 = mAcc_momdir(*mergeCand);
+             hf1 = mAcc_radpat(*vx);
+             hf2 = mAcc_radpat(*mergeCand);
+             trkW1 = mAcc_trkwt(*vx);
+             trkW2 = mAcc_trkwt(*mergeCand);
              trkW2.insert(trkW2.end(), trkW1.begin(), trkW1.end());
-             ntrks = vx->auxdata<int>("NumTrkAtVtx") +
-                     mergeCand->auxdata<int>("NumTrkAtVtx");
+             ntrks = mAcc_numtav(*vx) + mAcc_numtav(*mergeCand);
            }
 
            // delete copy of first vertex and then overwrite with merged vertex
@@ -201,11 +211,11 @@ namespace Trk{
              vx->setVertexType(typ2);
 
            if (moreDeco) {
-             vx->auxdata<std::vector<float>>("trkDistOverError") = doe2;
-             vx->auxdata<float>("MomentaDirection") = wght1 * md1 + wght2 * md2;
-             vx->auxdata<float>("radiiPattern") = wght1 * hf1 + wght2 * hf2;
-             vx->auxdata<std::vector<float>>("trkWeight") = trkW2;
-             vx->auxdata<int>("NumTrkAtVtx") = ntrks;
+             mAcc_trkdoe(*vx) = doe2;
+             mAcc_momdir(*vx) = wght1 * md1 + wght2 * md2;
+             mAcc_radpat(*vx) = wght1 * hf1 + wght2 * hf2;
+             mAcc_trkwt(*vx) = trkW2;
+             mAcc_numtav(*vx) = ntrks;
            }
 
            mDecor_sumPt2(*vx) = pt1 * pt1 + pt2 * pt2;
@@ -217,7 +227,7 @@ namespace Trk{
          } // loop over j
        }   // if vx found partner in compatibility
 
-       ATH_MSG_DEBUG("Merged sumPt2 " << vx->auxdataConst<float>("sumPt2"));
+       ATH_MSG_DEBUG("Merged sumPt2 " << mAcc_sumPt2(*vx));
 
        // whether we merged or not, can add vx to the container
        if (vx != nullptr)
