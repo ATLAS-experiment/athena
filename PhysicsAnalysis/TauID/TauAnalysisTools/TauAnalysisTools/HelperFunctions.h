@@ -5,7 +5,7 @@
  * @brief 
  * @date 2021-02-19
  * 
- * @copyright Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  * 
  */
 
@@ -87,7 +87,7 @@ xAOD::TauJetParameters::DecayMode getTruthDecayMode(const xAOD::TauJet& xTau);
  */
 int getNTauDecayParticles(const xAOD::TruthParticle& xTruthTau, int iPdgId, bool bCompareAbsoluteValues);
 /** returns true if last line in file is empty or the line starts with the number sign */
-bool testFileForEOFContainsCharacters(std::string sFileName);
+bool testFileForEOFContainsCharacters(const std::string& sFileName);
 void createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& vPi0s);
 void correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& correctedPi0s, TLorentzVector& TauP4);
 /** return charged and neutral daughters of truth tau */
