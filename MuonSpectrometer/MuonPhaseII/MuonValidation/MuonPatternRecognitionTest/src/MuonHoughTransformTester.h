@@ -73,6 +73,9 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nRPCHits{m_tree.newScalar<unsigned int>("genNRpcHits",0)};
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nMDTHits{m_tree.newScalar<unsigned int>("genNMdtHits",0)};
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nTGCHits{m_tree.newScalar<unsigned int>("genNTgcHits",0)};
+    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nsTGCHits{m_tree.newScalar<unsigned int>("genNsTgcHits",0)};
+    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nMMits{m_tree.newScalar<unsigned int>("genNMmHits",0)};
+    
     
     MuonVal::ScalarBranch<float>& m_out_gen_tantheta{m_tree.newScalar<float>("genTanTheta", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_z0{m_tree.newScalar<float>("genZ0", 0.0)}; 
@@ -90,7 +93,10 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nPhiHits{m_tree.newScalar<unsigned int>("maxNPhiHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nMdt{m_tree.newScalar<unsigned int>("maxNMdtHits", 0)}; 
     MuonVal::ScalarBranch<unsigned int>& m_out_max_nRpc{m_tree.newScalar<unsigned int>("maxNRpcHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nTgc{m_tree.newScalar<unsigned int>("maxNTgcHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned int>& m_out_max_nTgc{m_tree.newScalar<unsigned int>("maxNTgcHits", 0)};
+    MuonVal::ScalarBranch<unsigned int>& m_out_max_nsTgc{m_tree.newScalar<unsigned int>("maxNsTgcHits", 0)};
+    MuonVal::ScalarBranch<unsigned int>& m_out_max_nMm{m_tree.newScalar<unsigned int>("maxNMmHits", 0)};
+    
     /// Dump of the Mdt hits on maximum
     MuonVal::MdtIdentifierBranch    m_max_driftCircleId{m_tree, "maxMdtId"}; 
     MuonVal::VectorBranch<float>&   m_max_driftCirclRadius{m_tree.newVector<float>("maxMdtDriftR")}; 
@@ -111,6 +117,19 @@ namespace MuonValR4{
     MuonVal::VectorBranch<bool> &   m_max_tgcHitHasPhiMeas{m_tree.newVector<bool>("maxTgcHasPhiMeas")};
     MuonVal::VectorBranch<float>&   m_max_tgcHitErrorX{m_tree.newVector<float>("maxTgcEtaMeasError")};
     MuonVal::VectorBranch<float>&   m_max_tgcHitErrorY{m_tree.newVector<float>("maxTgcPhiMeasError")};
+
+    MuonVal::sTgcIdentifierBranch   m_max_stgcHitId{m_tree, "maxsTgcId"};
+    MuonVal::ThreeVectorBranch      m_max_stgcHitPos{m_tree,"maxsTgcHitPos"};
+    MuonVal::VectorBranch<bool> &   m_max_stgcHitHasPhiMeas{m_tree.newVector<bool>("maxsTgcHasPhiMeas")};
+    MuonVal::VectorBranch<float>&   m_max_stgcHitErrorX{m_tree.newVector<float>("maxsTgcEtaMeasError")};
+    MuonVal::VectorBranch<float>&   m_max_stgcHitErrorY{m_tree.newVector<float>("maxsTgcPhiMeasError")};
+
+    MuonVal::MmIdentifierBranch     m_max_MmHitId{m_tree, "maxMmId"};
+    MuonVal::ThreeVectorBranch      m_max_MmHitPos{m_tree,"maxMmHitPos"};
+    MuonVal::VectorBranch<bool> &   m_max_MmHitIsStero{m_tree.newVector<bool>("maxMmIsStero")};
+    MuonVal::VectorBranch<float>&   m_max_MmHitErrorX{m_tree.newVector<float>("maxMmEtaMeasError")};
+    MuonVal::VectorBranch<float>&   m_max_MmHitErrorY{m_tree.newVector<float>("maxMmPhiMeasError")};
+
 
     /// Draw the event display for the cases where the hough transform did not find any hough maximum
     Gaudi::Property<bool> m_drawEvtDisplayFailure{this, "drawDisplayFailed", false};
