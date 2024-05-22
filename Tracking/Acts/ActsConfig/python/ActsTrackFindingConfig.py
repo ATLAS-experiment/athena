@@ -258,17 +258,4 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
         CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
     return acc
 
-def ActsTrackMergerAlgCfg(flags,
-                          name: str = "ActsTrackMergerAlg",
-                          **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    kwargs.setdefault('OutputTrackCollection', 'ActsCombinedTracks')
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
-    acc.addEventAlgo(CompFactory.ActsTrk.TrackMergerAlg(name, **kwargs))
-    return acc
 
