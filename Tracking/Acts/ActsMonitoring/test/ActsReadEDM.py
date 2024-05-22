@@ -2,8 +2,24 @@
 
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+def getAllAvailableTracks(flags) -> list[str]:
+    from ActsConfig.ActsCollectionsConfig import TrackBackends
+    typedCollections = flags.Input.TypedCollections
+
+    trackCollections = []
+    for typedCollection in typedCollections:
+        [colType, colName] = typedCollection.split('#')
+
+        if colType not in TrackBackends.types:
+            continue
+        
+        prefix = TrackBackends.extractPrefix(collection=colName)
+        if f"{prefix}Tracks" not in trackCollections:
+            trackCollections.append(f"{prefix}Tracks")
+
+    return trackCollections
+
 if __name__ == "__main__":
-    import re
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
@@ -62,14 +78,14 @@ if __name__ == "__main__":
                                               OutputLevel=2,
                                               TracksLocation=track))
     if flags.readTrackParticles:
+        allTracks = getAllAvailableTracks(flags)
         from ActsConfig.ActsAnalysisConfig import ActsTrackParticleAnalysisAlgCfg
         for tp in flags.trackParticles.split(','):
-            src_track_name = re.search(r'^(.*)ParticlesAlt.*',tp).group(1)
             acc.merge(ActsTrackParticleAnalysisAlgCfg(flags,
                                                       name=f"{tp}AnalysisAlg",
                                                       OutputLevel=2,
                                                       TrackParticleLocation=tp,
-                                                      ExtraInputs={('ActsTrk::TrackContainer',src_track_name)}, # ensure scheduled after reader
+                                                      ExtraInputs={ ('ActsTrk::TrackContainer', el) for el in allTracks },
                                                       MonGroupName=f"{tp}Analysis"))
             
     acc.printConfig()

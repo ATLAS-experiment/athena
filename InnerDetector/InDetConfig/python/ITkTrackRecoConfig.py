@@ -265,17 +265,11 @@ def ITkActsTrackFinalCfg(flags,
     if len(InputCombinedITkTracks) == 0:
         return acc
     
-    # Schedule track merger
     mergeTrackContainer = "ActsCombinedTracks"
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackMergerAlgCfg
-    acc.merge(ActsTrackMergerAlgCfg(flags,
-                                    InputTrackCollections = InputCombinedITkTracks,
-                                    OutputTrackCollection = mergeTrackContainer))
-
     # Schedule Track particle creation
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToAltTrackParticleCnvAlg",
-                                                ACTSTracksLocation=mergeTrackContainer,
+                                                ACTSTracksLocation=InputCombinedITkTracks,
                                                 TrackParticlesOutKey=f'{mergeTrackContainer}ParticlesAlt'))
     
     

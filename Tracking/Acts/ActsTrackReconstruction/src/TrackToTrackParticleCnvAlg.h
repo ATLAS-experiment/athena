@@ -50,7 +50,6 @@ namespace ActsTrk
                                ISvcLocator *pSvcLocator);
 
     virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
@@ -68,8 +67,8 @@ namespace ActsTrk
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool
        {this, "ExtrapolationTool", ""};
 
-    SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey
-       {this, "ACTSTracksLocation", "","Track collection (ActsTrk variant)"};
+    SG::ReadHandleKeyArray<ActsTrk::TrackContainer> m_tracksContainerKey
+       {this, "ACTSTracksLocation", {},"Track collection (ActsTrk variant)"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey
        {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot or empty." };
     SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey

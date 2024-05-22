@@ -47,7 +47,7 @@ namespace ActsTrk {
 
     if (m_monitorTrackStateCounts) {
        for (const xAOD::TrackParticle *track_particle : *track_particles) {
-          monitorTrackStateCounts(*track_particle);
+	 ATH_CHECK( monitorTrackStateCounts(*track_particle) );
        }
     }
     auto monitor_pt = Monitored::Collection("pt", *track_particles,
@@ -80,51 +80,56 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  void TrackParticleAnalysisAlg::monitorTrackStateCounts(const xAOD::TrackParticle &track_particle) const {
+  StatusCode TrackParticleAnalysisAlg::monitorTrackStateCounts(const xAOD::TrackParticle &track_particle) const {
      static const SG::AuxElement::ConstAccessor<ElementLink<ActsTrk::TrackContainer> > actsTrackLink("actsTrack");
 
      ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(track_particle);
+     ATH_CHECK(link_to_track.isValid());
+
      // to ensure that the code does not suggest something stupid (i.e. creating an unnecessary copy)
      static_assert( std::is_same<ElementLink<ActsTrk::TrackContainer>::ElementConstReference,
                     std::optional<ActsTrk::TrackContainer::ConstTrackProxy> >::value);
      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *link_to_track;
-     if (optional_track.has_value()) {
-        ActsTrk::TrackContainer::ConstTrackProxy track = optional_track.value();
-        std::array<uint8_t, Acts::NumTrackStateFlags+1> counts{};
 
-        const ActsTrk::TrackContainer::ConstTrackProxy::IndexType
-           lastMeasurementIndex = track.tipIndex();
+     if ( not optional_track.has_value() ) {
+       ATH_MSG_WARNING("Invalid track link for particle  " << track_particle.index());
+       return StatusCode::SUCCESS;
+     }
+     
+     ActsTrk::TrackContainer::ConstTrackProxy track = optional_track.value();
+     std::array<uint8_t, Acts::NumTrackStateFlags+1> counts{};
+     
+     const ActsTrk::TrackContainer::ConstTrackProxy::IndexType
+       lastMeasurementIndex = track.tipIndex();
+     
+     track.container().trackStateContainer().visitBackwards(lastMeasurementIndex,
+							    [&counts] (const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+							    {
+							      Acts::ConstTrackStateType flag = state.typeFlags();
+							      ++counts[Acts::NumTrackStateFlags];
+							      
+							      for (unsigned int flag_i=0; flag_i<Acts::NumTrackStateFlags; ++flag_i) {
+								if (flag.test(flag_i)) {
+								  if (flag_i == Acts::TrackStateFlag::HoleFlag) {
+								    if (!state.hasReferenceSurface() || !state.referenceSurface().associatedDetectorElement()) continue;
+								  }
+								  ++counts[flag_i];
+								}
+							      }
+							    });
+     
+     auto monitor_states = Monitored::Scalar<int>("States",counts[Acts::TrackStateFlag::NumTrackStateFlags]);
+     auto monitor_measurement = Monitored::Scalar<int>("Measurements",counts[Acts::TrackStateFlag::MeasurementFlag]);
+     auto monitor_parameter = Monitored::Scalar<int>("Parameters",counts[Acts::TrackStateFlag::ParameterFlag]);
+     auto monitor_outlier = Monitored::Scalar<int>("Outliers",counts[Acts::TrackStateFlag::OutlierFlag]);
+     auto monitor_hole = Monitored::Scalar<int>("Holes",counts[Acts::TrackStateFlag::HoleFlag]);
+     auto monitor_material = Monitored::Scalar<int>("MaterialStates",counts[Acts::TrackStateFlag::MaterialFlag]);
+     auto monitor_sharedHit = Monitored::Scalar<int>("SharedHits",counts[Acts::TrackStateFlag::SharedHitFlag]);
 
-        track.container().trackStateContainer().visitBackwards(
-                 lastMeasurementIndex,
-                 [&counts
-                  ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
-                 {
-                    Acts::ConstTrackStateType flag = state.typeFlags();
-                    ++counts[Acts::NumTrackStateFlags];
-                    for (unsigned int flag_i=0; flag_i<Acts::NumTrackStateFlags; ++flag_i) {
-                       if (flag.test(flag_i)) {
-                          if (flag_i == Acts::TrackStateFlag::HoleFlag) {
-                             if (!state.hasReferenceSurface() || !state.referenceSurface().associatedDetectorElement()) continue;
-                          }
-                          ++counts[flag_i];
-                       }
-                    }
-                 });
-        auto monitor_states = Monitored::Scalar<int>("States",counts[Acts::TrackStateFlag::NumTrackStateFlags]);
-        auto monitor_measurement = Monitored::Scalar<int>("Measurements",counts[Acts::TrackStateFlag::MeasurementFlag]);
-        auto monitor_parameter = Monitored::Scalar<int>("Parameters",counts[Acts::TrackStateFlag::ParameterFlag]);
-        auto monitor_outlier = Monitored::Scalar<int>("Outliers",counts[Acts::TrackStateFlag::OutlierFlag]);
-        auto monitor_hole = Monitored::Scalar<int>("Holes",counts[Acts::TrackStateFlag::HoleFlag]);
-        auto monitor_material = Monitored::Scalar<int>("MaterialStates",counts[Acts::TrackStateFlag::MaterialFlag]);
-        auto monitor_sharedHit = Monitored::Scalar<int>("SharedHits",counts[Acts::TrackStateFlag::SharedHitFlag]);
-        fill(m_monGroupName.value(), monitor_states, monitor_measurement, monitor_parameter, monitor_outlier, monitor_hole,
-             monitor_material, monitor_sharedHit);
-     }
-     else {
-        ATH_MSG_WARNING("Invalid track link for particle  " << track_particle.index());
-     }
+     fill(m_monGroupName.value(),
+	  monitor_states, monitor_measurement, monitor_parameter, monitor_outlier, monitor_hole,
+	  monitor_material, monitor_sharedHit);
+     return StatusCode::SUCCESS;
   }
-
 
 }

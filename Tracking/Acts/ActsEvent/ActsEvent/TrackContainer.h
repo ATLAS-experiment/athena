@@ -35,6 +35,9 @@ public:
    ConstTrackProxy operator[](unsigned int index) const {
       return getTrack(index);
    }
+  bool empty() const {
+    return size() == 0;
+  }
 
    // Special indexing policy which will dereference element links
    // into an std::optional rather than a pointer or reference to an

@@ -21,7 +21,7 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
-    void monitorTrackStateCounts(const xAOD::TrackParticle &track_particle) const;
+    StatusCode monitorTrackStateCounts(const xAOD::TrackParticle &track_particle) const;
 
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey {this, "TrackParticleLocation", "",
         "Input track particle collection"};
