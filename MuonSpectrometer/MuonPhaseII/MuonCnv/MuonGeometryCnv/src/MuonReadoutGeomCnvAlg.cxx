@@ -376,7 +376,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx,
                                                                 alignStore ? alignStore->passivation : nullptr);
         /// Loop over the gas gaps & efine the 
         for (unsigned int gasGap = 0; gasGap < copyMe->nGasGaps(); ++gasGap) {
-            const MuonGMR4::StripLayer& stripLayer{copyMe->stripLayer(copyMe->createHash(0, gasGap +1))};
+            const MuonGMR4::StripLayer& stripLayer{copyMe->stripLayer(MuonGMR4::MmReadoutElement::createHash(gasGap +1, 0))};
             const MuonGMR4::StripDesign& designFrom{stripLayer.design()};
             
             newRE->m_Xlg[gasGap] = stripLayer.toOrigin() * 
