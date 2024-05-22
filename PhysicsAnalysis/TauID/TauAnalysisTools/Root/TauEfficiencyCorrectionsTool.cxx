@@ -48,6 +48,7 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   declareProperty( "EleIDLevel",                   m_iEleIDLevel                   = (int)ELEIDNONE );
   declareProperty( "MCCampaign",                   m_sMCCampaign                   = "" ); // MC16a, MC16d or MC16e
   declareProperty( "isAFII",	                   m_sAFII	                   = false );
+  declareProperty( "useFastSim",                   m_useFastSim                    = false );
   declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
   declareProperty( "TauSelectionTool",             m_tTauSelectionToolHandle );
   declareProperty( "PileupReweightingTool",        m_tPRWTool );
@@ -267,6 +268,7 @@ void TauEfficiencyCorrectionsTool::printConfig() const
   ATH_MSG_DEBUG( "  EleIDLevel " << m_iEleIDLevel );
   ATH_MSG_DEBUG( "  MCCampaign " << m_sMCCampaign );
   ATH_MSG_DEBUG( "  isAFII " << m_sAFII );
+  ATH_MSG_DEBUG( "  useFastSim " << m_useFastSim);
 }
 
 //______________________________________________________________________________
@@ -394,7 +396,13 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
     if (iEfficiencyCorrectionType == SFJetIDHadTau)
     {
       if (m_sInputFilePathJetIDHadTau.empty()) {
-        if (m_sAFII) ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using FullSim");
+        if (m_sAFII) {
+          ATH_MSG_ERROR("isAFII property is now deprecated, please use useFastSim property and AF3 samples");
+	  return StatusCode::FAILURE;
+        } else if(m_useFastSim) {
+          ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using full sim");
+        }
+
 	m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_2022-prerecommendation_v2.root";
       }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "TauScaleFactorJetIDHadTau";
@@ -429,7 +437,13 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
     {
       // the path must be updated once RNN eVeto SFs are available
       if (m_sInputFilePathEleIDElectron.empty()) {
-        if (m_sAFII) ATH_MSG_WARNING("No fast-sim recommendation for tau electron veto, using full sim");
+        if (m_sAFII) {
+	  ATH_MSG_ERROR("isAFII property is now deprecated, please use useFastSim property and AF3 samples");
+          return StatusCode::FAILURE;
+ 	} else if(m_useFastSim) {
+	  ATH_MSG_WARNING("No fast-sim recommendation for tau electron veto, using full sim");
+	}	
+
 	m_sInputFilePathEleIDElectron = sDirectory+ "EleRNN_TrueElectron_2022-mc20-prerec-v2.root";
       }
       if (m_sVarNameEleIDElectron.empty()) m_sVarNameEleIDElectron = "TauScaleFactorEleIDElectron";
@@ -527,7 +541,6 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
 //______________________________________________________________________________
 StatusCode TauEfficiencyCorrectionsTool::beginInputFile()
 {
-  // FIXME: policy for Fullsim and AtlFast3 scale factors to be reassessed in R22
   if (inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData")) {
     const xAOD::FileMetaData* fmd = nullptr;
     ATH_CHECK( inputMetaStore()->retrieve( fmd, "FileMetaData" ) );
@@ -536,10 +549,13 @@ StatusCode TauEfficiencyCorrectionsTool::beginInputFile()
     // if no result -> no simFlavor metadata, so must be data
     if(result)  std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
     
-    if (simType.find("ATLFASTII")!=std::string::npos && !m_sAFII)
-      ATH_MSG_WARNING("Input file is fast simulation but you are _not_ using AFII corrections and uncertainties, you should set \"isAFII\" to \"true\"");
-    else if (simType.find("FULLG4")!=std::string::npos && m_sAFII)
-      ATH_MSG_WARNING("Input file is full simulation but you are using AFII corrections and uncertainties, you should set \"isAFII\" to \"false\"");
+    if (simType.find("ATLFASTII")!=std::string::npos){
+      ATH_MSG_WARNING("Input file is AFII sample which should be replaced by AF3 as this will be the only atlas fast simulation supported by TauCP");
+    } else if( simType.find("ATLFAST3") != std::string::npos && !m_useFastSim){
+      ATH_MSG_WARNING("Input file is AF3 sample but you are _not_ using AF3 corrections and uncertainties, you should set \"useFastSim\" to \"true\"");
+    } else if (simType.find("FULLG4")!=std::string::npos && m_useFastSim){
+      ATH_MSG_WARNING("Input file is full simulation but you are using AF3 corrections and uncertainties, you should set \"useFastSim\" to \"false\"");
+    }
   }
 
   return StatusCode::SUCCESS;

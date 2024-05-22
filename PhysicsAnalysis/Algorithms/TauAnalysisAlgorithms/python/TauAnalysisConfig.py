@@ -69,7 +69,7 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
-        alg.smearingTool.isAFII = config.dataType() is DataType.FastSim
+        alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -168,7 +168,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
                 ( selectionTool.getType(), selectionTool.getName() )
-            alg.efficiencyCorrectionsTool.isAFII = config.dataType() is DataType.FastSim
+            alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
             alg.scaleFactorDecoration = 'tau_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
