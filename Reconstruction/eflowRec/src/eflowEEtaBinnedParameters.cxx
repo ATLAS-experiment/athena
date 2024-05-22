@@ -20,6 +20,7 @@ CREATED:  18th Aug, 2005
 #include "GaudiKernel/SystemOfUnits.h"
 
 //C++ Headers
+#include <float.h>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -91,7 +92,12 @@ void eflowEEtaBinnedParameters::initialise(const std::vector<double>& eBinBounds
     *bin1 = m_bins[lowEBin][etaBin].get();
     *bin2 = m_bins[highEBin][etaBin].get();
 
-    weight = log(m_eBinBounds[highEBin] / e) / log(m_eBinBounds[highEBin] / m_eBinBounds[lowEBin]);
+    double higherEBound = m_eBinBounds[highEBin];
+    double lowerEBound = m_eBinBounds[lowEBin];
+    //deals with e = 0 bin to avoid dividing by zero
+    if (lowerEBound < FLT_MIN) lowerEBound = FLT_MIN;
+
+    weight = log(higherEBound / e) / log(higherEBound / lowerEBound);
   }
   return weight;
 }
