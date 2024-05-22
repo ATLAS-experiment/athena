@@ -18,7 +18,6 @@ ex.type = 'Reco_tf'
 ex.input = 'data_run1'
 ex.threads = 1
 ex.args = '--outputAODFile=AOD.pool.root --outputHISTFile=HIST.root'
-ex.args += ' --CA'
 ex.args += ' --autoConfiguration="everything"'
 ex.args += ' --conditionsTag "all:COMCOND-BLKPA-RUN1-09"'
 ex.args += ' --geometryVersion "all:ATLAS-R1-2012-03-02-00"'
