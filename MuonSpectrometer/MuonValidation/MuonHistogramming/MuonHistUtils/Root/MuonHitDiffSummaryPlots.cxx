@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonHitDiffSummaryPlots.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Muon{
 
@@ -51,8 +52,9 @@ etaLayer4Hits(this, "diff_etaLayer4hits", "diff(reco - truth) eta Layer 4 hits",
   void MuonHitDiffSummaryPlots::fillPlot(Trk::HitTypePlots& hitPlots, xAOD::MuonSummaryType info, const xAOD::Muon& muon, const std::string& sInfo, const xAOD::TruthParticle& truthprt, float weight){
   uint8_t hitval = 0;
   if (!muon.summaryValue(hitval,info)) return;
-  if (!truthprt.isAvailable<uint8_t>(sInfo)) return;
-  hitPlots.fill(hitval - truthprt.auxdata<uint8_t>(sInfo), muon.eta(), muon.phi(), weight);
+  static const SG::ConstAccessor<uint8_t> acc (sInfo);
+  if (!acc.isAvailable(truthprt)) return;
+  hitPlots.fill(hitval - acc(truthprt), muon.eta(), muon.phi(), weight);
 }
 
 }

@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/RecoInfoPlots.h"
 #include "MuonHistUtils/MuonEnumDefs.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace Muon{
 											   
@@ -59,7 +60,10 @@ void RecoInfoPlots::initializePlots(){
 
   //trying to accomodate both in a way that the code compiles in both releases
   int correctEnum = (int) xAOD::Muon::MuonSpectrometerTrackParticle;
-  if (mu.isAvailable< ElementLink<xAOD::TrackParticleContainer> >("extrapolatedMuonSpectrometerTrackParticleLink") && (mu.auxdata< ElementLink<xAOD::TrackParticleContainer> >("extrapolatedMuonSpectrometerTrackParticleLink")).isValid()) correctEnum+=2; //check correct numbering in Muon.h
+  static const SG::ConstAccessor< ElementLink<xAOD::TrackParticleContainer> >
+    extrapLinkAcc ("extrapolatedMuonSpectrometerTrackParticleLink");
+  if (extrapLinkAcc.isAvailable(mu) && (extrapLinkAcc(mu)).isValid())
+    correctEnum+=2; //check correct numbering in Muon.h
   const xAOD::TrackParticle* msExtrapTrk = mu.trackParticle((xAOD::Muon::TrackParticleType) correctEnum);
   if (msExtrapTrk) {
     m_oMSTrkRecoInfoPlots.fill(*msExtrapTrk, weight);
