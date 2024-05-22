@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
 from TrkConfig.TrackingPassFlags import printActiveConfig
+from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching
@@ -158,8 +159,14 @@ def ITkStoreTrackSeparateContainerCfg(flags,
         result.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
                                                        ACTSTracksLocation=TrackContainer,
                                                        TrackParticlesOutKey=f'{TrackContainer}ParticlesAlt'))
-            
-            
+
+        if flags.Tracking.doTruth :
+            from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
+            result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags,
+                                                                name=f'{TrackContainer}ParticleTruthDecorationAlg',
+                                                                TrackToTruthAssociationMaps = [f'{TrackContainer}ToTruthParticleAssociation'],
+                                                                TrackParticleContainerName = f'{TrackContainer}ParticlesAlt'
+                                                                ))
     return result
 
 
@@ -271,8 +278,22 @@ def ITkActsTrackFinalCfg(flags,
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToAltTrackParticleCnvAlg",
                                                 ACTSTracksLocation=InputCombinedITkTracks,
                                                 TrackParticlesOutKey=f'{mergeTrackContainer}ParticlesAlt'))
-    
-    
+    if flags.Tracking.doTruth :
+        from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg
+        track_to_truth_maps=[]
+        for track_container in InputCombinedITkTracks :
+            track_to_truth_maps += [f'{track_container}ToTruthParticleAssociation']
+        # note: suppress stat dumps from ActsTrackParticleTruthDecorationAlg if there is only
+        #       a single input collection, because it duplicates in that case the output of
+        #       the TrackFindingValidationAlg
+        acc.merge(ActsTrackParticleTruthDecorationAlgCfg(
+                     flags,
+                     name=f'{mergeTrackContainer}ParticleTruthDecorationAlg',
+                     TrackToTruthAssociationMaps = track_to_truth_maps,
+                     TrackParticleContainerName = f'{mergeTrackContainer}ParticlesAlt',
+                     OutputLevel=WARNING              if len(InputCombinedITkTracks)==1 else INFO,
+                     ComputeTrackRecoEfficiency=False if len(InputCombinedITkTracks)==1 else True
+                     ))
     return acc
 
 def ITkTrackFinalCfg(flags,
