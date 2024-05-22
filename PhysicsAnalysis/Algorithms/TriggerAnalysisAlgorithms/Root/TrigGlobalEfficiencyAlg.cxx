@@ -101,6 +101,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestPhotonMapKeys(triggerCombination, "2015_2018/rel21.2/Summer2020_Rec_v1", photonLegsPerKey));
 
   std::map<std::string, std::string> legsPerTool;
+  auto nameForDefaultSF = ITrigGlobalEfficiencyCorrectionTool::toolnameForDefaultScaleFactor();
 
   // ELECTRON TOOLS
   ToolHandleArray<IAsgElectronEfficiencyCorrectionTool> electronEffTools, electronSFTools;
@@ -108,6 +109,11 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   if (!m_electronsHandle.empty() && !m_doMatchingOnly) {
     if (m_electronID.empty()) ATH_MSG_ERROR("Electron ID was not set for TrigGlobalEfficiencyAlg!");
     for (const auto &[trigKey, triggers] : electronLegsPerKey) {
+      if (trigKey == nameForDefaultSF) {  // no tool needed in this case
+        auto [itr, added] = legsPerTool.emplace(nameForDefaultSF, triggers);
+        if (!added) itr->second += "," + triggers;
+        continue;
+      }
       nTools++;
       for (bool isSFTool : {true, false}) { // one tool instance for efficiencies, another for scale factors
 	auto t = m_electronToolsFactory.emplace(m_electronToolsFactory.end(),
@@ -140,6 +146,11 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   if (!m_photonsHandle.empty() && !m_doMatchingOnly) {
     if (m_photonIsol.empty()) ATH_MSG_ERROR("Photon Isolation was not set for TrigGlobalEfficiencyAlg!");
     for (const auto &[trigKey, triggers] : photonLegsPerKey) {
+      if (trigKey == nameForDefaultSF) {  // no tool needed in this case
+        auto [itr, added] = legsPerTool.emplace(nameForDefaultSF, triggers);
+        if (!added) itr->second += "," + triggers;
+        continue;
+      }
       nTools++;
       for (bool isSFTool : {true, false}) { // one tool instance for efficiencies, another for scale factors
 	auto t = m_photonToolsFactory.emplace(m_photonToolsFactory.end(),

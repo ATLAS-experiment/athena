@@ -49,7 +49,8 @@ private:
 	TrigGlobalEfficiencyCorrectionTool* m_parent; /// pointer updated at each call to compute() because the parent tool might have been moved in-between
 	
 	std::vector<Period> m_periods;
-	std::map<std::pair<const Lepton*, std::size_t>, Efficiencies> m_cachedEfficiencies;
+	std::map<std::pair<const Lepton*, std::size_t>, Efficiencies> m_cachedEfficiencies;  // not thread safe
+	bool m_forceUnitSF;  // not thread safe
 	
 	bool aboveThreshold(const Lepton& p,std::size_t leg) const { return m_parent->aboveThreshold(p, leg); }
 	template<typename Trig1L> auto getLoosestLegAboveThreshold(const Lepton& lepton, const flat_set<Trig1L>& trigs, bool& success)
