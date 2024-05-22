@@ -95,7 +95,9 @@ namespace MuonGM {
         std::vector<GeoChildNodeWithTrf> children{getAllSubVolumes(pvc)};
         for (const GeoChildNodeWithTrf& child : children) {
             ATH_MSG_VERBOSE("Child node "<<child.nodeName<<" "<<child.volume->getLogVol()->getName()); 
-            if (child.volume->getLogVol()->getName().find("Sensitive") == std::string::npos) {
+            if (child.volume->getLogVol()->getName().find("Sensitive") == std::string::npos &&
+                /// Active gas volume in the R4 like description
+                child.volume->getLogVol()->getName() != "actMicroMegaGas") {
                 continue;
             }
             ++m_nlayers;

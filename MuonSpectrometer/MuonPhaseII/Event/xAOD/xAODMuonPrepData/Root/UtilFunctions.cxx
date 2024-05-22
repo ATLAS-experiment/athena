@@ -67,6 +67,9 @@ namespace xAOD{
         } else if (meas->type() == UncalibMeasType::TgcStripType) {
             const TgcStrip* strip = static_cast<const TgcStrip*>(meas);
             return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+        } else if (meas->type() == UncalibMeasType::MMClusterType) {
+            const MMCluster* clust = static_cast<const MMCluster*>(meas);
+            return toChamberTransform(gctx, clust) *(clust->localPosition<1>()[0] * Amg::Vector3D::UnitX());
         } else if (meas->type() == UncalibMeasType::sTgcStripType) {
             const sTgcMeasurement* sTgc = static_cast<const sTgcMeasurement*>(meas);
             if (sTgc->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip ||
@@ -101,7 +104,10 @@ namespace xAOD{
             return trf.linear() *dir;
         } else if (meas->type() == UncalibMeasType::MMClusterType) {
             const MMCluster* clust = static_cast<const MMCluster*>(meas);
-            return toChamberTransform(gctx,  clust) * Amg::Vector3D::UnitY();
+            return toChamberTransform(gctx,  clust).linear() * Amg::Vector3D::UnitY();
+        } else if (meas->type() == UncalibMeasType::sTgcStripType) {
+            const sTgcMeasurement* sTgc = static_cast<const sTgcMeasurement*>(meas);
+            return toChamberTransform(gctx,  sTgc).linear() * Amg::Vector3D::UnitY();
         }
         THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         return Amg::Vector3D::Zero();        
@@ -125,7 +131,10 @@ namespace xAOD{
             return trf.linear() *dir;
         } else if (meas->type() == UncalibMeasType::MMClusterType) {
             const MMCluster* clust = static_cast<const MMCluster*>(meas);
-            return toChamberTransform(gctx,  clust) * Amg::Vector3D::UnitX();
+            return toChamberTransform(gctx,  clust).linear() * Amg::Vector3D::UnitX();
+        } else if (meas->type() == UncalibMeasType::sTgcStripType) {
+            const sTgcMeasurement* sTgc = static_cast<const sTgcMeasurement*>(meas);
+            return toChamberTransform(gctx,  sTgc).linear() * Amg::Vector3D::UnitX();
         }
         THROW_EXCEPTION("Measurement "<<typeid(*meas).name()<<" is not supported");
         return Amg::Vector3D::Zero();  
