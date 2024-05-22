@@ -11,6 +11,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, BeamType
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from TileConfiguration.TileConfigFlags import TileRunType
+from AthenaCommon.SystemOfUnits import GeV
 
 import os
 import sys
@@ -36,7 +37,7 @@ def configureFlagsAndArgsFromPartition(flags, args, partition, log):
     # Set up default values
     runType = 'Physics'
     beamType = 'collisions'
-    beamEnergy = 200   # In TileTB: [GeV]
+    beamEnergy = 200 * GeV
     runNumber = 2400000
     project = 'data_H8'
 
@@ -48,7 +49,7 @@ def configureFlagsAndArgsFromPartition(flags, args, partition, log):
     else:
         runParams.checkout()
         beamType = runParams.beam_type
-        beamEnergy = runParams.beam_energy
+        beamEnergy = runParams.beam_energy * GeV
         runNumber = runParams.run_number
         project = runParams.T0_project_tag
         runType = runParams.run_type
@@ -116,7 +117,7 @@ def configureFlagsAndArgsFromPartition(flags, args, partition, log):
     args.nsamples = nSamples
 
 
-def TileTestBeamMonitoringCfg(flags, fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], **kwargs):
+def TileTestBeamMonitoringCfg(flags, fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402], useFELIX=False, **kwargs):
 
     ''' Function to configure Tile TestBeam monitoring.'''
 
@@ -134,11 +135,18 @@ def TileTestBeamMonitoringCfg(flags, fragIDs=[0x100, 0x101, 0x200, 0x201, 0x402]
     from TileMonitoring.TileTBCellMonitorAlgorithm import TileTBCellMonitoringConfig
     acc.merge(TileTBCellMonitoringConfig(flags, timeRange=[-200, 200], fragIDs=fragIDs))
 
-    from TileMonitoring.TileDigitsFlxMonitorAlgorithm import TileDigitsFlxMonitoringConfig
-    acc.merge(TileDigitsFlxMonitoringConfig(flags, TileDigitsContainerFlx="TileDigitsFlxFiltered"))
+    if useFELIX:
+        from TileMonitoring.TileTBCellMonitorAlgorithm import TileTBCellMonitoringConfig
+        acc.merge(TileTBCellMonitoringConfig(flags, timeRange=[-200, 200], fragIDs=fragIDs, useFELIX=True))
 
-    from TileMonitoring.TileRawChannelFlxMonitorAlgorithm import TileRawChannelFlxMonitoringConfig
-    acc.merge(TileRawChannelFlxMonitoringConfig(flags, TileRawChannelContainerFlx="TileRawChannelFlxFit"))
+        from TileMonitoring.TileTBPulseMonitorAlgorithm import TileTBPulseMonitoringConfig
+        acc.merge(TileTBPulseMonitoringConfig(flags, timeRange=[-200, 200], fragIDs=fragIDs, useFELIX=True))
+
+        from TileMonitoring.TileDigitsFlxMonitorAlgorithm import TileDigitsFlxMonitoringConfig
+        acc.merge(TileDigitsFlxMonitoringConfig(flags))
+
+        from TileMonitoring.TileRawChannelFlxMonitorAlgorithm import TileRawChannelFlxMonitoringConfig
+        acc.merge(TileRawChannelFlxMonitoringConfig(flags))
 
     return acc
 
@@ -208,6 +216,7 @@ if __name__ == '__main__':
     # =======>>> Set the Athena configuration flags to defaults (can be overriden via comand line)
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
+    flags.DQ.FileKey = 'Tile'
     flags.Exec.MaxEvents = 3
     flags.Common.isOnline = True
     flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-04-00-00'
@@ -231,7 +240,8 @@ if __name__ == '__main__':
         flags.Tile.RunType = TileRunType.PHY
         flags.Beam.Type = BeamType.Collisions
         # Get beam energy from meta data (Tile TB setup: [GeV])
-        flags.Beam.Energy = GetFileMD(flags.Input.Files).get("beam_energy", 100)
+        beamEnergy = GetFileMD(flags.Input.Files).get("beam_energy", 100)
+        flags.Beam.Energy = beamEnergy * GeV
 
         if not (args.filesInput or flags.Input.Files):
             flags.Input.Files = defaultTestFiles.RAW_RUN2
@@ -250,7 +260,7 @@ if __name__ == '__main__':
     flags.lock()
 
     log.info('=====>>> FINAL CONFIG FLAGS SETTINGS FOLLOW:')
-    flags.dump(pattern='Tile.*|Input.*|Exec.*|IOVDb.[D|G].*', evaluate=True)
+    flags.dump(pattern='Tile.*|Beam.*|Input.*|Exec.*|IOVDb.[D|G].*', evaluate=True)
 
     # =======>>> Initialize configuration object, add accumulator, merge, and run
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -299,7 +309,7 @@ if __name__ == '__main__':
         ]
 
     # =======>>> Configure Tile TestBeam monitoring
-    cfg.merge(TileTestBeamMonitoringCfg(flags, fragIDs=fragIDs))
+    cfg.merge(TileTestBeamMonitoringCfg(flags, fragIDs=fragIDs, useFELIX=True))
 
     # =======>>> Configure ROD to ROB mapping
     # Scan first event for all fragments to create proper ROD to ROB map
