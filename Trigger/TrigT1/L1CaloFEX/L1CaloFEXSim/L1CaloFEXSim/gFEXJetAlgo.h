@@ -68,6 +68,8 @@ namespace LVL1 {
 
     virtual void SaturateJets( gTowersType & jets, gTowersType sat ) const;
 
+    virtual void SaturateBlocks( gTowersType & gBlkSum, gTowersType sat ) const;
+
     virtual void gBlockAB(const gTowersType& twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
     
     virtual void blkOutAB(gTowersType & blocks, std::array<int, 32> & jetOutL, std::array<int, 32> & etaIndL, std::array<int, 32> & jetOutR, std::array<int, 32> & etaIndR) const;
