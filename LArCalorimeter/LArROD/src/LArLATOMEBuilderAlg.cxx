@@ -285,13 +285,18 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     }
     LArRawSC* scraw = dataItemsPool.nextElementPtr();
 
-    (*scraw) = LArRawSC(id, digitSC->Channel(), digitSC->SourceId(),
-                        newEnergies, newBCIDs, satur);
-    scraw->setTauEnergies(tauEnergies);
-    scraw->setPassTauSelection(passSelections);
+    scraw->setHardwareId(id);
+    scraw->setChannel(digitSC->Channel());
+    scraw->setSourceId(digitSC->SourceId());
+    scraw->setBCIds(std::move(newBCIDs));
+    scraw->setSaturation(std::move(satur));
+    scraw->setEnergies(std::move(newEnergies));
+    scraw->setTauEnergies(std::move(tauEnergies));
+    scraw->setPassTauSelection(std::move(passSelections));
     scraw->setOFCaOverflow(aoverflow);
     scraw->setOFCbOverflow(boverflow);
     scraw->setPedOverflow(pedoverflow);
+
     outputContainer->push_back(scraw);
 
   } /// scs
