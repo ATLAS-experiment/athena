@@ -9,9 +9,7 @@
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "StoreGate/ReadHandle.h"
 #include "InDetIdentifier/PixelID.h"
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
-
 
 ITkPixelEncodingAlg::ITkPixelEncodingAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator),
@@ -46,100 +44,128 @@ StatusCode ITkPixelEncodingAlg::execute(const EventContext& ctx) const
 {
 
   // const PixelRDO_Container p_pixelRDO_cont = nullptr;
-  SG::ReadHandle<PixelRDO_Container> p_pixelRDO_cont(m_pixelRDOKey, ctx);
-  
-  InDetDD::SiDetectorElementCollection::const_iterator element;
+  SG::ReadHandle<PixelRDO_Container> rdoContainer(m_pixelRDOKey, ctx);
 
-  for (element = m_pixelManager->getDetectorElementBegin(); element != m_pixelManager->getDetectorElementEnd(); ++element) {
-    
-    if (!(*element)) continue;
-  
-    const InDetDD::PixelModuleDesign *design = dynamic_cast<const InDetDD::PixelModuleDesign*>(&((*element)->design()));
+  PixelRDO_Container::const_iterator rdoCollections      = rdoContainer->begin();
+  PixelRDO_Container::const_iterator rdoCollectionsEnd   = rdoContainer->end();
 
-    // get the IdHash of the detector element
-    IdentifierHash IdHash = (*element)->identifyHash();
+  for(; rdoCollections!=rdoCollectionsEnd; ++rdoCollections){
+    const COLLECTION* RDO_Collection(*rdoCollections);
 
-    // get the module and chip definitions
-    const int chips = design->numberOfCircuits();            
-    int rowsPerChip = design->rowsPerCircuit();
-    int columnsPerChip = design->columnsPerCircuit();
-    // const int chipsInPhi = design->rows()/rowsPerChip;
-    // const int chipsinEta = design->columns()/columnsPerChip;            
-    
-    // const float phiPitch = design->phiPitch();
-    // bool use50x50 = true;
-    // if (phiPitch < s_pitch50x50)
-    //   use50x50 = false; 
+    for(const auto *const rdo : *RDO_Collection) {
+      // const Identifier rdoID = rdo->identify();
 
+      const Identifier rdoID = rdo->identify();
+      const Identifier wafferID = m_pixIdHelper->wafer_id(rdoID);
 
-    Region region = (*element)->isBarrel() ? BARREL : ENDCAP;  
-    
-    bool doSwapCoordinates = false;
-    // takle the case where the chips are rotated. You need to swap the phi/eta indices for the pixel
-    // since the front-end as well is rotated and the chip map has to get the right coordinates
-    // It happens for all the single chip modules in the endcap:
-    // - innermost layer
-    // - shorties in the next-to-innermost layer          
-    if (region==ENDCAP and chips==1) {
-      doSwapCoordinates = true;
-    }
-    
-    // swap dimensions if needed
-    if (doSwapCoordinates) 
-      std::swap(columnsPerChip, rowsPerChip);
-    
-    
-    // The chipmap was initialized here -- sroygara
-    // std::vector<ChipMap> chip_maps = std::vector<ChipMap>(chips, ChipMap(columnsPerChip, rowsPerChip, use50x50));
-          
-    // get the RDO collection associated to the detector element
-    PixelRDO_Container::const_iterator rdoCont_itr(p_pixelRDO_cont->indexFind(IdHash));
-    
-    // if the collection is filled, fill the chip map, otherwise leave it empty       
-    if (rdoCont_itr!=p_pixelRDO_cont->end()) {        
-      
-      // loop though the rdo collection 
-      for (auto rdo_itr = (*rdoCont_itr)->begin() ; rdo_itr != (*rdoCont_itr)->end() ; ++rdo_itr) {
+      int pixPhiIx = m_pixIdHelper->phi_index(rdoID);
+      int pixEtaIx = m_pixIdHelper->eta_index(rdoID);
 
-        // Get info from RDO          
-        const Identifier rdoID((*rdo_itr)->identify());
-        int pixPhiIx(m_pixIdHelper->phi_index(rdoID));
-        int pixEtaIx(m_pixIdHelper->eta_index(rdoID));
-        const int tot((*rdo_itr)->getToT());
-        
-        // swap coordinates if needed
-        if (doSwapCoordinates) {
-          std::swap(pixEtaIx,pixPhiIx);
-        }
-        
-        // evaluating the chip number considering the number of rows and columns per chip and
-        // the total number of rows and columns on the sensor
-        // int chip = std::ceil(pixEtaIx/columnsPerChip) + chipsInPhi*std::ceil(pixPhiIx/rowsPerChip);
-                  
-        // get the eta/phi index wrt to the chip, not the module
-        int pixEta = pixEtaIx - std::ceil(pixEtaIx/columnsPerChip)*columnsPerChip;
-        int pixPhi = pixPhiIx - std::ceil(pixPhiIx/rowsPerChip)*rowsPerChip;          
-        
-         ATH_MSG_DEBUG("nChips: " + std::to_string(chips) + "  ToT: " + std::to_string(tot) + " pixEta: " +  std::to_string(pixEta) + "  pixPhi: " + std::to_string(pixPhi));
-        
-        // The info is then passed to some sort of chip map -- sroygara
-        //chip_maps.at(chip).fillChipMap(pixEta, pixPhi, tot);
-        
-      }        
-    }
-  }
-  
-  // fillChipMaps(ctx);
+      const int tot = rdo->getToT();
+      uint32_t chip = getFE(wafferID, rdoID);
+      uint32_t col = getColumn(wafferID, rdoID);
+      uint32_t row = getRow(wafferID, rdoID);
+
+      ATH_MSG_INFO("Chip: "+ std::to_string(chip) + "  ToT: " + std::to_string(tot) + " pixEtaIx: " +  std::to_string(pixEtaIx) + " col: " +  std::to_string(col)+ "  pixPhiIx: " + std::to_string(pixPhiIx) + "  row: " + std::to_string(row));
+    };
+  };
 
   return StatusCode::SUCCESS;
 }
 
 
 
+// From ITkPixelReadoutManager
+uint32_t ITkPixelEncodingAlg::getColumn(const Identifier wafferID, const Identifier rdoID) const {
 
 
+  const InDetDD::SiDetectorElement *element = m_pixelManager->getDetectorElement(wafferID);
+  const InDetDD::PixelModuleDesign *design = static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
+
+  int eta_index = m_pixIdHelper->eta_index(rdoID);
+  int columnsPerFE = design->columnsPerCircuit();
 
 
+  // ---------------------
+  // Convert eta index to column number
+  // ---------------------
+  unsigned int column{};
+  if (eta_index >= columnsPerFE) {
+    column = 2 * columnsPerFE - eta_index - 1;
+  } else {
+    column = eta_index;
+  }
 
 
+  return column;
+}
 
+// From ITkPixelReadoutManager
+uint32_t ITkPixelEncodingAlg::getRow(const Identifier wafferID, const Identifier rdoID) const {
+  const InDetDD::SiDetectorElement *element = m_pixelManager->getDetectorElement(wafferID);
+  const InDetDD::PixelModuleDesign *design = static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
+
+  unsigned int FEsPerRow = design->numberOfCircuitsPerRow();
+  unsigned int rowsPerFE =  design->rowsPerCircuit();
+  unsigned int phi_index = m_pixIdHelper->phi_index(rdoID);
+
+  // Identify the module type
+  Region region = element->isBarrel() ? BARREL : ENDCAP;
+  if (region == ENDCAP) {
+    // Swap phi_index for even endcap modules
+    int module_phi = m_pixIdHelper->phi_module(wafferID);
+    if (module_phi % 2 == 0) {
+      phi_index = FEsPerRow * rowsPerFE - phi_index - 1;
+    }
+  }
+
+  // ---------------------
+  // Convert phi index to row number
+  // ---------------------
+  unsigned int row{};
+  if (phi_index >= rowsPerFE) {
+    row = 2 * rowsPerFE - phi_index - 1;
+  } else {
+    row = phi_index;
+  }
+
+  return row;
+}
+
+
+uint32_t ITkPixelEncodingAlg::getFE(const Identifier wafferID, const Identifier rdoID) const {
+  const InDetDD::SiDetectorElement *element = m_pixelManager->getDetectorElement(wafferID);
+  const InDetDD::PixelModuleDesign *design = static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
+
+  unsigned int FEsPerRow = design->numberOfCircuitsPerRow();
+  unsigned int rowsPerFE =  design->rowsPerCircuit();
+  unsigned int columnsPerFE = design->columnsPerCircuit();
+
+  // ---------------------
+  // Set module properties
+  // ---------------------
+  unsigned int phi_index = m_pixIdHelper->phi_index(rdoID);
+  unsigned int eta_index = m_pixIdHelper->eta_index(rdoID);
+
+  // Identify the module type
+  Region region = element->isBarrel() ? BARREL : ENDCAP;
+  if (region == ENDCAP) {
+    // Swap phi_index for even endcap modules
+    int module_phi = m_pixIdHelper->phi_module(wafferID);
+    if (module_phi % 2 == 0) {
+      phi_index = FEsPerRow * rowsPerFE - phi_index - 1;
+    }
+  }
+
+  // ---------------------
+  // Compute FE number
+  // ---------------------
+  // ITk has up to 4 FEs
+  unsigned int FErow = static_cast<unsigned int>(std::floor(phi_index / rowsPerFE));
+  unsigned int FEcol = static_cast<unsigned int>(std::floor(eta_index / columnsPerFE));
+  if (FErow > 0) {
+    return 2 + FEcol;
+  } else {
+    return FEcol;
+  }
+}
