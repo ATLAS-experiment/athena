@@ -23,7 +23,6 @@
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Surfaces/Surface.hpp"
-#include "Acts/TrackFinding/SourceLinkAccessorConcept.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -390,8 +389,10 @@ namespace ActsTrk
 
   struct TrackFindingAlg::CkfBranchStopper
   {
-    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState,
-                    RecoTrackStateContainer::TrackStateProxy &trackState) const
+    using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
+
+    BranchStopperResult stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState,
+                                   RecoTrackStateContainer::TrackStateProxy &trackState) const
     {
       if (!alg.m_trackStatePrinter.empty())
       {
@@ -399,7 +400,7 @@ namespace ActsTrk
       }
 
       if (!alg.m_doBranchHoleCut)
-        return false;
+        return BranchStopperResult::Continue;
 
       const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
       double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
@@ -412,13 +413,13 @@ namespace ActsTrk
              tipState.nOutliers > cutSet.maxOutliers) &&
             (trackState.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ||
              tipState.nMeasurements < cutSet.minMeasurements)))
-        return false;
+        return BranchStopperResult::Continue;
 
       ++event_stat[category_i][kNStoppedTracksMaxHoles];
       ATH_MSG_DEBUG("CkfBranchStopper: stopped branch with nHoles=" << tipState.nHoles
                                                                     << " nMeasurements=" << tipState.nMeasurements
                                                                     << " " << std::as_const(trackState).typeFlags());
-      return true;
+      return BranchStopperResult::StopAndDrop;
     };
     // Allow AthMsgStreamMacros.h macros using TrackFindingAlg's msgStream.
     MsgStream &msg(const MSG::Level lvl) const { return alg.msgStream(lvl); }
