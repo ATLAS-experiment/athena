@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonTree.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "AthContainers/ConstAccessor.h"
 #include "TROOT.h"
 #include "TVector3.h"
 
@@ -260,40 +261,56 @@ namespace Muon{
 	//
 	//Trk::TruthInfo
 	//
-	if (truthMu.isAvailable<int>("truthType")) 	{ m_th_truthType.push_back(truthMu.auxdata< int >("truthType")); } 
-	else 								{ m_th_truthType.push_back(-999); }
+        static const SG::ConstAccessor<int> truthTypeAcc("truthType");
+        static const SG::ConstAccessor<int> truthOriginAcc("truthOrigin");
+	if (truthTypeAcc.isAvailable(truthMu)) 	{ m_th_truthType.push_back(truthTypeAcc(truthMu)); } 
+	else 					{ m_th_truthType.push_back(-999); }
 	
-	if (truthMu.isAvailable<int>("truthOrigin")) { m_th_truthOrigin.push_back(truthMu.auxdata< int >("truthOrigin")); } 
-	else 								{ m_th_truthOrigin.push_back(-999); }
+	if (truthOriginAcc.isAvailable(truthMu)) { m_th_truthOrigin.push_back(truthOriginAcc(truthMu)); } 
+	else 					 { m_th_truthOrigin.push_back(-999); }
 	
 	//
 	//Trk::TruthTrkExtrapolation
 	//
-     if (truthMu.isAvailable<float>("CaloEntryLayer_px") &&
-         truthMu.isAvailable<float>("CaloEntryLayer_py") &&
-         truthMu.isAvailable<float>("CaloEntryLayer_pz")) 	{
-       
-		TVector3 v(truthMu.auxdata<float>("CaloEntryLayer_px"), truthMu.auxdata<float>("CaloEntryLayer_py"), truthMu.auxdata<float>("CaloEntryLayer_pz"));
+        static const SG::ConstAccessor<float> caloEnt_pxAcc("CaloEntryLayer_px");
+        static const SG::ConstAccessor<float> caloEnt_pyAcc("CaloEntryLayer_py");
+        static const SG::ConstAccessor<float> caloEnt_pzAcc("CaloEntryLayer_pz");
+        if (caloEnt_pxAcc.isAvailable(truthMu) &&
+            caloEnt_pyAcc.isAvailable(truthMu) &&
+            caloEnt_pzAcc.isAvailable(truthMu)) {
+		TVector3 v(caloEnt_pxAcc(truthMu),
+                           caloEnt_pyAcc(truthMu),
+                           caloEnt_pzAcc(truthMu));
 		m_th_CaloEntry_p.push_back(v.Mag()*0.001);
 	} else {
 		m_th_CaloEntry_p.push_back(-999.);
 	}
 	
-	if (truthMu.isAvailable<float>("MuonEntryLayer_px") &&
-         truthMu.isAvailable<float>("MuonEntryLayer_py") &&
-         truthMu.isAvailable<float>("MuonEntryLayer_pz")) 	{
+        static const SG::ConstAccessor<float> muonEnt_pxAcc("MuonEntryLayer_px");
+        static const SG::ConstAccessor<float> muonEnt_pyAcc("MuonEntryLayer_py");
+        static const SG::ConstAccessor<float> muonEnt_pzAcc("MuonEntryLayer_pz");
+	if (muonEnt_pxAcc.isAvailable(truthMu) &&
+            muonEnt_pyAcc.isAvailable(truthMu) &&
+            muonEnt_pzAcc.isAvailable(truthMu)) {
        
-		TVector3 v(truthMu.auxdata<float>("MuonEntryLayer_px"), truthMu.auxdata<float>("MuonEntryLayer_py"), truthMu.auxdata<float>("MuonEntryLayer_pz"));
+		TVector3 v(muonEnt_pxAcc(truthMu),
+                           muonEnt_pyAcc(truthMu),
+                           muonEnt_pzAcc(truthMu));
 		m_th_MuonEntry_p.push_back(v.Mag()*0.001);
 	} else {
 		m_th_MuonEntry_p.push_back(-999.);
 	}
     
-	if (truthMu.isAvailable<float>("MuonExitLayer_px") &&
-         truthMu.isAvailable<float>("MuonExitLayer_py") &&
-         truthMu.isAvailable<float>("MuonExitLayer_pz")) 	{
+        static const SG::ConstAccessor<float> muonExit_pxAcc("MuonExitLayer_px");
+        static const SG::ConstAccessor<float> muonExit_pyAcc("MuonExitLayer_py");
+        static const SG::ConstAccessor<float> muonExit_pzAcc("MuonExitLayer_pz");
+	if (muonExit_pxAcc.isAvailable(truthMu) &&
+            muonExit_pyAcc.isAvailable(truthMu) &&
+            muonExit_pzAcc.isAvailable(truthMu)) {
        
-		TVector3 v(truthMu.auxdata<float>("MuonExitLayer_px"), truthMu.auxdata<float>("MuonExitLayer_py"), truthMu.auxdata<float>("MuonExitLayer_pz"));
+		TVector3 v(muonExit_pxAcc(truthMu),
+                           muonExit_pyAcc(truthMu),
+                           muonExit_pzAcc(truthMu));
 		m_th_MuonExit_p.push_back(v.Mag()*0.001);
 	} else {
 		m_th_MuonExit_p.push_back(-999.);
@@ -302,13 +319,16 @@ namespace Muon{
 	//
 	//Trk::MSHit
 	//
-	if (truthMu.isAvailable<uint8_t>("nprecLayers")) 	{ m_th_nprecLayers.push_back(truthMu.auxdata<uint8_t>("nprecLayers")); } 
+        static const SG::ConstAccessor<uint8_t> nprecAcc("nprecLayers");
+	if (nprecAcc.isAvailable(truthMu)) 	{ m_th_nprecLayers.push_back(nprecAcc(truthMu)); } 
 	else										{ m_th_nprecLayers.push_back(-99); }
 	
-	if (truthMu.isAvailable<uint8_t>("nphiLayers")) 	{ m_th_nphiLayers.push_back(truthMu.auxdata<uint8_t>("nphiLayers")); } 
+        static const SG::ConstAccessor<uint8_t> nphiAcc("nphiLayers");
+	if (nphiAcc.isAvailable(truthMu)) 	{ m_th_nphiLayers.push_back(nphiAcc(truthMu)); } 
 	else 									{ m_th_nphiLayers.push_back(-99); }
 	
-	if (truthMu.isAvailable<uint8_t>("ntrigEtaLayers")) { m_th_ntrigEtaLayers.push_back(truthMu.auxdata<uint8_t>("ntrigEtaLayers")); } 
+        static const SG::ConstAccessor<uint8_t> ntrigEtaAcc("ntrigEtaLayers");
+	if (ntrigEtaAcc.isAvailable(truthMu)) { m_th_ntrigEtaLayers.push_back(ntrigEtaAcc(truthMu)); } 
 	else 									  { m_th_ntrigEtaLayers.push_back(-99); }
 
   }
