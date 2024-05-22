@@ -116,10 +116,18 @@ const Calculator::Period* Calculator::getPeriod(unsigned runNumber) const
 bool Calculator::compute(TrigGlobalEfficiencyCorrectionTool& parent, const LeptonList& leptons, unsigned runNumber, Efficiencies& efficiencies)
 {
 	m_parent = &parent;
+	m_forceUnitSF = false;
 	auto period = getPeriod(runNumber);
 	if(!period) return false;
 	m_cachedEfficiencies.clear();
-	return period->m_formula && period->m_formula(this, leptons, runNumber, efficiencies);
+	bool success = period->m_formula && period->m_formula(this, leptons, runNumber, efficiencies);
+	if (m_forceUnitSF)
+	{
+		efficiencies.data() = 1.;
+		efficiencies.mc() = 1.;
+		success = true;
+	}
+	return success;
 }
 
 bool Calculator::checkTriggerMatching(TrigGlobalEfficiencyCorrectionTool& parent, bool& matched, const LeptonList& leptons, unsigned runNumber)
@@ -236,28 +244,36 @@ Efficiencies Calculator::getCachedTriggerLegEfficiencies(const Lepton& lepton, u
 	Efficiencies& efficiencies = insertion.first->second;
 	if(insertion.second)
 	{
-		bool cpSuccess = false;
+		auto res = TrigGlobalEfficiencyCorrectionTool::TLE_ERROR;
 		switch(lepton.type())
 		{
 		case xAOD::Type::Electron:
-			cpSuccess = m_parent->getTriggerLegEfficiencies(lepton.electron(), runNumber, leg, lepton.tag(), efficiencies);
+			res = m_parent->getTriggerLegEfficiencies(lepton.electron(), runNumber, leg, lepton.tag(), efficiencies);
 			break;
 		case xAOD::Type::Muon:
-			cpSuccess = m_parent->getTriggerLegEfficiencies(lepton.muon(), leg, lepton.tag(), efficiencies);
+			res = m_parent->getTriggerLegEfficiencies(lepton.muon(), runNumber, leg, lepton.tag(), efficiencies);
 			break;
 		case xAOD::Type::Photon:
-			cpSuccess = m_parent->getTriggerLegEfficiencies(lepton.photon(), runNumber, leg, lepton.tag(), efficiencies);
+			res = m_parent->getTriggerLegEfficiencies(lepton.photon(), runNumber, leg, lepton.tag(), efficiencies);
 			break;
 		default: ATH_MSG_ERROR("Unsupported particle type");
 		}
-		if(!cpSuccess)
+		switch (res)
 		{
-			efficiencies.data() = -777.;
-			efficiencies.mc() = -777.;
-			success = false;
+			case TrigGlobalEfficiencyCorrectionTool::TLE_OK:
+				break;
+			case TrigGlobalEfficiencyCorrectionTool::TLE_UNAVAILABLE:
+				m_forceUnitSF = true;
+				break;
+			case TrigGlobalEfficiencyCorrectionTool::TLE_ERROR:
+				[[fallthrough]];
+			default:
+				success = false;
+				efficiencies.data() = -777.;
+				efficiencies.mc() = -777.;
 		}
 	}
-	if(efficiencies.mc()==-777.) success = false;
+	if(efficiencies.mc()==-777. && !m_forceUnitSF) success = false;
 	return efficiencies;
 }
 

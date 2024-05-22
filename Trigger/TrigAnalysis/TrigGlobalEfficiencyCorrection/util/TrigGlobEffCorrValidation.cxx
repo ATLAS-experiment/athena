@@ -131,8 +131,12 @@ struct Config
 	std::vector<float> leptonPtValues;
 	std::map<std::string, std::function<double(float)>> efficiencies;
 	std::function<bool(const std::vector<const xAOD::Electron*>&,const std::vector<const xAOD::Muon*>&,const std::vector<const xAOD::Photon*>&)> eventSelection = nullptr;
+	std::string unavailable;
 	double expectedEfficiency = -1.;
 	double expectedEfficiencyTolerance = 1e-6;
+	bool generateElectrons = false;
+	bool generateMuons = false;
+	bool generatePhotons = false;
 	bool debug = false;
 	
 	Config(const char* name) : testName(name), leptonPtValues {30e4f} { }
@@ -147,11 +151,13 @@ struct Config
 	Config& setEfficiency(const std::string& leg, double eff)
 	{
 		efficiencies.emplace(leg, [=](float){return eff;});
+		updateFlavours(leg);
 		return *this;
 	}
 	Config& setEfficiency(const std::string& leg, std::function<double(float)>&& eff)
 	{
 		efficiencies.emplace(leg, eff);
+		updateFlavours(leg);
 		return *this;
 	}
 	Config& setEventSelection(const decltype(eventSelection)& sel) { eventSelection = sel; return *this; }
@@ -161,6 +167,20 @@ struct Config
 		expectedEfficiency = eff;
 		expectedEfficiencyTolerance = tolerance;
 		return *this;
+	}
+	Config& setUnavailable(const std::string& leg)
+	{
+		if (!unavailable.empty()) unavailable += ',';
+		unavailable += leg;
+		updateFlavours(leg);
+		return *this;
+	}
+private:
+	void updateFlavours(const std::string& leg)
+	{
+		if (leg[0] == 'e') generateElectrons = true;
+		else if (leg[0] == 'm') generateMuons = true;
+		else if (leg[0] == 'g') generatePhotons = true;
 	}
 };
 
@@ -249,6 +269,14 @@ int main(int argc, char* argv[])
 		.setEfficiency("e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose", 0.60)
 		.setEfficiency("mu20_iloose_L1MU15_OR_mu50", 0.60)
 		.setExpectedEfficiency(0.60, 1e-6)
+	));
+	
+	ANA_CHECK(run_test(Config("RETURN_UNIT_SCALE_FACTOR")
+		.setTriggers("e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu50")
+		.setLeptonPDF(1, 1, {30e3f})
+		.setUnavailable("e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose")
+		.setEfficiency("mu20_iloose_L1MU15_OR_mu50", 0.60)
+		.setExpectedEfficiency(0.806800, 1e-6)
 	));
 	
 	ANA_CHECK(run_test(Config("1L (2 flavours, 1-4 leptons)")
@@ -514,7 +542,6 @@ bool run_test(const Config& cfg, int toy_to_debug)
 	std::vector<SimplePhotonEfficiencyCorrectionTool*> photonTools;
 	ToolHandleArray<IAsgPhotonEfficiencyCorrectionTool> photonEffToolsHandles, photonSFToolsHandles;
 	std::map<std::string,std::string> legsPerTool;
-	bool generateElectrons = false, generateMuons = false, generatePhotons = false;
 	for(auto& kv : cfg.efficiencies)
 	{
 		if(kv.first[0]=='e')
@@ -529,7 +556,6 @@ bool run_test(const Config& cfg, int toy_to_debug)
 			#ifdef XAOD_STANDALONE
 				electronSFToolsHandles.push_back(electronTools.back());
 			#endif
-			generateElectrons  =true;
 		}
 		else if(kv.first[0]=='g')
 		{
@@ -543,9 +569,11 @@ bool run_test(const Config& cfg, int toy_to_debug)
 			#ifdef XAOD_STANDALONE
 				photonSFToolsHandles.push_back(photonTools.back());
 			#endif
-			generatePhotons = true;
 		}
-		else if(kv.first[0]=='m') generateMuons = true;
+	}
+	if (!cfg.unavailable.empty())
+	{
+		legsPerTool[ITrigGlobalEfficiencyCorrectionTool::toolnameForDefaultScaleFactor()] = cfg.unavailable;
 	}
 	std::vector<SimpleMuonTriggerScaleFactors*> muonTools;
 	muonTools.emplace_back(new SimpleMuonTriggerScaleFactors("EFF-muons", cfg.efficiencies));
@@ -557,11 +585,14 @@ bool run_test(const Config& cfg, int toy_to_debug)
 	asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> trigGlobTool("TrigGlobalEfficiencyCorrectionTool/trigGlobTool" + suffix);
 	asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> trigGlobTool_toys("TrigGlobalEfficiencyCorrectionTool/trigGlobTool_toys" + suffix);
 	bool debug = cfg.debug || (toy_to_debug>=0);
+	bool compareWithToys = cfg.unavailable.empty();
 	ANA_CHECK(configure(trigGlobTool, electronEffToolsHandles, electronSFToolsHandles, muonToolsHandles, photonEffToolsHandles, photonSFToolsHandles, cfg.triggers, legsPerTool, 0, debug));
-	ANA_CHECK(configure(trigGlobTool_toys, electronEffToolsHandles, electronSFToolsHandles, muonToolsHandles, photonEffToolsHandles, photonSFToolsHandles, cfg.triggers, legsPerTool, nToysPerEvent, debug));
+	if (compareWithToys) {
+		ANA_CHECK(configure(trigGlobTool_toys, electronEffToolsHandles, electronSFToolsHandles, muonToolsHandles, photonEffToolsHandles, photonSFToolsHandles, cfg.triggers, legsPerTool, nToysPerEvent, debug));
+	}
 	std::default_random_engine rdm;
 	std::uniform_int_distribution<unsigned> nleptonsPdf(cfg.minLeptons, cfg.maxLeptons);
-	std::discrete_distribution<> flavourPdf({1.*generateElectrons, 1.*generateMuons, 1.*generatePhotons});
+	std::discrete_distribution<> flavourPdf({1.*cfg.generateElectrons, 1.*cfg.generateMuons, 1.*cfg.generatePhotons});
 	std::uniform_int_distribution<unsigned> ptIndexPdf(0, cfg.leptonPtValues.size()-1);
 	std::vector<const xAOD::Electron*> electrons;
 	std::vector<const xAOD::Muon*> muons;
@@ -624,7 +655,7 @@ bool run_test(const Config& cfg, int toy_to_debug)
 			return false;
 		}
 		sum_eff += eff;
-		for(int spl=0;spl<nToySamples;++spl)
+		for(int spl=0;spl<compareWithToys*nToySamples;++spl)
 		{
 			eff_toys = 0.;
 			if(trigGlobTool_toys->getEfficiency(runNumber, particles, eff_toys, dummy) != CP::CorrectionCode::Ok)
@@ -646,22 +677,26 @@ bool run_test(const Config& cfg, int toy_to_debug)
 		double eff = sum_eff / nToysPerTest;
 		if(fabs(eff - cfg.expectedEfficiency) > cfg.expectedEfficiencyTolerance)
 		{
+			Error(MSGSOURCE, "The difference is too large, %f versus %f", eff, cfg.expectedEfficiency);
 			return false;
 		}
 	}
-	double eff = sum_eff/nToysPerTest, eff_toys = 0., toys_rms = 0.;
-	for(double sum : sum_eff_toys) eff_toys += sum / nToysPerTest;
-	eff_toys /= nToySamples;
-	for(double sum : sum_eff_toys) toys_rms += pow(sum/nToysPerTest - eff_toys, 2);
-	toys_rms = sqrt(toys_rms / (nToySamples-1));
-	double  sigma = fabs(eff-eff_toys) / toys_rms;
-	if(!quiet) Info(MSGSOURCE, "Efficiency: %f, toys: %f (signif. = %.1f sigma)", eff, eff_toys, sigma);
-	if(sigma >= 3.)
+	if (compareWithToys)
 	{
-		Error(MSGSOURCE, "The difference is too large");
-		return false;
+		double eff = sum_eff/nToysPerTest, eff_toys = 0., toys_rms = 0.;
+		for(double sum : sum_eff_toys) eff_toys += sum / nToysPerTest;
+		eff_toys /= nToySamples;
+		for(double sum : sum_eff_toys) toys_rms += pow(sum/nToysPerTest - eff_toys, 2);
+		toys_rms = sqrt(toys_rms / (nToySamples-1));
+		double  sigma = fabs(eff-eff_toys) / toys_rms;
+		if(!quiet) Info(MSGSOURCE, "Efficiency: %f, toys: %f (signif. = %.1f sigma)", eff, eff_toys, sigma);
+		if(sigma >= 3.)
+		{
+			Error(MSGSOURCE, "The difference is too large");
+			return false;
+		}
+		else if(sigma >= 2.) Warning(MSGSOURCE, "The difference isn't small");
 	}
-	else if(sigma >= 2.) Warning(MSGSOURCE, "The difference isn't small");
 	for(auto tool : electronTools) delete tool;
 	for(auto tool : muonTools) delete tool;
 	for(auto tool : photonTools) delete tool;
