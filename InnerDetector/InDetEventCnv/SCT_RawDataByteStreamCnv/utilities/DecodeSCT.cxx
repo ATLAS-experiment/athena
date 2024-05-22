@@ -124,7 +124,7 @@ namespace {
   inline uint32_t 
   eventWord(const uint32_t * const buffer, const int index, const int length) {
     if (index > length) {
-      std::cout << "Attempt to read from the end of the buffer " << std::dec << index << " " << length << std::hex << std::endl;
+      std::cout << "Attempt to read from the end of the buffer " <<  index << " " << length << std::endl;
       return 0;
     } else {
       return buffer[index-1];
@@ -238,8 +238,8 @@ namespace {
         //cppcheck-suppress invalidPrintfArgType_sint   
         printf("SubFragment from %ld to %ld\n", begin-frameBuffer, end-frameBuffer);
         while (found) {
-          int length = static_cast<int>(end-begin);
-          decodeSubFragment(begin, length);
+          const int extent = static_cast<int>(end-begin);
+          decodeSubFragment(begin, extent);
           found = findNextSubFragment(begin, end, endBuffer);
           //cppcheck-suppress invalidPrintfArgType_sint    
           if (found) printf("SubFragment from %ld to %ld\n", begin-frameBuffer, end-frameBuffer);
