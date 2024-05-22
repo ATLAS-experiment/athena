@@ -106,10 +106,6 @@ def maxSeedsPerSP_Pixels_ranges( inflags ):
     {'-17':  5,
     '18-':   1 } )
 
-def maxSeedsPerSP_Strips_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-17':  5,
-    '18-':   5 } )
 
 ################################################################
     ## create set of tracking cut flags
@@ -178,10 +174,8 @@ def createTrackingPassFlags():
     icf.addFlag("maxdImpactSSSSeeds", lambda pcf:
                 10.0 * Units.mm if pcf.Tracking.doBLS
                 else maxdImpactSSSSeeds_ranges(pcf))
-    icf.addFlag("maxZSpacePointsPPPSeeds", 2700.0 * Units.mm )
-    icf.addFlag("maxZSpacePointsSSSSeeds", 2700.0 * Units.mm )
     icf.addFlag("maxSeedsPerSP_Pixels", maxSeedsPerSP_Pixels_ranges )
-    icf.addFlag("maxSeedsPerSP_Strips", maxSeedsPerSP_Strips_ranges )
+    icf.addFlag("maxSeedsPerSP_Strips", 5)
     icf.addFlag("keepAllConfirmedPixelSeeds", keepAllConfirmedPixelSeeds_ranges )
     icf.addFlag("keepAllConfirmedStripSeeds", False)
 
@@ -230,7 +224,6 @@ def createITkTrackingPassFlags():
     icf.addFlag("doZBoundary"               , True)
     icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
-    icf.addFlag("useEtaDepCuts"             , True)
     # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
     icf.addFlag("etaBins"                   , [-1.0, 2.0, 2.6, 9999.0])
     icf.addFlag("maxEta"                    , 4.0)
@@ -374,7 +367,6 @@ def createITkLargeD0TrackingPassFlags():
     icf.usePrdAssociationTool = True
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
 
-    icf.useEtaDepCuts      = True
     icf.minPT              = [1000 * Units.MeV]
     icf.maxEta             = 4.0
     icf.etaBins            = [-1.0, 4.0]
@@ -392,8 +384,6 @@ def createITkLargeD0TrackingPassFlags():
     icf.maxZImpactSeed     = 500.0 * Units.mm
     icf.maxPrimaryImpactSeed = 300.0 * Units.mm
     icf.minPTSeed          = 1000 * Units.MeV
-    icf.addFlag("maxZSpacePointsPPPSeeds" , 500 * Units.mm)
-    icf.addFlag("maxZSpacePointsSSSSeeds" , 2700 * Units.mm) # Off
 
     icf.radMax             = 1100. * Units.mm
     icf.nHolesMax          = icf.maxHoles
@@ -616,7 +606,6 @@ def createITkConversionTrackingPassFlags():
     icf.extension               = "Conversion"
     icf.usePrdAssociationTool   = True
 
-    icf.useEtaDepCuts           = True
     icf.etaBins                 = [-1.0,4.0]
     icf.minPT                   = [0.9 * Units.GeV]
     icf.maxPrimaryImpact        = [10.0 * Units.mm]
