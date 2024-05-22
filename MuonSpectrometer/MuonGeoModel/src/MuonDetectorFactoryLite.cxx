@@ -178,8 +178,7 @@ namespace MuonGM {
 
 	// here define the GeoAlignableTransform associated to the chamber
 	// nominal transform first
-	GeoAlignableTransform *xf = mapAXF[station->GetName()];
-
+	GeoAlignableTransform *xf = mapAXF[station->GetName()+"_Station_"+std::to_string(zi)+"_"+std::to_string(fi)];
 	// alignment issues and readout geometry for station
 	MuonStation *mst = m_manager->getMuonStation(station->GetName(), zi, fi + 1);
 	if (!mst) {
