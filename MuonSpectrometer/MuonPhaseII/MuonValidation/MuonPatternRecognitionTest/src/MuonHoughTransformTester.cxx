@@ -125,15 +125,19 @@ namespace MuonValR4 {
             m_out_gen_Phi= genParticlePtr->momentum().phi();
             m_out_gen_Pt= genParticlePtr->momentum().perp();
             m_out_gen_nHits = hits.size(); 
-            unsigned int nMdt{0}, nRpc{0}, nTgc{0}; 
+            unsigned int nMdt{0}, nRpc{0}, nTgc{0}, nMm{0}, nsTgc{0}; 
             for (const xAOD::MuonSimHit* hit : hits){
                 nMdt += m_idHelperSvc->isMdt(hit->identify()); 
                 nRpc += m_idHelperSvc->isRpc(hit->identify()); 
-                nTgc += m_idHelperSvc->isTgc(hit->identify()); 
+                nTgc += m_idHelperSvc->isTgc(hit->identify());
+                nMm  += m_idHelperSvc->isMM(hit->identify());
+                nsTgc += m_idHelperSvc->issTgc(hit->identify());
             }
             m_out_gen_nRPCHits = nRpc; 
             m_out_gen_nMDTHits = nMdt; 
             m_out_gen_nTGCHits = nTgc;
+            m_out_gen_nMMits = nMm;
+            m_out_gen_nsTGCHits = nsTgc;
 
             m_out_gen_tantheta = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.y()/chamberDir.z() : 1.e10); 
             m_out_gen_tanphi = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10); 
@@ -152,13 +156,9 @@ namespace MuonValR4 {
             }
             const MuonR4::HoughSegmentSeed* foundMax = nullptr; 
             // find the best hough maximum
-            size_t max_hits{0};
-            size_t max_etaHits{0};
-            size_t max_phiHits{0};
+            size_t max_hits{0}, max_etaHits{0}, max_phiHits{0};
             for (const MuonR4::HoughSegmentSeed & max : houghMaxima){                
-                size_t nFound{0}; 
-                size_t nEta{0};
-                size_t nPhi{0}; 
+                size_t nFound{0}, nEta{0}, nPhi{0}; 
                 for (const xAOD::MuonSimHit* simHit : hits) {
 
                     for (const MuonR4::HoughHitType & hitOnMax : max.getHitsInMax()) {
@@ -171,8 +171,8 @@ namespace MuonValR4 {
                         ///  the hit is in the same gas gap
                         else if (m_idHelperSvc->gasGapId(hitOnMax->identify()) == simHit->identify()) {
                             ++nFound;
-                            if (hitOnMax->measuresEta()) ++nEta; 
-                            if (hitOnMax->measuresPhi()) ++nPhi; 
+                            nEta+=hitOnMax->measuresEta(); 
+                            nPhi+=hitOnMax->measuresPhi(); 
                         }
                     }
                 }
@@ -196,7 +196,7 @@ namespace MuonValR4 {
                 m_out_max_nHits = max_hits; 
                 m_out_max_nEtaHits = max_etaHits; 
                 m_out_max_nPhiHits = max_phiHits; 
-                unsigned int nMdt{0}, nRpc{0}, nTgc{0}; 
+                unsigned int nMdt{0}, nRpc{0}, nTgc{0}, nMm{0}, nsTgc{0}; 
                 for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
                     /// Skip all space points that don' contain any phi measurement
                     
@@ -226,6 +226,22 @@ namespace MuonValR4 {
                             m_max_tgcHitErrorY.push_back(houghSP->uncertainty()[1]);
                             ++nTgc;
                             break;
+                        case xAOD::UncalibMeasType::sTgcStripType:
+                            m_max_stgcHitId.push_back(houghSP->identify());
+                            m_max_stgcHitPos.push_back(houghSP->positionInChamber());
+                            m_max_stgcHitHasPhiMeas.push_back(houghSP->measuresPhi());
+                            m_max_stgcHitErrorX.push_back(houghSP->uncertainty()[0]);
+                            m_max_stgcHitErrorY.push_back(houghSP->uncertainty()[1]);
+                            ++nsTgc;
+                            break;
+                        case xAOD::UncalibMeasType::MMClusterType:
+                            m_max_MmHitId.push_back(houghSP->identify());
+                            m_max_MmHitPos.push_back(houghSP->positionInChamber());
+                            m_max_MmHitIsStero.push_back(m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify()));
+                            m_max_MmHitErrorX.push_back(houghSP->uncertainty()[0]);
+                            m_max_MmHitErrorY.push_back(houghSP->uncertainty()[1]);
+                            ++nMm;
+                            break;                            
                         default:
                             ATH_MSG_WARNING("Technology "<<m_idHelperSvc->toString(houghSP->identify())
                                         <<" not yet implemented");                        
@@ -234,6 +250,8 @@ namespace MuonValR4 {
                 m_out_max_nMdt = nMdt;
                 m_out_max_nRpc = nRpc;
                 m_out_max_nTgc = nTgc;
+                m_out_max_nsTgc = nsTgc;
+                m_out_max_nMm = nMm;
                 if (m_drawEvtDisplaySuccess) {
                     ATH_CHECK(drawEventDisplay(ctx, hits, foundMax));
                 }
