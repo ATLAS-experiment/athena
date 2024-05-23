@@ -121,12 +121,6 @@ namespace ISFTesting {
         enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr        childParticle(unsigned short,
                                                        int) override {return nullptr;};
-    /** Update the properties of a child particle from a pre-defined
-        interaction based on the properties of the ith child of the
-        current TruthIncident (only used in quasi-stable particle
-        simulation). */
-    virtual HepMC::GenParticlePtr        updateChildParticle(unsigned short,
-                                                          HepMC::GenParticlePtr ) const override {return nullptr;};
   private:
     const HepMC::FourVector m_myPosition{0.0, 40.0, 0.0, 40.0};
   };

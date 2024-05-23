@@ -90,12 +90,6 @@ namespace ISF {
         will enter the HepMC truth event) */
     HepMC::GenParticlePtr     childParticle(unsigned short index,
                                             int bc) override final;
-    /** Update the properties of a child particle from a pre-defined
-        interaction based on the properties of the ith child of the
-        current TruthIncident (only used in quasi-stable particle
-        simulation) - TODO only a dummy implementation currently */
-    virtual HepMC::GenParticlePtr     updateChildParticle(unsigned short index,
-                                                          HepMC::GenParticlePtr existingChild) const override final;
     /** Update the id and particleLink properties of the parentAfterIncident (to be called after registerTruthIncident) */
     void updateParentAfterIncidentProperties();
     /** Update the id and particleLink properties of the child particles (to be called after registerTruthIncident) */
