@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from AthenaConfiguration.Enums import Format
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess
-from TrigConfigSvc.TrigConfigSvcCfg   import getL1MenuFileName
+from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
 def getL1TopoOnlineMonitorHypo(flags):
@@ -23,8 +22,7 @@ def L1TopoOnlineMonitorHypoToolGen(chainDict):
 
 def getL1TopoLabels(flags,connectors = {0: 'LegacyTopo0', 1: 'LegacyTopo1'}, bmax = 128):
     topo_trigline_labels = ["" for i in range(bmax)]
-    lvl1name = getL1MenuFileName(flags)
-    lvl1access  = L1MenuAccess(lvl1name)
+    lvl1access  = getL1MenuAccess(flags)
     for connector_id, connectorKey in connectors.items():
         topo_triglines_dict = lvl1access.connector(connectorKey)['triggerlines']
         if not isinstance(topo_triglines_dict, list):
@@ -50,8 +48,7 @@ def getL1TopoLabels(flags,connectors = {0: 'LegacyTopo0', 1: 'LegacyTopo1'}, bma
 
 def getMultiplicityLabels(flags,topoModule):
     topo_trigline_labels = ["" for i in range(128)]
-    lvl1name = getL1MenuFileName(flags)
-    lvl1access  = L1MenuAccess(lvl1name)
+    lvl1access  = getL1MenuAccess(flags)
     topo_triglines_dict = lvl1access.connector(topoModule)['triggerlines']
 
     for topo_trigline in topo_triglines_dict:
