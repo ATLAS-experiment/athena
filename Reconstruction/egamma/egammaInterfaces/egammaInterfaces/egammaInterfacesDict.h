@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAINTERFACES_EGAMMAINTERFACESDICT_H
@@ -11,13 +11,10 @@
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
- * @author RD Schaffer <R.D.Schaffer@cern.ch>
- *
  */
 
 #include "egammaInterfaces/IEMClusterTool.h"
 #include "egammaInterfaces/IEMConversionBuilder.h"
-#include "egammaInterfaces/IEMFourMomBuilder.h"
 #include "egammaInterfaces/IEMShowerBuilder.h"
 #include "egammaInterfaces/IegammaBaseTool.h"
 #include "egammaInterfaces/IegammaCheckEnergyDepositTool.h"

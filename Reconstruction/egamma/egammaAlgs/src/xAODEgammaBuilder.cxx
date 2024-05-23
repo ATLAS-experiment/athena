@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "xAODEgammaBuilder.h"
@@ -80,7 +80,7 @@ StatusCode
 xAODEgammaBuilder::initialize()
 {
   m_deltaEta1Pear = std::make_unique<electronPearShapeAlignmentCorrection>();
-
+  m_FourMomBuilder = std::make_unique<EMFourMomBuilder>();
   // the data handle keys
   ATH_CHECK(m_electronClusterRecContainerKey.initialize(m_doElectrons));
   ATH_CHECK(m_photonClusterRecContainerKey.initialize(m_doPhotons));
@@ -91,7 +91,6 @@ xAODEgammaBuilder::initialize()
   // retrieve tools
   ATH_CHECK(m_clusterTool.retrieve());
   ATH_CHECK(m_ShowerTool.retrieve());
-  ATH_CHECK(m_egammaTools.retrieve());
 
   if (m_doElectrons) {
     ATH_CHECK(m_electronTools.retrieve());
@@ -255,12 +254,12 @@ xAODEgammaBuilder::execute(const EventContext& ctx) const
   const CaloDetDescrManager* calodetdescrmgr = *caloDetDescrMgrHandle;
 
   // Shower Shapes
-  if (m_doElectrons) {
+  if (electrons) {
     for (xAOD::Electron* electron : *electrons) {
       ATH_CHECK(m_ShowerTool->execute(ctx, *calodetdescrmgr, electron));
     }
   }
-  if (m_doPhotons) {
+  if (photons) {
     for (xAOD::Photon* photon : *photons) {
       ATH_CHECK(m_ShowerTool->execute(ctx, *calodetdescrmgr, photon));
     }
@@ -268,37 +267,31 @@ xAODEgammaBuilder::execute(const EventContext& ctx) const
 
   // Object Quality
   if (m_doOQ) {
-    if (m_doElectrons) {
+    if (electrons) {
       for (xAOD::Electron* electron : *electrons) {
         ATH_CHECK(m_egammaOQTool->execute(ctx, *electron));
       }
     }
-    if (m_doPhotons) {
+    if (photons) {
       for (xAOD::Photon* photon : *photons) {
         ATH_CHECK(m_egammaOQTool->execute(ctx, *photon));
       }
     }
   }
 
-  // Calibration
-  if (m_clusterTool->contExecute(ctx, electrons, photons).isFailure()) {
-    ATH_MSG_ERROR("Problem executing the " << m_clusterTool << " tool");
-    return StatusCode::FAILURE;
-  }
+  // Energy calibration
+  ATH_CHECK(m_clusterTool->contExecute(ctx, electrons, photons));
 
-  // Tools for ToolHandleArrays
-  // First common photon/electron tools*/
-  for (const auto& tool : m_egammaTools) {
-    ATH_CHECK(CallTool(ctx, tool, electrons));
-    ATH_CHECK(CallTool(ctx, tool, photons));
-  }
-  // Tools for only electrons
+  //Followed by 4-Mom Building
+  m_FourMomBuilder->calculate(electrons);
+  m_FourMomBuilder->calculate(photons);
+  //Additional tools fpr electrons/photons
+  //e.g identification
   if (m_doElectrons) {
     for (const auto& tool : m_electronTools) {
       ATH_CHECK(CallTool(ctx, tool, electrons));
     }
   }
-  // Tools for only photons
   if (m_doPhotons) {
     for (const auto& tool : m_photonTools) {
       ATH_CHECK(CallTool(ctx, tool, photons));
@@ -364,8 +357,8 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
   }
   // Set DeltaEta, DeltaPhi , DeltaPhiRescaled
   electron->setTrackCaloMatchValues(
-    egRec->deltaEta(), 
-    egRec->deltaPhi(), 
+    egRec->deltaEta(),
+    egRec->deltaPhi(),
     egRec->deltaPhiRescaled(),
     egRec->deltaPhiLast()
   );
