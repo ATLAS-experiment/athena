@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
   BOOST_CHECK_EQUAL(ms->size_impl(), 2);
   
   auto outSurf = ActsTrk::decodeSurface(surfBackend[0], gctx);
-  testSurface(surf, outSurf, gctx);
+  testSurface(std::move(surf), std::move(outSurf), gctx);
   
 };
 

@@ -195,9 +195,9 @@ BOOST_AUTO_TEST_CASE(MemoryStats) {
   BOOST_CHECK_NE(out.find("total"), std::string::npos);
 
   const auto& h = stats.hist;
-
-  auto column_axis = axis::get<cat>(h.axis(0));
-  auto type_axis = axis::get<axis::category<>>(h.axis(1));
+  //using a const reference for column_axis causes the test to fail
+  const auto  column_axis = axis::get<cat>(h.axis(0));
+  const auto  & type_axis = axis::get<axis::category<>>(h.axis(1));
 
   for (int t = 0; t < type_axis.size(); t++) {
     for (int c = 0; c < column_axis.size(); c++) {
