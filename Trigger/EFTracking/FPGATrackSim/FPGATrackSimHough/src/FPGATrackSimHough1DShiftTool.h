@@ -136,7 +136,6 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         Gaudi::Property<float> m_d0spread {this, "d0spread", -1.0, "Make patterns with a d0spread as given, negative value turns it off" };
         Gaudi::Property<std::vector<float>> m_hitExtendProperty {this, "hitExtend", {}, "Number of adjacent bins that a hit triggers" };
         Gaudi::Property<std::string> m_bitShift_path { this, "bitShifts", "", "Instead of calculating bit shifts, input a list of shifts via a text file" };
-        Gaudi::Property<std::string> m_radii_file { this, "radiiFile", "", "Provide file with mean radii per layer for each subregion" };
         Gaudi::Property<bool> m_applyDropable { this, "applyDropable", false, "Enable logic that prevents redundant patterns with dropped hits" };
         Gaudi::Property<int> m_neighborWindow { this, "neighborWindow", 0, "Supress if neighbors have higher number of hit layers" };
         Gaudi::Property<unsigned> m_historyWindow {this, "historyWindow", 0, "Suppress if previous N bit shifts have neighbors with higher nubmer of hit layers" };
@@ -145,7 +144,7 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
 
 
         std::vector<float> m_hitExtend; // need second copy because property is "const" and can't be changed to default
-        std::vector<float> m_r;  // will be filled from m_radii_file
+        std::vector<float> m_r;  // will be filled from m_radii_file (now loaded through region map class).
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience
@@ -212,7 +211,7 @@ class FPGATrackSimHough1DShiftTool : public AthAlgTool, virtual public IFPGATrac
         void calculateDropable();
         std::vector<int> shiftWithDrop(std::vector<int>& shift,unsigned droplayer) const;
 
-        void readRadii(std::string const & filepath);
+
 };
 
 

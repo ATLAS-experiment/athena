@@ -703,10 +703,10 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
       
       // If this is a spacepoint the target R should be the average of the two layers.
       // TODO, get this to be loaded in from a mean radii file into the mapping infrastructure.
-      double target_r = fpgatracksim::TARGET_R_1STAGE[i];
+      double target_r = m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, i);
       if (sector_hits[i].getHitType() == HitType::spacepoint) {
         int other_layer = (sector_hits[i].getSide() == 0) ? i + 1 : i - 1;
-        target_r = (target_r + fpgatracksim::TARGET_R_1STAGE[other_layer]) / 2.;
+        target_r = (target_r + m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, other_layer)) / 2.;
       }
 
       // Create phi for any hits that are not spacepoints, as well as "inner" spacepoints.

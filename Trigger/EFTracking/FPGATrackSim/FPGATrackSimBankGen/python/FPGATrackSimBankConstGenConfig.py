@@ -46,6 +46,7 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.NNmap = ""
+    mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/eta0103phi0305_radii.txt"
     mappingSvc.layerOverride = []
     result.addService(mappingSvc, create=True, primary=True)
     return result
