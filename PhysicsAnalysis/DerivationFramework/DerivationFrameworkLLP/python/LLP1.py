@@ -359,8 +359,9 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     acc.addEventAlgo(LLP1EventCleanAlg)
 
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, EgammaTrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, EgammaTrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
+    from DerivationFrameworkTau.TauCommonConfig import TauThinningCfg
 
     # Inner detector tracks need to have greater than 10 GeV of pT
     LLP1TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
@@ -401,13 +402,18 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         MuonKey                 = "MuonsLRT",
         InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
 
-    # disable tau thinning for now
-    tau_thinning_expression = "(TauJets.ptFinalCalib >= 0)"
-    LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
-        name            = "LLP1TauJetThinningTool",
-        StreamName      = kwargs['StreamName'],
-        ContainerName   = "TauJets",
-        SelectionString = tau_thinning_expression))
+    # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
+    tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD}"
+    LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(TauThinningCfg(
+        flags,
+        name                 = "LLP1TauJetThinningTool",
+        StreamName           = kwargs['StreamName'],
+        Taus                 = "TauJets",
+        TauTracks            = "TauTracks",
+        TrackParticles       = "InDetTrackParticles",
+        TauNeutralPFOs       = "TauNeutralParticleFlowObjects",
+        TauSecondaryVertices = "TauSecondaryVertices",
+        SelectionString      = tau_thinning_expression))
 
     # Only keep tau tracks (and associated ID tracks) classified as charged tracks
     LLP1TauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
@@ -420,14 +426,15 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         TauTracksKey           = "TauTracks"))
 
     tau_murm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_MuonRM')
-    LLP1TauJetMuonRMParticleThinningTool = acc.getPrimaryAndMerge(TauJetLepRMParticleThinningCfg(
+    LLP1TauJetMuonRMParticleThinningTool = acc.getPrimaryAndMerge(TauThinningCfg(
         flags,
         name                   = "LLP1TauJets_MuonRMThinningTool",
         StreamName             = kwargs['StreamName'],
-        originalTauKey         = "TauJets",
-        LepRMTauKey            = "TauJets_MuonRM",
-        InDetTrackParticlesKey = "InDetTrackParticles",
-        TauTracksKey           = "TauTracks_MuonRM",
+        Taus                   = "TauJets_MuonRM",
+        TauTracks              = "TauTracks_MuonRM",
+        TrackParticles         = "InDetTrackParticles",
+        TauNeutralPFOs         = "TauNeutralParticleFlowObjects_MuonRM",
+        TauSecondaryVertices   = "TauSecondaryVertices_MuonRM",
         SelectionString        = tau_murm_thinning_expression))
 
     # ID tracks associated with high-pt di-tau
@@ -439,21 +446,21 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     ## Low-pt di-tau thinning
-    LLP1DiTauLowPtThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
-                                                                                 name            = "LLP1DiTauLowPtThinningTool",
-                                                                                 StreamName      = kwargs['StreamName'],
-                                                                                 ContainerName   = "DiTauJetsLowPt",
-                                                                                 SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
+    LLP1DiTauLowPtThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(
+        flags,
+        name            = "LLP1DiTauLowPtThinningTool",
+        StreamName      = kwargs['StreamName'],
+        ContainerName   = "DiTauJetsLowPt",
+        SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
 
     # ID tracks associated with low-pt ditau
-    LLP1DiTauLowPtTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(flags,
-                                                                                        name                    = "LLP1DiTauLowPtTPThinningTool",
-                                                                                        StreamName              = kwargs['StreamName'],
-                                                                                        DiTauKey                = "DiTauJetsLowPt",
-                                                                                        InDetTrackParticlesKey  = "InDetTrackParticles",
-                                                                                        SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
-
-
+    LLP1DiTauLowPtTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(
+        flags,
+        name                    = "LLP1DiTauLowPtTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        DiTauKey                = "DiTauJetsLowPt",
+        InDetTrackParticlesKey  = "InDetTrackParticles",
+        SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
 
 
     # ID Tracks associated with secondary vertices
