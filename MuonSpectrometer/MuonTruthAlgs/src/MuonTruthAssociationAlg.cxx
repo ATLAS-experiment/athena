@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthAssociationAlg.h"
@@ -14,6 +14,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "xAODTruth/TruthVertex.h"
+#include "AthContainers/ConstAccessor.h"
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;
@@ -24,13 +25,13 @@ namespace {
         else
             ++val;
     }
-    const SG::AuxElement::ConstAccessor<int> acc_origin("truthOrigin");
-    const SG::AuxElement::ConstAccessor<int> acc_type("truthType");
-    const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> > acc_link("truthParticleLink");
+    const SG::ConstAccessor<int> acc_origin("truthOrigin");
+    const SG::ConstAccessor<int> acc_type("truthType");
+    const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> > acc_link("truthParticleLink");
     //
-    const SG::AuxElement::Decorator<int> dec_origin("truthOrigin");
-    const SG::AuxElement::Decorator<int> dec_type ("truthType");
-    const SG::AuxElement::Decorator<ElementLink<xAOD::TruthParticleContainer> > dec_link("truthParticleLink");
+    const SG::Decorator<int> dec_origin("truthOrigin");
+    const SG::Decorator<int> dec_type ("truthType");
+    const SG::Decorator<ElementLink<xAOD::TruthParticleContainer> > dec_link("truthParticleLink");
     
 }  // namespace
 // Constructor with parameters:
@@ -247,18 +248,25 @@ void MuonTruthAssociationAlg::count_chamber_layers(const xAOD::IParticle* truthP
                                                    std::vector<unsigned int>& nprecHitsPerChamberLayer,
                                                    std::vector<unsigned int>& nphiHitsPerChamberLayer,
                                                    std::vector<unsigned int>& ntrigEtaHitsPerChamberLayer) const {
-    if (!truthParticle || !truthParticle->isAvailable<std::vector<unsigned long long> >("truthMdtHits")) {
+    static const SG::ConstAccessor<std::vector<unsigned long long> > truthMdtHitsAcc ("truthMdtHits");
+    if (!truthParticle || !truthMdtHitsAcc.isAvailable(*truthParticle)) {
         ATH_MSG_DEBUG("muon has no truth hits vector in the truth association alg");
         nprecHitsPerChamberLayer.clear();
         nphiHitsPerChamberLayer.clear();
         ntrigEtaHitsPerChamberLayer.clear();
         return;
     }
-    const std::vector<unsigned long long>& mdtTruth = truthParticle->auxdata<std::vector<unsigned long long> >("truthMdtHits");
+    const std::vector<unsigned long long>& mdtTruth = truthMdtHitsAcc(*truthParticle);
     std::vector<unsigned long long> cscTruth;
-    if (m_idHelperSvc->hasCSC()) cscTruth = truthParticle->auxdata<std::vector<unsigned long long> >("truthCscHits");
-    const std::vector<unsigned long long>& rpcTruth = truthParticle->auxdata<std::vector<unsigned long long> >("truthRpcHits");
-    const std::vector<unsigned long long>& tgcTruth = truthParticle->auxdata<std::vector<unsigned long long> >("truthTgcHits");
+    static const SG::ConstAccessor<std::vector<unsigned long long> >
+      truthCscHitsAcc("truthCscHits");
+    static const SG::ConstAccessor<std::vector<unsigned long long> >
+      truthRpcHitsAcc("truthRpcHits");
+    static const SG::ConstAccessor<std::vector<unsigned long long> >
+      truthTgcHitsAcc("truthTgcHits");
+    if (m_idHelperSvc->hasCSC()) cscTruth = truthCscHitsAcc(*truthParticle);
+    const std::vector<unsigned long long>& rpcTruth = truthRpcHitsAcc(*truthParticle);
+    const std::vector<unsigned long long>& tgcTruth = truthTgcHitsAcc(*truthParticle);
 
     for (const Trk::TrackStateOnSurface* tsit : *ptrk->trackStateOnSurfaces()) {
         if (!tsit || !tsit->trackParameters() || !tsit->measurementOnTrack()) continue;

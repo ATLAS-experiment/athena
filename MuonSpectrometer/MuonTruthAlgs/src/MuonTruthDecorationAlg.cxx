@@ -21,9 +21,11 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthContainers/Accessor.h"
+#include "AthContainers/Decorator.h"
 namespace {
-    const SG::AuxElement::Decorator<int> dec_truthOrigin{"truthOrigin"};
-    const SG::AuxElement::Decorator<int> dec_truthType{"truthType"};
+    const SG::Decorator<int> dec_truthOrigin{"truthOrigin"};
+    const SG::Decorator<int> dec_truthType{"truthType"};
     const std::vector<float> emptyVec;
 
     // Only reject muons from light quark deays
@@ -303,7 +305,9 @@ namespace Muon {
                 xAOD::MuonSegment* segment = new xAOD::MuonSegment();
                 segmentContainer->push_back(segment);
                 segment->setNHits(nprecLayers, nphiLayers, ntrigEtaLayers);
-                segment->auxdata<ElementLink<xAOD::TruthParticleContainer> >("truthParticleLink") = truthLink;
+                static const SG::Accessor<ElementLink<xAOD::TruthParticleContainer> >
+                  truthParticleLinkAcc("truthParticleLink");
+                truthParticleLinkAcc(*segment) = truthLink;
                 if (chId.is_valid()) {
                     int eta = m_idHelperSvc->stationEta(chId);
                     int sector = m_idHelperSvc->sector(chId);
@@ -341,24 +345,44 @@ namespace Muon {
             }
             const std::string r_name = col.key();
 
-            float& x = truthParticle.auxdata<float>(r_name + "_x");
-            float& y = truthParticle.auxdata<float>(r_name + "_y");
-            float& z = truthParticle.auxdata<float>(r_name + "_z");
-            float& px = truthParticle.auxdata<float>(r_name + "_px");
-            float& py = truthParticle.auxdata<float>(r_name + "_py");
-            float& pz = truthParticle.auxdata<float>(r_name + "_pz");
-            bool& found_truth = truthParticle.auxdata<bool>(r_name + "_is_matched");
+            SG::Accessor<float> xAcc (r_name + "_x");
+            SG::Accessor<float> yAcc (r_name + "_y");
+            SG::Accessor<float> zAcc (r_name + "_z");
+            SG::Accessor<float> pxAcc (r_name + "_px");
+            SG::Accessor<float> pyAcc (r_name + "_py");
+            SG::Accessor<float> pzAcc (r_name + "_pz");
+            float& x = xAcc(truthParticle);
+            float& y = yAcc(truthParticle);
+            float& z = zAcc(truthParticle);
+            float& px = pxAcc(truthParticle);
+            float& py = pyAcc(truthParticle);
+            float& pz = pzAcc(truthParticle);
+
+            SG::Accessor<bool> matchedAcc (r_name + "_is_matched");
+            bool& found_truth = matchedAcc(truthParticle);
+
             x = y = z = px = py = pz = dummy_val;
             found_truth = false;
+
             // Need to always make these, to avoid crashes later
-            float& ex = truthParticle.auxdata<float>(r_name + "_x_extr");
-            float& ey = truthParticle.auxdata<float>(r_name + "_y_extr");
-            float& ez = truthParticle.auxdata<float>(r_name + "_z_extr");
-            float& epx = truthParticle.auxdata<float>(r_name + "_px_extr");
-            float& epy = truthParticle.auxdata<float>(r_name + "_py_extr");
-            float& epz = truthParticle.auxdata<float>(r_name + "_pz_extr");
-            truthParticle.auxdata<std::vector<float> >(r_name + "_cov_extr") = emptyVec;
-            truthParticle.auxdata<bool>(r_name+"_is_extr") = false;
+            SG::Accessor<float> exAcc (r_name + "_x_extr");
+            SG::Accessor<float> eyAcc (r_name + "_y_extr");
+            SG::Accessor<float> ezAcc (r_name + "_z_extr");
+            SG::Accessor<float> epxAcc (r_name + "_px_extr");
+            SG::Accessor<float> epyAcc (r_name + "_py_extr");
+            SG::Accessor<float> epzAcc (r_name + "_pz_extr");
+            float& ex = exAcc(truthParticle);
+            float& ey = eyAcc(truthParticle);
+            float& ez = ezAcc(truthParticle);
+            float& epx = epxAcc(truthParticle);
+            float& epy = epyAcc(truthParticle);
+            float& epz = epzAcc(truthParticle);
+
+            SG::Accessor<std::vector<float> > ecovAcc (r_name + "_cov_extr");
+            ecovAcc(truthParticle) = emptyVec;
+
+            SG::Accessor<bool> eisAcc (r_name+"_is_extr");
+            eisAcc(truthParticle) = false;
             ex = ey = ez = epx = epy = epz = dummy_val;
 
             // loop over collection and find particle with the same bar code
@@ -411,13 +435,21 @@ namespace Muon {
 
             const Trk::TrackingVolume* volume = end_pars.volume;
             const std::string& r_name = end_pars.record_name;
-            float& ex = truthParticle.auxdata<float>(r_name + "_x_extr");
-            float& ey = truthParticle.auxdata<float>(r_name + "_y_extr");
-            float& ez = truthParticle.auxdata<float>(r_name + "_z_extr");
-            float& epx = truthParticle.auxdata<float>(r_name + "_px_extr");
-            float& epy = truthParticle.auxdata<float>(r_name + "_py_extr");
-            float& epz = truthParticle.auxdata<float>(r_name + "_pz_extr");
-            std::vector<float>& covMat = truthParticle.auxdata<std::vector<float> >(r_name + "_cov_extr");
+            SG::Accessor<float> exAcc (r_name + "_x_extr");
+            SG::Accessor<float> eyAcc (r_name + "_y_extr");
+            SG::Accessor<float> ezAcc (r_name + "_z_extr");
+            SG::Accessor<float> epxAcc (r_name + "_px_extr");
+            SG::Accessor<float> epyAcc (r_name + "_py_extr");
+            SG::Accessor<float> epzAcc (r_name + "_pz_extr");
+            float& ex = exAcc(truthParticle);
+            float& ey = eyAcc(truthParticle);
+            float& ez = ezAcc(truthParticle);
+            float& epx = epxAcc(truthParticle);
+            float& epy = epyAcc(truthParticle);
+            float& epz = epzAcc(truthParticle);
+
+            SG::Accessor<std::vector<float> > ecovAcc (r_name + "_cov_extr");
+            std::vector<float>& covMat = ecovAcc(truthParticle);
 
             std::unique_ptr<Trk::TrackParameters> exPars{
                 m_extrapolator->extrapolateToVolume(ctx, pars, *volume, Trk::alongMomentum, Trk::muon)};
@@ -425,7 +457,8 @@ namespace Muon {
                 ATH_MSG_VERBOSE("Extrapolation to "<<r_name<<" failed. ");
                 continue;
             }
-            truthParticle.auxdata<bool>(r_name+"_is_extr") = true;
+            SG::Accessor<bool> eisAcc (r_name+"_is_extr");
+            eisAcc(truthParticle) = true;
             ex = exPars->position().x();
             ey = exPars->position().y();
             ez = exPars->position().z();
@@ -626,27 +659,46 @@ namespace Muon {
             ++ntrigEtaLayers;
 
         // copy hit counts onto TruthParticle
-        truthParticle.auxdata<uint8_t>("nprecLayers") = nprecLayers;
-        truthParticle.auxdata<uint8_t>("nphiLayers") = nphiLayers;
-        truthParticle.auxdata<uint8_t>("ntrigEtaLayers") = ntrigEtaLayers;
-        truthParticle.auxdata<uint8_t>("innerSmallHits") = innerSmallHits;
-        truthParticle.auxdata<uint8_t>("innerLargeHits") = innerLargeHits;
-        truthParticle.auxdata<uint8_t>("middleSmallHits") = middleSmallHits;
-        truthParticle.auxdata<uint8_t>("middleLargeHits") = middleLargeHits;
-        truthParticle.auxdata<uint8_t>("outerSmallHits") = outerSmallHits;
-        truthParticle.auxdata<uint8_t>("outerLargeHits") = outerLargeHits;
-        truthParticle.auxdata<uint8_t>("extendedSmallHits") = extendedSmallHits;
-        truthParticle.auxdata<uint8_t>("extendedLargeHits") = extendedLargeHits;
+        static const SG::Accessor<uint8_t> nprecLayersAcc("nprecLayers");
+        static const SG::Accessor<uint8_t> nphiLayersAcc("nphiLayers");
+        static const SG::Accessor<uint8_t> ntrigEtaLayersAcc("ntrigEtaLayers");
+        static const SG::Accessor<uint8_t> innerSmallHitsAcc("innerSmallHits");
+        static const SG::Accessor<uint8_t> innerLargeHitsAcc("innerLargeHits");
+        static const SG::Accessor<uint8_t> middleSmallHitsAcc("middleSmallHits");
+        static const SG::Accessor<uint8_t> middleLargeHitsAcc("middleLargeHits");
+        static const SG::Accessor<uint8_t> outerSmallHitsAcc("outerSmallHits");
+        static const SG::Accessor<uint8_t> outerLargeHitsAcc("outerLargeHits");
+        static const SG::Accessor<uint8_t> extendedSmallHitsAcc("extendedSmallHits");
+        static const SG::Accessor<uint8_t> extendedLargeHitsAcc("extendedLargeHits");
+        nprecLayersAcc(truthParticle) = nprecLayers;
+        nphiLayersAcc(truthParticle) = nphiLayers;
+        ntrigEtaLayersAcc(truthParticle) = ntrigEtaLayers;
+        innerSmallHitsAcc(truthParticle) = innerSmallHits;
+        innerLargeHitsAcc(truthParticle) = innerLargeHits;
+        middleSmallHitsAcc(truthParticle) = middleSmallHits;
+        middleLargeHitsAcc(truthParticle) = middleLargeHits;
+        outerSmallHitsAcc(truthParticle) = outerSmallHits;
+        outerLargeHitsAcc(truthParticle) = outerLargeHits;
+        extendedSmallHitsAcc(truthParticle) = extendedSmallHits;
+        extendedLargeHitsAcc(truthParticle) = extendedLargeHits;
 
-        truthParticle.auxdata<uint8_t>("phiLayer1Hits") = phiLayer1Hits;
-        truthParticle.auxdata<uint8_t>("phiLayer2Hits") = phiLayer2Hits;
-        truthParticle.auxdata<uint8_t>("phiLayer3Hits") = phiLayer3Hits;
-        truthParticle.auxdata<uint8_t>("phiLayer4Hits") = phiLayer4Hits;
+        static const SG::Accessor<uint8_t> phiLayer1HitsAcc("phiLayer1Hits");
+        static const SG::Accessor<uint8_t> phiLayer2HitsAcc("phiLayer2Hits");
+        static const SG::Accessor<uint8_t> phiLayer3HitsAcc("phiLayer3Hits");
+        static const SG::Accessor<uint8_t> phiLayer4HitsAcc("phiLayer4Hits");
+        phiLayer1HitsAcc(truthParticle) = phiLayer1Hits;
+        phiLayer2HitsAcc(truthParticle) = phiLayer2Hits;
+        phiLayer3HitsAcc(truthParticle) = phiLayer3Hits;
+        phiLayer4HitsAcc(truthParticle) = phiLayer4Hits;
 
-        truthParticle.auxdata<uint8_t>("etaLayer1Hits") = etaLayer1Hits;
-        truthParticle.auxdata<uint8_t>("etaLayer2Hits") = etaLayer2Hits;
-        truthParticle.auxdata<uint8_t>("etaLayer3Hits") = etaLayer3Hits;
-        truthParticle.auxdata<uint8_t>("etaLayer4Hits") = etaLayer4Hits;
+        static const SG::Accessor<uint8_t> etaLayer1HitsAcc("etaLayer1Hits");
+        static const SG::Accessor<uint8_t> etaLayer2HitsAcc("etaLayer2Hits");
+        static const SG::Accessor<uint8_t> etaLayer3HitsAcc("etaLayer3Hits");
+        static const SG::Accessor<uint8_t> etaLayer4HitsAcc("etaLayer4Hits");
+        etaLayer1HitsAcc(truthParticle) = etaLayer1Hits;
+        etaLayer2HitsAcc(truthParticle) = etaLayer2Hits;
+        etaLayer3HitsAcc(truthParticle) = etaLayer3Hits;
+        etaLayer4HitsAcc(truthParticle) = etaLayer4Hits;
 
         if (msgLvl(MSG::DEBUG)) {
             ATH_MSG_DEBUG("Precision layers " << static_cast<int>(nprecLayers) << " phi layers " << static_cast<int>(nphiLayers)
@@ -686,9 +738,15 @@ namespace Muon {
     void MuonTruthDecorationAlg::addHitIDVectors(xAOD::TruthParticle& truthParticle,
                                                  const ChamberIdMap& ids) const {
 
-        std::vector<unsigned long long>& mdtTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthMdtHits");
-        std::vector<unsigned long long>& tgcTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthTgcHits");
-        std::vector<unsigned long long>& rpcTruthHits = truthParticle.auxdata<std::vector<unsigned long long> >("truthRpcHits");
+        static const SG::Accessor<std::vector<unsigned long long> >
+          truthMdtHitsAcc("truthMdtHits");
+        static const SG::Accessor<std::vector<unsigned long long> >
+          truthTgcHitsAcc("truthTgcHits");
+        static const SG::Accessor<std::vector<unsigned long long> >
+          truthRpcHitsAcc("truthRpcHits");
+        std::vector<unsigned long long>& mdtTruthHits = truthMdtHitsAcc(truthParticle);
+        std::vector<unsigned long long>& tgcTruthHits = truthTgcHitsAcc(truthParticle);
+        std::vector<unsigned long long>& rpcTruthHits = truthRpcHitsAcc(truthParticle);
 
         std::vector<unsigned long long> stgcTruthHits;
         std::vector<unsigned long long> cscTruthHits;
@@ -720,13 +778,19 @@ namespace Muon {
             }
         }
         if (m_idHelperSvc->hasCSC()) {
-            truthParticle.auxdata<std::vector<unsigned long long> >("truthCscHits") = std::move(cscTruthHits);
+            static const SG::Accessor<std::vector<unsigned long long> >
+              truthCscHitsAcc("truthCscHits");
+            truthCscHitsAcc(truthParticle) = std::move(cscTruthHits);
         }
         if (m_idHelperSvc->hasSTGC()) {
-            truthParticle.auxdata<std::vector<unsigned long long> >("truthStgcHits") = std::move(stgcTruthHits);
+            static const SG::Accessor<std::vector<unsigned long long> >
+              truthStgcHitsAcc("truthStgcHits");
+            truthStgcHitsAcc(truthParticle) = std::move(stgcTruthHits);
         }
         if (m_idHelperSvc->hasMM()) {
-            truthParticle.auxdata<std::vector<unsigned long long> >("truthMMHits") = std::move(mmTruthHits);
+            static const SG::Accessor<std::vector<unsigned long long> >
+              truthMMHitsAcc("truthMMHits");
+            truthMMHitsAcc(truthParticle) = std::move(mmTruthHits);
         }
         ATH_MSG_VERBOSE("Added " << mdtTruthHits.size() << " mdt truth hits, " << cscTruthHits.size() << " csc truth hits, "
                                  << rpcTruthHits.size() << " rpc truth hits, and " << tgcTruthHits.size() << " tgc truth hits");
