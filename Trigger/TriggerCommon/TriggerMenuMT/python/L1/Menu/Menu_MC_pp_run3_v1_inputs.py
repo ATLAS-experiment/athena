@@ -54,7 +54,18 @@ def defineInputsMenu():
                                                                                                                                    '0INVM70-2DR15-eEM12sl1-eEM12sl6']),   
                                                                                                                      
                                     TopoMenuDef( 'INVM_BOOSTDR_Ranges_Asymm_eEMsl6',                outputbits = (12,13), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM9sl6', 
-                                                                                                                                   '25INVM70-13DR25-eEM12sl1-eEM9sl6']),   
+                                                                                                                                         '25INVM70-13DR25-eEM12sl1-eEM9sl6']),   
+                            ]
+                if conn["name"] == "Topo3El":
+                    for group in conn["algorithmGroups"]:
+                        if group["fpga"]==0 and group["clock"]==1:
+                            group["algorithms"] += [
+                                    TopoMenuDef( '2DISAMB_jJ50ab_DR_eTAU_eTAU',             outputbits = (10,11), outputlines = ['2DISAMB-jJ50ab-0DR25-eTAU30ab-eTAU20ab',
+                                                                                                                                 '2DISAMB-jJ50ab-0DR28-eTAU30ab-eTAU20ab']),
+                                    TopoMenuDef( '2DISAMB_jJ40ab_DR_eTAU_eTAU',             outputbits = (12,13), outputlines = ['2DISAMB-jJ40ab-0DR25-eTAU30ab-eTAU20ab',
+                                                                                                                                 '2DISAMB-jJ40ab-0DR28-eTAU30ab-eTAU20ab']),
+                                    TopoMenuDef( '2DISAMB_jJ30ab_DR_eTAU_eTAU',             outputbits = (14,15), outputlines = ['2DISAMB-jJ30ab-0DR25-eTAU30ab-eTAU20ab',
+                                                                                                                                 '2DISAMB-jJ30ab-0DR28-eTAU30ab-eTAU20ab']),
                             ]
 
     #----------------------------------------------
