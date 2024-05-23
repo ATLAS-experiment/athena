@@ -38,6 +38,7 @@ MonopolePhysicsTool::MonopolePhysicsTool( const std::string& type,
                                           const std::string& nam,const IInterface* parent )
   : base_class ( type, nam , parent )
 {
+  declareProperty("deltaElectronsProductionCut", m_deltaElectronsProductionCut);
   m_physicsOptionType = G4AtlasPhysicsOption::Type::BSMPhysics;
 }
 
@@ -93,8 +94,8 @@ void MonopolePhysicsTool::ConstructProcess()
           pmanager->AddProcess(new G4mplAtlasTransportation(particle), -1, 0, 0);
 
           if (magnCharge != 0.0){
-            pmanager->AddProcess(new G4mplAtlasIonisation(magnCharge, G4String("mplAtlasIonisation")), -1, 1, 1);
-
+            pmanager->AddProcess(new G4mplAtlasIonisation(magnCharge, m_deltaElectronsProductionCut, G4String("mplAtlasIonisation")), -1, 1, 1);
+            ATH_MSG_INFO("ionisation model for monopole updated, production cut value " << m_deltaElectronsProductionCut);
           }
 
 

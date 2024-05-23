@@ -68,7 +68,7 @@ class G4mplAtlasIonisation : public G4VEnergyLossProcess
 
 public:
 
-  G4mplAtlasIonisation(G4double mCharge = 0.0, const G4String& name = "mplAtlasIonisation");
+  G4mplAtlasIonisation(G4double mCharge = 0.0, G4double deltaProdCut = 0.0, const G4String& name = "mplAtlasIonisation");
 
   virtual ~G4mplAtlasIonisation();
 
@@ -95,6 +95,7 @@ private:
   G4mplAtlasIonisation(const G4mplAtlasIonisation&);
 
   G4double    magneticCharge;
+  G4double    deltaProductCut;
   G4bool      isInitialised;
 
 };
