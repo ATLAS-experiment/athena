@@ -44,6 +44,35 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "full simulation samples. Only for testing purposes. The default "
             "is False.")
 
+        self.addOption ('splitCalibrationAndSmearing', False, type=bool,
+            info="EXPERIMENTAL: This splits the EgammaCalibrationAndSmearingTool "
+            " into two steps. The first step applies a baseline calibration that "
+            "is not affected by systematics. The second step then applies the "
+            "systematics dependent corrections.  The net effect is that the "
+            "slower first step only has to be run once, while the second is run "
+            "once per systematic. ATLASG-2358")
+
+
+    def makeCalibrationAndSmearingAlg (self, config, name) :
+        """Create the calibration and smearing algorithm
+        
+        Factoring this out into its own function, as we want to
+        instantiate it in multiple places"""
+        # Set up the calibration and smearing algorithm:
+        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name + self.postfix )
+        config.addPrivateTool( 'calibrationAndSmearingTool',
+                            'CP::EgammaCalibrationAndSmearingTool' )
+        alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+        alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
+        alg.calibrationAndSmearingTool.useFastSim = (
+            0 if self.forceFullSimConfig
+            else int( config.dataType() is DataType.FastSim ))
+        alg.egammas = config.readName (self.containerName)
+        alg.egammasOut = config.copyName (self.containerName)
+        alg.preselection = config.getPreselection (self.containerName, '')
+        return alg
+
+
     def makeAlgs (self, config) :
 
         if self.forceFullSimConfig:
@@ -84,21 +113,40 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
-        # Set up the calibration and smearing algorithm:
-        alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg',
-                                      'ElectronCalibrationAndSmearingAlg' + self.postfix )
-        config.addPrivateTool( 'calibrationAndSmearingTool',
-                               'CP::EgammaCalibrationAndSmearingTool' )
-        alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
-        alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useFastSim = (
-            0 if self.forceFullSimConfig
-            else int( config.dataType() is DataType.FastSim ))
-        alg.egammas = config.readName (self.containerName)
-        alg.egammasOut = config.copyName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
-        if config.isPhyslite() and not self.recalibratePhyslite :
-            alg.skipNominal = True
+        if not self.splitCalibrationAndSmearing :
+            # Set up the calibration and smearing algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'ElectronCalibrationAndSmearingAlg')
+            if config.isPhyslite() and not self.recalibratePhyslite :
+                alg.skipNominal = True
+        else:
+            # This splits the EgammaCalibrationAndSmearingTool into two
+            # steps. The first step applies a baseline calibration that
+            # is not affected by systematics. The second step then
+            # applies the systematics dependent corrections.  The net
+            # effect is that the slower first step only has to be run
+            # once, while the second is run once per systematic.
+            #
+            # For now (22 May 24) this has to happen in the same job, as
+            # the output of the first step is not part of PHYSLITE, and
+            # even for the nominal the output of the first and second
+            # step are different.  In the future the plan is to put both
+            # the output of the first and second step into PHYSLITE,
+            # allowing to skip the first step when running on PHYSLITE.
+            #
+            # WARNING: All of this is experimental, see: ATLASG-2358
+
+            # Set up the calibration algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'ElectronBaseCalibrationAlg')
+            # turn off systematics for the calibration step
+            alg.noToolSystematics = True
+            # turn off smearing for the calibration step
+            alg.calibrationAndSmearingTool.doSmearing = False
+
+            # Set up the smearing algorithm:
+            alg = self.makeCalibrationAndSmearingAlg (config, 'ElectronCalibrationSystematicsAlg')
+            # turn off scale corrections for the smearing step
+            alg.calibrationAndSmearingTool.doScaleCorrection = False
+            alg.calibrationAndSmearingTool.useMVACalibration = False
 
         if self.minPt > 0 :
             # Set up the the pt selection
