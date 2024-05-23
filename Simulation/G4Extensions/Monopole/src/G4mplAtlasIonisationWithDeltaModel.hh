@@ -61,7 +61,7 @@ class G4mplAtlasIonisationWithDeltaModel : public G4VEmModel, public G4VEmFluctu
 
 public:
 
-  G4mplAtlasIonisationWithDeltaModel(G4double mCharge, const G4String& nam = "mplAtlasIonisationWithDelta");
+  G4mplAtlasIonisationWithDeltaModel(G4double mCharge, G4double deltaProductCut, const G4String& nam = "mplAtlasIonisationWithDelta");
 
   virtual ~G4mplAtlasIonisationWithDeltaModel();
 
@@ -149,6 +149,8 @@ private:
   G4double dedxlim;
   G4double nmpl;
   G4double pi_hbarc2_over_mc2;
+  G4double deltaProdCut;
+  G4bool deltaProdSwitch;
   //G4double approxConst; <-- Not used.
 };
 

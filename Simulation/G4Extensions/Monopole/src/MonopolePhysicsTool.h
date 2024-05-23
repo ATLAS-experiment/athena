@@ -40,7 +40,13 @@ public:
 
 protected:
 
-
+private:
+  /**
+   * A modifier changing delta-electrons propagation properties
+   * default value of 0 does not modify the build in model
+   * value 0.03 suppresses the production by 3% and should be used when producing samples for systematics
+   */
+  double m_deltaElectronsProductionCut=0.0;
 
 
 

@@ -65,9 +65,10 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-G4mplAtlasIonisation::G4mplAtlasIonisation(G4double mCharge, const G4String& name)
+G4mplAtlasIonisation::G4mplAtlasIonisation(G4double mCharge, G4double deltaProdCut, const G4String& name)
   : G4VEnergyLossProcess(name),
     magneticCharge(mCharge),
+    deltaProductCut(deltaProdCut),
     isInitialised(false)
 {
 
@@ -109,7 +110,7 @@ void G4mplAtlasIonisation::InitialiseEnergyLossProcess(const G4ParticleDefinitio
   //  G4mplIonisationModel* ion  = new G4mplIonisationModel(magneticCharge);
   //  G4mplIonisationModel* ion  = new G4mplIonisationModel(magneticCharge,"PAI");
   //  G4mplAtlasIonisationModel* ion  = new G4mplAtlasIonisationModel(magneticCharge,"PAI");
-  G4mplAtlasIonisationWithDeltaModel* ion  = new G4mplAtlasIonisationWithDeltaModel(magneticCharge,"PAI");
+  G4mplAtlasIonisationWithDeltaModel* ion  = new G4mplAtlasIonisationWithDeltaModel(magneticCharge, deltaProductCut, "PAI");
   ion->SetLowEnergyLimit(0.1*CLHEP::keV);
   //  ion->SetLowEnergyLimit(1000.0*keV);
   //  ion->SetHighEnergyLimit(100.*TeV);

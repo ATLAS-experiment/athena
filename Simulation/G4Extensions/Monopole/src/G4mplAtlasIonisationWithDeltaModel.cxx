@@ -57,6 +57,7 @@
 
 // class header
 #include "G4mplAtlasIonisationWithDeltaModel.hh"
+#include <G4Types.hh>
 // Geant4 headers
 #include "Randomize.hh"
 #include "G4LossTableManager.hh"
@@ -70,7 +71,7 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
 
-G4mplAtlasIonisationWithDeltaModel::G4mplAtlasIonisationWithDeltaModel(G4double mCharge, const G4String& nam)
+G4mplAtlasIonisationWithDeltaModel::G4mplAtlasIonisationWithDeltaModel(G4double mCharge, G4double deltaProdCut, const G4String& nam)
   : G4VEmModel(nam),G4VEmFluctuationModel(nam),
     monopole(0),
     mass(0.0),
@@ -79,7 +80,9 @@ G4mplAtlasIonisationWithDeltaModel::G4mplAtlasIonisationWithDeltaModel(G4double 
     betalow(0.01),
     betalim(0.1),
     beta2lim(betalim*betalim),
-    bg2lim(beta2lim*(1.0 + beta2lim))
+    bg2lim(beta2lim*(1.0 + beta2lim)),
+    deltaProdCut(deltaProdCut),
+    deltaProdSwitch(deltaProdCut>0.000001)
 {
   nmpl = std::abs(magCharge) * 2 * CLHEP::fine_structure_const;
   //if(nmpl > 6)      { nmpl = 6; }
@@ -91,6 +94,8 @@ G4mplAtlasIonisationWithDeltaModel::G4mplAtlasIonisationWithDeltaModel(G4double 
   theElectron = G4Electron::Electron();
   G4cout << "### Monopole ionisation model with d-electron production, Gmag= "
          << magCharge/CLHEP::eplus << G4endl;
+  G4cout << "### Monopole ionisation model with d-electron production, delta-e production modification " << deltaProdCut << G4endl;
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo....
@@ -128,8 +133,9 @@ G4mplAtlasIonisationWithDeltaModel::ComputeDEDXPerVolume(const G4Material* mater
   const G4double tau   = kineticEnergy / mass;
   const G4double gam   = tau + 1.0;
   const G4double bg2   = tau * (tau + 2.0);
-  const G4double beta2 = bg2 / (gam * gam);
+  const G4double beta2 = bg2 / (gam * gam);  
   const G4double beta  = std::sqrt(beta2);
+
 
   // low-energy asymptotic formula
   G4double dedx  = dedxlim*beta*material->GetDensity();
@@ -248,7 +254,11 @@ G4mplAtlasIonisationWithDeltaModel::SampleSecondaries(std::vector<G4DynamicParti
   const G4double totEnergy     = kineticEnergy + mass;
   const G4double etot2         = totEnergy*totEnergy;
   const G4double beta2         = kineticEnergy*(kineticEnergy + 2.0*mass)/etot2;
-
+  if ( deltaProdSwitch ) {
+   const G4double delta_rand = G4UniformRand(); 
+   if ( delta_rand <= deltaProdCut )
+    return;
+  }
   // sampling without nuclear size effect
   const G4double q = G4UniformRand();
   const G4double deltaKinEnergy = minKinEnergy*maxKinEnergy
