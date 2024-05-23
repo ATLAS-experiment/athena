@@ -151,10 +151,10 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 	acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-	# EvtCleaning: get central tools from JetCommonCfg and set them up correctly 
-	# to add TightBad flags to EventInfo and AntiKt4EMTopoJets collections
-	acc.getEventAlgo("EventCleaningTestAlg_Tight").EventCleaningTool.DoDecorations = True
-	acc.getEventAlgo("EventCleaningTestAlg_Tight").doEvent = True
+	# EvtCleaning: instantiate our own version of EventCleaningAlg to
+	# add TightBad flags to EventInfo and AntiKt4EMTopoJets collections
+	from DerivationFrameworkSUSY.SUSYToolsConfig import SUSY20EventCleaningToolCfg
+	acc.merge(SUSY20EventCleaningToolCfg(flags, cleaningLevel = "TightBad"))
 
 	# CloseByIsolation correction augmentation
 	from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
