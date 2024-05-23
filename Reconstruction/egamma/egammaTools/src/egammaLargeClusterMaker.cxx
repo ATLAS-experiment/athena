@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaLargeClusterMaker.h"
@@ -7,7 +7,7 @@
 #include "CaloEvent/CaloClusterCellLink.h"
 #include "CaloUtils/CaloCellList.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
-#include "egammaUtils/egammaEnergyPositionAllSamples.h"
+#include "egammaCaloUtils/egammaEnergyPositionAllSamples.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"

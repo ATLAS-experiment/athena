@@ -1,13 +1,13 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "egammaCaloUtils/egammaStripsShape.h"
+#include "egammaCaloUtils/egammaEnergyPositionAllSamples.h"
+#include "egammaCaloUtils/egammaqweta1c.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CaloUtils/CaloCellList.h"
 #include "CaloUtils/CaloLayerCalculator.h"
-#include "egammaUtils/egammaEnergyPositionAllSamples.h"
-#include "egammaUtils/egammaqweta1c.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include <cfloat>
 #include <cmath>
@@ -702,7 +702,7 @@ StatusCode
 egammaStripsShape::execute(const xAOD::CaloCluster& cluster,
                            const CaloDetDescrManager& cmgr,
                            Info& info,
-                           bool ExecAllVariables) 
+                           bool ExecAllVariables)
 {
   //
   // Estimate shower shapes from first compartment
@@ -726,7 +726,7 @@ egammaStripsShape::execute(const xAOD::CaloCluster& cluster,
 
   // check if cluster is in barrel or end-cap
   const bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 2);
-  
+
   // define accordingly the position of CaloSampling
   const CaloSampling::CaloSample sam = in_barrel ? CaloSampling::EMB1 : CaloSampling::EME1;
   const CaloSampling::CaloSample samgran = in_barrel ? CaloSampling::EMB2 : CaloSampling::EME2;

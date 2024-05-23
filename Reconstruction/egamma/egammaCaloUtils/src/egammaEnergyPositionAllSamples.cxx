@@ -1,8 +1,8 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "egammaUtils/egammaEnergyPositionAllSamples.h"
+#include "egammaCaloUtils/egammaEnergyPositionAllSamples.h"
 #include "xAODCaloEvent/CaloCluster.h"
 namespace {
 /*if both in barrel and end-cap then have to
@@ -11,7 +11,7 @@ namespace {
  * As  eSample returns energy 0 in case of failure (eg. sampling not set)
  * while the other sample can have cells but energy <0 due to noise
  */
-bool isCrackBarrel(const xAOD::CaloCluster &cluster, 
+bool isCrackBarrel(const xAOD::CaloCluster &cluster,
                    const xAOD::CaloCluster::CaloSample barrel,
                    const xAOD::CaloCluster::CaloSample endCap) {
 
@@ -25,7 +25,7 @@ bool isCrackBarrel(const xAOD::CaloCluster &cluster,
   }
   if (barrelSamE >= endCapSamE) {
     return true; // barrel
-  }  
+  }
   return false; // endcap;
 }
 } // namespace
