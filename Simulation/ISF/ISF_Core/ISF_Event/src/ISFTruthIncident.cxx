@@ -168,12 +168,6 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
   return updateHepMCTruthParticle( *sec, &m_parent );
 }
 
-HepMC::GenParticlePtr ISF::ISFTruthIncident::updateChildParticle(unsigned short /*index*/,
-                                                               HepMC::GenParticlePtr existingChild) const {
-  // Dummy implementation
-  return existingChild;
-}
-
 
 /** return attached truth particle */
 HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFParticle& particle ) const {

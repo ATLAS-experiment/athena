@@ -108,13 +108,6 @@ namespace ISF {
         enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr     childParticle(unsigned short index,
                                                     int bc = HepMC::UNDEFINED_ID) = 0;
-    /** Update the properties of a child particle from a pre-defined
-        interaction based on the properties of the ith child of the
-        current TruthIncident (only used in quasi-stable particle
-        simulation). */
-    virtual HepMC::GenParticlePtr     updateChildParticle(unsigned short index,
-                                                          HepMC::GenParticlePtr existingChild) const = 0;
-
     /** Record that a particular child passed a check */
     inline void                       setChildPassedFilters(unsigned short index);
     /** Should a particular child be written out to the GenEvent */
