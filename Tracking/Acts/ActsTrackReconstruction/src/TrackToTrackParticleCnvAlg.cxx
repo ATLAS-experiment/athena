@@ -18,7 +18,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
-#include "DataHandleUtils.h"
 #include "CurvilinearCovarianceHelper.h"
 #include "HitSummaryDataUtils.h"
 #include "ExpectedHitUtils.h"
