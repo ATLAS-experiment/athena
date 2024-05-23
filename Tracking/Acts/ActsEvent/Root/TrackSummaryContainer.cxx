@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackSummaryContainer.h"
 #include "xAODTracking/TrackSummary.h"
@@ -154,9 +154,12 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
 // move assignment operator
 ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::operator = (
     ActsTrk::MutableTrackSummaryContainer&& other) noexcept {
-    
+  //NB. restoreDecorations may throw a GaudiException, resulting in a call to terminate()
+  // because the function is annotated 'noexcept'
   m_mutableTrackBackend = std::exchange(other.m_mutableTrackBackend, nullptr);
   m_mutableTrackBackendAux = std::exchange(other.m_mutableTrackBackendAux, nullptr);
+  //setStore throws an exception of type SG::ExcUntrackedSetStore, SG::ExcCLIDMismatch
+  //resulting in a call to terminate() because the function is marked 'noexcept'
   m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
   TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
 
@@ -164,7 +167,9 @@ ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::op
   m_decorations = std::move(other.m_decorations);
 
   //restore decorations
-  restoreDecorations();
+  // restoreDecorations may throw a GaudiException or SG::ExcBadVarName 
+  // resulting in a call to terminate() because the function is marked 'noexcept'
+  restoreDecorations(); 
 
   // invalidate vector type components of 'other'
   other.m_surfaces.clear();
@@ -251,7 +256,7 @@ void ActsTrk::MutableTrackSummaryContainer::clear() {
 void ActsTrk::MutableTrackSummaryContainer::setReferenceSurface_impl(
     ActsTrk::IndexType itrack, std::shared_ptr<const Acts::Surface> surface) {
   m_surfaces.resize(itrack + 1, nullptr);
-  m_surfaces[itrack] = surface;
+  m_surfaces[itrack] = std::move(surface);
 }
 
 void ActsTrk::MutableTrackSummaryContainer::encodeSurfaces( xAOD::TrackSurfaceAuxContainer* dest,  const Acts::GeometryContext& geoContext) const {

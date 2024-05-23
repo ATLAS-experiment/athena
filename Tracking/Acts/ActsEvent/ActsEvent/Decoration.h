@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_Decoration_h
 #define ActsEvent_Decoration_h
@@ -79,9 +79,9 @@ static Decoration decoration(std::string_view n, GetterType g, CopierType c,
   if (dec.auxid == SG::null_auxid)
     throw std::runtime_error("ActsTrk::Decoration Aux ID for " + dec.name +
                              " could not be found");
-  dec.getter = g;
-  dec.copier = c;
-  dec.setter = s;
+  dec.getter = std::move(g);
+  dec.copier = std::move(c);
+  dec.setter = std::move(s);
   return dec;
 }
 
