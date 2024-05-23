@@ -35,7 +35,6 @@ def xAODEgammaBuilderCfg(flags, name='xAODEgammaBuilder',
         oqtool = egammaOQFlagsBuilderCfg(flags)
         kwargs["ObjectQualityTool"] = acc.popToolsAndMerge(oqtool)
 
-    egammaTools = [CompFactory.EMFourMomBuilder()]
     eleTools = [acc.popToolsAndMerge(EMPIDBuilderElectronCfg(flags))]
     phoTools = [acc.popToolsAndMerge(EMPIDBuilderPhotonCfg(flags))]
 
@@ -54,9 +53,6 @@ def xAODEgammaBuilderCfg(flags, name='xAODEgammaBuilder',
     kwargs.setdefault(
         "AmbiguityTool",
         CompFactory.EGammaAmbiguityTool())
-    kwargs.setdefault(
-        "egammaTools",
-        egammaTools)
     kwargs.setdefault(
         "ElectronTools",
         eleTools)

@@ -88,7 +88,6 @@ def TrigTopoEgammaElectronCfg(flags, tag, variant, cellsName, InputElectronRecCo
                                                 AmbiguityTool = CompFactory.EGammaAmbiguityTool(),
                                                 EMClusterTool = acc.popToolsAndMerge(TrigEMClusterToolCfg(flags,variant,OutputClusterContainerName)),
                                                 EMShowerTool = acc.popToolsAndMerge(EMShowerBuilderCfg(flags, CellsName=cellsName)),
-                                                egammaTools = [CompFactory.EMFourMomBuilder()], # TODO use list defined elsewhere
                                                 doPhotons = False,
                                                 doElectrons = True)
         acc.addEventAlgo(builder)

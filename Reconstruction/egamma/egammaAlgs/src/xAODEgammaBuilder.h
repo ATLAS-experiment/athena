@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_XAODEGAMMABUILDER_H
@@ -79,6 +79,7 @@
 #include "egammaInterfaces/IegammaOQFlagsBuilder.h"
 #include "egammaRecEvent/egammaRecContainer.h"
 #include "egammaUtils/electronPearShapeAlignmentCorrection.h"
+#include "egammaUtils/EMFourMomBuilder.h"
 
 #include <memory>
 
@@ -112,10 +113,6 @@ private:
     StatusCode CallTool(const EventContext& ctx,
                         const ToolHandle<IegammaBaseTool>& tool,
                         DataVector<T> *container) const;
-
-    /** @brief Vector of tools for dressing electrons and photons **/
-    ToolHandleArray<IegammaBaseTool> m_egammaTools {this,
-        "egammaTools", {}, "Tools for dressing electrons and photons"};
 
     /** @brief Vector of tools for dressing ONLY electrons **/
     ToolHandleArray<IegammaBaseTool> m_electronTools {this,
@@ -188,6 +185,7 @@ private:
     Gaudi::Property<bool> m_doPhotons {this, "doPhotons", true, "Run the Photon reconstruction"};
     Gaudi::Property<bool> m_doElectrons {this, "doElectrons", true, "Run the Electron reconstruction"};
     std::unique_ptr<electronPearShapeAlignmentCorrection> m_deltaEta1Pear;
+    std::unique_ptr<EMFourMomBuilder> m_FourMomBuilder;
     bool m_doAmbiguity{};
     bool m_doOQ{};
     bool m_doDummyElectrons = false;
