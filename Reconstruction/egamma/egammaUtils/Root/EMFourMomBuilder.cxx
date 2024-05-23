@@ -10,15 +10,6 @@ namespace {
 constexpr float el_mass = 0.510998;
 constexpr float ph_mass = 0.0;
 
-AmgMatrix(5, 5)
-jacobian(const double phi, const int charge, const double momentum) {
-  AmgMatrix(5, 5) jac;
-  jac.setIdentity();
-  jac(3, 3) = -1.* (1. / std::sin(phi));            // deta/dtheta
-  jac(4, 4) = -1 * charge * (momentum * momentum);  // dp/d(q/p)
-  return jac;
-}
-
 void
 setFromCluster(xAOD::Egamma& eg)
 {
@@ -51,34 +42,6 @@ setFromTrkCluster(xAOD::Electron& el)
   const double pt =
     E > el_mass ? sqrt(E * E - el_mass * el_mass) / cosh(eta) : 0;
   el.setP4(pt, eta, phi, el_mass);
-
-  // Electron with tracks all should  have a covariance matrix set
-  AmgMatrix(4, 4) matrix;
-  matrix.setZero();
-  static const eg_resolution eg_resol("run2_pre");
-  const float sigmaE_over_E = eg_resol.getResolution(el);
-  matrix(0, 0) =
-    (sigmaE_over_E * E * sigmaE_over_E * E) / (cosh(eta) * cosh(eta));
-
-  // Direction can be filled only when a good track is there
-  if (goodTrack) {
-    xAOD::ParametersCovMatrix_t covmat =
-        trackParticle->definingParametersCovMatrix();
-    // Start from  the d0, z0, phi, theta, q/p
-    // and make the (Et, eta, phi, M)
-    AmgMatrix(5, 5) J = jacobian(trackParticle->phi(), trackParticle->charge(),
-                                 trackParticle->p4().P());
-    AmgMatrix(5, 5) m;
-    m.setZero();
-    m = J * (covmat * J.transpose());
-    matrix(1, 1) = m(3, 3);
-    matrix(2, 2) = m(2, 2);
-    matrix.fillSymmetric(0, 1, m(4, 3));
-    matrix.fillSymmetric(0, 2, m(4, 2));
-    matrix.fillSymmetric(1, 2, m(3, 2));
-  }
-
-  el.setCovMatrix(matrix.cast<float>());
 }
 
 void
@@ -110,7 +73,7 @@ calculate(xAOD::Electron& electron) {
   }
 }
 
-void 
+void
 calculate(xAOD::Photon& photon) {
   if (xAOD::EgammaHelpers::conversionType(&photon) ==
       xAOD::EgammaParameters::doubleSi) {
