@@ -69,7 +69,7 @@ class FPGATrackSimFitConstantBank : public AthMessaging
   int m_nconstr; // number of constraints: m_ncoords-m_npars
   int m_npixcy; // number of 2d coordinates
   int m_missingPlane; // plane that is missing
-  bool m_isFirstStage; // is this a first stage fit?
+//  bool m_isFirstStage; // is this a first stage fit?
   bool m_isIdealCoordFit; // fitting for ideal coordinates? by default always true for now
   
   ///////////////////////////////////////////////////////////////////////
