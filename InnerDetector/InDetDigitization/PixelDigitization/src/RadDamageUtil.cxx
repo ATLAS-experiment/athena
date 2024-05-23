@@ -288,7 +288,7 @@ const StatusCode RadDamageUtil::generateDistanceTimeMap(TH2F*& distanceMap_e, TH
   //https://gitlab.cern.ch/radiationDamageDigitization/radDamage_athena_rel22/blob/rel22_radDamageDev_master/scripts/SaveMapsForAthena.C
   //TODO: From DB call each time
   double temperature = 300;
-  double bField = 2;//Tesla
+  double bField = 2*m_fieldScale;//Tesla
   //From PixelModuleDesign: TODO
   //FIXME workaround, if PixelModuleDesign not available: retrieve sensor thickness from E field
   //double sensorThickness = module->thickness() * 1000.0;//default is 200;
