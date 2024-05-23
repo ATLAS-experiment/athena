@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
@@ -66,7 +66,7 @@ def TRT_TrackSegment_Cfg(flags):
         from InDetConfig.TRT_StandaloneTrackFinderConfig import (
             TRT_TrackSegment_TrackFinderCfg)
         acc.merge(TRT_TrackSegment_TrackFinderCfg(flags,
-                                                  InputSegmentsCollection = 'TRTSegmentsTRT'))
+                                                  InputSegmentsLocation = 'TRTSegmentsTRT'))
 
 
     return acc
