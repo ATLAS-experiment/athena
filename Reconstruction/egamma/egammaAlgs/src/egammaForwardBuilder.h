@@ -46,7 +46,6 @@
 #include "egammaInterfaces/IegammaOQFlagsBuilder.h"
 //
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
-#include "egammaUtils/EMFourMomBuilder.h"
 //
 #include <memory>
 #include <string>
@@ -200,7 +199,6 @@ protected:
     {},
     "The selector result names"
   };
-  std::unique_ptr<EMFourMomBuilder> m_FourMomBuilder;
 };
 #endif
 

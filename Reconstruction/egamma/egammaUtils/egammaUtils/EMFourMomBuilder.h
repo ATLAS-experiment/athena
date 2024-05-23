@@ -13,22 +13,25 @@
   @author Anastopoulos
   */
 
+#include "AthContainers/DataVector.h"
 #include "egammaUtils/eg_resolution.h"
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODEgamma/PhotonContainer.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
 
-class EMFourMomBuilder final
+namespace EMFourMomBuilder
 {
-public:
-  EMFourMomBuilder();
-  void calculate(xAOD::ElectronContainer* electrons) const;
-  void calculate(xAOD::PhotonContainer* photons) const;
-  void calculate(xAOD::Electron& electron) const;
-  void calculate(xAOD::Photon& photon) const;
- private:
-  std::unique_ptr<eg_resolution> m_eg_resol;
+  void calculate(xAOD::Electron& electron);
+  void calculate(xAOD::Photon& photon);
+
+  template<typename T>
+  void calculate(DataVector<T>* egammas)
+  {
+    if (egammas) {
+      for (T* egamma : *egammas) {
+        calculate(*egamma);
+      }
+    }
+  }
 };
 
 #endif

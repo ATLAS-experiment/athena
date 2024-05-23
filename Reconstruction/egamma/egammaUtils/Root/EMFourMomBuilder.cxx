@@ -37,7 +37,7 @@ setFromCluster(xAOD::Egamma& eg)
 }
 
 void
-setFromTrkCluster(xAOD::Electron& el, const eg_resolution& eg_resol)
+setFromTrkCluster(xAOD::Electron& el)
 {
 
   const xAOD::CaloCluster* cluster = el.caloCluster();
@@ -55,6 +55,7 @@ setFromTrkCluster(xAOD::Electron& el, const eg_resolution& eg_resol)
   // Electron with tracks all should  have a covariance matrix set
   AmgMatrix(4, 4) matrix;
   matrix.setZero();
+  static const eg_resolution eg_resol("run2_pre");
   const float sigmaE_over_E = eg_resol.getResolution(el);
   matrix(0, 0) =
     (sigmaE_over_E * E * sigmaE_over_E * E) / (cosh(eta) * cosh(eta));
@@ -94,47 +95,23 @@ setFromTrkCluster(xAOD::Photon& ph)
   }
   ph.setP4(E / cosh(eta), eta, phi, ph_mass);
 }
-
 }
 
 /////////////////////////////////////////////////////////////////
 
-EMFourMomBuilder::EMFourMomBuilder()
+namespace EMFourMomBuilder
 {
-  m_eg_resol = std::make_unique<eg_resolution>("run2_pre");
-}
-
 void
-EMFourMomBuilder::calculate(xAOD::ElectronContainer* electrons) const
-{
-  if (electrons) {
-    for (xAOD::Electron* electron : *electrons) {
-      calculate(*electron);
-    }
-  }
-}
-
-void
-EMFourMomBuilder::calculate(xAOD::PhotonContainer* photons) const
-{
-  if (photons) {
-    for (xAOD::Photon* photon : *photons) {
-      calculate(*photon);
-    }
-  }
-}
-
-void
-EMFourMomBuilder::calculate(xAOD::Electron& electron) const
-{
+calculate(xAOD::Electron& electron) {
   if (electron.trackParticle()) {
-    return setFromTrkCluster(electron, *m_eg_resol);
+    return setFromTrkCluster(electron);
   } else {
     setFromCluster(electron);
   }
 }
 
-void EMFourMomBuilder::calculate(xAOD::Photon& photon) const {
+void 
+calculate(xAOD::Photon& photon) {
   if (xAOD::EgammaHelpers::conversionType(&photon) ==
       xAOD::EgammaParameters::doubleSi) {
     setFromTrkCluster(photon);
@@ -142,3 +119,5 @@ void EMFourMomBuilder::calculate(xAOD::Photon& photon) const {
     setFromCluster(photon);
   }
 }
+}
+
