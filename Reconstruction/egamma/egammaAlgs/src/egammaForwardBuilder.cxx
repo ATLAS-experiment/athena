@@ -5,6 +5,7 @@
 #include "egammaForwardBuilder.h"
 #include "egammaInterfaces/IegammaBaseTool.h"
 #include "egammaCaloUtils/CookieCutterHelpers.h"
+#include "egammaUtils/EMFourMomBuilder.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
@@ -51,7 +52,6 @@ StatusCode egammaForwardBuilder::initialize()
   m_maxDelEta = m_maxDelEtaCells * cellEtaSize * 0.5;
   m_maxDelR2 = m_maxDelR * m_maxDelR; // Square now to avoid a slow sqrt later.
 
-  m_FourMomBuilder = std::make_unique<EMFourMomBuilder>();
   // The data handle keys.
   ATH_CHECK(m_topoClusterKey.initialize());
   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
@@ -245,7 +245,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
       );
     }
 
-    m_FourMomBuilder->calculate(*el);
+    EMFourMomBuilder::calculate(*el);
     ATH_CHECK(ExecObjectQualityTool(ctx, el));
 
     // Apply the Forward Electron selectors.

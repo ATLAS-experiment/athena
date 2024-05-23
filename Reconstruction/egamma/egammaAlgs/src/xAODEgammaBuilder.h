@@ -79,7 +79,6 @@
 #include "egammaInterfaces/IegammaOQFlagsBuilder.h"
 #include "egammaRecEvent/egammaRecContainer.h"
 #include "egammaUtils/electronPearShapeAlignmentCorrection.h"
-#include "egammaUtils/EMFourMomBuilder.h"
 
 #include <memory>
 
@@ -185,7 +184,6 @@ private:
     Gaudi::Property<bool> m_doPhotons {this, "doPhotons", true, "Run the Photon reconstruction"};
     Gaudi::Property<bool> m_doElectrons {this, "doElectrons", true, "Run the Electron reconstruction"};
     std::unique_ptr<electronPearShapeAlignmentCorrection> m_deltaEta1Pear;
-    std::unique_ptr<EMFourMomBuilder> m_FourMomBuilder;
     bool m_doAmbiguity{};
     bool m_doOQ{};
     bool m_doDummyElectrons = false;

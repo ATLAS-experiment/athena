@@ -11,6 +11,8 @@
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
+#include "egammaUtils/EMFourMomBuilder.h"
+
 #include "xAODEgamma/EgammaContainer.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronAuxContainer.h"
@@ -80,7 +82,6 @@ StatusCode
 xAODEgammaBuilder::initialize()
 {
   m_deltaEta1Pear = std::make_unique<electronPearShapeAlignmentCorrection>();
-  m_FourMomBuilder = std::make_unique<EMFourMomBuilder>();
   // the data handle keys
   ATH_CHECK(m_electronClusterRecContainerKey.initialize(m_doElectrons));
   ATH_CHECK(m_photonClusterRecContainerKey.initialize(m_doPhotons));
@@ -283,8 +284,8 @@ xAODEgammaBuilder::execute(const EventContext& ctx) const
   ATH_CHECK(m_clusterTool->contExecute(ctx, electrons, photons));
 
   //Followed by 4-Mom Building
-  m_FourMomBuilder->calculate(electrons);
-  m_FourMomBuilder->calculate(photons);
+  EMFourMomBuilder::calculate(electrons);
+  EMFourMomBuilder::calculate(photons);
   //Additional tools fpr electrons/photons
   //e.g identification
   if (m_doElectrons) {
