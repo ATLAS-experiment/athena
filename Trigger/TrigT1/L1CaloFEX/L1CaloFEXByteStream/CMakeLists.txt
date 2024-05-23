@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( L1CaloFEXByteStream )
@@ -19,5 +19,4 @@ atlas_add_component( L1CaloFEXByteStream
                      LINK_LIBRARIES TrigT1ResultByteStreamLib xAODTrigger TrigConfData xAODTrigL1Calo PathResolver AthenaMonitoringKernelLib ${TDAQ-COMMON_LIBRARIES} )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-# atlas_install_data( data/* )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 )
