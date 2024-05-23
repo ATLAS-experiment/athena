@@ -454,19 +454,11 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 
     const size_t thisFragmentSize = buffer.size()*sizeof(uint32_t);
     ATH_MSG_DEBUG( "Serialised size of " << address.persTypeName() << " is " << thisFragmentSize << " bytes" );
-    uint16_t  deferredInterfaceId=0; std::vector<uint32_t> deferredInterfaceBuffer;
+
     for (const uint16_t id : addressActiveModuleIds) {
-      
       // If result not yet truncated, try adding the serialised data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
-        // for truncation allowed collections, save the interface for a deferred addition
-        if (address.truncationMode==Address::Truncation::Allowed){
-          if (address.category == Address::Category::xAODInterface){
-            deferredInterfaceId=id;
-            deferredInterfaceBuffer=buffer;
-          }        
-        } else 
-        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode, deferredInterfaceId, deferredInterfaceBuffer));
+        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode));
       }
       // Check for truncation after adding data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
@@ -492,8 +484,7 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
                                                 const uint16_t id,
                                                 const std::vector<uint32_t>& data,
-                                                Address::Truncation truncationMode, 
-                                                const uint16_t  deferredInterfaceId, const std::vector<uint32_t>& deferredInterfaceBuffer) const {
+                                                Address::Truncation truncationMode) const {
   if (m_truncationThresholds.value().count(id)==0) {
     ATH_MSG_ERROR("Module ID " << id << " missing from TruncationThresholds map. Cannot determine if result needs truncation");
     return StatusCode::FAILURE;
@@ -522,10 +513,6 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
     hltResult.addTruncatedModuleId(id, severeTruncation);
   }
   else {
-    // for truncation allowed collections, add first the interface, only if the Aux is can be stored
-    if (truncationMode==Address::Truncation::Allowed){
-      hltResult.addSerialisedData(deferredInterfaceId, deferredInterfaceBuffer);
-    }
     // The data fits, so add it to the result
     ATH_MSG_DEBUG("Adding data to result with module ID " << id);
     hltResult.addSerialisedData(id, data);
@@ -574,7 +561,7 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
         if (!truncationInfo.recorded && truncationInfo.size > largestDropped.second) {
           largestDropped = {truncationInfo.addrPtr->persTypeName(), truncationInfo.size};
         }
-        // Decide if this was a severe truncation (event goes to debug stream)                
+        // Decide if this was a severe truncation (event goes to debug stream)
         if (!truncationInfo.recorded) {
           severeTruncation |= (truncationInfo.addrPtr->truncationMode==Address::Truncation::Error);
         }

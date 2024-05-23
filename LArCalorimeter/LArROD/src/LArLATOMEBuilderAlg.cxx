@@ -18,6 +18,11 @@
 #include "LArCOOLConditions/LArHVScaleCorrSC.h"
 #include <cmath>
 
+
+namespace {
+  inline int pow2(const int x) {return (0x1<<x);}
+};
+
 LArLATOMEBuilderAlg::LArLATOMEBuilderAlg(const std::string& name, ISvcLocator* pSvcLocator):
   AthReentrantAlgorithm(name, pSvcLocator) {}
 
@@ -190,10 +195,10 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     int peda_int=0;
     int pedb_int=0;
 
-    int pedHardpoint  = 3;
-    int firLSBdropped = 8;
-    int satLSBdropped = 6;
-    int paramBitSize  = 18;
+    const int pedHardpoint  = 3;
+    const int firLSBdropped = 8;
+    const int satLSBdropped = 6;
+    const int paramBitSize  = 18;
 
     for (unsigned int i = 0; i < ofca.size(); ++i) {
       if (!floatToInt(ofca_mev[i], ofca_int[i], firLSBdropped - pedHardpoint,
@@ -237,8 +242,8 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     std::vector<int> tauEnergies(nEnergies,0);
     std::vector<bool> passSelections(nEnergies,false);
     std::vector<bool> satur(nEnergies,false);
-    unsigned int nMaxBitsEnergy=18;
-    unsigned int nMaxBitsEnergyTau=22;
+    const unsigned int nMaxBitsEnergy=18;
+    const unsigned int nMaxBitsEnergyTau=22;
 
     for(unsigned int ss=0; ss<nEnergies; ++ss){
 
@@ -285,13 +290,18 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
     }
     LArRawSC* scraw = dataItemsPool.nextElementPtr();
 
-    (*scraw) = LArRawSC(id, digitSC->Channel(), digitSC->SourceId(),
-                        newEnergies, newBCIDs, satur);
-    scraw->setTauEnergies(tauEnergies);
-    scraw->setPassTauSelection(passSelections);
+    scraw->setHardwareId(id);
+    scraw->setChannel(digitSC->Channel());
+    scraw->setSourceId(digitSC->SourceId());
+    scraw->setBCIds(std::move(newBCIDs));
+    scraw->setSaturation(std::move(satur));
+    scraw->setEnergies(std::move(newEnergies));
+    scraw->setTauEnergies(std::move(tauEnergies));
+    scraw->setPassTauSelection(std::move(passSelections));
     scraw->setOFCaOverflow(aoverflow);
     scraw->setOFCbOverflow(boverflow);
     scraw->setPedOverflow(pedoverflow);
+
     outputContainer->push_back(scraw);
 
   } /// scs
@@ -303,7 +313,8 @@ StatusCode LArLATOMEBuilderAlg::execute(const EventContext& ctx) const {
 /// reproduce LDPB package computation in https://gitlab.cern.ch/atlas-lar-online/onlinelatomedb/-/blob/master/src/CondFloatDB.cpp
 bool LArLATOMEBuilderAlg::floatToInt(float val, int &newval, int hardpoint, int size) {
   if( std::isnan(val) )return false;
-  int intVal = round(val*pow(2,hardpoint));
+  //int intVal = std::round(val*(0x1<<hardpoint)); //was round(val*pow(2,hardpoint));
+  int intVal=std::round(val*pow2(hardpoint));
   bool isNeg = (intVal<0);
   unsigned int posVal = std::abs(intVal);
   if( (posVal >> (size -1)) != 0 ) return false;
