@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <string>
 
+using Athena::Units::GeV;
+
 StatusCode TileTBCellMonitorAlgorithm::initialize() {
 
   ATH_MSG_INFO("in initialize()");
@@ -122,6 +124,8 @@ StatusCode TileTBCellMonitorAlgorithm::initialize() {
     m_channelTimeGroups = buildToolMap<int>(m_tools, "TileChannelTime", modules);
   }
 
+  m_energyThresholdForTimeInGeV = m_energyThresholdForTime * (1.0 / GeV);
+
   return StatusCode::SUCCESS;
 }
 
@@ -130,8 +134,6 @@ StatusCode TileTBCellMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
   // In case you want to measure the execution time
   auto timer = Monitored::Timer("TIME_execute");
-
-  using Athena::Units::GeV;
 
   constexpr int allSamples = TileID::SAMP_E; // To be used to keep total energy from all samples
   constexpr int nSamples = allSamples + 1;
@@ -194,14 +196,13 @@ StatusCode TileTBCellMonitorAlgorithm::fillHistograms( const EventContext& ctx )
         int tower = m_tileID->tower(id);
 
         bool single_PMT_scin = (sample == TileID::SAMP_E);
-
         std::string moduleName = TileCalibUtils::getDrawerString(ros1, drawer);
         std::string sampleTowerSuffix = "_" + std::to_string(sample) + "_" + std::to_string(tower);
 
         // Keep energy in GeV;
-        double energy = cell->energy() * (1.0 / GeV);
-        double energy1 = tile_cell->ene1() * (1.0 / GeV);
-        double energy2 = tile_cell->ene2() * (1.0 / GeV);
+        double energy = cell->energy() * m_scaleFactor * (1.0 / GeV);
+        double energy1 = tile_cell->ene1() * m_scaleFactor * (1.0 / GeV);
+        double energy2 = tile_cell->ene2() * m_scaleFactor * (1.0 / GeV);
         double energyDiff = (single_PMT_scin) ? 0.0 : tile_cell->eneDiff() * (1.0 / GeV);
         double time = cell->time();
         double time1 = tile_cell->time1();
@@ -218,7 +219,7 @@ StatusCode TileTBCellMonitorAlgorithm::fillHistograms( const EventContext& ctx )
             fill(m_tools[m_channelEnergyGroups.at(moduleName)], monChannel2Energy);
           }
 
-          if (tile_cell->energy() > m_energyThresholdForTime) {
+          if (energy > m_energyThresholdForTimeInGeV) {
             if (isOkChannel1) {
               auto monChannel1Time = Monitored::Scalar<double>("time_" + std::to_string(channel1), time1);
               fill(m_tools[m_channelTimeGroups.at(moduleName)], monChannel1Time);
@@ -241,7 +242,7 @@ StatusCode TileTBCellMonitorAlgorithm::fillHistograms( const EventContext& ctx )
           auto monEnergy2 = Monitored::Scalar<double>("energy2" + sampleTowerSuffix, energy2);
           fill(m_tools[m_energy2VsEnergy1Groups.at(moduleName)], monEnergy1, monEnergy2);
 
-          if (tile_cell->energy() > m_energyThresholdForTime) {
+          if (energy > m_energyThresholdForTimeInGeV) {
             auto monTime = Monitored::Scalar<double>("time" + sampleTowerSuffix, time);
             fill(m_tools[m_timeGroups.at(moduleName)], monTime);
 

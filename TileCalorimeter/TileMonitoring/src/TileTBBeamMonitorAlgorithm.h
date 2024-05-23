@@ -103,7 +103,7 @@ class TileTBBeamMonitorAlgorithm : public AthMonitorAlgorithm {
     std::map<std::string, int> m_beamChamberGroups;
     std::vector<std::vector<int>> m_cherenkovVsTOFGroups;
 
-    enum BEAM_ELEMENTS_NUMBER {N_S_COUNTER = 3, N_CHERENKOV = 3, N_TOF = 3, N_SCALER = 3, N_MUON_WALL_PMT = 12};
+    enum BEAM_ELEMENTS_NUMBER {N_S_COUNTER = 3, N_CHERENKOV = 3, N_TOF = 3, N_SCALER = 3, N_MUON_WALL_PMT = 12, N_TDC_CHANNELS = 16};
 
     const TileHWID* m_tileID{nullptr};
     const TileHWID* m_tileHWID{nullptr};

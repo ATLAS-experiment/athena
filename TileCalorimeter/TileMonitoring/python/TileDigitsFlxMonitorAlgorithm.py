@@ -7,9 +7,9 @@
 @brief Python configuration of TileDigitsFlxMonitorAlgorithm algorithm for the Run III
 '''
 
-def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
+def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], topPath='TestBeam', **kwargs):
     '''Function to configures TileDigitsFlxMonAlg algorithms in the monitoring system.'''
-    
+
     kwargs.setdefault('TileDigitsContainerLegacy', 'TileDigitsCnt')
     kwargs.setdefault('TileDigitsContainerFlx', 'TileDigitsFlxCnt')
     kwargs.setdefault('FirstSample', 0)
@@ -37,7 +37,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
         setattr(tileDigitsFlxMonAlg, k, v)
 
     # Configure histogram with TileDigitsFlxMonAlg algorithm execution time
-    executeTimeGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileDigitsFlxMonExecuteTime', 'Tile/Felix')
+    executeTimeGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileDigitsFlxMonExecuteTime', f'{topPath}/Felix')
     executeTimeGroup.defineHistogram('TIME_execute', path = 'Digits', type='TH1F',
                                      title = 'Time for execute TileDigitsFlxMonAlg algorithm;time [#mus]',
                                      xbins = 300, xmin = 0, xmax = 300000)
@@ -56,7 +56,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             for drawer in range(0, Tile.MAX_DRAWER):
                 modules += [Tile.getDrawerString(ros, drawer)]
 
-    channelHFNGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonHFN', 'Tile/Felix/Digits')
+    channelHFNGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonHFN', f'{topPath}/Felix/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {runNumber} {moduleName} {gainName}: Mean RMS in event (HFN)-FELIX;Channel;HFN'
@@ -65,7 +65,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelHFNGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                             xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelPedGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonPed', 'Tile/Felix/Digits')
+    channelPedGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonPed', f'{topPath}/Felix/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {runNumber} {moduleName} {gainName}: Pedestal, sample[0]-FELIX;Channel;ADC'
@@ -74,7 +74,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelPedGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                             xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelHFNGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonHFN', 'Tile/Legacy/Digits')
+    channelHFNGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonHFN', f'{topPath}/Legacy/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {runNumber} {moduleName} {gainName}: Mean RMS in event (HFN);Channel;HFN'
@@ -83,7 +83,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelHFNGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                             xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelPedGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonPed', 'Tile/Legacy/Digits')
+    channelPedGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonPed', f'{topPath}/Legacy/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {runNumber} {moduleName} {gainName}: Pedestal, sample[0];Channel;ADC'
@@ -92,7 +92,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelPedGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                             xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelSamplesFlxGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonSamples', 'Tile/Felix/Digits')
+    channelSamplesFlxGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonSamples', f'{topPath}/Felix/Digits')
     for moduleName in modules:
         for channel in range(0, Tile.MAX_CHAN):
             for gainName in ['HG', 'LG']:
@@ -103,7 +103,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
                                                        xbins = 4096, xmin = -0.5, xmax = 4095.5)
 
 
-    channelSamplesLegacyGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonSamples', 'Tile/Legacy/Digits')
+    channelSamplesLegacyGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonSamples', f'{topPath}/Legacy/Digits')
     for moduleName in modules:
         for channel in range(0, Tile.MAX_CHAN):
             for gainName in ['HG', 'LG']:
@@ -113,7 +113,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
                 channelSamplesLegacyGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
                                                           xbins = 1024, xmin = -0.5, xmax = 1023.5)
 
-    channelAllSamplesDiffGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileChannelAllSamplesDiff', 'Tile/Compare/Digits')
+    channelAllSamplesDiffGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileChannelAllSamplesDiff', f'{topPath}/Compare/Digits')
     for moduleName in modules:
         for channel in range(0, Tile.MAX_CHAN):
             for gainName in ['HG', 'LG']:
@@ -123,7 +123,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
                 channelAllSamplesDiffGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
                                                            xbins = 200, xmin = -100, xmax = 100)
 
-    moduleAllSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileModuleAllSamplesDiff', 'Tile/Compare/Digits')
+    moduleAllSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileModuleAllSamplesDiff', f'{topPath}/Compare/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = (f'Run {runNumber} {moduleName} {gainName}: All channels samples difference (FELIX-Legacy*{felixScale});Sample [ADC];N')
@@ -132,7 +132,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             moduleAllSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
                                                   xbins = 200, xmin = -100, xmax = 100)
 
-    moduleSamplesDiffGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileModuleSamplesDiff', 'Tile/Compare/Digits')
+    moduleSamplesDiffGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileModuleSamplesDiff', f'{topPath}/Compare/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
             title = f'Run {runNumber} {moduleName} {gainName}: Samples difference (FELIX-Legacy*{felixScale});Channel;ADC'

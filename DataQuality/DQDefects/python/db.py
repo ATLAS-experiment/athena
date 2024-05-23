@@ -354,7 +354,7 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
                         flask_cool_target: str = 'oracle://ATONR_COOLOFL_GPN/ATLAS_COOLOFL_GLOBAL',
                         flask_auth: Mapping[str, str] = {},
                         flask_db: str = 'CONDBR2',
-                        flask_uri: str = 'https://aiatlas003.cern.ch:5000/cool/multi_iovs'
+                        flask_uri: str = 'https://cool-proxy-app.cern.ch/cool/multi_iovs'
                         ):
         if not use_flask:
             for defect in defect_list:
@@ -364,7 +364,7 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
             import os
             flask_uri = os.environ.get('DQM_COOL_FLASK_URI', flask_uri)
 
-            print(flask_uri)
+            log.debug(f'Flask server URI: {flask_uri}')
             self._insert_multiple_flask(defect_list, tag, flask_cool_target, 
                                         flask_auth, flask_db, flask_uri)
 
@@ -377,6 +377,7 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
         import requests
         import json
         import urllib.parse
+        import os
         from DQUtils.oracle import get_authentication
         data = {'grant_type':'client_credentials',
                 'audience': 'cool-flask-server'}
@@ -431,7 +432,7 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
                             headers={'Authorization': f'Bearer {token}'},
                             files={'file': ('iov.json', 
                                             json.dumps({'cool_multi_iov_request': submit_map}))},
-                                            verify=False
+                                            verify=('DQM_COOL_FLASK_NOVERIFY' not in os.environ)
                             )
             log.debug(r.content)
             if not r or r.json()['code'] != 0:

@@ -16,10 +16,6 @@
 
 ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   : EL::AnaAlgorithm(name, pSvcLocator),
-    //m_trigConfigTool("TrigConf::xAODConfigTool/xAODConfigTool", this),
-    //    m_trigMatchingTool("Trig::MatchingTool/TrigMatchingTool", this),
-    // disabling these
-    m_trigDecisionTool ("Trig::TrigDecisionTool/TrigDecisionTool"),
     m_grl ("GoodRunsListSelectionTool/grl", this),
     //m_zdcAnalysisTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool", this),
     m_selTool( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this )
@@ -432,7 +428,7 @@ StatusCode ZdcNtuple :: initialize ()
   if (enableTrigger) // HLT related
   {
     ANA_MSG_INFO("Trying to initialize TDT");
-    ANA_CHECK(m_trigDecisionTool.initialize());
+    ANA_CHECK(m_trigDecisionTool.retrieve());
   }
 
   // ZDC re-reco tool
