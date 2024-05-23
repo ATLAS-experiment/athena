@@ -16,7 +16,6 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("numSeedIncrement" , float("inf"))
     kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
-
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
@@ -345,6 +344,9 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
     
+    if flags.Tracking.ActiveConfig.extension == "ActsHeavyIon" and processPixels:
+        kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags, name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool', minPt=flags.Tracking.ActiveConfig.minPTSeed)))
+
     if processPixels:
         # Seeding algo
         kwargs.setdefault('PixelSeedingAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelSeedingAlg')

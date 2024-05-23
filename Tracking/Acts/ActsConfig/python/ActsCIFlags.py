@@ -12,6 +12,9 @@ def actsAloneWorkflowFlags(flags) -> None:
 def actsHeavyIonFlags(flags) -> None:
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
     flags.Acts.doAmbiguityResolution = False
+    flags.DQ.useTrigger = False
+    flags.Acts.doAnalysis = True
+    flags.Output.HISTFileName = "ActsMonitoringOutput.root"
 
 def actsWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts workflow to reco sequence"""

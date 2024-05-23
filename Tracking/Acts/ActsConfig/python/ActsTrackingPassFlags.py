@@ -33,6 +33,7 @@ def createActsHeavyIonTrackingPassFlags():
     icf.doActsSpacePoint = True
     icf.doActsSeed = True
     icf.doActsTrack = True
+    icf.minPTSeed = 0.4
     # If we do not want acts ambi resolution, first do the track convertion
     # and then the Athena ambi
     icf.doActsToAthenaTrack = lambda pcf : not pcf.Acts.doAmbiguityResolution
