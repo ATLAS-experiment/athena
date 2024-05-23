@@ -33,6 +33,7 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.subrmap =  flags.Trigger.FPGATrackSim.mapsDir+"/eta0103phi0305.subrmap" # presumably also here we want to be able to change the slices definition file
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
+    mappingSvc.radiiFile = flags.Trigger.FPGATrackSim.mapsDir + "/eta0103phi0305_radii.txt"
     mappingSvc.NNmap = ""
     mappingSvc.layerOverride = []
     result.addService(mappingSvc, create=True, primary=True)

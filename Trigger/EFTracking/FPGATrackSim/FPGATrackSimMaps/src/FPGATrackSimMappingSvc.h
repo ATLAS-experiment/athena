@@ -45,6 +45,7 @@ class FPGATrackSimMappingSvc : public AthService, virtual public IFPGATrackSimMa
         Gaudi::Property<std::string> m_pmap_path {this, "pmap", "", "path of the PMAP file"};
         Gaudi::Property<std::string> m_modulelut_path {this, "modulemap", "", "path of the ModuleLUT file"};
         Gaudi::Property<std::string> m_NNmap_path {this, "NNmap", "", "path of the NN weighting file"};
+        Gaudi::Property<std::string> m_radii_path {this, "radiiFile", "", "path of the average radius file" };
         Gaudi::Property<std::vector <int> > m_layerOverrides {this, "layerOverride", {}, "Overrides the selection of the 1st stage logical layers in the plane map. Each entry declares a detector layer to use as a logical layer. Specify a detector layer with { SiliconTech * 1000 + DetectorZone * 100 + PhysicalLayer }"};
 
             // Map unique pointers

@@ -17,6 +17,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
+#include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 
 #include <vector>
 
@@ -45,6 +46,8 @@ class TrackFitter
 
         void setPlaneMap(FPGATrackSimPlaneMap const * map)   { m_pmap = map; }
         FPGATrackSimPlaneMap const * getPlaneMap() const     { return m_pmap; }
+
+        void setRegionMap(FPGATrackSimRegionMap const* map)  { m_rmap = map; }
 
         void setNorecoveryNhits(int v)  { m_norecovery_nhits = v; }
         int getNorecoveryNhits() const  { return m_norecovery_nhits; }
@@ -110,7 +113,10 @@ class TrackFitter
         ///////////////////////////////////////////////////////////////////////
         // Storage
 
-        FPGATrackSimPlaneMap const *m_pmap = nullptr; // Convenience pointer
+        // Convenience pointer to mapping classes.
+        FPGATrackSimPlaneMap const *m_pmap = nullptr;
+        FPGATrackSimRegionMap const* m_rmap = nullptr;
+
 
         // This bank should always exist. If we are guessing hits there is only one bank and it is this one
         // and if we are not guessing hits it is for 8/8

@@ -54,7 +54,7 @@ class FPGATrackSimFitConstantBank : public AthMessaging
   
   void invlinfit(sector_t sector, FPGATrackSimTrack &track, double const *constr) const;
   void setIdealCoordFit(bool v) { m_isIdealCoordFit = v;}
-  
+
  private:
   
   FPGATrackSimPlaneMap const * m_pmap = nullptr;

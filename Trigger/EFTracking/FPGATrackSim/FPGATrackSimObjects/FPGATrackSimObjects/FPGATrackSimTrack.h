@@ -62,6 +62,9 @@ class FPGATrackSimTrack : public TObject {
   float getEtaCoord(int ilayer) const;
   float getPhiCoord(int ilayer) const;
 
+  // Retrieve the idealized radius for a given layer.
+  double getIdealRadius(int ilayer) const { return m_idealRadii.at(ilayer); };
+
   bool isValidCand() const    { return m_isValidCand; }
 
   void setTrackCorrType(TrackCorrType v) { m_trackCorrType = v; }
@@ -90,6 +93,7 @@ class FPGATrackSimTrack : public TObject {
   void setBarcodeFrac(const float& v) { m_barcode_frac = v; }
 
   void setValidCand(bool v)   { m_isValidCand = v; }
+  void setIdealRadii(const std::vector<double>& v) { m_idealRadii = v; }
 
   void calculateTruth(); // this will calculate the above quantities based on the hits
   void setNLayers(int); //Reset/resize the track hits vector
@@ -149,6 +153,11 @@ class FPGATrackSimTrack : public TObject {
   // Is this a valid track candidate for fitting?
   // At the moment, this is only *not* true if the track candidate has an illegal mix of duplicated spacepoints.
   bool m_isValidCand = true;
+
+  // Idealized radii used for the fit for this track. Unclear if it makes sense to store here,
+  // but the information is loaded into the region map class at runtime and needs to be propagated
+  // over to the track object (where the coordinate transform _currently_ lives) somehow.
+  std::vector<double> m_idealRadii;
 
   // Overlap removal member
   // There is currently only one algorithm

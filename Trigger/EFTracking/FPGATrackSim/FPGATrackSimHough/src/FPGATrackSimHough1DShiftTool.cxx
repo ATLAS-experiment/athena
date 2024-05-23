@@ -82,14 +82,10 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     }
     if (m_iterStep == 0u) m_iterStep = m_hitExtend[m_iterLayer] * 2 + 1; // default 1
 
-    // Copy correct r values
+    // Copy correct r values from the region map.
     m_r.resize(m_nLayers);
-    if (m_radii_file.value().empty()) {
-      ATH_MSG_ERROR("RADII FILE WAS EMPTY, We should not be in this configuration");
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_INFO("initialize() Reading Radii File: " << m_radii_file);
-      readRadii(m_radii_file);
+    for (unsigned ilayer = 0; ilayer < m_nLayers; ilayer++) {
+        m_r[ilayer] = m_FPGATrackSimMapping->SubRegionMap()->getAvgRadius(m_subRegion, ilayer);
     }
 
     // Warnings / corrections
@@ -311,55 +307,6 @@ void FPGATrackSimHough1DShiftTool::readShifts(std::string const & filepath)
     if (m_shifts.size()==0) ATH_MSG_FATAL("FPGATrackSimHough1DShiftTool::readShifts no shifts read");
     ATH_MSG_INFO("Read " << m_shifts.size() << " patterns from " << filepath);
 }
-
-void FPGATrackSimHough1DShiftTool::readRadii(std::string const & filepath)
-{
-    // Open the file
-    std::ifstream fin(filepath);
-    if (!fin.is_open())
-    {
-        ATH_MSG_FATAL("Couldn't open " << filepath);
-        throw ("FPGATrackSimHough1DShiftTool couldn't open " + filepath);
-    }
-
-    // Variables to fill
-    std::string line;
-    bool ok = true;
-
-    // Parse the file
-    while (getline(fin, line))
-    {
-        if (line.empty() || line[0] == '#') continue;
-        std::istringstream sline(line);
-        std::vector<int> shifts;
-
-	int subregion;
-	ok = ok && (sline >> subregion);
-	if (subregion==m_subRegion) {
-	    for (unsigned layer = 0; layer < m_nLayers; layer++)
-	    {
-	        float r;
-		ok = ok && (sline >> r);
-		if (!ok) break;
-		if (r<=0) {
-		  ATH_MSG_WARNING("Radius in radiiFile is "<< r <<" for layer:"
-				  << layer << " setting to dummy value!");
-		  r = 500.0; // dummy value that won't cause a crash, but won't work anywhere.
-		}
-		m_r[layer]=r;
-
-	   }
-	}
-	if (!ok) break;
-    }
-
-    if (!ok)
-    {
-        ATH_MSG_FATAL("Found error reading file at line: " << line);
-        throw "FPGATrackSimHough1DShiftTool read error";
-    }
-}
-
 
 
 StatusCode FPGATrackSimHough1DShiftTool::finalize()
