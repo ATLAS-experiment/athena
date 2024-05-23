@@ -97,6 +97,11 @@ StatusCode LArIdCablingTest::execute() {
                                                      << " offline id 0x" << std::hex << id.get_identifier32().get_compact() << std::dec << " onl "
                                                      << larOnlineID->isEMECOW(chid) << " / ofl " << caloId->is_em_endcap_outer(id));
       }
+      if (larOnlineID->isEMECchannel(chid) != caloId->is_em_endcap(id)) {
+        ATH_MSG_ERROR("isEMEC mismatch online Id 0x" << std::hex << chid.get_identifier32().get_compact() << std::dec << " " << larOnlineID->channel_name(chid)
+                                                     << " offline id 0x" << std::hex << id.get_identifier32().get_compact() << std::dec << " onl "
+                                                     << larOnlineID->isEMECchannel(chid) << " / ofl " << caloId->is_em_endcap(id));
+      }
       if (larOnlineID->isHECchannel(chid) != caloId->is_hec(id)) {
         ATH_MSG_ERROR("isHEC mismatch online Id 0x" << std::hex << chid.get_identifier32().get_compact() << std::dec << " " << larOnlineID->channel_name(chid)
                                                   << " offline id 0x" << std::hex << id.get_identifier32().get_compact() << std::dec << " onl "

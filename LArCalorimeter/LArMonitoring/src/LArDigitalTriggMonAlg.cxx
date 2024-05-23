@@ -688,7 +688,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
 int LArDigitalTriggMonAlg::whatPartition(HWIdentifier id, int side) const
 {
-  if (m_LArOnlineIDHelper->isEmBarrelOnline(id)) {
+  if (m_LArOnlineIDHelper->isEMBchannel(id)) {
     if(side==0) return 0;
     else return 1;
   } else if (m_LArOnlineIDHelper->isEMECchannel(id)) {

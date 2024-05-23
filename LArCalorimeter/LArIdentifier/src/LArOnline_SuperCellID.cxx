@@ -402,3 +402,9 @@ bool LArOnline_SuperCellID::isEMECOW(const HWIdentifier id) const {
 	       ft == 17 || ft == 18 || ft == 19 || ft == 20 || ft == 21 || ft == 23 || ft == 24)) || 
            (sl==2 && sideCondition && (ft==2 ||ft==9 || ft==15 || ft==21))));
 }
+
+bool LArOnline_SuperCellID::isEMECchannel(const HWIdentifier id) const {
+  int bec= barrel_ec(id);
+  int ft = feedthrough(id);
+  return (bec == 1 && !( ft==3 || ft==10 || ft==16 || ft==22 || ft==6));
+}
