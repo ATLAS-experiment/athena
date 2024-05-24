@@ -1,11 +1,6 @@
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
-*/
+# Herwig7_i
 
-/**
-@page Herwig7_i_page Herwig7_i
-
-@section Herwig7_i_Herwig7ForATLAS Herwig 7 for ATLAS
+## Herwig 7 for ATLAS
 
 Herwig 7 is a general-purpose event generator written in C++.
 It provides a significant amount of improvements and new features with respect
@@ -21,7 +16,7 @@ For more information on Herwig 7 in ATLAS please refer to the TWiki pages at
 https://twiki.cern.ch/twiki/bin/view/AtlasProtected/Herwig7ForAtlas
 
 
-@subsection AthenaInterface The Interface between Herwig7 and Athena
+## The Interface between Herwig7 and Athena
 
 Herwig 7 can be used in the same way as the Herwig++ 2.X series, in particular
 it is capable of showering MadGraph5_aMC\@NLO and PowhegBox events.
@@ -33,15 +28,8 @@ matching strategies, called 'subtractive' (MCatNLO-like) and 'multiplicative'
 shower and the dipole shower. Integration of these new features in the interface
 is still ongoing and will need to be validated afterwards.
 
-\note Currently, showering of Alpgen inputs is deprecated and was removed from
+### Note
+ Currently, showering of Alpgen inputs is deprecated and was removed from
 the interface since it would require a significant amount of validation. In case
 your are interested in this, please let us know.
 
-
-@subsection TableOfContents Contents of this Documentation
-
-- @ref Links
-- @ref FAQ
-- @ref MC15JobOptions
-
-*/
