@@ -63,14 +63,6 @@ def createOutputStream( streamName, fileName = "", asAlg = False ):
 
     return outputStream
 
-def createOutputConditionStream( streamName, fileName = "" ):
-    from RegistrationServices.OutputConditionsAlg import OutputConditionsAlg
-    conditionStream = OutputConditionsAlg(
-        streamName,
-        outputFile = fileName,
-        WriteIOV = False
-        )
-    return conditionStream
 
 ## backward compat
 #AthenaRootOutputStream          = createOutputStream
