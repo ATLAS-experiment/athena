@@ -11,9 +11,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 log = logging.getLogger(__name__)
 
 
-def precisionCaloPhotonVDVCfg(name, InViewRoIs, ion=False):
+def precisionCaloPhotonVDVCfg(flags, name, InViewRoIs, ion=False):
     acc = ComponentAccumulator()
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
     dataObjects= [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs ),
                   ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
                   ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
@@ -31,11 +31,11 @@ def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False):
 
     acc = ComponentAccumulator()
 
-    TrigEgammaKeys = getTrigEgammaKeys(ion = ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion = ion)
     log.debug('flags = %s',flags)
     log.debug('RoIs = %s',RoIs)
 
-    acc.merge(precisionCaloPhotonVDVCfg(name+'VDV',RoIs,ion))
+    acc.merge(precisionCaloPhotonVDVCfg(flags,name+'VDV',RoIs,ion))
 
     from TrigCaloRec.TrigCaloRecConfig import egammaTopoClusteringCfg, hltCaloTopoClusteringHICfg
     

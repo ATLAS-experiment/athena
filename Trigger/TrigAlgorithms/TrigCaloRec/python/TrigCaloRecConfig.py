@@ -342,10 +342,7 @@ def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwar
     return acc
 
 ##################### Unifying all cluster reco algs together ##################
-from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys	  import getTrigEgammaKeys
-TrigEgammaKeys = getTrigEgammaKeys()
-TrigEgammaKeys_LRT = getTrigEgammaKeys(name = '_LRT')
-TrigEgammaKeys_HI = getTrigEgammaKeys(ion = True)
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
 
 
 def hltCaloTopoClusteringCfg(
@@ -356,7 +353,9 @@ def hltCaloTopoClusteringCfg(
     elif nameSuffix == "FS":
         clustersKeyFromName = em_clusters
     else:
+        TrigEgammaKeys = getTrigEgammaKeys(flags)
         clustersKeyFromName = TrigEgammaKeys.precisionTopoClusterContainer
+        
     clusters = clustersKeyFromName if clustersKey is None else clustersKey
     acc = ComponentAccumulator()
     acc.merge(
@@ -409,6 +408,7 @@ def egammaTopoClusteringCfg(flags, RoIs):
 
 @AccumulatorCache
 def egammaTopoClusteringCfg_LRT(flags, RoIs):
+  TrigEgammaKeys_LRT = getTrigEgammaKeys(flags, name = '_LRT')
   cfg = hltCaloTopoClusteringCfg(flags, namePrefix="", nameSuffix="RoI_LRT", CellsName="CaloCells",  monitorCells=True, roisKey=RoIs, clustersKey= TrigEgammaKeys_LRT.precisionTopoClusterContainer)
   return cfg
 
@@ -433,8 +433,7 @@ def tauTopoClusteringCfg(flags, RoIs):
 @AccumulatorCache
 def hltCaloTopoClusteringHICfg(
     flags, CellsName=None, roisKey="UNSPECIFIED", doLC=False,algSuffix='HIRoI', ion=True):
-    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
     eventShape = TrigEgammaKeys.egEventShape
     clustersKey = TrigEgammaKeys.precisionTopoClusterContainer
     acc = ComponentAccumulator()

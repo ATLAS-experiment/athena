@@ -561,7 +561,7 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
                    "xAOD::TrigCompositeContainer#HLT_RuntimeMetadata"]
 
     acc = ComponentAccumulator()
-    tool = CompFactory.HLTEDMCreator(f"GapFiller_{'' if edmSet==['BS'] else '_'+'_'.join(edmSet)}")
+    tool = CompFactory.HLTEDMCreator(f"GapFiller{'' if edmSet==['BS'] else '_'+'_'.join(edmSet)}")
     alg = CompFactory.HLTEDMCreatorAlg("EDMCreatorAlg",
                                        OutputTools = [tool])
     alg.ExtraInputs = set(extraInputs)

@@ -6,7 +6,7 @@ from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 def TrigEgammaRecCfg(flags, name= "trigEgammaRec"):
     acc = ComponentAccumulator()
-    TrigEgammaKeys = getTrigEgammaKeys()
+    TrigEgammaKeys = getTrigEgammaKeys(flags)
     egammaRec = CompFactory.egammaRecBuilder( name = name,
                                                   InputClusterContainerName = TrigEgammaKeys.precisionCaloTopoCollection, # input,
                                                   egammaRecContainer        = TrigEgammaKeys.precisionCaloEgammaRecCollection, # output,
@@ -20,7 +20,7 @@ def TrigEgammaRecCfg(flags, name= "trigEgammaRec"):
 
 def TrigEgammaSuperClusterBuilderCfg(flags, name, calibrationType, superClusterCollectionName, superegammaRecCollectionName):
         acc = ComponentAccumulator()
-        TrigEgammaKeys = getTrigEgammaKeys()
+        TrigEgammaKeys = getTrigEgammaKeys(flags)
         from egammaTools.egammaSwToolConfig import egammaSwToolCfg
         from egammaMVACalib.egammaMVACalibConfig import egammaMVASvcCfg
         trigMVAfolder = flags.Trigger.egamma.Calib.precCaloMVAVersion
@@ -39,11 +39,10 @@ def TrigEgammaSuperClusterBuilderCfg(flags, name, calibrationType, superClusterC
 
 def TrigCaloClustersInConeToolCfg(flags, ion):
         acc = ComponentAccumulator()
+        TrigEgammaKeys = getTrigEgammaKeys(flags, ion =ion)
         if ion:
-            TrigEgammaKeys = getTrigEgammaKeys(ion =ion)
             name = "TrigCaloClustersInConeToolHI"
         else:
-            TrigEgammaKeys = getTrigEgammaKeys()
             name = "TrigCaloClustersInConeTool"
         tool = CompFactory.xAOD.CaloClustersInConeTool(name = name,
                                                        CaloClusterLocation = TrigEgammaKeys.precisionTopoClusterContainer)
@@ -109,13 +108,12 @@ def TrigCaloIsolationToolCfg(flags):
 
 def TrigPhotonIsoBuilderCfg(flags, ion = False):
         acc = ComponentAccumulator()
+        TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
         if ion:
             name = 'TrigPhotonIsolationBuilderHI'
-            TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
             TrigCaloIsolationTool = TrigCaloIsolationToolCfg_HI(flags)
         else:
             name = 'TrigPhotonIsolationBuilder'
-            TrigEgammaKeys = getTrigEgammaKeys()
             TrigCaloIsolationTool = TrigCaloIsolationToolCfg(flags)
 
         from xAODPrimitives.xAODIso import xAODIso as isoPar
