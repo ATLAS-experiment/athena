@@ -107,7 +107,7 @@ namespace ActsTrk
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
-    Gaudi::Property<bool> m_refitSeeds{this, "refitSeeds", true, "Run KalmanFitter on seeds before passing to CKF"};
+    Gaudi::Property<bool> m_refitSeeds{this, "refitSeeds", false, "Run KalmanFitter on seeds before passing to CKF"};
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "bins in |eta| to specify variable selections"};
     // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
