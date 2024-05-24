@@ -25,7 +25,7 @@ class TestParseTDPDatabase(unittest.TestCase):
         # Run 3 tests
         reference = {
             601229: 'pythia8',
-            700660: 'sherpa2210',
+            700660: 'sherpa2212',
             513105: 'amcatnlopythia8',
             999999: None,
         }
