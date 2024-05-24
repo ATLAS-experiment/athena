@@ -12,7 +12,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def fastTrackingSequenceGenCfg(flags, variant='', is_probe_leg = False):
     """ second step:  tracking....."""
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(variant)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, variant)
     inViewRoIs = "EMIDRoIs"+variant
     
     # calling the fastTracking Reco algo

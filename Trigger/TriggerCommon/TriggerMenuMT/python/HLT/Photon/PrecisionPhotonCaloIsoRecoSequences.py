@@ -7,9 +7,9 @@ from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-def precisionPhotonCaloIsoVDVCfg(name, InViewRoIs, ion=False):
+def precisionPhotonCaloIsoVDVCfg(flags, name, InViewRoIs, ion=False):
     acc = ComponentAccumulator()
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
     caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
     dataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
                    ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionTopoClusterContainer), # this is for the calo isolation tool
@@ -38,7 +38,7 @@ def precisionPhotonCaloIsoRecoSequence(flags, RoIs,  name = None, ion=False):
 
     log.debug('retrieve(precisionPhotonCaloIsoRecoSequence,None,RoIs = %s)',RoIs)
 
-    acc.merge(precisionPhotonCaloIsoVDVCfg(name+'VDV',RoIs,ion))
+    acc.merge(precisionPhotonCaloIsoVDVCfg(flags, name+'VDV',RoIs,ion))
 
     # Add CaloIsolationTool
     from TriggerMenuMT.HLT.Egamma.TrigEgammaFactoriesCfg import TrigPhotonIsoBuilderCfg

@@ -20,7 +20,7 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
     tag+=variant
 
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, variant, ion=ion)
 
     precisionGsfVDV = CompFactory.AthViews.ViewDataVerifier("PrecisionTrackViewDataVerifier_forGSFRefit"+tag+'VDV')
 

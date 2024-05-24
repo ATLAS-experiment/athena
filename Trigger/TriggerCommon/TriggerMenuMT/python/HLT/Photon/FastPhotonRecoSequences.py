@@ -26,7 +26,7 @@ def fastPhotonRecoSequence(flags, RoIs, name = None):
     
     acc.merge(fastPhotonVDVCfg(name+'VDV',RoIs))
 
-    TrigEgammaKeys = getTrigEgammaKeys()
+    TrigEgammaKeys = getTrigEgammaKeys(flags)
 
     thePhotonFex =  CompFactory.TrigEgammaFastPhotonReAlgo("EgammaFastPhotonFex_1")
     thePhotonFex.TrigEMClusterName = CaloMenuDefs.L2CaloClusters # From commom staff
