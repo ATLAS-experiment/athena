@@ -424,10 +424,6 @@ def MuonClusterSegmentFinderCfg(flags, name = " MuonClusterSegmentFinder", **kwa
 
 def MuonLayerHoughToolCfg(flags, name = "MuonLayerHoughTool" , **kwargs):
     result = ComponentAccumulator()
-    if flags.Muon.MuonTrigger:
-        kwargs.setdefault("DoTruth", False)
-    else:
-        kwargs.setdefault("DoTruth", flags.Input.isMC)
     layer_hough_tool = CompFactory.Muon.MuonLayerHoughTool(name, **kwargs)
     result.setPrivateTools(layer_hough_tool)
     return result

@@ -16,8 +16,3 @@ atlas_add_library( MuonLayerHough
                    LINK_LIBRARIES CxxUtils MuonStationIndexLib GaudiKernel AthenaKernel
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} GeoPrimitives )
 
-atlas_add_executable( MainLayerAnalysis
-                      exe/MainLayerAnalysis.cxx
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils GaudiKernel AthenaKernel MuonStationIndexLib GeoPrimitives MuonLayerHough )
-

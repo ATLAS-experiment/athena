@@ -3,8 +3,7 @@
 */
 
 #include <iostream>
-
-#include "MuonLayerHough/HitNtuple.h"
+#include "MuonLayerHough/Hit.h"
 
 namespace MuonHough {
 
