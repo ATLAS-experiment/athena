@@ -38,11 +38,6 @@ from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 triggerListsHelper = TriggerListsHelper(flags)
 chains = triggerListsHelper.Run2TriggerNamesNoTau + triggerListsHelper.Run2TriggerNamesTau
 
-# these are cases to debug further
-#chains= ["HLT_g45_tight_L1EM22VHI_xe45noL1"] 
-# chains=["HLT_e300_etcut"]
-# chains=["HLT_e28_lhtight_nod0_e15_etcut_L1EM7_Zee"]
-
 from TrigNavTools.NavConverterConfig import NavConverterCfg
 cfg.merge(NavConverterCfg(flags, chainsList=chains, runTheChecker=True))
 
@@ -58,7 +53,7 @@ cfg.merge(TileGMCfg(flags))
 # cfg.getEventAlgo("TrigEDMChecker").doDumpTrigCompsiteNavigation=True
 
 msg = cfg.getService('MessageSvc'); 
-msg.verboseLimit=0
+msg.verboseLimit=0 # this is option for verbose log
 msg.debugLimit=0
 msg.infoLimit=0 
 msg.warningLimit=0 
