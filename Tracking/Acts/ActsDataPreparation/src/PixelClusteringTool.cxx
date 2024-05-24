@@ -252,31 +252,5 @@ PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
 
     return StatusCode::SUCCESS;
 }
-
-// CTB parameterization, B field off
-double PixelClusteringTool::getPixelCTBPhiError(int layer, int phi,
-						int phiClusterSize) const
-{
-  double sigmaL0Phi1[3] = { 8.2*micrometer,  9.7*micrometer, 14.6*micrometer};
-  double sigmaL1Phi1[3] = {14.6*micrometer,  9.3*micrometer, 14.6*micrometer};
-  double sigmaL2Phi1[3] = {14.6*micrometer,  8.6*micrometer, 14.6*micrometer};
-  double sigmaL0Phi0[3] = {14.6*micrometer, 13.4*micrometer, 13.0*micrometer};
-  double sigmaL1Phi0[3] = {14.6*micrometer,  8.5*micrometer, 11.0*micrometer};
-  double sigmaL2Phi0[3] = {14.6*micrometer, 11.6*micrometer,  9.3*micrometer};
-  
-  if(phiClusterSize > 3) return 14.6*micrometer;
-  
-  if(layer == 0 && phi == 0) return sigmaL0Phi0[phiClusterSize-1];
-  if(layer == 1 && phi == 0) return sigmaL1Phi0[phiClusterSize-1];
-  if(layer == 2 && phi == 0) return sigmaL2Phi0[phiClusterSize-1];
-  if(layer == 0 && phi == 1) return sigmaL0Phi1[phiClusterSize-1];
-  if(layer == 1 && phi == 1) return sigmaL1Phi1[phiClusterSize-1];
-  if(layer == 2 && phi == 1) return sigmaL2Phi1[phiClusterSize-1];
-  
-  // shouldn't really happen...
-  ATH_MSG_WARNING("Unexpected layer and phi numbers: layer = "
-		  << layer << " and phi = " << phi);
-  return 14.6*micrometer;  
-}
   
 } // namespace ActsTrk
