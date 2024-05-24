@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/starts_with.h
@@ -29,7 +29,8 @@ namespace CxxUtils {
 bool starts_with (const char* s, const char* prefix);
 
 /**
- * @brief Test whether one string starts with another.
+ * @brief Test whether one string starts with
+ * a null-terminated byte string.
  * @param s String in which to search.
  * @param prefix Prefix for which to search.
  *
@@ -56,7 +57,8 @@ bool starts_with (const std::string& s, const std::string& prefix);
 bool ends_with (const char* s, const char* suffix);
 
 /**
- * @brief Test whether one string starts ends another.
+ * @brief Test whether one string ends with
+ * a null-terminated byte string.
  * @param s String in which to search.
  * @param suffix Suffix for which to search.
  *
