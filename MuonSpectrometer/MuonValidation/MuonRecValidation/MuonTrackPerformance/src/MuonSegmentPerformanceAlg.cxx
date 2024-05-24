@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentPerformanceAlg.h"
@@ -7,6 +7,7 @@
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "xAODMuon/MuonSegment.h"
 #include "xAODMuon/MuonSegmentContainer.h"
+#include "AthContainers/ConstAccessor.h"
 
 MuonSegmentPerformanceAlg::MuonSegmentPerformanceAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator),
@@ -67,7 +68,9 @@ StatusCode MuonSegmentPerformanceAlg::execute() {
             if (Muon::MuonStationIndex::chName(static_cast<Muon::MuonStationIndex::ChIndex>(chIndex)) == "CSL")
                 ATH_MSG_WARNING(" CSL with more than 4 layers ");
         }
-        const ElementLink<xAOD::MuonSegmentContainer>& recoLink = seg->auxdata<ElementLink<xAOD::MuonSegmentContainer> >("recoSegmentLink");
+        static const SG::ConstAccessor<ElementLink<xAOD::MuonSegmentContainer> >
+          recoSegmentLinkAcc("recoSegmentLink");
+        const ElementLink<xAOD::MuonSegmentContainer>& recoLink = recoSegmentLinkAcc(*seg);
         if (recoLink.isValid()) {
             ++m_nfound[index][chIndex];
             matchedSegments.insert(*recoLink);
