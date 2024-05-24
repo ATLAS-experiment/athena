@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -60,5 +60,5 @@ endif()
 
 # Unit test for python modules
 atlas_add_test( pymodules
-                 SCRIPT python -m unittest discover -v -s ${CMAKE_CURRENT_SOURCE_DIR}/test
+                 SCRIPT python -m unittest discover -v -s ${CMAKE_CURRENT_SOURCE_DIR}/test -p 'ut_*.py'
                  POST_EXEC_SCRIPT nopost.sh )
