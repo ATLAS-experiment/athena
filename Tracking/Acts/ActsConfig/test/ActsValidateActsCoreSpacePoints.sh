@@ -7,7 +7,7 @@ n_events=1
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
-  --preExec "flags.Exec.FPE=500;" \
+  --preExec "flags.Exec.FPE=-1;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsCoreValidateSpacePointsFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.validateCoreSpacePoints.pool.root \

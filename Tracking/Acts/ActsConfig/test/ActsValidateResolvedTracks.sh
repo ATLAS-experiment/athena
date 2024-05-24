@@ -8,6 +8,7 @@ n_events=1
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
+  --preExec "flags.Exec.FPE=-1;" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.validateResolvedTracks.pool.root  \
   --maxEvents ${n_events} \
