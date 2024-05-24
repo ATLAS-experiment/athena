@@ -10,7 +10,7 @@ ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+cou
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
-  --preExec "flags.Exec.FPE=500;" "flags.Tracking.doITkFastTracking=True;" \
+  --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doITkFastTracking=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \

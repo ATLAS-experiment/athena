@@ -13,7 +13,7 @@ Reco_tf.py \
     --outputAODFile AOD.athena.pool.root \
     --outputESDFile ESD.athena.pool.root \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" \
+    --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" \
     --maxEvents ${n_events} \
     --multithreaded
 
@@ -29,7 +29,7 @@ Reco_tf.py \
     --outputAODFile AOD.acts.pool.root \
     --outputESDFile ESD.acts.pool.root \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateSeedsFlags" \
-    --preExec "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" \
+    --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doTruth=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=True;" \
     --maxEvents ${n_events} \
     --multithreaded
 

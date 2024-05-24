@@ -8,7 +8,7 @@ n_events=2
 # Run reconstruction and produce AOD with persistified Acts EDM
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py --CA \
-  --preExec "flags.Exec.FPE=500;" "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;flags.Acts.EDM.PersistifyTracks=True;" \
+  --preExec "flags.Exec.FPE=-1;" "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;flags.Acts.EDM.PersistifyTracks=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --postInclude "InDetConfig.InDetPrepRawDataFormationConfig.HGTDInDetToXAODClusterConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
   --inputRDOFile ${input_rdo} \
