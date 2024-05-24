@@ -849,8 +849,8 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
   uint32_t DAC_value=0;
   uint16_t delay_value=0;
   uint16_t isPulsed_value=false; 
-  LArCalibParams* calibParams1=0;
-  LArCalibParams* calibParams2=0;
+  std::unique_ptr<LArCalibParams> calibParams1;
+  std::unique_ptr<LArCalibParams> calibParams2;
 
   int pattype=m_nthLATOME>>16;
   const LArOnOffIdMapping* cabling =0;
@@ -864,53 +864,35 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
       return;
     }
     
-    calibParams1=new LArCalibParams();
-    calibParams2=new LArCalibParams();
+    calibParams1=std::make_unique<LArCalibParams>();
+    calibParams2=std::make_unique<LArCalibParams>();
 
-    if(pattype>0x48){
+    if (pattype > 0x48) {
       StatusCode sc1 = calibParams1->initialize();
       StatusCode sc2 = calibParams2->initialize();
-      if(sc1 != StatusCode::SUCCESS || sc2 != StatusCode::SUCCESS){
-	ATH_MSG_WARNING( "could not initialize LArCalibParams, acc calib will not be filled " );
-	delete calibParams1;
-  delete calibParams2;
-	return;
-      } 
-      if(pattype==0x49 || pattype==0x4a){
-
-	calibParams1->set(1,m_latomeCalibPatternsInEvent[0].patterns,
-			  {m_latomeCalibPatternsInEvent[0].DAC},
-			  {m_latomeCalibPatternsInEvent[0].delay});
-
-	calibParams2->set(1,m_latomeCalibPatternsInEvent[2].patterns,
-			  {m_latomeCalibPatternsInEvent[2].DAC},
-			  {m_latomeCalibPatternsInEvent[2].delay});
+      if (sc1 != StatusCode::SUCCESS || sc2 != StatusCode::SUCCESS) {
+        ATH_MSG_WARNING("could not initialize LArCalibParams, acc calib will not be filled ");
+        return;
       }
-      else{
+      if (pattype == 0x49 || pattype == 0x4a) {
 
-	calibParams1->set(1,m_latomeCalibPatternsInEvent[1].patterns,
-			  {m_latomeCalibPatternsInEvent[1].DAC},
-			  {m_latomeCalibPatternsInEvent[1].delay});
+        calibParams1->set(1, m_latomeCalibPatternsInEvent[0].patterns, {m_latomeCalibPatternsInEvent[0].DAC}, {m_latomeCalibPatternsInEvent[0].delay});
 
-	calibParams2->set(1,m_latomeCalibPatternsInEvent[2].patterns,
-			  {m_latomeCalibPatternsInEvent[2].DAC},
-			  {m_latomeCalibPatternsInEvent[2].delay});
+        calibParams2->set(1, m_latomeCalibPatternsInEvent[2].patterns, {m_latomeCalibPatternsInEvent[2].DAC}, {m_latomeCalibPatternsInEvent[2].delay});
+      } else {
+
+        calibParams1->set(1, m_latomeCalibPatternsInEvent[1].patterns, {m_latomeCalibPatternsInEvent[1].DAC}, {m_latomeCalibPatternsInEvent[1].delay});
+
+        calibParams2->set(1, m_latomeCalibPatternsInEvent[2].patterns, {m_latomeCalibPatternsInEvent[2].DAC}, {m_latomeCalibPatternsInEvent[2].delay});
       }
-    }
-    else{
+    } else {
       StatusCode sc1 = calibParams1->initialize();
-      if(sc1 != StatusCode::SUCCESS){ 
-	ATH_MSG_WARNING( "could not initialize LArCalibParams, acc calib will not be filled " );
-	delete calibParams1;
-  delete calibParams2;
-	return;
-      } 
-      calibParams1->set(1,m_latomeCalibPatternsInEvent[0].patterns,
-			{m_latomeCalibPatternsInEvent[0].DAC},
-			{m_latomeCalibPatternsInEvent[0].delay});
-
+      if (sc1 != StatusCode::SUCCESS) {
+        ATH_MSG_WARNING("could not initialize LArCalibParams, acc calib will not be filled ");
+        return;
+      }
+      calibParams1->set(1, m_latomeCalibPatternsInEvent[0].patterns, {m_latomeCalibPatternsInEvent[0].DAC}, {m_latomeCalibPatternsInEvent[0].delay});
     }
-
   }
 
   const HWIdentifier hwidEmpty;
@@ -948,173 +930,154 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
 							    sum,sum2,ntmin);
       m_accdigits->push_back(accdigi);
     }
-    if(m_caccdigits){
-      if(pattype==0x49 || pattype==0x4a){
-	if(m_decoder->m_onlineId->barrel_ec(SCID)==0){
-	  calibParams=calibParams1;
-	}
-	else{
-	  calibParams=calibParams2;
-	}
+    if (m_caccdigits) {
+      if (pattype == 0x49 || pattype == 0x4a) {
+        if (m_decoder->m_onlineId->barrel_ec(SCID) == 0) {
+          calibParams = calibParams1.get();
+        } else {
+          calibParams = calibParams2.get();
+        }
+      } else if (pattype == 0x4b || pattype == 0x4c) {
+        if (m_decoder->m_onlineId->isHECchannel(SCID)) {
+          calibParams = calibParams1.get();
+        } else {
+          calibParams = calibParams2.get();
+        }
+      } else {
+        calibParams = calibParams1.get();
       }
-      else if (pattype==0x4b || pattype==0x4c){
-	if(m_decoder->m_onlineId->isHECchannel(SCID)){
-	  calibParams=calibParams1;
-	}
-	else{
-	  calibParams=calibParams2;
-	}
-      }
-      else{
-	calibParams=calibParams1;
-      }
-      unsigned int eventNb=0; ////dummy event number
+      unsigned int eventNb = 0;  ////dummy event number
       unsigned int numCL = 0;
       unsigned int numPulsedLeg = 0;
       std::vector<Identifier> ccellIds(0);
-      Identifier myofflineID = cabling->cnvToIdentifier(SCID) ;
-      ccellIds = m_decoder->m_sc2ccMappingTool->superCellToOfflineID( myofflineID );
-      for (Identifier id : ccellIds) {// loop cells in sc
-	HWIdentifier cellLegHWID  = cablingLeg->createSignalChannelID(id);
-	const std::vector<HWIdentifier>& calibLineLeg = clcabling->calibSlotLine(cellLegHWID);
-	numCL += calibLineLeg.size();
-	for (HWIdentifier calibLineHWID : calibLineLeg) {// loop legacy calib lines
-	  if ( calibParams->isPulsed(eventNb,calibLineHWID) ){
-	      numPulsedLeg += 1;
-	  }
-	}
+      Identifier myofflineID = cabling->cnvToIdentifier(SCID);
+      ccellIds = m_decoder->m_sc2ccMappingTool->superCellToOfflineID(myofflineID);
+      for (Identifier id : ccellIds) {  // loop cells in sc
+        HWIdentifier cellLegHWID = cablingLeg->createSignalChannelID(id);
+        const std::vector<HWIdentifier>& calibLineLeg = clcabling->calibSlotLine(cellLegHWID);
+        numCL += calibLineLeg.size();
+        for (HWIdentifier calibLineHWID : calibLineLeg) {  // loop legacy calib lines
+          if (calibParams->isPulsed(eventNb, calibLineHWID)) {
+            numPulsedLeg += 1;
+          }
+        }
       }
 
-      isPulsed_value=true;
-      if(numPulsedLeg!=numCL){
-      	if(m_decoder->m_keepPulsed) continue;
-	isPulsed_value=false;
+      isPulsed_value = true;
+      if (numPulsedLeg != numCL) {
+        if (m_decoder->m_keepPulsed)
+          continue;
+        isPulsed_value = false;
       }
-      DAC_value=calibParams->DAC(eventNb,SCID)*numPulsedLeg;
-      // Here we want to change the DAC value to reflect the incorrect factors applied in HEC, where some of the cells are much smaller yet have DAC2MeV factors which came from averaging over many cells
+      DAC_value = calibParams->DAC(eventNb, SCID) * numPulsedLeg;
+      // Here we want to change the DAC value to reflect the incorrect factors applied in HEC, where some of the cells are much smaller yet have DAC2MeV factors
+      // which came from averaging over many cells
       int ft = m_decoder->m_onlineId->feedthrough(SCID);
       int slot = m_decoder->m_onlineId->slot(SCID);
       int channel = m_decoder->m_onlineId->channel(SCID);
-      if( m_decoder->m_onlineId->barrel_ec(SCID)==1 && ( ft==3 || ft==10 || ft==16 || ft==22 ) ) {
-        // if it's HEC 
-        if ( slot == 1 ){
-           if ( channel >= 16 && channel <= 31 ){ // eta 1.65 bin
-                DAC_value = DAC_value / 1.363;
-                m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel "<<SCID<<"by 1/1.363" << endmsg;
-           }else if ( channel >= 32 && channel <= 47 ){ // eta 1.75 bin
-                DAC_value = DAC_value / 1.206;
-                m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel "<<SCID<<"by 1/1.206" << endmsg;
-           }
+      if (m_decoder->m_onlineId->barrel_ec(SCID) == 1 && (ft == 3 || ft == 10 || ft == 16 || ft == 22)) {
+        // if it's HEC
+        if (slot == 1) {
+          if (channel >= 16 && channel <= 31) {  // eta 1.65 bin
+            DAC_value = DAC_value / 1.363;
+            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.363" << endmsg;
+          } else if (channel >= 32 && channel <= 47) {  // eta 1.75 bin
+            DAC_value = DAC_value / 1.206;
+            m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel " << SCID << "by 1/1.206" << endmsg;
+          }
         }
       }
-      
-      delay_value=calibParams->Delay(eventNb,SCID);     
-      LArAccumulatedCalibDigit *accdigi = new LArAccumulatedCalibDigit(SCID,gain,
-								       sum,sum2,ntmin,
-								       DAC_value,delay_value,isPulsed_value);
-      
+
+      delay_value = calibParams->Delay(eventNb, SCID);
+      LArAccumulatedCalibDigit* accdigi = new LArAccumulatedCalibDigit(SCID, gain, sum, sum2, ntmin, DAC_value, delay_value, isPulsed_value);
+
       m_caccdigits->push_back(accdigi);
     }
 
-  }/// for loop on SCs
-
-
-  delete calibParams1;
-  delete calibParams2;
-
+  }  /// for loop on SCs
 }
 
 // Pass ADC values from an event
-void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping *map) {
-  //const CaloGain::CaloGain dummyGain = CaloGain::LARHIGHGAIN;
+void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping* map) {
+  // const CaloGain::CaloGain dummyGain = CaloGain::LARHIGHGAIN;
   const HWIdentifier hwidEmpty;
   for (SuperCell ch = 0; ch < N_LATOME_CHANNELS; ++ch) {
-    const auto SCID = map ? map->getChannelID(m_nthLATOME, ch):hwidEmpty;
+    const auto SCID = map ? map->getChannelID(m_nthLATOME, ch) : hwidEmpty;
     if (SCID == hwidEmpty) {
-      ATH_MSG_DEBUG( "No mapping for ch: " << std::dec << ch );
+      ATH_MSG_DEBUG("No mapping for ch: " << std::dec << ch);
       continue;
     }
-    if( m_decoder->m_ignoreBarrelChannels && m_decoder->m_onlineId->barrel_ec(SCID)==0) continue;
-    if( m_decoder->m_ignoreEndcapChannels && m_decoder->m_onlineId->barrel_ec(SCID)==1) continue;
+    if (m_decoder->m_ignoreBarrelChannels && m_decoder->m_onlineId->barrel_ec(SCID) == 0)
+      continue;
+    if (m_decoder->m_ignoreEndcapChannels && m_decoder->m_onlineId->barrel_ec(SCID) == 1)
+      continue;
 
     std::vector<short> adcValues_inChannel_inEvent;
 
-    if(m_hasRawAdc){ /// don't copy vectors for nothing
-      adcValues_inChannel_inEvent=m_rawValuesInEvent[ch].adc;
+    if (m_hasRawAdc) {  /// don't copy vectors for nothing
+      adcValues_inChannel_inEvent = m_rawValuesInEvent[ch].adc;
     }
-   
-    if(m_hasRawAdc && m_adc_coll){
+
+    if (m_hasRawAdc && m_adc_coll) {
       /// need to shift the BCID as well
       /// do it at the same time
-      
+
       std::vector<unsigned short> bcid_in_event;
-      for(short b=m_BC_rawADC; b<m_BC_rawADC+m_nBC_rawADC; ++b){
-	bcid_in_event.push_back(m_BCIDsInEvent[b]);
+      for (short b = m_BC_rawADC; b < m_BC_rawADC + m_nBC_rawADC; ++b) {
+        bcid_in_event.push_back(m_BCIDsInEvent[b]);
       }
-      
-      LArSCDigit* scDigit = new LArSCDigit(SCID, m_rawValuesInEvent[ch].latomeChannel,m_nthLATOME,
-					   adcValues_inChannel_inEvent, bcid_in_event);
+
+      LArSCDigit* scDigit = new LArSCDigit(SCID, m_rawValuesInEvent[ch].latomeChannel, m_nthLATOME, adcValues_inChannel_inEvent, bcid_in_event);
       m_adc_coll->push_back(scDigit);
     }
 
-    if(m_hasAdc && m_adc_bas_coll){
+    if (m_hasAdc && m_adc_bas_coll) {
       std::vector<unsigned short> bcid_in_event;
-      if(m_nBC_ADC==(short)m_BCIDsInEvent.size()){
-	bcid_in_event=m_BCIDsInEvent;
+      if (m_nBC_ADC == (short)m_BCIDsInEvent.size()) {
+        bcid_in_event = m_BCIDsInEvent;
+      } else {
+        for (short b = m_BC_ADC; b < m_BC_ADC + m_nBC_ADC; ++b) {
+          bcid_in_event.push_back(m_BCIDsInEvent[b]);
+        }
       }
-      else{
-	for(short b=m_BC_ADC; b<m_BC_ADC+m_nBC_ADC; ++b){
-	  bcid_in_event.push_back(m_BCIDsInEvent[b]);
-	}
-      }
-      LArSCDigit* scDigit = new LArSCDigit(SCID, m_rawValuesInEvent[ch].latomeChannel,m_nthLATOME,
-					   m_rawValuesInEvent[ch].adc_bas, bcid_in_event);
+      LArSCDigit* scDigit = new LArSCDigit(SCID, m_rawValuesInEvent[ch].latomeChannel, m_nthLATOME, m_rawValuesInEvent[ch].adc_bas, bcid_in_event);
       m_adc_bas_coll->push_back(scDigit);
-
     }
 
-    if(m_hasE && m_et_coll){
+    if (m_hasE && m_et_coll) {
       std::vector<unsigned short> bcid_in_event;
-      if(m_nBC_E==(unsigned short)m_BCIDsInEvent.size()){
-	bcid_in_event=m_BCIDsInEvent;
+      if (m_nBC_E == (unsigned short)m_BCIDsInEvent.size()) {
+        bcid_in_event = m_BCIDsInEvent;
+      } else {
+        for (short b = m_BC_E; b < m_BC_E + m_nBC_E; ++b) {
+          bcid_in_event.push_back(m_BCIDsInEvent[b]);
+        }
       }
-      else{
-	for(short b=m_BC_E; b<m_BC_E+m_nBC_E; ++b){
-	  bcid_in_event.push_back(m_BCIDsInEvent[b]);
-	}
-      }
-      LArRawSC* scDigit = new LArRawSC(SCID, m_rawValuesInEvent[ch].latomeChannel,m_nthLATOME,
-				       m_rawValuesInEvent[ch].et, bcid_in_event, m_rawValuesInEvent[ch].saturation);
+      LArRawSC* scDigit =
+          new LArRawSC(SCID, m_rawValuesInEvent[ch].latomeChannel, m_nthLATOME, m_rawValuesInEvent[ch].et, bcid_in_event, m_rawValuesInEvent[ch].saturation);
       m_et_coll->push_back(scDigit);
-
     }
 
-    if(m_hasEID && m_et_id_coll){
+    if (m_hasEID && m_et_id_coll) {
       std::vector<unsigned short> bcid_in_event;
-      if(m_nBC_EID==(short)m_BCIDsInEvent.size()){
-	bcid_in_event=m_BCIDsInEvent;
+      if (m_nBC_EID == (short)m_BCIDsInEvent.size()) {
+        bcid_in_event = m_BCIDsInEvent;
+      } else {
+        for (short b = m_BC_EID; b < m_BC_EID + m_nBC_EID; ++b) {
+          bcid_in_event.push_back(m_BCIDsInEvent[b]);
+        }
       }
-      else{
-	for(short b=m_BC_EID; b<m_BC_EID+m_nBC_EID; ++b){
-	  bcid_in_event.push_back(m_BCIDsInEvent[b]);
-	}
-      }
-      LArRawSC* scDigit = new LArRawSC(SCID, m_rawValuesInEvent[ch].latomeChannel,m_nthLATOME,
-				       m_rawValuesInEvent[ch].et_id, bcid_in_event,m_rawValuesInEvent[ch].saturation);
+      LArRawSC* scDigit =
+          new LArRawSC(SCID, m_rawValuesInEvent[ch].latomeChannel, m_nthLATOME, m_rawValuesInEvent[ch].et_id, bcid_in_event, m_rawValuesInEvent[ch].saturation);
       m_et_id_coll->push_back(scDigit);
-
     }
-
   }
-  
 }
-
 
 void LArLATOMEDecoder::EventProcess::fillHeader() {
 
-  if(m_header_coll){
-    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID,  m_activeSC, m_latomeBCID, m_l1ID, m_ROBFragSize);
+  if (m_header_coll) {
+    LArLATOMEHeader* latome = new LArLATOMEHeader(m_nthLATOME, m_latomeID, m_activeSC, m_latomeBCID, m_l1ID, m_ROBFragSize);
     m_header_coll->push_back(latome);
   }
-  
 }
