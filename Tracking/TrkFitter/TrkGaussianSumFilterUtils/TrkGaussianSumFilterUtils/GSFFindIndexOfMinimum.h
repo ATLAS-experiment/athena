@@ -14,13 +14,12 @@
  * possible implementation
  *
  * The issues are described in ATLASRECTS-5244
- * Some timing improvements in the overall time
- * for the algorithm
+ * Some timing improvements in the overall
+ * GSF refitting algorithm time can be found at :
  * https://gitlab.cern.ch/atlas/athena/-/merge_requests/67962
- *
- * At large a slow implmentation can slow
- * significantly the time
- * of the  overall algorithm.
+ * At large a slow implmentation can increase
+ * significantly the time for the GSF refititng
+ * algorithm.
  *
  * There is literature in the internet
  * namely in blogs by Wojciech Mula
@@ -29,25 +28,23 @@
  * integers using intrinsics and various
  * AVX levels.
  *
- * In Atlas currently we need to solve it for float.
+ * In ATLAS currently we need to solve it for float.
  * Furthermore, after discussion with Scott Snyder
- * we opted for using the gnu vector types.
+ * we opted for using the gnu vector types from "CxxUtils/vec.h".
  * And we target x86_64-v2.
+ * In this aimplementations a vec<float,4> vec<int,4>
+ * is a 4 wide register. And we do operation explicitly
+ * 4 elements a time.
  *
  * For completeness and future comparisons
  * we collect
- *
- * - A "C" implementation
- * - A "STL" implementation
- * - A "Vec"  implementation always tracking the index
+ * - A "C" implementation.
+ * - A "STL" implementation.
+ * - A "Vec"  implementation always tracking the index.
  * - A "Vec" implementation that updates the index when an new minimum is
  * found. This can be faster than the above when the inputs are not ordered.
- * - A "Vec" implementation that updates that find the minimum and then
- *   finds the index. This should be faster in most cases
- *
- * In the vec implementations a vec<float,4> vec<int,4>
- * is a 4 wide register. And we do operation explicit but 4 elements a time.
- * Still prb much readable than using intrinsics.
+ * - A "Vec" implementation that first finds the minimum and then
+ *   finds the index. This can be faster in many cases.
  *
  * We provide a convenient entry method
  * to select in compile time an implementation
@@ -344,7 +341,7 @@ float vecFindMinimum(const float* distancesIn, int n) {
   return minvalue;
 }
 ATH_ALWAYS_INLINE
-int32_t vecIdxofValue(const float value, const float* distancesIn, int n) {
+int32_t vecIdxOfValue(const float value, const float* distancesIn, int n) {
   using namespace CxxUtils;
   const float* array =
       std::assume_aligned<GSFConstants::alignment>(distancesIn);
@@ -368,10 +365,12 @@ int32_t vecIdxofValue(const float value, const float* distancesIn, int n) {
     // 4
     vload(values4, array + i + 12);  // 12-15
     vec<int, 4> eq4 = values4 == target;
-
+    //See if we have the value in any
+    //of the vectors
     vec<int, 4> eq12 = eq1 || eq2;
     vec<int, 4> eq34 = eq3 || eq4;
     vec<int, 4> eqAny = eq12 || eq34;
+    //If yes then use scalar code to locate it
     if (vany(eqAny)) {
       for (int32_t idx = i; idx < i + 16; ++idx) {
         if (distancesIn[idx] == value) {
@@ -389,7 +388,7 @@ int32_t vecMinThenIdx(const float* distancesIn, int n) {
   const float* array =
       std::assume_aligned<GSFConstants::alignment>(distancesIn);
   const float min = vecFindMinimum(array, n);
-  return vecIdxofValue(min, array, n);
+  return vecIdxOfValue(min, array, n);
 }
 
 }  // namespace findIdxOfMinDetail
