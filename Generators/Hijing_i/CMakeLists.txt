@@ -21,7 +21,7 @@ atlas_add_library( Hijing_iLib
    LINK_LIBRARIES ${HIJING_LIBRARIES} ${CLHEP_LIBRARIES}
    GeneratorFortranCommonLib GeneratorModulesLib StoreGateLib
    PRIVATE_LINK_LIBRARIES AtlasHepMCLib AthenaKernel GaudiKernel
-   GeneratorObjects GeneratorUtilsLib TruthUtils )
+   GeneratorObjects CxxUtils TruthUtils )
 
 atlas_add_component( Hijing_i
    src/components/*.cxx

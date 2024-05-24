@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GENERATORUTILS_STRINGPARSE_H
-#define GENERATORUTILS_STRINGPARSE_H
+#ifndef CXXUTILS_STRINGPARSE_H
+#define CXXUTILS_STRINGPARSE_H
 #include <string>
 #include <vector>
 #include <sstream>
