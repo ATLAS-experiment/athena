@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( StoreGateTests )
@@ -20,6 +20,7 @@ atlas_install_joboptions( share/*.py share/tests/*.py )
 
 atlas_add_test( PyClidsTestWriter
                 SCRIPT athena.py StoreGateTests/test_recordStlClids_jobOptions.py
+                PROPERTIES TIMEOUT 600
                 LOG_IGNORE_PATTERN "running|XMLCatalog|0x[0-9a-f]{4,}" )
 
 atlas_add_test( SgProducerConsumer
