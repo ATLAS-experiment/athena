@@ -63,7 +63,8 @@ namespace MuonGMR4 {
 
             /// Defines the edges of the trapezoid
             void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight);
-            /// Defines the edges of the trapezoid with stereo angle
+            /// Defines the edges of the trapezoid with stereo angle. 
+            /// The stereo angle is defined as the angle going from the nominal scheme to the stereo scheme
             void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight, double sAngle);
             /// Flips the edges of the trapezoid boundaries by 90 degrees clockwise
             void flipTrapezoid();
@@ -95,6 +96,8 @@ namespace MuonGMR4 {
             /// Checks whether an external point is inside the trapezoidal area
             bool insideTrapezoid(const Amg::Vector2D& extPos) const;
         protected:
+            /// Checks wheather the internal point is inside hte trapezoidal area
+            bool insideBoundaries(const Amg::Vector2D& pos) const;
             /// Calculates the position of a given strip (Local numbering scheme)
             virtual Amg::Vector2D stripPosition(int stripNum) const;
             /// Returns the intersection of a given strip with the left or right edge of the trapezoid
@@ -169,9 +172,9 @@ namespace MuonGMR4 {
             /// Stereo angle of the strip design
             double m_stereoAngle{0.};
             /// Matrix to translate from nominal -> stereo frame
-            AmgSymMatrix(2) m_stereoRotMat{AmgSymMatrix(2)::Identity()};
+            AmgSymMatrix(2) m_etaToStereo{AmgSymMatrix(2)::Identity()};
             /// Matrixt to translate from stereo -> nominal frame
-            AmgSymMatrix(2) m_nominalRotMat{AmgSymMatrix(2)::Identity()};
+            AmgSymMatrix(2) m_stereoToEta{AmgSymMatrix(2)::Identity()};
             /// Bottom left point of the trapezoid
             Amg::Vector2D m_bottomLeft{Amg::Vector2D::Zero()};
             /// Top right point of the trapezoid

@@ -60,11 +60,10 @@ namespace MuonGMR4{
         if (std::abs(sAngle) < std::numeric_limits<float>::epsilon()) return;
         m_stereoAngle = sAngle;
         m_hasStereo = true;
-        Eigen::Rotation2D rot{sAngle};
-        m_stripDir = rot * m_stripDir;
-        m_stripNormal = rot * m_stripNormal;
-        m_stereoRotMat = Eigen::Rotation2D{-sAngle};
-        m_nominalRotMat = rot;
+        m_etaToStereo = Eigen::Rotation2D{sAngle};
+        m_stereoToEta = Eigen::Rotation2D{-sAngle};
+        m_stripDir = m_stereoToEta * m_stripDir;
+        m_stripNormal = m_stereoToEta * m_stripNormal;
     }
 
     void StripDesign::defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight) {

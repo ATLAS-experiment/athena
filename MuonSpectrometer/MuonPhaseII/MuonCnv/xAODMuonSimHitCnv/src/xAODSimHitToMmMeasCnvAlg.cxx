@@ -29,9 +29,15 @@ StatusCode xAODSimHitToMmMeasCnvAlg::initialize(){
     return StatusCode::SUCCESS;
 }
 StatusCode xAODSimHitToMmMeasCnvAlg::finalize() {
-    if (m_allHits == 0) return StatusCode::SUCCESS;
-    ATH_MSG_INFO("Tried to convert "<<m_allHits<<" hits. In, "
-                <<(100.*m_acceptedHits /  m_allHits) <<" cases, the conversion was successful");
+    std::stringstream statstr{};
+    unsigned allHits{0};
+    for (unsigned int g = 0; g < m_allHits.size(); ++g) {
+        allHits += m_allHits[g];
+        statstr<<" *** Layer "<<(g+1)<<" "<<(100.* m_acceptedHits[g] / std::max(1u*m_allHits[g], 1u))
+               <<"% of "<<m_allHits[g]<<std::endl; 
+    }
+    if(!allHits) return StatusCode::SUCCESS;
+    ATH_MSG_INFO("Tried to convert "<<allHits<<" hits. Successes rate per layer  "<<std::endl<<statstr.str());
     return StatusCode::SUCCESS;
 }
 
@@ -60,7 +66,9 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         const Identifier hitId = simHit->identify();
         //ignore radiation for now
         if(std::abs(simHit->pdgId())!=13) continue;
-        ++m_allHits;
+        /// Calculate the index for the global hit counter
+        const unsigned int hitGapInNsw = (id_helper.multilayer(hitId) -1) * 4 + id_helper.gasGap(hitId) -1;
+        ++m_allHits[hitGapInNsw];
 
 
         const MuonGMR4::MmReadoutElement* readOutEle = m_DetMgr->getMmReadoutElement(hitId);
@@ -71,8 +79,9 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         
         int channelNumber = design.stripNumber(lHitPos.block<2,1>(0,0));
         if(channelNumber<0){
-            if (design.insideTrapezoid(lHitPos.block<2,1>(0,0))) {
-                ATH_MSG_WARNING("hit "<<Amg::toString(lHitPos)<<" is outside bounds "<<std::endl<<design<<" rejecting it");
+            if (!design.insideTrapezoid(lHitPos.block<2,1>(0,0))) {
+                ATH_MSG_WARNING("Hit "<<m_idHelperSvc->toString(hitId)<<" "<<Amg::toString(lHitPos)
+                              <<" is outside bounds "<<std::endl<<design<<" rejecting it");
             }
             continue;
         }
@@ -85,7 +94,7 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
                             << " lHitPos " << Amg::toString(lHitPos));
             continue;
         }
-        ++m_acceptedHits;
+        ++m_acceptedHits[hitGapInNsw];
         xAOD::MMCluster* prd = new xAOD::MMCluster();
         prdContainer->push_back(prd);
         

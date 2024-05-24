@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_MMREADOUTELEMENT_ICC
@@ -22,6 +22,9 @@ inline double MmReadoutElement::moduleThickness() const { return 2.*m_pars.halfT
 inline double MmReadoutElement::gapLengthS(const IdentifierHash& hash) const { return 2.*stripLayer(hash).design().shortHalfHeight(); }
 inline double MmReadoutElement::gapLengthL(const IdentifierHash& hash) const { return 2.*stripLayer(hash).design().longHalfHeight();}
 inline double MmReadoutElement::gapHeight(const IdentifierHash& hash) const { return 2.*stripLayer(hash).design().halfWidth();}
+inline int MmReadoutElement::readoutSide(const IdentifierHash& measHash) const {
+    return m_pars.readoutSide[static_cast<unsigned>(layerHash(measHash))];
+}
 inline unsigned int MmReadoutElement::nGasGaps() const { return m_pars.layers.size(); }
 inline unsigned int MmReadoutElement::numStrips(const IdentifierHash& hash) const { 
     return stripLayer(hash).design().numStrips();
@@ -84,7 +87,7 @@ inline unsigned int MmReadoutElement::stripNumber(const IdentifierHash& measHash
 }
 
 inline const StripLayer& MmReadoutElement::stripLayer(const IdentifierHash& measHash) const {
-    return m_pars.layers.at(static_cast<unsigned int>(layerHash(measHash)));
+    return *m_pars.layers.at(static_cast<unsigned int>(layerHash(measHash)));
 }
 
 inline const StripLayer& MmReadoutElement::stripLayer(const Identifier& measId) const {

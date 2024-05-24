@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_MMREAOUDGEOMTOOL_H
@@ -41,6 +41,7 @@ class MmReadoutGeomTool : public AthAlgTool,
        double distBotFrameStrip{0.};
        std::vector<double> stereoAngle{};
        std::vector<int> totalActiveStrips{};
+       std::vector<int> readoutSide{};
        int nMissedBottomEta{0};
        int nMissedBottomStereo{0};
        int nMissedTopEta{0};
@@ -50,10 +51,11 @@ class MmReadoutGeomTool : public AthAlgTool,
 
     struct FactoryCache {
        
-      using ParamBookTable = std::map<std::string, wMMTable>;
+        using ParamBookTable = std::map<std::string, wMMTable>;
+        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
+        std::set<StripLayerPtr, StripLayerSorter> stripLayers{};
 
-       std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
-       ParamBookTable parameterBook{};
+        ParamBookTable parameterBook{};
        
     };
 

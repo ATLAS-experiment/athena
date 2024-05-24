@@ -15,7 +15,7 @@ def SetupArgParser():
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default ="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST.db", help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--outRootFile", default="MdtGeoDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
     parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
     parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
@@ -76,6 +76,11 @@ def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonGMR4.NswGeoPlottingAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def setupGeoR4TestCfg(args, setupSimJob = False):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -189,6 +194,7 @@ if __name__=="__main__":
                                             ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryMM: 
+        cfg.merge(NswGeoPlottingAlgCfg(flags))
         cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"],
                                            ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     

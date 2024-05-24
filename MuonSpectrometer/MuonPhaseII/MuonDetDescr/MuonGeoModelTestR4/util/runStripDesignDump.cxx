@@ -36,22 +36,22 @@ void createGraph(const StripDesign& design, TFile& outFile, const std::string& g
     std::cout<<"################################################################"<<std::endl;
     outFile.WriteObject(graph.get(), graphName.c_str());
 }
+ double edgePoint(const StripDesign& design, unsigned int idx, bool min){
+    if (min) {
+        double minLeft  = std::min(design.cornerBotLeft()[idx], design.cornerBotRight()[idx]);
+        double minRight = std::min(design.cornerTopLeft()[idx], design.cornerTopRight()[idx]);
+        return std::min(minLeft, minRight) - 25.*Gaudi::Units::mm;
+    }
+    double maxLeft  = std::max(design.cornerBotLeft()[idx], design.cornerBotRight()[idx]);
+    double maxRight = std::max(design.cornerTopLeft()[idx], design.cornerTopRight()[idx]);
+    return std::max(maxLeft, maxRight) + 25.*Gaudi::Units::mm;
+}
 void testChannelNumber(const StripDesign& design, TFile& outFile, const std::string& histoName) {
-    auto edgePoint = [&design](unsigned int idx, bool min){
-        if (min) {
-            double minLeft  = std::min(design.cornerBotLeft()[idx], design.cornerBotRight()[idx]);
-            double minRight = std::min(design.cornerTopLeft()[idx], design.cornerTopRight()[idx]);
-            return std::min(minLeft, minRight) - 25.*Gaudi::Units::mm;
-        }
-        double maxLeft  = std::max(design.cornerBotLeft()[idx], design.cornerBotRight()[idx]);
-        double maxRight = std::max(design.cornerTopLeft()[idx], design.cornerTopRight()[idx]);
-        return std::max(maxLeft, maxRight) + 25.*Gaudi::Units::mm;
-        
-    };
-    const double lowX  = edgePoint(Amg::x, true);
-    const double highX = edgePoint(Amg::x, false);
-    const double lowY  = edgePoint(Amg::y, true);
-    const double highY = edgePoint(Amg::y, false);
+
+    const double lowX  = edgePoint(design, Amg::x, true);
+    const double highX = edgePoint(design, Amg::x, false);
+    const double lowY  = edgePoint(design, Amg::y, true);
+    const double highY = edgePoint(design, Amg::y, false);
     const unsigned nBinX = (highX -lowX) / 0.5*Gaudi::Units::mm;
     const unsigned nBinY = (highY -lowY) / 0.5*Gaudi::Units::mm;
     
@@ -59,12 +59,34 @@ void testChannelNumber(const StripDesign& design, TFile& outFile, const std::str
                                                          "channels:x[mm];y[mm];channelNumber", 
                                                           nBinX, lowX, highX,
                                                           nBinY, lowY, highY);
-    Eigen::Rotation2D stereoRot {-design.stereoAngle()};
+    Eigen::Rotation2D stereoRot{design.stereoAngle()};
     for (unsigned binX = 1; binX < nBinX; ++ binX) {
         for (unsigned binY = 1; binY < nBinY; ++binY) {
             const Amg::Vector2D pos{histo->GetXaxis()->GetBinCenter(binX),
                                     histo->GetYaxis()->GetBinCenter(binY)};
             histo->SetBinContent(binX, binY, design.stripNumber(stereoRot*pos));
+        }
+    }
+    outFile.WriteObject(histo.get(), histo->GetName());
+}
+void testBoundaries(const StripDesign& design, TFile& outFile, const std::string& histoName) {
+    const double lowX  = edgePoint(design, Amg::x, true);
+    const double highX = edgePoint(design, Amg::x, false);
+    const double lowY  = edgePoint(design, Amg::y, true);
+    const double highY = edgePoint(design, Amg::y, false);
+    const unsigned nBinX = (highX -lowX) / 0.25*Gaudi::Units::mm;
+    const unsigned nBinY = (highY -lowY) / 0.25*Gaudi::Units::mm;
+
+    std::unique_ptr<TH2I> histo = std::make_unique<TH2I>(histoName.c_str(),
+                                                         "boundaties:x[mm];y[mm];isInside", 
+                                                          nBinX, lowX, highX,
+                                                          nBinY, lowY, highY);
+    Eigen::Rotation2D stereoRot{design.stereoAngle()};
+    for (unsigned binX = 1; binX < nBinX; ++ binX) {
+        for (unsigned binY = 1; binY < nBinY; ++binY) {
+            const Amg::Vector2D pos{histo->GetXaxis()->GetBinCenter(binX),
+                                    histo->GetYaxis()->GetBinCenter(binY)};
+            histo->SetBinContent(binX, binY, design.insideTrapezoid(stereoRot*pos));
         }
     }
     outFile.WriteObject(histo.get(), histo->GetName());
@@ -239,6 +261,7 @@ int main(int argc, char** argv) {
     /// 
     createGraph(nominalDesign, *file, "NominalDesign");
     testChannelNumber(nominalDesign, *file, "NominalNumbers");
+    testBoundaries(nominalDesign, *file, "NominalBoundaries");
     if (!testChamberBackForthMapping(nominalDesign)) {
         std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --  Nominal design channel mapping failed "<<std::endl;
         return EXIT_FAILURE;
@@ -254,6 +277,7 @@ int main(int argc, char** argv) {
    
     createGraph(flippedDesign,*file, "FlippedDesign");
     testChannelNumber(flippedDesign, *file, "FlippedNumbers");
+    testBoundaries(flippedDesign, *file, "FlippedBoundaries");
     if (!testChamberBackForthMapping(flippedDesign)) {
         std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --   Flipped design channel mapping failed "<<std::endl;
         return EXIT_FAILURE;
@@ -266,6 +290,7 @@ int main(int argc, char** argv) {
     /// 
     createGraph(rotatedDesign, *file, "StereoDesign");
     testChannelNumber(rotatedDesign, *file, "StereoNumbers");
+    testBoundaries(rotatedDesign, *file, "StereoBoundaries");
     if (!testChamberBackForthMapping(rotatedDesign)) {
         std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --  Stereo Rotated design channel mapping failed "<<std::endl;
         return EXIT_FAILURE;

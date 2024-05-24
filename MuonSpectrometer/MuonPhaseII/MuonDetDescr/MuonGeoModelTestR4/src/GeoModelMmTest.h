@@ -55,6 +55,7 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
     MuonVal::ScalarBranch<short>& m_stPhi{m_tree.newScalar<short>("stationPhi")}; // [1, 8]
     MuonVal::ScalarBranch<short>& m_stML{m_tree.newScalar<short>("multilayer")}; // {1, 2}
     MuonVal::ScalarBranch<std::string>& m_chamberDesign{m_tree.newScalar<std::string>("chamberDesign")};
+    MuonVal::ScalarBranch<float>& m_stStripPitch{m_tree.newScalar<float>("stripPitch")};
 
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
@@ -63,7 +64,11 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
     /// Rotation matrix of the respective strip layers
     MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};    
     MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
-   //// Chamber Details
+    MuonVal::TwoVectorBranch m_firstStripPos{m_tree, "firstStripPos"};
+    MuonVal::VectorBranch<int>& m_readoutSide{m_tree.newVector<int>("stripReadoutSide")};
+    MuonVal::VectorBranch<unsigned>& m_readoutFirstStrip{m_tree.newVector<unsigned int>("stripFirstStrip")};
+
+    //// Chamber Details
     MuonVal::VectorBranch<short>& m_gasGap{m_tree.newVector<short>("gasGap")}; // gas gap number
     MuonVal::VectorBranch<bool>& m_isStereo{m_tree.newVector<bool>("isStereo")};
     MuonVal::ThreeVectorBranch m_stripCenter{m_tree, "stripCenter"};

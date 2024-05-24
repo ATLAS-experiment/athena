@@ -32,8 +32,10 @@ class MmReadoutElement : public MuonReadoutElement {
       double halfHeight{0.};
       /// number of gasGaps
       unsigned int nGasGaps{0};
-
-      std::vector<StripLayer> layers{};
+      /// Readout sides
+      std::vector<int> readoutSide{};
+      /// Pointers to the strip layers
+      std::vector<StripLayerPtr> layers{};
 
 #ifndef SIMULATIONBASE
         ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
@@ -81,7 +83,8 @@ class MmReadoutElement : public MuonReadoutElement {
     unsigned int firstStrip(const IdentifierHash& layerHash) const;
     /// Returns the strip length
     double stripLength(const IdentifierHash& measHash) const;
-
+  	/// Returns the readout side
+    int readoutSide(const IdentifierHash& measHash) const;
 
     StatusCode initElement() override final;
 

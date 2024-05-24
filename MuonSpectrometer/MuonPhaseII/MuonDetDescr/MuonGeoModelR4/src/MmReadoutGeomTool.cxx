@@ -80,6 +80,8 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
     }     
 
     const wMMTable& paramBook{parBookItr->second};
+    
+    define.readoutSide = paramBook.readoutSide;
 
     /*Sort Gas Gaps in a module quadruplet based on their Z position
       On side A the gas gap have local x axis translations : -24.975 , -8.175 , 8.175, 24.975
@@ -123,25 +125,20 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
         int firstActiveStrip{0};
         if (isStereo) {
             firstActiveStrip = paramBook.nMissedBottomStereo + 1;
-            firstStripPos = -gapHalfHeight + (firstActiveStrip - paramBook.nMissedTopEta -1) * paramBook.stripPitch;
+            firstStripPos = -gapHalfHeight + (1.*(firstActiveStrip - paramBook.nMissedTopEta) + 2.5)* paramBook.stripPitch;
         } else {
             firstActiveStrip = paramBook.nMissedBottomEta + 1;
             firstStripPos = -gapHalfHeight + 1.5 *paramBook.stripPitch;
         }
             
 
-        //Necessary strip layer rotation to match the alignment coordinate system
-        Amg::Transform3D stripLayerRotation{gapVol.transform
-                                    * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
-                                    * Amg::getRotateX3D(180.* Gaudi::Units::deg)
-                                    * Amg::getRotateZ3D(-paramBook.stereoAngle.at(gap)* Gaudi::Units::rad)};             
 
         /*The origin of the chamber/gasGap axes system is located at the center of the chamber.
         We subtract the HalfLength across the Z axis to transform from the center to the origin of the trapezoid
         The we add the strip pitch to reach the position of the first strip.*/
         StripDesignPtr stripDesign = std::make_unique<StripDesign>();
 
-        stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
+        stripDesign->defineStripLayout(firstStripPos * Amg::Vector2D::UnitX(),
                                         paramBook.stripPitch,
                                         paramBook.stripWidth,
                                         paramBook.totalActiveStrips.at(gap),
@@ -149,10 +146,18 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
 
         /// The stereo angle is defined clock-wise from the y-axis. So we need to input it with a minus when defining the trapezoid
         stripDesign->defineTrapezoid(gapHalfShortY, gapHalfLongY, gapHalfHeight, paramBook.stereoAngle.at(gap));
+
+        //Necessary strip layer rotation to match the alignment coordinate system
+        Amg::Transform3D stripLayerRotation{gapVol.transform
+                                    * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
+                                    * Amg::getRotateX3D(180.* Gaudi::Units::deg)
+                                    * Amg::getRotateZ3D(-stripDesign->stereoAngle())};
+
+
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
-        StripLayer stripLayer(stripLayerRotation, stripDesign, 
-                              IdentifierHash{static_cast<unsigned int>(gap)});
-        define.layers.push_back(std::move(stripLayer));
+        auto stripLayer = std::make_unique<StripLayer>(stripLayerRotation, stripDesign, 
+                                                       IdentifierHash{static_cast<unsigned int>(gap)});
+        define.layers.push_back(*factoryCache.stripLayers.emplace(std::move(stripLayer)).first);
     } //end of gas gap loop
     return StatusCode::SUCCESS;
 }
@@ -243,15 +248,18 @@ StatusCode MmReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.stripWidth = record->getDouble("stripWidth") ; 
         parBook.stereoAngle = tokenizeDouble(record->getString("stereoAngle"), ";");
         parBook.totalActiveStrips = tokenizeInt(record->getString("totalActiveStrips"), ";");
+        parBook.readoutSide = tokenizeInt(record->getString("readoutSide"),";");
         parBook.nMissedBottomEta = record->getInt("nMissedBottomEta"); 
         parBook.nMissedBottomStereo = record->getInt("nMissedBottomStereo"); 
         parBook.nMissedTopEta = record->getInt("nMissedTopEta");
         parBook.distBotFrameStrip = record->getDouble("dR_botFrame1stStrip");
         
         ATH_MSG_VERBOSE("Extracted parameters for chamber "<<chambType
-                       <<", stripPitch (eta/phi): "<<parBook.stripPitch<<"/"
-                       <<", stripWidth (eta/phi): "<<parBook.stripWidth<<"/"
-                    );
+                       <<", stripPitch: "<<parBook.stripPitch
+                       <<", stripWidth: "<<parBook.stripWidth
+                       <<", steroAngle: "<<parBook.stereoAngle
+                       <<", totalActiveStrips: "<<parBook.totalActiveStrips
+                       <<", readoutSites: "<<parBook.readoutSide);
     }
     
     return StatusCode::SUCCESS;
