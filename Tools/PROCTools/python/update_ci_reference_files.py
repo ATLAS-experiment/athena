@@ -101,10 +101,8 @@ def process_log_file(url, branch, test_name):
         # Okay, we have a digest change
         failing_tests[branch].append(process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name))
 
-    if 'ERROR    Your change breaks the frozen tier0 policy in test' in text:
-        failing_tests[branch].append(process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name))
-
-    if 'ERROR    Your change breaks the frozen derivation policy in test' in text:
+    if 'ERROR    Your change breaks the frozen tier0 policy in test' in text or 'ERROR    Your change breaks the frozen derivation policy in test' in text:
+        # DiffPool change
         failing_tests[branch].append(process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_name))
     
     return
@@ -367,18 +365,23 @@ def summarise_failing_tests(check_for_duplicates = True):
         print (' * Branch: {}'.format(branch))
         for test in tests:
             print('   - ', test)
-            if os.path.exists(test.new_version_directory):
-                msg = f'WARNING: The directory {test.new_version_directory} already exists. Are you sure you want to overwrite the existing references?'
-                if input("%s (y/N) " % msg).lower() != 'y':
+            if test.type == 'DiffPool':
+                if not test.new_version_directory:
+                    print('FATAL: No path to "new version" for test {} of type DiffPool.'.format(test.name))
                     sys.exit(1)
 
-            if (test.existing_ref not in reference_folders):
-                reference_folders.append(test.existing_ref)
-            elif check_for_duplicates:
-                print('FATAL: Found two tests which both change the same reference file: {}, which is not supported.'.format(test.existing_ref))
-                print('Consider running again in --test-run mode, to get a copy of the copy commands that could be run.')
-                print('The general advice is to take the largest file (since it will have the most events), and/or take the non-legacy one.')
-                sys.exit(1)
+                if os.path.exists(test.new_version_directory):
+                    msg = f'WARNING: The directory {test.new_version_directory} already exists. Are you sure you want to overwrite the existing references?'
+                    if input("%s (y/N) " % msg).lower() != 'y':
+                        sys.exit(1)
+
+                if (test.existing_ref not in reference_folders):
+                    reference_folders.append(test.existing_ref)
+                elif check_for_duplicates:
+                    print('FATAL: Found two tests which both change the same reference file: {}, which is not supported.'.format(test.existing_ref))
+                    print('Consider running again in --test-run mode, to get a copy of the copy commands that could be run.')
+                    print('The general advice is to take the largest file (since it will have the most events), and/or take the non-legacy one.')
+                    sys.exit(1)
             mr = test.mr
     return 'https://gitlab.cern.ch/atlas/athena/-/merge_requests/'+mr
 
