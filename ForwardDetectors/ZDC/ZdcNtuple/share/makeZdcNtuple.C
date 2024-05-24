@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
-int makeZdcNtuple(std::string submitDir = "submitDir", std::string readDir = "file:/tmp/steinber", int nevt = -1, const std::string& enableStr = "", const std::string& vers = "0", int localTrackLimit = 1e6, std::string grlOption = "")
+int makeZdcNtuple(const std::string & submitDir = "submitDir", const std::string & readDir = "file:/tmp/steinber", int nevt = -1, const std::string& enableStr = "", const std::string& vers = "0", int localTrackLimit = 1e6, const std::string & grlOption = "")
 {
 
   // Set up the job for xAOD access:
