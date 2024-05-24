@@ -1,6 +1,6 @@
 
 /*
-Copyright! (C) 2002-2012 CERN for the benefit of the ATLAS collaboration
+Copyright! (C) 2002-2012, 2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGAFPHYPO_TRIGAFPTOFHYPOTOOL_H
@@ -25,7 +25,7 @@ class TrigAFPToFHypoTool : public AthAlgTool
   
   struct AFPToFHypoToolInfo // data structure to be passed to the hypo tool
   {  
-   AFPToFHypoToolInfo(const TrigCompositeUtils::DecisionIDContainer a, const xAOD::AFPVertex* b, const xAOD::Vertex* c, TrigCompositeUtils::Decision *d) :
+   AFPToFHypoToolInfo(const TrigCompositeUtils::DecisionIDContainer& a, const xAOD::AFPVertex* b, const xAOD::Vertex* c, TrigCompositeUtils::Decision *d) :
    inputPassingChains(a), afpVtx(b), idVtx(c), outputDecision(d)
    {}
    const TrigCompositeUtils::DecisionIDContainer inputPassingChains;    
