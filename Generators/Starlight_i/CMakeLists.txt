@@ -20,7 +20,7 @@ atlas_add_library( Starlight_iLib
    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${STARLIGHT_LIBRARIES} GeneratorModulesLib
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel
-   GaudiKernel GeneratorUtilsLib TruthUtils StoreGateLib )
+   GaudiKernel CxxUtils TruthUtils StoreGateLib )
 
 atlas_add_component( Starlight_i
    src/components/*.cxx

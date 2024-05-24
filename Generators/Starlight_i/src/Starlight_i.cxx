@@ -16,7 +16,7 @@
 
 #include "Starlight_i/Starlight_i.h"
 
-#include "GeneratorUtils/StringParse.h"
+#include "CxxUtils/StringParse.h"
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"

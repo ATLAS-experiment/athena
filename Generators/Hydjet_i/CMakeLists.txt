@@ -26,7 +26,7 @@ atlas_add_library( Hydjet_iLib
    ${HYDJET_LIBRARIES} ${HIJING_LIBRARIES} CxxUtils GeneratorFortranCommonLib
    GeneratorModulesLib
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib
-   AthenaKernel GaudiKernel GeneratorObjects GeneratorUtilsLib StoreGateLib TruthUtils )
+   AthenaKernel GaudiKernel GeneratorObjects StoreGateLib TruthUtils )
 
 atlas_add_component( Hydjet_i
    src/components/*.cxx
