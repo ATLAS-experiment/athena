@@ -57,8 +57,8 @@ class xAODSimHitToMmMeasCnvAlg : public AthReentrantAlgorithm {
         SG::ReadCondHandleKey<NswErrorCalibData> m_uncertCalibKey{this, "ErrorCalibKey", "NswUncertData",
                                                          "Key of the parametrized NSW uncertainties"};
 
-        mutable std::atomic<unsigned> m_allHits ATLAS_THREAD_SAFE{};
-        mutable std::atomic<unsigned> m_acceptedHits ATLAS_THREAD_SAFE{};
+        mutable std::array<std::atomic<unsigned>, 8> m_allHits ATLAS_THREAD_SAFE{};
+        mutable std::array<std::atomic<unsigned>, 8> m_acceptedHits ATLAS_THREAD_SAFE{};
 
 };
 

@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STRIPLAYER_H
 #define MUONREADOUTGEOMETRYR4_STRIPLAYER_H
 
 #include <MuonReadoutGeometryR4/StripDesign.h>
+#include <GeoModelUtilities/TransientConstSharedPtr.h>
 namespace MuonGMR4{
     class StripLayer {
         public:
@@ -28,12 +29,20 @@ namespace MuonGMR4{
           Amg::Vector3D localStripLeftEdge(unsigned int stripNum) const;
           /// Returns the position of the right strip edge (negative local y) exoressed in the local frame
           Amg::Vector3D localStripRightEdge(unsigned int stripNum) const;
-      
+
+          bool operator<(const StripLayer& other) const;
         private:
            Amg::Transform3D m_transform{Amg::Transform3D::Identity()};
            StripDesignPtr m_design{};
            IdentifierHash m_hash{};
     };
+    using StripLayerPtr = GeoModel::TransientConstSharedPtr<StripLayer>;
+    /// Helper struct to share strip layer instances across the readout elements
+    struct StripLayerSorter {
+            bool operator()( const StripLayerPtr&a, const StripLayerPtr& b) const{
+                return (*a) < (*b);
+            }
+        };
     std::ostream& operator<<(std::ostream& ostr, const StripLayer& lay);
 }
 

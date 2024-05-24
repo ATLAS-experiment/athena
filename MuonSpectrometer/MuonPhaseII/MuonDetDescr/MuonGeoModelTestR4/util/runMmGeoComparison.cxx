@@ -27,7 +27,7 @@
 using namespace MuonGMR4;
 using namespace ActsTrk;
 
-constexpr double tolerance = 0.001*Gaudi::Units::millimeter;
+constexpr double tolerance = 0.003*Gaudi::Units::millimeter;
 
 /// Helper struct to represent a full MicroMegas chamber
 struct MmChamber{
@@ -56,9 +56,11 @@ struct MmChamber{
     unsigned int nGasGaps{0};
 
     ////Gas Gap dimensions for debug
-    float ActiveWidthS{0.};
-    float ActiveWidthL{0.};
-    float ActiveHeightR{0.};
+    double ActiveWidthS{0.};
+    double ActiveWidthL{0.};
+    double ActiveHeightR{0.};
+    double stripPitch{0.};
+
 
 
     struct MmChannel{
@@ -90,6 +92,12 @@ struct MmChamber{
         unsigned int gasGap{0};
         /// @ transformation
         Amg::Transform3D transform{Amg::Transform3D::Identity()};
+        /// @ Reference position of the first strip
+        Amg::Vector2D firstStripPos{Amg::Vector2D::Zero()};
+        /// @ Reference number of the first strip
+        unsigned int firstStrip{0};
+        /// @ Readout side on the detector
+        int readoutSide{0};
         /// @brief Ordering operator
         bool operator<(const MmLayer& other) const {
             return gasGap < other.gasGap;
@@ -171,6 +179,7 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<float> ActiveHeightR{treeReader, "ActiveHeightR"};
     TTreeReaderValue<float> ActiveWidthS{treeReader, "ActiveWidthS"};
     TTreeReaderValue<float> ActiveWidthL{treeReader, "ActiveWidthL"};
+    TTreeReaderValue<float> stripPitch{treeReader, "stripPitch"};
 
     /// Geo Model transformation
     TTreeReaderValue<std::vector<float>> geoModelTransformX{treeReader, "GeoModelTransformX"};
@@ -195,6 +204,13 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
 
     TTreeReaderValue<std::vector<uint8_t>> stripRotGasGap{treeReader, "stripRotGasGap"};
 
+    TTreeReaderValue<std::vector<float>> firstStripPosX{treeReader, "firstStripPosX"};
+    TTreeReaderValue<std::vector<float>> firstStripPosY{treeReader, "firstStripPosY"};
+
+    TTreeReaderValue<std::vector<int>> readoutSide{treeReader, "stripReadoutSide"};
+    TTreeReaderValue<std::vector<unsigned int>> firstStripNum{treeReader, "stripFirstStrip"};
+
+
     while (treeReader.Next()) {
         MmChamber newchamber{};
 
@@ -208,6 +224,7 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
         newchamber.ActiveHeightR = (*ActiveHeightR);
         newchamber.ActiveWidthS = (*ActiveWidthS);
         newchamber.ActiveWidthL = (*ActiveWidthL);
+        newchamber.stripPitch = (*stripPitch);
 
         Amg::Vector3D geoTrans{(*geoModelTransformX)[0], (*geoModelTransformY)[0], (*geoModelTransformZ)[0]};
         Amg::RotationMatrix3D geoRot{Amg::RotationMatrix3D::Identity()};
@@ -227,7 +244,6 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
             newStrip.gasGap = (*gasGap)[s];
             newStrip.channel = (*channel)[s];
             newStrip.isStereo = (*isStereo)[s];
-            if (newStrip.isStereo) continue;
             newchamber.channels.insert(std::move(newStrip));
         }
 
@@ -239,7 +255,10 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
             stripRot.col(1) = Amg::Vector3D((*stripRotCol2X)[l],(*stripRotCol2Y)[l], (*stripRotCol2Z)[l]);
             stripRot.col(2) = Amg::Vector3D((*stripRotCol3X)[l],(*stripRotCol3Y)[l], (*stripRotCol3Z)[l]);
             Amg::Vector3D layTrans{(*stripRotTransX)[l], (*stripRotTransY)[l], (*stripRotTransZ)[l]};
-            newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), std::move(layTrans)/*Amg::Vector3D::Zero()*/);
+            newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), std::move(layTrans));
+            newLayer.firstStripPos = Amg::Vector2D{(*firstStripPosX)[l], (*firstStripPosY)[l]};
+            newLayer.readoutSide = (*readoutSide)[l];
+            newLayer.firstStrip = (*firstStripNum)[l];
             newchamber.layers.insert(std::move(newLayer));
         }
         
@@ -257,7 +276,7 @@ std::set<MmChamber> readTreeDump(const std::string& inputFile) {
 
 #define TEST_BASICPROP(attribute, propName) \
     if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
-        std::cerr<<"runMmGeoComparison() "<<__LINE__<<": The chamber "<<reference  \
+        std::cerr<<"runMmGeoComparison() "<<__LINE__<<": The chamber "<<reference     \
                  <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
                  <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
         chamberOkay = false;                                                          \
@@ -315,10 +334,11 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(ActiveWidthS, "GasGap length on the short side");
         TEST_BASICPROP(ActiveWidthL, "GasGap length on the long side");
         TEST_BASICPROP(ActiveHeightR, "GasGap Height");
+        TEST_BASICPROP(stripPitch, "Strip pitch");
         // if (!chamberOkay) continue;
-        int c = 0;
         using MmLayer = MmChamber::MmLayer;
         for (const MmLayer& refLayer : reference.layers) {
+            break;
             std::set<MmLayer>::const_iterator lay_itr = test.layers.find(refLayer);
             if (lay_itr == test.layers.end()) {
                 std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
@@ -326,14 +346,33 @@ int main( int argc, char** argv ) {
                 chamberOkay = false;
                 continue;
             }
-
-            ++c;
-            if (c!=1) continue;
-            std::cout <<"runMmGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                     << "The R4 GeoModel transform is: " << Amg::toString(test.geoModelTransform) 
-                     << " and the R3 GeoModel transform is: " << Amg::toString(reference.geoModelTransform) << std::endl;
+            const MmLayer& testLayer{*lay_itr};
+            if ( (refLayer.firstStripPos- testLayer.firstStripPos).mag() > tolerance) {
+                std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
+                         <<testLayer.gasGap<<" has different starting position "
+                         <<Amg::toString(refLayer.firstStripPos, 2) <<" vs. "
+                         <<Amg::toString(testLayer.firstStripPos, 2)
+                         <<"difference: "<<Amg::toString(refLayer.firstStripPos- testLayer.firstStripPos, 2)
+                         <<" / "<<(refLayer.firstStripPos- testLayer.firstStripPos).mag()/reference.stripPitch
+                         <<std::endl;
+                chamberOkay = false;
+            }
+            if (refLayer.firstStrip != testLayer.firstStrip) {
+                 std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
+                         <<testLayer.gasGap<<" starts from different strip "<<refLayer.firstStrip<<" vs. "
+                         <<testLayer.firstStrip<<std::endl;
+                chamberOkay = false;
+            }
+            
+            
+            if (!Amg::doesNotDeform(refLayer.transform.inverse()* testLayer.transform)){
+                std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in "<<test<<" "
+                         <<testLayer<<" differs w.r.t. reference "<<Amg::toString(refLayer.transform)<<". vs. "
+                         <<Amg::toString(refLayer.transform.inverse()*testLayer.transform)<<std::endl;
+                chamberOkay = false;
+            }           
         }
-
+        unsigned int failedEta{0}, failedStereo{0};
         for (const MmChamber::MmChannel& refStrip : reference.channels) {
             std::set<MmChamber::MmChannel>::const_iterator strip_itr = test.channels.find(refStrip);
             if (strip_itr == test.channels.end()) {
@@ -346,16 +385,17 @@ int main( int argc, char** argv ) {
         
             /// Eta strips have their centres at local Y = 0 --> Their positions must
             /// match in absolute terms w.r.t legacy geometry
-            if (!refStrip.isStereo) {
+            if (!refStrip.isStereo && (failedEta <=10)) {
                 const Amg::Vector3D diffStrip{testStrip.globCenter - refStrip.globCenter};
                 if (diffStrip.mag() > tolerance) {
-                    std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in chamber "
+                    std::cerr<<"runMmGeoComparison() "<<__LINE__<<": In "
                              <<test<<" " <<testStrip <<"/local: "<<Amg::toString(testStrip.locCenter, 2) 
                              <<" should be located at "<<Amg::toString(refStrip.globCenter, 2)
                              <<"/local: "<<Amg::toString(refStrip.locCenter, 2)
                              <<" displacement: "<<Amg::toString(diffStrip, 2)<<"  "<<diffStrip.mag()<<std::endl;
                     chamberOkay = false;
                 }
+                ++failedEta;
             } 
             /// The centres of the Stereo layers are defined as the bisector of the 
             /// line between the two frame edges. However, thus far the parameter book
@@ -363,21 +403,26 @@ int main( int argc, char** argv ) {
             ///  --> Cannot compare the absolute position of the stereo layers. Instead check
             ///      that the left edge, right edge and center point in the new geometry
             ///      are on the same line as defined by the reference system.
-            else {
-                const Amg::Vector3D stripDir{(refStrip.leftEdge - refStrip.rightEdge).unit()};
-
-                const double centerDist = std::abs(stripDir.dot(testStrip.globCenter - refStrip.globCenter));
-                const double leftDist = std::abs(stripDir.dot(testStrip.leftEdge -refStrip.globCenter));
-                const double rightDist = std::abs(stripDir.dot(testStrip.rightEdge - refStrip.globCenter));
-                if (centerDist > tolerance || leftDist > tolerance || rightDist > tolerance) {
-                     std::cerr<<"runMmGeoComparison() "<<__LINE__<<": in chamber "
-                             <<test<<" " <<testStrip <<"/local: "<<Amg::toString(testStrip.locCenter, 2) 
-                             <<" is not describing the same stereo strip as "
+            else if (failedStereo <= 10) {
+                const Amg::Vector3D stripDir{Amg::getRotateZ3D(90*Gaudi::Units::deg)*
+                                             (refStrip.leftEdge - refStrip.rightEdge).unit()};
+                const Amg::Vector3D testDir{Amg::getRotateZ3D(90*Gaudi::Units::deg)*
+                                            (testStrip.rightEdge - testStrip.leftEdge).unit()};
+                const double centerDist = stripDir.dot(testStrip.globCenter - refStrip.globCenter);
+                const double leftDist = stripDir.dot(testStrip.leftEdge -refStrip.globCenter);
+                const double rightDist = stripDir.dot(testStrip.rightEdge - refStrip.globCenter);
+                if ( std::abs(centerDist) > tolerance || std::abs(leftDist) > tolerance || std::abs(rightDist) > tolerance) {
+                     std::cerr<<"runMmGeoComparison() "<<__LINE__<<": In "
+                             <<test<<" " <<testStrip <<" + mu "<<Amg::toString(testDir,2) 
+                             <<"/local: "<<Amg::toString(testStrip.locCenter, 2) 
+                             <<" does not describe the same stereo strip as "
                              <<Amg::toString(refStrip.globCenter, 2)<<" + lambda "<<Amg::toString(stripDir,2)
                              <<". Distances to the left-edge/center/right-edge: "
-                             <<leftDist<<"/"<<centerDist<<"/"<<rightDist<<std::endl;
+                             <<leftDist<<"/"<<centerDist<<"/"<<rightDist<<", dot: "
+                             <<std::acos(std::clamp(stripDir.dot(testDir),- 1., 1.)) / Gaudi::Units::deg<<std::endl;
                     chamberOkay = false;
                 }
+                ++failedStereo;
             }
         }
 

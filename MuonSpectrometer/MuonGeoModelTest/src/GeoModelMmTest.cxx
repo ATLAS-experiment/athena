@@ -136,6 +136,7 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
     m_stationName = id_helper.stationName(detElId);
     const int multilayer = id_helper.multilayer(detElId);
     m_multilayer = multilayer;
+    m_stStripPitch = roEl->getDesign(detElId)->inputPitch;
 
 
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ) 
@@ -167,18 +168,18 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
                           l_left{Amg::Vector2D::Zero()},
                           l_right{Amg::Vector2D::Zero()};
 
-            const MuonGM::MuonChannelDesign* design = roEl->getDesign(strip_id);
+            const MuonGM::MuonChannelDesign& design{*roEl->getDesign(strip_id)};
 
-            design->leftEdge(channel, l_left);
-            design->center(channel, l_cen);
-            design->rightEdge(channel, l_right);
+            design.leftEdge(channel, l_left);
+            design.center(channel, l_cen);
+            design.rightEdge(channel, l_right);
 
             roEl->surface(strip_id).localToGlobal(l_left, Amg::Vector3D::Zero(), strip_leftEdge);
             roEl->surface(strip_id).localToGlobal(l_cen, Amg::Vector3D::Zero(), strip_center);
             roEl->surface(strip_id).localToGlobal(l_right, Amg::Vector3D::Zero(), strip_rightEdge);
 
             m_locStripCenter.push_back(l_cen);
-            m_isStereo.push_back(design->hasStereoAngle());           
+            m_isStereo.push_back(design.hasStereoAngle());           
             m_gasGap.push_back(id_helper.gasGap(strip_id));
             m_channel.push_back(id_helper.channel(strip_id));
             m_stripCenter.push_back(strip_center);
@@ -189,23 +190,17 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx, const MuonGM::MMR
             m_stripActiveLengthLeft.push_back(roEl->stripActiveLengthLeft(strip_id));
             m_stripActiveLengthRight.push_back(roEl->stripActiveLengthRight(strip_id));
 
-            m_ActiveHeightR = roEl->getDesign(strip_id)->xSize();  
-            m_ActiveWidthL = roEl->getDesign(strip_id)->maxYSize();            
-            m_ActiveWidthS = roEl->getDesign(strip_id)->minYSize();
+            m_ActiveHeightR = design.xSize();  
+            m_ActiveWidthL =  design.maxYSize();            
+            m_ActiveWidthS =  design.minYSize();
 
             if (channel != fStrip) continue;
-            // /// Strip center
-            // const Amg::Vector3D globStripPos = roEl->globalPosition();
-            // Amg::Vector2D locStripPos{Amg::Vector2D::Zero()};
-            // const Trk::Surface& surf{roEl->surface(strip_id)};
-            // if (!surf.globalToLocal(globStripPos, Amg::Vector3D::Zero(), locStripPos)){
-            //     ATH_MSG_FATAL("Failed to build local strip position "<<m_idHelperSvc->toString(strip_id));
-            //     return StatusCode::FAILURE;
-            // }
-            // const Amg::Transform3D locTransf{locStripPos.x,locStripPos.y,0};
-            // m_locStripCenter.push_back(locStripPos);                  
-            // m_stripRotGasGap.push_back(gasgap);
 
+            m_stripRot.push_back(roEl->transform(strip_id));
+            m_stripRotGasGap.push_back(gasgap);
+            m_firstStripPos.push_back(design.firstPos() * Amg::Vector2D::UnitX()); 
+            m_readoutFirstStrip.push_back(design.numberOfMissingBottomStrips() + 1);
+            m_readoutSide.push_back(roEl->getReadoutSide()[gasgap -1]);    
         }
     }
     return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;

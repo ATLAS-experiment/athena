@@ -129,7 +129,7 @@ Identifier MmSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
                                               const Amg::Vector3D& hitAtGapPlane) const {
   /// that's the poor man's solution to find out in which gas gap we're
   for (unsigned int gap = 1; gap <= readOutEle->nGasGaps(); ++gap){
-     const Amg::Vector3D gapCentre = readOutEle->center(gctx, MmReadoutElement::createHash(0, gap));
+     const Amg::Vector3D gapCentre = readOutEle->center(gctx, MmReadoutElement::createHash(gap, 0));
      ATH_MSG_VERBOSE("Try to match "<<Amg::toString(hitAtGapPlane)<<" to "<<Amg::toString(gapCentre)
                   <<" in "<<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())<<" dZ: "
                   <<std::abs(gapCentre.z() - hitAtGapPlane.z()));

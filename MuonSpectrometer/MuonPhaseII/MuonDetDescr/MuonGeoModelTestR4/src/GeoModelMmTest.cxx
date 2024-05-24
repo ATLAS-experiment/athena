@@ -92,8 +92,9 @@ StatusCode GeoModelMmTest::execute() {
         }
         const MmIdHelper& id_helper{m_idHelperSvc->mmIdHelper()};
         for (unsigned int layer = 1; layer <= reElement->nGasGaps(); ++layer) {
-            const int numStrips = reElement->numStrips(layer);
-            const int fStrip = reElement->firstStrip(layer);
+            const IdentifierHash layerHash{MuonGMR4::MmReadoutElement::createHash(layer, 0)};
+            const int numStrips = reElement->numStrips(layerHash);
+            const int fStrip = reElement->firstStrip(layerHash);
             const int lStrip = fStrip+numStrips-1;
             
             for (int strip = fStrip; strip <= lStrip; ++strip) {
@@ -124,12 +125,16 @@ StatusCode GeoModelMmTest::execute() {
                 const MuonGMR4::StripDesign& design{reElement->stripLayer(layHash).design()};
                 const Amg::Vector3D stripPos = reElement->stripPosition(gctx, channelHash);
                 const Amg::Vector3D locStripPos = reElement->globalToLocalTrans(gctx, layHash) * stripPos;
-                if (design.stripNumber(locStripPos.block<2,1>(0,0)) != strip) {
+                const Amg::Vector2D stripPos2D{locStripPos.block<2,1>(0,0)};
+                const double stripLen{design.stripLength(strip)};
+                if (stripLen && (design.stripNumber(stripPos2D) != strip ||
+                    design.stripNumber(stripPos2D - 0.49 * stripLen * Amg::Vector2D::UnitY()) != strip ||
+                    design.stripNumber(stripPos2D + 0.49 * stripLen * Amg::Vector2D::UnitY()) != strip)) {
                     ATH_MSG_FATAL("Conversion channel -> strip -> channel failed for "
                         <<m_idHelperSvc->toString(chId)<<" "<<Amg::toString(stripPos)<<", local: "
-                        <<Amg::toString(locStripPos)<<" got "<<design.stripNumber(locStripPos.block<2,1>(0,0))
+                        <<Amg::toString(locStripPos)<<" got "<<design.stripNumber(stripPos2D)
                         <<", first strip: "<<fStrip<<std::endl<<design);
-                    // return StatusCode::FAILURE;
+                    return StatusCode::FAILURE;
                 }
                 ATH_MSG_VERBOSE("first strip "<<fStrip<<", numStrips "<< numStrips << ", channel "
                               << m_idHelperSvc->toString(chId) <<", strip position " << Amg::toString(stripPos));
@@ -151,11 +156,12 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
     m_stPhi      = reElement->stationPhi();
     m_stML       = reElement->multilayer();
     m_chamberDesign = reElement->chamberDesign();
+    m_stStripPitch = reElement->stripLayer(MuonGMR4::MmReadoutElement::createHash(1,1)).design().stripPitch();
     ///
-   /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
-   m_readoutTransform = transform;
-  ///
+    /// Dump the local to global transformation of the readout element
+    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
+    m_readoutTransform = transform;
+    ///
     m_moduleHeight = reElement->moduleHeight();
     m_moduleWidthS = reElement->moduleWidthL();
     m_moduleWidthL = reElement->moduleWidthS();
@@ -163,8 +169,9 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
     const MmIdHelper& id_helper{m_idHelperSvc->mmIdHelper()};
     for (unsigned int layer = 1; layer <= reElement->nGasGaps(); ++layer) {
 
-        unsigned int numStrips = reElement->numStrips(layer);
-        unsigned int fStrip = reElement->firstStrip(layer);
+        const IdentifierHash layHash{MuonGMR4::MmReadoutElement::createHash(layer, 0)};
+        unsigned int numStrips = reElement->numStrips(layHash);
+        unsigned int fStrip = reElement->firstStrip(layHash);
         unsigned int lStrip = fStrip+numStrips-1;
 
         for (unsigned int strip = fStrip; strip <= lStrip ; ++strip) {
@@ -179,8 +186,10 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
                 continue;
             }
             const IdentifierHash measHash{reElement->measurementHash(chId)};
-            m_locStripCenter.push_back(reElement->stripLayer(measHash).design().center(strip).value_or(Amg::Vector2D::Zero()));
-            m_isStereo.push_back(reElement->stripLayer(measHash).design().hasStereoAngle());
+
+            const MuonGMR4::StripDesign& design{reElement->stripLayer(measHash).design()};
+            m_locStripCenter.push_back(design.center(strip).value_or(Amg::Vector2D::Zero()));
+            m_isStereo.push_back(design.hasStereoAngle());
             m_stripCenter.push_back(reElement->stripPosition(gctx, measHash));
             m_stripLeftEdge.push_back(reElement->leftStripEdge(gctx,measHash));
             m_stripRightEdge.push_back(reElement->rightStripEdge(gctx,measHash));
@@ -198,6 +207,10 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
             ATH_MSG_VERBOSE("The local to global transformation on layers is: " << Amg::toString(reElement->localToGlobalTrans(gctx, chId)));
             m_stripRot.push_back(stripGlobToLoc);
             m_stripRotGasGap.push_back(layer);
+            m_firstStripPos.push_back(design.firstStripPos());
+            m_readoutFirstStrip.push_back(design.firstStripNumber());
+            m_readoutSide.push_back(reElement->readoutSide(measHash));
+            
         }
 
     }

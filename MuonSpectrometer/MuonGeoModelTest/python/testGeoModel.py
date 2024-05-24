@@ -22,7 +22,7 @@ def SetupArgParser():
                                                                                   "CONDBR2-BLKPA-RUN2-11"])
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
-    parser.add_argument("--outRootFile", default="GeoModelDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--outRootFile", default="LegacyGeoModelDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
     parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
     parser.add_argument("--noTgc", help="Disable the Tgcs from the geometry", action='store_true', default = False)
