@@ -60,6 +60,7 @@ StatusCode GNNVertexFitterAlg::execute(const EventContext &ctx) const {
       }
     }
   }
+  if (!pv) pv = pv_cont->front();
 
   // Perform a Vertex fit
   ATH_CHECK(m_VtxTool->fitAllVertices(inJetContainer.ptr(), outVertexContainer.ptr(), *pv, ctx));
