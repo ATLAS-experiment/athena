@@ -39,6 +39,10 @@ fileName   = buildFileName( derivationFlags.WriteDAOD_HION7Stream )
 DerivationName=streamName.split('_')[-1]
 TrackThinningThreshold=900 #in MeV
 
+if HIDerivationFlags.ptCutOn():
+    TrackThinningThreshold = 500 # in MeV
+    print "ptCutOn: Track pT cut to ", TrackThinningThreshold, " MeV"
+
 #Book DF jets only if they are in xAOD or they are made in AODFix
 BookDFJetCollection = (jobproperties.HIRecExampleFlags.doHIAODFix or HasCollection("DFAntiKt4HI"))
 MainJetCollection = ""
@@ -49,12 +53,13 @@ expression=''
 if not HIDerivationFlags.isSimulation():    
     TriggerDict = GetTriggers(project_tag, HIDerivationFlags.doMinBiasSelection(), DerivationName)
     for i, key in enumerate(TriggerDict):
-	    #Event selection based on DF jets for HI
-	    expression = expression + '(' + key + ' && count(' + MainJetCollection + 'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' 
-	    #Event selection based also on non-DF jets for pp
-	    if HIDerivationFlags.isPP and BookDFJetCollection: expression = expression + '|| (' + key + ' && count(AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) '
-	    if not i == len(TriggerDict) - 1:
-		    expression = expression + ' || ' 
+        #Event selection based on DF jets for HI
+        expression = expression + '(' + key + ' && count(' + MainJetCollection + 'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(' + MainJetCollection + 'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) '
+        if HIDerivationFlags.ptCutOn(): expression = '(HLT_j100_ion_L1J20 && count(AntiKt4HIJets.pt >99.5*GeV) >=1 ) '
+        #Event selection based also on non-DF jets for pp
+        if HIDerivationFlags.isPP and BookDFJetCollection: expression = expression + '|| (' + key + ' && count(AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count(AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) '
+        if not i == len(TriggerDict) - 1:
+            expression = expression + ' || ' 
 	    
     print "==========Event filtering expression=========="
     print expression

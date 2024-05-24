@@ -36,6 +36,13 @@ class doMinBiasSelection(JobProperty):
     allowedTypes = ['bool']
     StoredValue  = False
 
+class ptCutOn(JobProperty):
+    """ Turnes on pt cut tracking
+    """
+    statusOn     = True
+    allowedTypes = ['bool']
+    StoredValue  = False
+
 
 class HIDerivationFlags(JobPropertyContainer):
     """ The HIDerivation property container.
@@ -43,7 +50,7 @@ class HIDerivationFlags(JobPropertyContainer):
     pass
 
 jobproperties.add_Container(HIDerivationFlags)
-list_jobproperties = [isSimulation,isPP,isPPb,doMinBiasSelection]
+list_jobproperties = [isSimulation,isPP,isPPb,doMinBiasSelection,ptCutOn]
 for i in list_jobproperties:
     jobproperties.HIDerivationFlags.add_JobProperty(i)
 
