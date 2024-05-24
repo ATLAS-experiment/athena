@@ -23,7 +23,7 @@ def egammaFSHIEventShapeMakerCfg(flags):
         InputCellKey=cellMakerAcc.getPrimary().CellsName,
         NaviTowerKey="",
         InputTowerKey="",
-        OutputContainerKey=getTrigEgammaKeys(ion=True).egEventShape) 
+        OutputContainerKey=getTrigEgammaKeys(flags, ion=True).egEventShape) 
 
     acc.addEventAlgo(eventShapeMakerAlg)
     return acc

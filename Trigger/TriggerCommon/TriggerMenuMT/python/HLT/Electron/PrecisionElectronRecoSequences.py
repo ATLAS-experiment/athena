@@ -41,13 +41,13 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
 
     # makes datakeys based on LRT, GSF, noGSF, LRTGSF            
-    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, variant, ion=ion)
     
     # taking care of VDV before GSF related data comes in
     if doLRT:
-        TrigEgammaKeys_noGSF = getTrigEgammaKeys('_LRT')
+        TrigEgammaKeys_noGSF = getTrigEgammaKeys(flags, '_LRT')
     else:
-        TrigEgammaKeys_noGSF = getTrigEgammaKeys() 
+        TrigEgammaKeys_noGSF = getTrigEgammaKeys(flags) 
     
     # following reduces if-else checking for later implementations
     if doGSF:

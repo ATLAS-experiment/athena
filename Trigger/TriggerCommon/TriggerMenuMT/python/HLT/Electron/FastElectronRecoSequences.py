@@ -14,7 +14,7 @@ def fastElectronRecoSequence(flags, name, RoIs, variant=''):
     
     acc = ComponentAccumulator()
 
-    TrigEgammaKeys = getTrigEgammaKeys(variant)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, variant)
     trackParticlesName = TrigEgammaKeys.fastTrackParticleContainer  
 
     # A simple algorithm to confirm that data has been inherited from parent view

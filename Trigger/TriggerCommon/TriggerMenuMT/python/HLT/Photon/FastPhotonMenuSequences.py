@@ -10,7 +10,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 def fastPhotonSequenceGenCfg(flags,is_probe_leg=False):
     """Creates secpond step photon sequence"""
     
-    TrigEgammaKeys = getTrigEgammaKeys()
+    TrigEgammaKeys = getTrigEgammaKeys(flags)
 
     InViewRoIs = "EMIDRoIs"
     # Spawn View on SuperRoI encompassing all clusters found within the L1 RoI

@@ -28,7 +28,7 @@ def fastElectronSequenceGenCfg(flags, name='FastElectron', variant='', is_probe_
     reco.mergeReco(fastElectronRecoSequence(flags, name, InViewRoIs, variant))
     
     theFastElectronHypo = CompFactory.TrigEgammaFastElectronHypoAlg("TrigEgammaFastElectronHypoAlg"+variant)
-    TrigEgammaKeys = getTrigEgammaKeys(variant)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, variant)
     theFastElectronHypo.Electrons = TrigEgammaKeys.fastElectronContainer
     theFastElectronHypo.RunInView = True
     from TrigEgammaHypo.TrigEgammaFastElectronHypoTool import TrigEgammaFastElectronHypoToolFromDict
