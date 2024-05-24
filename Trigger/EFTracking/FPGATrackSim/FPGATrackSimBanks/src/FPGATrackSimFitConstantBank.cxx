@@ -19,7 +19,7 @@
 
 #include <sstream>
 
-FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool isFirstStage, int missingPlane) :
+FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap const * pmap, int ncoords, std::string const & fname, bool /*isFirstStage*/, int missingPlane) :
     AthMessaging ("FPGATrackSimFitConstantBank"),
     m_pmap(pmap),
     m_bankID(0),
@@ -28,7 +28,7 @@ FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap co
     m_nconstr(0),
     m_npixcy(0),
     m_missingPlane(missingPlane),
-    m_isFirstStage(isFirstStage),
+//    m_isFirstStage(isFirstStage),
     m_isIdealCoordFit(true)
 {
   std::ifstream geocfile(fname);
