@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // PyAthenaAlg.cxx 
@@ -93,6 +93,7 @@ StatusCode
 Alg::execute()
 {  
 //   ATH_MSG_DEBUG("Executing " << name() << "...");
+  RootUtils::PyGILStateEnsure ensure;
   PyObject* pycontext = PyCapsule_New ( const_cast<EventContext*>(&getContext()), nullptr, nullptr);
 
   StatusCode sc = PyAthena::callPyMethod( m_self, "sysExecute", pycontext );
