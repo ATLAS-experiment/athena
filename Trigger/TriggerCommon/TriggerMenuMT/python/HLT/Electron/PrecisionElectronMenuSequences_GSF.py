@@ -25,7 +25,7 @@ def precisionElectron_GSFSequenceGenCfg(flags, ion=False, variant='_GSF', is_pro
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.PrecisionElectronRecoSequences import precisionElectronRecoSequence
     reco.mergeReco(precisionElectronRecoSequence(flags, inViewRoIs, ion, doGSF='GSF' in variant, doLRT = 'LRT' in variant))
-    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, variant, ion=ion)
     selAcc = SelectionCA('PrecisionElectronMenuSequence'+variant,isProbe=is_probe_leg)
 
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import TrigEgammaPrecisionElectronHypoToolFromDict, TrigEgammaPrecisionElectronHypoAlgCfg

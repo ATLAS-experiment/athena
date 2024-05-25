@@ -513,7 +513,10 @@ class ItemDef:
         MenuItem('L1_eTAU80_2eTAU60').setLogic(d.eTAU80 & d.eTAU60.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_cTAU30M_2cTAU20M_4jJ30p0ETA25').setLogic(d.cTAU30M & d.cTAU20M.x(2) & d.jJ300ETA25.x(4) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_cTAU35M_2cTAU30M_2jJ55_3jJ50').setLogic(d.cTAU35M & d.cTAU30M.x(2) & d.jJ55.x(2) & d.jJ50.x(3) & physcond).setTriggerType(TT.calo)
+        # ATR-29439
+        MenuItem('L1_cTAU30M_2cTAU20M_3jJ30p0ETA25').setLogic(d.cTAU30M & d.cTAU20M.x(2) & d.jJ300ETA25.x(3) & physcond).setTriggerType(TT.calo)
 
+        
         #UPC TAU
         MenuItem('L1_2TAU1_VTE50' ).setLogic( d.HA1.x(2)      & Not(d.TE50) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2TAU2_VTE50' ).setLogic( d.HA2.x(2)      & Not(d.TE50) & physcond).setTriggerType(TT.calo)
@@ -1896,7 +1899,12 @@ class ItemDef:
             MenuItem('L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55').setLogic( d.cTAU30M & d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_0DR28_eTAU30ab_eTAU20ab & physcond)
             MenuItem('L1_cTAU20M_DR-eTAU20eTAU12-jJ40').setLogic( d.cTAU20M & d.TOPO_2DISAMB_jJ40ab_0DR10_eTAU20ab_eTAU12ab & physcond)
             MenuItem('L1_eTAU80_2cTAU30M_DR-eTAU30eTAU20').setLogic( d.eTAU80 & d.cTAU30M.x(2) & d.TOPO_0DR28_eTAU30ab_eTAU20ab & physcond)
-
+            # ATR-29439
+            MenuItem('L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ50').setLogic( d.cTAU30M & d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ50ab_0DR28_eTAU30ab_eTAU20ab & physcond)
+            MenuItem('L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ40').setLogic( d.cTAU30M & d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ40ab_0DR28_eTAU30ab_eTAU20ab & physcond)
+            MenuItem('L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ30').setLogic( d.cTAU30M & d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ30ab_0DR28_eTAU30ab_eTAU20ab & physcond)
+            
+            
             # ATR-26902
             MenuItem('L1_2cTAU20M_4DR28-eTAU30eTAU20-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR28_eTAU30ab_eTAU20ab   & physcond)
             MenuItem('L1_2cTAU20M_4DR32-eTAU30eTAU20-jJ55').setLogic ( d.cTAU20M.x(2) & d.TOPO_2DISAMB_jJ55ab_4DR32_eTAU30ab_eTAU20ab   & physcond)

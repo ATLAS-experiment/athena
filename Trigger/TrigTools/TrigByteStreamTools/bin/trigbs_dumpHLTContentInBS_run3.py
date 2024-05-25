@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -44,6 +44,9 @@ def get_parser():
     parser.add_argument('--sizes',
                         action='store_true', default=False,
                         help='dump info about EDM sizes per result; implies --hltres')
+    parser.add_argument('--deserialize',
+                        action='store_true', default=False,
+                        help='deserialize EDM collections (slow!); implies --hltres')
     parser.add_argument('--sizeSummary',
                         action='store_true', default=False,
                         help='dump summary info about EDM sizes at the end')
@@ -195,7 +198,7 @@ def hlt_rod_minor_version_from_event(event):
             return hlt_rod_minor_version(rob)
 
 
-def hlt_result(event, print_sizes=False, conf_keys=False, runtime_metadata=False):
+def hlt_result(event, print_sizes=False, deserialize=False, conf_keys=False, runtime_metadata=False):
     num_hlt_robs = 0
     info_str = ""
     for rob in event.children():
@@ -210,10 +213,10 @@ def hlt_result(event, print_sizes=False, conf_keys=False, runtime_metadata=False
             rob.fragment_size_word()*4,
             decode_status(rob)
         )
-        if print_sizes or conf_keys or runtime_metadata:
+        if print_sizes or deserialize or conf_keys or runtime_metadata:
             if version[0] < 1:
                 raise RuntimeError('Cannot decode data from before Run 3, HLT ROD minor version needs to be >= 1.0')
-            skip_payload = not conf_keys and not runtime_metadata
+            skip_payload = not conf_keys and not runtime_metadata and not deserialize
             collections = hltResultMT.get_collections(rob, skip_payload=skip_payload)
             if conf_keys:
                 conf_list = [c for c in collections if 'xAOD::TrigConfKeys_v' in c.name_persistent]
@@ -241,10 +244,19 @@ def hlt_result(event, print_sizes=False, conf_keys=False, runtime_metadata=False
                         meta.name_key, meta_obj.at(0))
                 if not meta_available:
                     info_str += '\n---- RuntimeMetadata unavailable in this ROB'
-            if print_sizes:
+            if print_sizes or deserialize:
                 for coll in collections:
-                    indent = '----' if not coll.is_xAOD_decoration() else '------'
-                    info_str += '\n{:s} {:s}'.format(indent, str(coll))
+                    indent = 4 if not coll.is_xAOD_decoration() else 6
+                    info_str += '\n{:s} {:s}'.format('-'*indent, str(coll))
+                    if deserialize and (coll_obj := coll.deserialise()) is not None:
+                        try:
+                            length = coll_obj.size()  # all collections should have this method
+                        except Exception:
+                            length = None
+                        if length is not None:
+                            info_str += f' ({length} element' + ('s)' if length!=1 else ')')
+                        info_str += '\n{:s} {:s}'.format(' '*indent, str(coll_obj))
+
 
     info_str = 'Found {:d} HLT ROBs'.format(num_hlt_robs) + info_str
     return info_str
@@ -339,8 +351,8 @@ def dump_info(bsfile, args):
             print(stream_tags(event))
 
         # HLT Result
-        if args.efres or args.sizes or args.confKeys or args.runtimeMetadata:
-            print(hlt_result(event, args.sizes, args.confKeys, args.runtimeMetadata))
+        if args.efres or args.sizes or args.deserialize or args.confKeys or args.runtimeMetadata:
+            print(hlt_result(event, args.sizes, args.deserialize, args.confKeys, args.runtimeMetadata))
 
     # Size summary (after the loop over events)
     if args.sizeSummary:

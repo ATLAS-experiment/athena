@@ -1045,7 +1045,6 @@ def getDevSignatures():
         ChainProp(name='HLT_tau25_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_4j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_L1TAU20IM_2TAU12IM_4J12p0ETA25', l1SeedThresholds=['TAU20IM','TAU12IM']+2*['FSNOSEED'], stream=['VBFDelayed'], groups=DevGroup+TauBJetGroup),
         ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB30_4j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M','cTAU20M']+2*['FSNOSEED'], stream=['VBFDelayed'], groups=DevGroup+TauBJetGroup+Topo2Group),
 
-
         # b+τ test chains for HH→bbττ
         # this is a scan in
         #   τ pₜ: [ 20 , 25 , 35 ]

@@ -18,7 +18,10 @@ def CombinedTrackingPassFlagSets(flags):
     # Primary Pass
     flags = flags.cloneAndReplace(
         "Tracking.ActiveConfig",
-        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")
+        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass",
+        # Keep original flags as some of the subsequent passes use
+        # lambda functions relying on them
+        keepOriginal=True)
     flags_set += [flags]
 
     # LRT pass

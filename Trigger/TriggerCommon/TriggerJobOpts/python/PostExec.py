@@ -54,7 +54,12 @@ def forceConditions(run, lb, iovDbSvc=None):
                 '/MUONALIGN/Onl/MDT/ENDCAP/SIDEA',
                 '/MUONALIGN/Onl/MDT/ENDCAP/SIDEC',
                 '/MUONALIGN/Onl/TGC/SIDEA',
-                '/MUONALIGN/Onl/TGC/SIDEC']
+                '/MUONALIGN/Onl/TGC/SIDEC',
+                '/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts',
+                '/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib',
+                '/TRIGGER/L1Calo/V1/Calibration/JfexModuleSettings',
+                '/TRIGGER/L1Calo/V1/Calibration/JfexNoiseCuts',
+                '/TRIGGER/L1Calo/V1/Calibration/JfexSystemSettings']
 
    from TrigCommon.AthHLT import get_sor_params
    sor = get_sor_params(run)

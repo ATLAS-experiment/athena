@@ -13,7 +13,7 @@ def TRTHitGeneratorSequenceGenCfg(flags, is_probe_leg = False):
     recAcc = ComponentAccumulator()
 
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-    TrigEgammaKeys = getTrigEgammaKeys()
+    TrigEgammaKeys = getTrigEgammaKeys(flags)
 
     """ hipTRT step ....."""
     inViewRoIs = "TRTHitGenerator"

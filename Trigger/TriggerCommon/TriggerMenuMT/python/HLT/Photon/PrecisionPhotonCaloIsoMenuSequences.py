@@ -18,7 +18,7 @@ def precisionPhotonCaloIsoSequenceGenCfg(flags, name, ion=False, is_probe_leg=Fa
     
     InViewRoIs = "PrecisionPhotonCaloIsoRoIs"
     hiInfo = 'HI' if ion is True else ''
-    TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    TrigEgammaKeys = getTrigEgammaKeys(flags, ion=ion)
 
     roiTool = CompFactory.ViewCreatorPreviousROITool()
     recoAcc = InViewRecoCA(tag(ion),InViewRoIs=InViewRoIs, RoITool = roiTool, RequireParentView = True, isProbe=is_probe_leg)
