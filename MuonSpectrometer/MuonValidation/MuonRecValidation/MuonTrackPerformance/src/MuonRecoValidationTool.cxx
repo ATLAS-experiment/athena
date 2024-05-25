@@ -421,7 +421,7 @@ namespace Muon {
         for (; hit != hit_end; ++hit) {
             // treat the case that the hit is a composite TGC hit
             if ((*hit)->tgc) {
-                for (const auto& prd : (*hit)->tgc->etaCluster.hitList) ids.insert(prd->identify());
+                for (const auto& prd : (*hit)->tgc->etaCluster) ids.insert(prd->identify());
             } else if ((*hit)->prd) {
                 ids.insert((*hit)->prd->identify());
             }

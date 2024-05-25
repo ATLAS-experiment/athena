@@ -15,7 +15,7 @@ namespace {
 
     inline const Trk::PrepRawData* prepData(const std::shared_ptr<MuonHough::Hit>& hit) {
         if (hit->prd) return hit->prd;
-        if (hit->tgc) return hit->tgc->phiCluster.hitList.front();
+        if (hit->tgc) return hit->tgc->phiCluster.front();
         return nullptr;
     }
     /// Helper struct to store the number of hits per chamber

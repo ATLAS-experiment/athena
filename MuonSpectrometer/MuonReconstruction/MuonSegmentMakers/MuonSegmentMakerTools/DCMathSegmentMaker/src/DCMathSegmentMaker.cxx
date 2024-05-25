@@ -935,6 +935,7 @@ namespace Muon {
             ATH_MSG_WARNING(" Unphysical error assigned for gasgap " << m_idHelperSvc->toString(gasGapId));
             error = 1.;
         }
+        ATH_MSG_VERBOSE("New space point for "<<m_idHelperSvc->toStringGasGap(gasGapId)<<" at ("<<lpx<<","<<lpy<<")");
         return Cluster2D(detElId, gasGapId, Amg::Vector2D(lpx, lpy), error, etaHit, phiHit);
     }
 

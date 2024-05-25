@@ -636,7 +636,7 @@ namespace Muon {
             for (auto ehit = maximum->hits.begin(); ehit != maximum->hits.end(); ++ehit) {
                 const MuonHough::Hit& etaHit = **ehit;
                 if (etaHit.tgc) {
-                    if (!etaHit.tgc->phiCluster.hitList.empty()) tgcClusters.insert(etaHit.tgc);
+                    if (!etaHit.tgc->phiCluster.empty()) tgcClusters.insert(etaHit.tgc);
                 } else if (etaHit.prd) {
                     triggerLayers.insert(m_idHelperSvc->gasGapId(etaHit.prd->identify()));
                 }
@@ -699,10 +699,10 @@ namespace Muon {
                 // case 1: phiHit measured in TGC -> get phiHits from phiCluster
                 // case 2: phiHit is prepared raw data -> use phiHit to extend the triggerLayersPhinMinMax map
                 if (phiHit->tgc) {
-                    if (phiHit->tgc->phiCluster.hitList.empty())
+                    if (phiHit->tgc->phiCluster.empty())
                         ATH_MSG_WARNING(" TGC 3D cluster without phi hits ");
                     else
-                        tgcClusters[m_idHelperSvc->stationIndex(phiHit->tgc->phiCluster.hitList.front()->identify())].insert(phiHit->tgc);
+                        tgcClusters[m_idHelperSvc->stationIndex(phiHit->tgc->phiCluster.front()->identify())].insert(phiHit->tgc);
                 } else if (phiHit->prd) {
                     Identifier gpId = m_idHelperSvc->gasGapId(phiHit->prd->identify());
                     auto mit = triggerLayersPhiMinMax.find(gpId);
@@ -728,8 +728,8 @@ namespace Muon {
                     std::set<const TgcClusterObj3D*>::const_iterator ttit = stit->second.begin();
                     std::set<const TgcClusterObj3D*>::const_iterator ttit_end = stit->second.end();
                     for (; ttit != ttit_end; ++ttit) {
-                        ATH_MSG_VERBOSE("  " << m_idHelperSvc->toString((*ttit)->phiCluster.hitList.front()->identify()) << "  nhits "
-                                             << (*ttit)->phiCluster.hitList.size());
+                        ATH_MSG_VERBOSE("  " << m_idHelperSvc->toString((*ttit)->phiCluster.front()->identify()) << "  nhits "
+                                             << (*ttit)->phiCluster.size());
                     }
                 }
             }
@@ -748,7 +748,7 @@ namespace Muon {
                 // loop over eta hits
                 for (const auto& etaHit : road_max->hits) {
                     if (etaHit->tgc) {
-                        if (etaHit->tgc->etaCluster.hitList.empty())
+                        if (etaHit->tgc->etaCluster.empty())
                             ATH_MSG_WARNING(" TGC 3D cluster without eta hits ");
                         else {
                             if (tgcClusters[stIndex].count(etaHit->tgc)) {
@@ -871,7 +871,7 @@ namespace Muon {
                             for (auto& hit : maxi->hits) {
                                 if (hit->debugInfo()) {
                                     hit->debugInfo()->phn = maxi2->max;
-                                    Identifier id = hit->tgc ? hit->tgc->etaCluster.hitList.front()->identify() : hit->prd->identify();
+                                    Identifier id = hit->tgc ? hit->tgc->etaCluster.front()->identify() : hit->prd->identify();
                                     ATH_MSG_VERBOSE(" " << m_idHelperSvc->toString(id) << " setphn " << hit->debugInfo()->phn);
                                 }
                             }
@@ -908,10 +908,10 @@ namespace Muon {
             // loop over hits
             for (const auto& phiHit : phiMaximum->hits) {
                 if (phiHit->tgc) {
-                    if (phiHit->tgc->phiCluster.hitList.empty())
+                    if (phiHit->tgc->phiCluster.empty())
                         ATH_MSG_WARNING(" TGC 3D cluster without phi hits ");
                     else
-                        tgcClusters[m_idHelperSvc->stationIndex(phiHit->tgc->phiCluster.hitList.front()->identify())].insert(phiHit->tgc);
+                        tgcClusters[m_idHelperSvc->stationIndex(phiHit->tgc->phiCluster.front()->identify())].insert(phiHit->tgc);
                 } else if (phiHit->prd) {
                     Identifier colId = phiHit->prd->identify();
                     Identifier layId = m_idHelperSvc->gasGapId(colId);
@@ -928,8 +928,8 @@ namespace Muon {
                     std::set<const TgcClusterObj3D*>::const_iterator ttit = stit->second.begin();
                     std::set<const TgcClusterObj3D*>::const_iterator ttit_end = stit->second.end();
                     for (; ttit != ttit_end; ++ttit) {
-                        ATH_MSG_VERBOSE("  " << m_idHelperSvc->toString((*ttit)->phiCluster.hitList.front()->identify()) << "  nhits "
-                                             << (*ttit)->phiCluster.hitList.size());
+                        ATH_MSG_VERBOSE("  " << m_idHelperSvc->toString((*ttit)->phiCluster.front()->identify()) << "  nhits "
+                                             << (*ttit)->phiCluster.size());
                     }
                 }
             }
@@ -972,13 +972,9 @@ namespace Muon {
                     // loop over hits
                     for (const auto& etaHit : maximum->hits) {
                         if (etaHit->tgc) {
-                            if (etaHit->tgc->etaCluster.hitList.empty())
-                                ATH_MSG_WARNING(" TGC 3D cluster without eta hits ");
-                            else {
-                                if (tgcClusters[stIndex].count(etaHit->tgc))
-                                    ++ntgcOverlaps;
+                            if (tgcClusters[stIndex].count(etaHit->tgc))
+                                ++ntgcOverlaps;
                                
-                            }
                         } else if (etaHit->prd) {
                             Identifier layId = m_idHelperSvc->gasGapId(etaHit->prd->identify());
                             ATH_MSG_VERBOSE(" eta layer hit " << m_idHelperSvc->toString(layId));
@@ -1104,8 +1100,8 @@ namespace Muon {
                 // loop over hits in maximum and add them to the hit list
                 for (const auto& hit : max->hits) {
                     if (hit->tgc) {
-                        const Identifier chId = m_idHelperSvc->chamberId(hit->tgc->etaCluster.hitList.front()->identify());
-                        prdsPerChamber[chId].insert(hit->tgc->etaCluster.hitList.begin(), hit->tgc->etaCluster.hitList.end());
+                        const Identifier chId = m_idHelperSvc->chamberId(hit->tgc->etaCluster.front()->identify());
+                        prdsPerChamber[chId].insert(hit->tgc->etaCluster.begin(), hit->tgc->etaCluster.end());
                     } else if (hit->prd) {
                         const Identifier chId = m_idHelperSvc->chamberId(hit->prd->identify());
                         prdsPerChamber[chId].insert(hit->prd);
@@ -1156,8 +1152,8 @@ namespace Muon {
             // loop over hits
             for (const auto& hit : pit->first->hits) {
                 if (hit->tgc) {
-                    const Identifier chId = m_idHelperSvc->chamberId(hit->tgc->phiCluster.hitList.front()->identify());
-                    phiHitsPerChamber[chId].insert(hit->tgc->phiCluster.hitList.begin(), hit->tgc->phiCluster.hitList.end());
+                    const Identifier chId = m_idHelperSvc->chamberId(hit->tgc->phiCluster.front()->identify());
+                    phiHitsPerChamber[chId].insert(hit->tgc->phiCluster.begin(), hit->tgc->phiCluster.end());
                 } else if (hit->prd) {
                     const Identifier chId = m_idHelperSvc->chamberId(hit->prd->identify());
                     phiHitsPerChamber[chId].insert(hit->prd);
@@ -1191,8 +1187,8 @@ namespace Muon {
                 for (const auto& hit : max->hits) {
                     Identifier chId;
                     if (hit->tgc) {
-                        chId = m_idHelperSvc->chamberId(hit->tgc->etaCluster.hitList.front()->identify());
-                        prdsPerChamber[chId].insert(hit->tgc->etaCluster.hitList.begin(), hit->tgc->etaCluster.hitList.end());
+                        chId = m_idHelperSvc->chamberId(hit->tgc->etaCluster.front()->identify());
+                        prdsPerChamber[chId].insert(hit->tgc->etaCluster.begin(), hit->tgc->etaCluster.end());
                     } else if (hit->prd) {
                         chId = m_idHelperSvc->chamberId(hit->prd->identify());
                         prdsPerChamber[chId].insert(hit->prd);
@@ -1210,7 +1206,7 @@ namespace Muon {
                         if (max->hough)
                             refPlane = max->hough->m_descriptor.referencePosition;
                         else if (hit->tgc)
-                            refPlane = hit->tgc->p11.z();
+                            refPlane = hit->tgc->getEdge(TgcEdge::LowEtaLowPhi).z();
                         else if (isBarrel)
                             refPlane = hit->prd->detectorElement()->surface(hit->prd->identify()).center().perp();
                         else
@@ -1314,7 +1310,7 @@ namespace Muon {
         if (hits.empty()) return false;
 
         if (hough.m_descriptor.chIndex < 0 || hough.m_descriptor.chIndex >= Muon::MuonStationIndex::ChIndexMax) {
-            Identifier id = hits.front()->tgc ? hits.front()->tgc->etaCluster.hitList.front()->identify() : hits.front()->prd->identify();
+            Identifier id = hits.front()->tgc ? hits.front()->tgc->etaCluster.front()->identify() : hits.front()->prd->identify();
             ATH_MSG_WARNING("Bad ChIndex " << m_idHelperSvc->toString(id) << "  " << hough.m_descriptor.chIndex);
             return false;
         }
@@ -1324,7 +1320,7 @@ namespace Muon {
         if (m_debugHough) hough.setDebug(true);
         hough.fillLayer2(hits);
 
-        Identifier id_hit = hits.front()->tgc ? hits.front()->tgc->etaCluster.hitList.front()->identify() : hits.front()->prd->identify();
+	Identifier id_hit = hits.front()->tgc ? hits.front()->tgc->etaCluster.front()->identify() : hits.front()->prd->identify();
         MuonHough::MuonLayerHoughSelector selectorLoose;
         MuonHough::MuonLayerHoughSelector selector;
 
@@ -1354,8 +1350,8 @@ namespace Muon {
                 const unsigned int nHitsInMaximum = maximum.hits.size();
                 for (unsigned int i = 0; i < nHitsInMaximum; ++i) {
                     MuonHough::Hit& hit = *(maximum.hits[i]);
-                    Identifier id = hit.tgc ? hit.tgc->etaCluster.hitList.front()->identify() : hit.prd->identify();
-                    int nhits = hit.tgc ? hit.tgc->etaCluster.hitList.size() : 1;
+                    Identifier id = hit.tgc ? hit.tgc->etaCluster.front()->identify() : hit.prd->identify();
+                    int nhits = hit.tgc ? hit.tgc->etaCluster.size() : 1;
 
                     nmdt += m_idHelperSvc->isMdt(id);
                     nstgc  += m_idHelperSvc->issTgc(id);
@@ -1402,9 +1398,9 @@ namespace Muon {
                 const unsigned int nHitsInMaximum = maximum.hits.size();
                 for (unsigned int i = 0; i < nHitsInMaximum; ++i) {
                     MuonHough::PhiHit& hit = *(maximum.hits[i]);
-                    Identifier id = hit.tgc ? hit.tgc->phiCluster.hitList.front()->identify() : hit.prd->identify();
+                    Identifier id = hit.tgc ? hit.tgc->phiCluster.front()->identify() : hit.prd->identify();
 
-                    int nhits = hit.tgc ? hit.tgc->phiCluster.hitList.size() : 1;
+                    int nhits = hit.tgc ? hit.tgc->phiCluster.size() : 1;
                     ATH_MSG_VERBOSE("findMaxima(Phi) phiHit " << m_idHelperSvc->toString(id) << " hits " << nhits);
                 }
 
@@ -1823,7 +1819,7 @@ namespace Muon {
             }
             return;
         }
-        if (!clustering.bestEtaCluster() || clustering.bestEtaCluster()->hitList.empty() || !clustering.bestEtaCluster()->hitList.front()) {
+        if (clustering.bestEtaCluster().empty()) {
             ATH_MSG_DEBUG("TgcHitClusteringObj, no eta cluster selected! ");
             if (msgLvl(MSG::DEBUG)) {
                 for (const TgcPrepData* prd : prds) { ATH_MSG_DEBUG("   " << m_idHelperSvc->toString(prd->identify())); }
@@ -1838,21 +1834,17 @@ namespace Muon {
             if (sectors[si] != sector) continue;
 
             for (const TgcClusterObj3D& cl : clustering.clusters3D) {
-                if (cl.etaCluster.hitList.empty()) {
-                    ATH_MSG_WARNING("Incomplete TgcClusterObj3D in chamber " << m_idHelperSvc->toString(chid));
-                    continue;
-                }
-                const Identifier id = cl.etaCluster.hitList.front()->identify();
+                const Identifier id = cl.etaCluster.front()->identify();
 
-                double x = cl.p11.z();
-                double y11 = rCor(cl, 1, sector);
-                double y12 = rCor(cl, 2, sector);
-                double y21 = rCor(cl, 3, sector);
-                double y22 = rCor(cl, 4, sector);
-                double phi11 = cl.p11.phi();
-                double phi12 = cl.p12.phi();
-                double phi21 = cl.p21.phi();
-                double phi22 = cl.p22.phi();
+                double x = cl.getEdge(TgcEdge::LowEtaLowPhi).z();
+                double y11 = rCor(cl, TgcEdge::LowEtaLowPhi, sector);
+                double y12 = rCor(cl, TgcEdge::LowEtaHighPhi, sector);
+                double y21 = rCor(cl, TgcEdge::LowEtaLowPhi, sector);
+                double y22 = rCor(cl, TgcEdge::HighEtaHighPhi, sector);
+                double phi11 = cl.getEdge(TgcEdge::LowEtaLowPhi).phi();
+                double phi12 = cl.getEdge(TgcEdge::LowEtaHighPhi).phi();
+                double phi21 = cl.getEdge(TgcEdge::LowEtaLowPhi).phi();
+                double phi22 = cl.getEdge(TgcEdge::HighEtaHighPhi).phi();
                 double ymin = std::min(std::min(y11, y12), std::min(y21, y22));
                 double ymax = std::max(std::max(y11, y12), std::max(y21, y22));
                 double phimin = std::min(std::min(phi11, phi12), std::min(phi21, phi22));
@@ -1860,23 +1852,27 @@ namespace Muon {
                 double phi1 = phimin;  // phiCor(phimin,sector);
                 double phi2 = phimax;  // phiCor(phimax,sector);
                 int sublayer = sublay(id, x);
+                ATH_MSG_VERBOSE("Cluster "<<m_idHelperSvc->toString(id)<<" x: "<<x<<", y11: "<<y11
+                             <<", y12: "<<y12<<", y21: "<<y21<<", y22: "<<y22<<", phi11: "<<phi11<<", "
+                             <<"phi12: "<<phi12<<", phi21: "<<phi21<<", phi22: "<<phi22<<" ymin: "<<ymin<<", ymax: "<<ymax
+                             <<", phimin: "<<phimin<<", phimax: "<<phimax);
 
                 MuonHough::HitDebugInfo* debug = new MuonHough::HitDebugInfo(technology, sector, region, layer, sublayer);
-                debug->clusterSize = cl.etaCluster.hitList.size();
-                debug->clusterLayers = cl.etaCluster.layers();
-                debug->isEtaPhi = cl.phiCluster.layers();
-                debug->time = cl.etaCluster.hitList.front()->getBcBitMap();
+                debug->clusterSize = cl.etaCluster.size();
+                debug->clusterLayers = 2;
+                debug->isEtaPhi = true;
+                debug->time = cl.etaCluster.front()->getBcBitMap();
                 std::map<unsigned int, unsigned int>::const_iterator pos = m_techToTruthNameIdx.find(technology);
                 if (pos != m_techToTruthNameIdx.end()) { matchTruth(truthHits, *truthCollections[pos->second], id, *debug); }
 
                 MuonHough::HitDebugInfo* phiDebug = new MuonHough::HitDebugInfo(*debug);
-                phiDebug->clusterSize = cl.phiCluster.hitList.size();
-                phiDebug->clusterLayers = cl.phiCluster.layers();
-                phiDebug->isEtaPhi = cl.etaCluster.layers();
+                phiDebug->clusterSize = cl.phiCluster.size();
+                phiDebug->clusterLayers = 1;
+                phiDebug->isEtaPhi = true;
 
-                std::unique_ptr<MuonHough::Hit> hit = std::make_unique<MuonHough::Hit>(sublayer, x, ymin, ymax, 2 * cl.etaCluster.layers(), debug, nullptr, &cl);
+                std::unique_ptr<MuonHough::Hit> hit = std::make_unique<MuonHough::Hit>(sublayer, x, ymin, ymax, 2, debug, nullptr, &cl);
                 std::unique_ptr<MuonHough::PhiHit> phiHit =
-                    std::make_unique<MuonHough::PhiHit>(sublayer, y11, phi1, phi2, 2 * cl.phiCluster.layers(), phiDebug, nullptr, &cl);
+                    std::make_unique<MuonHough::PhiHit>(sublayer, y11, phi1, phi2, 2, phiDebug, nullptr, &cl);
                 hits.emplace_back(std::move(hit));
                 phiHits.emplace_back(std::move(phiHit));
             }
