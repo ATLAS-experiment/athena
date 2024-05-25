@@ -122,7 +122,6 @@ def createEgammaConfigFlags():
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.ElectronsSuppESD + '.' +
                      prevFlags.Egamma.Keys.Output.EgammaSuppAOD + '.'
-                     "-EgammaCovarianceMatrix."
                      "-isEMLHLoose.-isEMLHTight.-isEMLHMedium.-isEMMedium"))
 
     egcf.addFlag("Egamma.Keys.Output.ForwardElectrons", 'ForwardElectrons')
