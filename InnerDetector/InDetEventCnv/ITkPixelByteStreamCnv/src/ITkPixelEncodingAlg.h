@@ -3,11 +3,14 @@
 */
 
 #ifndef ITKPIXEL_ENCODINGALG_H
-#define ITKPIXEL_ENCODINGALG_Hi
+#define ITKPIXEL_ENCODINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "PixelReadoutGeometry/IPixelReadoutManager.h"
+#include "ITkPixelHitSortingTool.h"
+#include "GaudiKernel/ToolHandle.h"
 
 namespace InDetDD {
   class PixelDetectorManager;
@@ -27,21 +30,25 @@ class ITkPixelEncodingAlg : public AthReentrantAlgorithm
 
   private:
 
-    enum Region {
-      INVALID_REGION=-1, BARREL, ENDCAP, N_REGIONS
-    };
+    //enum Region {
+    //  INVALID_REGION=-1, BARREL, ENDCAP, N_REGIONS
+    //};
 
-    typedef InDetRawDataCollection<PixelRDORawData> COLLECTION;
+    //typedef InDetRawDataCollection<PixelRDORawData> COLLECTION;
 
     SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this, "PixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
-    const InDetDD::PixelDetectorManager*           m_pixelManager;    
-    const PixelID*                                 m_pixIdHelper;  
+    //const InDetDD::PixelDetectorManager*           m_pixelManager;    
+    //const PixelID*                                 m_pixIdHelper;  
 
     static constexpr float s_pitch50x50=0.050;
 
-    uint32_t getColumn(const Identifier wafferID, const Identifier rdoID) const;
-    uint32_t getRow(const Identifier wafferID, const Identifier rdoID) const;
-    uint32_t getFE(const Identifier wafferID, const Identifier rdoID) const;
+    //uint32_t getColumn(const Identifier wafferID, const Identifier rdoID) const;
+    //uint32_t getRow(const Identifier wafferID, const Identifier rdoID) const;
+    //uint32_t getFE(const Identifier wafferID, const Identifier rdoID) const;
+
+    ToolHandle<ITkPixelHitSortingTool> m_hitSortingTool;
+
+
 };
 #endif
 
