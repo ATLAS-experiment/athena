@@ -2,6 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "src/HgtdClusterizationAlg.h"
+#include "src/HgtdClusteringTool.h"
 #include "src/PixelClusterizationAlg.h"
 #include "src/StripClusterizationAlg.h"
 #include "src/PixelSpacePointFormationAlg.h"
@@ -17,6 +19,7 @@
 
 
 // Algs
+DECLARE_COMPONENT(ActsTrk::HgtdClusterizationAlg)
 DECLARE_COMPONENT(ActsTrk::PixelClusterizationAlg)
 DECLARE_COMPONENT(ActsTrk::StripClusterizationAlg)
 DECLARE_COMPONENT(ActsTrk::PixelCacheClusterizationAlg)
@@ -29,6 +32,7 @@ DECLARE_COMPONENT(ActsTrk::StripSpacePointFormationAlg)
 DECLARE_COMPONENT(ActsTrk::StripCacheSpacePointFormationAlg)
 
 // Tools
+DECLARE_COMPONENT(ActsTrk::HgtdClusteringTool)
 DECLARE_COMPONENT(ActsTrk::PixelClusteringTool)
 DECLARE_COMPONENT(ActsTrk::StripClusteringTool)
 DECLARE_COMPONENT(ActsTrk::PixelSpacePointFormationTool)

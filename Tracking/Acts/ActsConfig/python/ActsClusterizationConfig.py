@@ -5,6 +5,33 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from ActsConfig.ActsUtilities import extractChildKwargs
 
+def ActsHgtdClusteringToolCfg(flags,
+                              name: str = "ActsHgtdClusteringTool",
+                              **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.ActsTrk.HgtdClusteringTool(name,**kwargs))
+    return acc
+
+def ActsHgtdClusterizationAlgCfg(flags,
+                                 name: str = "ActsHgtdClusterizationAlg",
+                                 **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    acc.merge(HGTD_ReadoutGeometryCfg(flags))
+
+    if 'ClusteringTool' not in kwargs:
+        kwargs.setdefault('ClusteringTool', acc.popToolsAndMerge(ActsHgtdClusteringToolCfg(flags)))
+        kwargs.setdefault('RDOContainerName', 'HGTD_RDOs')
+        kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
+    acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterizationAlg(name, **kwargs))
+    return acc
+
+
+
 def ActsPixelClusteringToolCfg(flags,
                                name: str = "ActsPixelClusteringTool",
                                **kwargs) -> ComponentAccumulator:
