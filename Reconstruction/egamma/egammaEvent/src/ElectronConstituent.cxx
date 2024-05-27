@@ -18,8 +18,6 @@
 namespace Analysis
 {
 
-ElectronConstituent::ElectronConstituent() = default;
-
 ElectronConstituent::ElectronConstituent(NameType& name)
   : m_name (name)
 {

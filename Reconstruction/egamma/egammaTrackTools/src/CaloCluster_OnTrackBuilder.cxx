@@ -72,8 +72,6 @@ CaloCluster_OnTrackBuilder::CaloCluster_OnTrackBuilder(const std::string& t,
   declareInterface<ICaloCluster_OnTrackBuilder>(this);
 }
 
-CaloCluster_OnTrackBuilder::~CaloCluster_OnTrackBuilder() = default;
-
 StatusCode
 CaloCluster_OnTrackBuilder::initialize()
 {

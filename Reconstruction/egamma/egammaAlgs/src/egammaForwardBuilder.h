@@ -58,7 +58,7 @@ public:
   egammaForwardBuilder(const std::string& name, ISvcLocator* pSvcLocator);
 
   /** @brief Destructor. */
-  ~egammaForwardBuilder();
+  ~egammaForwardBuilder() = default;
 
   /** @brief Initialize method. */
   virtual StatusCode initialize() override final;

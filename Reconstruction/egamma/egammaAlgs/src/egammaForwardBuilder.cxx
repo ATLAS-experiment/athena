@@ -43,8 +43,6 @@ egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
   : AthReentrantAlgorithm(name, pSvcLocator)
 {}
 
-egammaForwardBuilder::~egammaForwardBuilder() = default;
-
 StatusCode egammaForwardBuilder::initialize()
 {
   m_maxDelPhi = m_maxDelPhiCells * cellPhiSize * 0.5;

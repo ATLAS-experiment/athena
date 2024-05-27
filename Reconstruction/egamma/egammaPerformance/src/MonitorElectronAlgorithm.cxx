@@ -12,9 +12,6 @@ MonitorElectronAlgorithm::MonitorElectronAlgorithm( const std::string& name, ISv
 {
 }
 
-MonitorElectronAlgorithm::~MonitorElectronAlgorithm() = default;
-
-
 StatusCode MonitorElectronAlgorithm::initialize() {
     using namespace Monitored;
     ATH_CHECK( AthMonitorAlgorithm::initialize() );

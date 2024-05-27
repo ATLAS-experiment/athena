@@ -40,7 +40,7 @@ class EMInsituDatabaseEntry
   EMInsituDatabaseEntry(const std::string& dbaseID);
 
   /** Default Destructor*/
-  ~EMInsituDatabaseEntry();
+  ~EMInsituDatabaseEntry() = default;
   /** Copy Constructor*/
   EMInsituDatabaseEntry(const EMInsituDatabaseEntry& ob) = default;
  

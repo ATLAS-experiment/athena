@@ -23,8 +23,6 @@ egammaIso::egammaIso(const std::string& type,
         declareInterface<IegammaIso>(this);
     }
 
-egammaIso::~egammaIso()= default;
-
 StatusCode egammaIso::initialize(){
     ATH_MSG_DEBUG(" Initializing egammaIso");
     return StatusCode::SUCCESS;

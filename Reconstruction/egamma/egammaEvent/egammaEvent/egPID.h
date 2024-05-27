@@ -33,11 +33,11 @@ class egPID
  public:
 
   /** @brief Default constructor*/
-  egPID();
+  egPID() = default;
   /** @brief Destructor*/
-  ~egPID();
+  ~egPID() = default;
   /** @brief constructor*/
-  egPID(const egPID& original);   // copy constructor
+  egPID(const egPID& original) = default;   // copy constructor
   /// Assignment.
   egPID& operator= (const egPID& original);
   /** @brief Metod to define isEM variable */

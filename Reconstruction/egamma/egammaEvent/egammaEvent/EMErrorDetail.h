@@ -34,7 +34,7 @@ class EMErrorDetail : public egDetail
   EMErrorDetail(); 
 
   /** @brief Destructor*/
-  virtual ~EMErrorDetail();
+  virtual ~EMErrorDetail() = default;
 
   //void print() const; 
   virtual const std::string& className() const;

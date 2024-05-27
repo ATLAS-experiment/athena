@@ -11,9 +11,6 @@ MonitorTnPAlgorithm::MonitorTnPAlgorithm( const std::string& name, ISvcLocator* 
 :AthMonitorAlgorithm(name,pSvcLocator) {
 }
 
-MonitorTnPAlgorithm::~MonitorTnPAlgorithm() = default;
-
-
 StatusCode MonitorTnPAlgorithm::initialize() {
   using namespace Monitored;
   ATH_CHECK(AthMonitorAlgorithm::initialize());

@@ -47,7 +47,7 @@ class EMShowerMinimal  : public NavigableTerminalNode
   /** @brief Default constructor*/
   EMShowerMinimal();
   /** @brief Destructor*/
-  ~EMShowerMinimal();
+  ~EMShowerMinimal() = default;
 
   void print() const;
 

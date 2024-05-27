@@ -8,11 +8,6 @@
 
 namespace Analysis {
 
-
-Photon::~Photon()
-= default;
-
-
 Photon& Photon::operator=(const Photon& rhs) { 
   if ( this != &rhs ) {
     egamma::operator=( rhs );

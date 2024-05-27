@@ -21,7 +21,7 @@ class ZeeTaPMonTool : public egammaMonToolBase
   
   ZeeTaPMonTool(const std::string& type, const std::string& name, const IInterface* parent); 
   
-  virtual ~ZeeTaPMonTool();
+  virtual ~ZeeTaPMonTool() = default;
   
   virtual StatusCode initialize() override;
   virtual StatusCode bookHistograms() override;

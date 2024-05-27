@@ -86,12 +86,6 @@ EMShowerMinimal::EMShowerMinimal()
 
 }
 
-// --------------------------
-// Destructor
-// --------------------------
-EMShowerMinimal::~EMShowerMinimal()
-= default;
-
 // ----------------------------
 // print EMShowerMinimal quantities
 // ----------------------------

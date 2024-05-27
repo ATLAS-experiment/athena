@@ -14,8 +14,6 @@ egammaShowerShape::egammaShowerShape(const std::string& type,
         declareInterface<IegammaShowerShape>(this);
     }
 
-egammaShowerShape::~egammaShowerShape()= default;
-
 StatusCode egammaShowerShape::initialize(){
     ATH_MSG_DEBUG(" Initializing egammaShowerShape");
     return StatusCode::SUCCESS;

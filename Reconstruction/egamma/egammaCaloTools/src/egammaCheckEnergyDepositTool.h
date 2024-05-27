@@ -28,7 +28,7 @@ class egammaCheckEnergyDepositTool : virtual public IegammaCheckEnergyDepositToo
   egammaCheckEnergyDepositTool (const std::string& type,const std::string& name, const IInterface* parent);
 
   /** @brief destructor */
-  virtual ~egammaCheckEnergyDepositTool();
+  virtual ~egammaCheckEnergyDepositTool() = default;
 
   /** @brief initialize method */
   virtual StatusCode initialize() override final;

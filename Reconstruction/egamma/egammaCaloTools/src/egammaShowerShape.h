@@ -41,7 +41,7 @@ public:
             const std::string& name,
             const IInterface* parent);
     /** @brief Destructor*/
-    ~egammaShowerShape();  
+    ~egammaShowerShape() = default; 
 
     /** @brief AlgTool initialize method.*/
     StatusCode initialize() override;
