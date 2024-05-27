@@ -99,6 +99,12 @@ def TileTBAANtupleCfg(flags, outputFile='', useFELIX=None, **kwargs):
     from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
     acc.merge( TileDQstatusAlgCfg(flags) )
 
+    if flags.Input.isMC:
+        from TileConditions.TileSamplingFractionConfig import TileSamplingFractionCondAlgCfg
+        acc.merge( TileSamplingFractionCondAlgCfg(flags) )
+    else:
+        kwargs['TileSamplingFraction'] = ""
+
     if not outputFile:
         outputFile = f'tiletb_{run}.aan.root'
     histsvc = CompFactory.THistSvc()
