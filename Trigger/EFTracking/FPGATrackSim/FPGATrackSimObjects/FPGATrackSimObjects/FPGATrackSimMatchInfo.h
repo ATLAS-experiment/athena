@@ -12,7 +12,7 @@ public:
   FPGATrackSimMatchInfo() : m_barcode(0), m_evtindex(-1) { ; }
   FPGATrackSimMatchInfo(int v1, int v2) : m_barcode(v1), m_evtindex(v2) { ; }
 
-  int barcode() const { return m_barcode; }
+  unsigned long barcode() const { return m_barcode; }
   int evtindex() const { return m_evtindex; }
 
   bool operator==(const FPGATrackSimMatchInfo& o) const { return (m_barcode == o.m_barcode) && (m_evtindex == o.m_evtindex); }
@@ -20,7 +20,7 @@ public:
 
 
 private:
-  int m_barcode;
+  unsigned long m_barcode;
   int m_evtindex;
 
 
