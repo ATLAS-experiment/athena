@@ -21,7 +21,10 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
+#include "GeoModelKernel/GeoCountVolAndSTAction.h"
+#include "GeoModelKernel/GeoAccessVolAndSTAction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
+#include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/Units.h"
 #include "GeoGenericFunctions/AbsFunction.h"
 #include "GeoGenericFunctions/Variable.h"
@@ -47,7 +50,7 @@ using namespace GeoXF;
 //
 TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqliteReader, 
 						 InDetDD::AthenaComps * athenaComps,
-						 const ITRT_StrawStatusSummaryTool* /*sumTool*/, // added for Argon. Will be used in later revisions
+						 const ITRT_StrawStatusSummaryTool* sumTool, // added for Argon. Will be used in later revisions
 						 bool useOldActiveGasMixture,
 						 bool DC2CompatibleBarrelCoordinates,
 						 int overridedigversion,
@@ -59,7 +62,7 @@ TRTDetectorFactory_Lite::TRTDetectorFactory_Lite(GeoModelIO::ReadGeoModel *sqlit
     m_DC2CompatibleBarrelCoordinates(DC2CompatibleBarrelCoordinates),
     m_overridedigversion(overridedigversion),
     m_alignable(alignable),
-//    m_sumTool(sumTool),
+    m_sumTool(sumTool),
     m_useDynamicAlignFolders(useDynamicAlignmentFolders)
 { 
 }
@@ -91,6 +94,48 @@ const InDetDD::TRT_DetectorManager * TRTDetectorFactory_Lite::getDetectorManager
 void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 {
 
+  // Here we build materials by hand.  This awaits updates to GeoModelIO which would allow to retreive materials from
+  // the database. At that point we can remove the manual creation of materials.
+  
+  // Make two kinds of Gas
+  GeoElement *carbon = new GeoElement("Carbon","C",6,12.0112*GeoModelKernelUnits::gram/GeoModelKernelUnits::mole);
+  GeoElement *oxygen = new GeoElement("Oxygen","O",8,15.9994*GeoModelKernelUnits::gram/GeoModelKernelUnits::mole);
+  GeoElement *argon  = new GeoElement("Argon","Ar",18,39.948*GeoModelKernelUnits::gram/GeoModelKernelUnits::mole);
+  GeoElement *xenon  = new GeoElement("Xenon","Xe",54,131.3*GeoModelKernelUnits::gram/GeoModelKernelUnits::mole);
+
+  GeoMaterial *trtCO2   = new GeoMaterial("trt::CO2", 0.001842*GeoModelKernelUnits::gram / GeoModelKernelUnits::cm3);
+  trtCO2->add(carbon,1);
+  trtCO2->add(oxygen,2);
+  trtCO2->lock();
+
+  
+  GeoMaterial *trtO2   = new GeoMaterial("trt::O2", 0.001334*GeoModelKernelUnits::gram / GeoModelKernelUnits::cm3);
+  trtO2->add(oxygen,1);
+  trtO2->lock();
+
+  GeoMaterial *trtArgon = new GeoMaterial("trt::Argon", 0.001662*GeoModelKernelUnits::gram / GeoModelKernelUnits::cm3);
+  trtArgon->add(argon,1);
+  trtArgon->lock();
+
+  GeoMaterial *trtXenon = new GeoMaterial("trt::Xenon", 0.005485*GeoModelKernelUnits::gram / GeoModelKernelUnits::cm3);
+  trtXenon->add(xenon,1);
+  trtXenon->lock();
+  
+  GeoMaterial *argonGas = new GeoMaterial("trt::ArCO2O2",0.00165878*GeoModelKernelUnits::gram / GeoModelKernelUnits::cm3);
+  argonGas->add(trtArgon,0.7);
+  argonGas->add(trtCO2,0.27);
+  argonGas->add(trtO2,0.03);
+  argonGas->lock();
+
+  GeoMaterial *xenonGas = new GeoMaterial("trt::XeCO2O2",0.00437686*GeoModelKernelUnits::gram / GeoModelKernelUnits::cm3);
+  xenonGas->add(trtXenon,0.7);
+  xenonGas->add(trtCO2,0.27);
+  xenonGas->add(trtO2,0.03);
+  xenonGas->lock();
+
+  m_argonGas=argonGas;
+  m_xenonGas=xenonGas;
+  
   std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("TRT");
   std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("TRT");
 
@@ -144,6 +189,13 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
     T.matrix()=M;
     shellPosVec.push_back(T);
   }
+
+  //---------------------- Check if the folder TRT/Cond/StatusHT is in place ------------------------//
+  m_strawsvcavailable =
+    detStore()->contains<TRTCond::StrawStatusMultChanContainer>("/TRT/Cond/StatusHT")
+    &&
+    m_sumTool->getStrawStatusHTContainer() != nullptr;
+
   //---------------------- Initialize ID Helper ------------------------------------//
   const TRT_ID *idHelper = nullptr;
 
@@ -509,18 +561,37 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 
       }
 
-
+      // Get a list of fibre radiators in the barrel;
+      std::set<const GeoVPhysVol *> barrelFibreRadiators;
+      std::set<const GeoVPhysVol *> strawPlanes;
+      
       // Now create m_data->nBarrelModulesUsed unique modules within each layer.
       for (size_t iMod = 0; iMod<m_data->nBarrelModulesUsed;iMod++) {
         GeoFullPhysVol * pShell = mapFPV["TRTShell-"+std::to_string(iABC)+"-"+std::to_string(iMod)];
 	GeoAlignableTransform * xfx1 = mapAX["TRTShell-"+std::to_string(iABC)+"-"+std::to_string(iMod)];
 
+	
+
+	GeoVolumeCursor cursor(pShell);
+	while (!cursor.atEnd()) {
+	  if (cursor.getVolume()->getLogVol()->getName().find("FibreRadiator") != std::string::npos) {
+	    barrelFibreRadiators.insert(cursor.getVolume().get());
+	  }
+	  cursor.next();
+	}
+
+	
 
 	// Register the alignable transfrom to the manager
 	// +ve and -ve are part of the same barrel. We use barrel_ec = -1.
 	Identifier idModule = idHelper->module_id(-1, iMod, iABC);
 	// In barrel frame (generally the same as the global frame)
 	m_detectorManager->addAlignableTransform(AlignmentLevelModule, idModule, xfx1, pShell, pBarrelVol);
+
+	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
+	int strawStatusHT = TRTCond::StrawStatus::Good;
+	if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+	refreshGasBarrel(strawStatusHT,pShell);
 	
 	//-------------------------------------------------------------------//
 	//                                                                   //
@@ -754,6 +825,8 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		Identifier TRT_Identifier;
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
+		int strawStatusHT = TRTCond::StrawStatus::Good;
+		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
 		
 		
 		childPlane = mapFPV["TRTWheelA-StrawPlane-"
@@ -761,7 +834,8 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 				    +std::to_string(iiWheel)+"-"
 				    +std::to_string(iiPlane)];
 		
-		
+		refreshGasEndcap(strawStatusHT,childPlane);
+
 		// Create descriptors
 		// Just do it for the first wheel
 		if(iiWheel==firstIndexOfA && iiPlane < nStrawLayMaxEc)
@@ -880,13 +954,15 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		Identifier TRT_Identifier;
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
+		int strawStatusHT = TRTCond::StrawStatus::Good;
+		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
 		
-
 		childPlane = mapFPV["TRTWheelB-StrawPlane-"
 				    +std::to_string(iiSide)+"-"
 				    +std::to_string(iiWheel)+"-"
 				    +std::to_string(iiPlane)];
-		
+		refreshGasEndcap(strawStatusHT,childPlane);
+
 
 
 		// Create elements
@@ -1121,3 +1197,62 @@ void TRTDetectorFactory_Lite::setEndcapTransformField(size_t w) {
 }
 
 
+// These methods update the gas.
+void  TRTDetectorFactory_Lite::refreshGasEndcap(int strawStatusHT, GeoVPhysVol *strawPlane) const{
+  
+  const GeoMaterial *material = m_xenonGas.get();
+
+  if (m_strawsvcavailable && (strawStatusHT == TRTCond::StrawStatus::Dead ||
+			      strawStatusHT == TRTCond::StrawStatus::Argon))
+    material= m_argonGas.get();
+
+  // The volume hierarchy from here is: strawPlane>>straw>>gas
+  GeoVolumeCursor cursor0(strawPlane);
+  if (!cursor0.atEnd()) {
+    const GeoVPhysVol *v1=cursor0.getVolume().get();
+    GeoVolumeCursor cursor1(v1);
+    if (!cursor1.atEnd()) {
+      ATH_MSG_INFO("ENDCAP: REFRESHING GAS MIXTURE " << strawPlane->getLogVol()->getName() << " -->" << material->getName());
+      cursor1.getVolume()->getLogVol()->setMaterial(material);
+    }
+  }
+} 
+  
+void  TRTDetectorFactory_Lite::refreshGasBarrel(int strawStatusHT, GeoVPhysVol *shell) const{
+
+  const GeoMaterial *material = m_xenonGas.get();
+
+  if (m_strawsvcavailable && (strawStatusHT == TRTCond::StrawStatus::Dead ||
+			      strawStatusHT == TRTCond::StrawStatus::Argon))
+    material= m_argonGas.get();
+
+  GeoVolumeCursor cursor0(shell);
+  if (!cursor0.atEnd()) {
+    const GeoVPhysVol *v1=cursor0.getVolume().get();
+    GeoCountVolAndSTAction counter;
+    v1->exec(&counter);
+    for (unsigned int i=0;i<counter.getCount();i++) {
+      GeoAccessVolAndSTAction accessor(i);
+      v1->exec(&accessor);
+      const GeoSerialTransformer *st=accessor.getSerialTransformer();
+      if (st) {
+	const GeoVPhysVol *v2=st->getVolume().get();
+	GeoVolumeCursor cursor1(v2);
+	if (!cursor1.atEnd()) {
+	  const GeoVPhysVol *v3=cursor1.getVolume();
+	  GeoVolumeCursor cursor2(v3);
+	  while (!cursor2.atEnd()) {
+	    std::string regionName=cursor2.getVolume()->getLogVol()->getName();
+	    if (regionName=="GasMA" || regionName=="DeadRegion" || regionName=="InnerDeadRegion") {
+	      ATH_MSG_INFO("BARREL: REFRESHING GAS MIXTURE " << cursor2.getVolume()->getLogVol()->getName() << " -->" << material->getName());
+	      cursor2.getVolume()->getLogVol()->setMaterial(material);
+	    }
+	    cursor2.next();
+	  }
+	}
+      }
+    }
+  }
+
+}
+  
