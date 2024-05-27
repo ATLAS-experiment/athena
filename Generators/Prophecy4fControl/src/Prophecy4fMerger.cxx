@@ -6,7 +6,11 @@
 #include "TLorentzVector.h"
 #include "TVector3.h"
 /* Utils */
-#include "LHEF.h"
+#include "Pythia8/LHEF3.h"
+namespace LHEF {
+using Reader = Pythia8::Reader;
+using Writer = Pythia8::Writer;
+}
 #include <string>
 #include <iostream>
 #include <AsgMessaging/MessageCheck.h>
@@ -273,8 +277,8 @@ void Prophecy4fMerger::merge(){
         int nup_org=readH.hepeup.NUP;
 
         for(int nup=0; nup<nup_org; nup++){
-            if(readH.hepeup.idup(nup)==m_higgsID)
-                readH.hepeup.istup(nup)=2; // set Higgs status code to 2
+            if(readH.hepeup.IDUP[nup]==m_higgsID)
+                readH.hepeup.ISTUP[nup]=2; // set Higgs status code to 2
         }
         writeLHE.hepeup = readH.hepeup;
 
@@ -285,11 +289,11 @@ void Prophecy4fMerger::merge(){
         double daughter2[5][5];
     
         for(int i=0; i<nup_org; i++){
-            if(readH.hepeup.idup(i)==m_higgsID) {
-                TLorentzVector higgs( readH.hepeup.pup(i,0),
-                                      readH.hepeup.pup(i,1),
-                                      readH.hepeup.pup(i,2),
-                                      readH.hepeup.pup(i,3) );
+            if(readH.hepeup.IDUP[i]==m_higgsID) {
+                TLorentzVector higgs( readH.hepeup.PUP[i][0],
+                                      readH.hepeup.PUP[i][1],
+                                      readH.hepeup.PUP[i][2],
+                                      readH.hepeup.PUP[i][3] );
 	
                 TVector3 boostvec = higgs.BoostVector();
                 TLorentzRotation boost(-boostvec);
@@ -308,18 +312,18 @@ void Prophecy4fMerger::merge(){
                 TLorentzVector sum_daughter_rest_init;
 	
                 for(int k=0; k<read4f->hepeup.NUP; k++){
-                    TLorentzVector daughter(read4f->hepeup.pup(k,0),
-                                            read4f->hepeup.pup(k,1),
-                                            read4f->hepeup.pup(k,2),
-                                            read4f->hepeup.pup(k,3));
+                    TLorentzVector daughter(read4f->hepeup.PUP[k][0],
+                                            read4f->hepeup.PUP[k][1],
+                                            read4f->hepeup.PUP[k][2],
+                                            read4f->hepeup.PUP[k][3]);
                     sum_daughter_rest_init+=daughter;
                 }
 	
                 for(int j=0; j<read4f->hepeup.NUP; j++){
-                    TLorentzVector daughter(read4f->hepeup.pup(j,0),
-                                            read4f->hepeup.pup(j,1),
-                                            read4f->hepeup.pup(j,2),
-                                            read4f->hepeup.pup(j,3));
+                    TLorentzVector daughter(read4f->hepeup.PUP[j][0],
+                                            read4f->hepeup.PUP[j][1],
+                                            read4f->hepeup.PUP[j][2],
+                                            read4f->hepeup.PUP[j][3]);
                     sum_daughter_rest+=daughter;
 	  
                     daughter *= backboost;
@@ -333,17 +337,17 @@ void Prophecy4fMerger::merge(){
 	  
                     sum_daughter+=daughter;
 	  
-                    if( std::abs(read4f->hepeup.idup(j))==m_electronID ||
-                        std::abs(read4f->hepeup.idup(j))==m_muonID      ){
+                    if( std::abs(read4f->hepeup.IDUP[j])==m_electronID ||
+                        std::abs(read4f->hepeup.IDUP[j])==m_muonID      ){
 	    
-                        //ID_l[j]    = read4f->hepeup.idup(j);
+                        //ID_l[j]    = read4f->hepeup.IDUP[j];
                         P4_l[0][j] = daughter.Px();
                         P4_l[1][j] = daughter.Py();
                         P4_l[2][j] = daughter.Pz();
                         P4_l[3][j] = daughter.E();
 	    
                     }		
-                    else if( std::abs(read4f->hepeup.idup(j))==m_photonID ){
+                    else if( std::abs(read4f->hepeup.IDUP[j])==m_photonID ){
                         Pph[0] = daughter.Px();
                         Pph[1] = daughter.Py();
                         Pph[2] = daughter.Pz();
@@ -433,32 +437,32 @@ void Prophecy4fMerger::merge(){
       
             for(int jp=0; jp<read4f->hepeup.NUP; jp++){
                 if (jp < 4){
-                    writeLHE.hepeup.idup(nup_org+jp) = (jp % 2 == 0)?  ID_l[jp] : -ID_l[jp];
+                    writeLHE.hepeup.IDUP[nup_org+jp] = (jp % 2 == 0)?  ID_l[jp] : -ID_l[jp];
 
                 }
                 else{
-                    writeLHE.hepeup.idup(nup_org+jp) = read4f->hepeup.idup(jp);		  
+                    writeLHE.hepeup.IDUP[nup_org+jp] = read4f->hepeup.IDUP[jp];		  
                 }  
         
-                writeLHE.hepeup.istup(nup_org+jp)=read4f->hepeup.istup(jp);
-                if( read4f->hepeup.icolup1(jp)==0 &&
-                    read4f->hepeup.icolup2(jp)==0  ) {
-                    writeLHE.hepeup.icolup1(nup_org+jp)=0;
-                    writeLHE.hepeup.icolup2(nup_org+jp)=0;
+                writeLHE.hepeup.ISTUP[nup_org+jp]=read4f->hepeup.ISTUP[jp];
+                if( read4f->hepeup.ICOLUP[jp].first==0 &&
+                    read4f->hepeup.ICOLUP[jp].second==0  ) {
+                    writeLHE.hepeup.ICOLUP[nup_org+jp].first=0;
+                    writeLHE.hepeup.ICOLUP[nup_org+jp].second=0;
                 }
                 else {
-                    writeLHE.hepeup.icolup1(nup_org+jp)=read4f->hepeup.icolup1(jp)+100;
-                    writeLHE.hepeup.icolup2(nup_org+jp)=read4f->hepeup.icolup2(jp)+100;
+                    writeLHE.hepeup.ICOLUP[nup_org+jp].first=read4f->hepeup.ICOLUP[jp].first+100;
+                    writeLHE.hepeup.ICOLUP[nup_org+jp].second=read4f->hepeup.ICOLUP[jp].second+100;
                 }  
-                writeLHE.hepeup.mothup1(nup_org+jp)=3;//i-1;
-                writeLHE.hepeup.mothup2(nup_org+jp)=3;//i-1;
-                writeLHE.hepeup.pup(nup_org+jp,0)=daughter2[jp][0];
-                writeLHE.hepeup.pup(nup_org+jp,1)=daughter2[jp][1];
-                writeLHE.hepeup.pup(nup_org+jp,2)=daughter2[jp][2];
-                writeLHE.hepeup.pup(nup_org+jp,3)=daughter2[jp][3];
-                writeLHE.hepeup.pup(nup_org+jp,4)=daughter2[jp][4];
-                writeLHE.hepeup.vtimup(nup_org+jp)=read4f->hepeup.vtimup(jp);
-                writeLHE.hepeup.spinup(nup_org+jp)=read4f->hepeup.spinup(jp);
+                writeLHE.hepeup.MOTHUP[nup_org+jp].first=3;//i-1;
+                writeLHE.hepeup.MOTHUP[nup_org+jp].second=3;//i-1;
+                writeLHE.hepeup.PUP[nup_org+jp][0]=daughter2[jp][0];
+                writeLHE.hepeup.PUP[nup_org+jp][1]=daughter2[jp][1];
+                writeLHE.hepeup.PUP[nup_org+jp][2]=daughter2[jp][2];
+                writeLHE.hepeup.PUP[nup_org+jp][3]=daughter2[jp][3];
+                writeLHE.hepeup.PUP[nup_org+jp][4]=daughter2[jp][4];
+                writeLHE.hepeup.VTIMUP[nup_org+jp]=read4f->hepeup.VTIMUP[jp];
+                writeLHE.hepeup.SPINUP[nup_org+jp]=read4f->hepeup.SPINUP[jp];
             }
         }
 
@@ -467,9 +471,9 @@ void Prophecy4fMerger::merge(){
         // Get Prophecy4f weight
             writeLHE.hepeup.XWGTUP *= read4f->hepeup.XWGTUP;
             double prophecyWeight = read4f->hepeup.XWGTUP;
-        if ( writeLHE.hepeup.weights.size() > 0 ) {
-            for ( int i = 1, N = writeLHE.hepeup.weights.size(); i < N; ++i ) {
-                writeLHE.hepeup.weights[i].first *= prophecyWeight;
+        if ( writeLHE.hepeup.weights_compressed.size() > 0 ) {
+            for ( int i = 1, N = writeLHE.hepeup.weights_compressed.size(); i < N; ++i ) {
+                writeLHE.hepeup.weights_compressed[i] *= prophecyWeight;
     
             }
         }
