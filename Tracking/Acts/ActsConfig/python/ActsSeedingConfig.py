@@ -334,7 +334,7 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
     processStrips = flags.Detector.EnableITkStrip
 
     # For conversion pass we do not process pixels
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
+    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
         processPixels = False
     # For main pass disable strips if fast tracking configuration
     elif flags.Tracking.doITkFastTracking:

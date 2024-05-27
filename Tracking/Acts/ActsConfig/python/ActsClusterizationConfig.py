@@ -277,11 +277,6 @@ def ActsClusterizationCfg(flags) -> ComponentAccumulator:
     processPixels = flags.Detector.EnableITkPixel
     processStrips = flags.Detector.EnableITkStrip
 
-    # For conversion pass we do not process pixels since we assume
-    # they have been processed on the primary pass.
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        processPixels = False
-
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
