@@ -6,10 +6,7 @@
 #define GENERATORMODULES_PARTICLEDECAYER_H
 
 #include "GeneratorModules/GenModule.h"
-#include "CLHEP/Vector/LorentzVector.h"
-#include "AtlasHepMC/IO_BaseClass.h"
 #include "AtlasHepMC/Polarization.h"
-#include "AtlasHepMC/Flow.h"
 #include "HepPDT/ParticleDataTable.hh"
 
 

@@ -9,7 +9,6 @@
 
 #include "InDetPhysHitDecoratorAlg.h"
 #include "safeDecorator.h"
-// #include "GeneratorUtils/PIDUtils.h"
 #include "TrkParameters/TrackParameters.h" // Contains typedef to Trk::CurvilinearParameters
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "TrkToolInterfaces/IUpdator.h"
