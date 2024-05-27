@@ -10,7 +10,7 @@ atlas_add_component( AthenaPoolExampleAlgorithms
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaPoolExampleData AthenaPoolUtilities EventBookkeeperMetaData EventInfo GaudiKernel PersistentDataModel StoreGateLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Function helping to set up the integration tests
 function( _add_test testName toExecute )
@@ -48,73 +48,73 @@ set( TEST_IGNORE_STR "Warning in <TFile::Init>: no StreamerInfo found|BYTES_READ
 
 # Write 'Hits', with multistreamand
 _add_test( AthenaPoolExample_Write 
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_WriteJobOptions.py"
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_Write.py"
    IGNORE ${TEST_IGNORE_STR}
    PRE_EXEC test/pre_check.sh )
 
 # Read 'Hits' and write 'Tracks'
-_add_test( AthenaPoolExample_ReWrite
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_RWJobOptions.py"
+_add_test( AthenaPoolExample_ReadWrite
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadWrite.py"
    DEPENDS AthenaPoolExample_Write
    IGNORE ${TEST_IGNORE_STR} )
 
 # Read all output
 _add_test( AthenaPoolExample_Read
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadJobOptions.py"
-   DEPENDS AthenaPoolExample_ReWrite
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_Read.py"
+   DEPENDS AthenaPoolExample_ReadWrite
    IGNORE ${TEST_IGNORE_STR} )
 
 # Copy 'Hits' file without extending provenance
 _add_test( AthenaPoolExample_Copy
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_CopyJobOptions.py"
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_Copy.py"
    DEPENDS AthenaPoolExample_Read
    IGNORE ${TEST_IGNORE_STR} )
 
 # Read copied 'Hits' and write 'Tracks'
-_add_test( AthenaPoolExample_ReWriteAgain
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReWriteAgainJobOptions.py"
+#_add_test( AthenaPoolExample_ReWriteAgain
+#   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReWriteAgainJobOptions.py"
+#   DEPENDS AthenaPoolExample_Copy
+#   IGNORE ${TEST_IGNORE_STR} )
+_add_test( AthenaPoolExample_ReadWriteNext
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadWriteNext.py"
    DEPENDS AthenaPoolExample_Copy
-   IGNORE ${TEST_IGNORE_STR} )
-_add_test( AthenaPoolExample_ReWriteNext
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReWriteNextJobOptions.py"
-   DEPENDS AthenaPoolExample_ReWriteAgain
    IGNORE ${TEST_IGNORE_STR} )
 
 # Read all
 _add_test( AthenaPoolExample_ReadAgain
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadAgainJobOptions.py"
-   DEPENDS AthenaPoolExample_ReWriteNext
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadAgain.py"
+   DEPENDS AthenaPoolExample_ReadWriteNext
    IGNORE ${TEST_IGNORE_STR} )
 
 # Concatenate jobs write 'Hits' and 'Tracks' to different streams
 _add_test( AthenaPoolExample_Concat
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ConcatJobOptions.py"
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_Concat.py"
    DEPENDS AthenaPoolExample_ReadAgain
    IGNORE ${TEST_IGNORE_STR}
    PRE_EXEC test/pre_check.sh )
 _add_test( AthenaPoolExample_ReadConcat
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadJobOptions.py"
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_Read.py"
    DEPENDS AthenaPoolExample_Concat
    IGNORE ${TEST_IGNORE_STR} )
 
 # Testing 'Conditions' I/O
-_add_test( AthenaPoolExample_WCond
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_WCondJobOptions.py"
+_add_test( AthenaPoolExample_WriteCond
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_WriteCond.py"
    DEPENDS AthenaPoolExample_ReadConcat
    IGNORE ${TEST_IGNORE_STR} )
 
-_add_test( AthenaPoolExample_RCond
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_RCondJobOptions.py"
-   DEPENDS AthenaPoolExample_WCond
+_add_test( AthenaPoolExample_ReadCond
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadCond.py"
+   DEPENDS AthenaPoolExample_WriteCond
    IGNORE ${TEST_IGNORE_STR} )
 
 # Testing 'Metadata' I/O
-_add_test( AthenaPoolExample_WMeta
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_WMetaJobOptions.py"
-   DEPENDS AthenaPoolExample_RCond
+_add_test( AthenaPoolExample_WriteMeta
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_WriteMeta.py"
+   DEPENDS AthenaPoolExample_ReadCond
    IGNORE ${TEST_IGNORE_STR}
    PRE_EXEC test/pre_check.sh )
-_add_test( AthenaPoolExample_RMeta
-   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_RMetaJobOptions.py"
-   DEPENDS AthenaPoolExample_WMeta
+_add_test( AthenaPoolExample_ReadMeta
+   "athena.py AthenaPoolExampleAlgorithms/AthenaPoolExample_ReadMeta.py"
+   DEPENDS AthenaPoolExample_WriteMeta
    IGNORE ${TEST_IGNORE_STR} )

@@ -15,10 +15,8 @@ then
 elif [ "${test}" = "AthenaPoolExample_Concat" ]
 then
 	/bin/rm -f SimplePoolFile[13].root
-elif [ "${test}" = "AthenaPoolExample_WMeta" ]
+elif [ "${test}" = "AthenaPoolExample_WriteMeta" ]
 then
 	/bin/rm -f *.root Catalog2.xml
-	FCregisterPFN -p SimplePoolFile5.root -u xmlcatalog_file:Catalog2.xml -t ROOT_All -g C949FD2E-3B8E-9343-AAE0-1E2306900C43
+	FCregisterPFN -p SimplePoolFile5.root -u xmlcatalog_file:Catalog2.xml -t ROOT_All -g C949FD2E-3B8E-9343-AAE0-1E2306911C43
 fi
-# Turn off pool verbose printing
-export POOL_OUTMSG_LEVEL=4
