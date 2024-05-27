@@ -11,6 +11,10 @@
 '''
 
 from AthenaConfiguration.Enums import HIMode
+import logging
+logger = logging.getLogger('TrigHLTMonitoring')
+
+RAWonlySignatureList = ['Egamma', 'Calo', 'Bphys', 'MET']
 
 def createHLTDQConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -33,6 +37,13 @@ def createHLTDQConfigFlags():
 
     return acf
 
+def verifySignatureDQSettings(inputFlags):
+    if inputFlags.DQ.Environment == 'AOD' and not inputFlags.Input.isMC:
+        for signature in RAWonlySignatureList:
+            sigFlag = f"do{signature}"
+            if inputFlags.DQ.Steering.HLT[sigFlag]:
+                logger.error(f"HLT monitoring on data AOD input for {signature} not allowed - not all HLT collections are recorded to AOD!")
+                raise ValueError("HLT monitoring enabled on data AOD input.")
 
 def TrigHLTMonTopConfig(inputFlags):
     '''Configuring the HLT signatures top-level steering in the DQ monitoring system.'''
@@ -48,6 +59,11 @@ def TrigHLTMonTopConfig(inputFlags):
 
     # do not run in RAWtoESD, if we have two-step reco
     if inputFlags.DQ.Environment in ('online', 'tier0', 'tier0ESD', 'AOD'):
+
+        # Verify signature settings in case of AOD input, as content monitored by some signatures not available in AOD.
+        # Will raise exception to prevent signature monitoring crashing during running.
+        verifySignatureDQSettings(inputFlags)
+
         if inputFlags.DQ.Steering.HLT.doGeneral:
             from TrigHLTMonitoring.TrigGeneralMonitorAlgorithm import TrigGeneralMonConfig
             result.merge(TrigGeneralMonConfig(inputFlags))

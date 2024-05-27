@@ -13,7 +13,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 preExec = ';'.join([
   'flags.Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
-  'flags.Trigger.AODEDMSet=\'AODFULL\'',
+  'flags.Trigger.AODEDMSet=\'ESD\'',
 ])
 
 rdo2aod = ExecStep.ExecStep('RDOtoAOD')
