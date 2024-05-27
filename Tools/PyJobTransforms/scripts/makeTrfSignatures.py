@@ -1,8 +1,7 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-# $Id: makeTrfSignatures.py 630078 2014-11-21 11:20:16Z graemes $
 #
 
 __doc__ = 'Dump job transform arguments into a file as a pickle'
@@ -61,7 +60,7 @@ def main():
         logging.info('Writing JSON signatures to {0}'.format(cliargs['output']))
         sigFile = open(cliargs['output'], 'wb')
         json.dump(myTrfSigDesc, sigFile, indent=4)
-    except (OSError, IOError) as e:
+    except OSError as e:
         logging.error('Failed to dump pickled signatures to %s: %s', cliargs['output'], e)
         sys.exit(1)
         

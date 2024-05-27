@@ -58,8 +58,8 @@ mark_as_advanced( TDAQ-COMMON_ATROOT TDAQ_PROJECT_NAME
 set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
 
 # Configure flake8:
-set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,F,E101,E7,E9,W6
-                               --ignore E701,E702,E704,E741
+set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,B,F,E101,E7,E9,W6
+                               --ignore B006,B007,B019,E701,E702,E704,E741
                                --enable-extensions ATL902
    CACHE STRING "Default flake8 command" )
 set( ATLAS_PYTHON_CHECKER ${ATLAS_FLAKE8}
