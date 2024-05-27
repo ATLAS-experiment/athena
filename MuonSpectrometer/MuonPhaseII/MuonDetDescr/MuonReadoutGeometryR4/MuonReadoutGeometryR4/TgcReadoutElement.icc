@@ -73,36 +73,32 @@ inline Identifier TgcReadoutElement::measurementId(const IdentifierHash& measHas
 }
 inline unsigned int TgcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
 
+inline unsigned int TgcReadoutElement::numChannels(const IdentifierHash& measHash) const {
+    return isStrip(measHash) ? numStrips(gasGapNumber(measHash) + 1) 
+                             : numWireGangs(gasGapNumber(measHash) + 1);
+}
 inline unsigned int TgcReadoutElement::numStrips(unsigned int gasGap) const {
-    const StripLayerPtr& sensor{sensorLayout(gasGap, true)};
+    const StripLayerPtr& sensor{sensorLayout(constructHash(0, gasGap, true))};
     return sensor ? sensor->design().numStrips() : 0;
 }
 inline unsigned int TgcReadoutElement::numWireGangs(unsigned int gasGap) const {
-    const StripLayerPtr& sensor{sensorLayout(gasGap, false)};
+    const StripLayerPtr& sensor{sensorLayout(constructHash(0, gasGap, false))};
     return sensor ? sensor->design().numStrips() : 0;
 }
-inline const TgcReadoutElement::StripLayerPtr& TgcReadoutElement::sensorLayout(unsigned int gasGap, const bool isStrip) const {
-    const IdentifierHash layHash{constructHash(0, gasGap, isStrip)};
-    const unsigned layIdx{static_cast<unsigned>(layHash)};
-    return m_pars.sensorLayouts.at(layIdx);
+inline const StripLayerPtr& TgcReadoutElement::sensorLayout(const IdentifierHash& measHash) const {
+    return m_pars.sensorLayouts.at(layerHash(measHash));
 }
 inline const WireGroupDesign& TgcReadoutElement::wireGangLayout(unsigned int gasGap) const {
-    const StripLayerPtr& layerPtr = sensorLayout(gasGap, false);
+    const StripLayerPtr& layerPtr = sensorLayout(constructHash(0, gasGap, false));
     if (!layerPtr) {
-        std::stringstream err_str{};
-        err_str<<__FILE__<<":"<<__LINE__<<" Gas gap "<<gasGap<<" has no wire gangs in "
-               <<idHelperSvc()->toStringDetEl(identify())<<std::endl;
-        throw std::runtime_error(err_str.str());
+        THROW_EXCEPTION(" Gas gap "<<gasGap<<" has no wire gangs in "<<idHelperSvc()->toStringDetEl(identify()));
     }
     return static_cast<const WireGroupDesign&>(layerPtr->design());
 }
 inline const RadialStripDesign& TgcReadoutElement::stripLayout(unsigned int gasGap)  const {
-    const StripLayerPtr& layerPtr = sensorLayout(gasGap, true);
+    const StripLayerPtr& layerPtr = sensorLayout(constructHash(0, gasGap, true));
     if (!layerPtr) {
-        std::stringstream err_str{};
-        err_str<<__FILE__<<":"<<__LINE__<<" Gas gap "<<gasGap<<" has no strips in "
-               <<idHelperSvc()->toStringDetEl(identify())<<std::endl;
-        throw std::runtime_error(err_str.str());
+        THROW_EXCEPTION(" Gas gap "<<gasGap<<" has no strips in "<<idHelperSvc()->toStringDetEl(identify()));
     }
     return static_cast<const RadialStripDesign&>(layerPtr->design());
 }

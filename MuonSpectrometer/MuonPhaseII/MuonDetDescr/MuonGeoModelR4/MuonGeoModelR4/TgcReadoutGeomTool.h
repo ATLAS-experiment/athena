@@ -44,7 +44,6 @@ class TgcReadoutGeomTool : public AthAlgTool,
         double wirePitch{0.};
         unsigned int gasGap{0};
     };
-    using StripLayerPtr = GeoModel::TransientConstSharedPtr<StripLayer>;
     struct FactoryCache {       
        using ParamBookTable = std::map<std::string, wTgcTable>;
        ParamBookTable parameterBook{};
