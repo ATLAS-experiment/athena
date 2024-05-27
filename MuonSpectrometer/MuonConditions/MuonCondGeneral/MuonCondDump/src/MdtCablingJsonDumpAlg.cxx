@@ -61,10 +61,9 @@ StatusCode MdtCablingJsonDumpAlg::execute() {
  
   std::vector<MdtMezzanineCard> cached_cards{};
   std::set<MdtCablingData> cached_chnls{};
-  for (unsigned int hash = 0; hash < MuonGM::MuonDetectorManager::MdtRElMaxHash; ++hash){
-    const IdentifierHash id_hash{hash};
 
-    const MuonGM::MdtReadoutElement* readEle = detectorMgr->getMdtReadoutElement(id_hash);
+  for (auto det_itr = idHelper.detectorElement_begin(); det_itr != idHelper.detectorElement_end(); ++det_itr){
+    const MuonGM::MdtReadoutElement* readEle = detectorMgr->getMdtReadoutElement(*det_itr);
     if (!readEle) {
         ATH_MSG_DEBUG("Detector element does not exist. ");
         continue;

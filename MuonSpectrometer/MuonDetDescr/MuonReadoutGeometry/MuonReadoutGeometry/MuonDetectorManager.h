@@ -131,61 +131,6 @@ namespace MuonGM {
         inline int  IncludeCutoutsFlag() const;
         void setCutoutsBogFlag(int flag);
         inline int  IncludeCutoutsBogFlag() const;
-        
-        enum readoutElementHashMax {
-            MdtRElMaxHash = 2500,
-            CscRElMaxHash = 130,
-            RpcRElMaxHash = 2600,
-            TgcRElMaxHash = 1600,
-        };
-        enum detElementHashMax {
-            MdtDetElMaxHash = 1200,
-            CscDetElMaxHash = 65,
-            RpcDetElMaxHash = 1300,
-            TgcDetElMaxHash = 1600,
-        };
-        enum MdtGMRanges {
-            NMdtStatType = 26,
-            NMdtStatEta = 17,
-            NMdtStEtaOffset = 8,
-            NMdtStatPhi = 8,
-            NMdtMultilayer = 2,
-        };
-        enum RpcGMRanges {
-            NRpcStatType = 12,  // there are 12 station types where RPCs can be installed: BML/BMS/BOL/BOS/BMF/BOF/BOG/BME/BIR/BIM/BIL/BIS
-            NRpcStatEta = 17,
-            NRpcStEtaOffset = 8,
-            NRpcStatPhi = 8,
-            NDoubletR = 2,
-            NDoubletZ = 4
-        };  // using some trick to save space: dbz=4 if rib's chambers and doubletphi=2;
-        enum TgcGMRanges {
-            NTgcStatType = 8,
-            NTgcStatTypeOff = -41,
-            NTgcStatEta = 10,
-            NTgcStEtaOffset = 5,
-            NTgcStatPhi = 48,
-        };
-        enum CscGMRanges {
-            NCscStatType = 2,
-            NCscStatTypeOff = -50,
-            NCscStatEta = 2,
-            NCscStEtaOffset = 1,
-            NCscStatPhi = 8,
-            NCscChamberLayer = 2
-        };
-        enum sTgcGMRanges {
-            NsTgStatEta = 6,      /// 3 x 2 sides (-3,-2,-1 and 1,2,3)
-            NsTgStEtaOffset = 3,  /// needed offest to map (-3,-2,-1,1,2,3) to (0,1,2,3,4,5)
-            NsTgStatPhi = 16,     // large and small sector together
-            NsTgChamberLayer = 2
-        };
-        enum mmGMRanges {
-            NMMcStatEta = 4,      /// 2 x 2 sides (-2,-1 and 1,2)
-            NMMcStEtaOffset = 2,  /// needed offest to map (-2,-1,1,2) to (0,1,2,3)
-            NMMcStatPhi = 16,     // large and small sector together
-            NMMcChamberLayer = 2
-        };
 
         // Add a MuonStation to the list
         void addMuonStation(std::unique_ptr<MuonStation>&& mst);
@@ -211,6 +156,12 @@ namespace MuonGM {
             return m_nswAsBuilt ? m_nswAsBuilt->sTgcData.get() : nullptr; ; 
         }
 #endif
+        /**
+         *  Identifier <-> AMDB conversion constants in use
+        */
+        static constexpr int NCscStEtaOffset = 1;
+        static constexpr int NTgcStatTypeOff = -41;
+        static constexpr int NTgcStEtaOffset = 5;
 
         // map the RPC station indices (0-NRpcStatType) back to the RpcIdHelper stationNames
         int rpcStationName(const int stationIndex) const;
@@ -228,10 +179,6 @@ namespace MuonGM {
         int mmIdenToArrayIdx(const Identifier& id) const;
         int mdtIdentToArrayIdx(const Identifier& id) const;
 
-        /// The doublet z index is required during the initialization of the
-        /// detector element
-        int rpcIdentToArrayIdx(const Identifier& id, int& dbz_index) const;
-
         int m_minimalgeo{0};
         int m_includeCutouts{0};
         int m_includeCutoutsBog{0};
@@ -245,19 +192,13 @@ namespace MuonGM {
         std::string m_DBMuonVersion{};    // name of the MuonVersion table-collection in Oracle
        
         // 115.6 kBytes.
-        static constexpr int s_NumMaxRpcElements = NRpcStatType * NRpcStatEta * NRpcStatPhi * NDoubletR * NDoubletZ;
-    
-        static constexpr int s_NumMaxSTgcElemets = NsTgStatEta * NsTgStatPhi * NsTgChamberLayer;
-        static constexpr int s_NumMaxMMElements = NMMcStatEta * NMMcStatPhi * NMMcChamberLayer;
-        std::array<std::unique_ptr<MdtReadoutElement>, MdtRElMaxHash> m_mdtArray;
-        std::array<std::unique_ptr<CscReadoutElement>, CscRElMaxHash> m_cscArray;
-        std::array<std::unique_ptr<TgcReadoutElement>, TgcRElMaxHash> m_tgcArray;
+        std::vector<std::unique_ptr<MdtReadoutElement>> m_mdtArray;
+        std::vector<std::unique_ptr<CscReadoutElement>> m_cscArray;
+        std::vector<std::unique_ptr<TgcReadoutElement>> m_tgcArray;
         
-        std::array<std::unique_ptr<RpcReadoutElement>, s_NumMaxRpcElements> m_rpcArray;
-        std::array<std::unique_ptr<sTgcReadoutElement>, s_NumMaxSTgcElemets> m_stgArray;
-        std::array<std::unique_ptr<MMReadoutElement>, s_NumMaxMMElements> m_mmcArray;
-        //
-        std::array<const RpcReadoutElement*, RpcRElMaxHash> m_rpcArrayByHash{nullptr};
+        std::vector<std::unique_ptr<RpcReadoutElement>> m_rpcArray;
+        std::vector<std::unique_ptr<sTgcReadoutElement>> m_stgArray;
+        std::vector<std::unique_ptr<MMReadoutElement>> m_mmcArray;
         std::map<std::string, std::unique_ptr<MuonStation> > m_MuonStationMap;
 
         unsigned int m_n_mdtRE{0};
@@ -277,16 +218,8 @@ namespace MuonGM {
         /// RPC name caches
         std::map<int, int> m_rpcStatToIdx;
         std::map<int, int> m_rpcIdxToStat;
-        /// Cache the MDT station name integers and retrieve them from the 
-        /// dict parser. Needed in stationIndex -> mdtStationName conversion
-        int m_mdt_EIS_stName{-1}; //49
-        int m_mdt_BIM_stName{-1}; //52
-        int m_mdt_BME_stName{-1}; //53
-        int m_mdt_BMG_stName{-1}; //54
 
-        template <typename read_out, size_t N> void clearCache(std::array<std::unique_ptr<read_out>, N>& array);
-        template <typename read_out, size_t N> void fillCache(std::array<std::unique_ptr<read_out>, N>& array);
-        template <typename read_out, size_t N> void refreshCache(std::array<std::unique_ptr<read_out>, N>& array);
+
     };
 
     const MdtIdHelper* MuonDetectorManager::mdtIdHelper() const { 

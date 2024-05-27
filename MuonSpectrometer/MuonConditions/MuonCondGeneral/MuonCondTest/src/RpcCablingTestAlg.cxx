@@ -38,12 +38,11 @@ StatusCode RpcCablingTestAlg::execute(){
   }
   const RpcIdHelper& idHelper = m_idHelperSvc->rpcIdHelper();
   unsigned int n_elements{0}, n_success{0};
-  for (unsigned int hash = 0; hash < MuonGM::MuonDetectorManager::RpcRElMaxHash; ++hash){
-    const IdentifierHash id_hash{hash};
+  for (auto det_itr = idHelper.detectorElement_begin(); det_itr != idHelper.detectorElement_end(); ++det_itr){
 
-    const MuonGM::RpcReadoutElement* readEle = detectorMgr->getRpcReadoutElement(id_hash);
+    const MuonGM::RpcReadoutElement* readEle = detectorMgr->getRpcReadoutElement(*det_itr);
     if (!readEle) {
-        ATH_MSG_VERBOSE("Detector element "<<id_hash<<" does not exist. ");
+        ATH_MSG_VERBOSE("Detector element does not exist. ");
         continue;
     }
     if (!m_cabStat.empty() && !m_cabStat.count(m_idHelperSvc->stationName(readEle->identify()))){

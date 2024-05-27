@@ -756,7 +756,7 @@ namespace Muon {
         IdentifierHash hash{};
         if (idHelper.get_module_hash(id, hash) ||
             static_cast<unsigned int>(hash) >= idHelper.module_hash_max()){
-            ATH_MSG_WARNING("Failed to deduce module hash "<<toString(id));            
+            ATH_MSG_VERBOSE("Failed to deduce module hash "<<toString(id));            
         }
         return hash;
     }
@@ -764,7 +764,7 @@ namespace Muon {
         IdentifierHash hash{};
         if (idHelper.get_detectorElement_hash(id, hash) ||
             static_cast<unsigned int>(hash)>= idHelper.detectorElement_hash_max()) {
-            ATH_MSG_WARNING("Failed to deduce detector element hash "<<toString(id));
+            ATH_MSG_VERBOSE("Failed to deduce detector element hash "<<toString(id));
         }
         return hash;
     }

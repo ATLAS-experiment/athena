@@ -96,11 +96,9 @@ StatusCode RpcTrackAnaAlg::initRpcPanel() {
     m_StationNames[BO2] = {4, 5, 9, 10};  // doubletR = 2
 
     std::vector<int> BMBO_StationNames = {2, 3, 4, 5, 8, 9, 10, 53};
-    for (unsigned idetEl = 0;
-         idetEl < MuonGM::MuonDetectorManager::RpcRElMaxHash; ++idetEl) {
-        IdentifierHash hash{idetEl};
-        const MuonGM::RpcReadoutElement* readoutEl =
-            muonMgr->getRpcReadoutElement(hash);
+    for (auto idetEl = rpcIdHelper.detectorElement_begin();
+              idetEl != rpcIdHelper.detectorElement_end(); ++idetEl) {
+        const MuonGM::RpcReadoutElement* readoutEl = muonMgr->getRpcReadoutElement(*idetEl);
         if (!readoutEl)
             continue;
 
