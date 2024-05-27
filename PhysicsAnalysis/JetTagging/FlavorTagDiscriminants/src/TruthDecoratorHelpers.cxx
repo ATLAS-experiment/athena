@@ -32,20 +32,21 @@ namespace FlavorTagDiscriminants {
         }
 
         bool is_bc_hadron(const xAOD::TruthParticle* truth_particle, int flavour) {
+            if( truth_particle == nullptr ) { return false; }
             if( flavour == 5 && truth_particle->isBottomHadron() ) { return true; }
             if( flavour == 4 && truth_particle->isCharmHadron()  ) { return true; }
             return false;
         }
-        
+
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle, int flavour) {
           if (!is_bc_hadron(truth_particle, flavour)) return false;
-          if (!truth_particle->hasDecayVtx() ) return false; 
+          if (!truth_particle->hasDecayVtx() ) return false;
           for ( const auto out_part: truth_particle->decayVtx()->particles_out()) {
              if ( is_bc_hadron(out_part, flavour) ) return  false;
-          } 
+          }
           return true;
         }
-        
+
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle) {
             return is_weakly_decaying_hadron(truth_particle, 5) || is_weakly_decaying_hadron(truth_particle, 4);
         }
