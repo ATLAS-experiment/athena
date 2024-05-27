@@ -1,21 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCellPosition2Ntuple.h"
-#include "CaloIdentifier/CaloIdManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloConditions/CaloCellPositionShift.h"
 #include "Identifier/Identifier.h"
 
 
 //Constructor
 CaloCellPosition2Ntuple::CaloCellPosition2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name,pSvcLocator),
-  m_thistSvc(nullptr),
-  m_calo_id(nullptr),
-  m_key("LArCellPositionShift"),
   m_Hash(0),
   m_OffId(0),
   m_eta(0),
@@ -26,28 +21,18 @@ CaloCellPosition2Ntuple::CaloCellPosition2Ntuple(const std::string& name, ISvcLo
   m_dz(0),
   m_volume(0), 
   m_tree(nullptr)
-{
-  declareProperty("inputKey",m_key,"Key for CaloCellPositionShift");
-}
+{}
 
-//__________________________________________________________________________
-//Destructor
-CaloCellPosition2Ntuple::~CaloCellPosition2Ntuple()
-{
-  ATH_MSG_DEBUG( "CaloCellPosition2Ntuple destructor called"  );
-}
 //__________________________________________________________________________
 StatusCode CaloCellPosition2Ntuple::initialize()
 {
   ATH_MSG_DEBUG ("CaloCellPosition2Ntuple initialize()" );
   ATH_CHECK( service("THistSvc",m_thistSvc) );
 
-  const CaloIdManager* mgr = nullptr;
-  ATH_CHECK( detStore()->retrieve( mgr ) );
-  m_calo_id      = mgr->getCaloCell_ID();
+  ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
 
   ATH_CHECK( m_caloMgrKey.initialize() );
-  ATH_CHECK( detStore()->regHandle(m_cellPos,m_key) );
+  ATH_CHECK( m_cellPosKey.initialize() );
 
   m_tree = new TTree("mytree","Calo Noise ntuple");
   m_tree->Branch("iHash",&m_Hash,"iHash/I");
@@ -82,14 +67,18 @@ StatusCode CaloCellPosition2Ntuple::stop()
   m_calo_id->calo_cell_hash_range(CaloCell_ID::LARFCAL,fcalmin,fcalmax);
   int ncell=fcalmax-emmin;
 
-  int nread = (int)(m_cellPos->size());
-
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
 
+  SG::ReadCondHandle<CaloRec::CaloCellPositionShift> cellPosHdl{m_cellPosKey};
+  ATH_CHECK(cellPosHdl.isValid());
+  const CaloRec::CaloCellPositionShift* cellPos= *cellPosHdl;
+
+  int nread = (int)(cellPos->size());
+  
   if (nread > ncell) {
-    ATH_MSG_WARNING ( " CaloCellPosition size different from max lar hash " << m_cellPos->size() << " " << ncell );
+    ATH_MSG_WARNING ( " CaloCellPosition size different from max lar hash " << cellPos->size() << " " << ncell );
     return StatusCode::SUCCESS;
   }
   ATH_MSG_INFO ( " start loop over Calo cells " << ncell );
@@ -105,9 +94,9 @@ StatusCode CaloCellPosition2Ntuple::stop()
        m_phi = calodde->phi();
        m_layer = m_calo_id->calo_sample(id);
 
-       m_dx = m_cellPos->deltaX(i);
-       m_dy = m_cellPos->deltaY(i);
-       m_dz = m_cellPos->deltaZ(i);
+       m_dx = cellPos->deltaX(i);
+       m_dy = cellPos->deltaY(i);
+       m_dz = cellPos->deltaZ(i);
        m_volume = calodde->volume();
 
        m_tree->Fill();
