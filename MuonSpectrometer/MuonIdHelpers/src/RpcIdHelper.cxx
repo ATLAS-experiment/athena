@@ -282,8 +282,6 @@ int RpcIdHelper::init_id_to_hashes() {
         const Identifier& id = m_detectorElement_vec[i];
         m_detectorElement_hashes[id] = i;
     }
-    m_st_BMS = stationNameIndex("BMS");
-    m_st_BIL = stationNameIndex("BIL");
     return 0;
 }
 
@@ -299,30 +297,13 @@ int RpcIdHelper::get_module_hash(const Identifier& id, IdentifierHash& hash_id) 
 
 int RpcIdHelper::get_detectorElement_hash(const Identifier& id, IdentifierHash& hash_id) const {
     Identifier detElId = id;    
-    // Certain chambers require doublet Phi in hashing (See zIndex()) - do not reset m_dpb_impl in these cases
-    bool reset_dbp = true;
-    const int station = stationName(id);
-    
-    if (m_st_BMS == station) {
-        int eta = stationEta(id);
-        int dR = doubletR(id);
-        int dZ = doubletZ(id);
-        if (std::abs(eta) == 2 && dZ == 3) {
-            reset_dbp = false;
-        } else if (std::abs(eta) == 4 && dR == 2 && dZ == 3) {
-            reset_dbp = false;
-        } else if (std::abs(eta) == 4 && dR == 1 && dZ == 2) {
-            reset_dbp = false;
-        }
-    } else if (m_st_BIL == station && std::abs(stationEta(id)) == 2) {
-        reset_dbp = false;
+    // Certain chambers require doublet Phi in hashing (See isExtraDetElId()) - do not reset m_dpb_impl in these cases
+    if (!isExtraDetElId(id)) {
+        m_dbp_impl.reset(detElId);
     }
-    
-    if (reset_dbp) m_dbp_impl.reset(detElId);
     m_gap_impl.reset(detElId);
     m_mea_impl.reset(detElId);
-    m_str_impl.reset(detElId);
- 
+    m_str_impl.reset(detElId); 
     auto itr = m_detectorElement_hashes.find(detElId);
     if (itr == m_detectorElement_hashes.end()) {
         ATH_MSG_VERBOSE("Cannot find a valid detector element hash for "<<print_to_string(id));
@@ -782,6 +763,8 @@ int RpcIdHelper::init_detectorElement_hashes(void) {
     // create a vector(s) to retrieve the hashes for compact ids. For
     // the moment, we implement a hash for detector channels
     //
+    m_st_BMS = stationNameIndex("BMS");
+    m_st_BIL = stationNameIndex("BIL");
 
     // detector element hash
     IdContext context = detectorElement_context();
@@ -795,38 +778,25 @@ int RpcIdHelper::init_detectorElement_hashes(void) {
             Identifier id;
             get_id((*first), id);
             Identifier doubletZ_id = doubletZID(id);
-            int dZ = doubletZ(id);
-            int corrected_doubletZ = zIndex(id);
-            bool isInserted = false;
-            if (dZ == corrected_doubletZ) {
-                isInserted = ids.insert(doubletZ_id).second;
-                if (!isInserted)
+            if (!isExtraDetElId(id)) {
+                if (!ids.insert(doubletZ_id).second)
                     ATH_MSG_DEBUG("init_detectorElement_hashes "
                                   << "Please check the dictionary for possible duplication for " << id);
-            } else {
-                isInserted = ids.insert(id).second;
-                if (!isInserted) {
-                    ATH_MSG_ERROR("init_detectorElement_hashes "
-                                  << " Error: duplicated id for detector element id. nid " << (int)nids << " doubletPhi ID " << id);
-                    return 1;
-                }
+            } else if (!ids.insert(id).second) {
+                ATH_MSG_ERROR("init_detectorElement_hashes "
+                                << " Error: duplicated id for detector element id. nid " << (int)nids 
+                                << " doubletPhi ID " << id);
+                return 1;
+                
             }
             nids++;
         }
     }
     m_detectorElement_hash_max = ids.size();
     ATH_MSG_INFO("The detector element hash max is " << (int)m_detectorElement_hash_max);
-    m_detectorElement_vec.resize(m_detectorElement_hash_max);
 
-    nids = 0;
-    std::set<Identifier>::const_iterator first = ids.begin();
-    std::set<Identifier>::const_iterator last = ids.end();
-    for (; first != last && nids < m_detectorElement_vec.size(); ++first) {
-        m_detectorElement_vec[nids] = (*first);
-        nids++;
-    }
-
-    return (0);
+    m_detectorElement_vec.insert(m_detectorElement_vec.end(), ids.begin(), ids.end());
+    return 0;
 }
 
 Identifier RpcIdHelper::elementID(int stationName, int stationEta, int stationPhi, int doubletR) const {
@@ -873,10 +843,6 @@ Identifier RpcIdHelper::elementID(const Identifier& id, int doubletR, bool& isVa
 }
 Identifier RpcIdHelper::elementID(const Identifier& id) const { return parentID(id); }
 
-/*     Identifier panelID  (const Identifier& padID, int gasGap,) const; */
-/*     Identifier panelID  (const Identifier& channelID) const; */
-/*     Identifier panelID  (int stationName, int stationEta, int stationPhi, int doubletR, */
-/*                  int doubletZ, int doubletPhi,int gasGap,) const; */
 
 Identifier RpcIdHelper::panelID(int stationName, int stationEta, int stationPhi, int doubletR, int doubletZ, int doubletPhi, int gasGap,
                                 int measuresPhi) const {
@@ -1147,17 +1113,9 @@ int RpcIdHelper::rpcTechnology() const {
     return rpcField;
 }
 
-int RpcIdHelper::zIndex(const Identifier& id) const {
-    int station = stationName(id);
-    int eta = stationEta(id);
-    int dR = doubletR(id);
-    int dZ = doubletZ(id);
-    int dP = doubletPhi(id);
-    const std::string& name = stationNameString(station);
-    return zIndex(name, eta, dR, dZ, dP);
-}
-
-int RpcIdHelper::zIndex(const std::string& name, int eta, int dR, int dZ, int dP) {
+inline
+bool RpcIdHelper::isExtraDetElId(const Identifier& id) const {
+    const int station = stationName(id);
     /** - from Stefania
         BMS5 which has the following structure:
         for dbr=1 there are 3 dbZ, first and second are made of a single
@@ -1183,19 +1141,21 @@ int RpcIdHelper::zIndex(const std::string& name, int eta, int dR, int dZ, int dP
         BMS 5 are at StEta = +/- 2 and StPhi = 1,2,3,4,5,8
         BMS 6 are at StEta = +/- 4 and StPhi = 1,2,3,4,5,8
     */
-    int dbz_index = dZ;
 
-    if (name == "BMS") {
-        if (abs(eta) == 2 && dZ == 3) {
-            if (dP == 2) dbz_index++;
-        } else if (abs(eta) == 4 && dR == 2 && dZ == 3) {
-            if (dP == 2) dbz_index++;
-        } else if (abs(eta) == 4 && dR == 1 && dZ == 2) {
-            if (dP == 2) dbz_index++;
+
+    if (station == m_st_BMS) {
+        const int eta = stationEta(id);
+        const int dZ = doubletZ(id);
+        if (std::abs(eta) != 4 && dZ != 3) {
+            return false;
         }
-    } else if (name == "BIL") {
-        if (abs(eta) == 2 && dP == 2) dbz_index++;
+        const int dP = doubletPhi(id);
+        const int dR = doubletR(id);
+        return (dZ == 3 && dP == 2) || 
+               (std::abs(eta) == 4 && dZ !=1 && dR != 2 && dP == 2);
+    } else if (m_st_BIL == station) {
+       return std::abs(stationEta(id)) == 2 && doubletPhi(id) == 2;
     }
 
-    return dbz_index;
+    return false;
 }

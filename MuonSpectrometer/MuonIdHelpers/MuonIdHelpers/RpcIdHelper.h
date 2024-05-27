@@ -178,10 +178,11 @@ private:
 
     virtual int init_detectorElement_hashes() override;
     int init_id_to_hashes();
-    int zIndex(const Identifier& id) const;
-    static int zIndex(const std::string& name, int eta, int dR, int dZ, int dP) ;
-    std::unordered_map<Identifier, unsigned int> m_module_hashes;
-    std::unordered_map<Identifier, unsigned int > m_detectorElement_hashes;
+    
+    bool isExtraDetElId(const Identifier& id) const;
+
+    std::unordered_map<Identifier, unsigned int> m_module_hashes{};
+    std::unordered_map<Identifier, unsigned int > m_detectorElement_hashes{};
 
     // compact id indices
     size_type m_DOUBLETR_INDEX{0};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSTATIONINTERSECTCOND_MuonIntersectGeoData_H
 #define MUONSTATIONINTERSECTCOND_MuonIntersectGeoData_H
@@ -38,8 +38,7 @@ namespace Muon {
     private:
         std::vector<Identifier> binPlusneighbours(const Identifier& id) const;
       
-        static constexpr int s_NumMaxMdtElements = MuonGM::MuonDetectorManager::MdtRElMaxHash;
-        std::array<std::shared_ptr<MdtIntersectGeometry>, s_NumMaxMdtElements> m_geometry{};
+        std::vector<std::shared_ptr<MdtIntersectGeometry>> m_geometry{};
         const IMuonIdHelperSvc* m_idHelperSvc{nullptr};
         const MuonGM::MuonDetectorManager* m_detMgr{nullptr};
         const MdtCondDbData* m_dbData{nullptr};

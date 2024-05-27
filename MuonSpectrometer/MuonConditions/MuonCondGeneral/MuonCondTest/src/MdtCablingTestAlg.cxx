@@ -97,10 +97,10 @@ StatusCode MdtCablingTestAlg::execute(){
    const MdtIdHelper& idHelper = m_idHelperSvc->mdtIdHelper();
    unsigned int n_elements{0}, n_success{0};
    bool failure{false};
-   for (unsigned int hash = 0; hash < MuonGM::MuonDetectorManager::MdtRElMaxHash; ++hash){
-     const IdentifierHash id_hash{hash};
+  
+  for (auto det_itr = idHelper.detectorElement_begin(); det_itr != idHelper.detectorElement_end(); ++det_itr){
+    const MuonGM::MdtReadoutElement* readEle = detectorMgr->getMdtReadoutElement(*det_itr);
 
-    const MuonGM::MdtReadoutElement* readEle = detectorMgr->getMdtReadoutElement(id_hash);
     if (!readEle) {
         ATH_MSG_DEBUG("Detector element does not exist. ");
         continue;
