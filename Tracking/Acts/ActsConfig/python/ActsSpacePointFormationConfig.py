@@ -238,9 +238,9 @@ def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
     processPixels = flags.Detector.EnableITkPixel
     processStrips = flags.Detector.EnableITkStrip
 
-    # For conversion pass we do not process pixels since we assume
+    # For conversion and LRT pass we do not process pixels since we assume
     # they have been processed on the primary pass.
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
+    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
         processPixels = False
     elif flags.Tracking.doITkFastTracking:
         # Fast tracking configuration: disable strip
