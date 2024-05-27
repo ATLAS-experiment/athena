@@ -9,7 +9,8 @@
 #include <AsgTools/ToolHandle.h>
 #include <AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h>
 #include <EventBookkeeperTools/FilterReporterParams.h>
-
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+#include <AsgTools/PropertyWrapper.h>
 ///Author: will buttinger
 ///To use this alg in your joboptions:
 ///masterseq = CfgMgr.AthSequencer("AthMasterSeq")
@@ -26,9 +27,11 @@ class GRLSelectorAlg: public EL::AnaAlgorithm {
   virtual StatusCode  execute();
   virtual StatusCode  finalize();
 
- private: 
+ private:
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_grlKey {this, "grlKey", "EventInfo.decoratorName", "Decoration for GRL"};
   ToolHandle<IGoodRunsListSelectionTool> m_grlTool;
   FilterReporterParams m_filterParams {this, "GoodRunsList", "Good Runs Lists selection"};
+  Gaudi::Property<bool> m_noFilter {this, "noFilter", false, "whether to not apply a GRL decoration"};
 }; 
 
 #endif //> !GOODRUNSLISTS_GRLSELECTORALG_H

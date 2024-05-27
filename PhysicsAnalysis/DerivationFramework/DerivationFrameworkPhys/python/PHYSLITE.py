@@ -11,6 +11,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
+from GoodRunsLists.GoodRunsListsDictionary import getGoodRunsLists
 
 
 
@@ -42,6 +43,11 @@ def CPAlgorithmsCfg(flags):
     if flags.Input.isMC:
         # setup config and lumicalc files for pile-up tool
         configSeq += factory.makeConfig ('PileupReweighting')
+
+    # Set up the GRL decoration analysis config
+    configSeq += factory.makeConfig ('EventCleaning')
+    configSeq.setOptionValue ('.noFilter', True)
+    configSeq.setOptionValue ('.GRLDict', getGoodRunsLists())
 
     # set up the muon analysis algorithm config (must come before electrons and photons to allow FSR collection):
 
@@ -429,7 +435,7 @@ def PHYSLITECfg(flags):
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',
         'InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.numberOfTRTHits.numberOfTRTOutliers',
-        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification',
+        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.{GRL_Deco_names}'.format(GRL_Deco_names='.'.join(str(key) for key in (getGoodRunsLists()).keys())),
         'Kt4EMPFlowEventShape.Density',
         'TauTracks.pt.eta.phi.flagSet.trackLinks',
         'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R21Precision.GhostBHadronsFinalCount.GhostCHadronsFinalCount.Parent.GN2Xv01_phbb.GN2Xv01_phcc.GN2Xv01_ptop.GN2Xv01_pqcd',
