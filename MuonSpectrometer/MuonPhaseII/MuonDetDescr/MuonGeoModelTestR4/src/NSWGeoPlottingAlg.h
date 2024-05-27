@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-204 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_NSWPLOTTINGALG_H
 #define MUONGEOMODELTESTR4_NSWPLOTTINGALG_H
@@ -27,7 +27,8 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
  private:
   int layerId(const Identifier& id) const;
 
-  StatusCode initMicroMega();
+  StatusCode initMm();
+  StatusCode initStgc();
 
   // MuonDetectorManager from the conditions store
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
@@ -36,10 +37,12 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
   SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
   const MuonDetectorManager* m_detMgr{nullptr};
-  Gaudi::Property<std::string> m_outFile{this, "OutFile", "NSWGeoPlots.root"};
+
+  Gaudi::Property<bool> m_testActsSurf{this, "TestActsSurface", true};
   /// Map showing the active areas of the NSW to show the passivation
-  std::map<IdentifierHash, TH1*> m_nswActiveAreas{};
-  bool m_alg_run{false};
+  std::map<IdentifierHash, TH1*> m_mmActiveAreas{};
+  std::map<IdentifierHash, TH1*> m_stgcActiveAreas{};
+
 };
 
 }
