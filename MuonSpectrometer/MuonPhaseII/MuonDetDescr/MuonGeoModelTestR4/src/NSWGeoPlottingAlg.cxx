@@ -15,6 +15,9 @@
 #include "TH2I.h"
 
 
+using chType = sTgcIdHelper::sTgcChannelTypes;
+
+
 namespace MuonGMR4 {
 NswGeoPlottingAlg::NswGeoPlottingAlg(const std::string& name,
                                      ISvcLocator* pSvcLocator)
@@ -25,12 +28,12 @@ StatusCode NswGeoPlottingAlg::initialize() {
   ATH_CHECK(m_geoCtxKey.initialize());
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(detStore()->retrieve(m_detMgr));
-  ATH_CHECK(initMicroMega());
+  ATH_MSG_INFO("Check Acts surface "<<m_testActsSurf);
+  ATH_CHECK(initMm());
+  ATH_CHECK(initStgc());
   return StatusCode::SUCCESS;
 }
 StatusCode NswGeoPlottingAlg::execute() {
-  if (m_alg_run)
-    return StatusCode::SUCCESS;
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<ActsGeometryContext> gctxHandle{m_geoCtxKey, ctx};
   ATH_CHECK(gctxHandle.isPresent());
@@ -40,35 +43,95 @@ StatusCode NswGeoPlottingAlg::execute() {
       for (int gasGap = 1; gasGap <= 4; ++ gasGap) {
           const IdentifierHash  hash = MmReadoutElement::createHash(gasGap, (mm->stationEta() > 0 ? 1 : 2) +
                                                                             10 * mm->multilayer());
-          auto& histo = m_nswActiveAreas[hash];
+          auto histo = m_mmActiveAreas[hash];
           const StripDesign& design{mm->stripLayer(hash).design()};
+          const Acts::Surface& plane{mm->surface(mm->layerHash(hash))};
           const double halfY = 2.*design.longHalfHeight();
           const double halfX = 2.*design.halfWidth();
-          for (double x = -halfX; x <= halfX; x+= 0.25*Gaudi::Units::mm){
-              for (double y = -halfY; y<= halfY; y+=0.25*Gaudi::Units::mm) {
-                  Amg::Vector3D locPos{x,y,0};
-                  if (!design.insideTrapezoid(locPos.block<2,1>(0,0))) continue;
-                  const Amg::Vector3D globPos = mm->localToGlobalTrans(*gctxHandle, mm->layerHash(hash)) * locPos;
+          for (double x = -halfX; x <= halfX; x+= 1.*Gaudi::Units::mm){
+              for (double y = -halfY; y<= halfY; y+=1.*Gaudi::Units::mm) {
+                  const Amg::Vector3D locPos{x,y,0};
+                  if (!m_testActsSurf && !design.insideTrapezoid(locPos.block<2,1>(0,0))) {
+                      continue;
+                  } else if (m_testActsSurf && !plane.insideBounds(locPos.block<2,1>(0,0))) {
+                     continue;                     
+                  }
+                  
+                  const Amg::Vector3D globPos = plane.transform(gctxHandle->context()) * locPos;
                   histo->Fill(globPos.x(), globPos.y());
               }
           }
-
       }
   }
-  m_alg_run = true;
+
+  std::vector<const sTgcReadoutElement*> sTgcs = m_detMgr->getAllsTgcReadoutElements();
+  for (const sTgcReadoutElement* sTgc : sTgcs) {
+       for (int chanType : {chType::Strip, chType::Pad, chType::Wire}){
+          for (int gasGap = 1; gasGap <= 4; ++ gasGap) {
+              const IdentifierHash hash = sTgcReadoutElement::createHash(gasGap, chanType, (sTgc->stationEta() > 0 ? 1 : 2) +
+                                                                                          10 * sTgc->multilayer());
+              auto histo = m_stgcActiveAreas[hash];
+              
+              const StripDesign& design{ chanType == chType::Strip? sTgc->stripDesign(hash) :
+                                         chanType == chType::Wire ? static_cast<const StripDesign&>(sTgc->wireDesign(hash)) 
+                                                                  : static_cast<const StripDesign&>(sTgc->padDesign(hash))};
+              const Acts::Surface& plane{sTgc->surface(sTgc->layerHash(hash))};
+              const double halfY = 2.*design.longHalfHeight();
+              const double halfX = 2.*design.halfWidth();
+              for (double x = -halfX; x <= halfX; x+= 1.*Gaudi::Units::mm){
+                  for (double y = -halfY; y<= halfY; y+=1.*Gaudi::Units::mm) {
+                      const Amg::Vector3D locPos{x,y,0};
+                      if (!m_testActsSurf && !design.insideTrapezoid(locPos.block<2,1>(0,0))) {
+                          continue;
+                      } else if (m_testActsSurf && !plane.insideBounds(locPos.block<2,1>(0,0))) {
+                         continue;                     
+                      }
+                  
+                      const Amg::Vector3D globPos = plane.transform(gctxHandle->context()) * locPos;
+                      histo->Fill(globPos.x(), globPos.y());
+                  }
+              }
+          }
+      }
+  }
+
+
+  
+
   return StatusCode::SUCCESS;
 }
-StatusCode NswGeoPlottingAlg::initMicroMega() {
+StatusCode NswGeoPlottingAlg::initStgc() {
+    for (unsigned int ml =1 ; ml <= 2; ++ml) {
+        for(unsigned int active =1 ; active <= 2; ++active){
+            for (int chanType : {chType::Strip, chType::Pad, chType::Wire}){
+                for (unsigned int gasGap =1; gasGap <= 4; ++gasGap) {
+                    std::string histoName = "STGC_"+std::string(active == 1? "A" : "C") + "M" + 
+                                            std::to_string(ml) + "G" + std::to_string(gasGap) + 
+                                            + (chanType == chType::Strip? "S" :
+                                               chanType == chType::Wire ? "W" : "P");
+                
+                    auto newHisto = std::make_unique<TH2I>(histoName.c_str(),
+                                                                "ActiveNSW;x [mm]; y [mm]", 1000, -5001, 5001., 1000,
+                                                                -5001., 5001.);
+                    m_stgcActiveAreas[sTgcReadoutElement::createHash(gasGap, chanType, active + 10 * ml)] = newHisto.get();
+                    ATH_CHECK(histSvc()->regHist("/GEOMODELTESTER/ActiveSurfaces/"+ histoName,std::move(newHisto)));
+                }
+            }
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+StatusCode NswGeoPlottingAlg::initMm() {
  
   for (unsigned int ml = 1; ml <= 2; ++ml) {
     for (unsigned int active = 1; active <= 2; ++ active) {
         for (unsigned int gasGap = 1; gasGap <= 4; ++gasGap) {
-          std::string histoName = "NSW_"+std::string(active == 1? "A" : "C") + "M" + 
+          std::string histoName = "MM_"+std::string(active == 1? "A" : "C") + "M" + 
                                   std::to_string(ml) + "G" + std::to_string(gasGap);
           auto newHisto = std::make_unique<TH2I>(histoName.c_str(),
                                                                 "ActiveNSW;x [mm]; y [mm]", 1000, -5001, 5001., 1000,
                                                                 -5001., 5001.);
-          m_nswActiveAreas[MmReadoutElement::createHash(gasGap, active + 10 * ml)] = newHisto.get();
+          m_mmActiveAreas[MmReadoutElement::createHash(gasGap, active + 10 * ml)] = newHisto.get();
           ATH_CHECK(histSvc()->regHist("/GEOMODELTESTER/ActiveSurfaces/"+ histoName,std::move(newHisto)));
         }
     } 

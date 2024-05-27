@@ -291,7 +291,7 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.lFrameWidth = record->getDouble("ylFrame");
         parBook.sFrameWidth = record->getDouble("ysFrame");
 
-        ATH_MSG_ALWAYS("Parameters of the chamber " << key << " are: "
+        ATH_MSG_VERBOSE("Parameters of the chamber " << key << " are: "
                         << " numStrips: " << parBook.numStrips
                         << " stripPitch: " << parBook.stripPitch
                         << " stripWidth: " << parBook.stripWidth

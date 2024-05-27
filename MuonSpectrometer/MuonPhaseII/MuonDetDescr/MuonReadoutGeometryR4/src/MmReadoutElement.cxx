@@ -40,7 +40,8 @@ StatusCode MmReadoutElement::initElement() {
 #ifndef SIMULATIONBASE
     ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfShortWidth, 
                                                                                       m_pars.halfLongWidth, 
-                                                                                      m_pars.halfHeight)));
+                                                                                      m_pars.halfHeight,
+                                                                                      90.*Gaudi::Units::deg)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -51,9 +52,11 @@ StatusCode MmReadoutElement::initElement() {
       ATH_CHECK(insertTransform<MmReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
       const StripDesign& design{m_pars.layers[layer]->design()};
+
       ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.shortHalfHeight(),
-                                                                                   design.longHalfHeight(),
-                                                                                   design.halfWidth())));
+                                                                             design.longHalfHeight(),
+                                                                             design.halfWidth(),
+                                                                             90.*Gaudi::Units::deg - design.stereoAngle())));
 #endif
     }
 #ifndef SIMULATIONBASE
