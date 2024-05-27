@@ -409,17 +409,19 @@ namespace ActsTrk
       // https://github.com/acts-project/acts/blob/v34.0.0/Core/include/Acts/TrackFinding/MeasurementSelector.ipp#L99
       // counts any other measurement anywhere on the surface as an outlier, so does not register as a hole.
       // We really want to count them as holes.
-      if (!((tipState.nHoles > cutSet.maxHoles ||
-             tipState.nOutliers > cutSet.maxOutliers) &&
-            (trackState.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ||
-             tipState.nMeasurements < cutSet.minMeasurements)))
+      if (!(tipState.nHoles > cutSet.maxHoles || tipState.nOutliers > cutSet.maxOutliers))
         return BranchStopperResult::Continue;
 
-      ++event_stat[category_i][kNStoppedTracksMaxHoles];
-      ATH_MSG_DEBUG("CkfBranchStopper: stopped branch with nHoles=" << tipState.nHoles
-                                                                    << " nMeasurements=" << tipState.nMeasurements
-                                                                    << " " << std::as_const(trackState).typeFlags());
-      return BranchStopperResult::StopAndDrop;
+      bool enoughMeasurements = !(tipState.nMeasurements < cutSet.minMeasurements);
+      if (!enoughMeasurements)
+        ++event_stat[category_i][kNStoppedTracksMaxHoles];
+      ATH_MSG_DEBUG("CkfBranchStopper: stop and "
+                    << (enoughMeasurements ? "keep" : "drop")
+                    << " branch with nHoles=" << tipState.nHoles
+                    << ", nOutliers=" << tipState.nOutliers
+                    << ", nMeasurements=" << tipState.nMeasurements);
+      return enoughMeasurements ? BranchStopperResult::StopAndKeep
+                                : BranchStopperResult::StopAndDrop;
     };
     // Allow AthMsgStreamMacros.h macros using TrackFindingAlg's msgStream.
     MsgStream &msg(const MSG::Level lvl) const { return alg.msgStream(lvl); }
