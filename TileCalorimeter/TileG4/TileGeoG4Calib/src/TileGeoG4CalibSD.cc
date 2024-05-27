@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -356,7 +356,7 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
 
   int primary_id = 0;
   if (m_doCalibHitParticleID) {
-    if (m_atlasG4EvtUserInfo && m_atlasG4EvtUserInfo->GetCurrentPrimary()) primary_id = HepMC::barcode(m_atlasG4EvtUserInfo->GetCurrentPrimary());
+    if (m_atlasG4EvtUserInfo && m_atlasG4EvtUserInfo->GetCurrentPrimary()) primary_id = HepMC::barcode(m_atlasG4EvtUserInfo->GetCurrentPrimary()); // FIXME Barcode-based
     else throw std::runtime_error("CalibrationSensitiveDetector: Unable to retrieve barcode!");
   }
 

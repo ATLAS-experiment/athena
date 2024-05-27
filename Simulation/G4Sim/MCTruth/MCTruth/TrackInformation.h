@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TrackInformation_H
-#define TrackInformation_H
+#ifndef MCTRUTH_TRACKINFORMATION_H
+#define MCTRUTH_TRACKINFORMATION_H
 
 #include "VTrackInformation.h"
 #include "TruthUtils/MagicNumbers.h"
@@ -13,23 +13,91 @@ namespace ISF {
   class ISFParticle;
 }
 
+/** @class TrackInformation
+
+ * @brief Implementation of VTrackInformation. Instances of this class
+ * are attached as UserInformation to G4Tracks.
+
+ * The GenParticlePtr m_currentGenParticle held by the
+ * TrackInformation object points to the GenParticle corresponding to
+ * the current G4Track and can change during simulation (i.e. each
+ * time the track undergoes a non-destructive interaction).
+
+ * The other member variables are: m_theBaseISFParticle - a pointer to
+ * the ISFParticle corresponding to the current G4Track,
+ * m_returnedToISF - a flag indicating whether the ISFParticle
+ * corresponding to the current G4Track scheduled to be returned to
+ * the ISF, m_regenerationNr - the number of times the particle
+ * represented by the G4Track has undergone a non-destructive
+ * interaction that was recorded in the HepMC::GenEvent, m_barcode and
+ * m_uniqueID - convenience variables corresponding to the barcode and
+ * id of m_currentGenParticle.
+ * The member variables are m_classify: a classification of the
+ * current G4Track (Primary, Regenerated Primary, Registered
+ * Secondary, Secondary) and m_primaryGenParticle: a pointer to the
+ * GenParticle used to create the initial G4PrimaryParticle from which
+ * the current G4Track decends.
+ */
 class TrackInformation: public VTrackInformation {
 public:
   TrackInformation();
   TrackInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* baseIsp=nullptr);
+  /**
+   * @brief return a pointer to the GenParticle corresponding to the
+   * current G4Track (if there is one).
+   */
   virtual HepMC::ConstGenParticlePtr GetHepMCParticle() const override {return m_theParticle;}
   virtual HepMC::GenParticlePtr GetHepMCParticle() override {return m_theParticle;}
+  /**
+   * @brief set m_theParticle, the pointer to the GenParticle
+   * corresponding to the current G4Track. This will be updated each
+   * time an interaction of the G4Track is recorded to the
+   * HepMC::GenEvent. Also invalidates previously cached values in
+   * m_barcode and m_uniqueID.
+   */
+  virtual void SetParticle(HepMC::GenParticlePtr) override;
+
+  /**
+   * @brief return a pointer to the ISFParticle corresponding to the
+   * current G4Track.
+   */
   virtual const ISF::ISFParticle *GetBaseISFParticle() const override {return m_theBaseISFParticle;}
   virtual ISF::ISFParticle *GetBaseISFParticle() override {return m_theBaseISFParticle;}
+  /**
+   * @brief set the pointer to the ISFParticle corresponding to the
+   * current G4Track. (Only used to replace the ISFParticle by a copy
+   * of itself when the G4Track is killed and the copy is scheduled to
+   * be returned to the ISF.)
+   */
+  virtual void SetBaseISFParticle(ISF::ISFParticle*) override;
+
+  /**
+   * @brief Is the ISFParticle corresponding to the current G4Track
+   * scheduled to be returned to the ISF?
+   */
+  virtual bool GetReturnedToISF() const override {return m_returnedToISF;}
+  /**
+   * @brief Flag whether the ISFParticle corresponding to the current G4Track
+   * scheduled to be returned to the ISF. Only called in TrackProcessorUserActionPassBack::returnParticleToISF
+   */
+  virtual void SetReturnedToISF(bool returned) override {m_returnedToISF=returned;}
+
+  /**
+   * @brief return the number of times the particle represented by the
+   * G4Track has undergone a non-destructive interaction that was
+   * recorded in the HepMC::GenEvent.
+   */
+  int GetRegenerationNr() const {return m_regenerationNr;}
+  /**
+   * @brief update the number of times the particle represented by the
+   * G4Track has undergone a non-destructive interaction that was
+   * recorded in the HepMC::GenEvent.
+   */
+  void SetRegenerationNr(int i) {m_regenerationNr=i;}
+
   virtual int GetParticleBarcode() const override; // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const override;
   virtual int GetParticleStatus() const override;
-  virtual void SetParticle(HepMC::GenParticlePtr) override;
-  virtual void SetBaseISFParticle(ISF::ISFParticle*) override;
-  virtual void SetReturnedToISF(bool returned) override {m_returnedToISF=returned;}
-  virtual bool GetReturnedToISF() const override {return m_returnedToISF;}
-  void SetRegenerationNr(int i) {m_regenerationNr=i;}
-  int GetRegenerationNr() const {return m_regenerationNr;}
 private:
   int m_regenerationNr{0};
   HepMC::GenParticlePtr m_theParticle{};
@@ -39,4 +107,4 @@ private:
   bool m_returnedToISF{false};
 };
 
-#endif
+#endif // MCTRUTH_TRACKINFORMATION_H

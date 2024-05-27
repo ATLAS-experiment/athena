@@ -118,7 +118,7 @@ namespace G4UA
         if (!m_config.isISFJob) {
           // don't do anything
           auto  part = ppi->GetHepMCParticle();
-          if(part) {
+          if (part) {
             // OK, we got back to HepMC
             std::unique_ptr<TrackInformation> ti = std::make_unique<TrackInformation>(part);
             ti->SetRegenerationNr(0);
@@ -129,7 +129,7 @@ namespace G4UA
             /// is mutable. G4Tracks are thread-local.
             track->SetUserInformation(ti.release());
           }
-          // What does this condition mean?
+          // TODO What does this condition mean?
           else if(ppi->GetParticleUniqueID() >= 0 && ppi->GetParticleBarcode() >= 0) {
             // PrimaryParticleInformation should at least provide a barcode
             std::unique_ptr<TrackBarcodeInfo> bi = std::make_unique<TrackBarcodeInfo>(ppi->GetParticleUniqueID(), ppi->GetParticleBarcode());
