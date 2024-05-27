@@ -416,22 +416,22 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigEMClusterAuxContainer#HLT_LArPS_AllCaloClustersAux.',      'BS ESD', 'Egamma'),
 
     # Egamma
-    ('xAOD::TrigEMClusterContainer#HLT_FastCaloEMClusters',           'BS ESD AODCOMM', 'Egamma', [InViews('EMCaloViews')]),
-    ('xAOD::TrigEMClusterAuxContainer#HLT_FastCaloEMClustersAux.',    'BS ESD AODCOMM', 'Egamma'),
-    ('xAOD::TrigRingerRingsContainer#HLT_FastCaloRinger',             'BS ESD AODCOMM', 'Egamma', [InViews('EMCaloViews')]), #Ringer
-    ('xAOD::TrigRingerRingsAuxContainer#HLT_FastCaloRingerAux.',      'BS ESD AODCOMM', 'Egamma'), #Ringer
+    ('xAOD::TrigEMClusterContainer#HLT_FastCaloEMClusters',           'BS ESD', 'Egamma', [InViews('EMCaloViews')]),
+    ('xAOD::TrigEMClusterAuxContainer#HLT_FastCaloEMClustersAux.',    'BS ESD', 'Egamma'),
+    ('xAOD::TrigRingerRingsContainer#HLT_FastCaloRinger',             'BS ESD', 'Egamma', [InViews('EMCaloViews')]), #Ringer
+    ('xAOD::TrigRingerRingsAuxContainer#HLT_FastCaloRingerAux.',      'BS ESD', 'Egamma'), #Ringer
 
     # Egamma FWD
     ('xAOD::TrigEMClusterContainer#HLT_FastCaloEMClusters_FWD',           'BS ESD AODFULL', 'Egamma', [InViews('EMCaloViews_FWD')]),
     ('xAOD::TrigEMClusterAuxContainer#HLT_FastCaloEMClusters_FWDAux.',    'BS ESD AODFULL', 'Egamma'),
 
-    ('xAOD::TrigPhotonContainer#HLT_FastPhotons',                     'BS ESD AODCOMM', 'Egamma', [InViews('EMPhotonViews')]),
-    ('xAOD::TrigPhotonAuxContainer#HLT_FastPhotonsAux.',              'BS ESD AODCOMM', 'Egamma'),
-    ('xAOD::TrigElectronContainer#HLT_FastElectrons',                 'BS ESD AODCOMM', 'Egamma', [InViews('EMElectronViews')]),
-    ('xAOD::TrigElectronAuxContainer#HLT_FastElectronsAux.',          'BS ESD AODCOMM', 'Egamma'),
+    ('xAOD::TrigPhotonContainer#HLT_FastPhotons',                     'BS ESD AODFULL', 'Egamma', [InViews('EMPhotonViews')]),
+    ('xAOD::TrigPhotonAuxContainer#HLT_FastPhotonsAux.',              'BS ESD AODFULL', 'Egamma'),
+    ('xAOD::TrigElectronContainer#HLT_FastElectrons',                 'BS ESD AODFULL', 'Egamma', [InViews('EMElectronViews')]),
+    ('xAOD::TrigElectronAuxContainer#HLT_FastElectronsAux.',          'BS ESD AODFULL', 'Egamma'),
 
-    ('xAOD::TrigElectronContainer#HLT_FastElectrons_LRT',                 'BS ESD AODCOMM', 'Egamma', [InViews('EMElectron_LRTViews')]),
-    ('xAOD::TrigElectronAuxContainer#HLT_FastElectrons_LRTAux.',          'BS ESD AODCOMM', 'Egamma'),
+    ('xAOD::TrigElectronContainer#HLT_FastElectrons_LRT',                 'BS ESD AODFULL', 'Egamma', [InViews('EMElectron_LRTViews')]),
+    ('xAOD::TrigElectronAuxContainer#HLT_FastElectrons_LRTAux.',          'BS ESD AODFULL', 'Egamma'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_FTF',        'BS ESD AODFULL', 'Egamma', [InViews('EMFastTrackingViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_FTFAux.', 'BS ESD AODFULL', 'Egamma'),
@@ -590,10 +590,10 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigBphysContainer#HLT_DrellYan',                               'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
     ('xAOD::TrigBphysAuxContainer#HLT_DrellYanAux.',                        'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
     # Bphysics Di-electron chains
-    ('xAOD::TrigBphysContainer#HLT_DiElecPrecision',                        'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
-    ('xAOD::TrigBphysAuxContainer#HLT_DiElecPrecisionAux.',                 'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
-    ('xAOD::TrigBphysContainer#HLT_NoMuonDiElecPrecision',                  'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
-    ('xAOD::TrigBphysAuxContainer#HLT_NoMuonDiElecPrecisionAux.',           'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
+    ('xAOD::TrigBphysContainer#HLT_DiElecPrecision',                        '', 'Bphys'),
+    ('xAOD::TrigBphysAuxContainer#HLT_DiElecPrecisionAux.',                 '', 'Bphys'),
+    ('xAOD::TrigBphysContainer#HLT_NoMuonDiElecPrecision',                  '', 'Bphys'),
+    ('xAOD::TrigBphysAuxContainer#HLT_NoMuonDiElecPrecisionAux.',           '', 'Bphys'),
     ('xAOD::TrigBphysContainer#HLT_DiElecPrecisionGSF',                     'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
     ('xAOD::TrigBphysAuxContainer#HLT_DiElecPrecisionGSFAux.',              'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
     ('xAOD::TrigBphysContainer#HLT_NoMuonDiElecPrecisionGSF',               'BS ESD AODFULL AODSLIM AODBLSSLIM', 'Bphys'),
@@ -726,14 +726,14 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftf',                  'BS ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalib_roiftfAux.'+JetVars,   'BS ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_ftfAux.'+JetCopyVars, '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftf',                        'BS ESD', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_roiftfAux.'+JetCopyVars, 'BS ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',                        'BS ESD AODCOMM', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODCOMM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesgsc_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
@@ -741,20 +741,20 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjes',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjes',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesAux.'+JetCopyVars, '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_nojcalib',                      'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoJets_nojcalibAux.'+JetVars,       'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoSKJets_nojcalib',                    'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoSKJets_nojcalibAux.'+JetVars,     'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoSKJets_nojcalib',                    '', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoSKJets_nojcalibAux.'+JetVars,     '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalib',                  'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalibAux.'+JetVars,   'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalib',                  '', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMTopoCSSKJets_nojcalibAux.'+JetVars,   '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10LCTopoJets_subjes',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt10LCTopoJets_subjesAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
@@ -777,14 +777,14 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalib',                'BS ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalibAux.'+JetVars, 'BS ESD', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalib',                'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalibAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalib',                '', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalibAux.'+JetVars, '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowJets_nojcalib_ftf',                       'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowJets_nojcalib_ftfAux.'+JetVars,        'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowJets_nojcalib_ftf',                       '', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowJets_nojcalib_ftfAux.'+JetVars,        '', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftf',                'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftf',                '', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftf',                       'BS ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars,        'BS ESD', 'Jet'),
@@ -795,20 +795,20 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.'+LargeRJetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.'+JetCopyVars, '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.'+JetFastFTagVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                        '', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftfAux.'+JetCopyVars, '', 'Jet'),
     
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_jes_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_jes_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
@@ -816,8 +816,8 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftf',                'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftf',                '', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars, '', 'Jet'),
 
     ## event info
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_jet',                                 'BS ESD AODFULL', 'Jet' ),
@@ -978,8 +978,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigMissingETContainer#HLT_MET_tcpufit_sig30',                 'BS ESD AODFULL', 'MET'),
     ('xAOD::TrigMissingETAuxContainer#HLT_MET_tcpufit_sig30Aux.',          'BS ESD AODFULL', 'MET'),
 
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersFS',                  'BS ESD AODCOMM', 'Calo'),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersFSAux.nCells', 'BS ESD AODCOMM', 'Calo'),
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersFS',                  'BS ESD', 'Calo'),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersFSAux.nCells', 'BS ESD', 'Calo'),
 
     # tau
     ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                         'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews')]),
@@ -1041,18 +1041,18 @@ TriggerHLTListRun3 = [
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars, 'BS ESD AODFULL AODSLIM', 'Bjet'),
 
     # secvertex for b-jets
-    ('xAOD::VertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtx',                          'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
-    ('xAOD::VertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   'BS ESD AODFULL', 'Bjet'),
+    ('xAOD::VertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet', [InViews(BTagViewsEMTopo)]),
+    ('xAOD::VertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   '', 'Bjet'),
 
-    ('xAOD::VertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx',                          'BS ESD', 'Bjet', [InViews(BTagViewsEMPFlow)]),
-    ('xAOD::VertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   'BS ESD', 'Bjet'),
+    ('xAOD::VertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::VertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   '', 'Bjet'),
 
     # btagvertex for b-jets
-    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtx',                          'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
-    ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   'BS ESD AODFULL', 'Bjet'),
+    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtx',                          '', 'Bjet', [InViews(BTagViewsEMTopo)]),
+    ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   '', 'Bjet'),
 
-    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtx',                          'BS ESD', 'Bjet', [InViews(BTagViewsEMPFlow)]),
-    ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   'BS ESD', 'Bjet'),
+    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtx',                          '', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   '', 'Bjet'),
 
     # bjet b-tagging
     ('xAOD::BTaggingContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTagging',                          'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
@@ -1110,16 +1110,16 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeAuxContainer#HLT_HitDVAux.'+hitDVVars,            'BS ESD AODFULL AODSLIM', 'UTT'),
 
     # dE/dx
-    ('xAOD::TrigCompositeContainer#HLT_dEdxTrk',                           'BS ESD AODCOMM', 'UTT'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_dEdxTrkAux.'+dEdxTrkVars,        'BS ESD AODCOMM', 'UTT'),
+    ('xAOD::TrigCompositeContainer#HLT_dEdxTrk',                           'BS ESD AODFULL', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_dEdxTrkAux.'+dEdxTrkVars,        'BS ESD AODFULL', 'UTT'),
     ('xAOD::TrigCompositeContainer#HLT_dEdxHit',                           'BS ESD', 'UTT'),
     ('xAOD::TrigCompositeAuxContainer#HLT_dEdxHitAux.'+dEdxHitVars,        'BS ESD', 'UTT'),
     ('xAOD::TrigCompositeContainer#HLT_HPtdEdxTrk',                        'BS ESD AODFULL AODSLIM', 'UTT'),
     ('xAOD::TrigCompositeAuxContainer#HLT_HPtdEdxTrkAux.'+HPtdEdxTrkVars,  'BS ESD AODFULL AODSLIM', 'UTT'),
 
     # disappearing track
-    ('xAOD::TrigCompositeContainer#HLT_DisTrkCand',                           'BS ESD AODCOMM', 'UTT'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_DisTrkCandAux.'+DisTrkCandVars,     'BS ESD AODCOMM', 'UTT'),
+    ('xAOD::TrigCompositeContainer#HLT_DisTrkCand',                           'BS ESD AODFULL', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_DisTrkCandAux.'+DisTrkCandVars,     'BS ESD AODFULL', 'UTT'),
     ('xAOD::TrigCompositeContainer#HLT_DisTrkBDTSel',                         'BS ESD AODFULL AODSLIM', 'UTT'),
     ('xAOD::TrigCompositeAuxContainer#HLT_DisTrkBDTSelAux.'+DisTrkBDTSelVars, 'BS ESD AODFULL AODSLIM', 'UTT'),
 
