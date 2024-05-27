@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUMMARY: This code implements a "particle decayer" to allow us to augment the standard 
@@ -20,17 +20,18 @@
 //
 // See the jobOption in share folder for more information.
 //
- 
 
 #include "ParticleDecayer/ParticleDecayer.h"
+#include "HepPDT/ParticleDataTable.hh"
 #include "GeneratorObjects/McEventCollection.h"
-
+#include "CLHEP/Random/RandomEngine.h"
+#include <cmath> //M_PI
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //function to generate a lifetime (actually decay-length) according to the proper lifetime of the particle particle 
 double ParticleDecayer::rnd_ExpLifetime(CLHEP::HepRandomEngine* engine, double ct) {
   double r = engine->flat(); //< Return random num in [0,1]
-  return ((-ct)*(double)log((double)1.-r));
+  return ((-ct)*std::log(1.-r));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,13 +137,13 @@ StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, He
    double theta = genpart->momentum().theta();
 
    // Make sure theta is between 0 and pi
-   while( theta > CLHEP::pi )
+   while( theta > M_PI )
       {                                                                                                                
-         theta -= CLHEP::pi;                                                                                           
+         theta -= M_PI;                                                                                           
       }                                                                                                                
    while( theta < 0 )                                                                                                  
       {                                                                                                                
-         theta += CLHEP::pi;
+         theta += M_PI;
       }
 
    if (m_doExponentialDecay)
@@ -150,13 +151,13 @@ StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, He
          if(m_expDecayDoVariableLifetime) // Variable proper lifetime distribution, such that fixed fraction of events decays within detector, independent of boost
             {
                double distanceToEdge = -999.;
-               if ( theta < m_thetaEndCapBarrel || theta > ( CLHEP::pi - m_thetaEndCapBarrel) ) // Particle escapes through endcap
+               if ( theta < m_thetaEndCapBarrel || theta > ( M_PI - m_thetaEndCapBarrel) ) // Particle escapes through endcap
                   {
-                     distanceToEdge = std::abs(m_endCapDistance/cos(theta));
+                     distanceToEdge = std::abs(m_endCapDistance/std::cos(theta));
                   }
                else // Particle escapes through barrel
                   {
-                     distanceToEdge = m_barrelRadius/sin(theta);
+                     distanceToEdge = m_barrelRadius/std::sin(theta);
                   }
                if ( gamma < 1. )
                   {
@@ -164,7 +165,7 @@ StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, He
                      return StatusCode::FAILURE;
                   }
                double Limit  = distanceToEdge / gamma; // ctau is enhanced by factor gamma in lab frame
-               double lambda = -1.*Limit/log(1. - m_expDecayFractionToKeep);
+               double lambda = -1.*Limit/std::log(1. - m_expDecayFractionToKeep);
                ctau = rnd_ExpLifetime(engine,lambda);
                if (m_expDecayDoTruncateLongDecays)
                   {
@@ -182,17 +183,17 @@ StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, He
       }else if (m_doUniformDecay)
       {         
          double decayRadius = -999.;
-         if ( theta < m_thetaEndCapBarrel || theta > ( CLHEP::pi - m_thetaEndCapBarrel) ) // Particle escapes through endcap
+         if ( theta < m_thetaEndCapBarrel || theta > ( M_PI - m_thetaEndCapBarrel) ) // Particle escapes through endcap
             {
-               double outerLength = std::abs(m_endCapDistance/cos(theta));
-               double outerRadius = outerLength*sin(theta);
+               double outerLength = std::abs(m_endCapDistance/std::cos(theta));
+               double outerRadius = outerLength*std::sin(theta);
                decayRadius        = rnd_DoubleRange(engine,0., std::min(outerRadius, std::abs(m_barrelRadius)) );
             }else // Particle escapes through barrel
             {
                decayRadius = rnd_DoubleRange(engine,0., std::abs(m_barrelRadius));
             }
 
-         double decayLength = decayRadius/sin(theta);
+         double decayLength = decayRadius/std::sin(theta);
          ctau = decayLength/gamma;
       }else
       {
@@ -538,7 +539,7 @@ StatusCode ParticleDecayer::getDecayProducts( CLHEP::HepRandomEngine* engine, CL
          return StatusCode::FAILURE;
       }
    //Get the angles in the rest frame
-   double phi_rf   = rnd_DoubleRange(engine, -CLHEP::pi, CLHEP::pi);
+   double phi_rf   = rnd_DoubleRange(engine, -M_PI, M_PI);
    double ct_rf    = cosgen(engine, decayType);
    double theta_rf = std::acos(ct_rf);
 

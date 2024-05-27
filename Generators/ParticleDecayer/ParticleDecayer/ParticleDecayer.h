@@ -1,22 +1,25 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_PARTICLEDECAYER_H
 #define GENERATORMODULES_PARTICLEDECAYER_H
 
-#include "GeneratorModules/GenModule.h"
-#include "AtlasHepMC/Polarization.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenModule.h" //inheritance
+#include "CLHEP/Vector/LorentzVector.h" //member
+#include "AtlasHepMC/GenEvent.h" //typedef
+#include "AtlasHepMC/GenVertex.h" //typedef for GenVertexPtr
+#include "AtlasHepMC/SimpleVector.h" //typedef for FourVector
+#include "AtlasHepMC/GenParticle.h" //typedef for GenParticlePtr
+#include <vector>
 
+namespace HepPDT{
+  class ParticleDataTable;
+}
 
-#include "CLHEP/Vector/ThreeVector.h"
-#include "CLHEP/Vector/Boost.h"
-#include "CLHEP/Geometry/Normal3D.h"
-#include "CLHEP/Units/PhysicalConstants.h"
-#include "CLHEP/Vector/LorentzVector.h"
-
-#include "AthenaKernel/errorcheck.h"
+namespace CLHEP{
+  class HepRandomEngine;
+}
 
 
 
@@ -36,42 +39,42 @@ class ParticleDecayer: public GenModule {
   //name of the MC truth container  
   std::string m_truthParticleContainerName;
   // LeptonJet type: 1 = one dark photon per LeptonJet, 2 = two dark pjotons per LeptonJet
-  int m_LJType;
+  int m_LJType{};
   //new PDG ID of the scalar 
-  int m_scalarPDGID;
+  int m_scalarPDGID{};
   //new mass of the scalar in MeV
-  double m_scalarMass;
+  double m_scalarMass{};
   //mass of the dark photon (MeV)
-  double m_particleMass;
+  double m_particleMass{};
   //PDG ID of the dark photon 
-  int m_particleID;
+  int m_particleID{};
   //lifetime of the dark photon
-  double m_particleLifeTime; 
+  double m_particleLifeTime{}; 
   //new PDG_ID of thedark photon 
-  int m_particlePDGID;
+  int m_particlePDGID{};
   //polarization of the dark photon
-  int m_particlePolarization; 
+  int m_particlePolarization{}; 
   //opposite polarization switch in case of two dark photons
-  bool m_oppositePolarization;
+  bool m_oppositePolarization{};
   ////selection of the decay mode of the dark photon 
   //BR of dark photon decay to electrons
-  double m_BRElectron;
+  double m_BRElectron{};
   //BR of dark photon decay to muons 
-  double m_BRMuon;
+  double m_BRMuon{};
   //BR of dark photon decay to pions 
-  double m_BRPion;
+  double m_BRPion{};
 
-  bool   m_doUniformDecay;
-  bool   m_doExponentialDecay;
-  bool   m_expDecayDoVariableLifetime;
-  double m_expDecayFractionToKeep;
-  bool   m_expDecayDoTruncateLongDecays;
+  bool   m_doUniformDecay{};
+  bool   m_doExponentialDecay{};
+  bool   m_expDecayDoVariableLifetime{};
+  double m_expDecayFractionToKeep{};
+  bool   m_expDecayDoTruncateLongDecays{};
 
   double m_barrelRadius;
   double m_endCapDistance;
   double m_thetaEndCapBarrel;
 
-  HepPDT::ParticleDataTable* m_particleTable;
+  HepPDT::ParticleDataTable* m_particleTable{};
 
   double     getParticleMass(int pdgID); //retrieve tha particle mass given the PDG ID 
   void       addParticle   (HepMC::GenVertexPtr, int pdg, HepMC::FourVector, int statusCode); //add particles to the evgen file
