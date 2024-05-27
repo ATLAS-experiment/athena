@@ -23,10 +23,11 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+    nametag = name.replace('Kernel', '') #get the name to label the tools below such that other formats can use this KernelCfg
     augmentationTools = []
     # Add V0Tool
     if flags.BTagging.AddV0Finder:
-        acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix="FTAG1", container_name_prefix="FTAG"))
+        acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix=nametag, container_name_prefix="FTAG"))
 
     # thinning tools
     thinningTools = []
