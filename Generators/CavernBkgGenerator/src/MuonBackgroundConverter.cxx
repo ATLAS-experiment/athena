@@ -264,14 +264,6 @@ StatusCode MuonBackgroundConverter::callGenerator()
              p_prev = p_curr;
           }
        }
-      
-       /** reset recycling */
-       // std::cout << "m_evt=" << m_evt.size() << " in " << m_nEvents << std::endl;
-       // std::cout << "m_fmom=" << m_fourMom.size() << " in " << m_nEvents << std::endl;
-       // std::cout << "m_fpos=" << m_fourPos.size() << " in " << m_nEvents << std::endl;
-       // std::cout << "m_fpos=" << m_pdgCode.size() << " in " << m_nEvents << std::endl;
-       // std::cout << "m_npart=" << nPart << " in " << m_nEvents << std::endl;
-       // if ( m_used == (phiSymmetry-1) ) m_used=0;
  
        ATH_MSG_DEBUG("   Number of particles = " << nPart);
     }
@@ -305,14 +297,12 @@ StatusCode MuonBackgroundConverter::fillEvt( HepMC::GenEvent* event )
 
 
   ATH_MSG_INFO("the size of the event = " << m_pdgCode.size());
-  if ( m_pdgCode.size()==0 ) ATH_MSG_WARNING("Empty event");
+  if ( m_pdgCode.empty() ) ATH_MSG_WARNING("Empty event");
 
 
-  int nPart = m_pdgCode.size();
-  for ( int i = 0; i < nPart; i++ )
-  {
+  size_t nPart = m_pdgCode.size();
+  for ( size_t i = 0; i < nPart; i++ ) {
      HepMC::GenParticlePtr particle = HepMC::newGenParticlePtr( HepMC::FourVector(m_fourMom[i].x(),m_fourMom[i].y(),m_fourMom[i].z(),m_fourMom[i].e()), m_pdgCode[i], 1 );
-     HepMC::set_polarization(particle, m_polarization[i] );
 
      // Create the vertex, and add the particle to the vertex
      HepMC::GenVertexPtr vertex = HepMC::newGenVertexPtr( HepMC::FourVector(m_fourPos[i].x(),m_fourPos[i].y(),m_fourPos[i].z(),m_fourPos[i].t()) );
@@ -320,6 +310,8 @@ StatusCode MuonBackgroundConverter::fillEvt( HepMC::GenEvent* event )
 
      // Add the vertex to the event
      event->add_vertex( vertex );
+     // Add attributes
+     HepMC::set_polarization(particle, m_polarization[i] );
   }
   
   // Set the event number
