@@ -1,7 +1,10 @@
-## @file AthenaPoolExample_WriteJobOptions.py
+#!/env/python
+
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+## @file AthenaPoolExample_Write.py
 ## @brief Example job options file to illustrate how to write event data to Pool.
-## @author Peter van Gemmeren <gemmeren@anl.gov>
-## $Id: AthenaPoolExample_WriteJobOptions.py,v 1.34 2009-02-02 21:51:22 gemmeren Exp $
+
 ###############################################################
 #
 # This Job option:
@@ -54,94 +57,102 @@
 #
 #==============================================================
 
-## basic job configuration (for generator)
-import AthenaCommon.AtlasUnixGeneratorJob
 
-## get a handle on the default top-level algorithm sequence
-from AthenaCommon.AlgSequence import AlgSequence
-topSequence = AlgSequence()
-from AthenaCommon.AlgSequence import AthSequencer
-outSequence = AthSequencer("AthOutSeq")
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Constants import DEBUG
+from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
 
-#--------------------------------------------------------------
-# Event related parameters
-#--------------------------------------------------------------
-from AthenaCommon.AppMgr import theApp
-theApp.EvtMax = 20
+stream1name = "Stream1"
+file1Name = "ROOTTREE:SimplePoolFile1.root"
+stream2name = "Stream2"
+file2Name = "ROOTTREE:SimplePoolFile2.root"
+stream3name = "Stream3"
+file3Name =  "ROOTTREE:EmptyPoolFile.root"
+noTag = True
 
-#--------------------------------------------------------------
-# Load POOL support
-#--------------------------------------------------------------
-import AthenaPoolCnvSvc.WriteAthenaPool
+# Setup flags
+flags = initConfigFlags()
+flags.Common.MsgSuppression = False
+flags.Exec.MaxEvents = 20
+flags.Input.Files = []
+flags.addFlag(f"Output.{stream1name}FileName", file1Name)
+flags.addFlag(f"Output.{stream2name}FileName", file2Name)
+flags.addFlag(f"Output.{stream3name}FileName", file3Name)
+flags.Exec.DebugMessageComponents = [ outputStreamName(stream1name) , "PoolSvc", "AthenaPoolCnvSvc", "WriteData" ]
+flags.lock()
 
-## get a handle on the ServiceManager
-from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+# Main services
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+acc = MainServicesCfg( flags )
 
-#Explicitly specify the output file catalog
-from PoolSvc.PoolSvcConf import PoolSvc
-svcMgr += PoolSvc()
-svcMgr.PoolSvc.WriteCatalog = "xmlcatalog_file:Catalog1.xml"
-
-from AthenaPoolCnvSvc.AthenaPoolCnvSvcConf import AthenaPoolCnvSvc
-svcMgr += AthenaPoolCnvSvc()
-
-svcMgr.EventSelector.RunNumber = 1
-
-#--------------------------------------------------------------
-# Private Application Configuration options
-#--------------------------------------------------------------
 # Load CutFlowSvc
-from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-CreateCutFlowSvc( seq=topSequence, addMetaDataToAllOutputFiles=True )
+from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+acc.merge( CutFlowSvcCfg( flags ) )    #addMetaDataToAllOutputFiles=True ) )
+# Ensure proper metadata propagation
+from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+acc.merge( IOVDbSvcCfg( flags ) )
 
-# Load "user algorithm" top algorithms to be run, and the libraries that house them
-from AthenaPoolExampleAlgorithms.AthenaPoolExampleAlgorithmsConf import AthPoolEx__WriteData
-topSequence += AthPoolEx__WriteData( "WriteData" )
+# Pool writing
+acc.addEventAlgo( CompFactory.AthPoolEx.WriteData("WriteData", OutputLevel = DEBUG) )
 
-from AthenaPoolExampleAlgorithms.AthenaPoolExampleAlgorithmsConf import AthPoolEx__WriteTag
-WriteTag = AthPoolEx__WriteTag( "WriteTag" )
+WriteTag = CompFactory.AthPoolEx.WriteTag("WriteTag", OutputLevel = DEBUG)
 WriteTag.Magic = 1
-topSequence += WriteTag
-MagicWriteTag = AthPoolEx__WriteTag( "MagicWriteTag" )
+acc.addEventAlgo( WriteTag )
+
+MagicWriteTag = CompFactory.AthPoolEx.WriteTag("MagicWriteTag", OutputLevel = DEBUG)
 MagicWriteTag.Key = "MagicTag"
 MagicWriteTag.TagKey = "MagicTag"
 MagicWriteTag.Magic = 24
-topSequence += MagicWriteTag
+acc.addEventAlgo( MagicWriteTag )
 
-from AthenaPoolCnvSvc.WriteAthenaPool import AthenaPoolOutputStream
-Stream1 = AthenaPoolOutputStream( "Stream1" , "SimplePoolFile1.root" )
-Stream1.ItemList += [ "ExampleHitContainer#MyHits" ]
-Stream1.ItemList += [ "ExampleHitContainer#PetersHits" ]
-Stream1.WritingTool.AttributeListKey = MagicWriteTag.Key
 
-Stream2 = AthenaPoolOutputStream( "Stream2" , "SimplePoolFile2.root" )
-from AthenaCommon.AppMgr import theApp
-outStream = theApp.getOutputStream( "Stream2" )
-outStream.ItemList += [ "ExampleHitContainer#*" ]
-outStream.ExcludeList += [ "ExampleHitContainer#MyHits" ]
-outStream.WritingTool.AttributeListKey = "RunEventTag"
+# ----------------  Output Stream 1 configuration
+from AthenaPoolExampleAlgorithms.AthenaPoolExampleConfig import AthenaPoolExampleWriteCfg
+acc.merge( AthenaPoolExampleWriteCfg( flags, stream1name, writeCatalog = "file:Catalog1.xml",
+                                      disableEventTag = noTag ) )
 
-from AthenaPoolExampleAlgorithms.AthenaPoolExampleAlgorithmsConf import AthPoolEx__PassNoneFilter
-topSequence += AthPoolEx__PassNoneFilter( "PassNoneFilter" )
+stream1ca = OutputStreamCfg( flags, stream1name, disableEventTag = noTag,
+                             ItemList = [
+                                 'EventInfo#*', 'EventStreamInfo#*',
+                                 'ExampleHitContainer#MyHits', 'ExampleHitContainer#PetersHits' ] )
+stream1 = stream1ca.getEventAlgo( outputStreamName( stream1name ) )
+stream1.WritingTool.AttributeListKey = MagicWriteTag.Key
+acc.merge( stream1ca )
 
-Stream3 = AthenaPoolOutputStream( "Stream3" , "EmptyPoolFile.root" )
-Stream3.RequireAlgs = [ "PassNoneFilter" ]
+# ----------------  Output Stream 2 configuration
+acc.merge( AthenaPoolExampleWriteCfg( flags, stream2name, disableEventTag = noTag ) )
+stream2ca = OutputStreamCfg(flags, stream2name, disableEventTag = noTag,
+                            ItemList = ['EventInfo#*', 'ExampleHitContainer#MyHits'] )
+stream2 = stream2ca.getEventAlgo( outputStreamName( stream2name ) )
+stream2.ExcludeList += [ "ExampleHitContainer#MyHits" ]
+stream2.WritingTool.AttributeListKey = "RunEventTag"
+acc.merge( stream2ca )
+
+# ----------------  Output Stream 3 configuration
+filterAlg = CompFactory.AthPoolEx.PassNoneFilter("PassNoneFilter", OutputLevel = DEBUG)
+acc.addEventAlgo( filterAlg )
+acc.merge( AthenaPoolExampleWriteCfg( flags, stream3name, disableEventTag = noTag ) )
+stream3ca = OutputStreamCfg(flags, stream3name, disableEventTag = noTag )
+stream3 = stream3ca.getEventAlgo( outputStreamName( stream3name ) )
+stream3.RequireAlgs = [ "PassNoneFilter" ]
+acc.merge( stream3ca )
 
 #--------------------------------------------------------------
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
 #--------------------------------------------------------------
-svcMgr.MessageSvc.OutputLevel = 3
-svcMgr.PoolSvc.OutputLevel = 2 
-svcMgr.AthenaPoolCnvSvc.OutputLevel = 2
-topSequence.WriteData.OutputLevel = 2
-Stream1.OutputLevel = 2
-Stream1.WritingTool.OutputLevel = 3
-Stream1.HelperTools[0].OutputLevel = 3
-Stream2.OutputLevel = 2
-Stream2.WritingTool.OutputLevel = 3
-Stream2.HelperTools[0].OutputLevel = 3
+stream1.WritingTool.OutputLevel = 3
+stream1.HelperTools[0].OutputLevel = 3
+stream2.WritingTool.OutputLevel = 3
+stream2.HelperTools[0].OutputLevel = 3
 
-#
-# End of job options file
-#
-###############################################################
+# Run
+import sys
+sc = acc.run(flags.Exec.MaxEvents)
+sys.exit(sc.isFailure())
+
+
+
+
+
+
