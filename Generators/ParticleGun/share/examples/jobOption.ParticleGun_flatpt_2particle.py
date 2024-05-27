@@ -2,7 +2,7 @@
 
 # Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 
-include("GeneratorUtils/StdEvgenSetup.py")
+include("EvgenProdTools/StdEvgenSetup.py")
 theApp.EvtMax = 100
 
 import ParticleGun as PG
@@ -15,6 +15,6 @@ pg.samplers[1].pid = (13, -13) # cycle mu-+
 pg.samplers[1].mom = PG.PtEtaMPhiSampler(pt=[4000, 100000], eta=[-3.2, -1.0]) # flat in pt and -ve eta
 topSeq += pg
 
-include("GeneratorUtils/postJO.CopyWeights.py")
-include("GeneratorUtils/postJO.PoolOutput.py")
-include("GeneratorUtils/postJO.DumpMC.py")
+include("EvgenProdTools/postJO.CopyWeights.py")
+include("EvgenProdTools/postJO.PoolOutput.py")
+include("EvgenProdTools/postJO.DumpMC.py")

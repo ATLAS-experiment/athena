@@ -1,7 +1,7 @@
 ## Example job option script to run an event generator with FixHepMC filtering
 ## Author: Andy Buckley <andy.buckley@cern.ch>
 
-include("GeneratorUtils/StdEvgenSetup.py")
+include("EvgenProdTools/StdEvgenSetup.py")
 theApp.EvtMax = 100
 
 ## Configure and add an event generator to the alg seq
