@@ -59,7 +59,7 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
 
   // Truth Info
   FPGATrackSimOptionalEventInfo optional;
-  int mbc = 0; // to scale up barcodes!
+  unsigned long int mbc = 0; // to scale up barcodes!
 
   // --- Copy old data
   if (doReset)
@@ -70,7 +70,7 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
     {
       for (const auto& truthtrack : header->optional().getTruthTracks())
         {
-	        if (truthtrack.getBarcode() > mbc) mbc = truthtrack.getBarcode();
+	  if (truthtrack.getBarcode() > mbc) mbc = truthtrack.getBarcode();
       	  optional.addTruthTrack(truthtrack);
         }
 
@@ -98,15 +98,12 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
   // copy Hits
   for (auto rawhit : m_eventHeader->hits())
     {
-      if (rawhit.getBarcode() >= 0)
-        {
-           FPGATrackSimMultiTruth origtruth = rawhit.getTruth();
-           FPGATrackSimMultiTruth mt;
-           FPGATrackSimMultiTruth::Barcode uniquecode(rawhit.getEventIndex(),rawhit.getBarcode()+mbc);
-           mt.maximize(uniquecode, rawhit.getBarcodePt());
-           rawhit.setBarcode(rawhit.getBarcode() + mbc);
-           rawhit.setTruth(mt);
-        }
+      FPGATrackSimMultiTruth origtruth = rawhit.getTruth();
+      FPGATrackSimMultiTruth mt;
+      FPGATrackSimMultiTruth::Barcode uniquecode(rawhit.getEventIndex(),rawhit.getBarcode()+mbc);
+      mt.maximize(uniquecode, rawhit.getBarcodePt());
+      rawhit.setBarcode(rawhit.getBarcode() + mbc);
+      rawhit.setTruth(mt);
       header->addHit(rawhit);
     }
 

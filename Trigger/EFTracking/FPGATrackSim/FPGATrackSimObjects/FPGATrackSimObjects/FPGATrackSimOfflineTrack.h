@@ -18,7 +18,7 @@ public:
   void setPhi(double v) { m_phi = v; }
   void setD0(double v) { m_d0 = v; }
   void setZ0(double v) { m_z0 = v; }
-  void setBarcode(long v) { m_barcode = v; }
+  void setBarcode(unsigned long v) { m_barcode = v; }
   void setBarcodeFrac(float v) { m_barcode_frac = v; }
 
   double getPt() const { return m_qoverpt != 0 ? std::abs(sin(2 * std::atan(std::exp(-m_eta))) / m_qoverpt) : 99999999.; }
@@ -27,7 +27,7 @@ public:
   double getD0() const { return m_d0; }
   double getZ0() const { return m_z0; }
   double getQOverPt() const { return m_qoverpt / sin(2 * std::atan(std::exp(-m_eta))); }
-  long   getBarcode() const { return m_barcode; }
+  unsigned long   getBarcode() const { return m_barcode; }
   double getBarcodeFrac() const { return m_barcode_frac; }
 
   //  handling hits
@@ -46,7 +46,7 @@ private:
   double m_d0;
   double m_z0;
 
-  long   m_barcode; // matched geant particle barcode
+  unsigned long   m_barcode; // matched geant particle barcode
   double m_barcode_frac;  // largest "matching fraction" with any "good"
                           // geant particle, corresponding to the
                           // particle with m_barcode
