@@ -35,10 +35,6 @@ EMBremFit::EMBremFit()
   :	egDetail()
 { }	
 
-// destructor
-EMBremFit::~EMBremFit()
-= default;
-
 // interfaces
 const std::string EMBremFit::s_className = ClassName<EMBremFit>::name();
 const std::string& EMBremFit::className() const

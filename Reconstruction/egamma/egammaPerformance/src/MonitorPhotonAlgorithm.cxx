@@ -12,9 +12,6 @@ MonitorPhotonAlgorithm::MonitorPhotonAlgorithm( const std::string& name, ISvcLoc
 {
 }
 
-MonitorPhotonAlgorithm::~MonitorPhotonAlgorithm() = default;
-
-
 StatusCode MonitorPhotonAlgorithm::initialize() {
     using namespace Monitored;
     ATH_CHECK(AthMonitorAlgorithm::initialize() );

@@ -57,7 +57,7 @@ public:
                        const IInterface* parent);
 
   /** @brief Destructor*/
-  ~egammaOQFlagsBuilder();
+  ~egammaOQFlagsBuilder() = default;
   /** @brief initialize method*/
   StatusCode initialize();
   /** @brief standard execute method */

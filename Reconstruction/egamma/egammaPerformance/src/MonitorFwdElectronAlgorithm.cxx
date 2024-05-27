@@ -12,9 +12,6 @@ MonitorFwdElectronAlgorithm::MonitorFwdElectronAlgorithm( const std::string& nam
 {
 }
 
-MonitorFwdElectronAlgorithm::~MonitorFwdElectronAlgorithm() = default;
-
-
 StatusCode MonitorFwdElectronAlgorithm::initialize() {
     using namespace Monitored;
     ATH_CHECK( AthMonitorAlgorithm::initialize() );

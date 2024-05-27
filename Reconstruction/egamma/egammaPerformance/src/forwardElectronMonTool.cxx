@@ -103,8 +103,6 @@ forwardElectronMonTool::forwardElectronMonTool(const std::string & type, const s
 
 }
 
-forwardElectronMonTool::~forwardElectronMonTool() = default;
-
 StatusCode forwardElectronMonTool::initialize()
 {
   ATH_CHECK( egammaMonToolBase::initialize() );

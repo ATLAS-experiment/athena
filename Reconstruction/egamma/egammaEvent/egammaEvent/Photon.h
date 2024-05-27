@@ -31,7 +31,7 @@ public:
   { };
 
   /** @brief destructor */
-  ~Photon();
+  ~Photon() = default;
 
   Photon(const egamma& rhs, bool copyDetails=true, bool copyMinimal=false) : 
     egamma(rhs, copyDetails, copyMinimal)

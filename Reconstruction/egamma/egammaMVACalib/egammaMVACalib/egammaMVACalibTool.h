@@ -67,7 +67,7 @@ class egammaMVACalibTool : public asg::AsgTool, virtual public IegammaMVACalibTo
   ASG_TOOL_CLASS(egammaMVACalibTool, IegammaMVACalibTool)
 public:
   egammaMVACalibTool(const std::string& type);
-  virtual ~egammaMVACalibTool() override;
+  virtual ~egammaMVACalibTool() override = default;
 
   virtual StatusCode initialize() override;
 

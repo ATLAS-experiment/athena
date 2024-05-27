@@ -39,7 +39,7 @@ class EMConvert : public egDetail
   EMConvert();
 
   /** @brief Destructor*/
-  virtual ~EMConvert();
+  virtual ~EMConvert() = default;
   virtual const std::string& className() const;
   
   /** @brief general parameter retrieval*/

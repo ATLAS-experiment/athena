@@ -6,12 +6,6 @@
 #include "egammaEvent/egammaParamDefs.h"
 #include "AthenaKernel/ClassName.h"
 
-egDetail::egDetail() 
-= default;
-
-egDetail::~egDetail()
-= default;
-
 double egDetail::parameter(egammaParameters::ParamDef) const 
 {
   return egammaParameters::EgParamUndefined;

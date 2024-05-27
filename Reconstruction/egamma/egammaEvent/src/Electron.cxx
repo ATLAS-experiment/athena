@@ -8,11 +8,6 @@
 
 namespace Analysis {
 
-
-Electron::~Electron()
-= default;
-
-
 Electron& Electron::operator=(const Electron& rhs) 
 { 
   if ( this != &rhs ) {

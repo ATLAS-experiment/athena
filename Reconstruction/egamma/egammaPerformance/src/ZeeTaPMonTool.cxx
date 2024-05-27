@@ -69,8 +69,6 @@ ZeeTaPMonTool::ZeeTaPMonTool(const std::string & type, const std::string & name,
   m_nZCandidates = 0; 
 }
 
-ZeeTaPMonTool::~ZeeTaPMonTool() = default;
-
 StatusCode ZeeTaPMonTool::initialize()
 {
   ATH_CHECK( egammaMonToolBase::initialize() );

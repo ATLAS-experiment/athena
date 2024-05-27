@@ -46,7 +46,7 @@ public:
   egammaTruthAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
   /** @brief destructor */
-  virtual ~egammaTruthAssociationAlg();
+  virtual ~egammaTruthAssociationAlg() = default;
 
   /** @brief initialize method */
   virtual StatusCode initialize() override final;

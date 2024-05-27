@@ -61,10 +61,6 @@ EgammaPhysValMonitoringTool::EgammaPhysValMonitoringTool( const std::string& typ
 {    
 }
 
-// Destructor
-///////////////
-EgammaPhysValMonitoringTool::~EgammaPhysValMonitoringTool() = default;
-
 // Athena algtool's Hooks
 ////////////////////////////
 StatusCode EgammaPhysValMonitoringTool::initialize()

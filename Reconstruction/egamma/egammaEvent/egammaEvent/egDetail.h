@@ -30,9 +30,9 @@ class egDetail
  public:
 
   /** @brief Default constructor*/
-  egDetail();
+  egDetail() = default;
   /** @brief Destructor*/
-  virtual ~egDetail();
+  virtual ~egDetail() = default;
   /** @brief */
   virtual double parameter(egammaParameters::ParamDef) const; 
   /** @brief */

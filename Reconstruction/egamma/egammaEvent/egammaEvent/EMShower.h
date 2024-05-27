@@ -27,7 +27,7 @@ class EMShower : public egDetail
   /** @brief Default constructor*/
   EMShower();
   /** @brief Destructor*/
-  virtual ~EMShower();
+  virtual ~EMShower() = default;
   /** @brief */
   virtual const std::string& className() const;
   /** @brief */

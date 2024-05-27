@@ -42,10 +42,6 @@ EMTrackFit::EMTrackFit()
   : egDetail()
 { }
 
-// destructor
-EMTrackFit::~EMTrackFit()
-= default;
-
 // interfaces
 const std::string EMTrackFit::s_className = ClassName<EMTrackFit>::name();
 const std::string& EMTrackFit::className() const
