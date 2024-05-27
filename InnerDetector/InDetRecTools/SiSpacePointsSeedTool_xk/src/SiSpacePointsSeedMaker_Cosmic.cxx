@@ -49,7 +49,7 @@ StatusCode InDet::SiSpacePointsSeedMaker_Cosmic::initialize()
   // Build framework
   //
   buildFrameWork();
-  if ( m_ptmin < 300.) m_ptmin = 300.;
+  if ( m_ptmin/m_fieldScale < 300.) m_ptmin = 300.*m_fieldScale;
 
   // Get output print level
   //

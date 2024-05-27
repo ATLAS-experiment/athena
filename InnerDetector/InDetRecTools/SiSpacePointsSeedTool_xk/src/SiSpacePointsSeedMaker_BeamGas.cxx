@@ -588,8 +588,7 @@ void InDet::SiSpacePointsSeedMaker_BeamGas::findNext(EventData& data) const
 
 void InDet::SiSpacePointsSeedMaker_BeamGas::buildFrameWork() 
 {
-  m_ptmin     = std::abs(m_ptmin);
-  if (m_ptmin < 300.) m_ptmin = 300.;
+  m_ptmin = std::max( std::abs(m_ptmin), float(300.*m_fieldScale));
   m_etamax    = std::abs(m_etamax);
   m_dzdrmax   = 1.f/std::tan(2.f*std::atan(std::exp(-m_etamax)));
   m_dzdrmin   =-m_dzdrmax;
@@ -608,7 +607,7 @@ void InDet::SiSpacePointsSeedMaker_BeamGas::buildFrameWork()
   const float sFmax   = static_cast<float>(NFmax)/pi2;
   const float sFmin = 100./60.;
 
-  m_sF = m_ptmin /60.f;
+  m_sF = m_ptmin/m_fieldScale /60.f;
   if (m_sF    >sFmax ) m_sF    = sFmax;
   else if (m_sF < sFmin) m_sF = sFmin;
   m_fNmax     = static_cast<int>(pi2*m_sF);
