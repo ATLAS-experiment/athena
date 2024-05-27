@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIEventShapeJetIteration.h"
@@ -12,6 +12,7 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "AthContainers/ConstAccessor.h"
 
 namespace
 {
@@ -233,7 +234,8 @@ StatusCode HIEventShapeJetIteration::fillModulatorShape(xAOD::HIEventShape* ms, 
     for(const auto *sh : *summary_container)
     {
       std::string summary;
-      if(sh->isAvailable<std::string>("Summary")) summary=sh->auxdata<std::string>("Summary");
+      static const SG::ConstAccessor<std::string> SummaryAcc("Summary");
+      if(SummaryAcc.isAvailable(*sh)) summary=SummaryAcc(*sh);
       if(summary.compare("FCal")==0)
       {
 	s_fcal=sh;

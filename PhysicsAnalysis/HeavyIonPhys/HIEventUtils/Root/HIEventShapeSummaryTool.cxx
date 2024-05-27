@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIEventUtils/HIEventShapeSummaryTool.h"
 #include "HIEventUtils/HIEventDefs.h"
 #include "HIEventUtils/HICaloRange.h"
+#include "AthContainers/ConstAccessor.h"
 
 #include <sstream>
 #include <iostream>
@@ -43,7 +44,8 @@ StatusCode HIEventShapeSummaryTool::summarize(const xAOD::HIEventShapeContainer*
     es->setEtaMin(roundToTenth(itr.second.eta_min));
     es->setEtaMax(roundToTenth(itr.second.eta_max));
     es->setLayer(itr.second.layer);
-    es->auxdata<std::string>("Summary")=itr.second.name;
+    static const SG::Accessor<std::string> SummaryAcc("Summary");
+    SummaryAcc(*es)=itr.second.name;
   }
   return StatusCode::SUCCESS;
 }

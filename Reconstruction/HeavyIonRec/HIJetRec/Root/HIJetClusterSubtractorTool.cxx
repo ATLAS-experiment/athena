@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIJetClusterSubtractorTool.h"
@@ -8,6 +8,7 @@
 #include "HIEventUtils/HIEventShapeIndex.h"
 #include "HIJetRec/HIJetRecDefs.h"
 #include "HIJetRec/IHIUEModulatorTool.h"
+#include "AthContainers/ConstAccessor.h"
 #include "PathResolver/PathResolver.h"
 #include <TH3F.h>
 #include <TFile.h>
@@ -44,9 +45,10 @@ void HIJetClusterSubtractorTool::subtract(xAOD::IParticle::FourMom_t& subtr_mom,
   float eta=eta0;
   float phi=phi0;
 
-  if(cl->isAvailable<float>("HIEtaPhiWeight"))
+  static const SG::ConstAccessor<float> HIEtaPhiWeightAcc("HIEtaPhiWeight");
+  if(HIEtaPhiWeightAcc.isAvailable(*cl))
   {
-    float DF_weight=cl->auxdataConst<float>("HIEtaPhiWeight");
+    float DF_weight=HIEtaPhiWeightAcc(*cl);
     if(DF_weight!=0.) mod/=DF_weight;
   }
 
@@ -147,9 +149,10 @@ void HIJetClusterSubtractorTool::updateUsingCluster(xAOD::HIEventShapeContainer*
     xAOD::HIEventShape* slice=shape->at(es_bin);
     constexpr float area_cluster=HI::TowerBins::getBinArea();
     float ET=cl->e(HIJetRec::unsubtractedClusterState())/std::cosh(eta0);
-    if(cl->isAvailable<float>("HIEtaPhiWeight"))
+    static const SG::ConstAccessor<float> HIEtaPhiWeightAcc("HIEtaPhiWeight");
+    if(HIEtaPhiWeightAcc.isAvailable(*cl))
     {
-      float HI_weight=cl->auxdataConst<float>("HIEtaPhiWeight");
+      float HI_weight=HIEtaPhiWeightAcc(*cl);
       ET*=HI_weight;
     }
     //update members
