@@ -113,24 +113,15 @@ def FTAG2Cfg(flags):
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
             ]
 
-    if flags.BTagging.RunNewVrtSecInclusive:
-            FTAG2SlimmingHelper.AppendToDictionary.update({'NVSI_SecVrt_Tight' : 'xAOD::VertexContainer','NVSI_SecVrt_TightAux' : 'xAOD::VertexAuxContainer',
-                                                        'NVSI_SecVrt_Medium' : 'xAOD::VertexContainer','NVSI_SecVrt_MediumAux' : 'xAOD::VertexAuxContainer',
-                                                        'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
+    # update AppendToDictionary
+    extra_AppendToDictionary = {} #only add those items specifically for FTAG2 here!
+    FtagBaseContent.update_AppendToDictionary_in_SlimmingHelper(FTAG2SlimmingHelper, flags, extra_AppendToDictionary)
 
     # Static content
-    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper)
-    
-    if flags.BTagging.RunNewVrtSecInclusive:
-        excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
-        FTAG2SlimmingHelper.StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Loose", 
-                                              "xAOD::VertexContainer#NVSI_SecVrt_Medium", 
-                                              "xAOD::VertexContainer#NVSI_SecVrt_Tight"]
-        FTAG2SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_LooseAux."+excludedVertexAuxData]
-        FTAG2SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_MediumAux."+excludedVertexAuxData ]
-        FTAG2SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]
+    extra_StaticContent = [] #only add those items specifically for FTAG2 here! 
+    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper, flags, extra_StaticContent)
 
     # Add truth containers
     if flags.Input.isMC:

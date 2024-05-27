@@ -19,7 +19,7 @@ PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
     "Photons.TruthLink",
     "AntiKt2PV0TrackJets.pt.eta.phi.m",
     "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.GhostBHadronsFinalPt",
-    "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.TruthLabelDeltaR_B.TruthLabelDeltaR_C.TruthLabelDeltaR_T.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt",
+    "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.TruthLabelDeltaR_B.TruthLabelDeltaR_C.TruthLabelDeltaR_T.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt.GNNVerticesLink",
     "TruthPrimaryVertices.t.x.y.z",
     "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
     "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
@@ -36,10 +36,27 @@ PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
 
-
 ## Common functions used in PHYSVAL, FTAG1 and FTAG2
-def add_static_content_to_SlimmingHelper(SlimmingHelper, extra_StaticContent=[]):
+def update_AppendToDictionary_in_SlimmingHelper(SlimmingHelper, flags, extra_AppendToDictionary={}):
+    if flags.BTagging.RunNewVrtSecInclusive:
+        SlimmingHelper.AppendToDictionary.update({'NVSI_SecVrt_Tight' : 'xAOD::VertexContainer','NVSI_SecVrt_TightAux' : 'xAOD::VertexAuxContainer',
+                                                       'NVSI_SecVrt_Medium' : 'xAOD::VertexContainer','NVSI_SecVrt_MediumAux' : 'xAOD::VertexAuxContainer',
+                                                       'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
+
+    if len(extra_AppendToDictionary)>0:
+        SlimmingHelper.AppendToDictionary.update(extra_AppendToDictionary)
+
+def add_static_content_to_SlimmingHelper(SlimmingHelper, flags, extra_StaticContent=[]):
     all_StaticContent = PHYSVAL_FTAG1_FTAG2_StaticContent
+    excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+    all_StaticContent += ["xAOD::VertexContainer#GNNVertices"]
+    all_StaticContent += ["xAOD::VertexAuxContainer#GNNVerticesAux."+excludedVertexAuxData]
+    if flags.BTagging.RunNewVrtSecInclusive:
+        excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+        all_StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Loose", "xAOD::VertexContainer#NVSI_SecVrt_Medium", "xAOD::VertexContainer#NVSI_SecVrt_Tight"]
+        all_StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_LooseAux."+excludedVertexAuxData]
+        all_StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_MediumAux."+excludedVertexAuxData ]
+        all_StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]
     if len(extra_StaticContent) > 0:
         all_StaticContent += extra_StaticContent
     SlimmingHelper.StaticContent = all_StaticContent
