@@ -28,7 +28,7 @@ public:
 
   void setPDGCode(int v) { m_pdgcode = v; }
   void setStatus(int v) { m_status = v; }
-  void setBarcode(unsigned long v) { m_barcode = v; }
+  void setBarcode(int v) { m_barcode = v; }
   void setEventIndex(int v) { m_evtindex = v; }
   void setBarcodeFracOffline(double v) { m_barcode_frac_offline = v; }
 
@@ -54,8 +54,8 @@ public:
   int getPDGCode() const { return m_pdgcode; }
   int getStatus() const { return m_status; }
   int status() const { return m_status; }
-  unsigned long getBarcode() const { return m_barcode; }
-  unsigned long barcode() const { return m_barcode; }
+  int getBarcode() const { return m_barcode; }
+  int barcode() const { return m_barcode; }
   
   int getEventIndex() const { return m_evtindex; }
   double getBarcodeFracOffline() const { return m_barcode_frac_offline; }
@@ -88,7 +88,7 @@ private:
 
   int m_pdgcode;
   int m_status;
-  unsigned long m_barcode;
+  int m_barcode;
   int m_evtindex;
   double m_barcode_frac_offline; // largest "matching fraction" with any "good"
                                 // xAOD::TruthParticle, corresponding to the

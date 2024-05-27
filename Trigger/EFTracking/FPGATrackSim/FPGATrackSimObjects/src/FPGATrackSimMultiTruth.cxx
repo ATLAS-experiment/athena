@@ -14,7 +14,7 @@ ClassImp(FPGATrackSimMultiTruth)
 // ================================================================
 //   20-04-2009 Antonio Boveia (boveia@hep.uchicago.edu)
 
-unsigned long FPGATrackSimMultiTruth::best_barcode() const {
+long FPGATrackSimMultiTruth::best_barcode() const {
   Barcode code;
   Weight weight;
   return !best(code, weight) ? -999 : code.second;

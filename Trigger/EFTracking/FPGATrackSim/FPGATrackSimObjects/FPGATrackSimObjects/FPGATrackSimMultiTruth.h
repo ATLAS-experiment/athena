@@ -46,7 +46,7 @@
 class FPGATrackSimMultiTruth : public TObject {
 public:
 
-  typedef std::pair<unsigned long, unsigned long> Barcode; // = (event index, barcode)
+  typedef std::pair<long, long> Barcode; // = (event index, barcode)
   typedef float Weight;
   typedef std::map<Barcode, Weight> TruthMap;
 
@@ -69,7 +69,7 @@ public:
 
   bool isEmpty() const { return m_truth.empty(); }
 
-  unsigned long best_barcode() const;
+  long best_barcode() const;
 
   void add(const FPGATrackSimMultiTruth::Barcode& code, const FPGATrackSimMultiTruth::Weight& weight);
   void add(const FPGATrackSimMultiTruth& rval);
@@ -100,10 +100,9 @@ private:
   };
 
   struct TruthMapWeightLt {
-    unsigned long int bad = -1; /// Use value of -1 here
     bool operator()(const TruthMap::value_type& a, const TruthMap::value_type& b) const {
-      const bool a_info = (a.first.first != bad) && (a.first.second != bad);
-      const bool b_info = (b.first.first != bad) && (b.first.second != bad);
+      const bool a_info = (a.first.first != -1) && (a.first.second != -1);
+      const bool b_info = (b.first.first != -1) && (b.first.second != -1);
       return a_info && b_info ? a.second < b.second : b_info;
     }
   };

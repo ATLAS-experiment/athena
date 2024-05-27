@@ -45,8 +45,8 @@ class FPGATrackSimTrack : public TObject {
   //write a detmap
   int getNCoords() const;
   signed long getEventIndex() const { return m_eventindex; }
-  unsigned long getBarcode() const { return m_barcode; }
-  unsigned long barcode() const { return getBarcode(); }
+  signed long getBarcode() const { return m_barcode; }
+  signed long barcode() const { return getBarcode(); }
   float getBarcodeFrac() const { return m_barcode_frac; }
   //Should be passed as const ref to avoid excessive copying.
   const std::vector <FPGATrackSimHit>& getFPGATrackSimHits() const { return m_hits; }
@@ -89,7 +89,7 @@ class FPGATrackSimTrack : public TObject {
   void setTypeMask(unsigned int v) { m_typemask = v; }
   void setHitMap(unsigned int v) { m_hitmap = v; }
   void setEventIndex(const signed long& v) { m_eventindex = v; }
-  void setBarcode(const unsigned long& v) { m_barcode = v; }
+  void setBarcode(const signed long& v) { m_barcode = v; }
   void setBarcodeFrac(const float& v) { m_barcode_frac = v; }
 
   void setValidCand(bool v)   { m_isValidCand = v; }
@@ -145,7 +145,7 @@ class FPGATrackSimTrack : public TObject {
   std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
 
   signed long m_eventindex = -1; // matched particle event index
-  unsigned long m_barcode = -1; // matched geant particle barcode
+  signed long m_barcode = -1; // matched geant particle barcode
   float m_barcode_frac = 0.0F; // largest "matching fraction" with any "good"
   // geant particle, corresponding to the
   // particle with m_barcode
