@@ -1,4 +1,4 @@
-include("GeneratorUtils/StdEvgenSetup.py")
+include("EvgenProdTools/StdEvgenSetup.py")
 
 svcMgr.MessageSvc.OutputLevel = INFO
 
@@ -7,4 +7,4 @@ topAlg += Pythia8_i()
 topAlg.Pythia8_i.CollisionEnergy = 7000
 topAlg.Pythia8_i.Commands += ['HardQCD:all = on']
 
-include("GeneratorUtils/postJO.DumpMC.py")
+include("EvgenProdTools/postJO.DumpMC.py")
