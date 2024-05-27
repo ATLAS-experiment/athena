@@ -1,0 +1,36 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ACTSTRK_DATAPREPARATION_HGTD_CLUSTERING_TOOL_H
+#define ACTSTRK_DATAPREPARATION_HGTD_CLUSTERING_TOOL_H
+
+#include "AthenaBaseComps/AthAlgTool.h"
+#include "ActsToolInterfaces/IHGTDClusteringTool.h"
+
+#include "HGTD_Identifier/HGTD_ID.h"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
+
+namespace ActsTrk {
+
+class HgtdClusteringTool : public extends<AthAlgTool, IHGTDClusteringTool> {
+public:
+    HgtdClusteringTool(const std::string& type,
+		       const std::string& name,
+		       const IInterface* parent);
+
+    virtual StatusCode initialize() override;
+
+    virtual StatusCode clusterize(const RawDataCollection& RDOs,
+               const EventContext& ctx,
+               ClusterContainer& container) const override;
+
+private:
+    const HGTD_DetectorManager* m_hgtd_det_mgr{nullptr};
+
+};
+
+}
+
+#endif
+
