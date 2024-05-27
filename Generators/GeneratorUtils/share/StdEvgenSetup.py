@@ -1,7 +1,7 @@
 ## Generic JO header for use in all evgen job options
 
 ## Pull in *really* generic stuff shared with StdAnalysisSetup.py
-include("EvgenProdTools/StdJOSetup.py")
+include("GeneratorUtils/StdJOSetup.py")
 
 ## Provide a special evgen logger
 evgenLog = logging.getLogger("Evgen")

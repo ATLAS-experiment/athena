@@ -2,7 +2,7 @@
 
 # Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 
-include("EvgenProdTools/StdEvgenSetup.py")
+include("GeneratorUtils/StdEvgenSetup.py")
 theApp.EvtMax = 100
 
 import ParticleGun as PG
@@ -36,6 +36,6 @@ topSeq += PG.ParticleGun()
 topSeq.ParticleGun.randomSeed = 123456
 topSeq.ParticleGun.sampler = MyParticleSampler()
 
-include("EvgenProdTools/postJO.CopyWeights.py")
-include("EvgenProdTools/postJO.PoolOutput.py")
-include("EvgenProdTools/postJO.DumpMC.py")
+include("GeneratorUtils/postJO.CopyWeights.py")
+include("GeneratorUtils/postJO.PoolOutput.py")
+include("GeneratorUtils/postJO.DumpMC.py")
