@@ -22,10 +22,11 @@ namespace MuonGMR4{
         if (hash() != other.hash()) {
             return hash() < other.hash();
         }
-        if (other.m_design != m_design) {
-           return (*m_design) < (*other.m_design);
-        }
         const GeoTrf::TransformSorter sorter{};
-        return sorter(m_transform, other.m_transform);
+        const int trf = sorter.compare(m_transform, other.m_transform);
+        if (trf) {
+            return trf <0;
+        }
+        return (*m_design) < (*other.m_design);        
     }
 }

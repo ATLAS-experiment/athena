@@ -185,14 +185,18 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
                                        <<" gap: "<<gasGap<<" strip: "<<strip<<" meas phi: "<<measPhi);
                         continue;
                     }
-                    m_stripPos.push_back(reElement->stripPosition(gctx, stripID));
+                    const IdentifierHash measHash = reElement->measurementHash(stripID);
+                    const IdentifierHash layHash = reElement->layerHash(measHash);
+                    const Amg::Vector3D stripPos = reElement->stripPosition(gctx, measHash);
+                    m_stripPos.push_back(stripPos);
+                    m_locStripPos.push_back((reElement->globalToLocalTrans(gctx, layHash) * stripPos).block<2,1>(0,0));
                     m_stripPosGasGap.push_back(gasGap);
                     m_stripPosMeasPhi.push_back(measPhi);
                     m_stripPosNum.push_back(strip);
                     m_stripDblPhi.push_back(doubPhi);
 
                     if (strip != 1) continue;
-                    const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, stripID);
+                    const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, layHash);
                     m_stripRot.push_back(locToGlob);
                     m_stripRotGasGap.push_back(gasGap);
                     m_stripRotMeasPhi.push_back(measPhi);

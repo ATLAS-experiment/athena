@@ -153,7 +153,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
    m_doubletR   = readoutEle->getDoubletR();
    m_doubletZ   = readoutEle->getDoubletZ();
    m_doubletPhi = readoutEle->getDoubletPhi();
-   m_chamberDesign = readoutEle->getStationType();
+   m_chamberDesign = readoutEle->getTechnologyName();
 
    m_numStripsEta = readoutEle->Nstrips(false);
    m_numStripsPhi = readoutEle->Nstrips(true);

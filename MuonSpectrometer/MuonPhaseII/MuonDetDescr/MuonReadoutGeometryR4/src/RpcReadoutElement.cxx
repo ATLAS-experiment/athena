@@ -77,7 +77,7 @@ Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, 
 }
 Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
     return localToGlobalTrans(ctx, layerHash(measHash)) * 
-              sensorLayout(measHash).localStripRightEdge(stripNumber(measHash));
+           sensorLayout(measHash).localStripRightEdge(stripNumber(measHash));
 }
 
 Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
