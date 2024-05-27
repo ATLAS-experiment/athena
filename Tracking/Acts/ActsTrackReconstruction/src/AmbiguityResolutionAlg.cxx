@@ -23,14 +23,14 @@ namespace {
    std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
       const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
       const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
-      return uncalibMeas.identifierHash();
+      return uncalibMeas.identifier();
    }
 
    bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
       const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
       const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
 
-      return uncalibMeas_a.identifierHash() == uncalibMeas_b.identifierHash();
+      return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
    }
 }
 
