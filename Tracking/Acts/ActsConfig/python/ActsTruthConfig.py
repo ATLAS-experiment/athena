@@ -97,18 +97,13 @@ def ActsTruthAssociationAlgCfg(flags,
         acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="StripClusterToTruthAssociationAlg.", **kwargs) ))
         
     return acc
-    
-    
-def ActsTrackFindingValidationAlgCfg(flags,
-                                     name: str = 'ActsTracksValidationAlg',
-                                     **kwargs: dict) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    kwargs.setdefault('TruthParticleHitCounts','TruthParticleHitCounts')
-    kwargs.setdefault('TrackToTruthAssociationMap','ActsTracksToTruthParticles')
+
+def setDefaultTruthMatchingArgs(kwargs) :
     kwargs.setdefault('MatchWeights',[0.,               # other
                                       10., 5.,           # ID (pixel, strips)
                                       0.,  0., 0. , 0.,  # MS
                                       0. ])             # HGTD
+    # weights used for hit purity and hit efficiencies
     kwargs.setdefault('CountWeights',[0.,               # other
                                       1.,1.,            # ID (pixel, strips)
                                       0., 0., 0. , 0.,  # MS
@@ -117,6 +112,40 @@ def ActsTrackFindingValidationAlgCfg(flags,
     kwargs.setdefault('ShowDetailedTables',False)
     kwargs.setdefault('PdgIdCategorisation',False)
     kwargs.setdefault('StatisticEtaBins',[eta/10. for eta in range(5, 40, 5)])
+
+def ActsTrackParticleTruthDecorationAlgCfg(flags,
+                                           name: str = 'ActsTrackParticleTruthDecorationAlg',
+                                           **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('TrackToTruthAssociationMaps','ActsCombinedTracksToTruthParticleAssociation')
+    kwargs.setdefault('TrackParticleContainerName','ActsCombinedTracksParticlesAlt')
+    kwargs.setdefault('TruthParticleHitCounts','TruthParticleHitCounts')
+    # weights used for computing the matching probability and identifying the best match
+    setDefaultTruthMatchingArgs(kwargs)
+    kwargs.setdefault('ComputeTrackRecoEfficiency',False)
+
+    if 'TruthSelectionTool' not in kwargs:
+        # should be as tight or looser as the TruthSelectionTool when analysing the truth matches
+        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
+        kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+            InDetRttTruthSelectionToolCfg(flags,
+                                          name='RelaxedInDetRttTruthSelectionTool',
+                                          requireOnlyPrimary=False,
+                                          minPt=500.,
+                                          maxEta=4.5
+                                          )))
+
+    acc.addEventAlgo( CompFactory.ActsTrk.TrackParticleTruthDecorationAlg(name=name, **kwargs) )
+    return acc
+
+def ActsTrackFindingValidationAlgCfg(flags,
+                                     name: str = 'ActsTracksValidationAlg',
+                                     **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault('TruthParticleHitCounts','TruthParticleHitCounts')
+    kwargs.setdefault('TrackToTruthAssociationMap','ActsTracksToTruthParticles')
+    setDefaultTruthMatchingArgs(kwargs)
+    kwargs.setdefault('ComputeTrackRecoEfficiency',True)
     
     if 'TruthSelectionTool' not in kwargs:
         from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg

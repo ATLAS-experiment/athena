@@ -6,6 +6,8 @@
 #include "boost/container/small_vector.hpp"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "ActsEvent/TrackContainer.h"
+#include "AthLinks/DataLink.h"
 #include <vector>
 #include <array>
 #include <cstdint>
@@ -66,7 +68,20 @@ namespace ActsTrk
       std::array<HitCounterArray,kNRecoCounts> m_recoCounts;
    };
 
-   using TrackToTruthParticleAssociation = std::vector<HitCountsPerTrack> ;
+   class TrackToTruthParticleAssociation : public std::vector<HitCountsPerTrack> {
+   public:
+      using std::vector<HitCountsPerTrack>::vector ;
+
+      void setSourceContainer(DataLink<ActsTrk::TrackContainer> &&source) {
+         m_sourceTracks = std::move(source);
+      }
+      const ActsTrk::TrackContainer *sourceContainer() const {
+         return  m_sourceTracks.getDataPtr();
+      }
+         
+   private:
+      DataLink<ActsTrk::TrackContainer> m_sourceTracks;
+   };
 }
 
 #include "AthenaKernel/CLASS_DEF.h"

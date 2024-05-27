@@ -125,6 +125,7 @@ namespace ActsTrk
        return StatusCode::FAILURE;
     }
     track_association->resize( tracksContainer->size() );
+    track_association->setSourceContainer(DataLink<ActsTrk::TrackContainer>(*tracksContainer,ctx));
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
