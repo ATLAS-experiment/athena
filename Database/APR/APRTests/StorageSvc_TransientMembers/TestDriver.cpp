@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -27,7 +27,7 @@
 #include <memory>
 
 
-static const std::string file = "pool_test.root";
+static const std::string file = "TM.test.pool.root";
 static const std::string container = "container";
 static const int nObjects = 100;
 
@@ -51,12 +51,12 @@ TestDriver::testWriting()
   }
   storSvc->addRef();
   pool::Session* sessionHandle = 0;
-  if ( ! ( storSvc->startSession( pool::CREATE, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
+  if ( ! ( storSvc->startSession( pool::RECREATE, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor fd( file, file );
-  if ( ! ( storSvc->connect( sessionHandle, pool::CREATE, fd ).isSuccess() ) ) {
+  if ( ! ( storSvc->connect( sessionHandle, pool::RECREATE, fd ).isSuccess() ) ) {
     throw std::runtime_error( "Could not start a connection." );
   }
   pool::DatabaseConnection* connection = fd.dbc();

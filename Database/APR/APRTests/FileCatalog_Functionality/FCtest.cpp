@@ -11,6 +11,7 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include <filesystem>
 #include "POOLCore/Exception.h"
 #include "FileCatalog/IFileCatalog.h"
 
@@ -55,6 +56,8 @@ public:
   void singlesetUp(singletype t){
     if(t==xml){
       mycatalogurl="xmlcatalog_file:mycatalog.xml";
+      // get rid of any old catalogs
+      std::filesystem::remove( {"mycatalog.xml"} );
     }else if(t==mysql){
       mycatalogurl="mysqlcatalog_mysql://xiezhen@localhost/zhendb";
     }
