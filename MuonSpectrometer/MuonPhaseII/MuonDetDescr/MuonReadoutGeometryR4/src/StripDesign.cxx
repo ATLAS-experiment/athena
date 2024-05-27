@@ -12,7 +12,7 @@ namespace {
 /// Helper macro to facilliate the ordering
 #define ORDER_PROP(PROP)                                            \
       {                                                             \
-        if (std::abs(PROP - other.PROP) > tolerance) {              \
+        if (std::abs(1.*PROP - 1.*other.PROP) > tolerance) {        \
             return PROP < other.PROP;                               \
         }                                                           \
       }

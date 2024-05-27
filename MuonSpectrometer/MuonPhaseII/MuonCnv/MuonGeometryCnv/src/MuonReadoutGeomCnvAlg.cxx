@@ -206,6 +206,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
         parentPhysVol->add(physVol);
 
         std::unique_ptr<MuonGM::RpcReadoutElement> newElement = std::make_unique<MuonGM::RpcReadoutElement>(physVol, stName, 1, 1, false, mgr);
+        const bool aSide{copyMe->stationEta() > 0};
         newElement->setDoubletPhi(copyMe->doubletPhi());
         newElement->setDoubletR(copyMe->doubletR());
         newElement->setDoubletZ(copyMe->doubletZ());
@@ -224,7 +225,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
         newElement->m_phistripwidth = copyMe->stripPhiWidth();
         newElement->m_etastripwidth = copyMe->stripEtaWidth();
         newElement->m_phistrippitch = copyMe->stripPhiPitch();
-        newElement->m_etastrippitch = copyMe->stripEtaPitch();
+        newElement->m_etastrippitch =  (aSide > 0 ? 1. : -1.) *copyMe->stripEtaPitch();
         newElement->m_phistriplength = copyMe->stripPhiLength();
         newElement->m_etastriplength = copyMe->stripEtaLength();
 
@@ -232,27 +233,33 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
         newElement->m_netastripsperpanel = copyMe->nEtaStrips();
         newElement->m_nphistrippanels = copyMe->nPhiPanels();
         newElement->m_hasDEDontop = true;
+        newElement->m_descratzneg = false;
+
          for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
-            for (int doubPhi = copyMe->doubletPhi(); doubPhi <= copyMe->doubletPhiMax(); ++doubPhi) {
+            for (int doubPhi = copyMe->doubletPhiMax(); doubPhi >= copyMe->doubletPhi(); --doubPhi) {
                 for (bool measPhi : {false, true}) {
+                    const int channel = 1;
                     const Identifier gapId = idHelper.channelID(copyMe->identify(), 
                                                                 copyMe->doubletZ(), 
-                                                                doubPhi, gasGap, measPhi, 1);
+                                                                doubPhi, gasGap, measPhi, 
+                                                                channel);
 
                     const Amg::Vector3D locStripPos = copyMe->globalToLocalTrans(gctx) * copyMe->stripPosition(gctx, gapId);
                     ATH_MSG_VERBOSE("GasGap "<<m_idHelperSvc->toString(gapId)<<", local strip position: "<<Amg::toString(locStripPos));
                     newElement->m_gasGap_xPos[gasGap -1] = locStripPos.x();
+                    /// Hack to assign the proper strip positions  for REs having doubletPhi =2
+                    /// in their Identifier
+                    const int dbPIdx = copyMe->doubletPhi() == 2 ? 1 : doubPhi;
                     if (measPhi) {
-                        newElement->m_first_phistrip_s[doubPhi -1] = locStripPos.y();
+                        newElement->m_first_phistrip_s[dbPIdx -1] = locStripPos.y();
                         newElement->m_phistrip_z = locStripPos.z();
                     } else{
                         newElement->m_first_etastrip_z = locStripPos.z();
-                        newElement->m_etastrip_s[doubPhi-1] = locStripPos.y();
+                        newElement->m_etastrip_s[dbPIdx-1] = locStripPos.y();
                     }
                 }
             }
-         }
-
+        }
         newElement->m_mirrored = true;
         newElement->fillCache();
         newElement->m_mirrored = false;
@@ -325,25 +332,26 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
                                                                 refEle.doubletZ(), 
                                                                 doubPhi, gasGap, measPhi, strip);
                     
+                    const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
+                    const Amg::Transform3D& testTrans{testEle.transform(stripId)};
+                    if (strip == 1 && Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
+                        ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<std::endl
+                            <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
+                            <<" *** test: "<<GeoTrf::toString(testTrans, true));
+                            return StatusCode::FAILURE;
+                    }
+
                     const Amg::Vector3D refStripPos = refEle.stripPosition(gctx, stripId);
                     const Amg::Vector3D testStripPos = testEle.stripPos(stripId);
                     if ((refStripPos - testStripPos).mag() > std::numeric_limits<float>::epsilon()){
                         ATH_MSG_ERROR("Mismatch in strip positions "<<m_idHelperSvc->toString(stripId)
                                 <<" ref: "<<Amg::toString(refStripPos)<<" test: "<<Amg::toString(testStripPos)
                                 <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refStripPos)
-                                <<"test: "<<Amg::toString(testEle.absTransform().inverse()*testStripPos));
+                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testStripPos));
                         return StatusCode::FAILURE;
                     }
                     ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(stripId)
                                     <<" strip position "<<Amg::toString(refStripPos));
-                    const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
-                    const Amg::Transform3D& testTrans{testEle.transform(stripId)};
-                    if (Amg::doesNotDeform(refTrans.inverse()*testTrans)) continue;
-                    if (strip == 1) {
-                        ATH_MSG_VERBOSE("Transformation for "<<m_idHelperSvc->toString(stripId)<<std::endl
-                            <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
-                            <<" *** test: "<<GeoTrf::toString(testTrans, true));
-                    }  
                 }
             }
         }

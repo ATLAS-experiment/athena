@@ -59,6 +59,7 @@ class RpcReadoutGeomTool : public AthAlgTool,
       using CutOutTable = std::map<Identifier, std::vector<CutOutArea>>;
 
        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
+       std::set<StripLayerPtr, StripLayerSorter> stripLayers{};
        ParamBookTable parameterBook{};
        CutOutTable cutOuts{};
        

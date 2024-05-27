@@ -177,7 +177,9 @@ if __name__=="__main__":
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     
-    cfg.getCondAlgo("MuonDetectorManagerCondAlg").checkGeo = False
+    cfg.getCondAlgo("MuonDetectorManagerCondAlg").checkGeo = True
+    cfg.getService("MessageSvc").setVerbose = []
+    cfg.getService("MessageSvc").verboseLimit = 10000000
     
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
