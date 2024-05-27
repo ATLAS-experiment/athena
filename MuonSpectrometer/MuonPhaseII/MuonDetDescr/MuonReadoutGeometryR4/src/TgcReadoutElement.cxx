@@ -93,7 +93,7 @@ Amg::Transform3D TgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& la
       return m_pars.sensorLayouts[layIdx]->toOrigin();
 }
 Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const { 
-   const StripLayerPtr& layDesign{sensorLayout(gasGapNumber(measHash), isStrip(measHash))};
+   const StripLayerPtr& layDesign{sensorLayout(measHash)};
    if (!layDesign) {
        ATH_MSG_WARNING("The gasGap "<<gasGapNumber(measHash)<<" & strip:"<<isStrip(measHash)<<" is unknown");
        return Amg::Vector3D::Zero();
