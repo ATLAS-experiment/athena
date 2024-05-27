@@ -63,6 +63,10 @@ private:
 
   void setEndcapTransformField(size_t w);
 
+  // These methods update the gas.
+  void refreshGasEndcap(int strawStatusHT, GeoVPhysVol *strawPlane) const;
+  void refreshGasBarrel(int strawStatusHT, GeoVPhysVol *shell) const;
+  
   // private member data:
   GeoModelIO::ReadGeoModel                      *m_sqliteReader;
   InDetDD::TRT_DetectorManager                  *m_detectorManager = nullptr; // ownership handed to calleer.
@@ -72,9 +76,13 @@ private:
   bool m_DC2CompatibleBarrelCoordinates;
   int m_overridedigversion;
   bool m_alignable;
-//  const ITRT_StrawStatusSummaryTool* m_sumTool; // added for Argon
+  const ITRT_StrawStatusSummaryTool* m_sumTool; // added for Argon
+  bool m_strawsvcavailable;
   bool m_useDynamicAlignFolders;
 
+  GeoIntrusivePtr<const GeoMaterial> m_xenonGas{nullptr};
+  GeoIntrusivePtr<const GeoMaterial> m_argonGas{nullptr};
+  
 };
 
 #endif // TRTDetectorFactory_Lite_h
