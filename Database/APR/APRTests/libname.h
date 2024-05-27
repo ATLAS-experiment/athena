@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -16,7 +16,7 @@ namespace pool {}
 using namespace pool;
 void TestDriver::loadLibraries( const std::vector<std::string>& libraries )
 {
-  for ( std::vector<std::string>::const_iterator iLibrary = libraries.begin();
+   for ( std::vector<std::string>::const_iterator iLibrary = libraries.begin();
 	iLibrary != libraries.end(); ++iLibrary ) {
     const std::string& library = *iLibrary;
     std::cout << "Loading library " << library << std::endl;

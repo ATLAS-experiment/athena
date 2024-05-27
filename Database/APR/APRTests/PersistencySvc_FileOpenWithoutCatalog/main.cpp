@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -10,7 +10,7 @@ int main( int, char** ) {
   try {
     
     std::cout << "[OVAL] Creating the test driver." << std::endl;
-    pool::TestDriver driver;
+    pool::TestDriver driver("DB.FOWC.pool.root", "FOWC.catalog.xml");
 
     std::cout << "[OVAL] Loading the shared libraries." << std::endl;
     std::vector< std::string > libraries;
@@ -22,7 +22,7 @@ int main( int, char** ) {
     std::cout << "[OVAL] ...done" << std::endl;
 
     std::cout << "[OVAL] Reading the objects back from the database." << std::endl;
-    driver.read();
+    driver.read( driver.m_fileName );
     std::cout << "[OVAL] ...done" << std::endl;
 
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
+#include <filesystem>
 
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
@@ -28,17 +29,18 @@
 #include "MyTestClass.h"
 
 
-pool::TestDriver::TestDriver():
-  m_fileCatalog( 0 ),
-  m_fileName( "pool.root" ),
-  m_events( 100 )
+pool::TestDriver::TestDriver(const std::string& filename, const std::string& catname):
+   m_fileCatalog( 0 ),
+   m_fileName( filename ),
+   m_events( 100 )
 {
   std::cout << "[OVAL] Creating a file catalog" << std::endl;
   m_fileCatalog = new pool::IFileCatalog;
   if ( ! m_fileCatalog ) {
     throw std::runtime_error( "Could not create a file catalog" );
   }
-  pool::URIParser p;
+  std::filesystem::remove( {catname} );
+  pool::URIParser p( std::string("file:") + catname );
   p.parse();
   m_fileCatalog->setWriteCatalog( p.contactstring() );
   m_fileCatalog->connect();
