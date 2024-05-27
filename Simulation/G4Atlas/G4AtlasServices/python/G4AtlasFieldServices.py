@@ -5,8 +5,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def StandardFieldSvcCfg(flags, name="StandardField", **kwargs):
     result = ComponentAccumulator()
-    if flags.BField.configuredSolenoidFieldScale>160/7730 and  flags.BField.configuredSolenoidFieldScale<1:    # custom field configuration
-        kwargs.setdefault("UseSoleCurrent", flags.BField.configuredSolenoidFieldScale * 7730)
     result.addService(CompFactory.StandardFieldSvc(name, **kwargs), primary=True)
     return result
 

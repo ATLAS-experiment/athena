@@ -45,7 +45,6 @@ def RadDamageUtilCfg(flags, name="RadDamageUtil", **kwargs):
     kwargs.setdefault("betaElectrons", 4.5e-16)
     kwargs.setdefault("betaHoles", 6.0e-16)
     kwargs.setdefault("saveDebugMaps", False)
-    kwargs.setdefault("fieldScale", flags.BField.configuredSolenoidFieldScale)   # to handle custom B field where nominal hardcoded
     RadDamageUtil = CompFactory.RadDamageUtil
     return RadDamageUtil(name, **kwargs)
 

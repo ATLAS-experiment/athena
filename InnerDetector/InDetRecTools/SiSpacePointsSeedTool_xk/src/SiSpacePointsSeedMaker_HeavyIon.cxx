@@ -583,7 +583,8 @@ bool InDet::SiSpacePointsSeedMaker_HeavyIon::newVertices(EventData& data, const 
 
 void InDet::SiSpacePointsSeedMaker_HeavyIon::buildFrameWork() 
 {
-  m_ptmin = std::max( std::abs(m_ptmin), float(100.*m_fieldScale));
+  m_ptmin     = std::abs(m_ptmin)                  ;
+  if (m_ptmin < 100.) m_ptmin = 100.;
   m_etamax    = std::abs(m_etamax)                 ;
   m_dzdrmax   = 1.f/std::tan(2.f*std::atan(exp(-m_etamax)));
   m_dzdrmin   =-m_dzdrmax                      ;
@@ -602,7 +603,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildFrameWork()
   const float sFmax = static_cast<float>(NFmax)/pi2;
   const float sFmin = 100./60.;
 
-  m_sF = m_ptmin/m_fieldScale /60.;
+  m_sF = m_ptmin /60.;
   if (m_sF > sFmax ) m_sF = sFmax;
   else if (m_sF < sFmin) m_sF = sFmin;
   m_fNmax = static_cast<int>(pi2*m_sF);
@@ -612,7 +613,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildFrameWork()
   //
   const int   NFtmax = SizeRFV;
   const float sFvmax = static_cast<float>(NFtmax)/pi2;
-  m_sFv = m_ptmin/m_fieldScale /120.f;
+  m_sFv = m_ptmin/120.f;
   if (m_sFv > sFvmax) m_sFv = sFvmax; 
   m_fvNmax = static_cast<int>(pi2*m_sFv);
   if (m_fvNmax>=NFtmax) m_fvNmax = NFtmax-1;

@@ -74,8 +74,6 @@ private:
     this, "saveDebugMaps", false, "Flag to save map"
   };
 
-  Gaudi::Property<double> m_fieldScale{this, "fieldScale", 1.};
-
   static double alpha(int n, int Nrep, double a); //Poisson solution factor
   static double weighting3D(double x, double y, double z, int n, int m, int Nrep, double a, double b);
   static double weighting2D(double x, double z, double Lx, double sensorThickness);

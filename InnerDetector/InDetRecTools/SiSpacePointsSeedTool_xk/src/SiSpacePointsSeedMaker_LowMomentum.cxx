@@ -567,7 +567,8 @@ bool InDet::SiSpacePointsSeedMaker_LowMomentum::newVertices(EventData& data, con
 
 void InDet::SiSpacePointsSeedMaker_LowMomentum::buildFrameWork() 
 {
-  m_ptmin = std::max( std::abs(m_ptmin), float(50.*m_fieldScale));
+  m_ptmin     = std::abs(m_ptmin);
+  if (m_ptmin < 50.) m_ptmin = 50.;
   m_iptmax  = 1.f/std::abs(m_ptmax);
   m_iptmin  = 1.f/std::abs(m_ptmin);
   m_etamax    = std::abs(m_etamax);
@@ -585,7 +586,7 @@ void InDet::SiSpacePointsSeedMaker_LowMomentum::buildFrameWork()
   const int   NFmax = SizeRF;
   const float sFmax   = static_cast<float>(NFmax )/pi2;
   const float sFmin   = 100./60.;
-  m_sF = m_ptmin/m_fieldScale /60.f;
+  m_sF = m_ptmin /60.f;
   if (m_sF > sFmax ) m_sF = sFmax;
   else if (m_sF < sFmin) m_sF = sFmin;
   m_fNmax = static_cast<int>(pi2*m_sF);

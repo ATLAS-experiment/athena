@@ -218,7 +218,6 @@ namespace InDet {
     FloatProperty m_dImpactCutSlopeUnconfirmedPPP{this, "dImpactCutSlopeUnconfirmedPPP", 0.};
     FloatProperty m_maxdImpactDecays{this, "maxdImpactForDecays", 20.};
     FloatProperty m_ptmin{this, "pTmin", 500.};
-    FloatProperty m_fieldScale{this, "fieldScale", 1.};
     //@}
 
     /// @name Properties, which can be updated in newEvent method. checketa is prepared in EventData.

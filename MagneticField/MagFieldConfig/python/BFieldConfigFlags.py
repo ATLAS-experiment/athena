@@ -36,6 +36,4 @@ def createBFieldConfigFlags():
     bcf.addFlag("BField.barrelToroidOn", lambda prevFlags : _fieldAutoCfg(prevFlags)[1])
     # True when endcap toroid is on
     bcf.addFlag("BField.endcapToroidOn", lambda prevFlags : _fieldAutoCfg(prevFlags)[1])
-    # Solenoid field scale
-    bcf.addFlag("BField.configuredSolenoidFieldScale", 1.)
     return bcf
