@@ -6,7 +6,9 @@ from AthenaCommon.Constants import INFO
 
 def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
     """Mininmal basic config, just good enough for HelloWorld and alike"""
-    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence,Sequential=True))
+    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence,
+                                                        Sequential=True,
+                                                        TimeOut=flags.Exec.EventTimeOut))
     cfg.setAsTopLevel()
     cfg.setAppProperty('TopAlg',['AthSequencer/'+masterSequence])
     cfg.setAppProperty('MessageSvcType', 'MessageSvc')
