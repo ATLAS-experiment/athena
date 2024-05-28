@@ -2,14 +2,12 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LinkCounterAlg.h"
+
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "AthLinks/ElementLink.h"
 
-#include <nlohmann/json.hpp>
-
-#include <random>
 
 namespace FlavorTagDiscriminants {
 
