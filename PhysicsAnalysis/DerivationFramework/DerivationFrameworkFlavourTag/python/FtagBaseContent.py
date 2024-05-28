@@ -69,6 +69,7 @@ def trigger_setup(SlimmingHelper, option=''):
     SlimmingHelper.IncludeBPhysTriggerContent = False
     SlimmingHelper.IncludeMinBiasTriggerContent = False
     if option == 'FTAG2':
+        SlimmingHelper.IncludeTriggerNavigation = True
         SlimmingHelper.IncludeMuonTriggerContent = True
         SlimmingHelper.IncludeEGammaTriggerContent = True
         SlimmingHelper.IncludeBJetTriggerContent = True

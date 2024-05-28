@@ -5,6 +5,8 @@ BJetTriggerContent = [
     "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingAux.",
     "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
     "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.",
+    "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets",
+    "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.",
     "HLT_xAOD__BTaggingContainer_HLTBjetFex",
     "HLT_xAOD__BTaggingContainer_HLTBjetFexAux.",
     "HLT_xAOD__JetContainer_EFJet",
