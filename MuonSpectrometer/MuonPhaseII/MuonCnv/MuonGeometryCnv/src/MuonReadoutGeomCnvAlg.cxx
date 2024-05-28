@@ -455,11 +455,11 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
             ChannelDesign& etaDesign{newRE->m_etaDesign[layer-1]};
             etaDesign.type =  ChannelDesign::ChannelType::etaStrip;
             etaDesign.detType = ChannelDesign::DetType::STGC;
-            if (copyMe->yCutout()) {
+            if (copyEtaDesign.yCutout()) {
                 etaDesign.defineDiamond(copyEtaDesign.shortHalfHeight(),
                                         copyEtaDesign.longHalfHeight(),
                                         copyEtaDesign.halfWidth(),
-                                        copyMe->yCutout());
+                                        copyEtaDesign.yCutout());
             } else {
                 etaDesign.defineTrapezoid(copyEtaDesign.shortHalfHeight(),
                                           copyEtaDesign.longHalfHeight(),
@@ -476,7 +476,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
             ChannelDesign& phiDesign{newRE->m_phiDesign[layer-1]};
             phiDesign.type = ChannelDesign::ChannelType::phiStrip;
             phiDesign.detType = ChannelDesign::DetType::STGC;
-            if (copyMe->yCutout() == 0.) {
+            if (copyPhiDesign.yCutout() == 0.) {
                 phiDesign.defineTrapezoid(copyPhiDesign.shortHalfHeight(),
                                           copyPhiDesign.longHalfHeight(),
                                           copyPhiDesign.halfWidth());
@@ -484,7 +484,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
                 phiDesign.defineDiamond(copyPhiDesign.shortHalfHeight(),
                                         copyPhiDesign.longHalfHeight(),
                                         copyPhiDesign.halfWidth(), 
-                                        copyMe->yCutout());
+                                        copyPhiDesign.yCutout());
               }
               phiDesign.inputPitch  = copyPhiDesign.stripPitch();
               phiDesign.inputWidth  = 0.015;
@@ -492,7 +492,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
             //   phiDesign.firstPitch = firstWireGroup[il];             // Number of Wires in 1st group, group staggering
               //phiDesign.groupWidth  = wireGroupWidth;                // Number of Wires normal group
               phiDesign.nGroups = copyPhiDesign.numStrips();                           // Number of Wire Groups
-              phiDesign.wireCutout = copyMe->yCutout();                         // Size of "active" wire region for digits
+              phiDesign.wireCutout = copyPhiDesign.wireCutout();                       // Size of "active" wire region for digits
               phiDesign.nch = copyPhiDesign.nAllWires();
         }     
         newRE->fillCache();

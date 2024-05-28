@@ -22,6 +22,9 @@ namespace MuonGMR4 {
     inline const Amg::Vector2D& StripDesign::stripDir() const { return m_stripDir; }
     inline const Amg::Vector2D& StripDesign::firstStripPos() const { return m_firstStripPos; }
 
+/// Additional Functions for Diamonds
+    inline double StripDesign::yCutout() const { return m_yCutout; }
+/// ==============================================================================================
     SET_DIRECTION(edgeDirTop, m_dirTopEdge, m_topLeft, m_topRight)
     SET_DIRECTION(edgeDirBottom, m_dirBotEdge, m_bottomLeft, m_bottomRight)
     SET_DIRECTION(edgeDirLeft, m_dirLeftEdge, m_topLeft, m_bottomLeft)
@@ -115,9 +118,14 @@ namespace MuonGMR4 {
             return 0;
         }
         const Amg::Vector2D delta = (*bottomIsect) - (*topIsect);
+        double stripLen = std::hypot(delta.x(), delta.y());
+        /// Condition to limit the stripLength to a maximum length of long base of the sTGC L3 sector
+        if(yCutout() && stripLen > 2*longHalfHeight()) {
+            stripLen = 2*longHalfHeight();
+        }
         ATH_MSG_VERBOSE("Strip "<<stripNumber<<" right edge: "<<Amg::toString((*bottomIsect), 2)
-                     <<" left edge: "<<Amg::toString( (*topIsect),2)<<" length: "<<std::hypot(delta.x(), delta.y()));
-        return std::hypot(delta.x(), delta.y());
+                     <<" left edge: "<<Amg::toString( (*topIsect),2)<<" length: "<<stripLen);
+        return stripLen;
     }
     inline CheckVector2D StripDesign::rightInterSect(int stripCh, bool uncapped) const {
         return rightInterSect(stripPosition(stripCh), uncapped);
