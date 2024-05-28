@@ -20,7 +20,6 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
 #include "PathResolver/PathResolver.h"
-#include "CxxUtils/checker_macros.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
