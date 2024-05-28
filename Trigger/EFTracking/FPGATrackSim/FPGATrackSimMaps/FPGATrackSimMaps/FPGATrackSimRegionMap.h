@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimRegionMap.h
@@ -51,10 +51,10 @@ class FPGATrackSimHit;
 
 struct FPGATrackSimRegionBoundaries
 {
-    int phi_min; // minimum phi ID
-    int phi_max; // maximum phi ID
-    int eta_min; // minimum eta ID
-    int eta_max; // minimum eta ID
+    int phi_min{}; // minimum phi ID
+    int phi_max{}; // maximum phi ID
+    int eta_min{}; // minimum eta ID
+    int eta_max{}; // minimum eta ID
 };
 
 
