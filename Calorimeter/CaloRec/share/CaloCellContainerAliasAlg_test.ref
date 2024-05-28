@@ -1,6 +1,2 @@
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMaterials with default tag
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #310000 0 events processed so far  <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #310000 1 events processed so far  <<<===

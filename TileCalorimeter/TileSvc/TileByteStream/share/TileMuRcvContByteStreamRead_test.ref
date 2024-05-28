@@ -56,10 +56,6 @@ GeoModelSvc                                          INFO Explicitly initializin
 DetDescrCnvSvc                                       INFO  initializing 
 DetDescrCnvSvc                                       INFO Found DetectorStore service
 DetDescrCnvSvc                                       INFO  filling proxies for detector managers 
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                   WARNING  Getting InDetMaterials with default tag
 TileDddbManager                                      INFO n_tiglob = 5
 TileDddbManager                                      INFO n_timod = 320
 TileDddbManager                                      INFO n_cuts = 9
@@ -201,10 +197,6 @@ GeoModelSvc                                                       INFO Explicitl
 DetDescrCnvSvc                                                    INFO  initializing 
 DetDescrCnvSvc                                                    INFO Found DetectorStore service
 DetDescrCnvSvc                                                    INFO  filling proxies for detector managers 
-GeoModelSvc::RDBMaterialManager                                WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                                WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RDBMaterialManager                                WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RDBMaterialManager                                WARNING  Getting InDetMaterials with default tag
 TileDddbManager                                                   INFO n_tiglob = 5
 TileDddbManager                                                   INFO n_timod = 320
 TileDddbManager                                                   INFO n_cuts = 9

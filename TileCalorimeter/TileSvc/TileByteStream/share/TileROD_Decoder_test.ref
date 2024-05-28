@@ -13,10 +13,6 @@ ClassIDSvc           INFO getRegistryEntries: read 568 CLIDRegistry entries for 
 DetDescrCnvSvc       INFO  initializing
 DetDescrCnvSvc       INFO Found DetectorStore service
 DetDescrCnvSvc       INFO  filling proxies for detector managers
-GeoModelSvc::RD...WARNING  Getting PixTBMatComponents with default tag
-GeoModelSvc::RD...WARNING  Getting PixTBMaterials with default tag
-GeoModelSvc::RD...WARNING  Getting InDetMatComponents with default tag
-GeoModelSvc::RD...WARNING  Getting InDetMaterials with default tag
 TileCablingSvc       INFO Setting RUN2 (2014-2017) cabling
 TileCablingSvc       INFO Setting Cabling type to 4
 DetectorStore     WARNING retrieve(default): No valid proxy for default object
