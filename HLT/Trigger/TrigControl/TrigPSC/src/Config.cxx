@@ -14,7 +14,6 @@
 #include "GaudiKernel/IMessageSvc.h"
 #include "eformat/SourceIdentifier.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
 #include <array>
 #include <climits>
@@ -267,7 +266,7 @@ void psc::Config::fillopt_jo(const ptree& hlt)
   optmap["PYTHONSETUPFILE"] = hlt.get_child("pythonSetupFile").data();
 
   // Special case for running directly from JSON file
-  if (boost::algorithm::ends_with(boost::algorithm::to_lower_copy(optmap["JOBOPTIONSPATH"]), ".json")) {
+  if (boost::algorithm::to_lower_copy(optmap["JOBOPTIONSPATH"]).ends_with(".json")) {
     optmap["JOBOPTIONSTYPE"]  = "FILE";
   }
   else {

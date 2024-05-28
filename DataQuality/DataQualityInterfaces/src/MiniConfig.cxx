@@ -10,13 +10,11 @@
 #include <optional>
 #include <sstream>
 #include <utility>
-//#include <algorithm>
 
 #include "boost/algorithm/string/case_conv.hpp"
 #include "boost/algorithm/string/trim.hpp"
 
 #include "DataQualityInterfaces/MiniConfig.h"
-//#include "DataQualityInterfaces/Conditions.h"
 
 
 //Get rid of Root macros that confuse Doxygen
