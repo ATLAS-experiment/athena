@@ -1044,7 +1044,12 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   if ( genpart ) {
     if (genpart->end_vertex()) {
       // Old approach particle had an end vertex - predefined decays taken from the main GenEvent
-      processPredefinedDecays(genpart, isp, g4particle.get(), true);
+      // No longer supported
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): GenParticle has a valid end GenVertexPtr!" );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): genpart: " << genpart << ", barcode: " << HepMC::barcode(genpart) );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): genpart->end_vertex(): " << genpart->end_vertex() << ", barcode: " << HepMC::barcode(genpart->end_vertex()) );
+      ATH_MSG_FATAL ( "getG4PrimaryParticle(): Passing GenParticles with a valid end GenVertexPtr as input is no longer supported." );
+      abort();
     }
     else if (MC::isDecayed(genpart) // Some assumptions about main GenEvent here
              && !genpart->end_vertex()) {

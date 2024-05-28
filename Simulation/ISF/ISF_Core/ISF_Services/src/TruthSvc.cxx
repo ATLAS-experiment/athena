@@ -341,8 +341,10 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
 #endif
 
   if (parent->end_vertex()){
-      ATH_MSG_ERROR("Parent particle found with an end vertex attached.  This should not happen!");
-      abort();
+      ATH_MSG_ERROR ("createGVfromTI: Parent particle found with an end vertex attached.  This should not happen!");
+      ATH_MSG_ERROR ("createGVfromTI: Parent 1: " << parent << ", barcode: " << HepMC::barcode(parent));
+      ATH_MSG_ERROR ( "createGVfromTI: parent->end_vertex(): " << parent->end_vertex() << ", barcode: " << HepMC::barcode(parent->end_vertex()) );
+     abort();
   } else { // Normal simulation
 #ifdef DEBUG_TRUTHSVC
     ATH_MSG_VERBOSE ("createGVfromTI Parent 1: " << parent << ", barcode: " << HepMC::barcode(parent));
