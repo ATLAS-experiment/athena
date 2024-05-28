@@ -242,7 +242,7 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
   // Update the event information to note that this step has been dealt with
   if ( m_atlasG4EvtUserInfo ) {
       // Update the step info
-      m_atlasG4EvtUserInfo->SetLastProcessedBarcode( step->GetTrack()->GetTrackID() );
+      m_atlasG4EvtUserInfo->SetLastProcessedTrackID( step->GetTrack()->GetTrackID() );
       m_atlasG4EvtUserInfo->SetLastProcessedStep( step->GetTrack()->GetCurrentStepNumber() );
   }
 
