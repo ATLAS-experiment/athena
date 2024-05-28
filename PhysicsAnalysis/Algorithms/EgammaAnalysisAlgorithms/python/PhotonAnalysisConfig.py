@@ -215,9 +215,14 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
 
+        # Additional decorations
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg.particles = config.readName (self.containerName)
+
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
 
 
 
