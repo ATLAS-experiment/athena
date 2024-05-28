@@ -10,7 +10,6 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 
-#include "xAODBase/IParticleContainer.h"
 
 namespace FlavorTagDiscriminants {
 
