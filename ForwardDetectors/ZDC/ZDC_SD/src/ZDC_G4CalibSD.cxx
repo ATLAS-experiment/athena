@@ -63,7 +63,7 @@ G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>&
   unsigned int particleID = 0;
   if( m_doPID ) {
     AtlasG4EventUserInfo * atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
-    if (atlasG4EvtUserInfo) particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimary()); // FIXME Barcode-based
+    if (atlasG4EvtUserInfo) particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
   }
 
 

@@ -64,11 +64,11 @@ private:
 
   /// Set the following information as the currently traced particle
   void setCurrentParticle(ISF::ISFParticle* baseISFParticle,
-                          HepMC::ConstGenParticlePtr truthPrimary,
+                          HepMC::ConstGenParticlePtr primaryGenParticle,
                           HepMC::GenParticlePtr truthCurrentlyTraced);
 
   /// Classify the particle represented by the given set of truth links
-  TrackClassification classify(HepMC::ConstGenParticlePtr primaryTruthParticle,
+  TrackClassification classify(HepMC::ConstGenParticlePtr primaryGenParticle,
                                HepMC::ConstGenParticlePtr generationZeroTruthParticle,
                                HepMC::ConstGenParticlePtr currentlyTracedHepPart,
                                int regenerationNumber) const;

@@ -50,17 +50,17 @@ public:
    * @brief return a pointer to the GenParticle used to create the
    * initial G4PrimaryParticle from which the current G4Track decends.
    * Should match the return value of
-   * ISF::TruthBinding::getPrimaryTruthParticle().
+   * ISF::TruthBinding::getPrimaryGenParticle().
    * TODO Check that this is required.
    */
-  HepMC::ConstGenParticlePtr GetPrimaryHepMCParticle() const {return m_thePrimaryParticle;}
-  HepMC::GenParticlePtr GetPrimaryHepMCParticle() {return m_thePrimaryParticle;}
+  HepMC::ConstGenParticlePtr GetPrimaryGenParticle() const {return m_primaryGenParticle;}
+  HepMC::GenParticlePtr GetPrimaryGenParticle() {return m_primaryGenParticle;}
   /**
    * @brief set the pointer to the GenParticle used to create the
    * initial G4PrimaryParticle from which the current G4Track decends.
    * TODO Check that this is required - if so, ensure it is set consistently.
    */
-  void  SetPrimaryHepMCParticle(HepMC::GenParticlePtr);
+  void  SetPrimaryGenParticle(HepMC::GenParticlePtr);
 
   /**
    * @brief return a pointer to the GenParticle corresponding to the
@@ -107,7 +107,7 @@ public:
   virtual void Print() const {}
 private:
   TrackClassification m_classify;
-  HepMC::GenParticlePtr m_thePrimaryParticle{};
+  HepMC::GenParticlePtr m_primaryGenParticle{};
 };
 
 #endif // MCTRUTH_VTRACKINFORMATION_H

@@ -231,10 +231,10 @@ namespace G4UA {
         return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
       }
 
-      HepMC::GenParticlePtr         primaryHepParticle = trackInfo->GetPrimaryHepMCParticle();
+      HepMC::GenParticlePtr         primaryGenParticle = trackInfo->GetPrimaryGenParticle();
       HepMC::GenParticlePtr  generationZeroHepParticle = trackInfo->GetHepMCParticle();
 
-      ISF::TruthBinding* tBinding = new ISF::TruthBinding(truthParticle, primaryHepParticle, generationZeroHepParticle);
+      ISF::TruthBinding* tBinding = new ISF::TruthBinding(truthParticle, primaryGenParticle, generationZeroHepParticle);
 
       return tBinding;
     }

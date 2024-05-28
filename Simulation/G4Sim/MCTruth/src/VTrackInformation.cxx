@@ -8,9 +8,9 @@ VTrackInformation::VTrackInformation(TrackClassification tc):m_classify(tc)
 {
 }
 
-void VTrackInformation::SetPrimaryHepMCParticle(HepMC::GenParticlePtr p)
+void VTrackInformation::SetPrimaryGenParticle(HepMC::GenParticlePtr p)
 {
-  m_thePrimaryParticle=p;
+  m_primaryGenParticle = p;
 }
 
 bool VTrackInformation::GetReturnedToISF() const

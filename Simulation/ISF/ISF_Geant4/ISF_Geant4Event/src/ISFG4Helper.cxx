@@ -101,9 +101,7 @@ iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
   }
 
   TrackInformation *trackInfo = new TrackInformation( nonRegeneratedTruthParticle, &baseIsp );
-  auto primaryTruthParticle   = truthBinding->getPrimaryTruthParticle();
-
-  trackInfo->SetPrimaryHepMCParticle( primaryTruthParticle );
+  trackInfo->SetPrimaryGenParticle( truthBinding->getPrimaryGenParticle() );
   trackInfo->SetClassification( classification );
   aTrack.SetUserInformation( trackInfo );
 
