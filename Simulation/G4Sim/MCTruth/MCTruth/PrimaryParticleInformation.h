@@ -47,7 +47,6 @@ public:
    */
   HepMC::ConstGenParticlePtr GetHepMCParticle() const { return m_theParticle; }
   HepMC::GenParticlePtr GetHepMCParticle() { return m_theParticle; }
-  void SetParticle(HepMC::GenParticlePtr);
 
   /**
    * @brief return the number of times the particle represented by the
