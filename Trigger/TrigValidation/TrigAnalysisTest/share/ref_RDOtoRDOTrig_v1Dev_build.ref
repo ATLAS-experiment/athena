@@ -22555,6 +22555,28 @@ HLT_mu24_ivarmedium_tau20_mediumRNN_tracktwoMVA_probe_03dRAB_L1MU18VFCH:
     6: 12
     7: 12
     8: 12
+HLT_mu24_ivarmedium_tau20_mediumRNN_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14FCH:
+  eventCount: 0
+  stepCounts:
+    0: 6
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  stepFeatures:
+    0: 7
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 5
+    6: 5
+    7: 5
+    8: 5
 HLT_mu24_ivarmedium_tau20_mediumRNN_tracktwoMVA_probe_L1eTAU12_03dRAB_L1MU14FCH:
   eventCount: 0
   stepCounts:
