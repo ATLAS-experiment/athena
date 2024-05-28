@@ -918,7 +918,7 @@ void gFEXJetAlgo::ZeroNegative(gTowersType & jets) const{
 
 
 // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/jet_eng.vhd#L538
-void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType sat ) const {
+void gFEXJetAlgo::SaturateJets( gTowersType & jets, const gTowersType & sat ) const {
    for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
       if(static_cast<unsigned>(sat[irow][icolumn])) {
@@ -929,7 +929,7 @@ void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType sat ) const {
   }
 }
 
-void gFEXJetAlgo::SaturateBlocks( gTowersType & gBlkSum, gTowersType sat ) const {
+void gFEXJetAlgo::SaturateBlocks( gTowersType & gBlkSum, const gTowersType & sat ) const {
    for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
       if(static_cast<unsigned>(sat[irow][icolumn])) {
