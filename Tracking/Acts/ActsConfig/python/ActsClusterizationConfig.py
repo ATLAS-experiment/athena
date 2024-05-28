@@ -23,10 +23,16 @@ def ActsHgtdClusterizationAlgCfg(flags,
         from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     acc.merge(HGTD_ReadoutGeometryCfg(flags))
 
+    kwargs.setdefault('RDOContainerName', 'HGTD_RDOs')
+    kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
+
     if 'ClusteringTool' not in kwargs:
         kwargs.setdefault('ClusteringTool', acc.popToolsAndMerge(ActsHgtdClusteringToolCfg(flags)))
-        kwargs.setdefault('RDOContainerName', 'HGTD_RDOs')
-        kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
+
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsHgtdClusterizationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHgtdClusterizationMonitoringToolCfg(flags)))        
+        
     acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterizationAlg(name, **kwargs))
     return acc
 

@@ -14,7 +14,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
-
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 namespace ActsTrk {
 
@@ -29,17 +29,11 @@ public:
     
 private:
   ToolHandle< IHGTDClusteringTool > m_clusteringTool {this, "ClusteringTool", "", "The Clustering Tool"};
+  ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
 
   SG::ReadHandleKey<HGTD_RDO_Container> m_rdoContainerKey{this, "RDOContainerName", "", "Name of the HGTD_RDO container"};
-  SG::WriteHandleKey<xAOD::HGTDClusterContainer> m_clusterContainerKey{this, "ClusterContainerName", "", "Name of the HGTD cluster container"};
-  
-
+  SG::WriteHandleKey<xAOD::HGTDClusterContainer> m_clusterContainerKey{this, "ClusterContainerName", "", "Name of the HGTD cluster container"}; 
 };
-
-
-
-
-
 
 } // namespace ActsTrk
 
