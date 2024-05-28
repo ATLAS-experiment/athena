@@ -113,7 +113,7 @@ def JETM10Cfg(flags):
     JETM10SlimmingHelper.IncludeBPhysTriggerContent = False
     JETM10SlimmingHelper.IncludeMinBiasTriggerContent = False
 
-    JETM10SlimmingHelper.AllVariables += ['HLT_MET_tcpufit','HLT_MET_cell','HLT_MET_trkmht','HLT_MET_cvfpufit','HLT_MET_pfopufit','HLT_MET_mhtpufit_em','HLT_MET_mhtpufit_pf','HLT_MET_pfsum','HLT_MET_pfsum_vssk','HLT_MET_pfsum_cssk','HLT_MET_nn']
+    JETM10SlimmingHelper.AllVariables += ['HLT_MET_tcpufit','HLT_MET_cell','HLT_MET_trkmht','HLT_MET_cvfpufit','HLT_MET_pfopufit','HLT_MET_mhtpufit_em','HLT_MET_mhtpufit_pf','HLT_MET_pfsum','HLT_MET_pfsum_vssk','HLT_MET_pfsum_cssk','HLT_MET_nn','L1_jFexMETRoI','L1_jFexMETxRoI','L1_gMETComponentsJwoj','L1_gMETComponentsRms','L1_gMETComponentsNoiseCut']
 
     # Output stream    
     JETM10ItemList = JETM10SlimmingHelper.GetItemList()
