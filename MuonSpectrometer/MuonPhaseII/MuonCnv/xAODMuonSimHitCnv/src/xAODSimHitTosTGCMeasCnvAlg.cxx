@@ -168,6 +168,9 @@ void xAODSimHitTosTGCMeasCnvAlg::digitizePad(const EventContext& ctx,
     prd->setIdentifier(hitId.get_compact());
     prd->setGasGap(id_helper.gasGap(hitId));
     prd->setReadoutElement(readOutEle);
+    AmgSymMatrix(2) cov{AmgSymMatrix(2)::Identity()};
+    Amg::Vector2D lPos{lHitPos.block<2,1>(0,0)};
+    prd->setMeasurement(readOutEle->identHash(), xAOD::toStorage(lPos), xAOD::toStorage(cov));
 
 
 }
