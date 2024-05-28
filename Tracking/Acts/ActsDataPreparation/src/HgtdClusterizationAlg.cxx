@@ -4,6 +4,7 @@
 
 #include "HgtdClusterizationAlg.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 namespace ActsTrk {
 
@@ -16,6 +17,8 @@ namespace ActsTrk {
   {
     ATH_MSG_DEBUG("Initializing " << name() << " ...");
     ATH_CHECK(m_clusteringTool.retrieve());
+    ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
+
     ATH_CHECK(m_rdoContainerKey.initialize());
     ATH_CHECK(m_clusterContainerKey.initialize());
 
@@ -25,6 +28,10 @@ namespace ActsTrk {
 
   StatusCode HgtdClusterizationAlg::execute(const EventContext& ctx) const
   {
+    ATH_MSG_DEBUG("Executing " << name() << " ...");
+
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto mon = Monitored::Group( m_monTool, timer );
     
     SG::ReadHandle<HGTD_RDO_Container> rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
     if (!rdoContainer.isValid()) {
@@ -33,7 +40,8 @@ namespace ActsTrk {
     }
 
     SG::WriteHandle<xAOD::HGTDClusterContainer> clusterContainer = SG::makeHandle(m_clusterContainerKey, ctx);
-    ATH_CHECK(clusterContainer.record(std::make_unique<xAOD::HGTDClusterContainer>(),std::make_unique<xAOD::HGTDClusterAuxContainer>()));
+    ATH_CHECK(clusterContainer.record(std::make_unique<xAOD::HGTDClusterContainer>(),
+				      std::make_unique<xAOD::HGTDClusterAuxContainer>()));
 
     for (const auto rdoCollection : *rdoContainer) {
         if (rdoCollection->empty()) {
@@ -43,9 +51,7 @@ namespace ActsTrk {
         ATH_CHECK(m_clusteringTool->clusterize(*rdoCollection, ctx, *clusterContainer));
     }
 
-
     ATH_MSG_DEBUG("Executing HgtdClusterizationAlg...");
-
     return StatusCode::SUCCESS;
   }
   
