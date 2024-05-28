@@ -43,16 +43,16 @@ public:
    * implementations and Sensitive Detectors which record
    * CaloCalibrationHits.) TODO Rename
    */
-  HepMC::ConstGenParticlePtr GetCurrentPrimary() const {return m_currentPrimary;}
+  HepMC::ConstGenParticlePtr GetCurrentPrimaryGenParticle() const {return m_currentPrimaryGenParticle;}
   /**
-   * @brief set m_currentPrimary, the pointer to the
+   * @brief set m_currentPrimaryGenParticle, the pointer to the
    * HepMC::GenParticle used to create the current
    * G4PrimaryParticle. This pointer is updated each time there is a
    * new G4PrimaryParticle. Called from
    * (AthenaTrackingAction/TrackProcessorUserActionBase)::
    * PreUserTrackingAction(...). TODO Rename
    */
-  void SetCurrentPrimary(HepMC::ConstGenParticlePtr p) {m_currentPrimary=p;}
+  void SetCurrentPrimaryGenParticle(HepMC::ConstGenParticlePtr p) {m_currentPrimaryGenParticle = p;}
 
   /**
    * @brief return a pointer to the GenParticle corresponding to the
@@ -105,7 +105,7 @@ public:
 
 private:
   HepMC::GenEvent *m_theEvent{};
-  HepMC::ConstGenParticlePtr m_currentPrimary{};
+  HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
   HepMC::GenParticlePtr m_currentlyTraced{};
   // These next two variables are used by the CaloCalibrationHit
   // recording code as event-level flags They correspond to the Track

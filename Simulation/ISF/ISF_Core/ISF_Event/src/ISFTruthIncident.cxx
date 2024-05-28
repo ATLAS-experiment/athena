@@ -192,9 +192,9 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFP
     truthBinding->setTruthParticle(hepTruthParticle);
   } else {
     auto parentTruthBinding = parent ? parent->getTruthBinding() : nullptr;
-    auto hepPrimaryParticle = parentTruthBinding ? parentTruthBinding->getPrimaryTruthParticle() : nullptr;
+    auto primaryGenParticle = parentTruthBinding ? parentTruthBinding->getPrimaryGenParticle() : nullptr;
     auto hepGenZeroParticle = hepTruthParticle;
-    truthBinding = new TruthBinding( hepTruthParticle, hepPrimaryParticle, hepGenZeroParticle );
+    truthBinding = new TruthBinding( hepTruthParticle, primaryGenParticle, hepGenZeroParticle );
     particle.setTruthBinding(truthBinding);
   }
   // At this point the values returned by particle.getParticleLink()
