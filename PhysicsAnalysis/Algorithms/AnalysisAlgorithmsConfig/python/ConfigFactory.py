@@ -271,6 +271,9 @@ class ConfigFactory():
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPointConfig,
             superBlocks="TauJets")
+        from TauAnalysisAlgorithms.TauAnalysisConfig import TauTriggerAnalysisSFBlock
+        self.addAlgConfigBlock(algName="TriggerSF", alg=TauTriggerAnalysisSFBlock,
+                               superBlocks="TauJets")
 
         # SystObjectLink
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import SystObjectLinkBlock

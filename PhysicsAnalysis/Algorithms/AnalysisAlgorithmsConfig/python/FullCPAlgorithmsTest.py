@@ -21,6 +21,12 @@ triggerChains = [
     'HLT_mu20_mu8noL1',
     'HLT_2e17_lhvloose_nod0'
 ]
+tauTriggerChainsSF = {
+    '2015': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    '2016': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    '2017': ['HLT_tau25_medium1_tracktwo', 'HLT_tau35_medium1_tracktwo'],
+    '2018': ['HLT_tau25_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA', 'HLT_tau35_medium1_tracktwoEF_OR_mediumRNN_tracktwoMVA'],
+}
 
 # Example cuts used for event selection algorithm test
 exampleSelectionCuts = {
@@ -854,6 +860,12 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         containerName='AnaTauJets',
         selectionName='tight')
     configSeq.setOptionValue ('.quality', 'Tight')
+
+    if not forCompare:
+        configSeq += config.makeConfig('TauJets.TriggerSF')
+        configSeq.setOptionValue('.containerName', 'AnaTauJets')
+        configSeq.setOptionValue('.tauID', 'Tight')
+        configSeq.setOptionValue('.triggerChainsPerYear', tauTriggerChainsSF)
 
     configSeq += config.makeConfig ('TauJets.PtEtaSelection',
         containerName='AnaTauJets')
