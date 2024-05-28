@@ -17,8 +17,6 @@
 
 #include <TTree.h>
 
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string.hpp>
 #include <optional>
 #include <boost/regex.hpp>
 #include <boost/scope_exit.hpp>
@@ -201,7 +199,7 @@ namespace top {
         char const* sep = "\n  ";
         for (auto&& kv : readStats.containers()) {
           xAOD::BranchStats const& bs = kv.second;
-          if (boost::ends_with(bs.GetName(), "TDS") || boost::ends_with(bs.GetName(), "Aux.")) continue;
+          if (std::string(bs.GetName()).ends_with("TDS") || std::string(bs.GetName()).ends_with("Aux.")) continue;
           if (bs.readEntries()) {
             out << sep << json_dump(bs.GetName()) << ": " << json_dump(bs.readEntries());
             sep = ",\n  ";
