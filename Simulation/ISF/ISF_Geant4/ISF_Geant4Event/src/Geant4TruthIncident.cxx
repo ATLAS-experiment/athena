@@ -256,7 +256,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short
 bool iGeant4::Geant4TruthIncident::particleAlive(const G4Track *track) const {
   G4TrackStatus  trackStatus = track->GetTrackStatus();
 
-  if ( trackStatus!=fAlive ) {
+  if ( trackStatus != fAlive && trackStatus != fStopButAlive ) {
     // parent does not exist in G4 anymore after this step
 
     // check whether the particle was returned to ISF

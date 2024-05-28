@@ -1,11 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-
-///////////////////////////////////////////////////////////////////
-// PhysicsValidationUserAction.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "PhysicsValidationUserAction.h"
@@ -222,8 +217,7 @@ namespace G4UA{
       G4Track * track = aStep->GetTrack();
       
       int trackID=track->GetTrackID();
-      
-      //std::cout <<"processing track:"<< trackID<<":"<< mom.mag()<< std::endl;
+      const bool trackIsAlive = (track->GetTrackStatus() == fAlive || track->GetTrackStatus() == fStopButAlive);
       
       if (trackID != m_currentTrack) {     // for new G4Track only
 	
@@ -322,7 +316,7 @@ namespace G4UA{
 	VTrackInformation * trackInfo = static_cast<VTrackInformation*>(track->GetUserInformation());
 	::iGeant4::Geant4TruthIncident truth( aStep, *trackInfo->GetBaseISFParticle(), geoID, atlasG4EvtUserInfo);
 	unsigned int nSec = truth.numberOfChildren();
-	if (nSec>0 || track->GetTrackStatus()!=fAlive ) {      // save interaction info
+	if (nSec>0 || !trackIsAlive ) {      // save interaction info
 	  //std::cout <<"interaction:"<< process->GetProcessSubType() <<":"<<nSec<< std::endl;
 	  m_process=process->GetProcessSubType();
 	  m_pdg_mother = track->GetDefinition()->GetPDGEncoding();
@@ -334,7 +328,7 @@ namespace G4UA{
 	  m_vtx_theta   = postStep->GetPosition().theta();
 	  m_vtx_phi     = postStep->GetPosition().phi();
 	  
-	  int iPrimSurv = track->GetTrackStatus()!=fAlive ? 0 : 1;
+	  int iPrimSurv = !trackIsAlive ? 0 : 1;
 	  m_nChild     = nSec+iPrimSurv;
 	  
 	  G4ThreeVector pbal(mom);
@@ -404,7 +398,7 @@ namespace G4UA{
       }
       
       // if particle killed, save the info
-      if ( track->GetTrackStatus()!=fAlive ) {
+      if ( !trackIsAlive ) {
 	m_scEnd = process? process->GetProcessSubType() : -1;
 	m_geoID = geoID;
 	m_dt = track->GetLocalTime();

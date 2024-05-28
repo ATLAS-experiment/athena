@@ -151,7 +151,7 @@ namespace G4UA {
         } else {
           // TODO: link G4Track to ISF particle with the new GeoID
         }
-      } else if ( aTrackStatus!=fAlive ) {
+      } else if ( aTrackStatus!=fAlive && aTrackStatus != fStopButAlive  ) {
         // particle is killed by G4 in this step
         // TODO: do we need to handle this case specifically?
         // ATH_MSG_DEBUG(" -> G4Track enters geoID = " << nextGeoID <<
