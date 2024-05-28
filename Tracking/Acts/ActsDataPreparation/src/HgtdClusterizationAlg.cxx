@@ -51,7 +51,6 @@ namespace ActsTrk {
         ATH_CHECK(m_clusteringTool->clusterize(*rdoCollection, ctx, *clusterContainer));
     }
 
-    ATH_MSG_DEBUG("Executing HgtdClusterizationAlg...");
     return StatusCode::SUCCESS;
   }
   
