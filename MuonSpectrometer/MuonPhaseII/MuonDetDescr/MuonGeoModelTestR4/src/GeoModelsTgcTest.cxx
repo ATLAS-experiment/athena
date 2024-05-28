@@ -177,15 +177,12 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
     m_chamberDesign = reElement->chamberDesign();
     ///
     m_numLayers = reElement->numLayers();
-    m_yCutout = reElement->yCutout();
     m_gasTck = reElement->gasGapThickness();
     ///
     m_sChamberLength = reElement->sChamberLength();
     m_lChamberLength = reElement->lChamberLength();
     m_chamberHeight = reElement->chamberHeight();
-    ///
-    ///Pads will come here 
- 
+     
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
@@ -207,6 +204,8 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
             m_sPadLength = reElement->sPadLength(layID);
             m_lPadLength = reElement->lPadLength(layID);
             m_gapHeight = reElement->gapHeight(layID);
+            m_yCutout = reElement->yCutout(layID);
+
             switch (chType) {
                 case sTgcIdHelper::sTgcChannelTypes::Pad:
                     m_numPads.push_back(reElement->numPads(layID));

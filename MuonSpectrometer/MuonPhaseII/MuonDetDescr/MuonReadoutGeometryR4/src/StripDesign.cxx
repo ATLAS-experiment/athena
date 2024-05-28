@@ -80,6 +80,14 @@ namespace MuonGMR4{
         m_isFlipped = false;
 
     }
+    void StripDesign::defineDiamond(double HalfShortY, double HalfLongY, 
+                                        double HalfHeight, double yCutout) {
+        /// define a trapezoid region to preserve the functionality of intersect functions in StripDesign class
+        double HalfLongY_uncut = HalfLongY + yCutout * (HalfLongY - HalfShortY)/(2*HalfHeight - yCutout);
+        defineTrapezoid(HalfShortY, HalfLongY_uncut, HalfHeight);
+        m_yCutout = yCutout;
+        m_longHalfY = HalfLongY;
+    }
     void StripDesign::flipTrapezoid() {
         if (m_isFlipped) {
             ATH_MSG_WARNING("It's impossible to flip a trapezoid twice. Swap short and long lengths");
@@ -93,6 +101,7 @@ namespace MuonGMR4{
         m_topRight = Amg::Vector2D{m_longHalfY, m_halfX};
         resetDirCache();
     }
+
     void StripDesign::defineStripLayout(Amg::Vector2D&& posFirst,
                                         const double stripPitch,
                                         const double stripWidth,

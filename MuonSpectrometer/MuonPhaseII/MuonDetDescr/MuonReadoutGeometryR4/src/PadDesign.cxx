@@ -3,6 +3,16 @@
 */
 #include <MuonReadoutGeometryR4/PadDesign.h>
 #include <GaudiKernel/SystemOfUnits.h>
+namespace {
+    constexpr double tolerance = 0.001 * Gaudi::Units::mm;
+}
+/// Helper macro to facilliate the ordering
+#define ORDER_PROP(PROP)                                            \
+      {                                                             \
+        if (std::abs(PROP - other.PROP) > tolerance) {              \
+            return PROP < other.PROP;                               \
+        }                                                           \
+      }
 
 namespace MuonGMR4{
     void PadDesign::print(std::ostream& ostr) const {
@@ -18,6 +28,10 @@ namespace MuonGMR4{
     }
 
     bool PadDesign::operator<(const PadDesign& other) const {
+        ORDER_PROP(numPadPhi());
+        ORDER_PROP(numPadEta());
+        ORDER_PROP(firstPadPhiDiv());
+        ORDER_PROP(padPhiShift());
         return static_cast<const StripDesign&>(*this) < other;
     }
 
@@ -60,8 +74,8 @@ namespace MuonGMR4{
         double topLeftPoint{0.};
         double topRightPoint{0.};
         /// Defining the top and the bottom edge of the active area depending on whether its a diamond or a trapezoid
-        double maxBottom = /*yCutout()? (-2. * halfWidth() + yCutout()) :*/ -halfWidth();
-        double maxTop = /*yCutout()? yCutout :*/ halfWidth();
+        double maxBottom = -halfWidth();///
+        double maxTop = halfWidth();///
         /// Calculating the distance of top and bottom sides of the pad w.r.t. the chamber origin
         if(padEta == 1) {
             botEdge = maxBottom;
@@ -100,7 +114,7 @@ namespace MuonGMR4{
         topLeftPoint += padPhiShift() * cosLeft;
         topRightPoint += padPhiShift() * cosRight;
         /// Outer edges of the trapezoid do not undergo staggering. Hence the if conditions.
-        double adjHeight = /*yCutout()? 2 * halfWidth() - yCutout() :*/ 2 * halfWidth();
+        double adjHeight = yCutout()? 2 * halfWidth() - yCutout() : 2 * halfWidth();///
         if(padPhi == 1) {
             botRightPoint = shortHalfHeight() + ((longHalfHeight() - shortHalfHeight()) * (botEdge - maxBottom) / adjHeight);
             topRightPoint = shortHalfHeight() + ((longHalfHeight() - shortHalfHeight()) * (topEdge - maxBottom) / adjHeight);
@@ -115,18 +129,18 @@ namespace MuonGMR4{
         /// In our logic, we are keeping only four corners for all the pads and essentially ignoring the fifth vertex 
         /// for these specific cases because the technical drawings suggest that the active ignored is very small and
         /// the effect on reconstruction and digitization will be negligible.
-/*
-        if (yCutout && topEdge > 0) {
+
+        if (yCutout() && topEdge > (halfWidth() - yCutout())) {
             if (padPhi == 1) {
                 topRightPoint = longHalfHeight();
-                if (botEdge > 0) botRightPoint = longHalfHeight();
+                if (botEdge > (halfWidth() - yCutout())) botRightPoint = longHalfHeight();
             }
             if (padPhi == numPadPhi()) {
                 topLeftPoint = -longHalfHeight();
-                if (botEdge > 0) botLeftPoint = -longHalfHeight();
+                if (botEdge > (halfWidth() - yCutout())) botLeftPoint = -longHalfHeight();
             }
         }
-*/
+
         /// Swapping the edges and the points in a mirror fashion if our initial assumptions about the left/Right 
         /// and top/Bottom are false.
         if (botEdge > topEdge) {

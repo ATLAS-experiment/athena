@@ -120,7 +120,7 @@ Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& mea
       Amg::Vector2D stripCenter{Amg::Vector2D::Zero()};
       std::optional<Amg::Vector2D> stripCenterOpt = stripDesign(measHash).center(channelNumber(measHash));
       if (!stripCenterOpt) {
-         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip" << channelNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip " << channelNumber(measHash) << " doesn't intersect with the edges of the trapezoid.");
          return stripCenter;
       }
       stripCenter = std::move(*stripCenterOpt);
