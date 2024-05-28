@@ -616,7 +616,6 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
   if (makeLinkToTruth) {
     // Set the user information for this primary to point to the HepMcParticleLink...
     PrimaryParticleInformation* ppi = new PrimaryParticleInformation(genpart);
-    ppi->SetParticle(genpart);
     ppi->SetRegenerationNr(0);
     g4particle->SetUserInformation(ppi);
     ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
@@ -780,7 +779,6 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(HepMC::GenP
   if (makeLinkToTruth) {
     // Set the user information for this primary to point to the HepMcParticleLink...
     PrimaryParticleInformation* ppi = new PrimaryParticleInformation(&genpart);
-    ppi->SetParticle(&genpart);
     ppi->SetRegenerationNr(0);
     g4particle->SetUserInformation(ppi);
     ATH_MSG_VERBOSE("Making primary down the line with barcode " << ppi->GetParticleUniqueID());
