@@ -102,7 +102,6 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     """Decorate tau ID scores and working points"""
 
     kwargs.setdefault("evetoFix",         True)
-    kwargs.setdefault("DeepSetID",        True)
     kwargs.setdefault("GNNTauID",         True)
     kwargs.setdefault("TauContainerName", "TauJets")
     kwargs.setdefault("prefix",           kwargs['TauContainerName'])
@@ -115,19 +114,9 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     if kwargs['evetoFix']:
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNFixCfg(flags)) )
 
-    # vertex-corrected clusters must be rebuilt for tau ID
-    if kwargs['DeepSetID'] or kwargs['GNNTauID']:
-        tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
-
-    if kwargs['DeepSetID']:
-        # R22 DeepSet tau ID tune with track RNN scores
-        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags, version="v1")) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags, version="v1")) )
-        # R22 DeepSet tau ID tune without track RNN scores
-        tools.append( acc.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags, version="v2")) )
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags, version="v2")) )
-
     if kwargs['GNNTauID']:    
+        # vertex-corrected clusters must be rebuilt for tau ID
+        tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
         # Add in GNTau!
         tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags)) )
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags)) )
