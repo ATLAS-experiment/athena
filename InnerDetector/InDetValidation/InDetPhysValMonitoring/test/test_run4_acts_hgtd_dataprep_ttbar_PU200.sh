@@ -53,10 +53,38 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-run "IDPVM" \
+run "IDPVM-athena" \
     runIDPVM.py \
     --filesInput AOD.athena.root \
     --outputFile idpvm.athena.root \
+    --doActs --doHGTD
+
+reco_rc=$?
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
+run "Reconstruction-acts" \
+    Reco_tf.py --CA \
+    --inputRDOFile ${rdo_23p0} \
+    --outputAODFile AOD.acts.root \
+    --steering doRAWtoALL \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --postInclude "ActsConfig.ActsClusterizationConfig.ActsHgtdClusterizationAlgCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --preExec "flags.Reco.EnableHGTDExtension=True;flags.Acts.EDM.PersistifyClusters=True" \
+    --maxEvents ${nEvents} \
+    --perfmon fullmonmt \
+    --multithreaded
+
+reco_rc=$?
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
+run "IDPVM-acts" \
+    runIDPVM.py \
+    --filesInput AOD.acts.root \
+    --outputFile idpvm.acts.root \
     --doActs --doHGTD
 
 reco_rc=$?
@@ -68,9 +96,23 @@ echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
+run "dcube-last-acts" \
+    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_acts_last \
+    -c ${dcubeXmlAbsPath} \
+    -r ${lastref_dir}/idpvm.acts.root \
+    idpvm.acts.root
+
 run "dcube-last-athena" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_last \
+    -p -x dcube_athena_last \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.athena.root \
     idpvm.athena.root
+
+run "dcube-athena-acts" \
+    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_athena_acts \
+    -c ${dcubeXmlAbsPath} \
+    -r idpvm.athena.root \
+    idpvm.acts.root
