@@ -400,9 +400,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 	  passDigiNom = true;
 	}
 
-	//Should be able to use emplace_back here with C++20, see https://en.cppreference.com/w/cpp/language/aggregate_initialization
-	lvaluemap_digi.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
-	lvaluemap_digi_ALL.push_back({Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom, badNotMasked});
+	lvaluemap_digi.emplace_back(Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom, badNotMasked);
+	lvaluemap_digi_ALL.emplace_back(Digi_eta, Digi_phi, Digi_ieta, Digi_iphi, Digi_sampos, Digi_ADC, Digi_latomeSourceIdBIN, Pedestal, Digi_maxpos, Digi_partition, Digi_Diff_ADC_Ped_Norm, Digi_Diff_ADC_Ped, Digi_Diff_ADC0_Ped, BCID, lumi_block, passDigiNom, badNotMasked);
 
       } // End loop over samples
 
@@ -624,9 +623,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 	}
       } // end nominal selections
 
-      //Should be able to use emplace_back here with C++20, see https://en.cppreference.com/w/cpp/language/aggregate_initialization
-      lvaluemap_sc.push_back({SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0, notMaskedEoflGt1});
-      lvaluemap_sc_ALL.push_back({SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0, notMaskedEoflGt1});
+      lvaluemap_sc.emplace_back(SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0, notMaskedEoflGt1);
+      lvaluemap_sc_ALL.emplace_back(SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID, lumi_block, passSCNom, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0, notMaskedEoflGt1);
 
 
     } //end loop over SCs
