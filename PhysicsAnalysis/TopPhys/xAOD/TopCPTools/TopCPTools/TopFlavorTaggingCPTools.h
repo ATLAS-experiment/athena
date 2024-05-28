@@ -38,6 +38,7 @@ namespace top {
 
     std::string m_tagger = "";
     std::string m_cdi_file = "";
+    std::string m_cdi_file_online = "";
     std::string m_efficiency_maps;
     const std::vector<std::string> m_jet_flavors = {
       "B", "C", "T", "Light"

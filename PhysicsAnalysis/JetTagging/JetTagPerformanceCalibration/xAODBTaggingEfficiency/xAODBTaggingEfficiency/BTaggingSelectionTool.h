@@ -125,7 +125,7 @@ private:
   Tagger SetTaggerEnum(std::string taggerName){
     if(taggerName == "DL1r") return Tagger::DL1r;
     else if(taggerName == "DL1") return Tagger::DL1;
-    else if(taggerName == "MV2c10") return Tagger::MV2c10;
+    else if(taggerName == "MV2c10" || taggerName == "OnlineMV2") return Tagger::MV2c10;
     else 
       ATH_MSG_ERROR("Tagger Name NOT supported.");
     return Tagger::UNKNOWN;

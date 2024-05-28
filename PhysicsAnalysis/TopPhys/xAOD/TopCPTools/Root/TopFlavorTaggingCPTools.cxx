@@ -52,6 +52,10 @@ namespace top {
     } else {
       m_cdi_file = cdi_file_default;
     }
+    
+    if (m_config->bTaggingOnlineCDIPath() != "") { 
+      m_cdi_file_online=m_config->bTaggingOnlineCDIPath();
+    }
     // This ordering needs to match the indexing in TDP (for missing cases, we use default which gives a MC/MC of 1 as
     // its the same as the eff used in the calibration
     // Pythia6;Herwigpp;Pythia8;Sherpa(2.2);Sherpa(2.1);aMC@NLO+Pythia8;Herwig7.1.3;Sherpa228;Sherpa2210;Herwigpp721
@@ -76,6 +80,22 @@ namespace top {
     top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "DL1", {"FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85", "Continuous"}), "Error setting AntiKt4EMPFlowJets WP");
     top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "DL1r", {"FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85", "Continuous"}), "Error setting AntiKt4EMPFlowJets WP");
     top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", false, "DL1rmu", {"FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85", "Continuous"}), "Error setting AntiKt4EMPFlowJets WP");
+
+    //Online tagging for EMPflow jets
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "OnlineMV2", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Online WP");
+
+    //Conditional tagging for EMPflow jets for offline DL1r60
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r60", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r60");
+    
+    //Conditional tagging for EMPflow jets for offline DL1r70
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r70", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r70");
+
+    //Conditional tagging for EMPflow jets for offline DL1r77
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r77", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r77");
+    
+    //Conditional tagging for EMPflow jets for offline DL1r85
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r85", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP for offline DL1r85");
+    
 
     // Calibrated and uncalibrated working points for R=0.2 track jets for all algorithms
     top::check(setTaggerWorkingPoints("AntiKt2PV0TrackJets", true, "MV2c10", {"FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85", "Continuous"}), "Error setting AntiKt2PV0TrackJets WP");
@@ -104,6 +124,7 @@ namespace top {
     std::string trackJets_collection = m_config->sgKeyTrackJets();
 
     const std::string calib_file_path = PathResolverFindCalibFile(m_cdi_file);
+    const std::string calib_file_path_online = (m_cdi_file_online!="None") ? PathResolverFindCalibFile(m_cdi_file_online) : "";
     const std::string excludedSysts = m_config->bTagSystsExcludedFromEV() == "none" ? "" : m_config->bTagSystsExcludedFromEV();
 
     //------------------------------------------------------------
@@ -128,28 +149,27 @@ namespace top {
         // Setup BTaggingSelectionTool
         //------------------------------------------------------------
         // Updated name to use m_tagger
-        std::string btagsel_tool_name = "BTaggingSelectionTool_" + bTagWPName + "_" + caloJets_collection;
-        BTaggingSelectionTool* btagsel = new BTaggingSelectionTool(btagsel_tool_name);
-        top::check(btagsel->setProperty("TaggerName", m_tagger),
-                   "Failed to set b-tagging selecton tool TaggerName");
-        top::check(btagsel->setProperty("JetAuthor", caloJets_collection),
-                   "Failed to set b-tagging selection JetAuthor");
-        top::check(btagsel->setProperty("FlvTagCutDefinitionsFileName",
-                                        m_cdi_file),
-                   "Failed to set b-tagging selection tool CDI file");
-        top::check(btagsel->setProperty("OperatingPoint", btagWP),
-                   "Failed to set b-tagging selection tool OperatingPoint");
-        top::check(btagsel->setProperty("MinPt",
-                                        static_cast<double>(m_config->jetPtcut())),
-                   "Failed to set b-tagging selection tool MinPt");
-        top::check(btagsel->setProperty("MaxEta",
-                                        static_cast<double>(m_config->jetEtacut())),
-                   "Failed to set b-tagging selection tool MaxEta");
-        top::check(btagsel->initialize(),
-                   "Failed to initialize b-tagging selection tool");
-        m_btagging_selection_tools.push_back(btagsel);
-        m_config->setBTagAlgo_available(m_tagger, btagsel_tool_name);
-
+	std::string btagsel_tool_name = "BTaggingSelectionTool_" + bTagWPName + "_" + caloJets_collection;
+	BTaggingSelectionTool* btagsel = new BTaggingSelectionTool(btagsel_tool_name);
+	top::check(btagsel->setProperty("TaggerName", m_tagger),
+		   "Failed to set b-tagging selecton tool TaggerName");
+	top::check(btagsel->setProperty("JetAuthor", caloJets_collection),
+		   "Failed to set b-tagging selection JetAuthor");
+	top::check(btagsel->setProperty("FlvTagCutDefinitionsFileName",
+					m_cdi_file),
+		   "Failed to set b-tagging selection tool CDI file");
+	top::check(btagsel->setProperty("OperatingPoint", btagWP),
+		   "Failed to set b-tagging selection tool OperatingPoint");
+	top::check(btagsel->setProperty("MinPt",
+					static_cast<double>(m_config->jetPtcut())),
+		   "Failed to set b-tagging selection tool MinPt");
+	top::check(btagsel->setProperty("MaxEta",
+					static_cast<double>(m_config->jetEtacut())),
+		   "Failed to set b-tagging selection tool MaxEta");
+	top::check(btagsel->initialize(),
+		   "Failed to initialize b-tagging selection tool");
+	m_btagging_selection_tools.push_back(btagsel);
+	m_config->setBTagAlgo_available(m_tagger, btagsel_tool_name);
         if ((caloJets_type == "AntiKt4EMTopoJets" && std::find(m_calo_WPs_calib.begin(), m_calo_WPs_calib.end(), bTagWPName) == m_calo_WPs_calib.end()) ||
             (caloJets_type == "AntiKt4EMPFlowJets" && std::find(m_pflow_WPs_calib.begin(), m_pflow_WPs_calib.end(), bTagWPName) == m_pflow_WPs_calib.end())) {
           ATH_MSG_WARNING("top::FlavorTaggingCPTools::initialize");
@@ -168,21 +188,22 @@ namespace top {
           top::check(btageff->setProperty("JetAuthor", caloJets_collection),
                      "Failed to set b-tagging JetAuthor");
           top::check(btageff->setProperty("MinPt",
-                                          static_cast<double>(m_config->jetPtcut())),
-                                          "Failed to set b-tagging selection tool MinPt");
-          top::check(btageff->setProperty("EfficiencyFileName", calib_file_path),
-                     "Failed to set path to b-tagging CDI file");
-          top::check(btageff->setProperty("ScaleFactorFileName", calib_file_path),
-                     "Failed to set path to b-tagging CDI file");
+					  static_cast<double>(m_config->jetPtcut())),
+  		     "Failed to set b-tagging selection MinPt tool");
+	  top::check(btageff->setProperty("EfficiencyFileName", calib_file_path),
+		     "Failed to set path to b-tagging CDI file");
+	  top::check(btageff->setProperty("ScaleFactorFileName", calib_file_path),
+		     "Failed to set path to b-tagging CDI file");
           top::check(btageff->setProperty("ScaleFactorBCalibration", m_config->bTaggingCalibration_B()),
                      "Failed to set b-tagging calibration (B): " + m_config->bTaggingCalibration_B());
-          top::check(btageff->setProperty("ScaleFactorCCalibration", m_config->bTaggingCalibration_C()),
-                     "Failed to set b-tagging calibration (C): " + m_config->bTaggingCalibration_C());
-          // using same calibration for T as for C
-          top::check(btageff->setProperty("ScaleFactorTCalibration", m_config->bTaggingCalibration_C()),
-                     "Failed to set b-tagging calibration (T): " + m_config->bTaggingCalibration_C());
-          top::check(btageff->setProperty("ScaleFactorLightCalibration", m_config->bTaggingCalibration_Light()),
-                     "Failed to set b-tagging calibration (Light): " + m_config->bTaggingCalibration_Light());
+	  //note: C and Light factors not provided for Online trigger. Protection added when computing the SF
+	  top::check(btageff->setProperty("ScaleFactorCCalibration", m_config->bTaggingCalibration_C()),  
+		     "Failed to set b-tagging calibration (C): " + m_config->bTaggingCalibration_C());
+	  // using same calibration for T as for C
+	  top::check(btageff->setProperty("ScaleFactorTCalibration", m_config->bTaggingCalibration_C()),
+		     "Failed to set b-tagging calibration (T): " + m_config->bTaggingCalibration_C());
+	  top::check(btageff->setProperty("ScaleFactorLightCalibration", m_config->bTaggingCalibration_Light()),
+		     "Failed to set b-tagging calibration (Light): " + m_config->bTaggingCalibration_Light());
           for (auto jet_flav : m_jet_flavors) {
             // 09/02/18 IC: The pseudo-continuous does not have MC/MC SF so we need to only apply default for this case
             // 08/05/18 Francesco La Ruffa: The pseudo-continuous has now its own MC/MC SFs, no needed to set default
@@ -202,6 +223,91 @@ namespace top {
         m_config->setBTagWP_available(bTagWPName);
       }
     }
+
+    // online and conditional b-tag WP
+
+    for (const auto& TaggerBtagWP : m_config->bTagWP_onlCond()) {
+      m_tagger = TaggerBtagWP.first;
+      std::string btagWP = TaggerBtagWP.second;
+      std::string bTagWPName = m_tagger + "_" + btagWP;
+      if ((caloJets_type == "AntiKt4EMTopoJets" && std::find(m_calo_WPs.begin(), m_calo_WPs.end(), bTagWPName) == m_calo_WPs.end()) ||
+          (caloJets_type == "AntiKt4EMPFlowJets" && std::find(m_pflow_WPs.begin(), m_pflow_WPs.end(), bTagWPName) == m_pflow_WPs.end())) {
+        ATH_MSG_WARNING("top::FlavorTaggingCPTools::initialize");
+        ATH_MSG_WARNING("     b-tagging WP: " + bTagWPName + " not supported for jet collection " + caloJets_collection + " with algorithm " + m_tagger);
+        ATH_MSG_WARNING("     it will therefore be ignored");
+      } else {
+        //------------------------------------------------------------
+        // Setup BTaggingSelectionTool except for Conditional tools
+        //------------------------------------------------------------
+        // Updated name to use m_tagger
+	if(m_tagger.find("Conditional") == std::string::npos) {
+	  std::string btagsel_tool_name = "BTaggingSelectionTool_" + bTagWPName + "_" + caloJets_collection;
+	  BTaggingSelectionTool* btagsel = new BTaggingSelectionTool(btagsel_tool_name);
+	  top::check(btagsel->setProperty("TaggerName", m_tagger),
+		     "Failed to set b-tagging selecton tool TaggerName");
+	  top::check(btagsel->setProperty("JetAuthor", caloJets_collection),
+		     "Failed to set b-tagging selection JetAuthor");
+	  top::check(btagsel->setProperty("FlvTagCutDefinitionsFileName",
+					  m_cdi_file_online),
+		     "Failed to set b-tagging selection tool ONLINE CDI file");
+	  top::check(btagsel->setProperty("OperatingPoint", btagWP),
+		     "Failed to set b-tagging selection tool OperatingPoint");
+	  top::check(btagsel->setProperty("MinPt",
+					  static_cast<double>(m_config->jetPtcut())),
+		     "Failed to set b-tagging selection tool MinPt");
+	  top::check(btagsel->setProperty("MaxEta",
+					  static_cast<double>(m_config->jetEtacut())),
+		     "Failed to set b-tagging selection tool MaxEta");
+	  top::check(btagsel->initialize(),
+		     "Failed to initialize b-tagging selection tool");
+	  m_btagging_selection_tools.push_back(btagsel);
+	  m_config->setBTagAlgo_available(m_tagger, btagsel_tool_name);
+	}
+        if ((caloJets_type == "AntiKt4EMTopoJets" && std::find(m_calo_WPs_calib.begin(), m_calo_WPs_calib.end(), bTagWPName) == m_calo_WPs_calib.end()) ||
+            (caloJets_type == "AntiKt4EMPFlowJets" && std::find(m_pflow_WPs_calib.begin(), m_pflow_WPs_calib.end(), bTagWPName) == m_pflow_WPs_calib.end())) {
+          ATH_MSG_WARNING("top::FlavorTaggingCPTools::initialize");
+          ATH_MSG_WARNING("     b-tagging WP: " + bTagWPName + " is not calibrated for jet collection " + caloJets_collection);
+          ATH_MSG_WARNING("     it will therefore be ignored for the scale-factors, although the tagging decisions will be saved");
+        } else {
+          //------------------------------------------------------------
+          // Setup BTaggingEfficiencyTool
+          //------------------------------------------------------------
+          std::string btageff_tool_name = "BTaggingEfficiencyTool_" + bTagWPName + "_" + caloJets_collection;
+          BTaggingEfficiencyTool* btageff = new BTaggingEfficiencyTool(btageff_tool_name);
+          top::check(btageff->setProperty("TaggerName", m_tagger),
+                     "Failed to set b-tagging TaggerName");
+          top::check(btageff->setProperty("OperatingPoint", btagWP),
+                     "Failed to set b-tagging OperatingPoint");
+          top::check(btageff->setProperty("JetAuthor", caloJets_collection),
+                     "Failed to set b-tagging JetAuthor");
+          top::check(btageff->setProperty("MinPt",
+					  static_cast<double>(m_config->jetPtcut())),
+  		     "Failed to set b-tagging selection MinPt tool");
+	  top::check(btageff->setProperty("EfficiencyFileName", calib_file_path_online),
+		     "Failed to set path to ONLINE b-tagging CDI file");
+	  top::check(btageff->setProperty("ScaleFactorFileName", calib_file_path_online),
+		     "Failed to set path to ONLINE b-tagging CDI file");
+          top::check(btageff->setProperty("ScaleFactorBCalibration", m_config->bTaggingCalibration_B()),
+                     "Failed to set b-tagging calibration (B): " + m_config->bTaggingCalibration_B());
+          for (auto jet_flav : m_jet_flavors) {
+            top::check(btageff->setProperty("Efficiency" + jet_flav + "Calibrations", m_efficiency_maps),
+                       "Failed to set " + jet_flav + "-calibrations efficiency maps");
+          }
+          top::check(btageff->setProperty("ExcludeFromEigenVectorTreatment", excludedSysts),
+                     "Failed to set b-tagging systematics to exclude from EV treatment");
+          top::check(btageff->initialize(), "Failed to initialize " + bTagWPName);
+          // Check the excludedSysts - Cannot check before the tool is initialised
+          if (this->checkExcludedSysts(btageff, excludedSysts) != StatusCode::SUCCESS) {
+              ATH_MSG_WARNING("Incorrect excluded systematics have been provided.");
+          }
+          m_btagging_efficiency_tools.push_back(btageff);
+          m_config->setBTagWP_calibrated_onlCond(bTagWPName);
+        }
+        m_config->setBTagWP_available_onlCond(bTagWPName);
+      }
+    }
+
+    
     if (m_config->useTrackJets()) {
       for (auto TaggerBtagWP : m_config->bTagWP_trkJet()) {
         m_tagger = TaggerBtagWP.first;

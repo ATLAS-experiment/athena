@@ -472,9 +472,33 @@ namespace top {
     std::unordered_map<std::string, float> m_weight_bTagSF;
     std::unordered_map<std::string, float> m_weight_trackjet_bTagSF;
 
+    // nominal b-tagging SF for combined offline and online WP
+    std::unordered_map<std::string, float> m_weight_bTagSF_off_onl;
+
+    // nominal b-tagging SF for two combined offline and one online WP
+    std::unordered_map<std::string, float> m_weight_bTagSF_off1_off2_onl;
+    
     // per-jet nominal btag SF
     std::unordered_map<std::string, std::vector<float> > m_perjet_weight_bTagSF;
+    std::unordered_map<std::string, std::vector<float> > m_perjet_weight_bTagSF_onl;  // online part of SF
+    std::unordered_map<std::string, std::vector<float> > m_perjet_weight_bTagSF_cond; // conditional part of SF
     std::unordered_map<std::string, std::vector<float> > m_perjet_weight_trackjet_bTagSF;
+
+    // per-jet nominal trigger matched online btag weight
+    std::unordered_map<std::string, std::vector<float> > m_perjet_trigMatch_taggerWeight;
+    // per-jet trigger matched online 4-vector
+    std::unordered_map<std::string, std::vector<float> > m_perjet_trigMatch_pt;
+    std::unordered_map<std::string, std::vector<float> > m_perjet_trigMatch_eta;
+    std::unordered_map<std::string, std::vector<float> > m_perjet_trigMatch_phi;
+    std::unordered_map<std::string, std::vector<float> > m_perjet_trigMatch_e;
+    // per-jet online b-tagger acceptance result
+    std::unordered_map<std::string, std::vector<char> > m_perjet_isbtagged_onl;
+    
+    
+    // per-jet nominal btag efficiency
+    std::unordered_map<std::string, std::vector<float> > m_perjet_weight_bTagMCeff;
+    std::unordered_map<std::string, std::vector<float> > m_perjet_weight_bTagMCeff_onl;  // online part of MCeff    
+    std::unordered_map<std::string, std::vector<float> > m_perjet_weight_bTagMCeff_cond; // conditional part of MCeff
 
     // JVT (c++11 initialization for fun)
     float m_weight_jvt = 0.0;
@@ -491,17 +515,36 @@ namespace top {
     // eigen variations affecting b-jets [WP]
     std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_eigen_B_up;
     std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_eigen_B_down;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off_onl_eigen_B_up;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off_onl_eigen_B_down;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off1_off2_onl_eigen_B_up;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off1_off2_onl_eigen_B_down;
     std::unordered_map<std::string, std::vector<float> > m_weight_trackjet_bTagSF_eigen_B_up;
     std::unordered_map<std::string, std::vector<float> > m_weight_trackjet_bTagSF_eigen_B_down;
 
     std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagSF_eigen_B_up;
     std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagSF_eigen_B_down;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagSF_onl_eigen_B_up;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagSF_onl_eigen_B_down;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagSF_cond_eigen_B_up;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagSF_cond_eigen_B_down;
     std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_trackjet_bTagSF_eigen_B_up;
     std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_trackjet_bTagSF_eigen_B_down;
+
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagMCeff_eigen_B_up;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagMCeff_eigen_B_down;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagMCeff_onl_eigen_B_up;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagMCeff_onl_eigen_B_down;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagMCeff_cond_eigen_B_up;
+    std::unordered_map<std::string, std::vector<std::vector<float> > > m_perjet_weight_bTagMCeff_cond_eigen_B_down;
 
     // eigen variations affecting c-jets [WP]
     std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_eigen_C_up;
     std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_eigen_C_down;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off_onl_eigen_C_up;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off_onl_eigen_C_down;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off1_off2_onl_eigen_C_up;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off1_off2_onl_eigen_C_down;
     std::unordered_map<std::string, std::vector<float> > m_weight_trackjet_bTagSF_eigen_C_up;
     std::unordered_map<std::string, std::vector<float> > m_weight_trackjet_bTagSF_eigen_C_down;
 
@@ -513,6 +556,10 @@ namespace top {
     // eigen variations affecting light jets [WP]
     std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_eigen_Light_up;
     std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_eigen_Light_down;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off_onl_eigen_Light_up;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off_onl_eigen_Light_down;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off1_off2_onl_eigen_Light_up;
+    std::unordered_map<std::string, std::vector<float> > m_weight_bTagSF_off1_off2_onl_eigen_Light_down;
     std::unordered_map<std::string, std::vector<float> > m_weight_trackjet_bTagSF_eigen_Light_up;
     std::unordered_map<std::string, std::vector<float> > m_weight_trackjet_bTagSF_eigen_Light_down;
 
@@ -524,6 +571,10 @@ namespace top {
     // named systematics [WP][name]
     std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_bTagSF_named_up;
     std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_bTagSF_named_down;
+    std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_bTagSF_off_onl_named_up;
+    std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_bTagSF_off_onl_named_down;
+    std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_bTagSF_off1_off2_onl_named_up;
+    std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_bTagSF_off1_off2_onl_named_down;
     std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_trackjet_bTagSF_named_up;
     std::unordered_map<std::string, std::unordered_map<std::string, float> > m_weight_trackjet_bTagSF_named_down;
 
@@ -531,6 +582,14 @@ namespace top {
                        std::unordered_map<std::string, std::vector<float> > > m_perjet_weight_bTagSF_named_up;
     std::unordered_map<std::string,
                        std::unordered_map<std::string, std::vector<float> > > m_perjet_weight_bTagSF_named_down;
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::vector<float> > > m_perjet_weight_bTagSF_onl_named_up;
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::vector<float> > > m_perjet_weight_bTagSF_onl_named_down;
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::vector<float> > > m_perjet_weight_bTagSF_cond_named_up;
+    std::unordered_map<std::string,
+                       std::unordered_map<std::string, std::vector<float> > > m_perjet_weight_bTagSF_cond_named_down;
     std::unordered_map<std::string,
                        std::unordered_map<std::string, std::vector<float> > > m_perjet_weight_trackjet_bTagSF_named_up;
     std::unordered_map<std::string,
@@ -1230,9 +1289,23 @@ namespace top {
     // nominal b-tagging SF [WP]
     const std::unordered_map<std::string, float>& weight_bTagSF() const {return m_weight_bTagSF;}
     const std::unordered_map<std::string, std::vector<float> >& perjet_weight_bTagSF() const {return m_perjet_weight_bTagSF;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_weight_bTagSF_onl() const {return m_perjet_weight_bTagSF_onl;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_weight_bTagSF_cond() const {return m_perjet_weight_bTagSF_cond;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_weight_bTagMCeff() const {return m_perjet_weight_bTagMCeff;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_weight_bTagMCeff_onl() const {return m_perjet_weight_bTagMCeff_onl;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_weight_bTagMCeff_cond() const {return m_perjet_weight_bTagMCeff_cond;}
     const std::unordered_map<std::string, float>& weight_trackjet_bTagSF() const {return m_weight_trackjet_bTagSF;}
     const std::unordered_map<std::string, std::vector<float> >& perjet_weight_trackjet_bTagSF() const {return m_perjet_weight_trackjet_bTagSF;}
-
+    const std::unordered_map<std::string, std::vector<float> >& perjet_trigMatch_taggerWeight() const {return m_perjet_trigMatch_taggerWeight;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_trigMatch_pt() const {return m_perjet_trigMatch_pt;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_trigMatch_eta() const {return m_perjet_trigMatch_eta;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_trigMatch_phi() const {return m_perjet_trigMatch_phi;}
+    const std::unordered_map<std::string, std::vector<float> >& perjet_trigMatch_e() const {return m_perjet_trigMatch_e;}
+    const std::unordered_map<std::string, std::vector<char> >& perjet_isbtagged_onl() const {return m_perjet_isbtagged_onl;}
+    // combined b-tag WP (off and onl) and (off1 off2 onl) 
+    const std::unordered_map<std::string, float>& weight_bTagSF_off_onl() const {return m_weight_bTagSF_off_onl;}
+    const std::unordered_map<std::string, float>& weight_bTagSF_off1_off2_onl() const {return m_weight_bTagSF_off1_off2_onl;}
+    
     // JVT (c++11 initialization for fun)
     const float& weight_jvt() const {return m_weight_jvt;}
     const float& weight_jvt_up() const {return m_weight_jvt_up;}
@@ -1249,15 +1322,33 @@ namespace top {
     // eigen variations affecting b-jets [WP]
     const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_eigen_B_up() const {return m_weight_bTagSF_eigen_B_up;}
     const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_eigen_B_down() const {return m_weight_bTagSF_eigen_B_down;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off_onl_eigen_B_up() const {return m_weight_bTagSF_off_onl_eigen_B_up;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off_onl_eigen_B_down() const {return m_weight_bTagSF_off_onl_eigen_B_down;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off1_off2__onl_eigen_B_up() const {return m_weight_bTagSF_off1_off2_onl_eigen_B_up;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off1_off2_onl_eigen_B_down() const {return m_weight_bTagSF_off1_off2_onl_eigen_B_down;}
     const std::unordered_map<std::string, std::vector<float> >& weight_trackjet_bTagSF_eigen_B_up() const {return m_weight_trackjet_bTagSF_eigen_B_up;}
     const std::unordered_map<std::string, std::vector<float> >& weight_trackjet_bTagSF_eigen_B_down() const {return m_weight_trackjet_bTagSF_eigen_B_down;}
     const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_eigen_B_up() const {return m_perjet_weight_bTagSF_eigen_B_up;}
     const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_eigen_B_down() const {return m_perjet_weight_bTagSF_eigen_B_down;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_onl_eigen_B_up() const {return m_perjet_weight_bTagSF_onl_eigen_B_up;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_onl_eigen_B_down() const {return m_perjet_weight_bTagSF_onl_eigen_B_down;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_cond_eigen_B_up() const {return m_perjet_weight_bTagSF_cond_eigen_B_up;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_cond_eigen_B_down() const {return m_perjet_weight_bTagSF_cond_eigen_B_down;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagMCeff_eigen_B_up() const {return m_perjet_weight_bTagMCeff_eigen_B_up;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagMCeff_eigen_B_down() const {return m_perjet_weight_bTagMCeff_eigen_B_down;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagMCeff_onl_eigen_B_up() const {return m_perjet_weight_bTagMCeff_onl_eigen_B_up;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagMCeff_onl_eigen_B_down() const {return m_perjet_weight_bTagMCeff_onl_eigen_B_down;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagMCeff_cond_eigen_B_up() const {return m_perjet_weight_bTagMCeff_cond_eigen_B_up;}
+    const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagMCeff_cond_eigen_B_down() const {return m_perjet_weight_bTagMCeff_cond_eigen_B_down;}
     const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_trackjet_bTagSF_eigen_B_up() const {return m_perjet_weight_trackjet_bTagSF_eigen_B_up;}
     const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_trackjet_bTagSF_eigen_B_down() const {return m_perjet_weight_trackjet_bTagSF_eigen_B_down;}
     // eigen variations affecting c-jets [WP]
     const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_eigen_C_up() const {return m_weight_bTagSF_eigen_C_up;}
     const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_eigen_C_down() const {return m_weight_bTagSF_eigen_C_down;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off_onl_eigen_C_up() const {return m_weight_bTagSF_off_onl_eigen_C_up;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off_onl_eigen_C_down() const {return m_weight_bTagSF_off_onl_eigen_C_down;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off1_off2_onl_eigen_C_up() const {return m_weight_bTagSF_off1_off2_onl_eigen_C_up;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off1_off2_onl_eigen_C_down() const {return m_weight_bTagSF_off1_off2_onl_eigen_C_down;}
     const std::unordered_map<std::string, std::vector<float> >& weight_trackjet_bTagSF_eigen_C_up() const {return m_weight_trackjet_bTagSF_eigen_C_up;}
     const std::unordered_map<std::string, std::vector<float> >& weight_trackjet_bTagSF_eigen_C_down() const {return m_weight_trackjet_bTagSF_eigen_C_down;}
     const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_eigen_C_up() const {return m_perjet_weight_bTagSF_eigen_C_up;}
@@ -1267,6 +1358,10 @@ namespace top {
     // eigen variations affecting light jets [WP]
     const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_eigen_Light_up() const {return m_weight_bTagSF_eigen_Light_up;}
     const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_eigen_Light_down() const {return m_weight_bTagSF_eigen_Light_down;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off_onl_eigen_Light_up() const {return m_weight_bTagSF_off_onl_eigen_Light_up;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off_onl_eigen_Light_down() const {return m_weight_bTagSF_off_onl_eigen_Light_down;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off1_off2_onl_eigen_Light_up() const {return m_weight_bTagSF_off1_off2_onl_eigen_Light_up;}
+    const std::unordered_map<std::string, std::vector<float> >& weight_bTagSF_off1_off2_onl_eigen_Light_down() const {return m_weight_bTagSF_off1_off2_onl_eigen_Light_down;}
     const std::unordered_map<std::string, std::vector<float> >& weight_trackjet_bTagSF_eigen_Light_up() const {return m_weight_trackjet_bTagSF_eigen_Light_up;}
     const std::unordered_map<std::string, std::vector<float> >& weight_trackjet_bTagSF_eigen_Light_down() const {return m_weight_trackjet_bTagSF_eigen_Light_down;}
     const std::unordered_map<std::string, std::vector<std::vector<float> > >& perjet_weight_bTagSF_eigen_Light_up() const {return m_perjet_weight_bTagSF_eigen_C_up;}
@@ -1276,10 +1371,18 @@ namespace top {
     // named systematics [WP][name]
     const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_bTagSF_named_up() const {return m_weight_bTagSF_named_up;}
     const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_bTagSF_named_down() const {return m_weight_bTagSF_named_down;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_bTagSF_off_onl_named_up() const {return m_weight_bTagSF_off_onl_named_up;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_bTagSF_off_onl_named_down() const {return m_weight_bTagSF_off_onl_named_down;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_bTagSF_off1_off2_onl_named_up() const {return m_weight_bTagSF_off1_off2_onl_named_up;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_bTagSF_off1_off2_onl_named_down() const {return m_weight_bTagSF_off1_off2_onl_named_down;}
     const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_trackjet_bTagSF_named_up() const {return m_weight_trackjet_bTagSF_named_up;}
     const std::unordered_map<std::string, std::unordered_map<std::string, float> >& weight_trackjet_bTagSF_named_down() const {return m_weight_trackjet_bTagSF_named_down;}
     const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_bTagSF_named_up() const {return m_perjet_weight_bTagSF_named_up;}
     const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_bTagSF_named_down() const {return m_perjet_weight_bTagSF_named_down;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_bTagSF_onl_named_up() const {return m_perjet_weight_bTagSF_onl_named_up;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_bTagSF_onl_named_down() const {return m_perjet_weight_bTagSF_onl_named_down;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_bTagSF_cond_named_up() const {return m_perjet_weight_bTagSF_cond_named_up;}
+    const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_bTagSF_cond_named_down() const {return m_perjet_weight_bTagSF_cond_named_down;}
     const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_trackjet_bTagSF_named_up() const {return m_perjet_weight_trackjet_bTagSF_named_up;}
     const std::unordered_map<std::string, std::unordered_map<std::string, std::vector<float> > >& perjet_weight_trackjet_bTagSF_named_down() const {return m_perjet_weight_trackjet_bTagSF_named_down;}
 

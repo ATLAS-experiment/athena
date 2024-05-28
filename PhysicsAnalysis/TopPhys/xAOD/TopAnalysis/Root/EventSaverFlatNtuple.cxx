@@ -498,6 +498,36 @@ namespace top {
                         tagWP) == m_config->bTagWP_calibrated().end()) continue;
           m_weight_bTagSF[tagWP] = 0.;
           systematicTree->makeOutputVariable(m_weight_bTagSF[tagWP], "weight_bTagSF_" + shortBtagWP(tagWP));
+	  //
+	  // also add combined off_onl weight in case the triplet (offl,onl,cond) is configured
+	  //
+	  for (const auto& offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	    // check if this offline WP has a triplet (offl_onl_cond)
+	    std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	    if(tagWP == offlWP) {
+	      m_weight_bTagSF_off_onl[tagWP] = 0.;
+	      systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl[tagWP], "weight_bTagSF_off_onl_" + shortBtagWP(tagWP));
+	      // for those WP with offl_onl_cond triplet check if there is a
+	      // off1_off2 pair and in case there is check that also off2 has a
+	      // offl_onl_cond triplet. If both conditions are satisfied add
+	      // a off1_off2 btag weight
+	      for (const auto& off1Off2BtagWP : m_config->bTagWP_off1_off2()){
+		// check if this off1 WP has a off2 WP configured as pair (off1_off2)
+		std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
+		if ( tagWP == off1WP ) {
+		  std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
+		  for (const auto& offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		    // check if this off2 WP has a triplet (offl_onl_cond)
+		    std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
+		    if(tag2WP == off2WP) {
+		      m_weight_bTagSF_off1_off2_onl[tagWP] = 0.;
+		      systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl[tagWP], "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP));
+		    }
+		  }
+		}
+	      }	      
+	    }
+	  }
           if (m_config->storePerJetBtagSFs() && m_config->isMC()) {
             m_perjet_weight_bTagSF[tagWP] = std::vector<float>();
             m_perjet_weight_bTagSF_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
@@ -506,8 +536,16 @@ namespace top {
             m_perjet_weight_bTagSF_eigen_C_down[tagWP] = std::vector<std::vector<float> >();
             m_perjet_weight_bTagSF_eigen_Light_up[tagWP] = std::vector<std::vector<float> >();
             m_perjet_weight_bTagSF_eigen_Light_down[tagWP] = std::vector<std::vector<float> >();
+
+            m_perjet_weight_bTagMCeff[tagWP] = std::vector<float>();
+            m_perjet_weight_bTagMCeff_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
+            m_perjet_weight_bTagMCeff_eigen_B_down[tagWP] = std::vector<std::vector<float> >();
+
             systematicTree->makeOutputVariable(m_perjet_weight_bTagSF[tagWP],
                                                "weight_perjet_bTagSF_" + shortBtagWP(tagWP));
+            systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff[tagWP],
+                                               "weight_perjet_bTagMCeff_" + shortBtagWP(tagWP));
+
             if ((systematicTree->name() != nominalTTreeName) && (systematicTree->name() != nominalLooseTTreeName) && !(m_config->dumpBtagSystsInSystTrees())) continue;
             systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_eigen_B_up[tagWP], "weight_perjet_bTagSF_" + shortBtagWP(
                                                  tagWP) + "_eigenvars_B_up");
@@ -521,12 +559,112 @@ namespace top {
                                                  tagWP) + "_eigenvars_Light_up");
             systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_eigen_Light_down[tagWP], "weight_perjet_bTagSF_" + shortBtagWP(
                                                  tagWP) + "_eigenvars_Light_down");
+
+            systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_eigen_B_up[tagWP], "weight_perjet_bTagMCeff_" + shortBtagWP(
+                                                 tagWP) + "_eigenvars_B_up");
+            systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_eigen_B_down[tagWP], "weight_perjet_bTagMCeff_" + shortBtagWP(
+                                                 tagWP) + "_eigenvars_B_down");
+
+
             for (const std::string& name : m_config->btagging_namedSysts(tagWP)) {
               systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_named_up[tagWP][name], "weight_perjet_bTagSF_" + shortBtagWP(
                                                    tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
               systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_named_down[tagWP][name], "weight_perjet_bTagSF_" + shortBtagWP(
                                                    tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
             }
+	    //
+	    // also add onl and cond per-jet weights in case the triplet (offl,onl,cond) is configured
+	    //
+	    for (const auto& offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	      // check if this offline WP has a triplet (offl_onl_cond)
+	      std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	      if(tagWP == offlWP) {
+		// trigger match variables
+		m_perjet_trigMatch_taggerWeight[tagWP] = std::vector<float>();
+		m_perjet_trigMatch_pt[tagWP] = std::vector<float>();
+		m_perjet_trigMatch_eta[tagWP] = std::vector<float>();
+		m_perjet_trigMatch_phi[tagWP] = std::vector<float>();
+		m_perjet_trigMatch_e[tagWP] = std::vector<float>();
+		systematicTree->makeOutputVariable(m_perjet_trigMatch_taggerWeight[tagWP],
+						   "perjet_trigMatch_taggerWeight_" + shortBtagWP(tagWP));
+		systematicTree->makeOutputVariable(m_perjet_trigMatch_pt[tagWP],
+						   "perjet_trigMatch_pt_" + shortBtagWP(tagWP));
+		systematicTree->makeOutputVariable(m_perjet_trigMatch_eta[tagWP],
+						   "perjet_trigMatch_eta_" + shortBtagWP(tagWP));
+		systematicTree->makeOutputVariable(m_perjet_trigMatch_phi[tagWP],
+						   "perjet_trigMatch_phi_" + shortBtagWP(tagWP));
+		systematicTree->makeOutputVariable(m_perjet_trigMatch_e[tagWP],
+						   "perjet_trigMatch_e_" + shortBtagWP(tagWP));
+
+		// _onl variables
+		m_perjet_isbtagged_onl[tagWP] = std::vector<char>();
+		systematicTree->makeOutputVariable(m_perjet_isbtagged_onl[tagWP],
+						   "perjet_isbtagged_onl_" + shortBtagWP(tagWP));
+		
+		m_perjet_weight_bTagSF_onl[tagWP] = std::vector<float>();
+		m_perjet_weight_bTagSF_onl_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
+		m_perjet_weight_bTagSF_onl_eigen_B_down[tagWP] = std::vector<std::vector<float> >();
+		
+		m_perjet_weight_bTagMCeff_onl[tagWP] = std::vector<float>();
+		m_perjet_weight_bTagMCeff_onl_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
+		m_perjet_weight_bTagMCeff_onl_eigen_B_down[tagWP] = std::vector<std::vector<float> >();
+		
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_onl[tagWP],
+						   "weight_perjet_bTagSF_onl_" + shortBtagWP(tagWP));
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_onl[tagWP],
+						   "weight_perjet_bTagMCeff_onl_" + shortBtagWP(tagWP));
+		
+		if ((systematicTree->name() != nominalTTreeName) && (systematicTree->name() != nominalLooseTTreeName) && !(m_config->dumpBtagSystsInSystTrees())) continue;
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_onl_eigen_B_up[tagWP], "weight_perjet_bTagSF_onl_" + shortBtagWP(
+																   tagWP) + "_eigenvars_B_up");
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_onl_eigen_B_down[tagWP], "weight_perjet_bTagSF_onl_" + shortBtagWP(
+																     tagWP) + "_eigenvars_B_down");
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_onl_eigen_B_up[tagWP], "weight_perjet_bTagMCeff_onl_" + shortBtagWP(
+																	 tagWP) + "_eigenvars_B_up");
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_onl_eigen_B_down[tagWP], "weight_perjet_bTagMCeff_onl_" + shortBtagWP(
+																	   tagWP) + "_eigenvars_B_down");
+		
+		
+		for (const std::string& name : m_config->btagging_namedSysts(tagWP)) {
+		  systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_onl_named_up[tagWP][name], "weight_perjet_bTagSF_onl_" + shortBtagWP(
+																	 tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
+		  systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_onl_named_down[tagWP][name], "weight_perjet_bTagSF_onl_" + shortBtagWP(
+																	   tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
+		}
+		// _cond variables
+		m_perjet_weight_bTagSF_cond[tagWP] = std::vector<float>();
+		m_perjet_weight_bTagSF_cond_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
+		m_perjet_weight_bTagSF_cond_eigen_B_down[tagWP] = std::vector<std::vector<float> >();
+		
+		m_perjet_weight_bTagMCeff_cond[tagWP] = std::vector<float>();
+		m_perjet_weight_bTagMCeff_cond_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
+		m_perjet_weight_bTagMCeff_cond_eigen_B_down[tagWP] = std::vector<std::vector<float> >();
+		
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_cond[tagWP],
+						   "weight_perjet_bTagSF_cond_" + shortBtagWP(tagWP));
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_cond[tagWP],
+						   "weight_perjet_bTagMCeff_cond_" + shortBtagWP(tagWP));
+		
+		if ((systematicTree->name() != nominalTTreeName) && (systematicTree->name() != nominalLooseTTreeName) && !(m_config->dumpBtagSystsInSystTrees())) continue;
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_cond_eigen_B_up[tagWP], "weight_perjet_bTagSF_cond_" + shortBtagWP(
+																   tagWP) + "_eigenvars_B_up");
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_cond_eigen_B_down[tagWP], "weight_perjet_bTagSF_cond_" + shortBtagWP(
+																     tagWP) + "_eigenvars_B_down");
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_cond_eigen_B_up[tagWP], "weight_perjet_bTagMCeff_cond_" + shortBtagWP(
+																	 tagWP) + "_eigenvars_B_up");
+		systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_cond_eigen_B_down[tagWP], "weight_perjet_bTagMCeff_cond_" + shortBtagWP(
+																	   tagWP) + "_eigenvars_B_down");
+		
+		
+		for (const std::string& name : m_config->btagging_namedSysts(tagWP)) {
+		  systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_cond_named_up[tagWP][name], "weight_perjet_bTagSF_cond_" + shortBtagWP(
+																	 tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
+		  systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_cond_named_down[tagWP][name], "weight_perjet_bTagSF_cond_" + shortBtagWP(
+																	   tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
+		}
+		break;
+	      }
+	    }
           }
         }
         if (m_config->useTrackJets()) {
@@ -906,53 +1044,120 @@ namespace top {
             if (std::find(m_config->bTagWP_calibrated().begin(), m_config->bTagWP_calibrated().end(),
                           tagWP) == m_config->bTagWP_calibrated().end()) continue;
             // up
-            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_B_up[tagWP], "weight_bTagSF_" + shortBtagWP(
-                                                 tagWP) + "_eigenvars_B_up");
-            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_C_up[tagWP], "weight_bTagSF_" + shortBtagWP(
-                                                 tagWP) + "_eigenvars_C_up");
+            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_B_up[tagWP],
+					       "weight_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_B_up");
+            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_C_up[tagWP],
+					       "weight_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_C_up");
             systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_Light_up[tagWP],
                                                "weight_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_Light_up");
             // down
-            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_B_down[tagWP], "weight_bTagSF_" + shortBtagWP(
-                                                 tagWP) + "_eigenvars_B_down");
-            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_C_down[tagWP], "weight_bTagSF_" + shortBtagWP(
-                                                 tagWP) + "_eigenvars_C_down");
+            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_B_down[tagWP],
+					       "weight_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_B_down");
+            systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_C_down[tagWP],
+					       "weight_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_C_down");
             systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_Light_down[tagWP],
                                                "weight_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_Light_down");
             // named systematics
-            for (auto name : m_config->btagging_namedSysts(tagWP)) {
+            for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
               systematicTree->makeOutputVariable(m_weight_bTagSF_named_up[tagWP][name],
-                                                 "weight_bTagSF_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(
-                                                   name) + "_up");
-              systematicTree->makeOutputVariable(m_weight_bTagSF_named_down[tagWP][name], "weight_bTagSF_" + shortBtagWP(
-                                                   tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
+                                                 "weight_bTagSF_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
+              systematicTree->makeOutputVariable(m_weight_bTagSF_named_down[tagWP][name],
+						 "weight_bTagSF_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
             }
-          }
+	    //
+	    // also add off_onl combined systematics in case the triplet (offl,onl,cond) is configured
+	    //
+	    for (const auto& offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	      // check if this offline WP has a triplet (offl_onl_cond)
+	      std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	      if(tagWP == offlWP) {
+		// up
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_B_up[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_B_up");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_C_up[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_C_up");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_Light_up[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_Light_up");
+		// down
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_B_down[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_B_down");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_C_down[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_C_down");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_Light_down[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_Light_down");
+		// named systematics
+		for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
+		  systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_named_up[tagWP][name],
+						     "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
+		  systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_named_down[tagWP][name],
+						     "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
+		}
+		// for those WP with offl_onl_cond triplet check if there is a
+		// off1_off2 pair and in case there is check that also off2 has a
+		// offl_onl_cond triplet. If both conditions are satisfied add
+		// a off1_off2 btag systematics
+		for (const auto& off1Off2BtagWP : m_config->bTagWP_off1_off2()){
+		  // check if this off1 WP has a off2 WP configured as pair (off1_off2)
+		  std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
+		  if ( tagWP == off1WP ) {
+		    std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
+		    for (const auto& offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		      // check if this off2 WP has a triplet (offl_onl_cond)
+		      std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
+		      if(tag2WP == off2WP) {
+			// up
+			systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_eigen_B_up[tagWP],
+							   "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_eigenvars_B_up");
+			systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_eigen_C_up[tagWP],
+							   "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_eigenvars_C_up");
+			systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_eigen_Light_up[tagWP],
+							   "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_eigenvars_Light_up");
+			// down
+			systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_eigen_B_down[tagWP],
+							   "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_eigenvars_B_down");
+			systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_eigen_C_down[tagWP],
+							   "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_eigenvars_C_down");
+			systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_eigen_Light_down[tagWP],
+							   "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_eigenvars_Light_down");
+			// named systematics
+			for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
+			  systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_named_up[tagWP][name],
+							     "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
+			  systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_named_down[tagWP][name],
+							     "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
+			}
+		      }
+		    }
+		  }
+		}
+	      }
+	    }
+	  }
           if (m_config->useTrackJets()) {
             for (const auto& tagWP : m_config->bTagWP_available_trkJet()) {
               // skip uncalibrated though available WPs
               if (std::find(m_config->bTagWP_calibrated_trkJet().begin(), m_config->bTagWP_calibrated_trkJet().end(),
                             tagWP) == m_config->bTagWP_calibrated_trkJet().end()) continue;
               // up
-              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_B_up[tagWP], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                   tagWP) + "_eigenvars_B_up");
-              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_C_up[tagWP], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                   tagWP) + "_eigenvars_C_up");
-              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_Light_up[tagWP], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                   tagWP) + "_eigenvars_Light_up");
+              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_B_up[tagWP],
+						 "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_B_up");
+              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_C_up[tagWP],
+						 "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_C_up");
+              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_Light_up[tagWP],
+						 "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_Light_up");
               // down
-              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_B_down[tagWP], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                   tagWP) + "_eigenvars_B_down");
-              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_C_down[tagWP], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                   tagWP) + "_eigenvars_C_down");
-              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_Light_down[tagWP], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                   tagWP) + "_eigenvars_Light_down");
+              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_B_down[tagWP],
+						 "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_B_down");
+              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_C_down[tagWP],
+						 "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_C_down");
+              systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_Light_down[tagWP],
+						 "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_Light_down");
               // named systematics
-              for (auto name : m_config->trkjet_btagging_namedSysts(tagWP)) {
-                systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_named_up[tagWP][name], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                     tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
-                systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_named_down[tagWP][name], "weight_trackjet_bTagSF_" + shortBtagWP(
-                                                     tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
+              for (const auto& name : m_config->trkjet_btagging_namedSysts(tagWP)) {
+                systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_named_up[tagWP][name],
+						   "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
+                systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_named_down[tagWP][name],
+						   "weight_trackjet_bTagSF_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
               }
             }
           }
@@ -2068,6 +2273,34 @@ namespace top {
       for (const auto& tagWP : m_config->bTagWP_available()) {
         if (std::find(m_config->bTagWP_calibrated().begin(), m_config->bTagWP_calibrated().end(), tagWP) == m_config->bTagWP_calibrated().end()) continue;
         m_weight_bTagSF[tagWP] = m_sfRetriever->btagSF(event, top::topSFSyst::nominal, tagWP);
+	//
+	// also add off_onl combined weight in case the triplet (offl,onl,cond) is configured
+	//
+	for (const auto& offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	  // check if this offline WP has a triplet (offl_onl_cond)
+	  std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	  if(tagWP == offlWP) {
+	    m_weight_bTagSF_off_onl[tagWP] = m_sfRetriever->btagSF_off_onl(event, top::topSFSyst::nominal, tagWP);
+	    // for those WP with offl_onl_cond triplet check if there is a
+	    // off1_off2 pair and in case there is check that also off2 has a
+	    // offl_onl_cond triplet. If both conditions are satisfied add
+	    // a off1_off2 btag weight
+	    for (const auto& off1Off2BtagWP : m_config->bTagWP_off1_off2()){
+	      // check if this off1 WP has a off2 WP configured as pair (off1_off2)
+	      std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
+	      if ( tagWP == off1WP ) {
+		std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
+		for (const auto& offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		  // check if this off2 WP has a triplet (offl_onl_cond)
+		  std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
+		  if(tag2WP == off2WP) {
+		    m_weight_bTagSF_off1_off2_onl[tagWP] = m_sfRetriever->btagSF_off1_off2_onl(event, top::topSFSyst::nominal, tagWP, tag2WP);
+		  }
+		}
+	      }
+	    }
+	  }
+	}
       }
       if (m_config->useTrackJets()) {
         for (const auto& tagWP : m_config->bTagWP_available_trkJet()) {
@@ -2314,10 +2547,62 @@ namespace top {
           m_sfRetriever->btagSF_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_LIGHT,
                                            m_weight_bTagSF_eigen_Light_up[tagWP],
                                            m_weight_bTagSF_eigen_Light_down[tagWP], tagWP);
-          for (auto name : m_config->btagging_namedSysts(tagWP)) {
+          for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
             m_weight_bTagSF_named_up[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, false, name);
             m_weight_bTagSF_named_down[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, false, name);
           }
+	  //
+	  // also add combined off_onl weight in case the triplet (offl,onl,cond) is configured
+	  //
+	  for (const auto& offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	    // check if this offline WP has a triplet (offl_onl_cond)
+	    std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	    if(tagWP == offlWP) {
+	      m_sfRetriever->btagSF_off_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_B,
+						       m_weight_bTagSF_off_onl_eigen_B_up[tagWP],
+						       m_weight_bTagSF_off_onl_eigen_B_down[tagWP], tagWP);
+	      m_sfRetriever->btagSF_off_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_C,
+						       m_weight_bTagSF_off_onl_eigen_C_up[tagWP],
+						       m_weight_bTagSF_off_onl_eigen_C_down[tagWP], tagWP);
+	      m_sfRetriever->btagSF_off_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_LIGHT,
+						       m_weight_bTagSF_off_onl_eigen_Light_up[tagWP],
+						       m_weight_bTagSF_off_onl_eigen_Light_down[tagWP], tagWP);
+	      for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
+		m_weight_bTagSF_off_onl_named_up[tagWP][name] = m_sfRetriever->btagSF_off_onl(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, false, name);
+		m_weight_bTagSF_off_onl_named_down[tagWP][name] = m_sfRetriever->btagSF_off_onl(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, false, name);
+	      }
+	      // for those WP with offl_onl_cond triplet check if there is a
+	      // off1_off2 pair and in case there is check that also off2 has a
+	      // offl_onl_cond triplet. If both conditions are satisfied add
+	      // a off1_off2 btag weight
+	      for (const auto& off1Off2BtagWP : m_config->bTagWP_off1_off2()){
+		// check if this off1 WP has a off2 WP configured as pair (off1_off2)
+		std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
+		if ( tagWP == off1WP ) {
+		  std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
+		  for (const auto& offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		    // check if this off2 WP has a triplet (offl_onl_cond)
+		    std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
+		    if(tag2WP == off2WP) {
+		      m_sfRetriever->btagSF_off1_off2_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_B,
+								 m_weight_bTagSF_off1_off2_onl_eigen_B_up[tagWP],
+								 m_weight_bTagSF_off1_off2_onl_eigen_B_down[tagWP], tagWP, tag2WP);
+		      m_sfRetriever->btagSF_off1_off2_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_C,
+								 m_weight_bTagSF_off1_off2_onl_eigen_C_up[tagWP],
+								 m_weight_bTagSF_off1_off2_onl_eigen_C_down[tagWP], tagWP, tag2WP);
+		      m_sfRetriever->btagSF_off1_off2_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_LIGHT,
+								 m_weight_bTagSF_off1_off2_onl_eigen_Light_up[tagWP],
+								 m_weight_bTagSF_off1_off2_onl_eigen_Light_down[tagWP], tagWP, tag2WP);
+		      for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
+			m_weight_bTagSF_off1_off2_onl_named_up[tagWP][name] = m_sfRetriever->btagSF_off1_off2_onl(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, tag2WP, false, name);
+			m_weight_bTagSF_off1_off2_onl_named_down[tagWP][name] = m_sfRetriever->btagSF_off1_off2_onl(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, tag2WP, false, name);
+		      }
+		    }
+		  }
+		}
+	      }
+	    }
+	  }
         }
         if (m_config->useTrackJets()) {
           for (const auto& tagWP : m_config->bTagWP_available_trkJet()) {
@@ -2332,7 +2617,7 @@ namespace top {
             m_sfRetriever->btagSF_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_LIGHT,
                                              m_weight_trackjet_bTagSF_eigen_Light_up[tagWP],
                                              m_weight_trackjet_bTagSF_eigen_Light_down[tagWP], tagWP, true);
-            for (auto name : m_config->trkjet_btagging_namedSysts(tagWP)) {
+            for (const auto& name : m_config->trkjet_btagging_namedSysts(tagWP)) {
               m_weight_trackjet_bTagSF_named_up[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, true, name);
               m_weight_trackjet_bTagSF_named_down[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, true, name);
             }
@@ -2986,15 +3271,45 @@ namespace top {
 
         if (m_config->isMC() && m_config->storePerJetBtagSFs()) {
           m_perjet_weight_bTagSF[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_weight_bTagSF_onl[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_weight_bTagSF_cond[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_weight_bTagMCeff[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_weight_bTagMCeff_onl[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_weight_bTagMCeff_cond[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+
+          m_perjet_trigMatch_taggerWeight[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_trigMatch_pt[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_trigMatch_eta[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_trigMatch_phi[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_trigMatch_e[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_isbtagged_onl[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+
           m_perjet_weight_bTagSF_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_C_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_C_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_C_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_C_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_Light_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_Light_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_Light_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_Light_eigenvars(tagWP)));
+
+          m_perjet_weight_bTagSF_onl_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagSF_onl_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagSF_cond_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagSF_cond_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+	  
+          m_perjet_weight_bTagMCeff_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagMCeff_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagMCeff_onl_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagMCeff_onl_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagMCeff_cond_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagMCeff_cond_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+
           for (const std::string& name : m_config->btagging_namedSysts(tagWP)) {
             m_perjet_weight_bTagSF_named_up[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
             m_perjet_weight_bTagSF_named_down[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
+            m_perjet_weight_bTagSF_onl_named_up[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
+            m_perjet_weight_bTagSF_onl_named_down[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
+            m_perjet_weight_bTagSF_cond_named_up[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
+            m_perjet_weight_bTagSF_cond_named_down[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
           }
         }
       }
@@ -3103,9 +3418,13 @@ namespace top {
             if (std::find(m_config->bTagWP_calibrated().begin(),
               m_config->bTagWP_calibrated().end(), tagWP) == m_config->bTagWP_calibrated().end()) continue;
             m_perjet_weight_bTagSF[tagWP][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_nom");
+            m_perjet_weight_bTagMCeff[tagWP][i] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_nom");
+
             for (size_t ivar = 0; ivar < m_config->btagging_num_B_eigenvars(tagWP); ++ivar) {
               m_perjet_weight_bTagSF_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
               m_perjet_weight_bTagSF_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
+              m_perjet_weight_bTagMCeff_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
+              m_perjet_weight_bTagMCeff_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
             }
             for (size_t ivar = 0; ivar < m_config->btagging_num_C_eigenvars(tagWP); ++ivar) {
               m_perjet_weight_bTagSF_eigen_C_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_FT_EFF_Eigen_C_" + std::to_string(ivar) + "__1up");
@@ -3119,6 +3438,43 @@ namespace top {
               m_perjet_weight_bTagSF_named_up[tagWP][name][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_" + name + "__1up");
               m_perjet_weight_bTagSF_named_down[tagWP][name][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_" + name + "__1down");
             }
+	    //
+	    // also add onl and cond per-jet weights in case the triplet (offl,onl,cond) is configured
+	    //
+	    for (const auto& offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	      // check if this offline WP has a triplet (offl_onl_cond)
+	      std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	      if(tagWP == offlWP) {
+		m_perjet_weight_bTagSF_onl[tagWP][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_onl" + "_nom");
+		m_perjet_weight_bTagMCeff_onl[tagWP][i] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_onl" + "_nom");
+		m_perjet_weight_bTagSF_cond[tagWP][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_cond" + "_nom");
+		m_perjet_weight_bTagMCeff_cond[tagWP][i] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_cond" + "_nom");
+		m_perjet_trigMatch_taggerWeight[tagWP][i] = jetPtr->auxdataConst<float>("trigMatch_taggerWeight_" + tagWP + "_nom");
+		m_perjet_trigMatch_pt[tagWP][i] = jetPtr->auxdataConst<float>("trigMatch_pt_" + tagWP + "_nom");
+		m_perjet_trigMatch_eta[tagWP][i] = jetPtr->auxdataConst<float>("trigMatch_eta_" + tagWP + "_nom");
+		m_perjet_trigMatch_phi[tagWP][i] = jetPtr->auxdataConst<float>("trigMatch_phi_" + tagWP + "_nom");
+		m_perjet_trigMatch_e[tagWP][i] = jetPtr->auxdataConst<float>("trigMatch_e_" + tagWP + "_nom");
+		m_perjet_isbtagged_onl[tagWP][i] = jetPtr->auxdataConst<char>("btag_isTagged_" + tagWP + "_onl" + "_nom");
+		
+		for (size_t ivar = 0; ivar < m_config->btagging_num_B_eigenvars(tagWP); ++ivar) {
+		  m_perjet_weight_bTagSF_onl_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_onl" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
+		  m_perjet_weight_bTagSF_onl_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_onl" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
+		  m_perjet_weight_bTagMCeff_onl_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_onl" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
+		  m_perjet_weight_bTagMCeff_onl_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_onl" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
+		  m_perjet_weight_bTagSF_cond_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_cond" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
+		  m_perjet_weight_bTagSF_cond_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_cond" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
+		  m_perjet_weight_bTagMCeff_cond_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_cond" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
+		  m_perjet_weight_bTagMCeff_cond_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_cond" + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
+		}
+		for (const std::string& name : m_config->btagging_namedSysts(tagWP)) {
+		  m_perjet_weight_bTagSF_onl_named_up[tagWP][name][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_onl_" + name + "__1up");
+		  m_perjet_weight_bTagSF_onl_named_down[tagWP][name][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_onl_" + name + "__1down");
+		  m_perjet_weight_bTagSF_cond_named_up[tagWP][name][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_cond_" + name + "__1up");
+		  m_perjet_weight_bTagSF_cond_named_down[tagWP][name][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_cond_" + name + "__1down");
+		}
+		break;
+	      }
+	    }
           }
         }
 

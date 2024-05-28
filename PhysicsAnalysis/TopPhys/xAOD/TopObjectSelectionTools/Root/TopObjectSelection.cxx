@@ -103,16 +103,19 @@ namespace top {
     // for calo jets
     std::vector<std::string> availableWPs = m_config->bTagWP_available();
     for (auto& WP : availableWPs) {
-      if (m_config->useHIJets()) {
-        if (m_config->isMC()) {
-          m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_BTagging_AntiKt4HI";
-        } else {
-          m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_BTagging_DFAntiKt4HI";
-        }
-      } else {
-        m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_" + m_config->sgKeyJets();
+      bool isOnlineTagger=(WP.find("Online") != std::string::npos);
+      if (!isOnlineTagger) {
+	if (m_config->useHIJets()) {
+	  if (m_config->isMC()) {
+	    m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_BTagging_AntiKt4HI";
+	  } else {
+	    m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_BTagging_DFAntiKt4HI";
+	  }
+	} else {
+	  m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_" + m_config->sgKeyJets();
+	}
+	top::check(m_btagSelTools[WP].retrieve(), "Failed to retrieve b-tagging Selection tool");
       }
-      top::check(m_btagSelTools[WP].retrieve(), "Failed to retrieve b-tagging Selection tool");
     }
     // for track jets
     availableWPs = m_config->bTagWP_available_trkJet();

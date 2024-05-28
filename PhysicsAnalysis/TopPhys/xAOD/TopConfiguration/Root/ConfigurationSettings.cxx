@@ -614,6 +614,7 @@ namespace top {
                       "Base PDF set used to recalculate XF1,XF2 values if they are zero. Will be added to LHAPDFSets.",
                       " ");
     registerParameter("BTagCDIPath", "Path to the b-tagging CDI file. Default: Using the hardcoded path.", "Default");
+    registerParameter("BTagOnlineCDIPath", "Path to the online b-tagging CDI file. Default: not provided.", "None");
 
     registerParameter("BTaggingWP",
                       "DEPRECATED OPTION, use BTaggingCaloJetWP and BTaggingTrackJetWP for specifying b-tagging WPs for jet collections using calorimeter information and for track jets respectively.",
@@ -633,6 +634,27 @@ namespace top {
                       " For fixed-cut WPs, the simpler format 60%, instead of FixedCutBEff_60, is also tolerated."
                       " The specified WPs which are calibrated for all flavours will have scale-factors computed."
                       " By default, no WP is used.",
+                      " ");
+
+    registerParameter("BTaggingOnlineConditionalWP",
+                      "b-tagging WPs to use for online and conditional efficiency scale factors for calorimeter jet collection (e.g. EMTopo, EMPFlow) in the analysis, separated by blanks."
+                      " The format should follow the convention of the b-tagging CP group, e.g. OnlineMV20:FixedCutBEff_60"
+                      " For fixed-cut WPs, the simpler format 60%, instead of FixedCutBEff_60, is also tolerated."
+                      " The specified WPs which are calibrated will have scale-factors computed."
+                      " By default, no WP is used.",
+                      " ");
+
+    registerParameter("BTaggingOff1Off2WP",
+                      "b-tagging pairs consisting of a loser (offline1) and a tighter (offline2) offline b-tagging algo:WP pairs, separated by semicolon."
+                      "These pairs are used for the off1, off2, cond1, cond2, onl 5-tuple b-tagging."
+                      " The format should follow the convention of the b-tagging CP group, e.g. DL1r:FixedCutBEff_85;DL1r:FixedCutBEff_60."
+                      " By default, no offline pair is used.",
+                      " ");
+
+    registerParameter("BTaggingOfflOnlCondWP",
+                      "b-tagging triplets consisting of offline, online and conditoinal b-tagging algo:WP pairs, separated by semicolon."
+                      " The format should follow the convention of the b-tagging CP group, e.g. DL1r:FixedCutBEff_60;OnlineMV2:FixedCutBEff_60;ConditionalOnlineMV2GivenOfflineDL1r60:FixedCutBEff_60."
+                      " By default, no triplet is used.",
                       " ");
 
     registerParameter("UseXbbTagger", "Save LargeRjet Xbb Tagger probabilities as branches.", "False");

@@ -322,6 +322,42 @@ namespace top {
                  bool do_trackjets = false,
                  std::string uncert_name = "") const;
 
+    float btagSF_off_onl(const top::Event& event,
+                 const top::topSFSyst SFSyst = top::topSFSyst::nominal,
+                 std::string WPoff  = "DL1r_FixedCutBEff_60",
+                 bool do_trackjets = false,
+                 std::string uncert_name = "") const;
+
+    float btagSF_off1_off2_onl(const top::Event& event,
+                 const top::topSFSyst SFSyst = top::topSFSyst::nominal,
+                 std::string WPoff1  = "DL1r_FixedCutBEff_85",
+                 std::string WPoff2  = "DL1r_FixedCutBEff_60",
+                 bool do_trackjets = false,
+                 std::string uncert_name = "") const;
+
+    double btagSF_off_onl_weight(const bool isTagged_off,
+				 const bool isTagged_onl,
+				 const double mceff_off,
+				 const double sf_off,
+				 const double mceff_onl,
+				 const double sf_onl,
+				 const double mceff_cond,
+				 const double sf_cond) const;
+
+    double btagSF_off1_off2_onl_weight(const bool isTagged_off1,
+				       const bool isTagged_off2,
+				       const bool isTagged_onl,
+				       const double mceff_off1,
+				       const double sf_off1,
+				       const double mceff_off2,
+				       const double sf_off2,
+				       const double mceff_onl,
+				       const double sf_onl,
+				       const double mceff_cond1,
+				       const double sf_cond1,
+				       const double mceff_cond2,
+				       const double sf_cond2) const;
+
     void btagSF_eigen_vars(const top::Event& event,
                            const top::topSFSyst SFSyst,
                            std::vector<float>& btagSF_up,
@@ -329,6 +365,20 @@ namespace top {
                            std::string WP = "FixedCutBEff_77",
                            bool do_trackjets = false) const;
 
+    void btagSF_off_onl_eigen_vars(const top::Event& event,
+				   const top::topSFSyst SFSyst,
+				   std::vector<float>& btagSF_up,
+				   std::vector<float>& btagSF_down,
+				   std::string WPoff  = "DL1r_FixedCutBEff_60",
+				   bool do_trackjets = false) const;
+
+    void btagSF_off1_off2_onl_eigen_vars(const top::Event& event,
+					 const top::topSFSyst SFSyst,
+					 std::vector<float>& btagSF_up,
+					 std::vector<float>& btagSF_down,
+					 std::string WPoff1  = "DL1r_FixedCutBEff_85",
+					 std::string WPoff2  = "DL1r_FixedCutBEff_60",
+					 bool do_trackjets = false) const;
     /**
      *
      * JVT Efficiency SFs
