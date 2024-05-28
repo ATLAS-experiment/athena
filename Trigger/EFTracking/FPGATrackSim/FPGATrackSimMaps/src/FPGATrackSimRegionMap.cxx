@@ -86,14 +86,15 @@ void FPGATrackSimRegionMap::readRegion(ifstream & fin, int expected_region)
 
         if (region < 0) // Find the starting header of the next region
         {
-            ok = ok && (sline >> region);
+            ok = ok && (sline >> region);// should check this is a sensible number
             ok = ok && !(sline >> dummy); // No keyword to check that we're not reading a detector line, so make sure rest of string is empty
             ok = ok && (region == expected_region);
             if (!ok) break;
         }
         else // Detector layer line
         {
-            int isPix, BEC, physLayer, phi_min, phi_max, phi_tot, eta_min, eta_max, eta_tot;
+            int isPix{}, BEC{}, physLayer{}, phi_min{}, phi_max{}, phi_tot{}, eta_min{}, eta_max{}, eta_tot{};
+            //should check these are within sensible limits after they are read
             ok = ok && (sline >> isPix >> BEC >> physLayer >> phi_min >> phi_max >> phi_tot >> eta_min >> eta_max >> eta_tot);
             if (!ok) break;
 
@@ -171,7 +172,7 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
         std::istringstream sline(line);
         std::vector<int> shifts;
 
-        int subregion;
+        int subregion{-1};
         ok = ok && (sline >> subregion);
 
         // The radii file contains an "inclusive" line and then one for each subregion.
