@@ -12,101 +12,6 @@ class RoIStrategy(FlagEnum):
     File = 'File'
     TruthHS = 'TruthHS'
 
-def select( selInd, valuesmap ):
-    for k,v in valuesmap.items():    
-        ranges = [int(x) for x in k.split('-') if x != '']
-        if len(ranges) == 2:
-            if ranges[0] <= selInd and selInd <= ranges[1]: return v
-        if len(ranges) == 1 and k.startswith('-'):
-            if selInd <= ranges[0]: return v
-        if len(ranges) == 1 and k.endswith('-'):
-            if ranges[0] <= selInd: return v
-    raise RuntimeError("No value can be selected from ranges {} given key {}".format( valuesmap.keys(), selInd ))
-
-def minPT_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-1':   0.1 * Units.GeV,
-    '2-13': 0.4 * Units.GeV,
-    '14-':  0.5 * Units.GeV } )
-
-def minClusters_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-14':  7,
-    '15-':  8 } )
-
-def maxHoles_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-7':  3,
-    '8-':  2 } )
-
-def maxPixelHoles_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-7':  2,
-    '8-':  1 } )
-
-def maxPrimaryImpact_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-15':  10.0 * Units.mm,
-    '16-':  5.0 * Units.mm } )
-
-def maxZImpact_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-8':  320.0 * Units.mm,
-    '9-16':  250 * Units.mm,
-    '17-':  200.0 * Units.mm } )
-
-def nHolesMax_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-11':  3,
-    '12-':  2 } )
-
-def nHolesGapMax_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-11':  3,
-    '12-':  2 } )
-
-def Xi2max_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-11':  15.0,
-    '12-':  9.0 } )
-
-def Xi2maxNoAdd_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-11':  35.0,
-    '12-':  25.0 } )
-
-def maxdImpactPPSSeeds_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-3':  1.7,
-    '4-':  2.0 } )
-
-def maxdImpactSSSSeeds_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-3':  1000.0,
-    '4-16':  20.0,
-    '17-': 5.0 * Units.mm } )
-
-def doZBoundary_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-9':  False,
-    '10-':  True } )
-
-def roadWidth_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-16':  20.0,
-    '17-':  12.0 } )
-
-def keepAllConfirmedPixelSeeds_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-17':  False,
-    '18-':  True } )
-
-def maxSeedsPerSP_Pixels_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-17':  5,
-    '18-':   1 } )
-
-
 ################################################################
     ## create set of tracking cut flags
 ################################################################
@@ -124,7 +29,8 @@ def createTrackingPassFlags():
     icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
     # --- first set kinematic defaults
-    icf.addFlag("minPT", minPT_ranges )
+    icf.addFlag("minPT", lambda pcf: (0.4 * Units.GeV if pcf.Tracking.doLowMu else
+                                      0.5 * Units.GeV))
     icf.addFlag("maxPT", 1000.0 * Units.TeV) # off!
     icf.addFlag("minEta", -1) # off!
     icf.addFlag("maxEta", 2.7)
@@ -133,25 +39,26 @@ def createTrackingPassFlags():
     # --- cluster cuts
     icf.addFlag("minClusters", lambda pcf:
                 3 if (pcf.Detector.EnablePixel and not pcf.Detector.EnableSCT) else
-                6  if (pcf.Detector.EnableSCT and not pcf.Detector.EnablePixel) else
-                6 if pcf.Beam.Type is BeamType.Cosmics else
-                minClusters_ranges( pcf ) )
+                6 if (pcf.Detector.EnableSCT and not pcf.Detector.EnablePixel) else
+                7 if pcf.Tracking.doLowMu else
+                8 )
 
-    icf.addFlag("minSiNotShared", lambda pcf:
-                5 if pcf.Beam.Type is BeamType.Cosmics else 6)
+    icf.addFlag("minSiNotShared", 6)
     
     icf.addFlag("maxShared", 1) # cut is now on number of shared modules
     icf.addFlag("minPixel", 0)
-    icf.addFlag("maxHoles", maxHoles_ranges )
-    icf.addFlag("maxPixelHoles", maxPixelHoles_ranges )
+    icf.addFlag("maxHoles", lambda pcf: 3 if pcf.Tracking.doLowMu else 2)
+    icf.addFlag("maxPixelHoles", lambda pcf: 2 if pcf.Tracking.doLowMu else 1)
     icf.addFlag("maxSctHoles", 2)
     icf.addFlag("maxDoubleHoles", 1)
 
     icf.addFlag("maxPrimaryImpact", lambda pcf:
-                10.0 * Units.mm if pcf.Tracking.doBLS
-                else maxPrimaryImpact_ranges(pcf))
+                10.0 * Units.mm if (pcf.Tracking.doBLS or pcf.Tracking.doLowMu) else
+                5.0 * Units.mm)
     icf.addFlag("maxEMImpact", 50.0 * Units.mm)
-    icf.addFlag("maxZImpact", maxZImpact_ranges )
+    icf.addFlag("maxZImpact", lambda pcf:
+                320.0 * Units.mm if pcf.Tracking.doLowMu else
+                200.0 * Units.mm)
 
     # --- this is for the TRT-extension
     icf.addFlag("minTRTonTrk", 9)
@@ -159,24 +66,26 @@ def createTrackingPassFlags():
 
     # --- general pattern cuts for NewTracking
 
-    icf.addFlag("radMax", 600.0 * Units.mm) # default R cut for SP in SiSpacePointsSeedMaker
-    icf.addFlag("roadWidth", roadWidth_ranges )
-    icf.addFlag("nHolesMax", nHolesMax_ranges )
-    icf.addFlag("nHolesGapMax", nHolesGapMax_ranges ) # not as tight as 2*maxDoubleHoles
-    icf.addFlag("Xi2max", Xi2max_ranges )
-    icf.addFlag("Xi2maxNoAdd", Xi2maxNoAdd_ranges )
+    # default R cut for SP in SiSpacePointsSeedMaker
+    icf.addFlag("radMax", 600.0 * Units.mm)
+    icf.addFlag("roadWidth", lambda pcf:   20. if pcf.Tracking.doLowMu else 12.)
+    icf.addFlag("nHolesMax", lambda pcf:     3 if pcf.Tracking.doLowMu else 2)
+    icf.addFlag("nHolesGapMax", lambda pcf:  3 if pcf.Tracking.doLowMu else 2)
+    icf.addFlag("Xi2max", lambda pcf:      15. if pcf.Tracking.doLowMu else 9.)
+    icf.addFlag("Xi2maxNoAdd", lambda pcf: 35. if pcf.Tracking.doLowMu else 25.)
     icf.addFlag("nWeightedClustersMin", 6)
 
     # --- seeding
     icf.addFlag("useSeedFilter", True)
     icf.addFlag("maxTracksPerSharedPRD", 0)  ## is 0 ok for default??
-    icf.addFlag("maxdImpactPPSSeeds", 2)
+    icf.addFlag("maxdImpactPPSSeeds", lambda pcf: 1.7 if pcf.Tracking.doLowMu else 2.)
     icf.addFlag("maxdImpactSSSSeeds", lambda pcf:
-                10.0 * Units.mm if pcf.Tracking.doBLS
-                else maxdImpactSSSSeeds_ranges(pcf))
-    icf.addFlag("maxSeedsPerSP_Pixels", maxSeedsPerSP_Pixels_ranges )
+                1000. * Units.mm if pcf.Tracking.doLowMu else
+                10. * Units.mm if pcf.Tracking.doBLS else
+                5. * Units.mm)
+    icf.addFlag("maxSeedsPerSP_Pixels", lambda pcf: 5 if pcf.Tracking.doLowMu else 1)
     icf.addFlag("maxSeedsPerSP_Strips", 5)
-    icf.addFlag("keepAllConfirmedPixelSeeds", keepAllConfirmedPixelSeeds_ranges )
+    icf.addFlag("keepAllConfirmedPixelSeeds", lambda pcf: not pcf.Tracking.doLowMu)
     icf.addFlag("keepAllConfirmedStripSeeds", False)
 
     # --- min pt cut for brem
@@ -184,7 +93,8 @@ def createTrackingPassFlags():
     icf.addFlag("minPTBrem", 1. * Units.GeV) # off
 
     # --- Z Boundary Seeding
-    icf.addFlag("doZBoundary", doZBoundary_ranges)
+    icf.addFlag("doZBoundary", lambda pcf:
+                not (pcf.Beam.Type is BeamType.Cosmics or pcf.Tracking.doLowMu))
 
     icf.addFlag("usePixel"       		  , lambda pcf : pcf.Detector.EnablePixel )
     icf.addFlag("useTRT"        		  , lambda pcf : pcf.Detector.EnableTRT )
@@ -449,11 +359,15 @@ def createHighPileupTrackingPassFlags():
 def createMinBiasTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension                 = "MinBias"
-    icf.minPT =                   0.1 * Units.GeV
-
+    icf.minPT                     = 0.1 * Units.GeV
+    icf.maxPrimaryImpact          = 10. * Units.mm
+    icf.maxZImpact                = 250. * Units.mm
     icf.minClusters               = 5
-    icf.maxdImpactSSSSeeds        = 20.0    # apply cut on SSS seeds
+    icf.maxdImpactSSSSeeds        = 20.0 * Units.mm # apply cut on SSS seeds
+    icf.roadWidth                 = 20.
     icf.doBremRecoverySi          = False
+    icf.maxSeedsPerSP_Pixels      = 5
+    icf.keepAllConfirmedPixelSeeds = False
 
     return icf
 
@@ -581,7 +495,7 @@ def createLowPtTrackingPassFlags():
     icf.isLowPt          = True
     icf.maxPT = lambda pcf: (1e6 if pcf.Tracking.doMinBias else
                              pcf.Tracking.MainPass.minPT + 0.3) * Units.GeV
-    icf.minPT            = 0.050 * Units.GeV
+    icf.minPT            = 0.05 * Units.GeV
     icf.minClusters      = 5
     icf.minSiNotShared   = 4
     icf.maxShared        = 1   # cut is now on number of shared modules
@@ -594,8 +508,7 @@ def createLowPtTrackingPassFlags():
     icf.nHolesMax        = icf.maxHoles
     icf.nHolesGapMax     = icf.maxHoles # not as tight as 2*maxDoubleHoles
     icf.maxPrimaryImpact = lambda pcf: (
-        100.0 * Units.mm if pcf.Tracking.doMinBias else
-        maxPrimaryImpact_ranges( pcf ))
+        100. * Units.mm if pcf.Tracking.doMinBias else 10. * Units.mm)
     icf.doBremRecoverySi = False
     
     return icf
@@ -741,7 +654,7 @@ def createVtxBeamSpotTrackingPassFlags():
 def createCosmicsTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension        = "Cosmics"
-    icf.minPT            = 0.500 * Units.GeV
+    icf.minPT            = 0.5 * Units.GeV
     icf.maxPrimaryImpact = 1000. * Units.mm
     icf.maxZImpact       = 10000. * Units.mm
     icf.minClusters      = 4
@@ -752,12 +665,16 @@ def createCosmicsTrackingPassFlags():
     icf.maxDoubleHoles   = 1
     icf.minTRTonTrk      = 15
     icf.roadWidth        = 60.
-    icf.Xi2max           = 60.0
-    icf.Xi2maxNoAdd      = 100.0
+    icf.Xi2max           = 60.
+    icf.Xi2maxNoAdd      = 100.
     icf.nWeightedClustersMin = 8
     icf.nHolesMax        = 3
     icf.nHolesGapMax     = 3 # not as tight as 2*maxDoubleHoles
-    icf.doBremRecoverySi        = False
+    icf.maxdImpactSSSSeeds = 20. * Units.mm
+    icf.doBremRecoverySi = False
+    icf.doZBoundary      = False
+    icf.maxSeedsPerSP_Pixels = 5
+    icf.keepAllConfirmedPixelSeeds = False
 
     return icf
 
@@ -765,6 +682,7 @@ def createCosmicsTrackingPassFlags():
 def createHeavyIonTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension        = "HeavyIon"
+    icf.maxPrimaryImpact = 10. * Units.mm
     icf.maxZImpact       = 200. * Units.mm
     icf.minClusters      = 9
     icf.minSiNotShared   = 7
@@ -775,30 +693,24 @@ def createHeavyIonTrackingPassFlags():
     icf.Xi2max           = 6.
     icf.Xi2maxNoAdd      = 10.
 
-    # CutLevel dependendent flags:
-    # CutLevel 3 MinBias
-    # CutLevel 4  # ==CutLevel 2 with loosened hole cuts and chi^2 cuts
-    # CutLevel 5 # ==CutLevel 3 with loosened hole cuts and chi^2 cuts    
-
-    icf.maxdImpactSSSSeeds =  lambda pcf: \
-                              20. if pcf.Tracking.cutLevel >= 2 else 1000.
+    icf.maxdImpactSSSSeeds =  20. * Units.mm
     
-    icf.minPT              = lambda pcf: \
-                             0.3 *Units.GeV  if pcf.Tracking.cutLevel in [3, 5] else 0.5 * Units.GeV
-
-    #set this to 1.7 for all HI cut levels >=4, since standard cut levels set it to 2.0 from levels >=4. Not sure it has any effect, since we don't usually run mixed seeds (also true for HI?)
-    icf.maxdImpactPPSSeeds = lambda pcf: \
-                             1.7 if pcf.Tracking.cutLevel >= 4 else True
+    icf.minPT = 0.5 * Units.GeV
+    icf.maxdImpactPPSSeeds = 1.7
     
-    icf.maxHoles = lambda pcf: 2 if pcf.Tracking.cutLevel in [4, 5] else 0
-    icf.maxPixelHoles = lambda pcf: 1 if pcf.Tracking.cutLevel in [4, 5] else 0
-    icf.maxSctHoles = lambda pcf: 1 if pcf.Tracking.cutLevel in [4, 5] else 0
+    icf.maxHoles = 2
+    icf.maxPixelHoles = 1
+    icf.maxSctHoles = 1
     icf.maxDoubleHoles   = 0    
-    icf.Xi2max           = lambda pcf: 9. if pcf.Tracking.cutLevel in [4, 5] else 6.
-    icf.Xi2maxNoAdd      = lambda pcf: 25. if pcf.Tracking.cutLevel in [4, 5] else 10.
+    icf.Xi2max           = 9.
+    icf.Xi2maxNoAdd      = 25.
     icf.radMax           = 600. * Units.mm # restrict to pixels + first SCT layer
+    icf.roadWidth        = 20.
     icf.useTRT           = False
     icf.doBremRecoverySi = False
+    icf.doZBoundary      = False
+    icf.maxSeedsPerSP_Pixels = 5
+    icf.keepAllConfirmedPixelSeeds = False
 
     return icf
 
@@ -842,17 +754,26 @@ def createPixelTrackingPassFlags():
     icf.useSCT           = False
     icf.useSCTSeeding    = False
     icf.useTRT           = False
-    icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
-                           else 10. * Units.mm if pcf.Tracking.doUPC \
-                           else 5. * Units.mm
-    icf.roadWidth        = lambda pcf: 60.0 if pcf.Beam.Type is BeamType.Cosmics \
-                           else 12.0
-    icf.maxZImpact       = lambda pcf: 10000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxZImpact_ranges( pcf )
-    icf.Xi2max           = lambda pcf: 60.0  if pcf.Beam.Type is BeamType.Cosmics \
-                           else Xi2max_ranges( pcf )
-    icf.Xi2maxNoAdd      = lambda pcf: 100.0  if pcf.Beam.Type is BeamType.Cosmics \
-                           else Xi2maxNoAdd_ranges( pcf )
+    icf.maxPrimaryImpact = lambda pcf: (
+        1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics else
+        10. * Units.mm if pcf.Tracking.doUPC else
+        5. * Units.mm)
+    icf.roadWidth        = lambda pcf: (
+        60.0 if pcf.Beam.Type is BeamType.Cosmics else
+        12.0)
+    icf.maxZImpact       = lambda pcf: (
+        10000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics else
+        320. * Units.mm if pcf.Tracking.doLowMu else
+        250. * Units.mm if pcf.Tracking.doMinBias else
+        200. * Units.mm)
+    icf.Xi2max           = lambda pcf: (
+        60. if pcf.Beam.Type is BeamType.Cosmics else
+        15. if pcf.Tracking.doLowMu else
+        9.)
+    icf.Xi2maxNoAdd      = lambda pcf: (
+        100.0  if pcf.Beam.Type is BeamType.Cosmics else
+        35. if pcf.Tracking.doLowMu else
+        25.)
     icf.nWeightedClustersMin = 6
     icf.doBremRecoverySi        = False
 
@@ -882,6 +803,11 @@ def createDisappearingTrackingPassFlags():
     icf.useSCTSeeding    = False
     icf.maxEta           = 2.2
     icf.doBremRecoverySi = False
+    def MainPassFlags(pcf):
+        return pcf.Tracking.__getattr__(pcf.Tracking.PrimaryPassConfig.value+'Pass')
+    icf.maxPrimaryImpact = lambda pcf: MainPassFlags(pcf).maxPrimaryImpact
+    icf.maxZImpact = lambda pcf: MainPassFlags(pcf).maxZImpact
+    icf.roadWidth = lambda pcf: MainPassFlags(pcf).roadWidth
     return icf
 
 ########## SCT mode ######################
@@ -907,34 +833,39 @@ def createSCTTrackingPassFlags():
     icf.minPT            = _pick( default = 0.1 * Units.GeV,
                                   minbias=0.1 * Units.GeV,
                                   cosmics = 0.5* Units.GeV )
-    icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxPrimaryImpact_ranges( pcf )
-    icf.maxZImpact       = lambda pcf: 10000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxZImpact_ranges( pcf )
-    maxHolesDefault = 2
-    icf.maxHoles         = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxHolesDefault
-    icf.nHolesMax        = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxHolesDefault
-    icf.nHolesGapMax     = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxHolesDefault
-    icf.maxPixelHoles    = lambda pcf: 0 if pcf.Beam.Type is BeamType.Cosmics \
-                           else 0
-    icf.maxSctHoles      = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else 2
+    icf.maxPrimaryImpact = lambda pcf: (
+        1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics else
+        10. * Units.mm if pcf.Tracking.doLowMu else
+        5. * Units.mm)
+    icf.maxZImpact       = lambda pcf: (
+        10000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics else
+        320. * Units.mm if pcf.Tracking.doLowMu else
+        200.0 * Units.mm)
+
+    icf.maxHoles         = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics else 2
+    icf.nHolesMax        = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics else 2
+    icf.nHolesGapMax     = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics else 2
+    icf.maxPixelHoles    = lambda pcf: 0 if pcf.Beam.Type is BeamType.Cosmics else 0
+    icf.maxSctHoles      = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics else 2
     icf.maxShared        = 0
-    icf.roadWidth        = lambda pcf: 60. if pcf.Beam.Type is BeamType.Cosmics \
-                           else roadWidth_ranges( pcf )
-    icf.Xi2max           = lambda pcf: 60.0 if pcf.Beam.Type is BeamType.Cosmics \
-                           else Xi2max_ranges( pcf )
-    icf.Xi2maxNoAdd      = lambda pcf: 100.0 if pcf.Beam.Type is BeamType.Cosmics \
-                           else Xi2maxNoAdd_ranges( pcf )
-    icf.nWeightedClustersMin = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
-                               else 6
-    icf.minClusters      = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
-                           else minClusters_ranges( pcf )
-    icf.minSiNotShared   = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
-                           else 5
+    icf.roadWidth        = lambda pcf: (
+        60. if pcf.Beam.Type is BeamType.Cosmics else
+        20. if pcf.Tracking.doLowMu else
+        12.)
+    icf.Xi2max           = lambda pcf: (
+        60. if pcf.Beam.Type is BeamType.Cosmics else
+        15. if pcf.Tracking.doLowMu else
+        9.)
+    icf.Xi2maxNoAdd      = lambda pcf: (
+        100.0 if pcf.Beam.Type is BeamType.Cosmics else
+        35. if pcf.Tracking.doLowMu else
+        25.)
+    icf.nWeightedClustersMin = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics else 6
+    icf.minClusters      = lambda pcf: (
+        4 if pcf.Beam.Type is BeamType.Cosmics else
+        7 if pcf.Tracking.doLowMu else
+        8)
+    icf.minSiNotShared   = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics else 5
     icf.doBremRecoverySi        = False
     
     icf.RunPixelPID      = False
@@ -996,13 +927,10 @@ if __name__ == "__main__":
 
   flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
 
-  assert flags.Tracking.cutLevel == 19 , "default cut level is wrong"
-  assert flags.Tracking.ActiveConfig.minPT == 0.5 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minPT)
-  flags.Tracking.cutLevel = 3
-  assert flags.Tracking.ActiveConfig.minPT == 0.4 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minPT)
-  assert flags.Tracking.HeavyIonPass.minPT == 0.3 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.HeavyIonPass.minPT)
-
-  assert flags.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
+  assert flags.Tracking.ActiveConfig.maxPrimaryImpact == 5.0 * Units.mm, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.maxPrimaryImpact)
+  assert flags.Tracking.HeavyIonPass.maxPrimaryImpact == 10.0 * Units.mm, "wrong cut value {} ".format(flags.Tracking.HeavyIonPass.maxPrimaryImpact)
+  flags.Tracking.doBLS = True
+  assert flags.Tracking.ActiveConfig.maxPrimaryImpact == 10.0 * Units.mm, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.maxPrimaryImpact)
 
   l.info("flags.Tracking.ActiveConfig.minPT %f", flags.Tracking.ActiveConfig.minPT * 1.0)
   l.info("type(flags.Tracking.ActiveConfig.minPT) " + str(type(flags.Tracking.ActiveConfig.minPT)))
