@@ -308,6 +308,10 @@ atlas_add_citest( ACTS_ActsBenchmarkWithSpot_Cached
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
+atlas_add_citest( ACTS_CheckObjectCounts_Workflow
+  SCRIPT CheckCountTest.sh ActsCheckObjectCounts
+  LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|ActsTrackFindingAlg.Acts.*ERROR.*SurfaceError:1" )
+
 #################################################################################
 # Trigger
 #################################################################################
