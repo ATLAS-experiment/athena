@@ -34,12 +34,15 @@ class InputVariable : public IInputVariable
             const bool isJetVar
         );
 
-        // Constructors
+        /// Constructors
         InputVariable(const std::string& name): m_name{name}, m_scale{1.} {}
         InputVariable(
             const std::string& name, 
             std::function<float(const xAOD::Jet& jet, const JetContext& jc)> func
         );
+
+        /// Default destructor
+        virtual ~InputVariable() = default;
 
         /// return the value of the variable choose by the user
         [[nodiscard]] float getValue(const xAOD::Jet& jet, const JetContext& jc) const override {

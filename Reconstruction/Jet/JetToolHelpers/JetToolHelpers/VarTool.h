@@ -33,7 +33,7 @@ class VarTool : public asg::AsgTool, virtual public IVarTool
         /// Constructor for standalone usage
         VarTool(const std::string& name);
         /// Function initialising the tool
-        virtual StatusCode initialize();
+        virtual StatusCode initialize() override;
         /// return the InputVariable ready to be use 
         const InputVariable * getvar() const {return m_v.get();};
         /// return either xAOD or context variable values
