@@ -838,7 +838,13 @@ namespace top {
   bool EventCleaningSelection::isElectronTrigger(std::string const& trigger) const {
     top::check(trigger.find("HLT_") == 0, "Expected trigger name to start with `HLT_'");
     bool success;
-    return(TrigGlobEffCorr::ImportData::associatedLeptonFlavour(trigger.substr(4), success) == xAOD::Type::Electron);
+    // Catch for di-electron triggers HLT_2e*
+    if (trigger.substr(4,1)=="2"){
+      return(TrigGlobEffCorr::ImportData::associatedLeptonFlavour(trigger.substr(5), success) == xAOD::Type::Electron);
+    }
+    else {
+      return(TrigGlobEffCorr::ImportData::associatedLeptonFlavour(trigger.substr(4), success) == xAOD::Type::Electron);
+    }
   }
 
   bool EventCleaningSelection::isMuonTrigger(std::string const& trigger) const {
