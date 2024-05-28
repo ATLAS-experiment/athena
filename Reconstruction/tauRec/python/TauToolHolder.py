@@ -779,67 +779,6 @@ def TauWPDecoratorJetRNNCfg(flags):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
-def TauJetDeepSetEvaluatorCfg(flags, version=None):
-    result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauJetDeepSet_' + version
-
-    TauJetRNNEvaluator = CompFactory.getComp("TauJetRNNEvaluator")
-    if version == "v1":
-        NNConf = flags.Tau.TauJetDeepSetConfig
-        outputVarname = "JetDeepSetScore"
-    elif version == "v2":
-        NNConf = flags.Tau.TauJetDeepSetConfig_v2
-        outputVarname = "JetDeepSetScore_v2"
-
-    myTauJetRNNEvaluator = TauJetRNNEvaluator(name = _name,
-                                              NetworkFile1P = NNConf[0],
-                                              NetworkFile2P = NNConf[1],
-                                              NetworkFile3P = NNConf[2],
-                                              OutputVarname = outputVarname,
-                                              MaxTracks = 10,
-                                              MaxClusters = 6,
-                                              MaxClusterDR = 1.0,
-                                              VertexCorrection = True,
-                                              InputLayerScalar = "scalar",
-                                              InputLayerTracks = "tracks",
-                                              InputLayerClusters = "clusters",
-                                              OutputLayer = "rnnid_output",
-                                              OutputNode = "sig_prob")
-
-    result.setPrivateTools(myTauJetRNNEvaluator)
-    return result
-
-def TauWPDecoratorJetDeepSetCfg(flags, version=None):
-    result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorJetDeepSet_' + version
-
-    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
-    if version == "v1":
-        WPConf = flags.Tau.TauJetDeepSetWP
-        decorWPNames = ["JetDeepSetVeryLoose", "JetDeepSetLoose", "JetDeepSetMedium", "JetDeepSetTight"]
-        scoreName = "JetDeepSetScore"
-        newScoreName = "JetDeepSetScoreTrans"
-    elif version == "v2":
-        WPConf = flags.Tau.TauJetDeepSetWP_v2
-        decorWPNames = ["JetDeepSetVeryLoose_v2", "JetDeepSetLoose_v2", "JetDeepSetMedium_v2", "JetDeepSetTight_v2"]
-        scoreName = "JetDeepSetScore_v2"
-        newScoreName = "JetDeepSetScoreTrans_v2"
-
-    myTauWPDecorator = TauWPDecorator(name=_name,
-                                      flatteningFile1Prong = WPConf[0],
-                                      flatteningFile2Prong = WPConf[1],
-                                      flatteningFile3Prong = WPConf[2],
-                                      DecorWPNames = decorWPNames,
-                                      DecorWPCutEffs1P = [0.95, 0.85, 0.75, 0.60],
-                                      DecorWPCutEffs2P = [0.95, 0.75, 0.60, 0.45],
-                                      DecorWPCutEffs3P = [0.95, 0.75, 0.60, 0.45],
-                                      ScoreName = scoreName,
-                                      NewScoreName = newScoreName,
-                                      DefineWPs = True)
-
-    result.setPrivateTools(myTauWPDecorator)
-    return result
-
 def TauGNNEvaluatorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauGNN'
