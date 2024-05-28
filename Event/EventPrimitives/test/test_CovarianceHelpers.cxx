@@ -36,6 +36,13 @@ int main() {
               << Amg::hasPositiveOrZeroDiagElems(A) << '\n';
     std::cout << "All diagonal Elements are >0 " << Amg::hasPositiveDiagElems(A)
               << '\n';
+
+    AmgVector(5) V;
+    V << 50977.455023, -3154.699348, 191.699597, -3.127933, 0.000037;
+
+    std::cout << V << '\n';
+    std::cout << "ChiSquared is " << Amg::chi2(A, V)
+              << '\n';
   }
 
   std::cout << '\n' << "Testing dynamic Matrix A" << '\n';
@@ -60,6 +67,14 @@ int main() {
               << Amg::hasPositiveOrZeroDiagElems(A) << '\n';
     std::cout << "All diagonal Elements are >0 " << Amg::hasPositiveDiagElems(A)
               << '\n';
+
+    Amg::VectorX V;
+    V.resize(5);
+    V << 50977.455023, -3154.699348, 191.699597, -3.127933, 0.000037;
+
+    std::cout << V << '\n';
+    std::cout << "ChiSquared is " << Amg::chi2(A, V)
+              << '\n';
   }
 
   std::cout << '\n' << "Testing Matrix B" << '\n';
@@ -82,6 +97,13 @@ int main() {
               << Amg::hasPositiveOrZeroDiagElems(B) << '\n';
     std::cout << "All diagonal Elements are >0 " << Amg::hasPositiveDiagElems(B)
               << '\n';
+
+    AmgVector(5) V;
+    V << 36.0000, 0.0000, -0.0222, -0.0001, 0.0000;
+
+    std::cout << V << '\n';
+    std::cout << "ChiSquared is " << Amg::chi2(B, V)
+              << '\n';
   }
 
   std::cout << '\n' << "Testing Zero Matrix" << '\n';
@@ -101,6 +123,13 @@ int main() {
               << Amg::hasPositiveOrZeroDiagElems(zero) << '\n';
     std::cout << "All diagonal Elements are >0 "
               << Amg::hasPositiveDiagElems(zero) << '\n';
+
+    AmgVector(5) zeroV;
+    zeroV.setZero();
+
+    std::cout << zeroV << '\n';
+    std::cout << "ChiSquared is " << Amg::chi2(zero, zeroV)
+              << '\n';
   }
 
   std::cout << '\n' << "Testing Dynamic Zero Matrix" << '\n';
@@ -121,5 +150,13 @@ int main() {
               << Amg::hasPositiveOrZeroDiagElems(zero) << '\n';
     std::cout << "All diagonal Elements are >0 "
               << Amg::hasPositiveDiagElems(zero) << '\n';
+
+    Amg::VectorX zeroV;
+    zeroV.resize(5);
+    zeroV.setZero();
+
+    std::cout << zeroV << '\n';
+    std::cout << "ChiSquared is " << Amg::chi2(zero, zeroV)
+              << '\n';
   }
 }
