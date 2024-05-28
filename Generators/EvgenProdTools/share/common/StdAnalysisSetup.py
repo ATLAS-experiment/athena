@@ -1,7 +1,8 @@
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ## Generic JO header for use in all (evgen) analysis job options
 
 ## Pull in *really* generic stuff shared with StdEvgenSetup.py
-include("GeneratorUtils/StdJOSetup.py")
+include("EvgenProdTools/StdJOSetup.py")
 
 ## Enable reading in from POOL evgen files, from INFILE if set
 import AthenaPoolCnvSvc.ReadAthenaPool

@@ -5,7 +5,7 @@
 ## ROOT 2D histogram sampling alg (in ParticleGun.histsampling) by Andy Buckley
 ## Thanks to Alejandro Alonso for the initial Athena example on which this is based.
 
-include("GeneratorUtils/StdEvgenSetup.py")
+include("EvgenProdTools/StdEvgenSetup.py")
 theApp.EvtMax = 100
 
 import ParticleGun as PG
@@ -36,6 +36,6 @@ topSeq += PG.ParticleGun()
 topSeq.ParticleGun.randomSeed = 123456
 topSeq.ParticleGun.sampler = PtEtaHistParticleSampler(11, "data_histos_el_1470pt.root")
 
-include("GeneratorUtils/postJO.CopyWeights.py")
-include("GeneratorUtils/postJO.PoolOutput.py")
-include("GeneratorUtils/postJO.DumpMC.py")
+include("EvgenProdTools/postJO.CopyWeights.py")
+include("EvgenProdTools/postJO.PoolOutput.py")
+include("EvgenProdTools/postJO.DumpMC.py")
