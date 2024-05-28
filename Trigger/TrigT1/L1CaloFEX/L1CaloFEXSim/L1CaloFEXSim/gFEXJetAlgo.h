@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJetAlgo - JetFinder algorithm for gFEX
@@ -66,9 +66,9 @@ namespace LVL1 {
 
     virtual void ZeroNegative( gTowersType & jets ) const;
 
-    virtual void SaturateJets( gTowersType & jets, gTowersType sat ) const;
+    virtual void SaturateJets( gTowersType & jets, const gTowersType & sat ) const;
 
-    virtual void SaturateBlocks( gTowersType & gBlkSum, gTowersType sat ) const;
+    virtual void SaturateBlocks( gTowersType & gBlkSum, const gTowersType & sat ) const;
 
     virtual void gBlockAB(const gTowersType& twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
     
