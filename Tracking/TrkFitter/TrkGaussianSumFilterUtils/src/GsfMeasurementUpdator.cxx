@@ -8,6 +8,8 @@
  * @brief  Implementation code for Gsf Measurement Update
  */
 
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
+//
 #include "TrkGaussianSumFilterUtils/GsfMeasurementUpdator.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 #include "TrkGaussianSumFilterUtils/MultiComponentStateAssembler.h"
@@ -252,8 +254,7 @@ calculateFilterStep_5D(Trk::TrackParameters& TP,
   // --- compute filtered covariance matrix
   const AmgSymMatrix(5) newCov =
     trkCov.similarity(M) + sign * measCov.similarity(K);
-  double chiSquared =
-    (sign > 0) ? r.transpose() * R * r : r.transpose() * (-R) * r;
+  const double chiSquared = Amg::chi2(R, r, sign);
   // create the FQSonSurface
   fQ = Trk::FitQualityOnSurface(chiSquared, 5);
   TP.updateParameters(newPar, newCov);
@@ -299,8 +300,7 @@ calculateFilterStep_T(Trk::TrackParameters& TP,
   // C = M * trkCov * M.T() +/- K * covRio * K.T()
   const AmgSymMatrix(5) newCov =
     M * trkCov * M.transpose() + sign * K * measCov * K.transpose();
-  const double chiSquared =
-    (sign > 0) ? r.transpose() * R * r : r.transpose() * (-R) * r;
+  const double chiSquared = Amg::chi2(R, r, sign);
   // create the FQSonSurface
   fQ = Trk::FitQualityOnSurface(chiSquared, DIM);
   // In place update of parameters
@@ -429,10 +429,7 @@ makeChi2_T(Trk::FitQualityOnSurface& updatedFitQoS,
   AmgSymMatrix(DIM) R = sign * projection_T<DIM>(trkCov, paramKey);
   R += covPar;
   // calcualte the chi2 value
-  double chiSquared = 0.0;
-  if (R.determinant() != 0.0) {
-    chiSquared = r.transpose() * R.inverse() * r;
-  }
+  const double chiSquared = Amg::chi2(R.inverse(), r);
   updatedFitQoS = Trk::FitQualityOnSurface(chiSquared, DIM);
   return true;
 }
@@ -503,8 +500,7 @@ calculateWeight_T(const Trk::TrackParameters* componentTrackParameters,
     return { 0, 0 };
   }
   // Compute Chi2
-  return std::pair<double, double>(
-    det, (1. / (double)DIM) * ((r.transpose() * R.inverse() * r)(0, 0)));
+  return {det, (1. / (double)DIM) * Amg::chi2(R.inverse(), r)};
 }
 
 std::pair<double, double>
@@ -545,7 +541,7 @@ calculateWeight_2D_3(const Trk::TrackParameters* componentTrackParameters,
     return { 0, 0 };
   }
   // Compute Chi2
-  return { det, 0.5 * ((r.transpose() * R.inverse() * r)(0, 0)) };
+  return {det, 0.5 * Amg::chi2(R.inverse(), r)};
 }
 
 Trk::MultiComponentState

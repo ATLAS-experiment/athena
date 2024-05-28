@@ -15,6 +15,7 @@
 #define TRK_KALMANUPDATOR_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -331,7 +332,7 @@ KalmanUpdator::makeChi2Object(const Amg::VectorX& residual,
     return FitQualityOnSurface(0.0, (int)covRio.cols());
   }
   // get chi2 = r.T() * R^-1 * r
-  double chiSquared = residual.transpose() * R.inverse() * residual;
+  const double chiSquared = Amg::chi2(R.inverse(), residual);
   ATH_MSG_VERBOSE("-U- fitQuality of " << (sign > 0 ? "predicted" : "updated")
                                        << " state, chi2 :" << chiSquared
                                        << " / ndof= " << covRio.cols());

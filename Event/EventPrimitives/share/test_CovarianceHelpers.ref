@@ -12,6 +12,12 @@ Cholesky isPositiveSemiDefinite 0
 Cholesky isPositiveDefinite 0
 All diagonal Elements are >=0 1
 All diagonal Elements are >0 1
+ 50977.5
+ -3154.7
+   191.7
+-3.12793
+ 3.7e-05
+ChiSquared is 1.33992e+14
 
 Testing dynamic Matrix A
   50977.5   -3154.7     191.7  -3.12793   3.7e-05
@@ -25,6 +31,12 @@ Cholesky isPositiveSemiDefinite 0
 Cholesky isPositiveDefinite 0
 All diagonal Elements are >=0 1
 All diagonal Elements are >0 1
+ 50977.5
+ -3154.7
+   191.7
+-3.12793
+ 3.7e-05
+ChiSquared is 1.33992e+14
 
 Testing Matrix B
           36            0      -0.0222      -0.0001            0
@@ -38,6 +50,12 @@ Cholesky isPositiveSemiDefinite 0
 Cholesky isPositiveDefinite 0
 All diagonal Elements are >=0 0
 All diagonal Elements are >0 0
+     36
+      0
+-0.0222
+-0.0001
+      0
+ChiSquared is 43584
 
 Testing Zero Matrix
 0 0 0 0 0
@@ -51,6 +69,12 @@ Cholesky isPositiveSemiDefinite 1
 Cholesky isPositiveDefinite 0
 All diagonal Elements are >=0 1
 All diagonal Elements are >0 0
+0
+0
+0
+0
+0
+ChiSquared is 0
 
 Testing Dynamic Zero Matrix
 0 0 0 0 0
@@ -64,3 +88,9 @@ Cholesky isPositiveSemiDefinite 1
 Cholesky isPositiveDefinite 0
 All diagonal Elements are >=0 1
 All diagonal Elements are >0 0
+0
+0
+0
+0
+0
+ChiSquared is 0
