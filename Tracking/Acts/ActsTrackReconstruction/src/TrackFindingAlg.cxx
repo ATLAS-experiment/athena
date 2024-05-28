@@ -6,6 +6,7 @@
 
 // Athena
 #include "AsgTools/ToolStore.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"
@@ -18,7 +19,6 @@
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
-#include "AthenaMonitoringKernel/Monitored.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
@@ -27,19 +27,18 @@
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
-// ACTS glue
-#include "ActsEvent/TrackContainer.h"
 
-// PACKAGE
+// ActsTrk
+#include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsInterop/Logger.h"
-
 #include "ActsInterop/TableUtils.h"
-#include "OnTrackCalibrator.h"
-// Other
+#include "src/OnTrackCalibrator.h"
+
+// STL
 #include <sstream>
 #include <functional>
 #include <tuple>
@@ -379,62 +378,6 @@ namespace ActsTrk
 
   // === findTracks ==========================================================
 
-  static const Acts::TrackSelector::Config &getCuts(const Acts::TrackSelector &trackSelector, double eta)
-  {
-    const auto &selCfg = trackSelector.config();
-    return (std::abs(eta) < selCfg.absEtaEdges.front())   ? selCfg.cutSets.front()
-           : (std::abs(eta) >= selCfg.absEtaEdges.back()) ? selCfg.cutSets.back()
-                                                          : selCfg.getCuts(eta);
-  }
-
-  struct TrackFindingAlg::CkfBranchStopper
-  {
-    using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
-
-    BranchStopperResult stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState,
-                                   RecoTrackStateContainer::TrackStateProxy &trackState) const
-    {
-      if (!alg.m_trackStatePrinter.empty())
-      {
-        alg.m_trackStatePrinter->printTrackState(tgContext, trackState, measurementContainerOffsets, true);
-      }
-
-      if (!alg.m_doBranchHoleCut)
-        return BranchStopperResult::Continue;
-
-      const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
-      double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
-      const auto &cutSet = getCuts(alg.trackFinder().trackSelector, eta);
-
-      // https://github.com/acts-project/acts/blob/v34.0.0/Core/include/Acts/TrackFinding/MeasurementSelector.ipp#L99
-      // counts any other measurement anywhere on the surface as an outlier, so does not register as a hole.
-      // We really want to count them as holes.
-      if (!(tipState.nHoles > cutSet.maxHoles || tipState.nOutliers > cutSet.maxOutliers))
-        return BranchStopperResult::Continue;
-
-      bool enoughMeasurements = !(tipState.nMeasurements < cutSet.minMeasurements);
-      if (!enoughMeasurements)
-        ++event_stat[category_i][kNStoppedTracksMaxHoles];
-      ATH_MSG_DEBUG("CkfBranchStopper: stop and "
-                    << (enoughMeasurements ? "keep" : "drop")
-                    << " branch with nHoles=" << tipState.nHoles
-                    << ", nOutliers=" << tipState.nOutliers
-                    << ", nMeasurements=" << tipState.nMeasurements);
-      return enoughMeasurements ? BranchStopperResult::StopAndKeep
-                                : BranchStopperResult::StopAndDrop;
-    };
-    // Allow AthMsgStreamMacros.h macros using TrackFindingAlg's msgStream.
-    MsgStream &msg(const MSG::Level lvl) const { return alg.msgStream(lvl); }
-    bool msgLvl(const MSG::Level lvl) const { return alg.msgLevel(lvl); }
-
-    const TrackFindingAlg &alg;
-    const Acts::GeometryContext &tgContext;
-    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &measurementContainerOffsets;
-    const std::size_t &category_i;
-    // keep references to stats variables so we can update them.
-    EventStats &event_stat ATLAS_THREAD_SAFE;
-  };
-
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
                               const TrackFindingMeasurements &measurements,
@@ -507,12 +450,51 @@ namespace ActsTrk
     if (m_doTwoWay)
       secondOptions->extensions.calibrator.connect<&OnTrackCalibrator<RecoTrackStateContainer>::calibrate>(&calibrator);
 
+    const auto &trackSelectorCfg = trackFinder().trackSelector.config();
+    auto getCuts = [&trackSelectorCfg](double eta) -> const Acts::TrackSelector::Config & {
+      return (std::abs(eta) < trackSelectorCfg.absEtaEdges.front())   ? trackSelectorCfg.cutSets.front()
+             : (std::abs(eta) >= trackSelectorCfg.absEtaEdges.back()) ? trackSelectorCfg.cutSets.back()
+                                                                      : trackSelectorCfg.getCuts(eta);
+    };
+
     std::size_t category_i = 0;
     const auto measurementContainerOffsets = measurements.measurementContainerOffsets();
-    CkfBranchStopper ckfBranchStopper{*this, tgContext, measurementContainerOffsets, category_i, event_stat};
-    options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
+
+    using BranchStopperResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
+    auto stopBranch = [&](const Acts::CombinatorialKalmanFilterTipState &tipState,
+                          RecoTrackStateContainer::TrackStateProxy &trackState) -> BranchStopperResult {
+      if (!m_trackStatePrinter.empty()) {
+        m_trackStatePrinter->printTrackState(tgContext, trackState, measurementContainerOffsets, true);
+      }
+
+      if (!m_doBranchHoleCut)
+        return BranchStopperResult::Continue;
+
+      const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
+      double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
+      const auto &cutSet = getCuts(eta);
+
+      // https://github.com/acts-project/acts/blob/v35.0.0/Core/include/Acts/TrackFinding/MeasurementSelector.ipp#L99
+      // counts any other measurement anywhere on the surface as an outlier, so does not register as a hole.
+      // We really want to count them as holes.
+      if (!(tipState.nHoles > cutSet.maxHoles || tipState.nOutliers > cutSet.maxOutliers))
+        return BranchStopperResult::Continue;
+
+      bool enoughMeasurements = !(tipState.nMeasurements < cutSet.minMeasurements);
+      if (!enoughMeasurements)
+        ++event_stat[category_i][kNStoppedTracksMaxHoles];
+      ATH_MSG_DEBUG("CkfBranchStopper: stop and "
+                    << (enoughMeasurements ? "keep" : "drop")
+                    << " branch with nHoles=" << tipState.nHoles
+                    << ", nOutliers=" << tipState.nOutliers
+                    << ", nMeasurements=" << tipState.nMeasurements);
+      return enoughMeasurements ? BranchStopperResult::StopAndKeep
+                                : BranchStopperResult::StopAndDrop;
+    };
+
+    options.extensions.branchStopper.connect(stopBranch);
     if (m_doTwoWay)
-      secondOptions->extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
+      secondOptions->extensions.branchStopper.connect(stopBranch);
 
     Acts::PropagatorOptions<Acts::ActionList<Acts::MaterialInteractor>,
                             Acts::AbortList<Acts::EndOfWorldReached>>
@@ -588,7 +570,7 @@ namespace ActsTrk
           const auto fittedSeed = fittedSeedCollection->getTrack(0);
 
           double etaSeed = -std::log(std::tan(0.5 * fittedSeed.parameters()[Acts::eBoundTheta]));
-          const auto &cutSet = getCuts(trackFinder().trackSelector, etaSeed);
+          const auto &cutSet = getCuts(etaSeed);
           if (fittedSeed.transverseMomentum() < cutSet.ptMin)
           {
             ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << fittedSeed.transverseMomentum());
