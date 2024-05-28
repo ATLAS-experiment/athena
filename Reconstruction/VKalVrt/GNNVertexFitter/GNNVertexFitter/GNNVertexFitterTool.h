@@ -75,7 +75,7 @@ public:
   // Read handles
   SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_trackLinksKey{this, "trackLinksKey", "",
                                                              "Jet GNN Deco Read Key for track link"};
-  SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_trackOriginsKey{this, "trackLinksKey", "",
+  SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_trackOriginsKey{this, "trackOriginsKey", "",
                                                                "Jet GNN Deco Read Key for track origin"};
   SG::ReadDecorHandleKey<xAOD::BTaggingContainer> m_vertexLinksKey{this, "vertexLinksKey", "",
                                                               "Jet GNN Deco Read Key for vertex link"};

@@ -2261,6 +2261,14 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeed
 ///////////////////////////////////////////////////////////////////
 // New 3 space points pro seeds production
 ///////////////////////////////////////////////////////////////////
+namespace {
+   inline
+   float computeEta( float r, float z) {
+      float theta = r > 10e-9 ? std::atan2(r,z) : 0.f;
+      float tan_half_theta = std::tan(.5f * theta);
+      return tan_half_theta > 0.f ? -std::log(tan_half_theta) : 0.f;
+   }
+}
 
 void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeedWithCurvaturesComparison
 (EventData& data, SiSpacePointForSeed*& SPb, SiSpacePointForSeed*& SP0, float Zob) const
@@ -2301,12 +2309,8 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeedWithCurvaturesComparison
       float Zot = std::abs(topR - bottomR) > 10e-9 ?
         bottomZ - (bottomR - originalSeedQuality) * ((topZ - bottomZ) / (topR - bottomR)) : bottomZ;
 
-      float theta1 = std::abs(topR - bottomR) > 10e-9 ?
-        std::atan2(topR - bottomR, topZ - bottomZ) : 0.f;
-      float eta1 = theta1 > 0.f ? -std::log(std::tan(.5f * theta1)) : 0.f;
-
-      float theta0 = seedIP > 0.f ? std::atan2(seedIP, Zot) : 0.f;
-      float eta0 = theta0 > 0.f ? -std::log(std::tan(.5f * theta0)) : 0.f;
+      float eta1 = computeEta(topR - bottomR, topZ - bottomZ);
+      float eta0 = computeEta(seedIP, Zot);
 
       float deltaEta=std::abs(eta1-eta0); //For LLP daughters, the direction of the track is correlated with the direction of the LLP (which is correlated with the direction of the point of closest approach
       //calculate weighted average of d0 and deltaEta, normalized by their maximum values

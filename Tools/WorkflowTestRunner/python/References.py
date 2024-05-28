@@ -25,9 +25,9 @@ references_map = {
     "d1912": "v5",
     # Reco
     "q442": "v53",
-    "q449": "v83",
+    "q449": "v84",
     "q452": "v13",
-    "q454": "v19",
+    "q454": "v20",
     # Derivations
     "data_PHYS_Run2": "v23",
     "data_PHYSLITE_Run2": "v5",
