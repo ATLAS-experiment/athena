@@ -309,6 +309,13 @@ atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
 #################################################################################
+#                 Muon Phase II CI tests
+#################################################################################
+atlas_add_citest( MuonR4_PatternRecognition
+         SCRIPT PatternRecognitionMuonR4.sh 1 100
+         PROPERTIES PROCESSOR 1
+)
+#################################################################################
 # Trigger
 #################################################################################
 
