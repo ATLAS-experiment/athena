@@ -9,6 +9,7 @@
 #include <AsgAnalysisAlgorithms/AsgPtEtaSelectionTool.h>
 #include <AsgAnalysisAlgorithms/AsgCutBookkeeperAlg.h>
 #include <AsgAnalysisAlgorithms/AsgClassificationDecorationAlg.h>
+#include <AsgAnalysisAlgorithms/AsgEnergyDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgPriorityDecorationAlg.h>
 #include <AsgAnalysisAlgorithms/AsgEventScaleFactorAlg.h>
 #include <AsgAnalysisAlgorithms/AsgLeptonTrackSelectionAlg.h>
@@ -41,6 +42,7 @@ DECLARE_COMPONENT (CP::AsgFlagSelectionTool)
 DECLARE_COMPONENT (CP::AsgMaskSelectionTool)
 DECLARE_COMPONENT (CP::AsgPtEtaSelectionTool)
 DECLARE_COMPONENT (CP::AsgClassificationDecorationAlg)
+DECLARE_COMPONENT (CP::AsgEnergyDecoratorAlg)
 DECLARE_COMPONENT (CP::AsgPriorityDecorationAlg)
 DECLARE_COMPONENT (CP::AsgCutBookkeeperAlg)
 DECLARE_COMPONENT (CP::AsgEventScaleFactorAlg)

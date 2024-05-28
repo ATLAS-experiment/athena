@@ -98,9 +98,14 @@ class MuonCalibrationConfig (ConfigBlock):
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                 preselection = self.ptSelectionOutput)
 
+        # Additional decorations
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg.particles = config.readName (self.containerName)
+
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
 

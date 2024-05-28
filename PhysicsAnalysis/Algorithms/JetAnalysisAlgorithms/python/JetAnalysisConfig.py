@@ -412,6 +412,11 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'fjvtEfficiency')
             config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
+        # Additional decorations
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
+        alg.particles = config.readName (self.containerName)
+
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
 
 
 class RScanJetAnalysisConfig (ConfigBlock) :
