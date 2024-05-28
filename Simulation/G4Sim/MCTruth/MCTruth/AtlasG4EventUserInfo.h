@@ -37,15 +37,6 @@ public:
    */
   void SetHepMCEvent(HepMC::GenEvent*);
 
-  int GetNrOfPrimaryParticles() const; // Never called. TODO Remove
-  void SetNrOfPrimaryParticles(int nr); // Only called in ISF::InputConverter::ISF_to_G4Event(...). TODO Remove
-
-  int GetNrOfPrimaryVertices() const; // Never called. TODO Remove
-  void SetNrOfPrimaryVertices(int nr); // Only called in ISF::InputConverter::ISF_to_G4Event(...). TODO Remove
-
-  void SetVertexPosition(const G4ThreeVector&); // Never called. TODO Remove
-  const G4ThreeVector GetVertexPosition() const; // Never called. TODO Remove
-
   /**
    * @brief return a pointer to the HepMC::GenParticle used to create
    * the current G4PrimaryParticle. (Used in G4VFastSimulationModel
@@ -84,14 +75,14 @@ public:
    * ensure that unprocessed G4Steps are passed to the default
    * CaloCalibrationHit sensitive detector. TODO Rename
    */
-  int GetLastProcessedBarcode() const { return m_last_processed_barcode; }
+  int GetLastProcessedTrackID() const { return m_lastProcessedTrackID; }
   /**
    * @brief record the value of G4Track::GetTrackID() for the current
    * G4Step. Should be called by all CaloCalibrationHit Sensitive
    * Detectors after they process a G4Step. TODO Check this. TODO
    * Rename
    */
-  void SetLastProcessedBarcode(int b) { m_last_processed_barcode = b; }
+  void SetLastProcessedTrackID(int trackID) { m_lastProcessedTrackID = trackID; }
 
   /**
    * @brief return the value of the G4Track::GetCurrentStepNumber()
@@ -101,21 +92,18 @@ public:
    * that unprocessed G4Steps are passed to the default
    * CaloCalibrationHit sensitive detector.
    */
-  int GetLastProcessedStep() const { return m_last_processed_step; }
+  int GetLastProcessedStep() const { return m_lastProcessedStep; }
   /**
    * @brief record value of the G4Track::GetCurrentStepNumber() for
    * the current G4Step. Should be called by all CaloCalibrationHit
    * Sensitive Detectors after they process a G4Step. TODO Check this
    * is done.
    */
-  void SetLastProcessedStep(int s) { m_last_processed_step = s; }
+  void SetLastProcessedStep(int stepNumber) { m_lastProcessedStep = stepNumber; }
 
   void Print() const {}
 
 private:
-  G4ThreeVector m_vertexPosition; // TODO Remove
-  int m_nrOfPrimaryParticles{0}; // TODO Remove
-  int m_nrOfPrimaryVertices{0}; // TODO Remove
   HepMC::GenEvent *m_theEvent{};
   HepMC::ConstGenParticlePtr m_currentPrimary{};
   HepMC::GenParticlePtr m_currentlyTraced{};
@@ -124,8 +112,8 @@ private:
   // ID and step number of the last G4Step processed by a
   // CaloCalibrationHit SD Both are needed, because a particle might
   // have only one step
-  int m_last_processed_barcode{};
-  int m_last_processed_step{};
+  int m_lastProcessedTrackID{0};
+  int m_lastProcessedStep{0};
 };
 
 #endif // MCTRUTH_ATLASG4EVENTUSERINFO_H

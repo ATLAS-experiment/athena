@@ -474,7 +474,6 @@ G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ISFParticleVector& ispVe
   // retrieve world solid (volume)
   const G4VSolid *worldSolid = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume()->GetLogicalVolume()->GetSolid();
 
-  int n_pp=0;
   for ( ISF::ISFParticle *ispPtr: ispVector ) {
     ISF::ISFParticle &isp = *ispPtr;
     if ( !isInsideG4WorldVolume(isp, worldSolid) ) {
@@ -491,12 +490,11 @@ G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ISFParticleVector& ispVe
       continue;
     }
     this->addG4PrimaryVertex(g4evt,isp,useHepMC,shadowGenEvent);
-    n_pp++;
   }
 
   AtlasG4EventUserInfo *atlasG4EvtUserInfo=new AtlasG4EventUserInfo();
-  atlasG4EvtUserInfo->SetNrOfPrimaryParticles(n_pp);
-  atlasG4EvtUserInfo->SetNrOfPrimaryVertices(n_pp); // special case for ISF batches of particles
+  atlasG4EvtUserInfo->SetLastProcessedTrackID(0); // TODO Check if it is better to set this to -1 initially
+  atlasG4EvtUserInfo->SetLastProcessedStep(0); // TODO Check if it is better to set this to -1 initially
   atlasG4EvtUserInfo->SetHepMCEvent(genEvent);
   g4evt->SetUserInformation(atlasG4EvtUserInfo);
 
