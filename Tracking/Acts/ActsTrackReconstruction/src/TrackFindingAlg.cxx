@@ -74,7 +74,9 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
-    ATH_MSG_DEBUG("   " << m_doBranchHoleCut);
+    ATH_MSG_DEBUG("   " << m_ptMinMeasurements);
+    ATH_MSG_DEBUG("   " << m_absEtaMaxMeasurements);
+    ATH_MSG_DEBUG("   " << m_doBranchStopper);
     ATH_MSG_DEBUG("   " << m_doTwoWay);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
@@ -467,12 +469,34 @@ namespace ActsTrk
         m_trackStatePrinter->printTrackState(tgContext, trackState, measurementContainerOffsets, true);
       }
 
-      if (!m_doBranchHoleCut)
+      if (!m_doBranchStopper)
         return BranchStopperResult::Continue;
 
       const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
       double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
       const auto &cutSet = getCuts(eta);
+
+      if (typeIndex < m_ptMinMeasurements.size() &&
+          !(tipState.nMeasurements < m_ptMinMeasurements[typeIndex])) {
+        double pT = std::sin(parameters[Acts::eBoundTheta]) / parameters[Acts::eBoundQOverP];
+        if (std::abs(pT) < cutSet.ptMin) {
+          ++event_stat[category_i][kNStoppedTracksMinPt];
+          ATH_MSG_DEBUG("CkfBranchStopper: drop branch with q*pT="
+                        << pT << " after "
+                        << tipState.nMeasurements << " measurements");
+          return BranchStopperResult::StopAndDrop;
+        }
+      }
+
+      if (typeIndex < m_absEtaMaxMeasurements.size() &&
+          !(tipState.nMeasurements < m_absEtaMaxMeasurements[typeIndex]) &&
+          !(std::abs(eta) < trackSelectorCfg.absEtaEdges.back())) {
+        ++event_stat[category_i][kNStoppedTracksMaxEta];
+        ATH_MSG_DEBUG("CkfBranchStopper: drop branch with eta="
+                      << eta << " after "
+                      << tipState.nMeasurements << " measurements");
+        return BranchStopperResult::StopAndDrop;
+      }
 
       // https://github.com/acts-project/acts/blob/v35.0.0/Core/include/Acts/TrackFinding/MeasurementSelector.ipp#L99
       // counts any other measurement anywhere on the surface as an outlier, so does not register as a hole.
@@ -812,6 +836,8 @@ namespace ActsTrk
                                           std::make_pair(kNStoppedTracksMaxHoles, "Stopped tracks reaching max holes"),
                                           std::make_pair(kMultipleBranches, "Seeds with more than one branch"),
                                           std::make_pair(kNoSecond, "Tracks failing second CKF"),
+                                          std::make_pair(kNStoppedTracksMinPt, "Stopped tracks below pT cut"),
+                                          std::make_pair(kNStoppedTracksMaxEta, "Stopped tracks above max eta"),
                                       });
       assert(stat_labels.size() == kNStat);
       std::vector<std::string> categories;

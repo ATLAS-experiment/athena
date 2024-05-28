@@ -96,7 +96,10 @@ def ActsMainTrackFindingAlgCfg(flags,
             kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
             if flags.Acts.doTrackFindingTrackSelector == 4:
                 # don't use branch stopper - for comparison with previous behaviour
-                kwargs.setdefault("doBranchHoleCut", False)
+                kwargs.setdefault("doBranchStopper", False)
+            if flags.Acts.doTrackFindingTrackSelector == 1:  # disable with 6
+                kwargs.setdefault("ptMinMeasurements", isdet(flags, pixel=[3], strip=[6]))
+                kwargs.setdefault("absEtaMaxMeasurements", isdet(flags, pixel=[3], strip=[999999]))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
