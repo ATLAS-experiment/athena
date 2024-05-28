@@ -30,7 +30,7 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-trk" ] && [ $rc -ne 255 ] && rc=0
+    [ "${name}" = "dcube-athena-acts" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -104,21 +104,21 @@ ls -la "$lastref_dir"
 
 run "dcube-acts-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_last \
+    -p -x dcube_acts_last \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
 
 run "dcube-athena-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_last \
+    -p -x dcube_athena_last \
     -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/idpvm.athena.root \
     idpvm.athena.root
 
 run "dcube-athena-acts" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_last \
+    -p -x dcube_athena_acts \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.athena.root \
     idpvm.acts.root
