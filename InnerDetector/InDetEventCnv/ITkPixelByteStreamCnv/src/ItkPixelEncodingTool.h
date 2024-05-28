@@ -20,7 +20,8 @@ class ItkPixelEncodingTool: public AthAlgTool {
 
         StatusCode initialize();
 
-        std::vector<uint32_t> encodeFE(HitMap hitMap, uint8_t FE_id);
+        std::vector<uint32_t> encodeFE(HitMap hitMap);
+        //std::vector<uint32_t> encodeFE(HitMap hitMap, uint8_t FE_id);
 
     private:
 

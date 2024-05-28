@@ -16,7 +16,7 @@ StatusCode ITkPixelHitSortingTool::initialize(){
     return StatusCode::SUCCESS;
 }
 
-StatusCode ITkPixelHitSortingTool::sortRDOHits(SG::ReadHandle<PixelRDO_Container> &rdoContainer) const {
+void ITkPixelHitSortingTool::sortRDOHits(SG::ReadHandle<PixelRDO_Container> &rdoContainer) const {
     PixelRDO_Container::const_iterator rdoCollections      = rdoContainer->begin();
     PixelRDO_Container::const_iterator rdoCollectionsEnd   = rdoContainer->end();
 
@@ -41,5 +41,5 @@ StatusCode ITkPixelHitSortingTool::sortRDOHits(SG::ReadHandle<PixelRDO_Container
 
 
 
-    return StatusCode::SUCCESS;
+    // return StatusCode::SUCCESS;
 }
