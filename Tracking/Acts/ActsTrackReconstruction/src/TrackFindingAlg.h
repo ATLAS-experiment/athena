@@ -21,6 +21,7 @@
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/TrackProxy.hpp"
 
+// ActsTrk
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
@@ -38,7 +39,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
 
-// Other
+// STL
 #include <limits>
 #include <string>
 #include <vector>
@@ -189,7 +190,6 @@ namespace ActsTrk
     CKF_pimpl &trackFinder();
     const CKF_pimpl &trackFinder() const;
 
-    struct CkfBranchStopper;
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     // statistics

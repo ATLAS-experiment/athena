@@ -4,6 +4,8 @@
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H 1
 
+#include "src/TrackFindingAlg.h"
+
 // ACTS
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TrackContainer.hpp"
@@ -19,15 +21,19 @@
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/TrackSelector.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+
+// Athena
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
+// ActsTrk
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "src/TrackStatePrinter.h"
 
+// STL
 #include <unordered_map>
 #include <utility>
 #include <vector>
