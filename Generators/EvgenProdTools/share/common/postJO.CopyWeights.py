@@ -1,3 +1,4 @@
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ## Run the CopyEventWeight algorithm to copy HepMC weight(s) to EventInfo/EventType
 if not hasattr(topAlg, "EventInfoCnvAlg"):
     from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg

@@ -1,3 +1,4 @@
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 ## Generic JO header for use in any evgen-related job options
 ## Included by StdEvgenSetup.py and StdAnalysisSetup.py
 
