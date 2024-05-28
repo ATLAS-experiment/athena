@@ -171,7 +171,7 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nPixelSharedHits_vs_mu, "nPixelSharedHits_vs_mu");
     book(m_nSCTSharedHits_vs_mu, "nSCTSharedHits_vs_mu");
     book(m_nInnerMostPixelOutliers_vs_mu, "nInnerMostPixelOutliers_vs_mu");
-    book(m_nInnerMostPixelEndcapOutliers_vs_mu, "nInnerMostPixelOutliers_vs_mu");
+    book(m_nInnerMostPixelEndcapOutliers_vs_mu, "nInnerMostPixelEndcapOutliers_vs_mu");
     book(m_nInnerMostPixelSplitHits_vs_mu, "nInnerMostPixelSplitHits_vs_mu");
     book(m_nInnerMostPixelSplitEndcapHits_vs_mu, "nInnerMostPixelSplitEndcapHits_vs_mu");
     book(m_nExpectedInnerMostPixelHits_vs_mu, "nExpectedInnerMostPixelHits_vs_mu");
