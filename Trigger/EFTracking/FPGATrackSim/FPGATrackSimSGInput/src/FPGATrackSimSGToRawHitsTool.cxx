@@ -150,6 +150,8 @@ StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackS
     tmpOfflineTrack.setQOverPt(trackParticle->pt() > 0 ? trackParticle->charge() / trackParticle->pt() : 0);
     tmpOfflineTrack.setEta(trackParticle->eta());
     tmpOfflineTrack.setPhi(trackParticle->phi());
+    tmpOfflineTrack.setD0(trackParticle->d0());
+    tmpOfflineTrack.setZ0(trackParticle->z0());
 
     const Trk::TrackStates* trackStates = trackParticle->track()->trackStateOnSurfaces();
     if (trackStates == nullptr) {
@@ -292,7 +294,16 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
         tmpSGhit.setEventIndex(index);
       else
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
+
+      if (bestParent) {
+	unsigned int id2, barcode2;
+	bestExtcode.uniqueID(id2, barcode2);
+	tmpSGhit.setBarcode(id2);
+      }
+      else {
+	tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
+      }
+
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
 
@@ -365,8 +376,16 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
         tmpSGhit.setEventIndex(index);
       else
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-
-      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
+      
+      if (bestParent) {
+	unsigned int id2, barcode2;
+	bestExtcode.uniqueID(id2, barcode2);
+	tmpSGhit.setBarcode(id2);
+      }
+      else {
+	tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
+      }
+      
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
       tmpSGhit.setX(0.5 * (endsOfStrip.first.x() + endsOfStrip.second.x()));
@@ -514,7 +533,17 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
         clusterEquiv.setEventIndex(index);
       else
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
-      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
+
+      if (bestParent) {
+	unsigned int id2, barcode2;
+	bestExtcode.uniqueID(id2, barcode2);
+	clusterEquiv.setBarcode(id2);
+      }
+      else {
+	clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
+      }
+
+
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       clusterEquiv.setParentageMask(parentMask.to_ulong());
       clusterOut.setClusterEquiv(clusterEquiv);
@@ -583,8 +612,15 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       else
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
 
+      if (bestParent) {
+	unsigned int id2, barcode2;
+	bestExtcode.uniqueID(id2, barcode2);
+	clusterEquiv.setBarcode(id2);
+      }
+      else {
+	clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
+      }
 
-      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.uid() : std::numeric_limits<long>::max())); // FIXME
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       clusterEquiv.setParentageMask(parentMask.to_ulong());
       clusterOut.setClusterEquiv(clusterEquiv);
@@ -699,7 +735,11 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setPZ(track_truth_p * track_truth_costheta);
       tmpSGTrack.setPDGCode(pdgcode);
       tmpSGTrack.setStatus(particle->status());
-      tmpSGTrack.setBarcode(extBarcode2.uid()); // FIXME
+
+      unsigned int id2, barcode2;
+      extBarcode2.uniqueID(id2, barcode2);
+      tmpSGTrack.setBarcode(id2);
+
       index_type index2, position2;
       extBarcode2.eventIndex(index2, position2);
       tmpSGTrack.setEventIndex(index2);
