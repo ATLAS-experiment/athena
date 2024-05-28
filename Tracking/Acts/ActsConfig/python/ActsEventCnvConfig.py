@@ -8,9 +8,12 @@ def ActsToTrkConverterToolCfg(flags,
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if 'TrackingGeometryTool' not in kwargs:
+    # Currently this does not work if we are in a muon-only mode
+    if flags.Detector.GeometryITk and 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    else:
+         kwargs.setdefault("TrackingGeometryTool", "")
 
     acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
     return acc

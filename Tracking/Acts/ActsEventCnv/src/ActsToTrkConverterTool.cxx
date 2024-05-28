@@ -71,32 +71,35 @@ ActsTrk::ActsToTrkConverterTool::ActsToTrkConverterTool(
 StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
   ATH_MSG_INFO("Initializing ACTS to ATLAS converter tool");
 
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  if (!m_trackingGeometryTool.empty()) {
+    ATH_CHECK(m_trackingGeometryTool.retrieve());
+    m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
 
-  m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
-    // find acts surface with the same detector element ID
-    if (!surface)
-      return;
-    const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
-        surface->associatedDetectorElement());
-    if (!actsElement)
-      return;
-    // Conversion from Acts to ATLAS surface impossible for the TRT so the TRT
-    // surfaces are not stored in this map
-    bool isTRT = (dynamic_cast<const InDetDD::TRT_BaseElement *>(
-                      actsElement->upstreamDetectorElement()) != nullptr);
-    if (isTRT)
-      return;
-    
-    auto [it, ok] = m_actsSurfaceMap.insert({actsElement->identify(), surface});
-    if (!ok) {
-      ATH_MSG_WARNING("ATLAS ID "
-                      << actsElement->identify()
-                      << " has two ACTS surfaces: " << it->second->geometryId()
-                      << " and " << surface->geometryId());
-    }
-  });
+    m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
+      // find acts surface with the same detector element ID
+      if (!surface)
+        return;
+      const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
+          surface->associatedDetectorElement());
+      if (!actsElement)
+        return;
+      // Conversion from Acts to ATLAS surface impossible for the TRT so the TRT
+      // surfaces are not stored in this map
+      bool isTRT = (dynamic_cast<const InDetDD::TRT_BaseElement *>(
+                        actsElement->upstreamDetectorElement()) != nullptr);
+      if (isTRT)
+        return;
+
+      auto [it, ok] =
+          m_actsSurfaceMap.insert({actsElement->identify(), surface});
+      if (!ok) {
+        ATH_MSG_WARNING("ATLAS ID " << actsElement->identify()
+                                    << " has two ACTS surfaces: "
+                                    << it->second->geometryId() << " and "
+                                    << surface->geometryId());
+      }
+    });
+  }
   return StatusCode::SUCCESS;
 }
 
