@@ -1,0 +1,15 @@
+LineNumber,VariableName,Type,Description
+1,barcode,vector<int>,Barcode of BSM and their decay particles
+2,Classification,vector<unsigned int>,Particle classification as determined by the MCTruthClassifier
+3,classifierParticleOrigin,vector<unsigned int>,Particle origin as determined by the MCTruthClassifier
+4,classifierParticleOutCome,vector<unsigned int>,Particle outcome as determined by the MCTruthClassifier
+5,classifierParticleType,vector<unsigned int>,Particle type as determined by the MCTruthClassifier
+6,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from BSM particle to decay vertex
+7,e,vector<float>,Total energy of BSM and their decay particles
+8,m,vector<float>,"Mass of BSM and its decay particles (not necessarily equals to E^2-p^2 if not on mass shell)"
+9,pdgId,vector<int>,PDG identification of BSM and their decay particles
+10,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from BSM particle to production vertex
+11,px,vector<float>,x-component of BSM and their decay particles' momentum
+12,py,vector<float>,y-component of BSM and their decay particles' momentum
+13,pz,vector<float>,z-component of BSM and their decay particles' momentum
+14,status,vector<int>,Status code for BSM and their decay particles

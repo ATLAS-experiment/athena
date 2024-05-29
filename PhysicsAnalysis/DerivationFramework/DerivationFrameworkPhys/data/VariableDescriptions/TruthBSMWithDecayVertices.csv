@@ -1,0 +1,9 @@
+LineNumber,VariableName,Type,Description
+1,barcode,vector<int>,Barcode of BSM and their decay vertices
+2,id,vector<int>,BSM particle vertex status (type of vertex)
+3,incomingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Incoming particles in BSM particle decay collection
+4,outgoingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Outgoing particles in BSM particle decay collection
+5,t,vector<float>,Truth vertex time for BSM particle decays
+6,x,vector<float>,Truth vertex x-position for BSM particle decays
+7,y,vector<float>,Truth vertex y-position for BSM particle decays
+8,z,vector<float>,Truth vertex z-position for BSM particle decays

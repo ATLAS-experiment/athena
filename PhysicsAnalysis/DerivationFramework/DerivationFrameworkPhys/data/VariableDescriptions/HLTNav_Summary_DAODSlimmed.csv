@@ -1,0 +1,7 @@
+LineNumber,VariableName,Type,Description
+1,name,vector<string>,"Graph structure which the Trig Decision Tool can use to associate chains with HLT physics object 4-vectors. Used for trigger-matching from DAOD. Name of graph node"
+2,decisions,vector<vector<unsigned int> >,"For a node in the trigger navigation graph: list of passing chain-legs"
+3,linkColNames,vector<vector<string> >,"For a node in the trigger navigation graph: Parallel vector of ElementLinks - link name"
+4,linkColKeys,vector<vector<unsigned int> >,"For a node in the trigger navigation graph: Parallel vector of ElementLinks - link SG Key"
+5,linkColIndices,vector<vector<unsigned short> >,"For a node in the trigger navigation graph: Parallel vector of ElementLinks - link container index"
+6,linkColClids,vector<vector<unsigned int> >,"For a node in the trigger navigation graph: Parallel vector of ElementLinks - link collection type"

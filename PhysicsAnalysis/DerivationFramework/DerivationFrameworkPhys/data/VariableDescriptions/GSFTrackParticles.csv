@@ -1,0 +1,17 @@
+LineNumber,VariableName,Type,Description
+1,definingParametersCovMatrixDiag,vector<vector<float> >,Uncertainty of the 5 parameters (diagonal element on covariance matrix)
+2,definingParametersCovMatrixOffDiag,vector<vector<float> >,Uncertainty of the 5 parameters (off-diagonal element on covariance matrix)
+3,phi,vector<float>,Track kinematics representation (5 parameters of helix)
+4,originalTrackParticle,vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > >,Link from GSF track to original track particle
+5,numberOfPixelHits,vector<unsigned char>,Number of Pixel hits associated to GSF track
+6,numberOfSCTHits,vector<unsigned char>,Number of SCT hits associated to GSF track
+7,qOverP,vector<float>,Track kinematics representation (5 parameters of helix)
+8,numberOfInnermostPixelLayerHits,vector<unsigned char>,Number of hits in the innermost layer 
+9,numberOfNextToInnermostPixelLayerHits,vector<unsigned char>,Number of hits in the next to innermost layer 
+10,expectInnermostPixelLayerHit,vector<unsigned char>,Number of hits expected in the innermost layer
+11,expectNextToInnermostPixelLayerHit,vector<unsigned char>,Number of hits expected in the next to innermost layer
+12,chiSquared,vector<float>,chi square of fit for GSF (Gaussian Sum Filter) track
+13,d0,vector<float>,"Transverse impact parameter, i.e. the distance of the closest point of the track to the beamspot on the transverse plane (5 parameters of helix)"
+14,z0,vector<float>,"Longitudinal impact parameter, i.e. the track's distance from the beamspot along the z-axis, calculated at the point of closest approach to the beamspot on the transverse plane (5 parameters of helix)"
+15,theta,vector<float>,Track kinematics representation (5 parameters of helix)
+16,vz,vector<float>,"The point of reference for the z0 calculation, i.e. the vertex position along the z-axis"

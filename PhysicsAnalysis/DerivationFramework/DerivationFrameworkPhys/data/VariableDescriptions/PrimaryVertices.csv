@@ -1,0 +1,7 @@
+LineNumber,VariableName,Type,Description
+1,x,vector<float>,Primary vertex position in x
+2,y,vector<float>,Primary vertex position in y
+3,z,vector<float>,Primary vertex position in z
+4,vertexType,vector<short>,Enum defining the type of vertex created in the offline reconstruction
+5,trackParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TrackParticle_v1> > > >,Link from primary vertex to corresponding tracks
+6,neutralParticleLinks,vector<vector<ElementLink<DataVector<xAOD::NeutralParticle_v1> > > >,Link from primary vertex to corresponding neutral particles

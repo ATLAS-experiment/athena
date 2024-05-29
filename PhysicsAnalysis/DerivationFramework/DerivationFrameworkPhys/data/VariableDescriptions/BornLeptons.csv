@@ -1,0 +1,19 @@
+LineNumber,VariableName,Type,Description
+1,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Born (ME) lepton production vertex
+2,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Born (ME) lepton decay vertex
+3,m,vector<float>,Born (ME) lepton mass
+4,px,vector<float>,Born (ME) lepton px
+5,py,vector<float>,Born (ME) lepton py
+6,pz,vector<float>,Born (ME) lepton pz
+7,e,vector<float>,Born (ME) lepton energy
+8,pdgId,vector<int>,Born (ME) lepton pdg ID
+9,classifierParticleOrigin,vector<unsigned int>,Born (ME) lepton truth origin
+10,Classification,vector<unsigned int>,Born (ME) lepton truth classification
+11,barcode,vector<int>,Born (ME) lepton barcode (unique ID)
+12,status,vector<int>,Born (ME) lepton event generator status
+13,classifierParticleType,vector<unsigned int>,Born (ME) lepton truth type
+14,classifierParticleOutCome,vector<unsigned int>,Born (ME) lepton truth outcome
+15,polarizationPhi,vector<float>,Born (ME) lepton polarization in phi
+15,polarizationTheta,vector<float>,Born (ME) lepton polarization in theta
+17,dressedPhoton,vector<char>,Decoration from photon dressing
+18,unusedPhotonDecoration,vector<char>,"Name of the decoration for photons that were used in dressing (""unused” means no photons used in the dressing procedure)"

@@ -1,0 +1,6 @@
+LineNumber,VariableName,Type,Description
+1,mpx,vector<float>,Truth missing transverse energy x component
+2,mpy,vector<float>,Truth missing transverse energy y component
+3,sumet,vector<float>,Truth missing transverse energy scalar sum pT
+4,name,vector<string>,Truth missing transverse energy name
+5,source,vector<ULong64_t>,Truth missing transverse energy source bitmask

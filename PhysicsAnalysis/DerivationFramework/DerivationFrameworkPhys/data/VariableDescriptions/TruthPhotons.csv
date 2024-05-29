@@ -1,0 +1,22 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Truth photon mass (0)
+2,px,vector<float>,Truth photon momentum
+3,py,vector<float>,Truth photon momentum
+4,pz,vector<float>,Truth photon momentum
+5,e,vector<float>,Truth photon energy
+6,pdgId,vector<int>,Truth photon PDG identification (22)
+7,barcode,vector<int>,Truth photon unique identifier
+8,status,vector<int>,"Truth photon status (1, stable)"
+9,classifierParticleOrigin,vector<unsigned int>,Classification of origin from MCTC 
+10,classifierParticleType,vector<unsigned int>,Classification of type from MCTC
+11,classifierParticleOutCome,vector<unsigned int>,Classification of outcome from MCTC
+12,Classification,vector<unsigned int>,Classification based on new MCTC (Monte Carlo Truth Classifier)
+13,ptcone20,vector<float>,Truth track isolation (cone radius 0.2)
+14,etcone20,vector<float>,Truth isolation (cone radius 0.2)
+15,etcone40,vector<float>,Truth isolation (cone radius 0.4)
+16,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth photon to production vertex
+17,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth photon to decay vertex
+18,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth photon to truth parents
+19,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth photon to truth children
+20,polarizationPhi,vector<float>,Truth photon polarization in phi
+21,polarizationTheta,vector<float>,Truth photon polarization in theta

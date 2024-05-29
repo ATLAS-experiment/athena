@@ -1,0 +1,9 @@
+LineNumber,VariableName,Type,Description
+1,barcode,vector<int>,Truth vertex unique identifier for hard scatter
+2,id,vector<int>,Truth vertex status (type of vertex)
+3,x,vector<float>,Truth vertex x-position for hard scatter
+4,y,vector<float>,Truth vertex y-position for hard scatter
+5,z,vector<float>,Truth vertex z-position for hard scatter
+6,t,vector<float>,Truth vertex time for hard scatter
+7,incomingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Incoming particles in hard scatter collection
+8,outgoingParticleLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Outgoing particles in hard scatter collection

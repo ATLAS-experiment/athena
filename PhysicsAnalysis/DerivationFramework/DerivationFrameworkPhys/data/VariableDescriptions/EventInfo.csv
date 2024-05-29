@@ -1,0 +1,75 @@
+LineNumber,VariableName,Type,Description
+1,actualInteractionsPerCrossing,,Actual pileup mu (per BCID (Bunch Crosssing Identification))
+2,averageInteractionsPerCrossing,,Average pileup mu (average over BCIDs in the LB)
+3,beamSpotWeight,,Additional event weight in case multiple beamspot sizes are included in the dataset
+4,mcChannelNumber,,Monte Carlo DSID (channel number)
+5,RandomRunNumber,,Randomized run number from pileup reweighting
+6,GenFiltHT,,"Truth HT, definition to match generator filter"
+7,GenFiltHTinclNu,,Generator filter based on HT including neutrinos (effective mass proxy)
+8,GenFiltMET,,"Truth MET, definition to match generator filter"
+9,GenFiltPTZ,,Generator filter based on Z boson pT
+10,GenFiltFatJ,,Generator filter based on large radius jet momentum
+11,DFCommonJets_eventClean_LooseBad,,Event clean flag based on loose jet cleaning
+12,DFCommonJets_eventClean_LooseBadLLP,,Event clean flag based on loose LLP jet cleaning
+13,PileupWeight_NOSYS,,Nominal pileup weight
+14,runNumber,,Run number
+15,eventNumber,,Event number
+16,lumiBlock,,Lumiblock number
+17,timeStamp,,Time stamp in ns
+18,timeStampNSOffset,,Offset for timestamp (in case time stamp becomes very large)
+19,bcid,,Bunch crossing unique identifier
+20,detDescrTags,"vector<pair<string,string> >",Detector description (i.e. geometry version)
+21,eventTypeBitmask,,"Type of event (Monte Carlo, data, etc) as bitmask"
+22,pixelFlags,,Flags for Pixel detector status
+23,sctFlags,,Flags for SCT detector status
+24,trtFlags,,Flags for TRT detector status
+25,larFlags,,Flags for LAr calorimeter detector status
+26,tileFlags,,Flags for Tile calorimeter detector status
+27,muonFlags,,Flags for Muon system detector status
+28,forwardDetFlags,,Flags for forward detectors status
+29,coreFlags,,"""Core"" flags for e.g. data corruption"
+30,lumiFlags,,Flags for luminosity determination
+31,beamPosSigmaX,,Beam spot width in x
+32,beamPosSigmaXY,,Beam spot width in xy
+33,beamPosSigmaY,,Beam spot width in y
+34,beamPosSigmaZ,,Beam spot width in z
+35,beamPosX,,Beam spot position in x
+36,beamPosY,,Beam spot position in y
+37,beamPosZ,,Beam spot position in z
+38,beamStatus,,"Beam status (for data, e.g. stable beams)"
+39,beamTiltXZ,,Beam spot tilt (rotation) in xz plane
+40,beamTiltYZ,,Beam spot tilt (rotation) in yz plane
+41,mcEventNumber,,Monte Carlo simulation event number
+42,mcEventWeights,vector<float>,Generator event weight nominal and variations
+43,pileUpMixtureIDHighBits,,Identifier for pileup events overlaid as background
+44,pileUpMixtureIDLowBits,,Identifier for pileup events overlaid as background
+45,DFCommonJets_isBadBatman,,Calorimeter noise cleaning based on jets - flag for special calorimeter region
+46,DFCommonJets_BCIDDistanceFromFront,,Calorimeter noise cleaning based on jets - distance from the front of a bunch train
+47,DFCommonJets_BCIDDistanceTail,,Calorimeter noise cleaning based on jets - distance to the tail of the train
+48,DFCommonJets_BCIDGapBeforeTrain,,Calorimeter noise cleaning based on jets - number of empty bunches before the train
+49,DFCommonJets_BCIDGapAfterTrain,,Calorimeter noise cleaning based on jets - number of empty bunches after the train
+50,DFCommonJets_BCIDType,,Calorimeter noise cleaning based on jets - type of bunch crossing
+51,DFCommonJets_BCIDGapBeforeTrainMinus12,,Gap before train for the BCID 12 before the collision of interest
+52,DFCommonJets_BCIDGapAfterTrainMinus12,,Gap after train for the BCID 12 before the collision of interest
+53,DFCommonJets_BCIDTypeMinus12,,BCID type for the BCID 12 before the collision of interest
+54,HTXS_prodMode,,Higgs truth cross section production mode (a truth classification of Higgs events)
+55,hardScatterVertexLink,ElementLink<DataVector<xAOD::Vertex_v1> >,Link to the hard-scatter vertex (matrix element vertex)
+56,HF_Classification,,"Detailed classification of ttbar+heavy flavor events (counts of jets per category)"
+57,HF_SimpleClassification,,"Simplified classification of ttbar+heavy flavor events (light/c/b)"
+58,GRL2023,,Flag for specific Run 3 Good Run List
+59,GRL2023_ignoreTRIG,,Flag for specific Run 3 ignoreTrig Good Run List
+60,GRL2023_ignoreTRIG_HLTmisconf,,Flag for specific Run 3 ingnoreTrig_HLTmisconf Good Run List
+61,GRL2023_ignoreTRIG_HLTmisconf_JETCTPIN,,Flag for specific Run 3 ingnoreTrig_HLTmisconf_JETCTPIN Good Run List
+62,GRL2022,,Flag for specific Run 2 ingnoreTrig Good Run List
+63,GRL2022_ignore_TRIGLAR,,Flag for specific Run 2 ingnore_TRIGLAR Good Run List
+64,GRL2022_ignore_TRIGMUO_TRIGLAR,,Flag for specific Run 2 ingnore_TRIGMUO_TRIGLAR Good Run List
+65,GRL2018_Triggerno17e33prim,,Flag for specific Run 2 Triggerno17e33prim 2018 Good Run List
+66,GRL2018_BjetHLT,,Flag for specific Run 2 BjetHLT 2018 Good Run List
+67,GRL2017_Triggerno17e33prim,,Flag for specific Run 2 Triggerno17e33prim 2017 Good Run List
+68,GRL2017_BjetHLT_Normal2017,,Flag for specific Run 2 BjetHLT_Normal2017 Good Run List
+69,GRL2017_JetHLT_Normal2017,,Flag for specific Run 2 JetHLT_Normal2017 Good Run List
+70,GRL2016,,Flag for specific Run 2 2016 Good Run List
+71,GRL2016_ignore_TOROID_STATUS,,Flag for specific Run 2 ignore_TOROID_STATUS Good Run List
+72,GRL2016_BjetHLT,,Flag for specific Run 2 BjetHLT 2016 Good Run List
+73,GRL2016_BjetHLT_Tight,,Flag for specific Run 2 BjetHLT_Tight Good Run List
+74,GRL2015,,Flag for specific Run 2 2015 Good Run List

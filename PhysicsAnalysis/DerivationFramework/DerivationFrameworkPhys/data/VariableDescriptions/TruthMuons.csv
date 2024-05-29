@@ -1,0 +1,28 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Truth muon kinematics
+2,px,vector<float>,Truth muon kinematics
+3,py,vector<float>,Truth muon kinematics
+4,pz,vector<float>,Truth muon kinematics
+5,e,vector<float>,Truth muon kinematics
+6,pdgId,vector<int>,Truth muon PDG identification
+7,barcode,vector<int>,Trut muon barcode
+8,status,vector<int>,Truth muon status
+9,classifierParticleOrigin,vector<unsigned int>,Truth muon Monte Carlo classifier origin
+10,classifierParticleType,vector<unsigned int>,Truth muon Monte Carlo classifier type
+11,classifierParticleOutCome,vector<unsigned int>,Truth muon Monte Carlo classifier outcome
+12,Classification,vector<unsigned int>,Truth info
+13,e_dressed,vector<float>,Truth muon dressed kinematics
+14,pt_dressed,vector<float>,Truth muon dressed kinematics
+15,eta_dressed,vector<float>,Truth muon dressed kinematics
+16,phi_dressed,vector<float>,Truth muon dressed kinematics
+17,nPhotons_dressed,vector<int>,Truth muon number of photons used in dressing
+18,dressedPhoton,vector<char>,Decoration from photon dressing
+19,ptcone30,vector<float>,Truth level isolation in 0.2 cone
+20,etcone20,vector<float>,Truth level isolation in 0.3 cone
+21,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth muon to decay vertex
+22,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Link from truth muon to production vertex
+23,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth muon to truth parents
+24,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Link from truth muon to truth children
+25,polarizationPhi,vector<float>,Truth muon polarization in phi
+26,polarizationTheta,vector<float>,Truth muon polarization in theta
+

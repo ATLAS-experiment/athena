@@ -1,0 +1,20 @@
+LineNumber,VariableName,Type,Description
+1,pt,vector<float>,Silicon hit (extra loose) electron pT
+2,eta,vector<float>,Silicon hit (extra loose) electron eta
+3,phi,vector<float>,Silicon hit (extra loose) electron phi
+4,m,vector<float>,Silicon hit (extra loose) electron mass
+5,charge,vector<float>,Silicon hit (extra loose) electron charge
+6,truthType,vector<int>,Silicon hit (extra loose) electron truth type
+7,truthOrigin,vector<int>,Silicon hit (extra loose) electron truth origin
+8,ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr,vector<float>,Silicon hit (extra loose) electron variable-radius track-based isolation with close-by lepton correction
+9,topoetcone20_CloseByCorr,vector<float>,Silicon hit (extra loose) electron topo isolation within R = 0.2 (calo-based) with close-by lepton correction
+10,z0stheta,vector<float>,Silicon hit (extra loose) electron z0 sin(theta)
+11,d0Normalized,vector<float>,Silicon hit (extra loose) electron normalized d0
+12,nInnerExpPix,vector<int>,Silicon hit (extra loose) electron number of inner expected pixel hits
+13,clEta,vector<float>,Silicon hit (extra loose) electron cluster eta
+14,clPhi,vector<float>,Silicon hit (extra loose) electron cluster phi
+15,author,vector<unsigned short>,Silicon hit (extra loose) electron algorithm author
+16,OQ,vector<unsigned int>,Silicon hit (extra loose) electron quality
+17,DFCommonElectronsLHVeryLoose,vector<char>,Silicon hit (extra loose) electron very loose likelihood outcome
+18,firstEgMotherTruthType,vector<int>,Silicon hit (extra loose) electron parent truth type
+19,firstEgMotherTruthOrigin,vector<int>,Silicon hit (extra loose) electron parent truth origin

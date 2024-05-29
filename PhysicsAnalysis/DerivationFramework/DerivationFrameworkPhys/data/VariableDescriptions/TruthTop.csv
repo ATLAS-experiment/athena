@@ -1,0 +1,19 @@
+LineNumber,VariableName,Type,Description
+1,m,vector<float>,Top quark (W/Z/h) mass
+2,px,vector<float>,Top quark (W/Z/h) x-momentum
+3,py,vector<float>,Top quark (W/Z/h) y-momentum
+4,pz,vector<float>,Top quark (W/Z/h) z-momentum
+5,e,vector<float>,Top quark (W/Z/h) energy
+6,pdgId,vector<int>,Top quark PDG identification
+7,barcode,vector<int>,Top quark barcode (unique identifier)
+8,status,vector<int>,Top quark status
+9,prodVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Truth top production vertex
+10,decayVtxLink,vector<ElementLink<DataVector<xAOD::TruthVertex_v1> > >,Truth top decay vertex
+11,parentLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Parents of truth top quarks
+12,childLinks,vector<vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > > >,Children of truth top quarks
+13,classifierParticleOrigin,vector<unsigned int>,Classification of t-quark origin from MCTC
+14,classifierParticleType,vector<unsigned int>,Classification of t-quark type from MCTC
+15,classifierParticleOutCome,vector<unsigned int>,Classification of t-quark outcome from MCTC
+16,Classification,vector<unsigned int>,Classification of t-quark based on new MCTC (Monte Carlo Truth Classifier)
+17,polarizationPhi,vector<float>,Truth top polarization in phi
+18,polarizationTheta,vector<float>,Truth top polarization in theta

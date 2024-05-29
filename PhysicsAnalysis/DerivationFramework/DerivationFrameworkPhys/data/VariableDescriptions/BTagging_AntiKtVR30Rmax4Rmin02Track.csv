@@ -1,0 +1,7 @@
+LineNumber,VariableName,Type,Description
+1,DL1dv01_pu,vector<float>,Posterior score of DL1dv01 on VRTrackJets
+2,DL1dv01_pc,vector<float>,Posterior score of DL1dv01 on VRTrackJets
+3,DL1dv01_pb,vector<float>,Posterior score of DL1dv01 on VRTrackJets
+4,GN2v00_pc,vector<float>,Posterior score of next-gen GN2 tagger on VRTrackJets
+5,GN2v00_pb,vector<float>,Posterior score of next-gen GN2 tagger on VRTrackJets
+6,GN2v00_pu,vector<float>,Posterior score of next-gen GN2 tagger on VRTrackJets

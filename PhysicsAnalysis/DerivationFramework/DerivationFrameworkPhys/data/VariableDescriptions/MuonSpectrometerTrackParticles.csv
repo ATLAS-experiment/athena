@@ -1,0 +1,10 @@
+LineNumber,VariableName,Type,Description
+1,definingParametersCovMatrixDiag,vector<vector<float> >,Muon Spectrometer track: covariance matrix diagonal of track fit
+2,definingParametersCovMatrixOffDiag,vector<vector<float> >,Muon Spectrometer track: covariance matrix off-diagonal of track fit
+3,phi,vector<float>,Muon Spectrometer track kinematics
+4,qOverP,vector<float>,Muon Spectrometer track kinematics
+5,d0,vector<float>,"Transverse impact parameter, i.e. the distance of the closest point of the track to the beamspot on the transverse plane"
+6,z0,vector<float>,"Longitudinal impact parameter, i.e. the track's distance from the beamspot along the z-axis, calculated at the point of closest approach to the beamspot on the transverse plane"
+7,theta,vector<float>,Muon Spectrometer track kinematics
+8,vz,vector<float>,"The point of reference for the z0 calculation, i.e. the beamspot position along the z-axis"
+9,truthParticleLink,vector<ElementLink<DataVector<xAOD::TruthParticle_v1> > >,Link from muon to corresponding truth particle

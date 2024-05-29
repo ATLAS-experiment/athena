@@ -1,0 +1,5 @@
+LineNumber,VariableName,Type,Description
+1,x,vector<float>,True primary vertex x-position
+2,y,vector<float>,True primary vertex y-position
+3,z,vector<float>,True primary vertex z-position
+4,t,vector<float>,True primary vertex time
