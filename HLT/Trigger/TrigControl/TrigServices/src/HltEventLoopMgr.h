@@ -1,12 +1,15 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSERVICES_HLTEVENTLOOPMGR_H
 #define TRIGSERVICES_HLTEVENTLOOPMGR_H
 
-// Trigger includes
+// Local includes
+#include "EventLoopUtils.h"
 #include "TrigSORFromPtreeHelper.h"
+
+// Trigger includes
 #include "TrigKernel/ITrigEventLoopMgr.h"
 #include "TrigOutputHandling/HLTResultMTMaker.h"
 #include "TrigSteeringEvent/OnlineErrorCode.h"
@@ -40,14 +43,13 @@
 
 // TBB includes
 #include "tbb/concurrent_queue.h"
-#include "tbb/task_arena.h"
+#include "tbb/task_group.h"
 
 // System includes
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <memory>
-#include <thread>
 
 // Forward declarations
 class CondAttrListCollection;
@@ -75,7 +77,13 @@ public:
   /// Standard constructor
   HltEventLoopMgr(const std::string& name, ISvcLocator* svcLoc);
   /// Standard destructor
-  virtual ~HltEventLoopMgr() = default;
+  virtual ~HltEventLoopMgr() noexcept override;
+
+  // Copy and move not allowed
+  HltEventLoopMgr(const HltEventLoopMgr&) = delete;
+  HltEventLoopMgr(HltEventLoopMgr&&) = delete;
+  HltEventLoopMgr& operator=(const HltEventLoopMgr&) = delete;
+  HltEventLoopMgr& operator=(HltEventLoopMgr&&) = delete;
 
   /// @name Gaudi state transitions (overriden from AthService)
   ///@{
@@ -125,10 +133,12 @@ private:
   struct EventLoopStatus {
     /// Event source has more events
     std::atomic<bool> eventsAvailable{true};
-    /// Event source temporarily paused providing events
-    std::atomic<bool> triggerOnHold{false};
     /// No more events available and all ongoing processing has finished
     std::atomic<bool> loopEnded{false};
+    /// Condition variable to notify the main thread of the end of the event loop
+    std::condition_variable loopEndedCond;
+    /// Mutex to notify the main thread of the end of the event loop
+    std::mutex loopEndedMutex;
     /// Max lumiblock number seen in the loop
     std::atomic<EventIDBase::number_type> maxLB{0};
     /// Condition variable to synchronize COOL updates
@@ -137,9 +147,9 @@ private:
     std::mutex coolUpdateMutex;
     /// COOL update ongoing
     bool coolUpdateOngoing{false};
+    /// Event exit status code
+    StatusCode exitCode{StatusCode::SUCCESS};
   };
-  /// Enum type returned by the drainScheduler method
-  enum class DrainSchedulerStatusCode : int {INVALID=-3, FAILURE=-2, RECOVERABLE=-1, SCHEDULER_EMPTY=0, NO_EVENT=1, SUCCESS=2};
 
   // ------------------------- Helper methods ----------------------------------
 
@@ -171,36 +181,37 @@ private:
   StatusCode execAtStart(const EventContext& ctx) const;
 
   /** @brief Handle a failure to process an event
-   *  @return FAILURE breaks the event loop
+   *  @return FAILURE means the event loop was flagged to stop (no new events will be requested)
    **/
   StatusCode failedEvent(HLT::OnlineErrorCode errorCode,
                          const EventContext& eventContext);
 
-  /// The method executed by the event timeout monitoring thread
-  void runEventTimer();
-
   /// Reset the timeout flag and the timer, and mark the slot as busy or idle according to the second argument
   void resetEventTimer(const EventContext& eventContext, bool processing);
-
-  /// Perform all start-of-event actions for a single new event and push it to the scheduler
-  StatusCode startNextEvent(EventLoopStatus& loopStatus);
-
-  /// Drain the scheduler from all actions that may be queued
-  DrainSchedulerStatusCode drainScheduler();
-
-  /// Perform all end-of-event actions for a single event popped out from the scheduler
-  DrainSchedulerStatusCode processFinishedEvent();
 
   /// Clear an event slot in the whiteboard
   StatusCode clearWBSlot(size_t evtSlot) const;
 
-  /// Try to recover from a situation where scheduler and whiteboard see different number of free slots
-  StatusCode recoverFromStarvation();
+  /// @name Methods executed by LoopThreads
+  ///@{
+  /// The method executed by the input handling thread
+  void inputThreadCallback();
 
-  /** @brief Try to drain the scheduler and clear all event data slots.
-   *  Method of the last resort, used in attempts to recover from framework errors
-   **/
-  StatusCode drainAllSlots();
+  /// The method executed by the output handling thread
+  void outputThreadCallback();
+
+  /// The method executed by the event timeout monitoring thread
+  void eventTimerCallback();
+  ///@}
+
+  /// @name Methods executed by TBB tasks
+  ///@{
+  /// Perform all start-of-event actions for a single new event and push it to the scheduler
+  StatusCode startNextEvent();
+
+  /// Perform all end-of-event actions for a single event popped out from the scheduler
+  StatusCode processFinishedEvent();
+  ///@}
 
   // ------------------------- Handles to required services/tools --------------
   ServiceHandle<IIncidentSvc>        m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};
@@ -237,23 +248,23 @@ private:
   Gaudi::Property<float> m_softTimeoutFraction{
     this, "SoftTimeoutFraction", 0.8, "Fraction of the hard timeout to be set as the soft timeout"};
 
+  Gaudi::Property<unsigned int> m_timeoutThreadIntervalMs{
+    this, "TimeoutThreadIntervalMs", 1000, "How often the timeout thread checks for soft timeout, in milliseconds"};
+
   Gaudi::Property<bool> m_traceOnTimeout{
     this, "TraceOnTimeout", true,
     "Print a stack trace on the first soft timeout (might take a while, holding all threads)"};
-
-  Gaudi::Property<int> m_popFromSchedulerTimeout{
-    this, "PopFromSchedulerTimeout", 200,
-    "Maximum time in milliseconds to wait for a finished event before checking "
-    "if there are free slots to refill in the meantime"};
-
-  Gaudi::Property<int> m_popFromSchedulerQueryInterval{
-    this, "PopFromSchedulerQueryInterval", 5,
-    "Time to wait before asking again in case the Scheduler doesn't have a finished event available"};
 
   Gaudi::Property<int> m_maxParallelIOTasks{
     this, "MaxParallelIOTasks", -1,
     "Maximum number of I/O tasks which can be executed in parallel. "
     "If <=0 then the number of scheduler threads is used."};
+
+  Gaudi::Property<int> m_maxIOWakeUpIntervalMs{
+    this, "MaxIOWakeUpIntervalMs", -1,
+    "Maximum time input or output handling thread will sleep unless notified. Negative value (default) means no limit, "
+    "i.e. threads will only wake up on notifications. Zero means threads will never wait for notifications. "
+    "Positive value means the number of milliseconds after which a thread will wake up if it's not notified earlier."};
 
   Gaudi::Property<int> m_maxFrameworkErrors{
     this, "MaxFrameworkErrors", 10,
@@ -297,10 +308,6 @@ private:
     this, "RewriteLVL1", false,
     "Encode L1 results to ByteStream and write to the output. Possible only with athenaHLT, not online."};
 
-  Gaudi::Property<bool> m_popAll{
-    this, "PopAllMode", true, "If true, pop all finished events from scheduler and process all results before filling "
-    "the slots again. If false, pop only one and refill the slot before popping another finished event."};
-
   Gaudi::Property<bool> m_monitorScheduler{
     this, "MonitorScheduler", false, "Enable SchedulerMonSvc to collect scheduler status data in online histograms"};
 
@@ -339,28 +346,26 @@ private:
   std::vector<std::chrono::steady_clock::time_point> m_freeSlotStartPoint;
   /// Vector of flags to tell if a slot is idle or processing
   std::vector<bool> m_isSlotProcessing; // be aware of vector<bool> specialisation
-  /// Timeout mutex
-  std::mutex m_timeoutMutex;
-  /// Timeout condition variable
-  std::condition_variable m_timeoutCond;
+  /// Number of free slots used to synchronise input/output tasks
+  std::atomic<size_t> m_freeSlots{0};
+  /// Input handling thread (triggers reading new events)
+  std::unique_ptr<HLT::LoopThread> m_inputThread;
+  /// Output handling thread (triggers post-processing of finished events)
+  std::unique_ptr<HLT::LoopThread> m_outputThread;
   /// Timeout thread
-  std::unique_ptr<std::thread> m_timeoutThread;
+  std::unique_ptr<HLT::LoopThread> m_timeoutThread;
   /// Soft timeout value set to HardTimeout*SoftTimeoutFraction at initialisation
   std::chrono::milliseconds m_softTimeoutValue{0};
-  /// Task arena to enqueue parallel I/O tasks
-  std::unique_ptr<tbb::task_arena> m_parallelIOTaskArena;
+  /// Task group to execute parallel I/O tasks asynchronously
+  tbb::task_group m_parallelIOTaskGroup;
   /// Queue limiting the number of parallel I/O tasks
   tbb::concurrent_bounded_queue<bool> m_parallelIOQueue;
   /// Queue of events ready for output processing
   tbb::concurrent_bounded_queue<EventContext*> m_finishedEventsQueue;
-  /// Queue of result codes of output processing
-  tbb::concurrent_bounded_queue<DrainSchedulerStatusCode> m_drainSchedulerStatusQueue;
-  /// Queue of result codes of startNextEvent
-  tbb::concurrent_bounded_queue<StatusCode> m_startNextEventStatusQueue;
+  /// Object keeping track of the event loop status
+  EventLoopStatus m_loopStatus{};
   /// Flag set when a soft timeout produces a stack trace, to avoid producing multiple traces
   bool m_timeoutTraceGenerated{false};
-  /// Flag set to false if timer thread should be stopped
-  std::atomic<bool> m_runEventTimer{true};
   /// Counter of framework errors
   std::atomic<int> m_nFrameworkErrors{0};
   /// Application name
