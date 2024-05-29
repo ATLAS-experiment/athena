@@ -38,9 +38,6 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info="whether to recompute the photon shower shape fudge "
             "corrections (sets up an instance of CP::PhotonShowerShapeFudgeAlg). "
             "The default is False, i.e. to use derivation variables.")
-        self.addOption ('ptSelectionOutput', False, type=bool,
-            info="whether or not to apply a minimum pT cut to "
-            "calibrated photons. The default is False.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
@@ -200,7 +197,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                preselection=self.ptSelectionOutput)
+                                preselection=True)
 
         # Set up the isolation correction algorithm.
         alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
@@ -381,7 +378,6 @@ def makePhotonCalibrationConfig( seq, containerName,
                                  enableCleaning = None,
                                  cleaningAllowLate = None,
                                  recomputeIsEM = None,
-                                 ptSelectionOutput = None,
                                  forceFullSimConfig = None):
     """Create photon calibration analysis algorithms
 
@@ -398,8 +394,6 @@ def makePhotonCalibrationConfig( seq, containerName,
       enableCleaning -- Enable photon cleaning
       cleaningAllowLate -- Whether to ignore timing information in cleaning.
       recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
-      ptSelectionOutput -- Whether or not to apply pt selection when creating
-                           output containers.
       forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
@@ -409,7 +403,6 @@ def makePhotonCalibrationConfig( seq, containerName,
     config.setOptionValue ('enableCleaning', enableCleaning)
     config.setOptionValue ('cleaningAllowLate', cleaningAllowLate)
     config.setOptionValue ('recomputeIsEM', recomputeIsEM)
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
     config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)
 

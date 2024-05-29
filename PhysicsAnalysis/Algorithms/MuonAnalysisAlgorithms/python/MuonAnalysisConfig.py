@@ -18,9 +18,6 @@ class MuonCalibrationConfig (ConfigBlock):
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
             "all muons.")
-        self.addOption ('ptSelectionOutput', False, type=bool,
-            info="whether or not to apply a minimum pT cut to "
-            "calibrated muons. The default is False.")
         self.addOption ('minPt', 3.0e3, type=float,
             info="pT cut to apply to calibrated muons, in MeV. "
             "The default is 3.0 GeV.")
@@ -96,7 +93,7 @@ class MuonCalibrationConfig (ConfigBlock):
             alg.selectionTool.minPt = self.minPt
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                preselection = self.ptSelectionOutput)
+                                preselection = True)
 
         # Additional decorations
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' + self.containerName + self.postfix )
@@ -296,7 +293,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
 
 def makeMuonCalibrationConfig( seq, containerName,
-                               postfix = None, ptSelectionOutput = None):
+                               postfix = None):
     """Create muon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -309,13 +306,10 @@ def makeMuonCalibrationConfig( seq, containerName,
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
                  names are unique.
-      ptSelectionOutput -- Whether or not to apply pt selection when creating
-                           output containers.
     """
 
     config = MuonCalibrationConfig (containerName)
     config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
     seq.append (config)
 
 

@@ -26,9 +26,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="whether to perform LAr crack veto based on the cluster eta, "
             "i.e. remove electrons within 1.37<|eta|<1.52. The default "
             "is False.")
-        self.addOption ('ptSelectionOutput', False, type=bool,
-            info="whether or not to apply a minimum pT cut to "
-            "calibrated electrons. The default is False.")
         self.addOption ('isolationCorrection', False, type=bool,
             info="whether or not to perform isolation corrections (leakage "
             "corrections), i.e. set up an instance of "
@@ -157,7 +154,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                preselection=self.ptSelectionOutput)
+                                preselection=True)
 
         # Set up the isolation correction algorithm:
         if self.isolationCorrection:
@@ -464,7 +461,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
 def makeElectronCalibrationConfig( seq, containerName, postfix = None,
                                    crackVeto = None,
-                                   ptSelectionOutput = None,
                                    isolationCorrection = None,
                                    forceFullSimConfig = None):
     """Create electron calibration configuration blocks
@@ -479,14 +475,11 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
                  sequence with multiple working points to ensure all
                  names are unique.
       isolationCorrection -- Whether or not to perform isolation correction
-      ptSelectionOutput -- Whether or not to apply pt selection when creating
-                           output containers.
       forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
     config = ElectronCalibrationConfig (containerName)
     config.setOptionValue ('crackVeto', crackVeto)
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
     config.setOptionValue ('isolationCorrection', isolationCorrection)
     config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)
