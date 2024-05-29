@@ -418,6 +418,8 @@ JetChainParts = {
 
     # beamspot
     'beamspotChain'     : ['beamspotVtx'],
+    'pileuprm'       : # scedule pileup removal algo for  single jet, the m_min LogR value is minimul criteria to for jet LogR to start removal algorithm, the m_max LogR is the desired logR cut to pass for jetschedule pileup removal algo for single jet, the m_min LogR value is minimal criteria for jet LogR to start the removal algorithm, the n_max LogR is the desired logR cut to pass for jet
+       ['n041pileuprmn015' ],# left value is min LogR,right is max LogR, n stands for negative (for example n041 means -0.41 ) 
 }
 
 # ---- Jet Dictionary of default Values ----
@@ -465,7 +467,8 @@ JetChainParts_Default = {
     'tboundary'     : '',
 
     'beamspotChain' : '',
-}
+    'pileuprm'     : '',
+    }
 
 # ---- bJet Dictionary of default Values that are different to the ones for normal jet chains ----
 bJetChainParts_Default = {

@@ -9,7 +9,7 @@ from TrigHLTJetHypo.make_treevec import make_treevec
 # make a list of all possible cut items for the simple scenario
 all_elemental_keys = ('etaRange', 'jvt', 'smc',
                       'threshold', 'momCuts', 'bsel', 'tausel',
-                      'clrsel', 'timing', 'timeSig')
+                      'clrsel','pileuprm', 'timing', 'timeSig')
 
 # Extract moment cuts
 def _cuts_from_momCuts(momCuts):
@@ -83,7 +83,6 @@ def get_condition_args_from_chainpart(cp):
             lo   = values[0]
             vals = defaults(key, lo=lo)
             condargs.append((key, vals))
-
         if k == 'bsel':
             if 'bgnone' in v:
                 key = 'bgnone'
@@ -260,7 +259,15 @@ def get_condition_args_from_chainpart(cp):
                         vals   = defaults(k, lo=lo, hi=hi)
                         vals["moment"] = jetMoments[moment]
                         condargs.append((key, vals))
-
+        if k =='pileuprm':
+            key    = 'pileuprm'
+            values = v.split(key)
+            if "n" in values[0]:
+                 lo=values[0].replace("n","-",1)
+            if "n" in values[1]:
+                 hi=values[1].replace("n","-",1) 
+            vals =  defaults(key, lo=lo, hi=hi)
+            condargs.append((key, vals))
     return condargs
 
 
