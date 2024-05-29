@@ -14,16 +14,16 @@ def main(fileName: str):
     with open(fileName, 'r') as inFile:
         for line in inFile:
             # Check stat report statement
-            match = re.findall('(Acts\S+\s+INFO.*statistics)', line)
+            match = re.findall(r'(Acts\S+\s+INFO.*statistics)', line)
             if match:
                 print(match[0])
 
-            match = re.findall('(Acts\S+\s+INFO.*Ratios)', line)
+            match = re.findall(r'(Acts\S+\s+INFO.*Ratios)', line)
             if match:
                 print(match[0])
                 
             # print table
-            match = re.findall('\d{2}:\d{2}:\d{2}\s(\|[A-Za-z0-9. +/-]+\|[^a-df-z]+\|$)', line)
+            match = re.findall(r'\d{2}:\d{2}:\d{2}\s(\|[A-Za-z0-9. +/-]+\|[^a-df-z]+\|$)', line)
             if match:
                 print(match[0])
             
