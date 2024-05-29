@@ -22,6 +22,7 @@ GeoModelMdtTest::GeoModelMdtTest(const std::string& name,
 
 StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_detMgrKey.initialize());
+    ATH_CHECK(m_cablingKey.initialize(!m_cablingKey.empty()));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_tree.init(this));
 
@@ -146,6 +147,12 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
         m_asBuiltNegStagg = asBuilt->stagg (asBuiltMl, tubeSide_t::NEG);
     }
 
+    const MuonMDT_CablingMap* cabling{nullptr};
+    if (!m_cablingKey.empty()){
+         SG::ReadCondHandle<MuonMDT_CablingMap> cablingHandle{m_cablingKey, ctx};
+         ATH_CHECK(cablingHandle.isValid());
+         cabling = cablingHandle.cptr();
+    }
 
     const Amg::Transform3D trans{readoutEle->getMaterialGeom()->getAbsoluteTransform()};
     m_readoutTransform = readoutEle->getMaterialGeom()->getAbsoluteTransform();
@@ -179,7 +186,20 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
             m_activeTubeLength.push_back(readoutEle->getActiveTubeLength(lay,tube));
             m_tubeLength.push_back(readoutEle->tubeLength(tube_id));
             m_wireLength.push_back(readoutEle->getWireLength(lay, tube));
-            
+            if (cabling) {
+                MdtCablingData translation{};
+                if (!cabling->convert(tube_id, translation) ||
+                    !cabling->getOnlineId(translation, msgStream())){
+                    ATH_MSG_FATAL("Cabling translation failed");
+                    return StatusCode::FAILURE;
+                }
+                m_cablingCSM.push_back(translation.csm);
+                m_cablingMROD.push_back(translation.mrod);
+                m_cablingTdcId.push_back(translation.tdcId);
+                m_cablingTdcCh.push_back(translation.channelId);
+
+
+            }
             if (!m_dumpSurfaces) continue;
             const Amg::Vector3D globalDir {(tubePos - roPos).unit()};
             

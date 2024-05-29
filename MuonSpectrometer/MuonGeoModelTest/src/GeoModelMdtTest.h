@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELMDTTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELMDTTEST_H
@@ -9,6 +9,7 @@
 #include <set>
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "MuonCablingData/MuonMDT_CablingMap.h"
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
@@ -32,7 +33,9 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{
         this, "DetectorManagerKey", "MuonDetectorManager",
         "Key of input MuonDetectorManager condition data"};
-
+    
+    SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "CablingKey", "MuonMDT_CablingMap", 
+                                                            "Key of output MDT cabling map"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -77,7 +80,12 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     MuonVal::VectorBranch<double>& m_tubeLength{m_tree.newVector<double>("tubeLength")};
     MuonVal::VectorBranch<double>& m_activeTubeLength{m_tree.newVector<double>("activeTubeLength")};
     MuonVal::VectorBranch<double>& m_wireLength{m_tree.newVector<double>("wireLength")};
-    
+    /// Cabling information
+    MuonVal::VectorBranch<uint8_t>& m_cablingCSM{m_tree.newVector<uint8_t>("tubeOnlCSM")};
+    MuonVal::VectorBranch<uint8_t>& m_cablingMROD{m_tree.newVector<uint8_t>("tubeOnlMROD")};
+    MuonVal::VectorBranch<uint8_t>& m_cablingTdcId{m_tree.newVector<uint8_t>("tubeOnlTdcId")};
+    MuonVal::VectorBranch<uint8_t>& m_cablingTdcCh{m_tree.newVector<uint8_t>("tubeOnlTdcCh")};
+
     /// Position of the readout
     MuonVal::ThreeVectorBranch m_roPos{m_tree, "readOutPos"};
 
