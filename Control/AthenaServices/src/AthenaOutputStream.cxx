@@ -44,9 +44,6 @@
 
 #include <boost/tokenizer.hpp>
 #include <cassert>
-#include <mutex>
-#include <string>
-#include <vector>
 #include <sstream>
 
 using std::string;
@@ -446,7 +443,7 @@ void AthenaOutputStream::handle(const Incident& inc)
 
 
 // note - this method works in any slot - MetaCont uses the filenames to find objects
-void AthenaOutputStream::finalizeRange( const std::string rangeFN )
+void AthenaOutputStream::finalizeRange( const std::string & rangeFN )
 {
    ATH_MSG_DEBUG("Writing MetaData to " << rangeFN);
    // MN: not calling StopMetaDataIncident here but directly writeMetaData() - OK for Sim, check others

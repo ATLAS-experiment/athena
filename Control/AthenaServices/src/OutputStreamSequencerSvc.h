@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef OUTPUTSTREAMSEQUENCERSVC_H
@@ -68,7 +68,7 @@ public: // Non-static members
    std::string  currentRangeID() const;
 
    /// set the RangeID (possibly temporarily) so the right Range Filename may be generated
-   std::string  setRangeID(const std::string rangeID);
+   std::string  setRangeID(const std::string & rangeID);
 
    /// Is the service in active use? (true after the first range incident is handled)
    bool         inUse() const;
