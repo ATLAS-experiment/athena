@@ -29,8 +29,9 @@ def createTrackingPassFlags():
     icf.addFlag("doAmbiguityProcessorTrackFit", True)
 
     # --- first set kinematic defaults
-    icf.addFlag("minPT", lambda pcf: (0.4 * Units.GeV if pcf.Tracking.doLowMu else
-                                      0.5 * Units.GeV))
+    icf.addFlag("minPT", lambda pcf: (pcf.BField.configuredSolenoidFieldScale *
+                                      (0.4 * Units.GeV if pcf.Tracking.doLowMu else
+                                       0.5 * Units.GeV)))
     icf.addFlag("maxPT", 1000.0 * Units.TeV) # off!
     icf.addFlag("minEta", -1) # off!
     icf.addFlag("maxEta", 2.7)
@@ -90,7 +91,8 @@ def createTrackingPassFlags():
 
     # --- min pt cut for brem
     icf.addFlag("doBremRecoverySi", lambda pcf: pcf.Tracking.doBremRecovery)
-    icf.addFlag("minPTBrem", 1. * Units.GeV) # off
+    icf.addFlag("minPTBrem", lambda pcf: (
+        1. * Units.GeV * pcf.BField.configuredSolenoidFieldScale))
 
     # --- Z Boundary Seeding
     icf.addFlag("doZBoundary", lambda pcf:
@@ -138,12 +140,16 @@ def createITkTrackingPassFlags():
     icf.addFlag("etaBins"                   , [-1.0, 2.0, 2.6, 9999.0])
     icf.addFlag("maxEta"                    , 4.0)
     icf.addFlag("minPT"                     , lambda pcf :
-                [0.2 * Units.GeV] if pcf.Tracking.doLowMu
-                else [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV])
+                [0.2 * Units.GeV * pcf.BField.configuredSolenoidFieldScale]
+                if pcf.Tracking.doLowMu else
+                [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+                 0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+                 0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
 
-    icf.addFlag("minPTSeed"                 , lambda pcf :
-                0.2 * Units.GeV if pcf.Tracking.doLowMu
-                else 0.9 * Units.GeV)
+    icf.addFlag("minPTSeed"                 , lambda pcf : (
+        pcf.BField.configuredSolenoidFieldScale *
+        (0.2 * Units.GeV if pcf.Tracking.doLowMu
+         else 0.9 * Units.GeV)))
     icf.addFlag("maxPrimaryImpactSeed"      , 2.0 * Units.mm)
     icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
     icf.addFlag("useSeedFilter"             , True)
@@ -177,7 +183,8 @@ def createITkTrackingPassFlags():
 
     # --- min pt cut for brem
     icf.addFlag("doBremRecoverySi", lambda pcf: pcf.Tracking.doBremRecovery)
-    icf.addFlag("minPTBrem"               , [1. * Units.GeV])
+    icf.addFlag("minPTBrem", lambda pcf: (
+        [1. * Units.GeV * pcf.BField.configuredSolenoidFieldScale]))
 
     # -- use of calo information
     icf.addFlag("doCaloSeededBremSi", lambda pcf: pcf.Tracking.doCaloSeededBrem)
@@ -227,8 +234,10 @@ def createITkHeavyIonTrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension        = "HeavyIon"
     icf.maxPrimaryImpact = [2.0 * Units.mm]
-    icf.minPT            = [0.4 *Units.GeV]
-    icf.minPTSeed        = 0.4 * Units.GeV
+    icf.minPT            = lambda pcf : (
+        [0.4 *Units.GeV * pcf.BField.configuredSolenoidFieldScale])
+    icf.minPTSeed        = lambda pcf : (
+        0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters      = [6]
     icf.minSiNotShared   = [6]
     icf.Xi2max           = [6.]
@@ -244,12 +253,16 @@ def createITkFastTrackingPassFlags():
 
     icf = createITkTrackingPassFlags()
 
-    icf.minPT                 = [1.0 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV]
+    icf.minPT                 = lambda pcf : (
+        [1.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.maxZImpact            = [150.0 * Units.mm]
     icf.minPixel              = [3]
     icf.nHolesMax             = [1]
     icf.nHolesGapMax          = [1]
-    icf.minPTSeed             = 1.0 * Units.GeV
+    icf.minPTSeed             = lambda pcf: (
+        1.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.maxZImpactSeed        = 150.0 * Units.mm
     icf.useITkStripSeeding    = False
 
@@ -263,8 +276,12 @@ def createITkFTFPassFlags():
     icf.addFlag("doHitDV"            , False)
     icf.addFlag("doDisappearingTrk"  , False)
     icf.useSeedFilter         = False
-    icf.minPT                 = [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV]
-    icf.minPTSeed             = 0.9 * Units.GeV
+    icf.minPT                 = lambda pcf : (
+        [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
+    icf.minPTSeed             = lambda pcf : (
+        0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
 
     return icf
 
@@ -277,7 +294,8 @@ def createITkLargeD0TrackingPassFlags():
     icf.usePrdAssociationTool = True
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
 
-    icf.minPT              = [1000 * Units.MeV]
+    icf.minPT              = lambda pcf : (
+        [1000 * Units.MeV * pcf.BField.configuredSolenoidFieldScale])
     icf.maxEta             = 4.0
     icf.etaBins            = [-1.0, 4.0]
     icf.maxPrimaryImpact   = [300 * Units.mm]
@@ -293,7 +311,8 @@ def createITkLargeD0TrackingPassFlags():
 
     icf.maxZImpactSeed     = 500.0 * Units.mm
     icf.maxPrimaryImpactSeed = 300.0 * Units.mm
-    icf.minPTSeed          = 1000 * Units.MeV
+    icf.minPTSeed          = lambda pcf : (
+        1000 * Units.MeV * pcf.BField.configuredSolenoidFieldScale)
 
     icf.radMax             = 1100. * Units.mm
     icf.nHolesMax          = icf.maxHoles
@@ -321,8 +340,10 @@ def createITkLargeD0FastTrackingPassFlags():
 
     icf.maxEta             = 2.4
     icf.etaBins            = [-1.0, 2.4]
-    icf.minPT              = [5.0 * Units.GeV]
-    icf.minPTSeed          = 5.0 * Units.GeV
+    icf.minPT              = lambda pcf : (
+        [5.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
+    icf.minPTSeed          = lambda pcf : (
+        5.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.nWeightedClustersMin = [8]
     icf.maxPrimaryImpact   = [150 * Units.mm]
     icf.maxPrimaryImpactSeed = 150. * Units.mm
@@ -338,8 +359,10 @@ def createITkLowPtTrackingPassFlags():
 
     icf = createITkTrackingPassFlags()
     icf.extension          = "LowPt"
-    icf.minPT              = [0.4 * Units.GeV]
-    icf.minPTSeed          = 0.4 * Units.GeV
+    icf.minPT              = lambda pcf : (
+        [0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
+    icf.minPTSeed          = lambda pcf : (
+        0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.doBremRecoverySi   = False
 
     return icf
@@ -348,7 +371,8 @@ def createITkLowPtTrackingPassFlags():
 def createHighPileupTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension               = "HighPileup"
-    icf.minPT                   = 0.900 * Units.GeV
+    icf.minPT                   = lambda pcf : (
+        0.900 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters             = 9
     icf.maxPixelHoles           = 0
     icf.doBremRecoverySi        = False
@@ -359,7 +383,8 @@ def createHighPileupTrackingPassFlags():
 def createMinBiasTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension                 = "MinBias"
-    icf.minPT                     = 0.1 * Units.GeV
+    icf.minPT                     = lambda pcf: (
+        0.1 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.maxPrimaryImpact          = 10. * Units.mm
     icf.maxZImpact                = 250. * Units.mm
     icf.minClusters               = 5
@@ -376,7 +401,8 @@ def createUPCTrackingPassFlags():
     icf = createMinBiasTrackingPassFlags()
     icf.extension                 = "UPC"
     # --- min pt cut for brem
-    icf.minPTBrem                 = 0.75 * Units.GeV
+    icf.minPTBrem                 = lambda pcf: (
+        0.75 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     # MinBias turns off Brem Recovery, turn it on here
     icf.doBremRecoverySi = lambda pcf: pcf.Tracking.doBremRecovery
     return icf
@@ -394,8 +420,10 @@ def createLowPtRoITrackingPassFlags():
     icf.extension          = "LowPtRoI"
     icf.usePrdAssociationTool = True
     icf.storeSeparateContainer = True
-    icf.maxPT              = 0.850 * Units.GeV
-    icf.minPT              = 0.050 * Units.GeV
+    icf.maxPT              = lambda pcf: (
+        0.850 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
+    icf.minPT              = lambda pcf: (
+        0.050 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters        = 5
     icf.minSiNotShared     = 4
     icf.maxShared          = 1   # cut is now on number of shared modules
@@ -424,8 +452,10 @@ def createR3LargeD0TrackingPassFlags():
     icf.usePrdAssociationTool = True
     icf.usePixelSeeding    = False
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
-    icf.maxPT              = 1.0 * Units.TeV
-    icf.minPT              = 1.0 * Units.GeV
+    icf.maxPT              = lambda pcf : (
+        1.0 * Units.TeV * pcf.BField.configuredSolenoidFieldScale)
+    icf.minPT              = lambda pcf : (
+        1.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.maxEta             = 3
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxEMImpact        = 300 * Units.mm
@@ -463,8 +493,10 @@ def createLowPtLargeD0TrackingPassFlags():
     icf.extension          = "LowPtLargeD0"
     icf.usePrdAssociationTool = True
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
-    icf.maxPT              = 1.0 * Units.TeV
-    icf.minPT              = 100 * Units.MeV
+    icf.maxPT              = lambda pcf: (
+        1.0 * Units.TeV * pcf.BField.configuredSolenoidFieldScale)
+    icf.minPT              = lambda pcf: (
+        100 * Units.MeV * pcf.BField.configuredSolenoidFieldScale)
     icf.maxEta             = 5
     icf.maxPrimaryImpact   = 300.0 * Units.mm
     icf.maxZImpact         = 1500.0 * Units.mm
@@ -493,9 +525,12 @@ def createLowPtTrackingPassFlags():
     icf.extension        = "LowPt"
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
-    icf.maxPT = lambda pcf: (1e6 if pcf.Tracking.doMinBias else
-                             pcf.Tracking.MainPass.minPT + 0.3) * Units.GeV
-    icf.minPT            = 0.05 * Units.GeV
+    icf.maxPT            = lambda pcf: (
+        pcf.BField.configuredSolenoidFieldScale *
+        (1e6 if pcf.Tracking.doMinBias else
+         pcf.Tracking.MainPass.minPT + 0.3) * Units.GeV)
+    icf.minPT            = lambda pcf: (
+        0.05 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters      = 5
     icf.minSiNotShared   = 4
     icf.maxShared        = 1   # cut is now on number of shared modules
@@ -520,7 +555,8 @@ def createITkConversionTrackingPassFlags():
     icf.usePrdAssociationTool   = True
 
     icf.etaBins                 = [-1.0,4.0]
-    icf.minPT                   = [0.9 * Units.GeV]
+    icf.minPT                   = lambda pcf: (
+        [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.maxPrimaryImpact        = [10.0 * Units.mm]
     icf.maxZImpact              = [150.0 * Units.mm]
     icf.minClusters             = [6]
@@ -552,9 +588,12 @@ def createVeryLowPtTrackingPassFlags():
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
     icf.useTRTExtension  = False
-    icf.maxPT            = lambda pcf : (1e6 if pcf.Tracking.doMinBias else 
-                                         pcf.Tracking.MainPass.minPT + 0.3) * Units.GeV # some overlap
-    icf.minPT            = 0.050 * Units.GeV
+    icf.maxPT            = lambda pcf : (
+        pcf.BField.configuredSolenoidFieldScale *
+        (1e6 if pcf.Tracking.doMinBias else 
+         pcf.Tracking.MainPass.minPT + 0.3) * Units.GeV)
+    icf.minPT            = lambda pcf : (
+        0.050 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters      = 3
     icf.minSiNotShared   = 3
     icf.maxShared        = 1   # cut is now on number of shared modules
@@ -580,7 +619,8 @@ def createForwardTracksTrackingPassFlags():
     icf.storeSeparateContainer = True
     icf.minEta           = 2.4 # restrict to minimal eta
     icf.maxEta           = 2.7
-    icf.minPT            = 2 * Units.GeV
+    icf.minPT            = lambda pcf: (
+        2 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters      = 3
     icf.minSiNotShared   = 3
     icf.maxShared        = 1
@@ -606,7 +646,8 @@ def createBeamGasTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension        = "BeamGas"
     icf.usePrdAssociationTool = True
-    icf.minPT            = 0.500 * Units.GeV
+    icf.minPT            = lambda pcf: (
+        0.5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.maxPrimaryImpact = 300. * Units.mm
     icf.maxZImpact       = 2000. * Units.mm
     icf.minClusters      = 6
@@ -624,7 +665,8 @@ def createBeamGasTrackingPassFlags():
 def createVtxLumiTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension               = "VtxLumi"
-    icf.minPT                   = 0.900 * Units.GeV
+    icf.minPT                   = lambda pcf: (
+        0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters             = 7
     icf.maxPixelHoles           = 1
     icf.radMax                  = 600. * Units.mm
@@ -639,7 +681,8 @@ def createVtxLumiTrackingPassFlags():
 def createVtxBeamSpotTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension               = "VtxBeamSpot"
-    icf.minPT                   = 0.900 * Units.GeV
+    icf.minPT                   = lambda pcf: (
+        0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters             = 9
     icf.maxPixelHoles           = 0
     icf.radMax                  = 320. * Units.mm
@@ -654,7 +697,8 @@ def createVtxBeamSpotTrackingPassFlags():
 def createCosmicsTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension        = "Cosmics"
-    icf.minPT            = 0.5 * Units.GeV
+    icf.minPT            = lambda pcf: (
+        0.5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.maxPrimaryImpact = 1000. * Units.mm
     icf.maxZImpact       = 10000. * Units.mm
     icf.minClusters      = 4
@@ -693,9 +737,10 @@ def createHeavyIonTrackingPassFlags():
     icf.Xi2max           = 6.
     icf.Xi2maxNoAdd      = 10.
 
+    icf.minPT              = lambda pcf: (
+        0.5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
+        
     icf.maxdImpactSSSSeeds =  20. * Units.mm
-    
-    icf.minPT = 0.5 * Units.GeV
     icf.maxdImpactPPSSeeds = 1.7
     
     icf.maxHoles = 2
@@ -722,14 +767,14 @@ def createPixelTrackingPassFlags():
 
     def _minPt( pcf ):
         if pcf.Beam.Type is BeamType.Cosmics:
-            return 0.5 * Units.GeV
+            return 0.5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
         if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.UPC:
-            return 0.05 * Units.GeV
+            return 0.05 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
         if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.HIP:
-            return 0.05 * Units.GeV
+            return 0.05 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
         if pcf.Tracking.doMinBias:
-            return 0.05 * Units.GeV
-        return 0.1 * Units.GeV
+            return 0.05 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
+        return 0.1 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
     
     icf.minPT            = _minPt
     icf.minClusters      = 3
@@ -788,7 +833,8 @@ def createDisappearingTrackingPassFlags():
     icf.extension        = "Disappearing"
     icf.usePrdAssociationTool = True
     icf.storeSeparateContainer = True
-    icf.minPT            = 5 * Units.GeV
+    icf.minPT            = lambda pcf: (
+        5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters      = 4
     icf.maxHoles         = 0
     icf.maxPixelHoles    = 0
@@ -821,18 +867,15 @@ def createSCTTrackingPassFlags():
     icf.usePixelSeeding  = False
     icf.useTRT           = False
 
-    def _pick( default, cosmics, minbias):
-        def _internal( pcf ):
-            if pcf.Beam.Type is BeamType.Cosmics:
-                return cosmics
-            if pcf.Tracking.doMinBias:
-                return minbias
-            return default
-        return _internal
+    def _minpt( pcf ):
+        if pcf.Beam.Type is BeamType.Cosmics:
+            return 0.5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
+        if pcf.Tracking.doMinBias:
+            return 0.1 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
+        return 0.1 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
 
-    icf.minPT            = _pick( default = 0.1 * Units.GeV,
-                                  minbias=0.1 * Units.GeV,
-                                  cosmics = 0.5* Units.GeV )
+    icf.minPT            = _minpt
+
     icf.maxPrimaryImpact = lambda pcf: (
         1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics else
         10. * Units.mm if pcf.Tracking.doLowMu else
@@ -878,7 +921,8 @@ def createTRTTrackingPassFlags():
     icf.extension               = "TRT"
     icf.useTIDE_Ambi            = False
     icf.usePrdAssociationTool   = True
-    icf.minPT                   = 0.4 * Units.GeV
+    icf.minPT                   = lambda pcf: (
+        0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.doBremRecoverySi        = False
 
     icf.RunPixelPID             = False
@@ -932,6 +976,10 @@ if __name__ == "__main__":
   flags.Tracking.doBLS = True
   assert flags.Tracking.ActiveConfig.maxPrimaryImpact == 10.0 * Units.mm, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.maxPrimaryImpact)
 
+  assert flags.Tracking.ActiveConfig.minPT == 0.5 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minPT)
+  flags.BField.configuredSolenoidFieldScale = 0.1
+  assert flags.Tracking.ActiveConfig.minPT == 0.05 * Units.GeV, "wrong cut value {} ".format(flags.Tracking.ActiveConfig.minPT)      
+        
   l.info("flags.Tracking.ActiveConfig.minPT %f", flags.Tracking.ActiveConfig.minPT * 1.0)
   l.info("type(flags.Tracking.ActiveConfig.minPT) " + str(type(flags.Tracking.ActiveConfig.minPT)))
 
