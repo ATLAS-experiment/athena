@@ -237,6 +237,7 @@ namespace egEnergyCorr {
     es2018_R21_v1,     // model with new E1/E2 muon calibration from full run 2 low+high mu data
 
     es2022_R21_Precision,     // Precision Recomandation Rel21 model E1/E2 muon+Electron combination ; PS scale with Low-mu runs muons
+    es2022_R21_Precision_lowmu,     // model for 2017 and 2018 mu = 2 dataset at sqrt(s) = 13TeV and 5TeV based on precision Recomandation Rel21 model E1/E2 muon+Electron combination ; PS scale with Low-mu runs muons
 
     UNDEFINED
 
