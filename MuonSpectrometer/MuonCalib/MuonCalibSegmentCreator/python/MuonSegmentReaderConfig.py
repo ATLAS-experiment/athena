@@ -35,19 +35,19 @@ if __name__ == "__main__":
 
     #flags.Exec.SkipEvents = 1000
     #flags.Exec.MaxEvents = 1000
-    flags.Concurrency.NumThreads = 4
+    flags.Concurrency.NumThreads = 1
 
     ##############################################
-    # raw calibration stream data
-    #flags.Input.Files = ['/lustre/umt3/data17a/muoncal/calib/calibstream/456729/data23_calib.00456729.calibration_MuonAll.daq.RAW._0000.data']  # Barrel data
-    # fragment data barrel BMGA12 region
-    #flags.Input.Files = ['/lustre/umt3/data17a/muoncal/calib/fragments/456729/data23_calib.00456729.calibration_MuonAll.daq.RAW.0065_0069-0051.data']
-    # fragment data endcap region BIS7A
-    flags.Input.Files = ['/lustre/umt3/data17a/muoncal/calib/fragments/456729/data23_calib.00456729.calibration_MuonAll.daq.RAW.0000_0004-0120.data']
-    
+    # define the input files
+    inputdir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/MdtCalibration/'
+    flags.Input.Files = [f'{inputdir}data23_calib.00456729.calibration_MuonAll.daq.RAW.0000_0004-0051.data']  # BMG2/4/6A12 
+    #flags.Input.Files = [f'{d}data23_calib.00456729.calibration_MuonAll.daq.RAW.0000_0004-0200.data']  # Endcap 
+    #flags.Input.Files = [f'{d}data23_calib.00456729.calibration_MuonAll.daq.RAW.0000_0004-0120.data']  # BIS7A16
+    #flags.Input.Files = [f'{d}data23_calib.00456729.calibration_MuonAll.daq.RAW.0000_0004-0113.data']  # BIS7A02
+   
     flags.Input.TypedCollections = 'calibration_MuonAll'
     flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
-    flags.IOVDb.GlobalTag = 'CONDBR2-ES1PA-2023-02'
+    flags.IOVDb.GlobalTag = 'CONDBR2-ES1PA-2023-03'      # last update May 2024
     flags.Input.isMC = False
     flags.Input.ProjectName=flags.Input.Files[0].split('/')[-1].split('.')[0]
     data = flags.Input.Files[0].split('/')[-1].split('.')
@@ -55,18 +55,18 @@ if __name__ == "__main__":
         flags.Input.RunNumbers = [int(data[1][2:])]
     else:
         flags.Input.RunNumbers = [0]  #bogus run number in case parsing filename failed
+    ntuplename = flags.Input.Files[0].split('/')[-1][0:-4] + "ntuple.root"
     
     flags.Detector.GeometryMDT   = True 
     flags.Detector.GeometryTGC   = True
-    flags.Detector.GeometrysTGC   = False
-    flags.Detector.GeometryCSC   = False     
     flags.Detector.GeometryRPC   = True
-    flags.Detector.GeometryMM    = False
-    # TODO: disable these for now, to be determined if needed
-    flags.Detector.GeometryCalo  = False
-    flags.Detector.GeometryID    = False
-    flags.Detector.GeometryPixel    = False
-    flags.Detector.GeometrySCT    = False
+    flags.Detector.GeometryCSC   = False    # CSC was removed after LS2
+    flags.Detector.GeometrysTGC  = False    # no NSW data in calibration stream
+    flags.Detector.GeometryMM    = False    # no NSW data in calibration stream
+    flags.Detector.GeometryCalo  = False    # no Calo data in calibration stream
+    flags.Detector.GeometryID    = False    # no ID data in calibration stream
+    flags.Detector.GeometryPixel = False    # no ID data in calibration stream
+    flags.Detector.GeometrySCT   = False    # no ID data in calibration stream
 
     flags.Muon.makePRDs          = True
     
@@ -85,22 +85,28 @@ if __name__ == "__main__":
     #flags.Exec.OutputLevel = 2 # DEBUG
     flags.Exec.OutputLevel = 3 # INFO
 
+    flags.PerfMon.doFullMonMT = True
+    flags.PerfMon.OutputJSON = flags.Input.Files[0].split('/')[-1][0:-4] + "perfmonmt.json"
+
     flags.lock()
 
     acc = MainServicesCfg(flags)
-    histSvc = CompFactory.THistSvc(Output=["%s DATAFILE='%s', OPT='RECREATE'" % ("CALIBNTUPLESTREAM", 'ntuple.root')])
+    histSvc = CompFactory.THistSvc(Output=["%s DATAFILE='%s', OPT='RECREATE'" % ("CALIBNTUPLESTREAM", ntuplename)], AutoFlush= -10000000, AutoSave= -10000000)
     acc.addService(histSvc, primary=True)
+
+    #setup the cpu and memory monitoring
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    acc.merge(PerfMonMTSvcCfg(flags))
 
     # setup calibrationtool
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
     tool_kwargs = {}
     tool_kwargs["UseTwin"] = True
-    from AthenaCommon.Constants import DEBUG
-    tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, OutputLevel = DEBUG, TimeWindowSetting = 3, DoPropagationCorrection = True, DoSlewingCorrection = True, DoMagneticFieldCorrection = True))
+    tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 3, DoPropagationCorrection = True, DoSlewingCorrection = True, DoMagneticFieldCorrection = True))
 
     # configure the muoncalibration stream reading
-    from MuonCalibStreamCnv.MuonCalibStreamCnvConfig import MuonCalibStreamReadCfg, MuonCalibStreamTestAlgCfg, MdtCalibRawDataProviderCfg, RpcCalibRawDataProviderCfg, TgcCalibRawDataProviderCfg
+    from MuonCalibStreamCnv.MuonCalibStreamCnvConfig import MuonCalibStreamReadCfg, MdtCalibRawDataProviderCfg, RpcCalibRawDataProviderCfg, TgcCalibRawDataProviderCfg
 
     read = MuonCalibStreamReadCfg(flags)
     acc.merge(read)
@@ -128,14 +134,21 @@ if __name__ == "__main__":
         reco.merge(StandaloneMuonOutputCfg(flags))
     acc.merge(reco)
 
-    #configure testAlg 
-    testAlg = MuonCalibStreamTestAlgCfg(flags)
-    acc.merge(testAlg)
+    # configure testAlg (switch off)
+    #from MuonCalibStreamCnv.MuonCalibStreamCnvConfig import MuonCalibStreamTestAlgCfg
+    # testAlg = MuonCalibStreamTestAlgCfg(flags)
+    # acc.merge(testAlg)
 
     # configure segment creator
-    #from MuonCalibSegmentCreator.MuonSegmentReaderConfig import MuonSegmentReaderCfg
-    reader = MuonSegmentReaderCfg(flags, OutputLevel = DEBUG,CalibrationTool =  acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 3, DoPropagationCorrection = True, DoSlewingCorrection = True, DoMagneticFieldCorrection = True)))
+    #from AthenaCommon.Constants import DEBUG,INFO
+    reader = MuonSegmentReaderCfg(flags, CalibrationTool = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 3, DoPropagationCorrection = True, DoSlewingCorrection = True, DoMagneticFieldCorrection = True)))
     acc.merge(reader)
+
+    acc.getCondAlgo("MdtCalibDbAlg").ReadKeyDCS=""
+    
+    acc.getService('Athena::DelayedConditionsCleanerSvc').RingSize=2
+    acc.getService('Athena::DelayedConditionsCleanerSvc').CleanDelay=1
+    acc.getService('Athena::DelayedConditionsCleanerSvc').LookAhead=1 
 
     acc.printConfig(withDetails=True, summariseProps=True)
 
@@ -149,5 +162,5 @@ if __name__ == "__main__":
     # acc.getService('StoreGateSvc').Dump = True
 
     import sys
-    sys.exit(acc.run(20).isFailure())
+    sys.exit(acc.run(200).isFailure())
 

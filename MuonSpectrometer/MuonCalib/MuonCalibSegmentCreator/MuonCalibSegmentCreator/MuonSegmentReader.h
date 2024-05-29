@@ -1,5 +1,9 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+/*
+@ author Zhen Yan (zhen.yan@cern.ch)
 */
 
 #ifndef MUONCALIB_MUONSEGMENTREADER_H
@@ -12,17 +16,16 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "TrkSegment/SegmentCollection.h"
 #include "TrkTrack/TrackCollection.h"
+#include "TrkTrack/TrackInfo.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkToolInterfaces/IResidualPullCalculator.h"
 
-//#include "LumiBlockData/LuminosityCondData.h"
 #include "MuonCablingData/MuonMDT_CablingMap.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 // #include "MdtCalibSvc/MdtCalibrationTool.h"
 #include "MdtCalibInterfaces/IMdtCalibrationTool.h"
-// #include "MuonCalibEvent/MuonCalibPatternCollection.h"
 #include "MuonCalibITools/IIdToFixedIdTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -30,6 +33,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 //#include "MuonTester/MuonTesterBranch.h"
+#include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 
 #include "TTree.h"
 
@@ -38,15 +42,13 @@ using handles.*/
 namespace Trk {
     //class IExtrapolator;
     class IResidualPullCalculator;
+    class CompetingRIOsOnTrack;
+    class RIO_OnTrack;
 }  // namespace Trk
 
 using namespace MuonVal ;
 namespace MuonCalib {
 
-// class MuonSegmentReader : public AthReentrantAlgorithm
-//    {
-//    public:
-//    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 class MuonSegmentReader : public AthHistogramAlgorithm
    {
    public:
@@ -64,9 +66,12 @@ class MuonSegmentReader : public AthHistogramAlgorithm
 
         SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey", "EventInfo", "xAOD::EventInfo ReadHandleKey"};
 
+        // Loop for track_coll = ["MuonSpectrometerTracks","ExtrapolatedMuonTracks", "CombinedMuonTracks", "MSOnlyExtrapolatedTracks"] if input data type is ESD
         SG::ReadHandleKey<TrackCollection> m_TrkKey {this, "MuonTrackLocations", "MuonSpectrometerTracks"};
 
-        SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_MdtPrepData {this, "MdtPrepData", "MDT_DriftCircles"};
+        SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_MdtPrepDataKey {this, "MdtPrepData", "MDT_DriftCircles","MDT DriftCircles"};
+        SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_RpcPrepDataKey {this,"RpcPrdCollection","RPC_Measurements","RPC PRD Container"};
+        SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_TgcPrepDataKey{this,"TgcPrdCollection","TGC_Measurements","TGC PRD Container"};
 
         // /** MuonDetectorManager from the conditions store */
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
@@ -83,6 +88,8 @@ class MuonSegmentReader : public AthHistogramAlgorithm
 
         ToolHandle<MuonCalib::IIdToFixedIdTool> m_idToFixedIdTool{this, "IdToFixedIdTool", "MuonCalib::IdToFixedIdTool/MuonCalib_IdToFixedIdTool"};
 
+        ToolHandle<Muon::MuonEDMPrinterTool> m_printer{this, "Printer", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
+
         MuonTesterTree m_tree{"Segments", "CALIBNTUPLESTREAM"};
         // book event_x branches
         ScalarBranch<int>& m_runNumber{m_tree.newScalar<int>("event_runNumber")};
@@ -90,7 +97,7 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         ScalarBranch<int>& m_lumiBlock{m_tree.newScalar<int>("event_lumiBlock")};
         ScalarBranch<int>& m_bcId{m_tree.newScalar<int>("event_bcId")};
         ScalarBranch<int>& m_timeStamp{m_tree.newScalar<int>("event_timeStamp")};
-        ScalarBranch<float>& m_pt{m_tree.newScalar<float>("event_pt")};
+        ScalarBranch<float>& m_pt{m_tree.newScalar<float>("event_LVL2Pt")};
         //ScalarBranch<unsigned int>& m_eventTag{m_tree.newScalar<unsigned int>("event_eventTag")};
         //ScalarBranch<int>& m_nEvent{m_tree.newScalar<int>("event_nEvent")};
 
@@ -100,6 +107,18 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         VectorBranch<int>& m_rawMdt_tdc{m_tree.newVector<int>("rawMdt_tdc")}; 	//tdc counts of the raw MDT hit
         VectorBranch<int>& m_rawMdt_adc{m_tree.newVector<int>("rawMdt_adc")};  //adc counts of the raw MDT hit
         ThreeVectorBranch m_rawMdt_gPos{m_tree,"rawMdt_gPos"};
+
+        // rawRPC hit branches
+        ScalarBranch<int>& m_rawRpc_nRRpc{m_tree.newScalar<int>("rawRpc_nRRpc")};	//total number of MDT hits in the event
+        VectorBranch<unsigned int>& m_rawRpc_id{m_tree.newVector<unsigned int>("rawRpc_id")};	//identifier of the raw MDT hit (given by MuonFixedId)
+        VectorBranch<float>& m_rawRpc_time{m_tree.newVector<float>("rawRpc_time")}; 	//times of the raw RPC hit
+        ThreeVectorBranch m_rawRpc_gPos{m_tree,"rawRpc_gPos"};
+        
+        // rawRPC hit branches
+        ScalarBranch<int>& m_rawTgc_nRTgc{m_tree.newScalar<int>("rawTgc_nRTgc")};	//total number of MDT hits in the event
+        VectorBranch<unsigned int>& m_rawTgc_id{m_tree.newVector<unsigned int>("rawTgc_id")};	//identifier of the raw MDT hit (given by MuonFixedId)
+        VectorBranch<int>& m_rawTgc_bcBitMap{m_tree.newVector<int>("rawTgc_bcBitMap")}; 	//times of the raw MDT hit
+        ThreeVectorBranch m_rawTgc_gPos{m_tree,"rawTgc_gPos"};
 
         // Muon Track branches
         ScalarBranch<int>& m_trk_nTracks{m_tree.newScalar<int>("trk_nTracks")};
@@ -116,18 +135,15 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         ThreeVectorBranch m_trk_perigee{m_tree,"trk_perigee"} ;  
 
         VectorBranch<int>& m_trk_nMdtHits{m_tree.newVector<int>("trk_nMdtHits")};  
-        VectorBranch<int>& m_trk_nMdtGoodHits{m_tree.newVector<int>("trk_nMdtGoodHits")};  
         VectorBranch<int>& m_trk_nMdtHoles{m_tree.newVector<int>("trk_nMdtHoles")};  
-        VectorBranch<int>& m_trk_nOutliersHits{m_tree.newVector<int>("trk_nOutliersHis")};  
+        VectorBranch<int>& m_trk_nOutliersHits{m_tree.newVector<int>("trk_nOutliersHits")};  
         VectorBranch<int>& m_trk_nRpcPhiHits{m_tree.newVector<int>("trk_nRpcPhiHits")};  
         VectorBranch<int>& m_trk_nRpcEtaHits{m_tree.newVector<int>("trk_nRpcEtaHits")};  
         VectorBranch<int>& m_trk_nTgcPhiHits{m_tree.newVector<int>("trk_nTgcPhiHits")};  
         VectorBranch<int>& m_trk_nTgcEtaHits{m_tree.newVector<int>("trk_nTgcEtaHits")}; 
 
-        //int m_trk_nTracks = 0;
-
-        // Muon Track Hit branches
-        ScalarBranch<int>& m_trkHit_nHits{m_tree.newScalar<int>("trkHit_nHits")};
+        // Muon Track Hit branches (MDT)
+        VectorBranch<int>& m_trkHit_nMdtHits{m_tree.newVector<int>("trkHit_nMdtHits")};
         VectorBranch<int>& m_trkHit_trackIndex{m_tree.newVector<int>("trkHit_trackIndex")};        
         ThreeVectorBranch m_trkHit_gPos{m_tree,"trkHit_gPos"} ;
         ThreeVectorBranch m_trkHit_pos{m_tree,"trkHit_pos"} ;
@@ -136,12 +152,13 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         ThreeVectorBranch m_trkHit_center{m_tree,"trkHit_center"};  
 
         VectorBranch<int>& m_trkHit_adc{m_tree.newVector<int>("trkHit_adc")};        
-        VectorBranch<int>& m_trkHit_type{m_tree.newVector<int>("trkHit_type")};        
+        VectorBranch<int>& m_trkHit_type{m_tree.newVector<int>("trkHit_type")};        // 1 hits, 4 outliers
         VectorBranch<int>& m_trkHit_tdc{m_tree.newVector<int>("trkHit_tdc")};        
         VectorBranch<float>& m_trkHit_resi{m_tree.newVector<float>("trkHit_resi")};        
         VectorBranch<float>& m_trkHit_pull{m_tree.newVector<float>("trkHit_pull")};   
-        VectorBranch<unsigned int>& m_trkHit_FixedId{m_tree.newVector<unsigned int>("trkHit_FixedId")};       
+        VectorBranch<unsigned int>& m_trkHit_id{m_tree.newVector<unsigned int>("trkHit_id")};       
         VectorBranch<float>& m_trkHit_driftRadius{m_tree.newVector<float>("trkHit_driftRadius")};        
+        VectorBranch<float>& m_trkHit_error{m_tree.newVector<float>("trkHit_error")};        
         VectorBranch<float>& m_trkHit_rTrk{m_tree.newVector<float>("trkHit_rTrk")};        
         VectorBranch<float>& m_trkHit_driftTime{m_tree.newVector<float>("trkHit_driftTime")};        
         VectorBranch<float>& m_trkHit_distRO{m_tree.newVector<float>("trkHit_distRO")};  
@@ -159,7 +176,26 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         VectorBranch<float>& m_trkHit_bkgTime{m_tree.newVector<float>("trkHit_bkgTime")};        
         VectorBranch<float>& m_trkHit_tof{m_tree.newVector<float>("trkHit_tof")}; 
         VectorBranch<int>& m_trkHit_calibStatus{m_tree.newVector<int>("trkHit_calibStatus")}; 
-               
+
+        // Muon Track Hole branches (MDT)
+        VectorBranch<int>& m_trkHole_nHoles{m_tree.newVector<int>("trkHole_nHoles")};
+        VectorBranch<int>& m_trkHole_trackIndex{m_tree.newVector<int>("trkHole_trackIndex")};        
+        VectorBranch<int>& m_trkHole_type{m_tree.newVector<int>("trkHole_type")};       // 1 MDT, 2 RPC, 3 TGC
+        ThreeVectorBranch m_trkHole_gPos{m_tree,"trkHole_gPos"} ;  
+        VectorBranch<unsigned int>& m_trkHole_id{m_tree.newVector<unsigned int>("trkHole_id")};  
+        VectorBranch<float>& m_trkHole_driftRadius{m_tree.newVector<float>("trkHole_driftRadius")};   
+
+        // Muon Track trigger hit branches (RPC & TGC)
+        VectorBranch<int>& m_trkTriggerHit_nHits{m_tree.newVector<int>("trkTriggerHit_nHits")};
+        VectorBranch<int>& m_trkTriggerHit_trackIndex{m_tree.newVector<int>("trkTriggerHit_trackIndex")};        
+        VectorBranch<int>& m_trkTriggerHit_type{m_tree.newVector<int>("trkTriggerHit_type")};      // 0 unknown, 1 RPC rot, 2 RPC crot, 3 TGC rot, 4 TGC strip, 5 TGC wire   
+        ThreeVectorBranch m_trkTriggerHit_gPos{m_tree,"trkTriggerHit_gPos"} ;  
+        VectorBranch<unsigned int>& m_trkTriggerHit_id{m_tree.newVector<unsigned int>("trkTriggerHit_id")};  
+        VectorBranch<float>& m_trkTriggerHit_time{m_tree.newVector<float>("trkTriggerHit_time")};  // time for RPC and bcBitMap for TGC
+        
+        // store functions
+        void storeMeasurement(const EventContext& ctx, const MuonGM::MuonDetectorManager* MuonDetMgr, unsigned int itrk, const Trk::TrackStateOnSurface* trk_state, const Trk::MeasurementBase* measurement);
+        void storeHole(const Trk::TrackStateOnSurface * trk_state, unsigned int itrk) ;
 
    };
    
