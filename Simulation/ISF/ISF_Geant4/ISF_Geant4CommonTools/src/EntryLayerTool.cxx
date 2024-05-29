@@ -186,10 +186,10 @@ ISF::EntryLayer ISF::EntryLayerTool::registerParticle(const ISF::ISFParticle& pa
     // Use barcode of generation zero particle from truth binding if possible (reproduces legacy AtlasG4 behaviour).
     // Use barcode assigend to ISFParticle only if no generation zero particle is present.
     auto                truthBinding = particle.getTruthBinding();
-    auto generationZeroTruthParticle = truthBinding ? truthBinding->getGenerationZeroTruthParticle() : nullptr;
-    const int barcode = generationZeroTruthParticle ? HepMC::barcode(generationZeroTruthParticle) : particle.barcode(); // FIXME barcode-based
-    const int id = generationZeroTruthParticle ? HepMC::uniqueID(generationZeroTruthParticle) : particle.id();
-    const int status = generationZeroTruthParticle ? generationZeroTruthParticle->status() : particle.status();
+    auto generationZeroGenParticle = truthBinding ? truthBinding->getGenerationZeroGenParticle() : nullptr;
+    const int barcode = generationZeroGenParticle ? HepMC::barcode(generationZeroGenParticle) : particle.barcode(); // FIXME barcode-based
+    const int id = generationZeroGenParticle ? HepMC::uniqueID(generationZeroGenParticle) : particle.id();
+    const int status = generationZeroGenParticle ? generationZeroGenParticle->status() : particle.status();
 
     m_collection[layerHit]->Emplace(particle.pdgCode(),
                                     status,

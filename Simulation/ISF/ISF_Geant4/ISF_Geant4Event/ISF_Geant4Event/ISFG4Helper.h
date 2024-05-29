@@ -46,7 +46,7 @@ class ISFG4Helper {
   static TrackInformation* attachTrackInfoToNewG4Track( G4Track& aTrack,
                                    ISF::ISFParticle& baseIsp,
                                    TrackClassification classification,
-                                   HepMC::GenParticlePtr nonRegeneratedTruthParticle = nullptr);
+                                   HepMC::GenParticlePtr generationZeroGenParticle = nullptr);
   
   /** return pointer to current AtlasG4EventUserInfo */
   static AtlasG4EventUserInfo* getAtlasG4EventUserInfo();

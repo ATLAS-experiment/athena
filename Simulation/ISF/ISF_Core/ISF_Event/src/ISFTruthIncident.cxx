@@ -186,15 +186,15 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFPart
 HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFParticle& particle,
                                                                        ISF::ISFParticle* parent ) const {
   auto* truthBinding     = particle.getTruthBinding();
-  HepMC::GenParticlePtr hepTruthParticle = ParticleHelper_convert( particle );
+  HepMC::GenParticlePtr newGenParticle = ParticleHelper_convert( particle );
 
   if (truthBinding) {
-    truthBinding->setTruthParticle(hepTruthParticle);
+    truthBinding->setTruthParticle(newGenParticle);
   } else {
     auto parentTruthBinding = parent ? parent->getTruthBinding() : nullptr;
     auto primaryGenParticle = parentTruthBinding ? parentTruthBinding->getPrimaryGenParticle() : nullptr;
-    auto hepGenZeroParticle = hepTruthParticle;
-    truthBinding = new TruthBinding( hepTruthParticle, primaryGenParticle, hepGenZeroParticle );
+    auto generationZeroGenParticle = newGenParticle; // New physical particle so this is also the generation zero particle
+    truthBinding = new TruthBinding( newGenParticle, primaryGenParticle, generationZeroGenParticle );
     particle.setTruthBinding(truthBinding);
   }
   // At this point the values returned by particle.getParticleLink()
@@ -202,7 +202,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFP
   // TruthBinding.
 
   // FIXME Consider deleting the HepMcParticleLink and setting the id to HepMC::UNDEFINED_ID at this point?
-  return hepTruthParticle;
+  return newGenParticle;
 }
 
 /** Update the id and particleLink properties of the parentAfterIncident (to be called after registerTruthIncident) */
