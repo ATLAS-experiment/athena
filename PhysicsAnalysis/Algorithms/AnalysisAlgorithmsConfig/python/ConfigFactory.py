@@ -343,4 +343,8 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
             defaults={'configName': 'Output'})
 
+        # IOStats printouts
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import IOStatsBlock
+        self.addAlgConfigBlock(algName="IOStats", alg=IOStatsBlock)
+
         return

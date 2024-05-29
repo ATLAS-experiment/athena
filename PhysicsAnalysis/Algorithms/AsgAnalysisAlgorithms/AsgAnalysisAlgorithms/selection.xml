@@ -34,5 +34,6 @@
    <class name="CP::SystObjectUnioniserAlg" />
    <class name="CP::TreeFillerAlg" />
    <class name="CP::TreeMakerAlg" />
+   <class name="CP::IOStatsAlg" />
 
 </lcgdict>
