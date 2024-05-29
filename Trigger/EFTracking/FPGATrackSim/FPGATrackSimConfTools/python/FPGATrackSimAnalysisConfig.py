@@ -297,7 +297,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
     theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
-    theFPGATrackSimLogicalHistProcessAlg.Clustering = True
+    theFPGATrackSimLogicalHistProcessAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
     theFPGATrackSimLogicalHistProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimLogicalHistProcessAlg.outputHitTxt = flags.Trigger.FPGATrackSim.ActiveConfig.outputHitTxt
     theFPGATrackSimLogicalHistProcessAlg.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
