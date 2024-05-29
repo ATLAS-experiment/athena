@@ -424,15 +424,10 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.merge.RDO.e4993_s3214_r11315/RDO.17533168._000001.pool.root.1']
-    flags.Common.isOnline=False
-    flags.Exec.MaxEvents=25
+    flags.Exec.MaxEvents = 5
     flags.Concurrency.NumThreads = 1
-    flags.Concurrency.NumConcurrentEvents=1
-    flags.Scheduler.ShowDataDeps=True
-    flags.Scheduler.CheckDependencies=True
-    flags.Scheduler.ShowDataFlow=True
-    flags.Trigger.enableL1MuonPhase1=True
-    flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1'
+    flags.Trigger.enableL1MuonPhase1 = True
+    flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
     flags.fillFromArgs()
     flags.lock()
 
@@ -448,5 +443,4 @@ if __name__ == "__main__":
     acc.merge(Lvl1MuonSimulationCfg(flags))
 
     acc.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
-
     sys.exit(acc.run().isFailure())
