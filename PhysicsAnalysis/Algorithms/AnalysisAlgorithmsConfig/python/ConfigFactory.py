@@ -257,6 +257,9 @@ class ConfigFactory():
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=PhotonWorkingPointConfig,
             superBlocks="Photons")
+        from EgammaAnalysisAlgorithms.PhotonExtraVariablesConfig import PhotonExtraVariablesBlock
+        self.addAlgConfigBlock(algName="ExtraVariables", alg=PhotonExtraVariablesBlock,
+            superBlocks="Photons")
 
         # muons
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
