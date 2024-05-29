@@ -19,6 +19,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('UseHitScaleFactor', False)
     cf.addFlag('missHitsConsts', False)
     cf.addFlag('tracking', False)
+    cf.addFlag('clustering', True)
     cf.addFlag('bankDir', '')
 
     def __httHough1DFlags():
