@@ -49,7 +49,7 @@ case $ArtProcess in
 	echo  "art-result: $? final_comparison"
 
 	## dcube not so relevant for the time being : the refs are not target or best achieved, there are from main, nightly 28/07/23
-	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron_fwd_Run4.hist.root  Nightly-monitoring.hist.root
+	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/fwd_electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron_fwd_Run4.hist.root Nightly-monitoring.hist.root
 	#echo  "art-result: $? plot"
 
 	;;

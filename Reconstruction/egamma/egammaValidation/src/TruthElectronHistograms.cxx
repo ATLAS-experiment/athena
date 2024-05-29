@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthElectronHistograms.h"
@@ -20,13 +20,15 @@ StatusCode TruthElectronHistograms::initializePlots() {
 
 StatusCode TruthElectronHistograms::initializePlots(bool reducedHistSet) {
 
-  if (!reducedHistSet) {
-    histoMap["deltaPhi2"] = new TH1D(Form("%s_%s",m_name.c_str(),"deltaPhi2"), ";deltaPhi2; Events", 40, -0.06, 0.06);
-    histoMap["deltaEta2"] = new TH1D(Form("%s_%s",m_name.c_str(),"deltaEta2"), ";deltaEta2; Events", 40, -0.04, 0.04);
-    histoMap["deltaPhiRescaled2"] = new TH1D(Form("%s_%s",m_name.c_str(),"deltaPhiRescaled2"), ";deltaPhiRescaled2; Events", 40, -0.04, 0.04);
+  const char* fN = m_name.c_str();
 
-    histoMap["d0Oversigmad0"] = new TH1D(Form("%s_%s",m_name.c_str(),"d0Oversigmad0"), "; d0Oversigmad0; Events", 40, -10, 10);
-    histoMap["qOverp_resolution"] = new TH1D(Form("%s_%s",m_name.c_str(),"qOverp_resolution"), ";(q/P reco - q/P truth)/ q/p truth; Events", 60, -1, 1.5);
+  if (!reducedHistSet) {
+    histoMap["deltaPhi2"] = new TH1D(Form("%s_deltaPhi2",fN), ";deltaPhi2; Events", 40, -0.06, 0.06);
+    histoMap["deltaEta2"] = new TH1D(Form("%s_deltaEta2",fN), ";deltaEta2; Events", 40, -0.04, 0.04);
+    histoMap["deltaPhiRescaled2"] = new TH1D(Form("%s_deltaPhiRescaled2",fN), ";deltaPhiRescaled2; Events", 40, -0.04, 0.04);
+
+    histoMap["d0Oversigmad0"] = new TH1D(Form("%s_d0Oversigmad0",fN), "; d0Oversigmad0; Events", 40, -10, 10);
+    histoMap["qOverp_resolution"] = new TH1D(Form("%s_qOverp_resolution",fN), ";(q/P reco - q/P truth)/ q/p truth; Events", 60, -1, 1.5);
 
     ATH_CHECK(m_rootHistSvc->regHist(m_folder+"deltaPhi2", histoMap["deltaPhi2"]));
     ATH_CHECK(m_rootHistSvc->regHist(m_folder+"deltaEta2", histoMap["deltaEta2"]));
@@ -36,21 +38,16 @@ StatusCode TruthElectronHistograms::initializePlots(bool reducedHistSet) {
 
     // 2D only for truthPromptElectronWithRecoTrack (temporary)
     if (m_name == "truthPromptElectronWithRecoTrack") {
-      histoMap2D["eta_deltaPhi2"] =
-	new TH2D(Form("%s_%s",m_name.c_str(),"eta_deltaPhi2"),
-		 ";#eta;#Delta#phi_{2}; Events", 60, -4.5, 4.5, 40, -0.06, 0.06);
-      histoMap2D["eta_deltaEta2"] =
-	new TH2D(Form("%s_%s",m_name.c_str(),"eta_deltaEta2"),
-		 ";#eta;#Delta#eta_{2}; Events", 60, -4.5, 4.5, 40, -0.06, 0.06);
-      histoMap2D["eta_deltaPhiRescaled2"] =
-	new TH2D(Form("%s_%s",m_name.c_str(),"eta_deltaPhiRescaled2"),
-		 ";#eta;#Delta#phi_{2}^{Rescaled}; Events", 60, -4.5, 4.5, 40, -0.06, 0.06);
-      histoMap2D["eta_d0Oversigmad0"] =
-	new TH2D(Form("%s_%s",m_name.c_str(),"eta_d0Oversigmad0"),
-		 ";#eta;d_{0}/#sigma_{d_{0}}; Events", 60, -4.5, 4.5, 40, -10, 10);
-      histoMap2D["eta_qOverp_resolution"] =
-	new TH2D(Form("%s_%s",m_name.c_str(),"eta_qOverp_resolution"),
-		 ";#eta;(q/P_{reco})/(q/P_{truth}) -1; Events", 60, -4.5, 4.5, 60, -1, 1.5);
+      histoMap2D["eta_deltaPhi2"] = new TH2D(Form("%s_eta_deltaPhi2",fN),
+	";#eta;#Delta#phi_{2}; Events", 90, -4.5, 4.5, 40, -0.06, 0.06);
+      histoMap2D["eta_deltaEta2"] = new TH2D(Form("%s_eta_deltaEta2",fN),
+	";#eta;#Delta#eta_{2}; Events", 90, -4.5, 4.5, 40, -0.06, 0.06);
+      histoMap2D["eta_deltaPhiRescaled2"] = new TH2D(Form("%s_eta_deltaPhiRescaled2",fN),
+	";#eta;#Delta#phi_{2}^{Rescaled}; Events", 90, -4.5, 4.5, 40, -0.06, 0.06);
+      histoMap2D["eta_d0Oversigmad0"] = new TH2D(Form("%s_eta_d0Oversigmad0",fN),
+	";#eta;d_{0}/#sigma_{d_{0}}; Events", 90, -4.5, 4.5, 40, -10, 10);
+      histoMap2D["eta_qOverp_resolution"] = new TH2D(Form("%s_eta_qOverp_resolution",fN),
+	";#eta;(q/P_{reco})/(q/P_{truth}) -1; Events", 90, -4.5, 4.5, 60, -1, 1.5);
 
       for (const auto& e : histoMap2D) {
 	ATH_CHECK(m_rootHistSvc->regHist(m_folder+e.first, e.second));

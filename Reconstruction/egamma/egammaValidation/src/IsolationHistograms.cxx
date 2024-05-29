@@ -15,16 +15,18 @@ using namespace egammaMonitoring;
 
 StatusCode IsolationHistograms::initializePlots(bool do_var_histos) {
 
-  histoMap["ptCone20"] = new TH1D(Form("%s_%s",m_name.c_str(),"ptCone20" ), ";p_{T}^{cone20}; Events / 0.25 GeV", 60, 0., 15.);
-  histoMap["ptCone30"] = new TH1D(Form("%s_%s",m_name.c_str(),"ptCone30" ), ";p_{T}^{cone30}; Events / 0.25 GeV", 60, 0., 15.);
+  const char* fN = m_name.c_str();
+ 
+  histoMap["ptCone20"] = new TH1D(Form("%s_ptCone20",fN), ";p_{T}^{cone20} [GeV]; Events / 0.25 GeV", 60, 0., 15.);
+  histoMap["ptCone30"] = new TH1D(Form("%s_ptCone30",fN), ";p_{T}^{cone30} [GeV]; Events / 0.25 GeV", 60, 0., 15.);
 
   if (do_var_histos) {
-    histoMap["ptVarCone20"] = new TH1D(Form("%s_%s",m_name.c_str(),"ptVarCone20" ), ";p_{T}^{varCone20}; Events / 0.25 GeV", 60, 0., 15.);
-    histoMap["ptVarCone30"] = new TH1D(Form("%s_%s",m_name.c_str(),"ptVarCone30" ), ";p_{T}^{varCone30}; Events / 0.25 GeV", 60, 0., 15.);
+    histoMap["ptVarCone20"] = new TH1D(Form("%s_ptVarCone20",fN), ";p_{T}^{varCone20} [GeV]; Events / 0.25 GeV", 60, 0., 15.);
+    histoMap["ptVarCone30"] = new TH1D(Form("%s_ptVarCone30",fN), ";p_{T}^{varCone30} [GeV]; Events / 0.25 GeV", 60, 0., 15.);
   }
-  histoMap["topoEtCone20"] = new TH1D(Form("%s_%s",m_name.c_str(),"topoEtCone20" ), ";E_{T}^{topoCone20}; Events / 0.8 GeV", 60, -20., 30.);
-  histoMap["topoEtCone30"] = new TH1D(Form("%s_%s",m_name.c_str(),"topoEtCone30" ), ";E_{T}^{topoCone30}; Events / 0.8 GeV", 60, -20., 30.);
-  histoMap["topoEtCone40"] = new TH1D(Form("%s_%s",m_name.c_str(),"topoEtCone40" ), ";E_{T}^{topoCone40}; Events / 0.8 GeV", 60, -20., 30.);
+  histoMap["topoEtCone20"] = new TH1D(Form("%s_topoEtCone20",fN), ";E_{T}^{topoCone20} [GeV]; Events / 0.8 GeV", 60, -20., 30.);
+  histoMap["topoEtCone30"] = new TH1D(Form("%s_topoEtCone30",fN), ";E_{T}^{topoCone30} [GeV]; Events / 0.8 GeV", 60, -20., 30.);
+  histoMap["topoEtCone40"] = new TH1D(Form("%s_topoEtCone40",fN), ";E_{T}^{topoCone40} [GeV]; Events / 0.8 GeV", 60, -20., 30.);
 
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"ptCone20", histoMap["ptCone20"]));
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"ptCone30", histoMap["ptCone30"]));
