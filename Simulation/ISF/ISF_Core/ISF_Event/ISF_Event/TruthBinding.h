@@ -51,9 +51,9 @@ namespace ISF {
     inline HepMC::ConstGenParticlePtr getPrimaryGenParticle() const;
 
     /** pointer to the simulation truth particle before any regeneration happened (eg. brem) */
-    inline HepMC::GenParticlePtr getGenerationZeroTruthParticle();
-    inline HepMC::ConstGenParticlePtr getGenerationZeroTruthParticle() const;
-    inline void                setGenerationZeroTruthParticle(HepMC::GenParticlePtr p);
+    inline HepMC::GenParticlePtr getGenerationZeroGenParticle();
+    inline HepMC::ConstGenParticlePtr getGenerationZeroGenParticle() const;
+    inline void                setGenerationZeroGenParticle(HepMC::GenParticlePtr p);
 
     /** Create a TruthBinding for a child particle */
     inline TruthBinding* childTruthBinding(HepMC::GenParticlePtr childP);
@@ -61,7 +61,7 @@ namespace ISF {
   private:
     HepMC::GenParticlePtr   m_truthParticle{};               //!< pointer to particle in MC truth
     HepMC::GenParticlePtr   m_primaryGenParticle{};        //!< pointer to corresponding primary (generator) particle
-    HepMC::GenParticlePtr   m_generationZeroTruthParticle{}; //!< pointer to corresponding truth particle before any regenration
+    HepMC::GenParticlePtr   m_generationZeroGenParticle{}; //!< pointer to corresponding truth particle before any regenration
   };
 
 } // end of namespace

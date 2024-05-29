@@ -77,7 +77,7 @@ TrackInformation*
 iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
                                                     ISF::ISFParticle& baseIsp,
                                                     TrackClassification classification,
-                                                    HepMC::GenParticlePtr nonRegeneratedTruthParticle)
+                                                    HepMC::GenParticlePtr generationZeroGenParticle)
 {
   if ( aTrack.GetUserInformation() ) {
     G4ExceptionDescription description;
@@ -100,7 +100,7 @@ iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
     return nullptr;
   }
 
-  TrackInformation *trackInfo = new TrackInformation( nonRegeneratedTruthParticle, &baseIsp );
+  TrackInformation *trackInfo = new TrackInformation( generationZeroGenParticle, &baseIsp );
   trackInfo->SetPrimaryGenParticle( truthBinding->getPrimaryGenParticle() );
   trackInfo->SetClassification( classification );
   aTrack.SetUserInformation( trackInfo );

@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// TrackProcessorUserActionBase.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "TrackProcessorUserActionBase.h"
@@ -49,12 +45,6 @@ namespace G4UA {
 
 namespace iGeant4 {
 
-TrackProcessorUserActionBase::TrackProcessorUserActionBase():
-  m_atlasG4EvtUserInfo(nullptr),
-  m_curBaseISP(nullptr)
-{;
-}
-
 void TrackProcessorUserActionBase::BeginOfEventAction(const G4Event*)
 {
   m_curBaseISP = nullptr;
@@ -94,11 +84,11 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
     // G4Tracks aready returned to ISF will have a TrackInformation attached to them
     bool particleReturnedToISF = trackInfo && trackInfo->GetReturnedToISF();
     if (!particleReturnedToISF) {
-      HepMC::GenParticlePtr generationZeroTruthParticle{};
+      HepMC::GenParticlePtr generationZeroGenParticle{};
       ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aSecondaryTrack,
                                                 *m_curBaseISP,
                                                 Secondary,
-                                                generationZeroTruthParticle );
+                                                generationZeroGenParticle );
     }
   } // <- loop over secondaries from this step
 
@@ -168,19 +158,19 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
 
   int regenerationNr = ppInfo->GetRegenerationNr();
 
-  HepMC::GenParticlePtr primaryGenParticle = truthBinding->getGenerationZeroTruthParticle();
-  HepMC::GenParticlePtr generationZeroTruthParticle = truthBinding->getGenerationZeroTruthParticle();
+  HepMC::GenParticlePtr primaryGenParticle = truthBinding->getGenerationZeroGenParticle();
+  HepMC::GenParticlePtr generationZeroGenParticle = truthBinding->getGenerationZeroGenParticle();
   HepMC::GenParticlePtr currentlyTracedHepPart = truthBinding->getTruthParticle();
 
   auto classification = classify(primaryGenParticle,
-                                 generationZeroTruthParticle,
+                                 generationZeroGenParticle,
                                  currentlyTracedHepPart,
                                  regenerationNr);
 
   auto* newTrackInfo = ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track(aTrack,
                                                                  *baseISP,
                                                                  classification,
-                                                                 generationZeroTruthParticle );
+                                                                 generationZeroGenParticle );
   newTrackInfo->SetRegenerationNr(regenerationNr);
 
   setCurrentParticle(baseISP,
@@ -215,7 +205,7 @@ void TrackProcessorUserActionBase::setCurrentParticle(ISF::ISFParticle* baseISFP
 
 /// Classify the particle represented by the given set of truth links
 TrackClassification TrackProcessorUserActionBase::classify(HepMC::ConstGenParticlePtr primaryGenParticle,
-                                                           HepMC::ConstGenParticlePtr generationZeroTruthParticle,
+                                                           HepMC::ConstGenParticlePtr generationZeroGenParticle,
                                                            HepMC::ConstGenParticlePtr currentlyTracedHepPart,
                                                            int regenerationNumber) const
 {
@@ -224,7 +214,7 @@ TrackClassification TrackProcessorUserActionBase::classify(HepMC::ConstGenPartic
     if (currentlyTracedHepPart==primaryGenParticle) {
       return Primary;
     }
-    else if (generationZeroTruthParticle==primaryGenParticle && regenerationNumber>0) {
+    else if (generationZeroGenParticle == primaryGenParticle && regenerationNumber>0) {
       return RegeneratedPrimary;
     }
     else {

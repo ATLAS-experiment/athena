@@ -9,13 +9,13 @@ namespace ISF {
   TruthBinding::TruthBinding(HepMC::GenParticlePtr allTruthP) :
     m_truthParticle(allTruthP),
     m_primaryGenParticle(allTruthP),
-    m_generationZeroTruthParticle(allTruthP) { }
+    m_generationZeroGenParticle(allTruthP) { }
 
   /** constructor setting all truth particle pointers individually */
   TruthBinding::TruthBinding(HepMC::GenParticlePtr truthP, HepMC::GenParticlePtr primaryTruthP, HepMC::GenParticlePtr genZeroTruthP) :
     m_truthParticle(truthP),
     m_primaryGenParticle(primaryTruthP),
-    m_generationZeroTruthParticle(genZeroTruthP) { }
+    m_generationZeroGenParticle(genZeroTruthP) { }
 
   /** destructor */
   TruthBinding::~TruthBinding() = default;
@@ -51,12 +51,12 @@ namespace ISF {
       return false;
     }
 
-    const auto rhsGenZero = rhs.getGenerationZeroTruthParticle();
-    if (m_generationZeroTruthParticle && rhsGenZero) {
+    const auto rhsGenZero = rhs.getGenerationZeroGenParticle();
+    if (m_generationZeroGenParticle && rhsGenZero) {
 #ifdef HEPMC3
-      pass &= (m_generationZeroTruthParticle == rhsGenZero);
+      pass &= (m_generationZeroGenParticle == rhsGenZero);
 #else
-      pass &= *m_generationZeroTruthParticle == *rhsGenZero;
+      pass &= *m_generationZeroGenParticle == *rhsGenZero;
 #endif
     } else {
       return false;
@@ -70,7 +70,7 @@ namespace ISF {
     bool pass = true;
     pass &= m_truthParticle == rhs.getTruthParticle();
     pass &= m_primaryGenParticle == rhs.getPrimaryGenParticle();
-    pass &= m_generationZeroTruthParticle == rhs.getGenerationZeroTruthParticle();
+    pass &= m_generationZeroGenParticle == rhs.getGenerationZeroGenParticle();
     return pass;
   }
 
@@ -84,9 +84,9 @@ namespace ISF {
   HepMC::ConstGenParticlePtr TruthBinding::getPrimaryGenParticle() const { return m_primaryGenParticle; }
 
   /** pointer to the simulation truth particle before any regeneration (eg. brem) */
-  HepMC::GenParticlePtr TruthBinding::getGenerationZeroTruthParticle() { return m_generationZeroTruthParticle; }
-  HepMC::ConstGenParticlePtr TruthBinding::getGenerationZeroTruthParticle() const { return m_generationZeroTruthParticle; }
-  void                TruthBinding::setGenerationZeroTruthParticle(HepMC::GenParticlePtr p) { m_generationZeroTruthParticle = p; }
+  HepMC::GenParticlePtr TruthBinding::getGenerationZeroGenParticle() { return m_generationZeroGenParticle; }
+  HepMC::ConstGenParticlePtr TruthBinding::getGenerationZeroGenParticle() const { return m_generationZeroGenParticle; }
+  void                TruthBinding::setGenerationZeroGenParticle(HepMC::GenParticlePtr p) { m_generationZeroGenParticle = p; }
 
   /** Create a TruthBinding for a child particle */
   // Not const: otherwise it can trigger a thread-safety checker warning
