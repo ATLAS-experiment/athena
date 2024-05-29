@@ -25,7 +25,7 @@ class ITkPixelHitSortingTool: public AthAlgTool {
 
         StatusCode initialize();
 
-        void sortRDOHits(SG::ReadHandle<PixelRDO_Container> &rdoContainer) const;
+        StatusCode sortRDOHits(SG::ReadHandle<PixelRDO_Container> &rdoContainer) const;
 
     private:
 

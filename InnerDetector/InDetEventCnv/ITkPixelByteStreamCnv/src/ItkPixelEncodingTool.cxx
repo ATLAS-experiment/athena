@@ -22,8 +22,7 @@ StatusCode ItkPixelEncodingTool::initialize(){
     return StatusCode::SUCCESS;
 }
 
-//std::vector<uint32_t> ItkPixelEncodingTool::encodeFE(HitMap hitMap, uint8_t FE_id){
-std::vector<uint32_t> ItkPixelEncodingTool::encodeFE(HitMap hitMap){
+std::vector<uint32_t> ItkPixelEncodingTool::encodeFE(HitMap hitMap, uint8_t FE_id){
     //call the addToStream() method. For now assuming 1-event stream.
     //The FE_id functionality for data merging is yet to be implemented.
     m_encoder->addToStream(hitMap);
