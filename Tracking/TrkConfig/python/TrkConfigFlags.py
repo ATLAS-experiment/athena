@@ -194,13 +194,13 @@ def createTrackingConfigFlags():
     # --- defaults for backtracking
     def BackTrackingMinPt(flags):
         if flags.Tracking.doMinBias:
-            return 0.4 * Units.GeV
+            return 0.4 * Units.GeV * flags.BField.configuredSolenoidFieldScale
         elif (flags.Tracking.doLowMu or
               flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon or
               flags.Beam.Type is BeamType.Cosmics):
-            return 1.0 * Units.GeV
+            return 1.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
         else:
-            return 3.0 * Units.GeV
+            return 3.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
     icf.addFlag("Tracking.BackTracking.minPt", BackTrackingMinPt)
     icf.addFlag("Tracking.BackTracking.TRTSegFinderPtBins", 50)
     icf.addFlag("Tracking.BackTracking.maxTRTSharedFrac", 0.7)
@@ -260,17 +260,17 @@ def createTrackingConfigFlags():
                            PrimaryPassConfig.HeavyIon) or
                        prevFlags.Beam.Type is BeamType.Cosmics or
                        prevFlags.Tracking.doMinBias)
-                else 6.*Units.GeV)
+                else 6.*Units.GeV * prevFlags.BField.configuredSolenoidFieldScale)
 
     # TRT standalone configuration
     def TRTStandaloneMinPt(flags):
         if flags.Tracking.doMinBias:
-            return 0.4 * Units.GeV
+            return 0.4 * Units.GeV * flags.BField.configuredSolenoidFieldScale
         elif flags.Tracking.doLowMu or (
                 flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon):
-            return 1.0 * Units.GeV
+            return 1.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
         else:
-            return 2.0 * Units.GeV
+            return 2.0 * Units.GeV * flags.BField.configuredSolenoidFieldScale
     icf.addFlag("Tracking.TRTStandalone.minPt", TRTStandaloneMinPt)
     icf.addFlag("Tracking.TRTStandalone.minTRTPrecFrac", 0.15)
     icf.addFlag("Tracking.TRTStandalone.minTRT", 15)

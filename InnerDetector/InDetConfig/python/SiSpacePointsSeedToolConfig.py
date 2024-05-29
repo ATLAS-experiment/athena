@@ -9,6 +9,8 @@ def SiSpacePointsSeedMaker_CosmicCfg(
         flags, name="InDetSpSeedsMaker_Cosmic", **kwargs):
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
+
     acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_Cosmic(
         name, **kwargs))
     return acc
@@ -26,6 +28,7 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
                       flags.Tracking.ActiveConfig.maxdImpactPPSSeeds)
     kwargs.setdefault("maxdImpactSSS",
                       flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_HeavyIon(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
@@ -40,6 +43,7 @@ def SiSpacePointsSeedMaker_LowMomentumCfg(
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     kwargs.setdefault("maxRadius1",
                       0.75*flags.Tracking.ActiveConfig.radMax)
@@ -61,6 +65,7 @@ def SiSpacePointsSeedMaker_BeamGasCfg(
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     kwargs.setdefault("maxRadius1",
                       0.75*flags.Tracking.ActiveConfig.radMax)
@@ -82,6 +87,7 @@ def SiSpacePointsSeedMaker_ATLxkCfg(
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
 
     if flags.Tracking.ActiveConfig.extension in ["", "Forward"]:
         kwargs.setdefault("maxdImpactSSS",

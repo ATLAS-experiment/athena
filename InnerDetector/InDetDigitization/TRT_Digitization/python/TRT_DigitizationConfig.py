@@ -62,6 +62,9 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", TRT_FirstXing())
         kwargs.setdefault("LastXing", TRT_LastXing())
+    if flags.BField.configuredSolenoidFieldScale>0 and flags.BField.configuredSolenoidFieldScale<1:
+        from AthenaCommon.SystemOfUnits import tesla
+        kwargs.setdefault("Override_solenoidFieldStrength",  flags.BField.configuredSolenoidFieldScale * 2.0 * tesla)
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     TRTDigitizationTool = CompFactory.TRTDigitizationTool
