@@ -175,7 +175,7 @@ if __name__=="__main__":
 
     args = flags.fillFromArgs(parser=parser)
 
-    if 'help' in args:
+    if args.help:
         # No point doing more here, since we just want to print the help.
         sys.exit()
 
